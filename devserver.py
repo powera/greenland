@@ -9,6 +9,10 @@ import os.path
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
+# jinja2 template
+from jinja2 import Environment, PackageLoader, select_autoescape
+env = None  # lazy loading
+
 PORT = 9871
 
 HTML_WRAPPER = b"""
@@ -68,11 +72,14 @@ class InboundRequest(http.server.BaseHTTPRequestHandler):
     self.wfile.write(response)
 
   def WrapperHandler(self):
-    # a misnomer.  will handle multiple pages ... later
-    # this will also use Jinja2 templating ... later
-    path = "verbalator/index.html"
-    with open(path, mode='rb') as f:
-      response = f.read()
+    # a misnomer.  will handle _env other than verbalator ... later
+    global env
+    if not env:
+      env = Environment(loader=PackageLoader("verbalator"),
+                        autoescape=select_autoescape())
+    template = env.get_template("index.html")  # TODO: multiple pages
+    html = template.render()
+    response = bytes(html, "utf-8")
     self.send_response(200)
     self.send_header("Content-type", "text/html; charset=utf-8")
     self.send_header("Content-length", len(response))
