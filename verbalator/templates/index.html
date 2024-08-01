@@ -7,18 +7,29 @@
 <form method="post" name="verbalator">
   <table><tr><td>Text Sample</td><td>
   <textarea rows="8" cols="80" name="entry">
-    {{samples.gibbon}}
+    {{samples.pooh}}
 </textarea>
   </td></tr>
   <tr><td>Prompt</td><td>
     <select name="prompt">
       <option value="style">What is the style of the text?</option>
+      <option value="audience">What is the audience of the text?</option>
+      <option value="register">What is the register of language used in the text?</option>
       <option value="difficulty">What is the difficulty of the language used in the text?</option>
       <option value="history">What level of historical knowledge is necessary for understanding the text?</option>
       <option value="science">What level of scientific knowledge is necessary for understanding the text?</option>
+      <option value="culture">What level of cultural knowledge is necessary for understanding the text?</option>
     </select>
     </td></tr>
-  </table>
+  <tr><td>Filter</td><td>
+    <select name="filter">
+      <option value="violence">Are there any references to violence or violent acts?</option>
+      <option value="drugs">Are there any references to the consumption of narcotics?</option>
+      <option value="religion">Are there any references to religion or supernatural entities?</option>
+      <option value="pii">Is there any Personally Identifying Information?</option>
+    </select>
+    </td></tr>
+</table>
 <input type="submit" />
 </form>
 
