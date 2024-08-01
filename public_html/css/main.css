@@ -1,0 +1,79 @@
+div.reference {
+  font-size: 11px
+}
+
+.terminal {
+  /* Set the font to a fixed-width font */
+  font-family: monospace;
+  /* Set the font size to 13px */
+  font-size: 14px;
+  /* Set the background color to black */
+  background-color: black;
+  /* Set the text color to white */
+  color: white;
+  /* Set the width to 80 characters */
+  width: 80ch;
+  /* Set the height to 24 characters */
+  height: 432px;
+  line-height: 18px;
+  /* Add some padding to make the text appear slightly inset from the edge of the div */
+  padding: 0.5ch;
+  /* Set the box-sizing property to "border-box" so that the padding is included in the width and height calculations */
+  box-sizing: border-box;
+  /* Set the overflow property to "scroll" to add scrollbars to the div when its contents overflow */
+  overflow: scroll;
+  /* Set the margin to "auto" to add equal amounts of space on the top, bottom, left, and right sides of the div */
+  margin: auto;
+}
+
+.terminal a {
+  color: #dda;
+  text-decoration: underline;
+}
+
+.terminal a:visited {
+  color: #add;
+  text-decoration: underline;
+}
+
+.unicode-box-holder {
+  display: flex;
+  flex-wrap: wrap;
+  max-width: 90%;
+  align-items: center;
+}
+.unicode-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 150px;
+  height: 150px;
+  border: 1px solid #333;
+  padding: 3px;
+  margin: 3px;
+}
+.unicode-char {
+  font-size: 80px;
+  height: 120px;
+}
+.unicode-code {
+  font-family: monospace;
+  font-size: 10px;
+}
+.unicode-description {
+  text-align: center;
+  font-size: 10px;
+}
+
+/* for notifications such as "text copied to clipboard" */
+.notification {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 999;
+  background-color: #eee;
+  color: #000;
+  padding: 0.5em 1em;
+  border: 1px solid #000;
+}

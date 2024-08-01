@@ -1,0 +1,43 @@
+/* CSS for "colormail", post-processing */
+
+.xantham {
+  color: #FF69B4;
+}
+
+.red {
+  color: #FF0000;
+}
+
+.orange {
+  color: #FFA500;
+}
+
+.yellow {
+  color: #BF9900;
+}
+
+.green {
+  color: #33FF22;
+  font-family: monospace;
+}
+
+.teal {
+  color: #008080;
+  font-family: "Comic Sans MS", "Comic Sans", cursive;
+}
+
+.blue {
+  color: #0033FF;
+}
+
+.violet {
+  color: #4422DD;
+}
+
+.mogue {
+  color: #554466;
+}
+
+.gray, .frozen {
+  color: #aaaaaa;
+}
