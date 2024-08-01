@@ -9,6 +9,8 @@ import os.path
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
+PORT = 9871
+
 HTML_WRAPPER = b"""
 <html>
   <head>
@@ -33,8 +35,7 @@ class InboundRequest(http.server.BaseHTTPRequestHandler):
       return self.StaticHandler()
     if self.path.startswith("/js/"):
       return self.StaticHandler()
-    # the fallback handler is the "jinja2" handler for the domain
-    return domains.serve(self)
+    return self.WrapperHandler()
 
   def StaticHandler(self):
     # Handle a request for a static file.
@@ -66,9 +67,22 @@ class InboundRequest(http.server.BaseHTTPRequestHandler):
     self.end_headers()
     self.wfile.write(response)
 
+  def WrapperHandler(self):
+    # a misnomer.  will handle multiple pages ... later
+    # this will also use Jinja2 templating ... later
+    path = "verbalator/index.html"
+    with open(path, mode='rb') as f:
+      response = f.read()
+    self.send_response(200)
+    self.send_header("Content-type", "text/html; charset=utf-8")
+    self.send_header("Content-length", len(response))
+    self.end_headers()
+    self.wfile.write(response)
+
+
 
 def run(server_class=http.server.HTTPServer, handler_class=InboundRequest):
-  server_address = ('', 14001)
+  server_address = ('', PORT)
   httpd = server_class(server_address, handler_class)
   httpd.serve_forever()
 
