@@ -13,6 +13,9 @@ from watchdog.events import FileSystemEventHandler
 from jinja2 import Environment, PackageLoader, select_autoescape
 env = None  # lazy loading
 
+# verbalator imports; this should be elsewhere
+import verbalator.samples
+
 PORT = 9871
 
 HTML_WRAPPER = b"""
@@ -78,7 +81,7 @@ class InboundRequest(http.server.BaseHTTPRequestHandler):
       env = Environment(loader=PackageLoader("verbalator"),
                         autoescape=select_autoescape())
     template = env.get_template("index.html")  # TODO: multiple pages
-    html = template.render()
+    html = template.render(samples=verbalator.samples.ALL_SAMPLES)
     response = bytes(html, "utf-8")
     self.send_response(200)
     self.send_header("Content-type", "text/html; charset=utf-8")
