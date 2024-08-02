@@ -12,7 +12,8 @@ def generate_text(prompt, model="phi3:3.8b"):
   
   data = {
       "model": model,
-      "prompt": prompt
+      "prompt": prompt,
+      "stream": False,
   }
   
   response = requests.post(url, json=data)
@@ -29,6 +30,7 @@ def generate_text(prompt, model="phi3:3.8b"):
           logger.info(f"Total duration: {response_data.get('total_duration', 'N/A')}")
           logger.info(f"Load duration: {response_data.get('load_duration', 'N/A')}")
           logger.info(f"Prompt eval count: {response_data.get('prompt_eval_count', 'N/A')}")
+          logger.info(f"Prompt eval duration: {response_data.get('prompt_eval_duration', 'N/A')}")
           logger.info(f"Eval count: {response_data.get('eval_count', 'N/A')}")
           logger.info(f"Eval duration: {response_data.get('eval_duration', 'N/A')}")
         result += response_data.get('response', '')
