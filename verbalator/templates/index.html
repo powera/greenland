@@ -1,10 +1,13 @@
 <html>
-  <head><title>Verbalator</title></head>
+  <head>
+    <title>Verbalator</title>
+    <script src="/js/verbalator.js"></script>
+  </head>
   <body>
 
 <h1>Verbalator</h1>
 
-<form method="post" name="verbalator">
+<form name="verbalator">
 <table>
   <tr><td>Model</td><td>
     <select name="model">
@@ -42,8 +45,9 @@
     </textarea>
   </td></tr>
 </table>
-<input type="submit" />
+<button type="submit">Generate</button>
 </form>
 
+<div id="result"> </div>
   </body>
 </html>

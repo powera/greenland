@@ -1,0 +1,45 @@
+function submitVerbalator(event) {
+    event.preventDefault(); // Prevent the form from submitting normally
+
+    // Get the form data
+    const form = document.getElementById('verbalator');
+    const formData = new FormData(form);
+    const prompt = formData.get('prompt');
+    const entry = formData.get('entry');
+    const model = formData.get('model') || 'phi'; // Default to 'phi' if not specified
+
+    // Prepare the request data
+    const requestData = {
+        prompt: prompt,
+        entry: entry,
+        model: model
+    };
+
+    // Make the AJAX call
+    fetch('/query', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData),
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        // Handle the successful response
+        console.log('Success:', data);
+        document.getElementById('result').textContent = data.response;
+    })
+    .catch(error => {
+        // Handle any errors
+        console.error('Error:', error);
+        document.getElementById('result').textContent = 'An error occurred: ' + error.message;
+    });
+}
+
+// Attach the function to the form's submit event
+document.getElementById('verbalator').addEventListener('submit', submitVerbalator);
