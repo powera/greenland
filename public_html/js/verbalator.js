@@ -1,6 +1,8 @@
 function submitVerbalator(event) {
     event.preventDefault(); // Prevent the form from submitting normally
 
+    showLoading();
+
     // Get the form data
     const form = document.getElementById('verbalator');
     const formData = new FormData(form);
@@ -38,6 +40,9 @@ function submitVerbalator(event) {
         // Handle any errors
         console.error('Error:', error);
         document.getElementById('result').textContent = 'An error occurred: ' + error.message;
+    })
+    .finally(() => {
+        hideLoading();
     });
 }
 
@@ -48,3 +53,12 @@ document.addEventListener('DOMContentLoaded', function() {
         form.addEventListener('submit', submitVerbalator);
     }
 });
+
+function showLoading() {
+    document.getElementById('loading').style.display = 'block';
+    document.getElementById('result').textContent = '';
+}
+
+function hideLoading() {
+    document.getElementById('loading').style.display = 'none';
+}
