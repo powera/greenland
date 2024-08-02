@@ -97,8 +97,61 @@ mountain tops, descried the first rays of returning light, and
 proclaimed to the plain below the festival of his resurrection.
 """
 
+# Leegin Creative v. PSKS US Supreme Court Case
+LEEGIN = """
+In Dr. Miles Medical Co. v. John D. Park & Sons Co., 220 U. S. 373 (1911), the
+Court established the rule that it is per se illegal under §1 of the Sherman
+Act, 15 U. S. C. §1, for a manufacturer to agree with its distributor to set
+the minimum price the distributor can charge for the manufacturer’s goods. The
+question presented by the instant case is whether the Court should overrule the
+per se rule and allow resale price maintenance agreements to be judged by the
+rule of reason, the usual standard applied to determine if there is a violation
+of §1. The Court has abandoned the rule of per se illegality for other vertical
+restraints a manufacturer imposes on its distributors. Respected economic
+analysts, furthermore, conclude that vertical price restraints can have
+procompetitive effects. We now hold that Dr. Miles should be overruled and that
+vertical price restraints are to be judged by the rule of reason.
+"""
+
+# Python 3.12 documentation, Section 4.2, "for statements":
+PYTHON = """
+The for statement in Python differs a bit from what you may be used to in C or
+Pascal. Rather than always iterating over an arithmetic progression of numbers
+(like in Pascal), or giving the user the ability to define both the iteration
+step and halting condition (as C), Python’s for statement iterates over the
+items of any sequence (a list or a string), in the order that they appear in
+the sequence. For example (no pun intended):
+"""
+
+
+# Alexander's Ragtime Band, Irving Berlin, 1911
+RAGTIME = """
+Come on and hear
+Come on and hear
+Alexander's Ragtime Band
+Come on and hear
+Come on and hear
+It's the best band in the land!
+They can play a bugle call like you never heard before
+So natural that you want to go to war
+That's just the bestest band what am, Honey Lamb!
+Come on along
+Come on along
+Let me take you by the hand
+Up to the man, up to the man
+Who's the leader of the band
+And if you want to hear the Suwanee River played in ragtime
+Come on and hear
+Come on and hear
+Alexander's Ragtime Band!
+"""
+
+
 ALL_SAMPLES = {
   "twocities": TWOCITIES,
   "pooh": POOH,
   "gibbon": GIBBON,
+  "leegin": LEEGIN,
+  "python": PYTHON,
+  "ragtime": RAGTIME,
 }
