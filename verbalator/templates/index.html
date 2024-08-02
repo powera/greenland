@@ -5,11 +5,16 @@
 <h1>Verbalator</h1>
 
 <form method="post" name="verbalator">
-  <table><tr><td>Text Sample</td><td>
-  <textarea rows="8" cols="80" name="entry">
-    {{samples.pooh}}
-</textarea>
-  </td></tr>
+<table>
+  <tr><td>Model</td><td>
+    <select name="model">
+      <option value="gemma2:2b">gemma2:2b (1.6GB)</option>
+      <option value="gemma2:9b">gemma2:9b (5.4GB)</option>
+      <option value="llama3.1:8b">llama3.1:8b (4.7GB)</option>
+      <option value="phi3:3.8b">phi3:3.8b (2.2GB)</option>
+      <option value="phi3:14b">phi3:14b (7.9GB)</option>
+      <option value="mistral-nemo:12b">mistral-nemo:12b (7.1GB)</option>
+    </select>
   <tr><td>Prompt</td><td>
     <select name="prompt">
       <option value="style">What is the style of the text?</option>
@@ -30,7 +35,12 @@
       <option value="religion">Are there any references to religion or supernatural entities?</option>
       <option value="pii">Is there any Personally Identifying Information?</option>
     </select>
-    </td></tr>
+  </td></tr>
+  <tr><td>Text Sample</td><td>
+    <textarea rows="8" cols="80" name="entry">
+      {{samples.pooh}}
+    </textarea>
+  </td></tr>
 </table>
 <input type="submit" />
 </form>
