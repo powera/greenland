@@ -7,7 +7,7 @@
 
 <h1>Verbalator</h1>
 
-<form name="verbalator">
+<form id="verbalator">
 <table>
   <tr><td>Model</td><td>
     <select name="model">
@@ -20,15 +20,9 @@
     </select>
   <tr><td>Prompt</td><td>
     <select name="prompt">
-      <option value="style">What is the style of the text?</option>
-      <option value="audience">What is the audience of the text?</option>
-      <option value="register">What is the register of language used in the text?</option>
-      <option value="difficulty">What is the difficulty of the language used in the text?</option>
-      <option value="history">What level of historical knowledge is necessary for understanding the text?</option>
-      <option value="science">What level of scientific knowledge is necessary for understanding the text?</option>
-      <option value="culture">What level of cultural knowledge is necessary for understanding the text?</option>
-      <option value="medical">What level of medical knowledge is necessary for understanding the text?</option>
-      <option value="legal">What level of legal knowledge is necessary for understanding the text?</option>
+      {% for shortname, full_text in prompts.items() %}
+          <option value="{{ shortname }}">{{ full_text }}</option>
+      {% endfor %} 
     </select>
     </td></tr>
   <tr><td>Filter</td><td>

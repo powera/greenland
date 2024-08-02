@@ -14,21 +14,11 @@ from jinja2 import Environment, PackageLoader, select_autoescape
 env = None  # lazy loading
 
 # verbalator imports; this should be elsewhere
+import ollama  # local ollama
+import verbalator.common
 import verbalator.samples
 
 PORT = 9871
-
-HTML_WRAPPER = b"""
-<html>
-  <head>
-    <title>DEVSERVER</title>
-    <link rel="stylesheet" type="text/css" href="/css/main.css" />
-    <link rel="stylesheet" type="text/css" href="/css/wiki.css" />
-    <script lang="javascript" src="/js/main.js"></script>
-  </head>
-  <body><div class="terminal">%s</div></body>
-</html>
-"""
 
 
 class InboundRequest(http.server.BaseHTTPRequestHandler):
@@ -43,6 +33,32 @@ class InboundRequest(http.server.BaseHTTPRequestHandler):
     if self.path.startswith("/js/"):
       return self.StaticHandler()
     return self.WrapperHandler()
+
+  def do_POST(self):
+    if self.path == '/query':
+      content_length = int(self.headers['Content-Length'])
+      post_data = self.rfile.read(content_length)
+      data = json.loads(post_data.decode('utf-8'))
+
+      prompt = data.get('prompt')
+      entry = data.get('entry')
+      model = data.get('model', 'phi3:3.8b')
+
+      if not prompt:
+        self.send_error(400, "No prompt provided")
+        return
+
+      # TODO: don't concatenate prompt + entry
+      response = ollama.generate(prompt + "\n\n" + entry, model)
+
+      self.send_response(200)
+      self.send_header('Content-type', 'application/json')
+      self.send_header('Access-Control-Allow-Origin', '*')  # CORS header
+      self.end_headers()
+      self.wfile.write(json.dumps({"response": response}).encode())
+    else:
+      self.send_error(404, "Not Found")
+
 
   def StaticHandler(self):
     # Handle a request for a static file.
@@ -81,7 +97,8 @@ class InboundRequest(http.server.BaseHTTPRequestHandler):
       env = Environment(loader=PackageLoader("verbalator"),
                         autoescape=select_autoescape())
     template = env.get_template("index.html")  # TODO: multiple pages
-    html = template.render(samples=verbalator.samples.ALL_SAMPLES)
+    html = template.render(prompts=verbalator.common.PROMPTS,
+        samples=verbalator.samples.ALL_SAMPLES)
     response = bytes(html, "utf-8")
     self.send_response(200)
     self.send_header("Content-type", "text/html; charset=utf-8")

@@ -23,8 +23,3 @@ def generate_text(prompt, model="phi3:3.8b"):
     return result
   else:
     return f"Error: {response.status_code} - {response.text}"
-
-# Example usage
-prompt = "Explain the concept of machine learning in simple terms."
-response = generate_text(prompt)
-print(response)
