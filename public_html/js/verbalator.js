@@ -42,4 +42,9 @@ function submitVerbalator(event) {
 }
 
 // Attach the function to the form's submit event
-document.getElementById('verbalator').addEventListener('submit', submitVerbalator);
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('verbalator');
+    if (form) {
+        form.addEventListener('submit', submitVerbalator);
+    }
+});

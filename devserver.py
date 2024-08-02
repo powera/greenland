@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import http.server
+import json
 import os
 import os.path
 
@@ -40,7 +41,7 @@ class InboundRequest(http.server.BaseHTTPRequestHandler):
       post_data = self.rfile.read(content_length)
       data = json.loads(post_data.decode('utf-8'))
 
-      prompt = data.get('prompt')
+      prompt = verbalator.common.PROMPTS[data.get('prompt')]
       entry = data.get('entry')
       model = data.get('model', 'phi3:3.8b')
 
@@ -49,7 +50,7 @@ class InboundRequest(http.server.BaseHTTPRequestHandler):
         return
 
       # TODO: don't concatenate prompt + entry
-      response = ollama.generate(prompt + "\n\n" + entry, model)
+      response = ollama.generate_text(prompt + "\n\n" + entry, model)
 
       self.send_response(200)
       self.send_header('Content-type', 'application/json')
