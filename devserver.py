@@ -15,7 +15,9 @@ from jinja2 import Environment, PackageLoader, select_autoescape
 env = None  # lazy loading
 
 # verbalator imports; this should be elsewhere
-import ollama  # local ollama
+import anthropic_client
+import openai_client
+import ollama_client  # local ollama
 import verbalator.common
 import verbalator.samples
 
@@ -49,8 +51,13 @@ class InboundRequest(http.server.BaseHTTPRequestHandler):
         self.send_error(400, "No prompt provided")
         return
 
-      # TODO: don't concatenate prompt + entry
-      response = ollama.generate_text(prompt + "\n\n" + entry, model)
+      if model is "gpt4o-mini":
+        response = openai_client.generate_text(prompt, entry)
+      elif model is "claude-haiku":
+        response = anthropic_client.generate_text(prompt, entry)
+      else:
+        # TODO: don't concatenate prompt + entry
+        response = ollama_client.generate_text(prompt + "\n\n" + entry, model)
 
       self.send_response(200)
       self.send_header('Content-type', 'application/json')
