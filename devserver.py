@@ -51,9 +51,9 @@ class InboundRequest(http.server.BaseHTTPRequestHandler):
         self.send_error(400, "No prompt provided")
         return
 
-      if model is "gpt4o-mini":
+      if model == "gpt4o-mini":
         response = openai_client.generate_text(prompt, entry)
-      elif model is "claude-haiku":
+      elif model == "claude3-haiku":
         response = anthropic_client.generate_text(prompt, entry)
       else:
         # TODO: don't concatenate prompt + entry

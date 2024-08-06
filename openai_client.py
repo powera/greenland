@@ -42,7 +42,8 @@ def generate_text(prompt, sample):
       max_tokens=1536,
       temperature=0.15,  # scale is 0 to 2
   )
-  return completion
+  print(completion.usage)
+  return completion.choices[0].message.content
 
 
 def create_summary(input_file):
