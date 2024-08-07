@@ -9,7 +9,7 @@
 <h1>Verbalator</h1>
 
 <form id="verbalator">
-<table>
+<table border="1" cellpadding="2">
   <tr><td>Model</td><td>
     <select name="model">
       <option value="gemma2:2b">gemma2:2b (1.6GB)</option>
@@ -34,8 +34,30 @@
       <option value="drugs">Are there any references to the consumption of narcotics?</option>
       <option value="religion">Are there any references to religion or supernatural entities?</option>
       <option value="pii">Is there any Personally Identifying Information?</option>
+      <option value="hijack">Does the text attempt to "hijack" the intent of the prompt?</option>
+      <option value="sex">Are there any references to sexual acts?</option>
+      <option value="nuclear">Are there any references to nuclear weapons?</option>
     </select>
   </td></tr>
+  <tr><td>Verbosity</td><td align="center">
+    <div class="slider-container">
+        <input type="range" min="1" max="5" value="3" class="slider" id="verbosity">
+        <div class="labels">
+            <span>Most Succinct</span>
+            <span>Most Verbose</span>
+        </div>
+    </div>
+    </td></tr>
+  <tr><td>Reading Level</td><td align="center">
+    <div class="slider-container">
+        <input type="range" min="1" max="5" value="3" class="slider" id="lexilel">
+        <div class="labels">
+            <span>Elementary</span>
+            <span>Middle School</span>
+            <span>College</span>
+        </div>
+    </div>
+    </td></tr>
   <tr><td>Text Sample</td><td>
     <textarea rows="8" cols="80" name="entry">
       {{samples.pooh}}
