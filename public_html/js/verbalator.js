@@ -9,12 +9,16 @@ function submitVerbalator(event) {
     const prompt = formData.get('prompt');
     const entry = formData.get('entry');
     const model = formData.get('model') || 'phi'; // Default to 'phi' if not specified
+    const verbosity = formData.get('verbosity');
+    const reading_level = formData.get('reading_level');
 
     // Prepare the request data
     const requestData = {
         prompt: prompt,
         entry: entry,
-        model: model
+        model: model,
+        verbosity: verbosity,
+        reading_level: reading_level,
     };
 
     // Make the AJAX call

@@ -18,14 +18,14 @@ READING_LEVELS = [
     "Responses should use complex language, ideally at a college reading level.",
 ]
 
-def build_system_prompt(short_prompt):
+def build(short_prompt, verbosity, reading_level):
   base_prompt = verbalator.common.PROMPTS[short_prompt]
 
-"""
+  return f"""
 You are a helpful assistant.  When responding:
-* {verbosity}
-* {reading_level}
+* {VERBOSITY_LEVELS[verbosity]}
+* {READING_LEVELS[reading_level]}
 
-Answer the following question about the user-provided text: {prompt}
+Answer the following question about the user-provided text: {base_prompt}
 """
 
