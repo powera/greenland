@@ -45,11 +45,7 @@ class InboundRequest(http.server.BaseHTTPRequestHandler):
       post_data = self.rfile.read(content_length)
       data = json.loads(post_data.decode('utf-8'))
 
-      verbosity = data.get('verbosity', '3')
-      verbosity = int(verbosity) - 1  # HTML is 1-5, index is 0-4
-      reading_level = data.get('reading_level', '3')
-      reading_level = int(reading_level) - 1  # HTML is 1-5, index is 0-4
-      prompt = system_prompt_builder.build(data.get('prompt'), verbosity, reading_level)
+      prompt = system_prompt_builder.build(data.get('prompt'), data)
       entry = data.get('entry')
       model = data.get('model', 'phi3:3.8b')
 
