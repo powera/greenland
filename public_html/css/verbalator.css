@@ -68,3 +68,7 @@
 .labels span:last-child {
     right: -20%;
 }
+#cost_block {
+    display: none;
+    margin-top: 5px;
+}

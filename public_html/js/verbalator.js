@@ -39,6 +39,10 @@ function submitVerbalator(event) {
         // Handle the successful response
         console.log('Success:', data);
         document.getElementById('result').textContent = data.response;
+        document.getElementById('cost_block').style.display = 'block';
+        document.getElementById('tokens_in').textContent = data.usage.tokens_in;
+        document.getElementById('tokens_out').textContent = data.usage.tokens_out;
+        document.getElementById('cost').textContent = "$" + data.usage.cost.toFixed(6);
     })
     .catch(error => {
         // Handle any errors
@@ -61,6 +65,10 @@ document.addEventListener('DOMContentLoaded', function() {
 function showLoading() {
     document.getElementById('loading').style.display = 'block';
     document.getElementById('result').textContent = '';
+    document.getElementById('cost_block').style.display = 'none';
+    document.getElementById('tokens_in').textContent = '';
+    document.getElementById('tokens_out').textContent = '';
+    document.getElementById('cost').textContent = '';
 }
 
 function hideLoading() {
