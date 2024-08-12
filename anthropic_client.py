@@ -30,7 +30,11 @@ def generate_text(prompt, entry):
   )
   print(message.usage)
   print(f"Estimated cost: {estimate_cost(message.usage)}")
-  return message.content[0].text
+  return message.content[0].text, parse_usage(message.usage)
+
+def parse_usage(usage, model="haiku"):
+  cost = estimate_cost(usage, model)
+  return {"tokens_in": usage.input_tokens, "tokens_out": usage.output_tokens, "cost": cost}
 
 COSTS = {
   "haiku": {"input": 0.25, "output": 1.25},

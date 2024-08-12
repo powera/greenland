@@ -25,15 +25,22 @@ def generate_text(prompt, model="phi3:3.8b"):
         decoded_line = line.decode('utf-8')
         response_data = json.loads(decoded_line)
         if "total_duration" in response_data:
-          logger.info(f"Model: {response_data.get('model', 'N/A')}")
-          logger.info(f"Created at: {response_data.get('created_at', 'N/A')}")
-          logger.info(f"Total duration: {response_data.get('total_duration', 'N/A')}")
-          logger.info(f"Load duration: {response_data.get('load_duration', 'N/A')}")
-          logger.info(f"Prompt eval count: {response_data.get('prompt_eval_count', 'N/A')}")
-          logger.info(f"Prompt eval duration: {response_data.get('prompt_eval_duration', 'N/A')}")
-          logger.info(f"Eval count: {response_data.get('eval_count', 'N/A')}")
-          logger.info(f"Eval duration: {response_data.get('eval_duration', 'N/A')}")
+          usage = parse_usage(response_data)
         result += response_data.get('response', '')
-    return result
+    return result, usage
   else:
-    return f"Error: {response.status_code} - {response.text}"
+    return f"Error: {response.status_code} - {response.text}", {}
+
+def parse_usage(response_data):
+  usage = {"tokens_in": response_data.get("prompt_eval_count"), "tokens_out": response_data.get("eval_count"), "cost": estimate_cost(response_data)}
+  logger.info(f"Model: {response_data.get('model', 'N/A')}")
+  logger.info(f"Total duration: {response_data.get('total_duration', 'N/A')}")
+  logger.info(f"Load duration: {response_data.get('load_duration', 'N/A')}")
+  logger.info(f"Prompt eval duration: {response_data.get('prompt_eval_duration', 'N/A')}")
+  logger.info(f"Eval duration: {response_data.get('eval_duration', 'N/A')}")
+  return usage
+
+def estimate_cost(response_data):
+  # We use an estimate of $0.01 per 1000 seconds for the cost of running a local model
+  duration = response_data.get('total_duration') / (1000*1000*1000)
+  return duration * (0.01 / 1000)

@@ -57,18 +57,18 @@ class InboundRequest(http.server.BaseHTTPRequestHandler):
         return
 
       if model == "gpt4o-mini":
-        response = openai_client.generate_text(prompt, entry)
+        response, usage = openai_client.generate_text(prompt, entry)
       elif model == "claude3-haiku":
-        response = anthropic_client.generate_text(prompt, entry)
+        response, usage = anthropic_client.generate_text(prompt, entry)
       else:
         # TODO: don't concatenate prompt + entry
-        response = ollama_client.generate_text(prompt + "\n\n" + entry, model)
+        response, usage = ollama_client.generate_text(prompt + "\n\n" + entry, model)
 
       self.send_response(200)
       self.send_header('Content-type', 'application/json')
       self.send_header('Access-Control-Allow-Origin', '*')  # CORS header
       self.end_headers()
-      self.wfile.write(json.dumps({"response": response}).encode())
+      self.wfile.write(json.dumps({"response": response, "usage": usage}).encode())
     else:
       self.send_error(404, "Not Found")
 

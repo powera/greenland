@@ -43,12 +43,16 @@ def generate_text(prompt, sample):
       temperature=0.15,  # scale is 0 to 2
   )
   print(completion.usage)
-  return completion.choices[0].message.content
+  return completion.choices[0].message.content, parse_usage(completion.usage)
 
 COSTS = {
   "gpt-4o-mini": {"input": .15, "output": .6},
   "gpt-4o": {"input": 2.5, "output": 10},
 }
+
+def parse_usage(usage, model="gpt-4o-mini"):
+  cost = estimate_cost(usage, model)
+  return {"tokens_in": usage.prompt_tokens, "tokens_out": usage.completion_tokens, "cost": cost}
 
 def estimate_cost(usage, model="gpt-4o-mini"):
   cost = 0
