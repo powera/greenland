@@ -11,6 +11,12 @@ function submitVerbalator(event) {
     const model = formData.get('model') || 'phi'; // Default to 'phi' if not specified
     const verbosity = formData.get('verbosity');
     const reading_level = formData.get('reading_level');
+    const creativity = formData.get('creativity');
+    const politics = formData.get('politics');
+    const sports = formData.get('sports');
+    const celebrity = formData.get('celebrity');
+    const science = formData.get('science');
+    const religion = formData.get('religion');
 
     // Prepare the request data
     const requestData = {
@@ -19,6 +25,12 @@ function submitVerbalator(event) {
         model: model,
         verbosity: verbosity,
         reading_level: reading_level,
+        creativity: creativity,
+        politics: politics,
+        sports: sports,
+        celebrity: celebrity,
+        science: science,
+        religion: religion,
     };
 
     // Make the AJAX call
