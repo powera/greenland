@@ -19,6 +19,7 @@ import anthropic_client
 import openai_client
 import ollama_client  # local ollama
 import system_prompt_builder
+import util.flesch_kincaid as fk
 import verbalator.common
 import verbalator.samples
 
@@ -64,11 +65,12 @@ class InboundRequest(http.server.BaseHTTPRequestHandler):
         # TODO: don't concatenate prompt + entry
         response, usage = ollama_client.generate_text(prompt + "\n\n" + entry, model)
 
+      rrl = fk.flesch_kincaid_grade(response)  # response reading level
       self.send_response(200)
       self.send_header('Content-type', 'application/json')
       self.send_header('Access-Control-Allow-Origin', '*')  # CORS header
       self.end_headers()
-      self.wfile.write(json.dumps({"response": response, "usage": usage}).encode())
+      self.wfile.write(json.dumps({"response": response, "usage": usage, "reading_level": rrl}).encode())
     else:
       self.send_error(404, "Not Found")
 
