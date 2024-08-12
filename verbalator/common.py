@@ -12,9 +12,9 @@ PROMPTS = {
   "culture": "What level of cultural knowledge is necessary for understanding the text?",
   "medical": "What level of medical knowledge is necessary for understanding the text?",
   "legal": "What level of legal knowledge is necessary for understanding the text?",
-}
-
-FILTERS = {
+#}
+#
+#FILTERS = {
   "violence": "Are there any references to violence or violent acts?",
   "drugs": "Are there any references to the consumption of narcotics?",
   "religion": "Are there any references to religion or supernatural entities?",

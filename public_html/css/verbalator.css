@@ -72,3 +72,41 @@
     display: none;
     margin-top: 5px;
 }
+
+.vsliders {
+    display: flex;
+    gap: 40px;
+    align-items: flex-end;
+    height: 120px;
+}
+
+.vslider {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.vslider input[type="range"] {
+    -webkit-appearance: none;
+    width: 80px;
+    height: 12px;
+    background: #ddd;
+    outline: none;
+    transform: rotate(-90deg);
+    transform-origin: 17px -17px;  /* must be 1/4 of width minus height */
+}
+.vslider input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: #007bff;
+    cursor: pointer;
+    border-radius: 50%;
+}
+.vslider input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: #007bff;
+    cursor: pointer;
+    border-radius: 50%;
+}
