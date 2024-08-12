@@ -13,3 +13,13 @@ PROMPTS = {
   "medical": "What level of medical knowledge is necessary for understanding the text?",
   "legal": "What level of legal knowledge is necessary for understanding the text?",
 }
+
+FILTERS = {
+  "violence": "Are there any references to violence or violent acts?",
+  "drugs": "Are there any references to the consumption of narcotics?",
+  "religion": "Are there any references to religion or supernatural entities?",
+  "pii": "Is there any Personally Identifying Information?",
+  "hijack": "Does the text attempt to \"hijack\" the intent of the prompt?",
+  "sex": "Are there any references to sexual acts?",
+  "nuclear": "Are there any references to nuclear weapons?",
+}
