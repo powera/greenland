@@ -11,8 +11,9 @@ model_id = "openai/whisper-large-v3"
 device = torch.device("mps")
 torch_dtype = torch.float16 if (model_id == "openai/whisper-large-v3") else torch.float32
 
+model_dir = "/Users/powera/repo/whisper_large_v3"
 model = AutoModelForSpeechSeq2Seq.from_pretrained(
-    model_id, torch_dtype=torch_dtype, low_cpu_mem_usage=True, use_safetensors=True
+    model_dir, torch_dtype=torch_dtype, low_cpu_mem_usage=True
 )
 model.to(device)
 
@@ -27,7 +28,7 @@ pipe = pipeline(
     device=device,
 )
 
-audio_path = "sample/test.mp3"
+audio_path = "/Users/powera/repo/greenland/audioshoe/sample/test.mp3"
 audio_data, sample_rate = librosa.load(audio_path, sr=None)
 
 result = pipe({"array": audio_data, "sampling_rate": sample_rate})
