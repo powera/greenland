@@ -1,3 +1,12 @@
 __pycache__/
+
+# vim temp files
 *.swp
+
+# API keys
 keys/
+
+# py2app
+build/
+dist/
+.eggs/
