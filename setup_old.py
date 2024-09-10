@@ -9,7 +9,7 @@ from setuptools import setup, find_packages
 
 APP = ['devserver.py']
 DATA_FILES = ['audioshoe/sample/test.mp3']
-REQUIREMENTS = ['jinja2', 'requests', 'numpy', 'torch', 'torchaudio']
+REQUIREMENTS = ['jinja2', 'requests', 'numpy', 'torch', 'torchaudio', 'librosa', 'anthropic', 'transformers', 'tiktoken']
 
 setup(
     name='greenland',

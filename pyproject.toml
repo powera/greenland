@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools", "wheel", "py2app"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "greenland"
+version = "0.0.3"
+dependencies = [
+    "jinja2",
+    "requests",
+    "numpy",
+    "torch",
+    "torchaudio",
+    "librosa",
+    "anthropic",
+    "transformers",
+    "tiktoken",
+]
+
+[tool.py2app]
+app = ["devserver.py"]
+data-files = [
+    ["audioshoe/sample/test.mp3"],
+]
+
+[tool.setuptools.packages.find]
+include = ["*"]
+
