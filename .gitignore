@@ -6,8 +6,10 @@ __pycache__/
 # API keys
 keys/
 
-# py2app
+# pyinstaller
 build/
 dist/
 .eggs/
 greenland.egg-info/
+.DS_Store
+devserver.spec
