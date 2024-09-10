@@ -15,8 +15,11 @@ from jinja2 import Environment, PackageLoader, select_autoescape
 env = None  # lazy loading
 
 # verbalator imports; this should be elsewhere
-import anthropic_client
-import openai_client
+if (os.uname().sysname == "Darwin"):
+  pass
+else:
+  import anthropic_client
+  import openai_client
 import ollama_client  # local ollama
 import system_prompt_builder
 import util.flesch_kincaid as fk
@@ -73,7 +76,8 @@ class InboundRequest(http.server.BaseHTTPRequestHandler):
 
   def StaticHandler(self):
     # Handle a request for a static file.
-    path = os.path.join("public_html" + self.path)
+    base_dir = os.path.dirname(__file__)
+    path = os.path.join(base_dir, "public_html" + self.path)
     with open(path, mode='rb') as f:
       response = f.read()
 
