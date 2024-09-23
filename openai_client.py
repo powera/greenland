@@ -45,6 +45,29 @@ def generate_text(prompt, sample):
   print(completion.usage)
   return completion.choices[0].message.content, parse_usage(completion.usage)
 
+def evaluate_response(original_prompt, original_response):
+  model = TEST_MODEL
+  #encoder = tiktoken.get_encoding("cl100k_base")
+  input_length = len(original_prompt) + len(original_response)
+  if input_length > 12000:
+    raise Exception("Input data too long")
+  completion = client.chat.completions.create(
+      model=model,
+      messages=[
+          {
+              "role": "system",
+              "content": f"You are a concise assistant evaluating the output of another LLM.  The original prompt was << {original_prompt} >>.\n\nComment on the quality of response, any factual errors, whether the response was unnecessarily verbose or repetitive, and whether any unwarranted assumptions were made in answering the prompt.",
+          },
+          {
+              "role": "user",
+              "content": original_response,
+          },
+      ],
+      max_tokens=2048,
+  )
+  print(completion.usage)
+  return completion.choices[0].message.content, parse_usage(completion.usage)
+
 COSTS = {
   "gpt-4o-mini": {"input": .15, "output": .6},
   "gpt-4o": {"input": 2.5, "output": 10},

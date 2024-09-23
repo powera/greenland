@@ -33,11 +33,11 @@ def generate_text(prompt, model="phi3:3.8b"):
 
 def parse_usage(response_data):
   usage = {"tokens_in": response_data.get("prompt_eval_count"), "tokens_out": response_data.get("eval_count"), "cost": estimate_cost(response_data)}
-  logger.info(f"Model: {response_data.get('model', 'N/A')}")
-  logger.info(f"Total duration: {response_data.get('total_duration', 'N/A')}")
-  logger.info(f"Load duration: {response_data.get('load_duration', 'N/A')}")
-  logger.info(f"Prompt eval duration: {response_data.get('prompt_eval_duration', 'N/A')}")
-  logger.info(f"Eval duration: {response_data.get('eval_duration', 'N/A')}")
+  logger.debug(f"Model: {response_data.get('model', 'N/A')}")
+  logger.debug(f"Total duration: {response_data.get('total_duration', 'N/A')}")
+  logger.debug(f"Load duration: {response_data.get('load_duration', 'N/A')}")
+  logger.debug(f"Prompt eval duration: {response_data.get('prompt_eval_duration', 'N/A')}")
+  logger.debug(f"Eval duration: {response_data.get('eval_duration', 'N/A')}")
   return usage
 
 def estimate_cost(response_data):
