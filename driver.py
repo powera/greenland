@@ -46,9 +46,11 @@ def add_critique(slug):
   with open(f"cache/{slug}.json", "r") as f:
     doc = json.loads(f.read())
   for k in doc["results"]:
-    k["critique"] = openai.evaluate_response(doc["prompt"], k["response"])
+    if "critique" not in k:
+      k["critique"], _ = openai_client.evaluate_response(doc["prompt"], k["response"])
+      break
   with open(f"cache/{slug}.json", "w") as f:
-    f.write(json.dumps(result[slug], indent=2, sort_keys=True))
+    f.write(json.dumps(doc, indent=2, sort_keys=True))
 
 
 def json_to_html(json_file, output_html):
@@ -77,6 +79,12 @@ def json_to_html(json_file, output_html):
                 font-size: 15px;
             }
 
+
+            .response-critique {
+                display: flex;
+                justify-content: space-between;
+            }
+
             .active, .collapsible:hover {
                 background-color: #ccc;
             }
@@ -103,7 +111,16 @@ def json_to_html(json_file, output_html):
         html_content += f'''
         <button class="collapsible">Model: {result['model']} (Usage: {result['usage']})</button>
         <div class="content">
-            <p><strong>Response:</strong> {result['response'].replace(line_break, '<br>')}</p>
+            <div class="response-critique">
+                <div class="column">
+                    <div class="column-header">Response:</div>
+                    <p>{result['response'].replace(line_break, '<br>')}</p>
+                </div>
+                <div class="column">
+                    <div class="column-header">Critique:</div>
+                    <p>{result.get('critique', '').replace(line_break, '<br>')}</p>
+                </div>
+            </div>
         </div>
         '''
 
