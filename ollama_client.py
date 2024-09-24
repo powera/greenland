@@ -7,7 +7,8 @@ logger = logging.getLogger(__name__)
 
 SERVER = "100.123.16.86"
 
-def generate_text(prompt, model="phi3:3.8b"):
+
+def generate_text(prompt, model="smollm:360m"):
   url = f"http://{SERVER}:11434/api/generate"
   
   data = {
@@ -27,6 +28,35 @@ def generate_text(prompt, model="phi3:3.8b"):
         if "total_duration" in response_data:
           usage = parse_usage(response_data)
         result += response_data.get('response', '')
+    return result, usage
+  else:
+    return f"Error: {response.status_code} - {response.text}", {}
+
+
+def generate_chat(prompt, model="smollm:360m"):
+  url = f"http://{SERVER}:11434/api/chat"
+  
+  data = {
+      "model": model,
+      "messages": [
+        { "role": "user",
+          "content": prompt, }
+        ],
+      "stream": False,
+  }
+  
+  response = requests.post(url, json=data)
+  if response.status_code == 200:
+    result = ""
+    usage = ""
+    for line in response.iter_lines():
+      if line:
+        decoded_line = line.decode('utf-8')
+        response_data = json.loads(decoded_line)
+        if "total_duration" in response_data:
+          usage = parse_usage(response_data)
+        if "message" in response_data:
+          result += response_data["message"]["content"]
     return result, usage
   else:
     return f"Error: {response.status_code} - {response.text}", {}
