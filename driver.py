@@ -5,12 +5,15 @@
 import asyncio
 import json
 import os
+import re
 
 import local_client, ollama_client, openai_client, anthropic_client
 
 import util.flesch_kincaid as fk
 
 OLLAMA_MODELS = [
+    "llama3:latest",  # old, 4.7G
+    "qwen:4b",      # old, 2.3G
     "smollm:1.7b",  # 990M
     "phi3.5:3.8b",    # 2.2G
     "llama3.1:8b",  # 4.7G
@@ -118,6 +121,10 @@ def json_to_html(json_file, output_html):
 
     # Add each result in a collapsible div
     for idx, result in enumerate(data['results']):
+        response = result.get('response', '')
+        response = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', response)
+        response = response.replace('\n', '<br>')
+
         critique = result.get('critique', '')
         if isinstance(critique, dict):
           critique = f'''
@@ -127,6 +134,7 @@ def json_to_html(json_file, output_html):
 <b>Was there excessive repetition?</b> {critique["repetition"]}<br />
 <b>Was there excessive verbosity?</b> {critique["verbosity"]}<br />
 <b>Were there unwarranted assumptions?</b> {critique["unwarranted_assumptions"]}'''
+        critique = critique.replace('\n', '<br>')
 
         html_content += f'''
         <button class="collapsible">Model: {result['model']} (Usage: {result['usage']})</button>
@@ -134,11 +142,11 @@ def json_to_html(json_file, output_html):
             <div class="response-critique">
                 <div class="column response-column">
                     <div class="column-header">Response:</div>
-                    <p>{result['response'].replace(line_break, '<br>')}</p>
+                    <p>{response}</p>
                 </div>
                 <div class="column critique-column">
                     <div class="column-header">Critique:</div>
-                    <p>{critique.replace(line_break, '<br>')}</p>
+                    <p>{critique}</p>
                 </div>
             </div>
         </div>
