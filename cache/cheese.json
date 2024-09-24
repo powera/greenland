@@ -153,6 +153,23 @@
         "tokens_in": 19,
         "tokens_out": 535
       }
+    },
+    {
+      "critique": {
+        "factual_errors": "",
+        "is_refusal": false,
+        "overall_quality": "Very good",
+        "repetition": "No repetition",
+        "unwarranted_assumptions": "No unwarranted assumptions made.",
+        "verbosity": "Concise and appropriate"
+      },
+      "model": "gpt-4o-mini",
+      "response": "Here are 12 delicious types of cheese commonly found in American supermarkets:\n\n1. Cheddar\n2. Mozzarella\n3. Gouda\n4. Swiss\n5. Brie\n6. Feta\n7. Parmesan\n8. Provolone\n9. Blue cheese\n10. Monterey Jack\n11. Havarti\n12. Cream cheese\n\nThese cheeses offer a variety of flavors and textures suitable for different dishes and occasions.",
+      "usage": {
+        "cost": 5.79e-05,
+        "tokens_in": 30,
+        "tokens_out": 89
+      }
     }
   ]
 }

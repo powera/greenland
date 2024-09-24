@@ -153,6 +153,23 @@
         "tokens_in": 20,
         "tokens_out": 544
       }
+    },
+    {
+      "critique": {
+        "factual_errors": "",
+        "is_refusal": false,
+        "overall_quality": "Very good",
+        "repetition": "None",
+        "unwarranted_assumptions": "None",
+        "verbosity": "Concise"
+      },
+      "model": "gpt-4o-mini",
+      "response": "Here are 12 different types of deciduous trees commonly found in the American Midwest:\n\n1. **Sugar Maple (Acer saccharum)**\n2. **Red Maple (Acer rubrum)**\n3. **White Oak (Quercus alba)**\n4. **Northern Red Oak (Quercus rubra)**\n5. **Black Walnut (Juglans nigra)**\n6. **American Elm (Ulmus americana)**\n7. **Eastern Cottonwood (Populus deltoides)**\n8. **Silver Maple (Acer saccharinum)**\n9. **Hackberry (Celtis occidentalis)**\n10. **Tulip Tree (Liriodendron tulipifera)**\n11. **Sweetgum (Liquidambar styraciflua)**\n12. **Boxelder (Acer negundo)**\n\nThese trees are well-adapted to the region's climate and soil conditions.",
+      "usage": {
+        "cost": 0.00012014999999999999,
+        "tokens_in": 33,
+        "tokens_out": 192
+      }
     }
   ]
 }
