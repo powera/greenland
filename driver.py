@@ -49,6 +49,7 @@ def add_critique(slug):
     if "critique" not in k:
       critique_tuple, _ = openai_client.evaluate_response(doc["prompt"], k["response"])
       k["critique"] = critique_tuple.dict()
+      k["critique"]["overall_quality"] = str(k["critique"]["overall_quality"])
   with open(f"cache/{slug}.json", "w") as f:
     f.write(json.dumps(doc, indent=2, sort_keys=True))
   slug_json_to_html(slug)

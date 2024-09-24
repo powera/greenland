@@ -3,10 +3,11 @@
 import os
 
 from openai import OpenAI
+import tiktoken
 
 import json
 import pydantic  # for type signatures
-import tiktoken
+import enum      # for type signatures
 
 TEST_MODEL = "gpt-4o-mini-2024-07-18"
 PROD_MODEL = "gpt-4o-2024-08-06"
@@ -47,9 +48,19 @@ def generate_text(prompt, sample):
   return completion.choices[0].message.content, parse_usage(completion.usage)
 
 
+class QualityRating(enum.Enum):
+  BAD = "Bad"
+  MEDIOCRE = "Mediocre"
+  GOOD = "Good"
+  VERY_GOOD = "Very good"
+  EXCELLENT = "Excellent"
+
+  def __str__(self):
+    return self.value
+
 class ResponseSchema(pydantic.BaseModel):
   is_refusal: bool
-  overall_quality: str
+  overall_quality: QualityRating
   factual_errors: str
   verbosity: str
   repetition: str
