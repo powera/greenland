@@ -47,6 +47,31 @@ def generate_text(prompt, sample):
   print(completion.usage)
   return completion.choices[0].message.content, parse_usage(completion.usage)
 
+def answer_question(prompt):
+  model = TEST_MODEL
+  encoder = tiktoken.get_encoding("cl100k_base")
+  input_length = len(prompt)
+  if input_length > 12000:
+    raise Exception("Input data too long")
+  completion = client.chat.completions.create(
+      model=model,
+      messages=[
+          {
+              "role": "system",
+              "content": "You are a concise assistant."
+          },
+          {
+              "role": "user",
+              "content": prompt,
+          },
+      ],
+      presence_penalty=0.25,  # scale is -2 to 2
+      max_tokens=1536,
+      temperature=0.15,  # scale is 0 to 2
+  )
+  print(completion.usage)
+  return completion.choices[0].message.content, parse_usage(completion.usage)
+
 
 class QualityRating(enum.Enum):
   BAD = "Bad"

@@ -32,7 +32,7 @@ def multi_cross_run_to_json(slug_dict):
     result[slug]["results"] = []
   for model in OLLAMA_MODELS:
     for slug in slug_dict:
-      response, usage = ollama_client.generate_text(slug_dict[slug], model)
+      response, usage = ollama_client.generate_chat(slug_dict[slug], model)
       result[slug]["results"].append({"model": model, "response": response, "usage": usage})
 
   for slug in slug_dict:
@@ -40,6 +40,21 @@ def multi_cross_run_to_json(slug_dict):
       f.write(json.dumps(result[slug], indent=2, sort_keys=True))
     json_to_html(f"cache/{slug}.json", f"output/{slug}.html")
   return result
+
+
+def add_model_for_slug(slug, model="gpt-4o-mini"):
+  with open(f"cache/{slug}.json", "r") as f:
+    result = json.loads(f.read())
+  prompt = result["prompt"]
+  if model == "gpt-4o-mini":  # only model for now
+    response, usage = openai_client.answer_question(prompt)
+    result["results"].append({"model": "gpt-4o-mini", "response": response, "usage": usage})
+  else:
+    raise Exception("Unknown model.")
+
+  with open(f"cache/{slug}.json", "w") as f:
+    f.write(json.dumps(result, indent=2, sort_keys=True))
+  json_to_html(f"cache/{slug}.json", f"output/{slug}.html")
 
 
 def add_critique(slug):
