@@ -5,6 +5,7 @@ import os
 from openai import OpenAI
 
 import json
+import pydantic  # for type signatures
 import tiktoken
 
 TEST_MODEL = "gpt-4o-mini-2024-07-18"
@@ -45,13 +46,22 @@ def generate_text(prompt, sample):
   print(completion.usage)
   return completion.choices[0].message.content, parse_usage(completion.usage)
 
+
+class ResponseSchema(pydantic.BaseModel):
+  is_refusal: bool
+  overall_quality: str
+  factual_errors: str
+  verbosity: str
+  repetition: str
+  unwarranted_assumptions: str
+
 def evaluate_response(original_prompt, original_response):
   model = TEST_MODEL
   #encoder = tiktoken.get_encoding("cl100k_base")
   input_length = len(original_prompt) + len(original_response)
   if input_length > 12000:
     raise Exception("Input data too long")
-  completion = client.chat.completions.create(
+  completion = client.beta.chat.completions.parse(
       model=model,
       messages=[
           {
@@ -63,10 +73,11 @@ def evaluate_response(original_prompt, original_response):
               "content": original_response,
           },
       ],
+      response_format=ResponseSchema,
       max_tokens=2048,
   )
   print(completion.usage)
-  return completion.choices[0].message.content, parse_usage(completion.usage)
+  return completion.choices[0].message.parsed, parse_usage(completion.usage)
 
 COSTS = {
   "gpt-4o-mini": {"input": .15, "output": .6},
