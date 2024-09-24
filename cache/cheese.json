@@ -1,0 +1,158 @@
+{
+  "prompt": "What are 12 delicious types of cheese found in American supermarkets?",
+  "results": [
+    {
+      "critique": {
+        "factual_errors": "The response lists products inaccurately suggesting that types of cheese are sourced from various countries but refers to them as though they are distinctly different types available in supermarkets. Multiple repeated types like 'Cheddar' and the mislabeling of cheeses from other countries lead to confusion.",
+        "is_refusal": false,
+        "overall_quality": "Poor",
+        "repetition": "The response contains significant repetition in discussing the flavor profiles and pairing suggestions of different cheeses, which is redundant and dilutes the overall content.",
+        "unwarranted_assumptions": "The response assumes that readers will want to know about pairing suggestions for each cheese, which may not have been part of the original inquiry. Additionally, it suggests that cheeses like cheddar come from various countries without clarification.",
+        "verbosity": "The response is unnecessarily verbose, with excessive information about accompaniments for each cheese without providing a clear list of the requested varieties."
+      },
+      "model": "smollm:135m",
+      "response": "The joys of exploring the diverse world of cheese! While it's challenging to pinpoint a single, universally appealing type of cheese across all American supermarkets, I can provide you with some interesting facts and characteristics that might be worth noting:\n\n1. **Montelucca**: This creamy, buttery cheese is commonly found in American supermarkets like the American Cheese & Cheese Market (AMCM) or the American Cheese & Cheese Store (ACPS). It's known for its rich flavor profile and can be enjoyed with a variety of accompaniments like crackers, toast, or even bread.\n2. **Parmesan**: This Italian-inspired cheese is commonly found in American supermarkets like the American Cheese & Cheese Market (AMCM) or the American Cheese & Cheese Store (ACPS). It's known for its nutty flavor profile and can be enjoyed with a variety of accompaniments, including crackers, toast, or even bread.\n3. **Cheese**: While it might seem like an obvious choice, cheese is actually quite rare in American supermarkets due to the country's vast geographic diversity. For example, the United States has over 100 different types of cheese, and some are more common than others.\n4. **Cheddar**: This creamy, aged cheese is a staple in many American supermarkets, particularly in the Midwest and Northeast regions. It's known for its rich flavor profile and can be enjoyed with a variety of accompaniments like crackers, toast, or even bread.\n5. **Cheese from France**: While not as common as other types of cheese, French cheeses like cheddar, Gruy\u00e8re, and Brie are still widely available in American supermarkets. These cheeses are known for their unique flavor profiles and can be enjoyed with a variety of accompaniments.\n6. **Cheddar from Italy**: Italian-inspired cheese is also found in American supermarkets, particularly in the Midwest and Northeast regions. It's known for its nutty flavor profile and can be enjoyed with a variety of accompaniments like crackers, toast, or even bread.\n7. **Cheese from Spain**: Spanish cheeses like cheddar, goat cheese, and ricotta are also found in American supermarkets, particularly in the Midwest and Northeast regions. They're known for their rich flavor profile and can be enjoyed with a variety of accompaniments like crackers, toast, or even bread.\n8. **Cheddar from Belgium**: Belgian cheeses like chedder, gouda, and brie are also found in American supermarkets, particularly in the Midwest and Northeast regions. They're known for their unique flavor profile and can be enjoyed with a variety of accompaniments like crackers, toast, or even bread.\n9. **Cheese from Germany**: German cheeses like sauerbraten, sauerschnitt, and sauerbock are also found in American supermarkets, particularly in the Midwest and Northeast regions. They're known for their rich flavor profile and can be enjoyed with a variety of accompaniments like crackers, toast, or even bread.\n10. **Cheese from France**: French cheeses like chedder, Gruy\u00e8re, and Brie are also found in American supermarkets, particularly in the Midwest and Northeast regions. They're known for their nutty flavor profile and can be enjoyed with a variety of accompaniments like crackers, toast, or even bread.\n\nThese are just a few examples of the diverse types of cheese found in American supermarkets. Each type has its own unique characteristics that make it a truly special part of the country's gastronomic landscape!",
+      "usage": {
+        "cost": 3.483251e-05,
+        "tokens_in": 23,
+        "tokens_out": 724
+      }
+    },
+    {
+      "critique": {
+        "factual_errors": "Gelato is not a type of cheese, it is a type of frozen dessert; it does not belong in the list of cheeses.",
+        "is_refusal": false,
+        "overall_quality": "Poor",
+        "repetition": "Several cheeses such as Gouda, Feta, Parmesan, and Cheddar were repeated multiple times, detracting from the quality of the list.",
+        "unwarranted_assumptions": "The assumption that the reader is unfamiliar with checking expiration dates for cheese may not be valid, as many shoppers would know this basic grocery practice.",
+        "verbosity": "The response contains unnecessary descriptions for certain cheeses, making it more verbose than needed."
+      },
+      "model": "smollm:360m",
+      "response": "American supermarkets offer a wide variety of delicious and unique cheeses to suit different tastes and dietary needs. Here are 12 popular types of cheese found in American supermarkets:\n\n1. **Cheddar**: A classic favorite, cheddar is often paired with garlic bread or used as a topping for burgers and sandwiches.\n2. **Gouda**: A smooth, creamy cheese that pairs well with tomato sauce and is perfect for pasta dishes.\n3. **Parmesan**: A salty, savory cheese that's perfect for pizza, lasagnas, and caprese salads.\n4. **Mozzarella**: A soft, spreadable cheese ideal for fettuccine Alfredo or other Italian-style dishes.\n5. **Gelato**: A frozen version of ice cream that's often flavored with fruit, nuts, or chocolate.\n6. **Feta**: A tangy, crumbly cheese commonly used in Mediterranean cuisine and salads.\n7. **Brie**: A creamy, mild cheese perfect for sandwiches, burgers, and as a topping for pasta dishes.\n8. **Gorgonzola**: A mild, slightly sweet cheese with a nutty flavor that pairs well with tomato-based sauces.\n9. **Monterey Jack**: A salty, aged cheese often used in salads or as an ingredient in sandwiches.\n10. **Feta**: Similar to the above, but with a stronger, more pungent flavor.\n11. **Gouda**: A smooth, creamy cheese that pairs well with tomato-based sauces and is perfect for pasta dishes.\n12. **Parmesan**: A salty, savory cheese often used in Italian cuisine or paired with garlic bread.\n\nThese are just a few examples of the many delicious cheeses available in American supermarkets. You can also find artisanal cheeses like:\n\n* **Gouda**: Made from cow's milk and aged for several months to develop its rich flavor.\n* **Feta**: Similar to the above, but with a stronger, more pungent flavor.\n* **Parmesan**: A classic Italian cheese that pairs well with garlic bread or pasta dishes.\n* **Gelato**: A frozen version of ice cream made from milk and other ingredients.\n* **Cheddar**: A traditional American cheese variety often paired with garlic bread or used as a topping for burgers and sandwiches.\n\nRemember to always check the expiration dates and quality ratings before purchasing, especially if you're new to a particular type of cheese. Happy shopping!",
+      "usage": {
+        "cost": 3.9806340830000004e-05,
+        "tokens_in": 23,
+        "tokens_out": 525
+      }
+    },
+    {
+      "critique": {
+        "factual_errors": "Swiss Cheddar does not exist as a type of cheese; cheddar and Swiss are distinct cheeses. Additionally, blue cheese is not a type of cheddar; there's also confusion regarding the production methods of some cheeses, such as blue cheese, which typically isn't aged in red wine barrels. Goat's milk is incorrectly assigned to cheeses like Camembert and Parmesan, which are primarily made from cow's milk.",
+        "is_refusal": false,
+        "overall_quality": "The response contains several factual inaccuracies and a lack of clarity about cheese classifications.",
+        "repetition": "There are redundancies in mentioning Cheddar and Blue Cheese as different types in various formulations without clarifying their distinct types. The inconsistent labeling sometimes makes it feel like certain cheeses are repeated in different forms.",
+        "unwarranted_assumptions": "The response assumes that the reader understands the distinctions being made about cheese types without providing adequate clarification. There is also an unwarranted assumption that more obscure types of cheese (like blue cheese-White) would be familiar to the average consumer.",
+        "verbosity": "The answer contains unnecessary and unclear qualifications for some cheeses (e.g., 'often used for breakfast sandwiches or in sauces') which do not directly contribute to their identification as commonly found cheeses."
+      },
+      "model": "qwen2.5:0.5b",
+      "response": "There are many types of cheese in the United States, but here is a list of twelve popular and commonly consumed types:\n\n1. Parmesan - A type of cow's milk cheese that is often used as the base for other brands.\n\n2. Swiss Cheddar - A type of goat's milk cheese with a distinctive yellow color and flavor.\n\n3. Blue Cheese - A type of cheddar cheese made from cows milk that has been aged in red wine barrels, producing a unique dark color.\n\n4. Gouda - A type of cow's milk cheese that is often used for breakfast sandwiches or in sauces.\n\n5. Fontina - A type of goat's milk cheese with a rich, creamy flavor and strong aroma.\n\n6. Feta - A type of goat's milk cheese that has been aged in wine barrels, producing a tangy flavor and mild to strong taste.\n\n7. Parmigiano-Reggiano - A type of cow's milk cheese that is known for its sharp, spicy flavor and high-quality milk content.\n\n8. Cheddar - A type of cow's milk cheese with a distinctive yellow color and flavor.\n\n9. Camembert - A type of goat's milk cheese with a rich, creamy flavor and tangy taste.\n\n10. Emmental - A type of cow's milk cheese that is often used for breakfast sandwiches or in sauces.\n\n11. Cheddar-White - A type of cheese made from the same milk but aged in white wine barrels.\n\n12. Blue Cheese-White - A type of cheese made from the same milk and aged in white wine barrels.",
+      "usage": {
+        "cost": 3.6143501250000006e-05,
+        "tokens_in": 43,
+        "tokens_out": 324
+      }
+    },
+    {
+      "critique": {
+        "factual_errors": "Camembert is not Italian; it's a French cheese. Additionally, 'Parmesan-Campossotto' is not a known or standard type of cheese, which raises questions about the factual correctness.",
+        "is_refusal": false,
+        "overall_quality": "Fair",
+        "repetition": "No significant repetition is present, but certain descriptions could be more concise.",
+        "unwarranted_assumptions": "The response assumes that the reader wants details about the production and usage of each cheese rather than just a list of types.",
+        "verbosity": "The response is somewhat verbose, providing additional details that may not be necessary for a simple listing of cheese types."
+      },
+      "model": "qwen2.5:1.5b",
+      "response": "There are many different types of cheese that you might find in an American supermarket, but here are just some examples:\n\n- Cheddar: This is one of the most popular types of cheese and can be made from cow's milk or goat's milk.\n- Swiss Cheese: This type of cheese gets its name because it was originally made using a process called \"swimming\" where whey was allowed to drain out of the curds. It has a yellowish color and is known for having a firm, crumbly texture.\n- Mozzarella: This is a soft, white cheese that comes from Italy but can be found in American supermarkets. It's often used in pasta dishes or as a topping on pizza.\n- Brie: This type of cheese is made with cow's milk and has a creamy texture. It gets its name because it was originally wrapped in cheesecloth before being sliced, which looked like the skin of a bumblebee.\n- Gouda: This type of cheese comes from Holland and is known for having a mild flavor and a smooth, shiny appearance.\n- Edam: Another Dutch cheese that's similar to Gouda, but with a more pronounced nutty flavor. It's also used in many dishes where the buttery flavor would be appreciated.\n- Parmesan: This type of cheese comes from Italy and is known for its strong flavor. It has a creamy texture and can be found as grated or melted on pizza or pasta dishes.\n- Feta: This type of cheese comes from Greece and has a tangy, salty taste. It's often used in salads or as a topping on falafel.\n- Stilton: Another British cheese that's made with cow's milk. It has a rich flavor and is known for its deep blue color.\n- Boursin: This type of cheese comes from France and has a creamy texture and mild, buttery taste. It's often used in dishes where you want to add some richness without the creaminess of other cheeses.\n- Fontina: Another Italian cheese that has a creamy texture and nutty flavor. It's sometimes used as a topping for pizza or pasta dishes.\n- Taleggio: This type of cheese comes from Italy and is known for its strong, earthy flavor. It has a firm, crumbly texture and can be found in many European countries.\n\nOf course, there are many other types of cheese that you might find in an American supermarket as well. Some examples include Gruyere (a Swiss cheese), Camembert (an Italian cheese), Asiago (an Italian cheese), Parmesan-Campossotto (a combination of Parmesan and Campossotto cheeses) and so on.",
+      "usage": {
+        "cost": 9.578567167e-05,
+        "tokens_in": 43,
+        "tokens_out": 547
+      }
+    },
+    {
+      "critique": {
+        "factual_errors": "",
+        "is_refusal": false,
+        "overall_quality": "Good",
+        "repetition": "There is no significant repetition; each cheese is described uniquely.",
+        "unwarranted_assumptions": "There are no unwarranted assumptions; the response conveys factual information about commonly available cheeses.",
+        "verbosity": "The response is mostly concise but includes a brief concluding statement that could be considered slightly unnecessary."
+      },
+      "model": "gemma2:2b",
+      "response": "Here are 12 delicious types of cheese commonly found in American supermarkets, with a mix of classic favorites and some unique options:\n\n**Classics:**\n\n1. **Cheddar:** A sharp, savory favorite for grating, snacking, and baking.  \n2. **Mozzarella:** Mildly sweet and creamy, perfect for pizza or melting on sandwiches. \n3. **Monterey Jack:** Smooth and mild, often used in Mexican-inspired dishes like quesadillas.\n4. **American Cheese:** A processed cheese popular for melting and topping pizzas, burgers, and grilled sandwiches.\n\n**Semi-Hard & Flavors:**\n\n5. **Swiss:** Nutty and slightly salty, ideal for melting on a grilled sandwich or adding to salads.\n6. **Provolone:** Tangy and flavorful, commonly used in Italian dishes or as a spread on bread.\n7. **Gouda:** Sweet and nutty with a firm texture, perfect for pairing with fruit and crackers. \n\n**Soft & Creamy:**\n\n8. ** Brie:** A soft, buttery cheese with a delicate flavor, delicious on its own or with fruits and crusty bread.\n9. **Feta:** Salty and tangy, often used in salads, pasta dishes, and dips.\n\n**Unique & Specialty:**\n\n10. **Havarti:** Mildly sweet and nutty, popular for pairing with fruit and crackers. \n11. **Blue Cheese:** Sharp and pungent, best enjoyed on a small amount to balance flavors.  \n12. **Goat Cheese:** Tangy and refreshing, great for salads, dips, or spread on bread.\n\n\nThis list offers just a starting point - there are countless other delicious types of cheese found in American supermarkets!  \n",
+      "usage": {
+        "cost": 9.70099275e-05,
+        "tokens_in": 23,
+        "tokens_out": 361
+      }
+    },
+    {
+      "critique": {
+        "factual_errors": "",
+        "is_refusal": false,
+        "overall_quality": "The response provides a comprehensive list of twelve cheeses available in American supermarkets, detailing their characteristics and uses, but it suffers from issues of repetition and verbosity.",
+        "repetition": "There are significant repetitions in the descriptions, especially for Gouda, Brie, Swiss, Provolone, and Mozzarella, where similar phrases and ideas are repeated multiple times.",
+        "unwarranted_assumptions": "The response assumes that the reader is interested in extensive descriptions and pairings for each cheese, which may not be necessary for someone simply seeking a list.",
+        "verbosity": "The response includes excessive descriptions and unnecessary mentions of pairing or serving suggestions, particularly the repeated references to crackers/breadsticks, which lead to a more verbose answer than necessary."
+      },
+      "model": "phi3:3.8b",
+      "response": "Here is a list of twelve popular and delicious types of cheeses that you can find at many American supermarkets:\n\n1. Cheddar Cheese - A versatile, yellow or orange-colored hard cheese with a sharp taste when aged properly. It's perfect for grating on top of pasta dishes, sandwiches and burgers alike. \n2. Gouda Cheese - Originating from the Netherlands but now popular worldwide, this semi-hard cheese has a mild flavor with nutty undertones that make it great as part of salads or just enjoyed on its own. It'ries smooth texture also makes for an excellent spreadable option when creamier versions are available (like Gouda Leidse).\n3. Brie Cheese - A soft, white-colored cheese with a buttery and slightly earthy flavor profile that goes well in sandwiches or as part of desserts like charcuterie boards along with other fruits such as grapes, pears etc., plus crackers for dipping.\n4. Swiss Cheese - A semi-hard cheese made from cow's milk known primarily due to its signature holes (eyes) and nutty flavor which pairs perfectly well when melted over dishes like fondue or grilled sandwiches alike but also works great atop salads too!\n5. Provolone Cheese - A semi-hard cow's milk cheese with a sharp taste that melts into creamy layers perfect for pizzas, lasagna and omelets as well being delicious eaten alone or spread on crackers/breadsticks alike plus it can be aged too to create even richer flavors!\n6. Mozzare01: Cheddar Cheese - A versatile cheese that is perfect for grating, melting and pairing with fruits like apples or pears as well being great on its own when served at room temperature along with crackers/breadsticks too! \n7. Gouda Cheese \u2013 Originating from the Netherlands but now popular worldwide; this semi-hard cheese has a mild flavor with nutty undertones making it great for salads, sandwiches or enjoyed on its own at parties along with other fruits such as grapes and pears too!\n8. Brie Cheese \u2013 A soft white cow's milk cheese known primarily due to its buttery texture which goes well in grilled ham/veal dishes alike; it also works great when spread over crackers or breadsticks along with other fruits such as grapes and pears too!\n9. Swiss Cheese - A semi-hard cow's milk cheese made from rennet known primarily due to its signature holes (eyes) plus nutty flavor making it perfect for melting over fondue, grilling sandwiches or enjoyed on crackers/breadsticks alike too!\n10. Provolone Cheese - A semi-hard cow's milk cheese with a sharp taste that melds into creamy layers great when used in pizzas and lasagna but also fantastic topped over grilled meats, veggies or enjoyed on its own along side crackers/breadsticks too!\n11. Monterey Jack Cheese - A semi-hard cow's milk cheese known for mild flavors with hints of sweetness making it perfect as part of Mexican dishes such as burritos, tacos or enjoyed on its own alongside crackers/breadsticks alike too!\n12. Mozzarella Cheese - A semi-soft cow's milk cheese known primarily due to stringy texture which melts into deliciously gooey layers perfect for pizzas, lasagna but also fantastic as a standalone option alongside crackers/breadsticks too! \n\nI hope this list of popular American and worldwide-known cheeses can help you find the right kind to add some flavorful variety in your meals or parties alike. Enjoy experimenting with different pairings until finding what works best for yourself alongside crackers/breadsticks too!",
+      "usage": {
+        "cost": 0.00030529359750000004,
+        "tokens_in": 27,
+        "tokens_out": 918
+      }
+    },
+    {
+      "critique": {
+        "factual_errors": "None",
+        "is_refusal": false,
+        "overall_quality": "High",
+        "repetition": "None",
+        "unwarranted_assumptions": "The response assumes a general interest in popular cheeses without indicating any specific dietary restrictions or preferences.",
+        "verbosity": "Appropriate"
+      },
+      "model": "llama3.1:8b",
+      "response": "Here are 12 popular and delicious types of cheese commonly found in American supermarkets:\n\n1. **Cheddar**: A classic, versatile cheese great for snacking, sandwiches, and grating.\n2. **Mozzarella**: Perfect for pizza, lasagna, and caprese salads (with tomatoes and basil).\n3. **Monterey Jack**: A mild, semi-soft cheese great for grilled cheese, quesadillas, and snacks.\n4. **Provolone**: A smooth, aged Italian-style cheese perfect for sandwiches, pasta dishes, and paninis.\n5. **Gouda**: A creamy, nutty Dutch cheese great for snacking, grating, or using in sauces.\n6. **Colby**: A mild, semi-soft American cheese similar to Cheddar but with a milder flavor.\n7. **Pepper Jack**: A spicy variation of Monterey Jack cheese, perfect for adding heat to snacks and dishes.\n8. **Swiss**: A nutty, creamy cheese great for fondue, grilled cheese, and charcuterie boards.\n9. **Feta**: A salty, crumbly Greek cheese perfect for salads (like Greek salad), pasta dishes, and as a topping.\n10. **Ricotta**: An Italian cheese great for lasagna, cannoli, and as a dip for fresh fruit or crackers.\n11. **Parmesan**: A hard, aged Italian cheese often grated over pasta dishes, salads, and soups.\n12. **Blue Cheese**: A strong, pungent cheese with a tangy, creamy flavor perfect for dressings, sauces, and as a topping.\n\nThese are just a few examples of the many types of delicious cheese available in American supermarkets.",
+      "usage": {
+        "cost": 0.00022283274,
+        "tokens_in": 23,
+        "tokens_out": 350
+      }
+    },
+    {
+      "critique": {
+        "factual_errors": "No factual errors identified; all listed cheeses are commonly found in American supermarkets.",
+        "is_refusal": false,
+        "overall_quality": "High quality, informative response that meets the prompt well.",
+        "repetition": "No repetition present; each cheese is described uniquely.",
+        "unwarranted_assumptions": "No unwarranted assumptions made; the response directly addresses the prompt with relevant information.",
+        "verbosity": "The response is appropriately concise and informative without unnecessary padding."
+      },
+      "model": "gemma2:9b",
+      "response": "Here are 12 delicious types of cheese you'll likely find in most American supermarkets, spanning a range of flavors and textures:\n\n**Mild & Creamy:**\n\n1. **Cheddar:** A classic with many variations, from mild to sharp. Great for sandwiches, salads, or snacking.\n2. **Monterey Jack:** Mild and buttery, often found individually wrapped for easy snacking. Melts well.\n3. **Colby:** Similar to cheddar but milder, often blended with other cheeses.\n4. **Cream Cheese:** A spreadable delight, perfect for bagels, dips, or cheesecake.\n\n**Bold & Sharp:**\n\n5. **Pepper Jack:** Cheddar-based with a spicy kick from jalape\u00f1os. Great for quesadillas and tacos.\n6. **Sharp Cheddar:**  Tangy and assertive, pairs well with crackers or on a charcuterie board.\n7. **Blue Cheese:** Strong and pungent, best enjoyed in moderation on salads, pizza, or burgers.\n\n**Soft & Spreadable:**\n\n8. **Brie:** A creamy French cheese with a soft rind, delicious served at room temperature with crackers.\n9. **Goat Cheese (Ch\u00e8vre):** Tangy and earthy, available fresh or aged. Try it on salads or in baked dishes.\n\n**Other Favorites:**\n\n10. **Mozzarella:** Essential for pizza and pasta dishes, comes in fresh or shredded varieties.\n11. **Provolone:** Semi-hard Italian cheese with a nutty flavor, often used for sandwiches or grilled cheese.\n12. **Parmesan:** Hard, salty, and granular. Great for grating over pasta, salads, or soups.\n\n\n\nEnjoy exploring the world of American cheeses!",
+      "usage": {
+        "cost": 0.00037862705333000006,
+        "tokens_in": 23,
+        "tokens_out": 355
+      }
+    },
+    {
+      "critique": {
+        "factual_errors": "No significant factual errors were identified in the descriptions of the cheeses. However, it could be more accurate to note that Boursin is not a type of Brie but rather a distinct cheese altogether.",
+        "is_refusal": false,
+        "overall_quality": "The response is of good quality, providing a detailed list of 12 types of cheese with brief descriptions, including their origins, characteristics, and common uses.",
+        "repetition": "There is minimal repetition in the response, with each cheese presented uniquely without unnecessary redundancy in descriptions.",
+        "unwarranted_assumptions": "The response does not make unwarranted assumptions. It reasonably assumes the reader may want both a list and some context about each cheese.",
+        "verbosity": "The response is moderately verbose. While some description is beneficial, it could be condensed slightly for brevity without losing essential information."
+      },
+      "model": "mistral-nemo:12b",
+      "response": "Here are twelve delicious types of cheese that you can typically find in American supermarkets, representing a variety of styles and flavors:\n\n **1. Cheddar** - A popular, semi-hard cheese originating from England, known for its nutty flavor and varying degrees of sharpness.\n\n **2. Mozzarella** - A soft, white cheese originally from Italy, commonly used in pizza, pasta dishes, and salads like Caprese.\n\n **3. Colby** - Similar to cheddar but milder and softer, with a creamy texture. It's often found in the Midwest United States.\n\n **4. Gouda** - A Dutch semi-hard cheese made from cow's milk, available in young (younger than 6 months) or aged varieties, offering flavors ranging from sweet to pungent.\n\n **5. Swiss (Emmental)** - Holes of this famous Swiss cheese are caused by bacteria during aging. It has a mild, nutty flavor and is perfect for sandwiches and fondue.\n\n **6. Brie** - A soft, creamy French cheese with a bloomy rind, characterized by its earthy aroma and rich flavor. Popular varieties include Boursin and Camembert.\n\n **7. Blue Cheese (e.g., Roquefort)** - This crumbly, veined cheese is made by introducing Penicillium roqueforti mold during aging, giving it a distinctive tangy taste and salty finish.\n\n **8. Parmesan** - A hard, granular Italian cheese known for its rich, umami flavor and nutty undertones, typically grated over pasta dishes.\n\n **9. Monterey Jack** - An American Original, this semi-hard cheese has a smooth texture and mild flavor that becomes sharper with age or when aged with chili peppers (as in Pepper Jack).\n\n **10. Provolone** - An Italian cow's milk cheese known for its smoky, salty taste and stringy texture when melted.\n\n **11. Feta** - A Greek sheep's milk cheese with a tangy flavor, crumbly texture, and salty finish, commonly used in Mediterranean salads and dishes like spanakopita.\n\n **12. Cream Cheese (Neufch\u00e2tel)** - An American adaptation of French Neufch\u00e2tel, cream cheese is soft, mild-tasting, and often used as a base for spreads, frostings, or baked goods like cheesecake.\n\nThese cheeses offer a diverse range of flavors and textures to suit various tastes and culinary uses. Enjoy exploring these options at your local supermarket!",
+      "usage": {
+        "cost": 0.00141241205042,
+        "tokens_in": 19,
+        "tokens_out": 535
+      }
+    }
+  ]
+}
