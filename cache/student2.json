@@ -153,6 +153,23 @@
         "tokens_in": 62,
         "tokens_out": 456
       }
+    },
+    {
+      "critique": {
+        "factual_errors": "",
+        "is_refusal": false,
+        "overall_quality": "Very good",
+        "repetition": "There is no noticeable repetition in the response; each point is distinct and contributes a unique aspect of support.",
+        "unwarranted_assumptions": "The response does not make unwarranted assumptions; it logically considers the context of Mary's situation and her academic needs.",
+        "verbosity": "The response is concise and directly addresses the prompt without unnecessary elaboration."
+      },
+      "model": "gpt-4o-mini",
+      "response": "Given Mary's situation, a supportive educational placement and accommodations could include:\n\n1. **Alternative Education Program**: Enroll her in an alternative school or program that focuses on behavioral support and academic recovery.\n\n2. **Counseling Services**: Provide access to counseling for substance use and emotional support to address underlying issues.\n\n3. **Academic Support**: Implement tutoring or mentoring, especially in math, to help improve her grades.\n\n4. **Individualized Education Plan (IEP) or 504 Plan**: If applicable, develop an IEP or 504 Plan to provide tailored accommodations, such as extended time on tests or modified assignments.\n\n5. **Flexible Scheduling**: Allow for a flexible schedule that accommodates her needs, including time for counseling or recovery programs.\n\n6. **Positive Behavioral Interventions**: Use positive reinforcement strategies to encourage good behavior and academic engagement.\n\n7. **Parental Involvement**: Engage her family in the process to ensure support at home.\n\nThese measures can help Mary reintegrate into the school environment while addressing her academic and personal challenges.",
+      "usage": {
+        "cost": 0.00014055,
+        "tokens_in": 73,
+        "tokens_out": 216
+      }
     }
   ]
 }

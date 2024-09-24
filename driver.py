@@ -54,7 +54,8 @@ def add_model_for_slug(slug, model="gpt-4o-mini"):
 
   with open(f"cache/{slug}.json", "w") as f:
     f.write(json.dumps(result, indent=2, sort_keys=True))
-  json_to_html(f"cache/{slug}.json", f"output/{slug}.html")
+
+  return add_critique(slug)
 
 
 def add_critique(slug):
