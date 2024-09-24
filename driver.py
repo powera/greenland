@@ -11,13 +11,10 @@ import local_client, ollama_client, openai_client, anthropic_client
 import util.flesch_kincaid as fk
 
 OLLAMA_MODELS = [
-    "smollm:135m",  #  91M
-    "smollm:360m",  # 229M
-    "qwen2.5:0.5b", # 397M
-    "qwen2.5:1.5b", # 986M
-    "gemma2:2b",    # 1.6G
-    "phi3:3.8b",    # 2.2G
+    "smollm:1.7b",  # 990M
+    "phi3.5:3.8b",    # 2.2G
     "llama3.1:8b",  # 4.7G
+    "qwen2.5:7b",   # 4.7G
     "gemma2:9b",    # 5.4G
     "mistral-nemo:12b",  # 7.1G
 ]
@@ -47,11 +44,15 @@ def add_critique(slug):
     doc = json.loads(f.read())
   for k in doc["results"]:
     if "critique" not in k:
-      k["critique"], _ = openai_client.evaluate_response(doc["prompt"], k["response"])
-      break
+      critique_tuple, _ = openai_client.evaluate_response(doc["prompt"], k["response"])
+      k["critique"] = critique_tuple.dict()
   with open(f"cache/{slug}.json", "w") as f:
     f.write(json.dumps(doc, indent=2, sort_keys=True))
+  slug_json_to_html(slug)
 
+
+def slug_json_to_html(slug):
+    json_to_html(f"cache/{slug}.json", f"output/{slug}.html")
 
 def json_to_html(json_file, output_html):
     # Load JSON data
@@ -65,7 +66,7 @@ def json_to_html(json_file, output_html):
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>JSON to HTML</title>
+        <title>LLM Outputs</title>
         <style>
             .collapsible {
                 background-color: #f1f1f1;
@@ -76,7 +77,7 @@ def json_to_html(json_file, output_html):
                 border: none;
                 text-align: left;
                 outline: none;
-                font-size: 15px;
+                font-size: 14px;
             }
 
 
@@ -85,6 +86,15 @@ def json_to_html(json_file, output_html):
                 justify-content: space-between;
             }
 
+
+            .response-column {
+                width: 60%; /* 60% width for response */
+            }
+
+            .critique-column {
+                width: 40%; /* 40% width for critique */
+                font-size: 12px;
+            }
             .active, .collapsible:hover {
                 background-color: #ccc;
             }
@@ -108,17 +118,27 @@ def json_to_html(json_file, output_html):
 
     # Add each result in a collapsible div
     for idx, result in enumerate(data['results']):
+        critique = result.get('critique', '')
+        if isinstance(critique, dict):
+          critique = f'''
+<b>Was this a refusal?</b> {critique["is_refusal"]}<br />
+<b>What was the overall quality?</b> {critique["overall_quality"]}<br />
+<b>Were there factual errors?</b> {critique["factual_errors"]}<br />
+<b>Was there excessive repetition?</b> {critique["repetition"]}<br />
+<b>Was there excessive verbosity?</b> {critique["verbosity"]}<br />
+<b>Were there unwarranted assumptions?</b> {critique["unwarranted_assumptions"]}'''
+
         html_content += f'''
         <button class="collapsible">Model: {result['model']} (Usage: {result['usage']})</button>
         <div class="content">
             <div class="response-critique">
-                <div class="column">
+                <div class="column response-column">
                     <div class="column-header">Response:</div>
                     <p>{result['response'].replace(line_break, '<br>')}</p>
                 </div>
-                <div class="column">
+                <div class="column critique-column">
                     <div class="column-header">Critique:</div>
-                    <p>{result.get('critique', '').replace(line_break, '<br>')}</p>
+                    <p>{critique.replace(line_break, '<br>')}</p>
                 </div>
             </div>
         </div>
