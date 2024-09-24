@@ -137,7 +137,7 @@ def json_to_html(json_file, output_html):
         critique = critique.replace('\n', '<br>')
 
         html_content += f'''
-        <button class="collapsible">Model: {result['model']} (Usage: {result['usage']})</button>
+        <button class="collapsible">Model: {result['model']} (Cost: {result['usage']['cost']:.6f}, Response Tokens: {result['usage']['tokens_out']})</button>
         <div class="content">
             <div class="response-critique">
                 <div class="column response-column">
