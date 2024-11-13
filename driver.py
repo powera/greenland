@@ -11,15 +11,20 @@ import local_client, ollama_client, openai_client, anthropic_client
 
 import util.flesch_kincaid as fk
 
-OLLAMA_MODELS = [
+# possibly should be renamed?  "small" in the sense that answers are too incoherent
+SMALL_OLLAMA_MODELS = [
     "llama3:latest",  # old, 4.7G
     "qwen:4b",      # old, 2.3G
     "smollm:1.7b",  # 990M
+    "smollm2:360m", # 725MB,
+]
+
+OLLAMA_MODELS = [
     "phi3.5:3.8b",    # 2.2G
     "llama3.1:8b",  # 4.7G
     "qwen2.5:7b",   # 4.7G
     "gemma2:9b",    # 5.4G
-    "mistral-nemo:12b",  # 7.1G
+    "mistral-nemo:12b",  # 7.1G,
 ]
 
 
@@ -32,8 +37,11 @@ def multi_cross_run_to_json(slug_dict):
     result[slug]["results"] = []
   for model in OLLAMA_MODELS:
     for slug in slug_dict:
-      response, usage = ollama_client.generate_chat(slug_dict[slug], model)
-      result[slug]["results"].append({"model": model, "response": response, "usage": usage})
+      try:
+        response, usage = ollama_client.generate_chat(slug_dict[slug], model)
+        result[slug]["results"].append({"model": model, "response": response, "usage": usage})
+      except Exception as e:
+        print(e)
 
   for slug in slug_dict:
     with open(f"cache/{slug}.json", "w") as f:
@@ -42,13 +50,22 @@ def multi_cross_run_to_json(slug_dict):
   return result
 
 
-def add_model_for_slug(slug, model="gpt-4o-mini"):
+def add_model_for_slug(slug, model="gpt-4o-mini", persona=""):
   with open(f"cache/{slug}.json", "r") as f:
     result = json.loads(f.read())
   prompt = result["prompt"]
+  existing_keys = [x["model"] for x in result["results"] ]
   if model == "gpt-4o-mini":  # only model for now
-    response, usage = openai_client.answer_question(prompt)
-    result["results"].append({"model": "gpt-4o-mini", "response": response, "usage": usage})
+    if persona:
+      response, usage = openai_client.answer_question(prompt, persona=persona)
+      result["results"].append({"model": f"gpt-4o-mini/{persona}", "response": response, "usage": usage})
+    else:
+      if model not in existing_keys:
+        response, usage = openai_client.answer_question(prompt)
+        result["results"].append({"model": "gpt-4o-mini", "response": response, "usage": usage})
+  elif model in OLLAMA_MODELS:
+    response, usage = ollama_client.generate_chat(prompt, model)
+    result["results"].append({"model": model, "response": response, "usage": usage})
   else:
     raise Exception("Unknown model.")
 

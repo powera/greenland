@@ -45,7 +45,7 @@ def generate_chat(prompt, model="smollm:360m"):
       "stream": False,
   }
   
-  response = requests.post(url, json=data)
+  response = requests.post(url, json=data, timeout=50)
   if response.status_code == 200:
     result = ""
     usage = ""
