@@ -170,6 +170,23 @@
         "tokens_in": 41,
         "tokens_out": 78
       }
+    },
+    {
+      "critique": {
+        "factual_errors": "None",
+        "is_refusal": false,
+        "overall_quality": "Mediocre",
+        "repetition": "No noticeable repetition.",
+        "unwarranted_assumptions": "Assumes the reader is familiar with the concept of 'Hint-with-Joke' without explanation.",
+        "verbosity": "Concise but lacks depth in explanation."
+      },
+      "model": "smollm2:360m",
+      "response": "This is another Hint-with-Joke, also known as an \"Ask Me\" style question. The answer to the riddle would be: Pete!",
+      "usage": {
+        "cost": 1.2135236250000003e-05,
+        "tokens_in": 54,
+        "tokens_out": 33
+      }
     }
   ]
 }
