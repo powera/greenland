@@ -1,12 +1,62 @@
 [
-  "She peeled the orrange and enjoyed its juicy segments.",
-  "She peeled the oranje and savored its sweet, juicy segments.",
-  "She peeled the orang and ate the juicy segments.",
-  "She peeled the oranage and savored the sweet juice.",
-  "She peeled and ate the juicy oranage, savoring its sweet flavor.",
-  "My favorite fruit is orrange because it's both sweet and juicy.",
-  "She peeled the orrange and enjoyed its sweet, juicy flavor.",
-  "She peeled and ate the bright oringe slice for breakfast.",
-  "She sliced the orennge in half and squeezed the juice into her glass.",
-  "I love to eat a slice of orrange in the morning."
+  {
+    "id": 0,
+    "sentence": "She peeled the orrange and enjoyed its juicy segments.",
+    "incorrect": "orrange",
+    "correct": "orange"
+  },
+  {
+    "id": 1,
+    "sentence": "She peeled the oranje and savored its sweet, juicy segments.",
+    "incorrect": "oranje",
+    "correct": "orange"
+  },
+  {
+    "id": 2,
+    "sentence": "She peeled the orang and ate the juicy segments.",
+    "incorrect": "orang",
+    "correct": "orange"
+  },
+  {
+    "id": 3,
+    "sentence": "She peeled the oranage and savored the sweet juice.",
+    "incorrect": "oranage",
+    "correct": "orange"
+  },
+  {
+    "id": 4,
+    "sentence": "She peeled and ate the juicy oranage, savoring its sweet flavor.",
+    "incorrect": "oranage",
+    "correct": "orange"
+  },
+  {
+    "id": 5,
+    "sentence": "My favorite fruit is orrange because it's both sweet and juicy.",
+    "incorrect": "orrange",
+    "correct": "orange"
+  },
+  {
+    "id": 6,
+    "sentence": "She peeled the orrange and enjoyed its sweet, juicy flavor.",
+    "incorrect": "orrange",
+    "correct": "orange"
+  },
+  {
+    "id": 7,
+    "sentence": "She peeled and ate the bright oringe slice for breakfast.",
+    "incorrect": "oringe",
+    "correct": "orange"
+  },
+  {
+    "id": 8,
+    "sentence": "She sliced the orennge in half and squeezed the juice into her glass.",
+    "incorrect": "orennge",
+    "correct": "orange"
+  },
+  {
+    "id": 9,
+    "sentence": "I love to eat a slice of orrange in the morning.",
+    "incorrect": "orrange",
+    "correct": "orange"
+  }
 ]

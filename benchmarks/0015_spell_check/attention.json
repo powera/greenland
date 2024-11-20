@@ -1,12 +1,62 @@
 [
-  "She needed to pay attetion to the directions before starting the experiment.",
-  "She had to pay close attantion to the instructions in order to succeed.",
-  "Please pay attetion to the instructions before you begin the test.",
-  "She needed to pay attnetion to the details in the instructions.",
-  "She needed to get her children's attntion before she could leave the room.",
-  "Please pay attenion to the instructions on this page.",
-  "Please give your full attenion to the instructions before starting the experiment.",
-  "She tried to get his attetion by waving her hands frantically.",
-  "My teacher had to demand our atttention several times before we finished the test.",
-  "He tried to get her attenttion by waving his hands in front of her face."
+  {
+    "id": 0,
+    "sentence": "She needed to pay attetion to the directions before starting the experiment.",
+    "incorrect": "attetion",
+    "correct": "attention"
+  },
+  {
+    "id": 1,
+    "sentence": "She had to pay close attantion to the instructions in order to succeed.",
+    "incorrect": "attantion",
+    "correct": "attention"
+  },
+  {
+    "id": 2,
+    "sentence": "Please pay attetion to the instructions before you begin the test.",
+    "incorrect": "attetion",
+    "correct": "attention"
+  },
+  {
+    "id": 3,
+    "sentence": "She needed to pay attnetion to the details in the instructions.",
+    "incorrect": "attnetion",
+    "correct": "attention"
+  },
+  {
+    "id": 4,
+    "sentence": "She needed to get her children's attntion before she could leave the room.",
+    "incorrect": "attntion",
+    "correct": "attention"
+  },
+  {
+    "id": 5,
+    "sentence": "Please pay attenion to the instructions on this page.",
+    "incorrect": "attenion",
+    "correct": "attention"
+  },
+  {
+    "id": 6,
+    "sentence": "Please give your full attenion to the instructions before starting the experiment.",
+    "incorrect": "attenion",
+    "correct": "attention"
+  },
+  {
+    "id": 7,
+    "sentence": "She tried to get his attetion by waving her hands frantically.",
+    "incorrect": "attetion",
+    "correct": "attention"
+  },
+  {
+    "id": 8,
+    "sentence": "My teacher had to demand our atttention several times before we finished the test.",
+    "incorrect": "atttention",
+    "correct": "attention"
+  },
+  {
+    "id": 9,
+    "sentence": "He tried to get her attenttion by waving his hands in front of her face.",
+    "incorrect": "attenttion",
+    "correct": "attention"
+  }
 ]

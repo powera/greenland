@@ -1,12 +1,62 @@
 [
-  "To keep the different departments organized, they partioned off sections of the office space.",
-  "She used painter's tape to partion off a section of the wall for her art project.",
-  "To make more space for guests, we needed to partion the living room.",
-  "To keep things organized, we partionned the classroom into different learning areas.",
-  "To create separate work spaces, they decided to partion off the large room.",
-  "They used a partion to divide the large room into two smaller ones.",
-  "To divide the room for separate activities, they used a large partion wall.",
-  "To keep the children safe during the party, we need to particion off a section for the younger ones.",
-  "She used a paint roller to partion off the wall into two distinct sections.",
-  "We needed to partion the room into smaller areas for different activities."
+  {
+    "id": 0,
+    "sentence": "To keep the different departments organized, they partioned off sections of the office space.",
+    "incorrect": "partioned",
+    "correct": "partitioned"
+  },
+  {
+    "id": 1,
+    "sentence": "She used painter's tape to partion off a section of the wall for her art project.",
+    "incorrect": "partion",
+    "correct": "partition"
+  },
+  {
+    "id": 2,
+    "sentence": "To make more space for guests, we needed to partion the living room.",
+    "incorrect": "partion",
+    "correct": "partition"
+  },
+  {
+    "id": 3,
+    "sentence": "To keep things organized, we partionned the classroom into different learning areas.",
+    "incorrect": "partionned",
+    "correct": "partitioned"
+  },
+  {
+    "id": 4,
+    "sentence": "To create separate work spaces, they decided to partion off the large room.",
+    "incorrect": "partion",
+    "correct": "partition"
+  },
+  {
+    "id": 5,
+    "sentence": "They used a partion to divide the large room into two smaller ones.",
+    "incorrect": "partion",
+    "correct": "partition"
+  },
+  {
+    "id": 6,
+    "sentence": "To divide the room for separate activities, they used a large partion wall.",
+    "incorrect": "partion",
+    "correct": "partition"
+  },
+  {
+    "id": 7,
+    "sentence": "To keep the children safe during the party, we need to particion off a section for the younger ones.",
+    "incorrect": "particion",
+    "correct": "partition"
+  },
+  {
+    "id": 8,
+    "sentence": "She used a paint roller to partion off the wall into two distinct sections.",
+    "incorrect": "partion",
+    "correct": "partition"
+  },
+  {
+    "id": 9,
+    "sentence": "We needed to partion the room into smaller areas for different activities.",
+    "incorrect": "partion",
+    "correct": "partition"
+  }
 ]

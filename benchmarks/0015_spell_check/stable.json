@@ -1,12 +1,62 @@
 [
-  "Despite her many accomplishments, she didn't feel staable about her future career path.",
-  "Her emotions were stabe after her friend's apology.",
-  "Their living situation was far from stabal, with leaks in the roof and creaky floors.",
-  "After months of hard work, the young horse finally seemed staible enough to ride.",
-  "It was hard to keep the economy stabel during such turbulent times.",
-  "Despite his best efforts, he couldn't make the wobbly table staible.",
-  "Although her emotions were rarely stabl, she tried to maintain a facade of calm and control.",
-  "His emotions were stabe after his long day of work.",
-  "Despite working very hard all week, her mood remained stabble.",
-  "Despite living in a small town, her life didn't feel stayble."
+  {
+    "id": 0,
+    "sentence": "Despite her many accomplishments, she didn't feel staable about her future career path.",
+    "incorrect": "staable",
+    "correct": "stable"
+  },
+  {
+    "id": 1,
+    "sentence": "Her emotions were stabe after her friend's apology.",
+    "incorrect": "stabe",
+    "correct": "stable"
+  },
+  {
+    "id": 2,
+    "sentence": "Their living situation was far from stabal, with leaks in the roof and creaky floors.",
+    "incorrect": "stabal",
+    "correct": "stable"
+  },
+  {
+    "id": 3,
+    "sentence": "After months of hard work, the young horse finally seemed staible enough to ride.",
+    "incorrect": "staible",
+    "correct": "stable"
+  },
+  {
+    "id": 4,
+    "sentence": "It was hard to keep the economy stabel during such turbulent times.",
+    "incorrect": "stabel",
+    "correct": "stable"
+  },
+  {
+    "id": 5,
+    "sentence": "Despite his best efforts, he couldn't make the wobbly table staible.",
+    "incorrect": "staible",
+    "correct": "stable"
+  },
+  {
+    "id": 6,
+    "sentence": "Although her emotions were rarely stabl, she tried to maintain a facade of calm and control.",
+    "incorrect": "stabl",
+    "correct": "stable"
+  },
+  {
+    "id": 7,
+    "sentence": "His emotions were stabe after his long day of work.",
+    "incorrect": "stabe",
+    "correct": "stable"
+  },
+  {
+    "id": 8,
+    "sentence": "Despite working very hard all week, her mood remained stabble.",
+    "incorrect": "stabble",
+    "correct": "stable"
+  },
+  {
+    "id": 9,
+    "sentence": "Despite living in a small town, her life didn't feel stayble.",
+    "incorrect": "stayble",
+    "correct": "stable"
+  }
 ]
