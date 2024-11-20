@@ -22,6 +22,8 @@ def run_0015_spell_check(model):
       results = []
 
   total_questions = 0
+  has_correct_word = 0
+  has_proper_format = 0
   correct_answers = 0
   for x in sentence_list:
     prompt = f"""
@@ -36,13 +38,20 @@ Two example response:
 
     response, _ = ollama_client.generate_chat(prompt, model)
     total_questions += 1
+    if x["correct"] in response:
+      has_correct_word += 1
     response_parts = response.split()
-    if len(response_parts) == 3:
+    if len(response_parts) == 3 and response_parts[1] == "-":
+      has_proper_format += 1
       response_wrong = response.split()[0]
       response_right = response.split()[2]
       if x["incorrect"] == response_wrong and x["correct"] == response_right:
         correct_answers += 1
         continue
-    print(f"WRONG: Sentence << {x['sentence']} >>, Response << {response} >>")
 
-  print(f"RESULTS: {correct_answers} correct of {total_questions} questions.")
+  print(f"""
+RESULTS:
+{has_correct_word}/{total_questions} responses included the correct word.
+{has_proper_format}/{total_questions} responses were correctly formatted.
+{correct_answers}/{total_questions} responses were completely correct.
+        """)
