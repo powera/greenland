@@ -1,12 +1,62 @@
 [
-  "We ate dinner at the tabele in the backyard.",
-  "We gathered around the tabble to share our favorite stories.",
-  "Please sit down at the tabel and tell me about your day.",
-  "She placed her books on the tabble before starting her homework.",
-  "We needed to clear the tabble before we could eat dinner.",
-  "Please excuse me for setting my books on the tabl instead of finding a shelf.",
-  "We gathered around the tabl to share stories and laughter.",
-  "We gathered around the tabel to share our Thanksgiving feast.",
-  "Please put your dirty dishes on the tabel after you're finished eating.",
-  "She placed her textbook carefully on the tabel before starting her studying."
+  {
+    "id": 0,
+    "sentence": "We ate dinner at the tabele in the backyard.",
+    "incorrect": "tabele",
+    "correct": "table"
+  },
+  {
+    "id": 1,
+    "sentence": "We gathered around the tabble to share our favorite stories.",
+    "incorrect": "tabble",
+    "correct": "table"
+  },
+  {
+    "id": 2,
+    "sentence": "Please sit down at the tabel and tell me about your day.",
+    "incorrect": "tabel",
+    "correct": "table"
+  },
+  {
+    "id": 3,
+    "sentence": "She placed her books on the tabble before starting her homework.",
+    "incorrect": "tabble",
+    "correct": "table"
+  },
+  {
+    "id": 4,
+    "sentence": "We needed to clear the tabble before we could eat dinner.",
+    "incorrect": "tabble",
+    "correct": "table"
+  },
+  {
+    "id": 5,
+    "sentence": "Please excuse me for setting my books on the tabl instead of finding a shelf.",
+    "incorrect": "tabl",
+    "correct": "table"
+  },
+  {
+    "id": 6,
+    "sentence": "We gathered around the tabl to share stories and laughter.",
+    "incorrect": "tabl",
+    "correct": "table"
+  },
+  {
+    "id": 7,
+    "sentence": "We gathered around the tabel to share our Thanksgiving feast.",
+    "incorrect": "tabel",
+    "correct": "table"
+  },
+  {
+    "id": 8,
+    "sentence": "Please put your dirty dishes on the tabel after you're finished eating.",
+    "incorrect": "tabel",
+    "correct": "table"
+  },
+  {
+    "id": 9,
+    "sentence": "She placed her textbook carefully on the tabel before starting her studying.",
+    "incorrect": "tabel",
+    "correct": "table"
+  }
 ]

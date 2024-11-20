@@ -1,12 +1,62 @@
 [
-  "We were invited to a partee at Sarah's house on Saturday night.",
-  "We had a great partee last night to celebrate Emily's birthday.",
-  "We're having a pary at my house this weekend to celebrate summer break.",
-  "We had a partee to celebrate her graduation from high school.",
-  "She threw a super fun partee for her birthday.",
-  "We're having a partee this weekend to celebrate Sarah's birthday.",
-  "We had a great partee to celebrate Emily's birthday.",
-  "They were excited to go to the partee because they knew there would be lots of dancing.",
-  "We threw a partee to celebrate her birthday.",
-  "There's going to be a pary at my house this weekend!"
+  {
+    "id": 0,
+    "sentence": "We were invited to a partee at Sarah's house on Saturday night.",
+    "incorrect": "partee",
+    "correct": "party"
+  },
+  {
+    "id": 1,
+    "sentence": "We had a great partee last night to celebrate Emily's birthday.",
+    "incorrect": "partee",
+    "correct": "party"
+  },
+  {
+    "id": 2,
+    "sentence": "We're having a pary at my house this weekend to celebrate summer break.",
+    "incorrect": "pary",
+    "correct": "party"
+  },
+  {
+    "id": 3,
+    "sentence": "We had a partee to celebrate her graduation from high school.",
+    "incorrect": "partee",
+    "correct": "party"
+  },
+  {
+    "id": 4,
+    "sentence": "She threw a super fun partee for her birthday.",
+    "incorrect": "partee",
+    "correct": "party"
+  },
+  {
+    "id": 5,
+    "sentence": "We're having a partee this weekend to celebrate Sarah's birthday.",
+    "incorrect": "partee",
+    "correct": "party"
+  },
+  {
+    "id": 6,
+    "sentence": "We had a great partee to celebrate Emily's birthday.",
+    "incorrect": "partee",
+    "correct": "party"
+  },
+  {
+    "id": 7,
+    "sentence": "They were excited to go to the partee because they knew there would be lots of dancing.",
+    "incorrect": "partee",
+    "correct": "party"
+  },
+  {
+    "id": 8,
+    "sentence": "We threw a partee to celebrate her birthday.",
+    "incorrect": "partee",
+    "correct": "party"
+  },
+  {
+    "id": 9,
+    "sentence": "There's going to be a pary at my house this weekend!",
+    "incorrect": "pary",
+    "correct": "party"
+  }
 ]

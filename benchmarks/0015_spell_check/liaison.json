@@ -1,12 +1,62 @@
 [
-  "She served as the company's liason to the outside investors.",
-  "A skilled liason is essential for ensuring smooth communication between the two departments.",
-  "She was named the schools liasion to the local community center.",
-  "She acted as the liason between the two teams to ensure they were working together effectively.",
-  "She was appointed as the company's liason to help bridge the gap between departments.",
-  "She served as the school's liason to the parents and teachers.",
-  "She was chosen as the liasion between the two departments to help solve their communication issues.",
-  "She served as the school's leason between the students and the teachers.",
-  "He served as a liasion between the two groups, helping them find common ground.",
-  "She was the company's liason to the government agency."
+  {
+    "id": 0,
+    "sentence": "She served as the company's liason to the outside investors.",
+    "incorrect": "liason",
+    "correct": "liaison"
+  },
+  {
+    "id": 1,
+    "sentence": "A skilled liason is essential for ensuring smooth communication between the two departments.",
+    "incorrect": "liason",
+    "correct": "liaison"
+  },
+  {
+    "id": 2,
+    "sentence": "She was named the schools liasion to the local community center.",
+    "incorrect": "liasion",
+    "correct": "liaison"
+  },
+  {
+    "id": 3,
+    "sentence": "She acted as the liason between the two teams to ensure they were working together effectively.",
+    "incorrect": "liason",
+    "correct": "liaison"
+  },
+  {
+    "id": 4,
+    "sentence": "She was appointed as the company's liason to help bridge the gap between departments.",
+    "incorrect": "liason",
+    "correct": "liaison"
+  },
+  {
+    "id": 5,
+    "sentence": "She served as the school's liason to the parents and teachers.",
+    "incorrect": "liason",
+    "correct": "liaison"
+  },
+  {
+    "id": 6,
+    "sentence": "She was chosen as the liasion between the two departments to help solve their communication issues.",
+    "incorrect": "liasion",
+    "correct": "liaison"
+  },
+  {
+    "id": 7,
+    "sentence": "She served as the school's leason between the students and the teachers.",
+    "incorrect": "leason",
+    "correct": "liaison"
+  },
+  {
+    "id": 8,
+    "sentence": "He served as a liasion between the two groups, helping them find common ground.",
+    "incorrect": "liasion",
+    "correct": "liaison"
+  },
+  {
+    "id": 9,
+    "sentence": "She was the company's liason to the government agency.",
+    "incorrect": "liason",
+    "correct": "liaison"
+  }
 ]

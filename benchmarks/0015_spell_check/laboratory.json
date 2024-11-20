@@ -1,12 +1,62 @@
 [
-  "She spent many hours in the labratory conducting her science experiments.",
-  "My science teacher took our class to the labratory to dissect frogs.",
-  "She spent most of her summer working in the labratory analyzing samples.",
-  "She spent most of her summer vacation volunteering in the labratory.",
-  "She spent hours in the labratory, conducting experiments and taking notes.",
-  "She wore a lab coat and performed experiments in the labratory.",
-  "My science project required me to conduct experiments in the labratory.",
-  "She spent her summer volunteering in a labratory to help out with research.",
-  "During her science fair project, she spent many hours in the labratory conducting experiments.",
-  "She spent most of her time in the laberatory, conducting experiments on plants."
+  {
+    "id": 0,
+    "sentence": "She spent many hours in the labratory conducting her science experiments.",
+    "incorrect": "labratory",
+    "correct": "laboratory"
+  },
+  {
+    "id": 1,
+    "sentence": "My science teacher took our class to the labratory to dissect frogs.",
+    "incorrect": "labratory",
+    "correct": "laboratory"
+  },
+  {
+    "id": 2,
+    "sentence": "She spent most of her summer working in the labratory analyzing samples.",
+    "incorrect": "labratory",
+    "correct": "laboratory"
+  },
+  {
+    "id": 3,
+    "sentence": "She spent most of her summer vacation volunteering in the labratory.",
+    "incorrect": "labratory",
+    "correct": "laboratory"
+  },
+  {
+    "id": 4,
+    "sentence": "She spent hours in the labratory, conducting experiments and taking notes.",
+    "incorrect": "labratory",
+    "correct": "laboratory"
+  },
+  {
+    "id": 5,
+    "sentence": "She wore a lab coat and performed experiments in the labratory.",
+    "incorrect": "labratory",
+    "correct": "laboratory"
+  },
+  {
+    "id": 6,
+    "sentence": "My science project required me to conduct experiments in the labratory.",
+    "incorrect": "labratory",
+    "correct": "laboratory"
+  },
+  {
+    "id": 7,
+    "sentence": "She spent her summer volunteering in a labratory to help out with research.",
+    "incorrect": "labratory",
+    "correct": "laboratory"
+  },
+  {
+    "id": 8,
+    "sentence": "During her science fair project, she spent many hours in the labratory conducting experiments.",
+    "incorrect": "labratory",
+    "correct": "laboratory"
+  },
+  {
+    "id": 9,
+    "sentence": "She spent most of her time in the laberatory, conducting experiments on plants.",
+    "incorrect": "laberatory",
+    "correct": "laboratory"
+  }
 ]
