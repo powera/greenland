@@ -5,19 +5,19 @@ import torch
 import librosa
 from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
 
-model_id = "openai/whisper-large-v3"
+model_id = "openai/whisper-large-v3-turbo"
 
 # Always use MacBook M3 settings
 device = torch.device("mps")
-torch_dtype = torch.float16 if (model_id == "openai/whisper-large-v3") else torch.float32
+torch_dtype = torch.float16 if (model_id == "openai/whisper-large-v3-turbo") else torch.float32
 
-model_dir = "/Users/powera/repo/whisper_large_v3"
+model_dir = "/Users/powera/repo/whisper_turbo"
 model = AutoModelForSpeechSeq2Seq.from_pretrained(
     model_dir, torch_dtype=torch_dtype, low_cpu_mem_usage=True
 )
 model.to(device)
 
-processor = AutoProcessor.from_pretrained(model_id)
+processor = AutoProcessor.from_pretrained(model_dir)
 
 pipe = pipeline(
     "automatic-speech-recognition",
