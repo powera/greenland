@@ -1,6 +1,6 @@
 
 
-CREATE TABLE models (
+CREATE TABLE model (
   codename TEXT PRIMARY KEY,
   displayname TEXT NOT NULL,
   launch_date TEXT,
@@ -8,20 +8,20 @@ CREATE TABLE models (
   license_name TEXT
 );
 
-CREATE TABLE benchmarks (
+CREATE TABLE benchmark (
   codename TEXT PRIMARY KEY,
   displayname TEXT NOT NULL,
   description TEXT,
   license_name TEXT
 );
 
-CREATE TABLE runs (
+CREATE TABLE run (
   run_id INTEGER PRIMARY KEY AUTOINCREMENT,
   runtime TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   model_name TEXT,
   benchmark_name TEXT,
-  FOREIGN KEY (model_name) REFERENCES models (codename)
-  FOREIGN KEY (benchmark_name) REFERENCES benchmarks (codename)
+  FOREIGN KEY (model_name) REFERENCES model (codename)
+  FOREIGN KEY (benchmark_name) REFERENCES benchmark (codename)
 );
 
 CREATE TABLE run_details (
