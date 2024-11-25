@@ -29,5 +29,6 @@ CREATE TABLE run_details (
   benchmark_name TEXT,
   question_id TEXT,
   score INTEGER
+  FOREIGN KEY (run_id) REFERENCES run (run_id)
 );
 

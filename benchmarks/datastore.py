@@ -53,6 +53,7 @@ class RunDetail(Base):
     # Relationship to run
     run = relationship("Run", back_populates="run_details")
 
+
 def create_database_and_session(db_path='benchmarks.sqlite'):
     """
     Create a SQLite database engine and session.
@@ -71,6 +72,135 @@ def create_database_and_session(db_path='benchmarks.sqlite'):
     
     # Return a new session
     return Session()
+
+
+def insert_benchmark(session, codename, displayname, description=None, license_name=None):
+    """
+    Insert a new benchmark into the database.
+
+    :param session: SQLAlchemy session
+    :param codename: Unique identifier for the benchmark
+    :param displayname: Human-readable name of the benchmark
+    :param description: Optional description of the benchmark
+    :param license_name: Optional license information
+    :return: Tuple (success_boolean, message)
+    """
+    try:
+        # Create a new Benchmark object
+        new_benchmark = Benchmark(
+            codename=codename,
+            displayname=displayname,
+            description=description,
+            license_name=license_name
+        )
+
+        # Add to session and commit
+        session.add(new_benchmark)
+        session.commit()
+
+        return True, f"Benchmark '{codename}' successfully inserted"
+
+    except IntegrityError:
+        # Rollback the session in case of integrity error (e.g., duplicate primary key)
+        session.rollback()
+        return False, f"Benchmark '{codename}' already exists"
+
+    except SQLAlchemyError as e:
+        # Rollback and catch any other database-related errors
+        session.rollback()
+        return False, f"Error inserting benchmark: {str(e)}"
+
+
+def insert_model(session, codename, displayname, launch_date=None, filesize_mb=None, license_name=None):
+    """
+    Insert a new model into the database.
+
+    :param session: SQLAlchemy session
+    :param codename: Unique identifier for the model
+    :param displayname: Human-readable name of the model
+    :param launch_date: Optional launch date of the model
+    :param filesize_mb: Optional file size in megabytes
+    :param license_name: Optional license information
+    :return: Tuple (success_boolean, message)
+    """
+    try:
+        # Create a new Model object
+        new_model = Model(
+            codename=codename,
+            displayname=displayname,
+            launch_date=launch_date,
+            filesize_mb=filesize_mb,
+            license_name=license_name
+        )
+
+        # Add to session and commit
+        session.add(new_model)
+        session.commit()
+
+        return True, f"Model '{codename}' successfully inserted"
+
+    except IntegrityError:
+        # Rollback the session in case of integrity error (e.g., duplicate primary key)
+        session.rollback()
+        return False, f"Model '{codename}' already exists"
+
+    except SQLAlchemyError as e:
+        # Rollback and catch any other database-related errors
+        session.rollback()
+        return False, f"Error inserting model: {str(e)}"
+
+
+def insert_run(session, model_name, benchmark_name, runtime=None, run_details=None):
+    """
+    Insert a new run into the database.
+
+    :param session: SQLAlchemy session
+    :param model_name: Codename of the model
+    :param benchmark_name: Codename of the benchmark
+    :param runtime: Optional runtime timestamp (defaults to current time if None)
+    :param run_details: Optional list of run details (dict with question_id and score)
+    :return: Tuple (success_boolean, run_id_or_message)
+    """
+    try:
+        # Create a new Run object
+        new_run = Run(
+            model_name=model_name,
+            benchmark_name=benchmark_name,
+            runtime=runtime or func.current_timestamp()
+        )
+
+        # Add to session
+        session.add(new_run)
+
+        # Flush to get the run_id without committing
+        session.flush()
+
+        # If run details are provided, add them
+        if run_details:
+            for detail in run_details:
+                run_detail = RunDetail(
+                    run_id=new_run.run_id,
+                    benchmark_name=benchmark_name,
+                    question_id=detail.get('question_id'),
+                    score=detail.get('score')
+                )
+                session.add(run_detail)
+
+        # Commit the transaction
+        session.commit()
+
+        return True, new_run.run_id
+
+    except IntegrityError:
+        # Rollback the session in case of foreign key constraint violations
+        session.rollback()
+        return False, f"Error: Invalid model or benchmark name"
+
+    except SQLAlchemyError as e:
+        # Rollback and catch any other database-related errors
+        session.rollback()
+        return False, f"Error inserting run: {str(e)}"
+
 
 def list_all_models(session):
     """
