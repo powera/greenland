@@ -36,7 +36,7 @@ Two example response:
   chainge - change
 """
 
-    response, _ = ollama_client.generate_chat(prompt, model)
+    response, perf = ollama_client.generate_chat(prompt, model)
     total_questions += 1
     if x["correct"] in response:
       has_correct_word += 1
@@ -55,9 +55,51 @@ RESULTS:
 {has_proper_format}/{total_questions} responses were correctly formatted.
 {correct_answers}/{total_questions} responses were completely correct.
         """)
-<<<<<<< Updated upstream
-=======
 
+def run_0030_analyze_paragraph(model):
+  DIR = "benchmarks/0030_analyze_paragraph"
+
+  question_list = []
+  filename = "bigbench_understanding_fables.jsonl"
+  with open(os.path.join(DIR, filename)) as f:
+    for line in f:
+      question_list.append(json.loads(line))
+
+  total_questions = 0
+  correct_answers = 0
+
+  # for debug
+  question_list = question_list[::23]
+
+  for x in question_list:
+    # These currently are tuned for completion.  TODO: clean dataset
+    if x["query"].endswith("\nAnswer: "):
+      x["query"] = x["query"][:-9]
+
+    prompt = f"""
+What is the answer to this question: {x["query"]}
+
+Respond using JSON; give commentary in a field called "commentary", followed by the letter of the correct answer as "answer".  Do not include any chat or punctuation other than the JSON.
+"""
+
+    response_unparsed, perf = ollama_client.generate_chat(prompt, model, structured_json=True)
+    total_questions += 1
+    try:
+      response = json.loads(response_unparsed)
+    except json.decoder.JSONDecodeError:
+      print(f"""NOT JSON! Question {x["query"]}, Response {response_unparsed}""")
+      continue
+
+    correct = x["choices"][x["gold"]]
+    if response.get("answer", "") == correct:
+      correct_answers += 1
+    else:
+      print(f"""WRONG! Question {x["query"]}, Correct Answer {correct}, Response {response}""")
+
+  print(f"""
+RESULTS 0030_analyze_paragraph
+{correct_answers}/{total_questions} responses contained the correct answer.
+""")
 
 def run_0040_general_knowledge(model):
   DIR = "benchmarks/0040_general_knowledge"
@@ -83,7 +125,7 @@ What is the answer to this question: {x["context"]}
 When responding, give only the correct answer; do not form it into a sentence.
 """
 
-    response, _ = ollama_client.generate_chat(prompt, model)
+    response, perf = ollama_client.generate_chat(prompt, model)
     total_questions += 1
     if x["continuation"] in response:
       correct_answers += 1
@@ -94,4 +136,3 @@ When responding, give only the correct answer; do not form it into a sentence.
 RESULTS 0040_general_knowledge
 {correct_answers}/{total_questions} responses contained the correct answer.
 """)
->>>>>>> Stashed changes

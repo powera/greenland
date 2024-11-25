@@ -33,7 +33,7 @@ def generate_text(prompt, model="smollm:360m"):
     return f"Error: {response.status_code} - {response.text}", {}
 
 
-def generate_chat(prompt, model="smollm:360m"):
+def generate_chat(prompt, model="smollm:360m", structured_json=False):
   url = f"http://{SERVER}:11434/api/chat"
   
   data = {
@@ -44,6 +44,8 @@ def generate_chat(prompt, model="smollm:360m"):
         ],
       "stream": False,
   }
+  if structured_json:
+    data["format"] = "json"
   
   response = requests.post(url, json=data, timeout=50)
   if response.status_code == 200:
@@ -62,7 +64,7 @@ def generate_chat(prompt, model="smollm:360m"):
     return f"Error: {response.status_code} - {response.text}", {}
 
 def parse_usage(response_data):
-  usage = {"tokens_in": response_data.get("prompt_eval_count"), "tokens_out": response_data.get("eval_count"), "cost": estimate_cost(response_data)}
+  usage = {"tokens_in": response_data.get("prompt_eval_count"), "tokens_out": response_data.get("eval_count"), "cost": estimate_cost(response_data), "total_time": response_data.get("total_duration")}
   logger.debug(f"Model: {response_data.get('model', 'N/A')}")
   logger.debug(f"Total duration: {response_data.get('total_duration', 'N/A')}")
   logger.debug(f"Load duration: {response_data.get('load_duration', 'N/A')}")
