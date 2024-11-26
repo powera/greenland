@@ -15,6 +15,13 @@ CREATE TABLE benchmark (
   license_name TEXT
 );
 
+CREATE TABLE question (
+  question_id TEXT PRIMARY KEY,
+  benchmark_name TEXT,
+  question_info_json TEXT,
+  FOREIGN KEY (benchmark_name) REFERENCES benchmark (codename)
+);
+
 CREATE TABLE run (
   run_id INTEGER PRIMARY KEY AUTOINCREMENT,
   run_ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -27,10 +34,10 @@ CREATE TABLE run (
 
 CREATE TABLE run_details (
   run_id INTEGER,
-  benchmark_name TEXT,
   question_id TEXT,
   score INTEGER,
   eval_msec INTEGER,
   FOREIGN KEY (run_id) REFERENCES run (run_id)
+  FOREIGN_KEY (question_id) REFERENCES question (question_id)
 );
 

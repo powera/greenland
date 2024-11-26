@@ -64,7 +64,7 @@ RESULTS:
       "/Users/powera/repo/greenland/schema/benchmarks.db")
   benchmarks.datastore.insert_run(session, model, "0015_spell_check:correct_word", has_correct_word)
   benchmarks.datastore.insert_run(session, model, "0015_spell_check:proper_format", has_proper_format)
-  benchmarks.datastore.insert_run(session, model, "0015_spell_check:complete", correct_answer)
+  benchmarks.datastore.insert_run(session, model, "0015_spell_check:complete", correct_answers)
 
 def run_0030_analyze_paragraph(model):
   DIR = "benchmarks/0030_analyze_paragraph"
