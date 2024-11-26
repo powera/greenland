@@ -7,7 +7,7 @@ import json
 import os
 import re
 
-import local_client, ollama_client, openai_client, anthropic_client
+from clients import local_client, ollama_client, openai_client, anthropic_client
 
 import util.flesch_kincaid as fk
 

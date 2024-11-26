@@ -4,7 +4,7 @@
 
 import json
 
-import ollama_client
+from clients import ollama_client
 
 def gen_0015_spell_check_sentence(start_word):
   """Generates 1 sentences that use start_word but spell it incorrectly."""
