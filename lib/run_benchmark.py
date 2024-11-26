@@ -5,7 +5,9 @@
 import json
 import os
 
+import benchmarks.datastore
 from clients import ollama_client
+
 
 def run_0015_spell_check(model):
   DIR = "benchmarks/0015_spell_check"

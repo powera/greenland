@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, Text, ForeignKey, Timestamp
+from sqlalchemy import create_engine, Column, Integer, Text, ForeignKey, TIMESTAMP
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship
 from sqlalchemy.sql import func
 
@@ -15,7 +15,7 @@ class Benchmark(Base):
     license_name = Column(Text)
     
     # Relationship to runs
-    runs = relationship("Run", back_populates="benchmark")
+    run = relationship("Run", back_populates="benchmark")
 
 class Model(Base):
     __tablename__ = 'model'
@@ -27,16 +27,17 @@ class Model(Base):
     license_name = Column(Text)
     
     # Relationship to runs
-    runs = relationship("Run", back_populates="model")
+    run = relationship("Run", back_populates="model")
 
 class Run(Base):
     __tablename__ = 'run'
     
     run_id = Column(Integer, primary_key=True, autoincrement=True)
-    runtime = Column(Timestamp, server_default=func.current_timestamp())
+    run_ts = Column(TIMESTAMP, server_default=func.current_timestamp())
     model_name = Column(Text, ForeignKey('model.codename'))
     benchmark_name = Column(Text, ForeignKey('benchmark.codename'))
-    
+    normed_score = Column(Integer)
+
     # Relationships
     model = relationship("Model", back_populates="run")
     benchmark = relationship("Benchmark", back_populates="run")
@@ -49,6 +50,7 @@ class RunDetail(Base):
     benchmark_name = Column(Text, primary_key=True)
     question_id = Column(Text, primary_key=True)
     score = Column(Integer)
+    eval_msec = Column(Integer)
     
     # Relationship to run
     run = relationship("Run", back_populates="run_details")
@@ -150,14 +152,15 @@ def insert_model(session, codename, displayname, launch_date=None, filesize_mb=N
         return False, f"Error inserting model: {str(e)}"
 
 
-def insert_run(session, model_name, benchmark_name, runtime=None, run_details=None):
+def insert_run(session, model_name, benchmark_name, normed_Score, run_ts=None, run_details=None):
     """
     Insert a new run into the database.
 
     :param session: SQLAlchemy session
     :param model_name: Codename of the model
     :param benchmark_name: Codename of the benchmark
-    :param runtime: Optional runtime timestamp (defaults to current time if None)
+    :param normed_score: Overall score; 100=perfect, 0=random output
+    :param run_ts: Optional run_ts timestamp (defaults to current time if None)
     :param run_details: Optional list of run details (dict with question_id and score)
     :return: Tuple (success_boolean, run_id_or_message)
     """
@@ -166,7 +169,7 @@ def insert_run(session, model_name, benchmark_name, runtime=None, run_details=No
         new_run = Run(
             model_name=model_name,
             benchmark_name=benchmark_name,
-            runtime=runtime or func.current_timestamp()
+            run_ts=run_ts or func.current_timestamp()
         )
 
         # Add to session
@@ -182,7 +185,8 @@ def insert_run(session, model_name, benchmark_name, runtime=None, run_details=No
                     run_id=new_run.run_id,
                     benchmark_name=benchmark_name,
                     question_id=detail.get('question_id'),
-                    score=detail.get('score')
+                    score=detail.get('score'),
+                    eval_msec=detail.get('eval_msec')
                 )
                 session.add(run_detail)
 
