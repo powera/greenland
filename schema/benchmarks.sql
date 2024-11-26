@@ -20,7 +20,7 @@ CREATE TABLE run (
   runtime TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   model_name TEXT,
   benchmark_name TEXT,
-  FOREIGN KEY (model_name) REFERENCES model (codename)
+  FOREIGN KEY (model_name) REFERENCES model (codename),
   FOREIGN KEY (benchmark_name) REFERENCES benchmark (codename)
 );
 
@@ -28,7 +28,7 @@ CREATE TABLE run_details (
   run_id INTEGER,
   benchmark_name TEXT,
   question_id TEXT,
-  score INTEGER
+  score INTEGER,
   FOREIGN KEY (run_id) REFERENCES run (run_id)
 );
 
