@@ -32,3 +32,6 @@ def create_benchmarks():
     s, "0015_spell_check:complete", "Spell Check / Complete Response",
     "Given a sentence with one misspelled word, does the result identify the misspelled word and the correct spelling, in the requested format.", None)
 
+if __name__ == "__main__":
+  create_models()
+  create_benchmarks()

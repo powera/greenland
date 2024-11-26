@@ -14,9 +14,6 @@ class Benchmark(Base):
     displayname = Column(Text, nullable=False)
     description = Column(Text)
     license_name = Column(Text)
-    
-    # Relationship to runs
-    run = relationship("Run", back_populates="benchmark")
 
 class Model(Base):
     __tablename__ = 'model'
@@ -26,9 +23,15 @@ class Model(Base):
     launch_date = Column(Text)
     filesize_mb = Column(Integer)
     license_name = Column(Text)
-    
-    # Relationship to runs
-    run = relationship("Run", back_populates="model")
+
+class Question(Base):
+    __tablename__ = 'question'
+
+    question_id = Column(Text, primary_key=True)
+    benchmark_name = Column(Text, ForeignKey('benchmark.codename'))
+    question_info_json = Column(Text)
+
+    benchmark = relationship("Benchmark", back_populates="question")
 
 class Run(Base):
     __tablename__ = 'run'
@@ -42,19 +45,18 @@ class Run(Base):
     # Relationships
     model = relationship("Model", back_populates="run")
     benchmark = relationship("Benchmark", back_populates="run")
-    run_details = relationship("RunDetail", back_populates="run")
 
 class RunDetail(Base):
     __tablename__ = 'run_detail'
     
-    run_id = Column(Integer, ForeignKey('run.run_id'), primary_key=True)
-    benchmark_name = Column(Text, primary_key=True)
-    question_id = Column(Text, primary_key=True)
+    run_id = Column(Integer, ForeignKey('run.run_id'))
+    question_id = Column(Text, ForeignKey('question.question_id'))
     score = Column(Integer)
     eval_msec = Column(Integer)
     
     # Relationship to run
     run = relationship("Run", back_populates="run_details")
+    question = relationship("Question", back_populates="run_details")
 
 
 def create_database_and_session(db_path='benchmarks.sqlite'):
