@@ -10,6 +10,8 @@ from clients import ollama_client
 
 
 def run_0015_spell_check(model):
+  # The model string includes a quantization.
+  ollama_model = ":".join(model.split(":")[:-1])
   DIR = "benchmarks/0015_spell_check"
 
   sentence_list = []
@@ -38,7 +40,7 @@ Two example response:
   chainge - change
 """
 
-    response, perf = ollama_client.generate_chat(prompt, model)
+    response, perf = ollama_client.generate_chat(prompt, ollama_model)
     total_questions += 1
     if x["correct"] in response:
       has_correct_word += 1
@@ -57,6 +59,12 @@ RESULTS:
 {has_proper_format}/{total_questions} responses were correctly formatted.
 {correct_answers}/{total_questions} responses were completely correct.
         """)
+
+  session = benchmarks.datastore.create_database_and_session(
+      "/Users/powera/repo/greenland/schema/benchmarks.db")
+  benchmarks.datastore.insert_run(session, model, "0015_spell_check:correct_word", has_correct_word)
+  benchmarks.datastore.insert_run(session, model, "0015_spell_check:proper_format", has_proper_format)
+  benchmarks.datastore.insert_run(session, model, "0015_spell_check:complete", correct_answer)
 
 def run_0030_analyze_paragraph(model):
   DIR = "benchmarks/0030_analyze_paragraph"

@@ -1,4 +1,5 @@
 from sqlalchemy import create_engine, Column, Integer, Text, ForeignKey, TIMESTAMP
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship
 from sqlalchemy.sql import func
 
@@ -152,7 +153,7 @@ def insert_model(session, codename, displayname, launch_date=None, filesize_mb=N
         return False, f"Error inserting model: {str(e)}"
 
 
-def insert_run(session, model_name, benchmark_name, normed_Score, run_ts=None, run_details=None):
+def insert_run(session, model_name, benchmark_name, normed_score, run_ts=None, run_details=None):
     """
     Insert a new run into the database.
 
