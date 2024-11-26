@@ -14,13 +14,9 @@ from watchdog.events import FileSystemEventHandler
 from jinja2 import Environment, PackageLoader, select_autoescape
 env = None  # lazy loading
 
-# verbalator imports; this should be elsewhere
-if (os.uname().sysname == "Darwin"):
-  pass
-else:
-  import anthropic_client
-  import openai_client
-import ollama_client  # local ollama
+from clients import anthropic_client
+from clients import openai_client
+from clients import ollama_client  # local ollama
 import system_prompt_builder
 import util.flesch_kincaid as fk
 import verbalator.common
