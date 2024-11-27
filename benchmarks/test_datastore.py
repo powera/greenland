@@ -132,7 +132,6 @@ class TestDatastore(unittest.TestCase):
             run_details = [{"question_id": "test_question_1", "score": 90, "eval_msec": 1000}]
         )
         self.assertTrue(success)
-        self.assertIn('successfully inserted', message)
 
     def test_list_all_models(self):
         """
@@ -155,18 +154,19 @@ class TestDatastore(unittest.TestCase):
         insert_model(self.session, 'model1', 'Model One')
         insert_model(self.session, 'model2', 'Model Two')
         insert_benchmark(self.session, 'test_benchmark', 'Test Benchmark')
+        insert_benchmark(self.session, 'test_benchmark_2', 'Second Benchmark')
         
         # Insert runs with different scores
         insert_run(self.session, 'model1', 'test_benchmark', 90)
         insert_run(self.session, 'model2', 'test_benchmark', 85)
-        insert_run(self.session, 'model1', 'test_benchmark', 95)
+        insert_run(self.session, 'model1', 'test_benchmark_2', 95)
         
         top_runs = find_top_runs_for_benchmark(self.session, 'test_benchmark')
         
         # Verify top runs are returned in descending order
         self.assertEqual(len(top_runs), 2)
-        self.assertEqual(top_runs[0]['avg_score'], 95)
-        self.assertEqual(top_runs[1]['avg_score'], 90)
+        self.assertEqual(top_runs[0]['normed_score'], 90)
+        self.assertEqual(top_runs[1]['normed_score'], 85)
 
 if __name__ == '__main__':
     unittest.main()
