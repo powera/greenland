@@ -1,62 +1,78 @@
-from sqlalchemy import create_engine, Column, Integer, Text, ForeignKey, TIMESTAMP
+#!/usr/bin/python3
+
+import datetime
+
+from typing import List, Optional
+from sqlalchemy import String, Integer, Text, ForeignKey, TIMESTAMP, create_engine, func
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
-from sqlalchemy.orm import declarative_base, sessionmaker, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship, DeclarativeBase, sessionmaker
 from sqlalchemy.sql import func
 
 # Create a base class for declarative models
-Base = declarative_base()
+class Base(DeclarativeBase):
+  pass
 
 # Define ORM models that match the database schema
 class Benchmark(Base):
     __tablename__ = 'benchmark'
-    
-    codename = Column(Text, primary_key=True)
-    displayname = Column(Text, nullable=False)
-    description = Column(Text)
-    license_name = Column(Text)
+
+    codename: Mapped[str] = mapped_column(String, primary_key=True)
+    displayname: Mapped[str] = mapped_column(String, nullable=False)
+    description: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    license_name: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+
+    # Relationships
+    runs: Mapped[List['Run']] = relationship(back_populates='benchmark', lazy='noload')
+    questions: Mapped[List['Question']] = relationship(back_populates='benchmark')
 
 class Model(Base):
     __tablename__ = 'model'
-    
-    codename = Column(Text, primary_key=True)
-    displayname = Column(Text, nullable=False)
-    launch_date = Column(Text)
-    filesize_mb = Column(Integer)
-    license_name = Column(Text)
+
+    codename: Mapped[str] = mapped_column(String, primary_key=True)
+    displayname: Mapped[str] = mapped_column(String, nullable=False)
+    launch_date: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    filesize_mb: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    license_name: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+
+    # Relationships
+    runs: Mapped[List['Run']] = relationship(back_populates='model', lazy='noload')
 
 class Question(Base):
     __tablename__ = 'question'
 
-    question_id = Column(Text, primary_key=True)
-    benchmark_name = Column(Text, ForeignKey('benchmark.codename'))
-    question_info_json = Column(Text)
+    question_id: Mapped[str] = mapped_column(String, primary_key=True)
+    benchmark_name: Mapped[str] = mapped_column(String, ForeignKey('benchmark.codename'))
+    question_info_json: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
-    benchmark = relationship("Benchmark", back_populates="question")
+    # Relationships
+    benchmark: Mapped['Benchmark'] = relationship(back_populates='questions')
+    run_details: Mapped[List['RunDetail']] = relationship(back_populates='question', lazy='noload')
 
 class Run(Base):
     __tablename__ = 'run'
-    
-    run_id = Column(Integer, primary_key=True, autoincrement=True)
-    run_ts = Column(TIMESTAMP, server_default=func.current_timestamp())
-    model_name = Column(Text, ForeignKey('model.codename'))
-    benchmark_name = Column(Text, ForeignKey('benchmark.codename'))
-    normed_score = Column(Integer)
+
+    run_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    run_ts: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.current_timestamp())
+    model_name: Mapped[str] = mapped_column(String, ForeignKey('model.codename'))
+    benchmark_name: Mapped[str] = mapped_column(String, ForeignKey('benchmark.codename'))
+    normed_score: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
 
     # Relationships
-    model = relationship("Model", back_populates="run")
-    benchmark = relationship("Benchmark", back_populates="run")
+    model: Mapped['Model'] = relationship(back_populates='runs')
+    benchmark: Mapped['Benchmark'] = relationship(back_populates='runs')
+    run_details: Mapped[List['RunDetail']] = relationship(back_populates='run', lazy='noload')
 
 class RunDetail(Base):
     __tablename__ = 'run_detail'
-    
-    run_id = Column(Integer, ForeignKey('run.run_id'))
-    question_id = Column(Text, ForeignKey('question.question_id'))
-    score = Column(Integer)
-    eval_msec = Column(Integer)
-    
-    # Relationship to run
-    run = relationship("Run", back_populates="run_details")
-    question = relationship("Question", back_populates="run_details")
+
+    run_id: Mapped[int] = mapped_column(Integer, ForeignKey('run.run_id'), primary_key=True)
+    question_id: Mapped[str] = mapped_column(String, ForeignKey('question.question_id'), primary_key=True)
+    score: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    eval_msec: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+
+    # Relationships
+    run: Mapped['Run'] = relationship(back_populates='run_details')
+    question: Mapped['Question'] = relationship(back_populates='run_details')
 
 
 def create_database_and_session(db_path='benchmarks.sqlite'):
@@ -154,6 +170,37 @@ def insert_model(session, codename, displayname, launch_date=None, filesize_mb=N
         session.rollback()
         return False, f"Error inserting model: {str(e)}"
 
+
+
+def insert_question(session, question_id, benchmark_name, question_info_json=None):
+    """
+    Insert a new question into the database.
+
+    :param session: SQLAlchemy session
+    :param question_id: A text string identifying the question
+    :param benchmark_name: The benchmark associated with the question.
+    :param question_info_json: A json tuple with the necessary information for the benchmark.
+    :return: Tuple (success_boolean, message)
+    """
+    try:
+        new_question = Question(
+            question_id=question_id,
+            benchmark_name=benchmark_name,
+            question_info_json=question_info_json
+        )
+        session.add(new_question)
+        session.commit()
+        return True, f"Question '{question_id}' successfully inserted"
+
+    except IntegrityError:
+        # Rollback the session in case of integrity error (e.g., duplicate primary key)
+        session.rollback()
+        return False, f"Question '{question_id}' already exists"
+
+    except SQLAlchemyError as e:
+        # Rollback and catch any other database-related errors
+        session.rollback()
+        return False, f"Error inserting question: {str(e)}"
 
 def insert_run(session, model_name, benchmark_name, normed_score, run_ts=None, run_details=None):
     """
