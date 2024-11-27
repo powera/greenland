@@ -219,6 +219,7 @@ def insert_run(session, model_name, benchmark_name, normed_score, run_ts=None, r
         new_run = Run(
             model_name=model_name,
             benchmark_name=benchmark_name,
+            normed_score=normed_score,
             run_ts=run_ts or func.current_timestamp()
         )
 
@@ -233,7 +234,6 @@ def insert_run(session, model_name, benchmark_name, normed_score, run_ts=None, r
             for detail in run_details:
                 run_detail = RunDetail(
                     run_id=new_run.run_id,
-                    benchmark_name=benchmark_name,
                     question_id=detail.get('question_id'),
                     score=detail.get('score'),
                     eval_msec=detail.get('eval_msec')
@@ -284,19 +284,16 @@ def find_top_runs_for_benchmark(session, benchmark_codename, top_n=5):
     :param top_n: Number of top runs to return (default 5)
     :return: List of top runs with model and average score
     """
-    # Subquery to calculate average score per run
     top_runs = (
         session.query(
             Run.run_id, 
             Run.model_name, 
             Model.displayname.label('model_displayname'),
-            func.avg(RunDetail.score).label('avg_score')
+            Run.normed_score,
         )
-        .join(RunDetail, Run.run_id == RunDetail.run_id)
         .join(Model, Run.model_name == Model.codename)
         .filter(Run.benchmark_name == benchmark_codename)
-        .group_by(Run.run_id, Run.model_name, Model.displayname)
-        .order_by(func.avg(RunDetail.score).desc())
+        .order_by(Run.normed_score.desc())
         .limit(top_n)
         .all()
     )
@@ -306,7 +303,7 @@ def find_top_runs_for_benchmark(session, benchmark_codename, top_n=5):
             'run_id': run.run_id,
             'model_name': run.model_name,
             'model_displayname': run.model_displayname,
-            'avg_score': run.avg_score
+            'normed_score': run.normed_score
         } 
         for run in top_runs
     ]
