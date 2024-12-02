@@ -3,6 +3,7 @@
 """ Generates benchmark questions.  By LLMs, for LLMs. """
 
 import json
+import os
 
 from clients import ollama_client
 
@@ -45,10 +46,10 @@ def load_0015_spell_check_to_sqlite():
         for s in sentences_raw:
           sentence_list.append(s)
 
-  session = benchmarks.datastore.create_database_and_session(
-      "/Users/powera/repo/greenland/schema/benchmarks.db")
+  session = benchmarks.datastore.create_dev_session()
   idx = 0
   for sentence in sentence_list:
+    idx += 1
     benchmarks.datastore.insert_question(
         session, f"0015:{sentence['correct']}:{idx}",
         "0015_spell_check",

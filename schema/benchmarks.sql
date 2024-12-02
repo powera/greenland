@@ -10,7 +10,7 @@ CREATE TABLE model (
 
 CREATE TABLE benchmark (
   codename TEXT NOT NULL,
-  metric TExT NOT NULL,
+  metric TEXT NOT NULL,
   displayname TEXT NOT NULL,
   description TEXT,
   license_name TEXT,
@@ -38,10 +38,13 @@ CREATE TABLE run (
 CREATE TABLE run_detail (
   run_id INTEGER NOT NULL,
   question_id TEXT NOT NULL,
+  benchmark_name TEXT,
+  benchmark_metric TEXT,
   score INTEGER,
   eval_msec INTEGER,
   PRIMARY KEY (run_id, question_id),
   FOREIGN KEY (run_id) REFERENCES run (run_id),
   FOREIGN KEY (question_id) REFERENCES question (question_id)
+  FOREIGN KEY (benchmark_name, benchmark_metric) REFERENCES benchmark (codename, metric)
 );
 

@@ -75,13 +75,29 @@ class RunDetail(Base):
     __tablename__ = 'run_detail'
 
     run_id: Mapped[int] = mapped_column(Integer, ForeignKey('run.run_id'), primary_key=True)
+    benchmark_name: Mapped[str] = mapped_column(String)
+    benchmark_metric: Mapped[str] = mapped_column(String)
     question_id: Mapped[str] = mapped_column(String, ForeignKey('question.question_id'), primary_key=True)
     score: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     eval_msec: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
 
+    __table_args__ = (
+      ForeignKeyConstraint(
+        ['benchmark_name', 'benchmark_metric'],
+        ['benchmark.codename', 'benchmark.metric']
+        ),
+      )
+
     # Relationships
     run: Mapped['Run'] = relationship(back_populates='run_details')
     question: Mapped['Question'] = relationship(back_populates='run_details')
+
+
+def create_dev_session():
+    db_path = "/Users/powera/repo/greenland/schema/benchmarks.db"
+    engine = create_engine(f'sqlite:///{db_path}', echo=False)
+    Session = sessionmaker(bind=engine)
+    return Session()
 
 
 def create_database_and_session(db_path='benchmarks.sqlite'):
@@ -247,6 +263,8 @@ def insert_run(session, model_name, benchmark_name, benchmark_metric, normed_sco
             for detail in run_details:
                 run_detail = RunDetail(
                     run_id=new_run.run_id,
+                    benchmark_name=benchmark_name,
+                    benchmark_metric=benchmark_metric,
                     question_id=detail.get('question_id'),
                     score=detail.get('score'),
                     eval_msec=detail.get('eval_msec')
@@ -288,6 +306,29 @@ def list_all_models(session):
         for model in models
     ]
 
+def load_all_questions_for_benchmark(session, benchmark_name):
+    """
+    Load all questions associated with a specific benchmark.
+
+    :param session: SQLAlchemy session
+    :param benchmark_name: Codename of the benchmark
+    :return: List of questions with their details
+    """
+    questions = (
+        session.query(Question)
+        .filter(Question.benchmark_name == benchmark_name)
+        .all()
+    )
+    
+    return [
+        {
+            'question_id': question.question_id,
+            'benchmark_name': question.benchmark_name,
+            'question_info_json': question.question_info_json
+        } 
+        for question in questions
+    ]
+
 def find_top_runs_for_benchmark(session, benchmark_codename, benchmark_metric, top_n=5):
     """
     Find the top N runs for a specific benchmark based on average score.
@@ -322,25 +363,3 @@ def find_top_runs_for_benchmark(session, benchmark_codename, benchmark_metric, t
         } 
         for run in top_runs
     ]
-
-# Example usage
-if __name__ == '__main__':
-    # Create a session
-    session = create_database_and_session()
-    
-    try:
-        # List all models
-        print("All Models:")
-        models = list_all_models(session)
-        for model in models:
-            print(model)
-        
-        # Find top 5 runs for a specific benchmark (replace with an actual benchmark codename)
-        print("\nTop 5 Runs for 'my_benchmark':")
-        top_runs = find_top_runs_for_benchmark(session, 'my_benchmark')
-        for run in top_runs:
-            print(run)
-    
-    finally:
-        # Close the session
-        session.close()

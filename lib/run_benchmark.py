@@ -14,19 +14,9 @@ def warm_model(model):
   pass
 
 def load_0015_spell_check():
-  DIR = "benchmarks/0015_spell_check"
+  session = benchmarks.datastore.create_dev_session() 
+  return benchmarks.datastore.load_all_questions_for_benchmark(session, "0015_spell_check")
 
-  sentence_list = []
-  files = os.listdir(DIR)
-  files.sort()
-  for filename in files:
-    if filename.endswith(".json"):
-      word = filename[:-5]
-      with open(os.path.join(DIR, filename)) as f:
-        sentences_raw = json.load(f)
-        for s in sentences_raw:
-          sentence_list.append(s)
-  return sentence_list
 
 def run_0015_spell_check(model):
   # The model string includes a quantization.
@@ -37,9 +27,10 @@ def run_0015_spell_check(model):
   total_questions = 0
   run_details = {"correct_word": [], "proper_format": [], "correct_answer": []}
 
-  for x in sentence_list:
+  for row in sentence_list:
+    question_info = json.loads(row["question_info_json"])
     prompt = f"""
-What is the incorrectly-spelled word in this sentence: {x["sentence"]}
+What is the incorrectly-spelled word in this sentence: {question_info["sentence"]}
 
 When responding, give the incorrect spelling, followed by a space, hyphen, space, and the correct spelling.
 
@@ -50,10 +41,10 @@ Two example response:
 
     response, perf = ollama_client.generate_chat(prompt, ollama_model)
     total_questions += 1
-    question_id = f"spell_check_{total_questions}"  # TODO: non-hack IDs
+    question_id = row["question_id"]
     log_result(run_details["correct_word"],
                question_id,
-               x["correct"] in response,
+               question_info["correct"] in response,
                eval_msec=perf["total_msec"])
 
     response_parts = response.split()
@@ -67,7 +58,8 @@ Two example response:
     if is_formatted:
       response_wrong = response.split()[0]
       response_right = response.split()[2]
-      is_correct = x["incorrect"] == response_wrong and x["correct"] == response_right
+      is_correct = (question_info["incorrect"] == response_wrong and 
+                    question_info["correct"] == response_right)
     log_result(run_details["correct_answer"],
                question_id,
                is_correct,
@@ -84,9 +76,10 @@ RESULTS:
 {has_correct_answer}/{total_questions} responses were completely correct.
         """)
 
-  session = benchmarks.datastore.create_database_and_session(
-      "/Users/powera/repo/greenland/schema/benchmarks.db")
-  benchmarks.datastore.insert_run(session, model, "0015_spell_check", "correct_word", has_correct_word, run_details=run_details["correct_word"])
+  session = benchmarks.datastore.create_dev_session()
+  success, msg = benchmarks.datastore.insert_run(session, model, "0015_spell_check", "correct_word", has_correct_word, run_details=run_details["correct_word"])
+  if not success:
+    print(msg)
   benchmarks.datastore.insert_run(session, model, "0015_spell_check", "proper_format", has_proper_format, run_details=run_details["proper_format"])
   benchmarks.datastore.insert_run(session, model, "0015_spell_check", "complete", has_correct_answer, run_details=run_details["correct_answer"])
 
