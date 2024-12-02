@@ -71,6 +71,8 @@ def load_0030_analyze_paragraph_to_sqlite():
   idx = 0
   for sentence in sentence_list:
     idx += 1
+    if sentence["query"].endswith("\nAnswer: "):  # clean trailing "Answer: "
+      sentence["query"] = sentence["query"][:-9]
     benchmarks.datastore.insert_question(
         session, f"0030:fable:{idx}",
         "0030_analyze_paragraph",

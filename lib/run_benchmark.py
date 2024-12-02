@@ -9,9 +9,9 @@ import benchmarks.datastore
 from clients import ollama_client
 
 
-def log_result(result_array, question_id, score, eval_msec):
+def log_result(result_array, question_id, score, eval_msec, debug_json=None):
   """Populates result_array with the information for run_details."""
-  result_array.append({"question_id": question_id, "score": score, "eval_msec": eval_msec})
+  result_array.append({"question_id": question_id, "score": score, "eval_msec": eval_msec, "debug_json": debug_json})
 
 
 def load_benchmark_questions(benchmark):
@@ -92,12 +92,7 @@ def run_0030_analyze_paragraph(model):
   sentence_list = load_benchmark_questions("0030_analyze_paragraph")
   ollama_client.warm_model(ollama_model)
 
-  total_questions = 0
-  correct_answers = 0
-
-  # for debug
-  sentence_list = sentence_list[::10]
-
+  run_details = {"json_format": [], "correct_answer": []}
   for x in sentence_list:
     question_json = json.loads(x["question_info_json"])
     # These currently are tuned for completion.  TODO: clean dataset
@@ -111,24 +106,32 @@ Respond using JSON; give commentary in a field called "commentary", followed by 
 """
 
     response_unparsed, perf = ollama_client.generate_chat(prompt, ollama_model, structured_json=True)
-    total_questions += 1
     try:
       response = json.loads(response_unparsed)
+      is_correct = (response.get("answer", "") ==
+                    question_json["choices"][question_json["gold"]])
     except json.decoder.JSONDecodeError:
-      print(f"""NOT JSON! Question {question_json["query"]}, Response {response_unparsed}""")
-      continue
+      is_correct = False
+      response_unparsed = {"response": response_unparsed}
 
-    correct = question_json["choices"][question_json["gold"]]
-    if response.get("answer", "") == correct:
-      correct_answers += 1
-    else:
-      print(f"""WRONG! Question {question_json["query"]}, Correct Answer {correct}, Response {response}
-            """)
+    log_result(run_details["correct_answer"],
+               x["question_id"],
+               is_correct,
+               eval_msec=perf["total_msec"],
+               debug_json=(None if is_correct else response_unparsed)
+               )
 
+  has_correct_answer = sum(x["score"] for x in run_details["correct_answer"])
+  total_questions = len(run_details["correct_answer"])
   print(f"""
 RESULTS 0030_analyze_paragraph
-{correct_answers}/{total_questions} responses contained the correct answer.
+{has_correct_answer}/{total_questions} responses contained the correct answer.
 """)
+
+  session = benchmarks.datastore.create_dev_session()
+  success, msg = benchmarks.datastore.insert_run(session, model, "0030_analyze_paragraph", "correct_answer", has_correct_answer, run_details=run_details["correct_answer"])
+  if not success:
+    print(msg)
 
 
 def run_0040_general_knowledge(model):

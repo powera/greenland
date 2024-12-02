@@ -32,6 +32,10 @@ def create_benchmarks():
     s, "0015_spell_check", "complete", "Spell Check / Complete Response",
     "Given a sentence with one misspelled word, does the result identify the misspelled word and the correct spelling, in the requested format.", None)
 
+  benchmarks.datastore.insert_benchmark(
+    s, "0030_analyze_paragraph", "correct_answer", "Analyze Paragraph",
+    "Given a paragraph and 4 possible answers for a question about that paragraph, does the result choose the correct answer.", None)
+
 if __name__ == "__main__":
   create_models()
   create_benchmarks()
