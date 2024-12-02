@@ -9,22 +9,22 @@ import benchmarks.datastore
 from clients import ollama_client
 
 
-def warm_model(model):
-  # TODO: implement
-  pass
+def log_result(result_array, question_id, score, eval_msec):
+  """Populates result_array with the information for run_details."""
+  result_array.append({"question_id": question_id, "score": score, "eval_msec": eval_msec})
 
-def load_0015_spell_check():
+
+def load_benchmark_questions(benchmark):
   session = benchmarks.datastore.create_dev_session() 
-  return benchmarks.datastore.load_all_questions_for_benchmark(session, "0015_spell_check")
+  return benchmarks.datastore.load_all_questions_for_benchmark(session, benchmark)
 
 
 def run_0015_spell_check(model):
   # The model string includes a quantization.
   ollama_model = ":".join(model.split(":")[:-1])
-  sentence_list = load_0015_spell_check()
-  warm_model(ollama_model)
+  sentence_list = load_benchmark_questions("0015_spell_check")
+  ollama_client.warm_model(ollama_model)
 
-  total_questions = 0
   run_details = {"correct_word": [], "proper_format": [], "correct_answer": []}
 
   for row in sentence_list:
@@ -40,8 +40,8 @@ Two example response:
 """
 
     response, perf = ollama_client.generate_chat(prompt, ollama_model)
-    total_questions += 1
     question_id = row["question_id"]
+
     log_result(run_details["correct_word"],
                question_id,
                question_info["correct"] in response,
@@ -69,6 +69,8 @@ Two example response:
   has_correct_word = sum(x["score"] for x in run_details["correct_word"])
   has_proper_format = sum(x["score"] for x in run_details["proper_format"])
   has_correct_answer = sum(x["score"] for x in run_details["correct_answer"])
+  total_questions = len(run_details["correct_answer"])
+
   print(f"""
 RESULTS:
 {has_correct_word}/{total_questions} responses included the correct word.
@@ -84,86 +86,74 @@ RESULTS:
   benchmarks.datastore.insert_run(session, model, "0015_spell_check", "complete", has_correct_answer, run_details=run_details["correct_answer"])
 
 
-def log_result(result_array, question_id, score, eval_msec):
-  """Populates result_array with the information for run_details."""
-  result_array.append({"question_id": question_id, "score": score, "eval_msec": eval_msec})
-
-
 def run_0030_analyze_paragraph(model):
-  DIR = "benchmarks/0030_analyze_paragraph"
-
-  question_list = []
-  filename = "bigbench_understanding_fables.jsonl"
-  with open(os.path.join(DIR, filename)) as f:
-    for line in f:
-      question_list.append(json.loads(line))
+  # The model string includes a quantization.
+  ollama_model = ":".join(model.split(":")[:-1])
+  sentence_list = load_benchmark_questions("0030_analyze_paragraph")
+  ollama_client.warm_model(ollama_model)
 
   total_questions = 0
   correct_answers = 0
 
   # for debug
-  question_list = question_list[::23]
+  sentence_list = sentence_list[::10]
 
-  for x in question_list:
+  for x in sentence_list:
+    question_json = json.loads(x["question_info_json"])
     # These currently are tuned for completion.  TODO: clean dataset
-    if x["query"].endswith("\nAnswer: "):
-      x["query"] = x["query"][:-9]
+    if question_json["query"].endswith("\nAnswer: "):
+      question_json["query"] = question_json["query"][:-9]
 
     prompt = f"""
-What is the answer to this question: {x["query"]}
+What is the answer to this question: {question_json["query"]}
 
 Respond using JSON; give commentary in a field called "commentary", followed by the letter of the correct answer as "answer".  Do not include any chat or punctuation other than the JSON.
 """
 
-    response_unparsed, perf = ollama_client.generate_chat(prompt, model, structured_json=True)
+    response_unparsed, perf = ollama_client.generate_chat(prompt, ollama_model, structured_json=True)
     total_questions += 1
     try:
       response = json.loads(response_unparsed)
     except json.decoder.JSONDecodeError:
-      print(f"""NOT JSON! Question {x["query"]}, Response {response_unparsed}""")
+      print(f"""NOT JSON! Question {question_json["query"]}, Response {response_unparsed}""")
       continue
 
-    correct = x["choices"][x["gold"]]
+    correct = question_json["choices"][question_json["gold"]]
     if response.get("answer", "") == correct:
       correct_answers += 1
     else:
-      print(f"""WRONG! Question {x["query"]}, Correct Answer {correct}, Response {response}""")
+      print(f"""WRONG! Question {question_json["query"]}, Correct Answer {correct}, Response {response}
+            """)
 
   print(f"""
 RESULTS 0030_analyze_paragraph
 {correct_answers}/{total_questions} responses contained the correct answer.
 """)
 
-def run_0040_general_knowledge(model):
-  DIR = "benchmarks/0040_general_knowledge"
 
-  question_list = []
-  for filename in os.listdir(DIR):
-    if filename.endswith(".jsonl"):
-      corpus = filename[:-6]
-      with open(os.path.join(DIR, filename)) as f:
-        for line in f:
-          question_list.append(json.loads(line))
+def run_0040_general_knowledge(model):
+  # The model string includes a quantization.
+  ollama_model = ":".join(model.split(":")[:-1])
+  sentence_list = load_benchmark_questions("0040_general_knowledge")
+  ollama_client.warm_model(ollama_model)
 
   total_questions = 0
   correct_answers = 0
 
-  # for debug
-  question_list = question_list[::23]
-
-  for x in question_list:
+  for x in sentence_list:
+    question_json = json.loads(x["question_info_json"])
     prompt = f"""
-What is the answer to this question: {x["context"]}
+What is the answer to this question: {question_json["context"]}
 
 When responding, give only the correct answer; do not form it into a sentence.
 """
 
-    response, perf = ollama_client.generate_chat(prompt, model)
+    response, perf = ollama_client.generate_chat(prompt, ollama_model)
     total_questions += 1
-    if x["continuation"] in response:
+    if question_json["continuation"] in response:
       correct_answers += 1
     else:
-      print(f"""WRONG! Question {x["context"]}, Correct Answer {x["continuation"]}, Response {response}""")
+      print(f"""WRONG! Question {question_json["context"]}, Correct Answer {question_json["continuation"]}, Response {response}""")
 
   print(f"""
 RESULTS 0040_general_knowledge

@@ -8,6 +8,16 @@ logger = logging.getLogger(__name__)
 SERVER = "100.123.16.86"
 
 
+def warm_model(model):
+  url = f"http://{SERVER}:11434/api/chat"
+  data = {
+      "model": model,
+      "messages": []
+  }
+  response = requests.post(url, json=data, timeout=50)
+  return response.status_code == 200
+
+
 def generate_text(prompt, model="smollm:360m"):
   url = f"http://{SERVER}:11434/api/generate"
   
@@ -63,6 +73,7 @@ def generate_chat(prompt, model="smollm:360m", structured_json=False):
   else:
     return f"Error: {response.status_code} - {response.text}", {}
 
+
 def parse_usage(response_data):
   usage = {"tokens_in": response_data.get("prompt_eval_count"), "tokens_out": response_data.get("eval_count"), "cost": estimate_cost(response_data), "total_msec": response_data.get("total_duration") / 1_000_000}
   logger.debug(f"Model: {response_data.get('model', 'N/A')}")
@@ -71,6 +82,7 @@ def parse_usage(response_data):
   logger.debug(f"Prompt eval duration: {response_data.get('prompt_eval_duration', 'N/A')}")
   logger.debug(f"Eval duration: {response_data.get('eval_duration', 'N/A')}")
   return usage
+
 
 def estimate_cost(response_data):
   # We use an estimate of $0.01 per 1000 seconds for the cost of running a local model
