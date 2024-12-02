@@ -54,3 +54,51 @@ def load_0015_spell_check_to_sqlite():
         session, f"0015:{sentence['correct']}:{idx}",
         "0015_spell_check",
         json.dumps(sentence))
+
+
+def load_0030_analyze_paragraph_to_sqlite():
+  import benchmarks.datastore
+
+  DIR = "benchmarks/0030_analyze_paragraph"
+  filename = "bigbench_understanding_fables.jsonl"
+
+  sentence_list = []
+  with open(os.path.join(DIR, filename)) as f:
+    for line in f:
+      sentence_list.append(json.loads(line))
+
+  session = benchmarks.datastore.create_dev_session()
+  idx = 0
+  for sentence in sentence_list:
+    idx += 1
+    benchmarks.datastore.insert_question(
+        session, f"0030:fable:{idx}",
+        "0030_analyze_paragraph",
+        json.dumps(sentence))
+    if idx >= 100:
+      break
+
+def load_0040_general_knowledge_to_sqlite():
+  import benchmarks.datastore
+
+  DIR = "benchmarks/0040_general_knowledge"
+
+  sentence_list = []
+  files = os.listdir(DIR)
+  files.sort()
+  for filename in files:
+    if filename.endswith(".jsonl"):
+      with open(os.path.join(DIR, filename)) as f:
+        for line in f:
+          sentence_list.append(json.loads(line))
+
+  session = benchmarks.datastore.create_dev_session()
+  idx = 0
+  for sentence in sentence_list[::17]:  # Only load 100 for now
+    idx += 1
+    benchmarks.datastore.insert_question(
+        session, f"0040:{sentence['category']}:{idx}",
+        "0040_general_knowledge",
+        json.dumps(sentence))
+    if idx >= 100:
+      break
