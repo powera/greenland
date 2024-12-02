@@ -9,10 +9,12 @@ CREATE TABLE model (
 );
 
 CREATE TABLE benchmark (
-  codename TEXT PRIMARY KEY,
+  codename TEXT NOT NULL,
+  metric TExT NOT NULL,
   displayname TEXT NOT NULL,
   description TEXT,
-  license_name TEXT
+  license_name TEXT,
+  PRIMARY KEY (codename, metric)
 );
 
 CREATE TABLE question (
@@ -27,9 +29,10 @@ CREATE TABLE run (
   run_ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   model_name TEXT,
   benchmark_name TEXT,
+  benchmark_metric TEXT,
   normed_score INTEGER,
   FOREIGN KEY (model_name) REFERENCES model (codename),
-  FOREIGN KEY (benchmark_name) REFERENCES benchmark (codename)
+  FOREIGN KEY (benchmark_name, benchmark_metric) REFERENCES benchmark (codename, metric)
 );
 
 CREATE TABLE run_detail (
@@ -39,6 +42,6 @@ CREATE TABLE run_detail (
   eval_msec INTEGER,
   PRIMARY KEY (run_id, question_id),
   FOREIGN KEY (run_id) REFERENCES run (run_id),
-  FOREIGN_KEY (question_id) REFERENCES question (question_id)
+  FOREIGN KEY (question_id) REFERENCES question (question_id)
 );
 

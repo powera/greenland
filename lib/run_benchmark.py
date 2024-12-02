@@ -86,9 +86,9 @@ RESULTS:
 
   session = benchmarks.datastore.create_database_and_session(
       "/Users/powera/repo/greenland/schema/benchmarks.db")
-  benchmarks.datastore.insert_run(session, model, "0015_spell_check:correct_word", has_correct_word, run_details=run_details["correct_word"])
-  benchmarks.datastore.insert_run(session, model, "0015_spell_check:proper_format", has_proper_format, run_details=run_details["proper_format"])
-  benchmarks.datastore.insert_run(session, model, "0015_spell_check:complete", has_correct_answer, run_details=run_details["correct_answer"])
+  benchmarks.datastore.insert_run(session, model, "0015_spell_check", "correct_word", has_correct_word, run_details=run_details["correct_word"])
+  benchmarks.datastore.insert_run(session, model, "0015_spell_check", "proper_format", has_proper_format, run_details=run_details["proper_format"])
+  benchmarks.datastore.insert_run(session, model, "0015_spell_check", "complete", has_correct_answer, run_details=run_details["correct_answer"])
 
 
 def log_result(result_array, question_id, score, eval_msec):
