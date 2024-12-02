@@ -27,3 +27,29 @@ def gen_0015_spell_check(start_word):
 
   with open(f"benchmarks/0015_spell_check/{start_word}.json", "w") as f:
     json.dump(sentences, f, indent=2)
+
+
+def load_0015_spell_check_to_sqlite():
+  import benchmarks.datastore
+
+  DIR = "benchmarks/0015_spell_check"
+
+  sentence_list = []
+  files = os.listdir(DIR)
+  files.sort()
+  for filename in files:
+    if filename.endswith(".json"):
+      word = filename[:-5]
+      with open(os.path.join(DIR, filename)) as f:
+        sentences_raw = json.load(f)
+        for s in sentences_raw:
+          sentence_list.append(s)
+
+  session = benchmarks.datastore.create_database_and_session(
+      "/Users/powera/repo/greenland/schema/benchmarks.db")
+  idx = 0
+  for sentence in sentence_list:
+    benchmarks.datastore.insert_question(
+        session, f"0015:{sentence['correct']}:{idx}",
+        "0015_spell_check",
+        json.dumps(sentence))
