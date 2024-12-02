@@ -3,7 +3,7 @@
 import datetime
 
 from typing import List, Optional
-from sqlalchemy import String, Integer, Text, ForeignKey, TIMESTAMP, create_engine, func
+from sqlalchemy import String, Integer, Text, ForeignKey, ForeignKeyConstraint, TIMESTAMP, create_engine, func
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Mapped, mapped_column, relationship, DeclarativeBase, sessionmaker
 from sqlalchemy.sql import func
@@ -17,6 +17,7 @@ class Benchmark(Base):
     __tablename__ = 'benchmark'
 
     codename: Mapped[str] = mapped_column(String, primary_key=True)
+    metric: Mapped[str] = mapped_column(String, primary_key=True)
     displayname: Mapped[str] = mapped_column(String, nullable=False)
     description: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     license_name: Mapped[Optional[str]] = mapped_column(String, nullable=True)
@@ -54,8 +55,16 @@ class Run(Base):
     run_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     run_ts: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.current_timestamp())
     model_name: Mapped[str] = mapped_column(String, ForeignKey('model.codename'))
-    benchmark_name: Mapped[str] = mapped_column(String, ForeignKey('benchmark.codename'))
+    benchmark_name: Mapped[str] = mapped_column(String)
+    benchmark_metric: Mapped[str] = mapped_column(String)
     normed_score: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+
+    __table_args__ = (
+      ForeignKeyConstraint(
+        ['benchmark_name', 'benchmark_metric'],
+        ['benchmark.codename', 'benchmark.metric']
+        ),
+      )
 
     # Relationships
     model: Mapped['Model'] = relationship(back_populates='runs')
@@ -95,12 +104,13 @@ def create_database_and_session(db_path='benchmarks.sqlite'):
     return Session()
 
 
-def insert_benchmark(session, codename, displayname, description=None, license_name=None):
+def insert_benchmark(session, codename, metric, displayname, description=None, license_name=None):
     """
     Insert a new benchmark into the database.
 
     :param session: SQLAlchemy session
-    :param codename: Unique identifier for the benchmark
+    :param codename: Identifier for the benchmark
+    :param metric: The specific metric used for the benchmark
     :param displayname: Human-readable name of the benchmark
     :param description: Optional description of the benchmark
     :param license_name: Optional license information
@@ -110,6 +120,7 @@ def insert_benchmark(session, codename, displayname, description=None, license_n
         # Create a new Benchmark object
         new_benchmark = Benchmark(
             codename=codename,
+            metric=metric,
             displayname=displayname,
             description=description,
             license_name=license_name
@@ -202,13 +213,14 @@ def insert_question(session, question_id, benchmark_name, question_info_json=Non
         return False, f"Error inserting question: {str(e)}"
 
 
-def insert_run(session, model_name, benchmark_name, normed_score, run_ts=None, run_details=None):
+def insert_run(session, model_name, benchmark_name, benchmark_metric, normed_score, run_ts=None, run_details=None):
     """
     Insert a new run into the database.
 
     :param session: SQLAlchemy session
     :param model_name: Codename of the model
     :param benchmark_name: Codename of the benchmark
+    :param benchmark_metric: Specific metric of the benchmark
     :param normed_score: Overall score; 100=perfect, 0=random output
     :param run_ts: Optional run_ts timestamp (defaults to current time if None)
     :param run_details: Optional list of run details (dict with question_id and score)
@@ -219,6 +231,7 @@ def insert_run(session, model_name, benchmark_name, normed_score, run_ts=None, r
         new_run = Run(
             model_name=model_name,
             benchmark_name=benchmark_name,
+            benchmark_metric=benchmark_metric,
             normed_score=normed_score,
             run_ts=run_ts or func.current_timestamp()
         )
@@ -275,12 +288,13 @@ def list_all_models(session):
         for model in models
     ]
 
-def find_top_runs_for_benchmark(session, benchmark_codename, top_n=5):
+def find_top_runs_for_benchmark(session, benchmark_codename, benchmark_metric, top_n=5):
     """
     Find the top N runs for a specific benchmark based on average score.
     
     :param session: SQLAlchemy session
     :param benchmark_codename: Codename of the benchmark
+    :param benchmark_metric: Metric of the benchmark
     :param top_n: Number of top runs to return (default 5)
     :return: List of top runs with model and average score
     """
@@ -293,6 +307,7 @@ def find_top_runs_for_benchmark(session, benchmark_codename, top_n=5):
         )
         .join(Model, Run.model_name == Model.codename)
         .filter(Run.benchmark_name == benchmark_codename)
+        .filter(Run.benchmark_metric == benchmark_metric)
         .order_by(Run.normed_score.desc())
         .limit(top_n)
         .all()

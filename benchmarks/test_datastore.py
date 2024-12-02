@@ -42,6 +42,28 @@ class TestDatastore(unittest.TestCase):
         self.assertTrue(success)
         self.assertIn('successfully inserted', message)
 
+    def test_insert_benchmark_diff_metric(self):
+        """
+        Test inserting a duplicate benchmark
+        """
+        # First insertion should succeed
+        insert_benchmark(
+            self.session, 
+            'test_benchmark',
+            'answer',
+            'Test Benchmark'
+        )
+        
+        # different metric
+        success, message = insert_benchmark(
+            self.session, 
+            'test_benchmark', 
+            'politeness',
+            'Test Benchmark'
+        )
+        self.assertTrue(success)
+        self.assertIn('successfully inserted', message)
+
     def test_insert_benchmark_duplicate(self):
         """
         Test inserting a duplicate benchmark
@@ -49,7 +71,8 @@ class TestDatastore(unittest.TestCase):
         # First insertion should succeed
         insert_benchmark(
             self.session, 
-            'test_benchmark', 
+            'test_benchmark',
+            'answer',
             'Test Benchmark'
         )
         
@@ -57,6 +80,7 @@ class TestDatastore(unittest.TestCase):
         success, message = insert_benchmark(
             self.session, 
             'test_benchmark', 
+            'answer',
             'Test Benchmark'
         )
         self.assertFalse(success)
@@ -82,7 +106,7 @@ class TestDatastore(unittest.TestCase):
         Test inserting a question with a benchmark
         """
         # First, insert a benchmark
-        insert_benchmark(self.session, 'test_benchmark', 'Test Benchmark')
+        insert_benchmark(self.session, 'test_benchmark', 'answer', 'Test Benchmark')
         
         # Then insert a question
         success, message = insert_question(
@@ -100,13 +124,14 @@ class TestDatastore(unittest.TestCase):
         """
         # First, insert a model and benchmark
         insert_model(self.session, 'test_model', 'Test Model')
-        insert_benchmark(self.session, 'test_benchmark', 'Test Benchmark')
+        insert_benchmark(self.session, 'test_benchmark', 'answer', 'Test Benchmark')
         
         # Then insert a run
         success, run_id = insert_run(
             self.session,
             'test_model',
             'test_benchmark',
+            'answer',
             85
         )
         self.assertTrue(success)
@@ -118,7 +143,7 @@ class TestDatastore(unittest.TestCase):
         """
         # Setup: insert model, benchmark, run, and question
         insert_model(self.session, 'test_model', 'Test Model')
-        insert_benchmark(self.session, 'test_benchmark', 'Test Benchmark')
+        insert_benchmark(self.session, 'test_benchmark', 'answer', 'Test Benchmark')
         insert_question(
             self.session,
             'test_question_1',
@@ -128,6 +153,7 @@ class TestDatastore(unittest.TestCase):
             self.session,
             'test_model',
             'test_benchmark',
+            'answer',
             85,
             run_details = [{"question_id": "test_question_1", "score": 90, "eval_msec": 1000}]
         )
@@ -153,15 +179,15 @@ class TestDatastore(unittest.TestCase):
         # Setup: insert model, benchmark, and multiple runs
         insert_model(self.session, 'model1', 'Model One')
         insert_model(self.session, 'model2', 'Model Two')
-        insert_benchmark(self.session, 'test_benchmark', 'Test Benchmark')
-        insert_benchmark(self.session, 'test_benchmark_2', 'Second Benchmark')
+        insert_benchmark(self.session, 'test_benchmark', 'answer', 'Test Benchmark')
+        insert_benchmark(self.session, 'test_benchmark_2', 'answer', 'Second Benchmark')
         
         # Insert runs with different scores
-        insert_run(self.session, 'model1', 'test_benchmark', 90)
-        insert_run(self.session, 'model2', 'test_benchmark', 85)
-        insert_run(self.session, 'model1', 'test_benchmark_2', 95)
+        insert_run(self.session, 'model1', 'test_benchmark', 'answer', 90)
+        insert_run(self.session, 'model2', 'test_benchmark', 'answer', 85)
+        insert_run(self.session, 'model1', 'test_benchmark_2', 'answer', 95)
         
-        top_runs = find_top_runs_for_benchmark(self.session, 'test_benchmark')
+        top_runs = find_top_runs_for_benchmark(self.session, 'test_benchmark', 'answer')
         
         # Verify top runs are returned in descending order
         self.assertEqual(len(top_runs), 2)
