@@ -9,26 +9,34 @@ import benchmarks.datastore
 from clients import ollama_client
 
 
-def run_0015_spell_check(model):
-  # The model string includes a quantization.
-  ollama_model = ":".join(model.split(":")[:-1])
+def warm_model(model):
+  # TODO: implement
+  pass
+
+def load_0015_spell_check():
   DIR = "benchmarks/0015_spell_check"
 
   sentence_list = []
-  for filename in os.listdir(DIR):
+  files = os.listdir(DIR)
+  files.sort()
+  for filename in files:
     if filename.endswith(".json"):
       word = filename[:-5]
       with open(os.path.join(DIR, filename)) as f:
         sentences_raw = json.load(f)
         for s in sentences_raw:
           sentence_list.append(s)
+  return sentence_list
 
-      results = []
+def run_0015_spell_check(model):
+  # The model string includes a quantization.
+  ollama_model = ":".join(model.split(":")[:-1])
+  sentence_list = load_0015_spell_check()
+  warm_model(ollama_model)
 
   total_questions = 0
-  has_correct_word = 0
-  has_proper_format = 0
-  correct_answers = 0
+  run_details = {"correct_word": [], "proper_format": [], "correct_answer": []}
+
   for x in sentence_list:
     prompt = f"""
 What is the incorrectly-spelled word in this sentence: {x["sentence"]}
@@ -42,29 +50,51 @@ Two example response:
 
     response, perf = ollama_client.generate_chat(prompt, ollama_model)
     total_questions += 1
-    if x["correct"] in response:
-      has_correct_word += 1
+    question_id = f"spell_check_{total_questions}"  # TODO: non-hack IDs
+    log_result(run_details["correct_word"],
+               question_id,
+               x["correct"] in response,
+               eval_msec=perf["total_msec"])
+
     response_parts = response.split()
-    if len(response_parts) == 3 and response_parts[1] == "-":
-      has_proper_format += 1
+    is_formatted = len(response_parts) == 3 and response_parts[1] == "-"
+    log_result(run_details["proper_format"],
+               question_id,
+               is_formatted,
+               eval_msec=perf["total_msec"])
+
+    is_correct = False
+    if is_formatted:
       response_wrong = response.split()[0]
       response_right = response.split()[2]
-      if x["incorrect"] == response_wrong and x["correct"] == response_right:
-        correct_answers += 1
-        continue
+      is_correct = x["incorrect"] == response_wrong and x["correct"] == response_right
+    log_result(run_details["correct_answer"],
+               question_id,
+               is_correct,
+               eval_msec=perf["total_msec"])
 
+  # Sum of results
+  has_correct_word = sum(x["score"] for x in run_details["correct_word"])
+  has_proper_format = sum(x["score"] for x in run_details["proper_format"])
+  has_correct_answer = sum(x["score"] for x in run_details["correct_answer"])
   print(f"""
 RESULTS:
 {has_correct_word}/{total_questions} responses included the correct word.
 {has_proper_format}/{total_questions} responses were correctly formatted.
-{correct_answers}/{total_questions} responses were completely correct.
+{has_correct_answer}/{total_questions} responses were completely correct.
         """)
 
   session = benchmarks.datastore.create_database_and_session(
       "/Users/powera/repo/greenland/schema/benchmarks.db")
-  benchmarks.datastore.insert_run(session, model, "0015_spell_check:correct_word", has_correct_word)
-  benchmarks.datastore.insert_run(session, model, "0015_spell_check:proper_format", has_proper_format)
-  benchmarks.datastore.insert_run(session, model, "0015_spell_check:complete", correct_answers)
+  benchmarks.datastore.insert_run(session, model, "0015_spell_check:correct_word", has_correct_word, run_details=run_details["correct_word"])
+  benchmarks.datastore.insert_run(session, model, "0015_spell_check:proper_format", has_proper_format, run_details=run_details["proper_format"])
+  benchmarks.datastore.insert_run(session, model, "0015_spell_check:complete", has_correct_answer, run_details=run_details["correct_answer"])
+
+
+def log_result(result_array, question_id, score, eval_msec):
+  """Populates result_array with the information for run_details."""
+  result_array.append({"question_id": question_id, "score": score, "eval_msec": eval_msec})
+
 
 def run_0030_analyze_paragraph(model):
   DIR = "benchmarks/0030_analyze_paragraph"
