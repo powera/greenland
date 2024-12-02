@@ -80,6 +80,7 @@ class RunDetail(Base):
     question_id: Mapped[str] = mapped_column(String, ForeignKey('question.question_id'), primary_key=True)
     score: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     eval_msec: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    debug_json: Mapped[Optional[str]] = mapped_column(String)
 
     __table_args__ = (
       ForeignKeyConstraint(
@@ -267,7 +268,8 @@ def insert_run(session, model_name, benchmark_name, benchmark_metric, normed_sco
                     benchmark_metric=benchmark_metric,
                     question_id=detail.get('question_id'),
                     score=detail.get('score'),
-                    eval_msec=detail.get('eval_msec')
+                    eval_msec=detail.get('eval_msec'),
+                    debug_json=detail.get('debug_json', None),  # optional
                 )
                 session.add(run_detail)
 

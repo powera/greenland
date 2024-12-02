@@ -42,6 +42,7 @@ CREATE TABLE run_detail (
   benchmark_metric TEXT,
   score INTEGER,
   eval_msec INTEGER,
+  debug_json TEXT,
   PRIMARY KEY (run_id, question_id),
   FOREIGN KEY (run_id) REFERENCES run (run_id),
   FOREIGN KEY (question_id) REFERENCES question (question_id)
