@@ -171,7 +171,6 @@ def insert_model(session, codename, displayname, launch_date=None, filesize_mb=N
         return False, f"Error inserting model: {str(e)}"
 
 
-
 def insert_question(session, question_id, benchmark_name, question_info_json=None):
     """
     Insert a new question into the database.
@@ -201,6 +200,7 @@ def insert_question(session, question_id, benchmark_name, question_info_json=Non
         # Rollback and catch any other database-related errors
         session.rollback()
         return False, f"Error inserting question: {str(e)}"
+
 
 def insert_run(session, model_name, benchmark_name, normed_score, run_ts=None, run_details=None):
     """

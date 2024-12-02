@@ -32,12 +32,13 @@ CREATE TABLE run (
   FOREIGN KEY (benchmark_name) REFERENCES benchmark (codename)
 );
 
-CREATE TABLE run_details (
-  run_id INTEGER,
-  question_id TEXT,
+CREATE TABLE run_detail (
+  run_id INTEGER NOT NULL,
+  question_id TEXT NOT NULL,
   score INTEGER,
   eval_msec INTEGER,
-  FOREIGN KEY (run_id) REFERENCES run (run_id)
+  PRIMARY KEY (run_id, question_id),
+  FOREIGN KEY (run_id) REFERENCES run (run_id),
   FOREIGN_KEY (question_id) REFERENCES question (question_id)
 );
 
