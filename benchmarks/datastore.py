@@ -308,6 +308,25 @@ def list_all_models(session):
         for model in models
     ]
 
+def list_all_benchmarks(session):
+    """
+    List all benchmarks in the database.
+    
+    :param session: SQLAlchemy session
+    :return: List of benchmark details
+    """
+    benchmarks = session.query(Benchmark).all()
+    return [
+        {
+            'codename': benchmark.codename, 
+            'metric': benchmark.metric, 
+            'displayname': benchmark.displayname,
+            'description': benchmark.description,
+            'license_name': benchmark.license_name
+        } 
+        for benchmark in benchmarks
+    ]
+
 def load_all_questions_for_benchmark(session, benchmark_name):
     """
     Load all questions associated with a specific benchmark.
@@ -365,3 +384,32 @@ def find_top_runs_for_benchmark(session, benchmark_codename, benchmark_metric, t
         } 
         for run in top_runs
     ]
+
+
+def get_highest_benchmark_scores(session):
+    """
+    Get the highest benchmark scores for each (benchmark, model) combination.
+    
+    :param session: SQLAlchemy session
+    :return: Dict with (benchmark, model) tuple as key and highest score as value
+    """
+    # Query to get the highest score for each unique benchmark and model combination
+    highest_scores = (
+        session.query(
+            Run.benchmark_name, 
+            Run.benchmark_metric,
+            Run.model_name, 
+            Run.normed_score
+        )
+        .order_by(Run.normed_score)
+        .distinct(Run.benchmark_name, Run.benchmark_metric, Run.model_name)
+        .all()
+    )
+    
+    # Convert to dictionary with (benchmark, model) as key
+    result = {
+        (f"{run.benchmark_name}:{run.benchmark_metric}", run.model_name): run.normed_score 
+        for run in highest_scores
+    }
+    
+    return result

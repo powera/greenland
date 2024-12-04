@@ -47,14 +47,16 @@
             <th>{{ llm }}</th>
             {% endfor %}
         </tr>
-        {% for test in data.tests %}
+        {% for test in data.benchmarks %}
         <tr>
             <td class="header-cell">{{ test }}</td>
             {% for llm in data.llms %}
             <td>
+              {% if (test, llm) in data.scores %}
                 <div class="score" style="background-color: {{ data.scores[(test, llm)].color }}">
                     {{ data.scores[(test, llm)].value }}
                 </div>
+              {% endif %}
             </td>
             {% endfor %}
         </tr>
