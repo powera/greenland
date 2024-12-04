@@ -25,7 +25,7 @@ def create_benchmarks():
     "Given a sentence with one misspelled word, does the result contain the correct spelling for that word?  It does not have to be formatted correctly or correctly transcribe the misspelled word.", None)
 
   benchmarks.datastore.insert_benchmark(
-    s, "0015_spell_check", "format", "Spell Check / Answer Format",
+    s, "0015_spell_check", "proper_format", "Spell Check / Answer Format",
     "Given a sentence with one misspelled word, and a specified output format, does the result match that format -- regardless of whether the correct word is chosen.", None)
 
   benchmarks.datastore.insert_benchmark(
@@ -34,7 +34,7 @@ def create_benchmarks():
 
   benchmarks.datastore.insert_benchmark(
     s, "0030_analyze_paragraph", "correct_answer", "Analyze Paragraph",
-    "Given a paragraph and 4 possible answers for a question about that paragraph, does the result choose the correct answer.", None)
+    "Given a paragraph and 4 possible answers for a question about that paragraph, does the model choose the correct answer.", None)
 
 if __name__ == "__main__":
   create_models()
