@@ -86,6 +86,38 @@ RESULTS:
   benchmarks.datastore.insert_run(session, model, "0015_spell_check", "complete", has_correct_answer, run_details=run_details["correct_answer"])
 
 
+def run_0020_definitions(model):
+  # The model string includes a quantization.
+  ollama_model = ":".join(model.split(":")[:-1])
+  question_list = load_benchmark_questions("0020_definitions")
+  ollama_client.warm_model(ollama_model)
+
+  run_details = {"correct": []}
+
+  for x in question_list:
+    question_json = json.loads(x["question_info_json"])
+    response, perf = ollama_client.generate_chat(question_json["question"], ollama_model)
+    is_correct = (response.strip().lower() == question_json["correct"])
+    log_result(run_details["correct"],
+               x["question_id"],
+               is_correct,
+               eval_msec=perf["total_msec"],
+               debug_json=(None if is_correct else response)
+               )
+
+  has_correct_answer = sum(x["score"] for x in run_details["correct"])
+  total_questions = len(run_details["correct"])
+  print(f"""
+RESULTS 0020_definitions
+{has_correct_answer}/{total_questions} responses contained the correct answer.
+""")
+
+  session = benchmarks.datastore.create_dev_session()
+  success, msg = benchmarks.datastore.insert_run(session, model, "0020_definitions", "correct", has_correct_answer, run_details=run_details["correct"])
+  if not success:
+    print(msg)
+
+
 def run_0030_analyze_paragraph(model):
   # The model string includes a quantization.
   ollama_model = ":".join(model.split(":")[:-1])
