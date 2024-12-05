@@ -37,6 +37,23 @@
             background-color: #f5f5f5;
             font-weight: bold;
         }
+        .hover-box {
+            display: none;
+            position: absolute;
+            background-color: #333;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            width: 200px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: left;
+        }
+        th:hover .hover-box {
+            display: block;
+        }
+        td:hover .hover-box {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -44,12 +61,24 @@
         <tr>
             <th></th>
             {% for llm in data.llms %}
-            <th>{{ llm.displayname }}</th>
+            <th>{{ llm.displayname }}
+              <div class="hover-box">
+                <b>{{ llm.codename }}</b><br>
+                Launch Date: {{ llm.launch_date }}<br>
+                Size: {{ llm.filesize_mb }} MB<br>
+                License: {{ llm.license_name }}
+              </div>
+            </th>
             {% endfor %}
         </tr>
         {% for test in data.benchmarks %}
         <tr>
-            <td class="header-cell">{{ test.displayname }}</td>
+            <td class="header-cell">{{ test.displayname }}
+              <div class="hover-box">
+                <b> {{test.codename }}</b><br>
+                {{ test.description }}
+              </div>
+            </td>
             {% for llm in data.llms %}
             <td>
               {% if (test.longname, llm.codename) in data.scores %}
