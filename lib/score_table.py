@@ -26,34 +26,36 @@ def get_data():
   session = benchmarks.datastore.create_dev_session()
   llms = benchmarks.datastore.list_all_models(session)
   benchmark_info = benchmarks.datastore.list_all_benchmarks(session)
+  for key in benchmark_info:
+    key["longname"] = f'{key["codename"]}:{key["metric"]}'
   scores = benchmarks.datastore.get_highest_benchmark_scores(session)
+  # Add color information to the data
+  for key in scores:
+      score = scores[key]
+      scores[key] = {
+          'value': score,
+          'color': get_color(score)
+      }
+
   return {
-      "llms": [x["codename"] for x in llms],
-      "benchmarks": [f"""{x["codename"]}:{x["metric"]}""" for x in benchmark_info],
+      "llms": llms,
+      "benchmarks": benchmark_info,
       "scores": scores
       }
 
-# Sample data
-data = get_data()
+def generate_dashboard():
+  data = get_data()
 
-# Set up Jinja2 environment
-current_dir = os.path.dirname(os.path.abspath(__file__))
-template_dir = os.path.join(os.path.dirname(current_dir), 'templates')
+  # Set up Jinja2 environment
+  current_dir = os.path.dirname(os.path.abspath(__file__))
+  template_dir = os.path.join(os.path.dirname(current_dir), 'templates')
 
-env = Environment(loader=FileSystemLoader(template_dir))
-template = env.get_template('model_scores.html')
+  env = Environment(loader=FileSystemLoader(template_dir))
+  template = env.get_template('model_scores.html')
 
-# Add color information to the data
-for key in data['scores']:
-    score = data['scores'][key]
-    data['scores'][key] = {
-        'value': score,
-        'color': get_color(score)
-    }
+  # Render template
+  output = template.render(data=data)
 
-# Render template
-output = template.render(data=data)
-
-# Write to file
-with open('output/model_summary.html', 'w') as f:
-    f.write(output)
+  # Write to file
+  with open('output/model_summary.html', 'w') as f:
+      f.write(output)
