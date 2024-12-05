@@ -34,6 +34,10 @@ def create_benchmarks():
     "Given a sentence with one misspelled word, does the result identify the misspelled word and the correct spelling, in the requested format.", None)
 
   benchmarks.datastore.insert_benchmark(
+    s, "0020_definitions", "correct", "Definitions",
+    "Given a one-sentence definition and ten possible words, does the model choose the correct word.", None)
+
+  benchmarks.datastore.insert_benchmark(
     s, "0030_analyze_paragraph", "correct_answer", "Analyze Paragraph",
     "Given a paragraph and 4 possible answers for a question about that paragraph, does the model choose the correct answer.", None)
 

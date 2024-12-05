@@ -4,6 +4,7 @@
 
 import json
 import os
+import random
 
 from clients import ollama_client
 
@@ -28,6 +29,37 @@ def gen_0015_spell_check(start_word):
 
   with open(f"benchmarks/0015_spell_check/{start_word}.json", "w") as f:
     json.dump(sentences, f, indent=2)
+
+
+def gen_0020_question():
+  words = []
+  with open("benchmarks/0020_definitions/wordlist.txt") as f:
+    for line in f:
+      words.append(line.strip().lower())
+  choices = random.sample(words, 10)
+  correct = choices[0]  # We alpha-sort the choices later
+
+  prompt = f"""Write a one-sentence definition of the word f{correct}.  Do not include any niceties, and do not use the word f{correct}; just provide the definition."""
+  definition, _ = ollama_client.generate_chat(prompt, "gemma2:9b")
+
+  choices.sort()
+  question = f"""Which of the following ten words has this definition: {definition}
+
+Just give the single correct word, do not give a long explanation.
+
+The choices are: {" ".join(choices)}"""
+  return {"question": question, "correct": correct, "choices": choices}
+
+
+def load_0020_definitions_to_sqlite():
+  import benchmarks.datastore
+  session = benchmarks.datastore.create_dev_session()
+  for idx in range(100):
+    question = gen_0020_question()
+    benchmarks.datastore.insert_question(
+        session, f"0020:{question['correct']}:{idx}",
+        "0020_definitions",
+        json.dumps(question))
 
 
 def load_0015_spell_check_to_sqlite():
