@@ -44,17 +44,17 @@
         <tr>
             <th></th>
             {% for llm in data.llms %}
-            <th>{{ llm }}</th>
+            <th>{{ llm.displayname }}</th>
             {% endfor %}
         </tr>
         {% for test in data.benchmarks %}
         <tr>
-            <td class="header-cell">{{ test }}</td>
+            <td class="header-cell">{{ test.displayname }}</td>
             {% for llm in data.llms %}
             <td>
-              {% if (test, llm) in data.scores %}
-                <div class="score" style="background-color: {{ data.scores[(test, llm)].color }}">
-                    {{ data.scores[(test, llm)].value }}
+              {% if (test.longname, llm.codename) in data.scores %}
+                <div class="score" style="background-color: {{ data.scores[(test.longname, llm.codename)].color }}">
+                    {{ data.scores[(test.longname, llm.codename)].value }}
                 </div>
               {% endif %}
             </td>
