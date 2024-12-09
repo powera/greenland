@@ -27,7 +27,7 @@ def generate_text(prompt, model="smollm:360m"):
       "stream": False,
   }
   
-  response = requests.post(url, json=data)
+  response = requests.post(url, json=data, timeout=50)
   
   if response.status_code == 200:
     result = ""
@@ -40,10 +40,12 @@ def generate_text(prompt, model="smollm:360m"):
         result += response_data.get('response', '')
     return result, usage
   else:
-    return f"Error: {response.status_code} - {response.text}", {}
+    raise Exception(f"Error: {response.status_code} - {response.text}")
 
 
-def generate_chat(prompt, model="smollm:360m", structured_json=False, json_schema=None):
+def generate_chat(
+    prompt, model="smollm:360m", brief=False,
+    structured_json=False, json_schema=None):
   url = f"http://{SERVER}:11434/api/chat"
   
   data = {
@@ -54,6 +56,9 @@ def generate_chat(prompt, model="smollm:360m", structured_json=False, json_schem
         ],
       "stream": False,
   }
+  if brief:
+    data["options"] = {}
+    data["options"]["num_predict"] = 256
   if structured_json:
     data["format"] = "json"
   if json_schema:  # Overrides json schema
@@ -73,7 +78,7 @@ def generate_chat(prompt, model="smollm:360m", structured_json=False, json_schem
           result += response_data["message"]["content"]
     return result, usage
   else:
-    return f"Error: {response.status_code} - {response.text}", {}
+    raise Exception(f"Error: {response.status_code} - {response.text}")
 
 
 def parse_usage(response_data):

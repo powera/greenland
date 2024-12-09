@@ -9,6 +9,11 @@ import benchmarks.datastore
 from clients import ollama_client
 
 
+def get_all_model_codenames():
+  session = benchmarks.datastore.create_dev_session() 
+  models = benchmarks.datastore.list_all_models(session)
+  return [x["codename"] for x in models]
+
 def log_result(result_array, question_id, score, eval_msec, debug_json=None):
   """Populates result_array with the information for run_details."""
   result_array.append({"question_id": question_id, "score": score, "eval_msec": eval_msec, "debug_json": debug_json})
@@ -63,7 +68,7 @@ Respond in JSON, with keys of "incorrect" for the verbatim misspelled word, and 
                question_id,
                is_correct,
                eval_msec=perf["total_msec"],
-               debug_json=json.loads(response))
+               debug_json=response_unparsed)
 
   # Sum of results
   has_correct_word = sum(x["score"] for x in run_details["correct_word"])
@@ -72,7 +77,7 @@ Respond in JSON, with keys of "incorrect" for the verbatim misspelled word, and 
   total_questions = len(run_details["correct_answer"])
 
   print(f"""
-0015 RESULTS:
+0015 RESULTS for {model}:
 {has_correct_word}/{total_questions} responses included the correct word.
 {has_incorrect_word}/{total_questions} responses included the incorrect word.
 {has_correct_answer}/{total_questions} responses were completely correct.
@@ -102,8 +107,8 @@ def run_0020_definitions(model):
 
   for x in question_list:
     question_json = json.loads(x["question_info_json"])
-    response, perf = ollama_client.generate_chat(question_json["question"], ollama_model)
-    is_correct = (response.strip().lower() == question_json["correct"])
+    response, perf = ollama_client.generate_chat(question_json["question"], ollama_model, brief=True)
+    is_correct = (response.strip().strip(".").lower() == question_json["correct"])
     log_result(run_details["correct"],
                x["question_id"],
                is_correct,
