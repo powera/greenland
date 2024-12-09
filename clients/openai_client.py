@@ -26,7 +26,7 @@ def generate_text(prompt, sample):
   model = TEST_MODEL
   encoder = tiktoken.get_encoding("cl100k_base")
   input_length = len(sample)
-  if input_length > 12000:
+  if input_length > 52000:
     raise Exception("Input data too long")
   completion = client.chat.completions.create(
       model=model,
