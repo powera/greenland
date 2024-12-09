@@ -25,56 +25,56 @@ def run_0015_spell_check(model):
   sentence_list = load_benchmark_questions("0015_spell_check")
   ollama_client.warm_model(ollama_model)
 
-  run_details = {"correct_word": [], "proper_format": [], "correct_answer": []}
+  run_details = {"correct_word": [], "incorrect_word": [], "correct_answer": []}
+  response_schema = {
+      "type": "object",
+      "properties": {
+        "incorrect": {"type": "string"},
+        "correct": {"type": "string"},
+      },
+      "required": ["incorrect", "correct"],
+  }
 
   for row in sentence_list:
     question_info = json.loads(row["question_info_json"])
     prompt = f"""
 What is the incorrectly-spelled word in this sentence: {question_info["sentence"]}
 
-When responding, give the incorrect spelling, followed by a space, hyphen, space, and the correct spelling.
-
-Two example response:
-  bigg - big
-  chainge - change
+Respond in JSON, with keys of "incorrect" for the verbatim misspelled word, and "correct" for the correct spelling.
 """
 
-    response, perf = ollama_client.generate_chat(prompt, ollama_model)
+    response_unparsed, perf = ollama_client.generate_chat(prompt, ollama_model, json_schema=response_schema)
     question_id = row["question_id"]
 
+    response = json.loads(response_unparsed)
+    log_result(run_details["incorrect_word"],
+               question_id,
+               question_info["incorrect"] == response["incorrect"],
+               eval_msec=perf["total_msec"])
     log_result(run_details["correct_word"],
                question_id,
-               question_info["correct"] in response,
+               question_info["correct"] == response["correct"],
                eval_msec=perf["total_msec"])
 
-    response_parts = response.split()
-    is_formatted = len(response_parts) == 3 and response_parts[1] == "-"
-    log_result(run_details["proper_format"],
-               question_id,
-               is_formatted,
-               eval_msec=perf["total_msec"])
-
-    is_correct = False
-    if is_formatted:
-      response_wrong = response.split()[0]
-      response_right = response.split()[2]
-      is_correct = (question_info["incorrect"] == response_wrong and 
-                    question_info["correct"] == response_right)
+    is_correct = (
+        question_info["incorrect"] == response["incorrect"] and
+        question_info["correct"] == response["correct"])
     log_result(run_details["correct_answer"],
                question_id,
                is_correct,
-               eval_msec=perf["total_msec"])
+               eval_msec=perf["total_msec"],
+               debug_json=json.loads(response))
 
   # Sum of results
   has_correct_word = sum(x["score"] for x in run_details["correct_word"])
-  has_proper_format = sum(x["score"] for x in run_details["proper_format"])
+  has_incorrect_word = sum(x["score"] for x in run_details["incorrect_word"])
   has_correct_answer = sum(x["score"] for x in run_details["correct_answer"])
   total_questions = len(run_details["correct_answer"])
 
   print(f"""
-RESULTS:
+0015 RESULTS:
 {has_correct_word}/{total_questions} responses included the correct word.
-{has_proper_format}/{total_questions} responses were correctly formatted.
+{has_incorrect_word}/{total_questions} responses included the incorrect word.
 {has_correct_answer}/{total_questions} responses were completely correct.
         """)
 
@@ -82,8 +82,14 @@ RESULTS:
   success, msg = benchmarks.datastore.insert_run(session, model, "0015_spell_check", "correct_word", has_correct_word, run_details=run_details["correct_word"])
   if not success:
     print(msg)
-  benchmarks.datastore.insert_run(session, model, "0015_spell_check", "proper_format", has_proper_format, run_details=run_details["proper_format"])
-  benchmarks.datastore.insert_run(session, model, "0015_spell_check", "complete", has_correct_answer, run_details=run_details["correct_answer"])
+
+  success, msg = benchmarks.datastore.insert_run(session, model, "0015_spell_check", "incorrect_word", has_incorrect_word, run_details=run_details["incorrect_word"])
+  if not success:
+    print(msg)
+
+  success, msg = benchmarks.datastore.insert_run(session, model, "0015_spell_check", "complete", has_correct_answer, run_details=run_details["correct_answer"])
+  if not success:
+    print(msg)
 
 
 def run_0020_definitions(model):

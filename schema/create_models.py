@@ -22,12 +22,12 @@ def create_benchmarks():
   s = benchmarks.datastore.create_database_and_session(os.path.join(dir, "benchmarks.db"))
 
   benchmarks.datastore.insert_benchmark(
-    s, "0015_spell_check", "correct_word", "Spell Check / Correct Word",
-    "Given a sentence with one misspelled word, does the result contain the correct spelling for that word?  It does not have to be formatted correctly or correctly transcribe the misspelled word.", None)
+    s, "0015_spell_check", "incorrect_word", "Spell Check / Incorrect Word",
+    "Given a sentence with one misspelled word, does the result contain the incorrect spelling for that word? It does not need to choose the correct word to replace it.", None)
 
   benchmarks.datastore.insert_benchmark(
-    s, "0015_spell_check", "proper_format", "Spell Check / Answer Format",
-    "Given a sentence with one misspelled word, and a specified output format, does the result match that format -- regardless of whether the correct word is chosen.", None)
+    s, "0015_spell_check", "correct_word", "Spell Check / Correct Word",
+    "Given a sentence with one misspelled word, does the result contain the correct spelling for that word? It does not need to correctly transcribe the misspelled word.", None)
 
   benchmarks.datastore.insert_benchmark(
     s, "0015_spell_check", "complete", "Spell Check / Complete Response",
