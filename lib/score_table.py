@@ -25,6 +25,7 @@ def get_color(score):
 def get_data():
   session = benchmarks.datastore.create_dev_session()
   llms = benchmarks.datastore.list_all_models(session)
+  llms.sort(key=lambda x: (x["filesize_mb"], x["displayname"]))
   benchmark_info = benchmarks.datastore.list_all_benchmarks(session)
   for key in benchmark_info:
     key["longname"] = f'{key["codename"]}:{key["metric"]}'
