@@ -4,6 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Benchmark Run Details - {{ run_details.model_name }} on {{ run_details.benchmark_name }}</title>
+    <script>
+        function toggleQuestionInfo(toggleElement) {
+            const questionInfoContent = toggleElement.nextElementSibling;
+
+            if (questionInfoContent.classList.contains('hidden')) {
+                questionInfoContent.classList.remove('hidden');
+                toggleElement.textContent = '[X]';
+            } else {
+                questionInfoContent.classList.add('hidden');
+                toggleElement.textContent = '[+]';
+            }
+        }
+    </script>
+
     <style>
         /* Placeholder for future CSS */
         body {
@@ -38,6 +52,40 @@
             border-bottom: 2px solid #333;
             padding-bottom: 0.5rem;
         }
+        .question-info {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 1rem;
+            margin-top: 0.5rem;
+            position: relative;
+        }
+        .question-info-content {
+            max-height: 600px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding-right: 15px; /* Add scrollbar space */
+        }
+        .question-info-toggle {
+            cursor: pointer;
+            user-select: none;
+            font-weight: bold;
+            color: #666;
+        }
+        .question-info-toggle:hover {
+            color: #333;
+        }
+        .question-info pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            background-color: #f4f4f4;
+            padding: 0.5rem;
+            border-radius: 4px;
+            margin: 0;
+        }
+        .hidden {
+            display: none;
+        }
+
     </style>
 </head>
 <body>
@@ -87,8 +135,21 @@
                         <td>{{ detail.question_id }}</td>
                         <td>{{ detail.score }}</td>
                         <td>{{ detail.eval_msec }}</td>
-                        <td>{{ detail.debug_json or 'N/A' }}</td>
+                        <td>{{ detail.debug_json |tojson(indent=2) }}</td>
                     </tr>
+                    {% if detail.question_info_json %}
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{{ detail.question_info_json |tojson(indent=2)}}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endif %}
                     {% endfor %}
                 </tbody>
             </table>
