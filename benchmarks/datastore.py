@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import datetime
+import json
 
 from typing import List, Optional
 from sqlalchemy import String, Integer, Text, ForeignKey, ForeignKeyConstraint, TIMESTAMP, create_engine, func
@@ -415,13 +416,24 @@ def get_highest_benchmark_scores(session):
     return result
 
 
-def get_highest_scoring_run_details(session, model_name, benchmark_name):
+def decode_json(text):
+    if text is None:
+      return {}
+    try:
+      result = json.loads(text)
+      return result
+    except json.JSONDecodeError:
+      return {"result": text}
+
+
+def get_highest_scoring_run_details(session, model_name, benchmark_name, benchmark_metric):
     """
-    Retrieve run details for the highest-scoring run for a specific (model, benchmark) pair.
+    Retrieve run details for the highest-scoring run for a specific (model, benchmark_name, benchmark_metric) pair.
 
     :param session: SQLAlchemy session
     :param model_name: Name of the model
     :param benchmark_name: Name of the benchmark
+    :param benchmark_metric: Metric of the benchmark
     :return: Dictionary of run details
     """
     # First, find the highest-scoring run
@@ -429,6 +441,7 @@ def get_highest_scoring_run_details(session, model_name, benchmark_name):
         session.query(Run)
         .filter(Run.model_name == model_name)
         .filter(Run.benchmark_name == benchmark_name)
+        .filter(Run.benchmark_metric == benchmark_metric)
         .order_by(Run.normed_score.desc())
         .first()
     )
@@ -438,7 +451,8 @@ def get_highest_scoring_run_details(session, model_name, benchmark_name):
 
     # Then, get all run details for this run
     run_details = (
-        session.query(RunDetail)
+        session.query(RunDetail, Question)
+        .join(Question, RunDetail.question_id == Question.question_id)
         .filter(RunDetail.run_id == highest_run.run_id)
         .all()
     )
@@ -454,9 +468,10 @@ def get_highest_scoring_run_details(session, model_name, benchmark_name):
                 'question_id': detail.question_id,
                 'score': detail.score,
                 'eval_msec': detail.eval_msec,
-                'debug_json': detail.debug_json
+                'question_info_json': decode_json(query.question_info_json),
+                'debug_json': decode_json(detail.debug_json)
             }
-            for detail in run_details
+            for detail, query in run_details
         ]
     }
 

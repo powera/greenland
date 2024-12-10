@@ -24,11 +24,16 @@ def get_color(score):
 
 def get_data():
   session = benchmarks.datastore.create_dev_session()
+
   llms = benchmarks.datastore.list_all_models(session)
   llms.sort(key=lambda x: (x["filesize_mb"], x["displayname"]))
+  for key in llms:
+    key["dirname"] = key["codename"].replace(":", "__")
+
   benchmark_info = benchmarks.datastore.list_all_benchmarks(session)
   for key in benchmark_info:
     key["longname"] = f'{key["codename"]}:{key["metric"]}'
+
   scores = benchmarks.datastore.get_highest_benchmark_scores(session)
   # Add color information to the data
   for key in scores:
@@ -62,10 +67,10 @@ def generate_dashboard():
       f.write(output)
 
 
-def generate_run_detail(model_name, benchmark_name):
+def generate_run_detail(model_name, benchmark_name, benchmark_metric):
   session = benchmarks.datastore.create_dev_session()
   data = benchmarks.datastore.get_highest_scoring_run_details(
-      session, model_name, benchmark_name)
+      session, model_name, benchmark_name, benchmark_metric)
 
   # Set up Jinja2 environment
   current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -78,6 +83,10 @@ def generate_run_detail(model_name, benchmark_name):
   output = template.render(run_details=data)
 
   # Write to file
-  os.mkdir(f'output/{model_name}')
-  with open(f'output/{model_name}/{benchmark_name}.html', 'w') as f:
+  dirname = f'output/{model_name}'.replace(":", "__")
+  try:
+    os.mkdir(dirname)
+  except FileExistsError:
+    pass
+  with open(f'{dirname}/{benchmark_name}__{benchmark_metric}.html', 'w') as f:
       f.write(output)

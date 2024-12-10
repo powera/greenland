@@ -14,6 +14,11 @@ def get_all_model_codenames():
   models = benchmarks.datastore.list_all_models(session)
   return [x["codename"] for x in models]
 
+def get_all_benchmark_pairs():
+  session = benchmarks.datastore.create_dev_session() 
+  benchmark_info = benchmarks.datastore.list_all_benchmarks(session)
+  return [(x["codename"], x["metric"]) for x in benchmark_info]
+
 def log_result(result_array, question_id, score, eval_msec, debug_json=None):
   """Populates result_array with the information for run_details."""
   result_array.append({"question_id": question_id, "score": score, "eval_msec": eval_msec, "debug_json": debug_json})
