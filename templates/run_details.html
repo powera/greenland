@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Benchmark Run Details - {{ run_details.model_name }} on {{ run_details.benchmark_name }}</title>
+    <style>
+        /* Placeholder for future CSS */
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+        .run-summary, .run-details {
+            margin-bottom: 2rem;
+        }
+        .summary-table, .details-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .summary-table th, .details-table th {
+            background-color: #f4f4f4;
+            text-align: left;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+        }
+        .summary-table td, .details-table td {
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+        }
+        .details-table {
+            margin-top: 1rem;
+        }
+        .page-title {
+            color: #333;
+            border-bottom: 2px solid #333;
+            padding-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="page-title">Benchmark Run Details</h1>
+        
+        <div class="run-summary">
+            <h2>Run Summary</h2>
+            <table class="summary-table">
+                <tr>
+                    <th>Model</th>
+                    <td>{{ run_details.model_name }}</td>
+                </tr>
+                <tr>
+                    <th>Benchmark</th>
+                    <td>{{ run_details.benchmark_name }}</td>
+                </tr>
+                <tr>
+                    <th>Metric</th>
+                    <td>{{ run_details.benchmark_metric }}</td>
+                </tr>
+                <tr>
+                    <th>Normed Score</th>
+                    <td>{{ run_details.normed_score }}</td>
+                </tr>
+                <tr>
+                    <th>Run Timestamp</th>
+                    <td>{{ run_details.run_ts }}</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="run-details">
+            <h2>Question-Level Details</h2>
+            <table class="details-table">
+                <thead>
+                    <tr>
+                        <th>Question ID</th>
+                        <th>Score</th>
+                        <th>Evaluation Time (ms)</th>
+                        <th>Debug Info</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for detail in run_details.details %}
+                    <tr>
+                        <td>{{ detail.question_id }}</td>
+                        <td>{{ detail.score }}</td>
+                        <td>{{ detail.eval_msec }}</td>
+                        <td>{{ detail.debug_json or 'N/A' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if run_details.details|length == 0 %}
+        <div class="no-details">
+            <p>No detailed run information available.</p>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

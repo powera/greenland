@@ -60,3 +60,24 @@ def generate_dashboard():
   # Write to file
   with open('output/model_summary.html', 'w') as f:
       f.write(output)
+
+
+def generate_run_detail(model_name, benchmark_name):
+  session = benchmarks.datastore.create_dev_session()
+  data = benchmarks.datastore.get_highest_scoring_run_details(
+      session, model_name, benchmark_name)
+
+  # Set up Jinja2 environment
+  current_dir = os.path.dirname(os.path.abspath(__file__))
+  template_dir = os.path.join(os.path.dirname(current_dir), 'templates')
+
+  env = Environment(loader=FileSystemLoader(template_dir))
+  template = env.get_template('run_details.html')
+
+  # Render template
+  output = template.render(run_details=data)
+
+  # Write to file
+  os.mkdir(f'output/{model_name}')
+  with open(f'output/{model_name}/{benchmark_name}.html', 'w') as f:
+      f.write(output)

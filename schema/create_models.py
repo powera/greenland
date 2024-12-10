@@ -17,6 +17,7 @@ def create_models():
   benchmarks.datastore.insert_model(s, "phi3.5:3.8b:Q4_0", "PHI 3.5", "2024-08-17", 2200, "MIT License")
   benchmarks.datastore.insert_model(s, "granite3-dense:8b:Q4_K_M", "Granite 3", "2024-10-21", 4900, "Apache License")
   benchmarks.datastore.insert_model(s, "hermes3:8b:Q4_0", "Hermes 3", "2024-07-28", 4700, "Llama 3 License")
+  benchmarks.datastore.insert_model(s, "exaone3.5:7.8b:Q4_K_M", "ExaONE 3.5", "2024-12-10", 4800, "Exaone License")
 
 def create_benchmarks():
   dir = os.path.dirname(os.path.realpath(__file__))
