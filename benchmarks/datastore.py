@@ -413,3 +413,50 @@ def get_highest_benchmark_scores(session):
     }
     
     return result
+
+
+def get_highest_scoring_run_details(session, model_name, benchmark_name):
+    """
+    Retrieve run details for the highest-scoring run for a specific (model, benchmark) pair.
+
+    :param session: SQLAlchemy session
+    :param model_name: Name of the model
+    :param benchmark_name: Name of the benchmark
+    :return: Dictionary of run details
+    """
+    # First, find the highest-scoring run
+    highest_run = (
+        session.query(Run)
+        .filter(Run.model_name == model_name)
+        .filter(Run.benchmark_name == benchmark_name)
+        .order_by(Run.normed_score.desc())
+        .first()
+    )
+
+    if not highest_run:
+        return None
+
+    # Then, get all run details for this run
+    run_details = (
+        session.query(RunDetail)
+        .filter(RunDetail.run_id == highest_run.run_id)
+        .all()
+    )
+
+    return {
+        'run_id': highest_run.run_id,
+        'model_name': highest_run.model_name,
+        'benchmark_name': highest_run.benchmark_name,
+        'benchmark_metric': highest_run.benchmark_metric,
+        'normed_score': highest_run.normed_score,
+        'details': [
+            {
+                'question_id': detail.question_id,
+                'score': detail.score,
+                'eval_msec': detail.eval_msec,
+                'debug_json': detail.debug_json
+            }
+            for detail in run_details
+        ]
+    }
+
