@@ -76,6 +76,7 @@ def generate_chat(
           usage = parse_usage(response_data)
         if "message" in response_data:
           result += response_data["message"]["content"]
+    print(result)
     return result, usage
   else:
     raise Exception(f"Error: {response.status_code} - {response.text}")
