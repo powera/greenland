@@ -116,12 +116,7 @@ def generate_run_detail_by_id(run_id, session=None):
         return
 
     # Get all run details using the existing function
-    data = benchmarks.datastore.get_highest_scoring_run_details(
-        session, 
-        run.model_name, 
-        run.benchmark_name, 
-        run.benchmark_metric
-    )
+    data = benchmarks.datastore.get_run_by_run_id(run_id, session)
 
     # Write the details to a file
     _write_run_detail(data)

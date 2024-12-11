@@ -33,8 +33,9 @@ def load_benchmark_questions(benchmark):
     session = benchmarks.datastore.create_dev_session() 
     return benchmarks.datastore.load_all_questions_for_benchmark(session, benchmark)
 
-def update_scoretable(model, benchmark, metric, session):
-    lib.score_table.generate_run_detail(model, benchmark, metric, session)
+def update_scoretable(run_id, session):
+    lib.score_table.generate_run_detail_by_id(run_id, session)
+    lib.score_table.generate_dashboard()
 
 def run_0015_spell_check(model):
     # The model string includes a quantization.
@@ -109,7 +110,7 @@ Respond in JSON, with keys of "incorrect" for the verbatim misspelled word, and 
     success, msg = benchmarks.datastore.insert_run(session, model, "0015_spell_check", "complete", has_correct_answer, run_details=run_details["correct_answer"])
     if not success:
         print(msg)
-    update_scoretable(model, "0015_spell_check", "complete", session)
+    update_scoretable(msg, session)
 
 
 def run_0020_definitions(model):
@@ -143,7 +144,7 @@ RESULTS 0020_definitions
     if not success:
         print(msg)
 
-    update_scoretable(model, "0020_definitions", "correct", session)
+    update_scoretable(msg, session)
 
 def run_0030_analyze_paragraph(model):
     """
@@ -270,9 +271,7 @@ Correct answers: {correct_answers}/{total_questions} ({correct_answers/total_que
     
     if not success:
         print(f"Error saving results: {msg}")
-    
-    update_scoretable(model, "0030_analysis_paragraph", "correct", session)
-    return correct_answers, total_questions
+    update_scoretable(msg, session)
 
 
 def run_0035_simple_haystack(model):
@@ -338,7 +337,7 @@ RESULTS 0035_simple_haystack
         num_correct, run_details=run_details["correct"])
     if not success:
         print(msg)
-    update_scoretable(model, "0035_simple_haystack", "correct", session)
+    update_scoretable(msg, session)
 
 
 def run_0040_general_knowledge(model):
@@ -387,4 +386,4 @@ RESULTS 0040_general_knowledge
     if not success:
         print(msg)
         
-    update_scoretable(model, "0040_general_knowledge", "correct", session)
+    update_scoretable(msg, session)
