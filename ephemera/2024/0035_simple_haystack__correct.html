@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Benchmark Run Details - phi3.5:3.8b:Q4_0 on 0035_simple_haystack</title>
+    <script>
+        function toggleQuestionInfo(toggleElement) {
+            const questionInfoContent = toggleElement.nextElementSibling;
+
+            if (questionInfoContent.classList.contains('hidden')) {
+                questionInfoContent.classList.remove('hidden');
+                toggleElement.textContent = '[X]';
+            } else {
+                questionInfoContent.classList.add('hidden');
+                toggleElement.textContent = '[+]';
+            }
+        }
+    </script>
+
+    <style>
+        /* Placeholder for future CSS */
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+        .run-summary, .run-details {
+            margin-bottom: 2rem;
+        }
+        .summary-table, .details-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .summary-table th, .details-table th {
+            background-color: #f4f4f4;
+            text-align: left;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+        }
+        .summary-table td, .details-table td {
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+        }
+        .details-table {
+            margin-top: 1rem;
+        }
+        .page-title {
+            color: #333;
+            border-bottom: 2px solid #333;
+            padding-bottom: 0.5rem;
+        }
+        .question-info {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 1rem;
+            margin-top: 0.5rem;
+            position: relative;
+        }
+        .question-info-content {
+            max-height: 600px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding-right: 15px; /* Add scrollbar space */
+        }
+        .question-info-toggle {
+            cursor: pointer;
+            user-select: none;
+            font-weight: bold;
+            color: #666;
+        }
+        .question-info-toggle:hover {
+            color: #333;
+        }
+        .question-info pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            background-color: #f4f4f4;
+            padding: 0.5rem;
+            border-radius: 4px;
+            margin: 0;
+        }
+        .hidden {
+            display: none;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="page-title">Benchmark Run Details</h1>
+        
+        <div class="run-summary">
+            <h2>Run Summary</h2>
+            <table class="summary-table">
+                <tr>
+                    <th>Model</th>
+                    <td>phi3.5:3.8b:Q4_0</td>
+                </tr>
+                <tr>
+                    <th>Benchmark</th>
+                    <td>0035_simple_haystack</td>
+                </tr>
+                <tr>
+                    <th>Metric</th>
+                    <td>correct</td>
+                </tr>
+                <tr>
+                    <th>Normed Score</th>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <th>Run Timestamp</th>
+                    <td></td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="run-details">
+            <h2>Question-Level Details</h2>
+            <table class="details-table">
+                <thead>
+                    <tr>
+                        <th>Question ID</th>
+                        <th>Score</th>
+                        <th>Evaluation Time (ms)</th>
+                        <th>Debug Info</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                    <tr>
+                        <td>0035:haystack:0</td>
+                        <td>0</td>
+                        <td>3506.615583</td>
+                        <td>{
+  "result": "Yes, that sentence is from the provided list. It matches item number 5 exactly as written there. So my answer is yes."
+}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "sentences": [
+    "Alexander sauntered to the police station",
+    "Chloe dashed to the stadium",
+    "Leo crawled to the concert hall",
+    "Michael crawled to the park",
+    "Ella scampered to the police station",
+    "Ethan rafted to the mall"
+  ]
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0035:haystack:1</td>
+                        <td>0</td>
+                        <td>5607.281542</td>
+                        <td>{
+  "result": "Yes\n\n#### Explangy Solution Part by Part: The original text lists various sentences showing people and how they traveled, including one about \u0027Owen floating to school\u0027. This matches the sentence provided in your query. Hence, it can be affirmed that this particular scenario is present within these instructions or premises as requested for confirmation (yes/no). \n\nIn summary: The specific situation of Owen floating his way to school has indeed been outlined previously and thus we have confidently verified its existence in the original context. Hence, our answer remains consistent with a direct affirmative response (\"Yes\")."
+}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "sentences": [
+    "Owen floated to school",
+    "Jacob sneaked to the museum",
+    "Sofia walked to the playground",
+    "Amelia surfed to the office",
+    "Madison paddled to the police station",
+    "Samuel hiked to the bank"
+  ]
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0035:haystack:2</td>
+                        <td>0</td>
+                        <td>1888.979625</td>
+                        <td>{
+  "result": "Yes, that sentence appears in List number (3). The original format was not preserved here but I can still confirm from within your provided context. Thus, my answer is \u0027yes\u0027."
+}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "sentences": [
+    "Joseph skated to the playground",
+    "Charlotte paddled to the cafe",
+    "Ethan meandered to the fire station",
+    "Chloe climbed to the airport",
+    "Olivia sauntered to the university",
+    "Samuel meandered to the beach"
+  ]
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0035:haystack:3</td>
+                        <td>0</td>
+                        <td>841.580792</td>
+                        <td>{
+  "result": "Yes, that sentence appears at item number (3) of the given list."
+}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "sentences": [
+    "Charlotte surfed to the playground",
+    "William dove into the stadium",
+    "Ava canoed to the office",
+    "Sofia strutted to the zoo",
+    "Emily hustled to the garden",
+    "Elijah surfed to the courthouse"
+  ]
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0035:haystack:4</td>
+                        <td>0</td>
+                        <td>2399.007041</td>
+                        <td>{
+  "result": "Yes. The mentioned activity of \u0027canoeing\u0027 and destination, which is a \u0027train station,\u0027 corresponds exactly to Sentence 6 from the original text provided. Thus, this sentence does appear in the list above. Therefore, my answer would be \"yes\"."
+}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "sentences": [
+    "Scarlett scurried to the cafe",
+    "Daniel kayaked to the beach",
+    "William trekked to the hospital",
+    "Harper galloped to the fire station",
+    "Henry canoed to the train station",
+    "James trekked to the airport"
+  ]
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0035:haystack:5</td>
+                        <td>0</td>
+                        <td>2761.5855</td>
+                        <td>{
+  "result": "Yes, that sentence does appear as a part of item number 4. The original sentences are almost identical; they both convey \"Michael hopped/pranced to the bar,\" which suggests this is acceptable paraphrasing within context understanding tasks like these. So yes, in essence and meaning it appears there but with different wording (\"hopped\" vs \"pranced\")."
+}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "sentences": [
+    "Charlotte hustled to the beach",
+    "Henry trudged to the pool",
+    "Michael hopped to the bar",
+    "Michael pranced to the airport",
+    "Leo kayaked to the post office",
+    "Scarlett limped to the police station"
+  ]
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0035:haystack:6</td>
+                        <td>0</td>
+                        <td>6552.056708</td>
+                        <td>{
+  "result": "Yes, that sentence does match one of those listed as Michael scampering to the playground. It refers specifically to an action towards a place and aligns in context \u2014 although it describes \u0027wander\u0027 instead of \u0027scamper\u0027, which is understandable given both are locomotion actions\u2014 just like how Emily galloped (fast, possibly more so than walking) as opposed to simply going or strolling. So yes, the sentence appears within that conceptual frame in those provided sentences.\n\nPlease note: While all these descriptions correspond with physical activities and locations similar enough for context comprehension \u2014 \u0027wander\u0027, like others listed refers to a form of movement towards an objective location (a pool), just as Michael\u0027dict scampering or Emily galloping indicates movements in specific directions, the verbs used slightly differ. But they are all still related forms of locomotion which makes this interpretation valid within context comprehension frame based on provided examples."
+}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "sentences": [
+    "Michael scampered to the playground",
+    "Emily galloped to the library",
+    "Abigail swam to the aquarium",
+    "Daniel rafted to the zoo",
+    "John wandered to the pool",
+    "Avery skipped to the garden"
+  ]
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0035:haystack:7</td>
+                        <td>0</td>
+                        <td>1363.80225</td>
+                        <td>{
+  "result": "Yes, the given sentence is from the provided text as it matches line 2 exactly. So, my answer is yes."
+}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "sentences": [
+    "Grace strutted to the garden",
+    "Ethan sneaked to the bank",
+    "Emily raced to the bank",
+    "Victoria stumbled to the bar",
+    "Amelia meandered to the police station",
+    "Henry strolled to the hotel"
+  ]
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0035:haystack:8</td>
+                        <td>0</td>
+                        <td>1075.957</td>
+                        <td>{
+  "result": "Yes, that sentence appears at number 1 on the provided list. The answer is yes."
+}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "sentences": [
+    "Abigail hiked to the bus stop",
+    "Penelope climbed to the bus stop",
+    "Penelope skated to the beach",
+    "Samuel climbed to the aquarium",
+    "Emma sauntered to the church",
+    "Ava strolled to the beach"
+  ]
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0035:haystack:9</td>
+                        <td>0</td>
+                        <td>3141.065542</td>
+                        <td>{
+  "result": "Yes, this sentence does match one from the original text (sentence number 3). So, the answer is yes. The context here refers specifically that \u0027Madison\u0027 performs a similar action as described in sentences numbers three and six of your list which both involve paddling to somewhere \u2013 train station/theater respectively - making Madison\u2019dictional activity analogous."
+}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "sentences": [
+    "William trudged to the park",
+    "Avery sailed to the farm",
+    "Madison paddled to the train station",
+    "Charlotte marched to the church",
+    "Evelyn trudged to the airport",
+    "William scurried to the theater"
+  ]
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                </tbody>
+            </table>
+        </div>
+
+        
+    </div>
+</body>
+</html>
