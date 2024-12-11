@@ -144,23 +144,19 @@ def gen_0035_simple_haystack_sentence(name, action, location):
 def gen_0035_simple_haystack_question(names, actions, locations):
     """Generates a question consisting of 6 simple sentences."""
     sentences = []
-    used_combinations = set()
-
-    while len(sentences) < 6:
-        name = random.choice(names)
-        action = random.choice(actions)
-        location = random.choice(locations)
-
-        if (name, action, location) not in used_combinations:
-            sentence = gen_0035_simple_haystack_sentence(name, action, location)
-            sentences.append(sentence)
-            used_combinations.add((name, action, location))
+    count = 6
+    selected_names = random.sample(names, count)
+    selected_actions = random.sample(actions, count)
+    selected_locations = random.sample(locations, count)
+    for x in range(count):
+      sentence = gen_0035_simple_haystack_sentence(selected_names[x], selected_actions[x], selected_locations[x])
+      sentences.append(sentence)
 
     correct = {
         "sentence": sentences[-1],
-        "name": name,
-        "action": action,
-        "location": location,
+        "name": selected_names[-1],
+        "action": selected_actions[-1],
+        "location": selected_locations[-1],
     }
     return {"sentences": sentences, "correct": correct}
 
