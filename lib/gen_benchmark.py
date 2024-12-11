@@ -129,6 +129,58 @@ def load_0030_analyze_paragraph_to_sqlite():
       break
 
 
+def gen_0035_simple_haystack_sentence(names, actions, locations):
+    """Generates a simple subject-verb-object sentence."""
+    name = random.choice(names)
+    action = random.choice(actions)
+    location = random.choice(locations)
+
+    prompt = f"""Write a simple sentence with the following elements:
+    - Name: {name}
+    - Action: {action}
+    - Location: {location}
+
+    The sentence should be in the form "Name action to the location." Use the simple past tense for the verb.
+    Only reply with the single sentence, do not include any other text or punctuation."""
+
+    response, _ = ollama_client.generate_chat(prompt, "gemma2:9b")
+    return response.strip()
+
+def gen_0035_simple_haystack_question(names, actions, locations):
+    """Generates a question consisting of 6 simple sentences."""
+    sentences = []
+    for _ in range(6):
+        sentences.append(gen_0035_simple_haystack_sentence(names, actions, locations))
+
+    return {"sentences": sentences}
+
+def load_0035_simple_haystack_to_sqlite():
+    import benchmarks.datastore
+
+    names = []
+    with open("benchmarks/0035_simple_haystack/names.txt") as f:
+        for line in f:
+            names.append(line.strip())
+
+    actions = []
+    with open("benchmarks/0035_simple_haystack/actions.txt") as f:
+        for line in f:
+            actions.append(line.strip())
+
+    locations = []
+    with open("benchmarks/0035_simple_haystack/locations.txt") as f:
+        for line in f:
+            locations.append(line.strip())
+
+    session = benchmarks.datastore.create_dev_session()
+    for idx in range(100):
+        question = gen_0035_simple_haystack_question(names, actions, locations)
+        benchmarks.datastore.insert_question(
+            session, f"0035:haystack:{idx}",
+            "0035_simple_haystack",
+            json.dumps(question))
+
+
 def load_0040_general_knowledge_to_sqlite():
   import benchmarks.datastore
 

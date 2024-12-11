@@ -1,0 +1,40 @@
+park
+beach
+library
+museum
+school
+hospital
+restaurant
+mall
+theater
+zoo
+aquarium
+stadium
+airport
+train station
+bus stop
+grocery store
+bakery
+cafe
+gym
+pool
+playground
+garden
+farm
+factory
+office
+bank
+hotel
+church
+temple
+mosque
+courthouse
+fire station
+police station
+post office
+university
+college
+art gallery
+concert hall
+nightclub
+bar

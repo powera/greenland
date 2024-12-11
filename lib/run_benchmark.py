@@ -184,6 +184,60 @@ RESULTS 0030_analyze_paragraph
     print(msg)
 
 
+def run_0035_simple_haystack(model):
+    # The model string includes a quantization.
+    ollama_model = ":".join(model.split(":")[:-1])
+    question_list = load_benchmark_questions("0035_simple_haystack")
+    ollama_client.warm_model(ollama_model)
+
+    run_details = {"correct": []}
+
+    br = "\\n"
+    for x in question_list:
+        question_json = json.loads(x["question_info_json"])
+        sentences = question_json["sentences"]
+
+        # Randomly select a sentence to query
+        import random
+        query_sentence = random.choice(sentences)
+
+        # Create the prompt
+        prompt = f"""
+Given the following sentences:
+{''.join(f'{i+1}. {s}{{br}}' for i, s in enumerate(sentences))}
+
+Does the following sentence appear in the list above? Respond with only "yes" or "no".
+Sentence: {query_sentence}
+"""
+
+        response, perf = ollama_client.generate_chat(prompt, ollama_model, brief=True)
+        
+        is_correct = (response.strip().lower() == "yes")
+        
+        log_result(
+            run_details["correct"],
+            x["question_id"],
+            is_correct,
+            eval_msec=perf["total_msec"],
+            debug_json=(None if is_correct else response)
+        )
+
+    num_correct = sum(x["score"] for x in run_details["correct"])
+    total_questions = len(run_details["correct"])
+    
+    print(f"""
+RESULTS 0035_simple_haystack
+{num_correct}/{total_questions} responses were correct.
+""")
+
+    session = benchmarks.datastore.create_dev_session()
+    success, msg = benchmarks.datastore.insert_run(
+        session, model, "0035_simple_haystack", "correct", 
+        num_correct, run_details=run_details["correct"])
+    if not success:
+        print(msg)
+
+
 def run_0040_general_knowledge(model):
   # The model string includes a quantization.
   ollama_model = ":".join(model.split(":")[:-1])
