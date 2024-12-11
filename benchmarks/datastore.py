@@ -389,30 +389,34 @@ def find_top_runs_for_benchmark(session, benchmark_codename, benchmark_metric, t
 
 def get_highest_benchmark_scores(session):
     """
-    Get the highest benchmark scores for each (benchmark, model) combination.
-    
+    Get the highest benchmark scores for each (benchmark, model) combination along with their run IDs.
+
     :param session: SQLAlchemy session
-    :return: Dict with (benchmark, model) tuple as key and highest score as value
+    :return: Dict with (benchmark, model) tuple as key and dict containing score and run_id as value
     """
-    # Query to get the highest score for each unique benchmark and model combination
+    # Use a subquery to find the run with the highest score for each combination
     highest_scores = (
         session.query(
-            Run.benchmark_name, 
+            Run.benchmark_name,
             Run.benchmark_metric,
-            Run.model_name, 
-            Run.normed_score
+            Run.model_name,
+            Run.normed_score,
+            Run.run_id
         )
         .order_by(Run.normed_score)
         .distinct(Run.benchmark_name, Run.benchmark_metric, Run.model_name)
         .all()
     )
-    
+
     # Convert to dictionary with (benchmark, model) as key
     result = {
-        (f"{run.benchmark_name}:{run.benchmark_metric}", run.model_name): run.normed_score 
+        (f"{run.benchmark_name}:{run.benchmark_metric}", run.model_name): {
+            'score': run.normed_score,
+            'run_id': run.run_id
+        }
         for run in highest_scores
     }
-    
+
     return result
 
 
