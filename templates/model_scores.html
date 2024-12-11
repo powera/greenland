@@ -83,7 +83,7 @@
             <td>
               {% if (test.longname, llm.codename) in data.scores %}
                 <div class="score" style="background-color: {{ data.scores[(test.longname, llm.codename)].color }}">
-                  <a href="{{ llm.dirname}}/{{test.codename}}__{{test.metric}}.html">{{ data.scores[(test.longname, llm.codename)].value }}</a>
+                  <a href="run_details/{{data.scores[(test.longname, llm.codename)].run_id}}.html">{{ data.scores[(test.longname, llm.codename)].value }}</a>
                 </div>
               {% endif %}
             </td>
