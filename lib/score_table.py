@@ -67,8 +67,9 @@ def generate_dashboard():
       f.write(output)
 
 
-def generate_run_detail(model_name, benchmark_name, benchmark_metric):
-  session = benchmarks.datastore.create_dev_session()
+def generate_run_detail(model_name, benchmark_name, benchmark_metric, session=None):
+  if not session:
+    session = benchmarks.datastore.create_dev_session()
   data = benchmarks.datastore.get_highest_scoring_run_details(
       session, model_name, benchmark_name, benchmark_metric)
 

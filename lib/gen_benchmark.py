@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-""" Generates benchmark questions. By LLMs, for LLMs. """
+""" Generates benchmark questions."""
 
 import json
 import os
