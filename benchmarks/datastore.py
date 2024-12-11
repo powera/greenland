@@ -394,7 +394,7 @@ def get_highest_benchmark_scores(session):
     :param session: SQLAlchemy session
     :return: Dict with (benchmark, model) tuple as key and dict containing score and run_id as value
     """
-    # Use a subquery to find the run with the highest score for each combination
+    # Query to find the highest-score runs, and the run information.
     highest_scores = (
         session.query(
             Run.benchmark_name,
