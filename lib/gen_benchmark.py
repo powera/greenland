@@ -129,18 +129,13 @@ def load_0030_analyze_paragraph_to_sqlite():
       break
 
 
-def gen_0035_simple_haystack_sentence(names, actions, locations):
-    """Generates a simple subject-verb-object sentence."""
-    name = random.choice(names)
-    action = random.choice(actions)
-    location = random.choice(locations)
 
+def gen_0035_simple_haystack_sentence(name, action, location):
     prompt = f"""Write a simple sentence with the following elements:
     - Name: {name}
     - Action: {action}
     - Location: {location}
 
-    The sentence should be in the form "Name action to the location." Use the simple past tense for the verb.
     Only reply with the single sentence, do not include any other text or punctuation."""
 
     response, _ = ollama_client.generate_chat(prompt, "gemma2:9b")
@@ -150,9 +145,14 @@ def gen_0035_simple_haystack_question(names, actions, locations):
     """Generates a question consisting of 6 simple sentences."""
     sentences = []
     for _ in range(6):
-        sentences.append(gen_0035_simple_haystack_sentence(names, actions, locations))
-
-    return {"sentences": sentences}
+        """Generates a simple sentence."""
+        # TODO: generate the six tuples such that there cannot be repetition.
+        name = random.choice(names)
+        action = random.choice(actions)
+        location = random.choice(locations)
+        sentences.append(gen_0035_simple_haystack_sentence(name, action, location))
+    correct = {"sentence": sentences[-1], "name": name, "action": action, "location": location}  # CLEANUP
+    return {"sentences": sentences, "correct": correct}
 
 def load_0035_simple_haystack_to_sqlite():
     import benchmarks.datastore
@@ -173,7 +173,7 @@ def load_0035_simple_haystack_to_sqlite():
             locations.append(line.strip())
 
     session = benchmarks.datastore.create_dev_session()
-    for idx in range(100):
+    for idx in range(10):
         question = gen_0035_simple_haystack_question(names, actions, locations)
         benchmarks.datastore.insert_question(
             session, f"0035:haystack:{idx}",

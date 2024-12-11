@@ -178,25 +178,22 @@ def run_0030_analyze_paragraph(model):
     
     # Initialize results tracking
     run_details = {
-        "correct_answer": [],  # Tracks completely correct responses
-        "invalid_format": []   # Tracks responses that failed schema validation
+        "correct": [],  # Tracks completely correct responses
     }
     
     # Process each question
     for question_row in sentence_list:
         question_json = json.loads(question_row["question_info_json"])
         question_id = question_row["question_id"]
-        
-        # Clean up any trailing "Answer: " prompts from the dataset
-        clean_query = question_json["query"].rstrip("\nAnswer: ")
-        
+       
+        clean_query = question_json["query"]  # TODO: clean query
         # Construct prompt with clear instructions
         prompt = f"""
 Analyze this passage and question carefully: {clean_query}
 
 Respond using JSON with these fields:
 - "commentary": Your analysis of why you chose this answer
-- "answer": The single letter (A-E) representing your chosen answer
+- "answer": The single letter (A-D) representing your chosen answer
 
 The response should be valid JSON with no additional text or punctuation."""
 
@@ -217,14 +214,14 @@ The response should be valid JSON with no additional text or punctuation."""
             is_correct = (response.get("answer", "").upper() == correct_letter)
             
             # Log the result with debug info for incorrect answers
-            debug_info = None if is_correct else {
+            debug_info = {
                 "response": response,
                 "correct_answer": correct_letter,
                 "question": clean_query
             }
             
             log_result(
-                run_details["correct_answer"],
+                run_details["correct"],
                 question_id,
                 is_correct,
                 eval_msec=perf["total_msec"],
@@ -234,7 +231,7 @@ The response should be valid JSON with no additional text or punctuation."""
         except json.decoder.JSONDecodeError:
             # Log invalid JSON responses
             log_result(
-                run_details["invalid_format"],
+                run_details["correct"],
                 question_id,
                 0,  # Score of 0 for invalid format
                 eval_msec=perf["total_msec"],
@@ -243,14 +240,12 @@ The response should be valid JSON with no additional text or punctuation."""
     
     # Calculate summary statistics
     total_questions = len(sentence_list)
-    correct_answers = sum(x["score"] for x in run_details["correct_answer"])
-    invalid_formats = len(run_details["invalid_format"])
+    correct_answers = sum(x["score"] for x in run_details["correct"])
     
     # Print detailed results summary
     print(f"""
 RESULTS for {model} on 0030_analyze_paragraph:
 Correct answers: {correct_answers}/{total_questions} ({correct_answers/total_questions*100:.1f}%)
-Invalid responses: {invalid_formats}/{total_questions} ({invalid_formats/total_questions*100:.1f}%)
 """)
 
     # Save results to database
@@ -261,7 +256,7 @@ Invalid responses: {invalid_formats}/{total_questions} ({invalid_formats/total_q
         "0030_analyze_paragraph",
         "correct_answer",
         correct_answers,
-        run_details=run_details["correct_answer"]
+        run_details=run_details["correct"]
     )
     
     update_scoretable(model, "0030_analysis_paragraph", "correct")
@@ -293,20 +288,21 @@ def run_0035_simple_haystack(model):
 Given the following sentences:
 {''.join(f'{i+1}. {s}{{br}}' for i, s in enumerate(sentences))}
 
-Does the following sentence appear in the list above? Respond with only "yes" or "no".
-Sentence: {query_sentence}
+What is the subject for the sentence where the location is {{location}}?
+
+Respond in JSON.
 """
 
+        TODO: fix this section.
         response, perf = ollama_client.generate_chat(prompt, ollama_model, brief=True)
-        
-        is_correct = (response.strip().lower() == "yes")
+        is_correct = response["subject"] == correct["subject"] 
         
         log_result(
             run_details["correct"],
             x["question_id"],
             is_correct,
             eval_msec=perf["total_msec"],
-            debug_json=(None if is_correct else response)
+            debug_json=response,
         )
 
     num_correct = sum(x["score"] for x in run_details["correct"])
