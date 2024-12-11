@@ -117,7 +117,7 @@ def load_0030_analyze_paragraph_to_sqlite():
 
   session = benchmarks.datastore.create_dev_session()
   idx = 0
-  for sentence in sentence_list:
+  for sentence in sentence_list[2::7]:
     idx += 1
     if sentence["query"].endswith("\nAnswer: "):  # clean trailing "Answer: "
       sentence["query"] = sentence["query"][:-9]
@@ -125,7 +125,7 @@ def load_0030_analyze_paragraph_to_sqlite():
         session, f"0030:fable:{idx}",
         "0030_analyze_paragraph",
         json.dumps(sentence))
-    if idx >= 100:
+    if idx >= 10:
       break
 
 
