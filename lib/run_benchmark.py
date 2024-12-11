@@ -7,6 +7,7 @@ import os
 
 import benchmarks.datastore
 from clients import ollama_client
+import lib.score_table
 
 
 def get_all_model_codenames():
@@ -23,11 +24,12 @@ def log_result(result_array, question_id, score, eval_msec, debug_json=None):
   """Populates result_array with the information for run_details."""
   result_array.append({"question_id": question_id, "score": score, "eval_msec": eval_msec, "debug_json": debug_json})
 
-
 def load_benchmark_questions(benchmark):
   session = benchmarks.datastore.create_dev_session() 
   return benchmarks.datastore.load_all_questions_for_benchmark(session, benchmark)
 
+def update_scoretable(model, benchmark, metric):
+  lib.score_table.generate_run_detail(model, benchmark, metric)
 
 def run_0015_spell_check(model):
   # The model string includes a quantization.
@@ -102,6 +104,7 @@ Respond in JSON, with keys of "incorrect" for the verbatim misspelled word, and 
   success, msg = benchmarks.datastore.insert_run(session, model, "0015_spell_check", "complete", has_correct_answer, run_details=run_details["correct_answer"])
   if not success:
     print(msg)
+  update_scoretable(model, "0015_spell_check", "correct")
 
 
 def run_0020_definitions(model):
@@ -135,6 +138,7 @@ RESULTS 0020_definitions
   if not success:
     print(msg)
 
+  update_scoretable(model, "0020_definitions", "correct")
 
 def run_0030_analyze_paragraph(model):
   # The model string includes a quantization.
@@ -182,6 +186,7 @@ RESULTS 0030_analyze_paragraph
   success, msg = benchmarks.datastore.insert_run(session, model, "0030_analyze_paragraph", "correct_answer", has_correct_answer, run_details=run_details["correct_answer"])
   if not success:
     print(msg)
+  update_scoretable(model, "0030_analysis_paragraph", "correct")
 
 
 def run_0035_simple_haystack(model):
@@ -236,6 +241,7 @@ RESULTS 0035_simple_haystack
         num_correct, run_details=run_details["correct"])
     if not success:
         print(msg)
+    update_scoretable(model, "0035_simple_haystack", "correct")
 
 
 def run_0040_general_knowledge(model):
@@ -266,3 +272,4 @@ When responding, give only the correct answer; do not form it into a sentence.
 RESULTS 0040_general_knowledge
 {correct_answers}/{total_questions} responses contained the correct answer.
 """)
+  update_scoretable(model, "0040_general_knowledge", "correct")
