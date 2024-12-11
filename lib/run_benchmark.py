@@ -34,7 +34,7 @@ def load_benchmark_questions(benchmark):
     return benchmarks.datastore.load_all_questions_for_benchmark(session, benchmark)
 
 def update_scoretable(model, benchmark, metric, session):
-    lib.score_table.generate_run_detail(model, benchmark, metric)
+    lib.score_table.generate_run_detail(model, benchmark, metric, session)
 
 def run_0015_spell_check(model):
     # The model string includes a quantization.
