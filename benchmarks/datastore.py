@@ -387,6 +387,55 @@ def find_top_runs_for_benchmark(session, benchmark_codename, benchmark_metric, t
     ]
 
 
+def get_run_by_run_id(run_id, session=None):
+    """
+    Retrieve run details for a specific run ID.
+
+    :param run_id: ID of the run to retrieve
+    :param session: Optional SQLAlchemy session (will create one if not provided)
+    :return: Dictionary of run details or None if run not found
+    """
+    if session is None:
+        session = create_dev_session()
+
+    # First, get the run
+    run = (
+        session.query(Run)
+        .filter(Run.run_id == run_id)
+        .first()
+    )
+
+    if not run:
+        return None
+
+    # Then, get all run details for this run
+    run_details = (
+        session.query(RunDetail, Question)
+        .join(Question, RunDetail.question_id == Question.question_id)
+        .filter(RunDetail.run_id == run_id)
+        .all()
+    )
+
+    return {
+        'run_id': run.run_id,
+        'model_name': run.model_name,
+        'benchmark_name': run.benchmark_name,
+        'benchmark_metric': run.benchmark_metric,
+        'normed_score': run.normed_score,
+        'run_ts': run.run_ts,
+        'details': [
+            {
+                'question_id': detail.question_id,
+                'score': detail.score,
+                'eval_msec': detail.eval_msec,
+                'question_info_json': decode_json(query.question_info_json),
+                'debug_json': decode_json(detail.debug_json)
+            }
+            for detail, query in run_details
+        ]
+    }
+
+
 def get_highest_benchmark_scores(session):
     """
     Get the highest benchmark scores for each (benchmark, model) combination along with their run IDs.
