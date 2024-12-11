@@ -109,7 +109,7 @@ Respond in JSON, with keys of "incorrect" for the verbatim misspelled word, and 
     success, msg = benchmarks.datastore.insert_run(session, model, "0015_spell_check", "complete", has_correct_answer, run_details=run_details["correct_answer"])
     if not success:
         print(msg)
-    update_scoretable(model, "0015_spell_check", "correct", session)
+    update_scoretable(model, "0015_spell_check", "complete", session)
 
 
 def run_0020_definitions(model):
