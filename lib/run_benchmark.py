@@ -60,11 +60,13 @@ Respond in JSON, with keys of "incorrect" for the verbatim misspelled word, and 
     log_result(run_details["incorrect_word"],
                question_id,
                question_info["incorrect"] == response["incorrect"],
-               eval_msec=perf["total_msec"])
+               eval_msec=perf["total_msec"],
+               debug_json=response_unparsed)
     log_result(run_details["correct_word"],
                question_id,
                question_info["correct"] == response["correct"],
-               eval_msec=perf["total_msec"])
+               eval_msec=perf["total_msec"],
+               debug_json=response_unparsed)
 
     is_correct = (
         question_info["incorrect"] == response["incorrect"] and
