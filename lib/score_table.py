@@ -85,6 +85,62 @@ def generate_dashboard():
         f.write(output)
 
 
+def _write_run_detail(run_details):
+    """
+    Helper function to write run details to an HTML file.
+    
+    Args:
+        run_details: Dictionary containing run details
+    """
+    if not run_details:
+        return  # No run details found
+
+    # Set up Jinja2 environment
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    template_dir = os.path.join(os.path.dirname(current_dir), 'templates')
+    env = Environment(loader=FileSystemLoader(template_dir))
+    template = env.get_template('run_details.html')
+
+    # Render template
+    output = template.render(run_details=run_details)
+
+    # Create run_details directory if it doesn't exist
+    os.makedirs('output/run_details', exist_ok=True)
+
+    # Write to file using run_id
+    run_id = run_details['run_id']
+    with open(f'output/run_details/{run_id}.html', 'w') as f:
+        f.write(output)
+
+
+def generate_run_detail_by_id(run_id, session=None):
+    """
+    Generate detailed HTML report for a specific run ID.
+    
+    Args:
+        run_id: ID of the run to generate details for
+        session: Optional SQLAlchemy session (will create if None)
+    """
+    if not session:
+        session = benchmarks.datastore.create_dev_session()
+
+    # Query the Run table to get run details
+    run = session.query(benchmarks.datastore.Run).get(run_id)
+    if not run:
+        return
+
+    # Get all run details using the existing function
+    data = benchmarks.datastore.get_highest_scoring_run_details(
+        session, 
+        run.model_name, 
+        run.benchmark_name, 
+        run.benchmark_metric
+    )
+
+    # Write the details to a file
+    _write_run_detail(data)
+
+
 def generate_run_detail(model_name, benchmark_name, benchmark_metric, session=None):
     """
     Generate detailed HTML report for a specific benchmark run.
@@ -102,22 +158,5 @@ def generate_run_detail(model_name, benchmark_name, benchmark_metric, session=No
     data = benchmarks.datastore.get_highest_scoring_run_details(
         session, model_name, benchmark_name, benchmark_metric)
 
-    if not data:
-        return  # No run details found
-
-    # Set up Jinja2 environment
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    template_dir = os.path.join(os.path.dirname(current_dir), 'templates')
-    env = Environment(loader=FileSystemLoader(template_dir))
-    template = env.get_template('run_details.html')
-
-    # Render template
-    output = template.render(run_details=data)
-
-    # Create run_details directory if it doesn't exist
-    os.makedirs('output/run_details', exist_ok=True)
-
-    # Write to file using run_id
-    run_id = data['run_id']
-    with open(f'output/run_details/{run_id}.html', 'w') as f:
-        f.write(output)
+    # Write the details to a file
+    _write_run_detail(data)
