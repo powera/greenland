@@ -38,26 +38,12 @@ def get_data():
     scores = benchmarks.datastore.get_highest_benchmark_scores(session)
     # Add color information to the data
     for key in scores:
-        score = scores[key]
+        score_data = scores[key]
         scores[key] = {
-            'value': score,
-            'color': get_color(score),
-            'run_id': None  # Will be populated with highest scoring run ID
+            'value': score_data["score"],
+            'color': get_color(score_data["score"]),
+            'run_id': score_data["run_id"],
         }
-
-    # Get run IDs for each benchmark-model pair
-    for model in llms:
-        for benchmark in benchmark_info:
-            key = (benchmark["longname"], model["codename"])
-            if key in scores:
-                highest_run = session.query(benchmarks.datastore.Run).filter_by(
-                    model_name=model["codename"],
-                    benchmark_name=benchmark["codename"],
-                    benchmark_metric=benchmark["metric"]
-                ).order_by(benchmarks.datastore.Run.normed_score.desc()).first()
-                
-                if highest_run:
-                    scores[key]['run_id'] = highest_run.run_id
 
     return {
         "llms": llms,
