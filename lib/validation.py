@@ -4,25 +4,35 @@
 import enum
 import json
 from dataclasses import dataclass
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Optional
 import pydantic
 
 from clients import openai_client, ollama_client
 
+VALIDATION_PROMPTS = {
+    "definition": lambda response, expected, context: f"""Given this definition: "{response}"
+Does this definition accurately describe the word "{expected}"?""",
+    
+    "general_knowledge": lambda response, expected, context: f"""Given this question and answer:
+Question: {context}
+Response: {response}
+Expected: {expected}
+
+Is this response correct?""",
+    
+    "ambiguous_meaning": lambda response, expected, context: f"""In this sentence: "{context}"
+Are there multiple valid interpretations of the word "{expected}"?"""
+}
+
 @dataclass
 class ValidationResult:
-    """Base class for validation results."""
+    """Results from validating LLM responses."""
     valid: bool
     confidence: float
     explanation: str
-
-@dataclass 
-class DefinitionValidation(ValidationResult):
-    """Results from validating word definitions."""
-    definition: str
-    expected_word: str
-    likely_word: str
-    validator_results: List[Dict]
+    expected: Optional[str] = None
+    response: Optional[str] = None
+    validator_results: List[Dict] = None
 
 class QualityRating(enum.Enum):
     """Quality levels for response evaluation."""
@@ -46,67 +56,65 @@ class ResponseEvaluation(pydantic.BaseModel):
 
 class ResponseValidator:
     """Utilities for validating LLM responses."""
-        
-    def validate_definition(
-        self, 
-        definition: str,
-        expected_word: str,
-        validator_models: tuple = ("granite3-dense:8b:Q4_K_M", "qwen2.5:7b:Q4_K_M")
-    ) -> DefinitionValidation:
-        """Validate that a definition correctly defines the expected word."""
+    
+    def validate(
+        self,
+        response: str,
+        task_type: str,
+        expected: str = None,
+        context: str = None,
+        validator_models: tuple = ("granite3-dense:8b:Q4_K_M", "qwen2.5:7b:Q4_K_M", "gemma2:7b:Q4_K_M")
+    ) -> ValidationResult:
+        """Validate a response for a given task type."""
+        if task_type not in VALIDATION_PROMPTS:
+            raise ValueError(f"Unsupported task type: {task_type}")
+
         validation_results = []
         schema = {
             "type": "object",
             "properties": {
-                "matches_word": {"type": "boolean"},
-                "likely_word": {"type": "string"},
-                "confidence": {"type": "integer", "minimum": 0, "maximum": 100},
-                "explanation": {"type": "string"}
+                "explanation": {"type": "string"},
+                "valid": {"type": "boolean"},
+                "confidence": {"type": "integer", "minimum": 0, "maximum": 100}
             },
-            "required": ["matches_word", "likely_word"]
+            "required": ["explanation", "valid", "confidence"]
         }
+
+        prompt = VALIDATION_PROMPTS[task_type](response, expected, context) + """
+
+Respond in JSON format with:
+- explanation: brief reason for your decision
+- valid: boolean indicating if the response is correct/valid
+- confidence: 0-100 score of your confidence"""
 
         for model in validator_models:
             ollama_model = ":".join(model.split(":")[:-1])
-            prompt = f"""Given this definition: "{definition}"
-Does this definition accurately describe the word "{expected_word}"?
-
-Respond in JSON format with these fields:
-- matches_word: boolean indicating if the definition matches the word
-- likely_word: what word you think this actually defines
-- confidence: 0-100 score of your confidence
-- explanation: brief reason for your decision"""
-
-            response_text, _ = ollama_client.generate_chat(
-                prompt,
-                ollama_model,
-                json_schema=schema,
-                structured_json=True
-            )
-            
             try:
+                response_text, _ = ollama_client.generate_chat(
+                    prompt,
+                    ollama_model,
+                    json_schema=schema,
+                    structured_json=True
+                )
                 result = json.loads(response_text)
                 validation_results.append({"validator_model": model, **result})
-            except json.JSONDecodeError:
+            except (json.JSONDecodeError, KeyError):
                 validation_results.append({
                     "validator_model": model,
-                    "matches_word": False,
-                    "likely_word": "INVALID_RESPONSE",
-                    "confidence": 0,
-                    "explanation": "Failed to parse validator response"
+                    "explanation": "Failed to parse validator response",
+                    "valid": False,
+                    "confidence": 0
                 })
 
-        valid_count = sum(1 for r in validation_results if r["matches_word"])
-        avg_confidence = sum(r.get("confidence", 0) 
-                           for r in validation_results) / len(validation_results)
+        is_valid = all(r["valid"] for r in validation_results)
+        avg_confidence = sum(r["confidence"] for r in validation_results) / len(validation_results)
 
-        return DefinitionValidation(
-            valid=valid_count >= len(validator_models) / 2,
+        return ValidationResult(
+            valid=is_valid,
             confidence=avg_confidence,
-            explanation=validation_results[0].get("explanation", ""),
-            definition=definition,
-            expected_word=expected_word,
-            likely_word=validation_results[0].get("likely_word", ""),
+            explanation=validation_results[0]["explanation"],
+            expected=expected,
+            response=response,
             validator_results=validation_results
         )
 
@@ -148,9 +156,14 @@ Respond in JSON format with these fields:
 # Create default validator instance
 validator = ResponseValidator()
 
-# Expose key functions at module level
-def validate_definition(*args, **kwargs) -> DefinitionValidation:
-    return validator.validate_definition(*args, **kwargs)
+def validate(*args, **kwargs) -> ValidationResult:
+    return validator.validate(*args, **kwargs)
+
+def validate_definition(response: str, expected: str, **kwargs) -> ValidationResult:
+    return validate(response, "definition", expected, **kwargs)
+
+def validate_general_knowledge(response: str, expected: str, context: str, **kwargs) -> ValidationResult:
+    return validate(response, "general_knowledge", expected, context, **kwargs)
 
 def evaluate_response(*args, **kwargs) -> Tuple[ResponseEvaluation, Dict]:
     return validator.evaluate_response(*args, **kwargs)
