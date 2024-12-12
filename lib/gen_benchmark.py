@@ -1,313 +1,320 @@
 #!/usr/bin/python3
 
-""" Generates benchmark questions."""
+"""Generates benchmark questions and loads them into the database."""
 
 import json
 import os
 import random
+from dataclasses import dataclass
+from typing import Dict, List, Optional, Any
+from sqlalchemy.orm import Session
 
 from clients import ollama_client
+import benchmarks.datastore
 
-def gen_0015_spell_check_sentence(start_word):
-    """Generates 1 sentence that uses start_word but spells it incorrectly."""
-    prompt = f"""
-Write a sentence using the word {start_word}, but spelling it incorrectly.
+@dataclass
+class ValidationResult:
+    """Stores validation results for generated definitions."""
+    is_valid: bool
+    validation_score: float
+    validator_results: List[Dict]
+    definition: str
+    expected_word: str
 
+class BenchmarkGenerator:
+    """Base class for generating benchmark questions."""
+    
+    def __init__(self, session: Optional[Session] = None):
+        """Initialize generator with optional database session."""
+        self.session = session or benchmarks.datastore.create_dev_session()
+
+    def save_question(self, question_id: str, benchmark_name: str, 
+                     question_info: Dict[str, Any]) -> None:
+        """Save generated question to database."""
+        benchmarks.datastore.insert_question(
+            self.session,
+            question_id,
+            benchmark_name,
+            json.dumps(question_info)
+        )
+
+class SpellCheckGenerator(BenchmarkGenerator):
+    """Generator for spell check benchmark questions."""
+    
+    def generate_sentence(self, start_word: str, model: str = "gemma2:9b") -> str:
+        """Generate a sentence using start_word but spelled incorrectly."""
+        prompt = f"""Write a sentence using the word {start_word}, but spelling it incorrectly.
 Reply with only the single sentence, do not include additional conversation.
-
 The sentence should be at about an 8th grade reading level."""
+        
+        response, _ = ollama_client.generate_chat(prompt, model)
+        return response.strip()
 
-    response, _ = ollama_client.generate_chat(prompt, "gemma2:9b")
-    return response.strip()
+    def generate_batch(self, start_word: str) -> None:
+        """Generate 10 sentences for a given word."""
+        sentences = []
+        for _ in range(10):
+            sentence = self.generate_sentence(start_word)
+            sentences.append({
+                "sentence": sentence,
+                "incorrect": "",
+                "correct": start_word
+            })
 
+        with open(f"benchmarks/0015_spell_check/{start_word}.json", "w") as f:
+            json.dump(sentences, f, indent=2)
 
-def gen_0015_spell_check(start_word):
-    """Generates 10 sentences that use start_word but spell it incorrectly."""
-    sentences = []
-    for _ in range(10):
-        sentence = gen_0015_spell_check_sentence(start_word)
-        sentences.append({"sentence": sentence, "incorrect": "", "correct": start_word})
+    def load_to_database(self) -> None:
+        """Load generated spell check questions into database."""
+        DIR = "benchmarks/0015_spell_check"
+        files = sorted(os.listdir(DIR))
 
-    with open(f"benchmarks/0015_spell_check/{start_word}.json", "w") as f:
-        json.dump(sentences, f, indent=2)
-
-
-def load_0015_spell_check_to_sqlite():
-    import benchmarks.datastore
-
-    DIR = "benchmarks/0015_spell_check"
-
-    session = benchmarks.datastore.create_dev_session()
-
-    files = os.listdir(DIR)
-    files.sort()
-
-    for idx, filename in enumerate(files):
-        if filename.endswith(".json"):
+        for idx, filename in enumerate(files):
+            if not filename.endswith(".json"):
+                continue
+                
             with open(os.path.join(DIR, filename)) as f:
                 sentences = json.load(f)
                 for sentence in sentences:
-                    benchmarks.datastore.insert_question(
-                        session,
+                    self.save_question(
                         f"0015:{sentence['correct']}:{idx}",
                         "0015_spell_check",
-                        json.dumps(sentence),
+                        sentence
                     )
 
+class DefinitionsGenerator(BenchmarkGenerator):
+    """Generator for definitions benchmark questions."""
 
-def validate_definition(definition: str, expected_word: str, 
-                       validator_models=("granite3-dense:8b:Q4_K_M", "qwen2.5:7b:Q4_K_M")):
-    """
-    Validates that a generated definition actually defines the expected word by checking 
-    with two validator models.
-    
-    Args:
-        definition: The definition to validate
-        expected_word: The word that should be defined
-        validator_models: Tuple of model names to use for validation
-        
-    Returns:
-        dict with validation results and metrics
-    """
-    validation_results = []
-    
-    # Schema for validator responses
-    response_schema = {
-        "type": "object",
-        "properties": {
-            "matches_word": {"type": "boolean"},
-            "likely_word": {"type": "string"},
-            "confidence": {"type": "integer", "minimum": 0, "maximum": 100},
-            "explanation": {"type": "string"}
-        },
-        "required": ["matches_word", "likely_word"]
-    }
-    
-    for model in validator_models:
-        # Strip quantization suffix for Ollama
-        ollama_model = ":".join(model.split(":")[:-1])
-        
-        prompt = f"""Given this definition: "{definition}"
+    def validate_definition(self, definition: str, expected_word: str,
+                          validator_models: tuple = ("granite3-dense:8b:Q4_K_M", 
+                                                   "qwen2.5:7b:Q4_K_M")) -> ValidationResult:
+        """Validate that a definition correctly defines the expected word."""
+        validation_results = []
+        schema = {
+            "type": "object",
+            "properties": {
+                "matches_word": {"type": "boolean"},
+                "likely_word": {"type": "string"},
+                "confidence": {"type": "integer", "minimum": 0, "maximum": 100},
+                "explanation": {"type": "string"}
+            },
+            "required": ["matches_word", "likely_word"]
+        }
+
+        for model in validator_models:
+            ollama_model = ":".join(model.split(":")[:-1])
+            prompt = f"""Given this definition: "{definition}"
 
 Does this definition accurately describe the word "{expected_word}"?
 
 Respond in JSON format with these fields:
 - matches_word: boolean indicating if the definition matches the word
-- likely_word: what word you think this actually defines (can be same as expected if it matches)
-- confidence: 0-100 score of your confidence in this assessment
-- explanation: brief reason for your decision
+- likely_word: what word you think this actually defines
+- confidence: 0-100 score of your confidence
+- explanation: brief reason for your decision"""
 
-Only respond with valid JSON, no additional text."""
+            response_text, _ = ollama_client.generate_chat(
+                prompt,
+                ollama_model,
+                json_schema=schema,
+                structured_json=True
+            )
 
-        response_unparsed, _ = ollama_client.generate_chat(
-            prompt, 
-            ollama_model,
-            json_schema=response_schema,
-            structured_json=True
+            try:
+                result = json.loads(response_text)
+                validation_results.append({"validator_model": model, **result})
+            except json.JSONDecodeError:
+                validation_results.append({
+                    "validator_model": model,
+                    "matches_word": False,
+                    "likely_word": "INVALID_RESPONSE",
+                    "confidence": 0,
+                    "explanation": "Failed to parse validator response"
+                })
+
+        valid_count = sum(1 for r in validation_results if r["matches_word"])
+        avg_confidence = sum(r.get("confidence", 0) for r in validation_results) / len(validation_results)
+
+        return ValidationResult(
+            is_valid=valid_count >= len(validator_models) / 2,
+            validation_score=avg_confidence,
+            validator_results=validation_results,
+            definition=definition,
+            expected_word=expected_word
         )
-        
-        try:
-            result = json.loads(response_unparsed)
-            validation_results.append({
-                "validator_model": model,
-                **result
-            })
-        except json.JSONDecodeError:
-            # If we get invalid JSON, treat it as a failed validation
-            validation_results.append({
-                "validator_model": model,
-                "matches_word": False,
-                "likely_word": "INVALID_RESPONSE",
-                "confidence": 0,
-                "explanation": "Failed to parse validator response"
-            })
-    
-    # Analyze the validation results
-    valid_count = sum(1 for r in validation_results if r["matches_word"])
-    avg_confidence = sum(r.get("confidence", 0) for r in validation_results) / len(validation_results)
-    
-    # Return consolidated results
-    return {
-        "is_valid": valid_count >= len(validator_models) / 2,  # majority must agree
-        "validation_score": avg_confidence,
-        "validator_results": validation_results,
-        "definition": definition,
-        "expected_word": expected_word
-    }
 
+    def generate_question(self, model: str = "gemma2:9b") -> Dict:
+        """Generate a single definition question."""
+        with open("benchmarks/0020_definitions/wordlist.txt") as f:
+            words = [line.strip().lower() for line in f]
 
-def gen_0020_question(model="gemma2:9b"):
-    with open("benchmarks/0020_definitions/wordlist.txt") as f:
-        words = [line.strip().lower() for line in f]
+        choices = random.sample(words, 10)
+        correct = choices[0]
+        choices.sort()
 
-    choices = random.sample(words, 10)
-    correct = choices[0]  # We alpha-sort the choices later
+        schema = {
+            "type": "object",
+            "properties": {
+                "definition": {"type": "string"},
+                "explanation": {"type": "string"},
+            },
+            "required": ["definition"],
+        }
 
-    prompt = f"""Write a one-sentence definition of the word "{correct}".
-
+        prompt = f"""Write a one-sentence definition of the word "{correct}".
 Do not use the word "{correct}" in the response; just provide the definition.
-
 Respond in JSON, with the definition in "definition" and an (optional) explanation in "explanation"."""
 
-    response_schema = {
-        "type": "object",
-        "properties": {
-            "definition": {"type": "string"},
-            "explanation": {"type": "string"},
-        },
-        "required": ["definition"],
-    }
+        response_text, _ = ollama_client.generate_chat(prompt, model, json_schema=schema)
+        response = json.loads(response_text)
+        definition = response["definition"]
 
-    response_unparsed, _ = ollama_client.generate_chat(
-        prompt, model, json_schema=response_schema
-    )
-    response = json.loads(response_unparsed)
-    definition = response["definition"]
-
-    choices.sort()
-    question = f'Which of the following ten words has this definition: {definition}\n\nJust give the single correct word, do not give a long explanation.\n\nThe choices are: {", ".join(choices)}'
-    return {"question": question, "definition": definition, "correct": correct, "choices": choices}
-
-
-def gen_0020_question_with_validation(model="gemma2:9b"):
-    """
-    Enhanced version of gen_0020_question that includes definition validation.
-    """
-    max_attempts = 3
-    for attempt in range(max_attempts):
-        question = gen_0020_question(model)
-        validation = validate_definition(
-            question["definition"],
-            question["correct"]
-        )
+        question = f'Which of the following ten words has this definition: {definition}\n\nJust give the single correct word, do not give a long explanation.\n\nThe choices are: {", ".join(choices)}'
         
-        if validation["is_valid"]:
-            return question
-        
-        print(f"Attempt {attempt + 1} failed validation:")
-        print(json.dumps(validation, indent=2))
+        return {
+            "question": question,
+            "definition": definition,
+            "correct": correct,
+            "choices": choices
+        }
+
+    def generate_validated_question(self, model: str = "gemma2:9b", max_attempts: int = 3) -> Dict:
+        """Generate a question with validated definition."""
+        for attempt in range(max_attempts):
+            question = self.generate_question(model)
+            validation = self.validate_definition(
+                question["definition"],
+                question["correct"]
+            )
+            
+            if validation.is_valid:
+                return question
+                
+            print(f"Attempt {attempt + 1} failed validation:")
+            print(json.dumps(vars(validation), indent=2))
+            
+        raise ValueError(f"Failed to generate valid definition after {max_attempts} attempts")
+
+    def load_to_database(self) -> None:
+        """Load generated definition questions into database."""
+        for idx in range(100):
+            question = self.generate_validated_question()
+            self.save_question(
+                f"0020:{question['correct']}:{idx}",
+                "0020_definitions",
+                question
+            )
+
+class SimpleHaystackGenerator(BenchmarkGenerator):
+    """Generator for simple haystack benchmark questions."""
     
-    raise ValueError(f"Failed to generate valid definition after {max_attempts} attempts")
+    def generate_sentence(self, name: str, action: str, location: str, 
+                         model: str = "gemma2:9b") -> str:
+        """Generate a simple sentence with given elements."""
+        prompt = f"""Write a simple sentence with the following elements:
+    - Name: {name}
+    - Action: {action}
+    - Location: {location}
+Only reply with the single sentence, do not include any other text or punctuation."""
 
-def load_0020_definitions_to_sqlite():
-    import benchmarks.datastore
+        response, _ = ollama_client.generate_chat(prompt, model)
+        return response.strip()
 
-    session = benchmarks.datastore.create_dev_session()
-    for idx in range(100):
-        question = gen_0020_question_with_validation()
-        benchmarks.datastore.insert_question(
-            session,
-            f"0020:{question['correct']}:{idx}",
-            "0020_definitions",
-            json.dumps(question),
-        )
+    def generate_question(self, names: List[str], actions: List[str], 
+                         locations: List[str]) -> Dict:
+        """Generate a question with 6 simple sentences."""
+        count = 6
+        selected = {
+            'names': random.sample(names, count),
+            'actions': random.sample(actions, count),
+            'locations': random.sample(locations, count)
+        }
+        
+        sentences = [
+            self.generate_sentence(n, a, l)
+            for n, a, l in zip(selected['names'], selected['actions'], selected['locations'])
+        ]
 
+        return {
+            "sentences": sentences,
+            "correct": {
+                "sentence": sentences[-1],
+                "name": selected['names'][-1],
+                "action": selected['actions'][-1],
+                "location": selected['locations'][-1],
+            }
+        }
 
-def load_0030_analyze_paragraph_to_sqlite():
-    import benchmarks.datastore
+    def load_to_database(self) -> None:
+        """Load generated haystack questions into database."""
+        def load_list(filename: str) -> List[str]:
+            with open(f"benchmarks/0035_simple_haystack/{filename}") as f:
+                return [line.strip() for line in f]
 
-    DIR = "benchmarks/0030_analyze_paragraph"
-    filename = "bigbench_understanding_fables.jsonl"
+        resources = {
+            'names': load_list('names.txt'),
+            'actions': load_list('actions.txt'),
+            'locations': load_list('locations.txt')
+        }
 
-    session = benchmarks.datastore.create_dev_session()
+        for idx in range(10):
+            question = self.generate_question(**resources)
+            self.save_question(
+                f"0035:haystack:{idx}",
+                "0035_simple_haystack",
+                question
+            )
 
-    with open(os.path.join(DIR, filename)) as f:
+def load_paragraph_analysis_to_database(session: Optional[Session] = None) -> None:
+    """Load paragraph analysis questions from file into database."""
+    if not session:
+        session = benchmarks.datastore.create_dev_session()
+
+    filename = "benchmarks/0030_analyze_paragraph/bigbench_understanding_fables.jsonl"
+    with open(filename) as f:
         for idx, line in enumerate(f):
-            sentence = json.loads(line)
             if idx % 7 != 2:
                 continue
+
+            sentence = json.loads(line)
             if sentence["query"].endswith("\nAnswer: "):
-                sentence["query"] = sentence["query"][:-9]  # clean trailing "Answer: "
+                sentence["query"] = sentence["query"][:-9]
+
             benchmarks.datastore.insert_question(
                 session,
                 f"0030:fable:{idx // 7 + 1}",
                 "0030_analyze_paragraph",
-                json.dumps(sentence),
+                json.dumps(sentence)
             )
+            
             if idx // 7 + 1 >= 10:
                 break
 
-
-def gen_0035_simple_haystack_sentence(name, action, location):
-    prompt = f"""Write a simple sentence with the following elements:
-    - Name: {name}
-    - Action: {action}
-    - Location: {location}
-
-    Only reply with the single sentence, do not include any other text or punctuation."""
-
-    response, _ = ollama_client.generate_chat(prompt, "gemma2:9b")
-    return response.strip()
-
-
-def gen_0035_simple_haystack_question(names, actions, locations):
-    """Generates a question consisting of 6 simple sentences."""
-    sentences = []
-    count = 6
-    selected_names = random.sample(names, count)
-    selected_actions = random.sample(actions, count)
-    selected_locations = random.sample(locations, count)
-    for x in range(count):
-      sentence = gen_0035_simple_haystack_sentence(selected_names[x], selected_actions[x], selected_locations[x])
-      sentences.append(sentence)
-
-    correct = {
-        "sentence": sentences[-1],
-        "name": selected_names[-1],
-        "action": selected_actions[-1],
-        "location": selected_locations[-1],
-    }
-    return {"sentences": sentences, "correct": correct}
-
-
-def load_0035_simple_haystack_to_sqlite():
-    import benchmarks.datastore
-
-    with open("benchmarks/0035_simple_haystack/names.txt") as f:
-        names = [line.strip() for line in f]
-
-    with open("benchmarks/0035_simple_haystack/actions.txt") as f:
-        actions = [line.strip() for line in f]
-
-    with open("benchmarks/0035_simple_haystack/locations.txt") as f:
-        locations = [line.strip() for line in f]
-
-    session = benchmarks.datastore.create_dev_session()
-    for idx in range(10):
-        question = gen_0035_simple_haystack_question(names, actions, locations)
-        benchmarks.datastore.insert_question(
-            session,
-            f"0035:haystack:{idx}",
-            "0035_simple_haystack",
-            json.dumps(question),
-        )
-
-
-def load_0040_general_knowledge_to_sqlite():
-    import benchmarks.datastore
+def load_general_knowledge_to_database(session: Optional[Session] = None) -> None:
+    """Load general knowledge questions from files into database."""
+    if not session:
+        session = benchmarks.datastore.create_dev_session()
 
     DIR = "benchmarks/0040_general_knowledge"
-
-    session = benchmarks.datastore.create_dev_session()
-
-    files = os.listdir(DIR)
-    files.sort()
+    files = sorted(os.listdir(DIR))
 
     idx = 0
     for filename in files:
-        if filename.endswith(".jsonl"):
-            with open(os.path.join(DIR, filename)) as f:
-                for line in f:
-                    if idx % 17 == 0:
-                        sentence = json.loads(line)
-                        benchmarks.datastore.insert_question(
-                            session,
-                            f"0040:{sentence['category']}:{idx // 17 + 1}",
-                            "0040_general_knowledge",
-                            json.dumps(sentence),
-                        )
-                    idx += 1
-                    if idx // 17 + 1 > 100:
-                        break
+        if not filename.endswith(".jsonl"):
+            continue
+            
+        with open(os.path.join(DIR, filename)) as f:
+            for line in f:
+                if idx % 17 == 0:
+                    sentence = json.loads(line)
+                    benchmarks.datastore.insert_question(
+                        session,
+                        f"0040:{sentence['category']}:{idx // 17 + 1}",
+                        "0040_general_knowledge",
+                        json.dumps(sentence)
+                    )
+                idx += 1
+                if idx // 17 + 1 > 100:
+                    break
         if idx // 17 + 1 > 100:
             break
