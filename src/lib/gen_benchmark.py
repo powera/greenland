@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 
 from clients import ollama_client
 import benchmarks.datastore
+import constants
 import lib.validator
 
 class BenchmarkGenerator:
@@ -58,7 +59,7 @@ The sentence should be at about an 8th grade reading level."""
 
     def load_to_database(self) -> None:
         """Load generated spell check questions into database."""
-        DIR = "benchmarks/0015_spell_check"
+        DIR = os.path.join(constants.BENCHMARK_DIR, "0015_spell_check")
         files = sorted(os.listdir(DIR))
 
         for idx, filename in enumerate(files):
@@ -230,7 +231,7 @@ def load_general_knowledge_to_database(session: Optional[Session] = None) -> Non
     if not session:
         session = benchmarks.datastore.create_dev_session()
 
-    DIR = "benchmarks/0040_general_knowledge"
+    DIR = os.path.join(constants.BENCHMARK_DIR, "0040_general_knowledge")
     files = sorted(os.listdir(DIR))
 
     idx = 0

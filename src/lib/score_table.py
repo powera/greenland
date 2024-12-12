@@ -3,7 +3,7 @@ import math
 import os
 
 import benchmarks.datastore
-
+import constants
 
 def get_color(score):
     """
@@ -57,17 +57,17 @@ def generate_dashboard():
     data = get_data()
 
     # Set up Jinja2 environment
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    template_dir = os.path.join(os.path.dirname(current_dir), 'templates')
+    template_dir = constants.TEMPLATES_DIR
     env = Environment(loader=FileSystemLoader(template_dir))
     template = env.get_template('model_scores.html')
 
     # Ensure output directory exists
-    os.makedirs('output', exist_ok=True)
+    os.makedirs(constants.OUTPUT_DIR, exist_ok=True)
 
     # Render template and write to file
     output = template.render(data=data)
-    with open('output/model_summary.html', 'w') as f:
+    output_path = os.path.join(constants.OUTPUT_DIR, 'model_summary.html')
+    with open(output_path, 'w') as f:
         f.write(output)
 
 
@@ -82,20 +82,21 @@ def _write_run_detail(run_details):
         return  # No run details found
 
     # Set up Jinja2 environment
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    template_dir = os.path.join(os.path.dirname(current_dir), 'templates')
+    template_dir = constants.TEMPLATES_DIR
     env = Environment(loader=FileSystemLoader(template_dir))
     template = env.get_template('run_details.html')
 
     # Render template
     output = template.render(run_details=run_details)
 
-    # Create run_details directory if it doesn't exist
-    os.makedirs('output/run_details', exist_ok=True)
+    # Ensure output directory exists
+    os.makedirs(constants.OUTPUT_DIR, exist_ok=True)
+    os.makedirs(os.path.join(constants.OUTPUT_DIR, "run_details"), exist_ok=True)
 
     # Write to file using run_id
     run_id = run_details['run_id']
-    with open(f'output/run_details/{run_id}.html', 'w') as f:
+    run_path = os.path.join(constants.OUTPUT_DIR, "run_details", f"{run_id}.html")
+    with open(run_path, 'w') as f:
         f.write(output)
 
 

@@ -9,6 +9,9 @@ from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Mapped, mapped_column, relationship, DeclarativeBase, sessionmaker
 from sqlalchemy.sql import func
 
+# project imports
+import constants
+
 # Create a base class for declarative models
 class Base(DeclarativeBase):
   pass
@@ -96,7 +99,7 @@ class RunDetail(Base):
 
 
 def create_dev_session():
-    db_path = "/Users/powera/repo/greenland/schema/benchmarks.db"
+    db_path = os.path.join(constants.SCHEMA_DIR, "benchmarks.db")
     engine = create_engine(f'sqlite:///{db_path}', echo=False)
     Session = sessionmaker(bind=engine)
     return Session()
