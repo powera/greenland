@@ -112,56 +112,6 @@ sincere—like talking to a peer or a favorite teacher.""",
         usage = UsageInfo.from_completion(completion.usage)
         return completion.choices[0].message.content, vars(usage)
 
-# Response evaluation schema and function (to be moved later)
-class QualityRating(enum.Enum):
-    BAD = "Bad"
-    MEDIOCRE = "Mediocre"
-    GOOD = "Good"
-    VERY_GOOD = "Very good"
-    EXCELLENT = "Excellent"
-
-    def __str__(self):
-        return self.value
-
-class ResponseSchema(pydantic.BaseModel):
-    is_refusal: bool
-    overall_quality: QualityRating
-    factual_errors: str
-    verbosity: str
-    repetition: str
-    unwarranted_assumptions: str
-
-def evaluate_response(original_prompt: str, original_response: str,
-                     model: str = TEST_MODEL) -> Tuple[ResponseSchema, Dict]:
-    """Evaluate quality of LLM response."""
-    client = OpenAIClient()
-    input_length = len(original_prompt) + len(original_response)
-    if input_length > 12000:
-        raise ValueError("Input data too long")
-
-    completion = client.client.beta.chat.completions.parse(
-        model=model,
-        messages=[
-            {
-                "role": "system",
-                "content": f"You are a concise assistant evaluating the output of "
-                          f"another LLM. The original prompt was << {original_prompt} >>.\n\n"
-                          "Comment on the quality of response, any factual errors, whether "
-                          "the response was unnecessarily verbose or repetitive, and whether "
-                          "any unwarranted assumptions were made in answering the prompt.",
-            },
-            {
-                "role": "user",
-                "content": original_response,
-            },
-        ],
-        response_format=ResponseSchema,
-        max_tokens=2048,
-    )
-
-    usage = UsageInfo.from_completion(completion.usage)
-    return completion.choices[0].message.parsed, vars(usage)
-
 # Create default client instance
 client = OpenAIClient()
 

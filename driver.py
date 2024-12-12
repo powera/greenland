@@ -8,6 +8,7 @@ import os
 import re
 
 from clients import local_client, ollama_client, openai_client, anthropic_client
+import lib.validator
 
 import util.flesch_kincaid as fk
 
@@ -80,7 +81,7 @@ def add_critique(slug):
     doc = json.loads(f.read())
   for k in doc["results"]:
     if "critique" not in k:
-      critique_tuple, _ = openai_client.evaluate_response(doc["prompt"], k["response"])
+      critique_tuple, _ = lib.validator.evaluate_response(doc["prompt"], k["response"])
       k["critique"] = critique_tuple.dict()
       k["critique"]["overall_quality"] = str(k["critique"]["overall_quality"])
   with open(f"cache/{slug}.json", "w") as f:
