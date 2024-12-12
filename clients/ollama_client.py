@@ -12,7 +12,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 SERVER = "100.123.16.86"
-DEFAULT_MODEL = "smollm:360m"
+DEFAULT_MODEL = "smollm2:360m"  # Responses are low-quality but generally coherent.
 DEFAULT_TIMEOUT = 50
 
 @dataclass
