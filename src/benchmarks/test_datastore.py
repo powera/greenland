@@ -1,7 +1,7 @@
 import unittest
 import os
 import json
-from datastore import (
+from benchmarks.datastore import (
     create_database_and_session,
     insert_benchmark,
     insert_model,
