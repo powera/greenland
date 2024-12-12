@@ -133,6 +133,8 @@ class ScoreTableGenerator:
                           benchmark_metric: str) -> None:
         """
         Generate detailed HTML report for a specific benchmark run.
+
+        Largely obsolete; but still possibly used for a "Hall of Fame".
         
         Parameters:
             model_name (str): Name of the model
@@ -150,9 +152,12 @@ class ScoreTableGenerator:
 # Create default generator instance
 generator = ScoreTableGenerator()
 
-def generate_dashboard() -> None:
+def generate_dashboard(session: Optional[object] = None) -> None:
     """Generate the main dashboard HTML file using default generator."""
-    generator.generate_dashboard()
+    if session:
+        ScoreTableGenerator(session).generate_dashboard()
+    else:
+        generator.generate_dashboard()
 
 def generate_run_detail_by_id(run_id: int, session: Optional[object] = None) -> None:
     """
@@ -166,20 +171,3 @@ def generate_run_detail_by_id(run_id: int, session: Optional[object] = None) -> 
         ScoreTableGenerator(session).generate_run_detail_by_id(run_id)
     else:
         generator.generate_run_detail_by_id(run_id)
-
-def generate_run_detail(model_name: str, benchmark_name: str, 
-                       benchmark_metric: str, session: Optional[object] = None) -> None:
-    """
-    Generate detailed HTML report for a specific benchmark run.
-    
-    Parameters:
-        model_name (str): Name of the model
-        benchmark_name (str): Name of the benchmark
-        benchmark_metric (str): Metric used for the benchmark
-        session (object, optional): SQLAlchemy session
-    """
-    if session:
-        ScoreTableGenerator(session).generate_run_detail(
-            model_name, benchmark_name, benchmark_metric)
-    else:
-        generator.generate_run_detail(model_name, benchmark_name, benchmark_metric)
