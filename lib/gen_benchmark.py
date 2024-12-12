@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 
 from clients import ollama_client
 import benchmarks.datastore
+import lib.validator
 
 @dataclass
 class ValidationResult:
@@ -85,64 +86,6 @@ The sentence should be at about an 8th grade reading level."""
 class DefinitionsGenerator(BenchmarkGenerator):
     """Generator for definitions benchmark questions."""
 
-    def validate_definition(self, definition: str, expected_word: str,
-        validator_models: tuple = ("granite3-dense:8b:Q4_K_M", 
-                                   "qwen2.5:7b:Q4_K_M")) -> ValidationResult:
-        """Validate that a definition correctly defines the expected word."""
-        validation_results = []
-        schema = {
-            "type": "object",
-            "properties": {
-                "explanation": {"type": "string"}
-                "matches_word": {"type": "boolean"},
-                "likely_word": {"type": "string"},
-                "confidence": {"type": "integer", "minimum": 0, "maximum": 100},
-            },
-            "required": ["matches_word", "likely_word"]
-        }
-
-        for model in validator_models:
-            ollama_model = ":".join(model.split(":")[:-1])
-            prompt = f"""Given this definition: "{definition}"
-
-Does this definition accurately describe the word "{expected_word}"?
-
-Respond in JSON format with these fields:
-- explanation: brief reason for your decision
-- matches_word: boolean indicating if the definition matches the word
-- likely_word: what word you think this actually defines
-- confidence: 0-100 score of your confidence"""
-
-            response_text, _ = ollama_client.generate_chat(
-                prompt,
-                ollama_model,
-                json_schema=schema,
-                structured_json=True
-            )
-
-            try:
-                result = json.loads(response_text)
-                validation_results.append({"validator_model": model, **result})
-            except json.JSONDecodeError:
-                validation_results.append({
-                    "validator_model": model,
-                    "matches_word": False,
-                    "likely_word": "INVALID_RESPONSE",
-                    "confidence": 0,
-                    "explanation": "Failed to parse validator response"
-                })
-
-        valid_count = sum(1 for r in validation_results if r["matches_word"])
-        avg_confidence = sum(r.get("confidence", 0) for r in validation_results) / len(validation_results)
-
-        return ValidationResult(
-            is_valid=valid_count >= len(validator_models) / 2,
-            validation_score=avg_confidence,
-            validator_results=validation_results,
-            definition=definition,
-            expected_word=expected_word
-        )
-
     def generate_question(self, model: str = "gemma2:9b") -> Dict:
         """Generate a single definition question."""
         with open("benchmarks/0020_definitions/wordlist.txt") as f:
@@ -170,7 +113,7 @@ Respond in JSON, with the definition in "definition" and an (optional) explanati
         definition = response["definition"]
 
         question = f'Which of the following ten words has this definition: {definition}\n\nJust give the single correct word, do not give a long explanation.\n\nThe choices are: {", ".join(choices)}'
-        
+
         return {
             "question": question,
             "definition": definition,
@@ -182,17 +125,17 @@ Respond in JSON, with the definition in "definition" and an (optional) explanati
         """Generate a question with validated definition."""
         for attempt in range(max_attempts):
             question = self.generate_question(model)
-            validation = self.validate_definition(
+            validation = lib.validate.validate_definition(
                 question["definition"],
                 question["correct"]
             )
-            
-            if validation.is_valid:
+
+            if validation.valid:
                 return question
-                
+
             print(f"Attempt {attempt + 1} failed validation:")
             print(json.dumps(vars(validation), indent=2))
-            
+
         raise ValueError(f"Failed to generate valid definition after {max_attempts} attempts")
 
     def load_to_database(self) -> None:
@@ -204,6 +147,7 @@ Respond in JSON, with the definition in "definition" and an (optional) explanati
                 "0020_definitions",
                 question
             )
+
 
 class SimpleHaystackGenerator(BenchmarkGenerator):
     """Generator for simple haystack benchmark questions."""
