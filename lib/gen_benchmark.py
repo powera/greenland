@@ -13,15 +13,6 @@ from clients import ollama_client
 import benchmarks.datastore
 import lib.validator
 
-@dataclass
-class ValidationResult:
-    """Stores validation results for generated definitions."""
-    is_valid: bool
-    validation_score: float
-    validator_results: List[Dict]
-    definition: str
-    expected_word: str
-
 class BenchmarkGenerator:
     """Base class for generating benchmark questions."""
     
