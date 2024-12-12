@@ -86,17 +86,17 @@ class DefinitionsGenerator(BenchmarkGenerator):
     """Generator for definitions benchmark questions."""
 
     def validate_definition(self, definition: str, expected_word: str,
-                          validator_models: tuple = ("granite3-dense:8b:Q4_K_M", 
-                                                   "qwen2.5:7b:Q4_K_M")) -> ValidationResult:
+        validator_models: tuple = ("granite3-dense:8b:Q4_K_M", 
+                                   "qwen2.5:7b:Q4_K_M")) -> ValidationResult:
         """Validate that a definition correctly defines the expected word."""
         validation_results = []
         schema = {
             "type": "object",
             "properties": {
+                "explanation": {"type": "string"}
                 "matches_word": {"type": "boolean"},
                 "likely_word": {"type": "string"},
                 "confidence": {"type": "integer", "minimum": 0, "maximum": 100},
-                "explanation": {"type": "string"}
             },
             "required": ["matches_word", "likely_word"]
         }
@@ -108,10 +108,10 @@ class DefinitionsGenerator(BenchmarkGenerator):
 Does this definition accurately describe the word "{expected_word}"?
 
 Respond in JSON format with these fields:
+- explanation: brief reason for your decision
 - matches_word: boolean indicating if the definition matches the word
 - likely_word: what word you think this actually defines
-- confidence: 0-100 score of your confidence
-- explanation: brief reason for your decision"""
+- confidence: 0-100 score of your confidence"""
 
             response_text, _ = ollama_client.generate_chat(
                 prompt,
