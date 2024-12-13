@@ -204,11 +204,8 @@ class OllamaClient:
         
         # Phase 2: Get structured response
         if json_schema:
-            structure_prompt = f"""Based on the previous response to the prompt:
-{prompt}
-
-Provide a structured response following this schema:
-{json.dumps(json_schema, indent=2)}"""
+            response_keys = json_schema["properties"].keys()
+            structure_prompt = f"""Based on the previous response to the prompt, provide a JSON response using the following keys: {", ".join(response_keys)}"""
             
             if self.debug:
                 logger.debug("Phase 2 structure prompt: %s", structure_prompt)
