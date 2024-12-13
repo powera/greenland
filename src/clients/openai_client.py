@@ -3,11 +3,14 @@
 
 import enum
 import json
+import os
 from dataclasses import dataclass
 from typing import Dict, Tuple, Optional
 import pydantic
 import tiktoken
 from openai import OpenAI
+
+import constants
 
 TEST_MODEL = "gpt-4o-mini-2024-07-18"
 PROD_MODEL = "gpt-4o-2024-11-20"
@@ -57,7 +60,8 @@ sincere—like talking to a peer or a favorite teacher.""",
 
     def _load_key(self) -> str:
         """Load OpenAI API key from file."""
-        with open("./keys/openai.key") as f:
+        key_path = os.path.join(constants.KEY_DIR, "openai.key")
+        with open(key_path) as f:
             return f.read().strip()
 
     def generate_text(self, prompt: str, sample: str, 

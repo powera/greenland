@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 from clients import ollama_client
 import benchmarks.datastore
 import constants
-import lib.validator
+import lib.validation
 
 class BenchmarkGenerator:
     """Base class for generating benchmark questions."""
@@ -59,10 +59,11 @@ The sentence should be at about an 8th grade reading level."""
 
     def load_to_database(self) -> None:
         """Load generated spell check questions into database."""
-        DIR = os.path.join(constants.BENCHMARK_DIR, "0015_spell_check")
+        DIR = os.path.join(constants.BENCHMARK_DATA_DIR, "0015_spell_check")
         files = sorted(os.listdir(DIR))
 
-        for idx, filename in enumerate(files):
+        idx = 0
+        for filename in files:
             if not filename.endswith(".json"):
                 continue
                 
@@ -74,6 +75,7 @@ The sentence should be at about an 8th grade reading level."""
                         "0015_spell_check",
                         sentence
                     )
+                    idx += 1
 
 class DefinitionsGenerator(BenchmarkGenerator):
     """Generator for definitions benchmark questions."""
@@ -117,7 +119,7 @@ Respond in JSON, with the definition in "definition" and an (optional) explanati
         """Generate a question with validated definition."""
         for attempt in range(max_attempts):
             question = self.generate_question(model)
-            validation = lib.validate.validate_definition(
+            validation = lib.validation.validate_definition(
                 question["definition"],
                 question["correct"]
             )
@@ -231,7 +233,7 @@ def load_general_knowledge_to_database(session: Optional[Session] = None) -> Non
     if not session:
         session = benchmarks.datastore.create_dev_session()
 
-    DIR = os.path.join(constants.BENCHMARK_DIR, "0040_general_knowledge")
+    DIR = os.path.join(constants.BENCHMARK_DATA_DIR, "0040_general_knowledge")
     files = sorted(os.listdir(DIR))
 
     idx = 0
