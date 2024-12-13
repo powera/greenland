@@ -24,24 +24,20 @@ def create_benchmarks():
   s = benchmarks.datastore.create_database_and_session(os.path.join(dir, "benchmarks.db"))
 
   benchmarks.datastore.insert_benchmark(
-    s, "0015_spell_check", "incorrect_word", "Spell Check / Incorrect Word",
-    "Given a sentence with one misspelled word, does the result contain the incorrect spelling for that word? It does not need to choose the correct word to replace it.", None)
-
-  benchmarks.datastore.insert_benchmark(
-    s, "0015_spell_check", "correct_word", "Spell Check / Correct Word",
-    "Given a sentence with one misspelled word, does the result contain the correct spelling for that word? It does not need to correctly transcribe the misspelled word.", None)
-
-  benchmarks.datastore.insert_benchmark(
-    s, "0015_spell_check", "complete", "Spell Check / Complete Response",
+    s, "0015_spell_check", "Spell Check / Complete Response",
     "Given a sentence with one misspelled word, does the result identify the misspelled word and the correct spelling, in the requested format.", None)
 
   benchmarks.datastore.insert_benchmark(
-    s, "0020_definitions", "correct", "Definitions",
+    s, "0020_definitions", "Definitions",
     "Given a one-sentence definition and ten possible words, does the model choose the correct word.", None)
 
   benchmarks.datastore.insert_benchmark(
-    s, "0030_analyze_paragraph", "correct_answer", "Analyze Paragraph",
+    s, "0030_analyze_paragraph", "Analyze Paragraph",
     "Given a paragraph and 4 possible answers for a question about that paragraph, does the model choose the correct answer.", None)
+
+  benchmarks.datastore.insert_benchmark(
+    s, "0035_simple_haystack", "Haystack Search",
+    "Given six sentences and a question about one sentence, does the model chooset he correct answer.", None)
 
 if __name__ == "__main__":
   create_models()
