@@ -2,9 +2,10 @@
 
 import datetime
 import json
+import os
 
-from typing import List, Optional
-from sqlalchemy import String, Integer, Text, ForeignKey, ForeignKeyConstraint, TIMESTAMP, create_engine, func
+from typing import List, Optional, Dict, Any
+from sqlalchemy import String, Integer, Text, ForeignKey, TIMESTAMP, create_engine, func
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Mapped, mapped_column, relationship, DeclarativeBase, sessionmaker
 from sqlalchemy.sql import func
@@ -14,14 +15,13 @@ import constants
 
 # Create a base class for declarative models
 class Base(DeclarativeBase):
-  pass
+    pass
 
 # Define ORM models that match the database schema
 class Benchmark(Base):
     __tablename__ = 'benchmark'
 
     codename: Mapped[str] = mapped_column(String, primary_key=True)
-    metric: Mapped[str] = mapped_column(String, primary_key=True)
     displayname: Mapped[str] = mapped_column(String, nullable=False)
     description: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     license_name: Mapped[Optional[str]] = mapped_column(String, nullable=True)
@@ -59,16 +59,8 @@ class Run(Base):
     run_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     run_ts: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.current_timestamp())
     model_name: Mapped[str] = mapped_column(String, ForeignKey('model.codename'))
-    benchmark_name: Mapped[str] = mapped_column(String)
-    benchmark_metric: Mapped[str] = mapped_column(String)
+    benchmark_name: Mapped[str] = mapped_column(String, ForeignKey('benchmark.codename'))
     normed_score: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-
-    __table_args__ = (
-      ForeignKeyConstraint(
-        ['benchmark_name', 'benchmark_metric'],
-        ['benchmark.codename', 'benchmark.metric']
-        ),
-      )
 
     # Relationships
     model: Mapped['Model'] = relationship(back_populates='runs')
@@ -79,31 +71,21 @@ class RunDetail(Base):
     __tablename__ = 'run_detail'
 
     run_id: Mapped[int] = mapped_column(Integer, ForeignKey('run.run_id'), primary_key=True)
-    benchmark_name: Mapped[str] = mapped_column(String)
-    benchmark_metric: Mapped[str] = mapped_column(String)
     question_id: Mapped[str] = mapped_column(String, ForeignKey('question.question_id'), primary_key=True)
     score: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     eval_msec: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    debug_json: Mapped[Optional[str]] = mapped_column(String)
-
-    __table_args__ = (
-      ForeignKeyConstraint(
-        ['benchmark_name', 'benchmark_metric'],
-        ['benchmark.codename', 'benchmark.metric']
-        ),
-      )
+    debug_json: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
     # Relationships
     run: Mapped['Run'] = relationship(back_populates='run_details')
     question: Mapped['Question'] = relationship(back_populates='run_details')
 
-
 def create_dev_session():
+    """Create a database session for development."""
     db_path = os.path.join(constants.SCHEMA_DIR, "benchmarks.db")
     engine = create_engine(f'sqlite:///{db_path}', echo=False)
     Session = sessionmaker(bind=engine)
     return Session()
-
 
 def create_database_and_session(db_path='benchmarks.sqlite'):
     """
@@ -112,59 +94,43 @@ def create_database_and_session(db_path='benchmarks.sqlite'):
     :param db_path: Path to the SQLite database file
     :return: SQLAlchemy session
     """
-    # Create engine
     engine = create_engine(f'sqlite:///{db_path}', echo=False)
-    
-    # Create all tables
     Base.metadata.create_all(engine)
-    
-    # Create a session factory
     Session = sessionmaker(bind=engine)
-    
-    # Return a new session
     return Session()
 
-
-def insert_benchmark(session, codename, metric, displayname, description=None, license_name=None):
+def insert_benchmark(session, codename: str, displayname: str, description: str = None, 
+                    license_name: str = None) -> tuple[bool, str]:
     """
     Insert a new benchmark into the database.
 
     :param session: SQLAlchemy session
     :param codename: Identifier for the benchmark
-    :param metric: The specific metric used for the benchmark
     :param displayname: Human-readable name of the benchmark
     :param description: Optional description of the benchmark
     :param license_name: Optional license information
     :return: Tuple (success_boolean, message)
     """
     try:
-        # Create a new Benchmark object
         new_benchmark = Benchmark(
             codename=codename,
-            metric=metric,
             displayname=displayname,
             description=description,
             license_name=license_name
         )
-
-        # Add to session and commit
         session.add(new_benchmark)
         session.commit()
-
         return True, f"Benchmark '{codename}' successfully inserted"
 
     except IntegrityError:
-        # Rollback the session in case of integrity error (e.g., duplicate primary key)
         session.rollback()
         return False, f"Benchmark '{codename}' already exists"
-
     except SQLAlchemyError as e:
-        # Rollback and catch any other database-related errors
         session.rollback()
         return False, f"Error inserting benchmark: {str(e)}"
 
-
-def insert_model(session, codename, displayname, launch_date=None, filesize_mb=None, license_name=None):
+def insert_model(session, codename: str, displayname: str, launch_date: str = None,
+                filesize_mb: int = None, license_name: str = None) -> tuple[bool, str]:
     """
     Insert a new model into the database.
 
@@ -177,7 +143,6 @@ def insert_model(session, codename, displayname, launch_date=None, filesize_mb=N
     :return: Tuple (success_boolean, message)
     """
     try:
-        # Create a new Model object
         new_model = Model(
             codename=codename,
             displayname=displayname,
@@ -185,32 +150,26 @@ def insert_model(session, codename, displayname, launch_date=None, filesize_mb=N
             filesize_mb=filesize_mb,
             license_name=license_name
         )
-
-        # Add to session and commit
         session.add(new_model)
         session.commit()
-
         return True, f"Model '{codename}' successfully inserted"
 
     except IntegrityError:
-        # Rollback the session in case of integrity error (e.g., duplicate primary key)
         session.rollback()
         return False, f"Model '{codename}' already exists"
-
     except SQLAlchemyError as e:
-        # Rollback and catch any other database-related errors
         session.rollback()
         return False, f"Error inserting model: {str(e)}"
 
-
-def insert_question(session, question_id, benchmark_name, question_info_json=None):
+def insert_question(session, question_id: str, benchmark_name: str, 
+                   question_info_json: str = None) -> tuple[bool, str]:
     """
     Insert a new question into the database.
 
     :param session: SQLAlchemy session
     :param question_id: A text string identifying the question
-    :param benchmark_name: The benchmark associated with the question.
-    :param question_info_json: A json tuple with the necessary information for the benchmark.
+    :param benchmark_name: The benchmark associated with the question
+    :param question_info_json: JSON string with the necessary information for the benchmark
     :return: Tuple (success_boolean, message)
     """
     try:
@@ -224,76 +183,57 @@ def insert_question(session, question_id, benchmark_name, question_info_json=Non
         return True, f"Question '{question_id}' successfully inserted"
 
     except IntegrityError:
-        # Rollback the session in case of integrity error (e.g., duplicate primary key)
         session.rollback()
         return False, f"Question '{question_id}' already exists"
-
     except SQLAlchemyError as e:
-        # Rollback and catch any other database-related errors
         session.rollback()
         return False, f"Error inserting question: {str(e)}"
 
-
-def insert_run(session, model_name, benchmark_name, benchmark_metric, normed_score, run_ts=None, run_details=None):
+def insert_run(session, model_name: str, benchmark_name: str, normed_score: int,
+               run_ts: datetime.datetime = None, run_details: List[Dict] = None) -> tuple[bool, Any]:
     """
     Insert a new run into the database.
 
     :param session: SQLAlchemy session
     :param model_name: Codename of the model
     :param benchmark_name: Codename of the benchmark
-    :param benchmark_metric: Specific metric of the benchmark
     :param normed_score: Overall score; 100=perfect, 0=random output
-    :param run_ts: Optional run_ts timestamp (defaults to current time if None)
+    :param run_ts: Optional run timestamp (defaults to current time if None)
     :param run_details: Optional list of run details (dict with question_id and score)
     :return: Tuple (success_boolean, run_id_or_message)
     """
     try:
-        # Create a new Run object
         new_run = Run(
             model_name=model_name,
             benchmark_name=benchmark_name,
-            benchmark_metric=benchmark_metric,
             normed_score=normed_score,
             run_ts=run_ts or func.current_timestamp()
         )
-
-        # Add to session
         session.add(new_run)
-
-        # Flush to get the run_id without committing
         session.flush()
 
-        # If run details are provided, add them
         if run_details:
             for detail in run_details:
                 run_detail = RunDetail(
                     run_id=new_run.run_id,
-                    benchmark_name=benchmark_name,
-                    benchmark_metric=benchmark_metric,
                     question_id=detail.get('question_id'),
                     score=detail.get('score'),
                     eval_msec=detail.get('eval_msec'),
-                    debug_json=detail.get('debug_json', None),  # optional
+                    debug_json=detail.get('debug_json')
                 )
                 session.add(run_detail)
 
-        # Commit the transaction
         session.commit()
-
         return True, new_run.run_id
 
     except IntegrityError:
-        # Rollback the session in case of foreign key constraint violations
         session.rollback()
-        return False, f"Error: Invalid model or benchmark name"
-
+        return False, "Error: Invalid model or benchmark name"
     except SQLAlchemyError as e:
-        # Rollback and catch any other database-related errors
         session.rollback()
         return False, f"Error inserting run: {str(e)}"
 
-
-def list_all_models(session):
+def list_all_models(session) -> List[Dict]:
     """
     List all models in the database.
     
@@ -312,7 +252,7 @@ def list_all_models(session):
         for model in models
     ]
 
-def list_all_benchmarks(session):
+def list_all_benchmarks(session) -> List[Dict]:
     """
     List all benchmarks in the database.
     
@@ -322,16 +262,15 @@ def list_all_benchmarks(session):
     benchmarks = session.query(Benchmark).all()
     return [
         {
-            'codename': benchmark.codename, 
-            'metric': benchmark.metric, 
+            'codename': benchmark.codename,
             'displayname': benchmark.displayname,
             'description': benchmark.description,
             'license_name': benchmark.license_name
-        } 
+        }
         for benchmark in benchmarks
     ]
 
-def load_all_questions_for_benchmark(session, benchmark_name):
+def load_all_questions_for_benchmark(session, benchmark_name: str) -> List[Dict]:
     """
     Load all questions associated with a specific benchmark.
 
@@ -354,26 +293,24 @@ def load_all_questions_for_benchmark(session, benchmark_name):
         for question in questions
     ]
 
-def find_top_runs_for_benchmark(session, benchmark_codename, benchmark_metric, top_n=5):
+def find_top_runs_for_benchmark(session, benchmark_name: str, top_n: int = 5) -> List[Dict]:
     """
-    Find the top N runs for a specific benchmark based on average score.
+    Find the top N runs for a specific benchmark based on score.
     
     :param session: SQLAlchemy session
-    :param benchmark_codename: Codename of the benchmark
-    :param benchmark_metric: Metric of the benchmark
+    :param benchmark_name: Codename of the benchmark
     :param top_n: Number of top runs to return (default 5)
-    :return: List of top runs with model and average score
+    :return: List of top runs with model and score
     """
     top_runs = (
         session.query(
             Run.run_id, 
             Run.model_name, 
             Model.displayname.label('model_displayname'),
-            Run.normed_score,
+            Run.normed_score
         )
         .join(Model, Run.model_name == Model.codename)
-        .filter(Run.benchmark_name == benchmark_codename)
-        .filter(Run.benchmark_metric == benchmark_metric)
+        .filter(Run.benchmark_name == benchmark_name)
         .order_by(Run.normed_score.desc())
         .limit(top_n)
         .all()
@@ -389,8 +326,7 @@ def find_top_runs_for_benchmark(session, benchmark_codename, benchmark_metric, t
         for run in top_runs
     ]
 
-
-def get_run_by_run_id(run_id, session=None):
+def get_run_by_run_id(run_id: int, session=None) -> Optional[Dict]:
     """
     Retrieve run details for a specific run ID.
 
@@ -401,7 +337,6 @@ def get_run_by_run_id(run_id, session=None):
     if session is None:
         session = create_dev_session()
 
-    # First, get the run
     run = (
         session.query(Run)
         .filter(Run.run_id == run_id)
@@ -411,7 +346,6 @@ def get_run_by_run_id(run_id, session=None):
     if not run:
         return None
 
-    # Then, get all run details for this run
     run_details = (
         session.query(RunDetail, Question)
         .join(Question, RunDetail.question_id == Question.question_id)
@@ -423,7 +357,6 @@ def get_run_by_run_id(run_id, session=None):
         'run_id': run.run_id,
         'model_name': run.model_name,
         'benchmark_name': run.benchmark_name,
-        'benchmark_metric': run.benchmark_metric,
         'normed_score': run.normed_score,
         'run_ts': run.run_ts,
         'details': [
@@ -438,31 +371,27 @@ def get_run_by_run_id(run_id, session=None):
         ]
     }
 
-
-def get_highest_benchmark_scores(session):
+def get_highest_benchmark_scores(session) -> Dict:
     """
-    Get the highest benchmark scores for each (benchmark, model) combination along with their run IDs.
+    Get the highest benchmark scores for each (benchmark, model) combination with run IDs.
 
     :param session: SQLAlchemy session
     :return: Dict with (benchmark, model) tuple as key and dict containing score and run_id as value
     """
-    # Query to find the highest-score runs, and the run information.
     highest_scores = (
         session.query(
             Run.benchmark_name,
-            Run.benchmark_metric,
             Run.model_name,
             Run.normed_score,
             Run.run_id
         )
         .order_by(Run.normed_score)
-        .distinct(Run.benchmark_name, Run.benchmark_metric, Run.model_name)
+        .distinct(Run.benchmark_name, Run.model_name)
         .all()
     )
 
-    # Convert to dictionary with (benchmark, model) as key
-    result = {
-        (f"{run.benchmark_name}:{run.benchmark_metric}", run.model_name): {
+    return {
+        (run.benchmark_name, run.model_name): {
             'score': run.normed_score,
             'run_id': run.run_id
         }
@@ -482,14 +411,13 @@ def decode_json(text):
       return {"result": text}
 
 
-def get_highest_scoring_run_details(session, model_name, benchmark_name, benchmark_metric):
+def get_highest_scoring_run_details(session, model_name, benchmark_name):
     """
-    Retrieve run details for the highest-scoring run for a specific (model, benchmark_name, benchmark_metric) pair.
+    Retrieve run details for the highest-scoring run for a specific (model, benchmark_name) pair.
 
     :param session: SQLAlchemy session
     :param model_name: Name of the model
     :param benchmark_name: Name of the benchmark
-    :param benchmark_metric: Metric of the benchmark
     :return: Dictionary of run details
     """
     # First, find the highest-scoring run
@@ -497,7 +425,6 @@ def get_highest_scoring_run_details(session, model_name, benchmark_name, benchma
         session.query(Run)
         .filter(Run.model_name == model_name)
         .filter(Run.benchmark_name == benchmark_name)
-        .filter(Run.benchmark_metric == benchmark_metric)
         .order_by(Run.normed_score.desc())
         .first()
     )
@@ -517,7 +444,6 @@ def get_highest_scoring_run_details(session, model_name, benchmark_name, benchma
         'run_id': highest_run.run_id,
         'model_name': highest_run.model_name,
         'benchmark_name': highest_run.benchmark_name,
-        'benchmark_metric': highest_run.benchmark_metric,
         'normed_score': highest_run.normed_score,
         'details': [
             {

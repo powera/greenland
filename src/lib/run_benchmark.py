@@ -2,7 +2,7 @@
 """Runs benchmarks against language models."""
 
 import json
-from typing import Dict, List, Optional, Tuple, Any
+from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
 
 import benchmarks.datastore
@@ -34,13 +34,12 @@ class BenchmarkRunner:
         """Warm up model before running benchmark."""
         ollama_client.warm_model(self.ollama_model)
         
-    def save_results(self, benchmark: str, metric: str, score: int, details: List[BenchmarkResult]) -> None:
+    def save_results(self, benchmark: str, score: int, details: List[BenchmarkResult]) -> None:
         """Save benchmark results to database."""
         success, run_id = benchmarks.datastore.insert_run(
             self.session, 
             self.model,
             benchmark,
-            metric,
             score,
             run_details=[vars(d) for d in details]
         )
@@ -61,11 +60,7 @@ class SpellCheckBenchmark(BenchmarkRunner):
         questions = self.load_questions("0015_spell_check")
         self.warm_up()
         
-        results = {
-            "correct_word": [],
-            "incorrect_word": [],
-            "correct_answer": []
-        }
+        results = []
         
         schema = {
             "type": "object",
@@ -87,38 +82,24 @@ Respond in JSON, with keys of "incorrect" for the verbatim misspelled word, and 
                 self.ollama_model,
                 json_schema=schema
             )
-            response = json.loads(response_text)
             
-            # Track results for each metric
-            results["incorrect_word"].append(BenchmarkResult(
-                question["question_id"],
-                info["incorrect"] == response["incorrect"],
-                perf["total_msec"],
-                response_text
-            ))
+            try:
+                response = json.loads(response_text)
+                is_correct = (info["incorrect"] == response["incorrect"] and 
+                            info["correct"] == response["correct"])
+            except json.JSONDecodeError:
+                is_correct = False
             
-            results["correct_word"].append(BenchmarkResult(
-                question["question_id"],
-                info["correct"] == response["correct"],
-                perf["total_msec"],
-                response_text
-            ))
-            
-            is_correct = (info["incorrect"] == response["incorrect"] and 
-                         info["correct"] == response["correct"])
-            results["correct_answer"].append(BenchmarkResult(
+            results.append(BenchmarkResult(
                 question["question_id"],
                 is_correct,
                 perf["total_msec"],
                 response_text
             ))
 
-        # Save results for each metric
-        total = len(questions)
-        for metric, details in results.items():
-            score = sum(r.score for r in details)
-            self.save_results("0015_spell_check", metric, score, details)
-            print(f"{metric}: {score}/{total}")
+        score = sum(r.score for r in results)
+        self.save_results("0015_spell_check", score, results)
+        print(f"Correct: {score}/{len(questions)}")
 
 class DefinitionsBenchmark(BenchmarkRunner):
     """Benchmark for testing word definition abilities."""
@@ -146,7 +127,7 @@ class DefinitionsBenchmark(BenchmarkRunner):
             ))
             
         score = sum(r.score for r in results)
-        self.save_results("0020_definitions", "correct", score, results)
+        self.save_results("0020_definitions", score, results)
         print(f"Correct: {score}/{len(questions)}")
 
 class ParagraphAnalysisBenchmark(BenchmarkRunner):
@@ -207,7 +188,7 @@ Respond using JSON with these fields:
             ))
             
         score = sum(r.score for r in results)
-        self.save_results("0030_analyze_paragraph", "correct_answer", score, results)
+        self.save_results("0030_analyze_paragraph", score, results)
         print(f"Correct: {score}/{len(questions)}")
 
 class SimpleHaystackBenchmark(BenchmarkRunner):
@@ -256,7 +237,7 @@ Respond in JSON with a 'subject' field containing only the subject's name."""
             ))
             
         score = sum(r.score for r in results)
-        self.save_results("0035_simple_haystack", "correct", score, results)
+        self.save_results("0035_simple_haystack", score, results)
         print(f"Correct: {score}/{len(questions)}")
 
 class GeneralKnowledgeBenchmark(BenchmarkRunner):
@@ -290,7 +271,7 @@ When responding, give only the correct answer; do not form it into a sentence.""
             ))
             
         score = sum(r.score for r in results)
-        self.save_results("0040_general_knowledge", "correct", score, results)
+        self.save_results("0040_general_knowledge", score, results)
         print(f"Correct: {score}/{len(questions)}")
 
 def get_all_model_codenames() -> List[str]:
@@ -298,11 +279,10 @@ def get_all_model_codenames() -> List[str]:
     session = benchmarks.datastore.create_dev_session()
     return [x["codename"] for x in benchmarks.datastore.list_all_models(session)]
 
-def get_all_benchmark_pairs() -> List[Tuple[str, str]]:
-    """Get list of all benchmark name/metric pairs from database."""
+def get_all_benchmarks() -> List[str]:
+    """Get list of all benchmark names from database."""
     session = benchmarks.datastore.create_dev_session()
-    benchmarks_list = benchmarks.datastore.list_all_benchmarks(session)
-    return [(x["codename"], x["metric"]) for x in benchmarks_list]
+    return [x["codename"] for x in benchmarks.datastore.list_all_benchmarks(session)]
 
 BENCHMARK_CLASSES = {
     "0015_spell_check": SpellCheckBenchmark,
