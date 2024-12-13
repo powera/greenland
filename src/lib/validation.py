@@ -63,7 +63,7 @@ class ResponseValidator:
         task_type: str,
         expected: str = None,
         context: str = None,
-        validator_models: tuple = ("granite3-dense:8b:Q4_K_M", "qwen2.5:7b:Q4_K_M", "gemma2:7b:Q4_K_M")
+        validator_models: tuple = ("qwen2.5:7b:Q4_K_M", "gemma2:9b:Q4_0")
     ) -> ValidationResult:
         """Validate a response for a given task type."""
         if task_type not in VALIDATION_PROMPTS:
