@@ -34,12 +34,13 @@ class BenchmarkRunner:
         """Warm up model before running benchmark."""
         ollama_client.warm_model(self.ollama_model)
         
-    def save_results(self, benchmark: str, score: int, details: List[BenchmarkResult]) -> None:
+    def save_results(self, benchmark: str, metric: str, score: int, details: List[BenchmarkResult]) -> None:
         """Save benchmark results to database."""
         success, run_id = benchmarks.datastore.insert_run(
             self.session, 
             self.model,
             benchmark,
+            metric,
             score,
             run_details=[vars(d) for d in details]
         )
@@ -50,19 +51,18 @@ class BenchmarkRunner:
     def _update_scoretable(self, run_id: int) -> None:
         """Update score table with new results."""
         lib.score_table.generate_run_detail_by_id(run_id, self.session)
-        lib.score_table.generate_dashboard()
+        lib.score_table.generate_dashboard(self.session)
 
 class SpellCheckBenchmark(BenchmarkRunner):
     """Benchmark for testing spell checking abilities."""
     
-    def run(self) -> None:
-        """Execute the spell check benchmark."""
-        questions = self.load_questions("0015_spell_check")
-        self.warm_up()
+    def __init__(self, model: str):
+        super().__init__(model)
+        self.context = """You are a spell checking assistant. For each sentence, identify:
+1. The incorrectly spelled word exactly as it appears
+2. The correct spelling of that word"""
         
-        results = []
-        
-        schema = {
+        self.schema = {
             "type": "object",
             "properties": {
                 "incorrect": {"type": "string"},
@@ -70,35 +70,36 @@ class SpellCheckBenchmark(BenchmarkRunner):
             },
             "required": ["incorrect", "correct"],
         }
+    
+    def run(self) -> None:
+        """Execute the spell check benchmark."""
+        questions = self.load_questions("0015_spell_check")
+        self.warm_up()
         
+        results = []
         for question in questions:
             info = json.loads(question["question_info_json"])
-            prompt = f"""What is the incorrectly-spelled word in this sentence: {info["sentence"]}
-
-Respond in JSON, with keys of "incorrect" for the verbatim misspelled word, and "correct" for the correct spelling."""
-
-            response_text, perf = ollama_client.generate_chat(
-                prompt, 
-                self.ollama_model,
-                json_schema=schema
+            prompt = f"What is the incorrectly-spelled word in this sentence: {info['sentence']}"
+            
+            _, structured_response, perf = ollama_client.generate_chat(
+                prompt=prompt,
+                model=self.ollama_model,
+                json_schema=self.schema,
+                context=self.context
             )
             
-            try:
-                response = json.loads(response_text)
-                is_correct = (info["incorrect"] == response["incorrect"] and 
-                            info["correct"] == response["correct"])
-            except json.JSONDecodeError:
-                is_correct = False
+            is_correct = (info["incorrect"] == structured_response["incorrect"] and 
+                         info["correct"] == structured_response["correct"])
             
             results.append(BenchmarkResult(
                 question["question_id"],
                 is_correct,
                 perf["total_msec"],
-                response_text
+                json.dumps(structured_response)
             ))
 
         score = sum(r.score for r in results)
-        self.save_results("0015_spell_check", score, results)
+        self.save_results("0015_spell_check", "accuracy", score, results)
         print(f"Correct: {score}/{len(questions)}")
 
 class DefinitionsBenchmark(BenchmarkRunner):
@@ -112,33 +113,35 @@ class DefinitionsBenchmark(BenchmarkRunner):
         results = []
         for question in questions:
             info = json.loads(question["question_info_json"])
-            response, perf = ollama_client.generate_chat(
+            free_response, _, perf = ollama_client.generate_chat(
                 info["question"],
                 self.ollama_model,
                 brief=True
             )
             
-            is_correct = response.strip().strip(".").lower() == info["correct"]
+            is_correct = free_response.strip().strip(".").lower() == info["correct"]
             results.append(BenchmarkResult(
                 question["question_id"],
                 is_correct,
                 perf["total_msec"],
-                None if is_correct else response
+                None if is_correct else free_response
             ))
             
         score = sum(r.score for r in results)
-        self.save_results("0020_definitions", score, results)
+        self.save_results("0020_definitions", "accuracy", score, results)
         print(f"Correct: {score}/{len(questions)}")
 
 class ParagraphAnalysisBenchmark(BenchmarkRunner):
     """Benchmark for testing paragraph comprehension abilities."""
     
-    def run(self) -> None:
-        """Execute the paragraph analysis benchmark."""
-        questions = self.load_questions("0030_analyze_paragraph")
-        self.warm_up()
+    def __init__(self, model: str):
+        super().__init__(model)
+        self.context = """You are a reading comprehension assistant. For each passage:
+1. Analyze the text carefully
+2. Select the best answer from the choices provided
+3. Explain your reasoning"""
         
-        schema = {
+        self.schema = {
             "type": "object",
             "properties": {
                 "commentary": {"type": "string"},
@@ -146,39 +149,37 @@ class ParagraphAnalysisBenchmark(BenchmarkRunner):
             },
             "required": ["commentary", "answer"]
         }
+    
+    def run(self) -> None:
+        """Execute the paragraph analysis benchmark."""
+        questions = self.load_questions("0030_analyze_paragraph")
+        self.warm_up()
         
         results = []
         for question in questions:
             info = json.loads(question["question_info_json"])
             query = info["query"].removesuffix("\nAnswer: ")
             
-            prompt = f"""Analyze this passage and question carefully: {query}
-
-Respond using JSON with these fields:
-- "commentary": Your analysis of why you chose this answer
-- "answer": The single letter (A-D) representing your chosen answer"""
-
-            response_text, perf = ollama_client.generate_chat(
-                prompt,
-                self.ollama_model,
-                json_schema=schema,
-                structured_json=True
+            _, structured_response, perf = ollama_client.generate_chat(
+                prompt=query,
+                model=self.ollama_model,
+                json_schema=self.schema,
+                context=self.context
             )
             
             try:
-                response = json.loads(response_text)
                 correct_letter = info["choices"][info["gold"]]
-                is_correct = response.get("answer", "").upper() == correct_letter
+                is_correct = structured_response["answer"].upper() == correct_letter
                 
                 debug_info = {
-                    "response": response,
+                    "response": structured_response,
                     "correct_answer": correct_letter,
                     "question": query
                 } if not is_correct else None
                 
-            except json.JSONDecodeError:
+            except (KeyError, TypeError):
                 is_correct = False
-                debug_info = response_text
+                debug_info = structured_response
                 
             results.append(BenchmarkResult(
                 question["question_id"],
@@ -188,22 +189,28 @@ Respond using JSON with these fields:
             ))
             
         score = sum(r.score for r in results)
-        self.save_results("0030_analyze_paragraph", score, results)
+        self.save_results("0030_analyze_paragraph", "accuracy", score, results)
         print(f"Correct: {score}/{len(questions)}")
 
 class SimpleHaystackBenchmark(BenchmarkRunner):
     """Benchmark for testing information retrieval abilities."""
 
-    def run(self) -> None:
-        """Execute the simple haystack benchmark."""
-        questions = self.load_questions("0035_simple_haystack")
-        self.warm_up()
+    def __init__(self, model: str):
+        super().__init__(model)
+        self.context = """You are an information retrieval assistant. For each set of sentences:
+1. Find the sentence containing the specified location
+2. Identify the subject (person or entity) in that sentence"""
         
-        schema = {
+        self.schema = {
             "type": "object",
             "properties": {"subject": {"type": "string"}},
             "required": ["subject"]
         }
+
+    def run(self) -> None:
+        """Execute the simple haystack benchmark."""
+        questions = self.load_questions("0035_simple_haystack")
+        self.warm_up()
         
         results = []
         for question in questions:
@@ -213,35 +220,38 @@ class SimpleHaystackBenchmark(BenchmarkRunner):
             prompt = f"""Given these sentences:
 {chr(10).join(sentences)}
 
-What is the subject for the sentence where the location is {info["correct"]["location"]}?
+What is the subject for the sentence where the location is {info["correct"]["location"]}?"""
 
-Respond in JSON with a 'subject' field containing only the subject's name."""
-
-            response_text, perf = ollama_client.generate_chat(
-                prompt,
-                self.ollama_model,
-                json_schema=schema
+            _, structured_response, perf = ollama_client.generate_chat(
+                prompt=prompt,
+                model=self.ollama_model,
+                json_schema=self.schema,
+                context=self.context
             )
             
             try:
-                response = json.loads(response_text)
-                is_correct = response["subject"].lower() == info["correct"]["name"].lower()
-            except (json.JSONDecodeError, KeyError):
+                is_correct = structured_response["subject"].lower() == info["correct"]["name"].lower()
+            except KeyError:
                 is_correct = False
                 
             results.append(BenchmarkResult(
                 question["question_id"],
                 is_correct,
                 perf["total_msec"],
-                response_text
+                json.dumps(structured_response)
             ))
             
         score = sum(r.score for r in results)
-        self.save_results("0035_simple_haystack", score, results)
+        self.save_results("0035_simple_haystack", "accuracy", score, results)
         print(f"Correct: {score}/{len(questions)}")
 
 class GeneralKnowledgeBenchmark(BenchmarkRunner):
     """Benchmark for testing general knowledge abilities."""
+
+    def __init__(self, model: str):
+        super().__init__(model)
+        self.context = """You are a knowledgeable assistant providing concise, factual answers.
+Respond with just the answer - do not include explanations or additional context."""
     
     def run(self) -> None:
         """Execute the general knowledge benchmark."""
@@ -251,15 +261,15 @@ class GeneralKnowledgeBenchmark(BenchmarkRunner):
         results = []
         for question in questions:
             info = json.loads(question["question_info_json"])
-            prompt = f"""What is the answer to this question: {info["context"]}
-
-When responding, give only the correct answer; do not form it into a sentence."""
-
-            response, perf = ollama_client.generate_chat(prompt, self.ollama_model)
-            is_correct = info["continuation"] in response
+            free_response, _, perf = ollama_client.generate_chat(
+                prompt=info["context"],
+                model=self.ollama_model,
+                context=self.context
+            )
             
+            is_correct = info["continuation"] in free_response
             debug_info = None if is_correct else {
-                "response": response,
+                "response": free_response,
                 "expected": info["continuation"]
             }
             
@@ -271,8 +281,16 @@ When responding, give only the correct answer; do not form it into a sentence.""
             ))
             
         score = sum(r.score for r in results)
-        self.save_results("0040_general_knowledge", score, results)
+        self.save_results("0040_general_knowledge", "accuracy", score, results)
         print(f"Correct: {score}/{len(questions)}")
+
+BENCHMARK_CLASSES = {
+    "0015_spell_check": SpellCheckBenchmark,
+    "0020_definitions": DefinitionsBenchmark, 
+    "0030_analyze_paragraph": ParagraphAnalysisBenchmark,
+    "0035_simple_haystack": SimpleHaystackBenchmark,
+    "0040_general_knowledge": GeneralKnowledgeBenchmark
+}
 
 def get_all_model_codenames() -> List[str]:
     """Get list of all model codenames from database."""
@@ -283,14 +301,6 @@ def get_all_benchmarks() -> List[str]:
     """Get list of all benchmark names from database."""
     session = benchmarks.datastore.create_dev_session()
     return [x["codename"] for x in benchmarks.datastore.list_all_benchmarks(session)]
-
-BENCHMARK_CLASSES = {
-    "0015_spell_check": SpellCheckBenchmark,
-    "0020_definitions": DefinitionsBenchmark, 
-    "0030_analyze_paragraph": ParagraphAnalysisBenchmark,
-    "0035_simple_haystack": SimpleHaystackBenchmark,
-    "0040_general_knowledge": GeneralKnowledgeBenchmark
-}
 
 def run_benchmark(benchmark_name: str, model: str) -> None:
     """Run a specific benchmark against a model."""
