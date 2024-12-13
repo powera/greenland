@@ -3,26 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LLM Test Scores</title>
+    <title>Language Model Benchmark Results</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
+            color: #333;
         }
+        
         table {
             border-collapse: collapse;
             max-width: 1200px;
             margin: 0 auto;
+            width: 100%;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
+        
         th, td {
-            border: 1px solid #ddd;
+            border: 1px solid #e0e0e0;
             padding: 12px;
             text-align: center;
         }
+        
         th {
-            background-color: #f5f5f5;
-            font-weight: bold;
+            background-color: #f8f9fa;
+            font-weight: 600;
+            position: relative;
         }
+        
         .score a {
             font-weight: bold;
             color: white;
@@ -32,60 +40,106 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            text-decoration: none;
+            border-radius: 4px;
         }
+        
         .header-cell {
-            background-color: #f5f5f5;
-            font-weight: bold;
+            background-color: #f8f9fa;
+            font-weight: 600;
+            text-align: left;
         }
+        
         .hover-box {
             display: none;
             position: absolute;
             background-color: #333;
             color: white;
-            padding: 10px;
-            border-radius: 5px;
-            width: 200px;
+            padding: 12px;
+            border-radius: 6px;
+            width: 250px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             text-align: left;
+            z-index: 100;
+            font-size: 14px;
+            line-height: 1.4;
         }
-        th:hover .hover-box {
-            display: block;
-        }
+        
+        th:hover .hover-box,
         td:hover .hover-box {
             display: block;
+        }
+        
+        .model-header {
+            min-width: 150px;
+        }
+        
+        .benchmark-name {
+            min-width: 180px;
+        }
+        
+        .page-title {
+            text-align: center;
+            color: #333;
+            margin: 30px 0;
+            font-size: 24px;
+        }
+        
+        .last-updated {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
         }
     </style>
 </head>
 <body>
+    <h1 class="page-title">Language Model Benchmark Results</h1>
+    <p class="last-updated">Last updated: {{ data.current_time }}</p>
+    
     <table>
         <tr>
             <th></th>
             {% for llm in data.llms %}
-            <th>{{ llm.displayname }}
-              <div class="hover-box">
-                <b>{{ llm.codename }}</b><br>
-                Launch Date: {{ llm.launch_date }}<br>
-                Size: {{ llm.filesize_mb }} MB<br>
-                License: {{ llm.license_name }}
-              </div>
+            <th class="model-header">{{ llm.displayname }}
+                <div class="hover-box">
+                    <p><strong>Model:</strong> {{ llm.codename }}</p>
+                    {% if llm.launch_date %}
+                    <p><strong>Launch Date:</strong> {{ llm.launch_date }}</p>
+                    {% endif %}
+                    {% if llm.filesize_mb %}
+                    <p><strong>Size:</strong> {{ llm.filesize_mb }} MB</p>
+                    {% endif %}
+                    {% if llm.license_name %}
+                    <p><strong>License:</strong> {{ llm.license_name }}</p>
+                    {% endif %}
+                </div>
             </th>
             {% endfor %}
         </tr>
-        {% for test in data.benchmarks %}
+        
+        {% for benchmark in data.benchmarks %}
         <tr>
-            <td class="header-cell">{{ test.displayname }}
-              <div class="hover-box">
-                <b> {{test.codename }}</b><br>
-                {{ test.description }}
-              </div>
+            <td class="header-cell benchmark-name">{{ benchmark.displayname }}
+                <div class="hover-box">
+                    <p><strong>Benchmark ID:</strong> {{ benchmark.codename }}</p>
+                    {% if benchmark.description %}
+                    <p><strong>Description:</strong> {{ benchmark.description }}</p>
+                    {% endif %}
+                    {% if benchmark.license_name %}
+                    <p><strong>License:</strong> {{ benchmark.license_name }}</p>
+                    {% endif %}
+                </div>
             </td>
             {% for llm in data.llms %}
             <td>
-              {% if (test.longname, llm.codename) in data.scores %}
-                <div class="score" style="background-color: {{ data.scores[(test.longname, llm.codename)].color }}">
-                  <a href="run_details/{{data.scores[(test.longname, llm.codename)].run_id}}.html">{{ data.scores[(test.longname, llm.codename)].value }}</a>
+                {% if (benchmark.codename, llm.codename) in data.scores %}
+                <div class="score" style="background-color: {{ data.scores[(benchmark.codename, llm.codename)].color }}">
+                    <a href="run_details/{{ data.scores[(benchmark.codename, llm.codename)].run_id }}.html">
+                        {{ data.scores[(benchmark.codename, llm.codename)].value }}
+                    </a>
                 </div>
-              {% endif %}
+                {% endif %}
             </td>
             {% endfor %}
         </tr>
