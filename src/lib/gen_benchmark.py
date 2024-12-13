@@ -34,14 +34,25 @@ class BenchmarkGenerator:
 class SpellCheckGenerator(BenchmarkGenerator):
     """Generator for spell check benchmark questions."""
     
+    def __init__(self, session: Optional[Session] = None):
+        super().__init__(session)
+        self.context = """You are a creative writing assistant. Write a natural-sounding sentence that:
+1. Uses the specified word as its subject or object
+2. Introduces a spelling error in that word
+3. Maintains proper grammar and natural flow aside from the misspelling
+4. Is written at roughly an 8th grade reading level"""
+
     def generate_sentence(self, start_word: str, model: str = "gemma2:9b") -> str:
         """Generate a sentence using start_word but spelled incorrectly."""
-        prompt = f"""Write a sentence using the word {start_word}, but spelling it incorrectly.
-Reply with only the single sentence, do not include additional conversation.
-The sentence should be at about an 8th grade reading level."""
+        prompt = f"Write a sentence using the word '{start_word}', but spell it incorrectly."
         
-        response, _ = ollama_client.generate_chat(prompt, model)
-        return response.strip()
+        free_response, _, _ = ollama_client.generate_chat(
+            prompt=prompt,
+            model=model,
+            context=self.context
+        )
+            
+        return free_response.strip()
 
     def generate_batch(self, start_word: str) -> None:
         """Generate 10 sentences for a given word."""
@@ -50,7 +61,7 @@ The sentence should be at about an 8th grade reading level."""
             sentence = self.generate_sentence(start_word)
             sentences.append({
                 "sentence": sentence,
-                "incorrect": "",
+                "incorrect": "",  # To be filled in by human annotator
                 "correct": start_word
             })
 
@@ -80,6 +91,23 @@ The sentence should be at about an 8th grade reading level."""
 class DefinitionsGenerator(BenchmarkGenerator):
     """Generator for definitions benchmark questions."""
 
+    def __init__(self, session: Optional[Session] = None):
+        super().__init__(session)
+        self.context = """You are a lexicographer writing clear, concise definitions. For each word:
+1. Write a single-sentence definition
+2. Do not use the word itself in the definition
+3. Focus on the most common meaning of the word
+4. Use simple, clear language"""
+        
+        self.schema = {
+            "type": "object",
+            "properties": {
+                "definition": {"type": "string"},
+                "explanation": {"type": "string"},
+            },
+            "required": ["definition"],
+        }
+
     def generate_question(self, model: str = "gemma2:9b") -> Dict:
         """Generate a single definition question."""
         with open("benchmarks/0020_definitions/wordlist.txt") as f:
@@ -89,24 +117,18 @@ class DefinitionsGenerator(BenchmarkGenerator):
         correct = choices[0]
         choices.sort()
 
-        schema = {
-            "type": "object",
-            "properties": {
-                "definition": {"type": "string"},
-                "explanation": {"type": "string"},
-            },
-            "required": ["definition"],
-        }
+        prompt = f'Define the word "{correct}"'
+        
+        _, structured_response, _ = ollama_client.generate_chat(
+            prompt=prompt,
+            model=model,
+            json_schema=self.schema,
+            context=self.context
+        )
+        
+        definition = structured_response["definition"]
 
-        prompt = f"""Write a one-sentence definition of the word "{correct}".
-Do not use the word "{correct}" in the response; just provide the definition.
-Respond in JSON, with the definition in "definition" and an (optional) explanation in "explanation"."""
-
-        response_text, _ = ollama_client.generate_chat(prompt, model, json_schema=schema)
-        response = json.loads(response_text)
-        definition = response["definition"]
-
-        question = f'Which of the following ten words has this definition: {definition}\n\nJust give the single correct word, do not give a long explanation.\n\nThe choices are: {", ".join(choices)}'
+        question = f'Which word has this definition: {definition}\n\nThe choices are: {", ".join(choices)}'
 
         return {
             "question": question,
@@ -142,21 +164,32 @@ Respond in JSON, with the definition in "definition" and an (optional) explanati
                 question
             )
 
-
 class SimpleHaystackGenerator(BenchmarkGenerator):
     """Generator for simple haystack benchmark questions."""
+    
+    def __init__(self, session: Optional[Session] = None):
+        super().__init__(session)
+        self.context = """You are writing simple, clear sentences that each contain:
+1. A specific person or entity (the subject)
+2. An action they are performing
+3. A location where the action takes place
+Use natural language and vary the sentence structure."""
     
     def generate_sentence(self, name: str, action: str, location: str, 
                          model: str = "gemma2:9b") -> str:
         """Generate a simple sentence with given elements."""
-        prompt = f"""Write a simple sentence with the following elements:
-    - Name: {name}
-    - Action: {action}
-    - Location: {location}
-Only reply with the single sentence, do not include any other text or punctuation."""
+        prompt = f"""Create a sentence using:
+- Name: {name}
+- Action: {action}
+- Location: {location}"""
 
-        response, _ = ollama_client.generate_chat(prompt, model)
-        return response.strip()
+        free_response, _, _ = ollama_client.generate_chat(
+            prompt=prompt,
+            model=model,
+            context=self.context
+        )
+        
+        return free_response.strip()
 
     def generate_question(self, names: List[str], actions: List[str], 
                          locations: List[str]) -> Dict:
