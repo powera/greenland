@@ -34,13 +34,12 @@ class BenchmarkRunner:
         """Warm up model before running benchmark."""
         ollama_client.warm_model(self.ollama_model)
         
-    def save_results(self, benchmark: str, metric: str, score: int, details: List[BenchmarkResult]) -> None:
+    def save_results(self, benchmark: str, score: int, details: List[BenchmarkResult]) -> None:
         """Save benchmark results to database."""
         success, run_id = benchmarks.datastore.insert_run(
             self.session, 
             self.model,
             benchmark,
-            metric,
             score,
             run_details=[vars(d) for d in details]
         )
