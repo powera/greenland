@@ -98,7 +98,7 @@ class SpellCheckBenchmark(BenchmarkRunner):
             ))
 
         score = sum(r.score for r in results)
-        self.save_results("0015_spell_check", "accuracy", score, results)
+        self.save_results("0015_spell_check", score, results)
         print(f"Correct: {score}/{len(questions)}")
 
 class DefinitionsBenchmark(BenchmarkRunner):
@@ -127,7 +127,7 @@ class DefinitionsBenchmark(BenchmarkRunner):
             ))
             
         score = sum(r.score for r in results)
-        self.save_results("0020_definitions", "accuracy", score, results)
+        self.save_results("0020_definitions", score, results)
         print(f"Correct: {score}/{len(questions)}")
 
 class ParagraphAnalysisBenchmark(BenchmarkRunner):
@@ -188,7 +188,7 @@ class ParagraphAnalysisBenchmark(BenchmarkRunner):
             ))
             
         score = sum(r.score for r in results)
-        self.save_results("0030_analyze_paragraph", "accuracy", score, results)
+        self.save_results("0030_analyze_paragraph", score, results)
         print(f"Correct: {score}/{len(questions)}")
 
 class SimpleHaystackBenchmark(BenchmarkRunner):
@@ -241,7 +241,7 @@ What is the subject for the sentence where the location is {info["correct"]["loc
             ))
             
         score = sum(r.score for r in results)
-        self.save_results("0035_simple_haystack", "accuracy", score, results)
+        self.save_results("0035_simple_haystack", score, results)
         print(f"Correct: {score}/{len(questions)}")
 
 class GeneralKnowledgeBenchmark(BenchmarkRunner):
@@ -280,7 +280,7 @@ Respond with just the answer - do not include explanations or additional context
             ))
             
         score = sum(r.score for r in results)
-        self.save_results("0040_general_knowledge", "accuracy", score, results)
+        self.save_results("0040_general_knowledge", score, results)
         print(f"Correct: {score}/{len(questions)}")
 
 BENCHMARK_CLASSES = {
