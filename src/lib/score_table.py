@@ -58,9 +58,7 @@ class ScoreTableGenerator:
         llms.sort(key=lambda x: (x["filesize_mb"], x["displayname"]))
 
         # Get benchmark information
-        benchmark_info = benchmarks.datastore.list_all_benchmarks(self.session)
-        for benchmark in benchmark_info:
-            benchmark["longname"] = f'{benchmark["codename"]}:{benchmark["metric"]}'
+        benchmarks_list = benchmarks.datastore.list_all_benchmarks(self.session)
 
         # Get scores and add color information
         scores = benchmarks.datastore.get_highest_benchmark_scores(self.session)
@@ -74,7 +72,7 @@ class ScoreTableGenerator:
 
         return {
             "llms": llms,
-            "benchmarks": benchmark_info,
+            "benchmarks": benchmarks_list,
             "scores": scores
         }
 
@@ -129,25 +127,21 @@ class ScoreTableGenerator:
         data = benchmarks.datastore.get_run_by_run_id(run_id, self.session)
         self._write_run_detail(data)
 
-    def generate_run_detail(self, model_name: str, benchmark_name: str, 
-                          benchmark_metric: str) -> None:
+    def generate_run_detail(self, model_name: str, benchmark_name: str) -> None:
         """
-        Generate detailed HTML report for a specific benchmark run.
-
-        Largely obsolete; but still possibly used for a "Hall of Fame".
+        Generate detailed HTML report for highest-scoring benchmark run.
         
         Parameters:
             model_name (str): Name of the model
             benchmark_name (str): Name of the benchmark
-            benchmark_metric (str): Metric used for the benchmark
         """
-        data = benchmarks.datastore.get_highest_scoring_run_details(
-            self.session,
-            model_name,
-            benchmark_name,
-            benchmark_metric
-        )
-        self._write_run_detail(data)
+        highest_scores = benchmarks.datastore.get_highest_benchmark_scores(self.session)
+        key = (benchmark_name, model_name)
+        
+        if key in highest_scores:
+            run_id = highest_scores[key]['run_id']
+            data = benchmarks.datastore.get_run_by_run_id(run_id, self.session)
+            self._write_run_detail(data)
 
 # Create default generator instance
 generator = ScoreTableGenerator()
