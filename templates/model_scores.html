@@ -38,10 +38,17 @@
             width: 80px;
             height: 80px;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             text-decoration: none;
             border-radius: 4px;
+            gap: 4px;
+        }
+        
+        .score .time {
+            font-size: 12px;
+            opacity: 0.9;
         }
         
         .header-cell {
@@ -136,7 +143,8 @@
                 {% if (benchmark.codename, llm.codename) in data.scores %}
                 <div class="score" style="background-color: {{ data.scores[(benchmark.codename, llm.codename)].color }}">
                     <a href="run_details/{{ data.scores[(benchmark.codename, llm.codename)].run_id }}.html">
-                        {{ data.scores[(benchmark.codename, llm.codename)].value }}
+                        <span class="value">{{ data.scores[(benchmark.codename, llm.codename)].value }}</span>
+                        <span class="time">{{ "%.1f"|format(data.scores[(benchmark.codename, llm.codename)].avg_eval_time) }}ms</span>
                     </a>
                 </div>
                 {% endif %}

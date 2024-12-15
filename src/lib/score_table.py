@@ -15,6 +15,7 @@ class ScoreData:
     value: int
     color: str
     run_id: int
+    avg_eval_time: float  # Average evaluation time in milliseconds
 
 class ScoreTableGenerator:
     """Generates HTML reports for benchmark scores and run details."""
@@ -46,6 +47,27 @@ class ScoreTableGenerator:
         
         return f"rgb({red}, {green}, 0)"
 
+    def _calculate_avg_eval_time(self, run_id: int) -> float:
+        """
+        Calculate average evaluation time for a run.
+        
+        Parameters:
+            run_id (int): ID of the run
+            
+        Returns:
+            float: Average evaluation time in milliseconds
+        """
+        run_data = benchmarks.datastore.get_run_by_run_id(run_id, self.session)
+        if not run_data or not run_data['details']:
+            return 0.0
+            
+        eval_times = [detail['eval_msec'] for detail in run_data['details'] 
+                     if detail['eval_msec'] is not None]
+        if not eval_times:
+            return 0.0
+            
+        return sum(eval_times) / len(eval_times)
+
     def _get_dashboard_data(self) -> Dict:
         """
         Gather all data needed for the dashboard.
@@ -60,14 +82,16 @@ class ScoreTableGenerator:
         # Get benchmark information
         benchmarks_list = benchmarks.datastore.list_all_benchmarks(self.session)
 
-        # Get scores and add color information
+        # Get scores and add color and timing information
         scores = benchmarks.datastore.get_highest_benchmark_scores(self.session)
         for key in scores:
             score_data = scores[key]
+            avg_time = self._calculate_avg_eval_time(score_data["run_id"])
             scores[key] = ScoreData(
                 value=score_data["score"],
                 color=self._get_color(score_data["score"]),
-                run_id=score_data["run_id"]
+                run_id=score_data["run_id"],
+                avg_eval_time=avg_time
             ).__dict__
 
         return {
