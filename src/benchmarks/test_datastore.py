@@ -1,6 +1,7 @@
 import unittest
 import os
 import json
+from datetime import datetime
 from benchmarks.datastore import (
     create_database_and_session,
     insert_benchmark,
@@ -8,7 +9,9 @@ from benchmarks.datastore import (
     insert_question,
     insert_run,
     list_all_models,
-    find_top_runs_for_benchmark
+    list_all_benchmarks,
+    find_top_runs_for_benchmark,
+    load_all_questions_for_benchmark
 )
 
 class TestDatastore(unittest.TestCase):
@@ -42,28 +45,6 @@ class TestDatastore(unittest.TestCase):
         self.assertTrue(success)
         self.assertIn('successfully inserted', message)
 
-    def test_insert_benchmark_diff_metric(self):
-        """
-        Test inserting a duplicate benchmark
-        """
-        # First insertion should succeed
-        insert_benchmark(
-            self.session, 
-            'test_benchmark',
-            'answer',
-            'Test Benchmark'
-        )
-        
-        # different metric
-        success, message = insert_benchmark(
-            self.session, 
-            'test_benchmark', 
-            'politeness',
-            'Test Benchmark'
-        )
-        self.assertTrue(success)
-        self.assertIn('successfully inserted', message)
-
     def test_insert_benchmark_duplicate(self):
         """
         Test inserting a duplicate benchmark
@@ -72,16 +53,16 @@ class TestDatastore(unittest.TestCase):
         insert_benchmark(
             self.session, 
             'test_benchmark',
-            'answer',
-            'Test Benchmark'
+            'Test Benchmark',
+            'Test Description'
         )
         
         # Second insertion should fail
         success, message = insert_benchmark(
             self.session, 
             'test_benchmark', 
-            'answer',
-            'Test Benchmark'
+            'Test Benchmark',
+            'Test Description'
         )
         self.assertFalse(success)
         self.assertIn('already exists', message)
@@ -106,7 +87,7 @@ class TestDatastore(unittest.TestCase):
         Test inserting a question with a benchmark
         """
         # First, insert a benchmark
-        insert_benchmark(self.session, 'test_benchmark', 'answer', 'Test Benchmark')
+        insert_benchmark(self.session, 'test_benchmark', 'Test Benchmark', 'Test Description')
         
         # Then insert a question
         success, message = insert_question(
@@ -124,40 +105,66 @@ class TestDatastore(unittest.TestCase):
         """
         # First, insert a model and benchmark
         insert_model(self.session, 'test_model', 'Test Model')
-        insert_benchmark(self.session, 'test_benchmark', 'answer', 'Test Benchmark')
+        insert_benchmark(self.session, 'test_benchmark', 'Test Benchmark', 'Test Description')
         
         # Then insert a run
         success, run_id = insert_run(
             self.session,
             'test_model',
             'test_benchmark',
-            'answer',
-            85
+            85  # normed_score
         )
         self.assertTrue(success)
-        self.assertIsNotNone(run_id)
+        self.assertIsInstance(run_id, int)
 
-    def test_insert_run_detail(self):
+    def test_insert_run_with_details(self):
         """
-        Test inserting a run detail
+        Test inserting a run with run details
         """
         # Setup: insert model, benchmark, run, and question
         insert_model(self.session, 'test_model', 'Test Model')
-        insert_benchmark(self.session, 'test_benchmark', 'answer', 'Test Benchmark')
+        insert_benchmark(self.session, 'test_benchmark', 'Test Benchmark', 'Test Description')
         insert_question(
             self.session,
             'test_question_1',
-            'test_benchmark'
+            'test_benchmark',
+            json.dumps({'test': 'data'})
         )
+        
+        run_details = [{
+            "question_id": "test_question_1",
+            "score": 1,  # Using binary scoring
+            "eval_msec": 1000,
+            "debug_json": json.dumps({"test": "debug"})
+        }]
+        
         success, run_id = insert_run(
             self.session,
             'test_model',
             'test_benchmark',
-            'answer',
-            85,
-            run_details = [{"question_id": "test_question_1", "score": 90, "eval_msec": 1000}]
+            85,  # normed_score
+            run_details=run_details
         )
         self.assertTrue(success)
+        self.assertIsInstance(run_id, int)
+
+    def test_insert_run_with_timestamp(self):
+        """
+        Test inserting a run with a specific timestamp
+        """
+        insert_model(self.session, 'test_model', 'Test Model')
+        insert_benchmark(self.session, 'test_benchmark', 'Test Benchmark', 'Test Description')
+        
+        timestamp = datetime(2024, 1, 1, 12, 0, 0)
+        success, run_id = insert_run(
+            self.session,
+            'test_model',
+            'test_benchmark',
+            85,
+            run_ts=timestamp
+        )
+        self.assertTrue(success)
+        self.assertIsInstance(run_id, int)
 
     def test_list_all_models(self):
         """
@@ -172,6 +179,43 @@ class TestDatastore(unittest.TestCase):
         self.assertTrue(any(m['codename'] == 'model1' for m in models))
         self.assertTrue(any(m['codename'] == 'model2' for m in models))
 
+    def test_list_all_benchmarks(self):
+        """
+        Test listing all benchmarks
+        """
+        insert_benchmark(self.session, 'benchmark1', 'Benchmark One', 'Description 1')
+        insert_benchmark(self.session, 'benchmark2', 'Benchmark Two', 'Description 2')
+        
+        benchmarks = list_all_benchmarks(self.session)
+        self.assertEqual(len(benchmarks), 2)
+        self.assertTrue(any(b['codename'] == 'benchmark1' for b in benchmarks))
+        self.assertTrue(any(b['codename'] == 'benchmark2' for b in benchmarks))
+
+    def test_load_all_questions_for_benchmark(self):
+        """
+        Test loading all questions for a specific benchmark
+        """
+        insert_benchmark(self.session, 'test_benchmark', 'Test Benchmark', 'Test Description')
+        
+        # Insert multiple questions
+        questions_data = [
+            ('q1', {'type': 'multiple_choice'}),
+            ('q2', {'type': 'free_response'}),
+        ]
+        
+        for qid, data in questions_data:
+            insert_question(
+                self.session,
+                f'test_question_{qid}',
+                'test_benchmark',
+                json.dumps(data)
+            )
+        
+        questions = load_all_questions_for_benchmark(self.session, 'test_benchmark')
+        self.assertEqual(len(questions), 2)
+        self.assertTrue(any(q['question_id'] == 'test_question_q1' for q in questions))
+        self.assertTrue(any(q['question_id'] == 'test_question_q2' for q in questions))
+
     def test_find_top_runs_for_benchmark(self):
         """
         Test finding top runs for a benchmark
@@ -179,20 +223,19 @@ class TestDatastore(unittest.TestCase):
         # Setup: insert model, benchmark, and multiple runs
         insert_model(self.session, 'model1', 'Model One')
         insert_model(self.session, 'model2', 'Model Two')
-        insert_benchmark(self.session, 'test_benchmark', 'answer', 'Test Benchmark')
-        insert_benchmark(self.session, 'test_benchmark_2', 'answer', 'Second Benchmark')
+        insert_benchmark(self.session, 'test_benchmark', 'Test Benchmark', 'Test Description')
         
         # Insert runs with different scores
-        insert_run(self.session, 'model1', 'test_benchmark', 'answer', 90)
-        insert_run(self.session, 'model2', 'test_benchmark', 'answer', 85)
-        insert_run(self.session, 'model1', 'test_benchmark_2', 'answer', 95)
+        insert_run(self.session, 'model1', 'test_benchmark', 90)
+        insert_run(self.session, 'model2', 'test_benchmark', 85)
+        insert_run(self.session, 'model1', 'test_benchmark', 95)  # Better score
         
-        top_runs = find_top_runs_for_benchmark(self.session, 'test_benchmark', 'answer')
+        top_runs = find_top_runs_for_benchmark(self.session, 'test_benchmark', 2)
         
-        # Verify top runs are returned in descending order
+        # Verify top runs are returned in descending order by score
         self.assertEqual(len(top_runs), 2)
-        self.assertEqual(top_runs[0]['normed_score'], 90)
-        self.assertEqual(top_runs[1]['normed_score'], 85)
+        self.assertEqual(top_runs[0]['normed_score'], 95)
+        self.assertEqual(top_runs[1]['normed_score'], 90)
 
 if __name__ == '__main__':
     unittest.main()
