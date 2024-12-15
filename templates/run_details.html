@@ -131,7 +131,7 @@
                         <td>{{ detail.question_id }}</td>
                         <td>{{ detail.score }}</td>
                         <td>{{ detail.eval_msec }}</td>
-                        <td>{{ detail.debug_json |tojson(indent=2) }}</td>
+                        <td>{{ detail.debug_json }}</td>
                     </tr>
                     {% if detail.question_info_json %}
                     <tr>
@@ -141,7 +141,7 @@
                             </div>
                             <div class="question-info-content hidden">
                               <strong>Question Information:</strong>
-                              <pre>{{ detail.question_info_json |tojson(indent=2)}}</pre>
+                              <pre>{{ detail.question_info_json }}</pre>
                             </div>
                         </td>
                     </tr>

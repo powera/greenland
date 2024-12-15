@@ -403,12 +403,14 @@ def get_highest_benchmark_scores(session) -> Dict:
 
 def decode_json(text):
     if text is None:
-      return {}
+        return {}
     try:
-      result = json.loads(text)
-      return result
+        # First parse the JSON
+        result = json.loads(text)
+        # Then re-encode with ensure_ascii=False for proper Unicode display
+        return json.dumps(result, ensure_ascii=False, indent=2)
     except json.JSONDecodeError:
-      return {"result": text}
+        return {"result": text}
 
 
 def get_highest_scoring_run_details(session, model_name, benchmark_name):
