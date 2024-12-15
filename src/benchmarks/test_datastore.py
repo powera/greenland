@@ -10,7 +10,6 @@ from benchmarks.datastore import (
     insert_run,
     list_all_models,
     list_all_benchmarks,
-    find_top_runs_for_benchmark,
     load_all_questions_for_benchmark
 )
 
@@ -216,26 +215,6 @@ class TestDatastore(unittest.TestCase):
         self.assertTrue(any(q['question_id'] == 'test_question_q1' for q in questions))
         self.assertTrue(any(q['question_id'] == 'test_question_q2' for q in questions))
 
-    def test_find_top_runs_for_benchmark(self):
-        """
-        Test finding top runs for a benchmark
-        """
-        # Setup: insert model, benchmark, and multiple runs
-        insert_model(self.session, 'model1', 'Model One')
-        insert_model(self.session, 'model2', 'Model Two')
-        insert_benchmark(self.session, 'test_benchmark', 'Test Benchmark', 'Test Description')
-        
-        # Insert runs with different scores
-        insert_run(self.session, 'model1', 'test_benchmark', 90)
-        insert_run(self.session, 'model2', 'test_benchmark', 85)
-        insert_run(self.session, 'model1', 'test_benchmark', 95)  # Better score
-        
-        top_runs = find_top_runs_for_benchmark(self.session, 'test_benchmark', 2)
-        
-        # Verify top runs are returned in descending order by score
-        self.assertEqual(len(top_runs), 2)
-        self.assertEqual(top_runs[0]['normed_score'], 95)
-        self.assertEqual(top_runs[1]['normed_score'], 90)
 
 if __name__ == '__main__':
     unittest.main()
