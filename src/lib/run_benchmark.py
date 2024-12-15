@@ -421,3 +421,68 @@ def run_benchmark(benchmark_name: str, model: str) -> None:
         
     benchmark = benchmark_class(model)
     benchmark.run()
+
+def run_missing_benchmarks(
+    blacklist_models: Optional[Set[str]] = None,
+    blacklist_benchmarks: Optional[Set[str]] = None,
+    session = None
+) -> List[Tuple[str, str]]:
+    """
+    Run all benchmark/model combinations that aren't in the database.
+    
+    Args:
+        blacklist_models: Set of model codenames to never run
+        blacklist_benchmarks: Set of benchmark codenames to never run
+        session: Optional database session (will create if None)
+        
+    Returns:
+        List of (model, benchmark) pairs that were run
+    
+    Example:
+        >>> run_missing_benchmarks(
+        ...     blacklist_models={'unstable-model'},
+        ...     blacklist_benchmarks={'expensive-benchmark'}
+        ... )
+    """
+    if session is None:
+        session = benchmarks.datastore.create_dev_session()
+        
+    # Initialize blacklists if not provided
+    blacklist_models = blacklist_models or set()
+    blacklist_benchmarks = blacklist_benchmarks or set()
+    
+    # Get all available models and benchmarks
+    all_models = {
+        model['codename'] for model in datastore.list_all_models(session)
+        if model['codename'] not in blacklist_models
+    }
+    all_benchmarks = {
+        bench['codename'] for bench in datastore.list_all_benchmarks(session)
+        if bench['codename'] not in blacklist_benchmarks
+    }
+    
+    # Get existing scores
+    highest_scores = benchmarks.datastore.get_highest_benchmark_scores(session)
+    
+    # Track what we run
+    combinations_run = []
+    
+    # Try each combination
+    for model in sorted(all_models):
+        for benchmark in sorted(all_benchmarks):
+            # Skip if already has a score or is blacklisted
+            if (benchmark, model) in highest_scores:
+                continue
+                
+            logger.info(f"Running benchmark {benchmark} for model {model}")
+            
+            try:
+                # Use the existing run_benchmark function
+                run_benchmark(benchmark, model)
+                combinations_run.append((model, benchmark))
+                
+            except Exception as e:
+                logger.error(f"Error running {benchmark} for {model}: {str(e)}")
+                continue
+                
+    return combinations_run
