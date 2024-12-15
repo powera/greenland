@@ -2,12 +2,15 @@
 """Runs benchmarks against language models."""
 
 import json
-from typing import Dict, List, Optional, Any
+import logging
+from typing import Dict, List, Set, Tuple, Optional, Any
 from dataclasses import dataclass
 
 import benchmarks.datastore
 from clients import ollama_client
 import lib.score_table
+
+logger = logging.getLogger(__name__)
 
 @dataclass
 class BenchmarkResult:
@@ -453,11 +456,11 @@ def run_missing_benchmarks(
     
     # Get all available models and benchmarks
     all_models = {
-        model['codename'] for model in datastore.list_all_models(session)
+        model['codename'] for model in benchmarks.datastore.list_all_models(session)
         if model['codename'] not in blacklist_models
     }
     all_benchmarks = {
-        bench['codename'] for bench in datastore.list_all_benchmarks(session)
+        bench['codename'] for bench in benchmarks.datastore.list_all_benchmarks(session)
         if bench['codename'] not in blacklist_benchmarks
     }
     
