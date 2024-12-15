@@ -340,7 +340,7 @@ When translating a word from {self.origin_lang.upper()} to {self.target_lang.upp
             if info.get("choices"):
                 prompt += f"\nPossible translations: {', '.join(info['choices'])}"
 
-            response_text, perf = ollama_client.generate_chat(
+            _, structured_response, perf = ollama_client.generate_chat(
                 prompt,
                 self.ollama_model,
                 json_schema=schema,
@@ -348,8 +348,7 @@ When translating a word from {self.origin_lang.upper()} to {self.target_lang.upp
             )
             
             try:
-                response = json.loads(response_text)
-                translated = response["translation"].lower().strip()
+                translated = structured_response["translation"].lower().strip()
                 
                 # Get correct answer based on target language
                 correct = info[self.target_lang].lower()
@@ -361,7 +360,7 @@ When translating a word from {self.origin_lang.upper()} to {self.target_lang.upp
                     is_correct = translated == correct
                     
                 debug_info = None if is_correct else {
-                    "response": response["translation"],
+                    "response": structured_response["translation"],
                     "expected": info[self.target_lang]
                 }
                 
@@ -373,7 +372,7 @@ When translating a word from {self.origin_lang.upper()} to {self.target_lang.upp
                     
             except (json.JSONDecodeError, KeyError):
                 is_correct = False
-                debug_info = response_text
+                debug_info = structured_response
                 
             results.append(BenchmarkResult(
                 question["question_id"],
@@ -410,7 +409,7 @@ def run_benchmark(benchmark_name: str, model: str) -> None:
     # Handle translation benchmarks
     if benchmark_name.startswith("0050_translation_"):
         # Extract language codes from benchmark name
-        _, origin_lang, target_lang = benchmark_name.split("_")[2:]
+        origin_lang, target_lang = benchmark_name.split("_")[2:]
         benchmark = TranslationBenchmark(model, origin_lang, target_lang)
         benchmark.run()
         return

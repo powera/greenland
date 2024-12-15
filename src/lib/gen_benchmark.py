@@ -392,7 +392,7 @@ class TranslationGenerator(BenchmarkGenerator):
             self.save_question(
                 f"{self.benchmark_codename}:{idx}",
                 self.benchmark_codename,
-                json.dumps(question)
+                question,
             )
 
         # Add benchmark metadata with unique codename for this language pair
