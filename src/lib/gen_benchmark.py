@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 
 from clients import ollama_client
 import benchmarks.datastore
-from benchmarks.0050_translate.wordlist_extended import TRANSLATIONS, TranslationEntry
+from benchmarks.data.wordlist_extended import TRANSLATIONS, TranslationEntry
 import constants
 import lib.validation
 
