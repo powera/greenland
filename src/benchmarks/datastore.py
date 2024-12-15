@@ -293,39 +293,6 @@ def load_all_questions_for_benchmark(session, benchmark_name: str) -> List[Dict]
         for question in questions
     ]
 
-def find_top_runs_for_benchmark(session, benchmark_name: str, top_n: int = 5) -> List[Dict]:
-    """
-    Find the top N runs for a specific benchmark based on score.
-    
-    :param session: SQLAlchemy session
-    :param benchmark_name: Codename of the benchmark
-    :param top_n: Number of top runs to return (default 5)
-    :return: List of top runs with model and score
-    """
-    top_runs = (
-        session.query(
-            Run.run_id, 
-            Run.model_name, 
-            Model.displayname.label('model_displayname'),
-            Run.normed_score
-        )
-        .join(Model, Run.model_name == Model.codename)
-        .filter(Run.benchmark_name == benchmark_name)
-        .order_by(Run.normed_score.desc())
-        .limit(top_n)
-        .all()
-    )
-    
-    return [
-        {
-            'run_id': run.run_id,
-            'model_name': run.model_name,
-            'model_displayname': run.model_displayname,
-            'normed_score': run.normed_score
-        } 
-        for run in top_runs
-    ]
-
 def get_run_by_run_id(run_id: int, session=None) -> Optional[Dict]:
     """
     Retrieve run details for a specific run ID.
