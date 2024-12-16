@@ -3,7 +3,7 @@ name = "greenland"
 version = "0.1.0"
 description = "A benchmark suite for language models"
 authors = [
-    {name = "Greenland Authors", email = "authors@greenland.dev"}
+    {name = "Greenland Authors", email = "greenland@earlyversion.com"}
 ]
 dependencies = [
     "sqlalchemy>=2.0.0",
@@ -13,7 +13,6 @@ dependencies = [
 ]
 requires-python = ">=3.9"
 readme = "README.md"
-license = {text = "MIT"}
 
 [project.optional-dependencies]
 dev = [
