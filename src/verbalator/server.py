@@ -1,18 +1,14 @@
 #!/usr/bin/python3
+"""HTTP server for handling LLM generation requests."""
 
 import http.server
 import json
 import os
-import os.path
-
-
-# jinja2 template
+from dataclasses import asdict
+from typing import Dict, Tuple, Any, Optional
 from jinja2 import Environment, PackageLoader, select_autoescape
-env = None  # lazy loading
 
-from clients import anthropic_client
-from clients import openai_client
-from clients import ollama_client  # local ollama
+from clients import anthropic_client, openai_client, ollama_client
 import constants
 import util.flesch_kincaid as fk
 import verbalator.common
@@ -21,105 +17,184 @@ import verbalator.samples
 
 PORT = 9871
 
+class GenerationHandler:
+    """Handles text generation requests using different LLM clients."""
+    
+    @staticmethod
+    def generate_text(
+        prompt: str,
+        entry: Optional[str],
+        model: str = "phi3:3.8b"
+    ) -> Tuple[str, Dict[str, Any]]:
+        """
+        Generate text using specified model and track usage.
+        
+        Args:
+            prompt: The generation prompt
+            entry: Optional additional context
+            model: Model identifier to use
+            
+        Returns:
+            Tuple of (generated_text, usage_info)
+        """
+        if model == "gpt4o-mini":
+            return openai_client.generate_text(prompt, entry)
+        elif model == "claude3-haiku":
+            return anthropic_client.generate_text(prompt, entry)
+        else:
+            # Use Ollama client with combined prompt
+            full_prompt = f"{prompt}\n\n{entry}" if entry else prompt
+            response, usage = ollama_client.generate_text(full_prompt, model)
+            return response, asdict(usage)
 
-class InboundRequest(http.server.BaseHTTPRequestHandler):
+class RequestHandler(http.server.BaseHTTPRequestHandler):
+    """HTTP request handler for the server."""
+    
+    def __init__(self, *args, **kwargs):
+        self.jinja_env = None
+        super().__init__(*args, **kwargs)
+        
+    @property
+    def template_env(self) -> Environment:
+        """Lazy loading of Jinja environment."""
+        if not self.jinja_env:
+            self.jinja_env = Environment(
+                loader=PackageLoader("verbalator"),
+                autoescape=select_autoescape()
+            )
+        return self.jinja_env
 
-  def do_GET(self):
-    if self.path == "/favicon.ico":
-      return self.FaviconHandler()
-    if self.path.startswith("/images/"):
-      return self.StaticHandler()
-    if self.path.startswith("/css/"):
-      return self.StaticHandler()
-    if self.path.startswith("/js/"):
-      return self.StaticHandler()
-    return self.WrapperHandler()
+    def do_GET(self) -> None:
+        """Handle GET requests."""
+        handlers = {
+            "/favicon.ico": self._serve_favicon,
+            "/images/": self._serve_static,
+            "/css/": self._serve_static,
+            "/js/": self._serve_static
+        }
+        
+        # Find matching handler based on path prefix
+        handler = next(
+            (handlers[prefix] for prefix in handlers if self.path.startswith(prefix)),
+            self._serve_template
+        )
+        handler()
 
-  def do_POST(self):
-    if self.path == '/query':
-      content_length = int(self.headers['Content-Length'])
-      post_data = self.rfile.read(content_length)
-      data = json.loads(post_data.decode('utf-8'))
+    def do_POST(self) -> None:
+        """Handle POST requests."""
+        if self.path == '/query':
+            self._handle_generation_request()
+        else:
+            self.send_error(404, "Not Found")
 
-      prompt = verbalator.prompt_builder.build(data.get('prompt'), data)
-      entry = data.get('entry')
-      model = data.get('model', 'phi3:3.8b')
+    def _serve_static(self) -> None:
+        """Serve static files."""
+        path = os.path.join(constants.VERBALATOR_HTML_DIR, self.path)
+        with open(path, mode='rb') as f:
+            response = f.read()
 
-      if not prompt:
-        self.send_error(400, "No prompt provided")
-        return
+        content_types = {
+            "/images/": ("image/png", {"Cache-control": "public, max-age=3600"}),
+            "/css/": ("text/css", {}),
+            "/js/": ("text/javascript", {}),
+            "default": ("text/html; charset=utf-8", {})
+        }
+        
+        # Get content type and extra headers based on path prefix
+        content_type, extra_headers = next(
+            (content_types[prefix] for prefix in content_types if self.path.startswith(prefix)),
+            content_types["default"]
+        )
 
-      if model == "gpt4o-mini":
-        response, usage = openai_client.generate_text(prompt, entry)
-      elif model == "claude3-haiku":
-        response, usage = anthropic_client.generate_text(prompt, entry)
-      else:
-        # TODO: don't concatenate prompt + entry
-        response, usage = ollama_client.generate_text(prompt + "\n\n" + entry, model)
+        self._send_response(response, content_type, extra_headers)
 
-      rrl = fk.flesch_kincaid_grade(response)  # response reading level
-      self.send_response(200)
-      self.send_header('Content-type', 'application/json')
-      self.send_header('Access-Control-Allow-Origin', '*')  # CORS header
-      self.end_headers()
-      self.wfile.write(json.dumps({"response": response, "usage": usage, "reading_level": rrl}).encode())
-    else:
-      self.send_error(404, "Not Found")
+    def _serve_favicon(self) -> None:
+        """Serve favicon.ico."""
+        path = os.path.join(constants.VERBALATOR_HTML_DIR, "favicon.ico")
+        with open(path, mode='rb') as f:
+            response = f.read()
+        self._send_response(response, "image/x-icon")
 
+    def _serve_template(self) -> None:
+        """Serve template-rendered pages."""
+        template = self.template_env.get_template("index.html")
+        html = template.render(
+            prompts=verbalator.common.PROMPTS,
+            samples=verbalator.samples.ALL_SAMPLES
+        )
+        self._send_response(
+            bytes(html, "utf-8"),
+            "text/html; charset=utf-8"
+        )
 
-  def StaticHandler(self):
-    # Handle a request for a static file.
-    path = os.path.join(constants.VERBALATOR_HTML_DIR, self.path)
-    with open(path, mode='rb') as f:
-      response = f.read()
+    def _handle_generation_request(self) -> None:
+        """Handle text generation requests."""
+        try:
+            # Parse request data
+            content_length = int(self.headers['Content-Length'])
+            post_data = self.rfile.read(content_length)
+            data = json.loads(post_data.decode('utf-8'))
 
-    self.send_response(200)
-    if self.path.startswith("/images/"):
-      self.send_header("Content-type", "image/png")
-      self.send_header("Cache-control", "public, max-age=3600")
-    elif self.path.startswith("/css/"):
-      self.send_header("Content-type", "text/css")
-    elif self.path.startswith("/js/"):
-      self.send_header("Content-type", "text/javascript")
-    else:
-      self.send_header("Content-type", "text/html; charset=utf-8")
-    self.send_header("Content-length", len(response))
-    self.end_headers()
-    self.wfile.write(response)
+            # Extract parameters
+            prompt = verbalator.prompt_builder.build(data.get('prompt'), data)
+            if not prompt:
+                raise ValueError("No prompt provided")
 
-  def FaviconHandler(self):
-    path = os.path.join(constants.VERBALATOR_HTML_DIR, "favicon.ico")
-    with open(path, mode='rb') as f:
-      response = f.read()
-    self.send_response(200)
-    self.send_header("Content-type", "image/x-icon")
-    self.send_header("Content-length", len(response))
-    self.end_headers()
-    self.wfile.write(response)
+            # Generate response
+            response, usage = GenerationHandler.generate_text(
+                prompt=prompt,
+                entry=data.get('entry'),
+                model=data.get('model', 'phi3:3.8b')
+            )
 
-  def WrapperHandler(self):
-    # a misnomer.  will handle _env other than verbalator ... later
-    global env
-    if not env:
-      env = Environment(loader=PackageLoader("verbalator"),
-                        autoescape=select_autoescape())
-    template = env.get_template("index.html")  # TODO: multiple pages
-    html = template.render(prompts=verbalator.common.PROMPTS,
-        samples=verbalator.samples.ALL_SAMPLES)
-    response = bytes(html, "utf-8")
-    self.send_response(200)
-    self.send_header("Content-type", "text/html; charset=utf-8")
-    self.send_header("Content-length", len(response))
-    self.end_headers()
-    self.wfile.write(response)
+            # Calculate reading level
+            reading_level = fk.flesch_kincaid_grade(response)
 
+            # Send response
+            self._send_json_response({
+                "response": response,
+                "usage": usage,
+                "reading_level": reading_level
+            })
 
+        except (ValueError, KeyError) as e:
+            self.send_error(400, str(e))
+        except Exception as e:
+            self.send_error(500, str(e))
 
-def run(server_class=http.server.HTTPServer, handler_class=InboundRequest):
-  server_address = ('', PORT)
-  httpd = server_class(server_address, handler_class)
-  httpd.serve_forever()
+    def _send_response(
+        self,
+        content: bytes,
+        content_type: str,
+        extra_headers: Dict[str, str] = None
+    ) -> None:
+        """Send HTTP response with headers."""
+        self.send_response(200)
+        self.send_header("Content-type", content_type)
+        self.send_header("Content-length", len(content))
+        
+        if extra_headers:
+            for key, value in extra_headers.items():
+                self.send_header(key, value)
+                
+        self.end_headers()
+        self.wfile.write(content)
 
+    def _send_json_response(self, data: Dict) -> None:
+        """Send JSON response with CORS headers."""
+        response = json.dumps(data).encode()
+        self.send_response(200)
+        self.send_header('Content-type', 'application/json')
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Content-length', len(response))
+        self.end_headers()
+        self.wfile.write(response)
+
+def run(server_class=http.server.HTTPServer, handler_class=RequestHandler) -> None:
+    """Run the HTTP server."""
+    server_address = ('', PORT)
+    httpd = server_class(server_address, handler_class)
+    httpd.serve_forever()
 
 if __name__ == "__main__":
-  run()
+    run()
