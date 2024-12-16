@@ -5,11 +5,19 @@ import logging
 from dataclasses import dataclass
 from typing import Dict, Optional, Tuple, Any, List
 
-from clients import ollama_client, openai_client
+from clients import ollama_client, openai_client, anthropic_client
+from telemetry import LLMUsage
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
+
+@dataclass
+class TwoPhaseResponse:
+    """Container for both free-form and structured responses."""
+    free_response: str
+    structured_response: Dict[str, Any]
+    usage: LLMUsage
 
 class UnifiedLLMClient:
     """Client for routing requests to appropriate LLM backend based on model name."""
@@ -24,20 +32,22 @@ class UnifiedLLMClient:
         # Initialize backend clients
         self.ollama = ollama_client.OllamaClient(debug=debug)
         self.openai = openai_client.OpenAIClient(debug=debug)
+        self.anthropic = anthropic_client.AnthropicClient(debug=debug)
         
         # Model name prefixes for routing
-        self.openai_prefixes = ['gpt-', 'text-', 'dalle-']
+        self.openai_prefixes = ['gpt-']
+        self.anthropic_prefixes = ['claude-']
         
-    def _is_openai_model(self, model: str) -> bool:
-        """Determine if model is an OpenAI model based on prefix."""
-        return any(model.startswith(prefix) for prefix in self.openai_prefixes)
-        
-    def _route_to_client(self, model: str):
+    def _get_client(self, model: str):
         """Get appropriate client for model."""
-        if self._is_openai_model(model):
+        if any(model.startswith(prefix) for prefix in self.openai_prefixes):
             if self.debug:
                 logger.debug("Routing to OpenAI client for model: %s", model)
             return self.openai
+        elif any(model.startswith(prefix) for prefix in self.anthropic_prefixes):
+            if self.debug:
+                logger.debug("Routing to Anthropic client for model: %s", model)
+            return self.anthropic
         else:
             if self.debug:
                 logger.debug("Routing to Ollama client for model: %s", model)
@@ -45,10 +55,10 @@ class UnifiedLLMClient:
 
     def warm_model(self, model: str) -> bool:
         """Initialize model for faster first inference."""
-        client = self._route_to_client(model)
+        client = self._get_client(model)
         return client.warm_model(model)
 
-    def generate_text(self, prompt: str, model: str) -> Tuple[str, Dict]:
+    def generate_text(self, prompt: str, model: str) -> Tuple[str, LLMUsage]:
         """
         Generate text using appropriate backend.
         
@@ -63,12 +73,12 @@ class UnifiedLLMClient:
             logger.debug("Generating text with model: %s", model)
             logger.debug("Prompt: %s", prompt)
             
-        client = self._route_to_client(model)
+        client = self._get_client(model)
         result, usage = client.generate_text(prompt, model)
         
         if self.debug:
             logger.debug("Generated text: %s", result)
-            logger.debug("Usage info: %s", usage)
+            logger.debug("Usage metrics: %s", usage.to_dict())
             
         return result, usage
 
@@ -79,7 +89,7 @@ class UnifiedLLMClient:
         brief: bool = False,
         json_schema: Optional[Dict] = None,
         context: Optional[str] = None
-    ) -> Tuple[str, Dict[str, Any], Dict]:
+    ) -> TwoPhaseResponse:
         """
         Generate chat completion using appropriate backend.
         
@@ -91,7 +101,7 @@ class UnifiedLLMClient:
             context: Optional context to include before the prompt
         
         Returns:
-            Tuple containing (free_response, structured_response, usage_info)
+            TwoPhaseResponse containing free_response, structured_response, and usage_info
         """
         if self.debug:
             logger.debug("Generating chat response")
@@ -100,8 +110,14 @@ class UnifiedLLMClient:
             logger.debug("Context: %s", context)
             logger.debug("JSON schema: %s", json_schema)
             
-        client = self._route_to_client(model)
-        return client.generate_chat(prompt, model, brief, json_schema, context)
+        client = self._get_client(model)
+        response = client.generate_chat(prompt, model, brief, json_schema, context)
+        
+        if self.debug:
+            logger.debug("Chat response: %s", response)
+            logger.debug("Usage metrics: %s", response.usage.to_dict())
+            
+        return response
 
 # Create default client instance
 client = UnifiedLLMClient(debug=False)  # Set to True to enable debug logging
@@ -110,7 +126,7 @@ client = UnifiedLLMClient(debug=False)  # Set to True to enable debug logging
 def warm_model(model: str) -> bool:
     return client.warm_model(model)
 
-def generate_text(prompt: str, model: str) -> Tuple[str, Dict]:
+def generate_text(prompt: str, model: str) -> Tuple[str, LLMUsage]:
     return client.generate_text(prompt, model)
 
 def generate_chat(
@@ -119,11 +135,12 @@ def generate_chat(
     brief: bool = False,
     json_schema: Optional[Dict] = None,
     context: Optional[str] = None
-) -> Tuple[str, Dict[str, Any], Dict]:
+) -> Tuple[str, Dict[str, Any], LLMUsage]:
     """
     Generate a chat response using appropriate backend based on model name.
     
     Returns:
         Tuple containing (free_response, structured_response, usage_info)
     """
-    return client.generate_chat(prompt, model, brief, json_schema, context)
+    response = client.generate_chat(prompt, model, brief, json_schema, context)
+    return response.free_response, response.structured_response, response.usage
