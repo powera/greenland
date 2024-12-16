@@ -13,6 +13,7 @@ env = None  # lazy loading
 from clients import anthropic_client
 from clients import openai_client
 from clients import ollama_client  # local ollama
+import constants
 import util.flesch_kincaid as fk
 import verbalator.common
 import verbalator.prompt_builder
@@ -68,8 +69,7 @@ class InboundRequest(http.server.BaseHTTPRequestHandler):
 
   def StaticHandler(self):
     # Handle a request for a static file.
-    base_dir = os.path.dirname(__file__)
-    path = os.path.join(base_dir, "public_html" + self.path)
+    path = os.path.join(constants.VERBALATOR_HTML_DIR, self.path)
     with open(path, mode='rb') as f:
       response = f.read()
 
@@ -88,7 +88,7 @@ class InboundRequest(http.server.BaseHTTPRequestHandler):
     self.wfile.write(response)
 
   def FaviconHandler(self):
-    path = "public_html/favicon.ico"
+    path = os.path.join(constants.VERBALATOR_HTML_DIR, "favicon.ico")
     with open(path, mode='rb') as f:
       response = f.read()
     self.send_response(200)

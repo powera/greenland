@@ -12,3 +12,6 @@ SCHEMA_DIR = os.path.join(SRC_DIR, "schema")
 KEY_DIR = os.path.join(PROJECT_ROOT, "keys")
 TEMPLATES_DIR = os.path.join(PROJECT_ROOT, "templates")
 OUTPUT_DIR = os.path.join(PROJECT_ROOT, "output")
+
+# Verbalator directories; possibly should be refactored
+VERBALATOR_HTML_DIR = os.path.join(PROJECT_ROOT, "public_html")
