@@ -42,7 +42,7 @@ class CostConfig:
     }
     
     # Ollama cost per compute second (estimated)
-    OLLAMA_COST_PER_SEC = 0.01  # $0.01 per second
+    OLLAMA_COST_PER_SEC = 0.000_05  # $0.05 per thousand seconds
 
     @classmethod
     def get_model_tier(cls, model_name: str) -> ModelTier:
