@@ -1,7 +1,9 @@
 #!/usr/bin/python3
 """Utilities for building structured LLM prompts with style controls."""
 
+from dataclasses import dataclass
 from typing import Dict, List, Optional
+
 import verbalator.common
 
 @dataclass
