@@ -3,66 +3,42 @@
 
 import json
 import logging
-from dataclasses import dataclass
-from typing import Dict, Optional, Tuple, Union, Any, List
-import tiktoken
-from openai import OpenAI
 import os
-import constants
+import time
+from dataclasses import dataclass
+from typing import Dict, Optional, Tuple, Any, List
 
-# Configure logging with DEBUG level option
+from openai import OpenAI
+import tiktoken
+
+import constants
+from telemetry import LLMUsage
+
+# Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
+# Model identifiers
 TEST_MODEL = "gpt-4o-mini-2024-07-18"
 PROD_MODEL = "gpt-4o-2024-11-20"
 DEFAULT_MODEL = TEST_MODEL
 DEFAULT_TIMEOUT = 50
 
 @dataclass
-class UsageInfo:
-    """Tracks token usage and cost information."""
-    tokens_in: int
-    tokens_out: int
-    total_msec: float
-    cost: float
-
-    @classmethod
-    def from_completion(cls, completion, model: str = "gpt-4o-mini") -> 'UsageInfo':
-        """Create UsageInfo from OpenAI completion usage data."""
-        costs = {
-            "gpt-4o-mini": {"input": .15, "output": .6},
-            "gpt-4o": {"input": 2.5, "output": 10},
-        }
-        
-        model_base = model.split("-")[0:2]
-        model_costs = costs.get("-".join(model_base), costs["gpt-4o-mini"])
-        
-        cost = (completion.usage.prompt_tokens * (model_costs["input"] / 1000000) +
-                completion.usage.completion_tokens * (model_costs["output"] / 1000000))
-                
-        return cls(
-            tokens_in=completion.usage.prompt_tokens,
-            tokens_out=completion.usage.completion_tokens,
-            total_msec=completion.usage.total_tokens * 10,  # Rough estimate of processing time
-            cost=cost
-        )
-
-    def combine(self, other: 'UsageInfo') -> 'UsageInfo':
-        """Combine usage information from multiple responses."""
-        return UsageInfo(
-            tokens_in=self.tokens_in + other.tokens_in,
-            tokens_out=self.tokens_out + other.tokens_out,
-            total_msec=self.total_msec + other.total_msec,
-            cost=self.cost + other.cost
-        )
-
-@dataclass
 class TwoPhaseResponse:
     """Container for both free-form and structured responses."""
     free_response: str
     structured_response: Dict[str, Any]
-    usage: UsageInfo
+    usage: LLMUsage
+
+def measure_completion(func):
+    """Decorator to measure completion API call duration."""
+    def wrapper(*args, **kwargs):
+        start_time = time.time()
+        result = func(*args, **kwargs)
+        duration_ms = (time.time() - start_time) * 1000
+        return result, duration_ms
+    return wrapper
 
 class OpenAIClient:
     """Client for making requests to OpenAI API with two-phase responses."""
@@ -83,19 +59,24 @@ class OpenAIClient:
         with open(key_path) as f:
             return f.read().strip()
 
+    @measure_completion
+    def _create_completion(self, **kwargs) -> Any:
+        """Create completion with timing measurement."""
+        return self.client.chat.completions.create(**kwargs)
+
     def warm_model(self, model: str) -> bool:
         """Simulate model warmup (not needed for OpenAI but kept for API compatibility)."""
         if self.debug:
             logger.debug("Model warmup not required for OpenAI: %s", model)
         return True
 
-    def generate_text(self, prompt: str, model: str = DEFAULT_MODEL) -> Tuple[str, UsageInfo]:
+    def generate_text(self, prompt: str, model: str = DEFAULT_MODEL) -> Tuple[str, LLMUsage]:
         """Generate text completion using OpenAI API."""
         if self.debug:
             logger.debug("Generating text with model: %s", model)
             logger.debug("Prompt: %s", prompt)
             
-        completion = self.client.chat.completions.create(
+        completion, duration_ms = self._create_completion(
             model=model,
             messages=[
                 {
@@ -107,12 +88,20 @@ class OpenAIClient:
             temperature=0.15,
         )
         
-        usage = UsageInfo.from_completion(completion, model)
+        usage = LLMUsage.from_api_response(
+            {
+                "prompt_tokens": completion.usage.prompt_tokens,
+                "completion_tokens": completion.usage.completion_tokens,
+                "total_duration": duration_ms
+            },
+            model=model
+        )
+        
         result = completion.choices[0].message.content
         
         if self.debug:
             logger.debug("Generated text: %s", result)
-            logger.debug("Usage info: %s", vars(usage))
+            logger.debug("Usage metrics: %s", usage.to_dict())
                 
         return result, usage
 
@@ -150,7 +139,7 @@ class OpenAIClient:
             messages.append({"role": "system", "content": context})
         messages.append({"role": "user", "content": prompt})
         
-        completion = self.client.chat.completions.create(
+        completion, duration_ms = self._create_completion(
             model=model,
             messages=messages,
             max_tokens=256 if brief else 1536,
@@ -158,11 +147,18 @@ class OpenAIClient:
         )
         
         free_response = completion.choices[0].message.content
-        free_usage = UsageInfo.from_completion(completion, model)
+        free_usage = LLMUsage.from_api_response(
+            {
+                "prompt_tokens": completion.usage.prompt_tokens,
+                "completion_tokens": completion.usage.completion_tokens,
+                "total_duration": duration_ms
+            },
+            model=model
+        )
         
         if self.debug:
             logger.debug("Phase 1 response: %s", free_response)
-            logger.debug("Phase 1 usage: %s", vars(free_usage))
+            logger.debug("Phase 1 usage metrics: %s", free_usage.to_dict())
         
         # Phase 2: Get structured response if schema provided
         if json_schema:
@@ -171,7 +167,7 @@ class OpenAIClient:
             if self.debug:
                 logger.debug("Phase 2 structure prompt: %s", structure_prompt)
             
-            completion = self.client.chat.completions.create(
+            completion, duration_ms = self._create_completion(
                 model=model,
                 messages=messages + [
                     {"role": "assistant", "content": free_response},
@@ -183,11 +179,18 @@ class OpenAIClient:
             )
             
             json_response = completion.choices[0].message.content
-            json_usage = UsageInfo.from_completion(completion, model)
+            json_usage = LLMUsage.from_api_response(
+                {
+                    "prompt_tokens": completion.usage.prompt_tokens,
+                    "completion_tokens": completion.usage.completion_tokens,
+                    "total_duration": duration_ms
+                },
+                model=model
+            )
             
             if self.debug:
                 logger.debug("Phase 2 JSON response: %s", json_response)
-                logger.debug("Phase 2 usage: %s", vars(json_usage))
+                logger.debug("Phase 2 usage metrics: %s", json_usage.to_dict())
             
             try:
                 structured_response = json.loads(json_response)
@@ -197,13 +200,13 @@ class OpenAIClient:
                 structured_response = {"error": error_msg}
         else:
             structured_response = {}
-            json_usage = UsageInfo(0, 0, 0, 0)
+            json_usage = LLMUsage(tokens_in=0, tokens_out=0, cost=0.0, total_msec=0)
         
         # Combine usage from both phases
         total_usage = free_usage.combine(json_usage)
         
         if self.debug:
-            logger.debug("Total usage: %s", vars(total_usage))
+            logger.debug("Total usage metrics: %s", total_usage.to_dict())
         
         return TwoPhaseResponse(
             free_response=free_response,
@@ -218,9 +221,8 @@ client = OpenAIClient(debug=False)  # Set to True to enable debug logging
 def warm_model(model: str) -> bool:
     return client.warm_model(model)
 
-def generate_text(prompt: str, model: str = DEFAULT_MODEL) -> Tuple[str, Dict]:
-    result, usage = client.generate_text(prompt, model)
-    return result, vars(usage)
+def generate_text(prompt: str, model: str = DEFAULT_MODEL) -> Tuple[str, LLMUsage]:
+    return client.generate_text(prompt, model)
 
 def generate_chat(
     prompt: str,
@@ -228,7 +230,7 @@ def generate_chat(
     brief: bool = False,
     json_schema: Optional[Dict] = None,
     context: Optional[str] = None
-) -> Tuple[str, Dict[str, Any], Dict]:
+) -> Tuple[str, Dict[str, Any], LLMUsage]:
     """
     Generate a two-phase chat response.
     
@@ -236,4 +238,4 @@ def generate_chat(
         Tuple containing (free_response, structured_response, usage_info)
     """
     response = client.generate_chat(prompt, model, brief, json_schema, context)
-    return response.free_response, response.structured_response, vars(response.usage)
+    return response.free_response, response.structured_response, response.usage

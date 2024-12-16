@@ -8,6 +8,8 @@ from dataclasses import dataclass
 from typing import Dict, Optional, Tuple, Union, Any, List
 import requests
 
+from telemetry import LLMUsage
+
 # Configure logging with DEBUG level option
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -17,39 +19,11 @@ DEFAULT_MODEL = "smollm2:360m"  # Responses are low-quality but generally cohere
 DEFAULT_TIMEOUT = 50
 
 @dataclass
-class UsageInfo:
-    """Tracks token usage and cost information."""
-    tokens_in: int
-    tokens_out: int
-    total_msec: float
-    cost: float
-
-    @classmethod
-    def from_response(cls, response_data: Dict[str, Any]) -> 'UsageInfo':
-        """Create UsageInfo from Ollama response data."""
-        duration = response_data.get('total_duration', 0) / 1_000_000  # Convert to ms
-        return cls(
-            tokens_in=response_data.get('prompt_eval_count', 0),
-            tokens_out=response_data.get('eval_count', 0),
-            total_msec=duration,
-            cost=duration * (0.01 / 1000000)  # $0.01 per 1000 seconds
-        )
-
-    def combine(self, other: 'UsageInfo') -> 'UsageInfo':
-        """Combine usage information from multiple responses."""
-        return UsageInfo(
-            tokens_in=self.tokens_in + other.tokens_in,
-            tokens_out=self.tokens_out + other.tokens_out,
-            total_msec=self.total_msec + other.total_msec,
-            cost=self.cost + other.cost
-        )
-
-@dataclass
 class TwoPhaseResponse:
     """Container for both free-form and structured responses."""
     free_response: str
     structured_response: Dict[str, Any]
-    usage: UsageInfo
+    usage: LLMUsage
 
 class OllamaClient:
     """Client for making requests to Ollama API with two-phase responses."""
@@ -83,7 +57,7 @@ class OllamaClient:
             
         return response
 
-    def _process_chat_response(self, response: requests.Response) -> Tuple[str, UsageInfo]:
+    def _process_chat_response(self, response: requests.Response, model: str) -> Tuple[str, LLMUsage]:
         """Process chat response and extract content and usage info."""
         result = ""
         usage = None
@@ -98,9 +72,9 @@ class OllamaClient:
                     logger.debug("Response data: %s", json.dumps(response_data, indent=2))
                     
                 if "total_duration" in response_data:
-                    usage = UsageInfo.from_response(response_data)
+                    usage = LLMUsage.from_api_response(response_data, model=model)
                     if self.debug:
-                        logger.debug("Usage info: %s", vars(usage))
+                        logger.debug("Usage info: %s", usage)
                         
                 if "message" in response_data:
                     result += response_data["message"]["content"]
@@ -120,7 +94,7 @@ class OllamaClient:
             
         return success
 
-    def generate_text(self, prompt: str, model: str = DEFAULT_MODEL) -> Tuple[str, UsageInfo]:
+    def generate_text(self, prompt: str, model: str = DEFAULT_MODEL) -> Tuple[str, LLMUsage]:
         """Generate text completion using Ollama API."""
         if self.debug:
             logger.debug("Generating text with model: %s", model)
@@ -140,12 +114,12 @@ class OllamaClient:
             if line:
                 response_data = json.loads(line.decode('utf-8'))
                 if "total_duration" in response_data:
-                    usage = UsageInfo.from_response(response_data)
+                    usage = LLMUsage.from_api_response(response_data, model=model)
                 result += response_data.get('response', '')
                 
         if self.debug:
             logger.debug("Generated text: %s", result)
-            logger.debug("Usage info: %s", vars(usage))
+            logger.debug("Usage info: %s", usage)
                 
         return result, usage
 
@@ -196,16 +170,15 @@ class OllamaClient:
             data["options"] = {"num_predict": 256}
             
         response = self._make_request("chat", data)
-        free_response, free_usage = self._process_chat_response(response)
+        free_response, free_usage = self._process_chat_response(response, model)
         
         if self.debug:
             logger.debug("Phase 1 response: %s", free_response)
-            logger.debug("Phase 1 usage: %s", vars(free_usage))
+            logger.debug("Phase 1 usage: %s", free_usage)
         
         # Phase 2: Get structured response
         if json_schema:
-            response_keys = json_schema["properties"].keys()
-            structure_prompt = f"""Based on the previous response to the prompt, provide a JSON response using the following keys: {", ".join(response_keys)}"""
+            structure_prompt = f"""Based on the previous response to the prompt, provide a JSON response using the following keys: {", ".join(json_schema["properties"].keys())}"""
             
             if self.debug:
                 logger.debug("Phase 2 structure prompt: %s", structure_prompt)
@@ -221,11 +194,11 @@ class OllamaClient:
             }
             
             response = self._make_request("chat", data)
-            json_response, json_usage = self._process_chat_response(response)
+            json_response, json_usage = self._process_chat_response(response, model)
             
             if self.debug:
                 logger.debug("Phase 2 JSON response: %s", json_response)
-                logger.debug("Phase 2 usage: %s", vars(json_usage))
+                logger.debug("Phase 2 usage: %s", json_usage)
             
             try:
                 structured_response = json.loads(json_response)
@@ -235,13 +208,13 @@ class OllamaClient:
                 structured_response = {"error": error_msg}
         else:
             structured_response = {}
-            json_usage = UsageInfo(0, 0, 0, 0)
+            json_usage = LLMUsage(tokens_in=0, tokens_out=0, cost=0.0, total_msec=0)
         
         # Combine usage from both phases
         total_usage = free_usage.combine(json_usage)
         
         if self.debug:
-            logger.debug("Total usage: %s", vars(total_usage))
+            logger.debug("Total usage: %s", total_usage)
         
         return TwoPhaseResponse(
             free_response=free_response,
@@ -274,4 +247,4 @@ def generate_chat(
         Tuple containing (free_response, structured_response, usage_info)
     """
     response = client.generate_chat(prompt, model, brief, json_schema, context)
-    return response.free_response, response.structured_response, vars(response.usage)
+    return response.free_response, response.structured_response, response.usage
