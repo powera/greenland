@@ -16,19 +16,13 @@ CACHE_DIR = os.path.join(constants.DATA_DIR, "responses")
 OUTPUT_DIR = constants.OUTPUT_DIR
 
 # Model groups
-SMALL_OLLAMA_MODELS = [
-    "llama3:latest",  # old, 4.7G
-    "qwen:4b",        # old, 2.3G
-    "smollm:1.7b",    # 990M
-    "smollm2:360m",   # 725MB,
-]
-
 OLLAMA_MODELS = [
-    "phi3.5:3.8b",     # 2.2G
-    "llama3.1:8b",     # 4.7G
+    "smollm2:360m",   # 725MB,
+    "qwen2.5:1.5b",   # 986MB,
+    "gemma2:2b",      # 1.6G,
+    "llama3.2:3b",     # 2.0G
     "qwen2.5:7b",      # 4.7G
     "gemma2:9b",       # 5.4G
-    "mistral-nemo:12b", # 7.1G,
 ]
 
 def multi_cross_run_to_json(slug_dict: Dict[str, str]) -> Dict:
@@ -137,7 +131,7 @@ def json_to_html(json_file: str, output_html: str) -> None:
     with open(json_file, 'r') as f:
         data = json.load(f)
 
-    # HTML template [keeping existing template exactly as is]
+    # HTML template
     html_content = '''
     <!DOCTYPE html>
     <html lang="en">
@@ -225,7 +219,7 @@ def json_to_html(json_file: str, output_html: str) -> None:
         </div>
         '''
 
-    # Add JavaScript [keeping existing exactly as is]
+    # Add JavaScript
     html_content += '''
     <script>
         var coll = document.getElementsByClassName("collapsible");
