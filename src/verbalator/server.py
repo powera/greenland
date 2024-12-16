@@ -5,10 +5,6 @@ import json
 import os
 import os.path
 
-# watchdog for file changes
-# TODO: implement
-from watchdog.observers import Observer
-from watchdog.events import FileSystemEventHandler
 
 # jinja2 template
 from jinja2 import Environment, PackageLoader, select_autoescape
@@ -17,9 +13,9 @@ env = None  # lazy loading
 from clients import anthropic_client
 from clients import openai_client
 from clients import ollama_client  # local ollama
-import system_prompt_builder
 import util.flesch_kincaid as fk
 import verbalator.common
+import verbalator.prompt_builder
 import verbalator.samples
 
 PORT = 9871
@@ -44,7 +40,7 @@ class InboundRequest(http.server.BaseHTTPRequestHandler):
       post_data = self.rfile.read(content_length)
       data = json.loads(post_data.decode('utf-8'))
 
-      prompt = system_prompt_builder.build(data.get('prompt'), data)
+      prompt = verbalator.prompt_builder.build(data.get('prompt'), data)
       entry = data.get('entry')
       model = data.get('model', 'phi3:3.8b')
 
