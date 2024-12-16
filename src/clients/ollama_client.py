@@ -258,7 +258,7 @@ def warm_model(model: str) -> bool:
 
 def generate_text(prompt: str, model: str = DEFAULT_MODEL) -> Tuple[str, Dict]:
     result, usage = client.generate_text(prompt, model)
-    return result, vars(usage)
+    return result, usage
 
 def generate_chat(
     prompt: str,

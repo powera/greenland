@@ -4,9 +4,14 @@
 import http.server
 import json
 import os
+import sys
+
 from dataclasses import asdict
 from typing import Dict, Tuple, Any, Optional
 from jinja2 import Environment, PackageLoader, select_autoescape
+
+# Add parent directory to Python path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from clients import anthropic_client, openai_client, ollama_client
 import constants
@@ -87,9 +92,21 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
         else:
             self.send_error(404, "Not Found")
 
+    def _get_normalized_path(self) -> str:
+        """Get normalized file path from request path."""
+        # Remove query parameters if any
+        path = self.path.split('?')[0]
+        # Convert URL path to filesystem path
+        normalized_path = os.path.normpath(path.lstrip('/'))
+        # Ensure the path doesn't try to access parent directories
+        if normalized_path.startswith('..') or '/../' in normalized_path:
+            raise ValueError("Invalid path")
+        return normalized_path
+
     def _serve_static(self) -> None:
         """Serve static files."""
-        path = os.path.join(constants.VERBALATOR_HTML_DIR, self.path)
+        normalized_path = self._get_normalized_path()
+        path = os.path.join(constants.VERBALATOR_HTML_DIR, normalized_path)
         with open(path, mode='rb') as f:
             response = f.read()
 
