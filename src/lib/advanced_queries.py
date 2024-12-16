@@ -4,7 +4,8 @@
 
 import logging
 from enum import Enum
-from typing import Tuple, Dict, List
+from typing import Tuple, Dict, List, Callable, Optional
+from dataclasses import dataclass
 
 from clients import unified_client
 from telemetry import LLMUsage
@@ -14,6 +15,13 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 DEFAULT_MODEL = "gemma2:9b"
+
+@dataclass
+class ResponseConfig:
+    """Configuration for a response type."""
+    context_template: str
+    prompt_template: str
+    description: str
 
 class ResponseType(Enum):
     """Available response types for different kinds of topics."""
@@ -25,57 +33,195 @@ class ResponseType(Enum):
     LITERARY = "literary"        # Plot summaries and narrative descriptions
     CULTURAL = "cultural"        # Broader cultural movements and traditions
 
-def categorize_topic(topic: str, model: str = DEFAULT_MODEL) -> Tuple[Dict, LLMUsage]:
-    """Determine appropriate response type for a given topic.
+# Response type configurations
+RESPONSE_CONFIGS = {
+    ResponseType.HISTORICAL: ResponseConfig(
+        context_template="""You are explaining historical topics to an educated general audience. Your response should be:
+- Approximately {length} words in length
+- Well-structured with clear chronology
+- Include specific dates, key figures, and locations
+- Focus on both what happened and why it matters
+- Written in an engaging, narrative style
+Avoid editorializing or modern political comparisons.""",
+        prompt_template="Provide a {length}-word explanation of {topic}.",
+        description="Historical events, contexts, and developments"
+    ),
+    
+    ResponseType.SCIENTIFIC: ResponseConfig(
+        context_template="""You are explaining scientific concepts to an educated general audience. Your response should be:
+- Approximately {length} words in length
+- Start with fundamental principles
+- Use precise scientific terminology with clear explanations
+- Include real-world examples and applications
+- Build from basic to more complex aspects
+- Incorporate relevant mathematical concepts when appropriate
+Avoid oversimplification while maintaining accessibility.""",
+        prompt_template="Provide a {length}-word scientific explanation of {topic}.",
+        description="Natural phenomena and scientific concepts"
+    ),
+    
+    ResponseType.TECHNICAL: ResponseConfig(
+        context_template="""You are explaining technical concepts for an educated general audience. Your response should be:
+- Approximately {length} words in length
+- Begin with a high-level overview
+- Break down complex concepts into understandable parts
+- Include practical applications or examples
+- Use technical terms with clear explanations
+- Address both how it works and why it matters
+- Include relevant diagrams or code examples if requested
+Avoid oversimplification while maintaining clarity.""",
+        prompt_template="Provide a {length}-word technical explanation of {topic}.",
+        description="Engineering, technology, programming, and systems"
+    ),
+    
+    ResponseType.BIOGRAPHICAL: ResponseConfig(
+        context_template="""You are writing biographical descriptions for an educated general audience. Your response should be:
+- Approximately {length} words in length
+- Lead with the person's most significant contributions or role
+- Include key life events and their impact
+- Mention current activities or legacy if applicable
+- Maintain a neutral, factual tone
+- Focus on verified information
+- Include relevant dates and locations
+Avoid speculation and unsubstantiated claims.""",
+        prompt_template="Provide a {length}-word biographical description of {topic}.",
+        description="Living or recently deceased people"
+    ),
+    
+    ResponseType.ANALYTICAL: ResponseConfig(
+        context_template="""You are providing critical analysis for an educated general audience. Your response should be:
+- Approximately {length} words in length
+- Present a clear analytical framework
+- Support claims with specific evidence
+- Consider multiple interpretations where relevant
+- Connect to broader themes or patterns
+- Develop a cohesive argument
+- Include relevant theoretical frameworks
+Balance depth of analysis with clarity of expression.""",
+        prompt_template="Provide a {length}-word analytical response about {topic}.",
+        description="Critical analysis and evaluation"
+    ),
+    
+    ResponseType.LITERARY: ResponseConfig(
+        context_template="""You are providing plot summaries and narrative descriptions for an educated general audience. Your response should be:
+- Approximately {length} words in length
+- Begin with a brief introduction of the work
+- Present the plot chronologically
+- Focus on key events and character developments
+- Include major plot points and resolution
+- Mention genre and style where relevant
+- Avoid detailed analysis or interpretation
+Maintain narrative flow while being concise.""",
+        prompt_template="Provide a {length}-word plot summary of {topic}.",
+        description="Plot summaries and narrative descriptions"
+    ),
+    
+    ResponseType.CULTURAL: ResponseConfig(
+        context_template="""You are explaining cultural phenomena for an educated general audience. Your response should be:
+- Approximately {length} words in length
+- Provide relevant historical context
+- Explain cultural significance and impact
+- Include key trends and developments
+- Address broader societal implications
+- Recognize diverse perspectives
+- Consider cross-cultural influences
+- Acknowledge regional variations
+Maintain cultural sensitivity while being informative.""",
+        prompt_template="Provide a {length}-word explanation of this cultural topic: {topic}.",
+        description="Broader cultural movements and traditions"
+    )
+}
+
+
+def _generate_response(
+    topic: str,
+    target_length: int,
+    config: ResponseConfig,
+    model: str = DEFAULT_MODEL
+) -> Tuple[str, LLMUsage]:
+    """Generate a response using the specified configuration.
     
     Args:
-        topic: The topic to categorize (e.g., "French Revolution", "Jane Eyre")
-        model: Model to use for analysis
+        topic: Topic to explain
+        target_length: Desired length in words
+        config: ResponseConfig containing templates and settings
+        model: Model to use for generation
         
     Returns:
-        Tuple containing (categorization_results, usage_metrics)
+        Tuple containing (response_text, usage_metrics)
     """
+    _validate_target_length(target_length)
+    
+    context = config.context_template.format(length=target_length)
+    prompt = config.prompt_template.format(length=target_length, topic=topic)
+    
+    response, _, usage = unified_client.generate_chat(
+        prompt=prompt,
+        model=model,
+        context=context
+    )
+    
+    return response.strip(), usage
+
+def generate_smart_response(
+    topic: str,
+    target_length: int,
+    model: str = DEFAULT_MODEL
+) -> Tuple[str, LLMUsage, ResponseType]:
+    """Generate an appropriate response based on topic categorization.
+    
+    Args:
+        topic: Topic to explain
+        target_length: Desired length in words
+        model: Model to use for generation
+        
+    Returns:
+        Tuple containing (response_text, usage_metrics, response_type)
+    """
+    # First categorize the topic
+    categorization, cat_usage = categorize_topic(topic, model)
+    response_type = ResponseType(categorization["response_type"])
+    
+    # Get the appropriate config
+    config = RESPONSE_CONFIGS[response_type]
+    
+    # Generate the response
+    response, gen_usage = _generate_response(topic, target_length, config, model)
+    
+    # Combine usage metrics from both operations
+    total_usage = cat_usage.combine(gen_usage)
+    
+    return response, total_usage, response_type
+
+def categorize_topic(topic: str, model: str = DEFAULT_MODEL) -> Tuple[Dict, LLMUsage]:
+    """Determine appropriate response type for a given topic."""
     context = """You are categorizing topics to determine the most appropriate response type.
-Consider these response types and their use cases:
+Consider these response types and their use cases:"""
 
-- Historical: Historical events, contexts, and developments (e.g., "the writing and publication history of Jane Eyre")
-- Scientific: Natural phenomena, physical processes, biology, chemistry, physics
-- Technical: Engineering, technology, programming, systems
-- Biographical: Living or recently deceased people
-- Analytical: Critical analysis and evaluation (e.g., "analysis of Gothic elements in Jane Eyre")
-- Literary: Plot summaries and narrative descriptions (e.g., "what happens in Jane Eyre")
-- Cultural: Broader cultural movements and traditions
-
-For literary works, carefully distinguish between:
-- Literary response for plot summaries and character descriptions
-- Analytical response for thematic analysis and critical interpretation
-- Historical response for publication history and historical context
-- Cultural response for influence and role in cultural movements
-
-Select the response type that best matches how the topic should be approached."""
+    # Add descriptions for each response type
+    for resp_type in ResponseType:
+        context += f"\n- {resp_type.value}: {RESPONSE_CONFIGS[resp_type].description}"
 
     schema = {
         "type": "object",
         "properties": {
             "response_type": {
                 "type": "string",
-                "enum": ["historical", "scientific", "technical", "biographical", 
-                        "analytical", "literary", "cultural"]
+                "enum": [rt.value for rt in ResponseType]
             },
             "explanation": {"type": "string"},
             "secondary_aspects": {
                 "type": "array",
                 "items": {
                     "type": "string",
-                    "enum": ["historical", "scientific", "technical", "biographical", 
-                            "analytical", "literary", "cultural"]
+                    "enum": [rt.value for rt in ResponseType]
                 }
             }
         },
         "required": ["response_type", "explanation", "secondary_aspects"]
     }
 
-    prompt = f"""Analyze this topic and determine the most appropriate response type: {topic}"""
+    prompt = f"Analyze this topic and determine the most appropriate response type: {topic}"
     
     _, response, usage = unified_client.generate_chat(
         prompt=prompt,
@@ -86,240 +232,9 @@ Select the response type that best matches how the topic should be approached.""
     
     return response, usage
 
-
-def generate_historical_response(topic: str, target_length: int, model: str = DEFAULT_MODEL) -> Tuple[str, LLMUsage]:
-    """Generate a historical explanation of specified length.
-    
-    Args:
-        topic: Historical topic to explain (e.g. "Battle of Hastings")
-        target_length: Desired length in words
-        model: Model to use for generation
-        
-    Returns:
-        Tuple containing (response_text, usage_metrics)
-    """
-    _validate_target_length(target_length)
-    
-    context = f"""You are explaining historical topics to an educated general audience. Your response should be:
-- Approximately {target_length} words in length
-- Well-structured with clear chronology
-- Include specific dates, key figures, and locations
-- Focus on both what happened and why it matters
-- Written in an engaging, narrative style
-Avoid editorializing or modern political comparisons."""
-
-    prompt = f"""Provide a {target_length}-word explanation of {topic}."""
-    
-    response, _, usage = unified_client.generate_chat(
-        prompt=prompt,
-        model=model,
-        context=context
-    )
-    
-    return response.strip(), usage
-
-def generate_scientific_response(topic: str, target_length: int, model: str = DEFAULT_MODEL) -> Tuple[str, LLMUsage]:
-    """Generate a scientific explanation of specified length.
-    
-    Args:
-        topic: Scientific topic to explain (e.g. "how a lever functions")
-        target_length: Desired length in words
-        model: Model to use for generation
-        
-    Returns:
-        Tuple containing (response_text, usage_metrics)
-    """
-    _validate_target_length(target_length)
-    
-    context = f"""You are explaining scientific concepts to an educated general audience. Your response should be:
-- Approximately {target_length} words in length
-- Start with fundamental principles
-- Use precise scientific terminology with clear explanations
-- Include real-world examples and applications
-- Build from basic to more complex aspects
-Avoid oversimplification while maintaining accessibility."""
-
-    prompt = f"""Provide a {target_length}-word scientific explanation of {topic}."""
-    
-    response, _, usage = unified_client.generate_chat(
-        prompt=prompt,
-        model=model,
-        context=context
-    )
-    
-    return response.strip(), usage
-
-def generate_biographical_response(subject: str, target_length: int, model: str = DEFAULT_MODEL) -> Tuple[str, LLMUsage]:
-    """Generate a biographical explanation of specified length.
-    
-    Args:
-        subject: Person to describe (e.g., "Greta Thunberg")
-        target_length: Desired length in words
-        model: Model to use for generation
-        
-    Returns:
-        Tuple containing (response_text, usage_metrics)
-    """
-    _validate_target_length(target_length)
-    
-    context = f"""You are writing biographical descriptions for an educated general audience. Your response should be:
-- Approximately {target_length} words in length
-- Lead with the person's most significant contributions or role
-- Include key life events and their impact
-- Mention current activities or legacy if applicable
-- Maintain a neutral, factual tone
-- Focus on verified information
-Avoid speculation and unsubstantiated claims."""
-
-    prompt = f"""Provide a {target_length}-word biographical description of {subject}."""
-    
-    response, _, usage = unified_client.generate_chat(
-        prompt=prompt,
-        model=model,
-        context=context
-    )
-    
-    return response.strip(), usage
-
-def generate_technical_response(topic: str, target_length: int, model: str = DEFAULT_MODEL) -> Tuple[str, LLMUsage]:
-    """Generate a technical explanation of specified length.
-    
-    Args:
-        topic: Technical topic to explain (e.g., "how containerization works")
-        target_length: Desired length in words
-        model: Model to use for generation
-        
-    Returns:
-        Tuple containing (response_text, usage_metrics)
-    """
-    _validate_target_length(target_length)
-    
-    context = f"""You are explaining technical concepts for an educated general audience. Your response should be:
-- Approximately {target_length} words in length
-- Begin with a high-level overview
-- Break down complex concepts into understandable parts
-- Include practical applications or examples
-- Use technical terms with clear explanations
-- Address both how it works and why it matters
-Avoid oversimplification while maintaining clarity."""
-
-    prompt = f"""Provide a {target_length}-word technical explanation of {topic}."""
-    
-    response, _, usage = unified_client.generate_chat(
-        prompt=prompt,
-        model=model,
-        context=context
-    )
-    
-    return response.strip(), usage
-
-def generate_literary_response(work: str, target_length: int, model: str = DEFAULT_MODEL) -> Tuple[str, LLMUsage]:
-    """Generate a literary explanation of specified length.
-    
-    Args:
-        work: Literary work to describe (e.g., "The Great Gatsby")
-        target_length: Desired length in words
-        model: Model to use for generation
-        
-    Returns:
-        Tuple containing (response_text, usage_metrics)
-    """
-    _validate_target_length(target_length)
-    
-    context = f"""You are providing plot summaries and narrative descriptions for an educated general audience. Your response should be:
-- Approximately {target_length} words in length
-- Begin with a brief introduction of the work
-- Present the plot chronologically
-- Focus on key events and character developments
-- Include major plot points and resolution
-- Avoid detailed analysis or interpretation
-Maintain narrative flow while being concise."""
-
-    prompt = f"""Provide a {target_length}-word plot summary of {work}."""
-    
-    response, _, usage = unified_client.generate_chat(
-        prompt=prompt,
-        model=model,
-        context=context
-    )
-    
-    return response.strip(), usage
-
-def generate_cultural_response(topic: str, target_length: int, model: str = DEFAULT_MODEL) -> Tuple[str, LLMUsage]:
-    """Generate a cultural explanation of specified length.
-    
-    Args:
-        topic: Cultural topic to explain (e.g., "K-pop's global influence")
-        target_length: Desired length in words
-        model: Model to use for generation
-        
-    Returns:
-        Tuple containing (response_text, usage_metrics)
-    """
-    _validate_target_length(target_length)
-    
-    context = f"""You are explaining cultural phenomena for an educated general audience. Your response should be:
-- Approximately {target_length} words in length
-- Provide relevant historical context
-- Explain cultural significance and impact
-- Include key trends and developments
-- Address broader societal implications
-- Recognize diverse perspectives
-Maintain cultural sensitivity while being informative."""
-
-    prompt = f"""Provide a {target_length}-word explanation of this cultural topic: {topic}."""
-    
-    response, _, usage = unified_client.generate_chat(
-        prompt=prompt,
-        model=model,
-        context=context
-    )
-    
-    return response.strip(), usage
-
-def generate_analytical_response(topic: str, target_length: int, model: str = DEFAULT_MODEL) -> Tuple[str, LLMUsage]:
-    """Generate an analytical response of specified length.
-    
-    Args:
-        topic: Topic to analyze (e.g., "symbolism in Animal Farm")
-        target_length: Desired length in words
-        model: Model to use for generation
-        
-    Returns:
-        Tuple containing (response_text, usage_metrics)
-    """
-    _validate_target_length(target_length)
-    
-    context = f"""You are providing critical analysis for an educated general audience. Your response should be:
-- Approximately {target_length} words in length
-- Present a clear analytical framework
-- Support claims with specific evidence
-- Consider multiple interpretations where relevant
-- Connect to broader themes or patterns
-- Develop a cohesive argument
-Balance depth of analysis with clarity of expression."""
-
-    prompt = f"""Provide a {target_length}-word analytical response about {topic}."""
-    
-    response, _, usage = unified_client.generate_chat(
-        prompt=prompt,
-        model=model,
-        context=context
-    )
-    
-    return response.strip(), usage
-
+# Analysis functions
 def analyze_quotes(essay: str, model: str = DEFAULT_MODEL) -> Tuple[str, LLMUsage]:
-    """Analyze quotes and cultural references in an essay.
-    
-    Args:
-        essay: Text to analyze
-        model: Model to use for analysis
-        
-    Returns:
-        Tuple containing (analysis_text, usage_metrics)
-        The analysis text will contain identified quotes and explanations in a readable format
-    """
+    """Analyze quotes and cultural references in an essay."""
     _validate_input(essay)
     
     context = """You are analyzing text for an academic audience. For each quote or cultural reference, present your findings in this structure:
@@ -343,16 +258,7 @@ List findings in order of appearance in the text."""
     return response.strip(), usage
 
 def analyze_logic(essay: str, model: str = DEFAULT_MODEL) -> Tuple[str, LLMUsage]:
-    """Analyze logical arguments in an essay.
-    
-    Args:
-        essay: Text to analyze
-        model: Model to use for analysis
-        
-    Returns:
-        Tuple containing (analysis_text, usage_metrics)
-        The analysis text will contain identified arguments and their evaluation in a readable format
-    """
+    """Analyze logical arguments in an essay."""
     _validate_input(essay)
     
     context = """You are conducting logical analysis for an academic audience. For each major argument, present your analysis in this structure:
@@ -376,6 +282,7 @@ Focus on argument structure and logical relationships."""
     
     return response.strip(), usage
 
+# Validation functions
 def _validate_input(text: str, min_length: int = 10) -> None:
     """Validate input text meets minimum requirements."""
     if not text or len(text.strip()) < min_length:
