@@ -4,7 +4,7 @@
 
 import logging
 from enum import Enum
-from typing import Tuple, Dict, List, Callable, Optional
+from typing import Tuple, Dict, List, Union, Callable, Optional
 from dataclasses import dataclass
 
 from clients import unified_client
@@ -192,6 +192,43 @@ def generate_smart_response(
     total_usage = cat_usage.combine(gen_usage)
     
     return response, total_usage, response_type
+
+def generate_response(
+    topic: str,
+    target_length: int,
+    response_type: Union[str, ResponseType],
+    model: str = DEFAULT_MODEL
+) -> Tuple[str, LLMUsage]:
+    """Generate a response for a given topic and response type.
+    
+    Args:
+        topic: Topic to explain
+        target_length: Desired length in words
+        response_type: Type of response (can be string or ResponseType enum)
+        model: Model to use for generation
+        
+    Returns:
+        Tuple containing (response_text, usage_metrics)
+        
+    Raises:
+        ValueError: If response_type is not valid
+    """
+    # Convert string to enum if needed
+    if isinstance(response_type, str):
+        try:
+            response_type = ResponseType(response_type.lower())
+        except ValueError:
+            valid_types = [rt.value for rt in ResponseType]
+            raise ValueError(f"Invalid response type. Must be one of: {', '.join(valid_types)}")
+    
+    # Get the configuration for this response type
+    if response_type not in RESPONSE_CONFIGS:
+        raise ValueError(f"No configuration found for response type: {response_type}")
+    
+    config = RESPONSE_CONFIGS[response_type]
+    
+    # Generate the response using the existing helper
+    return _generate_response(topic, target_length, config, model)
 
 def categorize_topic(topic: str, model: str = DEFAULT_MODEL) -> Tuple[Dict, LLMUsage]:
     """Determine appropriate response type for a given topic."""
