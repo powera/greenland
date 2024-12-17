@@ -171,7 +171,15 @@ class OpenAIClient:
         
         # If JSON schema provided, configure for structured response
         if json_schema:
-            json_schema["additionalProperties"] = False
+            # Remove any minimum/maximum constraints from schema properties
+            clean_schema = json_schema.copy()
+            if "properties" in clean_schema:
+                for prop in clean_schema["properties"].values():
+                    if isinstance(prop, dict):
+                        prop.pop("minimum", None)
+                        prop.pop("maximum", None)
+            
+            clean_schema["additionalProperties"] = False
             kwargs["temperature"] = 0.15  # Lower temperature for structured output
             kwargs["response_format"] = {
                 "type": "json_schema",
@@ -179,7 +187,7 @@ class OpenAIClient:
                     "name": "Details",
                     "description": "N/A",
                     "strict": True,
-                    "schema": json_schema
+                    "schema": clean_schema
                 }
             }
         
