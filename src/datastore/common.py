@@ -99,30 +99,3 @@ def decode_json(text: Optional[str]) -> Dict:
         return json.dumps(result, ensure_ascii=False, indent=2)
     except json.JSONDecodeError:
         return {"result": text}
-
-# Base classes for test types
-class TestBase:
-    """Base class for both benchmarks and qualitative tests."""
-    __tablename__ = None  # Must be set by child classes
-
-    codename: Mapped[str] = mapped_column(String, primary_key=True)
-    displayname: Mapped[str] = mapped_column(String, nullable=False)
-    description: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-
-class RunBase:
-    """Base class for both benchmark and qualitative test runs."""
-    __tablename__ = None  # Must be set by child classes
-
-    run_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    run_ts: Mapped[datetime.datetime] = mapped_column(
-        TIMESTAMP, server_default=func.current_timestamp()
-    )
-    model_name: Mapped[str] = mapped_column(String, ForeignKey('model.codename'))
-
-class RunDetailBase:
-    """Base class for both benchmark and qualitative test run details."""
-    __tablename__ = None  # Must be set by child classes
-
-    run_id: Mapped[int] = mapped_column(ForeignKey('run.run_id'), primary_key=True)
-    eval_msec: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    debug_json: Mapped[Optional[str]] = mapped_column(String, nullable=True)

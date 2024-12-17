@@ -2,20 +2,24 @@
 
 """Benchmark definitions and database models."""
 
+import datetime
 from typing import Dict, List, Optional, Any, Tuple
-from sqlalchemy import String, Integer, ForeignKey
+from sqlalchemy import String, Integer, ForeignKey, TIMESTAMP
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 
 from datastore.common import (
-    Base, TestBase, RunBase, RunDetailBase, create_dev_session,
+    Base, create_dev_session,
     create_database_and_session, decode_json
 )
 
-class Benchmark(Base, TestBase):
+class Benchmark(Base):
     """Benchmark definition."""
     __tablename__ = 'benchmark'
+    codename: Mapped[str] = mapped_column(String, primary_key=True)
+    displayname: Mapped[str] = mapped_column(String, nullable=False)
+    description: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
     license_name: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
@@ -35,9 +39,14 @@ class Question(Base):
     benchmark: Mapped['Benchmark'] = relationship(back_populates='questions')
     run_details: Mapped[List['RunDetail']] = relationship(back_populates='question', lazy='noload')
 
-class Run(Base, RunBase):
+class Run(Base):
     """Benchmark run results."""
     __tablename__ = 'run'
+    run_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    run_ts: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP, server_default=func.current_timestamp()
+    )
+    model_name: Mapped[str] = mapped_column(String, ForeignKey('model.codename'))
 
     benchmark_name: Mapped[str] = mapped_column(String, ForeignKey('benchmark.codename'))
     normed_score: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
@@ -47,9 +56,12 @@ class Run(Base, RunBase):
     benchmark: Mapped['Benchmark'] = relationship(back_populates='runs')
     run_details: Mapped[List['RunDetail']] = relationship(back_populates='run', lazy='noload')
 
-class RunDetail(Base, RunDetailBase):
+class RunDetail(Base):
     """Detailed results for a benchmark run."""
     __tablename__ = 'run_detail'
+    run_id: Mapped[int] = mapped_column(ForeignKey('run.run_id'), primary_key=True)
+    eval_msec: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    debug_json: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
     question_id: Mapped[str] = mapped_column(String, ForeignKey('question.question_id'), primary_key=True)
     score: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)

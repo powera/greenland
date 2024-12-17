@@ -8,11 +8,14 @@ from sqlalchemy import String, Integer, Text, ForeignKey, TIMESTAMP
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from datastore.common import Base, TestBase, RunBase, RunDetailBase, create_dev_session, decode_json
+from datastore.common import Base, create_dev_session, decode_json
 
-class QualTest(Base, TestBase):
+class QualTest(Base):
     """Qualitative test definition."""
     __tablename__ = 'qual_test'
+    codename: Mapped[str] = mapped_column(String, primary_key=True)
+    displayname: Mapped[str] = mapped_column(String, nullable=False)
+    description: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
     # Relationships
     runs: Mapped[List['QualRun']] = relationship(back_populates='qual_test', lazy='noload')
@@ -30,9 +33,14 @@ class QualTopic(Base):
     qual_test: Mapped['QualTest'] = relationship(back_populates='topics')
     run_details: Mapped[List['QualRunDetail']] = relationship(back_populates='topic', lazy='noload')
 
-class QualRun(Base, RunBase):
+class QualRun(Base):
     """Qualitative test run results."""
     __tablename__ = 'qual_run'
+    run_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    run_ts: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP, server_default=func.current_timestamp()
+    )
+    model_name: Mapped[str] = mapped_column(String, ForeignKey('model.codename'))
 
     qual_test_name: Mapped[str] = mapped_column(String, ForeignKey('qual_test.codename'))
     avg_score: Mapped[Optional[float]] = mapped_column(Integer, nullable=True)
@@ -42,9 +50,12 @@ class QualRun(Base, RunBase):
     qual_test: Mapped['QualTest'] = relationship(back_populates='runs')
     run_details: Mapped[List['QualRunDetail']] = relationship(back_populates='run', lazy='noload')
 
-class QualRunDetail(Base, RunDetailBase):
+class QualRunDetail(Base):
     """Detailed results for a qualitative test run."""
     __tablename__ = 'qual_run_detail'
+    run_id: Mapped[int] = mapped_column(ForeignKey('run.run_id'), primary_key=True)
+    eval_msec: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    debug_json: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
     topic_id: Mapped[str] = mapped_column(String, ForeignKey('qual_topic.topic_id'), primary_key=True)
     accuracy_score: Mapped[int] = mapped_column(Integer, nullable=False)  # 0-10
