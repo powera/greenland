@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-"""Client for interacting with OpenAI API with two-phase responses."""
+"""Client for interacting with OpenAI API with two-phase responses using direct HTTP requests."""
 
 import json
 import logging
@@ -8,7 +8,7 @@ import time
 from dataclasses import dataclass
 from typing import Dict, Optional, Tuple, Any, List
 
-from openai import OpenAI
+import requests
 import tiktoken
 
 import constants
@@ -23,6 +23,7 @@ TEST_MODEL = "gpt-4o-mini-2024-07-18"
 PROD_MODEL = "gpt-4o-2024-11-20"
 DEFAULT_MODEL = TEST_MODEL
 DEFAULT_TIMEOUT = 50
+API_BASE = "https://api.openai.com/v1"
 
 @dataclass
 class TwoPhaseResponse:
@@ -41,7 +42,7 @@ def measure_completion(func):
     return wrapper
 
 class OpenAIClient:
-    """Client for making requests to OpenAI API with two-phase responses."""
+    """Client for making direct HTTP requests to OpenAI API with two-phase responses."""
     
     def __init__(self, timeout: int = DEFAULT_TIMEOUT, debug: bool = False):
         """Initialize OpenAI client with API key."""
@@ -50,7 +51,11 @@ class OpenAIClient:
         if debug:
             logger.setLevel(logging.DEBUG)
             logger.debug("Initialized OpenAIClient in debug mode")
-        self.client = OpenAI(api_key=self._load_key())
+        self.api_key = self._load_key()
+        self.headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json"
+        }
         self.encoder = tiktoken.get_encoding("cl100k_base")
 
     def _load_key(self) -> str:
@@ -60,9 +65,27 @@ class OpenAIClient:
             return f.read().strip()
 
     @measure_completion
-    def _create_completion(self, **kwargs) -> Any:
-        """Create completion with timing measurement."""
-        return self.client.chat.completions.create(**kwargs)
+    def _create_completion(self, **kwargs) -> Dict:
+        """Make direct HTTP request to OpenAI chat completions endpoint."""
+        url = f"{API_BASE}/chat/completions"
+        
+        if self.debug:
+            logger.debug("Making request to %s", url)
+            logger.debug("Request data: %s", json.dumps(kwargs, indent=2))
+            
+        response = requests.post(
+            url,
+            headers=self.headers,
+            json=kwargs,
+            timeout=self.timeout
+        )
+        
+        if response.status_code != 200:
+            error_msg = f"Error {response.status_code}: {response.text}"
+            logger.error(error_msg)
+            raise Exception(error_msg)
+            
+        return response.json()
 
     def warm_model(self, model: str) -> bool:
         """Simulate model warmup (not needed for OpenAI but kept for API compatibility)."""
@@ -76,7 +99,7 @@ class OpenAIClient:
             logger.debug("Generating text with model: %s", model)
             logger.debug("Prompt: %s", prompt)
             
-        completion, duration_ms = self._create_completion(
+        completion_data, duration_ms = self._create_completion(
             model=model,
             messages=[
                 {
@@ -90,14 +113,14 @@ class OpenAIClient:
         
         usage = LLMUsage.from_api_response(
             {
-                "prompt_tokens": completion.usage.prompt_tokens,
-                "completion_tokens": completion.usage.completion_tokens,
+                "prompt_tokens": completion_data["usage"]["prompt_tokens"],
+                "completion_tokens": completion_data["usage"]["completion_tokens"],
                 "total_duration": duration_ms
             },
             model=model
         )
         
-        result = completion.choices[0].message.content
+        result = completion_data["choices"][0]["message"]["content"]
         
         if self.debug:
             logger.debug("Generated text: %s", result)
@@ -139,18 +162,18 @@ class OpenAIClient:
             messages.append({"role": "system", "content": context})
         messages.append({"role": "user", "content": prompt})
         
-        completion, duration_ms = self._create_completion(
+        completion_data, duration_ms = self._create_completion(
             model=model,
             messages=messages,
             max_tokens=256 if brief else 1536,
             temperature=0.45,
         )
         
-        free_response = completion.choices[0].message.content
+        free_response = completion_data["choices"][0]["message"]["content"]
         free_usage = LLMUsage.from_api_response(
             {
-                "prompt_tokens": completion.usage.prompt_tokens,
-                "completion_tokens": completion.usage.completion_tokens,
+                "prompt_tokens": completion_data["usage"]["prompt_tokens"],
+                "completion_tokens": completion_data["usage"]["completion_tokens"],
                 "total_duration": duration_ms
             },
             model=model
@@ -167,7 +190,7 @@ class OpenAIClient:
             if self.debug:
                 logger.debug("Phase 2 structure prompt: %s", structure_prompt)
             
-            completion, duration_ms = self._create_completion(
+            completion_data, duration_ms = self._create_completion(
                 model=model,
                 messages=messages + [
                     {"role": "assistant", "content": free_response},
@@ -178,11 +201,11 @@ class OpenAIClient:
                 response_format={"type": "json_object", "schema": json_schema}
             )
             
-            json_response = completion.choices[0].message.content
+            json_response = completion_data["choices"][0]["message"]["content"]
             json_usage = LLMUsage.from_api_response(
                 {
-                    "prompt_tokens": completion.usage.prompt_tokens,
-                    "completion_tokens": completion.usage.completion_tokens,
+                    "prompt_tokens": completion_data["usage"]["prompt_tokens"],
+                    "completion_tokens": completion_data["usage"]["completion_tokens"],
                     "total_duration": duration_ms
                 },
                 model=model
