@@ -5,12 +5,14 @@ from datetime import datetime
 from datastore.benchmarks import (
     create_database_and_session,
     insert_benchmark,
-    insert_model,
     insert_question,
     insert_run,
-    list_all_models,
     list_all_benchmarks,
     load_all_questions_for_benchmark
+)
+from datastore.common import (
+    insert_model,
+    list_all_models
 )
 
 class TestDatastore(unittest.TestCase):
