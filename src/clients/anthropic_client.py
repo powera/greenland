@@ -23,10 +23,9 @@ DEFAULT_MODEL = TEST_MODEL
 DEFAULT_TIMEOUT = 50
 
 @dataclass
-class TwoPhaseResponse:
-    """Container for both free-form and structured responses."""
-    free_response: str
-    structured_response: Dict[str, Any]
+class APIResponse:
+    """Container for API response."""
+    response_text: str
     usage: LLMUsage
 
 def measure_completion(func):
@@ -39,7 +38,7 @@ def measure_completion(func):
     return wrapper
 
 class AnthropicClient:
-    """Client for making requests to Anthropic API with two-phase responses."""
+    """Client for making requests to Anthropic API."""
     
     def __init__(self, api_key: Optional[str] = None, debug: bool = False):
         """
@@ -135,19 +134,21 @@ class AnthropicClient:
         brief: bool = False,
         json_schema: Optional[Dict] = None,
         context: Optional[str] = None
-    ) -> TwoPhaseResponse:
+    ) -> Tuple[str, Dict[str, Any], LLMUsage]:
         """
-        Generate two-phase chat completion using Anthropic API.
+        Generate chat completion using Anthropic API.
         
         Args:
             prompt: The main prompt/question
             model: Model to use for generation
             brief: Whether to limit response length
-            json_schema: Schema for structured response
+            json_schema: Schema for structured response (if provided, returns JSON)
             context: Optional context to include before the prompt
         
         Returns:
-            TwoPhaseResponse containing both free-form and structured responses
+            Tuple containing (response_text, structured_data, usage_info)
+            For text responses, structured_data will be empty dict
+            For JSON responses, response_text will be empty string
         """
         if self.debug:
             logger.debug("Generating chat response")
@@ -156,21 +157,28 @@ class AnthropicClient:
             logger.debug("Context: %s", context)
             logger.debug("JSON schema: %s", json.dumps(json_schema, indent=2) if json_schema else None)
         
-        # Phase 1: Get free-form response
         system_prompt = context if context else "You are a helpful assistant."
-        
-        message, duration_ms = self._create_completion(
-            max_tokens=256 if brief else 1536,
-            messages=[{
+        kwargs = {
+            "max_tokens": 256 if brief else 1536,
+            "messages": [{
                 "role": "user",
                 "content": prompt
             }],
-            model=model,
-            system=system_prompt
-        )
+            "model": model,
+            "system": system_prompt
+        }
         
-        free_response = message.content[0].text
-        free_usage = LLMUsage.from_api_response(
+        # Configure for JSON response if schema provided
+        if json_schema:
+            schema_prompt = f"""Provide a JSON response matching this schema:
+{json.dumps(json_schema, indent=2)}"""
+            kwargs["messages"][0]["content"] = f"{prompt}\n\n{schema_prompt}"
+            kwargs["response_format"] = {"type": "json_object"}
+        
+        message, duration_ms = self._create_completion(**kwargs)
+        
+        response_content = message.content[0].text
+        usage = LLMUsage.from_api_response(
             {
                 "prompt_tokens": message.usage.input_tokens,
                 "completion_tokens": message.usage.output_tokens,
@@ -179,62 +187,25 @@ class AnthropicClient:
             model=model
         )
         
-        if self.debug:
-            logger.debug("Phase 1 response: %s", free_response)
-            logger.debug("Phase 1 usage metrics: %s", free_usage.to_dict())
-        
-        # Phase 2: Get structured response if schema provided
+        # Parse JSON response if schema was provided
         if json_schema:
-            structure_prompt = """Based on the previous response, provide a structured response that matches this schema:
-            """ + json.dumps(json_schema, indent=2)
-            
-            message, duration_ms = self._create_completion(
-                max_tokens=1536,
-                messages=[
-                    {"role": "user", "content": prompt},
-                    {"role": "assistant", "content": free_response},
-                    {"role": "user", "content": structure_prompt}
-                ],
-                model=model,
-                system=system_prompt,
-                response_format={"type": "json_object"}
-            )
-            
-            json_response = message.content[0].text
-            json_usage = LLMUsage.from_api_response(
-                {
-                    "prompt_tokens": message.usage.input_tokens,
-                    "completion_tokens": message.usage.output_tokens,
-                    "total_duration": duration_ms
-                },
-                model=model
-            )
-            
-            if self.debug:
-                logger.debug("Phase 2 JSON response: %s", json_response)
-                logger.debug("Phase 2 usage metrics: %s", json_usage.to_dict())
-            
             try:
-                structured_response = json.loads(json_response)
+                structured_data = json.loads(response_content)
+                response_text = ""
             except json.JSONDecodeError:
-                error_msg = f"Failed to parse JSON response: {json_response}"
+                error_msg = f"Failed to parse JSON response: {response_content}"
                 logger.error(error_msg)
-                structured_response = {"error": error_msg}
+                structured_data = {"error": error_msg}
+                response_text = ""
         else:
-            structured_response = {}
-            json_usage = LLMUsage(tokens_in=0, tokens_out=0, cost=0.0, total_msec=0)
-        
-        # Combine usage from both phases
-        total_usage = free_usage.combine(json_usage)
+            response_text = response_content
+            structured_data = {}
         
         if self.debug:
-            logger.debug("Total usage metrics: %s", total_usage.to_dict())
+            logger.debug("Response text: %s", response_text if response_text else "JSON response")
+            logger.debug("Usage metrics: %s", usage.to_dict())
         
-        return TwoPhaseResponse(
-            free_response=free_response,
-            structured_response=structured_response,
-            usage=total_usage
-        )
+        return response_text, structured_data, usage
 
 # Create default client instance
 client = AnthropicClient(debug=False)  # Set to True to enable debug logging
@@ -254,10 +225,11 @@ def generate_chat(
     context: Optional[str] = None
 ) -> Tuple[str, Dict[str, Any], LLMUsage]:
     """
-    Generate a two-phase chat response.
+    Generate a chat response, either text or JSON.
     
     Returns:
-        Tuple containing (free_response, structured_response, usage_info)
+        Tuple containing (response_text, structured_data, usage_info)
+        For text responses, structured_data will be empty dict
+        For JSON responses, response_text will be empty string
     """
-    response = client.generate_chat(prompt, model, brief, json_schema, context)
-    return response.free_response, response.structured_response, response.usage
+    return client.generate_chat(prompt, model, brief, json_schema, context)

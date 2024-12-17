@@ -13,10 +13,10 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 @dataclass
-class TwoPhaseResponse:
-    """Container for both free-form and structured responses."""
-    free_response: str
-    structured_response: Dict[str, Any]
+class Response:
+    """Container for response data."""
+    response_text: str
+    structured_data: Dict[str, Any]
     usage: LLMUsage
 
 class UnifiedLLMClient:
@@ -89,7 +89,7 @@ class UnifiedLLMClient:
         brief: bool = False,
         json_schema: Optional[Dict] = None,
         context: Optional[str] = None
-    ) -> TwoPhaseResponse:
+    ) -> Response:
         """
         Generate chat completion using appropriate backend.
         
@@ -97,11 +97,13 @@ class UnifiedLLMClient:
             prompt: The main prompt/question
             model: Model name (determines backend)
             brief: Whether to limit response length
-            json_schema: Schema for structured response
+            json_schema: Schema for structured response (if provided, returns JSON)
             context: Optional context to include before the prompt
         
         Returns:
-            TwoPhaseResponse containing free_response, structured_response, and usage_info
+            Response containing response_text, structured_data, and usage_info
+            For text responses, structured_data will be empty dict
+            For JSON responses, response_text will be empty string
         """
         if self.debug:
             logger.debug("Generating chat response")
@@ -111,13 +113,23 @@ class UnifiedLLMClient:
             logger.debug("JSON schema: %s", json_schema)
             
         client = self._get_client(model)
-        response = client.generate_chat(prompt, model, brief, json_schema, context)
+        response_text, structured_data, usage = client.generate_chat(
+            prompt=prompt,
+            model=model,
+            brief=brief,
+            json_schema=json_schema,
+            context=context
+        )
         
         if self.debug:
-            logger.debug("Chat response: %s", response)
-            logger.debug("Usage metrics: %s", response.usage.to_dict())
+            logger.debug("Chat response: %s", response_text if response_text else "JSON response")
+            logger.debug("Usage metrics: %s", usage.to_dict())
             
-        return response
+        return Response(
+            response_text=response_text,
+            structured_data=structured_data,
+            usage=usage
+        )
 
 # Create default client instance
 client = UnifiedLLMClient(debug=False)  # Set to True to enable debug logging
@@ -140,7 +152,9 @@ def generate_chat(
     Generate a chat response using appropriate backend based on model name.
     
     Returns:
-        Tuple containing (free_response, structured_response, usage_info)
+        Tuple containing (response_text, structured_data, usage_info)
+        For text responses, structured_data will be empty dict
+        For JSON responses, response_text will be empty string
     """
     response = client.generate_chat(prompt, model, brief, json_schema, context)
-    return response.free_response, response.structured_response, response.usage
+    return response.response_text, response.structured_data, response.usage
