@@ -26,13 +26,7 @@ class Model(Base):
     filesize_mb: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     license_name: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
-    # These relationships will be set up by the respective modules
-    benchmark_runs: Mapped[List['Run']] = relationship(
-        "Run", back_populates='model', lazy='noload'
-    )
-    qual_runs: Mapped[List['QualRun']] = relationship(
-        "QualRun", back_populates='model', lazy='noload'
-    )
+    # benchmark runs and qual runs are populated in those files.
 
 def create_dev_session():
     """Create a database session for development."""
