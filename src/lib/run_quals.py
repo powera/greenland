@@ -9,7 +9,7 @@ import json
 from clients import unified_client
 from telemetry import LLMUsage
 import datastore.quals
-from advanced_queries import ResponseType, RESPONSE_CONFIGS
+import lib.advanced_queries
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -106,14 +106,13 @@ Score each criterion from 0-10 (10 being best) and provide a brief explanation."
         results = []
         total_score = 0
         
-        config = RESPONSE_CONFIGS[self.response_type]
         for topic in self.topics:
-            # Generate response using the appropriate response type configuration
-            prompt = config.prompt_template.format(length=TARGET_LENGTH, topic=topic)
-            response, _, gen_usage = unified_client.generate_chat(
-                prompt,
-                self.model,
-                context=config.context_template.format(length=TARGET_LENGTH)
+            # Generate response using advanced_queries.generate_response
+            response, gen_usage = lib.advanced_queries.generate_response(
+                topic,
+                TARGET_LENGTH,
+                self.response_type,
+                self.model
             )
             
             # Evaluate the response
@@ -166,7 +165,7 @@ class HistoricalAnalysisQual(QualTestRunner):
     def __init__(self, model: str, session=None):
         super().__init__(model, session)
         self.test_name = "historical_analysis"
-        self.response_type = ResponseType.HISTORICAL
+        self.response_type = lib.advanced_queries.ResponseType.HISTORICAL
         self.topics = [
             "The causes and effects of the Industrial Revolution",
             "The impact of the printing press on medieval Europe",
@@ -184,7 +183,7 @@ class ScientificExplanationQual(QualTestRunner):
     def __init__(self, model: str, session=None):
         super().__init__(model, session)
         self.test_name = "scientific_explanation"
-        self.response_type = ResponseType.SCIENTIFIC
+        self.response_type = lib.advanced_queries.ResponseType.SCIENTIFIC
         self.topics = [
             "The process of photosynthesis in plants",
             "How black holes form and evolve",
@@ -202,7 +201,7 @@ class TechnicalAnalysisQual(QualTestRunner):
     def __init__(self, model: str, session=None):
         super().__init__(model, session)
         self.test_name = "technical_analysis"
-        self.response_type = ResponseType.TECHNICAL
+        self.response_type = lib.advanced_queries.ResponseType.TECHNICAL
         self.topics = [
             "How public key encryption works",
             "The architecture of modern CPUs",
@@ -220,7 +219,7 @@ class BiographicalAnalysisQual(QualTestRunner):
     def __init__(self, model: str, session=None):
         super().__init__(model, session)
         self.test_name = "biographical_analysis"
-        self.response_type = ResponseType.BIOGRAPHICAL
+        self.response_type = lib.advanced_queries.ResponseType.BIOGRAPHICAL
         self.topics = [
             "The life and achievements of Marie Curie",
             "Albert Einstein's contributions to physics",
@@ -238,7 +237,7 @@ class LiteraryAnalysisQual(QualTestRunner):
     def __init__(self, model: str, session=None):
         super().__init__(model, session)
         self.test_name = "literary_analysis"
-        self.response_type = ResponseType.LITERARY
+        self.response_type = lib.advanced_queries.ResponseType.LITERARY
         self.topics = [
             "The plot and themes of 1984 by George Orwell",
             "The narrative structure of One Hundred Years of Solitude",
@@ -256,7 +255,7 @@ class CulturalAnalysisQual(QualTestRunner):
     def __init__(self, model: str, session=None):
         super().__init__(model, session)
         self.test_name = "cultural_analysis"
-        self.response_type = ResponseType.CULTURAL
+        self.response_type = lib.advanced_queries.ResponseType.CULTURAL
         self.topics = [
             "The influence of jazz on American culture",
             "The role of tea ceremonies in Japanese society",
@@ -274,7 +273,7 @@ class AnalyticalResponseQual(QualTestRunner):
     def __init__(self, model: str, session=None):
         super().__init__(model, session)
         self.test_name = "analytical_response"
-        self.response_type = ResponseType.ANALYTICAL
+        self.response_type = lib.advanced_queries.ResponseType.ANALYTICAL
         self.topics = [
             "The economic impact of automation on employment",
             "The effects of social media on political discourse",
