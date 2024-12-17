@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-"""Client for interacting with OpenAI API with two-phase responses using direct HTTP requests."""
+"""Client for interacting with OpenAI API using direct HTTP requests."""
 
 import json
 import logging
@@ -26,10 +26,9 @@ DEFAULT_TIMEOUT = 50
 API_BASE = "https://api.openai.com/v1"
 
 @dataclass
-class TwoPhaseResponse:
-    """Container for both free-form and structured responses."""
-    free_response: str
-    structured_response: Dict[str, Any]
+class APIResponse:
+    """Container for API response."""
+    response_text: str
     usage: LLMUsage
 
 def measure_completion(func):
@@ -42,7 +41,7 @@ def measure_completion(func):
     return wrapper
 
 class OpenAIClient:
-    """Client for making direct HTTP requests to OpenAI API with two-phase responses."""
+    """Client for making direct HTTP requests to OpenAI API."""
     
     def __init__(self, timeout: int = DEFAULT_TIMEOUT, debug: bool = False):
         """Initialize OpenAI client with API key."""
@@ -135,42 +134,59 @@ class OpenAIClient:
         brief: bool = False,
         json_schema: Optional[Dict] = None,
         context: Optional[str] = None
-    ) -> TwoPhaseResponse:
+    ) -> Tuple[str, Dict[str, Any], LLMUsage]:
         """
-        Generate two-phase chat completion using OpenAI API.
+        Generate chat completion using OpenAI API.
         
         Args:
             prompt: The main prompt/question
             model: Model to use for generation
             brief: Whether to limit response length
-            json_schema: Schema for structured response
+            json_schema: Schema for structured response (if provided, returns JSON)
             context: Optional context to include before the prompt
         
         Returns:
-            TwoPhaseResponse containing both free-form and structured responses
+            Tuple containing (response_text, structured_data, usage_info)
+            For text responses, structured_data will be empty dict
+            For JSON responses, response_text will be empty string
         """
         if self.debug:
             logger.debug("Generating chat response")
             logger.debug("Model: %s", model)
             logger.debug("Brief mode: %s", brief)
             logger.debug("Context: %s", context)
-            logger.debug("JSON schema: %s", json.dumps(json_schema, indent=2) if json_schema else None)
+            logger.debug("JSON schema: %s", json_dumps(json_schema, indent=2) if json_schema else None)
         
-        # Phase 1: Get free-form response
         messages = []
         if context:
             messages.append({"role": "system", "content": context})
         messages.append({"role": "user", "content": prompt})
         
-        completion_data, duration_ms = self._create_completion(
-            model=model,
-            messages=messages,
-            max_tokens=256 if brief else 1536,
-            temperature=0.45,
-        )
+        kwargs = {
+            "model": model,
+            "messages": messages,
+            "max_tokens": 256 if brief else 1536,
+            "temperature": 0.45,
+        }
         
-        free_response = completion_data["choices"][0]["message"]["content"]
-        free_usage = LLMUsage.from_api_response(
+        # If JSON schema provided, configure for structured response
+        if json_schema:
+            json_schema["additionalProperties"] = False
+            kwargs["temperature"] = 0.15  # Lower temperature for structured output
+            kwargs["response_format"] = {
+                "type": "json_schema",
+                "json_schema": {
+                    "name": "Details",
+                    "description": "N/A",
+                    "strict": True,
+                    "schema": json_schema
+                }
+            }
+        
+        completion_data, duration_ms = self._create_completion(**kwargs)
+        
+        response_content = completion_data["choices"][0]["message"]["content"]
+        usage = LLMUsage.from_api_response(
             {
                 "prompt_tokens": completion_data["usage"]["prompt_tokens"],
                 "completion_tokens": completion_data["usage"]["completion_tokens"],
@@ -179,70 +195,25 @@ class OpenAIClient:
             model=model
         )
         
-        if self.debug:
-            logger.debug("Phase 1 response: %s", free_response)
-            logger.debug("Phase 1 usage metrics: %s", free_usage.to_dict())
-        
-        # Phase 2: Get structured response if schema provided
+        # Parse JSON response if schema was provided
         if json_schema:
-            structure_prompt = "Based on the previous response to the prompt, provide a structured response that matches the schema."
-            
-            if self.debug:
-                logger.debug("Phase 2 structure prompt: %s", structure_prompt)
-           
-            json_schema["additionalProperties"] = False
-            completion_data, duration_ms = self._create_completion(
-                model=model,
-                messages=messages + [
-                    {"role": "assistant", "content": free_response},
-                    {"role": "user", "content": structure_prompt}
-                ],
-                max_tokens=1536,
-                temperature=0.15,
-                response_format={"type": "json_schema",
-                                 "json_schema": {
-                                   "name": "Details",
-                                   "description": "N/A",
-                                   "strict": True,
-                                   "schema": json_schema}
-                                 },
-            )
-            
-            json_response = completion_data["choices"][0]["message"]["content"]
-            json_usage = LLMUsage.from_api_response(
-                {
-                    "prompt_tokens": completion_data["usage"]["prompt_tokens"],
-                    "completion_tokens": completion_data["usage"]["completion_tokens"],
-                    "total_duration": duration_ms
-                },
-                model=model
-            )
-            
-            if self.debug:
-                logger.debug("Phase 2 JSON response: %s", json_response)
-                logger.debug("Phase 2 usage metrics: %s", json_usage.to_dict())
-            
             try:
-                structured_response = json.loads(json_response)
+                structured_data = json.loads(response_content)
+                response_text = ""
             except json.JSONDecodeError:
-                error_msg = f"Failed to parse JSON response: {json_response}"
+                error_msg = f"Failed to parse JSON response: {response_content}"
                 logger.error(error_msg)
-                structured_response = {"error": error_msg}
+                structured_data = {"error": error_msg}
+                response_text = ""
         else:
-            structured_response = {}
-            json_usage = LLMUsage(tokens_in=0, tokens_out=0, cost=0.0, total_msec=0)
-        
-        # Combine usage from both phases
-        total_usage = free_usage.combine(json_usage)
+            response_text = response_content
+            structured_data = {}
         
         if self.debug:
-            logger.debug("Total usage metrics: %s", total_usage.to_dict())
+            logger.debug("Response text: %s", response_text if response_text else "JSON response")
+            logger.debug("Usage metrics: %s", usage.to_dict())
         
-        return TwoPhaseResponse(
-            free_response=free_response,
-            structured_response=structured_response,
-            usage=total_usage
-        )
+        return response_text, structured_data, usage
 
 # Create default client instance
 client = OpenAIClient(debug=False)  # Set to True to enable debug logging
@@ -262,10 +233,11 @@ def generate_chat(
     context: Optional[str] = None
 ) -> Tuple[str, Dict[str, Any], LLMUsage]:
     """
-    Generate a two-phase chat response.
+    Generate a chat response, either text or JSON.
     
     Returns:
-        Tuple containing (free_response, structured_response, usage_info)
+        Tuple containing (response_text, structured_data, usage_info)
+        For text responses, structured_data will be empty dict
+        For JSON responses, response_text will be empty string
     """
-    response = client.generate_chat(prompt, model, brief, json_schema, context)
-    return response.free_response, response.structured_response, response.usage
+    return client.generate_chat(prompt, model, brief, json_schema, context)
