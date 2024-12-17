@@ -8,6 +8,7 @@ import json
 
 from clients import unified_client
 from telemetry import LLMUsage
+import datastore.quals
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -31,12 +32,14 @@ class QualResult:
 class QualTestRunner:
     """Base class for running qualification tests."""
     
-    def __init__(self, model: str):
+    def __init__(self, model: str, session=None):
         """Initialize qualification test runner with model name."""
         self.model = model
         self.evaluator_model = EVALUATOR_MODEL
         self.topics: List[str] = []
         self.criteria: Dict[str, str] = {}
+        self.session = session
+        self.test_name = None  # Must be set by subclass
         
     def evaluate_response(
         self,
@@ -92,12 +95,13 @@ Score each criterion from 0-10 (10 being best) and provide a brief explanation."
         
         return scores, evaluation["explanation"], usage
 
-    def run(self) -> List[QualResult]:
+    def run(self, save_to_db: bool = False) -> List[QualResult]:
         """Execute the qualification tests."""
-        if not self.topics or not self.criteria:
-            raise ValueError("Topics and criteria must be defined in subclass")
+        if not self.topics or not self.criteria or not self.test_name:
+            raise ValueError("Topics, criteria, and test_name must be defined in subclass")
             
         results = []
+        total_score = 0
         
         for topic in self.topics:
             # Generate response using advanced query
@@ -116,6 +120,7 @@ Score each criterion from 0-10 (10 being best) and provide a brief explanation."
             
             # Calculate average score
             avg_score = sum(scores.values()) // len(scores)
+            total_score += avg_score
             
             # Create result object
             result = QualResult(
@@ -135,13 +140,27 @@ Score each criterion from 0-10 (10 being best) and provide a brief explanation."
             
             results.append(result)
             
+        # Save results to database if requested
+        if save_to_db and self.session:
+            overall_score = total_score / len(results)
+            success, run_id = datastore.quals.insert_qual_run(
+                self.session,
+                self.model,
+                self.test_name,
+                overall_score,
+                [vars(r) for r in results]
+            )
+            if not success:
+                logger.error(f"Failed to save results to database: {run_id}")
+            
         return results
 
 class HistoricalAnalysisQual(QualTestRunner):
     """Qualification tests for historical analysis responses."""
     
-    def __init__(self, model: str):
-        super().__init__(model)
+    def __init__(self, model: str, session=None):
+        super().__init__(model, session)
+        self.test_name = "historical_analysis"
         self.topics = [
             "The causes and effects of the Industrial Revolution",
             "The impact of the printing press on medieval Europe",
@@ -156,8 +175,9 @@ class HistoricalAnalysisQual(QualTestRunner):
 class ScientificExplanationQual(QualTestRunner):
     """Qualification tests for scientific explanation responses."""
     
-    def __init__(self, model: str):
-        super().__init__(model)
+    def __init__(self, model: str, session=None):
+        super().__init__(model, session)
+        self.test_name = "scientific_explanation"
         self.topics = [
             "The process of photosynthesis in plants",
             "How black holes form and evolve",
@@ -172,8 +192,9 @@ class ScientificExplanationQual(QualTestRunner):
 class TechnicalAnalysisQual(QualTestRunner):
     """Qualification tests for technical analysis responses."""
     
-    def __init__(self, model: str):
-        super().__init__(model)
+    def __init__(self, model: str, session=None):
+        super().__init__(model, session)
+        self.test_name = "technical_analysis"
         self.topics = [
             "How public key encryption works",
             "The architecture of modern CPUs",
@@ -192,13 +213,15 @@ QUAL_TEST_CLASSES = {
     "technical": TechnicalAnalysisQual
 }
 
-def run_qual_test(test_type: str, model: str) -> List[QualResult]:
+def run_qual_test(test_type: str, model: str, save_to_db: bool = False, session=None) -> List[QualResult]:
     """
     Run a specific qualification test against a model.
     
     Args:
         test_type: Type of qualification test to run
         model: Model to test
+        save_to_db: Whether to save results to database
+        session: Optional database session (required if save_to_db is True)
         
     Returns:
         List of QualResults for each topic
@@ -207,5 +230,8 @@ def run_qual_test(test_type: str, model: str) -> List[QualResult]:
     if not test_class:
         raise ValueError(f"Unknown qualification test type: {test_type}")
         
-    test = test_class(model)
-    return test.run()
+    if save_to_db and not session:
+        session = datastore.quals.create_dev_session()
+        
+    test = test_class(model, session)
+    return test.run(save_to_db)
