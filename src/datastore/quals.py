@@ -8,7 +8,11 @@ from sqlalchemy import String, Integer, Text, ForeignKey, TIMESTAMP
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from datastore.common import Base, create_dev_session, decode_json
+from datastore.common import Base, Model, create_dev_session, decode_json
+
+Model.qual_runs = relationship(
+    "QualRun", back_populates='model', lazy='noload'
+)
 
 class QualTest(Base):
     """Qualitative test definition."""
