@@ -150,7 +150,8 @@ class LLMUsage:
         
         # Convert duration from API format (if present)
         duration = response_data.get('total_duration', 0)
-        if duration > 1000:  # Ollama returns nanoseconds
+        # TODO: fix hackiness
+        if duration > 1000000:  # Ollama returns nanoseconds
             duration = duration / 1_000_000  # Convert to milliseconds
             
         # Calculate cost if not provided
