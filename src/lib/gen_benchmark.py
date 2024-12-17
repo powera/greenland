@@ -229,7 +229,7 @@ Use natural language and vary the sentence structure."""
             'locations': load_list('locations.txt')
         }
 
-        for idx in range(10):
+        for idx in range(25):
             question = self.generate_question(**resources)
             self.save_question(
                 f"0035:haystack:{idx}",

@@ -7,7 +7,7 @@ from typing import Dict, List, Set, Tuple, Optional, Any
 from dataclasses import dataclass
 
 import benchmarks.datastore
-from clients import ollama_client
+from clients import unified_client
 import lib.score_table
 
 logger = logging.getLogger(__name__)
@@ -26,7 +26,10 @@ class BenchmarkRunner:
     def __init__(self, model: str):
         """Initialize benchmark runner with model name."""
         self.model = model
-        self.ollama_model = ":".join(model.split(":")[:-1])  # Strip quantization
+        if "gpt-4" in self.model:
+          self.remote_model = self.model
+        else:
+          self.remote_model = ":".join(model.split(":")[:-1])  # Strip quantization
         self.session = benchmarks.datastore.create_dev_session()
         
     def load_questions(self, benchmark: str) -> List[Dict]:
@@ -35,7 +38,7 @@ class BenchmarkRunner:
         
     def warm_up(self):
         """Warm up model before running benchmark."""
-        ollama_client.warm_model(self.ollama_model)
+        unified_client.warm_model(self.remote_model)
         
     def save_results(self, benchmark: str, score: int, details: List[BenchmarkResult]) -> None:
         """Save benchmark results to database."""
@@ -83,9 +86,9 @@ class SpellCheckBenchmark(BenchmarkRunner):
             info = json.loads(question["question_info_json"])
             prompt = f"What is the incorrectly-spelled word in this sentence: {info['sentence']}"
             
-            _, structured_response, perf = ollama_client.generate_chat(
+            _, structured_response, perf = unified_client.generate_chat(
                 prompt=prompt,
-                model=self.ollama_model,
+                model=self.remote_model,
                 json_schema=self.schema,
                 context=self.context
             )
@@ -96,7 +99,7 @@ class SpellCheckBenchmark(BenchmarkRunner):
             results.append(BenchmarkResult(
                 question["question_id"],
                 is_correct,
-                perf["total_msec"],
+                int(perf.total_msec),
                 json.dumps(structured_response)
             ))
 
@@ -115,9 +118,9 @@ class DefinitionsBenchmark(BenchmarkRunner):
         results = []
         for question in questions:
             info = json.loads(question["question_info_json"])
-            free_response, _, perf = ollama_client.generate_chat(
+            free_response, _, perf = unified_client.generate_chat(
                 info["question"],
-                self.ollama_model,
+                self.remote_model,
                 brief=True
             )
             
@@ -125,7 +128,7 @@ class DefinitionsBenchmark(BenchmarkRunner):
             results.append(BenchmarkResult(
                 question["question_id"],
                 is_correct,
-                perf["total_msec"],
+                int(perf.total_msec),
                 None if is_correct else free_response
             ))
             
@@ -162,9 +165,9 @@ class ParagraphAnalysisBenchmark(BenchmarkRunner):
             info = json.loads(question["question_info_json"])
             query = info["query"].removesuffix("\nAnswer: ")
             
-            _, structured_response, perf = ollama_client.generate_chat(
+            _, structured_response, perf = unified_client.generate_chat(
                 prompt=query,
-                model=self.ollama_model,
+                model=self.remote_model,
                 json_schema=self.schema,
                 context=self.context
             )
@@ -186,11 +189,11 @@ class ParagraphAnalysisBenchmark(BenchmarkRunner):
             results.append(BenchmarkResult(
                 question["question_id"],
                 is_correct,
-                perf["total_msec"],
+                int(perf.total_msec),
                 json.dumps(debug_info) if debug_info else None
             ))
             
-        score = sum(r.score for r in results)
+        score = sum(r.score for r in results) * 10
         self.save_results("0030_analyze_paragraph", score, results)
         print(f"Correct: {score}/{len(questions)}")
 
@@ -224,9 +227,9 @@ class SimpleHaystackBenchmark(BenchmarkRunner):
 
 What is the subject for the sentence where the location is {info["correct"]["location"]}?"""
 
-            _, structured_response, perf = ollama_client.generate_chat(
+            _, structured_response, perf = unified_client.generate_chat(
                 prompt=prompt,
-                model=self.ollama_model,
+                model=self.remote_model,
                 json_schema=self.schema,
                 context=self.context
             )
@@ -239,11 +242,11 @@ What is the subject for the sentence where the location is {info["correct"]["loc
             results.append(BenchmarkResult(
                 question["question_id"],
                 is_correct,
-                perf["total_msec"],
+                int(perf.total_msec),
                 json.dumps(structured_response)
             ))
             
-        score = sum(r.score for r in results)
+        score = 4 * sum(r.score for r in results)  # 25 questions
         self.save_results("0035_simple_haystack", score, results)
         print(f"Correct: {score}/{len(questions)}")
 
@@ -263,9 +266,9 @@ Respond with just the answer - do not include explanations or additional context
         results = []
         for question in questions:
             info = json.loads(question["question_info_json"])
-            free_response, _, perf = ollama_client.generate_chat(
+            free_response, _, perf = unified_client.generate_chat(
                 prompt=info["context"],
-                model=self.ollama_model,
+                model=self.remote_model,
                 context=self.context
             )
             
@@ -278,7 +281,7 @@ Respond with just the answer - do not include explanations or additional context
             results.append(BenchmarkResult(
                 question["question_id"],
                 is_correct,
-                perf["total_msec"],
+                int(perf.total_msec),
                 json.dumps(debug_info) if debug_info else None
             ))
             
@@ -343,9 +346,9 @@ When translating a word from {self.origin_lang.upper()} to {self.target_lang.upp
             if info.get("choices"):
                 prompt += f"\nPossible translations: {', '.join(info['choices'])}"
 
-            _, structured_response, perf = ollama_client.generate_chat(
+            _, structured_response, perf = unified_client.generate_chat(
                 prompt,
-                self.ollama_model,
+                self.remote_model,
                 json_schema=schema,
                 context=context
             )
@@ -380,11 +383,12 @@ When translating a word from {self.origin_lang.upper()} to {self.target_lang.upp
             results.append(BenchmarkResult(
                 question["question_id"],
                 is_correct,
-                perf["total_msec"],
+                int(perf.total_msec),
                 json.dumps(debug_info) if debug_info else None
             ))
             
-        score = sum(r.score for r in results)
+        score = sum(r.score for r in results) * 2
+        if score > 100: score=100  # 51 questions
         self.save_results(self.benchmark_codename, score, results)
         print(f"Correct: {score}/{len(questions)}")
 
