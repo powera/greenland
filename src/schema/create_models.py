@@ -22,6 +22,7 @@ def create_models():
 
   # Small models
   benchmarks.datastore.insert_model(session, "gemma2:2b:Q4_0", "Gemma2 Small", "2024-06-07", 1600, "Gemma License")
+  benchmarks.datastore.insert_model(session, "qwen2.5:1.5b:Q4_K_M", "QWEN25 Small", "2024-09-15", 986, "Apache License")
 
   # Remote models
   benchmarks.datastore.insert_model(session, "gpt-4o-mini-2024-07-18", "GPT-4o-mini", "2024-07-18", 2047, "Closed Model")

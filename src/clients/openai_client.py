@@ -189,7 +189,8 @@ class OpenAIClient:
             
             if self.debug:
                 logger.debug("Phase 2 structure prompt: %s", structure_prompt)
-            
+           
+            json_schema["additionalProperties"] = False
             completion_data, duration_ms = self._create_completion(
                 model=model,
                 messages=messages + [
@@ -198,7 +199,13 @@ class OpenAIClient:
                 ],
                 max_tokens=1536,
                 temperature=0.15,
-                response_format={"type": "json_object", "schema": json_schema}
+                response_format={"type": "json_schema",
+                                 "json_schema": {
+                                   "name": "Details",
+                                   "description": "N/A",
+                                   "strict": True,
+                                   "schema": json_schema}
+                                 },
             )
             
             json_response = completion_data["choices"][0]["message"]["content"]
