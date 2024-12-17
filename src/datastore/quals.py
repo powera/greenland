@@ -7,6 +7,7 @@ from typing import Dict, List, Optional, Any
 from sqlalchemy import String, Integer, Text, ForeignKey, TIMESTAMP
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.sql import func
 
 from datastore.common import Base, Model, create_dev_session, decode_json
 
