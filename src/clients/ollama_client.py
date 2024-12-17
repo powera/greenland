@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-"""Client for interacting with Ollama API with two-phase responses."""
+"""Client for interacting with Ollama API with optional two-phase responses."""
 
 import json
 import logging
@@ -26,7 +26,7 @@ class TwoPhaseResponse:
     usage: LLMUsage
 
 class OllamaClient:
-    """Client for making requests to Ollama API with two-phase responses."""
+    """Client for making requests to Ollama API with optional two-phase responses."""
     
     def __init__(self, server: str = SERVER, timeout: int = DEFAULT_TIMEOUT, debug: bool = False):
         self.server = server
@@ -129,10 +129,11 @@ class OllamaClient:
         model: str = DEFAULT_MODEL,
         brief: bool = False,
         json_schema: Optional[Dict] = None,
-        context: Optional[str] = None
-    ) -> TwoPhaseResponse:
+        context: Optional[str] = None,
+        two_phase: bool = True
+    ) -> Union[TwoPhaseResponse, Tuple[str, Dict[str, Any], LLMUsage]]:
         """
-        Generate two-phase chat completion using Ollama API.
+        Generate chat completion using Ollama API.
         
         Args:
             prompt: The main prompt/question
@@ -140,9 +141,12 @@ class OllamaClient:
             brief: Whether to limit response length
             json_schema: Schema for structured response
             context: Optional context to include before the prompt
+            two_phase: If True, use two-phase response for JSON (default: True)
         
         Returns:
-            TwoPhaseResponse containing both free-form and structured responses
+            TwoPhaseResponse if two_phase=True, otherwise a tuple (text, json, usage)
+            For text-only responses, json will be empty dict
+            For JSON-only responses (two_phase=False), text will be empty string
         """
         if self.debug:
             logger.debug("Generating chat response")
@@ -150,15 +154,22 @@ class OllamaClient:
             logger.debug("Brief mode: %s", brief)
             logger.debug("Context: %s", context)
             logger.debug("JSON schema: %s", json.dumps(json_schema, indent=2) if json_schema else None)
+            logger.debug("Two-phase mode: %s", two_phase)
         
-        # Phase 1: Get free-form response
+        # Phase 1: Get response (either free-form or JSON)
         messages = []
         if context:
             messages.append({"role": "system", "content": context})
-        messages.append({"role": "user", "content": prompt})
-        
-        if self.debug:
-            logger.debug("Phase 1 messages: %s", json.dumps(messages, indent=2))
+            
+        if json_schema and not two_phase:
+            # Add schema to prompt for single-phase JSON response
+            schema_prompt = f"""Provide a JSON response matching this schema:
+{json.dumps(json_schema, indent=2)}
+
+Query: {prompt}"""
+            messages.append({"role": "user", "content": schema_prompt})
+        else:
+            messages.append({"role": "user", "content": prompt})
         
         data = {
             "model": model,
@@ -170,57 +181,56 @@ class OllamaClient:
             data["options"] = {"num_predict": 256}
             
         response = self._make_request("chat", data)
-        free_response, free_usage = self._process_chat_response(response, model)
+        response_text, response_usage = self._process_chat_response(response, model)
         
-        if self.debug:
-            logger.debug("Phase 1 response: %s", free_response)
-            logger.debug("Phase 1 usage: %s", free_usage)
-        
-        # Phase 2: Get structured response
+        # Handle JSON responses
         if json_schema:
-            structure_prompt = f"""Based on the previous response to the prompt, provide a JSON response using the following keys: {", ".join(json_schema["properties"].keys())}"""
-            
-            if self.debug:
-                logger.debug("Phase 2 structure prompt: %s", structure_prompt)
-            
-            data = {
-                "model": model,
-                "messages": messages + [
-                    {"role": "assistant", "content": free_response},
-                    {"role": "user", "content": structure_prompt}
-                ],
-                "format": json_schema,
-                "stream": False,
-            }
-            
-            response = self._make_request("chat", data)
-            json_response, json_usage = self._process_chat_response(response, model)
-            
-            if self.debug:
-                logger.debug("Phase 2 JSON response: %s", json_response)
-                logger.debug("Phase 2 usage: %s", json_usage)
-            
-            try:
-                structured_response = json.loads(json_response)
-            except json.JSONDecodeError:
-                error_msg = f"Failed to parse JSON response: {json_response}"
-                logger.error(error_msg)
-                structured_response = {"error": error_msg}
+            if two_phase:
+                # Phase 2: Get structured response
+                structure_prompt = f"""Based on the previous response to the prompt, provide a JSON response using the following keys: {", ".join(json_schema["properties"].keys())}"""
+                
+                if self.debug:
+                    logger.debug("Phase 2 structure prompt: %s", structure_prompt)
+                
+                data = {
+                    "model": model,
+                    "messages": messages + [
+                        {"role": "assistant", "content": response_text},
+                        {"role": "user", "content": structure_prompt}
+                    ],
+                    "format": json_schema,
+                    "stream": False,
+                }
+                
+                response = self._make_request("chat", data)
+                json_text, json_usage = self._process_chat_response(response, model)
+                
+                try:
+                    structured_response = json.loads(json_text)
+                except json.JSONDecodeError:
+                    error_msg = f"Failed to parse JSON response: {json_text}"
+                    logger.error(error_msg)
+                    structured_response = {"error": error_msg}
+                
+                # Return two-phase response
+                total_usage = response_usage.combine(json_usage)
+                return TwoPhaseResponse(
+                    free_response=response_text,
+                    structured_response=structured_response,
+                    usage=total_usage
+                )
+            else:
+                # Single-phase JSON response
+                try:
+                    structured_response = json.loads(response_text)
+                    return "", structured_response, response_usage
+                except json.JSONDecodeError:
+                    error_msg = f"Failed to parse JSON response: {response_text}"
+                    logger.error(error_msg)
+                    return "", {"error": error_msg}, response_usage
         else:
-            structured_response = {}
-            json_usage = LLMUsage(tokens_in=0, tokens_out=0, cost=0.0, total_msec=0)
-        
-        # Combine usage from both phases
-        total_usage = free_usage.combine(json_usage)
-        
-        if self.debug:
-            logger.debug("Total usage: %s", total_usage)
-        
-        return TwoPhaseResponse(
-            free_response=free_response,
-            structured_response=structured_response,
-            usage=total_usage
-        )
+            # Text-only response
+            return response_text, {}, response_usage
 
 # Create default client instance
 client = OllamaClient(debug=False)  # Set to True to enable debug logging
@@ -238,13 +248,18 @@ def generate_chat(
     model: str = DEFAULT_MODEL,
     brief: bool = False,
     json_schema: Optional[Dict] = None,
-    context: Optional[str] = None
+    context: Optional[str] = None,
+    two_phase: bool = True
 ) -> Tuple[str, Dict[str, Any], Dict]:
     """
-    Generate a two-phase chat response.
+    Generate a chat response.
     
     Returns:
-        Tuple containing (free_response, structured_response, usage_info)
+        Tuple containing (response_text, structured_data, usage_info)
+        When two_phase=True and json_schema provided, combines both phases
+        When two_phase=False or no json_schema, returns single-phase response
     """
-    response = client.generate_chat(prompt, model, brief, json_schema, context)
-    return response.free_response, response.structured_response, response.usage
+    response = client.generate_chat(prompt, model, brief, json_schema, context, two_phase)
+    if isinstance(response, TwoPhaseResponse):
+        return response.free_response, response.structured_response, response.usage
+    return response
