@@ -9,12 +9,14 @@ import json
 from clients import unified_client
 from telemetry import LLMUsage
 import datastore.quals
+from advanced_queries import ResponseType, RESPONSE_CONFIGS
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 EVALUATOR_MODEL = "gpt-4o-mini"
+TARGET_LENGTH = 500  # Standard length for all responses
 
 @dataclass
 class QualResult:
@@ -40,6 +42,7 @@ class QualTestRunner:
         self.criteria: Dict[str, str] = {}
         self.session = session
         self.test_name = None  # Must be set by subclass
+        self.response_type = None  # Must be set by subclass
         
     def evaluate_response(
         self,
@@ -68,12 +71,12 @@ Score each criterion from 0-10 (10 being best) and provide a brief explanation."
         schema = {
             "type": "object",
             "properties": {
+                "explanation": {"type": "string"},
                 "accuracy_score": {"type": "integer", "minimum": 0, "maximum": 10},
                 "clarity_score": {"type": "integer", "minimum": 0, "maximum": 10},
                 "completeness_score": {"type": "integer", "minimum": 0, "maximum": 10},
-                "explanation": {"type": "string"}
             },
-            "required": ["accuracy_score", "clarity_score", "completeness_score", "explanation"]
+            "required": ["explanation", "accuracy_score", "clarity_score", "completeness_score"]
         }
 
         prompt = f"""Evaluate this response:
@@ -97,18 +100,20 @@ Score each criterion from 0-10 (10 being best) and provide a brief explanation."
 
     def run(self, save_to_db: bool = False) -> List[QualResult]:
         """Execute the qualification tests."""
-        if not self.topics or not self.criteria or not self.test_name:
-            raise ValueError("Topics, criteria, and test_name must be defined in subclass")
+        if not self.topics or not self.criteria or not self.test_name or not self.response_type:
+            raise ValueError("Topics, criteria, test_name, and response_type must be defined in subclass")
             
         results = []
         total_score = 0
         
+        config = RESPONSE_CONFIGS[self.response_type]
         for topic in self.topics:
-            # Generate response using advanced query
+            # Generate response using the appropriate response type configuration
+            prompt = config.prompt_template.format(length=TARGET_LENGTH, topic=topic)
             response, _, gen_usage = unified_client.generate_chat(
-                topic,
+                prompt,
                 self.model,
-                context="Provide a comprehensive analysis with accurate information and clear explanations."
+                context=config.context_template.format(length=TARGET_LENGTH)
             )
             
             # Evaluate the response
@@ -161,6 +166,7 @@ class HistoricalAnalysisQual(QualTestRunner):
     def __init__(self, model: str, session=None):
         super().__init__(model, session)
         self.test_name = "historical_analysis"
+        self.response_type = ResponseType.HISTORICAL
         self.topics = [
             "The causes and effects of the Industrial Revolution",
             "The impact of the printing press on medieval Europe",
@@ -178,6 +184,7 @@ class ScientificExplanationQual(QualTestRunner):
     def __init__(self, model: str, session=None):
         super().__init__(model, session)
         self.test_name = "scientific_explanation"
+        self.response_type = ResponseType.SCIENTIFIC
         self.topics = [
             "The process of photosynthesis in plants",
             "How black holes form and evolve",
@@ -195,6 +202,7 @@ class TechnicalAnalysisQual(QualTestRunner):
     def __init__(self, model: str, session=None):
         super().__init__(model, session)
         self.test_name = "technical_analysis"
+        self.response_type = ResponseType.TECHNICAL
         self.topics = [
             "How public key encryption works",
             "The architecture of modern CPUs",
@@ -206,11 +214,87 @@ class TechnicalAnalysisQual(QualTestRunner):
             "completeness": "Coverage of key components and processes"
         }
 
+class BiographicalAnalysisQual(QualTestRunner):
+    """Qualification tests for biographical analysis responses."""
+    
+    def __init__(self, model: str, session=None):
+        super().__init__(model, session)
+        self.test_name = "biographical_analysis"
+        self.response_type = ResponseType.BIOGRAPHICAL
+        self.topics = [
+            "The life and achievements of Marie Curie",
+            "Albert Einstein's contributions to physics",
+            "Ada Lovelace's role in early computing"
+        ]
+        self.criteria = {
+            "accuracy": "Biographical accuracy and proper timeline",
+            "clarity": "Clear presentation of life events and achievements",
+            "completeness": "Coverage of key life events and contributions"
+        }
+
+class LiteraryAnalysisQual(QualTestRunner):
+    """Qualification tests for literary analysis responses."""
+    
+    def __init__(self, model: str, session=None):
+        super().__init__(model, session)
+        self.test_name = "literary_analysis"
+        self.response_type = ResponseType.LITERARY
+        self.topics = [
+            "The plot and themes of 1984 by George Orwell",
+            "The narrative structure of One Hundred Years of Solitude",
+            "Character development in Pride and Prejudice"
+        ]
+        self.criteria = {
+            "accuracy": "Accuracy of plot details and literary elements",
+            "clarity": "Clear presentation of narrative elements",
+            "completeness": "Coverage of key plot points and themes"
+        }
+
+class CulturalAnalysisQual(QualTestRunner):
+    """Qualification tests for cultural analysis responses."""
+    
+    def __init__(self, model: str, session=None):
+        super().__init__(model, session)
+        self.test_name = "cultural_analysis"
+        self.response_type = ResponseType.CULTURAL
+        self.topics = [
+            "The influence of jazz on American culture",
+            "The role of tea ceremonies in Japanese society",
+            "The impact of Renaissance art on European culture"
+        ]
+        self.criteria = {
+            "accuracy": "Cultural accuracy and proper context",
+            "clarity": "Clear explanation of cultural significance",
+            "completeness": "Coverage of key cultural elements and impact"
+        }
+
+class AnalyticalResponseQual(QualTestRunner):
+    """Qualification tests for analytical responses."""
+    
+    def __init__(self, model: str, session=None):
+        super().__init__(model, session)
+        self.test_name = "analytical_response"
+        self.response_type = ResponseType.ANALYTICAL
+        self.topics = [
+            "The economic impact of automation on employment",
+            "The effects of social media on political discourse",
+            "The relationship between climate change and biodiversity"
+        ]
+        self.criteria = {
+            "accuracy": "Analytical accuracy and evidence-based reasoning",
+            "clarity": "Clear presentation of analysis and arguments",
+            "completeness": "Coverage of key factors and implications"
+        }
+
 # Map of qualification test types to their runner classes
 QUAL_TEST_CLASSES = {
     "historical": HistoricalAnalysisQual,
     "scientific": ScientificExplanationQual,
-    "technical": TechnicalAnalysisQual
+    "technical": TechnicalAnalysisQual,
+    "biographical": BiographicalAnalysisQual,
+    "literary": LiteraryAnalysisQual,
+    "cultural": CulturalAnalysisQual,
+    "analytical": AnalyticalResponseQual
 }
 
 def run_qual_test(test_type: str, model: str, save_to_db: bool = False, session=None) -> List[QualResult]:
