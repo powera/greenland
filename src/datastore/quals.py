@@ -1,29 +1,25 @@
 #!/usr/bin/python3
 
+"""Qualitative test definitions and database models."""
+
 import datetime
-import json
-from typing import List, Optional, Dict, Any
-from sqlalchemy import String, Integer, Text, ForeignKey, TIMESTAMP, create_engine, func
+from typing import Dict, List, Optional, Any
+from sqlalchemy import String, Integer, Text, ForeignKey, TIMESTAMP
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
-from sqlalchemy.orm import Mapped, mapped_column, relationship, DeclarativeBase, sessionmaker
-from sqlalchemy.sql import func
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-# project imports
-import constants
-from datastore.benchmarks import Base, Model
+from datastore.common import Base, TestBase, RunBase, RunDetailBase, create_dev_session, decode_json
 
-class QualTest(Base):
+class QualTest(Base, TestBase):
+    """Qualitative test definition."""
     __tablename__ = 'qual_test'
-
-    codename: Mapped[str] = mapped_column(String, primary_key=True)
-    displayname: Mapped[str] = mapped_column(String, nullable=False)
-    description: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
     # Relationships
     runs: Mapped[List['QualRun']] = relationship(back_populates='qual_test', lazy='noload')
     topics: Mapped[List['QualTopic']] = relationship(back_populates='qual_test')
 
 class QualTopic(Base):
+    """Topic for qualitative testing."""
     __tablename__ = 'qual_topic'
 
     topic_id: Mapped[str] = mapped_column(String, primary_key=True)
@@ -34,12 +30,10 @@ class QualTopic(Base):
     qual_test: Mapped['QualTest'] = relationship(back_populates='topics')
     run_details: Mapped[List['QualRunDetail']] = relationship(back_populates='topic', lazy='noload')
 
-class QualRun(Base):
+class QualRun(Base, RunBase):
+    """Qualitative test run results."""
     __tablename__ = 'qual_run'
 
-    run_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    run_ts: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.current_timestamp())
-    model_name: Mapped[str] = mapped_column(String, ForeignKey('model.codename'))
     qual_test_name: Mapped[str] = mapped_column(String, ForeignKey('qual_test.codename'))
     avg_score: Mapped[Optional[float]] = mapped_column(Integer, nullable=True)
 
@@ -48,45 +42,28 @@ class QualRun(Base):
     qual_test: Mapped['QualTest'] = relationship(back_populates='runs')
     run_details: Mapped[List['QualRunDetail']] = relationship(back_populates='run', lazy='noload')
 
-class QualRunDetail(Base):
+class QualRunDetail(Base, RunDetailBase):
+    """Detailed results for a qualitative test run."""
     __tablename__ = 'qual_run_detail'
 
-    run_id: Mapped[int] = mapped_column(Integer, ForeignKey('qual_run.run_id'), primary_key=True)
     topic_id: Mapped[str] = mapped_column(String, ForeignKey('qual_topic.topic_id'), primary_key=True)
     accuracy_score: Mapped[int] = mapped_column(Integer, nullable=False)  # 0-10
     clarity_score: Mapped[int] = mapped_column(Integer, nullable=False)   # 0-10
     completeness_score: Mapped[int] = mapped_column(Integer, nullable=False)  # 0-10
-    eval_msec: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     response_text: Mapped[str] = mapped_column(Text, nullable=False)
     evaluation_text: Mapped[str] = mapped_column(Text, nullable=False)
-    debug_json: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
     # Relationships
     run: Mapped['QualRun'] = relationship(back_populates='run_details')
     topic: Mapped['QualTopic'] = relationship(back_populates='run_details')
 
-# Add this relationship to the Model class in benchmarks.py:
-# qual_runs: Mapped[List['QualRun']] = relationship(back_populates='model', lazy='noload')
-
-def create_dev_session():
-    """Create a database session for development."""
-    db_path = db_path = constants.SQLITE_DB_PATH
-    engine = create_engine(f'sqlite:///{db_path}', echo=False)
-    Session = sessionmaker(bind=engine)
-    return Session()
-
-def insert_qual_test(session, codename: str, displayname: str, description: str = None) -> tuple[bool, str]:
-    """
-    Insert a new qualification test into the database.
-
-    Args:
-        session: SQLAlchemy session
-        codename: Identifier for the qual test
-        displayname: Human-readable name of the qual test
-        description: Optional description
-    Returns:
-        Tuple (success_boolean, message)
-    """
+def insert_qual_test(
+    session,
+    codename: str,
+    displayname: str,
+    description: str = None
+) -> tuple[bool, str]:
+    """Insert a new qualification test into the database."""
     try:
         new_qual_test = QualTest(
             codename=codename,
@@ -104,19 +81,13 @@ def insert_qual_test(session, codename: str, displayname: str, description: str 
         session.rollback()
         return False, f"Error inserting qualification test: {str(e)}"
 
-def insert_qual_topic(session, topic_id: str, qual_test_name: str, 
-                     topic_text: str) -> tuple[bool, str]:
-    """
-    Insert a new qualification test topic into the database.
-
-    Args:
-        session: SQLAlchemy session
-        topic_id: Unique identifier for the topic
-        qual_test_name: The qual test associated with the topic
-        topic_text: The topic text to be analyzed
-    Returns:
-        Tuple (success_boolean, message)
-    """
+def insert_qual_topic(
+    session,
+    topic_id: str,
+    qual_test_name: str,
+    topic_text: str
+) -> tuple[bool, str]:
+    """Insert a new qualification test topic into the database."""
     try:
         new_topic = QualTopic(
             topic_id=topic_id,
@@ -135,24 +106,13 @@ def insert_qual_topic(session, topic_id: str, qual_test_name: str,
         return False, f"Error inserting topic: {str(e)}"
 
 def insert_qual_run(
-    session, 
-    model_name: str, 
+    session,
+    model_name: str,
     qual_test_name: str,
     avg_score: float,
     run_details: List[Dict]
 ) -> tuple[bool, Any]:
-    """
-    Insert a new qualification test run into the database.
-
-    Args:
-        session: SQLAlchemy session
-        model_name: Codename of the model
-        qual_test_name: Codename of the qual test
-        avg_score: Average score across all topics (0-10)
-        run_details: List of run details (dict with topic_id and scores)
-    Returns:
-        Tuple (success_boolean, run_id_or_message)
-    """
+    """Insert a new qualification test run into the database."""
     try:
         new_run = QualRun(
             model_name=model_name,
@@ -188,14 +148,7 @@ def insert_qual_run(
         return False, f"Error inserting run: {str(e)}"
 
 def list_all_qual_tests(session) -> List[Dict]:
-    """
-    List all qualification tests in the database.
-    
-    Args:
-        session: SQLAlchemy session
-    Returns:
-        List of qual test details
-    """
+    """List all qualification tests in the database."""
     qual_tests = session.query(QualTest).all()
     return [
         {
