@@ -6,7 +6,7 @@ import logging
 from typing import Dict, List, Set, Tuple, Optional, Any
 from dataclasses import dataclass
 
-import benchmarks.datastore
+import datastore.benchmarks
 from clients import unified_client
 import lib.score_table
 
@@ -30,11 +30,11 @@ class BenchmarkRunner:
           self.remote_model = self.model
         else:
           self.remote_model = ":".join(model.split(":")[:-1])  # Strip quantization
-        self.session = benchmarks.datastore.create_dev_session()
+        self.session = datastore.benchmarks.create_dev_session()
         
     def load_questions(self, benchmark: str) -> List[Dict]:
         """Load benchmark questions from database."""
-        return benchmarks.datastore.load_all_questions_for_benchmark(self.session, benchmark)
+        return datastore.benchmarks.load_all_questions_for_benchmark(self.session, benchmark)
         
     def warm_up(self):
         """Warm up model before running benchmark."""
@@ -42,7 +42,7 @@ class BenchmarkRunner:
         
     def save_results(self, benchmark: str, score: int, details: List[BenchmarkResult]) -> None:
         """Save benchmark results to database."""
-        success, run_id = benchmarks.datastore.insert_run(
+        success, run_id = datastore.benchmarks.insert_run(
             self.session, 
             self.model,
             benchmark,
@@ -402,13 +402,13 @@ BENCHMARK_CLASSES = {
 
 def get_all_model_codenames() -> List[str]:
     """Get list of all model codenames from database."""
-    session = benchmarks.datastore.create_dev_session()
-    return [x["codename"] for x in benchmarks.datastore.list_all_models(session)]
+    session = datastore.benchmarks.create_dev_session()
+    return [x["codename"] for x in datastore.benchmarks.list_all_models(session)]
 
 def get_all_benchmarks() -> List[str]:
     """Get list of all benchmark names from database."""
-    session = benchmarks.datastore.create_dev_session()
-    return [x["codename"] for x in benchmarks.datastore.list_all_benchmarks(session)]
+    session = datastore.benchmarks.create_dev_session()
+    return [x["codename"] for x in datastore.benchmarks.list_all_benchmarks(session)]
 
 def run_benchmark(benchmark_name: str, model: str) -> None:
     """Run a specific benchmark against a model."""
@@ -452,7 +452,7 @@ def run_missing_benchmarks(
         ... )
     """
     if session is None:
-        session = benchmarks.datastore.create_dev_session()
+        session = datastore.benchmarks.create_dev_session()
         
     # Initialize blacklists if not provided
     blacklist_models = blacklist_models or set()
@@ -460,16 +460,16 @@ def run_missing_benchmarks(
     
     # Get all available models and benchmarks
     all_models = {
-        model['codename'] for model in benchmarks.datastore.list_all_models(session)
+        model['codename'] for model in datastore.benchmarks.list_all_models(session)
         if model['codename'] not in blacklist_models
     }
     all_benchmarks = {
-        bench['codename'] for bench in benchmarks.datastore.list_all_benchmarks(session)
+        bench['codename'] for bench in datastore.benchmarks.list_all_benchmarks(session)
         if bench['codename'] not in blacklist_benchmarks
     }
     
     # Get existing scores
-    highest_scores = benchmarks.datastore.get_highest_benchmark_scores(session)
+    highest_scores = datastore.benchmarks.get_highest_benchmark_scores(session)
     
     # Track what we run
     combinations_run = []

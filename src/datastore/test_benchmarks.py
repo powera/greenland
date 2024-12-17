@@ -2,7 +2,7 @@ import unittest
 import os
 import json
 from datetime import datetime
-from benchmarks.datastore import (
+from datastore.benchmarks import (
     create_database_and_session,
     insert_benchmark,
     insert_model,

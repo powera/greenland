@@ -10,7 +10,7 @@ from typing import Dict, List, Optional, Any
 from sqlalchemy.orm import Session
 
 from clients import ollama_client
-import benchmarks.datastore
+import datastore.benchmarks
 from benchmarks.data.wordlist_extended import TRANSLATIONS, TranslationEntry
 import constants
 import lib.validation
@@ -20,12 +20,12 @@ class BenchmarkGenerator:
     
     def __init__(self, session: Optional[Session] = None):
         """Initialize generator with optional database session."""
-        self.session = session or benchmarks.datastore.create_dev_session()
+        self.session = session or datastore.benchmarks.create_dev_session()
 
     def save_question(self, question_id: str, benchmark_name: str, 
                      question_info: Dict[str, Any]) -> None:
         """Save generated question to database."""
-        benchmarks.datastore.insert_question(
+        datastore.benchmarks.insert_question(
             self.session,
             question_id,
             benchmark_name,
@@ -240,7 +240,7 @@ Use natural language and vary the sentence structure."""
 def load_paragraph_analysis_to_database(session: Optional[Session] = None) -> None:
     """Load paragraph analysis questions from file into database."""
     if not session:
-        session = benchmarks.datastore.create_dev_session()
+        session = datastore.benchmarks.create_dev_session()
 
     filename = "benchmarks/0030_analyze_paragraph/bigbench_understanding_fables.jsonl"
     with open(filename) as f:
@@ -252,7 +252,7 @@ def load_paragraph_analysis_to_database(session: Optional[Session] = None) -> No
             if sentence["query"].endswith("\nAnswer: "):
                 sentence["query"] = sentence["query"][:-9]
 
-            benchmarks.datastore.insert_question(
+            datastore.benchmarks.insert_question(
                 session,
                 f"0030:fable:{idx // 7 + 1}",
                 "0030_analyze_paragraph",
@@ -265,7 +265,7 @@ def load_paragraph_analysis_to_database(session: Optional[Session] = None) -> No
 def load_general_knowledge_to_database(session: Optional[Session] = None) -> None:
     """Load general knowledge questions from files into database."""
     if not session:
-        session = benchmarks.datastore.create_dev_session()
+        session = datastore.benchmarks.create_dev_session()
 
     DIR = os.path.join(constants.BENCHMARK_DATA_DIR, "0040_general_knowledge")
     files = sorted(os.listdir(DIR))
@@ -279,7 +279,7 @@ def load_general_knowledge_to_database(session: Optional[Session] = None) -> Non
             for line in f:
                 if idx % 17 == 0:
                     sentence = json.loads(line)
-                    benchmarks.datastore.insert_question(
+                    datastore.benchmarks.insert_question(
                         session,
                         f"0040:{sentence['category']}:{idx // 17 + 1}",
                         "0040_general_knowledge",
