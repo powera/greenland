@@ -10,8 +10,12 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 
 from datastore.common import (
-    Base, create_dev_session,
+    Base, Model, create_dev_session,
     create_database_and_session, decode_json
+)
+
+Model.benchmark_runs = relationship(
+    "Run", back_populates='model', lazy='noload'
 )
 
 class Benchmark(Base):
