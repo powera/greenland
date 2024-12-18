@@ -6,7 +6,7 @@ import logging
 import argparse
 from typing import List, Set, Optional
 import datastore.quals
-import datastore.benchmarks
+import datastore.common
 import lib.run_quals
 
 # Configure logging
@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 def get_all_model_codenames(session) -> List[str]:
     """Get list of all model codenames from database."""
-    return [x["codename"] for x in datastore.benchmarks.list_all_models(session)]
+    return [x["codename"] for x in datastore.common.list_all_models(session)]
 
 def get_completed_quals(session) -> Set[str]:
     """Get set of already completed model/test pairs."""
