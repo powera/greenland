@@ -7,6 +7,7 @@ import sys
 import logging
 import argparse
 import traceback
+import importlib
 
 def run_script(script_path: str, args: list) -> None:
     """
@@ -31,7 +32,8 @@ def run_script(script_path: str, args: list) -> None:
     
     # Import and run the script
     try:
-        __import__(script_path).main()
+        module = importlib.import_module(script_path)
+        module.main()
     except Exception:
         logging.error("Error running script:\n%s", traceback.format_exc())
         sys.exit(1)
