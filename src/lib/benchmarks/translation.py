@@ -4,15 +4,139 @@
 
 import json
 import logging
-from typing import Dict
+import random
+from typing import Dict, Optional, List
+from sqlalchemy import text
+from sqlalchemy.orm import Session
 
 from clients import unified_client
 from clients.ollama_client import OllamaTimeoutError
-from lib.benchmarks.base import BenchmarkRunner, BenchmarkResult
+from lib.benchmarks.base import BenchmarkRunner, BenchmarkResult, BenchmarkGenerator
+from benchmarks.data.wordlist_extended import TRANSLATIONS, TranslationEntry
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
+
+class TranslationGenerator(BenchmarkGenerator):
+    """Generator for translation benchmark questions."""
+    
+    def __init__(self, origin_lang: str, target_lang: str, session: Optional[Session] = None):
+        """
+        Initialize generator with language pair.
+        
+        Args:
+            origin_lang: Source language code (fr, de, ind, sw, ko, kn, zh)
+            target_lang: Target language code (en, fr, de, ind, sw, ko, kn, zh)
+            session: Optional database session
+        """
+        super().__init__(session)
+        self.origin_lang = origin_lang
+        self.target_lang = target_lang
+        
+        # Validate language codes
+        valid_langs = {'en', 'fr', 'de', 'ind', 'sw', 'ko', 'kn', 'zh'}
+        if origin_lang not in valid_langs or target_lang not in valid_langs:
+            raise ValueError(f"Language codes must be one of: {', '.join(valid_langs)}")
+        if origin_lang == target_lang:
+            raise ValueError("Origin and target languages must be different")
+            
+    @property
+    def benchmark_codename(self) -> str:
+        """Get unique benchmark codename for this language pair."""
+        return f"0050_translation_{self.origin_lang}_{self.target_lang}"
+
+    def get_translation(self, entry: TranslationEntry, lang: str) -> str:
+        """Get translation for a specific language from entry."""
+        return getattr(entry, lang)
+
+    def get_translation_details(self, entry: TranslationEntry, lang: str) -> Optional[str]:
+        """Get translation details for a specific language from entry."""
+        return getattr(entry, f"{lang}_details", None)
+
+    def generate_question(self, word_entry: TranslationEntry, include_choices: bool = True) -> Dict:
+        """Generate a single translation question."""
+        # Get translations for origin and target languages
+        origin_word = self.get_translation(word_entry, self.origin_lang)
+        target_word = self.get_translation(word_entry, self.target_lang)
+        
+        # Get any special notes about usage
+        origin_details = self.get_translation_details(word_entry, self.origin_lang)
+        target_details = self.get_translation_details(word_entry, self.target_lang)
+        
+        # Create list of possible answers for multiple choice
+        if include_choices:
+            all_translations = [
+                self.get_translation(entry, self.target_lang) 
+                for entry in TRANSLATIONS 
+                if self.get_translation(entry, self.target_lang)
+            ]
+            incorrect_choices = [t for t in all_translations if t != target_word]
+            
+            # Select 7 random incorrect choices
+            choices = random.sample(incorrect_choices, min(7, len(incorrect_choices)))
+            # Add the correct answer
+            choices.append(target_word)
+            # Shuffle the choices
+            random.shuffle(choices)
+        else:
+            choices = None
+        
+        question = {
+            "word": origin_word,  # Word to translate
+            f"{self.target_lang}": target_word,  # Correct translation
+            "origin_lang": self.origin_lang,
+            "target_lang": self.target_lang
+        }
+        
+        # Add any available usage details
+        if origin_details:
+            question["origin_details"] = origin_details
+        if target_details:
+            question["target_details"] = target_details
+        if choices:
+            question["choices"] = choices
+            
+        return question
+
+    def load_to_database(self) -> None:
+        """Load generated translation questions into database."""
+        from sqlalchemy import text
+        
+        # Filter for entries that have valid translations for both languages
+        valid_entries = [
+            entry for entry in TRANSLATIONS 
+            if self.get_translation(entry, self.origin_lang) and 
+               self.get_translation(entry, self.target_lang)
+        ]
+        
+        if not valid_entries:
+            raise ValueError(f"No valid translations found for {self.origin_lang} to {self.target_lang}")
+        
+        for idx, entry in enumerate(valid_entries):
+            question = self.generate_question(entry)
+            self.save_question(
+                f"{self.benchmark_codename}:{idx}",
+                self.benchmark_codename,
+                question,
+            )
+
+        # Add benchmark metadata with unique codename for this language pair
+        benchmark_name = f"Translation ({self.origin_lang.upper()} → {self.target_lang.upper()})"
+        self.session.execute(text("""
+            INSERT INTO benchmark (codename, displayname, description)
+            VALUES (
+                :codename,
+                :displayname,
+                :description
+            )
+            ON CONFLICT DO NOTHING
+        """), {
+            "codename": self.benchmark_codename,
+            "displayname": benchmark_name,
+            "description": f"Tests ability to translate {self.origin_lang.upper()} words to {self.target_lang.upper()} with multiple choice validation"
+        })
+        self.session.commit()
 
 class TranslationBenchmark(BenchmarkRunner):
     """Benchmark for testing language translation abilities."""
