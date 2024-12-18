@@ -75,13 +75,14 @@ class UnifiedLLMClient:
             logger.debug("Warming up model: %s", model)
         return client.warm_model(model)
 
-    def generate_text(self, prompt: str, model: str) -> Tuple[str, LLMUsage]:
+    def generate_text(self, prompt: str, model: str, timeout: Optional[float] = None) -> Tuple[str, LLMUsage]:
         """
         Generate text using appropriate backend.
         
         Args:
             prompt: Text prompt for generation
             model: Model name (determines backend)
+            timeout: Timeout in seconds (TODO: add support to back ends.)
             
         Returns:
             Tuple containing (generated_text, usage_info)
@@ -114,7 +115,8 @@ class UnifiedLLMClient:
         model: str,
         brief: bool = False,
         json_schema: Optional[Dict] = None,
-        context: Optional[str] = None
+        context: Optional[str] = None,
+        timeout: Optional[float] = None,
     ) -> Response:
         """
         Generate chat completion using appropriate backend.
@@ -125,6 +127,7 @@ class UnifiedLLMClient:
             brief: Whether to limit response length
             json_schema: Schema for structured response (if provided, returns JSON)
             context: Optional context to include before the prompt
+            timeout: Timeout in seconds (TODO: add support to back ends.)
         
         Returns:
             Response containing response_text, structured_data, and usage_info
@@ -172,15 +175,16 @@ client = UnifiedLLMClient()  # Use defaults for timeout and debug
 def warm_model(model: str) -> bool:
     return client.warm_model(model)
 
-def generate_text(prompt: str, model: str) -> Tuple[str, LLMUsage]:
-    return client.generate_text(prompt, model)
+def generate_text(prompt: str, model: str, timeout: Optional[float] = None) -> Tuple[str, LLMUsage]:
+    return client.generate_text(prompt, model, timeout)
 
 def generate_chat(
     prompt: str,
     model: str,
     brief: bool = False,
     json_schema: Optional[Dict] = None,
-    context: Optional[str] = None
+    context: Optional[str] = None,
+    timeout: Optional[float] = None,
 ) -> Tuple[str, Dict[str, Any], LLMUsage]:
     """
     Generate a chat response using appropriate backend based on model name.
@@ -190,5 +194,5 @@ def generate_chat(
         For text responses, structured_data will be empty dict
         For JSON responses, response_text will be empty string
     """
-    response = client.generate_chat(prompt, model, brief, json_schema, context)
+    response = client.generate_chat(prompt, model, brief, json_schema, context, timeout=timeout)
     return response.response_text, response.structured_data, response.usage
