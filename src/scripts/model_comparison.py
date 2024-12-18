@@ -1,3 +1,4 @@
+# scripts/model_comparison.py
 #!/usr/bin/python3
 
 """Tools to run a barrage of models/prompts via script."""
@@ -5,6 +6,7 @@
 import json
 import os
 import re
+import argparse
 from typing import Dict, List
 
 from clients import ollama_client, openai_client
@@ -241,3 +243,25 @@ def json_to_html(json_file: str, output_html: str) -> None:
 
     with open(output_html, 'w') as f:
         f.write(html_content)
+
+def main():
+    """Main entry point."""
+    parser = argparse.ArgumentParser(description="Run model comparisons")
+    parser.add_argument("--slug", help="Slug to process")
+    parser.add_argument("--model", help="Model to add (defaults to gpt-4o-mini)", default="gpt-4o-mini")
+    parser.add_argument("--persona", help="Optional persona for GPT-4 Mini model")
+    parser.add_argument("--prompts", type=json.loads, help="JSON dict of slug:prompt pairs to run")
+    
+    args = parser.parse_args()
+    
+    if args.slug:
+        # Add model for specific slug
+        add_model_for_slug(args.slug, args.model, args.persona)
+    elif args.prompts:
+        # Run cross comparison
+        multi_cross_run_to_json(args.prompts)
+    else:
+        parser.error("Either --slug or --prompts is required")
+
+if __name__ == "__main__":
+    main()
