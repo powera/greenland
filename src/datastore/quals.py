@@ -58,7 +58,7 @@ class QualRun(Base):
 class QualRunDetail(Base):
     """Detailed results for a qualitative test run."""
     __tablename__ = 'qual_run_detail'
-    run_id: Mapped[int] = mapped_column(ForeignKey('run.run_id'), primary_key=True)
+    run_id: Mapped[int] = mapped_column(ForeignKey('qual_run.run_id'), primary_key=True)
     eval_msec: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     debug_json: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
@@ -174,3 +174,30 @@ def list_all_qual_tests(session) -> List[Dict]:
         }
         for test in qual_tests
     ]
+
+
+def get_highest_qual_scores(session) -> Dict:
+    """Get the highest qualification test scores for each (test, model) combination with run IDs.
+
+    :param session: SQLAlchemy session
+    :return: Dict with (qual_test, model) tuple as key and dict containing score and run_id as value
+    """
+    highest_scores = (
+        session.query(
+            QualRun.qual_test_name,
+            QualRun.model_name,
+            QualRun.avg_score,
+            QualRun.run_id
+        )
+        .order_by(QualRun.avg_score)
+        .distinct(QualRun.qual_test_name, QualRun.model_name)
+        .all()
+    )
+
+    return {
+        (run.qual_test_name, run.model_name): {
+            'score': run.avg_score,
+            'run_id': run.run_id
+        }
+        for run in highest_scores
+    }
