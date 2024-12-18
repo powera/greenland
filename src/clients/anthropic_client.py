@@ -40,12 +40,13 @@ def measure_completion(func):
 class AnthropicClient:
     """Client for making requests to Anthropic API."""
     
-    def __init__(self, api_key: Optional[str] = None, debug: bool = False):
+    def __init__(self, api_key: Optional[str] = None, timeout: int = DEFAULT_TIMEOUT, debug: bool = False):
         """
         Initialize Anthropic client.
         
         Args:
             api_key: Optional API key (will load from file if not provided)
+            timeout: Request timeout in seconds
             debug: Enable debug logging
         """
         self.debug = debug
@@ -54,7 +55,8 @@ class AnthropicClient:
             logger.debug("Initialized AnthropicClient in debug mode")
             
         self.client = Anthropic(
-            api_key=api_key or self._load_key()
+            api_key=api_key or self._load_key(),
+            default_request_timeout=timeout
         )
 
     def _load_key(self) -> str:
