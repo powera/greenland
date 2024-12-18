@@ -25,17 +25,20 @@ def run_script(script_path: str, args: list) -> None:
     # Modify sys.argv to pass remaining args to script
     sys.argv = [script_path] + args
     
+    # Add scripts prefix if not present
+    if not script_path.startswith("scripts."):
+        script_path = f"scripts.{script_path}"
+    
     # Import and run the script
-    script_module = os.path.splitext(os.path.basename(script_path))[0]
     try:
-        __import__(f"scripts.{script_module}").main()
+        __import__(script_path).main()
     except Exception:
         logging.error("Error running script:\n%s", traceback.format_exc())
         sys.exit(1)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run a script with additional arguments")
-    parser.add_argument("script", help="Script name to run (e.g. scripts.run_all_quals)")
+    parser.add_argument("script", help="Script name to run (e.g. run_all_quals or scripts.run_all_quals)")
     parser.add_argument("args", nargs=argparse.REMAINDER, help="Arguments to pass to script")
     args = parser.parse_args()
         
