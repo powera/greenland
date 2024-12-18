@@ -1,6 +1,3 @@
-#!/usr/bin/python3
-"""Runs qualification tests to evaluate advanced query responses."""
-
 import logging
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Any, Tuple
@@ -10,6 +7,7 @@ from clients import unified_client
 from telemetry import LLMUsage
 import datastore.quals
 import lib.advanced_queries
+from clients.ollama_client import OllamaTimeoutError
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -43,6 +41,24 @@ class QualTestRunner:
         self.session = session
         self.test_name = None  # Must be set by subclass
         self.response_type = None  # Must be set by subclass
+        
+    def calculate_timeout(self, length: int = TARGET_LENGTH) -> int:
+        """Calculate timeout based on response length."""
+        return 20 + (length // 5)
+
+    def handle_timeout(self, topic: str, error: OllamaTimeoutError) -> QualResult:
+        """Handle timeout error and return appropriate qualification result."""
+        return QualResult(
+            topic_id=topic,
+            accuracy_score=0,
+            clarity_score=0,
+            completeness_score=0,
+            avg_score=0,
+            eval_msec=0,
+            response_text="",
+            evaluation_text="Evaluation failed: Request timeout",
+            debug_json=json.dumps({"error": "Request timeout", "details": str(error)})
+        )
         
     def evaluate_response(
         self,
@@ -105,48 +121,56 @@ Score each criterion from 0-10 (10 being best) and provide a brief explanation."
             
         results = []
         total_score = 0
+        timeout = self.calculate_timeout(TARGET_LENGTH)
         
         for topic in self.topics:
-            # Generate response using advanced_queries.generate_response
-            response, gen_usage = lib.advanced_queries.generate_response(
-                topic,
-                TARGET_LENGTH,
-                self.response_type,
-                self.model
-            )
-            
-            # Evaluate the response
-            scores, evaluation, eval_usage = self.evaluate_response(
-                topic,
-                response,
-                self.criteria
-            )
-            
-            # Calculate average score
-            avg_score = sum(scores.values()) // len(scores)
-            total_score += avg_score
-            
-            # Create result object
-            result = QualResult(
-                topic_id=topic,
-                accuracy_score=scores["accuracy"],
-                clarity_score=scores["clarity"],
-                completeness_score=scores["completeness"],
-                avg_score=avg_score,
-                eval_msec=int(gen_usage.total_msec + eval_usage.total_msec),
-                response_text=response,
-                evaluation_text=evaluation,
-                debug_json=json.dumps({
-                    "generation_usage": gen_usage.to_dict(),
-                    "evaluation_usage": eval_usage.to_dict()
-                })
-            )
-            
+            try:
+                # Generate response using advanced_queries.generate_response
+                response, gen_usage = lib.advanced_queries.generate_response(
+                    topic,
+                    TARGET_LENGTH,
+                    self.response_type,
+                    self.model
+                )
+                
+                # Evaluate the response
+                scores, evaluation, eval_usage = self.evaluate_response(
+                    topic,
+                    response,
+                    self.criteria
+                )
+                
+                # Calculate average score
+                avg_score = sum(scores.values()) // len(scores)
+                total_score += avg_score
+                
+                # Create result object
+                result = QualResult(
+                    topic_id=topic,
+                    accuracy_score=scores["accuracy"],
+                    clarity_score=scores["clarity"],
+                    completeness_score=scores["completeness"],
+                    avg_score=avg_score,
+                    eval_msec=int(gen_usage.total_msec + eval_usage.total_msec),
+                    response_text=response,
+                    evaluation_text=evaluation,
+                    debug_json=json.dumps({
+                        "generation_usage": gen_usage.to_dict(),
+                        "evaluation_usage": eval_usage.to_dict()
+                    })
+                )
+            except OllamaTimeoutError as e:
+                result = self.handle_timeout(topic, e)
+                
             results.append(result)
             
         # Save results to database if requested
         if save_to_db and self.session:
-            overall_score = total_score / len(results)
+            # Scale total score to 100-point scale
+            # Each topic has 3 criteria scored 0-10, max 30 points per topic
+            max_possible = len(self.topics) * 30
+            overall_score = (total_score * 100) // max_possible
+            
             success, run_id = datastore.quals.insert_qual_run(
                 self.session,
                 self.model,
