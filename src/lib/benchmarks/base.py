@@ -6,6 +6,7 @@ import json
 import logging
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Any
+from sqlalchemy.orm import Session
 
 import datastore.benchmarks
 from clients import unified_client, ollama_client
@@ -23,6 +24,23 @@ class BenchmarkResult:
     score: int
     eval_msec: int
     debug_json: Optional[str] = None
+
+class BenchmarkGenerator:
+    """Base class for generating benchmark questions."""
+    
+    def __init__(self, session: Optional[Session] = None):
+        """Initialize generator with optional database session."""
+        self.session = session or datastore.benchmarks.create_dev_session()
+
+    def save_question(self, question_id: str, benchmark_name: str, 
+                     question_info: Dict[str, Any]) -> None:
+        """Save generated question to database."""
+        datastore.benchmarks.insert_question(
+            self.session,
+            question_id,
+            benchmark_name,
+            json.dumps(question_info)
+        )
 
 class BenchmarkRunner:
     """Base class for running benchmarks against models."""
