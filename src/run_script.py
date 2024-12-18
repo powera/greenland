@@ -1,0 +1,44 @@
+#!/usr/bin/python3
+
+"""Script runner with logging setup."""
+
+import os
+import sys
+import logging
+import argparse
+
+def run_script(script_path: str, args: list) -> None:
+    """
+    Run a Python script from the scripts directory.
+    
+    Args:
+        script_path: Path to script relative to scripts directory
+        args: Additional command line arguments to pass to script
+    """
+    # Add parent directory to path so imports work
+    sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    
+    # Configure logging
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
+    
+    # Modify sys.argv to pass remaining args to script
+    sys.argv = [script_path] + args
+    
+    # Import and run the script
+    script_module = os.path.splitext(os.path.basename(script_path))[0]
+    try:
+        __import__(f"scripts.{script_module}").main()
+    except Exception as e:
+        logging.error(f"Error running script: {str(e)}")
+        sys.exit(1)
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Run a script with additional arguments")
+    parser.add_argument("script", help="Script name to run (e.g. scripts.run_all_quals)")
+    parser.add_argument("args", nargs=argparse.REMAINDER, help="Arguments to pass to script")
+    args = parser.parse_args()
+        
+    run_script(args.script, args.args)
