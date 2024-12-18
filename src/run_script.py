@@ -6,6 +6,7 @@ import os
 import sys
 import logging
 import argparse
+import traceback
 
 def run_script(script_path: str, args: list) -> None:
     """
@@ -15,9 +16,6 @@ def run_script(script_path: str, args: list) -> None:
         script_path: Path to script relative to scripts directory
         args: Additional command line arguments to pass to script
     """
-    # Add parent directory to path so imports work
-    sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    
     # Configure logging
     logging.basicConfig(
         level=logging.INFO,
@@ -31,8 +29,8 @@ def run_script(script_path: str, args: list) -> None:
     script_module = os.path.splitext(os.path.basename(script_path))[0]
     try:
         __import__(f"scripts.{script_module}").main()
-    except Exception as e:
-        logging.error(f"Error running script: {str(e)}")
+    except Exception:
+        logging.error("Error running script:\n%s", traceback.format_exc())
         sys.exit(1)
 
 if __name__ == "__main__":
