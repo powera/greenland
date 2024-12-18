@@ -12,6 +12,9 @@ from telemetry import LLMUsage
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
+# Default timeout values (in seconds)
+DEFAULT_TIMEOUT = 50
+
 @dataclass
 class Response:
     """Container for response data."""
@@ -22,17 +25,24 @@ class Response:
 class UnifiedLLMClient:
     """Client for routing requests to appropriate LLM backend based on model name."""
     
-    def __init__(self, debug: bool = False):
-        """Initialize client with optional debug mode."""
+    def __init__(self, timeout: int = DEFAULT_TIMEOUT, debug: bool = False):
+        """
+        Initialize client with configurable timeout and debug mode.
+        
+        Args:
+            timeout: Request timeout in seconds for all backends
+            debug: Whether to enable debug logging
+        """
+        self.timeout = timeout
         self.debug = debug
         if debug:
             logger.setLevel(logging.DEBUG)
-            logger.debug("Initialized UnifiedLLMClient in debug mode")
+            logger.debug("Initialized UnifiedLLMClient (timeout=%ds)", timeout)
             
-        # Initialize backend clients
-        self.ollama = ollama_client.OllamaClient(debug=debug)
-        self.openai = openai_client.OpenAIClient(debug=debug)
-        self.anthropic = anthropic_client.AnthropicClient(debug=debug)
+        # Initialize backend clients - debug logs only in client used
+        self.ollama = ollama_client.OllamaClient(timeout=timeout, debug=False)
+        self.openai = openai_client.OpenAIClient(timeout=timeout, debug=False)
+        self.anthropic = anthropic_client.AnthropicClient(timeout=timeout, debug=False)
         
         # Model name prefixes for routing
         self.openai_prefixes = ['gpt-']
@@ -40,22 +50,29 @@ class UnifiedLLMClient:
         
     def _get_client(self, model: str):
         """Get appropriate client for model."""
+        client = None
+        client_name = None
+        
         if any(model.startswith(prefix) for prefix in self.openai_prefixes):
-            if self.debug:
-                logger.debug("Routing to OpenAI client for model: %s", model)
-            return self.openai
+            client = self.openai
+            client_name = "OpenAI"
         elif any(model.startswith(prefix) for prefix in self.anthropic_prefixes):
-            if self.debug:
-                logger.debug("Routing to Anthropic client for model: %s", model)
-            return self.anthropic
+            client = self.anthropic
+            client_name = "Anthropic"
         else:
-            if self.debug:
-                logger.debug("Routing to Ollama client for model: %s", model)
-            return self.ollama
+            client = self.ollama
+            client_name = "Ollama"
+            
+        if self.debug:
+            logger.debug("Using %s client for model: %s", client_name, model)
+            client.debug = True
+        return client
 
     def warm_model(self, model: str) -> bool:
         """Initialize model for faster first inference."""
         client = self._get_client(model)
+        if self.debug:
+            logger.debug("Warming up model: %s", model)
         return client.warm_model(model)
 
     def generate_text(self, prompt: str, model: str) -> Tuple[str, LLMUsage]:
@@ -68,19 +85,28 @@ class UnifiedLLMClient:
             
         Returns:
             Tuple containing (generated_text, usage_info)
+            
+        Raises:
+            TimeoutError: If request exceeds configured timeout
+            ConnectionError: If connection to backend fails
+            RuntimeError: For other request failures
         """
         if self.debug:
-            logger.debug("Generating text with model: %s", model)
-            logger.debug("Prompt: %s", prompt)
+            logger.debug("Text generation request: model=%s", model)
             
         client = self._get_client(model)
-        result, usage = client.generate_text(prompt, model)
-        
-        if self.debug:
-            logger.debug("Generated text: %s", result)
-            logger.debug("Usage metrics: %s", usage.to_dict())
+        try:
+            result, usage = client.generate_text(prompt, model)
             
-        return result, usage
+            if self.debug:
+                logger.debug("Generation complete: %d chars, %d tokens", 
+                            len(result), usage.total_tokens)
+                            
+            return result, usage
+            
+        except Exception as e:
+            logger.error("Text generation failed: %s", str(e))
+            raise
 
     def generate_chat(
         self,
@@ -104,35 +130,43 @@ class UnifiedLLMClient:
             Response containing response_text, structured_data, and usage_info
             For text responses, structured_data will be empty dict
             For JSON responses, response_text will be empty string
+            
+        Raises:
+            TimeoutError: If request exceeds configured timeout  
+            ConnectionError: If connection to backend fails
+            RuntimeError: For other request failures
         """
         if self.debug:
-            logger.debug("Generating chat response")
-            logger.debug("Model: %s", model)
-            logger.debug("Brief mode: %s", brief)
-            logger.debug("Context: %s", context)
-            logger.debug("JSON schema: %s", json_schema)
+            logger.debug("Chat request: model=%s, brief=%s, schema=%s", 
+                        model, brief, bool(json_schema))
             
         client = self._get_client(model)
-        response_text, structured_data, usage = client.generate_chat(
-            prompt=prompt,
-            model=model,
-            brief=brief,
-            json_schema=json_schema,
-            context=context
-        )
-        
-        if self.debug:
-            logger.debug("Chat response: %s", response_text if response_text else "JSON response")
-            logger.debug("Usage metrics: %s", usage.to_dict())
+        try:
+            response_text, structured_data, usage = client.generate_chat(
+                prompt=prompt,
+                model=model,
+                brief=brief,
+                json_schema=json_schema,
+                context=context
+            )
             
-        return Response(
-            response_text=response_text,
-            structured_data=structured_data,
-            usage=usage
-        )
+            if self.debug:
+                response_type = "JSON" if json_schema else "text"
+                logger.debug("Chat complete: %s response, %d tokens", 
+                            response_type, usage.total_tokens)
+                
+            return Response(
+                response_text=response_text,
+                structured_data=structured_data,
+                usage=usage
+            )
+            
+        except Exception as e:
+            logger.error("Chat generation failed: %s", str(e))
+            raise
 
 # Create default client instance
-client = UnifiedLLMClient(debug=False)  # Set to True to enable debug logging
+client = UnifiedLLMClient()  # Use defaults for timeout and debug
 
 # Expose key functions at module level for API compatibility
 def warm_model(model: str) -> bool:
