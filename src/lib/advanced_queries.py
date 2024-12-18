@@ -132,6 +132,13 @@ Maintain cultural sensitivity while being informative.""",
     )
 }
 
+def _calculate_timeout(target_length: int) -> int:
+    """Calculate timeout based on response length.
+    
+    :param target_length: Target response length in words
+    :return: Timeout in seconds
+    """
+    return 20 + (target_length // 5)
 
 def _generate_response(
     topic: str,
@@ -155,10 +162,14 @@ def _generate_response(
     context = config.context_template.format(length=target_length)
     prompt = config.prompt_template.format(length=target_length, topic=topic)
     
+    # Calculate timeout based on target length
+    timeout = _calculate_timeout(target_length)
+    
     response, _, usage = unified_client.generate_chat(
         prompt=prompt,
         model=model,
-        context=context
+        context=context,
+        timeout=timeout  # Pass timeout to unified client
     )
     
     return response.strip(), usage
