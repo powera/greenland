@@ -53,10 +53,11 @@ class AnthropicClient:
         if debug:
             logger.setLevel(logging.DEBUG)
             logger.debug("Initialized AnthropicClient in debug mode")
-            
+        
+        # Silently ignore the timeout parameter.  More necessary for Ollama, and currently doesn't work here.
+        self.default_timeout = timeout
         self.client = Anthropic(
             api_key=api_key or self._load_key(),
-            default_request_timeout=timeout
         )
 
     def _load_key(self) -> str:
