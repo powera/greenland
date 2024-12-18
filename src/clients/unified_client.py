@@ -48,10 +48,19 @@ class UnifiedLLMClient:
         self.openai_prefixes = ['gpt-']
         self.anthropic_prefixes = ['claude-']
         
-    def _get_client(self, model: str):
-        """Get appropriate client for model."""
+    def _get_client(self, model: str) -> Tuple[Any, str]:
+        """
+        Get appropriate client for model and normalize model name.
+        
+        Args:
+            model: Original model name/identifier
+            
+        Returns:
+            Tuple of (client, normalized_model_name)
+        """
         client = None
         client_name = None
+        normalized_model = model
         
         if any(model.startswith(prefix) for prefix in self.openai_prefixes):
             client = self.openai
@@ -62,18 +71,28 @@ class UnifiedLLMClient:
         else:
             client = self.ollama
             client_name = "Ollama"
+            # Strip quantization suffix if present (e.g. ":Q4_0")
+            # But preserve base model name if no quantization
+            parts = model.split(":")
+            if len(parts) > 2:  # Has quantization suffix
+                normalized_model = ":".join(parts[:-1])
             
         if self.debug:
-            logger.debug("Using %s client for model: %s", client_name, model)
+            if normalized_model != model:
+                logger.debug("Using %s client for model: %s (normalized from %s)", 
+                           client_name, normalized_model, model)
+            else:
+                logger.debug("Using %s client for model: %s", client_name, model)
             client.debug = True
-        return client
+            
+        return client, normalized_model
 
-    def warm_model(self, model: str) -> bool:
+    def warm_model(self, model: str, timeout: Optional[float] = None) -> bool:
         """Initialize model for faster first inference."""
-        client = self._get_client(model)
+        client, normalized_model = self._get_client(model)
         if self.debug:
-            logger.debug("Warming up model: %s", model)
-        return client.warm_model(model)
+            logger.debug("Warming up model: %s", normalized_model)
+        return client.warm_model(normalized_model)
 
     def generate_text(self, prompt: str, model: str, timeout: Optional[float] = None) -> Tuple[str, LLMUsage]:
         """
@@ -82,7 +101,7 @@ class UnifiedLLMClient:
         Args:
             prompt: Text prompt for generation
             model: Model name (determines backend)
-            timeout: Timeout in seconds (TODO: add support to back ends.)
+            timeout: Optional timeout override in seconds
             
         Returns:
             Tuple containing (generated_text, usage_info)
@@ -95,9 +114,9 @@ class UnifiedLLMClient:
         if self.debug:
             logger.debug("Text generation request: model=%s", model)
             
-        client = self._get_client(model)
+        client, normalized_model = self._get_client(model)
         try:
-            result, usage = client.generate_text(prompt, model)
+            result, usage = client.generate_text(prompt, normalized_model)
             
             if self.debug:
                 logger.debug("Generation complete: %d chars, %d tokens", 
@@ -116,7 +135,7 @@ class UnifiedLLMClient:
         brief: bool = False,
         json_schema: Optional[Dict] = None,
         context: Optional[str] = None,
-        timeout: Optional[float] = None,
+        timeout: Optional[float] = None
     ) -> Response:
         """
         Generate chat completion using appropriate backend.
@@ -127,7 +146,7 @@ class UnifiedLLMClient:
             brief: Whether to limit response length
             json_schema: Schema for structured response (if provided, returns JSON)
             context: Optional context to include before the prompt
-            timeout: Timeout in seconds (TODO: add support to back ends.)
+            timeout: Optional timeout override in seconds
         
         Returns:
             Response containing response_text, structured_data, and usage_info
@@ -143,11 +162,11 @@ class UnifiedLLMClient:
             logger.debug("Chat request: model=%s, brief=%s, schema=%s", 
                         model, brief, bool(json_schema))
             
-        client = self._get_client(model)
+        client, normalized_model = self._get_client(model)
         try:
             response_text, structured_data, usage = client.generate_chat(
                 prompt=prompt,
-                model=model,
+                model=normalized_model,
                 brief=brief,
                 json_schema=json_schema,
                 context=context
@@ -172,8 +191,8 @@ class UnifiedLLMClient:
 client = UnifiedLLMClient()  # Use defaults for timeout and debug
 
 # Expose key functions at module level for API compatibility
-def warm_model(model: str) -> bool:
-    return client.warm_model(model)
+def warm_model(model: str, timeout: Optional[float] = None) -> bool:
+    return client.warm_model(model, timeout)
 
 def generate_text(prompt: str, model: str, timeout: Optional[float] = None) -> Tuple[str, LLMUsage]:
     return client.generate_text(prompt, model, timeout)
@@ -184,7 +203,7 @@ def generate_chat(
     brief: bool = False,
     json_schema: Optional[Dict] = None,
     context: Optional[str] = None,
-    timeout: Optional[float] = None,
+    timeout: Optional[float] = None
 ) -> Tuple[str, Dict[str, Any], LLMUsage]:
     """
     Generate a chat response using appropriate backend based on model name.
@@ -194,5 +213,5 @@ def generate_chat(
         For text responses, structured_data will be empty dict
         For JSON responses, response_text will be empty string
     """
-    response = client.generate_chat(prompt, model, brief, json_schema, context, timeout=timeout)
+    response = client.generate_chat(prompt, model, brief, json_schema, context, timeout)
     return response.response_text, response.structured_data, response.usage
