@@ -53,7 +53,7 @@ def run_missing_quals(blacklist_models: Set[str] = None, target_model: Optional[
     
     # Try each combination
     for model in sorted(all_models):
-        for test_type in run_quals.QUAL_TEST_CLASSES:
+        for test_type in lib.run_quals.QUAL_TEST_CLASSES:
             # Skip if already has a score
             if f"{test_type}:{model}" in completed:
                 continue
@@ -61,7 +61,7 @@ def run_missing_quals(blacklist_models: Set[str] = None, target_model: Optional[
             logger.info(f"Running {test_type} qualification test for model {model}")
             
             try:
-                run_quals.run_qual_test(test_type, model, save_to_db=True, session=session)
+                lib.run_quals.run_qual_test(test_type, model, save_to_db=True, session=session)
             except Exception as e:
                 logger.error(f"Error running {test_type} for {model}: {str(e)}")
                 continue
