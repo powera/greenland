@@ -7,7 +7,7 @@ import argparse
 from typing import List, Set, Optional
 import datastore.quals
 import datastore.benchmarks
-import run_quals
+import lib.run_quals
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
