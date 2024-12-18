@@ -7,6 +7,7 @@ import logging
 from dataclasses import dataclass
 from typing import Dict, Optional, Tuple, Union, Any, List
 import requests
+from requests.exceptions import Timeout, RequestException
 
 from telemetry import LLMUsage
 
@@ -17,6 +18,18 @@ logger = logging.getLogger(__name__)
 SERVER = "100.123.16.86"
 DEFAULT_MODEL = "smollm2:360m"  # Responses are low-quality but generally coherent.
 DEFAULT_TIMEOUT = 50
+
+class OllamaError(Exception):
+    """Base exception for Ollama client errors."""
+    pass
+
+class OllamaTimeoutError(OllamaError):
+    """Raised when an Ollama request times out."""
+    pass
+
+class OllamaRequestError(OllamaError):
+    """Raised when an Ollama request fails."""
+    pass
 
 @dataclass
 class TwoPhaseResponse:
@@ -35,46 +48,39 @@ class OllamaClient:
         self.debug = debug
         if debug:
             logger.setLevel(logging.DEBUG)
-            logger.debug("Initialized OllamaClient in debug mode")
 
     def _make_request(self, endpoint: str, data: Dict) -> requests.Response:
         """Make HTTP request to Ollama API."""
         url = f"{self.base_url}/{endpoint}"
         
         if self.debug:
-            logger.debug("Making request to %s", url)
-            logger.debug("Request data: %s", json.dumps(data, indent=2))
+            logger.debug("Request to %s: %s", url, json.dumps(data, indent=2))
             
-        response = requests.post(url, json=data, timeout=self.timeout)
-        
-        if self.debug:
-            logger.debug("Response status code: %d", response.status_code)
+        try:
+            response = requests.post(url, json=data, timeout=self.timeout)
+            response.raise_for_status()
+            return response
             
-        if response.status_code != 200:
-            error_msg = f"Error: {response.status_code} - {response.text}"
-            logger.error(error_msg)
-            raise Exception(error_msg)
-            
-        return response
+        except Timeout:
+            raise OllamaTimeoutError(f"Request timed out after {self.timeout}s")
+        except RequestException as e:
+            if e.response is not None:
+                error_msg = f"Error {e.response.status_code}: {e.response.text}"
+            else:
+                error_msg = str(e)
+            raise OllamaRequestError(error_msg) from e
 
     def _process_chat_response(self, response: requests.Response, model: str) -> Tuple[str, LLMUsage]:
         """Process chat response and extract content and usage info."""
         result = ""
         usage = None
-        
-        if self.debug:
-            logger.debug("Processing chat response...")
             
         for line in response.iter_lines():
             if line:
                 response_data = json.loads(line.decode('utf-8'))
-                if self.debug:
-                    logger.debug("Response data: %s", json.dumps(response_data, indent=2))
                     
                 if "total_duration" in response_data:
                     usage = LLMUsage.from_api_response(response_data, model=model)
-                    if self.debug:
-                        logger.debug("Usage info: %s", usage)
                         
                 if "message" in response_data:
                     result += response_data["message"]["content"]
@@ -83,23 +89,14 @@ class OllamaClient:
 
     def warm_model(self, model: str) -> bool:
         """Initialize model for faster first inference."""
-        if self.debug:
-            logger.debug("Warming up model: %s", model)
-            
-        response = self._make_request("chat", {"model": model, "messages": []})
-        success = response.status_code == 200
-        
-        if self.debug:
-            logger.debug("Model warmup %s", "successful" if success else "failed")
-            
-        return success
+        try:
+            response = self._make_request("chat", {"model": model, "messages": []})
+            return response.status_code == 200
+        except OllamaError:
+            return False
 
     def generate_text(self, prompt: str, model: str = DEFAULT_MODEL) -> Tuple[str, LLMUsage]:
         """Generate text completion using Ollama API."""
-        if self.debug:
-            logger.debug("Generating text with model: %s", model)
-            logger.debug("Prompt: %s", prompt)
-            
         data = {
             "model": model,
             "prompt": prompt,
@@ -118,8 +115,7 @@ class OllamaClient:
                 result += response_data.get('response', '')
                 
         if self.debug:
-            logger.debug("Generated text: %s", result)
-            logger.debug("Usage info: %s", usage)
+            logger.debug("Generated %d characters", len(result))
                 
         return result, usage
 
@@ -147,14 +143,14 @@ class OllamaClient:
             TwoPhaseResponse if two_phase=True, otherwise a tuple (text, json, usage)
             For text-only responses, json will be empty dict
             For JSON-only responses (two_phase=False), text will be empty string
+            
+        Raises:
+            OllamaTimeoutError: If request times out
+            OllamaRequestError: If request fails
         """
         if self.debug:
-            logger.debug("Generating chat response")
-            logger.debug("Model: %s", model)
-            logger.debug("Brief mode: %s", brief)
-            logger.debug("Context: %s", context)
-            logger.debug("JSON schema: %s", json.dumps(json_schema, indent=2) if json_schema else None)
-            logger.debug("Two-phase mode: %s", two_phase)
+            logger.debug("Chat request: model=%s, brief=%s, schema=%s", 
+                        model, brief, bool(json_schema))
         
         # Phase 1: Get response (either free-form or JSON)
         messages = []
@@ -189,9 +185,6 @@ Query: {prompt}"""
                 # Phase 2: Get structured response
                 structure_prompt = f"""Based on the previous response to the prompt, provide a JSON response using the following keys: {", ".join(json_schema["properties"].keys())}"""
                 
-                if self.debug:
-                    logger.debug("Phase 2 structure prompt: %s", structure_prompt)
-                
                 data = {
                     "model": model,
                     "messages": messages + [
@@ -208,9 +201,7 @@ Query: {prompt}"""
                 try:
                     structured_response = json.loads(json_text)
                 except json.JSONDecodeError:
-                    error_msg = f"Failed to parse JSON response: {json_text}"
-                    logger.error(error_msg)
-                    structured_response = {"error": error_msg}
+                    structured_response = {"error": f"Failed to parse JSON: {json_text}"}
                 
                 # Return two-phase response
                 total_usage = response_usage.combine(json_usage)
@@ -225,9 +216,7 @@ Query: {prompt}"""
                     structured_response = json.loads(response_text)
                     return "", structured_response, response_usage
                 except json.JSONDecodeError:
-                    error_msg = f"Failed to parse JSON response: {response_text}"
-                    logger.error(error_msg)
-                    return "", {"error": error_msg}, response_usage
+                    return "", {"error": f"Failed to parse JSON: {response_text}"}, response_usage
         else:
             # Text-only response
             return response_text, {}, response_usage
