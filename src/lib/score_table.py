@@ -7,6 +7,7 @@ from typing import Dict, List, Optional
 from jinja2 import Environment, FileSystemLoader
 
 import datastore.benchmarks
+import datastore.common
 import constants
 
 @dataclass
@@ -22,7 +23,7 @@ class ScoreTableGenerator:
     
     def __init__(self, session: Optional[object] = None):
         """Initialize generator with optional database session."""
-        self.session = session or datastore.benchmarks.create_dev_session()
+        self.session = session or datastore.common.create_dev_session()
         self.template_env = Environment(loader=FileSystemLoader(constants.TEMPLATES_DIR))
        
 
@@ -82,7 +83,7 @@ class ScoreTableGenerator:
             dict: Dictionary containing models, benchmarks, and scores data
         """
         # Get model data sorted by size and name
-        llms = datastore.benchmarks.list_all_models(self.session)
+        llms = datastore.common.list_all_models(self.session)
         llms.sort(key=lambda x: (x["filesize_mb"], x["displayname"]))
 
         # Get benchmark information
