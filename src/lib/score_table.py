@@ -24,28 +24,34 @@ class ScoreTableGenerator:
         """Initialize generator with optional database session."""
         self.session = session or datastore.benchmarks.create_dev_session()
         self.template_env = Environment(loader=FileSystemLoader(constants.TEMPLATES_DIR))
-        
+       
+
     def _get_color(self, score: int) -> str:
         """
-        Convert a score (0-100) to an RGB color value.
-        
+        Convert a score (0-100) to an RGB color value using a muted color scheme.
+
         Parameters:
             score (int): Score value between 0 and 100
-            
+
         Returns:
-            str: RGB color string (e.g., "rgb(0, 255, 0)")
+            str: RGB color string (e.g., "rgb(144, 190, 144)")
         """
         if score == 100:
-            return "rgb(0, 255, 0)"
-        
+            return "rgb(144, 190, 144)"  # Muted green
+
         # Convert score to value between 0 and 1
         normalized = score / 100.0
-        
-        # Calculate red and green components
-        red = int(40 + 215 * (1 - normalized))
-        green = int(215 * normalized)
-        
-        return f"rgb({red}, {green}, 0)"
+
+        # Base colors for interpolation
+        low_r, low_g, low_b = 190, 144, 144  # Muted red
+        high_r, high_g, high_b = 144, 190, 144  # Muted green
+
+        # Interpolate between the colors
+        red = int(low_r + (high_r - low_r) * normalized)
+        green = int(low_g + (high_g - low_g) * normalized)
+        blue = int(low_b + (high_b - low_b) * normalized)
+
+        return f"rgb({red}, {green}, {blue})"
 
     def _calculate_avg_eval_time(self, run_id: int) -> float:
         """
