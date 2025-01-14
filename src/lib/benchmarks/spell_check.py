@@ -31,13 +31,13 @@ class SpellCheckGenerator(BenchmarkGenerator):
         """Generate a sentence using start_word but spelled incorrectly."""
         prompt = f"Write a sentence using the word '{start_word}', but spell it incorrectly."
         
-        free_response, _, _ = ollama_client.generate_chat(
+        response = ollama_client.generate_chat(
             prompt=prompt,
             model=model,
             context=self.context
         )
             
-        return free_response.strip()
+        return response.response_text.strip()
 
     def generate_batch(self, start_word: str) -> None:
         """Generate 10 sentences for a given word."""
@@ -110,13 +110,13 @@ class SpellCheckBenchmark(BenchmarkRunner):
                 )
                 
                 is_correct = (info["incorrect"] == response.structured_data["incorrect"] and 
-                              info["correct"] == response.structured_data["correct"])
+                            info["correct"] == response.structured_data["correct"])
                 
                 results.append(BenchmarkResult(
                     question["question_id"],
                     is_correct,
-                    int(perf.total_msec),
-                    json.dumps(structured_response)
+                    int(response.usage.total_msec),
+                    json.dumps(response.structured_data)
                 ))
             except OllamaTimeoutError as e:
                 results.append(self.handle_timeout(question["question_id"], e))
