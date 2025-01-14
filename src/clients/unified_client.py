@@ -2,11 +2,11 @@
 """Unified client for routing requests to appropriate LLM backends."""
 
 import logging
-from dataclasses import dataclass
-from typing import Dict, Optional, Tuple, Any, List
+from typing import Dict, Optional, Tuple, Any
 
 from clients import ollama_client, openai_client, anthropic_client
 from telemetry import LLMUsage
+from clients.types import Response
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -14,8 +14,6 @@ logger = logging.getLogger(__name__)
 
 # Default timeout values (in seconds)
 DEFAULT_TIMEOUT = 50
-
-from clients.types import Response
 
 class UnifiedLLMClient:
     """Client for routing requests to appropriate LLM backend based on model name."""
@@ -99,7 +97,7 @@ class UnifiedLLMClient:
             timeout: Optional timeout override in seconds
             
         Returns:
-            Response data class.
+            Response data class containing response_text, structured_data, and usage
             
         Raises:
             TimeoutError: If request exceeds configured timeout
@@ -115,7 +113,7 @@ class UnifiedLLMClient:
             
             if self.debug:
                 logger.debug("Generation complete: %d chars, %d tokens", 
-                            len(result.response_text), usage.total_tokens)
+                            len(result.response_text), result.usage.total_tokens)
                             
             return result
             
@@ -144,7 +142,7 @@ class UnifiedLLMClient:
             timeout: Optional timeout override in seconds
         
         Returns:
-            Response containing response_text, structured_data, and usage_info
+            Response containing response_text, structured_data, and usage
             For text responses, structured_data will be empty dict
             For JSON responses, response_text will be empty string
             
@@ -170,7 +168,7 @@ class UnifiedLLMClient:
             if self.debug:
                 response_type = "JSON" if json_schema else "text"
                 logger.debug("Chat complete: %s response, %d tokens", 
-                            response_type, usage.total_tokens)
+                            response_type, result.usage.total_tokens)
                 
             return result
             
@@ -185,7 +183,13 @@ client = UnifiedLLMClient()  # Use defaults for timeout and debug
 def warm_model(model: str, timeout: Optional[float] = None) -> bool:
     return client.warm_model(model, timeout)
 
-def generate_text(prompt: str, model: str, timeout: Optional[float] = None) -> Tuple[str, LLMUsage]:
+def generate_text(prompt: str, model: str, timeout: Optional[float] = None) -> Response:
+    """
+    Generate text using appropriate backend based on model name.
+    
+    Returns:
+        Response data class containing response_text, structured_data, and usage
+    """
     return client.generate_text(prompt, model, timeout)
 
 def generate_chat(
@@ -195,14 +199,13 @@ def generate_chat(
     json_schema: Optional[Dict] = None,
     context: Optional[str] = None,
     timeout: Optional[float] = None
-) -> Tuple[str, Dict[str, Any], LLMUsage]:
+) -> Response:
     """
     Generate a chat response using appropriate backend based on model name.
     
     Returns:
-        Tuple containing (response_text, structured_data, usage_info)
+        Response data class containing response_text, structured_data, and usage
         For text responses, structured_data will be empty dict
         For JSON responses, response_text will be empty string
     """
-    response = client.generate_chat(prompt, model, brief, json_schema, context, timeout)
-    return response.response_text, response.structured_data, response.usage
+    return client.generate_chat(prompt, model, brief, json_schema, context, timeout)
