@@ -32,13 +32,6 @@ class OllamaRequestError(OllamaError):
     """Raised when an Ollama request fails."""
     pass
 
-@dataclass
-class TwoPhaseResponse:
-    """Container for both free-form and structured responses."""
-    free_response: str
-    structured_response: Dict[str, Any]
-    usage: LLMUsage
-
 class OllamaClient:
     """Client for making requests to Ollama API with optional two-phase responses."""
     
@@ -128,7 +121,7 @@ class OllamaClient:
         json_schema: Optional[Dict] = None,
         context: Optional[str] = None,
         two_phase: bool = True
-    ) -> Union[TwoPhaseResponse, Tuple[str, Dict[str, Any], LLMUsage]]:
+    ) -> Response:
         """
         Generate chat completion using Ollama API.
         
@@ -141,9 +134,7 @@ class OllamaClient:
             two_phase: If True, use two-phase response for JSON (default: True)
         
         Returns:
-            TwoPhaseResponse if two_phase=True, otherwise a tuple (text, json, usage)
-            For text-only responses, json will be empty dict
-            For JSON-only responses (two_phase=False), text will be empty string
+            Response data class.
             
         Raises:
             OllamaTimeoutError: If request times out
@@ -206,16 +197,19 @@ Query: {prompt}"""
                 
                 # Return two-phase response
                 total_usage = response_usage.combine(json_usage)
-                return TwoPhaseResponse(
-                    free_response=response_text,
-                    structured_response=structured_response,
+                return Response(
+                    response_text=response_text,
+                    structured_data=structured_response,
                     usage=total_usage
                 )
             else:
                 # Single-phase JSON response
                 try:
                     structured_response = json.loads(response_text)
-                    return "", structured_response, response_usage
+                    return Response(
+                        response_text=response_text,
+                        structured_data=structured_response,
+                        usage=response_usage)
                 except json.JSONDecodeError:
                     return "", {"error": f"Failed to parse JSON: {response_text}"}, response_usage
         else:
@@ -250,6 +244,4 @@ def generate_chat(
         When two_phase=False or no json_schema, returns single-phase response
     """
     response = client.generate_chat(prompt, model, brief, json_schema, context, two_phase)
-    if isinstance(response, TwoPhaseResponse):
-        return response.free_response, response.structured_response, response.usage
     return response
