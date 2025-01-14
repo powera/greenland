@@ -5,8 +5,7 @@ import json
 import logging
 import os
 import time
-from dataclasses import dataclass
-from typing import Dict, Optional, Tuple, Any, List
+from typing import Dict, Optional, Any, Tuple
 
 import requests
 import tiktoken
@@ -87,7 +86,7 @@ class OpenAIClient:
             logger.debug("Model warmup not required for OpenAI: %s", model)
         return True
 
-    def generate_text(self, prompt: str, model: str = DEFAULT_MODEL) -> Tuple[str, LLMUsage]:
+    def generate_text(self, prompt: str, model: str = DEFAULT_MODEL) -> Response:
         """Generate text completion using OpenAI API."""
         if self.debug:
             logger.debug("Generating text with model: %s", model)
@@ -120,7 +119,11 @@ class OpenAIClient:
             logger.debug("Generated text: %s", result)
             logger.debug("Usage metrics: %s", usage.to_dict())
                 
-        return result, usage
+        return Response(
+            response_text=result,
+            structured_data={},
+            usage=usage
+        )
 
     def generate_chat(
         self,
@@ -129,7 +132,7 @@ class OpenAIClient:
         brief: bool = False,
         json_schema: Optional[Dict] = None,
         context: Optional[str] = None
-    ) -> Tuple[str, Dict[str, Any], LLMUsage]:
+    ) -> Response:
         """
         Generate chat completion using OpenAI API.
         
@@ -141,7 +144,7 @@ class OpenAIClient:
             context: Optional context to include before the prompt
         
         Returns:
-            Tuple containing (response_text, structured_data, usage_info)
+            Response containing response_text, structured_data, and usage
             For text responses, structured_data will be empty dict
             For JSON responses, response_text will be empty string
         """
@@ -150,7 +153,7 @@ class OpenAIClient:
             logger.debug("Model: %s", model)
             logger.debug("Brief mode: %s", brief)
             logger.debug("Context: %s", context)
-            logger.debug("JSON schema: %s", json_dumps(json_schema, indent=2) if json_schema else None)
+            logger.debug("JSON schema: %s", json.dumps(json_schema, indent=2) if json_schema else None)
         
         messages = []
         if context:
@@ -216,7 +219,11 @@ class OpenAIClient:
             logger.debug("Response text: %s", response_text if response_text else "JSON response")
             logger.debug("Usage metrics: %s", usage.to_dict())
         
-        return response_text, structured_data, usage
+        return Response(
+            response_text=response_text,
+            structured_data=structured_data,
+            usage=usage
+        )
 
 # Create default client instance
 client = OpenAIClient(debug=False)  # Set to True to enable debug logging
@@ -225,7 +232,13 @@ client = OpenAIClient(debug=False)  # Set to True to enable debug logging
 def warm_model(model: str) -> bool:
     return client.warm_model(model)
 
-def generate_text(prompt: str, model: str = DEFAULT_MODEL) -> Tuple[str, LLMUsage]:
+def generate_text(prompt: str, model: str = DEFAULT_MODEL) -> Response:
+    """
+    Generate text using OpenAI API.
+    
+    Returns:
+        Response containing response_text, structured_data (empty dict), and usage
+    """
     return client.generate_text(prompt, model)
 
 def generate_chat(
@@ -234,12 +247,12 @@ def generate_chat(
     brief: bool = False,
     json_schema: Optional[Dict] = None,
     context: Optional[str] = None
-) -> Tuple[str, Dict[str, Any], LLMUsage]:
+) -> Response:
     """
-    Generate a chat response, either text or JSON.
+    Generate a chat response using OpenAI API.
     
     Returns:
-        Tuple containing (response_text, structured_data, usage_info)
+        Response containing response_text, structured_data, and usage
         For text responses, structured_data will be empty dict
         For JSON responses, response_text will be empty string
     """
