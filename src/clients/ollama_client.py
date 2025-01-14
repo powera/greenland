@@ -5,7 +5,7 @@
 import json
 import logging
 from dataclasses import dataclass
-from typing import Dict, Optional, Tuple, Union, Any, List
+from typing import Dict, Optional, Union, Any, List
 import requests
 from requests.exceptions import Timeout, RequestException
 
@@ -64,7 +64,7 @@ class OllamaClient:
                 error_msg = str(e)
             raise OllamaRequestError(error_msg) from e
 
-    def _process_chat_response(self, response: requests.Response, model: str) -> Tuple[str, LLMUsage]:
+    def _process_chat_response(self, response: requests.Response, model: str) -> tuple[str, LLMUsage]:
         """Process chat response and extract content and usage info."""
         result = ""
         usage = None
@@ -89,7 +89,7 @@ class OllamaClient:
         except OllamaError:
             return False
 
-    def generate_text(self, prompt: str, model: str = DEFAULT_MODEL) -> Tuple[str, LLMUsage]:
+    def generate_text(self, prompt: str, model: str = DEFAULT_MODEL) -> Response:
         """Generate text completion using Ollama API."""
         data = {
             "model": model,
@@ -111,7 +111,11 @@ class OllamaClient:
         if self.debug:
             logger.debug("Generated %d characters", len(result))
                 
-        return Response(response_text=result, usage=usage)
+        return Response(
+            response_text=result,
+            structured_data={},
+            usage=usage
+        )
 
     def generate_chat(
         self,
@@ -134,7 +138,7 @@ class OllamaClient:
             two_phase: If True, use two-phase response for JSON (default: True)
         
         Returns:
-            Response data class.
+            Response data class
             
         Raises:
             OllamaTimeoutError: If request times out
@@ -207,16 +211,23 @@ Query: {prompt}"""
                 try:
                     structured_response = json.loads(response_text)
                     return Response(
-                        response_text=response_text,
+                        response_text="",
                         structured_data=structured_response,
-                        usage=response_usage)
+                        usage=response_usage
+                    )
                 except json.JSONDecodeError:
-                    return "", {"error": f"Failed to parse JSON: {response_text}"}, response_usage
+                    return Response(
+                        response_text="",
+                        structured_data={"error": f"Failed to parse JSON: {response_text}"},
+                        usage=response_usage
+                    )
         else:
             # Text-only response
             return Response(
                 response_text=response_text,
-                usage=response_usage)
+                structured_data={},
+                usage=response_usage
+            )
 
 # Create default client instance
 client = OllamaClient(debug=False)  # Set to True to enable debug logging
@@ -225,9 +236,8 @@ client = OllamaClient(debug=False)  # Set to True to enable debug logging
 def warm_model(model: str) -> bool:
     return client.warm_model(model)
 
-def generate_text(prompt: str, model: str = DEFAULT_MODEL) -> Tuple[str, Dict]:
-    result, usage = client.generate_text(prompt, model)
-    return result, usage
+def generate_text(prompt: str, model: str = DEFAULT_MODEL) -> Response:
+    return client.generate_text(prompt, model)
 
 def generate_chat(
     prompt: str,
@@ -236,14 +246,11 @@ def generate_chat(
     json_schema: Optional[Dict] = None,
     context: Optional[str] = None,
     two_phase: bool = True
-) -> Tuple[str, Dict[str, Any], Dict]:
+) -> Response:
     """
     Generate a chat response.
     
     Returns:
-        Tuple containing (response_text, structured_data, usage_info)
-        When two_phase=True and json_schema provided, combines both phases
-        When two_phase=False or no json_schema, returns single-phase response
+        Response data class containing response_text, structured_data, and usage_info
     """
-    response = client.generate_chat(prompt, model, brief, json_schema, context, two_phase)
-    return response
+    return client.generate_chat(prompt, model, brief, json_schema, context, two_phase)
