@@ -5,7 +5,7 @@
 import json
 import logging
 import os
-from typing import Dict
+from typing import Dict, Optional
 from sqlalchemy.orm import Session
 
 from clients import unified_client, ollama_client
@@ -102,15 +102,15 @@ class SpellCheckBenchmark(BenchmarkRunner):
             prompt = f"What is the incorrectly-spelled word in this sentence: {info['sentence']}"
             
             try:
-                _, structured_response, perf = unified_client.generate_chat(
+                response = unified_client.generate_chat(
                     prompt=prompt,
                     model=self.remote_model,
                     json_schema=self.schema,
                     context=self.context
                 )
                 
-                is_correct = (info["incorrect"] == structured_response["incorrect"] and 
-                             info["correct"] == structured_response["correct"])
+                is_correct = (info["incorrect"] == response.structured_data["incorrect"] and 
+                             info["correct"] == response.structured_data["correct"])
                 
                 results.append(BenchmarkResult(
                     question["question_id"],

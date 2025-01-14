@@ -15,12 +15,7 @@ logger = logging.getLogger(__name__)
 # Default timeout values (in seconds)
 DEFAULT_TIMEOUT = 50
 
-@dataclass
-class Response:
-    """Container for response data."""
-    response_text: str
-    structured_data: Dict[str, Any]
-    usage: LLMUsage
+from clients.types import Response
 
 class UnifiedLLMClient:
     """Client for routing requests to appropriate LLM backend based on model name."""
@@ -94,7 +89,7 @@ class UnifiedLLMClient:
             logger.debug("Warming up model: %s", normalized_model)
         return client.warm_model(normalized_model)
 
-    def generate_text(self, prompt: str, model: str, timeout: Optional[float] = None) -> Tuple[str, LLMUsage]:
+    def generate_text(self, prompt: str, model: str, timeout: Optional[float] = None) -> Response:
         """
         Generate text using appropriate backend.
         
@@ -104,7 +99,7 @@ class UnifiedLLMClient:
             timeout: Optional timeout override in seconds
             
         Returns:
-            Tuple containing (generated_text, usage_info)
+            Response data class.
             
         Raises:
             TimeoutError: If request exceeds configured timeout
@@ -116,13 +111,13 @@ class UnifiedLLMClient:
             
         client, normalized_model = self._get_client(model)
         try:
-            result, usage = client.generate_text(prompt, normalized_model)
+            result = client.generate_text(prompt, normalized_model)
             
             if self.debug:
                 logger.debug("Generation complete: %d chars, %d tokens", 
-                            len(result), usage.total_tokens)
+                            len(result.response_text), usage.total_tokens)
                             
-            return result, usage
+            return result
             
         except Exception as e:
             logger.error("Text generation failed: %s", str(e))
@@ -164,7 +159,7 @@ class UnifiedLLMClient:
             
         client, normalized_model = self._get_client(model)
         try:
-            response_text, structured_data, usage = client.generate_chat(
+            result = client.generate_chat(
                 prompt=prompt,
                 model=normalized_model,
                 brief=brief,
@@ -177,11 +172,7 @@ class UnifiedLLMClient:
                 logger.debug("Chat complete: %s response, %d tokens", 
                             response_type, usage.total_tokens)
                 
-            return Response(
-                response_text=response_text,
-                structured_data=structured_data,
-                usage=usage
-            )
+            return result
             
         except Exception as e:
             logger.error("Chat generation failed: %s", str(e))

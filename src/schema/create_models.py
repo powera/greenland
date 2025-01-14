@@ -18,6 +18,7 @@ def create_models():
   datastore.benchmarks.insert_model(s, "granite3-dense:8b:Q4_K_M", "Granite 3", "2024-10-21", 4900, "Apache License")
   datastore.benchmarks.insert_model(s, "hermes3:8b:Q4_0", "Hermes 3", "2024-07-28", 4700, "Llama 3 License")
   datastore.benchmarks.insert_model(s, "exaone3.5:7.8b:Q4_K_M", "ExaONE 3.5", "2024-12-10", 4800, "Exaone License")
+  datastore.benchmarks.insert_model(s, "phi4:14b:Q4_K_M", "Phi 4", "2025-01-08", 9100, "MIT License")
 
 
   # Small models

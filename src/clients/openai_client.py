@@ -13,6 +13,7 @@ import tiktoken
 
 import constants
 from telemetry import LLMUsage
+from clients.types import Response
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -24,12 +25,6 @@ PROD_MODEL = "gpt-4o-2024-11-20"
 DEFAULT_MODEL = TEST_MODEL
 DEFAULT_TIMEOUT = 50
 API_BASE = "https://api.openai.com/v1"
-
-@dataclass
-class APIResponse:
-    """Container for API response."""
-    response_text: str
-    usage: LLMUsage
 
 def measure_completion(func):
     """Decorator to measure completion API call duration."""

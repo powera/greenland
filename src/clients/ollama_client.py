@@ -10,6 +10,7 @@ import requests
 from requests.exceptions import Timeout, RequestException
 
 from telemetry import LLMUsage
+from clients.types import Response
 
 # Configure logging with DEBUG level option
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
