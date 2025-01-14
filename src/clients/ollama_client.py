@@ -111,7 +111,7 @@ class OllamaClient:
         if self.debug:
             logger.debug("Generated %d characters", len(result))
                 
-        return result, usage
+        return Response(response_text=result, usage=usage)
 
     def generate_chat(
         self,
@@ -214,7 +214,9 @@ Query: {prompt}"""
                     return "", {"error": f"Failed to parse JSON: {response_text}"}, response_usage
         else:
             # Text-only response
-            return response_text, {}, response_usage
+            return Response(
+                response_text=response_text,
+                usage=response_usage)
 
 # Create default client instance
 client = OllamaClient(debug=False)  # Set to True to enable debug logging
