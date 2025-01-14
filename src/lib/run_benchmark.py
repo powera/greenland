@@ -4,6 +4,7 @@
 import logging
 from typing import Dict, List, Set, Tuple, Optional
 import datastore.benchmarks
+import datastore.common
 
 from lib.benchmarks.base import BenchmarkRunner
 from lib.benchmarks.spell_check import SpellCheckBenchmark
@@ -26,7 +27,7 @@ BENCHMARK_CLASSES = {
 def get_all_model_codenames() -> List[str]:
     """Get list of all model codenames from database."""
     session = datastore.benchmarks.create_dev_session()
-    return [x["codename"] for x in datastore.benchmarks.list_all_models(session)]
+    return [x["codename"] for x in datastore.common.list_all_models(session)]
 
 def get_all_benchmarks() -> List[str]:
     """Get list of all benchmark names from database."""
@@ -83,7 +84,7 @@ def run_missing_benchmarks(
 
     # Get all available models and benchmarks
     all_models = {
-        model['codename'] for model in datastore.benchmarks.list_all_models(session)
+        model['codename'] for model in datastore.common.list_all_models(session)
         if model['codename'] not in blacklist_models
     }
     all_benchmarks = {
