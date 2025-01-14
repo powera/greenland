@@ -48,14 +48,14 @@ class DefinitionsGenerator(BenchmarkGenerator):
 
         prompt = f'Define the word "{correct}"'
         
-        _, structured_response, _ = ollama_client.generate_chat(
+        response = ollama_client.generate_chat(
             prompt=prompt,
             model=model,
             json_schema=self.schema,
             context=self.context
         )
         
-        definition = structured_response["definition"]
+        definition = response.structured_data["definition"]
 
         question = f'Which word has this definition: {definition}\n\nThe choices are: {", ".join(choices)}'
 
@@ -105,18 +105,18 @@ class DefinitionsBenchmark(BenchmarkRunner):
         for question in questions:
             info = json.loads(question["question_info_json"])
             try:
-                free_response, _, perf = unified_client.generate_chat(
+                response = unified_client.generate_chat(
                     info["question"],
                     self.remote_model,
                     brief=True
                 )
                 
-                is_correct = free_response.strip().strip(".").lower() == info["correct"]
+                is_correct = response.response_text.strip().strip(".").lower() == info["correct"]
                 results.append(BenchmarkResult(
                     question["question_id"],
                     is_correct,
-                    int(perf.total_msec),
-                    None if is_correct else free_response
+                    int(response.usage.total_msec),
+                    None if is_correct else response.response_text
                 ))
             except OllamaTimeoutError as e:
                 results.append(self.handle_timeout(question["question_id"], e))
