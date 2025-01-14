@@ -2,6 +2,7 @@
 """Runs benchmarks against language models."""
 
 import logging
+import traceback
 from typing import Dict, List, Set, Tuple, Optional
 import datastore.benchmarks
 import datastore.common
@@ -113,7 +114,7 @@ def run_missing_benchmarks(
                 combinations_run.append((model, benchmark))
 
             except Exception as e:
-                logger.error(f"Error running {benchmark} for {model}: {str(e)}")
+                logger.error("Chat generation failed: %s\n%s", str(e), traceback.format_exc())
                 continue
 
     return combinations_run

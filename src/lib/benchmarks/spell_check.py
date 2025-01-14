@@ -110,7 +110,7 @@ class SpellCheckBenchmark(BenchmarkRunner):
                 )
                 
                 is_correct = (info["incorrect"] == response.structured_data["incorrect"] and 
-                             info["correct"] == response.structured_data["correct"])
+                              info["correct"] == response.structured_data["correct"])
                 
                 results.append(BenchmarkResult(
                     question["question_id"],
