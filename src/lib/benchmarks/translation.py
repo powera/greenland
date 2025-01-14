@@ -101,8 +101,6 @@ class TranslationGenerator(BenchmarkGenerator):
 
     def load_to_database(self) -> None:
         """Load generated translation questions into database."""
-        from sqlalchemy import text
-        
         # Filter for entries that have valid translations for both languages
         valid_entries = [
             entry for entry in TRANSLATIONS 
@@ -196,7 +194,7 @@ When translating a word from {self.origin_lang.upper()} to {self.target_lang.upp
                 prompt += f"\nPossible translations: {', '.join(info['choices'])}"
 
             try:
-                _, structured_response, perf = unified_client.generate_chat(
+                response = unified_client.generate_chat(
                     prompt,
                     self.remote_model,
                     json_schema=schema,
@@ -204,7 +202,7 @@ When translating a word from {self.origin_lang.upper()} to {self.target_lang.upp
                 )
                 
                 try:
-                    translated = structured_response["translation"].lower().strip()
+                    translated = response.structured_data["translation"].lower().strip()
                     
                     # Get correct answer based on target language
                     correct = info[self.target_lang].lower()
@@ -216,7 +214,7 @@ When translating a word from {self.origin_lang.upper()} to {self.target_lang.upp
                         is_correct = translated == correct
                         
                     debug_info = None if is_correct else {
-                        "response": structured_response["translation"],
+                        "response": response.structured_data["translation"],
                         "expected": info[self.target_lang]
                     }
                     
@@ -227,12 +225,12 @@ When translating a word from {self.origin_lang.upper()} to {self.target_lang.upp
                         debug_info["target_word_details"] = info["target_details"]
                 except (json.JSONDecodeError, KeyError):
                     is_correct = False
-                    debug_info = structured_response
+                    debug_info = response.structured_data
 
                 results.append(BenchmarkResult(
                     question["question_id"],
                     is_correct,
-                    int(perf.total_msec),
+                    int(response.usage.total_msec),
                     json.dumps(debug_info) if debug_info else None
                 ))
             except OllamaTimeoutError as e:
