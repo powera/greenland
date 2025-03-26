@@ -1,0 +1,3164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Benchmark Run Details - gemma2:2b:Q4_0 on 0050_translation_en_zh</title>
+    <script>
+        function toggleQuestionInfo(toggleElement) {
+            const questionInfoContent = toggleElement.nextElementSibling;
+
+            if (questionInfoContent.classList.contains('hidden')) {
+                questionInfoContent.classList.remove('hidden');
+                toggleElement.textContent = '[X]';
+            } else {
+                questionInfoContent.classList.add('hidden');
+                toggleElement.textContent = '[+]';
+            }
+        }
+    </script>
+
+    <style>
+        /* Placeholder for future CSS */
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+        .run-summary, .run-details {
+            margin-bottom: 2rem;
+        }
+        .summary-table, .details-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .summary-table th, .details-table th {
+            background-color: #f4f4f4;
+            text-align: left;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+        }
+        .summary-table td, .details-table td {
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+        }
+        .details-table {
+            margin-top: 1rem;
+        }
+        .page-title {
+            color: #333;
+            border-bottom: 2px solid #333;
+            padding-bottom: 0.5rem;
+        }
+        .question-info {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 1rem;
+            margin-top: 0.5rem;
+            position: relative;
+        }
+        .question-info-content {
+            max-height: 600px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding-right: 15px; /* Add scrollbar space */
+        }
+        .question-info-toggle {
+            cursor: pointer;
+            user-select: none;
+            font-weight: bold;
+            color: #666;
+        }
+        .question-info-toggle:hover {
+            color: #333;
+        }
+        .question-info pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            background-color: #f4f4f4;
+            padding: 0.5rem;
+            border-radius: 4px;
+            margin: 0;
+        }
+        .hidden {
+            display: none;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="page-title">Benchmark Run Details</h1>
+        
+        <div class="run-summary">
+            <h2>Run Summary</h2>
+            <table class="summary-table">
+                <tr>
+                    <th>Model</th>
+                    <td>gemma2:2b:Q4_0</td>
+                </tr>
+                <tr>
+                    <th>Benchmark</th>
+                    <td>0050_translation_en_zh</td>
+                </tr>
+                <tr>
+                    <th>Normed Score</th>
+                    <td>96</td>
+                </tr>
+                <tr>
+                    <th>Run Timestamp</th>
+                    <td>2025-03-26 19:56:13</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="run-details">
+            <h2>Question-Level Details</h2>
+            <table class="details-table">
+                <thead>
+                    <tr>
+                        <th>Question ID</th>
+                        <th>Score</th>
+                        <th>Evaluation Time (ms)</th>
+                        <th>Debug Info</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                    <tr>
+                        <td>0050_translation_en_zh:0</td>
+                        <td>100</td>
+                        <td>2138</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"flower\"\nPossible translations: 跳舞, 美丽, 微笑, 落下, 花, 云, 水, 躲藏",
+  "answer_type": "multiple_choice",
+  "correct_answer": "花",
+  "category": "translation_en_zh",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "zh",
+    "has_details"
+  ],
+  "choices": [
+    "跳舞",
+    "美丽",
+    "微笑",
+    "落下",
+    "花",
+    "云",
+    "水",
+    "躲藏"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_zh:1</td>
+                        <td>100</td>
+                        <td>652</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"to drive\"\nPossible translations: 躲藏, 新鲜, 开车, 重, 云, 山, 最强, 花",
+  "answer_type": "multiple_choice",
+  "correct_answer": "开车",
+  "category": "translation_en_zh",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "zh",
+    "has_details"
+  ],
+  "choices": [
+    "躲藏",
+    "新鲜",
+    "开车",
+    "重",
+    "云",
+    "山",
+    "最强",
+    "花"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_zh:10</td>
+                        <td>100</td>
+                        <td>555</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"mountain\"\nPossible translations: 树, 花, 书, 山, 锋利, 甜, 写, 跳舞",
+  "answer_type": "multiple_choice",
+  "correct_answer": "山",
+  "category": "translation_en_zh",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "zh"
+  ],
+  "choices": [
+    "树",
+    "花",
+    "书",
+    "山",
+    "锋利",
+    "甜",
+    "写",
+    "跳舞"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_zh:11</td>
+                        <td>100</td>
+                        <td>599</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"to sing\"\nPossible translations: 笑, 甜, 深, 沙, 新鲜, 唱歌, 睡觉, 美丽",
+  "answer_type": "multiple_choice",
+  "correct_answer": "唱歌",
+  "category": "translation_en_zh",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "zh"
+  ],
+  "choices": [
+    "笑",
+    "甜",
+    "深",
+    "沙",
+    "新鲜",
+    "唱歌",
+    "睡觉",
+    "美丽"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_zh:12</td>
+                        <td>100</td>
+                        <td>917</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"heart\"\nPossible translations: 吃, 跑, 心, 锋利, 呼吸, 朋友, 星星, 甜",
+  "answer_type": "multiple_choice",
+  "correct_answer": "心",
+  "category": "translation_en_zh",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "zh",
+    "has_details"
+  ],
+  "choices": [
+    "吃",
+    "跑",
+    "心",
+    "锋利",
+    "呼吸",
+    "朋友",
+    "星星",
+    "甜"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_zh:13</td>
+                        <td>100</td>
+                        <td>852</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"bright\"\nPossible translations: 火, 石头, 风, 温暖, 明亮, 圆, 书, 最强",
+  "answer_type": "multiple_choice",
+  "correct_answer": "明亮",
+  "category": "translation_en_zh",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "zh",
+    "has_details"
+  ],
+  "choices": [
+    "火",
+    "石头",
+    "风",
+    "温暖",
+    "明亮",
+    "圆",
+    "书",
+    "最强"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_zh:14</td>
+                        <td>100</td>
+                        <td>964</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"to dance\"\nPossible translations: 呼吸, 唱歌, 安静, 水, 花, 跳舞, 月亮, 开车",
+  "answer_type": "multiple_choice",
+  "correct_answer": "跳舞",
+  "category": "translation_en_zh",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "zh"
+  ],
+  "choices": [
+    "呼吸",
+    "唱歌",
+    "安静",
+    "水",
+    "花",
+    "跳舞",
+    "月亮",
+    "开车"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_zh:15</td>
+                        <td>100</td>
+                        <td>581</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"quiet\"\nPossible translations: 笑, 轻, 跳舞, 光滑, 圆, 安静, 新鲜, 飞",
+  "answer_type": "multiple_choice",
+  "correct_answer": "安静",
+  "category": "translation_en_zh",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "zh",
+    "has_details"
+  ],
+  "choices": [
+    "笑",
+    "轻",
+    "跳舞",
+    "光滑",
+    "圆",
+    "安静",
+    "新鲜",
+    "飞"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_zh:16</td>
+                        <td>100</td>
+                        <td>465</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"tree\"\nPossible translations: 书, 安静, 开车, 睡觉, 落下, 树, 跑, 月亮",
+  "answer_type": "multiple_choice",
+  "correct_answer": "树",
+  "category": "translation_en_zh",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "zh"
+  ],
+  "choices": [
+    "书",
+    "安静",
+    "开车",
+    "睡觉",
+    "落下",
+    "树",
+    "跑",
+    "月亮"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_zh:17</td>
+                        <td>100</td>
+                        <td>559</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"to write\"\nPossible translations: 山, 写, 冷, 跳舞, 树, 跑, 笑, 轻",
+  "answer_type": "multiple_choice",
+  "correct_answer": "写",
+  "category": "translation_en_zh",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "zh"
+  ],
+  "choices": [
+    "山",
+    "写",
+    "冷",
+    "跳舞",
+    "树",
+    "跑",
+    "笑",
+    "轻"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_zh:18</td>
+                        <td>100</td>
+                        <td>528</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"sky\"\nPossible translations: 冷, 呼吸, 风, 火, 鸟, 石头, 天空, 锋利",
+  "answer_type": "multiple_choice",
+  "correct_answer": "天空",
+  "category": "translation_en_zh",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "zh"
+  ],
+  "choices": [
+    "冷",
+    "呼吸",
+    "风",
+    "火",
+    "鸟",
+    "石头",
+    "天空",
+    "锋利"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_zh:19</td>
+                        <td>100</td>
+                        <td>633</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"fresh\"\nPossible translations: 跳舞, 冷, 成长, 快, 明亮, 新鲜, 重, 心",
+  "answer_type": "multiple_choice",
+  "correct_answer": "新鲜",
+  "category": "translation_en_zh",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "zh"
+  ],
+  "choices": [
+    "跳舞",
+    "冷",
+    "成长",
+    "快",
+    "明亮",
+    "新鲜",
+    "重",
+    "心"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_zh:2</td>
+                        <td>100</td>
+                        <td>466</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"strongest\"\nPossible translations: 深, 落下, 新鲜, 圆, 跳舞, 甜, 最强, 山",
+  "answer_type": "multiple_choice",
+  "correct_answer": "最强",
+  "category": "translation_en_zh",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "zh"
+  ],
+  "choices": [
+    "深",
+    "落下",
+    "新鲜",
+    "圆",
+    "跳舞",
+    "甜",
+    "最强",
+    "山"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_zh:20</td>
+                        <td>100</td>
+                        <td>734</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"friend\"\nPossible translations: 书, 锋利, 安静, 圆, 朋友, 美丽, 飞, 云",
+  "answer_type": "multiple_choice",
+  "correct_answer": "朋友",
+  "category": "translation_en_zh",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "zh"
+  ],
+  "choices": [
+    "书",
+    "锋利",
+    "安静",
+    "圆",
+    "朋友",
+    "美丽",
+    "飞",
+    "云"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_zh:21</td>
+                        <td>100</td>
+                        <td>594</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"to run\"\nPossible translations: 书, 沙, 唱歌, 朋友, 写, 跑, 最强, 深",
+  "answer_type": "multiple_choice",
+  "correct_answer": "跑",
+  "category": "translation_en_zh",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "zh"
+  ],
+  "choices": [
+    "书",
+    "沙",
+    "唱歌",
+    "朋友",
+    "写",
+    "跑",
+    "最强",
+    "深"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_zh:22</td>
+                        <td>100</td>
+                        <td>502</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"round\"\nPossible translations: 呼吸, 重, 躲藏, 落下, 飞, 圆, 朋友, 山",
+  "answer_type": "multiple_choice",
+  "correct_answer": "圆",
+  "category": "translation_en_zh",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "zh"
+  ],
+  "choices": [
+    "呼吸",
+    "重",
+    "躲藏",
+    "落下",
+    "飞",
+    "圆",
+    "朋友",
+    "山"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_zh:23</td>
+                        <td>100</td>
+                        <td>559</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"wind\"\nPossible translations: 美丽, 盐, 睡觉, 微笑, 轻, 风, 安静, 书",
+  "answer_type": "multiple_choice",
+  "correct_answer": "风",
+  "category": "translation_en_zh",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "zh",
+    "has_details"
+  ],
+  "choices": [
+    "美丽",
+    "盐",
+    "睡觉",
+    "微笑",
+    "轻",
+    "风",
+    "安静",
+    "书"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_zh:24</td>
+                        <td>100</td>
+                        <td>550</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"warm\"\nPossible translations: 跑, 天空, 树, 跳舞, 火, 新鲜, 温暖, 风",
+  "answer_type": "multiple_choice",
+  "correct_answer": "温暖",
+  "category": "translation_en_zh",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "zh"
+  ],
+  "choices": [
+    "跑",
+    "天空",
+    "树",
+    "跳舞",
+    "火",
+    "新鲜",
+    "温暖",
+    "风"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_zh:25</td>
+                        <td>100</td>
+                        <td>755</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"stone\"\nPossible translations: 唱歌, 山, 跳舞, 石头, 美丽, 甜, 写, 冷",
+  "answer_type": "multiple_choice",
+  "correct_answer": "石头",
+  "category": "translation_en_zh",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "zh"
+  ],
+  "choices": [
+    "唱歌",
+    "山",
+    "跳舞",
+    "石头",
+    "美丽",
+    "甜",
+    "写",
+    "冷"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_zh:26</td>
+                        <td>100</td>
+                        <td>595</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"deep\"\nPossible translations: 跳舞, 石头, 雨, 心, 冷, 风, 甜, 深",
+  "answer_type": "multiple_choice",
+  "correct_answer": "深",
+  "category": "translation_en_zh",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "zh",
+    "has_details"
+  ],
+  "choices": [
+    "跳舞",
+    "石头",
+    "雨",
+    "心",
+    "冷",
+    "风",
+    "甜",
+    "深"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_zh:27</td>
+                        <td>100</td>
+                        <td>563</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"to swim\"\nPossible translations: 火, 笑, 深, 甜, 圆, 游泳, 草, 飞",
+  "answer_type": "multiple_choice",
+  "correct_answer": "游泳",
+  "category": "translation_en_zh",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "zh"
+  ],
+  "choices": [
+    "火",
+    "笑",
+    "深",
+    "甜",
+    "圆",
+    "游泳",
+    "草",
+    "飞"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_zh:28</td>
+                        <td>100</td>
+                        <td>493</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"bird\"\nPossible translations: 光滑, 鸟, 新鲜, 星星, 天空, 最强, 轻, 雨",
+  "answer_type": "multiple_choice",
+  "correct_answer": "鸟",
+  "category": "translation_en_zh",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "zh"
+  ],
+  "choices": [
+    "光滑",
+    "鸟",
+    "新鲜",
+    "星星",
+    "天空",
+    "最强",
+    "轻",
+    "雨"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_zh:29</td>
+                        <td>100</td>
+                        <td>540</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"sweet\"\nPossible translations: 月亮, 甜, 沙, 飞, 跳舞, 石头, 光滑, 云",
+  "answer_type": "multiple_choice",
+  "correct_answer": "甜",
+  "category": "translation_en_zh",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "zh",
+    "has_details"
+  ],
+  "choices": [
+    "月亮",
+    "甜",
+    "沙",
+    "飞",
+    "跳舞",
+    "石头",
+    "光滑",
+    "云"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_zh:3</td>
+                        <td>100</td>
+                        <td>395</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"book\"\nPossible translations: 火, 山, 飞, 心, 书, 花, 呼吸, 软",
+  "answer_type": "multiple_choice",
+  "correct_answer": "书",
+  "category": "translation_en_zh",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "zh"
+  ],
+  "choices": [
+    "火",
+    "山",
+    "飞",
+    "心",
+    "书",
+    "花",
+    "呼吸",
+    "软"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_zh:30</td>
+                        <td>100</td>
+                        <td>525</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"cloud\"\nPossible translations: 天空, 写, 圆, 新鲜, 云, 跳舞, 花, 跳舞",
+  "answer_type": "multiple_choice",
+  "correct_answer": "云",
+  "category": "translation_en_zh",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "zh"
+  ],
+  "choices": [
+    "天空",
+    "写",
+    "圆",
+    "新鲜",
+    "云",
+    "跳舞",
+    "花",
+    "跳舞"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_zh:31</td>
+                        <td>100</td>
+                        <td>505</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"to smile\"\nPossible translations: 飞, 微笑, 跳舞, 明亮, 轻, 鸟, 月亮, 最强",
+  "answer_type": "multiple_choice",
+  "correct_answer": "微笑",
+  "category": "translation_en_zh",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "zh"
+  ],
+  "choices": [
+    "飞",
+    "微笑",
+    "跳舞",
+    "明亮",
+    "轻",
+    "鸟",
+    "月亮",
+    "最强"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_zh:32</td>
+                        <td>0</td>
+                        <td>684</td>
+                        <td>{
+  "response": "光滑",
+  "expected": "软"
+}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"soft\"\nPossible translations: 花, 躲藏, 温暖, 树, 光滑, 明亮, 吃, 软",
+  "answer_type": "multiple_choice",
+  "correct_answer": "软",
+  "category": "translation_en_zh",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "zh"
+  ],
+  "choices": [
+    "花",
+    "躲藏",
+    "温暖",
+    "树",
+    "光滑",
+    "明亮",
+    "吃",
+    "软"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_zh:33</td>
+                        <td>100</td>
+                        <td>518</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"rain\"\nPossible translations: 轻, 跑, 圆, 盐, 星星, 雨, 重, 开车",
+  "answer_type": "multiple_choice",
+  "correct_answer": "雨",
+  "category": "translation_en_zh",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "zh"
+  ],
+  "choices": [
+    "轻",
+    "跑",
+    "圆",
+    "盐",
+    "星星",
+    "雨",
+    "重",
+    "开车"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_zh:34</td>
+                        <td>100</td>
+                        <td>556</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"to grow\"\nPossible translations: 星星, 沙, 成长, 心, 云, 火, 躲藏, 唱歌",
+  "answer_type": "multiple_choice",
+  "correct_answer": "成长",
+  "category": "translation_en_zh",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "zh"
+  ],
+  "choices": [
+    "星星",
+    "沙",
+    "成长",
+    "心",
+    "云",
+    "火",
+    "躲藏",
+    "唱歌"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_zh:35</td>
+                        <td>100</td>
+                        <td>528</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"quick\"\nPossible translations: 天空, 雨, 明亮, 飞, 火, 最强, 重, 快",
+  "answer_type": "multiple_choice",
+  "correct_answer": "快",
+  "category": "translation_en_zh",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "zh"
+  ],
+  "choices": [
+    "天空",
+    "雨",
+    "明亮",
+    "飞",
+    "火",
+    "最强",
+    "重",
+    "快"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_zh:36</td>
+                        <td>100</td>
+                        <td>507</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"star\"\nPossible translations: 快, 飞, 星星, 呼吸, 鸟, 躲藏, 朋友, 草",
+  "answer_type": "multiple_choice",
+  "correct_answer": "星星",
+  "category": "translation_en_zh",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "zh"
+  ],
+  "choices": [
+    "快",
+    "飞",
+    "星星",
+    "呼吸",
+    "鸟",
+    "躲藏",
+    "朋友",
+    "草"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_zh:37</td>
+                        <td>100</td>
+                        <td>514</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"to dance\"\nPossible translations: 安静, 最强, 落下, 跳舞, 软, 盐, 飞, 写",
+  "answer_type": "multiple_choice",
+  "correct_answer": "跳舞",
+  "category": "translation_en_zh",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "zh"
+  ],
+  "choices": [
+    "安静",
+    "最强",
+    "落下",
+    "跳舞",
+    "软",
+    "盐",
+    "飞",
+    "写"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_zh:38</td>
+                        <td>100</td>
+                        <td>529</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"heavy\"\nPossible translations: 甜, 重, 开车, 山, 圆, 月亮, 跳舞, 沙",
+  "answer_type": "multiple_choice",
+  "correct_answer": "重",
+  "category": "translation_en_zh",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "zh",
+    "has_details"
+  ],
+  "choices": [
+    "甜",
+    "重",
+    "开车",
+    "山",
+    "圆",
+    "月亮",
+    "跳舞",
+    "沙"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_zh:39</td>
+                        <td>100</td>
+                        <td>500</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"fire\"\nPossible translations: 星星, 最强, 火, 山, 花, 冷, 睡觉, 快",
+  "answer_type": "multiple_choice",
+  "correct_answer": "火",
+  "category": "translation_en_zh",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "zh"
+  ],
+  "choices": [
+    "星星",
+    "最强",
+    "火",
+    "山",
+    "花",
+    "冷",
+    "睡觉",
+    "快"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_zh:4</td>
+                        <td>100</td>
+                        <td>420</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"to eat\"\nPossible translations: 软, 安静, 吃, 游泳, 飞, 山, 星星, 书",
+  "answer_type": "multiple_choice",
+  "correct_answer": "吃",
+  "category": "translation_en_zh",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "zh"
+  ],
+  "choices": [
+    "软",
+    "安静",
+    "吃",
+    "游泳",
+    "飞",
+    "山",
+    "星星",
+    "书"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_zh:40</td>
+                        <td>100</td>
+                        <td>531</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"to breathe\"\nPossible translations: 新鲜, 飞, 呼吸, 冷, 天空, 重, 花, 甜",
+  "answer_type": "multiple_choice",
+  "correct_answer": "呼吸",
+  "category": "translation_en_zh",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "zh"
+  ],
+  "choices": [
+    "新鲜",
+    "飞",
+    "呼吸",
+    "冷",
+    "天空",
+    "重",
+    "花",
+    "甜"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_zh:41</td>
+                        <td>100</td>
+                        <td>542</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"sharp\"\nPossible translations: 锋利, 写, 开车, 笑, 甜, 软, 山, 天空",
+  "answer_type": "multiple_choice",
+  "correct_answer": "锋利",
+  "category": "translation_en_zh",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "zh",
+    "has_details"
+  ],
+  "choices": [
+    "锋利",
+    "写",
+    "开车",
+    "笑",
+    "甜",
+    "软",
+    "山",
+    "天空"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_zh:42</td>
+                        <td>100</td>
+                        <td>493</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"salt\"\nPossible translations: 新鲜, 盐, 唱歌, 跑, 软, 甜, 跳舞, 草",
+  "answer_type": "multiple_choice",
+  "correct_answer": "盐",
+  "category": "translation_en_zh",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "zh"
+  ],
+  "choices": [
+    "新鲜",
+    "盐",
+    "唱歌",
+    "跑",
+    "软",
+    "甜",
+    "跳舞",
+    "草"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_zh:43</td>
+                        <td>100</td>
+                        <td>527</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"to hide\"\nPossible translations: 水, 微笑, 星星, 落下, 书, 心, 吃, 躲藏",
+  "answer_type": "multiple_choice",
+  "correct_answer": "躲藏",
+  "category": "translation_en_zh",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "zh"
+  ],
+  "choices": [
+    "水",
+    "微笑",
+    "星星",
+    "落下",
+    "书",
+    "心",
+    "吃",
+    "躲藏"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_zh:44</td>
+                        <td>100</td>
+                        <td>508</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"smooth\"\nPossible translations: 跳舞, 开车, 光滑, 盐, 风, 树, 写, 月亮",
+  "answer_type": "multiple_choice",
+  "correct_answer": "光滑",
+  "category": "translation_en_zh",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "zh"
+  ],
+  "choices": [
+    "跳舞",
+    "开车",
+    "光滑",
+    "盐",
+    "风",
+    "树",
+    "写",
+    "月亮"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_zh:45</td>
+                        <td>100</td>
+                        <td>518</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"grass\"\nPossible translations: 轻, 微笑, 星星, 明亮, 唱歌, 树, 安静, 草",
+  "answer_type": "multiple_choice",
+  "correct_answer": "草",
+  "category": "translation_en_zh",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "zh"
+  ],
+  "choices": [
+    "轻",
+    "微笑",
+    "星星",
+    "明亮",
+    "唱歌",
+    "树",
+    "安静",
+    "草"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_zh:46</td>
+                        <td>100</td>
+                        <td>548</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"to fly\"\nPossible translations: 快, 呼吸, 盐, 鸟, 石头, 成长, 飞, 天空",
+  "answer_type": "multiple_choice",
+  "correct_answer": "飞",
+  "category": "translation_en_zh",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "zh"
+  ],
+  "choices": [
+    "快",
+    "呼吸",
+    "盐",
+    "鸟",
+    "石头",
+    "成长",
+    "飞",
+    "天空"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_zh:47</td>
+                        <td>100</td>
+                        <td>592</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"cold\"\nPossible translations: 冷, 书, 树, 重, 水, 落下, 甜, 飞",
+  "answer_type": "multiple_choice",
+  "correct_answer": "冷",
+  "category": "translation_en_zh",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "zh"
+  ],
+  "choices": [
+    "冷",
+    "书",
+    "树",
+    "重",
+    "水",
+    "落下",
+    "甜",
+    "飞"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_zh:48</td>
+                        <td>100</td>
+                        <td>545</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"sand\"\nPossible translations: 树, 深, 书, 火, 沙, 冷, 花, 石头",
+  "answer_type": "multiple_choice",
+  "correct_answer": "沙",
+  "category": "translation_en_zh",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "zh"
+  ],
+  "choices": [
+    "树",
+    "深",
+    "书",
+    "火",
+    "沙",
+    "冷",
+    "花",
+    "石头"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_zh:49</td>
+                        <td>0</td>
+                        <td>503</td>
+                        <td>{
+  "response": "落",
+  "expected": "落下"
+}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"to fall\"\nPossible translations: 树, 游泳, 成长, 鸟, 笑, 最强, 快, 落下",
+  "answer_type": "multiple_choice",
+  "correct_answer": "落下",
+  "category": "translation_en_zh",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "zh"
+  ],
+  "choices": [
+    "树",
+    "游泳",
+    "成长",
+    "鸟",
+    "笑",
+    "最强",
+    "快",
+    "落下"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_zh:5</td>
+                        <td>100</td>
+                        <td>587</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"beautiful\"\nPossible translations: 落下, 美丽, 山, 沙, 深, 火, 唱歌, 游泳",
+  "answer_type": "multiple_choice",
+  "correct_answer": "美丽",
+  "category": "translation_en_zh",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "zh"
+  ],
+  "choices": [
+    "落下",
+    "美丽",
+    "山",
+    "沙",
+    "深",
+    "火",
+    "唱歌",
+    "游泳"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_zh:50</td>
+                        <td>100</td>
+                        <td>470</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"light\"\nPossible translations: 吃, 水, 雨, 云, 软, 微笑, 轻, 草",
+  "answer_type": "multiple_choice",
+  "correct_answer": "轻",
+  "category": "translation_en_zh",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "zh",
+    "has_details"
+  ],
+  "choices": [
+    "吃",
+    "水",
+    "雨",
+    "云",
+    "软",
+    "微笑",
+    "轻",
+    "草"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_zh:6</td>
+                        <td>100</td>
+                        <td>1604</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"water\"\nPossible translations: 跳舞, 甜, 轻, 沙, 最强, 水, 游泳, 成长",
+  "answer_type": "multiple_choice",
+  "correct_answer": "水",
+  "category": "translation_en_zh",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "zh"
+  ],
+  "choices": [
+    "跳舞",
+    "甜",
+    "轻",
+    "沙",
+    "最强",
+    "水",
+    "游泳",
+    "成长"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_zh:7</td>
+                        <td>100</td>
+                        <td>598</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"to sleep\"\nPossible translations: 轻, 新鲜, 朋友, 鸟, 沙, 星星, 睡觉, 心",
+  "answer_type": "multiple_choice",
+  "correct_answer": "睡觉",
+  "category": "translation_en_zh",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "zh"
+  ],
+  "choices": [
+    "轻",
+    "新鲜",
+    "朋友",
+    "鸟",
+    "沙",
+    "星星",
+    "睡觉",
+    "心"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_zh:8</td>
+                        <td>100</td>
+                        <td>652</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"moon\"\nPossible translations: 锋利, 甜, 明亮, 火, 成长, 躲藏, 鸟, 月亮",
+  "answer_type": "multiple_choice",
+  "correct_answer": "月亮",
+  "category": "translation_en_zh",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "zh",
+    "has_details"
+  ],
+  "choices": [
+    "锋利",
+    "甜",
+    "明亮",
+    "火",
+    "成长",
+    "躲藏",
+    "鸟",
+    "月亮"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_zh:9</td>
+                        <td>100</td>
+                        <td>645</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"to laugh\"\nPossible translations: 锋利, 笑, 轻, 新鲜, 微笑, 游泳, 星星, 软",
+  "answer_type": "multiple_choice",
+  "correct_answer": "笑",
+  "category": "translation_en_zh",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "zh"
+  ],
+  "choices": [
+    "锋利",
+    "笑",
+    "轻",
+    "新鲜",
+    "微笑",
+    "游泳",
+    "星星",
+    "软"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                </tbody>
+            </table>
+        </div>
+
+        
+    </div>
+</body>
+</html>
