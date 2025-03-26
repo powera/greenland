@@ -1,120 +1,248 @@
 #!/usr/bin/python3
-"""Runs benchmarks against language models."""
+
+"""Main interface for running benchmarks."""
 
 import logging
 import traceback
 from typing import Dict, List, Set, Tuple, Optional
+
 import datastore.benchmarks
 import datastore.common
+from lib.benchmarks.factory import (
+    get_runner, get_generator, get_all_benchmark_codes, 
+    get_benchmark_metadata
+)
 
-from lib.benchmarks.base import BenchmarkRunner
-from lib.benchmarks.spell_check import SpellCheckBenchmark
-from lib.benchmarks.definitions import DefinitionsBenchmark
-from lib.benchmarks.paragraph_analysis import ParagraphAnalysisBenchmark
-from lib.benchmarks.haystack import SimpleHaystackBenchmark
-from lib.benchmarks.general_knowledge import GeneralKnowledgeBenchmark
-from lib.benchmarks.translation import TranslationBenchmark
-
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-BENCHMARK_CLASSES = {
-    "0015_spell_check": SpellCheckBenchmark,
-    "0020_definitions": DefinitionsBenchmark,
-    "0030_analyze_paragraph": ParagraphAnalysisBenchmark,
-    "0035_simple_haystack": SimpleHaystackBenchmark,
-    "0040_general_knowledge": GeneralKnowledgeBenchmark
-}
 
 def get_all_model_codenames() -> List[str]:
-    """Get list of all model codenames from database."""
-    session = datastore.benchmarks.create_dev_session()
-    return [x["codename"] for x in datastore.common.list_all_models(session)]
+    """
+    Get a list of all model codenames from the database.
+    
+    Returns:
+        List of model codenames
+    """
+    session = datastore.common.create_dev_session()
+    models = datastore.common.list_all_models(session)
+    return [model["codename"] for model in models]
+
 
 def get_all_benchmarks() -> List[str]:
-    """Get list of all benchmark names from database."""
-    session = datastore.benchmarks.create_dev_session()
-    return [x["codename"] for x in datastore.benchmarks.list_all_benchmarks(session)]
+    """
+    Get a list of all registered benchmark codes.
+    
+    Returns:
+        List of benchmark codes
+    """
+    return get_all_benchmark_codes()
 
-def run_benchmark(benchmark_name: str, model: str) -> None:
-    """Run a specific benchmark against a model."""
 
-    # Handle translation benchmarks
-    if benchmark_name.startswith("0050_translation_"):
-        # Extract language codes from benchmark name
-        origin_lang, target_lang = benchmark_name.split("_")[2:]
-        benchmark = TranslationBenchmark(model, origin_lang, target_lang)
-        benchmark.run()
-        return
+def run_benchmark(benchmark_code: str, model: str) -> Optional[int]:
+    """
+    Run a specific benchmark for a model.
+    
+    Args:
+        benchmark_code: Benchmark code to run
+        model: Model codename to benchmark
+        
+    Returns:
+        Run ID if successful, None otherwise
+    """
+    logger.info("Running benchmark %s for model %s", benchmark_code, model)
+    
+    try:
+        runner = get_runner(benchmark_code, model)
+        if not runner:
+            logger.error("Failed to create runner for benchmark %s", benchmark_code)
+            return None
+            
+        # Execute the benchmark
+        run_id = runner.run()
+        
+        logger.info("Benchmark %s completed for model %s (run_id=%s)", 
+                   benchmark_code, model, run_id)
+        return run_id
+        
+    except Exception as e:
+        logger.error("Error running benchmark %s for model %s: %s", 
+                    benchmark_code, model, str(e))
+        logger.error(traceback.format_exc())
+        return None
 
-    # Handle other benchmark types
-    benchmark_class = BENCHMARK_CLASSES.get(benchmark_name)
-    if not benchmark_class:
-        raise ValueError(f"Unknown benchmark: {benchmark_name}")
-
-    benchmark = benchmark_class(model)
-    benchmark.run()
 
 def run_missing_benchmarks(
-    blacklist_models: Optional[Set[str]] = None,
+    blacklist_models: Optional[Set[str]] = None, 
     blacklist_benchmarks: Optional[Set[str]] = None,
     session = None
 ) -> List[Tuple[str, str]]:
     """
-    Run all benchmark/model combinations that aren't in the database.
-
+    Run all benchmarks that don't have results yet.
+    
     Args:
-        blacklist_models: Set of model codenames to never run
-        blacklist_benchmarks: Set of benchmark codenames to never run
-        session: Optional database session (will create if None)
-
+        blacklist_models: Optional set of models to exclude
+        blacklist_benchmarks: Optional set of benchmarks to exclude
+        session: Optional database session
+        
     Returns:
         List of (model, benchmark) pairs that were run
-
-    Example:
-        >>> run_missing_benchmarks(
-        ...     blacklist_models={'unstable-model'},
-        ...     blacklist_benchmarks={'expensive-benchmark'}
-        ... )
     """
-    if session is None:
-        session = datastore.benchmarks.create_dev_session()
-
-    # Initialize blacklists if not provided
+    if not session:
+        session = datastore.common.create_dev_session()
+        
     blacklist_models = blacklist_models or set()
     blacklist_benchmarks = blacklist_benchmarks or set()
-
-    # Get all available models and benchmarks
-    all_models = {
-        model['codename'] for model in datastore.common.list_all_models(session)
-        if model['codename'] not in blacklist_models
-    }
-    all_benchmarks = {
-        bench['codename'] for bench in datastore.benchmarks.list_all_benchmarks(session)
-        if bench['codename'] not in blacklist_benchmarks
-    }
-
+    
+    # Get all models and benchmarks
+    models = [m for m in get_all_model_codenames() if m not in blacklist_models]
+    benchmarks = [b for b in get_all_benchmarks() if b not in blacklist_benchmarks]
+    
     # Get existing scores
-    highest_scores = datastore.benchmarks.get_highest_benchmark_scores(session)
+    scores = datastore.benchmarks.get_highest_benchmark_scores(session)
+    
+    # Find missing benchmark/model combinations
+    missing = []
+    for benchmark in benchmarks:
+        for model in models:
+            if (benchmark, model) not in scores:
+                missing.append((model, benchmark))
+    
+    # Run missing benchmarks
+    run_pairs = []
+    for model, benchmark in missing:
+        logger.info("Running missing benchmark: %s for %s", benchmark, model)
+        try:
+            run_id = run_benchmark(benchmark, model)
+            if run_id:
+                run_pairs.append((model, benchmark))
+        except Exception as e:
+            logger.error("Failed to run %s for %s: %s", benchmark, model, str(e))
+            logger.error(traceback.format_exc())
+    
+    return run_pairs
 
-    # Track what we run
-    combinations_run = []
 
-    # Try each combination
-    for model in sorted(all_models):
-        for benchmark in sorted(all_benchmarks):
-            # Skip if already has a score or is blacklisted
-            if (benchmark, model) in highest_scores:
-                continue
+def generate_benchmark_questions(benchmark_code: str, session=None) -> bool:
+    """
+    Generate questions for a benchmark and load them into the database.
+    
+    Args:
+        benchmark_code: Benchmark code
+        session: Optional database session
+        
+    Returns:
+        True if successful, False otherwise
+    """
+    logger.info("Generating questions for benchmark %s", benchmark_code)
+    
+    try:
+        generator = get_generator(benchmark_code, session)
+        if not generator:
+            logger.error("Failed to create generator for benchmark %s", benchmark_code)
+            return False
+            
+        # Generate and load questions
+        generator.load_to_database()
+        
+        logger.info("Successfully generated questions for benchmark %s", benchmark_code)
+        return True
+        
+    except Exception as e:
+        logger.error("Error generating questions for benchmark %s: %s", 
+                    benchmark_code, str(e))
+        logger.error(traceback.format_exc())
+        return False
 
-            logger.info(f"Running benchmark {benchmark} for model {model}")
 
-            try:
-                # Use the existing run_benchmark function
-                run_benchmark(benchmark, model)
-                combinations_run.append((model, benchmark))
+def get_benchmark_info() -> List[Dict]:
+    """
+    Get information about all registered benchmarks.
+    
+    Returns:
+        List of benchmark metadata dictionaries
+    """
+    result = []
+    for code in get_all_benchmark_codes():
+        metadata = get_benchmark_metadata(code)
+        if metadata:
+            result.append({
+                "code": metadata.code,
+                "name": metadata.name,
+                "description": metadata.description,
+                "version": metadata.version
+            })
+    return result
 
-            except Exception as e:
-                logger.error("Chat generation failed: %s\n%s", str(e), traceback.format_exc())
-                continue
 
-    return combinations_run
+# Command-line interface if script is run directly
+if __name__ == "__main__":
+    import argparse
+    
+    parser = argparse.ArgumentParser(description="Run benchmarks for language models")
+    subparsers = parser.add_subparsers(dest="command", help="Command to execute")
+    
+    # Run benchmark command
+    run_parser = subparsers.add_parser("run", help="Run a benchmark")
+    run_parser.add_argument("benchmark", help="Benchmark code")
+    run_parser.add_argument("model", help="Model codename")
+    
+    # Generate questions command
+    gen_parser = subparsers.add_parser("generate", help="Generate benchmark questions")
+    gen_parser.add_argument("benchmark", help="Benchmark code")
+    
+    # List benchmarks command
+    list_parser = subparsers.add_parser("list", help="List available benchmarks")
+    
+    # List models command
+    models_parser = subparsers.add_parser("models", help="List available models")
+    
+    # Run missing benchmarks command
+    missing_parser = subparsers.add_parser("missing", help="Run missing benchmarks")
+    missing_parser.add_argument("--blacklist-models", nargs="+", help="Models to exclude")
+    missing_parser.add_argument("--blacklist-benchmarks", nargs="+", help="Benchmarks to exclude")
+    
+    args = parser.parse_args()
+    
+    if args.command == "run":
+        run_id = run_benchmark(args.benchmark, args.model)
+        if run_id:
+            print(f"Benchmark completed successfully. Run ID: {run_id}")
+        else:
+            print("Benchmark failed.")
+            
+    elif args.command == "generate":
+        success = generate_benchmark_questions(args.benchmark)
+        if success:
+            print(f"Successfully generated questions for {args.benchmark}")
+        else:
+            print(f"Failed to generate questions for {args.benchmark}")
+            
+    elif args.command == "list":
+        benchmarks = get_benchmark_info()
+        print("Available benchmarks:")
+        for benchmark in benchmarks:
+            print(f"  {benchmark['code']}: {benchmark['name']}")
+            if benchmark['description']:
+                print(f"    {benchmark['description']}")
+                
+    elif args.command == "models":
+        models = get_all_model_codenames()
+        print("Available models:")
+        for model in models:
+            print(f"  {model}")
+            
+    elif args.command == "missing":
+        blacklist_models = set(args.blacklist_models) if args.blacklist_models else set()
+        blacklist_benchmarks = set(args.blacklist_benchmarks) if args.blacklist_benchmarks else set()
+        
+        run_pairs = run_missing_benchmarks(blacklist_models, blacklist_benchmarks)
+        
+        if run_pairs:
+            print("Successfully ran the following benchmarks:")
+            for model, benchmark in run_pairs:
+                print(f"  {benchmark} for {model}")
+        else:
+            print("No missing benchmarks found or all runs failed.")add_argument("--blacklist-models", nargs="+", help="Models to exclude")
+    missing_parser.
