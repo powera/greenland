@@ -38,14 +38,18 @@ class ScoreTableGenerator:
             str: RGB color string (e.g., "rgb(144, 190, 144)")
         """
         if score == 100:
-            return "rgb(144, 190, 144)"  # Muted green
+            return "rgb(13, 71, 161)"  # dark blue
 
         # Convert score to value between 0 and 1
         normalized = score / 100.0
 
         # Base colors for interpolation
-        low_r, low_g, low_b = 190, 144, 144  # Muted red
-        high_r, high_g, high_b = 144, 190, 144  # Muted green
+        if (score > 70):
+            low_r, low_g, low_b = 530, 400, -70  # not reached
+            high_r, high_g, high_b = 30, 100, 230
+        else:  # score <= 70
+            low_r, low_g, low_b = 230, 140, 60  # light orange
+            high_r, high_g, high_b = 230, 230, 60  # green?  not reached
 
         # Interpolate between the colors
         red = int(low_r + (high_r - low_r) * normalized)
