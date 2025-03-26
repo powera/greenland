@@ -192,7 +192,7 @@ def list_all_benchmarks(session) -> List[Dict]:
     :param session: SQLAlchemy session
     :return: List of benchmark details
     """
-    benchmarks = session.query(Benchmark).all()
+    benchmarks = session.query(Benchmark).order_by(Benchmark.codename).all()
     return [
         {
             'codename': benchmark.codename,
