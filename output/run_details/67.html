@@ -1,0 +1,1462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Benchmark Run Details - qwen2.5:7b:Q4_K_M on 0020_definitions</title>
+    <script>
+        function toggleQuestionInfo(toggleElement) {
+            const questionInfoContent = toggleElement.nextElementSibling;
+
+            if (questionInfoContent.classList.contains('hidden')) {
+                questionInfoContent.classList.remove('hidden');
+                toggleElement.textContent = '[X]';
+            } else {
+                questionInfoContent.classList.add('hidden');
+                toggleElement.textContent = '[+]';
+            }
+        }
+    </script>
+
+    <style>
+        /* Placeholder for future CSS */
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+        .run-summary, .run-details {
+            margin-bottom: 2rem;
+        }
+        .summary-table, .details-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .summary-table th, .details-table th {
+            background-color: #f4f4f4;
+            text-align: left;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+        }
+        .summary-table td, .details-table td {
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+        }
+        .details-table {
+            margin-top: 1rem;
+        }
+        .page-title {
+            color: #333;
+            border-bottom: 2px solid #333;
+            padding-bottom: 0.5rem;
+        }
+        .question-info {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 1rem;
+            margin-top: 0.5rem;
+            position: relative;
+        }
+        .question-info-content {
+            max-height: 600px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding-right: 15px; /* Add scrollbar space */
+        }
+        .question-info-toggle {
+            cursor: pointer;
+            user-select: none;
+            font-weight: bold;
+            color: #666;
+        }
+        .question-info-toggle:hover {
+            color: #333;
+        }
+        .question-info pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            background-color: #f4f4f4;
+            padding: 0.5rem;
+            border-radius: 4px;
+            margin: 0;
+        }
+        .hidden {
+            display: none;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="page-title">Benchmark Run Details</h1>
+        
+        <div class="run-summary">
+            <h2>Run Summary</h2>
+            <table class="summary-table">
+                <tr>
+                    <th>Model</th>
+                    <td>qwen2.5:7b:Q4_K_M</td>
+                </tr>
+                <tr>
+                    <th>Benchmark</th>
+                    <td>0020_definitions</td>
+                </tr>
+                <tr>
+                    <th>Normed Score</th>
+                    <td>100</td>
+                </tr>
+                <tr>
+                    <th>Run Timestamp</th>
+                    <td>2025-03-26 20:24:45</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="run-details">
+            <h2>Question-Level Details</h2>
+            <table class="details-table">
+                <thead>
+                    <tr>
+                        <th>Question ID</th>
+                        <th>Score</th>
+                        <th>Evaluation Time (ms)</th>
+                        <th>Debug Info</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                    <tr>
+                        <td>0020_definitions:batch_gemma2_9b:0</td>
+                        <td>100</td>
+                        <td>2151</td>
+                        <td>{
+  "response": "valley",
+  "correct_answer": "valley",
+  "is_correct": true
+}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Which word has this definition: A low area of land bordered by hills or mountains.\n\nThe choices are: clever, enemy, kingdom, lightning, patient, peaceful, sincere, slumber, trouble, valley",
+  "answer_type": "multiple_choice",
+  "correct_answer": "valley",
+  "category": "vocabulary",
+  "difficulty": "medium",
+  "tags": [
+    "vocabulary",
+    "definitions"
+  ],
+  "choices": [
+    "clever",
+    "enemy",
+    "kingdom",
+    "lightning",
+    "patient",
+    "peaceful",
+    "sincere",
+    "slumber",
+    "trouble",
+    "valley"
+  ],
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0020_definitions:batch_gemma2_9b:1</td>
+                        <td>100</td>
+                        <td>522</td>
+                        <td>{
+  "response": "opal",
+  "correct_answer": "opal",
+  "is_correct": true
+}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Which word has this definition: It is a gemstone that often displays shifting colors when viewed from different angles.\n\nThe choices are: brother, cloudy, grave, heart, honest, iceberg, ignite, opal, sunset, voyage",
+  "answer_type": "multiple_choice",
+  "correct_answer": "opal",
+  "category": "vocabulary",
+  "difficulty": "medium",
+  "tags": [
+    "vocabulary",
+    "definitions"
+  ],
+  "choices": [
+    "brother",
+    "cloudy",
+    "grave",
+    "heart",
+    "honest",
+    "iceberg",
+    "ignite",
+    "opal",
+    "sunset",
+    "voyage"
+  ],
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0020_definitions:batch_gemma2_9b:10</td>
+                        <td>100</td>
+                        <td>999</td>
+                        <td>{
+  "response": "echo",
+  "correct_answer": "echo",
+  "is_correct": true
+}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Which word has this definition: A sound that is repeated back after being reflected.\n\nThe choices are: calm, danger, echo, grace, honest, ignite, memory, puzzle, sword, unique",
+  "answer_type": "multiple_choice",
+  "correct_answer": "echo",
+  "category": "vocabulary",
+  "difficulty": "medium",
+  "tags": [
+    "vocabulary",
+    "definitions"
+  ],
+  "choices": [
+    "calm",
+    "danger",
+    "echo",
+    "grace",
+    "honest",
+    "ignite",
+    "memory",
+    "puzzle",
+    "sword",
+    "unique"
+  ],
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0020_definitions:batch_gemma2_9b:11</td>
+                        <td>100</td>
+                        <td>898</td>
+                        <td>{
+  "response": "strength",
+  "correct_answer": "strength",
+  "is_correct": true
+}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Which word has this definition: The quality of being able to exert force or endure pressure.\n\nThe choices are: breeze, grave, honor, iceberg, maze, outcast, rebel, stealth, strength, tactic",
+  "answer_type": "multiple_choice",
+  "correct_answer": "strength",
+  "category": "vocabulary",
+  "difficulty": "medium",
+  "tags": [
+    "vocabulary",
+    "definitions"
+  ],
+  "choices": [
+    "breeze",
+    "grave",
+    "honor",
+    "iceberg",
+    "maze",
+    "outcast",
+    "rebel",
+    "stealth",
+    "strength",
+    "tactic"
+  ],
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0020_definitions:batch_gemma2_9b:12</td>
+                        <td>100</td>
+                        <td>843</td>
+                        <td>{
+  "response": "swift",
+  "correct_answer": "swift",
+  "is_correct": true
+}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Which word has this definition: Moving or capable of moving at high speed.\n\nThe choices are: amber, cloudy, cypress, duel, fable, greedy, noble, passion, swift, valley",
+  "answer_type": "multiple_choice",
+  "correct_answer": "swift",
+  "category": "vocabulary",
+  "difficulty": "medium",
+  "tags": [
+    "vocabulary",
+    "definitions"
+  ],
+  "choices": [
+    "amber",
+    "cloudy",
+    "cypress",
+    "duel",
+    "fable",
+    "greedy",
+    "noble",
+    "passion",
+    "swift",
+    "valley"
+  ],
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0020_definitions:batch_gemma2_9b:13</td>
+                        <td>100</td>
+                        <td>918</td>
+                        <td>{
+  "response": "proud",
+  "correct_answer": "proud",
+  "is_correct": true
+}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Which word has this definition: Feeling a deep sense of satisfaction and pleasure due to one's own achievements or qualities.\n\nThe choices are: gem, glitter, hidden, meadow, oracle, proud, sapphire, skyline, stealth, swift",
+  "answer_type": "multiple_choice",
+  "correct_answer": "proud",
+  "category": "vocabulary",
+  "difficulty": "medium",
+  "tags": [
+    "vocabulary",
+    "definitions"
+  ],
+  "choices": [
+    "gem",
+    "glitter",
+    "hidden",
+    "meadow",
+    "oracle",
+    "proud",
+    "sapphire",
+    "skyline",
+    "stealth",
+    "swift"
+  ],
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0020_definitions:batch_gemma2_9b:14</td>
+                        <td>100</td>
+                        <td>838</td>
+                        <td>{
+  "response": "magic",
+  "correct_answer": "magic",
+  "is_correct": true
+}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Which word has this definition: It refers to seemingly impossible feats or supernatural occurrences.\n\nThe choices are: brother, delight, grace, journey, magic, oracle, phantom, quest, savage, valley",
+  "answer_type": "multiple_choice",
+  "correct_answer": "magic",
+  "category": "vocabulary",
+  "difficulty": "medium",
+  "tags": [
+    "vocabulary",
+    "definitions"
+  ],
+  "choices": [
+    "brother",
+    "delight",
+    "grace",
+    "journey",
+    "magic",
+    "oracle",
+    "phantom",
+    "quest",
+    "savage",
+    "valley"
+  ],
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0020_definitions:batch_gemma2_9b:15</td>
+                        <td>100</td>
+                        <td>962</td>
+                        <td>{
+  "response": "adventure",
+  "correct_answer": "adventure",
+  "is_correct": true
+}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Which word has this definition: A journey or experience that is exciting and often involves some danger.\n\nThe choices are: adventure, magic, passion, peaceful, proud, river, roaming, simple, sword, whistle",
+  "answer_type": "multiple_choice",
+  "correct_answer": "adventure",
+  "category": "vocabulary",
+  "difficulty": "medium",
+  "tags": [
+    "vocabulary",
+    "definitions"
+  ],
+  "choices": [
+    "adventure",
+    "magic",
+    "passion",
+    "peaceful",
+    "proud",
+    "river",
+    "roaming",
+    "simple",
+    "sword",
+    "whistle"
+  ],
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0020_definitions:batch_gemma2_9b:16</td>
+                        <td>100</td>
+                        <td>967</td>
+                        <td>{
+  "response": "zeal",
+  "correct_answer": "zeal",
+  "is_correct": true
+}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Which word has this definition: A strong feeling of excitement and eagerness to do something.\n\nThe choices are: amber, ancient, dragon, energy, heart, splendor, tension, victory, youth, zeal",
+  "answer_type": "multiple_choice",
+  "correct_answer": "zeal",
+  "category": "vocabulary",
+  "difficulty": "medium",
+  "tags": [
+    "vocabulary",
+    "definitions"
+  ],
+  "choices": [
+    "amber",
+    "ancient",
+    "dragon",
+    "energy",
+    "heart",
+    "splendor",
+    "tension",
+    "victory",
+    "youth",
+    "zeal"
+  ],
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0020_definitions:batch_gemma2_9b:17</td>
+                        <td>100</td>
+                        <td>899</td>
+                        <td>{
+  "response": "monster",
+  "correct_answer": "monster",
+  "is_correct": true
+}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Which word has this definition: A frightening or terrifying creature, often mythical or supernatural.\n\nThe choices are: crystal, daring, distant, kingdom, monster, proud, rebel, relic, tame, tower",
+  "answer_type": "multiple_choice",
+  "correct_answer": "monster",
+  "category": "vocabulary",
+  "difficulty": "medium",
+  "tags": [
+    "vocabulary",
+    "definitions"
+  ],
+  "choices": [
+    "crystal",
+    "daring",
+    "distant",
+    "kingdom",
+    "monster",
+    "proud",
+    "rebel",
+    "relic",
+    "tame",
+    "tower"
+  ],
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0020_definitions:batch_gemma2_9b:18</td>
+                        <td>100</td>
+                        <td>865</td>
+                        <td>{
+  "response": "energy",
+  "correct_answer": "energy",
+  "is_correct": true
+}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Which word has this definition: The ability to do work or cause change.\n\nThe choices are: cheerful, courage, energy, fragile, lightning, memory, puzzle, roaming, soldier, wisdom",
+  "answer_type": "multiple_choice",
+  "correct_answer": "energy",
+  "category": "vocabulary",
+  "difficulty": "medium",
+  "tags": [
+    "vocabulary",
+    "definitions"
+  ],
+  "choices": [
+    "cheerful",
+    "courage",
+    "energy",
+    "fragile",
+    "lightning",
+    "memory",
+    "puzzle",
+    "roaming",
+    "soldier",
+    "wisdom"
+  ],
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0020_definitions:batch_gemma2_9b:19</td>
+                        <td>100</td>
+                        <td>843</td>
+                        <td>{
+  "response": "justice",
+  "correct_answer": "justice",
+  "is_correct": true
+}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Which word has this definition: The state of being fair and impartial, resulting in rightfulness or equity.\n\nThe choices are: ancient, ashes, cypress, energy, grave, justice, melody, phantom, remark, sword",
+  "answer_type": "multiple_choice",
+  "correct_answer": "justice",
+  "category": "vocabulary",
+  "difficulty": "medium",
+  "tags": [
+    "vocabulary",
+    "definitions"
+  ],
+  "choices": [
+    "ancient",
+    "ashes",
+    "cypress",
+    "energy",
+    "grave",
+    "justice",
+    "melody",
+    "phantom",
+    "remark",
+    "sword"
+  ],
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0020_definitions:batch_gemma2_9b:2</td>
+                        <td>100</td>
+                        <td>674</td>
+                        <td>{
+  "response": "gentle",
+  "correct_answer": "gentle",
+  "is_correct": true
+}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Which word has this definition: Describes someone or something that is soft, kind, and not harsh.\n\nThe choices are: charm, gentle, glitter, heart, hunter, mighty, peaceful, peril, universe, valor",
+  "answer_type": "multiple_choice",
+  "correct_answer": "gentle",
+  "category": "vocabulary",
+  "difficulty": "medium",
+  "tags": [
+    "vocabulary",
+    "definitions"
+  ],
+  "choices": [
+    "charm",
+    "gentle",
+    "glitter",
+    "heart",
+    "hunter",
+    "mighty",
+    "peaceful",
+    "peril",
+    "universe",
+    "valor"
+  ],
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0020_definitions:batch_gemma2_9b:20</td>
+                        <td>100</td>
+                        <td>931</td>
+                        <td>{
+  "response": "knight",
+  "correct_answer": "knight",
+  "is_correct": true
+}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Which word has this definition: A mounted warrior who served a lord or king in medieval times.\n\nThe choices are: absent, frost, knight, loyal, peril, realm, sapphire, splendor, unique, void",
+  "answer_type": "multiple_choice",
+  "correct_answer": "knight",
+  "category": "vocabulary",
+  "difficulty": "medium",
+  "tags": [
+    "vocabulary",
+    "definitions"
+  ],
+  "choices": [
+    "absent",
+    "frost",
+    "knight",
+    "loyal",
+    "peril",
+    "realm",
+    "sapphire",
+    "splendor",
+    "unique",
+    "void"
+  ],
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0020_definitions:batch_gemma2_9b:21</td>
+                        <td>100</td>
+                        <td>964</td>
+                        <td>{
+  "response": "honor",
+  "correct_answer": "honor",
+  "is_correct": true
+}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Which word has this definition: It is a quality that commands respect and shows good character.\n\nThe choices are: cheerful, cypress, gentle, glitter, honor, lure, monster, mystery, survivor, tower",
+  "answer_type": "multiple_choice",
+  "correct_answer": "honor",
+  "category": "vocabulary",
+  "difficulty": "medium",
+  "tags": [
+    "vocabulary",
+    "definitions"
+  ],
+  "choices": [
+    "cheerful",
+    "cypress",
+    "gentle",
+    "glitter",
+    "honor",
+    "lure",
+    "monster",
+    "mystery",
+    "survivor",
+    "tower"
+  ],
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0020_definitions:batch_gemma2_9b:22</td>
+                        <td>100</td>
+                        <td>955</td>
+                        <td>{
+  "response": "queen",
+  "correct_answer": "queen",
+  "is_correct": true
+}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Which word has this definition: She is the female monarch of a country.\n\nThe choices are: bronze, delight, grave, keeper, mythic, passion, peril, queen, sword, warrior",
+  "answer_type": "multiple_choice",
+  "correct_answer": "queen",
+  "category": "vocabulary",
+  "difficulty": "medium",
+  "tags": [
+    "vocabulary",
+    "definitions"
+  ],
+  "choices": [
+    "bronze",
+    "delight",
+    "grave",
+    "keeper",
+    "mythic",
+    "passion",
+    "peril",
+    "queen",
+    "sword",
+    "warrior"
+  ],
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0020_definitions:batch_gemma2_9b:23</td>
+                        <td>100</td>
+                        <td>956</td>
+                        <td>{
+  "response": "ignite",
+  "correct_answer": "ignite",
+  "is_correct": true
+}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Which word has this definition: To cause something to start burning suddenly and brightly.\n\nThe choices are: brother, cypress, emblem, ignite, jewel, meadow, mighty, royalty, truth, village",
+  "answer_type": "multiple_choice",
+  "correct_answer": "ignite",
+  "category": "vocabulary",
+  "difficulty": "medium",
+  "tags": [
+    "vocabulary",
+    "definitions"
+  ],
+  "choices": [
+    "brother",
+    "cypress",
+    "emblem",
+    "ignite",
+    "jewel",
+    "meadow",
+    "mighty",
+    "royalty",
+    "truth",
+    "village"
+  ],
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0020_definitions:batch_gemma2_9b:24</td>
+                        <td>100</td>
+                        <td>967</td>
+                        <td>{
+  "response": "zeal",
+  "correct_answer": "zeal",
+  "is_correct": true
+}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Which word has this definition: A strong feeling of enthusiasm and eagerness.\n\nThe choices are: bright, gem, melody, mighty, power, stealth, unique, universe, victory, zeal",
+  "answer_type": "multiple_choice",
+  "correct_answer": "zeal",
+  "category": "vocabulary",
+  "difficulty": "medium",
+  "tags": [
+    "vocabulary",
+    "definitions"
+  ],
+  "choices": [
+    "bright",
+    "gem",
+    "melody",
+    "mighty",
+    "power",
+    "stealth",
+    "unique",
+    "universe",
+    "victory",
+    "zeal"
+  ],
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0020_definitions:batch_gemma2_9b:3</td>
+                        <td>100</td>
+                        <td>1107</td>
+                        <td>{
+  "response": "glory",
+  "correct_answer": "glory",
+  "is_correct": true
+}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Which word has this definition: A feeling of great pride and honor.\n\nThe choices are: breeze, fragile, glory, iceberg, magic, outcast, rescue, savage, skeptic, wonder",
+  "answer_type": "multiple_choice",
+  "correct_answer": "glory",
+  "category": "vocabulary",
+  "difficulty": "medium",
+  "tags": [
+    "vocabulary",
+    "definitions"
+  ],
+  "choices": [
+    "breeze",
+    "fragile",
+    "glory",
+    "iceberg",
+    "magic",
+    "outcast",
+    "rescue",
+    "savage",
+    "skeptic",
+    "wonder"
+  ],
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0020_definitions:batch_gemma2_9b:4</td>
+                        <td>100</td>
+                        <td>1316</td>
+                        <td>{
+  "response": "fighter",
+  "correct_answer": "fighter",
+  "is_correct": true
+}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Which word has this definition: A person who engages in combat or contests.\n\nThe choices are: ashes, battle, bright, danger, dragon, fearful, fighter, proud, sacred, tension",
+  "answer_type": "multiple_choice",
+  "correct_answer": "fighter",
+  "category": "vocabulary",
+  "difficulty": "medium",
+  "tags": [
+    "vocabulary",
+    "definitions"
+  ],
+  "choices": [
+    "ashes",
+    "battle",
+    "bright",
+    "danger",
+    "dragon",
+    "fearful",
+    "fighter",
+    "proud",
+    "sacred",
+    "tension"
+  ],
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0020_definitions:batch_gemma2_9b:5</td>
+                        <td>100</td>
+                        <td>881</td>
+                        <td>{
+  "response": "belief",
+  "correct_answer": "belief",
+  "is_correct": true
+}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Which word has this definition: A conviction about something, often without proof.\n\nThe choices are: belief, clever, danger, fearful, moonlit, precious, promise, quest, whistle, witty",
+  "answer_type": "multiple_choice",
+  "correct_answer": "belief",
+  "category": "vocabulary",
+  "difficulty": "medium",
+  "tags": [
+    "vocabulary",
+    "definitions"
+  ],
+  "choices": [
+    "belief",
+    "clever",
+    "danger",
+    "fearful",
+    "moonlit",
+    "precious",
+    "promise",
+    "quest",
+    "whistle",
+    "witty"
+  ],
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0020_definitions:batch_gemma2_9b:6</td>
+                        <td>100</td>
+                        <td>774</td>
+                        <td>{
+  "response": "justice",
+  "correct_answer": "justice",
+  "is_correct": true
+}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Which word has this definition: The fair and impartial treatment of people according to established rules and principles.\n\nThe choices are: animal, harmony, hidden, justice, noble, reckless, sapphire, signal, splendor, swift",
+  "answer_type": "multiple_choice",
+  "correct_answer": "justice",
+  "category": "vocabulary",
+  "difficulty": "medium",
+  "tags": [
+    "vocabulary",
+    "definitions"
+  ],
+  "choices": [
+    "animal",
+    "harmony",
+    "hidden",
+    "justice",
+    "noble",
+    "reckless",
+    "sapphire",
+    "signal",
+    "splendor",
+    "swift"
+  ],
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0020_definitions:batch_gemma2_9b:7</td>
+                        <td>100</td>
+                        <td>846</td>
+                        <td>{
+  "response": "scared",
+  "correct_answer": "scared",
+  "is_correct": true
+}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Which word has this definition: Experiencing intense fear or anxiety.\n\nThe choices are: clever, greedy, guardian, harmony, monster, quirk, scared, thunder, treasure, valley",
+  "answer_type": "multiple_choice",
+  "correct_answer": "scared",
+  "category": "vocabulary",
+  "difficulty": "medium",
+  "tags": [
+    "vocabulary",
+    "definitions"
+  ],
+  "choices": [
+    "clever",
+    "greedy",
+    "guardian",
+    "harmony",
+    "monster",
+    "quirk",
+    "scared",
+    "thunder",
+    "treasure",
+    "valley"
+  ],
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0020_definitions:batch_gemma2_9b:8</td>
+                        <td>100</td>
+                        <td>900</td>
+                        <td>{
+  "response": "honest",
+  "correct_answer": "honest",
+  "is_correct": true
+}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Which word has this definition: Someone who always tells the truth and acts with integrity.\n\nThe choices are: bronze, calm, honest, island, ivory, journey, reckless, sincere, tower, wild",
+  "answer_type": "multiple_choice",
+  "correct_answer": "honest",
+  "category": "vocabulary",
+  "difficulty": "medium",
+  "tags": [
+    "vocabulary",
+    "definitions"
+  ],
+  "choices": [
+    "bronze",
+    "calm",
+    "honest",
+    "island",
+    "ivory",
+    "journey",
+    "reckless",
+    "sincere",
+    "tower",
+    "wild"
+  ],
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0020_definitions:batch_gemma2_9b:9</td>
+                        <td>100</td>
+                        <td>1055</td>
+                        <td>{
+  "response": "village",
+  "correct_answer": "village",
+  "is_correct": true
+}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Which word has this definition: A small community of homes and residents, typically located in a rural area.\n\nThe choices are: adventure, guardian, heart, honest, loyal, meadow, quest, slumber, sunset, village",
+  "answer_type": "multiple_choice",
+  "correct_answer": "village",
+  "category": "vocabulary",
+  "difficulty": "medium",
+  "tags": [
+    "vocabulary",
+    "definitions"
+  ],
+  "choices": [
+    "adventure",
+    "guardian",
+    "heart",
+    "honest",
+    "loyal",
+    "meadow",
+    "quest",
+    "slumber",
+    "sunset",
+    "village"
+  ],
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                </tbody>
+            </table>
+        </div>
+
+        
+    </div>
+</body>
+</html>
