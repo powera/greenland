@@ -169,6 +169,9 @@ Query: {prompt}"""
         
         if brief:
             data["options"] = {"num_predict": 256}
+
+        if json_schema:
+            data["format"] = json_schema
             
         response = self._make_request("chat", data)
         response_text, response_usage = self._process_chat_response(response, model)

@@ -20,7 +20,7 @@ BENCHMARK_CODE = "0016_antonym"
 
 
 @runner(BENCHMARK_CODE)
-class AntonymBenchmark(BenchmarkRunner):
+class AntonymRunner(BenchmarkRunner):
     """Benchmark for testing antonym identification abilities."""
     
     def prepare_prompt(self, question_data: Dict) -> Tuple[str, Optional[Dict], Optional[str]]:

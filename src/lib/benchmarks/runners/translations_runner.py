@@ -2,14 +2,6 @@
 
 """Translation benchmark runner implementation."""
 
-# Apply benchmark decorator to this module
-# This registers the module as a benchmark with the factory
-benchmark(
-    code="0050_translation",
-    name="Translation Benchmark",
-    description="Tests ability to translate words between different languages with multiple choice validation"
-)(None)  # The decorator expects a module object, but we'll use None for the placeholder
-
 import json
 import logging
 from typing import Dict, List, Optional
@@ -21,7 +13,7 @@ from lib.benchmarks.data_models import (
     BenchmarkResult, BenchmarkMetadata, AnswerType
 )
 from lib.benchmarks.factory import runner, get_benchmark_metadata, benchmark
-from lib.benchmarks.translations_generator import VALID_LANGS, get_translation_metadata
+from lib.benchmarks.generators.translations_generator import VALID_LANGS, get_translation_metadata
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
