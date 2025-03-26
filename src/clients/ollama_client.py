@@ -123,8 +123,7 @@ class OllamaClient:
         model: str = DEFAULT_MODEL,
         brief: bool = False,
         json_schema: Optional[Dict] = None,
-        context: Optional[str] = None,
-        two_phase: bool = True
+        context: Optional[str] = None
     ) -> Response:
         """
         Generate chat completion using Ollama API.
@@ -135,7 +134,6 @@ class OllamaClient:
             brief: Whether to limit response length
             json_schema: Schema for structured response
             context: Optional context to include before the prompt
-            two_phase: If True, use two-phase response for JSON (default: True)
         
         Returns:
             Response data class
@@ -153,7 +151,7 @@ class OllamaClient:
         if context:
             messages.append({"role": "system", "content": context})
             
-        if json_schema and not two_phase:
+        if json_schema:
             # Add schema to prompt for single-phase JSON response
             schema_prompt = f"""Provide a JSON response matching this schema:
 {json.dumps(json_schema, indent=2)}
@@ -177,50 +175,20 @@ Query: {prompt}"""
         
         # Handle JSON responses
         if json_schema:
-            if two_phase:
-                # Phase 2: Get structured response
-                structure_prompt = f"""Based on the previous response to the prompt, provide a JSON response using the following keys: {", ".join(json_schema["properties"].keys())}"""
-                
-                data = {
-                    "model": model,
-                    "messages": messages + [
-                        {"role": "assistant", "content": response_text},
-                        {"role": "user", "content": structure_prompt}
-                    ],
-                    "format": json_schema,
-                    "stream": False,
-                }
-                
-                response = self._make_request("chat", data)
-                json_text, json_usage = self._process_chat_response(response, model)
-                
-                try:
-                    structured_response = json.loads(json_text)
-                except json.JSONDecodeError:
-                    structured_response = {"error": f"Failed to parse JSON: {json_text}"}
-                
-                # Return two-phase response
-                total_usage = response_usage.combine(json_usage)
+            # Single-phase JSON response
+            try:
+                structured_response = json.loads(response_text)
                 return Response(
-                    response_text=response_text,
+                    response_text="",
                     structured_data=structured_response,
-                    usage=total_usage
+                    usage=response_usage
                 )
-            else:
-                # Single-phase JSON response
-                try:
-                    structured_response = json.loads(response_text)
-                    return Response(
-                        response_text="",
-                        structured_data=structured_response,
-                        usage=response_usage
-                    )
-                except json.JSONDecodeError:
-                    return Response(
-                        response_text="",
-                        structured_data={"error": f"Failed to parse JSON: {response_text}"},
-                        usage=response_usage
-                    )
+            except json.JSONDecodeError:
+                return Response(
+                    response_text="",
+                    structured_data={"error": f"Failed to parse JSON: {response_text}"},
+                    usage=response_usage
+                )
         else:
             # Text-only response
             return Response(
