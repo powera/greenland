@@ -244,5 +244,4 @@ if __name__ == "__main__":
             for model, benchmark in run_pairs:
                 print(f"  {benchmark} for {model}")
         else:
-            print("No missing benchmarks found or all runs failed.")add_argument("--blacklist-models", nargs="+", help="Models to exclude")
-    missing_parser.
+            print("No missing benchmarks found or all runs failed.")

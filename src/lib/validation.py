@@ -90,13 +90,12 @@ Respond in JSON format with:
         for model in validator_models:
             ollama_model = ":".join(model.split(":")[:-1])
             try:
-                response_text, _ = ollama_client.generate_chat(
+                response = ollama_client.generate_chat(
                     prompt,
                     ollama_model,
-                    json_schema=schema,
-                    structured_json=True
+                    json_schema=schema
                 )
-                result = json.loads(response_text)
+                result = response.structured_data
                 validation_results.append({"validator_model": model, **result})
             except (json.JSONDecodeError, KeyError):
                 validation_results.append({
