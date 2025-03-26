@@ -1,0 +1,3160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Benchmark Run Details - gemma2:9b:Q4_0 on 0050_translation_en_fr</title>
+    <script>
+        function toggleQuestionInfo(toggleElement) {
+            const questionInfoContent = toggleElement.nextElementSibling;
+
+            if (questionInfoContent.classList.contains('hidden')) {
+                questionInfoContent.classList.remove('hidden');
+                toggleElement.textContent = '[X]';
+            } else {
+                questionInfoContent.classList.add('hidden');
+                toggleElement.textContent = '[+]';
+            }
+        }
+    </script>
+
+    <style>
+        /* Placeholder for future CSS */
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+        .run-summary, .run-details {
+            margin-bottom: 2rem;
+        }
+        .summary-table, .details-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .summary-table th, .details-table th {
+            background-color: #f4f4f4;
+            text-align: left;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+        }
+        .summary-table td, .details-table td {
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+        }
+        .details-table {
+            margin-top: 1rem;
+        }
+        .page-title {
+            color: #333;
+            border-bottom: 2px solid #333;
+            padding-bottom: 0.5rem;
+        }
+        .question-info {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 1rem;
+            margin-top: 0.5rem;
+            position: relative;
+        }
+        .question-info-content {
+            max-height: 600px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding-right: 15px; /* Add scrollbar space */
+        }
+        .question-info-toggle {
+            cursor: pointer;
+            user-select: none;
+            font-weight: bold;
+            color: #666;
+        }
+        .question-info-toggle:hover {
+            color: #333;
+        }
+        .question-info pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            background-color: #f4f4f4;
+            padding: 0.5rem;
+            border-radius: 4px;
+            margin: 0;
+        }
+        .hidden {
+            display: none;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="page-title">Benchmark Run Details</h1>
+        
+        <div class="run-summary">
+            <h2>Run Summary</h2>
+            <table class="summary-table">
+                <tr>
+                    <th>Model</th>
+                    <td>gemma2:9b:Q4_0</td>
+                </tr>
+                <tr>
+                    <th>Benchmark</th>
+                    <td>0050_translation_en_fr</td>
+                </tr>
+                <tr>
+                    <th>Normed Score</th>
+                    <td>98</td>
+                </tr>
+                <tr>
+                    <th>Run Timestamp</th>
+                    <td>2025-03-26 19:39:23</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="run-details">
+            <h2>Question-Level Details</h2>
+            <table class="details-table">
+                <thead>
+                    <tr>
+                        <th>Question ID</th>
+                        <th>Score</th>
+                        <th>Evaluation Time (ms)</th>
+                        <th>Debug Info</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                    <tr>
+                        <td>0050_translation_en_fr:0</td>
+                        <td>100</td>
+                        <td>6327</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"flower\"\nPossible translations: lumineux, ciel, lourd, nager, étoile, sel, sable, fleur",
+  "answer_type": "multiple_choice",
+  "correct_answer": "fleur",
+  "category": "translation_en_fr",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "fr"
+  ],
+  "choices": [
+    "lumineux",
+    "ciel",
+    "lourd",
+    "nager",
+    "étoile",
+    "sel",
+    "sable",
+    "fleur"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_fr:1</td>
+                        <td>100</td>
+                        <td>1237</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"to drive\"\nPossible translations: conduire, sel, doux, pointu, sucré, frais, profond, dormir",
+  "answer_type": "multiple_choice",
+  "correct_answer": "conduire",
+  "category": "translation_en_fr",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "fr",
+    "has_details"
+  ],
+  "choices": [
+    "conduire",
+    "sel",
+    "doux",
+    "pointu",
+    "sucré",
+    "frais",
+    "profond",
+    "dormir"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_fr:10</td>
+                        <td>100</td>
+                        <td>1248</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"mountain\"\nPossible translations: pointu, grandir, voler, ciel, sable, danser, sucré, montagne",
+  "answer_type": "multiple_choice",
+  "correct_answer": "montagne",
+  "category": "translation_en_fr",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "fr"
+  ],
+  "choices": [
+    "pointu",
+    "grandir",
+    "voler",
+    "ciel",
+    "sable",
+    "danser",
+    "sucré",
+    "montagne"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_fr:11</td>
+                        <td>100</td>
+                        <td>1194</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"to sing\"\nPossible translations: respirer, feu, fleur, eau, frais, sucré, léger, chanter",
+  "answer_type": "multiple_choice",
+  "correct_answer": "chanter",
+  "category": "translation_en_fr",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "fr"
+  ],
+  "choices": [
+    "respirer",
+    "feu",
+    "fleur",
+    "eau",
+    "frais",
+    "sucré",
+    "léger",
+    "chanter"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_fr:12</td>
+                        <td>100</td>
+                        <td>1147</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"heart\"\nPossible translations: sucré, pierre, livre, pointu, lune, vent, léger, cœur",
+  "answer_type": "multiple_choice",
+  "correct_answer": "cœur",
+  "category": "translation_en_fr",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "fr"
+  ],
+  "choices": [
+    "sucré",
+    "pierre",
+    "livre",
+    "pointu",
+    "lune",
+    "vent",
+    "léger",
+    "cœur"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_fr:13</td>
+                        <td>100</td>
+                        <td>1162</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"bright\"\nPossible translations: ciel, écrire, conduire, lumineux, courir, voler, silencieux, chaud",
+  "answer_type": "multiple_choice",
+  "correct_answer": "lumineux",
+  "category": "translation_en_fr",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "fr",
+    "has_details"
+  ],
+  "choices": [
+    "ciel",
+    "écrire",
+    "conduire",
+    "lumineux",
+    "courir",
+    "voler",
+    "silencieux",
+    "chaud"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_fr:14</td>
+                        <td>100</td>
+                        <td>1110</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"to dance\"\nPossible translations: ami, courir, nager, conduire, danser, sucré, chaud, lourd",
+  "answer_type": "multiple_choice",
+  "correct_answer": "danser",
+  "category": "translation_en_fr",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "fr"
+  ],
+  "choices": [
+    "ami",
+    "courir",
+    "nager",
+    "conduire",
+    "danser",
+    "sucré",
+    "chaud",
+    "lourd"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_fr:15</td>
+                        <td>100</td>
+                        <td>1115</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"quiet\"\nPossible translations: silencieux, grandir, conduire, arbre, profond, doux, oiseau, feu",
+  "answer_type": "multiple_choice",
+  "correct_answer": "silencieux",
+  "category": "translation_en_fr",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "fr",
+    "has_details"
+  ],
+  "choices": [
+    "silencieux",
+    "grandir",
+    "conduire",
+    "arbre",
+    "profond",
+    "doux",
+    "oiseau",
+    "feu"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_fr:16</td>
+                        <td>100</td>
+                        <td>1273</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"tree\"\nPossible translations: sourire, arbre, eau, lisse, rire, oiseau, chanter, livre",
+  "answer_type": "multiple_choice",
+  "correct_answer": "arbre",
+  "category": "translation_en_fr",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "fr"
+  ],
+  "choices": [
+    "sourire",
+    "arbre",
+    "eau",
+    "lisse",
+    "rire",
+    "oiseau",
+    "chanter",
+    "livre"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_fr:17</td>
+                        <td>100</td>
+                        <td>1287</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"to write\"\nPossible translations: conduire, sourire, écrire, tomber, manger, danser, nager, lune",
+  "answer_type": "multiple_choice",
+  "correct_answer": "écrire",
+  "category": "translation_en_fr",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "fr"
+  ],
+  "choices": [
+    "conduire",
+    "sourire",
+    "écrire",
+    "tomber",
+    "manger",
+    "danser",
+    "nager",
+    "lune"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_fr:18</td>
+                        <td>100</td>
+                        <td>1120</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"sky\"\nPossible translations: tomber, le plus fort, sourire, danser, ciel, eau, respirer, rapide",
+  "answer_type": "multiple_choice",
+  "correct_answer": "ciel",
+  "category": "translation_en_fr",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "fr",
+    "has_details"
+  ],
+  "choices": [
+    "tomber",
+    "le plus fort",
+    "sourire",
+    "danser",
+    "ciel",
+    "eau",
+    "respirer",
+    "rapide"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_fr:19</td>
+                        <td>100</td>
+                        <td>1203</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"fresh\"\nPossible translations: feu, oiseau, ami, froid, frais, léger, cacher, ciel",
+  "answer_type": "multiple_choice",
+  "correct_answer": "frais",
+  "category": "translation_en_fr",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "fr"
+  ],
+  "choices": [
+    "feu",
+    "oiseau",
+    "ami",
+    "froid",
+    "frais",
+    "léger",
+    "cacher",
+    "ciel"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_fr:2</td>
+                        <td>100</td>
+                        <td>1290</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"strongest\"\nPossible translations: rire, eau, rond, léger, le plus fort, profond, ciel, pluie",
+  "answer_type": "multiple_choice",
+  "correct_answer": "le plus fort",
+  "category": "translation_en_fr",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "fr"
+  ],
+  "choices": [
+    "rire",
+    "eau",
+    "rond",
+    "léger",
+    "le plus fort",
+    "profond",
+    "ciel",
+    "pluie"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_fr:20</td>
+                        <td>100</td>
+                        <td>1359</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"friend\"\nPossible translations: léger, manger, livre, danser, chaud, vent, rond, ami",
+  "answer_type": "multiple_choice",
+  "correct_answer": "ami",
+  "category": "translation_en_fr",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "fr"
+  ],
+  "choices": [
+    "léger",
+    "manger",
+    "livre",
+    "danser",
+    "chaud",
+    "vent",
+    "rond",
+    "ami"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_fr:21</td>
+                        <td>100</td>
+                        <td>1122</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"to run\"\nPossible translations: courir, herbe, fleur, pierre, pluie, grandir, sable, léger",
+  "answer_type": "multiple_choice",
+  "correct_answer": "courir",
+  "category": "translation_en_fr",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "fr"
+  ],
+  "choices": [
+    "courir",
+    "herbe",
+    "fleur",
+    "pierre",
+    "pluie",
+    "grandir",
+    "sable",
+    "léger"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_fr:22</td>
+                        <td>100</td>
+                        <td>1180</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"round\"\nPossible translations: cacher, arbre, rond, oiseau, étoile, respirer, eau, fleur",
+  "answer_type": "multiple_choice",
+  "correct_answer": "rond",
+  "category": "translation_en_fr",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "fr"
+  ],
+  "choices": [
+    "cacher",
+    "arbre",
+    "rond",
+    "oiseau",
+    "étoile",
+    "respirer",
+    "eau",
+    "fleur"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_fr:23</td>
+                        <td>100</td>
+                        <td>1175</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"wind\"\nPossible translations: rire, beau/belle, léger, cacher, rond, manger, vent, profond",
+  "answer_type": "multiple_choice",
+  "correct_answer": "vent",
+  "category": "translation_en_fr",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "fr",
+    "has_details"
+  ],
+  "choices": [
+    "rire",
+    "beau/belle",
+    "léger",
+    "cacher",
+    "rond",
+    "manger",
+    "vent",
+    "profond"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_fr:24</td>
+                        <td>100</td>
+                        <td>1188</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"warm\"\nPossible translations: lune, chaud, oiseau, beau/belle, cœur, eau, danser, ciel",
+  "answer_type": "multiple_choice",
+  "correct_answer": "chaud",
+  "category": "translation_en_fr",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "fr"
+  ],
+  "choices": [
+    "lune",
+    "chaud",
+    "oiseau",
+    "beau/belle",
+    "cœur",
+    "eau",
+    "danser",
+    "ciel"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_fr:25</td>
+                        <td>100</td>
+                        <td>1161</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"stone\"\nPossible translations: écrire, cacher, pierre, pointu, étoile, léger, livre, voler",
+  "answer_type": "multiple_choice",
+  "correct_answer": "pierre",
+  "category": "translation_en_fr",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "fr"
+  ],
+  "choices": [
+    "écrire",
+    "cacher",
+    "pierre",
+    "pointu",
+    "étoile",
+    "léger",
+    "livre",
+    "voler"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_fr:26</td>
+                        <td>100</td>
+                        <td>1215</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"deep\"\nPossible translations: léger, profond, rapide, voler, pluie, fleur, chaud, chanter",
+  "answer_type": "multiple_choice",
+  "correct_answer": "profond",
+  "category": "translation_en_fr",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "fr",
+    "has_details"
+  ],
+  "choices": [
+    "léger",
+    "profond",
+    "rapide",
+    "voler",
+    "pluie",
+    "fleur",
+    "chaud",
+    "chanter"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_fr:27</td>
+                        <td>100</td>
+                        <td>1231</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"to swim\"\nPossible translations: lisse, froid, nager, rire, vent, pierre, chanter, profond",
+  "answer_type": "multiple_choice",
+  "correct_answer": "nager",
+  "category": "translation_en_fr",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "fr"
+  ],
+  "choices": [
+    "lisse",
+    "froid",
+    "nager",
+    "rire",
+    "vent",
+    "pierre",
+    "chanter",
+    "profond"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_fr:28</td>
+                        <td>100</td>
+                        <td>1245</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"bird\"\nPossible translations: fleur, arbre, rire, nuage, vent, pierre, respirer, oiseau",
+  "answer_type": "multiple_choice",
+  "correct_answer": "oiseau",
+  "category": "translation_en_fr",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "fr"
+  ],
+  "choices": [
+    "fleur",
+    "arbre",
+    "rire",
+    "nuage",
+    "vent",
+    "pierre",
+    "respirer",
+    "oiseau"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_fr:29</td>
+                        <td>100</td>
+                        <td>1273</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"sweet\"\nPossible translations: ciel, sel, danser, oiseau, sucré, voler, rire, grandir",
+  "answer_type": "multiple_choice",
+  "correct_answer": "sucré",
+  "category": "translation_en_fr",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "fr",
+    "has_details"
+  ],
+  "choices": [
+    "ciel",
+    "sel",
+    "danser",
+    "oiseau",
+    "sucré",
+    "voler",
+    "rire",
+    "grandir"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_fr:3</td>
+                        <td>100</td>
+                        <td>1185</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"book\"\nPossible translations: cacher, lumineux, sel, chanter, livre, feu, conduire, rire",
+  "answer_type": "multiple_choice",
+  "correct_answer": "livre",
+  "category": "translation_en_fr",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "fr",
+    "has_details"
+  ],
+  "choices": [
+    "cacher",
+    "lumineux",
+    "sel",
+    "chanter",
+    "livre",
+    "feu",
+    "conduire",
+    "rire"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_fr:30</td>
+                        <td>100</td>
+                        <td>1232</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"cloud\"\nPossible translations: sucré, le plus fort, nuage, vent, herbe, nager, respirer, voler",
+  "answer_type": "multiple_choice",
+  "correct_answer": "nuage",
+  "category": "translation_en_fr",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "fr"
+  ],
+  "choices": [
+    "sucré",
+    "le plus fort",
+    "nuage",
+    "vent",
+    "herbe",
+    "nager",
+    "respirer",
+    "voler"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_fr:31</td>
+                        <td>100</td>
+                        <td>1186</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"to smile\"\nPossible translations: pierre, frais, lune, ciel, écrire, sourire, silencieux, rapide",
+  "answer_type": "multiple_choice",
+  "correct_answer": "sourire",
+  "category": "translation_en_fr",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "fr"
+  ],
+  "choices": [
+    "pierre",
+    "frais",
+    "lune",
+    "ciel",
+    "écrire",
+    "sourire",
+    "silencieux",
+    "rapide"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_fr:32</td>
+                        <td>100</td>
+                        <td>1214</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"soft\"\nPossible translations: manger, sucré, lourd, chanter, doux, courir, froid, écrire",
+  "answer_type": "multiple_choice",
+  "correct_answer": "doux",
+  "category": "translation_en_fr",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "fr"
+  ],
+  "choices": [
+    "manger",
+    "sucré",
+    "lourd",
+    "chanter",
+    "doux",
+    "courir",
+    "froid",
+    "écrire"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_fr:33</td>
+                        <td>100</td>
+                        <td>1214</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"rain\"\nPossible translations: courir, chaud, grandir, beau/belle, ami, pluie, vent, sucré",
+  "answer_type": "multiple_choice",
+  "correct_answer": "pluie",
+  "category": "translation_en_fr",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "fr"
+  ],
+  "choices": [
+    "courir",
+    "chaud",
+    "grandir",
+    "beau/belle",
+    "ami",
+    "pluie",
+    "vent",
+    "sucré"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_fr:34</td>
+                        <td>100</td>
+                        <td>1242</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"to grow\"\nPossible translations: montagne, chaud, tomber, lourd, grandir, feu, sucré, écrire",
+  "answer_type": "multiple_choice",
+  "correct_answer": "grandir",
+  "category": "translation_en_fr",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "fr"
+  ],
+  "choices": [
+    "montagne",
+    "chaud",
+    "tomber",
+    "lourd",
+    "grandir",
+    "feu",
+    "sucré",
+    "écrire"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_fr:35</td>
+                        <td>100</td>
+                        <td>1145</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"quick\"\nPossible translations: sourire, manger, oiseau, froid, rapide, eau, beau/belle, fleur",
+  "answer_type": "multiple_choice",
+  "correct_answer": "rapide",
+  "category": "translation_en_fr",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "fr"
+  ],
+  "choices": [
+    "sourire",
+    "manger",
+    "oiseau",
+    "froid",
+    "rapide",
+    "eau",
+    "beau/belle",
+    "fleur"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_fr:36</td>
+                        <td>100</td>
+                        <td>1200</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"star\"\nPossible translations: eau, grandir, pluie, oiseau, étoile, nuage, livre, herbe",
+  "answer_type": "multiple_choice",
+  "correct_answer": "étoile",
+  "category": "translation_en_fr",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "fr"
+  ],
+  "choices": [
+    "eau",
+    "grandir",
+    "pluie",
+    "oiseau",
+    "étoile",
+    "nuage",
+    "livre",
+    "herbe"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_fr:37</td>
+                        <td>100</td>
+                        <td>950</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"to dance\"\nPossible translations: léger, le plus fort, danser, lisse, frais, montagne, chanter, livre",
+  "answer_type": "multiple_choice",
+  "correct_answer": "danser",
+  "category": "translation_en_fr",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "fr"
+  ],
+  "choices": [
+    "léger",
+    "le plus fort",
+    "danser",
+    "lisse",
+    "frais",
+    "montagne",
+    "chanter",
+    "livre"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_fr:38</td>
+                        <td>100</td>
+                        <td>1203</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"heavy\"\nPossible translations: frais, lune, rond, nuage, courir, manger, cœur, lourd",
+  "answer_type": "multiple_choice",
+  "correct_answer": "lourd",
+  "category": "translation_en_fr",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "fr"
+  ],
+  "choices": [
+    "frais",
+    "lune",
+    "rond",
+    "nuage",
+    "courir",
+    "manger",
+    "cœur",
+    "lourd"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_fr:39</td>
+                        <td>100</td>
+                        <td>1043</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"fire\"\nPossible translations: rire, feu, grandir, rapide, profond, cacher, livre, écrire",
+  "answer_type": "multiple_choice",
+  "correct_answer": "feu",
+  "category": "translation_en_fr",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "fr"
+  ],
+  "choices": [
+    "rire",
+    "feu",
+    "grandir",
+    "rapide",
+    "profond",
+    "cacher",
+    "livre",
+    "écrire"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_fr:4</td>
+                        <td>100</td>
+                        <td>1259</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"to eat\"\nPossible translations: voler, montagne, pierre, beau/belle, herbe, manger, ciel, rire",
+  "answer_type": "multiple_choice",
+  "correct_answer": "manger",
+  "category": "translation_en_fr",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "fr"
+  ],
+  "choices": [
+    "voler",
+    "montagne",
+    "pierre",
+    "beau/belle",
+    "herbe",
+    "manger",
+    "ciel",
+    "rire"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_fr:40</td>
+                        <td>100</td>
+                        <td>1211</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"to breathe\"\nPossible translations: respirer, écrire, herbe, eau, oiseau, pierre, chaud, sel",
+  "answer_type": "multiple_choice",
+  "correct_answer": "respirer",
+  "category": "translation_en_fr",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "fr"
+  ],
+  "choices": [
+    "respirer",
+    "écrire",
+    "herbe",
+    "eau",
+    "oiseau",
+    "pierre",
+    "chaud",
+    "sel"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_fr:41</td>
+                        <td>100</td>
+                        <td>1310</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"sharp\"\nPossible translations: rire, tomber, nager, fleur, doux, pointu, pierre, chaud",
+  "answer_type": "multiple_choice",
+  "correct_answer": "pointu",
+  "category": "translation_en_fr",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "fr",
+    "has_details"
+  ],
+  "choices": [
+    "rire",
+    "tomber",
+    "nager",
+    "fleur",
+    "doux",
+    "pointu",
+    "pierre",
+    "chaud"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_fr:42</td>
+                        <td>100</td>
+                        <td>1149</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"salt\"\nPossible translations: courir, sel, léger, doux, eau, lourd, sable, manger",
+  "answer_type": "multiple_choice",
+  "correct_answer": "sel",
+  "category": "translation_en_fr",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "fr"
+  ],
+  "choices": [
+    "courir",
+    "sel",
+    "léger",
+    "doux",
+    "eau",
+    "lourd",
+    "sable",
+    "manger"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_fr:43</td>
+                        <td>100</td>
+                        <td>1299</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"to hide\"\nPossible translations: conduire, dormir, ciel, sable, voler, cacher, froid, nager",
+  "answer_type": "multiple_choice",
+  "correct_answer": "cacher",
+  "category": "translation_en_fr",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "fr"
+  ],
+  "choices": [
+    "conduire",
+    "dormir",
+    "ciel",
+    "sable",
+    "voler",
+    "cacher",
+    "froid",
+    "nager"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_fr:44</td>
+                        <td>100</td>
+                        <td>1320</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"smooth\"\nPossible translations: sucré, arbre, écrire, pluie, sable, lisse, chanter, montagne",
+  "answer_type": "multiple_choice",
+  "correct_answer": "lisse",
+  "category": "translation_en_fr",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "fr"
+  ],
+  "choices": [
+    "sucré",
+    "arbre",
+    "écrire",
+    "pluie",
+    "sable",
+    "lisse",
+    "chanter",
+    "montagne"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_fr:45</td>
+                        <td>100</td>
+                        <td>1105</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"grass\"\nPossible translations: montagne, rond, pointu, manger, arbre, herbe, danser, lourd",
+  "answer_type": "multiple_choice",
+  "correct_answer": "herbe",
+  "category": "translation_en_fr",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "fr"
+  ],
+  "choices": [
+    "montagne",
+    "rond",
+    "pointu",
+    "manger",
+    "arbre",
+    "herbe",
+    "danser",
+    "lourd"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_fr:46</td>
+                        <td>100</td>
+                        <td>1174</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"to fly\"\nPossible translations: conduire, voler, léger, sucré, oiseau, manger, étoile, le plus fort",
+  "answer_type": "multiple_choice",
+  "correct_answer": "voler",
+  "category": "translation_en_fr",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "fr",
+    "has_details"
+  ],
+  "choices": [
+    "conduire",
+    "voler",
+    "léger",
+    "sucré",
+    "oiseau",
+    "manger",
+    "étoile",
+    "le plus fort"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_fr:47</td>
+                        <td>100</td>
+                        <td>1192</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"cold\"\nPossible translations: chaud, froid, courir, respirer, pluie, sable, cacher, étoile",
+  "answer_type": "multiple_choice",
+  "correct_answer": "froid",
+  "category": "translation_en_fr",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "fr"
+  ],
+  "choices": [
+    "chaud",
+    "froid",
+    "courir",
+    "respirer",
+    "pluie",
+    "sable",
+    "cacher",
+    "étoile"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_fr:48</td>
+                        <td>100</td>
+                        <td>1193</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"sand\"\nPossible translations: fleur, rire, sable, dormir, le plus fort, ami, chaud, doux",
+  "answer_type": "multiple_choice",
+  "correct_answer": "sable",
+  "category": "translation_en_fr",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "fr"
+  ],
+  "choices": [
+    "fleur",
+    "rire",
+    "sable",
+    "dormir",
+    "le plus fort",
+    "ami",
+    "chaud",
+    "doux"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_fr:49</td>
+                        <td>100</td>
+                        <td>1320</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"to fall\"\nPossible translations: tomber, danser, montagne, vent, voler, nager, frais, rire",
+  "answer_type": "multiple_choice",
+  "correct_answer": "tomber",
+  "category": "translation_en_fr",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "fr"
+  ],
+  "choices": [
+    "tomber",
+    "danser",
+    "montagne",
+    "vent",
+    "voler",
+    "nager",
+    "frais",
+    "rire"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_fr:5</td>
+                        <td>0</td>
+                        <td>1184</td>
+                        <td>{
+  "response": "beau",
+  "expected": "beau/belle"
+}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"beautiful\"\nPossible translations: fleur, dormir, chanter, beau/belle, danser, doux, écrire, eau",
+  "answer_type": "multiple_choice",
+  "correct_answer": "beau/belle",
+  "category": "translation_en_fr",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "fr"
+  ],
+  "choices": [
+    "fleur",
+    "dormir",
+    "chanter",
+    "beau/belle",
+    "danser",
+    "doux",
+    "écrire",
+    "eau"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_fr:50</td>
+                        <td>100</td>
+                        <td>1203</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"light\"\nPossible translations: frais, oiseau, sel, manger, sucré, léger, grandir, rond",
+  "answer_type": "multiple_choice",
+  "correct_answer": "léger",
+  "category": "translation_en_fr",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "fr",
+    "has_details"
+  ],
+  "choices": [
+    "frais",
+    "oiseau",
+    "sel",
+    "manger",
+    "sucré",
+    "léger",
+    "grandir",
+    "rond"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_fr:6</td>
+                        <td>100</td>
+                        <td>1158</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"water\"\nPossible translations: silencieux, chanter, nuage, feu, livre, ami, eau, sucré",
+  "answer_type": "multiple_choice",
+  "correct_answer": "eau",
+  "category": "translation_en_fr",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "fr"
+  ],
+  "choices": [
+    "silencieux",
+    "chanter",
+    "nuage",
+    "feu",
+    "livre",
+    "ami",
+    "eau",
+    "sucré"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_fr:7</td>
+                        <td>100</td>
+                        <td>1245</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"to sleep\"\nPossible translations: dormir, chaud, frais, chanter, pierre, sel, montagne, rire",
+  "answer_type": "multiple_choice",
+  "correct_answer": "dormir",
+  "category": "translation_en_fr",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "fr"
+  ],
+  "choices": [
+    "dormir",
+    "chaud",
+    "frais",
+    "chanter",
+    "pierre",
+    "sel",
+    "montagne",
+    "rire"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_fr:8</td>
+                        <td>100</td>
+                        <td>1181</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"moon\"\nPossible translations: danser, profond, arbre, voler, pluie, frais, rond, lune",
+  "answer_type": "multiple_choice",
+  "correct_answer": "lune",
+  "category": "translation_en_fr",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "fr"
+  ],
+  "choices": [
+    "danser",
+    "profond",
+    "arbre",
+    "voler",
+    "pluie",
+    "frais",
+    "rond",
+    "lune"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>0050_translation_en_fr:9</td>
+                        <td>100</td>
+                        <td>1054</td>
+                        <td>{}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="4" class="question-info">
+                            <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
+                                [+]
+                            </div>
+                            <div class="question-info-content hidden">
+                              <strong>Question Information:</strong>
+                              <pre>{
+  "question_text": "Translate this word: \"to laugh\"\nPossible translations: cacher, le plus fort, cœur, grandir, rire, sel, chanter, silencieux",
+  "answer_type": "multiple_choice",
+  "correct_answer": "rire",
+  "category": "translation_en_fr",
+  "difficulty": "medium",
+  "tags": [
+    "translation",
+    "en",
+    "fr"
+  ],
+  "choices": [
+    "cacher",
+    "le plus fort",
+    "cœur",
+    "grandir",
+    "rire",
+    "sel",
+    "chanter",
+    "silencieux"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "translation"
+    ]
+  },
+  "evaluation_criteria": {
+    "exact_match": true,
+    "case_sensitive": false,
+    "contains": false,
+    "required_fields": [],
+    "tolerance": 0.0
+  }
+}</pre>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                </tbody>
+            </table>
+        </div>
+
+        
+    </div>
+</body>
+</html>
