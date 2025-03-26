@@ -12,7 +12,7 @@ from lib.benchmarks.data_models import (
     BenchmarkQuestion, BenchmarkMetadata, 
     AnswerType, Difficulty, EvaluationCriteria
 )
-from lib.benchmarks.factory import benchmark, generator
+from lib.benchmarks.factory import benchmark, generator, register_benchmark_metadata
 from benchmarks.data.wordlist_extended import TRANSLATIONS, TranslationEntry
 
 # Configure logging
@@ -63,13 +63,9 @@ class TranslationGenerator(BenchmarkGenerator):
         
         # Extract language codes from metadata code
         parts = metadata.code.split('_')
-        if len(parts) >= 3:
-            lang_parts = parts[2].split('_')
-            if len(lang_parts) >= 2:
-                self.origin_lang = lang_parts[0]
-                self.target_lang = lang_parts[1]
-            else:
-                raise ValueError(f"Invalid metadata code format: {metadata.code}")
+        if len(parts) == 4:
+            self.origin_lang = parts[2]
+            self.target_lang = parts[3]
         else:
             raise ValueError(f"Invalid metadata code format: {metadata.code}")
         
@@ -220,6 +216,29 @@ class LanguagePairGenerator:
                 
             except Exception as e:
                 logger.error(f"Error generating benchmark for {origin_lang} to {target_lang}: {str(e)}")
+
+    # Modified version to generate only specified pairs
+    @staticmethod
+    def generate_specific_pairs(pairs, session=None):
+        """Generate benchmark data for specific language pairs."""
+        for origin_lang, target_lang in pairs:
+            try:
+                # Create metadata
+                metadata = get_translation_metadata(origin_lang, target_lang)
+                register_benchmark_metadata(metadata)
+                
+                # Create generator
+                generator = TranslationGenerator(metadata, session)
+                
+                # Load to database
+                generator.load_to_database()
+                
+                logger.info(f"Generated benchmark data for {origin_lang} to {target_lang}")
+                
+            except Exception as e:
+                logger.error(f"Error generating benchmark for {origin_lang} to {target_lang}: {str(e)}")
+
+    
 
 if __name__ == "__main__":
     # When run directly, generate data for all language pairs
