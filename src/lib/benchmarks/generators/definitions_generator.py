@@ -4,9 +4,11 @@
 
 import json
 import logging
+import os.path
 import random
 from typing import Dict, List, Optional
 
+import constants
 from clients import unified_client, ollama_client
 from lib.benchmarks.base import BenchmarkGenerator
 from lib.benchmarks.data_models import (
@@ -64,7 +66,7 @@ class DefinitionsGenerator(BenchmarkGenerator):
             BenchmarkQuestion object
         """
         # Load word list
-        with open("benchmarks/0020_definitions/wordlist.txt") as f:
+        with open(os.path.join(constants.BENCHMARK_DATA_DIR, "0020_definitions/wordlist.txt")) as f:
             words = [line.strip().lower() for line in f]
 
         # Select words for this question
@@ -81,7 +83,7 @@ class DefinitionsGenerator(BenchmarkGenerator):
             json_schema=self.schema,
             context=self.context
         )
-        
+
         definition = response.structured_data["definition"]
 
         # Create question text
