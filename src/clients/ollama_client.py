@@ -212,8 +212,7 @@ def generate_chat(
     model: str = DEFAULT_MODEL,
     brief: bool = False,
     json_schema: Optional[Dict] = None,
-    context: Optional[str] = None,
-    two_phase: bool = True
+    context: Optional[str] = None
 ) -> Response:
     """
     Generate a chat response.
@@ -221,4 +220,4 @@ def generate_chat(
     Returns:
         Response data class containing response_text, structured_data, and usage_info
     """
-    return client.generate_chat(prompt, model, brief, json_schema, context, two_phase)
+    return client.generate_chat(prompt, model, brief, json_schema, context)
