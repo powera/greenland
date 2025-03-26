@@ -1,0 +1,142 @@
+[
+  {
+    "word": "happy",
+    "candidates": ["sad", "joyful", "cheerful", "content", "pleased", "ecstatic"],
+    "antonym": "sad",
+    "difficulty": "easy",
+    "category": "emotions"
+  },
+  {
+    "word": "bright",
+    "candidates": ["dark", "shiny", "luminous", "brilliant", "gleaming", "radiant"],
+    "antonym": "dark",
+    "difficulty": "easy",
+    "category": "appearance"
+  },
+  {
+    "word": "generous",
+    "candidates": ["stingy", "charitable", "giving", "benevolent", "altruistic", "selfless"],
+    "antonym": "stingy",
+    "difficulty": "medium",
+    "category": "character"
+  },
+  {
+    "word": "ancient",
+    "candidates": ["modern", "primitive", "antique", "archaic", "bygone", "primeval"],
+    "antonym": "modern",
+    "difficulty": "medium",
+    "category": "time"
+  },
+  {
+    "word": "transparent",
+    "candidates": ["opaque", "clear", "translucent", "see-through", "limpid", "crystalline"],
+    "antonym": "opaque",
+    "difficulty": "medium",
+    "category": "appearance"
+  },
+  {
+    "word": "verbose",
+    "candidates": ["concise", "wordy", "loquacious", "garrulous", "talkative", "prolix"],
+    "antonym": "concise",
+    "difficulty": "hard",
+    "category": "communication"
+  },
+  {
+    "word": "precarious",
+    "candidates": ["stable", "dangerous", "risky", "uncertain", "unstable", "hazardous"],
+    "antonym": "stable",
+    "difficulty": "hard",
+    "category": "condition"
+  },
+  {
+    "word": "meticulous",
+    "candidates": ["careless", "thorough", "precise", "fastidious", "detailed", "scrupulous"],
+    "antonym": "careless",
+    "difficulty": "hard",
+    "category": "character"
+  },
+  {
+    "word": "shallow",
+    "candidates": ["deep", "superficial", "surface-level", "trivial", "cursory", "slight"],
+    "antonym": "deep",
+    "difficulty": "easy",
+    "category": "dimension"
+  },
+  {
+    "word": "coarse",
+    "candidates": ["fine", "rough", "crude", "rugged", "unrefined", "grainy"],
+    "antonym": "fine",
+    "difficulty": "medium",
+    "category": "texture"
+  },
+  {
+    "word": "rigid",
+    "candidates": ["flexible", "stiff", "unbending", "inflexible", "unyielding", "firm"],
+    "antonym": "flexible",
+    "difficulty": "medium",
+    "category": "physical property"
+  },
+  {
+    "word": "extravagant",
+    "candidates": ["frugal", "lavish", "excessive", "luxurious", "opulent", "sumptuous"],
+    "antonym": "frugal",
+    "difficulty": "medium",
+    "category": "behavior"
+  },
+  {
+    "word": "mundane",
+    "candidates": ["extraordinary", "common", "routine", "ordinary", "everyday", "usual"],
+    "antonym": "extraordinary",
+    "difficulty": "hard",
+    "category": "quality"
+  },
+  {
+    "word": "reluctant",
+    "candidates": ["eager", "hesitant", "unwilling", "disinclined", "averse", "loath"],
+    "antonym": "eager",
+    "difficulty": "medium",
+    "category": "attitude"
+  },
+  {
+    "word": "audacious",
+    "candidates": ["timid", "bold", "daring", "brave", "fearless", "intrepid"],
+    "antonym": "timid",
+    "difficulty": "hard",
+    "category": "character"
+  },
+  {
+    "word": "malevolent",
+    "candidates": ["benevolent", "spiteful", "malicious", "hostile", "wicked", "cruel"],
+    "antonym": "benevolent",
+    "difficulty": "hard",
+    "category": "character"
+  },
+  {
+    "word": "authentic",
+    "candidates": ["fake", "genuine", "real", "legitimate", "bona fide", "actual"],
+    "antonym": "fake",
+    "difficulty": "medium",
+    "category": "quality"
+  },
+  {
+    "word": "abundant",
+    "candidates": ["scarce", "plentiful", "copious", "ample", "bountiful", "profuse"],
+    "antonym": "scarce",
+    "difficulty": "medium",
+    "category": "quantity"
+  },
+  {
+    "word": "rational",
+    "candidates": ["irrational", "logical", "reasonable", "sensible", "analytical", "coherent"],
+    "antonym": "irrational",
+    "difficulty": "medium",
+    "category": "thinking"
+  },
+  {
+    "word": "monotonous",
+    "candidates": ["varied", "repetitive", "tedious", "boring", "dull", "unvarying"],
+    "antonym": "varied",
+    "difficulty": "hard",
+    "category": "quality"
+  }
+]

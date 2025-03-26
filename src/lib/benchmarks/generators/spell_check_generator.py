@@ -10,6 +10,7 @@ from typing import Dict, List, Optional
 
 from sqlalchemy.orm import Session
 
+import constants
 from clients import unified_client
 from lib.benchmarks.base import BenchmarkGenerator
 from lib.benchmarks.data_models import (
@@ -133,7 +134,7 @@ Just return the misspelled word with no other text."""
     def load_to_database(self) -> None:
         """Load generated spell check questions into database."""
         # Path to the directory containing spell check JSON files
-        DIR = os.path.join("src", "benchmarks", "0015_spell_check")
+        DIR = os.path.join(constants.BENCHMARK_DATA_DIR, "0015_spell_check")
         files = sorted(os.listdir(DIR))
 
         questions = []
