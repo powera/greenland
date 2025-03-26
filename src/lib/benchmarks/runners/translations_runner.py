@@ -35,13 +35,9 @@ class TranslationRunner(BenchmarkRunner):
         
         # Extract language codes from metadata code
         parts = metadata.code.split('_')
-        if len(parts) >= 3:
-            lang_parts = parts[2].split('_')
-            if len(lang_parts) >= 2:
-                self.origin_lang = lang_parts[0]
-                self.target_lang = lang_parts[1]
-            else:
-                raise ValueError(f"Invalid metadata code format: {metadata.code}")
+        if len(parts) == 4:
+            self.origin_lang = parts[2]
+            self.target_lang = parts[3]
         else:
             raise ValueError(f"Invalid metadata code format: {metadata.code}")
         

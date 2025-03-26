@@ -9,6 +9,7 @@ from typing import Dict, List, Optional
 
 from sqlalchemy.orm import Session
 
+import constants
 from clients import ollama_client
 from lib.benchmarks.base import BenchmarkGenerator
 from lib.benchmarks.data_models import (
@@ -44,7 +45,7 @@ class AntonymGenerator(BenchmarkGenerator):
 
     def load_to_database(self) -> None:
         """Load antonym questions into database from JSON files."""
-        DIR = os.path.join("benchmarks", "0016_antonym")
+        DIR = os.path.join(constants.BENCHMARK_DATA_DIR, "0016_antonym")
         files = sorted(os.listdir(DIR))
 
         for filename in files:

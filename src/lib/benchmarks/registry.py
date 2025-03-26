@@ -6,7 +6,7 @@ Registry for various benchmarks.
 
 import logging
 from lib.benchmarks.data_models import BenchmarkMetadata
-from lib.benchmarks.factory import benchmark
+from lib.benchmarks.factory import benchmark, register_runner
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -38,3 +38,15 @@ from lib.benchmarks.runners.definitions_runner import DefinitionsRunner
            the correct definition of words.""")
 class DefinitionsBenchmark:
     """Module container for spell check benchmark."""
+
+from lib.benchmarks.generators.translations_generator import TranslationGenerator
+from lib.benchmarks.runners.translations_runner import TranslationRunner
+for codepair in ["en_fr", "en_zh", "sw_ko"]:
+    benchmark_code = f"0050_translation_{codepair}"
+    @benchmark(code=benchmark_code, name=f"Translation {codepair}", description="""
+               A benchmark to evaluate a model's ability to translate 
+               words from one language to another.""")
+    class TranslationBenchmark:
+        """Module container for spell check benchmark."""
+        pass
+    register_runner(benchmark_code, TranslationRunner)
