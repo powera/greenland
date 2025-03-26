@@ -4,7 +4,7 @@
 import logging
 from typing import Dict, Optional, Tuple, Any
 
-from clients import ollama_client, openai_client, anthropic_client
+from clients import ollama_client, openai_client
 from telemetry import LLMUsage
 from clients.types import Response
 
@@ -35,7 +35,7 @@ class UnifiedLLMClient:
         # Initialize backend clients - debug logs only in client used
         self.ollama = ollama_client.OllamaClient(timeout=timeout, debug=False)
         self.openai = openai_client.OpenAIClient(timeout=timeout, debug=False)
-        self.anthropic = anthropic_client.AnthropicClient(timeout=timeout, debug=False)
+        #self.anthropic = anthropic_client.AnthropicClient(timeout=timeout, debug=False)
         
         # Model name prefixes for routing
         self.openai_prefixes = ['gpt-']
