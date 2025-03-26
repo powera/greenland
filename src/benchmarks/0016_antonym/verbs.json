@@ -1,0 +1,142 @@
+[
+  {
+    "word": "create",
+    "candidates": ["destroy", "build", "produce", "craft", "make", "form"],
+    "antonym": "destroy",
+    "difficulty": "easy",
+    "category": "action"
+  },
+  {
+    "word": "increase",
+    "candidates": ["decrease", "raise", "expand", "enlarge", "grow", "amplify"],
+    "antonym": "decrease",
+    "difficulty": "easy",
+    "category": "quantity"
+  },
+  {
+    "word": "arrive",
+    "candidates": ["depart", "reach", "appear", "enter", "come", "approach"],
+    "antonym": "depart",
+    "difficulty": "easy",
+    "category": "movement"
+  },
+  {
+    "word": "accept",
+    "candidates": ["reject", "receive", "embrace", "welcome", "acknowledge", "approve"],
+    "antonym": "reject",
+    "difficulty": "easy",
+    "category": "response"
+  },
+  {
+    "word": "construct",
+    "candidates": ["demolish", "build", "assemble", "erect", "fabricate", "compose"],
+    "antonym": "demolish",
+    "difficulty": "medium",
+    "category": "creation"
+  },
+  {
+    "word": "accelerate",
+    "candidates": ["decelerate", "hasten", "quicken", "speed", "expedite", "hurry"],
+    "antonym": "decelerate",
+    "difficulty": "medium",
+    "category": "motion"
+  },
+  {
+    "word": "strengthen",
+    "candidates": ["weaken", "fortify", "reinforce", "bolster", "toughen", "harden"],
+    "antonym": "weaken",
+    "difficulty": "medium",
+    "category": "condition"
+  },
+  {
+    "word": "praise",
+    "candidates": ["criticize", "commend", "applaud", "compliment", "acclaim", "laud"],
+    "antonym": "criticize",
+    "difficulty": "medium",
+    "category": "communication"
+  },
+  {
+    "word": "ascend",
+    "candidates": ["descend", "climb", "rise", "mount", "scale", "elevate"],
+    "antonym": "descend",
+    "difficulty": "medium",
+    "category": "direction"
+  },
+  {
+    "word": "conceal",
+    "candidates": ["reveal", "hide", "obscure", "cloak", "mask", "shroud"],
+    "antonym": "reveal",
+    "difficulty": "medium",
+    "category": "visibility"
+  },
+  {
+    "word": "prohibit",
+    "candidates": ["permit", "forbid", "ban", "disallow", "restrict", "outlaw"],
+    "antonym": "permit",
+    "difficulty": "medium",
+    "category": "regulation"
+  },
+  {
+    "word": "disperse",
+    "candidates": ["gather", "scatter", "spread", "disseminate", "distribute", "diffuse"],
+    "antonym": "gather",
+    "difficulty": "hard",
+    "category": "movement"
+  },
+  {
+    "word": "diminish",
+    "candidates": ["augment", "reduce", "lessen", "shrink", "dwindle", "wane"],
+    "antonym": "augment",
+    "difficulty": "hard",
+    "category": "quantity"
+  },
+  {
+    "word": "illuminate",
+    "candidates": ["obscure", "brighten", "enlighten", "clarify", "elucidate", "light"],
+    "antonym": "obscure",
+    "difficulty": "hard",
+    "category": "visibility"
+  },
+  {
+    "word": "exacerbate",
+    "candidates": ["alleviate", "worsen", "aggravate", "intensify", "escalate", "inflame"],
+    "antonym": "alleviate",
+    "difficulty": "hard",
+    "category": "effect"
+  },
+  {
+    "word": "repudiate",
+    "candidates": ["affirm", "reject", "disavow", "deny", "disown", "renounce"],
+    "antonym": "affirm",
+    "difficulty": "hard",
+    "category": "communication"
+  },
+  {
+    "word": "deter",
+    "candidates": ["encourage", "discourage", "prevent", "inhibit", "hinder", "dissuade"],
+    "antonym": "encourage",
+    "difficulty": "hard",
+    "category": "influence"
+  },
+  {
+    "word": "expedite",
+    "candidates": ["delay", "accelerate", "hasten", "advance", "quicken", "facilitate"],
+    "antonym": "delay",
+    "difficulty": "hard",
+    "category": "timing"
+  },
+  {
+    "word": "liberate",
+    "candidates": ["confine", "free", "release", "emancipate", "unshackle", "discharge"],
+    "antonym": "confine",
+    "difficulty": "hard",
+    "category": "freedom"
+  },
+  {
+    "word": "commence",
+    "candidates": ["conclude", "begin", "initiate", "start", "launch", "inaugurate"],
+    "antonym": "conclude",
+    "difficulty": "medium",
+    "category": "timing"
+  }
+]
