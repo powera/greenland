@@ -13,6 +13,16 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 # Register benchmark metadata
+
+from lib.benchmarks.generators.letter_count_generator import LetterCountGenerator
+from lib.benchmarks.runners.letter_count_runner import LetterCountRunner
+@benchmark(code="0012_letter_count", name="Letter Count", description="""
+           A benchmark to evaluate a model's ability to count 
+           how many times a specific letter appears in a word.""")
+class LetterCountBenchmark:
+    """Module container for letter count benchmark."""
+    pass
+
 from lib.benchmarks.generators.spell_check_generator import SpellCheckGenerator
 from lib.benchmarks.runners.spell_check_runner import SpellCheckRunner
 @benchmark(code="0015_spell_check", name="Spell Check", description="""
