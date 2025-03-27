@@ -39,6 +39,16 @@ from lib.benchmarks.runners.definitions_runner import DefinitionsRunner
 class DefinitionsBenchmark:
     """Module container for spell check benchmark."""
 
+
+from lib.benchmarks.generators.unit_conversion_generator import UnitConversionGenerator
+from lib.benchmarks.runners.unit_conversion_runner import UnitConversionRunner
+@benchmark(code="0022_unit_conversion", name="Unit Conversion", description="""
+           A benchmark to evaluate a model's ability to accurately convert 
+           between different units of measurement.""")
+class UnitConversionBenchmark:
+    """Module container for unit conversion benchmark."""
+    pass
+
 from lib.benchmarks.generators.translations_generator import TranslationGenerator
 from lib.benchmarks.runners.translations_runner import TranslationRunner
 for codepair in ["en_fr", "en_zh", "sw_ko"]:
