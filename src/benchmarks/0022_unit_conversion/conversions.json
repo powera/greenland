@@ -1,0 +1,22 @@
+[
+  {"from_unit": "pounds", "to_unit": "kilograms", "factor": 0.45359237, "precision": 1},
+  {"from_unit": "kilograms", "to_unit": "pounds", "factor": 2.20462262, "precision": 1},
+  {"from_unit": "miles", "to_unit": "kilometers", "factor": 1.60934, "precision": 1},
+  {"from_unit": "kilometers", "to_unit": "miles", "factor": 0.621371, "precision": 2},
+  {"from_unit": "inches", "to_unit": "centimeters", "factor": 2.54, "precision": 1},
+  {"from_unit": "centimeters", "to_unit": "inches", "factor": 0.393701, "precision": 2},
+  {"from_unit": "feet", "to_unit": "meters", "factor": 0.3048, "precision": 2},
+  {"from_unit": "meters", "to_unit": "feet", "factor": 3.28084, "precision": 1},
+  {"from_unit": "gallons", "to_unit": "liters", "factor": 3.78541, "precision": 1},
+  {"from_unit": "liters", "to_unit": "gallons", "factor": 0.264172, "precision": 2},
+  {"from_unit": "fahrenheit", "to_unit": "celsius", "special": "temp_f_to_c", "precision": 1},
+  {"from_unit": "celsius", "to_unit": "fahrenheit", "special": "temp_c_to_f", "precision": 1},
+  {"from_unit": "ounces", "to_unit": "grams", "factor": 28.3495, "precision": 1},
+  {"from_unit": "grams", "to_unit": "ounces", "factor": 0.035274, "precision": 2},
+  {"from_unit": "square feet", "to_unit": "square meters", "factor": 0.092903, "precision": 2},
+  {"from_unit": "square meters", "to_unit": "square feet", "factor": 10.7639, "precision": 1},
+  {"from_unit": "acres", "to_unit": "hectares", "factor": 0.404686, "precision": 2},
+  {"from_unit": "hectares", "to_unit": "acres", "factor": 2.47105, "precision": 2},
+  {"from_unit": "cubic feet", "to_unit": "cubic meters", "factor": 0.0283168, "precision": 3},
+  {"from_unit": "cubic meters", "to_unit": "cubic feet", "factor": 35.3147, "precision": 1}
+]
