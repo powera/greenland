@@ -1,0 +1,28 @@
+core_files:
+    # LLM clients
+  - path: src/clients/unified_client.py
+    description: Unified LLM Client
+  - path: src/clients/openai_client.py
+    description: Openai LLM Client
+  - path: src/clients/ollama_client.py
+    description: Ollama LLM Client
+    
+    # Datastore
+  - path: src/datastore/common.py
+    description: Base datastore
+  - path: src/datastore/benchmarks.py
+    description: Benchmarks datastore
+
+    # Lib
+  - path: src/lib/score_table.py
+    description: Score table generator
+  - path: src/lib/benchmarks/base.py
+    description: Base class for benchmarks
+  - path: src/lib/benchmarks/data_models.py
+    description: Data classes for benchmarks
+  - path: src/lib/benchmarks/factory.py
+    description: Registry for benchmarks
+
+    templates:
+    # Verbalator
+  - path: src/verbalator/templates/index.html
