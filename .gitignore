@@ -13,3 +13,6 @@ dist/
 greenland.egg-info/
 .DS_Store
 devserver.spec
+
+# for claude staging
+claude/staging
