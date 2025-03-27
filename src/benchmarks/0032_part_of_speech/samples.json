@@ -1,0 +1,102 @@
+[
+  {
+    "sentence": "The large dog ran across the garden.",
+    "target_word": "ran",
+    "pos": "verb"
+  },
+  {
+    "sentence": "She quickly finished her homework.",
+    "target_word": "quickly",
+    "pos": "adverb"
+  },
+  {
+    "sentence": "The red car stopped at the traffic light.",
+    "target_word": "red",
+    "pos": "adjective"
+  },
+  {
+    "sentence": "He gave the book to his friend.",
+    "target_word": "book",
+    "pos": "noun"
+  },
+  {
+    "sentence": "The cat jumped over the fence.",
+    "target_word": "over",
+    "pos": "preposition"
+  },
+  {
+    "sentence": "I saw her at the store yesterday.",
+    "target_word": "yesterday",
+    "pos": "adverb"
+  },
+  {
+    "sentence": "The beautiful butterfly landed on the flower.",
+    "target_word": "beautiful",
+    "pos": "adjective"
+  },
+  {
+    "sentence": "She and her sister went to the movie.",
+    "target_word": "and",
+    "pos": "conjunction"
+  },
+  {
+    "sentence": "The teacher explained the lesson clearly.",
+    "target_word": "teacher",
+    "pos": "noun"
+  },
+  {
+    "sentence": "He shouted loudly to get attention.",
+    "target_word": "shouted",
+    "pos": "verb"
+  },
+  {
+    "sentence": "The old man walked slowly with his cane.",
+    "target_word": "with",
+    "pos": "preposition"
+  },
+  {
+    "sentence": "She bought a new dress for the party.",
+    "target_word": "new",
+    "pos": "adjective"
+  },
+  {
+    "sentence": "The children played happily in the park.",
+    "target_word": "happily",
+    "pos": "adverb"
+  },
+  {
+    "sentence": "They went to the beach but forgot sunscreen.",
+    "target_word": "but",
+    "pos": "conjunction"
+  },
+  {
+    "sentence": "The bird sang sweetly from the tree.",
+    "target_word": "bird",
+    "pos": "noun"
+  },
+  {
+    "sentence": "That book belongs to me.",
+    "target_word": "That",
+    "pos": "determiner"
+  },
+  {
+    "sentence": "The brave knight fought the dragon.",
+    "target_word": "brave",
+    "pos": "adjective"
+  },
+  {
+    "sentence": "She carefully placed the vase on the table.",
+    "target_word": "carefully",
+    "pos": "adverb"
+  },
+  {
+    "sentence": "He always arrives before the meeting starts.",
+    "target_word": "before",
+    "pos": "preposition"
+  },
+  {
+    "sentence": "The team cheered when they won the game.",
+    "target_word": "when",
+    "pos": "conjunction"
+  }
+]

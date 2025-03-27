@@ -59,6 +59,16 @@ class UnitConversionBenchmark:
     """Module container for unit conversion benchmark."""
     pass
 
+
+from lib.benchmarks.generators.part_of_speech_generator import PartOfSpeechGenerator
+from lib.benchmarks.runners.part_of_speech_runner import PartOfSpeechRunner
+@benchmark(code="0032_part_of_speech", name="Part of Speech", description="""
+           A benchmark to evaluate a model's ability to identify
+           the part of speech of a specific word in a sentence.""")
+class PartOfSpeechBenchmark:
+    """Module container for part of speech benchmark."""
+    pass
+
 from lib.benchmarks.generators.translations_generator import TranslationGenerator
 from lib.benchmarks.runners.translations_runner import TranslationRunner
 for codepair in ["en_fr", "en_zh", "sw_ko"]:
