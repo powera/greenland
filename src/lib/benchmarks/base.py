@@ -21,6 +21,78 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 
+#!/usr/bin/python3
+
+"""Base classes for implementing language model benchmarks."""
+
+import json
+import logging
+import os
+import uuid
+import random
+from typing import Dict, List, Optional, Any, Union, Tuple, Set
+
+import datastore.benchmarks
+import constants
+from clients import unified_client, ollama_client
+from clients.ollama_client import OllamaTimeoutError
+from lib.benchmarks.data_models import (
+    BenchmarkQuestion, BenchmarkResult, BenchmarkMetadata,
+    AnswerType, Difficulty, EvaluationCriteria
+)
+import lib.score_table
+import lib.validation
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
+# Default model for validation and LLM-based question generation
+DEFAULT_VALIDATION_MODEL = "gpt-4o-mini-2024-07-18"
+DEFAULT_GENERATION_MODEL = "gemma2:9b"
+
+# Common word lists that can be shared across benchmarks
+COMMON_WORDS = None  # Lazy-loaded
+
+def get_common_words() -> List[str]:
+    """
+    Get common English words list, loading from file if needed.
+    This allows sharing the word list across multiple benchmark generators.
+    
+    Returns:
+        List of common English words
+    """
+    global COMMON_WORDS
+    
+    if COMMON_WORDS is None:
+        # Define paths for potential word list files
+        paths = [
+            os.path.join(constants.BENCHMARK_DATA_DIR, "common", "words.txt"),
+            os.path.join(constants.BENCHMARK_DATA_DIR, "0020_definitions", "wordlist.txt")
+        ]
+        
+        # Try each path until we find a valid file
+        for path in paths:
+            if os.path.exists(path):
+                with open(path, 'r') as f:
+                    COMMON_WORDS = [line.strip().lower() for line in f if line.strip()]
+                logger.info(f"Loaded {len(COMMON_WORDS)} common words from {path}")
+                break
+        
+        # If no file found, use a small fallback list
+        if COMMON_WORDS is None:
+            COMMON_WORDS = [
+                "apple", "banana", "computer", "dog", "elephant", "freedom",
+                "garden", "happiness", "internet", "journey", "knowledge", "language",
+                "mountain", "notebook", "ocean", "patience", "question", "rainbow",
+                "science", "technology", "umbrella", "variety", "window", "xylophone",
+                "yesterday", "zebra"
+            ]
+            logger.warning(f"No word list file found. Using fallback list of {len(COMMON_WORDS)} words.")
+    
+    return COMMON_WORDS
+
+
 class BenchmarkGenerator:
     """Base class for generating benchmark questions."""
     
@@ -44,6 +116,73 @@ class BenchmarkGenerator:
         )
         if not success and "already exists" not in msg:
             logger.error("Failed to create benchmark: %s", msg)
+        
+        # Default context for LLM-based generation
+        self.context = "You are a helpful assistant creating benchmark questions."
+
+    def load_json_file(self, filename: str, subdir: Optional[str] = None) -> Any:
+        """
+        Load data from a JSON file.
+        
+        Args:
+            filename: Name of the JSON file to load
+            subdir: Optional subdirectory within the benchmark directory
+            
+        Returns:
+            Parsed JSON data
+            
+        Raises:
+            FileNotFoundError: If file doesn't exist
+            JSONDecodeError: If file contains invalid JSON
+        """
+        # Determine file path
+        if subdir:
+            file_path = os.path.join(constants.BENCHMARK_DATA_DIR, self.metadata.code, subdir, filename)
+        else:
+            file_path = os.path.join(constants.BENCHMARK_DATA_DIR, self.metadata.code, filename)
+        
+        # Load and parse the file
+        try:
+            with open(file_path, 'r') as f:
+                data = json.load(f)
+            logger.debug(f"Loaded data from {file_path}")
+            return data
+        except FileNotFoundError:
+            logger.error(f"File not found: {file_path}")
+            raise
+        except json.JSONDecodeError as e:
+            logger.error(f"Invalid JSON in {file_path}: {e}")
+            raise
+
+    def load_text_file(self, filename: str, subdir: Optional[str] = None) -> List[str]:
+        """
+        Load lines from a text file.
+        
+        Args:
+            filename: Name of the text file to load
+            subdir: Optional subdirectory within the benchmark directory
+            
+        Returns:
+            List of non-empty lines from the file
+            
+        Raises:
+            FileNotFoundError: If file doesn't exist
+        """
+        # Determine file path
+        if subdir:
+            file_path = os.path.join(constants.BENCHMARK_DATA_DIR, self.metadata.code, subdir, filename)
+        else:
+            file_path = os.path.join(constants.BENCHMARK_DATA_DIR, self.metadata.code, filename)
+        
+        # Load the file
+        try:
+            with open(file_path, 'r') as f:
+                lines = [line.strip() for line in f if line.strip()]
+            logger.debug(f"Loaded {len(lines)} lines from {file_path}")
+            return lines
+        except FileNotFoundError:
+            logger.error(f"File not found: {file_path}")
+            raise
 
     def generate_question(self, *args, **kwargs) -> BenchmarkQuestion:
         """
@@ -52,6 +191,149 @@ class BenchmarkGenerator:
         Must be implemented by subclasses.
         """
         raise NotImplementedError("Subclasses must implement generate_question")
+
+    def generate_llm_question(
+        self,
+        prompt: str,
+        model: str = DEFAULT_GENERATION_MODEL,
+        schema: Optional[Dict] = None,
+        context: Optional[str] = None
+    ) -> Any:
+        """
+        Generate question content using an LLM.
+        
+        Args:
+            prompt: Prompt for the LLM
+            model: Model to use for generation
+            schema: Optional JSON schema for structured output
+            context: Optional context to override self.context
+            
+        Returns:
+            Response text or structured data based on schema
+        """
+        # Use custom context if provided, otherwise use default
+        ctx = context or self.context
+        
+        # Generate response
+        response = unified_client.generate_chat(
+            prompt=prompt,
+            model=model,
+            json_schema=schema,
+            context=ctx
+        )
+        
+        # Return structured data if schema was provided, otherwise text
+        if schema:
+            return response.structured_data
+        else:
+            return response.response_text.strip()
+
+    def validate_question(
+        self,
+        question: BenchmarkQuestion,
+        model: str = DEFAULT_VALIDATION_MODEL,
+        max_attempts: int = 3
+    ) -> Tuple[bool, Optional[str]]:
+        """
+        Validate a question using an LLM for quality checks.
+        
+        Args:
+            question: Question to validate
+            model: Model to use for validation
+            max_attempts: Maximum validation attempts
+            
+        Returns:
+            Tuple of (is_valid, reason)
+        """
+        # Extract question details for validation
+        question_text = question.question_text
+        answer_type = question.answer_type.value
+        correct_answer = question.correct_answer
+        
+        # Customize validation based on answer type
+        validation_prompt = f"""
+Validate if this benchmark question is clear, unambiguous, and has a correct answer.
+
+Question: {question_text}
+Answer Type: {answer_type}
+Expected Answer: {correct_answer}
+
+Validation criteria:
+1. Question is clear and unambiguous
+2. The expected answer is correct
+3. No spelling or grammar errors in the question
+4. No extraneous or misleading information
+
+Respond with a JSON object with these fields:
+- valid: boolean (true if the question meets all criteria, false otherwise)
+- reason: string (explanation of validation result, especially if invalid)
+"""
+
+        # Schema for validation response
+        schema = {
+            "type": "object",
+            "properties": {
+                "valid": {"type": "boolean"},
+                "reason": {"type": "string"}
+            },
+            "required": ["valid", "reason"]
+        }
+        
+        try:
+            # Get validation result
+            result = unified_client.generate_chat(
+                prompt=validation_prompt,
+                model=model,
+                json_schema=schema
+            )
+            
+            validation = result.structured_data
+            return validation["valid"], validation["reason"]
+            
+        except Exception as e:
+            logger.error(f"Validation error: {str(e)}")
+            return False, f"Validation failed with error: {str(e)}"
+
+    def generate_validated_question(
+        self,
+        *args,
+        validation_model: str = DEFAULT_VALIDATION_MODEL,
+        max_attempts: int = 3,
+        **kwargs
+    ) -> BenchmarkQuestion:
+        """
+        Generate a question and validate it, retrying if needed.
+        
+        Args:
+            validation_model: Model to use for validation
+            max_attempts: Maximum generation attempts
+            *args, **kwargs: Passed to generate_question
+            
+        Returns:
+            Validated BenchmarkQuestion object
+            
+        Raises:
+            ValueError: If unable to generate a valid question after max attempts
+        """
+        for attempt in range(max_attempts):
+            # Generate candidate question
+            question = self.generate_question(*args, **kwargs)
+            
+            # Validate the question
+            is_valid, reason = self.validate_question(
+                question, 
+                model=validation_model, 
+                max_attempts=1
+            )
+            
+            if is_valid:
+                logger.debug(f"Question validated successfully on attempt {attempt + 1}")
+                return question
+            else:
+                logger.info(f"Attempt {attempt + 1} failed validation: {reason}")
+        
+        # If we get here, all attempts failed
+        raise ValueError(f"Failed to generate valid question after {max_attempts} attempts")
 
     def save_question(self, question: BenchmarkQuestion, custom_id: Optional[str] = None) -> str:
         """
@@ -107,14 +389,60 @@ class BenchmarkGenerator:
             
         return question_ids
     
-    def load_to_database(self) -> None:
+    def load_existing_questions(self) -> List[Dict]:
         """
-        Load questions into database.
+        Load existing questions for this benchmark from the database.
         
-        Must be implemented by subclasses.
+        Returns:
+            List of question dictionaries
         """
-        raise NotImplementedError("Subclasses must implement load_to_database")
-
+        return datastore.benchmarks.load_all_questions_for_benchmark(
+            self.session, self.metadata.code
+        )
+    
+    def clear_existing_questions(self) -> None:
+        """
+        Clear all existing questions for this benchmark from the database.
+        This is useful when regenerating all questions from scratch.
+        
+        Note: This is a destructive operation!
+        """
+        # This method requires additional database functionality.
+        # For now, we'll just log a warning.
+        logger.warning(
+            f"clear_existing_questions not implemented yet. " 
+            f"You need to manually delete questions for benchmark {self.metadata.code}."
+        )
+    
+    def load_to_database(self, num_questions: int = 40) -> List[str]:
+        """
+        Load questions into database. The default implementation generates
+        questions using generate_question() and saves them.
+        
+        Args:
+            num_questions: Number of questions to generate
+            
+        Returns:
+            List of question IDs
+            
+        Note: Subclasses can override this for custom loading behavior.
+        """
+        logger.info(f"Generating {num_questions} questions for benchmark {self.metadata.code}")
+        
+        questions = []
+        for i in range(num_questions):
+            try:
+                question = self.generate_question()
+                questions.append(question)
+                logger.info(f"Generated question {i+1}/{num_questions}")
+            except Exception as e:
+                logger.error(f"Error generating question {i+1}: {str(e)}")
+        
+        # Save questions with batch ID
+        question_ids = self.batch_save_questions(questions)
+        
+        logger.info(f"Successfully saved {len(question_ids)} questions to database")
+        return question_ids
 
 class BenchmarkRunner:
     """Base class for running benchmarks against models."""
@@ -350,6 +678,38 @@ class BenchmarkRunner:
                 "is_correct": is_correct
             }
     
+    def run_sample(self, num_questions: int = 5) -> List[BenchmarkResult]:
+        """
+        Run a small sample of the benchmark for testing purposes.
+        
+        Args:
+            num_questions: Number of questions to sample
+            
+        Returns:
+            List of benchmark results
+        """
+        # Load questions
+        all_questions = self.load_questions()
+        if not all_questions:
+            self.logger.error(f"No questions found for benchmark {self.metadata.code}")
+            return []
+            
+        # Sample questions
+        sample_questions = random.sample(all_questions, min(num_questions, len(all_questions)))
+        
+        # Process each question
+        self.logger.info(f"Running sample of {len(sample_questions)} questions")
+        results = []
+        for question in sample_questions:
+            result = self.process_question(question)
+            results.append(result)
+            
+        # Calculate score
+        score = self.calculate_score(results)
+        correct_count = sum(1 for r in results if r.score == 100)
+        self.logger.info(f"Sample complete. Score: {score}/100 ({correct_count}/{len(results)} correct)")
+        
+        return results
 
     def run(self) -> int:
         """Execute the benchmark and return the run ID."""
