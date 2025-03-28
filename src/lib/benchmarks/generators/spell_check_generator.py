@@ -5,8 +5,8 @@
 import json
 import logging
 import os
-import time
-from typing import Dict, List, Optional
+import random
+from typing import Dict, List, Optional, Tuple
 
 from sqlalchemy.orm import Session
 
@@ -39,25 +39,56 @@ class SpellCheckGenerator(BenchmarkGenerator):
 3. Maintains proper grammar and natural flow aside from the misspelling
 4. Is written at roughly an 8th grade reading level"""
 
-    def generate_question(self, word: str, incorrect_spelling: str, sentence: str) -> BenchmarkQuestion:
+    def generate_question(self, word: Optional[str] = None) -> BenchmarkQuestion:
         """
         Generate a standardized benchmark question for spell checking.
         
         Args:
-            word: The correctly spelled word
-            incorrect_spelling: The misspelled version in the sentence
-            sentence: The sentence containing the misspelled word
+            word: Optional specific word to use (if None, a random word will be selected)
             
         Returns:
             BenchmarkQuestion object
         """
-        # Create a structured question
+        if word is None:
+            # Load wordlist from data or use from existing list
+            try:
+                all_words = self.load_text_file("wordlist.txt")
+                word = random.choice(all_words)
+            except FileNotFoundError:
+                # Fallback to a small set of common words
+                common_words = ["attention", "demonstrate", "laboratory", "laughter", 
+                              "liaison", "orange", "partition", "party", "stable", "table"]
+                word = random.choice(common_words)
+        
+        # Use LLM to generate a sentence with misspelled word
+        schema = {
+            "type": "object",
+            "properties": {
+                "sentence": {"type": "string", "description": "A sentence containing the misspelled word"},
+                "incorrect": {"type": "string", "description": "The misspelled version of the word"},
+                "correct": {"type": "string", "description": "The correct spelling of the word"}
+            },
+            "required": ["sentence", "incorrect", "correct"]
+        }
+        
+        prompt = f"""Create a sentence that contains a misspelled version of the word "{word}".
+Make sure the misspelling is natural (like a common typing or spelling error).
+The sentence should be grammatically correct except for the misspelling."""
+
+        # Generate content using the LLM
+        response = self.generate_llm_question(
+            prompt=prompt,
+            schema=schema,
+            context=self.context
+        )
+        
+        # Create the benchmark question
         question = BenchmarkQuestion(
-            question_text=f"What is the incorrectly-spelled word in this sentence: {sentence}",
+            question_text=f"What is the incorrectly-spelled word in this sentence: {response['sentence']}",
             answer_type=AnswerType.JSON,
             correct_answer={
-                "incorrect": incorrect_spelling,
-                "correct": word
+                "incorrect": response["incorrect"],
+                "correct": response["correct"]
             },
             category="spelling",
             difficulty=Difficulty.MEDIUM,
@@ -79,88 +110,53 @@ class SpellCheckGenerator(BenchmarkGenerator):
         
         return question
 
-    def generate_sentence(self, word: str, model: str = "gemma2:9b") -> str:
-        """Generate a sentence using word but spelled incorrectly."""
-        prompt = f"Write a sentence using the word '{word}', but spell it incorrectly."
-        
-        response = unified_client.generate_chat(
-            prompt=prompt,
-            model=model,
-            context=self.context
-        )
-            
-        return response.response_text.strip()
-
-    def extract_misspelled_word(self, sentence: str, correct_word: str, model: str = "gemma2:9b") -> str:
-        """Extract the misspelled version of the word from the sentence."""
-        prompt = f"""In this sentence: "{sentence}"
-What is the misspelled version of the word "{correct_word}"? 
-Just return the misspelled word with no other text."""
-        
-        response = unified_client.generate_chat(
-            prompt=prompt,
-            model=model,
-            brief=True
-        )
-            
-        return response.response_text.strip()
-
-    def generate_batch(self, wordlist: List[str], model: str = "gemma2:9b") -> List[BenchmarkQuestion]:
+    def load_question_from_file(self, filename: str) -> List[BenchmarkQuestion]:
         """
-        Generate a batch of spell check questions from a wordlist.
+        Load questions from a JSON file.
         
         Args:
-            wordlist: List of correctly spelled words
-            model: Model to use for generating sentences
+            filename: Name of the JSON file (without extension)
             
         Returns:
             List of BenchmarkQuestion objects
         """
-        questions = []
-        
-        for word in wordlist:
-            sentence = self.generate_sentence(word, model)
-            time.sleep(1)  # Prevent rate limiting
+        try:
+            # Load the JSON file for this word
+            word_data = self.load_json_file(f"{filename}.json")
+            questions = []
             
-            # Extract the misspelled word
-            misspelled = self.extract_misspelled_word(sentence, word, model)
-            
-            # Generate the question
-            question = self.generate_question(word, misspelled, sentence)
-            questions.append(question)
-            
-        return questions
-
-    def load_to_database(self) -> None:
-        """Load generated spell check questions into database."""
-        # Path to the directory containing spell check JSON files
-        DIR = os.path.join(constants.BENCHMARK_DATA_DIR, "0015_spell_check")
-        files = sorted(os.listdir(DIR))
-
-        questions = []
-        
-        for filename in files:
-            if not filename.endswith(".json"):
-                continue
+            for item in word_data:
+                if not all(k in item for k in ["sentence", "incorrect", "correct"]):
+                    logger.warning(f"Skipping incomplete item in {filename}.json: {item}")
+                    continue
                 
-            word = filename.split('.')[0]  # Extract word from filename
-            
-            with open(os.path.join(DIR, filename)) as f:
-                sentences = json.load(f)
-                
-                for idx, item in enumerate(sentences):
-                    if not item.get("incorrect"):
-                        logger.warning(f"Skipping item with missing 'incorrect' field: {item}")
-                        continue
-                        
-                    question = self.generate_question(
-                        word=item["correct"],
-                        incorrect_spelling=item["incorrect"],
-                        sentence=item["sentence"]
+                question = BenchmarkQuestion(
+                    question_text=f"What is the incorrectly-spelled word in this sentence: {item['sentence']}",
+                    answer_type=AnswerType.JSON,
+                    correct_answer={
+                        "incorrect": item["incorrect"],
+                        "correct": item["correct"]
+                    },
+                    category="spelling",
+                    difficulty=Difficulty.MEDIUM,
+                    tags=["spelling", "correction"],
+                    schema={
+                        "type": "object",
+                        "properties": {
+                            "incorrect": {"type": "string"},
+                            "correct": {"type": "string"},
+                        },
+                        "required": ["incorrect", "correct"]
+                    },
+                    evaluation_criteria=EvaluationCriteria(
+                        exact_match=True,
+                        case_sensitive=False,
+                        required_fields=["incorrect", "correct"]
                     )
-                    
-                    # Save with a custom ID format
-                    self.save_question(question, f"{word}:{idx}")
-                    questions.append(question)
-        
-        logger.info(f"Loaded {len(questions)} spell check questions into database")
+                )
+                questions.append(question)
+            
+            return questions
+        except (FileNotFoundError, json.JSONDecodeError) as e:
+            logger.error(f"Error loading questions from {filename}.json: {str(e)}")
+            return []

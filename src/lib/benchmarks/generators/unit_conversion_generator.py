@@ -4,16 +4,14 @@
 
 import json
 import logging
-import os
 import random
-from typing import Dict, List, Optional, Any, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from lib.benchmarks.base import BenchmarkGenerator
 from lib.benchmarks.data_models import (
     BenchmarkQuestion, BenchmarkMetadata, AnswerType, Difficulty, EvaluationCriteria
 )
 from lib.benchmarks.factory import generator
-import constants
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -47,19 +45,11 @@ class UnitConversionGenerator(BenchmarkGenerator):
         
     def _load_conversion_data(self) -> List[Dict]:
         """Load conversion data from JSON file or use defaults."""
-        file_path = os.path.join(constants.BENCHMARK_DATA_DIR, 
-                               "0022_unit_conversion", "conversions.json")
-        
         try:
-            if os.path.exists(file_path):
-                with open(file_path, 'r') as f:
-                    logger.info(f"Loading conversion data from {file_path}")
-                    return json.load(f)
-            else:
-                logger.warning(f"Conversion file not found at {file_path}. Using defaults.")
-                return DEFAULT_CONVERSIONS
-        except (json.JSONDecodeError, IOError) as e:
-            logger.error(f"Error loading conversion data: {e}. Using defaults.")
+            # Use the base class's load_json_file method
+            return self.load_json_file("conversions.json")
+        except (FileNotFoundError, json.JSONDecodeError) as e:
+            logger.warning(f"Couldn't load conversion data: {e}. Using defaults.")
             return DEFAULT_CONVERSIONS
     
     def _special_conversion(self, value: float, special_type: str) -> float:
@@ -72,8 +62,21 @@ class UnitConversionGenerator(BenchmarkGenerator):
             logger.warning(f"Unknown special conversion type: {special_type}")
             return value
     
-    def generate_question(self, conversion: Dict, value: Optional[float] = None) -> BenchmarkQuestion:
-        """Generate a single unit conversion question."""
+    def generate_question(self, conversion: Optional[Dict] = None, value: Optional[float] = None) -> BenchmarkQuestion:
+        """
+        Generate a single unit conversion question.
+        
+        Args:
+            conversion: Optional specific conversion to use; if None, one is randomly selected
+            value: Optional specific value to use; if None, a random value is generated
+            
+        Returns:
+            BenchmarkQuestion object
+        """
+        # If no conversion specified, choose randomly
+        if conversion is None:
+            conversion = random.choice(self.conversions)
+            
         # Generate a random value if none provided
         if value is None:
             # Choose a reasonable range for the specific units
@@ -94,10 +97,15 @@ class UnitConversionGenerator(BenchmarkGenerator):
         question_text = f"How many {conversion['to_unit']} is {value} {conversion['from_unit']}?"
         
         # Create evaluation criteria with tolerance
-        # Tolerance is typically higher for larger values
-        base_tolerance = 10**(-precision)  # Base precision
-        relative_tolerance = abs(correct_value) * 0.01  # 1% relative tolerance
-        tolerance = max(base_tolerance, relative_tolerance)
+        # Special case for temperature - always allow 1-2 degree tolerance
+        if conversion["from_unit"] in ["fahrenheit", "celsius"] or conversion["to_unit"] in ["fahrenheit", "celsius"]:
+            # Fixed tolerance for temperature (1-2 degrees)
+            tolerance = 1.5  
+        else:
+            # For other units, tolerance is relative to the value
+            base_tolerance = 10**(-precision)  # Base precision
+            relative_tolerance = abs(correct_value) * 0.01  # 1% relative tolerance
+            tolerance = max(base_tolerance, relative_tolerance)
         
         eval_criteria = EvaluationCriteria(
             exact_match=False,
@@ -140,27 +148,3 @@ class UnitConversionGenerator(BenchmarkGenerator):
             return Difficulty.MEDIUM
         else:
             return Difficulty.EASY
-    
-    def load_to_database(self, num_questions: int = 40) -> List[str]:
-        """Generate and load questions into the database."""
-        questions = []
-        question_ids = []
-        
-        # Ensure we generate a balanced mix of conversions
-        cycles = (num_questions + len(self.conversions) - 1) // len(self.conversions)
-        
-        for _ in range(cycles):
-            # Shuffle to get a mix of conversion types
-            random.shuffle(self.conversions)
-            for conversion in self.conversions:
-                if len(questions) >= num_questions:
-                    break
-                questions.append(self.generate_question(conversion))
-        
-        # Save the questions to the database
-        for i, question in enumerate(questions):
-            question_id = self.save_question(question, f"q{i+1}")
-            question_ids.append(question_id)
-            logger.info(f"Created question {question_id}: {question.question_text}")
-        
-        return question_ids
