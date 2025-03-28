@@ -4,13 +4,9 @@
 
 import json
 import logging
-import time
 from typing import Dict, List, Optional, Any, Tuple
 
-from clients import unified_client
-from clients.ollama_client import OllamaTimeoutError
 from lib.benchmarks.base import BenchmarkRunner
-from lib.benchmarks.data_models import BenchmarkResult
 from lib.benchmarks.factory import runner
 
 # Configure logging
@@ -52,7 +48,7 @@ Provide your answer as a single integer in the specified JSON format."""
         
         return prompt, schema, context
         
-    def evaluate_response(self, question_data: Dict, response: Any) -> int:
+    def evaluate_response(self, question_data: Dict, response: Any) -> bool:
         """
         Evaluate if the count is correct.
         
@@ -61,7 +57,7 @@ Provide your answer as a single integer in the specified JSON format."""
             response: Model response (structured dictionary)
             
         Returns:
-            Score (100 for correct, 0 for incorrect)
+            Boolean indicating whether the response is correct
         """
         expected_count = int(question_data.get("correct_answer", 0))
         
@@ -71,90 +67,31 @@ Provide your answer as a single integer in the specified JSON format."""
             try:
                 actual_count = int(response["count"])
             except (ValueError, TypeError):
-                return 0
+                return False
         else:
             # Try to parse response as a direct number
             try:
                 actual_count = int(response)
             except (ValueError, TypeError):
-                return 0
+                return False
                 
         # Check for exact match (letter counting should be exact)
-        return 100 if actual_count == expected_count else 0
+        return actual_count == expected_count
         
-    def run(self) -> int:
-        """
-        Execute the benchmark and return the run ID.
-        
-        Returns:
-            Run ID of the benchmark results
-        """
-        self.warm_up()
-        questions = self.load_questions()
-        
-        if not questions:
-            logger.error("No questions found for benchmark %s", self.metadata.code)
-            return -1
-            
-        logger.info("Running benchmark %s with %d questions on model %s", 
-                   self.metadata.code, len(questions), self.model)
-                   
-        results = []
-        
-        for i, question_json in enumerate(questions):
-            question_data = json.loads(question_json["question_info_json"])
-            question_id = question_json["question_id"]
-            
-            logger.info("Processing question %d/%d: %s", 
-                      i+1, len(questions), question_id)
-            
-            prompt, schema, context = self.prepare_prompt(question_data)
-            
-            start_time = time.time()
-            try:
-                # Use structured response format
-                response = unified_client.generate_chat(
-                    prompt=prompt,
-                    model=self.remote_model,
-                    json_schema=schema,
-                    context=context
-                )
-                
-                eval_time_ms = int((time.time() - start_time) * 1000)
-                
-                # Extract the count and evaluate
-                structured_data = response.structured_data
-                score = self.evaluate_response(question_data, structured_data)
-                
-                results.append(BenchmarkResult(
-                    question_id=question_id,
-                    score=score,
-                    eval_msec=eval_time_ms,
-                    debug_json=json.dumps({
-                        "prompt": prompt,
-                        "response": structured_data,
-                        "expected": question_data.get("correct_answer"),
-                        "score": score
-                    })
-                ))
-                
-            except OllamaTimeoutError as e:
-                results.append(self.handle_timeout(question_id, e))
-            except Exception as e:
-                logger.error("Error processing question %s: %s", question_id, str(e))
-                results.append(BenchmarkResult(
-                    question_id=question_id,
-                    score=0,
-                    eval_msec=0,
-                    debug_json=json.dumps({"error": str(e)})
-                ))
-        
-        # Calculate overall score based on individual results
-        overall_score = self.calculate_score(results)
-        
-        logger.info("Benchmark %s completed with score %d", 
-                   self.metadata.code, overall_score)
-                   
-        # Save results to database
-        run_id = self.save_results(overall_score, results)
-        return run_id
+    def build_debug_info(self, question_data: Dict, response: Any, is_correct: bool) -> Dict:
+        """Build debug information for benchmark results."""
+        # Create debug info with the question text for better context
+        if hasattr(response, 'structured_data') and response.structured_data:
+            return {
+                "prompt": question_data.get("question_text", ""),
+                "response": response.structured_data,
+                "expected": question_data.get("correct_answer"),
+                "is_correct": is_correct
+            }
+        else:
+            return {
+                "prompt": question_data.get("question_text", ""),
+                "response": response.response_text,
+                "expected": question_data.get("correct_answer"),
+                "is_correct": is_correct
+            }
