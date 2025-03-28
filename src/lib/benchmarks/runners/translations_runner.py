@@ -4,7 +4,7 @@
 
 import json
 import logging
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple, Any
 
 from clients import unified_client
 from clients.ollama_client import OllamaTimeoutError
@@ -56,6 +56,7 @@ When translating a word from {self.origin_lang.upper()} to {self.target_lang.upp
 - Do not include articles unless they are part of the standard translation
 - Do not provide explanations or alternative translations"""
     
+    @staticmethod
     def create_language_pair_runner(model: str, origin_lang: str, target_lang: str) -> 'TranslationRunner':
         """
         Create a runner for a specific language pair.
@@ -71,21 +72,18 @@ When translating a word from {self.origin_lang.upper()} to {self.target_lang.upp
         metadata = get_translation_metadata(origin_lang, target_lang)
         return TranslationRunner(model, metadata)
     
-    def run(self) -> int:
+    def prepare_prompt(self, question_data: Dict) -> Tuple[str, Optional[Dict], Optional[str]]:
         """
-        Execute the translation benchmark.
+        Prepare prompt, schema, and context for the translation question.
         
-        Returns:
-            Run ID of the saved results
-        """
-        # Load questions from database
-        questions = self.load_questions()
-        if not questions:
-            logger.error(f"No questions found for benchmark {self.metadata.code}")
-            return -1
+        Args:
+            question_data: Question data from database
             
-        # Warm up model
-        self.warm_up()
+        Returns:
+            Tuple of (prompt, schema, context)
+        """
+        # Extract question text
+        question_text = question_data.get("question_text", "")
         
         # Define response schema
         schema = {
@@ -99,89 +97,61 @@ When translating a word from {self.origin_lang.upper()} to {self.target_lang.upp
         # Get system context
         context = self.get_system_context()
         
-        # Process each question
-        results = []
-        for question_data in questions:
-            # Parse question info
-            question_id = question_data["question_id"]
-            question_info = json.loads(question_data["question_info_json"])
-            
-            # Extract question text and correct answer
-            question_text = question_info.get("question_text", "")
-            correct_answer = question_info.get("correct_answer", "")
-            
-            try:
-                # Generate response from model
-                response = unified_client.generate_chat(
-                    question_text,
-                    self.remote_model,
-                    json_schema=schema,
-                    context=context
-                )
-                
-                # Extract and validate translation
-                try:
-                    translated = response.structured_data.get("translation", "").lower().strip()
-                    
-                    # Determine if answer is correct
-                    if question_info.get("answer_type") == AnswerType.MULTIPLE_CHOICE.value:
-                        # For multiple choice, validate against choices
-                        choices = [c.lower() for c in question_info.get("choices", [])]
-                        is_correct = translated in choices and translated == correct_answer.lower()
-                    else:
-                        # For free text, direct comparison
-                        is_correct = translated == correct_answer.lower()
-                    
-                    # Prepare debug information
-                    debug_info = None
-                    if not is_correct:
-                        debug_info = {
-                            "response": response.structured_data.get("translation", ""),
-                            "expected": correct_answer
-                        }
-                        
-                        # Include language-specific details if available
-                        for detail_field in ["origin_details", "target_details"]:
-                            if detail_field in question_info:
-                                debug_info[detail_field] = question_info[detail_field]
-                
-                except (KeyError, TypeError, AttributeError):
-                    is_correct = False
-                    debug_info = {
-                        "error": "Failed to extract translation from response",
-                        "response_data": response.structured_data
-                    }
-                
-                # Create result
-                score = 100 if is_correct else 0
-                results.append(BenchmarkResult(
-                    question_id=question_id,
-                    score=score,
-                    eval_msec=int(response.usage.total_msec),
-                    debug_json=json.dumps(debug_info) if debug_info else None
-                ))
-                
-            except OllamaTimeoutError as e:
-                results.append(self.handle_timeout(question_id, e))
-            except Exception as e:
-                logger.error(f"Error processing question {question_id}: {str(e)}")
-                results.append(BenchmarkResult(
-                    question_id=question_id,
-                    score=0,
-                    eval_msec=0,
-                    debug_json=json.dumps({"error": str(e)})
-                ))
+        return question_text, schema, context
         
-        # Calculate overall score
-        correct_count = sum(1 for r in results if r.score == 100)
-        total_count = len(results)
-        if total_count > 0:
-            overall_score = int((correct_count / total_count) * 100)
-        else:
-            overall_score = 0
-            
-        logger.info(f"Translation benchmark complete: {correct_count}/{total_count} correct ({overall_score}%)")
+    def evaluate_response(self, question_data: Dict, response: Any) -> bool:
+        """
+        Evaluate if a translation response is correct.
         
-        # Save results to database
-        run_id = self.save_results(overall_score, results)
-        return run_id
+        Args:
+            question_data: Question data from database
+            response: Model response (dictionary with translation key)
+            
+        Returns:
+            Boolean indicating whether response is correct
+        """
+        # Get correct answer from question data
+        correct_answer = question_data.get("correct_answer", "").lower()
+        
+        # Extract translation from response
+        try:
+            translated = response.get("translation", "").lower().strip()
+            
+            # Determine if answer is correct
+            if question_data.get("answer_type") == AnswerType.MULTIPLE_CHOICE.value:
+                # For multiple choice, validate against choices
+                choices = [c.lower() for c in question_data.get("choices", [])]
+                is_correct = translated in choices and translated == correct_answer
+            else:
+                # For free text, direct comparison
+                is_correct = translated == correct_answer
+                
+            return is_correct
+            
+        except (KeyError, TypeError, AttributeError):
+            return False
+    
+    def build_debug_info(self, question_data: Dict, response: Any, is_correct: bool) -> Dict:
+        """
+        Build debug information for translation benchmark results.
+        
+        Args:
+            question_data: Question data from database
+            response: Response object from unified_client
+            is_correct: Whether the response was correct
+            
+        Returns:
+            Dictionary with debug information
+        """
+        debug_info = {
+            "response": response.structured_data.get("translation", ""),
+            "expected": question_data.get("correct_answer"),
+            "is_correct": is_correct
+        }
+        
+        # Include language-specific details if available
+        for detail_field in ["origin_details", "target_details"]:
+            if detail_field in question_data:
+                debug_info[detail_field] = question_data[detail_field]
+                
+        return debug_info
