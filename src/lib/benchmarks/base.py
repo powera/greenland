@@ -4,29 +4,6 @@
 
 import json
 import logging
-import uuid
-from typing import Dict, List, Optional, Any, Union, Tuple
-
-import datastore.benchmarks
-from clients import unified_client
-from clients.ollama_client import OllamaTimeoutError
-from lib.benchmarks.data_models import (
-    BenchmarkQuestion, BenchmarkResult, BenchmarkMetadata,
-    AnswerType, Difficulty, EvaluationCriteria
-)
-import lib.score_table
-
-# Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
-
-
-#!/usr/bin/python3
-
-"""Base classes for implementing language model benchmarks."""
-
-import json
-import logging
 import os
 import uuid
 import random
@@ -50,48 +27,6 @@ logger = logging.getLogger(__name__)
 # Default model for validation and LLM-based question generation
 DEFAULT_VALIDATION_MODEL = "gpt-4o-mini-2024-07-18"
 DEFAULT_GENERATION_MODEL = "gemma2:9b"
-
-# Common word lists that can be shared across benchmarks
-COMMON_WORDS = None  # Lazy-loaded
-
-def get_common_words() -> List[str]:
-    """
-    Get common English words list, loading from file if needed.
-    This allows sharing the word list across multiple benchmark generators.
-    
-    Returns:
-        List of common English words
-    """
-    global COMMON_WORDS
-    
-    if COMMON_WORDS is None:
-        # Define paths for potential word list files
-        paths = [
-            os.path.join(constants.BENCHMARK_DATA_DIR, "common", "words.txt"),
-            os.path.join(constants.BENCHMARK_DATA_DIR, "0020_definitions", "wordlist.txt")
-        ]
-        
-        # Try each path until we find a valid file
-        for path in paths:
-            if os.path.exists(path):
-                with open(path, 'r') as f:
-                    COMMON_WORDS = [line.strip().lower() for line in f if line.strip()]
-                logger.info(f"Loaded {len(COMMON_WORDS)} common words from {path}")
-                break
-        
-        # If no file found, use a small fallback list
-        if COMMON_WORDS is None:
-            COMMON_WORDS = [
-                "apple", "banana", "computer", "dog", "elephant", "freedom",
-                "garden", "happiness", "internet", "journey", "knowledge", "language",
-                "mountain", "notebook", "ocean", "patience", "question", "rainbow",
-                "science", "technology", "umbrella", "variety", "window", "xylophone",
-                "yesterday", "zebra"
-            ]
-            logger.warning(f"No word list file found. Using fallback list of {len(COMMON_WORDS)} words.")
-    
-    return COMMON_WORDS
-
 
 class BenchmarkGenerator:
     """Base class for generating benchmark questions."""

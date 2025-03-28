@@ -2,10 +2,9 @@
 
 """Generator for letter count benchmark questions."""
 
-import json
 import logging
 import random
-from typing import Dict, List, Optional, Any
+from typing import List, Optional
 
 from lib.benchmarks.base import BenchmarkGenerator
 from lib.benchmarks.data_models import (
@@ -37,6 +36,7 @@ class LetterCountGenerator(BenchmarkGenerator):
     def __init__(self, metadata: BenchmarkMetadata, session=None):
         """Initialize generator with benchmark metadata."""
         super().__init__(metadata, session)
+        # Use the common words list that is hardcoded
         self.word_list = COMMON_WORDS
         
     def generate_question(self, word: Optional[str] = None, letter: Optional[str] = None) -> BenchmarkQuestion:
@@ -62,9 +62,9 @@ class LetterCountGenerator(BenchmarkGenerator):
                 if char.isalpha():
                     letter_counts[char.lower()] = letter_counts.get(char.lower(), 0) + 1
                     
-            # Select letters that appear at least once, with higher probability for those appearing multiple times
-            candidates = [(letter, count) for letter, count in letter_counts.items()]
-            letter = random.choice(candidates)[0]
+            # Select letters that appear at least once
+            candidates = list(letter_counts.keys())
+            letter = random.choice(candidates)
         
         # Count occurrences
         count = word.lower().count(letter.lower())
@@ -84,39 +84,3 @@ class LetterCountGenerator(BenchmarkGenerator):
                 tolerance=0.0  # No tolerance for counting - must be exact
             )
         )
-        
-    def load_to_database(self, num_questions: int = 50) -> List[str]:
-        """
-        Generate and load questions into the database.
-        
-        Args:
-            num_questions: Number of questions to generate
-            
-        Returns:
-            List of question IDs
-        """
-        questions = []
-        
-        # Generate a diverse set of questions
-        used_pairs = set()  # Track (word, letter) pairs to avoid duplicates
-        
-        while len(questions) < num_questions:
-            word = random.choice(self.word_list)
-            
-            # Select a letter that appears in the word
-            letters = [char.lower() for char in word if char.isalpha()]
-            letter = random.choice(letters)
-            
-            # Avoid duplicates
-            if (word, letter) in used_pairs:
-                continue
-                
-            used_pairs.add((word, letter))
-            questions.append(self.generate_question(word, letter))
-            
-            if len(questions) % 10 == 0:
-                logger.info("Generated %d/%d questions", len(questions), num_questions)
-        
-        # Save questions to database
-        logger.info("Saving %d questions to database", len(questions))
-        return self.batch_save_questions(questions)
