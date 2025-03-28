@@ -6,12 +6,10 @@ import json
 import logging
 from typing import Dict, List, Optional, Tuple, Any
 
-from clients import unified_client
-from clients.ollama_client import OllamaTimeoutError
 from lib.benchmarks.base import BenchmarkRunner
 from lib.benchmarks.data_models import (
-    BenchmarkQuestion, BenchmarkResult, BenchmarkMetadata,
-    AnswerType, Difficulty
+    BenchmarkMetadata,
+    AnswerType
 )
 from lib.benchmarks.factory import runner
 
@@ -67,89 +65,3 @@ a given definition from a list of choices. Respond with only the correct word, n
         
         # Check if response contains the correct word
         return cleaned_response == correct_answer
-        
-    def process_question(self, question: Dict) -> BenchmarkResult:
-        """
-        Process a single benchmark question.
-        
-        Args:
-            question: Question data from database
-            
-        Returns:
-            BenchmarkResult object
-        """
-        question_data = json.loads(question["question_info_json"])
-        question_id = question["question_id"]
-        
-        try:
-            # Prepare the prompt
-            prompt, schema, context = self.prepare_prompt(question_data)
-            
-            # Generate response
-            response = unified_client.generate_chat(
-                prompt=prompt,
-                model=self.remote_model,
-                brief=True,
-                context=context
-            )
-            
-            # Evaluate response
-            is_correct = self.evaluate_response(question_data, response.response_text)
-            
-            # Return benchmark result
-            return BenchmarkResult(
-                question_id=question_id,
-                score=100 if is_correct else 0,
-                eval_msec=int(response.usage.total_msec),
-                debug_json=json.dumps({
-                    "response": response.response_text,
-                    "correct_answer": question_data.get("correct_answer"),
-                    "is_correct": is_correct
-                })
-            )
-            
-        except OllamaTimeoutError as e:
-            return self.handle_timeout(question_id, e)
-        except Exception as e:
-            logger.error(f"Error processing question {question_id}: {e}")
-            return BenchmarkResult(
-                question_id=question_id,
-                score=0,
-                eval_msec=0,
-                debug_json=json.dumps({"error": str(e)})
-            )
-
-    def run(self) -> int:
-        """
-        Execute the definitions benchmark.
-        
-        Returns:
-            Run ID of the saved results
-        """
-        # Load questions for this benchmark
-        questions = self.load_questions()
-        if not questions:
-            logger.error(f"No questions found for benchmark {self.metadata.code}")
-            return -1
-            
-        # Warm up the model
-        logger.info(f"Warming up model {self.model}...")
-        self.warm_up()
-        
-        # Process each question
-        logger.info(f"Running benchmark with {len(questions)} questions...")
-        results = []
-        for idx, question in enumerate(questions):
-            logger.info(f"Processing question {idx+1}/{len(questions)}: {question['question_id']}")
-            result = self.process_question(question)
-            results.append(result)
-            
-        # Calculate score
-        score = self.calculate_score(results)
-        logger.info(f"Benchmark complete. Score: {score}/100 ({sum(1 for r in results if r.score == 100)}/{len(results)} correct)")
-        
-        # Save results to database
-        run_id = self.save_results(score, results)
-        logger.info(f"Results saved with run ID: {run_id}")
-        
-        return run_id

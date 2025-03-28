@@ -151,7 +151,7 @@ class BenchmarkRunner:
 
     def prepare_prompt(self, question_data: Dict) -> Tuple[str, Optional[Dict], Optional[str]]:
         """
-        Prepare prompt and context for the question.
+        Prepare prompt and context for the question.  Must be implemented by subclasses.
         
         Args:
             question_data: Question data from database
@@ -159,14 +159,7 @@ class BenchmarkRunner:
         Returns:
             Tuple of (prompt, schema, context)
         """
-        # Basic implementation - can be overridden by subclasses
-        prompt = question_data.get("question_text", "")
-        schema = question_data.get("schema")
-        
-        # Context is typically provided by the subclass
-        context = None
-        
-        return prompt, schema, context
+        raise NotImplementedError("Subclasses must implement run method")
         
     def evaluate_response(self, question_data: Dict, response: Any) -> bool:
         """
@@ -298,10 +291,93 @@ class BenchmarkRunner:
         
         return int(score)
         
-    def run(self) -> int:
-        """
-        Execute the benchmark and return the run ID.
+    def process_question(self, question: Dict) -> BenchmarkResult:
+        """Process a single benchmark question."""
+        question_data = json.loads(question["question_info_json"])
+        question_id = question["question_id"]
         
-        This method should be implemented by subclasses.
-        """
-        raise NotImplementedError("Subclasses must implement run method")
+        try:
+            # Prepare the prompt
+            prompt, schema, context = self.prepare_prompt(question_data)
+            
+            # Generate response
+            response = unified_client.generate_chat(
+                prompt=prompt,
+                model=self.remote_model,
+                json_schema=schema,
+                context=context
+            )
+            
+            # Evaluate response
+            is_correct = self.evaluate_response(question_data, 
+                                               schema and response.structured_data or response.response_text)
+            
+            # Build debug information
+            debug_info = self.build_debug_info(question_data, response, is_correct)
+            
+            # Return benchmark result
+            return BenchmarkResult(
+                question_id=question_id,
+                score=100 if is_correct else 0,
+                eval_msec=int(response.usage.total_msec),
+                debug_json=json.dumps(debug_info) if debug_info else None
+            )
+            
+        except OllamaTimeoutError as e:
+            return self.handle_timeout(question_id, e)
+        except Exception as e:
+            logger.error(f"Error processing question {question_id}: {str(e)}")
+            return BenchmarkResult(
+                question_id=question_id,
+                score=0,
+                eval_msec=0,
+                debug_json=json.dumps({"error": str(e)})
+            )
+            
+    def build_debug_info(self, question_data: Dict, response: Any, is_correct: bool) -> Dict:
+        """Build debug information for benchmark results."""
+        # Default implementation - subclasses can override
+        if hasattr(response, 'structured_data') and response.structured_data:
+            return {
+                "response": response.structured_data,
+                "expected": question_data.get("correct_answer"),
+                "is_correct": is_correct
+            }
+        else:
+            return {
+                "response": response.response_text,
+                "expected": question_data.get("correct_answer"),
+                "is_correct": is_correct
+            }
+    
+
+    def run(self) -> int:
+        """Execute the benchmark and return the run ID."""
+        # Load questions for this benchmark
+        questions = self.load_questions()
+        if not questions:
+            logger.error(f"No questions found for benchmark {self.metadata.code}")
+            return -1
+            
+        # Warm up the model
+        logger.info(f"Warming up model {self.model}...")
+        self.warm_up()
+        
+        # Process each question
+        logger.info(f"Running {self.metadata.code} benchmark with {len(questions)} questions...")
+        results = []
+        for idx, question in enumerate(questions):
+            logger.info(f"Processing question {idx+1}/{len(questions)}: {question['question_id']}")
+            result = self.process_question(question)
+            results.append(result)
+            
+        # Calculate score
+        score = self.calculate_score(results)
+        correct_count = sum(1 for r in results if r.score == 100)
+        logger.info(f"Benchmark complete. Score: {score}/100 ({correct_count}/{len(results)} correct)")
+        
+        # Save results to database
+        run_id = self.save_results(score, results)
+        logger.info(f"Results saved with run ID: {run_id}")
+        
+        return run_id
