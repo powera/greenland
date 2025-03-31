@@ -5,9 +5,9 @@
 import json
 import logging
 import random
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Iterator
 
-from lib.benchmarks.base import BenchmarkGenerator
+from lib.benchmarks.base_generator import BenchmarkGenerator
 from lib.benchmarks.data_models import (
     BenchmarkQuestion, BenchmarkMetadata, AnswerType, Difficulty, EvaluationCriteria
 )
@@ -41,8 +41,21 @@ class UnitConversionGenerator(BenchmarkGenerator):
     def __init__(self, metadata: BenchmarkMetadata, session=None):
         """Initialize generator with benchmark metadata."""
         super().__init__(metadata, session)
-        self.conversions = self._load_conversion_data()
         
+        # Configure strategy flags
+        self.can_load_from_file = True  # Support loading from JSON files
+        self.can_generate_locally = True  # Support generating locally with our algorithm
+        self.can_generate_with_llm = False  # No need for LLM generation here
+        
+        # Set file paths for file-based generation
+        self.questions_file_path = "conversions.json"
+        
+        # Preferred strategy order
+        self.strategy_order = ["file", "local"]
+        
+        # Load conversion data
+        self.conversions = self._load_conversion_data()
+    
     def _load_conversion_data(self) -> List[Dict]:
         """Load conversion data from JSON file or use defaults."""
         try:
@@ -62,21 +75,35 @@ class UnitConversionGenerator(BenchmarkGenerator):
             logger.warning(f"Unknown special conversion type: {special_type}")
             return value
     
-    def generate_question(self, conversion: Optional[Dict] = None, value: Optional[float] = None) -> BenchmarkQuestion:
-        """
-        Generate a single unit conversion question.
+    def _get_value_range(self, unit: str) -> Tuple[float, float]:
+        """Get a reasonable value range for a given unit."""
+        ranges = {
+            "pounds": (1, 500),
+            "kilograms": (1, 200),
+            "miles": (1, 1000),
+            "kilometers": (1, 1000),
+            "inches": (1, 100),
+            "centimeters": (1, 200),
+            "gallons": (1, 50),
+            "liters": (1, 100),
+            "fahrenheit": (-20, 120),
+            "celsius": (-30, 50)
+        }
         
-        Args:
-            conversion: Optional specific conversion to use; if None, one is randomly selected
-            value: Optional specific value to use; if None, a random value is generated
-            
-        Returns:
-            BenchmarkQuestion object
-        """
-        # If no conversion specified, choose randomly
-        if conversion is None:
-            conversion = random.choice(self.conversions)
-            
+        return ranges.get(unit, (1, 100))  # Default range if unit not found
+    
+    def _determine_difficulty(self, conversion: Dict) -> Difficulty:
+        """Determine the difficulty of a conversion problem."""
+        # Base difficulty on precision and whether it's special conversion
+        if "special" in conversion:
+            return Difficulty.MEDIUM
+        elif conversion.get("precision", 1) > 1:
+            return Difficulty.MEDIUM
+        else:
+            return Difficulty.EASY
+    
+    def _generate_conversion_question(self, conversion: Dict, value: Optional[float] = None) -> BenchmarkQuestion:
+        """Helper method to generate a question from a conversion definition."""
         # Generate a random value if none provided
         if value is None:
             # Choose a reasonable range for the specific units
@@ -122,29 +149,79 @@ class UnitConversionGenerator(BenchmarkGenerator):
             evaluation_criteria=eval_criteria
         )
     
-    def _get_value_range(self, unit: str) -> Tuple[float, float]:
-        """Get a reasonable value range for a given unit."""
-        ranges = {
-            "pounds": (1, 500),
-            "kilograms": (1, 200),
-            "miles": (1, 1000),
-            "kilometers": (1, 1000),
-            "inches": (1, 100),
-            "centimeters": (1, 200),
-            "gallons": (1, 50),
-            "liters": (1, 100),
-            "fahrenheit": (-20, 120),
-            "celsius": (-30, 50)
-        }
+    def _generate_from_file(self, **kwargs) -> Iterator[BenchmarkQuestion]:
+        """
+        Generate questions from files.
         
-        return ranges.get(unit, (1, 100))  # Default range if unit not found
+        Yields:
+            BenchmarkQuestion objects
+        """
+        try:
+            # Try to load questions directly if they exist
+            questions_data = self.load_json_file("questions.json")
+            for item in questions_data:
+                try:
+                    question = BenchmarkQuestion(
+                        question_text=item['question_text'],
+                        answer_type=AnswerType(item['answer_type']),
+                        correct_answer=item['correct_answer'],
+                        category=item.get('category'),
+                        difficulty=Difficulty(item['difficulty']) if 'difficulty' in item else None,
+                        tags=item.get('tags', []),
+                        evaluation_criteria=EvaluationCriteria(**item['evaluation_criteria']) 
+                            if 'evaluation_criteria' in item else EvaluationCriteria()
+                    )
+                    yield question
+                except (KeyError, ValueError) as e:
+                    logger.warning(f"Error loading question from file: {e}")
+                    continue
+        except (FileNotFoundError, json.JSONDecodeError):
+            # If no questions file exists, load conversion data and generate questions
+            logger.info("No questions.json found, using conversion definitions to generate questions")
+            conversion_data = self.conversions
+            
+            # Yield questions for each conversion type with a few different values
+            for conversion in conversion_data:
+                # Generate 3 questions per conversion type with different values
+                for _ in range(3):
+                    yield self._generate_conversion_question(conversion)
     
-    def _determine_difficulty(self, conversion: Dict) -> Difficulty:
-        """Determine the difficulty of a conversion problem."""
-        # Base difficulty on precision and whether it's special conversion
-        if "special" in conversion:
-            return Difficulty.MEDIUM
-        elif conversion.get("precision", 1) > 1:
-            return Difficulty.MEDIUM
-        else:
-            return Difficulty.EASY
+    def _generate_locally(self, **kwargs) -> Iterator[BenchmarkQuestion]:
+        """
+        Generate questions using local algorithms.
+        
+        Yields:
+            BenchmarkQuestion objects
+        """
+        # We can generate an unlimited number of questions by randomly selecting
+        # conversion types and values
+        seen_questions = set()
+        
+        # Keep track of used conversion indices to cycle through all conversions
+        conversion_indices = list(range(len(self.conversions)))
+        random.shuffle(conversion_indices)
+        
+        # Use an infinitely cycling index
+        idx = 0
+        
+        while True:
+            # Get the next conversion definition
+            conversion_idx = conversion_indices[idx % len(conversion_indices)]
+            conversion = self.conversions[conversion_idx]
+            
+            # Generate a question with random values
+            question = self._generate_conversion_question(conversion)
+            
+            # Skip duplicates
+            question_key = (question.question_text, question.correct_answer)
+            if question_key not in seen_questions:
+                seen_questions.add(question_key)
+                yield question
+            
+            # Advance to next conversion type
+            idx += 1
+            
+            # Periodically clear the seen questions set to avoid memory issues
+            # during long-running generation
+            if len(seen_questions) > 1000:
+                seen_questions.clear()
