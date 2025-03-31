@@ -18,10 +18,25 @@ core_files:
     description: Score table generator
   - path: src/lib/benchmarks/base.py
     description: Base class for benchmarks
+  - path: src/lib/benchmarks/base_generator.py
+    description: Base class for benchmark generators
+  - path: src/lib/benchmarks/base_runner.py
+    description: Base class for benchmark runners
   - path: src/lib/benchmarks/data_models.py
     description: Data classes for benchmarks
   - path: src/lib/benchmarks/factory.py
+    description: Factory for benchmarks
+  - path: src/lib/benchmarks/registry.py
     description: Registry for benchmarks
+  - path: src/lib/benchmarks/run_benchmark.py
+    description: Helpers to run benchmarks
+
+    # Sample benchmarks
+
+  - path: src/lib/benchmarks/part_of_speech_generator.py
+    description: Part-of-speech benchmark generator
+  - path: src/lib/benchmarks/part_of_speech_runner.py
+    description: Part-of-speech benchmark runner
 
     templates:
     # Verbalator
