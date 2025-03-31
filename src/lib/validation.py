@@ -3,11 +3,23 @@
 
 import enum
 import json
+import logging
 from dataclasses import dataclass
 from typing import Dict, List, Tuple, Optional
 import pydantic
 
-from clients import openai_client, ollama_client
+from clients import openai_client, ollama_client, unified_client
+
+from lib.benchmarks.data_models import BenchmarkQuestion
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
+# Default model for validation and LLM-based question generation
+DEFAULT_VALIDATION_MODEL = "gpt-4o-mini-2024-07-18"
+DEFAULT_GENERATION_MODEL = "gemma2:9b"
+
 
 VALIDATION_PROMPTS = {
     "definition": lambda response, expected, context: f"""Given this definition: "{response}"
@@ -166,3 +178,68 @@ def validate_general_knowledge(response: str, expected: str, context: str, **kwa
 
 def evaluate_response(*args, **kwargs) -> Tuple[ResponseEvaluation, Dict]:
     return validator.evaluate_response(*args, **kwargs)
+
+
+def validate_question(
+        self,
+        question: BenchmarkQuestion,
+        model: str = DEFAULT_VALIDATION_MODEL
+    ) -> Tuple[bool, Optional[str]]:
+        """
+        Validate a question using an LLM for quality checks.
+        
+        Args:
+            question: Question to validate
+            model: Model to use for validation
+            
+        Returns:
+            Tuple of (is_valid, reason)
+        """
+        # Extract question details for validation
+        question_text = question.question_text
+        answer_type = question.answer_type.value
+        correct_answer = question.correct_answer
+        
+        # Customize validation based on answer type
+        validation_prompt = f"""
+Validate if this benchmark question is clear, unambiguous, and has a correct answer.
+
+Question: {question_text}
+Answer Type: {answer_type}
+Expected Answer: {correct_answer}
+
+Validation criteria:
+1. Question is clear and unambiguous
+2. The expected answer is correct
+3. No spelling or grammar errors in the question
+4. No extraneous or misleading information
+
+Respond with a JSON object with these fields:
+- valid: boolean (true if the question meets all criteria, false otherwise)
+- reason: string (explanation of validation result, especially if invalid)
+"""
+
+        # Schema for validation response
+        schema = {
+            "type": "object",
+            "properties": {
+                "valid": {"type": "boolean"},
+                "reason": {"type": "string"}
+            },
+            "required": ["valid", "reason"]
+        }
+        
+        try:
+            # Get validation result
+            result = unified_client.generate_chat(
+                prompt=validation_prompt,
+                model=model,
+                json_schema=schema
+            )
+            
+            validation = result.structured_data
+            return validation["valid"], validation["reason"]
+            
+        except Exception as e:
+            logger.error(f"Validation error: {str(e)}")
+            return False, f"Validation failed with error: {str(e)}"
