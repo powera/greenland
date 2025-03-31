@@ -5,9 +5,9 @@
 import json
 import logging
 import random
-from typing import Dict, Optional, List
+from typing import Dict, Optional, List, Iterator
 
-from lib.benchmarks.base import BenchmarkGenerator
+from lib.benchmarks.base_generator import BenchmarkGenerator
 from lib.benchmarks.data_models import (
     BenchmarkQuestion, BenchmarkMetadata, 
     AnswerType, Difficulty, EvaluationCriteria
@@ -59,6 +59,7 @@ class TranslationGenerator(BenchmarkGenerator):
             metadata: Benchmark metadata
             session: Optional database session
         """
+        # Call the parent constructor first
         super().__init__(metadata, session)
         
         # Extract language codes from metadata code
@@ -74,6 +75,17 @@ class TranslationGenerator(BenchmarkGenerator):
             raise ValueError(f"Language codes must be one of: {', '.join(VALID_LANGS)}")
         if self.origin_lang == self.target_lang:
             raise ValueError("Origin and target languages must be different")
+        
+        # Set up generation strategy flags
+        self.can_generate_locally = True  # We can generate locally from wordlist
+        self.can_generate_with_llm = True  # We can also use LLM for more diverse translations
+        self.can_load_from_file = False   # We don't have file-based translations
+        
+        # Set LLM context for generation
+        self.context = f"""You are a helpful assistant creating translation questions.
+        You will translate words from {self.origin_lang.upper()} to {self.target_lang.upper()}.
+        Always provide accurate translations and include any important cultural or linguistic context.
+        """
 
     def get_translation(self, entry: TranslationEntry, lang: str) -> str:
         """Get translation for a specific language from entry."""
@@ -83,26 +95,19 @@ class TranslationGenerator(BenchmarkGenerator):
         """Get translation details for a specific language from entry."""
         return getattr(entry, f"{lang}_details", None)
 
-    def generate_question(self, word_entry: TranslationEntry, 
-                         include_choices: bool = True) -> BenchmarkQuestion:
+    def _create_question(self, origin_word: str, target_word: str, 
+                       include_choices: bool = True) -> BenchmarkQuestion:
         """
-        Generate a single translation question.
+        Create a translation question from origin and target words.
         
         Args:
-            word_entry: TranslationEntry object
+            origin_word: Word in the origin language
+            target_word: Translation in the target language
             include_choices: Whether to include multiple choice options
             
         Returns:
             BenchmarkQuestion object
         """
-        # Get translations for origin and target languages
-        origin_word = self.get_translation(word_entry, self.origin_lang)
-        target_word = self.get_translation(word_entry, self.target_lang)
-        
-        # Get any special notes about usage
-        origin_details = self.get_translation_details(word_entry, self.origin_lang)
-        target_details = self.get_translation_details(word_entry, self.target_lang)
-        
         # Create question text
         question_text = f"Translate this word: \"{origin_word}\""
         
@@ -128,8 +133,6 @@ class TranslationGenerator(BenchmarkGenerator):
         
         # Create additional metadata as tags
         tags = ["translation", self.origin_lang, self.target_lang]
-        if origin_details or target_details:
-            tags.append("has_details")
         
         # Determine difficulty (could be enhanced based on word complexity)
         difficulty = Difficulty.MEDIUM
@@ -164,8 +167,13 @@ class TranslationGenerator(BenchmarkGenerator):
         
         return question
 
-    def load_to_database(self) -> None:
-        """Load generated translation questions into database."""
+    def _generate_locally(self, **kwargs) -> Iterator[BenchmarkQuestion]:
+        """
+        Generate translation questions from local wordlist.
+        
+        Yields:
+            BenchmarkQuestion objects one at a time
+        """
         # Filter for entries that have valid translations for both languages
         valid_entries = [
             entry for entry in TRANSLATIONS 
@@ -174,17 +182,83 @@ class TranslationGenerator(BenchmarkGenerator):
         ]
         
         if not valid_entries:
-            raise ValueError(f"No valid translations found for {self.origin_lang} to {self.target_lang}")
+            logger.warning(f"No valid translations found for {self.origin_lang} to {self.target_lang}")
+            return
         
-        # Generate and save questions
-        questions = []
-        for idx, entry in enumerate(valid_entries):
-            question = self.generate_question(entry)
-            questions.append(question)
+        # Shuffle entries to get different questions each time
+        random.shuffle(valid_entries)
         
-        # Batch save questions
-        self.batch_save_questions(questions)
-        logger.info(f"Generated and saved {len(questions)} translation questions")
+        # Generate and yield questions
+        for entry in valid_entries:
+            origin_word = self.get_translation(entry, self.origin_lang)
+            target_word = self.get_translation(entry, self.target_lang)
+            
+            # Get any special notes about usage (potential future enhancement)
+            origin_details = self.get_translation_details(entry, self.origin_lang)
+            target_details = self.get_translation_details(entry, self.target_lang)
+            
+            # Create and yield question
+            yield self._create_question(origin_word, target_word)
+
+    def _generate_with_llm(self, **kwargs) -> Iterator[BenchmarkQuestion]:
+        """
+        Generate translation questions using an LLM.
+        
+        This allows for more diverse translations that might not be in our database.
+        
+        Yields:
+            BenchmarkQuestion objects one at a time
+        """
+        # Define schema for LLM responses
+        schema = {
+            "type": "object",
+            "properties": {
+                "origin_word": {"type": "string", "description": f"A word in {self.origin_lang.upper()}"},
+                "target_word": {"type": "string", "description": f"The translation in {self.target_lang.upper()}"},
+                "difficulty": {"type": "string", "enum": ["easy", "medium", "hard"]}
+            },
+            "required": ["origin_word", "target_word", "difficulty"]
+        }
+        
+        # Provide word categories to prompt more diverse responses
+        categories = [
+            "common nouns", "verbs", "adjectives", "adverbs", 
+            "food", "animals", "colors", "emotions", "technology",
+            "culture-specific terms", "idioms", "body parts"
+        ]
+        
+        # Generate questions indefinitely (until the caller stops iterating)
+        while True:
+            # Choose a random category for variety
+            category = random.choice(categories)
+            
+            # Create prompt
+            prompt = f"""Please generate a translation pair from {self.origin_lang.upper()} to {self.target_lang.upper()}.
+            The word should be from the category: {category}.
+            Provide the original word and its accurate translation.
+            Also rate the difficulty of the translation as easy, medium, or hard.
+            """
+            
+            try:
+                # Get translation pair from LLM
+                response = self.get_llm_question(prompt, schema=schema)
+                
+                if not response or "origin_word" not in response or "target_word" not in response:
+                    logger.warning("Incomplete response from LLM, retrying...")
+                    continue
+                
+                # Extract data
+                origin_word = response["origin_word"]
+                target_word = response["target_word"]
+                
+                # Create and yield question
+                yield self._create_question(origin_word, target_word)
+                
+            except Exception as e:
+                logger.error(f"Error generating translation with LLM: {e}")
+                # Skip this iteration but continue generating
+                continue
+
 
 class LanguagePairGenerator:
     """Helper class to generate benchmark data for all language pairs."""
@@ -238,8 +312,11 @@ class LanguagePairGenerator:
             except Exception as e:
                 logger.error(f"Error generating benchmark for {origin_lang} to {target_lang}: {str(e)}")
 
-    
 
 if __name__ == "__main__":
     # When run directly, generate data for all language pairs
-    LanguagePairGenerator.generate_all_pairs()
+    LanguagePairGenerator.generate_specific_pairs([
+        ('en', 'fr'), 
+        ('en', 'zh'),
+        ('sw', 'ko')
+    ])

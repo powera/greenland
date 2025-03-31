@@ -5,9 +5,9 @@
 import json
 import logging
 import random
-from typing import Dict, List, Optional, Any, Tuple
+from typing import Dict, List, Optional, Any, Iterator
 
-from lib.benchmarks.base import BenchmarkGenerator
+from lib.benchmarks.base import *
 from lib.benchmarks.data_models import (
     BenchmarkQuestion, BenchmarkMetadata, AnswerType, Difficulty, EvaluationCriteria
 )
@@ -31,35 +31,91 @@ class PartOfSpeechGenerator(BenchmarkGenerator):
         """Initialize generator with benchmark metadata."""
         super().__init__(metadata, session)
         
+        # Strategy configuration
+        self.can_load_from_file = True
+        self.can_generate_locally = False  # No local algorithmic generation
+        self.can_generate_with_llm = True
+        
+        # Set file paths for file-based generation
+        self.questions_file_path = "samples.json"
+        
         # Set custom context for LLM-based generation
         self.context = """You are a linguistics expert helping to create part-of-speech benchmark questions.
 Your task is to create clear, unambiguous questions about identifying parts of speech in sentences.
 Each question should have a clear, correct answer based on standard English grammar rules."""
-    
-    def _load_sample_data(self) -> List[Dict]:
-        """
-        Load sample sentences with part of speech data from JSON file.
         
-        Returns:
-            List of dictionaries containing sentence data
+        # Sample cache
+        self._samples = None
+        self._sample_index = 0
+    
+    def _generate_from_file(self, **kwargs) -> Iterator[BenchmarkQuestion]:
+        """
+        Generate questions from sample file.
+        
+        This generator yields BenchmarkQuestion objects one at a time.
+        
+        Yields:
+            BenchmarkQuestion objects
         """
         try:
-            # Use base class method to load JSON file
-            samples = self.load_json_file("samples.json")
-            logger.info(f"Loaded {len(samples)} sample sentences")
-            return samples
+            # Load samples if not already loaded
+            if not self._samples:
+                self._samples = self.load_json_file(self.questions_file_path)
+                logger.info(f"Loaded {len(self._samples)} sample sentences from file")
+            
+            # Yield questions for each sample
+            for sample in self._samples:
+                sentence = sample["sentence"]
+                target_word = sample["target_word"]
+                correct_pos = sample["pos"]
+                
+                # Create prompt for the model
+                question_text = f"In the sentence '{sentence}', what is the part of speech of the word '{target_word}'?"
+                
+                # Create schema for structured response
+                schema = {
+                    "type": "object",
+                    "properties": {
+                        "part_of_speech": {
+                            "type": "string",
+                            "description": "The part of speech of the target word"
+                        }
+                    },
+                    "required": ["part_of_speech"]
+                }
+                
+                # Create the benchmark question
+                question = BenchmarkQuestion(
+                    question_text=question_text,
+                    answer_type=AnswerType.JSON,
+                    correct_answer={"part_of_speech": correct_pos},
+                    category="grammar",
+                    difficulty=Difficulty.MEDIUM,
+                    tags=["grammar", "part-of-speech", "linguistics"],
+                    schema=schema,
+                    evaluation_criteria=EvaluationCriteria(
+                        exact_match=False,
+                        case_sensitive=False,
+                        required_fields=["part_of_speech"]
+                    )
+                )
+                
+                yield question
+                
         except (FileNotFoundError, json.JSONDecodeError) as e:
             logger.error(f"Error loading sample data: {str(e)}")
-            return []
     
-    def _generate_sentence_with_llm(self) -> Dict:
+    def _generate_with_llm(self, **kwargs) -> Iterator[BenchmarkQuestion]:
         """
-        Generate a sentence with target word and part of speech using an LLM.
+        Generate questions using language model.
         
-        Returns:
-            Dictionary with sentence, target_word, and pos
+        This generator can yield an unlimited number of questions by continuously
+        prompting the LLM for new sentences.
+        
+        Yields:
+            BenchmarkQuestion objects
         """
-        # Schema for structured LLM response
+        # Create schema for structured LLM response
         schema = {
             "type": "object",
             "properties": {
@@ -80,74 +136,57 @@ Each question should have a clear, correct answer based on standard English gram
             "required": ["sentence", "target_word", "pos"]
         }
         
-        # Create prompt for the LLM
-        pos_type = random.choice(PARTS_OF_SPEECH)
-        prompt = f"""Create a simple, clear sentence that contains at least one {pos_type}.
+        # Generate an unlimited stream of questions
+        while True:
+            # Choose random part of speech to focus on
+            pos_type = random.choice(PARTS_OF_SPEECH)
+            
+            # Create prompt for the LLM
+            prompt = f"""Create a simple, clear sentence that contains at least one {pos_type}.
 Choose one {pos_type} from your sentence as the target word.
 Return the sentence, the target word (which must be a {pos_type}), and confirm that the part of speech is '{pos_type}'."""
-        
-        # Generate sentence data using LLM
-        sentence_data = self.generate_llm_question(prompt, schema=schema)
-        return sentence_data
-        
-    def generate_question(self, sentence_data: Optional[Dict] = None) -> BenchmarkQuestion:
-        """
-        Generate a question to identify the part of speech of a word.
-        
-        Args:
-            sentence_data: Optional dictionary containing sentence, target_word, and pos.
-                          If None, will first try to use sample data, then fall back to LLM.
             
-        Returns:
-            BenchmarkQuestion object
-        """
-        # If no sentence data provided, try to get from samples before using LLM
-        if not sentence_data:
-            # Try to load sample data if we haven't already
-            if not hasattr(self, '_samples') or not self._samples:
-                self._samples = self._load_sample_data()
-                self._sample_index = 0
-            
-            # Use a sample if available, otherwise generate with LLM
-            if hasattr(self, '_samples') and self._samples and self._sample_index < len(self._samples):
-                sentence_data = self._samples[self._sample_index]
-                self._sample_index += 1
-                logger.info(f"Using sample data ({self._sample_index}/{len(self._samples)})")
-            else:
-                sentence_data = self._generate_sentence_with_llm()
-                logger.info("Generated sentence data using LLM")
-        
-        sentence = sentence_data["sentence"]
-        target_word = sentence_data["target_word"]
-        correct_pos = sentence_data["pos"]
-        
-        # Create prompt for the model
-        question_text = f"In the sentence '{sentence}', what is the part of speech of the word '{target_word}'?"
-        
-        # Create schema for structured response
-        schema = {
-            "type": "object",
-            "properties": {
-                "part_of_speech": {
-                    "type": "string",
-                    "description": "The part of speech of the target word"
+            try:
+                # Generate sentence data using LLM
+                sentence_data = self.get_llm_question(prompt, schema=schema)
+                
+                sentence = sentence_data["sentence"]
+                target_word = sentence_data["target_word"]
+                correct_pos = sentence_data["pos"]
+                
+                # Create prompt for the benchmark question
+                question_text = f"In the sentence '{sentence}', what is the part of speech of the word '{target_word}'?"
+                
+                # Create schema for structured response
+                response_schema = {
+                    "type": "object",
+                    "properties": {
+                        "part_of_speech": {
+                            "type": "string",
+                            "description": "The part of speech of the target word"
+                        }
+                    },
+                    "required": ["part_of_speech"]
                 }
-            },
-            "required": ["part_of_speech"]
-        }
-        
-        # Create the benchmark question
-        return BenchmarkQuestion(
-            question_text=question_text,
-            answer_type=AnswerType.JSON,
-            correct_answer={"part_of_speech": correct_pos},
-            category="grammar",
-            difficulty=Difficulty.MEDIUM,
-            tags=["grammar", "part-of-speech", "linguistics"],
-            schema=schema,
-            evaluation_criteria=EvaluationCriteria(
-                exact_match=False,
-                case_sensitive=False,
-                required_fields=["part_of_speech"]
-            )
-        )
+                
+                # Create the benchmark question
+                question = BenchmarkQuestion(
+                    question_text=question_text,
+                    answer_type=AnswerType.JSON,
+                    correct_answer={"part_of_speech": correct_pos},
+                    category="grammar",
+                    difficulty=Difficulty.MEDIUM,
+                    tags=["grammar", "part-of-speech", "linguistics"],
+                    schema=response_schema,
+                    evaluation_criteria=EvaluationCriteria(
+                        exact_match=False,
+                        case_sensitive=False,
+                        required_fields=["part_of_speech"]
+                    )
+                )
+                
+                yield question
+                
+            except Exception as e:
+                logger.error(f"Error generating question with LLM: {str(e)}")
+                # If we encounter an error, we'll continue the loop and try again
