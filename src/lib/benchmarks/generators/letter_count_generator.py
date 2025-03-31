@@ -4,9 +4,11 @@
 
 import logging
 import random
-from typing import List, Optional
+import os
+import json
+from typing import List, Optional, Dict, Iterator
 
-from lib.benchmarks.base import BenchmarkGenerator
+from lib.benchmarks.base import *
 from lib.benchmarks.data_models import (
     BenchmarkQuestion, BenchmarkMetadata, 
     AnswerType, Difficulty, EvaluationCriteria
@@ -17,18 +19,6 @@ from lib.benchmarks.factory import generator
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-# Sample words to use for the benchmark
-COMMON_WORDS = [
-    "strawberry", "programming", "mathematics", "engineering", "intelligence",
-    "development", "application", "successful", "interesting", "beautiful",
-    "ordinary", "atmosphere", "excitement", "conversation", "experience",
-    "knowledge", "necessary", "community", "education", "information",
-    "technology", "understanding", "opportunity", "relationship", "environment",
-    "significant", "performance", "profession", "university", "restaurant",
-    "breakfast", "president", "television", "government", "important",
-    "computer", "different", "business", "possible", "together"
-]
-
 @generator("0012_letter_count")
 class LetterCountGenerator(BenchmarkGenerator):
     """Generator for letter count benchmark questions."""
@@ -36,27 +26,39 @@ class LetterCountGenerator(BenchmarkGenerator):
     def __init__(self, metadata: BenchmarkMetadata, session=None):
         """Initialize generator with benchmark metadata."""
         super().__init__(metadata, session)
-        # Use the common words list that is hardcoded
-        self.word_list = COMMON_WORDS
         
-    def generate_question(self, word: Optional[str] = None, letter: Optional[str] = None) -> BenchmarkQuestion:
+        # Use the common words list that is hardcoded
+        self.word_list = COMMON_LONG_WORDS
+        
+        # Enable only local generation strategy
+        self.can_load_from_file = False
+        self.can_generate_locally = True
+        self.can_generate_with_llm = False
+        
+        # Define the benchmark directory (in case we want to add file loading later)
+        self.questions_directory = os.path.join("benchmarks", "0012_letter_count")
+    
+    def _generate_locally(self, **kwargs) -> Iterator[BenchmarkQuestion]:
         """
-        Generate a question asking to count occurrences of a letter in a word.
+        Generate letter count questions algorithmically.
+        
+        This is a generator function that yields BenchmarkQuestion objects
+        one at a time.
         
         Args:
-            word: Optional specific word to use
-            letter: Optional specific letter to count
+            **kwargs: Additional parameters to control generation
             
-        Returns:
-            BenchmarkQuestion object
+        Yields:
+            BenchmarkQuestion objects
         """
-        # If no word provided, select a random one
-        if not word:
+        logger.info("Generating letter count questions locally")
+        
+        # We can generate questions indefinitely with random selections
+        while True:
+            # Select a random word
             word = random.choice(self.word_list)
             
-        # If no letter provided, select a random one from the word
-        if not letter:
-            # Prefer letters that appear multiple times
+            # Select a random letter from the word
             letter_counts = {}
             for char in word:
                 if char.isalpha():
@@ -65,22 +67,24 @@ class LetterCountGenerator(BenchmarkGenerator):
             # Select letters that appear at least once
             candidates = list(letter_counts.keys())
             letter = random.choice(candidates)
-        
-        # Count occurrences
-        count = word.lower().count(letter.lower())
-        
-        # Create the question
-        question_text = f"How many times does the letter '{letter}' appear in the word '{word}'?"
-        
-        return BenchmarkQuestion(
-            question_text=question_text,
-            answer_type=AnswerType.NUMERIC,
-            correct_answer=count,
-            category="Letter Counting",
-            difficulty=Difficulty.EASY,
-            tags=["letter_count", "spelling", "counting"],
-            evaluation_criteria=EvaluationCriteria(
-                exact_match=True,
-                tolerance=0.0  # No tolerance for counting - must be exact
+            
+            # Count occurrences
+            count = word.lower().count(letter.lower())
+            
+            # Create the question
+            question_text = f"How many times does the letter '{letter}' appear in the word '{word}'?"
+            
+            question = BenchmarkQuestion(
+                question_text=question_text,
+                answer_type=AnswerType.NUMERIC,
+                correct_answer=count,
+                category="Letter Counting",
+                difficulty=Difficulty.EASY,
+                tags=["letter_count", "spelling", "counting"],
+                evaluation_criteria=EvaluationCriteria(
+                    exact_match=True,
+                    tolerance=0.0  # No tolerance for counting - must be exact
+                )
             )
-        )
+            
+            yield question
