@@ -6,7 +6,7 @@ Registry for various benchmarks.
 
 import logging
 from lib.benchmarks.data_models import BenchmarkMetadata
-from lib.benchmarks.factory import benchmark, register_runner
+from lib.benchmarks.factory import benchmark, register_generator, register_runner
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -79,4 +79,5 @@ for codepair in ["en_fr", "en_zh", "sw_ko"]:
     class TranslationBenchmark:
         """Module container for spell check benchmark."""
         pass
+    register_generator(benchmark_code, TranslationGenerator)
     register_runner(benchmark_code, TranslationRunner)
