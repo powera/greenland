@@ -305,15 +305,6 @@ class BenchmarkGenerator:
         Yields:
             BenchmarkQuestion objects
         """
-        # If we already have a combined generator, use it
-        if self._combined_generator is not None:
-            questions_generated = 0
-            for question in self._combined_generator:
-                yield question
-                questions_generated += 1
-                if count is not None and questions_generated >= count:
-                    break
-            return
             
         # Otherwise, create a new combined generator
         questions_generated = 0
