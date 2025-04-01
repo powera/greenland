@@ -3,8 +3,7 @@
 """Generator for antonym benchmark questions."""
 
 import logging
-import os
-from typing import Optional, List, Dict, Iterator
+from typing import Optional, Iterator
 
 from sqlalchemy.orm import Session
 

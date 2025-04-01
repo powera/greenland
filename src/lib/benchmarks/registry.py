@@ -14,6 +14,15 @@ logger = logging.getLogger(__name__)
 
 # Register benchmark metadata
 
+from lib.benchmarks.generators.word_length_generator import WordLengthGenerator
+from lib.benchmarks.runners.word_length_runner import WordLengthRunner
+@benchmark(code="0011_word_length", name="Word Length", description="""
+           A benchmark to evaluate a model's ability to count 
+           the total number of letters in a given word.""")
+class WordLengthBenchmark:
+    """Module container for word length benchmark."""
+    pass
+
 from lib.benchmarks.generators.letter_count_generator import LetterCountGenerator
 from lib.benchmarks.runners.letter_count_runner import LetterCountRunner
 @benchmark(code="0012_letter_count", name="Letter Count", description="""
@@ -81,3 +90,14 @@ for codepair in ["en_fr", "en_zh", "sw_ko"]:
         pass
     register_generator(benchmark_code, TranslationGenerator)
     register_runner(benchmark_code, TranslationRunner)
+
+from lib.benchmarks.generators.pinyin_letter_count_generator import PinyinLetterCountGenerator
+from lib.benchmarks.runners.pinyin_letter_count_runner import PinyinLetterCountRunner
+@benchmark(code="0051_pinyin_letters", 
+           name="Pinyin Letter Count", 
+           description="""A benchmark to evaluate a model's ability to count 
+           how many times a specific letter appears in the Pinyin representation 
+           of a Chinese sentence.""")
+class PinyinLetterCountBenchmark:
+    """Module container for Pinyin letter count benchmark."""
+    pass
