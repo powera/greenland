@@ -101,3 +101,18 @@ from lib.benchmarks.runners.pinyin_letter_count_runner import PinyinLetterCountR
 class PinyinLetterCountBenchmark:
     """Module container for Pinyin letter count benchmark."""
     pass
+
+
+# Register the geography benchmark
+from lib.benchmarks.generators.geography_generator import GeographyGenerator
+from lib.benchmarks.runners.geography_runner import GeographyRunner
+@benchmark(code="0120_geography", name="Geography Knowledge", description="""
+           A benchmark to evaluate a model's knowledge of world geography through
+           multiple-choice questions about countries, capitals, physical features,
+           and other geographical information.""")
+class GeographyBenchmark:
+    """Module container for geography benchmark."""
+    pass
+
+register_generator("0120_geography", GeographyGenerator)
+register_runner("0120_geography", GeographyRunner)
