@@ -39,5 +39,7 @@ core_files:
     description: Part-of-speech benchmark runner
 
     templates:
-    # Verbalator
-  - path: src/verbalator/templates/index.html
+  - path: templates/model_scores.html
+    description: Model scores main page template
+  - path: templates/run_details.html
+    description: Individual run details template
