@@ -12,3 +12,6 @@ from lib.benchmarks.generators.spell_check_generator import SpellCheckGenerator
 from lib.benchmarks.generators.translations_generator import TranslationGenerator
 from lib.benchmarks.generators.unit_conversion_generator import UnitConversionGenerator
 from lib.benchmarks.generators.word_length_generator import WordLengthGenerator
+
+# Knowledge generators
+from lib.benchmarks.generators.geography_generator import GeographyGenerator

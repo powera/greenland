@@ -12,3 +12,6 @@ from lib.benchmarks.runners.spell_check_runner import SpellCheckRunner
 from lib.benchmarks.runners.translations_runner import TranslationRunner
 from lib.benchmarks.runners.unit_conversion_runner import UnitConversionRunner
 from lib.benchmarks.runners.word_length_runner import WordLengthRunner
+
+# Knowledge questions
+from lib.benchmarks.runners.geography_runner import GeographyRunner

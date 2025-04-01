@@ -45,7 +45,7 @@ class BenchmarkGenerator:
     strategies when one source is exhausted, ensuring efficient question generation.
     """
     
-    def __init__(self, metadata: BenchmarkMetadata, session=None):
+    def __init__(self, metadata: BenchmarkMetadata, session=None, auto_validate: bool = False):
         """
         Initialize generator with benchmark metadata.
         
@@ -55,6 +55,8 @@ class BenchmarkGenerator:
         """
         self.metadata = metadata
         self.session = session or datastore.benchmarks.create_dev_session()
+        self.auto_validate = auto_validate
+        self.validation_model = DEFAULT_VALIDATION_MODEL
         
         # Strategy configuration flags (subclasses should override these)
         self.can_load_from_file = False  # Set to True if questions can be loaded from files
