@@ -67,3 +67,23 @@ RIVERS = [
     "Ob", "Yenisei", "Lena", "Amur", "Indus", "Brahmaputra", "Salween", "Irrawaddy", "Murray", "Darling",
     "Colorado", "Columbia", "St. Lawrence", "Orinoco", "Paraná", "Zambezi", "Niger", "Tigris", "Euphrates"
 ]
+
+# List of common animals
+ANIMALS = [
+    "alligator", "bear", "cat", "cheetah", "chimpanzee", "cow", "crocodile", "deer", "dog", "dolphin",
+    "elephant", "fox", "giraffe", "goat", "gorilla", "hippopotamus", "horse", "kangaroo", "koala", "leopard",
+    "lion", "monkey", "panda", "pig", "rabbit", "rhinoceros", "sheep", "tiger", "wolf", "zebra"
+]
+
+# List of common colors
+COLORS = [
+    "red", "blue", "green", "yellow", "purple", "orange", "pink", "brown", "black", "white",
+    "gray", "cyan", "magenta", "violet", "indigo", "gold", "silver", "beige", "teal", "navy"
+]
+
+# List of common foods
+FOODS = [
+    "pizza", "burger", "pasta", "salad", "sushi", "sandwich", "taco", "cake", "ice cream", "chocolate",
+    "fruit", "vegetable", "rice", "bread", "cheese", "egg", "chicken", "fish", "steak", "seafood",
+    "soup", "cereal", "oatmeal", "pie", "cookie", "donut", "waffle"
+]
