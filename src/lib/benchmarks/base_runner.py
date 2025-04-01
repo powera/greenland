@@ -35,6 +35,7 @@ class BenchmarkRunner:
         """
         self.model = model
         self.metadata = metadata
+        self.logger = logger  # TODO: don't use self
         
         # Handle quantization suffix in model names
         if "gpt-" in self.model or "claude-" in self.model:
