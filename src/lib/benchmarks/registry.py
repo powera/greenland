@@ -78,6 +78,23 @@ class PartOfSpeechBenchmark:
     """Module container for part of speech benchmark."""
     pass
 
+from lib.benchmarks.generators.lemma_generator import LemmaGenerator
+from lib.benchmarks.runners.lemma_runner import LemmaRunner
+@benchmark(code="0033_lemma", name="Lemma Identification", description="""
+         A benchmark to evaluate a model's ability to identify the lemma (base form) 
+         of a given word. The lemma is the dictionary form:
+         - For nouns: the singular form (e.g., "cats" → "cat")
+         - For verbs: the infinitive form without "to" (e.g., "running" → "run")
+         - For adjectives: the positive form (e.g., "better" → "good")
+         """)
+class LemmaBenchmark:
+    """Module container for lemma identification benchmark."""
+    pass
+
+# Register generator and runner
+register_generator("0033_lemma", LemmaGenerator)
+register_runner("0033_lemma", LemmaRunner)
+
 from lib.benchmarks.generators.translations_generator import TranslationGenerator
 from lib.benchmarks.runners.translations_runner import TranslationRunner
 for codepair in ["en_fr", "en_zh", "sw_ko"]:
