@@ -5,6 +5,7 @@
 # Import all runners to register them with the factory
 from lib.benchmarks.runners.antonym_runner import AntonymRunner
 from lib.benchmarks.runners.definitions_runner import DefinitionsRunner 
+from lib.benchmarks.runners.lemma_runner import LemmaRunner
 from lib.benchmarks.runners.letter_count_runner import LetterCountRunner
 from lib.benchmarks.runners.part_of_speech_runner import PartOfSpeechRunner
 from lib.benchmarks.runners.pinyin_letter_count_runner import PinyinLetterCountRunner
