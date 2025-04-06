@@ -10,6 +10,7 @@ import os
 from typing import Dict, List, Optional, Any, Set, Tuple
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
+import constants
 from wordfreq import linguistic_db
 from wordfreq.linguistic_client import LinguisticClient
 
@@ -18,9 +19,9 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 # Constants
-DEFAULT_DB_PATH = 'linguistics.sqlite'
+DEFAULT_DB_PATH = constants.WORDFREQ_DB_PATH
 DEFAULT_BATCH_SIZE = 50
-DEFAULT_THREADS = 4
+DEFAULT_THREADS = 5
 DEFAULT_MAX_RETRIES = 3
 DEFAULT_THROTTLE = 1.0  # seconds between API calls
 
@@ -30,7 +31,7 @@ class WordProcessor:
     def __init__(
         self, 
         db_path: str = DEFAULT_DB_PATH,
-        model: str = "llama3.2:3b",
+        model: str = "gpt-4o-2024-11-20",
         threads: int = DEFAULT_THREADS,
         batch_size: int = DEFAULT_BATCH_SIZE,
         throttle: float = DEFAULT_THROTTLE,

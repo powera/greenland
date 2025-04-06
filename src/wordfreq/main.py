@@ -6,6 +6,7 @@ import os
 import logging
 from typing import Dict, List, Optional, Any
 
+import constants
 from wordfreq import linguistic_db
 from wordfreq.word_processor import WordProcessor
 from wordfreq.linguistic_client import LinguisticClient
@@ -17,7 +18,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 # Constants
-DEFAULT_DB_PATH = 'linguistics.sqlite'
+DEFAULT_DB_PATH = constants.WORDFREQ_DB_PATH
 DEFAULT_MODEL = 'llama3.2:3b'
 
 def main():

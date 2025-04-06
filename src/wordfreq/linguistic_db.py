@@ -9,6 +9,8 @@ from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Mapped, mapped_column, relationship, DeclarativeBase, sessionmaker
 from sqlalchemy.sql import func
 
+import constants
+
 # Define the base class for SQLAlchemy models
 class Base(DeclarativeBase):
     """Base class for all SQLAlchemy models."""
@@ -82,7 +84,7 @@ class QueryLog(Base):
     success: Mapped[bool] = mapped_column(Boolean, default=True)
     error: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
-def create_database_session(db_path: str = 'linguistics.sqlite'):
+def create_database_session(db_path: str = constants.WORDFREQ_DB_PATH):
     """Create a new database session."""
     engine = create_engine(f'sqlite:///{db_path}')
     Base.metadata.create_all(engine)
