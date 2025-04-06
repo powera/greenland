@@ -119,6 +119,18 @@ class PinyinLetterCountBenchmark:
     """Module container for Pinyin letter count benchmark."""
     pass
 
+from lib.benchmarks.generators.english_to_ipa_generator import EnglishToIPAGenerator
+from lib.benchmarks.runners.english_to_ipa_runner import EnglishToIPARunner
+@benchmark(code="0061_english_to_ipa", name="English to IPA", description="""
+           A benchmark to evaluate a model's ability to convert English words 
+           to their IPA (International Phonetic Alphabet) pronunciation.""")
+class EnglishToIPABenchmark:
+    """Module container for English to IPA benchmark."""
+    pass
+
+# Register the generator and runner classes
+register_generator("0061_english_to_ipa", EnglishToIPAGenerator)
+register_runner("0061_english_to_ipa", EnglishToIPARunner)
 
 # Register the geography benchmark
 from lib.benchmarks.generators.geography_generator import GeographyGenerator
