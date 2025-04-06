@@ -27,8 +27,8 @@ def run_script(script_path: str, args: list) -> None:
     sys.argv = [script_path] + args
     
     # Add scripts prefix if not present
-    if not script_path.startswith("scripts."):
-        script_path = f"scripts.{script_path}"
+    #if not script_path.startswith("scripts."):
+    #    script_path = f"scripts.{script_path}"
     
     # Import and run the script
     try:
