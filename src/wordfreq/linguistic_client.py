@@ -8,7 +8,7 @@ import time
 from typing import Dict, List, Optional, Any, Tuple
 
 from clients.unified_client import UnifiedLLMClient
-import wordfreq.linguistic_db
+from wordfreq import linguistic_db
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -96,7 +96,7 @@ class LinguisticClient:
                                 "description": "Additional notes about the word"
                             }
                         },
-                        "required": ["pos", "confidence"]
+                        "required": ["pos", "confidence", "multiple_meanings", "different_pos", "special_case", "notes"]
                     }
                 }
             },

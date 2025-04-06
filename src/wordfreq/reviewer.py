@@ -7,6 +7,7 @@ import sys
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
 
+import constants
 from wordfreq import linguistic_db
 
 # Configure logging
@@ -29,7 +30,7 @@ class CliColors:
 class LinguisticReviewer:
     """Interactive tool for reviewing and updating linguistic data."""
     
-    def __init__(self, db_path: str = 'linguistics.sqlite'):
+    def __init__(self, db_path: str = constants.WORDFREQ_DB_PATH):
         """
         Initialize reviewer with database session.
         
@@ -542,7 +543,7 @@ def main():
     import argparse
     
     parser = argparse.ArgumentParser(description="Review and update linguistic data")
-    parser.add_argument("--db", default="linguistics.sqlite", help="Database file path")
+    parser.add_argument("--db", default=constants.WORDFREQ_DB_PATH, help="Database file path")
     parser.add_argument("--word", help="Word to display/edit (skips menu)")
     
     args = parser.parse_args()

@@ -16,3 +16,6 @@ OUTPUT_DIR = os.path.join(os.path.dirname(PROJECT_ROOT), "greenland_output")
 
 # Verbalator directories; possibly should be refactored
 VERBALATOR_HTML_DIR = os.path.join(PROJECT_ROOT, "public_html")
+
+# Wordfreq directories
+WORDFREQ_DB_PATH = os.path.join(SRC_DIR, "wordfreq", "data", "linguistics.sqlite")
