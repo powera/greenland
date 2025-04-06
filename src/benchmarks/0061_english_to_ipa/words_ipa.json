@@ -1,0 +1,289 @@
+[
+    {
+      "word": "read",
+      "sentence": "I will read this book tomorrow.",
+      "ipa": "ɹid",
+      "difficulty": "easy",
+      "alternatives": ["riːd"]
+    },
+    {
+      "word": "read",
+      "sentence": "I read this book yesterday.",
+      "ipa": "ɹɛd",
+      "difficulty": "easy",
+      "alternatives": ["rɛd"]
+    },
+    {
+      "word": "minute",
+      "sentence": "I'll be ready in a minute.",
+      "ipa": "ˈmɪnɪt",
+      "difficulty": "easy",
+      "alternatives": ["ˈmɪnət"]
+    },
+    {
+      "word": "minute",
+      "sentence": "There's a minute difference between these samples.",
+      "ipa": "maɪˈnut",
+      "difficulty": "medium",
+      "alternatives": ["maɪˈnjut"]
+    },
+    {
+      "word": "bass",
+      "sentence": "He plays bass guitar in a rock band.",
+      "ipa": "beɪs",
+      "difficulty": "easy",
+      "alternatives": ["beɪs"]
+    },
+    {
+      "word": "bass",
+      "sentence": "We caught a large bass while fishing.",
+      "ipa": "bæs",
+      "difficulty": "easy",
+      "alternatives": ["bɑːs"]
+    },
+    {
+      "word": "wind",
+      "sentence": "The wind is blowing strongly today.",
+      "ipa": "wɪnd",
+      "difficulty": "easy",
+      "alternatives": ["wɪnd"]
+    },
+    {
+      "word": "wind",
+      "sentence": "Please wind the clock before going to bed.",
+      "ipa": "waɪnd",
+      "difficulty": "easy",
+      "alternatives": ["waɪnd"]
+    },
+    {
+      "word": "tear",
+      "sentence": "A tear rolled down her cheek.",
+      "ipa": "tɪɹ",
+      "difficulty": "easy",
+      "alternatives": ["tɪə(r)", "tɪər"]
+    },
+    {
+      "word": "tear",
+      "sentence": "Be careful not to tear the paper.",
+      "ipa": "tɛɹ",
+      "difficulty": "easy",
+      "alternatives": ["teə(r)", "tɛər"]
+    },
+    {
+      "word": "through",
+      "sentence": "We walked through the park.",
+      "ipa": "θɹu",
+      "difficulty": "medium",
+      "alternatives": ["θruː"]
+    },
+    {
+      "word": "knight",
+      "sentence": "The knight rescued the princess.",
+      "ipa": "naɪt",
+      "difficulty": "medium",
+      "alternatives": ["naɪt"]
+    },
+    {
+      "word": "psychology",
+      "sentence": "She's studying psychology at university.",
+      "ipa": "saɪˈkɑlədʒi",
+      "difficulty": "hard",
+      "alternatives": ["saɪˈkɒlədʒi"]
+    },
+    {
+      "word": "colonel",
+      "sentence": "The colonel gave orders to his regiment.",
+      "ipa": "ˈkɜɹnəl",
+      "difficulty": "hard",
+      "alternatives": ["ˈkɜːnl̩"]
+    },
+    {
+      "word": "subtle",
+      "sentence": "There was a subtle hint of lemon in the dish.",
+      "ipa": "ˈsʌtl̩",
+      "difficulty": "medium",
+      "alternatives": ["ˈsʌtəl"]
+    },
+    {
+      "word": "epitome",
+      "sentence": "This painting is the epitome of Renaissance art.",
+      "ipa": "əˈpɪtəmi",
+      "difficulty": "hard",
+      "alternatives": ["ɪˈpɪtəmi"]
+    },
+    {
+      "word": "chaos",
+      "sentence": "The room was in chaos after the party.",
+      "ipa": "ˈkeɪɑs",
+      "difficulty": "medium",
+      "alternatives": ["ˈkeɪɒs"]
+    },
+    {
+      "word": "queue",
+      "sentence": "We had to wait in a long queue.",
+      "ipa": "kju",
+      "difficulty": "medium",
+      "alternatives": ["kjuː"]
+    },
+    {
+      "word": "quay",
+      "sentence": "The boats were tied up at the quay.",
+      "ipa": "ki",
+      "difficulty": "hard",
+      "alternatives": ["kiː"]
+    },
+    {
+      "word": "island",
+      "sentence": "We spent our vacation on a tropical island.",
+      "ipa": "ˈaɪlənd",
+      "difficulty": "medium",
+      "alternatives": ["ˈaɪlənd"]
+    },
+    {
+      "word": "schedule",
+      "sentence": "I have a busy schedule this week.",
+      "ipa": "ˈskɛdʒul",
+      "difficulty": "medium",
+      "alternatives": ["ˈʃɛdjuːl"]
+    },
+    {
+      "word": "leisure",
+      "sentence": "Reading is one of my favorite leisure activities.",
+      "ipa": "ˈliʒɚ",
+      "difficulty": "medium",
+      "alternatives": ["ˈlɛʒə(r)"]
+    },
+    {
+      "word": "debt",
+      "sentence": "They are working to pay off their debt.",
+      "ipa": "dɛt",
+      "difficulty": "medium",
+      "alternatives": ["det"]
+    },
+    {
+      "word": "salmon",
+      "sentence": "We had salmon for dinner.",
+      "ipa": "ˈsæmən",
+      "difficulty": "medium",
+      "alternatives": ["ˈsæmən"]
+    },
+    {
+      "word": "yacht",
+      "sentence": "They sailed around the world in their yacht.",
+      "ipa": "jɑt",
+      "difficulty": "hard",
+      "alternatives": ["jɒt"]
+    },
+    {
+      "word": "aisle",
+      "sentence": "The bride walked down the aisle.",
+      "ipa": "aɪl",
+      "difficulty": "medium",
+      "alternatives": ["aɪl"]
+    },
+    {
+      "word": "heir",
+      "sentence": "He is the heir to the throne.",
+      "ipa": "ɛɹ",
+      "difficulty": "medium",
+      "alternatives": ["eə(r)"]
+    },
+    {
+      "word": "honest",
+      "sentence": "Please be honest with me.",
+      "ipa": "ˈɑnɪst",
+      "difficulty": "medium",
+      "alternatives": ["ˈɒnɪst"]
+    },
+    {
+      "word": "gnome",
+      "sentence": "There was a ceramic gnome in the garden.",
+      "ipa": "noʊm",
+      "difficulty": "medium",
+      "alternatives": ["nəʊm"]
+    },
+    {
+      "word": "pneumonia",
+      "sentence": "She was hospitalized with pneumonia.",
+      "ipa": "nuˈmoʊniə",
+      "difficulty": "hard",
+      "alternatives": ["njuːˈməʊniə"]
+    },
+    {
+      "word": "xylophone",
+      "sentence": "She plays the xylophone in the orchestra.",
+      "ipa": "ˈzaɪləfoʊn",
+      "difficulty": "hard",
+      "alternatives": ["ˈzaɪləfəʊn"]
+    },
+    {
+      "word": "phlegm",
+      "sentence": "The cough medicine helps to clear phlegm.",
+      "ipa": "flɛm",
+      "difficulty": "hard",
+      "alternatives": ["flem"]
+    },
+    {
+      "word": "either",
+      "sentence": "You can choose either option.",
+      "ipa": "ˈiðɚ",
+      "difficulty": "medium",
+      "alternatives": ["ˈaɪðə(r)"]
+    },
+    {
+      "word": "caramel",
+      "sentence": "I love caramel sauce on ice cream.",
+      "ipa": "ˈkɛɹəməl",
+      "difficulty": "medium",
+      "alternatives": ["ˈkærəmel", "ˈkɑɹməl"]
+    },
+    {
+      "word": "data",
+      "sentence": "We need to analyze this data.",
+      "ipa": "ˈdeɪtə",
+      "difficulty": "medium",
+      "alternatives": ["ˈdɑːtə", "ˈdætə"]
+    },
+    {
+      "word": "route",
+      "sentence": "What's the quickest route to the airport?",
+      "ipa": "ɹut",
+      "difficulty": "medium",
+      "alternatives": ["raʊt"]
+    },
+    {
+      "word": "often",
+      "sentence": "I often go for a run in the morning.",
+      "ipa": "ˈɔfən",
+      "difficulty": "medium",
+      "alternatives": ["ˈɔftən", "ˈɒfən", "ˈɒftən"]
+    },
+    {
+      "word": "syrup",
+      "sentence": "I like maple syrup on pancakes.",
+      "ipa": "ˈsɪɹəp",
+      "difficulty": "medium",
+      "alternatives": ["ˈsɜːrəp", "ˈsɪrʌp"]
+    },
+    {
+      "word": "privacy",
+      "sentence": "We value our customers' privacy.",
+      "ipa": "ˈpɹaɪvəsi",
+      "difficulty": "medium",
+      "alternatives": ["ˈprɪvəsi"]
+    },
+    {
+      "word": "genre",
+      "sentence": "Science fiction is my favorite genre of film.",
+      "ipa": "ˈʒɑnɹə",
+      "difficulty": "hard",
+      "alternatives": ["ˈʒɒnrə"]
+    },
+    {
+      "word": "segue",
+      "sentence": "Let's segue into our next topic.",
+      "ipa": "ˈsɛgweɪ",
+      "difficulty": "hard",
+      "alternatives": ["ˈsegweɪ"]
+    }
+  ]
