@@ -92,27 +92,35 @@ class LinguisticClient:
         """
         return get_session(self.db_path, echo=self.debug)
 
-    def query_part_of_speech(self, word: str) -> Tuple[List[Dict[str, Any]], bool]:
+    def query_definitions(self, word: str) -> Tuple[List[Dict[str, Any]], bool]:
         """
-        Query LLM for part of speech information.
+        Query LLM for definitions, POS, and lemma information.
         
         Args:
             word: Word to analyze
             
         Returns:
-            Tuple of (list of POS data, success flag)
+            Tuple of (list of definition data, success flag)
         """
         schema = {
             "type": "object",
             "properties": {
-                "parts_of_speech": {
+                "definitions": {
                     "type": "array",
                     "items": {
                         "type": "object",
                         "properties": {
+                            "definition": {
+                                "type": "string",
+                                "description": "The definition of the word for this specific meaning"
+                            },
                             "pos": {
                                 "type": "string",
-                                "description": "The part of speech (noun, verb, etc.)"
+                                "description": "The part of speech for this definition (noun, verb, etc.)"
+                            },
+                            "lemma": {
+                                "type": "string",
+                                "description": "The base form (lemma) for this definition"
                             },
                             "confidence": {
                                 "type": "number",
@@ -120,11 +128,7 @@ class LinguisticClient:
                             },
                             "multiple_meanings": {
                                 "type": "boolean",
-                                "description": "Whether the word has multiple meanings in this part of speech"
-                            },
-                            "different_pos": {
-                                "type": "boolean",
-                                "description": "Whether the word can be used as different parts of speech"
+                                "description": "Whether this definition covers multiple related meanings"
                             },
                             "special_case": {
                                 "type": "boolean",
@@ -132,155 +136,58 @@ class LinguisticClient:
                             },
                             "notes": {
                                 "type": "string",
-                                "description": "Additional notes about the word"
+                                "description": "Additional notes about this definition"
+                            },
+                            "examples": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "description": "Example sentence using this definition"
+                                }
                             }
                         },
                         "additionalProperties": False,
-                        "required": ["pos", "confidence", "multiple_meanings", "different_pos", "special_case", "notes"]
+                        "required": ["definition", "pos", "lemma", "confidence", "multiple_meanings", "special_case", "notes", "examples"]
                     }
                 }
             },
-            "required": ["parts_of_speech"]
+            "additionalProperties": False,
+            "required": ["definitions"]
         }
         
         context = """
-        You are a linguistic expert specialized in part of speech analysis.
+        You are a linguistic expert specialized in dictionary definitions.
         
-        Your task is to identify all possible parts of speech for a given word.
+        Your task is to provide comprehensive definitions for a given word, including:
+        - All distinct meanings of the word
+        - The part of speech for each definition
+        - The base form (lemma) for each definition
+        - Example sentences for each definition
         
         Valid parts of speech include: noun, verb, adjective, adverb, pronoun, preposition, 
         conjunction, interjection, determiner, article, numeral, auxiliary, modal.
         
-        For each part of speech, provide:
-        1. A confidence score (0-1)
-        2. Whether the word has multiple meanings in this part of speech
-        3. Whether the word can be used as different parts of speech
-        4. Whether this is a special case (foreign word, part of name, etc.)
-        5. Any additional notes about the word's usage
-        
-        Respond only with a structured JSON object following the schema provided.
-        """
-        
-        prompt = f"What is the part of speech of the word '{word}'?"
-        
-        # Try multiple times in case of failure
-        for attempt in range(RETRY_COUNT):
-            try:
-                response = self.client.generate_chat(
-                    prompt=prompt,
-                    model=self.model,
-                    json_schema=schema,
-                    context=context
-                )
-                
-                # Log the query
-                try:
-                    session = self.get_session()
-                    linguistic_db.log_query(
-                        session,
-                        word=word,
-                        query_type='pos',
-                        prompt=prompt,
-                        response=json.dumps(response.structured_data),
-                        model=self.model
-                    )
-                except Exception as e:
-                    logger.error(f"Failed to log query: {e}")
-                
-                if response.structured_data and 'parts_of_speech' in response.structured_data:
-                    return response.structured_data['parts_of_speech'], True
-                else:
-                    logger.warning(f"Failed to get valid POS response for '{word}' (attempt {attempt+1})")
-                    time.sleep(RETRY_DELAY)
-            except Exception as e:
-                logger.error(f"Error querying for POS: {e} (attempt {attempt+1})")
-                
-                # Log the failed query
-                try:
-                    session = self.get_session()
-                    linguistic_db.log_query(
-                        session,
-                        word=word,
-                        query_type='pos',
-                        prompt=prompt,
-                        response=str(e),
-                        model=self.model,
-                        success=False,
-                        error=str(e)
-                    )
-                except Exception as log_err:
-                    logger.error(f"Failed to log query error: {log_err}")
-                    
-                time.sleep(RETRY_DELAY)
-        
-        # Return empty list if all attempts failed
-        return [], False
-                
-    def query_lemma(self, word: str) -> Tuple[List[Dict[str, Any]], bool]:
-        """
-        Query LLM for lemma information.
-        
-        Args:
-            word: Word to analyze
-            
-        Returns:
-            Tuple of (list of lemma data, success flag)
-        """
-        schema = {
-            "type": "object",
-            "properties": {
-                "lemmas": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "lemma": {
-                                "type": "string",
-                                "description": "The base form (lemma) of the word"
-                            },
-                            "pos": {
-                                "type": "string",
-                                "description": "The part of speech this lemma applies to"
-                            },
-                            "confidence": {
-                                "type": "number",
-                                "description": "Confidence score from 0-1"
-                            },
-                            "notes": {
-                                "type": "string",
-                                "description": "Additional notes about the lemma"
-                            }
-                        },
-                        "required": ["lemma", "pos", "confidence", "notes"]
-                    }
-                }
-            },
-            "additionalProperties": False,
-            "required": ["lemmas"]
-        }
-        
-        context = """
-        You are a linguistic expert specialized in lemmatization.
-        
-        Lemmatization is the process of finding the base form (lemma) of a word:
+        For lemmatization (finding the base form):
         - For nouns: the singular form (e.g., "cats" → "cat")
         - For verbs: the infinitive form without "to" (e.g., "running" → "run")
         - For adjectives and adverbs: the positive form (e.g., "better" → "good")
         
-        Your task is to identify the lemma (base form) of a given word.
+        For each definition, provide:
+        1. The definition text
+        2. The part of speech
+        3. The lemma (base form)
+        4. A confidence score (0-1)
+        5. Whether this definition covers multiple related meanings
+        6. Whether this is a special case (foreign word, part of name, etc.)
+        7. Any additional notes about the definition
+        8. At least one example sentence
         
-        If the word has multiple possible lemmas depending on part of speech, provide each one.
-        
-        For each lemma, provide:
-        1. The lemma itself
-        2. The part of speech it applies to (noun, verb, etc.)
-        3. A confidence score (0-1)
-        4. Any additional notes
+        Make sure to separate different definitions (e.g., "bank" as a financial institution vs. "bank" as the side of a river).
         
         Respond only with a structured JSON object following the schema provided.
         """
         
-        prompt = f"What is the lemma (base form) of the word '{word}'?"
+        prompt = f"Provide comprehensive dictionary definitions for the word '{word}'."
         
         # Try multiple times in case of failure
         for attempt in range(RETRY_COUNT):
@@ -298,7 +205,7 @@ class LinguisticClient:
                     linguistic_db.log_query(
                         session,
                         word=word,
-                        query_type='lemma',
+                        query_type='definitions',
                         prompt=prompt,
                         response=json.dumps(response.structured_data),
                         model=self.model
@@ -306,13 +213,13 @@ class LinguisticClient:
                 except Exception as e:
                     logger.error(f"Failed to log query: {e}")
                 
-                if response.structured_data and 'lemmas' in response.structured_data:
-                    return response.structured_data['lemmas'], True
+                if response.structured_data and 'definitions' in response.structured_data:
+                    return response.structured_data['definitions'], True
                 else:
-                    logger.warning(f"Failed to get valid lemma response for '{word}' (attempt {attempt+1})")
+                    logger.warning(f"Failed to get valid definitions response for '{word}' (attempt {attempt+1})")
                     time.sleep(RETRY_DELAY)
             except Exception as e:
-                logger.error(f"Error querying for lemma: {e} (attempt {attempt+1})")
+                logger.error(f"Error querying for definitions: {e} (attempt {attempt+1})")
                 
                 # Log the failed query
                 try:
@@ -320,7 +227,7 @@ class LinguisticClient:
                     linguistic_db.log_query(
                         session,
                         word=word,
-                        query_type='lemma',
+                        query_type='definitions',
                         prompt=prompt,
                         response=str(e),
                         model=self.model,
@@ -335,176 +242,13 @@ class LinguisticClient:
         # Return empty list if all attempts failed
         return [], False
     
-    def query_combined(self, word: str) -> Tuple[Dict[str, List[Dict[str, Any]]], bool]:
-        """
-        Query LLM for both part of speech and lemma information.
-        
-        Args:
-            word: Word to analyze
-            
-        Returns:
-            Tuple of (dict with 'parts_of_speech' and 'lemmas' lists, success flag)
-        """
-        schema = {
-            "type": "object",
-            "properties": {
-                "parts_of_speech": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "pos": {
-                                "type": "string",
-                                "description": "The part of speech (noun, verb, etc.)"
-                            },
-                            "confidence": {
-                                "type": "number",
-                                "description": "Confidence score from 0-1"
-                            },
-                            "multiple_meanings": {
-                                "type": "boolean",
-                                "description": "Whether the word has multiple meanings in this part of speech"
-                            },
-                            "different_pos": {
-                                "type": "boolean",
-                                "description": "Whether the word can be used as different parts of speech"
-                            },
-                            "special_case": {
-                                "type": "boolean",
-                                "description": "Whether this is a special case (foreign word, part of name, etc.)"
-                            },
-                            "notes": {
-                                "type": "string",
-                                "description": "Additional notes about the word"
-                            }
-                        },
-                        "additionalProperties": False,
-                        "required": ["pos", "confidence", "multiple_meanings", "different_pos", "special_case", "notes"]
-                    }
-                },
-                "lemmas": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "lemma": {
-                                "type": "string",
-                                "description": "The base form (lemma) of the word"
-                            },
-                            "pos": {
-                                "type": "string",
-                                "description": "The part of speech this lemma applies to"
-                            },
-                            "confidence": {
-                                "type": "number",
-                                "description": "Confidence score from 0-1"
-                            },
-                            "notes": {
-                                "type": "string",
-                                "description": "Additional notes about the lemma"
-                            }
-                        },
-                        "additionalProperties": False,
-                        "required": ["lemma", "pos", "confidence", "notes"]
-                    }
-                }
-            },
-            "additionalProperties": False,
-            "required": ["parts_of_speech", "lemmas"]
-        }
-        
-        context = """
-        You are a linguistic expert specialized in both part of speech analysis and lemmatization.
-        
-        Your task is to analyze a given word and provide:
-        
-        1. All possible parts of speech for the word
-           - Valid parts of speech include: noun, verb, adjective, adverb, pronoun, preposition, 
-             conjunction, interjection, determiner, article, numeral, auxiliary, modal
-           - For each part of speech, provide:
-             a. A confidence score (0-1)
-             b. Whether the word has multiple meanings in this part of speech
-             c. Whether the word can be used as different parts of speech
-             d. Whether this is a special case (foreign word, part of name, etc.)
-             e. Any additional notes about the word's usage
-        
-        2. All possible lemmas (base forms) for the word
-           - Lemmatization is the process of finding the base form:
-             a. For nouns: the singular form (e.g., "cats" → "cat")
-             b. For verbs: the infinitive form without "to" (e.g., "running" → "run")
-             c. For adjectives and adverbs: the positive form (e.g., "better" → "good")
-           - For each lemma, provide:
-             a. The lemma itself
-             b. The part of speech it applies to (noun, verb, etc.)
-             c. A confidence score (0-1)
-             d. Any additional notes
-        
-        Respond only with a structured JSON object following the schema provided.
-        """
-        
-        prompt = f"Analyze the word '{word}' for its parts of speech and lemma (base form)."
-        
-        # Try multiple times in case of failure
-        for attempt in range(RETRY_COUNT):
-            try:
-                response = self.client.generate_chat(
-                    prompt=prompt,
-                    model=self.model,
-                    json_schema=schema,
-                    context=context
-                )
-                
-                # Log the query
-                try:
-                    session = self.get_session()
-                    linguistic_db.log_query(
-                        session,
-                        word=word,
-                        query_type='both',
-                        prompt=prompt,
-                        response=json.dumps(response.structured_data),
-                        model=self.model
-                    )
-                except Exception as e:
-                    logger.error(f"Failed to log query: {e}")
-                
-                if response.structured_data and 'parts_of_speech' in response.structured_data and 'lemmas' in response.structured_data:
-                    return response.structured_data, True
-                else:
-                    logger.warning(f"Failed to get valid combined response for '{word}' (attempt {attempt+1})")
-                    time.sleep(RETRY_DELAY)
-            except Exception as e:
-                logger.error(f"Error querying for combined info: {e} (attempt {attempt+1})")
-                
-                # Log the failed query
-                try:
-                    session = self.get_session()
-                    linguistic_db.log_query(
-                        session,
-                        word=word,
-                        query_type='both',
-                        prompt=prompt,
-                        response=str(e),
-                        model=self.model,
-                        success=False,
-                        error=str(e)
-                    )
-                except Exception as log_err:
-                    logger.error(f"Failed to log query error: {log_err}")
-                    
-                time.sleep(RETRY_DELAY)
-        
-        # Return empty dict if all attempts failed
-        return {'parts_of_speech': [], 'lemmas': []}, False
-    
-    def process_word(self, word: str, rank: Optional[int] = None, use_combined: bool = True) -> bool:
+    def process_word(self, word: str, rank: Optional[int] = None) -> bool:
         """
         Process a word to get linguistic information and store in database.
         
         Args:
             word: Word to process
             rank: Optional frequency ranking of the word
-            use_combined: Whether to use combined query for POS and lemma
             
         Returns:
             Success flag
@@ -514,72 +258,36 @@ class LinguisticClient:
         # Add or get word in database
         word_obj = linguistic_db.add_word(session, word, rank)
         
-        if use_combined:
-            # Query for both POS and lemma in one call
-            results, success = self.query_combined(word)
+        # Query for definitions, POS, lemmas, and examples
+        definitions, success = self.query_definitions(word)
+        
+        if success:
+            for def_data in definitions:
+                # Add definition with POS and lemma
+                definition = linguistic_db.add_definition(
+                    session,
+                    word_obj,
+                    definition_text=def_data.get('definition', f"Definition for {word}"),
+                    pos_type=def_data.get('pos', 'unknown'),
+                    lemma=def_data.get('lemma', word),
+                    confidence=def_data.get('confidence', 0.0),
+                    multiple_meanings=def_data.get('multiple_meanings', False),
+                    special_case=def_data.get('special_case', False),
+                    notes=def_data.get('notes')
+                )
+                
+                # Add examples
+                for example_text in def_data.get('examples', []):
+                    linguistic_db.add_example(
+                        session,
+                        definition,
+                        example_text=example_text
+                    )
             
-            if success:
-                # Process parts of speech
-                for pos_data in results.get('parts_of_speech', []):
-                    linguistic_db.add_part_of_speech(
-                        session,
-                        word_obj,
-                        pos_type=pos_data.get('pos', 'unknown'),
-                        confidence=pos_data.get('confidence', 0.0),
-                        multiple_meanings=pos_data.get('multiple_meanings', False),
-                        different_pos=pos_data.get('different_pos', False),
-                        special_case=pos_data.get('special_case', False),
-                        notes=pos_data.get('notes')
-                    )
-                
-                # Process lemmas
-                for lemma_data in results.get('lemmas', []):
-                    linguistic_db.add_lemma(
-                        session,
-                        word_obj,
-                        lemma=lemma_data.get('lemma', word),
-                        pos_type=lemma_data.get('pos'),
-                        confidence=lemma_data.get('confidence', 0.0),
-                        notes=lemma_data.get('notes')
-                    )
-                
-                return True
-            else:
-                logger.warning(f"Combined query failed for '{word}', falling back to separate queries")
-        
-        # Separate queries if combined failed or not requested
-        pos_success = False
-        lemma_success = False
-        
-        # Get part of speech
-        pos_results, pos_success = self.query_part_of_speech(word)
-        if pos_success:
-            for pos_data in pos_results:
-                linguistic_db.add_part_of_speech(
-                    session,
-                    word_obj,
-                    pos_type=pos_data.get('pos', 'unknown'),
-                    confidence=pos_data.get('confidence', 0.0),
-                    multiple_meanings=pos_data.get('multiple_meanings', False),
-                    different_pos=pos_data.get('different_pos', False),
-                    special_case=pos_data.get('special_case', False),
-                    notes=pos_data.get('notes')
-                )
-        
-        # Get lemma
-        lemma_results, lemma_success = self.query_lemma(word)
-        if lemma_success:
-            for lemma_data in lemma_results:
-                linguistic_db.add_lemma(
-                    session,
-                    word_obj,
-                    lemma=lemma_data.get('lemma', word),
-                    pos_type=lemma_data.get('pos'),
-                    confidence=lemma_data.get('confidence', 0.0),
-                    notes=lemma_data.get('notes')
-                )
-        
-        return pos_success or lemma_success
+            return True
+        else:
+            logger.warning(f"Failed to process word '{word}'")
+            return False
 
     @classmethod
     def close_all(cls):

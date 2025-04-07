@@ -62,47 +62,46 @@ class LinguisticReviewer:
         print(f"\n{self.c.HEADER}{self.c.BOLD}Word:{self.c.ENDC} {word.word}")
         print(f"{self.c.BLUE}Rank:{self.c.ENDC} {word.frequency_rank}")
         
-        # Parts of speech
-        pos_entries = word.parts_of_speech
-        print(f"\n{self.c.HEADER}Parts of Speech:{self.c.ENDC}")
-        if not pos_entries:
-            print(f"  {self.c.YELLOW}No parts of speech recorded{self.c.ENDC}")
+        # Definitions
+        definitions = word.definitions
+        print(f"\n{self.c.HEADER}Definitions:{self.c.ENDC}")
+        if not definitions:
+            print(f"  {self.c.YELLOW}No definitions recorded{self.c.ENDC}")
         else:
-            for i, pos in enumerate(pos_entries):
+            for i, definition in enumerate(definitions):
                 flags = []
-                if pos.multiple_meanings:
+                if definition.multiple_meanings:
                     flags.append("multiple meanings")
-                if pos.different_pos:
-                    flags.append("different POS")
-                if pos.special_case:
+                if definition.special_case:
                     flags.append("special case")
                 
                 flag_str = f" [{', '.join(flags)}]" if flags else ""
-                verified_str = f" {self.c.GREEN}[✓]{self.c.ENDC}" if pos.verified else ""
+                verified_str = f" {self.c.GREEN}[✓]{self.c.ENDC}" if definition.verified else ""
                 
-                print(f"  {self.c.CYAN}[{i+1}]{self.c.ENDC} {pos.pos_type}{flag_str}{verified_str} - Confidence: {pos.confidence:.2f}")
-                if pos.notes:
-                    print(f"      Notes: {pos.notes}")
-        
-        # Lemmas
-        lemma_entries = word.lemmas
-        print(f"\n{self.c.HEADER}Lemmas:{self.c.ENDC}")
-        if not lemma_entries:
-            print(f"  {self.c.YELLOW}No lemmas recorded{self.c.ENDC}")
-        else:
-            for i, lemma in enumerate(lemma_entries):
-                pos_str = f" ({lemma.pos_type})" if lemma.pos_type else ""
-                verified_str = f" {self.c.GREEN}[✓]{self.c.ENDC}" if lemma.verified else ""
+                print(f"  {self.c.CYAN}[{i+1}]{self.c.ENDC} {definition.definition_text}{flag_str}{verified_str}")
+                print(f"    {self.c.BLUE}Part of speech:{self.c.ENDC} {definition.pos_type}")
+                print(f"    {self.c.BLUE}Lemma:{self.c.ENDC} {definition.lemma}")
+                print(f"    {self.c.BLUE}Confidence:{self.c.ENDC} {definition.confidence:.2f}")
                 
-                print(f"  {self.c.CYAN}[{i+1}]{self.c.ENDC} {lemma.lemma}{pos_str}{verified_str} - Confidence: {lemma.confidence:.2f}")
-                if lemma.notes:
-                    print(f"      Notes: {lemma.notes}")
+                if definition.notes:
+                    print(f"    {self.c.BLUE}Notes:{self.c.ENDC} {definition.notes}")
+                
+                # Examples
+                examples = definition.examples
+                if examples:
+                    print(f"    {self.c.BLUE}Examples:{self.c.ENDC}")
+                    for j, example in enumerate(examples):
+                        print(f"      - {example.example_text}")
+                
+                # Add a separator between definitions
+                if i < len(definitions) - 1:
+                    print()
         
         return True
-    
-    def edit_pos(self, word_text: str) -> bool:
+        
+    def edit_definition(self, word_text: str) -> bool:
         """
-        Edit parts of speech for a word.
+        Edit a definition for a word.
         
         Args:
             word_text: Word to edit
@@ -115,39 +114,45 @@ class LinguisticReviewer:
             print(f"{self.c.RED}Word '{word_text}' not found in the database.{self.c.ENDC}")
             return False
         
-        # Display current POS entries
+        # Display current definitions
         self.display_word_info(word_text)
         
-        # Choose POS to edit
-        pos_entries = word.parts_of_speech
-        if not pos_entries:
-            print(f"{self.c.YELLOW}No parts of speech to edit. Add one first.{self.c.ENDC}")
+        # Choose definition to edit
+        definitions = word.definitions
+        if not definitions:
+            print(f"{self.c.YELLOW}No definitions to edit. Add one first.{self.c.ENDC}")
             return False
         
         try:
-            choice = int(input(f"\n{self.c.BOLD}Enter POS number to edit (1-{len(pos_entries)}) or 0 to cancel: {self.c.ENDC}"))
+            choice = int(input(f"\n{self.c.BOLD}Enter definition number to edit (1-{len(definitions)}) or 0 to cancel: {self.c.ENDC}"))
             if choice == 0:
                 return False
             
-            if choice < 1 or choice > len(pos_entries):
+            if choice < 1 or choice > len(definitions):
                 print(f"{self.c.RED}Invalid choice.{self.c.ENDC}")
                 return False
             
-            pos = pos_entries[choice-1]
+            definition = definitions[choice-1]
             
             # Get new values
-            print(f"\n{self.c.BOLD}Editing POS #{choice}. Press Enter to keep current values.{self.c.ENDC}")
+            print(f"\n{self.c.BOLD}Editing definition #{choice}. Press Enter to keep current values.{self.c.ENDC}")
             
-            new_pos_type = input(f"Part of speech [{pos.pos_type}]: ").strip()
+            new_definition_text = input(f"Definition [{definition.definition_text}]: ").strip()
+            new_definition_text = new_definition_text if new_definition_text else None
+            
+            new_pos_type = input(f"Part of speech [{definition.pos_type}]: ").strip()
             new_pos_type = new_pos_type if new_pos_type else None
             
-            new_confidence = input(f"Confidence [{pos.confidence}]: ").strip()
+            new_lemma = input(f"Lemma [{definition.lemma}]: ").strip()
+            new_lemma = new_lemma if new_lemma else None
+            
+            new_confidence = input(f"Confidence [{definition.confidence}]: ").strip()
             try:
                 new_confidence = float(new_confidence) if new_confidence else None
             except ValueError:
                 new_confidence = None
             
-            new_multiple = input(f"Multiple meanings (y/n) [{pos.multiple_meanings}]: ").strip().lower()
+            new_multiple = input(f"Multiple meanings (y/n) [{definition.multiple_meanings}]: ").strip().lower()
             if new_multiple in ('y', 'yes'):
                 new_multiple = True
             elif new_multiple in ('n', 'no'):
@@ -155,15 +160,7 @@ class LinguisticReviewer:
             else:
                 new_multiple = None
             
-            new_different = input(f"Different POS (y/n) [{pos.different_pos}]: ").strip().lower()
-            if new_different in ('y', 'yes'):
-                new_different = True
-            elif new_different in ('n', 'no'):
-                new_different = False
-            else:
-                new_different = None
-            
-            new_special = input(f"Special case (y/n) [{pos.special_case}]: ").strip().lower()
+            new_special = input(f"Special case (y/n) [{definition.special_case}]: ").strip().lower()
             if new_special in ('y', 'yes'):
                 new_special = True
             elif new_special in ('n', 'no'):
@@ -171,7 +168,7 @@ class LinguisticReviewer:
             else:
                 new_special = None
             
-            new_verified = input(f"Verified (y/n) [{pos.verified}]: ").strip().lower()
+            new_verified = input(f"Verified (y/n) [{definition.verified}]: ").strip().lower()
             if new_verified in ('y', 'yes'):
                 new_verified = True
             elif new_verified in ('n', 'no'):
@@ -179,32 +176,33 @@ class LinguisticReviewer:
             else:
                 new_verified = None
             
-            new_notes = input(f"Notes [{pos.notes or ''}]: ").strip()
+            new_notes = input(f"Notes [{definition.notes or ''}]: ").strip()
             new_notes = new_notes if new_notes else None
             
-            # Update POS
-            linguistic_db.update_part_of_speech(
+            # Update definition
+            linguistic_db.update_definition(
                 self.session,
-                pos.id,
+                definition.id,
+                definition_text=new_definition_text,
                 pos_type=new_pos_type,
+                lemma=new_lemma,
                 confidence=new_confidence,
                 multiple_meanings=new_multiple,
-                different_pos=new_different,
                 special_case=new_special,
                 verified=new_verified,
                 notes=new_notes
             )
             
-            print(f"{self.c.GREEN}POS updated successfully.{self.c.ENDC}")
+            print(f"{self.c.GREEN}Definition updated successfully.{self.c.ENDC}")
             return True
             
         except ValueError:
             print(f"{self.c.RED}Invalid input.{self.c.ENDC}")
             return False
     
-    def add_pos(self, word_text: str) -> bool:
+    def add_definition(self, word_text: str) -> bool:
         """
-        Add a new part of speech for a word.
+        Add a new definition for a word.
         
         Args:
             word_text: Word to edit
@@ -217,16 +215,24 @@ class LinguisticReviewer:
             print(f"{self.c.RED}Word '{word_text}' not found in the database.{self.c.ENDC}")
             return False
         
-        # Display current POS entries
+        # Display current definitions
         self.display_word_info(word_text)
         
-        # Get new POS values
-        print(f"\n{self.c.BOLD}Adding new part of speech for '{word.word}'.{self.c.ENDC}")
+        # Get new definition values
+        print(f"\n{self.c.BOLD}Adding new definition for '{word.word}'.{self.c.ENDC}")
+        
+        definition_text = input("Definition: ").strip()
+        if not definition_text:
+            print(f"{self.c.RED}Definition cannot be empty.{self.c.ENDC}")
+            return False
         
         pos_type = input("Part of speech: ").strip()
         if not pos_type:
             print(f"{self.c.RED}Part of speech cannot be empty.{self.c.ENDC}")
             return False
+        
+        lemma = input(f"Lemma [default: {word.word}]: ").strip()
+        lemma = lemma if lemma else word.word
         
         confidence_str = input("Confidence (0-1) [1.0]: ").strip()
         try:
@@ -238,9 +244,6 @@ class LinguisticReviewer:
         multiple = input("Multiple meanings (y/n) [n]: ").strip().lower()
         multiple = multiple in ('y', 'yes')
         
-        different = input("Different POS (y/n) [n]: ").strip().lower()
-        different = different in ('y', 'yes')
-        
         special = input("Special case (y/n) [n]: ").strip().lower()
         special = special in ('y', 'yes')
         
@@ -250,113 +253,39 @@ class LinguisticReviewer:
         notes = input("Notes: ").strip()
         notes = notes if notes else None
         
-        # Add POS
-        pos = linguistic_db.add_part_of_speech(
+        # Add definition
+        definition = linguistic_db.add_definition(
             self.session,
             word,
+            definition_text=definition_text,
             pos_type=pos_type,
+            lemma=lemma,
             confidence=confidence,
             multiple_meanings=multiple,
-            different_pos=different,
             special_case=special,
             notes=notes
         )
         
-        # Update verified status (can't be done in add_part_of_speech)
-        linguistic_db.update_part_of_speech(
-            self.session,
-            pos.id,
-            verified=verified
-        )
+        # See if user wants to add examples
+        add_examples = input(f"{self.c.BOLD}Would you like to add example sentences? (y/n) [y]: {self.c.ENDC}").strip().lower()
+        if add_examples != 'n' and add_examples != 'no':
+            while True:
+                example_text = input("Example sentence (or leave empty to finish): ").strip()
+                if not example_text:
+                    break
+                
+                linguistic_db.add_example(self.session, definition, example_text)
+                print(f"{self.c.GREEN}Example added.{self.c.ENDC}")
         
-        print(f"{self.c.GREEN}POS added successfully.{self.c.ENDC}")
+        print(f"{self.c.GREEN}Definition added successfully.{self.c.ENDC}")
         return True
-    
-    def edit_lemma(self, word_text: str) -> bool:
+        
+    def add_example(self, word_text: str) -> bool:
         """
-        Edit lemmas for a word.
+        Add an example sentence to a definition.
         
         Args:
-            word_text: Word to edit
-            
-        Returns:
-            Whether the edit was successful
-        """
-        word = linguistic_db.get_word_by_text(self.session, word_text)
-        if not word:
-            print(f"{self.c.RED}Word '{word_text}' not found in the database.{self.c.ENDC}")
-            return False
-        
-        # Display current lemma entries
-        self.display_word_info(word_text)
-        
-        # Choose lemma to edit
-        lemma_entries = word.lemmas
-        if not lemma_entries:
-            print(f"{self.c.YELLOW}No lemmas to edit. Add one first.{self.c.ENDC}")
-            return False
-        
-        try:
-            choice = int(input(f"\n{self.c.BOLD}Enter lemma number to edit (1-{len(lemma_entries)}) or 0 to cancel: {self.c.ENDC}"))
-            if choice == 0:
-                return False
-            
-            if choice < 1 or choice > len(lemma_entries):
-                print(f"{self.c.RED}Invalid choice.{self.c.ENDC}")
-                return False
-            
-            lemma = lemma_entries[choice-1]
-            
-            # Get new values
-            print(f"\n{self.c.BOLD}Editing lemma #{choice}. Press Enter to keep current values.{self.c.ENDC}")
-            
-            new_lemma = input(f"Lemma [{lemma.lemma}]: ").strip()
-            new_lemma = new_lemma if new_lemma else None
-            
-            new_pos = input(f"Part of speech [{lemma.pos_type or ''}]: ").strip()
-            new_pos = new_pos if new_pos else None
-            
-            new_confidence = input(f"Confidence [{lemma.confidence}]: ").strip()
-            try:
-                new_confidence = float(new_confidence) if new_confidence else None
-            except ValueError:
-                new_confidence = None
-            
-            new_verified = input(f"Verified (y/n) [{lemma.verified}]: ").strip().lower()
-            if new_verified in ('y', 'yes'):
-                new_verified = True
-            elif new_verified in ('n', 'no'):
-                new_verified = False
-            else:
-                new_verified = None
-            
-            new_notes = input(f"Notes [{lemma.notes or ''}]: ").strip()
-            new_notes = new_notes if new_notes else None
-            
-            # Update lemma
-            linguistic_db.update_lemma(
-                self.session,
-                lemma.id,
-                lemma=new_lemma,
-                pos_type=new_pos,
-                confidence=new_confidence,
-                verified=new_verified,
-                notes=new_notes
-            )
-            
-            print(f"{self.c.GREEN}Lemma updated successfully.{self.c.ENDC}")
-            return True
-            
-        except ValueError:
-            print(f"{self.c.RED}Invalid input.{self.c.ENDC}")
-            return False
-    
-    def add_lemma(self, word_text: str) -> bool:
-        """
-        Add a new lemma for a word.
-        
-        Args:
-            word_text: Word to edit
+            word_text: Word containing the definition
             
         Returns:
             Whether the addition was successful
@@ -366,53 +295,42 @@ class LinguisticReviewer:
             print(f"{self.c.RED}Word '{word_text}' not found in the database.{self.c.ENDC}")
             return False
         
-        # Display current lemma entries
+        # Display current definitions
         self.display_word_info(word_text)
         
-        # Get new lemma values
-        print(f"\n{self.c.BOLD}Adding new lemma for '{word.word}'.{self.c.ENDC}")
-        
-        lemma = input("Lemma: ").strip()
-        if not lemma:
-            print(f"{self.c.RED}Lemma cannot be empty.{self.c.ENDC}")
+        # Choose definition to add example to
+        definitions = word.definitions
+        if not definitions:
+            print(f"{self.c.YELLOW}No definitions to add examples to. Add a definition first.{self.c.ENDC}")
             return False
         
-        pos_type = input("Part of speech: ").strip()
-        pos_type = pos_type if pos_type else None
-        
-        confidence_str = input("Confidence (0-1) [1.0]: ").strip()
         try:
-            confidence = float(confidence_str) if confidence_str else 1.0
+            choice = int(input(f"\n{self.c.BOLD}Enter definition number to add example to (1-{len(definitions)}) or 0 to cancel: {self.c.ENDC}"))
+            if choice == 0:
+                return False
+            
+            if choice < 1 or choice > len(definitions):
+                print(f"{self.c.RED}Invalid choice.{self.c.ENDC}")
+                return False
+            
+            definition = definitions[choice-1]
+            
+            # Get example text
+            example_text = input("Example sentence: ").strip()
+            if not example_text:
+                print(f"{self.c.RED}Example cannot be empty.{self.c.ENDC}")
+                return False
+            
+            # Add example
+            linguistic_db.add_example(self.session, definition, example_text)
+            
+            print(f"{self.c.GREEN}Example added successfully.{self.c.ENDC}")
+            return True
+            
         except ValueError:
-            print(f"{self.c.RED}Invalid confidence value.{self.c.ENDC}")
+            print(f"{self.c.RED}Invalid input.{self.c.ENDC}")
             return False
-        
-        verified = input("Verified (y/n) [y]: ").strip().lower()
-        verified = verified != 'n' and verified != 'no'
-        
-        notes = input("Notes: ").strip()
-        notes = notes if notes else None
-        
-        # Add lemma
-        lemma_obj = linguistic_db.add_lemma(
-            self.session,
-            word,
-            lemma=lemma,
-            pos_type=pos_type,
-            confidence=confidence,
-            notes=notes
-        )
-        
-        # Update verified status (can't be done in add_lemma)
-        linguistic_db.update_lemma(
-            self.session,
-            lemma_obj.id,
-            verified=verified
-        )
-        
-        print(f"{self.c.GREEN}Lemma added successfully.{self.c.ENDC}")
-        return True
-
+    
     def list_problematic_words(self, limit: int = 10) -> None:
         """
         List problematic words.
@@ -428,19 +346,20 @@ class LinguisticReviewer:
             return
         
         for item in words:
-            flags = []
-            for pos_data in item['parts_of_speech']:
-                pos_type, multiple, different, special, notes = pos_data
-                if multiple:
-                    flags.append("multiple meanings")
-                if different:
-                    flags.append("different POS")
-                if special:
-                    flags.append("special case")
+            # Collect flags from all definitions
+            all_flags = []
+            for definition in item['definitions']:
+                if definition['multiple_meanings']:
+                    all_flags.append("multiple meanings")
+                if definition['special_case']:
+                    all_flags.append("special case")
             
-            flag_str = f" [{', '.join(set(flags))}]" if flags else ""
+            flag_str = f" [{', '.join(set(all_flags))}]" if all_flags else ""
             
             print(f"{self.c.CYAN}{item['word']}{self.c.ENDC}{flag_str} (rank: {item['rank']})")
+            # Show definition summaries
+            for i, definition in enumerate(item['definitions']):
+                print(f"  {i+1}. {definition['pos']} - {definition['text'][:50]}...")
     
     def list_common_words_by_pos(self, pos_type: str, limit: int = 20) -> None:
         """
@@ -467,27 +386,22 @@ class LinguisticReviewer:
             f"{'Word':<{word_width}} "
             f"{'Lemma':<{lemma_width}} "
             f"{'Confidence':<10} "
-            f"{'Flags'}{self.c.ENDC}"
+            f"{'Definition'}{self.c.ENDC}"
         )
         print(header)
         print("-" * (6 + word_width + lemma_width + 10 + 20))
         
         # Print words
         for item in words:
-            flags = []
-            if item["multiple_meanings"]:
-                flags.append("multiple")
-            if item["verified"]:
-                flags.append("verified")
-            
-            flag_str = f"{', '.join(flags)}" if flags else ""
+            # Truncate definition for display
+            definition = item['definition'][:50] + "..." if len(item['definition']) > 50 else item['definition']
             
             row = (
                 f"{item['rank']:<6} "
                 f"{item['word']:<{word_width}} "
                 f"{item['lemma'] or '':<{lemma_width}} "
                 f"{item['confidence']:<10.2f} "
-                f"{flag_str}"
+                f"{definition}"
             )
             print(row)
 
@@ -506,27 +420,21 @@ class LinguisticReviewer:
             return
         
         for word in words:
-            missing = []
-            if not word.parts_of_speech:
-                missing.append("POS")
-            if not word.lemmas:
-                missing.append("lemma")
-            
-            print(f"{self.c.CYAN}{word.word}{self.c.ENDC} (rank: {word.frequency_rank}) - Missing: {', '.join(missing)}")
+            print(f"{self.c.CYAN}{word.word}{self.c.ENDC} (rank: {word.frequency_rank}) - Missing: definitions")
     
     def interactive_menu(self) -> None:
         """Run interactive menu for reviewing and editing words."""
         while True:
             print(f"\n{self.c.HEADER}{self.c.BOLD}Linguistic Data Reviewer{self.c.ENDC}")
             print(f"{self.c.CYAN}1.{self.c.ENDC} Display word information")
-            print(f"{self.c.CYAN}2.{self.c.ENDC} Edit part of speech")
-            print(f"{self.c.CYAN}3.{self.c.ENDC} Add part of speech")
-            print(f"{self.c.CYAN}4.{self.c.ENDC} Edit lemma")
-            print(f"{self.c.CYAN}5.{self.c.ENDC} Add lemma")
-            print(f"{self.c.CYAN}6.{self.c.ENDC} List problematic words")
-            print(f"{self.c.CYAN}7.{self.c.ENDC} Find words with missing data")
-            print(f"{self.c.CYAN}8.{self.c.ENDC} Show statistics")
-            print(f"{self.c.CYAN}9.{self.c.ENDC} List common words by part of speech")
+            print(f"{self.c.CYAN}2.{self.c.ENDC} Edit definition")
+            print(f"{self.c.CYAN}3.{self.c.ENDC} Add definition")
+            print(f"{self.c.CYAN}4.{self.c.ENDC} Add example to definition")
+            print(f"{self.c.CYAN}5.{self.c.ENDC} List problematic words")
+            print(f"{self.c.CYAN}6.{self.c.ENDC} Find words with missing data")
+            print(f"{self.c.CYAN}7.{self.c.ENDC} Show statistics")
+            print(f"{self.c.CYAN}8.{self.c.ENDC} List common words by part of speech")
+            print(f"{self.c.CYAN}9.{self.c.ENDC} Data migration tools")
 
             print(f"{self.c.CYAN}0.{self.c.ENDC} Exit")
             
@@ -542,41 +450,41 @@ class LinguisticReviewer:
                 elif choice == 2:
                     word = input(f"{self.c.BOLD}Enter word: {self.c.ENDC}").strip()
                     if word:
-                        self.edit_pos(word)
+                        self.edit_definition(word)
                 elif choice == 3:
                     word = input(f"{self.c.BOLD}Enter word: {self.c.ENDC}").strip()
                     if word:
-                        self.add_pos(word)
+                        self.add_definition(word)
                 elif choice == 4:
                     word = input(f"{self.c.BOLD}Enter word: {self.c.ENDC}").strip()
                     if word:
-                        self.edit_lemma(word)
+                        self.add_example(word)
                 elif choice == 5:
-                    word = input(f"{self.c.BOLD}Enter word: {self.c.ENDC}").strip()
-                    if word:
-                        self.add_lemma(word)
-                elif choice == 6:
                     limit = input(f"{self.c.BOLD}Enter limit (default: 10): {self.c.ENDC}").strip()
                     try:
                         limit = int(limit) if limit else 10
                     except ValueError:
                         limit = 10
                     self.list_problematic_words(limit)
-                elif choice == 7:
+                elif choice == 6:
                     limit = input(f"{self.c.BOLD}Enter limit (default: 10): {self.c.ENDC}").strip()
                     try:
                         limit = int(limit) if limit else 10
                     except ValueError:
                         limit = 10
                     self.find_missing_data(limit)
-                elif choice == 8:
+                elif choice == 7:
                     stats = linguistic_db.get_processing_stats(self.session)
                     print(f"\n{self.c.HEADER}{self.c.BOLD}Database Statistics:{self.c.ENDC}")
                     print(f"  Total words: {stats['total_words']}")
-                    print(f"  Words with POS: {stats['words_with_pos']} ({stats['words_with_pos']/stats['total_words']*100:.1f}%)")
-                    print(f"  Words with lemma: {stats['words_with_lemma']} ({stats['words_with_lemma']/stats['total_words']*100:.1f}%)")
-                    print(f"  Fully processed: {stats['words_complete']} ({stats['percent_complete']:.1f}%)")
-                elif choice == 9:
+                    percent_with_defs = stats['words_with_definitions']/stats['total_words']*100 if stats['total_words'] > 0 else 0
+                    print(f"  Words with definitions: {stats['words_with_definitions']} ({percent_with_defs:.1f}%)")
+                    percent_with_examples = stats['words_with_examples']/stats['total_words']*100 if stats['total_words'] > 0 else 0
+                    print(f"  Words with examples: {stats['words_with_examples']} ({percent_with_examples:.1f}%)")
+                    print(f"  Total definitions: {stats['total_definitions']}")
+                    print(f"  Total examples: {stats['total_examples']}")
+                    print(f"  Overall completion: {stats['percent_complete']:.1f}%")
+                elif choice == 8:
                     pos_type = input(f"{self.c.BOLD}Enter part of speech (noun, verb, adjective, etc.): {self.c.ENDC}").strip().lower()
                     if not pos_type:
                         print(f"{self.c.RED}Part of speech cannot be empty.{self.c.ENDC}")
@@ -589,44 +497,19 @@ class LinguisticReviewer:
                         limit = 20
                     
                     self.list_common_words_by_pos(pos_type, limit)
-                else:
-                    print(f"{self.c.RED}Invalid choice.{self.c.ENDC}")
-            except ValueError:
-                print(f"{self.c.RED}Invalid input.{self.c.ENDC}")
-            except KeyboardInterrupt:
-                print(f"\n{self.c.YELLOW}Operation cancelled.{self.c.ENDC}")
-    
-    def close(self):
-        """Close database session."""
-        if self.session:
-            self.session.close()
-            logger.info("Database session closed")
-
-def main():
-    """Command-line interface."""
-    import argparse
-    
-    parser = argparse.ArgumentParser(description="Review and update linguistic data")
-    parser.add_argument("--db", default=constants.WORDFREQ_DB_PATH, help="Database file path")
-    parser.add_argument("--word", help="Word to display/edit (skips menu)")
-    
-    args = parser.parse_args()
-    
-    # Create reviewer
-    reviewer = LinguisticReviewer(db_path=args.db)
-    
-    try:
-        if args.word:
-            # Display word and exit
-            reviewer.display_word_info(args.word)
-        else:
-            # Run interactive menu
-            reviewer.interactive_menu()
-        
-    except KeyboardInterrupt:
-        print("\nExiting...")
-    finally:
-        reviewer.close()
-
-if __name__ == "__main__":
-    main()
+                elif choice == 9:
+                    confirm = input(f"{self.c.BOLD}{self.c.RED}WARNING: This will migrate data from the old schema to the new one. Continue? (y/n): {self.c.ENDC}").strip().lower()
+                    if confirm in ('y', 'yes'):
+                        stats = linguistic_db.migrate_from_old_schema(self.session)
+                        if "error" in stats:
+                            print(f"{self.c.RED}Migration failed: {stats['error']}{self.c.ENDC}")
+                        else:
+                            print(f"{self.c.GREEN}Migration completed:{self.c.ENDC}")
+                            print(f"  Words processed: {stats['words_processed']}")
+                            print(f"  Definitions created: {stats['definitions_created']}")
+                            print(f"  Words with POS but no lemma: {stats['words_with_pos_but_no_lemma']}")
+                            print(f"  Words with lemma but no POS: {stats['words_with_lemma_but_no_pos']}")
+                    else:
+                        print(f"{self.c.YELLOW}Migration cancelled.{self.c.ENDC}")
+            except Exception as e:
+                logger.error(f"Error: {e}")
