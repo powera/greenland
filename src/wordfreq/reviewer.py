@@ -79,9 +79,11 @@ class LinguisticReviewer:
                 verified_str = f" {self.c.GREEN}[✓]{self.c.ENDC}" if definition.verified else ""
                 
                 print(f"  {self.c.CYAN}[{i+1}]{self.c.ENDC} {definition.definition_text}{flag_str}{verified_str}")
+                print(f"    {self.c.BLUE}Confidence:{self.c.ENDC} {definition.confidence:.2f}")
                 print(f"    {self.c.BLUE}Part of speech:{self.c.ENDC} {definition.pos_type}")
                 print(f"    {self.c.BLUE}Lemma:{self.c.ENDC} {definition.lemma}")
-                print(f"    {self.c.BLUE}Confidence:{self.c.ENDC} {definition.confidence:.2f}")
+                if definition.chinese_translation:
+                    print(f"    {self.c.BLUE}Chinese:{self.c.ENDC} {definition.chinese_translation}")
                 
                 if definition.notes:
                     print(f"    {self.c.BLUE}Notes:{self.c.ENDC} {definition.notes}")
