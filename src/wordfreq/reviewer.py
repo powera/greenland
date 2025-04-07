@@ -442,6 +442,55 @@ class LinguisticReviewer:
             
             print(f"{self.c.CYAN}{item['word']}{self.c.ENDC}{flag_str} (rank: {item['rank']})")
     
+    def list_common_words_by_pos(self, pos_type: str, limit: int = 20) -> None:
+        """
+        List the most common words for a specified part of speech.
+        
+        Args:
+            pos_type: Part of speech to filter by
+            limit: Maximum number of words to display
+        """
+        print(f"\n{self.c.HEADER}{self.c.BOLD}Most Common {pos_type.capitalize()} Words:{self.c.ENDC}")
+        
+        words = linguistic_db.get_common_words_by_pos(self.session, pos_type, limit=limit)
+        if not words:
+            print(f"{self.c.YELLOW}No words found with part of speech '{pos_type}'.{self.c.ENDC}")
+            return
+        
+        # Calculate column widths
+        word_width = max(len("Word"), max(len(item["word"]) for item in words))
+        lemma_width = max(len("Lemma"), max(len(str(item["lemma"] or "")) for item in words))
+        
+        # Print header
+        header = (
+            f"{self.c.BOLD}{'Rank':<6} "
+            f"{'Word':<{word_width}} "
+            f"{'Lemma':<{lemma_width}} "
+            f"{'Confidence':<10} "
+            f"{'Flags'}{self.c.ENDC}"
+        )
+        print(header)
+        print("-" * (6 + word_width + lemma_width + 10 + 20))
+        
+        # Print words
+        for item in words:
+            flags = []
+            if item["multiple_meanings"]:
+                flags.append("multiple")
+            if item["verified"]:
+                flags.append("verified")
+            
+            flag_str = f"{', '.join(flags)}" if flags else ""
+            
+            row = (
+                f"{item['rank']:<6} "
+                f"{item['word']:<{word_width}} "
+                f"{item['lemma'] or '':<{lemma_width}} "
+                f"{item['confidence']:<10.2f} "
+                f"{flag_str}"
+            )
+            print(row)
+
     def find_missing_data(self, limit: int = 10) -> None:
         """
         Find words with missing linguistic data.
@@ -477,6 +526,8 @@ class LinguisticReviewer:
             print(f"{self.c.CYAN}6.{self.c.ENDC} List problematic words")
             print(f"{self.c.CYAN}7.{self.c.ENDC} Find words with missing data")
             print(f"{self.c.CYAN}8.{self.c.ENDC} Show statistics")
+            print(f"{self.c.CYAN}9.{self.c.ENDC} List common words by part of speech")
+
             print(f"{self.c.CYAN}0.{self.c.ENDC} Exit")
             
             try:
@@ -525,6 +576,19 @@ class LinguisticReviewer:
                     print(f"  Words with POS: {stats['words_with_pos']} ({stats['words_with_pos']/stats['total_words']*100:.1f}%)")
                     print(f"  Words with lemma: {stats['words_with_lemma']} ({stats['words_with_lemma']/stats['total_words']*100:.1f}%)")
                     print(f"  Fully processed: {stats['words_complete']} ({stats['percent_complete']:.1f}%)")
+                elif choice == 9:
+                    pos_type = input(f"{self.c.BOLD}Enter part of speech (noun, verb, adjective, etc.): {self.c.ENDC}").strip().lower()
+                    if not pos_type:
+                        print(f"{self.c.RED}Part of speech cannot be empty.{self.c.ENDC}")
+                        continue
+                    
+                    limit = input(f"{self.c.BOLD}Enter limit (default: 20): {self.c.ENDC}").strip()
+                    try:
+                        limit = int(limit) if limit else 20
+                    except ValueError:
+                        limit = 20
+                    
+                    self.list_common_words_by_pos(pos_type, limit)
                 else:
                     print(f"{self.c.RED}Invalid choice.{self.c.ENDC}")
             except ValueError:

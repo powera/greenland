@@ -7,12 +7,14 @@ import csv
 import logging
 import time
 import os
+import threading
 from typing import Dict, List, Optional, Any, Set, Tuple
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import constants
 from wordfreq import linguistic_db
 from wordfreq.linguistic_client import LinguisticClient
+from wordfreq.connection_pool import get_session, close_thread_sessions
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -20,9 +22,9 @@ logger = logging.getLogger(__name__)
 
 # Constants
 DEFAULT_DB_PATH = constants.WORDFREQ_DB_PATH
-DEFAULT_BATCH_SIZE = 50
+DEFAULT_BATCH_SIZE = 100
 DEFAULT_THREADS = 5
-DEFAULT_MAX_RETRIES = 3
+DEFAULT_MAX_RETRIES = 1
 DEFAULT_THROTTLE = 1.0  # seconds between API calls
 
 class WordProcessor:
@@ -31,7 +33,7 @@ class WordProcessor:
     def __init__(
         self, 
         db_path: str = DEFAULT_DB_PATH,
-        model: str = "gpt-4o-2024-11-20",
+        model: str = "llama3.2:3b",
         threads: int = DEFAULT_THREADS,
         batch_size: int = DEFAULT_BATCH_SIZE,
         throttle: float = DEFAULT_THROTTLE,
@@ -60,14 +62,16 @@ class WordProcessor:
         
         if debug:
             logger.setLevel(logging.DEBUG)
-            
-        # Create database session
-        self.session = linguistic_db.create_database_session(db_path)
         
-        # Create linguistic client
-        self.client = LinguisticClient(model=model, session=self.session, debug=debug)
+        # Initialize the database if needed
+        session = get_session(db_path, echo=debug)
+        linguistic_db.ensure_tables_exist(session)
         
         logger.info(f"Initialized WordProcessor with model {model}")
+    
+    def get_session(self):
+        """Get a thread-local database session."""
+        return get_session(self.db_path, echo=self.debug)
     
     def load_words_from_json(self, file_path: str) -> int:
         """
@@ -105,8 +109,10 @@ class WordProcessor:
             
             # Add words to database with rankings
             count = 0
+            session = self.get_session()
+            
             for rank, (word, freq) in enumerate(sorted_words, start=1):
-                if linguistic_db.add_word(self.session, word, rank):
+                if linguistic_db.add_word(session, word, rank):
                     count += 1
                     
             logger.info(f"Added {count} words from {file_path}")
@@ -133,6 +139,8 @@ class WordProcessor:
         
         try:
             count = 0
+            session = self.get_session()
+            
             with open(file_path, 'r', encoding='utf-8') as f:
                 reader = csv.reader(f)
                 
@@ -156,7 +164,7 @@ class WordProcessor:
                             rank = i + 1
                             
                         if word:
-                            if linguistic_db.add_word(self.session, word, rank):
+                            if linguistic_db.add_word(session, word, rank):
                                 count += 1
                                 
             logger.info(f"Added {count} words from {file_path}")
@@ -180,11 +188,13 @@ class WordProcessor:
         
         try:
             count = 0
+            session = self.get_session()
+            
             with open(file_path, 'r', encoding='utf-8') as f:
                 for i, line in enumerate(f):
                     word = line.strip()
                     if word:
-                        if linguistic_db.add_word(self.session, word, i+1):
+                        if linguistic_db.add_word(session, word, i+1):
                             count += 1
                             
             logger.info(f"Added {count} words from {file_path}")
@@ -206,19 +216,26 @@ class WordProcessor:
             Success flag
         """
         logger.info(f"Processing word: {word}")
-        return self.client.process_word(word, rank)
+        client = LinguisticClient.get_instance(model=self.model, db_path=self.db_path, debug=self.debug)
+        return client.process_word(word, rank)
     
     def _worker(self, word_obj: Any) -> Tuple[str, bool]:
         """Worker function for thread pool."""
+        # Each thread gets its own client instance
+        client = LinguisticClient.get_instance(model=self.model, db_path=self.db_path, debug=self.debug)
+        
         word = word_obj.word
         rank = word_obj.frequency_rank
+        thread_name = threading.current_thread().name
+        
+        logger.debug(f"[{thread_name}] Processing word: {word}")
         
         for attempt in range(self.max_retries):
             try:
-                success = self.client.process_word(word, rank)
+                success = client.process_word(word, rank)
                 return (word, success)
             except Exception as e:
-                logger.error(f"Error processing '{word}' (attempt {attempt+1}): {e}")
+                logger.error(f"[{thread_name}] Error processing '{word}' (attempt {attempt+1}): {e}")
                 time.sleep(self.throttle)
                 
         return (word, False)
@@ -248,7 +265,7 @@ class WordProcessor:
                     logger.warning(f"Failed to process '{word}'")
                 
                 # Throttle to avoid overloading the API
-                time.sleep(self.throttle)
+                time.sleep(self.throttle / self.threads)
                 
         return (success_count, total_count)
     
@@ -266,10 +283,11 @@ class WordProcessor:
         logger.info("Starting batch processing of words")
         
         # Get words to process
+        session = self.get_session()
         if skip_processed:
-            words = linguistic_db.get_words_needing_analysis(self.session, limit=limit or 100000)
+            words = linguistic_db.get_words_needing_analysis(session, limit=limit or 100000)
         else:
-            query = self.session.query(linguistic_db.Word).order_by(linguistic_db.Word.frequency_rank)
+            query = session.query(linguistic_db.Word).order_by(linguistic_db.Word.frequency_rank)
             if limit:
                 query = query.limit(limit)
             words = query.all()
@@ -312,132 +330,7 @@ class WordProcessor:
         }
         
     def close(self):
-        """Close database session."""
-        if self.session:
-            self.session.close()
-            logger.info("Database session closed")
-
-def main():
-    """Command-line interface."""
-    import argparse
-    
-    parser = argparse.ArgumentParser(description="Process word lists to extract linguistic information")
-    subparsers = parser.add_subparsers(dest="command", help="Command to execute")
-    
-    # Load command
-    load_parser = subparsers.add_parser("load", help="Load words from a file")
-    load_parser.add_argument("file", help="File to load")
-    load_parser.add_argument("--format", choices=["json", "csv", "text"], help="File format (default: auto-detect)")
-    load_parser.add_argument("--word-column", type=int, default=0, help="Column index for words in CSV (0-based)")
-    load_parser.add_argument("--rank-column", type=int, default=None, help="Column index for rank in CSV (0-based)")
-    load_parser.add_argument("--no-header", action="store_true", help="CSV file has no header row")
-    
-    # Process command
-    process_parser = subparsers.add_parser("process", help="Process words in database")
-    process_parser.add_argument("--limit", type=int, default=None, help="Maximum number of words to process")
-    process_parser.add_argument("--all", action="store_true", help="Process all words, including those already processed")
-    process_parser.add_argument("--batch-size", type=int, default=DEFAULT_BATCH_SIZE, help="Batch size for processing")
-    process_parser.add_argument("--threads", type=int, default=DEFAULT_THREADS, help="Number of threads for parallel processing")
-    
-    # Single word command
-    word_parser = subparsers.add_parser("word", help="Process a single word")
-    word_parser.add_argument("word", help="Word to process")
-    
-    # Stats command
-    stats_parser = subparsers.add_parser("stats", help="Show database statistics")
-    
-    # Common arguments
-    parser.add_argument("--db", default=DEFAULT_DB_PATH, help="Database file path")
-    parser.add_argument("--model", default="llama3.2:3b", help="LLM model to use")
-    parser.add_argument("--debug", action="store_true", help="Enable debug logging")
-    
-    args = parser.parse_args()
-    
-    # Create processor
-    processor = WordProcessor(
-        db_path=args.db,
-        model=args.model,
-        threads=getattr(args, 'threads', DEFAULT_THREADS),
-        batch_size=getattr(args, 'batch_size', DEFAULT_BATCH_SIZE),
-        debug=args.debug
-    )
-    
-    try:
-        if args.command == "load":
-            # Auto-detect format if not specified
-            if not args.format:
-                ext = os.path.splitext(args.file)[1].lower()
-                if ext == '.json':
-                    args.format = 'json'
-                elif ext == '.csv':
-                    args.format = 'csv'
-                else:
-                    args.format = 'text'
-            
-            # Load file
-            if args.format == 'json':
-                count = processor.load_words_from_json(args.file)
-            elif args.format == 'csv':
-                count = processor.load_words_from_csv(
-                    args.file, 
-                    word_column=args.word_column,
-                    rank_column=args.rank_column,
-                    has_header=not args.no_header
-                )
-            else:  # text
-                count = processor.load_words_from_text(args.file)
-                
-            print(f"Loaded {count} words from {args.file}")
-            
-        elif args.command == "process":
-            stats = processor.process_all_words(
-                limit=args.limit,
-                skip_processed=not args.all
-            )
-            
-            print(f"Processing complete: {stats['successful']}/{stats['processed']} words successful")
-            
-        elif args.command == "word":
-            success = processor.process_single_word(args.word)
-            if success:
-                print(f"Successfully processed '{args.word}'")
-            else:
-                print(f"Failed to process '{args.word}'")
-                
-        elif args.command == "stats":
-            stats = linguistic_db.get_processing_stats(processor.session)
-            
-            print("Database Statistics:")
-            print(f"  Total words: {stats['total_words']}")
-            print(f"  Words with POS: {stats['words_with_pos']} ({stats['words_with_pos']/stats['total_words']*100:.1f}%)")
-            print(f"  Words with lemma: {stats['words_with_lemma']} ({stats['words_with_lemma']/stats['total_words']*100:.1f}%)")
-            print(f"  Fully processed words: {stats['words_complete']} ({stats['percent_complete']:.1f}%)")
-            
-            # List problematic words
-            print("\nProblematic words (sample):")
-            problematic = linguistic_db.list_problematic_words(processor.session, limit=10)
-            for item in problematic:
-                print(f"  {item['word']} (rank {item['rank']}):")
-                for pos_type, multiple, different, special, notes in item['parts_of_speech']:
-                    flags = []
-                    if multiple:
-                        flags.append("multiple meanings")
-                    if different:
-                        flags.append("different POS")
-                    if special:
-                        flags.append("special case")
-                    
-                    print(f"    POS: {pos_type} {' - ' + ', '.join(flags) if flags else ''}")
-                    if notes:
-                        print(f"      Notes: {notes}")
-                
-                print(f"    Lemmas: {', '.join(l[0] for l in item['lemmas'])}")
-                
-        else:
-            parser.print_help()
-            
-    finally:
-        processor.close()
-
-if __name__ == "__main__":
-    main()
+        """Close database sessions and other resources."""
+        close_thread_sessions()
+        LinguisticClient.close_all()
+        logger.info("All resources closed")
