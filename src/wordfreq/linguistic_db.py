@@ -26,21 +26,21 @@ class Word(Base):
     added_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now())
     updated_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
     
-    # Relationships
-    parts_of_speech = relationship("PartOfSpeech", back_populates="word", cascade="all, delete-orphan")
-    lemmas = relationship("Lemma", back_populates="word", cascade="all, delete-orphan")
+    # Relationships - now to definitions instead of directly to POS and lemmas
+    definitions = relationship("Definition", back_populates="word", cascade="all, delete-orphan")
 
-class PartOfSpeech(Base):
-    """Model for storing part of speech information for a word."""
-    __tablename__ = 'parts_of_speech'
+class Definition(Base):
+    """Model for storing definitions of a word."""
+    __tablename__ = 'definitions'
     
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     word_id: Mapped[int] = mapped_column(ForeignKey("words.id"), nullable=False)
-    pos_type: Mapped[str] = mapped_column(String, nullable=False)
+    definition_text: Mapped[str] = mapped_column(Text, nullable=False)
+    pos_type: Mapped[str] = mapped_column(String, nullable=False)  # Part of speech for this definition
+    lemma: Mapped[str] = mapped_column(String, nullable=False)     # Lemma for this definition
     
-    # Special flags for handling complex cases
+    # Special flags for handling complex cases (moved from POS to definition level)
     multiple_meanings: Mapped[bool] = mapped_column(Boolean, default=False)
-    different_pos: Mapped[bool] = mapped_column(Boolean, default=False)
     special_case: Mapped[bool] = mapped_column(Boolean, default=False)
     
     confidence: Mapped[float] = mapped_column(Integer, default=0.0)  # 0-1 score from LLM
@@ -50,25 +50,20 @@ class PartOfSpeech(Base):
     updated_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
     
     # Relationships
-    word = relationship("Word", back_populates="parts_of_speech")
+    word = relationship("Word", back_populates="definitions")
+    examples = relationship("Example", back_populates="definition", cascade="all, delete-orphan")
 
-class Lemma(Base):
-    """Model for storing lemma information for a word."""
-    __tablename__ = 'lemmas'
+class Example(Base):
+    """Model for storing example sentences for a definition."""
+    __tablename__ = 'examples'
     
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    word_id: Mapped[int] = mapped_column(ForeignKey("words.id"), nullable=False)
-    lemma: Mapped[str] = mapped_column(String, nullable=False)
-    pos_type: Mapped[Optional[str]] = mapped_column(String, nullable=True)  # Associated POS for this lemma
-    
-    confidence: Mapped[float] = mapped_column(Integer, default=0.0)  # 0-1 score from LLM
-    verified: Mapped[bool] = mapped_column(Boolean, default=False)
-    notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    definition_id: Mapped[int] = mapped_column(ForeignKey("definitions.id"), nullable=False)
+    example_text: Mapped[str] = mapped_column(Text, nullable=False)
     added_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now())
-    updated_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
     
     # Relationships
-    word = relationship("Word", back_populates="lemmas")
+    definition = relationship("Definition", back_populates="examples")
 
 class QueryLog(Base):
     """Model for tracking LLM queries for auditing and debugging."""
@@ -76,7 +71,7 @@ class QueryLog(Base):
     
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     word: Mapped[str] = mapped_column(String, nullable=False)
-    query_type: Mapped[str] = mapped_column(String, nullable=False)  # 'pos', 'lemma', 'both'
+    query_type: Mapped[str] = mapped_column(String, nullable=False)  # 'definition', 'examples', etc.
     prompt: Mapped[str] = mapped_column(Text, nullable=False)
     response: Mapped[str] = mapped_column(Text, nullable=False)
     model: Mapped[str] = mapped_column(String, nullable=False)
@@ -116,49 +111,45 @@ def add_word(session, word: str, rank: Optional[int] = None) -> Word:
     session.commit()
     return new_word
 
-def add_part_of_speech(
+def add_definition(
     session, 
-    word_obj: Word, 
+    word_obj: Word,
+    definition_text: str,
     pos_type: str,
+    lemma: str,
     confidence: float = 0.0,
     multiple_meanings: bool = False,
-    different_pos: bool = False,
     special_case: bool = False,
     notes: Optional[str] = None
-) -> PartOfSpeech:
-    """Add part of speech information for a word."""
-    pos = PartOfSpeech(
+) -> Definition:
+    """Add a definition for a word."""
+    definition = Definition(
         word_id=word_obj.id,
+        definition_text=definition_text,
         pos_type=pos_type,
+        lemma=lemma,
         confidence=confidence,
         multiple_meanings=multiple_meanings,
-        different_pos=different_pos,
         special_case=special_case,
         notes=notes
     )
-    session.add(pos)
+    session.add(definition)
     session.commit()
-    return pos
+    return definition
 
-def add_lemma(
-    session, 
-    word_obj: Word, 
-    lemma: str, 
-    pos_type: Optional[str] = None,
-    confidence: float = 0.0,
-    notes: Optional[str] = None
-) -> Lemma:
-    """Add lemma information for a word."""
-    lemma_obj = Lemma(
-        word_id=word_obj.id,
-        lemma=lemma,
-        pos_type=pos_type,
-        confidence=confidence,
-        notes=notes
+def add_example(
+    session,
+    definition_obj: Definition,
+    example_text: str
+) -> Example:
+    """Add an example sentence for a definition."""
+    example = Example(
+        definition_id=definition_obj.id,
+        example_text=example_text
     )
-    session.add(lemma_obj)
+    session.add(example)
     session.commit()
-    return lemma_obj
+    return example
 
 def log_query(
     session,
@@ -185,11 +176,10 @@ def log_query(
     return log
 
 def get_words_needing_analysis(session, limit: int = 100) -> List[Word]:
-    """Get words that need linguistic analysis (no POS or lemma info)."""
+    """Get words that need linguistic analysis (no definitions)."""
     return session.query(Word)\
-        .outerjoin(PartOfSpeech)\
-        .outerjoin(Lemma)\
-        .filter((PartOfSpeech.id == None) | (Lemma.id == None))\
+        .outerjoin(Definition)\
+        .filter(Definition.id == None)\
         .limit(limit)\
         .all()
 
@@ -197,19 +187,12 @@ def get_word_by_text(session, word_text: str) -> Optional[Word]:
     """Get a word from the database by its text."""
     return session.query(Word).filter(Word.word == word_text).first()
 
-def get_all_pos_for_word(session, word_text: str) -> List[PartOfSpeech]:
-    """Get all parts of speech for a word."""
+def get_all_definitions_for_word(session, word_text: str) -> List[Definition]:
+    """Get all definitions for a word."""
     word = get_word_by_text(session, word_text)
     if not word:
         return []
-    return word.parts_of_speech
-
-def get_all_lemmas_for_word(session, word_text: str) -> List[Lemma]:
-    """Get all lemmas for a word."""
-    word = get_word_by_text(session, word_text)
-    if not word:
-        return []
-    return word.lemmas
+    return word.definitions
 
 def get_common_words_by_pos(session, pos_type: str, limit: int = 50) -> List[Dict[str, Any]]:
     """
@@ -223,94 +206,61 @@ def get_common_words_by_pos(session, pos_type: str, limit: int = 50) -> List[Dic
     Returns:
         List of dictionaries containing word information
     """
-    # Query words with the specified part of speech, ordered by frequency rank
-    query = session.query(Word, PartOfSpeech)\
-        .join(PartOfSpeech)\
-        .filter(PartOfSpeech.pos_type == pos_type)\
+    # Query words with definitions of the specified part of speech, ordered by frequency rank
+    query = session.query(Word, Definition)\
+        .join(Definition)\
+        .filter(Definition.pos_type == pos_type)\
         .order_by(Word.frequency_rank)\
         .limit(limit)
     
     results = []
-    for word, pos in query:
-        # Find primary lemma for this word and POS
-        primary_lemma = session.query(Lemma)\
-            .filter(Lemma.word_id == word.id)\
-            .filter((Lemma.pos_type == pos_type) | (Lemma.pos_type == None))\
-            .order_by(Lemma.confidence.desc())\
-            .first()
-            
-        lemma_text = primary_lemma.lemma if primary_lemma else None
-        
+    for word, definition in query:
         results.append({
             "word": word.word,
             "rank": word.frequency_rank,
             "pos": pos_type,
-            "confidence": pos.confidence,
-            "lemma": lemma_text,
-            "multiple_meanings": pos.multiple_meanings,
-            "verified": pos.verified
+            "lemma": definition.lemma,
+            "definition": definition.definition_text,
+            "confidence": definition.confidence,
+            "multiple_meanings": definition.multiple_meanings,
+            "verified": definition.verified
         })
     
     return results
 
-def update_part_of_speech(
+def update_definition(
     session,
-    pos_id: int,
+    definition_id: int,
+    definition_text: Optional[str] = None,
     pos_type: Optional[str] = None,
+    lemma: Optional[str] = None,
     confidence: Optional[float] = None,
     multiple_meanings: Optional[bool] = None,
-    different_pos: Optional[bool] = None,
     special_case: Optional[bool] = None,
     verified: Optional[bool] = None,
     notes: Optional[str] = None
 ) -> bool:
-    """Update part of speech information."""
-    pos = session.query(PartOfSpeech).filter(PartOfSpeech.id == pos_id).first()
-    if not pos:
+    """Update definition information."""
+    definition = session.query(Definition).filter(Definition.id == definition_id).first()
+    if not definition:
         return False
         
+    if definition_text is not None:
+        definition.definition_text = definition_text
     if pos_type is not None:
-        pos.pos_type = pos_type
-    if confidence is not None:
-        pos.confidence = confidence
-    if multiple_meanings is not None:
-        pos.multiple_meanings = multiple_meanings
-    if different_pos is not None:
-        pos.different_pos = different_pos
-    if special_case is not None:
-        pos.special_case = special_case
-    if verified is not None:
-        pos.verified = verified
-    if notes is not None:
-        pos.notes = notes
-        
-    session.commit()
-    return True
-
-def update_lemma(
-    session,
-    lemma_id: int,
-    lemma: Optional[str] = None,
-    pos_type: Optional[str] = None,
-    confidence: Optional[float] = None,
-    verified: Optional[bool] = None,
-    notes: Optional[str] = None
-) -> bool:
-    """Update lemma information."""
-    lemma_obj = session.query(Lemma).filter(Lemma.id == lemma_id).first()
-    if not lemma_obj:
-        return False
-        
+        definition.pos_type = pos_type
     if lemma is not None:
-        lemma_obj.lemma = lemma
-    if pos_type is not None:
-        lemma_obj.pos_type = pos_type
+        definition.lemma = lemma
     if confidence is not None:
-        lemma_obj.confidence = confidence
+        definition.confidence = confidence
+    if multiple_meanings is not None:
+        definition.multiple_meanings = multiple_meanings
+    if special_case is not None:
+        definition.special_case = special_case
     if verified is not None:
-        lemma_obj.verified = verified
+        definition.verified = verified
     if notes is not None:
-        lemma_obj.notes = notes
+        definition.notes = notes
         
     session.commit()
     return True
@@ -318,43 +268,169 @@ def update_lemma(
 def get_processing_stats(session) -> Dict[str, Any]:
     """Get statistics about the current processing state."""
     total_words = session.query(func.count(Word.id)).scalar()
-    words_with_pos = session.query(func.count(Word.id))\
-        .join(PartOfSpeech).scalar()
-    words_with_lemma = session.query(func.count(Word.id))\
-        .join(Lemma).scalar()
-    words_complete = session.query(func.count(Word.id))\
-        .join(PartOfSpeech)\
-        .join(Lemma)\
+    words_with_definitions = session.query(func.count(Word.id))\
+        .join(Definition).scalar()
+    
+    # Count words with at least one example
+    words_with_examples = session.query(func.count(Word.id))\
+        .join(Definition)\
+        .join(Example)\
         .scalar()
+    
+    # Count total definitions and examples
+    total_definitions = session.query(func.count(Definition.id)).scalar()
+    total_examples = session.query(func.count(Example.id)).scalar()
     
     return {
         "total_words": total_words or 0,
-        "words_with_pos": words_with_pos or 0,
-        "words_with_lemma": words_with_lemma or 0, 
-        "words_complete": words_complete or 0,
-        "percent_complete": (words_complete / total_words * 100) if total_words else 0
+        "words_with_definitions": words_with_definitions or 0,
+        "words_with_examples": words_with_examples or 0,
+        "total_definitions": total_definitions or 0, 
+        "total_examples": total_examples or 0,
+        "percent_complete": (words_with_definitions / total_words * 100) if total_words else 0
     }
 
 def list_problematic_words(session, limit: int = 100) -> List[Dict[str, Any]]:
     """List words that have been flagged as problematic (special cases, multiple meanings, etc.)."""
-    query = session.query(Word).join(PartOfSpeech)\
+    query = session.query(Word).join(Definition)\
         .filter(
-            (PartOfSpeech.multiple_meanings == True) |
-            (PartOfSpeech.different_pos == True) |
-            (PartOfSpeech.special_case == True)
+            (Definition.multiple_meanings == True) |
+            (Definition.special_case == True)
         ).limit(limit)
     
     results = []
     for word in query:
-        parts_of_speech = [(pos.pos_type, pos.multiple_meanings, pos.different_pos, pos.special_case, pos.notes) 
-                           for pos in word.parts_of_speech]
-        lemmas = [(lemma.lemma, lemma.pos_type, lemma.notes) for lemma in word.lemmas]
+        definitions_data = []
+        for definition in word.definitions:
+            examples = [example.example_text for example in definition.examples]
+            
+            definitions_data.append({
+                "text": definition.definition_text,
+                "pos": definition.pos_type,
+                "lemma": definition.lemma,
+                "multiple_meanings": definition.multiple_meanings,
+                "special_case": definition.special_case,
+                "notes": definition.notes,
+                "examples": examples
+            })
         
         results.append({
             "word": word.word,
             "rank": word.frequency_rank,
-            "parts_of_speech": parts_of_speech,
-            "lemmas": lemmas
+            "definitions": definitions_data
         })
     
     return results
+
+def migrate_from_old_schema(session):
+    """
+    Migrate data from the old schema (separate POS and lemmas) to the new schema.
+    
+    Args:
+        session: Database session
+        
+    Returns:
+        Dictionary with migration statistics
+    """
+    from sqlalchemy import Table, MetaData, inspect
+    
+    metadata = MetaData()
+    
+    # Check if old tables exist
+    inspector = inspect(session.bind)
+    if 'parts_of_speech' not in inspector.get_table_names() or 'lemmas' not in inspector.get_table_names():
+        return {"error": "Old schema tables not found"}
+        
+    # Reflect the old tables
+    old_pos_table = Table('parts_of_speech', metadata, autoload_with=session.bind)
+    old_lemma_table = Table('lemmas', metadata, autoload_with=session.bind)
+    
+    # Get all words
+    words = session.query(Word).all()
+    stats = {
+        "words_processed": 0,
+        "definitions_created": 0,
+        "words_with_pos_but_no_lemma": 0,
+        "words_with_lemma_but_no_pos": 0
+    }
+    
+    for word in words:
+        # Get old POS and lemma entries
+        old_pos_entries = session.query(old_pos_table).filter(old_pos_table.c.word_id == word.id).all()
+        old_lemma_entries = session.query(old_lemma_table).filter(old_lemma_table.c.word_id == word.id).all()
+        
+        if not old_pos_entries and not old_lemma_entries:
+            continue
+        
+        stats["words_processed"] += 1
+        
+        # Handle case where we have POS but no lemma
+        if old_pos_entries and not old_lemma_entries:
+            stats["words_with_pos_but_no_lemma"] += 1
+            for pos in old_pos_entries:
+                # Create definition with the word itself as lemma
+                add_definition(
+                    session,
+                    word,
+                    definition_text=f"Definition for {word.word} as {pos.pos_type}",
+                    pos_type=pos.pos_type,
+                    lemma=word.word,  # Default to the word itself
+                    confidence=pos.confidence,
+                    multiple_meanings=pos.multiple_meanings,
+                    special_case=pos.special_case,
+                    notes=pos.notes
+                )
+                stats["definitions_created"] += 1
+        
+        # Handle case where we have lemma but no POS
+        elif old_lemma_entries and not old_pos_entries:
+            stats["words_with_lemma_but_no_pos"] += 1
+            for lemma in old_lemma_entries:
+                # Create definition with generic POS
+                add_definition(
+                    session,
+                    word,
+                    definition_text=f"Definition for {word.word}",
+                    pos_type=lemma.pos_type or "unknown",
+                    lemma=lemma.lemma,
+                    confidence=lemma.confidence,
+                    notes=lemma.notes
+                )
+                stats["definitions_created"] += 1
+        
+        # Handle case where we have both POS and lemma
+        else:
+            # Try to match POS and lemmas that go together
+            for pos in old_pos_entries:
+                # Find matching lemma by POS type if possible
+                matching_lemma = next(
+                    (l for l in old_lemma_entries if l.pos_type == pos.pos_type), 
+                    old_lemma_entries[0] if old_lemma_entries else None
+                )
+                
+                lemma_text = matching_lemma.lemma if matching_lemma else word.word
+                lemma_notes = matching_lemma.notes if matching_lemma else None
+                
+                # Create combined definition
+                combined_notes = None
+                if pos.notes and lemma_notes:
+                    combined_notes = f"POS: {pos.notes}; Lemma: {lemma_notes}"
+                elif pos.notes:
+                    combined_notes = pos.notes
+                elif lemma_notes:
+                    combined_notes = lemma_notes
+                
+                add_definition(
+                    session,
+                    word,
+                    definition_text=f"Definition for {word.word} as {pos.pos_type}",
+                    pos_type=pos.pos_type,
+                    lemma=lemma_text,
+                    confidence=pos.confidence,
+                    multiple_meanings=pos.multiple_meanings,
+                    special_case=pos.special_case,
+                    notes=combined_notes
+                )
+                stats["definitions_created"] += 1
+    
+    return stats
