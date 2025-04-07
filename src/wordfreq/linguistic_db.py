@@ -91,6 +91,16 @@ def create_database_session(db_path: str = constants.WORDFREQ_DB_PATH):
     Session = sessionmaker(bind=engine)
     return Session()
 
+def ensure_tables_exist(session):
+    """
+    Ensure tables exist in the database.
+    
+    Args:
+        session: Database session
+    """
+    engine = session.get_bind().engine
+    Base.metadata.create_all(engine)
+
 def add_word(session, word: str, rank: Optional[int] = None) -> Word:
     """Add a word to the database if it doesn't exist, or return existing one."""
     existing = session.query(Word).filter(Word.word == word).first()
@@ -200,6 +210,48 @@ def get_all_lemmas_for_word(session, word_text: str) -> List[Lemma]:
     if not word:
         return []
     return word.lemmas
+
+def get_common_words_by_pos(session, pos_type: str, limit: int = 50) -> List[Dict[str, Any]]:
+    """
+    Get the most common words for a specified part of speech.
+    
+    Args:
+        session: Database session
+        pos_type: Part of speech type to filter by
+        limit: Maximum number of words to return
+        
+    Returns:
+        List of dictionaries containing word information
+    """
+    # Query words with the specified part of speech, ordered by frequency rank
+    query = session.query(Word, PartOfSpeech)\
+        .join(PartOfSpeech)\
+        .filter(PartOfSpeech.pos_type == pos_type)\
+        .order_by(Word.frequency_rank)\
+        .limit(limit)
+    
+    results = []
+    for word, pos in query:
+        # Find primary lemma for this word and POS
+        primary_lemma = session.query(Lemma)\
+            .filter(Lemma.word_id == word.id)\
+            .filter((Lemma.pos_type == pos_type) | (Lemma.pos_type == None))\
+            .order_by(Lemma.confidence.desc())\
+            .first()
+            
+        lemma_text = primary_lemma.lemma if primary_lemma else None
+        
+        results.append({
+            "word": word.word,
+            "rank": word.frequency_rank,
+            "pos": pos_type,
+            "confidence": pos.confidence,
+            "lemma": lemma_text,
+            "multiple_meanings": pos.multiple_meanings,
+            "verified": pos.verified
+        })
+    
+    return results
 
 def update_part_of_speech(
     session,

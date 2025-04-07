@@ -5,10 +5,13 @@
 import json
 import logging
 import time
+import threading
 from typing import Dict, List, Optional, Any, Tuple
 
 from clients.unified_client import UnifiedLLMClient
 from wordfreq import linguistic_db
+from wordfreq.connection_pool import get_session, close_thread_sessions
+import constants
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -29,17 +32,22 @@ VALID_POS_TYPES = {
 class LinguisticClient:
     """Client for querying LLMs for linguistic information."""
     
-    def __init__(self, model: str = DEFAULT_MODEL, session = None, debug: bool = False):
+    # Thread-local storage for client instances
+    _thread_local = threading.local()
+    # Lock for thread safety
+    _lock = threading.Lock()
+    
+    def __init__(self, model: str = DEFAULT_MODEL, db_path: str = None, debug: bool = False):
         """
-        Initialize client with model and database session.
+        Initialize client with model and database path.
         
         Args:
             model: Model name to use for queries
-            session: SQLAlchemy database session
+            db_path: Path to the SQLite database, or None to use default
             debug: Whether to enable debug logging
         """
         self.model = model
-        self.session = session
+        self.db_path = db_path or constants.WORDFREQ_DB_PATH
         self.debug = debug
         self.client = UnifiedLLMClient(debug=debug)
         
@@ -52,6 +60,37 @@ class LinguisticClient:
             logger.info(f"Model {model} warmed up successfully")
         except Exception as e:
             logger.warning(f"Failed to warm up model {model}: {e}")
+    
+    @classmethod
+    def get_instance(cls, model: str = DEFAULT_MODEL, db_path: str = None, debug: bool = False) -> 'LinguisticClient':
+        """
+        Get a thread-local instance of the LinguisticClient.
+        
+        This method ensures that each thread gets its own client instance.
+        
+        Args:
+            model: Model name to use for queries
+            db_path: Path to the SQLite database, or None to use default
+            debug: Whether to enable debug logging
+            
+        Returns:
+            Thread-local LinguisticClient instance
+        """
+        if not hasattr(cls._thread_local, 'instance'):
+            with cls._lock:
+                # Initialize the thread-local instance
+                cls._thread_local.instance = cls(model=model, db_path=db_path, debug=debug)
+                logger.debug(f"Created new LinguisticClient for thread {threading.current_thread().name}")
+        return cls._thread_local.instance
+    
+    def get_session(self):
+        """
+        Get a thread-local database session.
+        
+        Returns:
+            Thread-local database session
+        """
+        return get_session(self.db_path, echo=self.debug)
 
     def query_part_of_speech(self, word: str) -> Tuple[List[Dict[str, Any]], bool]:
         """
@@ -96,6 +135,7 @@ class LinguisticClient:
                                 "description": "Additional notes about the word"
                             }
                         },
+                        "additionalProperties": False,
                         "required": ["pos", "confidence", "multiple_meanings", "different_pos", "special_case", "notes"]
                     }
                 }
@@ -135,15 +175,15 @@ class LinguisticClient:
                 
                 # Log the query
                 try:
-                    if self.session:
-                        linguistic_db.log_query(
-                            self.session,
-                            word=word,
-                            query_type='pos',
-                            prompt=prompt,
-                            response=json.dumps(response.structured_data),
-                            model=self.model
-                        )
+                    session = self.get_session()
+                    linguistic_db.log_query(
+                        session,
+                        word=word,
+                        query_type='pos',
+                        prompt=prompt,
+                        response=json.dumps(response.structured_data),
+                        model=self.model
+                    )
                 except Exception as e:
                     logger.error(f"Failed to log query: {e}")
                 
@@ -157,17 +197,17 @@ class LinguisticClient:
                 
                 # Log the failed query
                 try:
-                    if self.session:
-                        linguistic_db.log_query(
-                            self.session,
-                            word=word,
-                            query_type='pos',
-                            prompt=prompt,
-                            response=str(e),
-                            model=self.model,
-                            success=False,
-                            error=str(e)
-                        )
+                    session = self.get_session()
+                    linguistic_db.log_query(
+                        session,
+                        word=word,
+                        query_type='pos',
+                        prompt=prompt,
+                        response=str(e),
+                        model=self.model,
+                        success=False,
+                        error=str(e)
+                    )
                 except Exception as log_err:
                     logger.error(f"Failed to log query error: {log_err}")
                     
@@ -211,10 +251,11 @@ class LinguisticClient:
                                 "description": "Additional notes about the lemma"
                             }
                         },
-                        "required": ["lemma", "confidence"]
+                        "required": ["lemma", "pos", "confidence", "notes"]
                     }
                 }
             },
+            "additionalProperties": False,
             "required": ["lemmas"]
         }
         
@@ -253,15 +294,15 @@ class LinguisticClient:
                 
                 # Log the query
                 try:
-                    if self.session:
-                        linguistic_db.log_query(
-                            self.session,
-                            word=word,
-                            query_type='lemma',
-                            prompt=prompt,
-                            response=json.dumps(response.structured_data),
-                            model=self.model
-                        )
+                    session = self.get_session()
+                    linguistic_db.log_query(
+                        session,
+                        word=word,
+                        query_type='lemma',
+                        prompt=prompt,
+                        response=json.dumps(response.structured_data),
+                        model=self.model
+                    )
                 except Exception as e:
                     logger.error(f"Failed to log query: {e}")
                 
@@ -275,17 +316,17 @@ class LinguisticClient:
                 
                 # Log the failed query
                 try:
-                    if self.session:
-                        linguistic_db.log_query(
-                            self.session,
-                            word=word,
-                            query_type='lemma',
-                            prompt=prompt,
-                            response=str(e),
-                            model=self.model,
-                            success=False,
-                            error=str(e)
-                        )
+                    session = self.get_session()
+                    linguistic_db.log_query(
+                        session,
+                        word=word,
+                        query_type='lemma',
+                        prompt=prompt,
+                        response=str(e),
+                        model=self.model,
+                        success=False,
+                        error=str(e)
+                    )
                 except Exception as log_err:
                     logger.error(f"Failed to log query error: {log_err}")
                     
@@ -337,7 +378,8 @@ class LinguisticClient:
                                 "description": "Additional notes about the word"
                             }
                         },
-                        "required": ["pos", "confidence"]
+                        "additionalProperties": False,
+                        "required": ["pos", "confidence", "multiple_meanings", "different_pos", "special_case", "notes"]
                     }
                 },
                 "lemmas": {
@@ -362,10 +404,12 @@ class LinguisticClient:
                                 "description": "Additional notes about the lemma"
                             }
                         },
-                        "required": ["lemma", "confidence"]
+                        "additionalProperties": False,
+                        "required": ["lemma", "pos", "confidence", "notes"]
                     }
                 }
             },
+            "additionalProperties": False,
             "required": ["parts_of_speech", "lemmas"]
         }
         
@@ -412,15 +456,15 @@ class LinguisticClient:
                 
                 # Log the query
                 try:
-                    if self.session:
-                        linguistic_db.log_query(
-                            self.session,
-                            word=word,
-                            query_type='both',
-                            prompt=prompt,
-                            response=json.dumps(response.structured_data),
-                            model=self.model
-                        )
+                    session = self.get_session()
+                    linguistic_db.log_query(
+                        session,
+                        word=word,
+                        query_type='both',
+                        prompt=prompt,
+                        response=json.dumps(response.structured_data),
+                        model=self.model
+                    )
                 except Exception as e:
                     logger.error(f"Failed to log query: {e}")
                 
@@ -434,17 +478,17 @@ class LinguisticClient:
                 
                 # Log the failed query
                 try:
-                    if self.session:
-                        linguistic_db.log_query(
-                            self.session,
-                            word=word,
-                            query_type='both',
-                            prompt=prompt,
-                            response=str(e),
-                            model=self.model,
-                            success=False,
-                            error=str(e)
-                        )
+                    session = self.get_session()
+                    linguistic_db.log_query(
+                        session,
+                        word=word,
+                        query_type='both',
+                        prompt=prompt,
+                        response=str(e),
+                        model=self.model,
+                        success=False,
+                        error=str(e)
+                    )
                 except Exception as log_err:
                     logger.error(f"Failed to log query error: {log_err}")
                     
@@ -465,12 +509,10 @@ class LinguisticClient:
         Returns:
             Success flag
         """
-        if not self.session:
-            logger.error("No database session provided")
-            return False
-            
+        session = self.get_session()
+        
         # Add or get word in database
-        word_obj = linguistic_db.add_word(self.session, word, rank)
+        word_obj = linguistic_db.add_word(session, word, rank)
         
         if use_combined:
             # Query for both POS and lemma in one call
@@ -480,7 +522,7 @@ class LinguisticClient:
                 # Process parts of speech
                 for pos_data in results.get('parts_of_speech', []):
                     linguistic_db.add_part_of_speech(
-                        self.session,
+                        session,
                         word_obj,
                         pos_type=pos_data.get('pos', 'unknown'),
                         confidence=pos_data.get('confidence', 0.0),
@@ -493,7 +535,7 @@ class LinguisticClient:
                 # Process lemmas
                 for lemma_data in results.get('lemmas', []):
                     linguistic_db.add_lemma(
-                        self.session,
+                        session,
                         word_obj,
                         lemma=lemma_data.get('lemma', word),
                         pos_type=lemma_data.get('pos'),
@@ -514,7 +556,7 @@ class LinguisticClient:
         if pos_success:
             for pos_data in pos_results:
                 linguistic_db.add_part_of_speech(
-                    self.session,
+                    session,
                     word_obj,
                     pos_type=pos_data.get('pos', 'unknown'),
                     confidence=pos_data.get('confidence', 0.0),
@@ -529,7 +571,7 @@ class LinguisticClient:
         if lemma_success:
             for lemma_data in lemma_results:
                 linguistic_db.add_lemma(
-                    self.session,
+                    session,
                     word_obj,
                     lemma=lemma_data.get('lemma', word),
                     pos_type=lemma_data.get('pos'),
@@ -538,3 +580,12 @@ class LinguisticClient:
                 )
         
         return pos_success or lemma_success
+
+    @classmethod
+    def close_all(cls):
+        """
+        Close all resources for all threads.
+        This should be called when the application is shutting down.
+        """
+        close_thread_sessions()
+        logger.info("Closed all database sessions")
