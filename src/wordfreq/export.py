@@ -9,6 +9,7 @@ import os
 from typing import Dict, List, Optional, Any, Set
 from sqlalchemy import select, and_, func
 
+import constants
 from wordfreq import linguistic_db
 
 # Configure logging
@@ -18,7 +19,7 @@ logger = logging.getLogger(__name__)
 class LinguisticExporter:
     """Export linguistic data to various formats."""
     
-    def __init__(self, db_path: str = 'linguistics.sqlite'):
+    def __init__(self, db_path: str = constants.WORDFREQ_DB_PATH):
         """
         Initialize exporter with database path.
         
