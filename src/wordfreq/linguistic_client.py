@@ -288,6 +288,242 @@ class LinguisticClient:
         else:
             logger.warning(f"Failed to process word '{word}'")
             return False
+        
+    def query_chinese_translation(self, word: str, definition: str, example: str) -> Tuple[str, bool]:
+        """
+        Query LLM for a Chinese translation of a specific word definition.
+        
+        Args:
+            word: The English word to translate
+            definition: The specific definition of the word
+            example: An example sentence using the word
+            
+        Returns:
+            Tuple of (translation string, success flag)
+        """
+        schema = {
+            "type": "object",
+            "properties": {
+                "translation": {
+                    "type": "object",
+                    "properties": {
+                        "chinese": {
+                            "type": "string",
+                            "description": "The Chinese translation (preferably two characters when possible)"
+                        },
+                        "pinyin": {
+                            "type": "string",
+                            "description": "The pinyin pronunciation of the Chinese translation"
+                        },
+                        "confidence": {
+                            "type": "number",
+                            "description": "Confidence score from 0-1"
+                        },
+                        "notes": {
+                            "type": "string",
+                            "description": "Additional notes about this translation"
+                        }
+                    },
+                    "additionalProperties": False,
+                    "required": ["chinese", "pinyin", "confidence", "notes"]
+                }
+            },
+            "additionalProperties": False,
+            "required": ["translation"]
+        }
+        
+        context = """
+        You are a bilingual English-Chinese linguistic expert.
+        
+        Your task is to provide an accurate Chinese translation for a specific definition of an English word.
+        
+        Guidelines:
+        - Provide a translation that specifically matches the given definition, not other meanings of the word
+        - Unless a one-character term is unambiguous, provide a two-character term (e.g., prefer '跳舞' over '舞')
+        - Include proper pinyin pronunciation with tone marks
+        - When multiple translations are possible, choose the most common or appropriate one
+        - Only provide translations into standard Mandarin Chinese (not regional variants)
+        
+        Respond only with a structured JSON object following the schema provided.
+        """
+        
+        prompt = f"""Provide a Chinese translation for the English word '{word}' with the following definition:
+        
+        Definition: {definition}
+        Example sentence: {example}
+        
+        Return only a JSON object with the translation, pinyin, confidence score, and any notes."""
+        
+        # Try multiple times in case of failure
+        for attempt in range(RETRY_COUNT):
+            try:
+                response = self.client.generate_chat(
+                    prompt=prompt,
+                    model=self.model,
+                    json_schema=schema,
+                    context=context
+                )
+                
+                # Log the query
+                try:
+                    session = self.get_session()
+                    linguistic_db.log_query(
+                        session,
+                        word=word,
+                        query_type='chinese_translation',
+                        prompt=prompt,
+                        response=json.dumps(response.structured_data),
+                        model=self.model
+                    )
+                except Exception as e:
+                    logger.error(f"Failed to log translation query: {e}")
+                
+                if response.structured_data and 'translation' in response.structured_data:
+                    return response.structured_data['translation']['chinese'], True
+                else:
+                    logger.warning(f"Failed to get valid translation response for '{word}' (attempt {attempt+1})")
+                    time.sleep(RETRY_DELAY)
+            except Exception as e:
+                logger.error(f"Error querying for translation: {e} (attempt {attempt+1})")
+                
+                # Log the failed query
+                try:
+                    session = self.get_session()
+                    linguistic_db.log_query(
+                        session,
+                        word=word,
+                        query_type='chinese_translation',
+                        prompt=prompt,
+                        response=str(e),
+                        model=self.model,
+                        success=False,
+                        error=str(e)
+                    )
+                except Exception as log_err:
+                    logger.error(f"Failed to log query error: {log_err}")
+                    
+                time.sleep(RETRY_DELAY)
+    
+        # Return empty string if all attempts failed
+        return "", False
+
+    def add_translation_for_definition(self, definition_id: int) -> bool:
+        """
+        Add a Chinese translation for a specific definition.
+        
+        Args:
+            definition_id: The ID of the definition to translate
+            
+        Returns:
+            Success flag
+        """
+        session = self.get_session()
+        
+        # Get the definition
+        definition = session.query(linguistic_db.Definition).filter(linguistic_db.Definition.id == definition_id).first()
+        if not definition:
+            logger.warning(f"Definition with ID {definition_id} not found")
+            return False
+        
+        # Get the word
+        word = definition.word
+        
+        # Get an example sentence if available
+        example_text = "No example available."
+        if definition.examples and len(definition.examples) > 0:
+            example_text = definition.examples[0].example_text
+        
+        # Query for translation
+        translation, success = self.query_chinese_translation(
+            word.word, 
+            definition.definition_text,
+            example_text
+        )
+        
+        if success and translation:
+            # Update the definition with the translation
+            linguistic_db.update_chinese_translation(session, definition.id, translation)
+            logger.info(f"Added Chinese translation '{translation}' for '{word.word}' (definition ID: {definition.id})")
+            return True
+        else:
+            logger.warning(f"Failed to get Chinese translation for '{word.word}' (definition ID: {definition.id})")
+            return False
+
+    def add_missing_translations_for_word(self, word_text: str, throttle: float = 1.0) -> Dict[str, Any]:
+        """
+        Add Chinese translations for all definitions of a word that don't have translations yet.
+        
+        Args:
+            word_text: Word to add translations for
+            throttle: Time to wait between API calls (seconds)
+            
+        Returns:
+            Dictionary with statistics about the processing
+        """
+        logger.info(f"Adding missing Chinese translations for definitions of '{word_text}'")
+        
+        session = self.get_session()
+        word = linguistic_db.get_word_by_text(session, word_text)
+        
+        if not word:
+            logger.warning(f"Word '{word_text}' not found in the database")
+            return {
+                "word": word_text,
+                "total_definitions": 0,
+                "missing_translations": 0,
+                "processed": 0,
+                "successful": 0
+            }
+        
+        # Get all definitions for the word
+        definitions = word.definitions
+        total_definitions = len(definitions)
+        
+        if total_definitions == 0:
+            logger.warning(f"No definitions found for word '{word_text}'")
+            return {
+                "word": word_text,
+                "total_definitions": 0,
+                "missing_translations": 0,
+                "processed": 0,
+                "successful": 0
+            }
+        
+        # Filter for definitions without translations
+        definitions_without_translations = [
+            d for d in definitions 
+            if not d.chinese_translation or not d.chinese_translation.strip()
+        ]
+        
+        missing_translations = len(definitions_without_translations)
+        logger.info(f"Found {missing_translations} definitions without translations (out of {total_definitions} total)")
+        
+        successful = 0
+        processed = 0
+        
+        for definition in definitions_without_translations:
+            success = self.add_translation_for_definition(definition.id)
+            processed += 1
+            
+            if success:
+                successful += 1
+                logger.info(f"Added translation for definition ID {definition.id}")
+            else:
+                logger.warning(f"Failed to add translation for definition ID {definition.id}")
+            
+            # Throttle to avoid overloading the API
+            time.sleep(throttle)
+        
+        logger.info(f"Processing complete for '{word_text}': {successful}/{processed} successful " 
+                    f"({missing_translations} missing, {total_definitions} total)")
+        
+        return {
+            "word": word_text,
+            "total_definitions": total_definitions,
+            "missing_translations": missing_translations,
+            "processed": processed,
+            "successful": successful
+        }
 
     @classmethod
     def close_all(cls):

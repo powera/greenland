@@ -38,6 +38,7 @@ class Definition(Base):
     definition_text: Mapped[str] = mapped_column(Text, nullable=False)
     pos_type: Mapped[str] = mapped_column(String, nullable=False)  # Part of speech for this definition
     lemma: Mapped[str] = mapped_column(String, nullable=False)     # Lemma for this definition
+    chinese_translation: Mapped[Optional[str]] = mapped_column(String, nullable=True)  # Chinese translation
     
     # Special flags for handling complex cases (moved from POS to definition level)
     multiple_meanings: Mapped[bool] = mapped_column(Boolean, default=False)
@@ -264,6 +265,27 @@ def update_definition(
         
     session.commit()
     return True
+
+def update_chinese_translation(
+    session,
+    definition_id: int,
+    chinese_translation: str
+) -> bool:
+    """Update Chinese translation for a definition."""
+    definition = session.query(Definition).filter(Definition.id == definition_id).first()
+    if not definition:
+        return False
+        
+    definition.chinese_translation = chinese_translation
+    session.commit()
+    return True
+
+def get_definitions_without_translations(session, limit: int = 100) -> List[Definition]:
+    """Get definitions that need Chinese translations."""
+    return session.query(Definition)\
+        .filter(Definition.chinese_translation == None)\
+        .limit(limit)\
+        .all()
 
 def get_processing_stats(session) -> Dict[str, Any]:
     """Get statistics about the current processing state."""
