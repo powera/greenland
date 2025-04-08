@@ -3,6 +3,7 @@
 """Database models for storing linguistic information about words."""
 
 import datetime
+import enum
 from typing import Dict, List, Optional, Any, Set
 from sqlalchemy import String, Integer, Text, ForeignKey, TIMESTAMP, Boolean, create_engine, func
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
@@ -15,6 +16,84 @@ import constants
 class Base(DeclarativeBase):
     """Base class for all SQLAlchemy models."""
     pass
+
+
+# Define the subtype enumerations
+class NounSubtype(enum.Enum):
+    """Subtypes for nouns."""
+    HUMAN = "human"
+    ANIMAL = "animal"
+    PLANT = "plant"
+    BUILDING_STRUCTURE = "building_structure"
+    SMALL_MOVABLE_OBJECT = "small_movable_object"
+    NATURAL_FEATURE = "natural_feature"
+    TOOL_MACHINE = "tool_machine"
+    MATERIAL_SUBSTANCE = "material_substance"
+    CONCEPT_IDEA = "concept_idea"
+    EMOTION_FEELING = "emotion_feeling"
+    PROCESS_EVENT = "process_event"
+    TIME_PERIOD = "time_period"
+    GROUP_PEOPLE = "group_people"
+    GROUP_ANIMAL = "group_animal"
+    COLLECTION_THINGS = "collection_things"
+    PERSONAL_NAME = "personal_name"
+    PLACE_NAME = "place_name"
+    ORGANIZATION_NAME = "organization_name"
+    OTHER = "other"
+
+class VerbSubtype(enum.Enum):
+    """Subtypes for verbs."""
+    PHYSICAL_ACTION = "physical_action"
+    CREATION_ACTION = "creation_action"
+    DESTRUCTION_ACTION = "destruction_action"
+    MENTAL_STATE = "mental_state"
+    EMOTIONAL_STATE = "emotional_state"
+    POSSESSION = "possession"
+    DEVELOPMENT = "development"
+    CHANGE = "change"
+    SPEAKING = "speaking"
+    WRITING = "writing"
+    EXPRESSING = "expressing"
+    DIRECTIONAL_MOVEMENT = "directional_movement"
+    MANNER_MOVEMENT = "manner_movement"
+    OTHER = "other"
+
+class AdjectiveSubtype(enum.Enum):
+    """Subtypes for adjectives."""
+    SIZE = "size"
+    COLOR = "color"
+    SHAPE = "shape"
+    TEXTURE = "texture"
+    QUALITY = "quality"
+    AESTHETIC = "aesthetic"
+    IMPORTANCE = "importance"
+    ORIGIN = "origin"
+    PURPOSE = "purpose"
+    MATERIAL = "material"
+    DEFINITE_QUANTITY = "definite_quantity"
+    INDEFINITE_QUANTITY = "indefinite_quantity"
+    DURATION = "duration"
+    FREQUENCY = "frequency"
+    SEQUENCE = "sequence"
+    OTHER = "other"
+
+class AdverbSubtype(enum.Enum):
+    """Subtypes for adverbs."""
+    STYLE = "style"
+    ATTITUDE = "attitude"
+    SPECIFIC_TIME = "specific_time"
+    RELATIVE_TIME = "relative_time"
+    DURATION = "duration"
+    DIRECTION = "direction"
+    LOCATION = "location"
+    DISTANCE = "distance"
+    INTENSITY = "intensity"
+    COMPLETENESS = "completeness"
+    APPROXIMATION = "approximation"
+    DEFINITE_FREQUENCY = "definite_frequency"
+    INDEFINITE_FREQUENCY = "indefinite_frequency"
+    OTHER = "other"
+
 
 class Word(Base):
     """Model for storing word information."""
@@ -37,9 +116,10 @@ class Definition(Base):
     word_id: Mapped[int] = mapped_column(ForeignKey("words.id"), nullable=False)
     definition_text: Mapped[str] = mapped_column(Text, nullable=False)
     pos_type: Mapped[str] = mapped_column(String, nullable=False)  # Part of speech for this definition
+    pos_subtype: Mapped[Optional[str]] = mapped_column(String, nullable=True)  # Store the subtype as string for flexibility
     lemma: Mapped[str] = mapped_column(String, nullable=False)     # Lemma for this definition
     chinese_translation: Mapped[Optional[str]] = mapped_column(String, nullable=True)  # Chinese translation
-    
+
     # Special flags for handling complex cases (moved from POS to definition level)
     multiple_meanings: Mapped[bool] = mapped_column(Boolean, default=False)
     special_case: Mapped[bool] = mapped_column(Boolean, default=False)
@@ -80,6 +160,35 @@ class QueryLog(Base):
     success: Mapped[bool] = mapped_column(Boolean, default=True)
     error: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
+# Helper function to get subtype enum based on POS
+def get_subtype_enum(pos_type: str) -> Optional[enum.EnumMeta]:
+    """Get the appropriate subtype enum class based on part of speech."""
+    pos_type = pos_type.lower()
+    if pos_type == 'noun':
+        return NounSubtype
+    elif pos_type == 'verb':
+        return VerbSubtype
+    elif pos_type == 'adjective':
+        return AdjectiveSubtype
+    elif pos_type == 'adverb':
+        return AdverbSubtype
+    return None
+
+def get_subtype_values_for_pos(pos_type: str) -> List[str]:
+    """
+    Get all possible subtype values for a given part of speech.
+    
+    Args:
+        pos_type: Part of speech (noun, verb, adjective, adverb)
+        
+    Returns:
+        List of possible subtype values
+    """
+    enum_class = get_subtype_enum(pos_type)
+    if enum_class:
+        return [e.value for e in enum_class]
+    return []
+
 def create_database_session(db_path: str = constants.WORDFREQ_DB_PATH):
     """Create a new database session."""
     engine = create_engine(f'sqlite:///{db_path}')
@@ -118,6 +227,7 @@ def add_definition(
     definition_text: str,
     pos_type: str,
     lemma: str,
+    pos_subtype: Optional[str] = None,
     confidence: float = 0.0,
     multiple_meanings: bool = False,
     special_case: bool = False,
@@ -128,6 +238,7 @@ def add_definition(
         word_id=word_obj.id,
         definition_text=definition_text,
         pos_type=pos_type,
+        pos_subtype=pos_subtype,
         lemma=lemma,
         confidence=confidence,
         multiple_meanings=multiple_meanings,
@@ -235,6 +346,7 @@ def update_definition(
     definition_text: Optional[str] = None,
     pos_type: Optional[str] = None,
     lemma: Optional[str] = None,
+    pos_subtype: Optional[str] = None,
     confidence: Optional[float] = None,
     multiple_meanings: Optional[bool] = None,
     special_case: Optional[bool] = None,
@@ -250,6 +362,8 @@ def update_definition(
         definition.definition_text = definition_text
     if pos_type is not None:
         definition.pos_type = pos_type
+    if pos_subtype is not None:
+        definition.pos_subtype = pos_subtype
     if lemma is not None:
         definition.lemma = lemma
     if confidence is not None:

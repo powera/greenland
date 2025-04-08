@@ -84,7 +84,9 @@ class LinguisticReviewer:
                 print(f"    {self.c.BLUE}Lemma:{self.c.ENDC} {definition.lemma}")
                 if definition.chinese_translation:
                     print(f"    {self.c.BLUE}Chinese:{self.c.ENDC} {definition.chinese_translation}")
-                
+                if definition.pos_subtype:
+                    print(f"    {self.c.BLUE}Subtype:{self.c.ENDC} {definition.pos_subtype}")
+
                 if definition.notes:
                     print(f"    {self.c.BLUE}Notes:{self.c.ENDC} {definition.notes}")
                 
