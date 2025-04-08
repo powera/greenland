@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 
 # Constants
 DEFAULT_DB_PATH = constants.WORDFREQ_DB_PATH
+DEFAULT_MODEL = "llama3.2:3b"
 DEFAULT_BATCH_SIZE = 100
 DEFAULT_THREADS = 5
 DEFAULT_MAX_RETRIES = 1
@@ -33,7 +34,7 @@ class WordProcessor:
     def __init__(
         self, 
         db_path: str = DEFAULT_DB_PATH,
-        model: str = "llama3.2:3b",
+        model: str = DEFAULT_MODEL,
         threads: int = DEFAULT_THREADS,
         batch_size: int = DEFAULT_BATCH_SIZE,
         throttle: float = DEFAULT_THROTTLE,

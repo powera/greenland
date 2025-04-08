@@ -114,11 +114,14 @@ class Definition(Base):
     
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     word_id: Mapped[int] = mapped_column(ForeignKey("words.id"), nullable=False)
+    ipa_pronunciation: Mapped[Optional[str]] = mapped_column(String, nullable=True)  # IPA pronunciation
+    phonetic_pronunciation: Mapped[Optional[str]] = mapped_column(String, nullable=True)  # Phonetic pronunciation
     definition_text: Mapped[str] = mapped_column(Text, nullable=False)
     pos_type: Mapped[str] = mapped_column(String, nullable=False)  # Part of speech for this definition
     pos_subtype: Mapped[Optional[str]] = mapped_column(String, nullable=True)  # Store the subtype as string for flexibility
     lemma: Mapped[str] = mapped_column(String, nullable=False)     # Lemma for this definition
     chinese_translation: Mapped[Optional[str]] = mapped_column(String, nullable=True)  # Chinese translation
+
 
     # Special flags for handling complex cases (moved from POS to definition level)
     multiple_meanings: Mapped[bool] = mapped_column(Boolean, default=False)
@@ -227,10 +230,11 @@ def add_definition(
     definition_text: str,
     pos_type: str,
     lemma: str,
-    pos_subtype: Optional[str] = None,
     confidence: float = 0.0,
     multiple_meanings: bool = False,
     special_case: bool = False,
+    ipa_pronunciation: Optional[str] = None,
+    phonetic_pronunciation: Optional[str] = None,
     notes: Optional[str] = None
 ) -> Definition:
     """Add a definition for a word."""
@@ -238,11 +242,12 @@ def add_definition(
         word_id=word_obj.id,
         definition_text=definition_text,
         pos_type=pos_type,
-        pos_subtype=pos_subtype,
         lemma=lemma,
         confidence=confidence,
         multiple_meanings=multiple_meanings,
         special_case=special_case,
+        ipa_pronunciation=ipa_pronunciation,
+        phonetic_pronunciation=phonetic_pronunciation,
         notes=notes
     )
     session.add(definition)
@@ -340,17 +345,19 @@ def get_common_words_by_pos(session, pos_type: str, limit: int = 50) -> List[Dic
     
     return results
 
+
 def update_definition(
     session,
     definition_id: int,
     definition_text: Optional[str] = None,
     pos_type: Optional[str] = None,
     lemma: Optional[str] = None,
-    pos_subtype: Optional[str] = None,
     confidence: Optional[float] = None,
     multiple_meanings: Optional[bool] = None,
     special_case: Optional[bool] = None,
     verified: Optional[bool] = None,
+    ipa_pronunciation: Optional[str] = None,
+    phonetic_pronunciation: Optional[str] = None,
     notes: Optional[str] = None
 ) -> bool:
     """Update definition information."""
@@ -362,8 +369,6 @@ def update_definition(
         definition.definition_text = definition_text
     if pos_type is not None:
         definition.pos_type = pos_type
-    if pos_subtype is not None:
-        definition.pos_subtype = pos_subtype
     if lemma is not None:
         definition.lemma = lemma
     if confidence is not None:
@@ -374,6 +379,10 @@ def update_definition(
         definition.special_case = special_case
     if verified is not None:
         definition.verified = verified
+    if ipa_pronunciation is not None:
+        definition.ipa_pronunciation = ipa_pronunciation
+    if phonetic_pronunciation is not None:
+        definition.phonetic_pronunciation = phonetic_pronunciation
     if notes is not None:
         definition.notes = notes
         
@@ -398,6 +407,25 @@ def get_definitions_without_translations(session, limit: int = 100) -> List[Defi
     """Get definitions that need Chinese translations."""
     return session.query(Definition)\
         .filter(Definition.chinese_translation == None)\
+        .limit(limit)\
+        .all()
+
+def get_definitions_without_subtypes(session, limit: int = 100) -> List[Definition]:
+    """Get definitions that need POS subtypes."""
+    return session.query(Definition)\
+        .filter(Definition.pos_subtype == None)\
+        .order_by(Definition.id.desc())\
+        .limit(limit)\
+        .all()
+
+
+def get_definitions_without_pronunciation(session, limit: int = 100) -> List[Definition]:
+    """Get definitions that need pronunciation information."""
+    return session.query(Definition)\
+        .filter(
+            (Definition.ipa_pronunciation == None) | 
+            (Definition.phonetic_pronunciation == None)
+        )\
         .limit(limit)\
         .all()
 

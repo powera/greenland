@@ -884,6 +884,333 @@ class LinguisticClient:
             "successful": successful
         }
 
+    def query_pronunciation(self, word: str, sentence: str) -> Tuple[Dict[str, Any], bool]:
+        """
+        Query LLM for IPA and phonetic pronunciation of a word.
+        
+        Args:
+            word: Word to get pronunciation for
+            sentence: Context sentence showing usage of the word
+            
+        Returns:
+            Tuple of (pronunciation data, success flag)
+        """
+        schema = {
+            "type": "object",
+            "properties": {
+                "pronunciation": {
+                    "type": "object",
+                    "properties": {
+                        "ipa": {
+                            "type": "string",
+                            "description": "IPA pronunciation for the word in American English"
+                        },
+                        "phonetic": {
+                            "type": "string",
+                            "description": "Simple phonetic pronunciation (e.g. 'SOO-duh-nim' for 'pseudonym')"
+                        },
+                        "alternatives": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "variant": {
+                                        "type": "string",
+                                        "description": "Variant name (e.g. 'British', 'Australian', 'Alternative')"
+                                    },
+                                    "ipa": {
+                                        "type": "string",
+                                        "description": "IPA pronunciation for this variant"
+                                    }
+                                },
+                                "additionalProperties": False,
+                                "required": ["variant", "ipa"]
+                            },
+                            "description": "Alternative valid pronunciations (British, Australian, etc.)"
+                        },
+                        "confidence": {
+                            "type": "number",
+                            "description": "Confidence score from 0-1"
+                        },
+                        "notes": {
+                            "type": "string",
+                            "description": "Additional notes about the pronunciation"
+                        }
+                    },
+                    "additionalProperties": False,
+                    "required": ["ipa", "phonetic", "alternatives", "confidence", "notes"]
+                }
+            },
+            "additionalProperties": False,
+            "required": ["pronunciation"]
+        }
+        
+        context = """
+        You are a pronunciation expert specialized in both International Phonetic Alphabet (IPA) and 
+        simplified phonetic representations.
+        
+        Your task is to provide accurate pronunciations for English words given their context in a sentence.
+        
+        For each word, provide:
+        1. The IPA pronunciation following standard American English conventions
+        - Include stress markers (ˈ for primary stress, ˌ for secondary stress)
+        - Use proper IPA symbols (e.g., /ə/ for schwa, /θ/ for "th" in "think")
+        - Include phonemic transcription between forward slashes: /like this/
+        
+        2. A simplified phonetic pronunciation using capital letters for stressed syllables
+        - Hyphenate between syllables
+        - Use familiar English spelling patterns (e.g., "SOO-duh-nim" for "pseudonym")
+        - This should be readable by someone unfamiliar with IPA
+        
+        3. Alternative pronunciations if relevant (British English, Australian English, etc.)
+        
+        4. A confidence score (0-1) indicating how certain you are of the pronunciation
+        
+        5. Any additional notes about the pronunciation
+        
+        Important: Pay attention to the context sentence to determine the correct pronunciation, 
+        especially for words with multiple pronunciations depending on usage (e.g., "read", "tear", "wind").
+        """
+        
+        prompt = f"""Provide the pronunciation for the word '{word}' as used in this sentence:
+        
+        "{sentence}"
+        
+        Return the IPA and simplified phonetic pronunciation, along with any alternative pronunciations.
+        """
+        
+        # Try multiple times in case of failure
+        for attempt in range(RETRY_COUNT):
+            try:
+                response = self.client.generate_chat(
+                    prompt=prompt,
+                    model=self.model,
+                    json_schema=schema,
+                    context=context
+                )
+                
+                # Log the query
+                try:
+                    session = self.get_session()
+                    linguistic_db.log_query(
+                        session,
+                        word=word,
+                        query_type='pronunciation',
+                        prompt=prompt,
+                        response=json.dumps(response.structured_data),
+                        model=self.model
+                    )
+                except Exception as e:
+                    logger.error(f"Failed to log pronunciation query: {e}")
+                
+                if response.structured_data and 'pronunciation' in response.structured_data:
+                    return response.structured_data['pronunciation'], True
+                else:
+                    logger.warning(f"Failed to get valid pronunciation response for '{word}' (attempt {attempt+1})")
+                    time.sleep(RETRY_DELAY)
+            except Exception as e:
+                logger.error(f"Error querying for pronunciation: {e} (attempt {attempt+1})")
+                
+                # Log the failed query
+                try:
+                    session = self.get_session()
+                    linguistic_db.log_query(
+                        session,
+                        word=word,
+                        query_type='pronunciation',
+                        prompt=prompt,
+                        response=str(e),
+                        model=self.model,
+                        success=False,
+                        error=str(e)
+                    )
+                except Exception as log_err:
+                    logger.error(f"Failed to log query error: {log_err}")
+                    
+                time.sleep(RETRY_DELAY)
+        
+        # Return empty data if all attempts failed
+        return {}, False
+
+    def update_pronunciation_for_definition(self, definition_id: int, sentence: Optional[str] = None) -> bool:
+        """
+        Update the pronunciation information for a specific definition.
+        
+        Args:
+            definition_id: The ID of the definition to update
+            sentence: Optional context sentence (if not provided, will use example or create one)
+            
+        Returns:
+            Success flag
+        """
+        session = self.get_session()
+        
+        # Get the definition
+        definition = session.query(linguistic_db.Definition).filter(linguistic_db.Definition.id == definition_id).first()
+        if not definition:
+            logger.warning(f"Definition with ID {definition_id} not found")
+            return False
+        
+        # Get the word
+        word = definition.word
+        
+        # Get a context sentence (from provided sentence, example, or generate a simple one)
+        if not sentence:
+            # Try to get an example sentence from the definition
+            if definition.examples and len(definition.examples) > 0:
+                sentence = definition.examples[0].example_text
+            else:
+                raise Exception("Could not get context sentence.")
+        
+        # Query for pronunciation
+        pronunciation_data, success = self.query_pronunciation(word.word, sentence)
+        
+        if success:
+            # Update the definition with the pronunciation information
+            try:
+                ipa = pronunciation_data.get('ipa', '')
+                phonetic = pronunciation_data.get('phonetic', '')
+                
+                # Update the definition with the pronunciation
+                linguistic_db.update_definition(
+                    session, 
+                    definition.id, 
+                    ipa_pronunciation=ipa,
+                    phonetic_pronunciation=phonetic
+                )
+                
+                logger.info(f"Added pronunciations for '{word.word}' (definition ID: {definition.id})")
+                logger.debug(f"IPA: {ipa}, Phonetic: {phonetic}")
+                return True
+            except Exception as e:
+                logger.error(f"Error updating pronunciation for definition {definition_id}: {e}")
+                return False
+        else:
+            logger.warning(f"Failed to get pronunciation for '{word.word}' (definition ID: {definition.id})")
+            return False
+
+    def update_missing_pronunciations_for_word(self, word_text: str, throttle: float = 1.0) -> Dict[str, Any]:
+        """
+        Add missing pronunciations for all definitions of a word.
+        
+        Args:
+            word_text: Word to update pronunciations for
+            throttle: Time to wait between API calls (seconds)
+            
+        Returns:
+            Dictionary with statistics about the processing
+        """
+        logger.info(f"Adding missing pronunciations for definitions of '{word_text}'")
+        
+        session = self.get_session()
+        word = linguistic_db.get_word_by_text(session, word_text)
+        
+        if not word:
+            logger.warning(f"Word '{word_text}' not found in the database")
+            return {
+                "word": word_text,
+                "total_definitions": 0,
+                "missing_pronunciations": 0,
+                "processed": 0,
+                "successful": 0
+            }
+        
+        # Get all definitions for the word
+        definitions = word.definitions
+        total_definitions = len(definitions)
+        
+        if total_definitions == 0:
+            logger.warning(f"No definitions found for word '{word_text}'")
+            return {
+                "word": word_text,
+                "total_definitions": 0,
+                "missing_pronunciations": 0,
+                "processed": 0,
+                "successful": 0
+            }
+        
+        # Filter for definitions without pronunciations
+        definitions_without_pronunciations = [
+            d for d in definitions 
+            if not d.ipa_pronunciation or not d.phonetic_pronunciation
+        ]
+        
+        missing_pronunciations = len(definitions_without_pronunciations)
+        logger.info(f"Found {missing_pronunciations} definitions without pronunciations (out of {total_definitions} total)")
+        
+        successful = 0
+        processed = 0
+        
+        for definition in definitions_without_pronunciations:
+            success = self.update_pronunciation_for_definition(definition.id)
+            processed += 1
+            
+            if success:
+                successful += 1
+                logger.info(f"Added pronunciation for definition ID {definition.id}")
+            else:
+                logger.warning(f"Failed to add pronunciation for definition ID {definition.id}")
+            
+            # Throttle to avoid overloading the API
+            time.sleep(throttle)
+        
+        logger.info(f"Processing complete for '{word_text}': {successful}/{processed} successful " 
+                    f"({missing_pronunciations} missing, {total_definitions} total)")
+        
+        return {
+            "word": word_text,
+            "total_definitions": total_definitions,
+            "missing_pronunciations": missing_pronunciations,
+            "processed": processed,
+            "successful": successful
+        }
+
+    def update_pronunciations_for_batch(self, limit: int = 100, throttle: float = 1.0) -> Dict[str, Any]:
+        """
+        Add missing pronunciations for a batch of definitions.
+        
+        Args:
+            limit: Maximum number of definitions to process
+            throttle: Time to wait between API calls (seconds)
+            
+        Returns:
+            Dictionary with statistics about the processing
+        """
+        logger.info(f"Processing batch of {limit} definitions for pronunciations")
+        
+        session = self.get_session()
+        definitions = linguistic_db.get_definitions_without_pronunciation(session, limit=limit)
+        
+        total = len(definitions)
+        successful = 0
+        processed = 0
+        
+        logger.info(f"Found {total} definitions without pronunciations")
+        
+        for definition in definitions:
+            word = definition.word
+            logger.info(f"Processing definition ID {definition.id} for word '{word.word}'")
+            
+            success = self.update_pronunciation_for_definition(definition.id)
+            processed += 1
+            
+            if success:
+                successful += 1
+                logger.info(f"Added pronunciation for '{word.word}' definition ID {definition.id}")
+            else:
+                logger.warning(f"Failed to add pronunciation for '{word.word}' definition ID {definition.id}")
+                
+            # Throttle to avoid overloading the API
+            time.sleep(throttle)
+        
+        logger.info(f"Batch processing complete: {successful}/{processed} successful (out of {total} total)")
+        
+        return {
+            "total": total,
+            "processed": processed,
+            "successful": successful
+        }
+
     @classmethod
     def close_all(cls):
         """
