@@ -9,6 +9,7 @@ import threading
 from typing import Dict, List, Optional, Any, Tuple
 
 from clients.unified_client import UnifiedLLMClient
+import util.prompt_loader
 from wordfreq import linguistic_db
 from wordfreq.connection_pool import get_session, close_thread_sessions
 import constants
@@ -155,37 +156,7 @@ class LinguisticClient:
             "required": ["definitions"]
         }
         
-        context = """
-        You are a linguistic expert specialized in dictionary definitions.
-        
-        Your task is to provide comprehensive definitions for a given word, including:
-        - All distinct meanings of the word
-        - The part of speech for each definition
-        - The base form (lemma) for each definition
-        - Example sentences for each definition
-        
-        Valid parts of speech include: noun, verb, adjective, adverb, pronoun, preposition, 
-        conjunction, interjection, determiner, article, numeral, auxiliary, modal.
-        
-        For lemmatization (finding the base form):
-        - For nouns: the singular form (e.g., "cats" → "cat")
-        - For verbs: the infinitive form without "to" (e.g., "running" → "run")
-        - For adjectives and adverbs: the positive form (e.g., "better" → "good")
-        
-        For each definition, provide:
-        1. The definition text
-        2. The part of speech
-        3. The lemma (base form)
-        4. A confidence score (0-1)
-        5. Whether this definition covers multiple related meanings
-        6. Whether this is a special case (foreign word, part of name, etc.)
-        7. Any additional notes about the definition
-        8. At least one example sentence
-        
-        Make sure to separate different definitions (e.g., "bank" as a financial institution vs. "bank" as the side of a river).
-        
-        Respond only with a structured JSON object following the schema provided.
-        """
+        context = util.prompt_loader.get_context("wordfreq", "definitions")
         
         prompt = f"Provide comprehensive dictionary definitions for the word '{word}'."
         
@@ -332,20 +303,8 @@ class LinguisticClient:
             "required": ["translation"]
         }
         
-        context = """
-        You are a bilingual English-Chinese linguistic expert.
-        
-        Your task is to provide an accurate Chinese translation for a specific definition of an English word.
-        
-        Guidelines:
-        - Provide a translation that specifically matches the given definition, not other meanings of the word
-        - Unless a one-character term is unambiguous, provide a two-character term (e.g., prefer '跳舞' over '舞')
-        - Include proper pinyin pronunciation with tone marks
-        - When multiple translations are possible, choose the most common or appropriate one
-        - Only provide translations into standard Mandarin Chinese (not regional variants)
-        
-        Respond only with a structured JSON object following the schema provided.
-        """
+        context = util.prompt_loader.get_context("wordfreq", "chinese_translation")
+
         
         prompt = f"""Provide a Chinese translation for the English word '{word}' with the following definition:
         
@@ -406,6 +365,107 @@ class LinguisticClient:
     
         # Return empty string if all attempts failed
         return "", False
+
+    def query_word_forms(self, lemma: str, pos_type: str) -> Tuple[List[Dict[str, Any]], bool]:
+        """
+        Query LLM for all forms of a lemma based on its part of speech.
+        
+        Args:
+            lemma: The base form of the word (lemma)
+            pos_type: Part of speech (noun, verb, adjective, adverb)
+            
+        Returns:
+            Tuple of (list of word forms data, success flag)
+        """
+        schema = {
+            "type": "object",
+            "properties": {
+                "word_forms": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "form": {
+                                "type": "string",
+                                "description": "The inflected form of the word"
+                            },
+                            "form_type": {
+                                "type": "string",
+                                "description": "The grammatical form (e.g., past tense, plural, comparative)"
+                            },
+                            "examples": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "description": "Example sentence using this word form"
+                                }
+                            }
+                        },
+                        "additionalProperties": False,
+                        "required": ["form", "form_type", "examples"]
+                    }
+                }
+            },
+            "additionalProperties": False,
+            "required": ["word_forms"]
+        }
+        
+        context = util.prompt_loader.get_context("wordfreq", "word_forms")
+        
+        prompt = f"Provide all possible forms of the {pos_type} '{lemma}'."
+        
+        # Try multiple times in case of failure
+        for attempt in range(RETRY_COUNT):
+            try:
+                response = self.client.generate_chat(
+                    prompt=prompt,
+                    model=self.model,
+                    json_schema=schema,
+                    context=context
+                )
+                
+                # Log the query
+                try:
+                    session = self.get_session()
+                    linguistic_db.log_query(
+                        session,
+                        word=lemma,
+                        query_type='word_forms',
+                        prompt=prompt,
+                        response=json.dumps(response.structured_data),
+                        model=self.model
+                    )
+                except Exception as e:
+                    logger.error(f"Failed to log word forms query: {e}")
+                
+                if response.structured_data and 'word_forms' in response.structured_data:
+                    return response.structured_data['word_forms'], True
+                else:
+                    logger.warning(f"Failed to get valid word forms response for '{lemma}' (attempt {attempt+1})")
+                    time.sleep(RETRY_DELAY)
+            except Exception as e:
+                logger.error(f"Error querying for word forms: {e} (attempt {attempt+1})")
+                
+                # Log the failed query
+                try:
+                    session = self.get_session()
+                    linguistic_db.log_query(
+                        session,
+                        word=lemma,
+                        query_type='word_forms',
+                        prompt=prompt,
+                        response=str(e),
+                        model=self.model,
+                        success=False,
+                        error=str(e)
+                    )
+                except Exception as log_err:
+                    logger.error(f"Failed to log query error: {log_err}")
+                    
+                time.sleep(RETRY_DELAY)
+        
+        # Return empty list if all attempts failed
+        return [], False
 
     def add_translation_for_definition(self, definition_id: int) -> bool:
         """
@@ -575,110 +635,7 @@ class LinguisticClient:
         }
         
         # Select the appropriate context based on the part of speech
-        if pos_type == 'noun':
-            context = """
-            You are a linguistic taxonomy expert specialized in classifying nouns.
-            
-            Your task is to classify a noun into its specific subtype based on its definition.
-            
-            NOUN SUBTYPES:
-            - human: People or roles (teacher, doctor, child)
-            - animal: All animals (dog, tiger, fish)
-            - plant: All plants (tree, flower, grass)
-            - building_structure: Buildings and structures (laboratory, house, bridge)
-            - small_movable_object: Portable items (pen, book, phone)
-            - natural_feature: Natural elements (mountain, river, cloud)
-            - tool_machine: Tools and machines (engine, hammer, computer)
-            - material_substance: Materials and substances (water, metal, cloth)
-            - concept_idea: Abstract concepts (freedom, justice, theory)
-            - emotion_feeling: Emotions and feelings (happiness, anger, love)
-            - process_event: Processes or events (meeting, evolution, war)
-            - time_period: Time periods (month, century, season)
-            - group_people: Groups of people (team, family, crowd)
-            - group_animal: Groups of animals (flock, herd, swarm)
-            - collection_things: Collections (set, bunch, pile)
-            - personal_name: Personal names (John, Maria)
-            - place_name: Place names (London, Amazon)
-            - organization_name: Organization names (Microsoft, United Nations)
-            - other: Any noun that doesn't fit the above categories
-            
-            Respond only with a structured JSON object following the schema provided.
-            """
-        elif pos_type == 'verb':
-            context = """
-            You are a linguistic taxonomy expert specialized in classifying verbs.
-            
-            Your task is to classify a verb into its specific subtype based on its definition.
-            
-            VERB SUBTYPES:
-            - physical_action: Physical actions (run, jump, build)
-            - creation_action: Creating things (make, create, construct)
-            - destruction_action: Destroying things (break, destroy, demolish)
-            - mental_state: Mental states (know, believe, understand)
-            - emotional_state: Emotional states (love, hate, fear)
-            - possession: Having or ownership (have, own, possess)
-            - development: Development or growth (grow, evolve, develop)
-            - change: Transformation (become, transform, alter)
-            - speaking: Speaking communication (say, tell, talk)
-            - writing: Written communication (write, record, type)
-            - expressing: Showing or expressing (show, display, demonstrate)
-            - directional_movement: Movement with direction (go, come, enter)
-            - manner_movement: Way of moving (walk, swim, fly)
-            - other: Any verb that doesn't fit the above categories
-            
-            Respond only with a structured JSON object following the schema provided.
-            """
-        elif pos_type == 'adjective':
-            context = """
-            You are a linguistic taxonomy expert specialized in classifying adjectives.
-            
-            Your task is to classify an adjective into its specific subtype based on its definition.
-            
-            ADJECTIVE SUBTYPES:
-            - size: Size descriptions (big, small, huge)
-            - color: Color descriptions (red, blue, green)
-            - shape: Shape descriptions (round, square, triangular)
-            - texture: Texture descriptions (soft, hard, smooth)
-            - quality: Quality assessments (good, bad, excellent)
-            - aesthetic: Beauty or appearance (beautiful, ugly, pretty)
-            - importance: Importance or priority (important, essential, trivial)
-            - origin: Origin or source (American, Chinese, domestic)
-            - purpose: Purpose or function (educational, medical, industrial)
-            - material: Material composition (wooden, metal, plastic)
-            - definite_quantity: Specific amounts (one, ten, hundred)
-            - indefinite_quantity: Inexact amounts (many, few, some)
-            - duration: Time duration (brief, long, eternal)
-            - frequency: Frequency of occurrence (daily, occasional, rare)
-            - sequence: Order or sequence (first, last, next)
-            - other: Any adjective that doesn't fit the above categories
-            
-            Respond only with a structured JSON object following the schema provided.
-            """
-        else:  # adverb
-            context = """
-            You are a linguistic taxonomy expert specialized in classifying adverbs.
-            
-            Your task is to classify an adverb into its specific subtype based on its definition.
-            
-            ADVERB SUBTYPES:
-            - style: Manner or style (quickly, carefully, well)
-            - attitude: Attitude or approach (eagerly, reluctantly, willingly)
-            - specific_time: Specific times (now, yesterday, tomorrow)
-            - relative_time: Relative times (already, soon, recently)
-            - duration: Time duration (briefly, temporarily, permanently)
-            - direction: Directional movement (up, down, forward)
-            - location: Positions or locations (here, there, everywhere)
-            - distance: Distance references (nearby, far, close)
-            - intensity: Intensity or degree (very, extremely, slightly)
-            - completeness: Completeness (entirely, partly, completely)
-            - approximation: Approximation (almost, nearly, exactly)
-            - definite_frequency: Specific frequency (daily, weekly, monthly)
-            - indefinite_frequency: Inexact frequency (often, sometimes, rarely)
-            - other: Any adverb that doesn't fit the above categories
-            
-            Respond only with a structured JSON object following the schema provided.
-            """
-        
+        context = util.prompt_loader.get_context("wordfreq", "pos_subtype", pos_type)
         prompt = f"""Classify the word '{word}' into the appropriate subtype of {pos_type}.
         
         Definition: {definition_text}
@@ -945,32 +902,7 @@ class LinguisticClient:
             "required": ["pronunciation"]
         }
         
-        context = """
-        You are a pronunciation expert specialized in both International Phonetic Alphabet (IPA) and 
-        simplified phonetic representations.
-        
-        Your task is to provide accurate pronunciations for English words given their context in a sentence.
-        
-        For each word, provide:
-        1. The IPA pronunciation following standard American English conventions
-        - Include stress markers (ˈ for primary stress, ˌ for secondary stress)
-        - Use proper IPA symbols (e.g., /ə/ for schwa, /θ/ for "th" in "think")
-        - Include phonemic transcription between forward slashes: /like this/
-        
-        2. A simplified phonetic pronunciation using capital letters for stressed syllables
-        - Hyphenate between syllables
-        - Use familiar English spelling patterns (e.g., "SOO-duh-nim" for "pseudonym")
-        - This should be readable by someone unfamiliar with IPA
-        
-        3. Alternative pronunciations if relevant (British English, Australian English, etc.)
-        
-        4. A confidence score (0-1) indicating how certain you are of the pronunciation
-        
-        5. Any additional notes about the pronunciation
-        
-        Important: Pay attention to the context sentence to determine the correct pronunciation, 
-        especially for words with multiple pronunciations depending on usage (e.g., "read", "tear", "wind").
-        """
+        context = util.prompt_loader.get_context("wordfreq", "pronunciation")
         
         prompt = f"""Provide the pronunciation for the word '{word}' as used in this sentence:
         
