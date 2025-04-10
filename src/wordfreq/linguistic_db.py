@@ -351,6 +351,7 @@ def update_definition(
     definition_id: int,
     definition_text: Optional[str] = None,
     pos_type: Optional[str] = None,
+    pos_subtype: Optional[str] = None,
     lemma: Optional[str] = None,
     confidence: Optional[float] = None,
     multiple_meanings: Optional[bool] = None,
@@ -369,6 +370,8 @@ def update_definition(
         definition.definition_text = definition_text
     if pos_type is not None:
         definition.pos_type = pos_type
+    if pos_subtype is not None:
+        definition.pos_subtype = pos_subtype
     if lemma is not None:
         definition.lemma = lemma
     if confidence is not None:
