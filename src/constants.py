@@ -19,3 +19,9 @@ VERBALATOR_HTML_DIR = os.path.join(PROJECT_ROOT, "public_html")
 
 # Wordfreq directories
 WORDFREQ_DB_PATH = os.path.join(SRC_DIR, "wordfreq", "data", "linguistics.sqlite")
+
+# Wiki corpus directories
+#WIKI_CORPUS_BASE_PATH = os.path.join(PROJECT_ROOT, "data", "wikicorpus")
+WIKI_CORPUS_BASE_PATH = "/Volumes/kelvin/wikipedia/2022_MAY"
+WIKI_CORPUS_PREFIX = "enwiki-20220501"
+WIKI_INDEX_SCHEMA_PATH = os.path.join(SCHEMA_DIR, "wiki_index.schema")
