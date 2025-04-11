@@ -1,0 +1,18 @@
+-- Schema for wiki index SQLite database
+-- Used to store offsets for pages in Wikimedia multistream dump files
+
+-- Drop existing tables if they exist
+DROP TABLE IF EXISTS offsets;
+DROP INDEX IF EXISTS offsets_key_idx;
+
+-- Create the offsets table
+CREATE TABLE offsets (
+    key TEXT NOT NULL,            -- The page title
+    offset INTEGER NOT NULL,      -- The byte offset in the dump file
+    offset_readsize INTEGER,      -- The number of bytes to read
+    page_id INTEGER,              -- The Wikimedia page ID
+    PRIMARY KEY (key)
+);
+
+-- Create an index on the key for faster lookups
+CREATE INDEX offsets_key_idx ON offsets (key);
