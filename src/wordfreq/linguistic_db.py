@@ -5,7 +5,7 @@
 import datetime
 import enum
 from typing import Dict, List, Optional, Any, Set
-from sqlalchemy import String, Integer, Text, ForeignKey, TIMESTAMP, Boolean, create_engine, func
+from sqlalchemy import String, Integer, Text, Float, ForeignKey, TIMESTAMP, Boolean, create_engine, func
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Mapped, mapped_column, relationship, DeclarativeBase, sessionmaker
 from sqlalchemy.sql import func
@@ -162,6 +162,52 @@ class QueryLog(Base):
     timestamp: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now())
     success: Mapped[bool] = mapped_column(Boolean, default=True)
     error: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
+class Corpus(Base):
+    """Model for storing corpus information."""
+    __tablename__ = 'corpus'
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    name: Mapped[str] = mapped_column(String, unique=True, nullable=False)
+    description: Mapped[str] = mapped_column(String, nullable=True)
+    
+    # Relationships
+    word_frequencies = relationship("WordFrequency", back_populates="corpus", cascade="all, delete-orphan")
+
+class WordFrequency(Base):
+    """Model for storing word frequency in different corpora."""
+    __tablename__ = 'word_frequencies'
+    
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    word_id: Mapped[int] = mapped_column(ForeignKey("words.id"), nullable=False)
+    corpus_id: Mapped[int] = mapped_column(ForeignKey("corpus.id"), nullable=False)
+    rank: Mapped[int] = mapped_column(Integer, nullable=False)
+    frequency: Mapped[float] = mapped_column(Float, nullable=True)  # Optional raw frequency
+    
+    # Relationships
+    word = relationship("Word", back_populates="frequencies")
+    corpus = relationship("Corpus", back_populates="word_frequencies")
+
+# Add relationship to Word model
+Word.frequencies = relationship("WordFrequency", back_populates="word", cascade="all, delete-orphan")
+
+# Helper functions to initialize corpus data
+def initialize_corpora(session):
+    """Create the four corpus entries if they don't exist."""
+    corpora = [
+        {"name": "19th_books", "description": "19th century books from Project Gutenberg"},
+        {"name": "20th_books", "description": "20th century books (largely sci-fi)"},
+        {"name": "subtitles", "description": "Various TV subtitles"},
+        {"name": "wiki_vital", "description": "Vital 1000 Wikipedia articles from 2022"}
+    ]
+    
+    for corpus_data in corpora:
+        existing = session.query(Corpus).filter(Corpus.name == corpus_data["name"]).first()
+        if not existing:
+            new_corpus = Corpus(**corpus_data)
+            session.add(new_corpus)
+    
+    session.commit()
 
 # Helper function to get subtype enum based on POS
 def get_subtype_enum(pos_type: str) -> Optional[enum.EnumMeta]:
