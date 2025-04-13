@@ -80,11 +80,10 @@ def calculate_harmonic_mean_ranks(
         # Get ranks for each corpus
         for corpus_id in corpus_ids:
             if word.id in freq_by_word and corpus_id in freq_by_word[word.id]:
-                rank = freq_by_word[word.id][corpus_id]
-                word_ranks.append(rank)
-                corpus_ranks[corpus_id] = rank
+                corpus_ranks[corpus_id] = freq_by_word[word.id][corpus_id]
             else:
                 corpus_ranks[corpus_id] = unknown_rank
+            word_ranks.append(corpus_ranks[corpus_id])
         
         # If no ranks found, use unknown_rank for all corpora
         if not word_ranks:
