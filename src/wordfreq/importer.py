@@ -6,6 +6,7 @@ import json
 import csv
 import logging
 import os
+import re
 from typing import Dict, List, Optional, Any, Tuple
 
 import constants
@@ -17,12 +18,15 @@ from wordfreq.linguistic_db import Word, Corpus, WordFrequency
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
+# Regular expression to detect words containing numerals
+CONTAINS_NUMERAL_PATTERN = re.compile(r'[0-9]')
+
 def import_frequency_data(
     file_path: str, 
     corpus_name: str, 
     file_type: str = "json", 
     max_words: int = 5000,
-    value_type: str = "auto"  # New parameter to specify what the numeric values represent: "rank", "frequency", or "auto"
+    value_type: str = "auto"  # Parameter to specify what the numeric values represent: "rank", "frequency", or "auto"
 ) -> Tuple[int, int]:
     """
     Import word frequency data from a file into the database.
@@ -30,7 +34,7 @@ def import_frequency_data(
     Args:
         file_path: Path to the frequency data file
         corpus_name: Name of the corpus (gutenberg, books_20th, subtitles, wiki_vital)
-        file_type: File type (json, csv, text)
+        file_type: File type (json, subtlex)
         max_words: Maximum number of words to import
         value_type: How to interpret numeric values in simple word->number mappings:
                    - "rank": Values are treated as ranks (lower is more frequent)
@@ -51,7 +55,7 @@ def import_frequency_data(
         raise ValueError(f"Corpus '{corpus_name}' not found")
     
     # Process the file based on type
-    words_data = {}
+    raw_words_data = {}
     
     try:
         if file_type.lower() == "json":
@@ -61,17 +65,17 @@ def import_frequency_data(
                 # Handle different JSON formats
                 if isinstance(data, dict) and 'global_word_frequency' in data:
                     # Known format with explicit frequency data
-                    words_data = data['global_word_frequency']
+                    raw_words_data = data['global_word_frequency']
                     # Mark that these are frequencies
                     detected_type = "frequency"
                 elif isinstance(data, dict):
                     # Generic dictionary mapping
-                    words_data = data
+                    raw_words_data = data
                     # Will need to analyze
                     detected_type = "unknown"
                 elif isinstance(data, list):
                     # Convert list to rank dictionary (1-indexed)
-                    words_data = {word: i+1 for i, word in enumerate(data)}
+                    raw_words_data = {word: i+1 for i, word in enumerate(data)}
                     # Mark that these are ranks
                     detected_type = "rank"
                 else:
@@ -88,7 +92,7 @@ def import_frequency_data(
                         continue
                     word = row[0]
                     row_count += 1
-                    words_data[word] = row_count
+                    raw_words_data[word] = row_count
                 detected_type = "rank"
         else:
             logger.error(f"Unsupported file type: {file_type}")
@@ -97,7 +101,7 @@ def import_frequency_data(
         # If value_type is "auto", try to determine whether values represent ranks or frequencies
         if value_type == "auto" and detected_type == "unknown":
             # Sample data to see if values look like ranks or frequencies
-            sample_values = list(words_data.values())[:100]  # Take first 100 values
+            sample_values = list(raw_words_data.values())[:100]  # Take first 100 values
             
             # Heuristics:
             # 1. Ranks are typically integers
@@ -124,15 +128,21 @@ def import_frequency_data(
             value_type = detected_type
             logger.info(f"Using detected value type: {value_type}")
         
-        # Process the data
-        imported_count = 0
-        total_count = len(words_data)
+        # Process words: lowercase, filter out numerals, and merge duplicate entries
+        words_data = {}
+        skipped_numeral_count = 0
+        merged_count = 0
         
-        for word_text, data in words_data.items():
-            # Get or create the word
-            word_obj = linguistic_db.add_word(session, word_text)
+        for word_text, data in raw_words_data.items():
+            # Convert to lowercase
+            word_text_lower = word_text.lower()
             
-            # Handle different data formats
+            # Skip words containing numerals
+            if CONTAINS_NUMERAL_PATTERN.search(word_text_lower):
+                skipped_numeral_count += 1
+                continue
+            
+            # Determine rank and frequency for this entry
             rank = None
             frequency = None
             
@@ -144,12 +154,46 @@ def import_frequency_data(
                 # If data is just a number, interpret based on value_type
                 if value_type == "rank":
                     rank = int(data) if isinstance(data, int) else int(data + 0.5)  # Round floats
-                    # We could estimate frequency as 1/rank, but that's not accurate
                     frequency = None
                 else:  # value_type == "frequency"
                     frequency = float(data)
-                    # We could estimate rank based on sorting, but that happens later
                     rank = None
+            
+            # If the lowercase word already exists in our processed data
+            if word_text_lower in words_data:
+                merged_count += 1
+                existing_data = words_data[word_text_lower]
+                
+                # For ranks, keep the higher rank (lower number)
+                if value_type == "rank" and rank is not None:
+                    if existing_data.get("rank") is None or rank < existing_data["rank"]:
+                        existing_data["rank"] = rank
+                
+                # For frequencies, keep the higher frequency
+                if value_type == "frequency" and frequency is not None:
+                    if existing_data.get("frequency") is None or frequency > existing_data["frequency"]:
+                        existing_data["frequency"] = frequency
+            else:
+                # Add new entry
+                words_data[word_text_lower] = {
+                    "rank": rank,
+                    "frequency": frequency
+                }
+        
+        logger.info(f"Processed word data: {len(words_data)} unique lowercase words")
+        logger.info(f"Filtered out {skipped_numeral_count} words containing numerals")
+        logger.info(f"Merged {merged_count} duplicate words with different capitalization")
+        
+        # Import the processed words
+        imported_count = 0
+        total_count = len(words_data)
+        
+        for word_text, data in words_data.items():
+            # Get or create the word
+            word_obj = linguistic_db.add_word(session, word_text)
+            
+            rank = data.get("rank")
+            frequency = data.get("frequency")
             
             # Add or update the frequency record
             existing = session.query(WordFrequency).filter(

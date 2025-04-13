@@ -19,6 +19,7 @@ VERBALATOR_HTML_DIR = os.path.join(PROJECT_ROOT, "public_html")
 
 # Wordfreq directories
 WORDFREQ_DB_PATH = os.path.join(SRC_DIR, "wordfreq", "data", "linguistics.sqlite")
+IPA_DICT_PATH = os.path.join(SRC_DIR, "wordfreq", "data", "en_US_ipadict.txt")
 
 # Wiki corpus directories
 #WIKI_CORPUS_BASE_PATH = os.path.join(PROJECT_ROOT, "data", "wikicorpus")

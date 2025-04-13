@@ -181,7 +181,7 @@ class WordFrequency(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     word_id: Mapped[int] = mapped_column(ForeignKey("words.id"), nullable=False)
     corpus_id: Mapped[int] = mapped_column(ForeignKey("corpus.id"), nullable=False)
-    rank: Mapped[int] = mapped_column(Integer, nullable=False)
+    rank: Mapped[int] = mapped_column(Integer, nullable=True)
     frequency: Mapped[float] = mapped_column(Float, nullable=True)  # Optional raw frequency
     
     # Relationships
