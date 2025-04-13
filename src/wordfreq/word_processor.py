@@ -74,151 +74,20 @@ class WordProcessor:
         """Get a thread-local database session."""
         return get_session(self.db_path, echo=self.debug)
     
-    def load_words_from_json(self, file_path: str) -> int:
-        """
-        Load words from a JSON file (output from compare.py).
-        
-        Args:
-            file_path: Path to JSON file
-            
-        Returns:
-            Number of words loaded
-        """
-        logger.info(f"Loading words from JSON file: {file_path}")
-        
-        try:
-            with open(file_path, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-                
-            # Handle different JSON formats
-            word_data = {}
-            if isinstance(data, dict) and 'global_word_frequency' in data:
-                # Format from compare.py
-                word_data = data['global_word_frequency']
-            elif isinstance(data, dict):
-                # Simple word:frequency dictionary
-                word_data = data
-            elif isinstance(data, list):
-                # List of words with no frequency
-                word_data = {word: i+1 for i, word in enumerate(data)}
-            else:
-                logger.error(f"Unrecognized JSON format in {file_path}")
-                return 0
-                
-            # Sort by frequency (highest first)
-            sorted_words = sorted(word_data.items(), key=lambda x: x[1], reverse=True)
-            
-            # Add words to database with rankings
-            count = 0
-            session = self.get_session()
-            
-            for rank, (word, freq) in enumerate(sorted_words, start=1):
-                if linguistic_db.add_word(session, word, rank):
-                    count += 1
-                    
-            logger.info(f"Added {count} words from {file_path}")
-            return count
-            
-        except Exception as e:
-            logger.error(f"Error loading words from {file_path}: {e}")
-            return 0
-    
-    def load_words_from_csv(self, file_path: str, word_column: int = 0, rank_column: Optional[int] = None, has_header: bool = True) -> int:
-        """
-        Load words from a CSV file.
-        
-        Args:
-            file_path: Path to CSV file
-            word_column: Column index containing words (0-based)
-            rank_column: Column index containing rank/frequency (0-based), or None if not present
-            has_header: Whether the file has a header row
-            
-        Returns:
-            Number of words loaded
-        """
-        logger.info(f"Loading words from CSV file: {file_path}")
-        
-        try:
-            count = 0
-            session = self.get_session()
-            
-            with open(file_path, 'r', encoding='utf-8') as f:
-                reader = csv.reader(f)
-                
-                # Skip header if present
-                if has_header:
-                    next(reader, None)
-                
-                # Process rows
-                for i, row in enumerate(reader):
-                    if word_column < len(row):
-                        word = row[word_column].strip()
-                        
-                        # Get rank if available
-                        rank = None
-                        if rank_column is not None and rank_column < len(row):
-                            try:
-                                rank = int(row[rank_column])
-                            except (ValueError, TypeError):
-                                rank = i + 1
-                        else:
-                            rank = i + 1
-                            
-                        if word:
-                            if linguistic_db.add_word(session, word, rank):
-                                count += 1
-                                
-            logger.info(f"Added {count} words from {file_path}")
-            return count
-            
-        except Exception as e:
-            logger.error(f"Error loading words from {file_path}: {e}")
-            return 0
-    
-    def load_words_from_text(self, file_path: str) -> int:
-        """
-        Load words from a plain text file (one word per line).
-        
-        Args:
-            file_path: Path to text file
-            
-        Returns:
-            Number of words loaded
-        """
-        logger.info(f"Loading words from text file: {file_path}")
-        
-        try:
-            count = 0
-            session = self.get_session()
-            
-            with open(file_path, 'r', encoding='utf-8') as f:
-                for i, line in enumerate(f):
-                    word = line.strip()
-                    if word:
-                        if linguistic_db.add_word(session, word, i+1):
-                            count += 1
-                            
-            logger.info(f"Added {count} words from {file_path}")
-            return count
-            
-        except Exception as e:
-            logger.error(f"Error loading words from {file_path}: {e}")
-            return 0
-    
-    def process_single_word(self, word: str, rank: Optional[int] = None) -> bool:
+    def process_single_word(self, word: str, extended: bool=False) -> bool:
         """
         Process a single word to get linguistic information.
         
         Args:
             word: Word to process
-            rank: Optional frequency ranking
+            extended: Whether to resolve extended properties (prounciations, etc.)
             
         Returns:
             Success flag
         """
         logger.info(f"Processing word: {word}")
         client = LinguisticClient.get_instance(model=self.model, db_path=self.db_path, debug=self.debug)
-        return client.process_word(word, rank)
+        return client.process_word(word, extended=extended)
     
     def _worker(self, word_obj: Any) -> Tuple[str, bool]:
         """Worker function for thread pool."""
@@ -226,14 +95,13 @@ class WordProcessor:
         client = LinguisticClient.get_instance(model=self.model, db_path=self.db_path, debug=self.debug)
         
         word = word_obj.word
-        rank = word_obj.frequency_rank
         thread_name = threading.current_thread().name
         
         logger.debug(f"[{thread_name}] Processing word: {word}")
         
         for attempt in range(self.max_retries):
             try:
-                success = client.process_word(word, rank)
+                success = client.process_word(word, extended=False)
                 return (word, success)
             except Exception as e:
                 logger.error(f"[{thread_name}] Error processing '{word}' (attempt {attempt+1}): {e}")
@@ -330,6 +198,7 @@ class WordProcessor:
             "batches": batch_count
         }
         
+
     def close(self):
         """Close database sessions and other resources."""
         close_thread_sessions()

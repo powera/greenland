@@ -213,13 +213,13 @@ class LinguisticClient:
         # Return empty list if all attempts failed
         return [], False
     
-    def process_word(self, word: str, rank: Optional[int] = None) -> bool:
+    def process_word(self, word: str, extended=False) -> bool:
         """
         Process a word to get linguistic information and store in database.
         
         Args:
             word: Word to process
-            rank: Optional frequency ranking of the word
+            extended: Whether to populate subfields.
             
         Returns:
             Success flag
@@ -227,38 +227,46 @@ class LinguisticClient:
         session = self.get_session()
         
         # Add or get word in database
-        word_obj = linguistic_db.add_word(session, word, rank)
+        word_obj = linguistic_db.add_word(session, word)
         
-        # Query for definitions, POS, lemmas, and examples
-        definitions, success = self.query_definitions(word)
-        
-        if success:
-            for def_data in definitions:
-                # Add definition with POS and lemma
-                definition = linguistic_db.add_definition(
-                    session,
-                    word_obj,
-                    definition_text=def_data.get('definition', f"Definition for {word}"),
-                    pos_type=def_data.get('pos', 'unknown'),
-                    lemma=def_data.get('lemma', word),
-                    confidence=def_data.get('confidence', 0.0),
-                    multiple_meanings=def_data.get('multiple_meanings', False),
-                    special_case=def_data.get('special_case', False),
-                    notes=def_data.get('notes')
-                )
-                
-                # Add examples
-                for example_text in def_data.get('examples', []):
-                    linguistic_db.add_example(
-                        session,
-                        definition,
-                        example_text=example_text
-                    )
+        if len(word_obj.definitions) == 0:
+            # Query for definitions, POS, lemmas, and examples
+            definitions, success = self.query_definitions(word)
             
-            return True
+            if success:
+                for def_data in definitions:
+                    # Add definition with POS and lemma
+                    definition = linguistic_db.add_definition(
+                        session,
+                        word_obj,
+                        definition_text=def_data.get('definition', f"Definition for {word}"),
+                        pos_type=def_data.get('pos', 'unknown'),
+                        lemma=def_data.get('lemma', word),
+                        confidence=def_data.get('confidence', 0.0),
+                        multiple_meanings=def_data.get('multiple_meanings', False),
+                        special_case=def_data.get('special_case', False),
+                        notes=def_data.get('notes')
+                    )
+                    
+                    # Add examples
+                    for example_text in def_data.get('examples', []):
+                        linguistic_db.add_example(
+                            session,
+                            definition,
+                            example_text=example_text
+                        )
+            else:
+                logger.warning(f"Failed to process word '{word}'")
+                return False
         else:
-            logger.warning(f"Failed to process word '{word}'")
-            return False
+            logger.info(f"Word '{word}' already exists in the database with {len(word_obj.definitions)} definitions")
+                
+        if extended:
+            self.add_missing_translations_for_word(word)
+            self.update_missing_subtypes_for_word(word)
+            self.update_missing_pronunciations_for_word(word)
+
+        return True
         
     def query_chinese_translation(self, word: str, definition: str, example: str) -> Tuple[str, bool]:
         """
