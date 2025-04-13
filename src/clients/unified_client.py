@@ -4,7 +4,7 @@
 import logging
 from typing import Dict, Optional, Tuple, Any
 
-from clients import ollama_client, openai_client, anthropic_client
+from clients import ollama_client, openai_client, anthropic_client, lmstudio_client
 from telemetry import LLMUsage
 from clients.types import Response
 
@@ -18,7 +18,7 @@ DEFAULT_TIMEOUT = 50
 class UnifiedLLMClient:
     """Client for routing requests to appropriate LLM backend based on model name."""
     
-    def __init__(self, timeout: int = DEFAULT_TIMEOUT, debug: bool = False):
+    def __init__(self, timeout: int = DEFAULT_TIMEOUT, debug: bool = True):
         """
         Initialize client with configurable timeout and debug mode.
         
@@ -33,7 +33,8 @@ class UnifiedLLMClient:
             logger.debug("Initialized UnifiedLLMClient (timeout=%ds)", timeout)
             
         # Initialize backend clients - debug logs only in client used
-        self.ollama = ollama_client.OllamaClient(timeout=timeout, debug=False)
+        #self.ollama = ollama_client.OllamaClient(timeout=timeout, debug=False)
+        self.ollama = lmstudio_client.LMStudioClient(timeout=timeout, debug=False)
         self.openai = openai_client.OpenAIClient(timeout=timeout, debug=False)
         self.anthropic = anthropic_client.AnthropicClient(timeout=timeout, debug=False)
         

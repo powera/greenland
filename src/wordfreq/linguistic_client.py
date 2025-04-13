@@ -660,7 +660,6 @@ class LinguisticClient:
                     json_schema=schema,
                     context=context
                 )
-                
                 # Log the query
                 try:
                     session = self.get_session()
