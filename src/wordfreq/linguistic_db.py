@@ -281,6 +281,7 @@ def add_definition(
     special_case: bool = False,
     ipa_pronunciation: Optional[str] = None,
     phonetic_pronunciation: Optional[str] = None,
+    chinese_translation: Optional[str] = None,
     notes: Optional[str] = None
 ) -> Definition:
     """Add a definition for a word."""
@@ -294,6 +295,7 @@ def add_definition(
         special_case=special_case,
         ipa_pronunciation=ipa_pronunciation,
         phonetic_pronunciation=phonetic_pronunciation,
+        chinese_translation=chinese_translation,
         notes=notes
     )
     session.add(definition)
@@ -343,6 +345,7 @@ def get_words_needing_analysis(session, limit: int = 100) -> List[Word]:
     return session.query(Word)\
         .outerjoin(Definition)\
         .filter(Definition.id == None)\
+        .order_by(Word.frequency_rank)\
         .limit(limit)\
         .all()
 
@@ -357,7 +360,7 @@ def get_all_definitions_for_word(session, word_text: str) -> List[Definition]:
         return []
     return word.definitions
 
-def get_common_words_by_pos(session, pos_type: str, limit: int = 50) -> List[Dict[str, Any]]:
+def get_common_words_by_pos(session, pos_type: str, pos_subtype: str = None, limit: int = 50) -> List[Dict[str, Any]]:
     """
     Get the most common words for a specified part of speech.
     
@@ -370,11 +373,19 @@ def get_common_words_by_pos(session, pos_type: str, limit: int = 50) -> List[Dic
         List of dictionaries containing word information
     """
     # Query words with definitions of the specified part of speech, ordered by frequency rank
-    query = session.query(Word, Definition)\
-        .join(Definition)\
-        .filter(Definition.pos_type == pos_type)\
-        .order_by(Word.frequency_rank)\
-        .limit(limit)
+    if pos_subtype:
+        query = session.query(Word, Definition)\
+            .join(Definition)\
+            .filter(Definition.pos_type == pos_type)\
+            .filter(Definition.pos_subtype == pos_subtype)\
+            .order_by(Word.frequency_rank)\
+            .limit(limit)
+    else:
+        query = session.query(Word, Definition)\
+            .join(Definition)\
+            .filter(Definition.pos_type == pos_type)\
+            .order_by(Word.frequency_rank)\
+            .limit(limit)
     
     results = []
     for word, definition in query:
