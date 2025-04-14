@@ -36,18 +36,29 @@ def measure_completion(func):
 class AnthropicClient:
     """Client for making direct HTTP requests to Anthropic API."""
 
-    def __init__(self, timeout: int = DEFAULT_TIMEOUT, debug: bool = False):
-        """Initialize Anthropic client with API key."""
+    def __init__(self, timeout: int = DEFAULT_TIMEOUT, cache: bool = False, debug: bool = False):
+        """
+        Initialize Anthropic client with API key.
+        
+        Args:
+            timeout: Request timeout in seconds
+            debug: Whether to enable debug logging
+            default_system_prompt: Default system prompt to use for all requests
+        """
         self.timeout = timeout
         self.debug = debug
+        self.cache = cache
+
         if debug:
             logger.setLevel(logging.DEBUG)
             logger.debug("Initialized AnthropicClient in debug mode")
+            
         self.api_key = self._load_key()
         self.headers = {
             "x-api-key": self.api_key,
             "anthropic-version": "2023-06-01",
-            "content-type": "application/json"
+            "content-type": "application/json",
+            "anthropic-beta": "prompt-caching-2024-07-31"
         }
 
     def _load_key(self) -> str:
@@ -70,7 +81,7 @@ class AnthropicClient:
         if self.debug:
             logger.debug("Making request to %s", url)
             logger.debug("Request data: %s", json.dumps(kwargs, indent=2))
-
+            
         response = requests.post(
             url,
             headers=self.headers,
@@ -91,8 +102,15 @@ class AnthropicClient:
             logger.debug("Model warmup not required for Anthropic: %s", model)
         return True
 
-    def generate_text(self, prompt: str, model: str = DEFAULT_MODEL) -> Response:
-        """Generate text completion using Anthropic API."""
+    def generate_text(self, prompt: str, model: str = DEFAULT_MODEL, system_prompt: Optional[str] = None) -> Response:
+        """
+        Generate text completion using Anthropic API.
+        
+        Args:
+            prompt: Text prompt for generation
+            model: Model name to use
+            system_prompt: Optional system prompt
+        """
         if self.debug:
             logger.debug("Generating text with model: %s", model)
             logger.debug("Prompt: %s", prompt)
@@ -105,7 +123,8 @@ class AnthropicClient:
                     "content": prompt,
                 },
             ],
-            max_tokens=1536,
+            system=system_prompt,
+            max_tokens=3192,
         )
 
         usage = LLMUsage.from_api_response(
@@ -146,7 +165,7 @@ class AnthropicClient:
             model: Model to use for generation
             brief: Whether to limit response length
             json_schema: Schema for structured response (if provided, returns JSON)
-            context: Optional context to include before the prompt
+            context: Optional context.
 
         Returns:
             Response containing response_text, structured_data, and usage
@@ -157,31 +176,37 @@ class AnthropicClient:
             logger.debug("Generating chat response")
             logger.debug("Model: %s", model)
             logger.debug("Brief mode: %s", brief)
-            logger.debug("Context: %s", context)
             logger.debug("JSON schema: %s", json.dumps(json_schema, indent=2) if json_schema else None)
+            
+            if context:
+                logger.debug("Using provided context: %s", context)
 
-        system_prompt = context if context else "You are a helpful assistant."
         kwargs = {
             "model": model,
-            "messages": [
-                {
-                    "role": "user",
-                    "content": prompt,
-                },
-            ],
-            "system": system_prompt,
-            "max_tokens": 256 if brief else 1536,
+            "max_tokens": 512 if brief else 3192,
         }
 
-        # If JSON schema provided, configure for structured response
+        if context:
+            kwargs["system"] = [{
+                "type": "text",
+                "text": context,
+            }]
+
         if json_schema:
             # Add the schema as a text prompt
-            schema_prompt = f"""Please provide a JSON response matching exactly this schema:
+            schema_prefix = f"""Please provide a JSON response matching exactly this schema:
 {json.dumps(json_schema, indent=2)}
 
-Your response must be valid JSON that matches the schema above.
-Query: {prompt}"""
-            kwargs["messages"][0]["content"] = schema_prompt
+Your response must be valid JSON that matches the schema above."""
+
+            kwargs["messages"] = [
+                {"role": "user", "content": schema_prefix},
+                {"role": "user", "content": prompt}
+            ]
+            if self.cache and context:  # Don't cache if no (long) system prompt
+                kwargs["messages"][0]["cache_control"] = {"type": "ephemeral"}
+        else:
+            kwargs["messages"] = [{"role": "user", "content": prompt}]
 
         completion_data, duration_ms = self._create_message(**kwargs)
 
@@ -240,15 +265,6 @@ client = AnthropicClient(debug=False)  # Set to True to enable debug logging
 def warm_model(model: str) -> bool:
     return client.warm_model(model)
 
-def generate_text(prompt: str, model: str = DEFAULT_MODEL) -> Response:
-    """
-    Generate text using Anthropic API.
-
-    Returns:
-        Response containing response_text, structured_data (empty dict), and usage
-    """
-    return client.generate_text(prompt, model)
-
 def generate_chat(
     prompt: str,
     model: str = DEFAULT_MODEL,
@@ -258,6 +274,13 @@ def generate_chat(
 ) -> Response:
     """
     Generate a chat response using Anthropic API.
+    
+    Args:
+        prompt: The main prompt/question
+        model: Model to use for generation
+        brief: Whether to limit response length
+        json_schema: Schema for structured response (if provided, returns JSON)
+        context: Optional context to override the default system prompt
 
     Returns:
         Response containing response_text, structured_data, and usage
@@ -265,3 +288,12 @@ def generate_chat(
         For JSON responses, response_text will be empty string
     """
     return client.generate_chat(prompt, model, brief, json_schema, context)
+
+def set_system_prompt(system_prompt: str) -> None:
+    """
+    Set a new default system prompt for the default client.
+    
+    Args:
+        system_prompt: New default system prompt to use
+    """
+    client.set_system_prompt(system_prompt)

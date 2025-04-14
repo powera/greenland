@@ -13,7 +13,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 # Default timeout values (in seconds)
-DEFAULT_TIMEOUT = 50
+DEFAULT_TIMEOUT = 150
 
 class UnifiedLLMClient:
     """Client for routing requests to appropriate LLM backend based on model name."""

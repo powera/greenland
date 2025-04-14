@@ -19,7 +19,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 # Common model information
-DEFAULT_MODEL = "llama3.2:3b"
+DEFAULT_MODEL = constants.DEFAULT_MODEL
 RETRY_COUNT = 3
 RETRY_DELAY = 2  # seconds
 
@@ -266,7 +266,7 @@ class LinguisticClient:
             self.update_missing_subtypes_for_word(word)
             self.update_missing_pronunciations_for_word(word)
 
-        return True
+        logger.info(f"Successfully processed word '{word}' with {len(word_obj.definitions)} definitions.")
         
     def query_chinese_translation(self, word: str, definition: str, example: str) -> Tuple[str, bool]:
         """
