@@ -1,5 +1,7 @@
 import os
 
+DEFAULT_MODEL = "gemma-3-12b-it-q4_k_m.gguf"
+
 # Get the src directory
 SRC_DIR = os.path.dirname(os.path.abspath(__file__))
 
