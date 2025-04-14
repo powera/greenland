@@ -36,7 +36,7 @@ def measure_completion(func):
 class AnthropicClient:
     """Client for making direct HTTP requests to Anthropic API."""
 
-    def __init__(self, timeout: int = DEFAULT_TIMEOUT, cache: bool = False, debug: bool = False):
+    def __init__(self, timeout: int = DEFAULT_TIMEOUT, cache: bool = True, debug: bool = False):
         """
         Initialize Anthropic client with API key.
         
@@ -105,49 +105,8 @@ class AnthropicClient:
     def generate_text(self, prompt: str, model: str = DEFAULT_MODEL, system_prompt: Optional[str] = None) -> Response:
         """
         Generate text completion using Anthropic API.
-        
-        Args:
-            prompt: Text prompt for generation
-            model: Model name to use
-            system_prompt: Optional system prompt
         """
-        if self.debug:
-            logger.debug("Generating text with model: %s", model)
-            logger.debug("Prompt: %s", prompt)
-
-        completion_data, duration_ms = self._create_message(
-            model=model,
-            messages=[
-                {
-                    "role": "user",
-                    "content": prompt,
-                },
-            ],
-            system=system_prompt,
-            max_tokens=3192,
-        )
-
-        usage = LLMUsage.from_api_response(
-            {
-                "prompt_tokens": completion_data["usage"]["input_tokens"],
-                "completion_tokens": completion_data["usage"]["output_tokens"],
-                "total_duration": duration_ms
-            },
-            model=model
-        )
-
-        # Extract text from the first content block
-        result = completion_data["content"][0]["text"]
-
-        if self.debug:
-            logger.debug("Generated text: %s", result)
-            logger.debug("Usage metrics: %s", usage.to_dict())
-
-        return Response(
-            response_text=result,
-            structured_data={},
-            usage=usage
-        )
+        raise Exception("Text generation not supported. Use generate_chat instead.")
 
     def generate_chat(
         self,
@@ -184,13 +143,12 @@ class AnthropicClient:
         kwargs = {
             "model": model,
             "max_tokens": 512 if brief else 3192,
+            "system": [],
+            "messages": [],
         }
 
         if context:
-            kwargs["system"] = [{
-                "type": "text",
-                "text": context,
-            }]
+            kwargs["system"].append({"type": "text", "text": context})
 
         if json_schema:
             # Add the schema as a text prompt
@@ -199,12 +157,18 @@ class AnthropicClient:
 
 Your response must be valid JSON that matches the schema above."""
 
-            kwargs["messages"] = [
-                {"role": "user", "content": schema_prefix},
+            if self.cache and context:  # Only cache if also a (long) system prompt
+                kwargs["system"].append(
+                    {"type": "text", "text": schema_prefix, "cache_control": {"type": "ephemeral"}}
+                )
+            else:
+                kwargs["system"].append(
+                    {"type": "text", "text": schema_prefix}
+                )
+            kwargs["messages"].append(
                 {"role": "user", "content": prompt}
-            ]
-            if self.cache and context:  # Don't cache if no (long) system prompt
-                kwargs["messages"][0]["cache_control"] = {"type": "ephemeral"}
+            )
+            
         else:
             kwargs["messages"] = [{"role": "user", "content": prompt}]
 

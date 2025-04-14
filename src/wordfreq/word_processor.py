@@ -23,10 +23,10 @@ logger = logging.getLogger(__name__)
 # Constants
 DEFAULT_DB_PATH = constants.WORDFREQ_DB_PATH
 DEFAULT_MODEL = constants.DEFAULT_MODEL
-DEFAULT_BATCH_SIZE = 100
-DEFAULT_THREADS = 5
+DEFAULT_BATCH_SIZE = 128
+DEFAULT_THREADS = 4
 DEFAULT_MAX_RETRIES = 1
-DEFAULT_THROTTLE = 1.0  # seconds between API calls
+DEFAULT_THROTTLE = 3.0  # seconds between API calls
 
 class WordProcessor:
     """Processor for loading and analyzing word lists."""

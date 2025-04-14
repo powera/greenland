@@ -233,6 +233,51 @@ class LinguisticReviewer:
             )
             print(row)
 
+    def list_common_words_by_pos_subtype(self, pos_type: str, pos_subtype: str, limit: int = 20) -> None:
+        """
+        List the most common words for a specified part of speech.
+        
+        Args:
+            pos_type: Part of speech to filter by
+            limit: Maximum number of words to display
+        """
+        print(f"\n{self.c.HEADER}{self.c.BOLD}Most Common {pos_type.capitalize()}/{pos_subtype} Words:{self.c.ENDC}")
+        
+        words = linguistic_db.get_common_words_by_pos(self.session, pos_type, pos_subtype=pos_subtype, limit=limit)
+        if not words:
+            print(f"{self.c.YELLOW}No words found with part of speech '{pos_type}/{pos_subtype}'.{self.c.ENDC}")
+            return
+        
+        # Calculate column widths
+        word_width = max(len("Word"), max(len(item["word"]) for item in words))
+        lemma_width = max(len("Lemma"), max(len(str(item["lemma"] or "")) for item in words))
+        
+        # Print header
+        header = (
+            f"{self.c.BOLD}{'Rank':<6} "
+            f"{'Word':<{word_width}} "
+            f"{'Lemma':<{lemma_width}} "
+            f"{'Confidence':<10} "
+            f"{'Definition'}{self.c.ENDC}"
+        )
+        print(header)
+        print("-" * (6 + word_width + lemma_width + 10 + 20))
+        
+        # Print words
+        for item in words:
+            # Truncate definition for display
+            definition = item['definition'][:50] + "..." if len(item['definition']) > 50 else item['definition']
+            if not item['rank']:
+                item['rank'] = "N/A"
+            row = (
+                f"{item['rank']:<6} "
+                f"{item['word']:<{word_width}} "
+                f"{item['lemma'] or '':<{lemma_width}} "
+                f"{item['confidence']:<10.2f} "
+                f"{definition}"
+            )
+            print(row)
+
     def find_missing_data(self, limit: int = 10) -> None:
         """
         Find words with missing linguistic data.

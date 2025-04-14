@@ -119,25 +119,25 @@ class LinguisticClient:
                                 "type": "string",
                                 "description": "The part of speech for this definition (noun, verb, etc.)"
                             },
+                            "pos_subtype": {
+                                "type": "string",
+                                "description": "A subtype for the part of speech"
+                            },
+                            "phonetic_spelling": {  
+                                "type": "string",
+                                "description": "Phonetic spelling of the word"
+                            },
                             "lemma": {
                                 "type": "string",
                                 "description": "The base form (lemma) for this definition"
                             },
-                            "confidence": {
-                                "type": "number",
-                                "description": "Confidence score from 0-1"
-                            },
-                            "multiple_meanings": {
-                                "type": "boolean",
-                                "description": "Whether this definition covers multiple related meanings"
+                            "ipa_spelling": {  
+                                "type": "string",
+                                "description": "International Phonetic Alphabet for the word"
                             },
                             "special_case": {
                                 "type": "boolean",
                                 "description": "Whether this is a special case (foreign word, part of name, etc.)"
-                            },
-                            "notes": {
-                                "type": "string",
-                                "description": "Additional notes about this definition"
                             },
                             "examples": {
                                 "type": "array",
@@ -145,10 +145,23 @@ class LinguisticClient:
                                     "type": "string",
                                     "description": "Example sentence using this definition"
                                 }
-                            }
+                            },
+                            "notes": {
+                                "type": "string",
+                                "description": "Additional notes about this definition"
+                            },
+                            "chinese_translation": {
+                                "type": "string",
+                                "description": "The Chinese translation of the word"
+                            },
+                            "confidence": {
+                                "type": "number",
+                                "description": "Confidence score from 0-1"
+                            },
                         },
                         "additionalProperties": False,
-                        "required": ["definition", "pos", "lemma", "confidence", "multiple_meanings", "special_case", "notes", "examples"]
+                        "required": ["definition", "pos", "pos_subtype", "lemma", "confidence", 
+                                     "special_case", "notes", "examples", "chinese_translation", "phonetic_spelling", "ipa_spelling"]
                     }
                 }
             },
@@ -243,10 +256,18 @@ class LinguisticClient:
                         pos_type=def_data.get('pos', 'unknown'),
                         lemma=def_data.get('lemma', word),
                         confidence=def_data.get('confidence', 0.0),
+                        phonetic_pronunciation=def_data.get('phonetic_spelling', None),
+                        ipa_pronunciation=def_data.get('ipa_spelling', None),
+                        chinese_translation=def_data.get('chinese_translation', None),
                         multiple_meanings=def_data.get('multiple_meanings', False),
                         special_case=def_data.get('special_case', False),
                         notes=def_data.get('notes')
                     )
+                    if definition.pos_type in "noun verb adjective adverb".split():
+                        # Add subtype if available
+                        subtype = def_data.get('pos_subtype')
+                        if subtype:
+                            linguistic_db.update_definition(session, definition.id, pos_subtype=subtype)
                     
                     # Add examples
                     for example_text in def_data.get('examples', []):
@@ -267,7 +288,8 @@ class LinguisticClient:
             self.update_missing_pronunciations_for_word(word)
 
         logger.info(f"Successfully processed word '{word}' with {len(word_obj.definitions)} definitions.")
-        
+        return True
+
     def query_chinese_translation(self, word: str, definition: str, example: str) -> Tuple[str, bool]:
         """
         Query LLM for a Chinese translation of a specific word definition.
