@@ -222,7 +222,8 @@ class LinguisticReviewer:
         for item in words:
             # Truncate definition for display
             definition = item['definition'][:50] + "..." if len(item['definition']) > 50 else item['definition']
-            
+            if not item['rank']:
+                item['rank'] = "N/A"
             row = (
                 f"{item['rank']:<6} "
                 f"{item['word']:<{word_width}} "

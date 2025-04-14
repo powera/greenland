@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 # Constants
 DEFAULT_DB_PATH = constants.WORDFREQ_DB_PATH
-DEFAULT_MODEL = 'llama3.2:3b'
+DEFAULT_MODEL = constants.DEFAULT_MODEL
 
 def main():
     """Command-line interface."""
