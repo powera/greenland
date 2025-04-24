@@ -3,74 +3,264 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Language Model Benchmark Results</title>
+    <title>LLM Benchmark Results</title>
     <style>
+        :root {
+            --primary: #3f51b5;
+            --primary-dark: #303f9f;
+            --primary-light: #c5cae9;
+            --accent: #ff4081;
+            --text-primary: #212121;
+            --text-secondary: #757575;
+            --divider: #bdbdbd;
+            --background: #f5f5f5;
+            --card: #ffffff;
+            --success: #4caf50;
+            --warning: #ff9800;
+            --error: #f44336;
+            --info: #2196f3;
+        }
+        
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            color: #333;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background);
+            color: var(--text-primary);
+            line-height: 1.5;
         }
         
-        table {
-            border-collapse: collapse;
-            max-width: 1200px;
+        .container {
+            max-width: 1400px;
             margin: 0 auto;
-            width: 100%;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            padding: 20px;
         }
         
-        th, td {
-            border: 1px solid #e0e0e0;
-            padding: 4px;
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 16px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 500;
+        }
+        
+        .last-updated {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin: 8px 0 24px;
+            text-align: right;
+        }
+        
+        .controls {
+            background-color: var(--card);
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .filter-title {
+            font-weight: 500;
+            margin: 0 0 8px;
+            color: var(--text-primary);
+            font-size: 16px;
+        }
+        
+        .filter-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .filter-chip {
+            background-color: var(--primary-light);
+            border: none;
+            border-radius: 16px;
+            padding: 6px 12px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            color: var(--text-primary);
+        }
+        
+        .filter-chip:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .filter-chip.active {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .search-box {
+            position: relative;
+            max-width: 300px;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 8px 12px 8px 36px;
+            border: 1px solid var(--divider);
+            border-radius: 4px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        
+        .search-box input:focus {
+            border-color: var(--primary);
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+        
+        .results-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background-color: var(--card);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .results-table th {
+            background-color: #f8f9fa;
+            font-weight: 500;
+            text-align: left;
+            padding: 12px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            border-bottom: 1px solid var(--divider);
+        }
+        
+        .results-table td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #eeeeee;
             text-align: center;
         }
         
-        th {
-            background-color: #f8f9fa;
-            font-weight: 600;
+        .results-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .model-header {
             position: relative;
+            min-width: 100px;
+            text-align: center;
         }
         
-        .score {
-            width: 72px;
-            height: 72px;
-            margin: 0 auto;
-        }
-        
-        .score a {
-            height: 100%;
+        .model-header .model-info {
             display: flex;
             flex-direction: column;
             align-items: center;
-            line-height: normal;
+        }
+        
+        .model-name {
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+        
+        .model-badge {
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-bottom: 4px;
+        }
+        
+        .model-badge.local {
+            background-color: #e3f2fd;
+            color: #0d47a1;
+        }
+        
+        .model-badge.remote {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        .model-size {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        
+        .benchmark-info {
+            position: relative;
+            min-width: 200px;
+        }
+        
+        .benchmark-name {
+            font-weight: 500;
+        }
+        
+        .benchmark-category {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+        
+        .score-cell {
+            position: relative;
+        }
+        
+        .score-container {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto;
+            position: relative;
+            display: flex;
+            align-items: center;
             justify-content: center;
-            text-decoration: none;
-            border-radius: 4px;
-            gap: 2px;
+            border-radius: 50%;
         }
         
-        .score .value {
+        .score-value {
             font-size: 18px;
-            font-weight: bold;
+            font-weight: 700;
             color: white;
-            text-shadow: 1px 1px 1px rgba(0,0,0,0.5);
-            line-height: normal;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+            z-index: 2;
         }
         
-        .score .time {
-            color: black;
-            font-size: 14px;
+        .score-time {
+            position: absolute;
+            bottom: -10px;
             background-color: white;
-            line-height: normal;
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            white-space: nowrap;
         }
         
-        .header-cell {
-            background-color: #f8f9fa;
-            font-weight: 600;
-            text-align: left;
-        }
-        
-        .hover-box {
+        .hover-info {
             display: none;
             position: absolute;
             background-color: #333;
@@ -78,89 +268,387 @@
             padding: 12px;
             border-radius: 6px;
             width: 250px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            text-align: left;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
             z-index: 100;
             font-size: 14px;
             line-height: 1.4;
+            left: 50%;
+            transform: translateX(-50%);
+            top: 100%;
         }
         
-        th:hover .hover-box,
-        td:hover .hover-box {
+        th:hover .hover-info,
+        .benchmark-info:hover .hover-info,
+        .score-container:hover .hover-info {
             display: block;
         }
         
-        .benchmark-name {
-            min-width: 180px;
+        .hover-info p {
+            margin: 8px 0;
         }
         
-        .page-title {
-            text-align: center;
-            color: #333;
-            margin: 30px 0;
-            font-size: 24px;
+        .hover-info strong {
+            font-weight: 500;
         }
         
-        .last-updated {
+        /* Responsive design */
+        @media (max-width: 1200px) {
+            .table-container {
+                overflow-x: auto;
+            }
+            
+            .results-table {
+                min-width: 1000px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .filter-group {
+                flex-direction: column;
+            }
+        }
+        
+        /* Performance category colors */
+        .score-excellent {
+            background-color: #1b5e20;
+        }
+        
+        .score-good {
+            background-color: #4caf50;
+        }
+        
+        .score-average {
+            background-color: #ff9800;
+        }
+        
+        .score-below-average {
+            background-color: #f44336;
+        }
+        
+        .score-poor {
+            background-color: #b71c1c;
+        }
+        
+        /* Loading indicator and no results */
+        .loading {
             text-align: center;
-            color: #666;
-            margin-bottom: 30px;
-            font-size: 14px;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+            background-color: var(--card);
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
         }
     </style>
 </head>
 <body>
-    <h1 class="page-title">Language Model Benchmark Results</h1>
-    <p class="last-updated">Last updated: {{ data.current_time }}</p>
+    <header>
+        <div class="header-content">
+            <h1>Language Model Benchmark Results</h1>
+        </div>
+    </header>
     
-    <table>
-        <tr>
-            <th></th>
-            {% for llm in data.llms %}
-            <th class="model-header">{{ llm.displayname }}
-                <div class="hover-box">
-                    <p><strong>Model:</strong> {{ llm.codename }}</p>
-                    {% if llm.launch_date %}
-                    <p><strong>Launch Date:</strong> {{ llm.launch_date }}</p>
-                    {% endif %}
-                    {% if llm.filesize_mb %}
-                    <p><strong>Size:</strong> {{ llm.filesize_mb }} MB</p>
-                    {% endif %}
-                    {% if llm.license_name %}
-                    <p><strong>License:</strong> {{ llm.license_name }}</p>
-                    {% endif %}
-                </div>
-            </th>
-            {% endfor %}
-        </tr>
+    <div class="container">
+        <p class="last-updated">Last updated: {{ data.current_time|default('April 24, 2025') }}</p>
         
-        {% for benchmark in data.benchmarks %}
-        <tr>
-            <td class="header-cell benchmark-name">{{ benchmark.displayname }}
-                <div class="hover-box">
-                    <p><strong>Benchmark ID:</strong> {{ benchmark.codename }}</p>
-                    {% if benchmark.description %}
-                    <p><strong>Description:</strong> {{ benchmark.description }}</p>
-                    {% endif %}
-                    {% if benchmark.license_name %}
-                    <p><strong>License:</strong> {{ benchmark.license_name }}</p>
-                    {% endif %}
+        <div class="controls">
+            <div class="filter-group">
+                <div>
+                    <h3 class="filter-title">Model Type</h3>
+                    <div class="filter-chips" id="model-type-filter">
+                        <button class="filter-chip active" data-type="all">All</button>
+                        <button class="filter-chip" data-type="local">Local Models</button>
+                        <button class="filter-chip" data-type="remote">Remote Models</button>
+                    </div>
                 </div>
-            </td>
-            {% for llm in data.llms %}
-            <td>
-                {% if (benchmark.codename, llm.codename) in data.scores %}
-                <div class="score" style="background-color: {{ data.scores[(benchmark.codename, llm.codename)].color }}">
-                    <a href="run_details/{{ data.scores[(benchmark.codename, llm.codename)].run_id }}.html">
-                        <span class="value">{{ data.scores[(benchmark.codename, llm.codename)].value }}</span>
-                        <span class="time">{{ "%.1f"|format(data.scores[(benchmark.codename, llm.codename)].avg_eval_time) }}ms</span>
-                    </a>
+                
+                <div>
+                    <h3 class="filter-title">Model Size</h3>
+                    <div class="filter-chips" id="model-size-filter">
+                        <button class="filter-chip active" data-size="all">All</button>
+                        <button class="filter-chip" data-size="small">Small (<2GB)</button>
+                        <button class="filter-chip" data-size="medium">Medium (2-5GB)</button>
+                        <button class="filter-chip" data-size="large">Large (>5GB)</button>
+                    </div>
                 </div>
-                {% endif %}
-            </td>
-            {% endfor %}
-        </tr>
-        {% endfor %}
-    </table>
+                
+                <div>
+                    <h3 class="filter-title">Benchmark Category</h3>
+                    <div class="filter-chips" id="benchmark-category-filter">
+                        <button class="filter-chip active" data-category="all">All</button>
+                        <button class="filter-chip" data-category="language">Language</button>
+                        <button class="filter-chip" data-category="reasoning">Reasoning</button>
+                        <button class="filter-chip" data-category="knowledge">Knowledge</button>
+                        <button class="filter-chip" data-category="translation">Translation</button>
+                    </div>
+                </div>
+                
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="search-input" placeholder="Search models or benchmarks...">
+                </div>
+            </div>
+        </div>
+        
+        <div class="table-container">
+            <table class="results-table" id="results-table">
+                <thead>
+                    <tr>
+                        <th class="benchmark-header">Benchmark</th>
+                        {% for llm in data.llms %}
+                        <th class="model-header">
+                            <div class="model-info">
+                                <span class="model-name">{{ llm.displayname }}</span>
+                                {% if llm.codename.startswith('gpt-') or llm.codename.startswith('claude-') or llm.codename.startswith('gemini-') %}
+                                <span class="model-badge remote">Remote</span>
+                                {% else %}
+                                <span class="model-badge local">Local</span>
+                                {% endif %}
+                                <span class="model-size">{{ llm.filesize_mb }} MB</span>
+                            </div>
+                            <div class="hover-info">
+                                <p><strong>Model:</strong> {{ llm.codename }}</p>
+                                {% if llm.launch_date %}
+                                <p><strong>Launch:</strong> {{ llm.launch_date }}</p>
+                                {% endif %}
+                                {% if llm.filesize_mb %}
+                                <p><strong>Size:</strong> {{ llm.filesize_mb }} MB</p>
+                                {% endif %}
+                                {% if llm.license_name %}
+                                <p><strong>License:</strong> {{ llm.license_name }}</p>
+                                {% endif %}
+                            </div>
+                        </th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for benchmark in data.benchmarks %}
+                    <tr class="benchmark-row" 
+                        data-category="{{ benchmark.category|default('language') }}">
+                        <td class="benchmark-info">
+                            <div class="benchmark-name">{{ benchmark.displayname }}</div>
+                            <div class="benchmark-category">{{ benchmark.category|default('Language') }}</div>
+                            <div class="hover-info">
+                                <p><strong>ID:</strong> {{ benchmark.codename }}</p>
+                                {% if benchmark.description %}
+                                <p><strong>Description:</strong> {{ benchmark.description }}</p>
+                                {% endif %}
+                            </div>
+                        </td>
+                        
+                        {% for llm in data.llms %}
+                        <td class="score-cell">
+                            {% if (benchmark.codename, llm.codename) in data.scores %}
+                            {% set score = data.scores[(benchmark.codename, llm.codename)] %}
+                            <a href="run_details/{{ score.run_id }}.html" class="score-link">
+                                <div class="score-container" 
+                                     style="background-color: {{ score.color }}">
+                                    <span class="score-value">{{ score.value }}</span>
+                                    <span class="score-time">{{ "%.1f"|format(score.avg_eval_time) }}ms</span>
+                                    <div class="hover-info">
+                                        <p><strong>Score:</strong> {{ score.value }}/100</p>
+                                        <p><strong>Avg Time:</strong> {{ "%.1f"|format(score.avg_eval_time) }}ms</p>
+                                        <p><strong>Run ID:</strong> {{ score.run_id }}</p>
+                                        <p>Click for detailed results</p>
+                                    </div>
+                                </div>
+                            </a>
+                            {% endif %}
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <div id="no-results" class="no-results" style="display: none;">
+            <p>No results found matching your filters.</p>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add benchmark categories based on codenames
+            const benchmarkRows = document.querySelectorAll('.benchmark-row');
+            benchmarkRows.forEach(row => {
+                const benchmarkName = row.querySelector('.benchmark-name').textContent;
+                const benchmarkInfo = row.querySelector('.benchmark-info');
+                const categoryElement = row.querySelector('.benchmark-category');
+                
+                // Determine category based on benchmark ID or name
+                let category = 'language'; // Default
+                
+                if (benchmarkInfo.textContent.includes('translation') || 
+                    benchmarkInfo.textContent.includes('_translation_')) {
+                    category = 'translation';
+                } else if (benchmarkInfo.textContent.includes('knowledge') ||
+                          benchmarkInfo.textContent.includes('geography')) {
+                    category = 'knowledge';
+                } else if (benchmarkInfo.textContent.includes('reason') ||
+                          benchmarkInfo.textContent.includes('conversion') ||
+                          benchmarkInfo.textContent.includes('count')) {
+                    category = 'reasoning';
+                }
+                
+                // Update category display and data attribute
+                categoryElement.textContent = category.charAt(0).toUpperCase() + category.slice(1);
+                row.setAttribute('data-category', category);
+            });
+            
+            // Model type filtering
+            const modelTypeChips = document.querySelectorAll('#model-type-filter .filter-chip');
+            modelTypeChips.forEach(chip => {
+                chip.addEventListener('click', function() {
+                    modelTypeChips.forEach(c => c.classList.remove('active'));
+                    this.classList.add('active');
+                    filterTable();
+                });
+            });
+            
+            // Model size filtering
+            const sizeChips = document.querySelectorAll('#model-size-filter .filter-chip');
+            sizeChips.forEach(chip => {
+                chip.addEventListener('click', function() {
+                    sizeChips.forEach(c => c.classList.remove('active'));
+                    this.classList.add('active');
+                    filterTable();
+                });
+            });
+            
+            // Benchmark category filtering
+            const categoryChips = document.querySelectorAll('#benchmark-category-filter .filter-chip');
+            categoryChips.forEach(chip => {
+                chip.addEventListener('click', function() {
+                    categoryChips.forEach(c => c.classList.remove('active'));
+                    this.classList.add('active');
+                    filterTable();
+                });
+            });
+            
+            // Search functionality
+            const searchInput = document.getElementById('search-input');
+            searchInput.addEventListener('input', filterTable);
+            
+            // Table filtering function
+            function filterTable() {
+                const modelType = document.querySelector('#model-type-filter .filter-chip.active').getAttribute('data-type');
+                const modelSize = document.querySelector('#model-size-filter .filter-chip.active').getAttribute('data-size');
+                const category = document.querySelector('#benchmark-category-filter .filter-chip.active').getAttribute('data-category');
+                const searchTerm = searchInput.value.toLowerCase();
+                
+                const table = document.getElementById('results-table');
+                const headerRow = table.querySelector('thead tr');
+                const rows = table.querySelectorAll('tbody tr');
+                
+                // Handle column filtering (models)
+                const modelHeaders = headerRow.querySelectorAll('th.model-header');
+                modelHeaders.forEach((header, index) => {
+                    const isRemote = header.querySelector('.model-badge').classList.contains('remote');
+                    const sizeText = header.querySelector('.model-size').textContent;
+                    const sizeMB = parseInt(sizeText);
+                    
+                    // Check model type filter
+                    let showModel = true;
+                    if (modelType === 'local' && isRemote) showModel = false;
+                    if (modelType === 'remote' && !isRemote) showModel = false;
+                    
+                    // Check model size filter
+                    if (showModel && modelSize !== 'all') {
+                        if (modelSize === 'small' && sizeMB >= 2000) showModel = false;
+                        if (modelSize === 'medium' && (sizeMB < 2000 || sizeMB > 5000)) showModel = false;
+                        if (modelSize === 'large' && sizeMB <= 5000) showModel = false;
+                    }
+                    
+                    // Check search term
+                    if (showModel && searchTerm) {
+                        const modelName = header.querySelector('.model-name').textContent.toLowerCase();
+                        if (!modelName.includes(searchTerm)) showModel = false;
+                    }
+                    
+                    // Apply visibility
+                    const columnIndex = index + 1; // +1 because first column is benchmark name
+                    
+                    if (showModel) {
+                        header.style.display = '';
+                        // Show the corresponding column in each row
+                        rows.forEach(row => {
+                            const cell = row.cells[columnIndex];
+                            if (cell) cell.style.display = '';
+                        });
+                    } else {
+                        header.style.display = 'none';
+                        // Hide the corresponding column in each row
+                        rows.forEach(row => {
+                            const cell = row.cells[columnIndex];
+                            if (cell) cell.style.display = 'none';
+                        });
+                    }
+                });
+                
+                // Handle row filtering (benchmarks)
+                let visibleRowCount = 0;
+                
+                rows.forEach(row => {
+                    const rowCategory = row.getAttribute('data-category');
+                    const benchmarkName = row.querySelector('.benchmark-name').textContent.toLowerCase();
+                    const benchmarkInfo = row.querySelector('.benchmark-info').textContent.toLowerCase();
+                    
+                    let showRow = true;
+                    
+                    // Check category filter
+                    if (category !== 'all' && rowCategory !== category) {
+                        showRow = false;
+                    }
+                    
+                    // Check search term
+                    if (showRow && searchTerm && !benchmarkName.includes(searchTerm) && !benchmarkInfo.includes(searchTerm)) {
+                        showRow = false;
+                    }
+                    
+                    // Apply visibility
+                    row.style.display = showRow ? '' : 'none';
+                    if (showRow) visibleRowCount++;
+                });
+                
+                // Show/hide no results message
+                document.getElementById('no-results').style.display = visibleRowCount === 0 ? 'block' : 'none';
+                document.querySelector('.table-container').style.display = visibleRowCount === 0 ? 'none' : '';
+            }
+            
+            // Apply initial highlighting based on scores
+            const scoreContainers = document.querySelectorAll('.score-container');
+            scoreContainers.forEach(container => {
+                const scoreValue = parseInt(container.querySelector('.score-value').textContent);
+                
+                // Remove existing classes
+                container.classList.remove('score-excellent', 'score-good', 'score-average', 'score-below-average', 'score-poor');
+                
+                // Add appropriate class based on score
+                if (scoreValue >= 90) {
+                    container.classList.add('score-excellent');
+                } else if (scoreValue >= 75) {
+                    container.classList.add('score-good');
+                } else if (scoreValue >= 50) {
+                    container.classList.add('score-average');
+                } else if (scoreValue >= 25) {
+                    container.classList.add('score-below-average');
+                } else {
+                    container.classList.add('score-poor');
+                }
+            });
+        });
+    </script>
 </body>
 </html>
