@@ -27,7 +27,7 @@
             margin: 0 auto;
             padding: 1rem;
         }
-        .run-summary, .run-details {
+        .run-summary, .run-details, .system-prompt {
             margin-bottom: 2rem;
         }
         .summary-table, .details-table {
@@ -52,14 +52,14 @@
             border-bottom: 2px solid #333;
             padding-bottom: 0.5rem;
         }
-        .question-info {
+        .question-info, .system-prompt-content {
             background-color: #f9f9f9;
             border: 1px solid #ddd;
             padding: 1rem;
             margin-top: 0.5rem;
             position: relative;
         }
-        .question-info-content {
+        .question-info-content, .system-prompt-text {
             max-height: 600px;
             overflow-y: auto;
             overflow-x: hidden;
@@ -74,7 +74,7 @@
         .question-info-toggle:hover {
             color: #333;
         }
-        .question-info pre {
+        .question-info pre, .system-prompt-text pre {
             white-space: pre-wrap;
             word-wrap: break-word;
             background-color: #f4f4f4;
@@ -85,12 +85,27 @@
         .hidden {
             display: none;
         }
-
+        .system-prompt-heading {
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1 class="page-title">Benchmark Run Details</h1>
+        
+        <!-- System Prompt Section -->
+        {% if system_prompt %}
+        <div class="system-prompt">
+            <h2>System Prompt</h2>
+            <div class="system-prompt-content">
+                <div class="system-prompt-text">
+                    <pre>{{ system_prompt }}</pre>
+                </div>
+            </div>
+        </div>
+        {% endif %}
         
         <div class="run-summary">
             <h2>Run Summary</h2>
