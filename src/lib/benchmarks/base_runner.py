@@ -38,7 +38,7 @@ class BenchmarkRunner:
         self.logger = logger  # TODO: don't use self
         
         # Handle quantization suffix in model names
-        if "gpt-" in self.model or "claude-" in self.model:
+        if "gpt-" in self.model or "claude-" in self.model or "gemini-" in self.model:
             self.remote_model = self.model
         else:
             # Strip quantization suffix if present (e.g., ":Q4_0")
