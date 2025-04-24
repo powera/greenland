@@ -5,6 +5,7 @@ import os
 from dataclasses import dataclass
 from typing import Dict, List, Optional
 from jinja2 import Environment, FileSystemLoader
+import logging
 
 import datastore.benchmarks
 import datastore.common
@@ -133,8 +134,11 @@ class ScoreTableGenerator:
         """
         if not run_details:
             return
-            
+        
         template = self.template_env.get_template('run_details.html')
+        
+        # Get system prompt (context) for this benchmark
+        system_prompt = self._get_context_from_benchmark(run_details['benchmark_name'])
         
         # Ensure output directories exist
         os.makedirs(os.path.join(constants.OUTPUT_DIR, "run_details"), exist_ok=True)
@@ -146,7 +150,7 @@ class ScoreTableGenerator:
             f"{run_details['run_id']}.html"
         )
         with open(run_path, 'w') as f:
-            f.write(template.render(run_details=run_details))
+            f.write(template.render(run_details=run_details, system_prompt=system_prompt))
 
     def generate_run_detail_by_id(self, run_id: int) -> None:
         """
@@ -177,6 +181,39 @@ class ScoreTableGenerator:
             run_id = highest_scores[key]['run_id']
             data = datastore.benchmarks.get_run_by_run_id(run_id, self.session)
             self._write_run_detail(data)
+
+    def _get_context_from_benchmark(self, benchmark_name: str) -> Optional[str]:
+        """
+        Get the system prompt (context) for a specific benchmark using the registry.
+        
+        Parameters:
+            benchmark_name (str): Name of the benchmark
+            
+        Returns:
+            str: System prompt text or None if not available
+        """
+        try:
+            # Import here to avoid circular imports
+            import lib.benchmarks.registry
+            from lib.benchmarks.factory import get_runner
+
+            # Create a dummy question to pass to prepare_prompt
+            dummy_question = {
+                "question_text": "Sample question",
+                "answer_type": "free_text",
+                "correct_answer": "Sample answer"
+            }
+            
+            # Get a runner instance for this benchmark (with a dummy model name)
+            runner = get_runner(benchmark_name, "dummy_model")
+            if runner:
+                # Call prepare_prompt to get the context
+                _, _, context = runner.prepare_prompt(dummy_question)
+                return context
+        except Exception as e:
+            logging.error(f"Error getting context for benchmark {benchmark_name}: {e}")
+        
+        return None
 
 # Create default generator instance
 generator = ScoreTableGenerator()
