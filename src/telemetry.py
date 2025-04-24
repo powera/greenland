@@ -16,11 +16,14 @@ class ModelTier(Enum):
     # OpenAI models
     GPT4_MINI = auto()  # gpt-4o-mini models
     GPT4 = auto()       # gpt-4o models
+    GPT_41_NANO = auto()  # gpt-4.1-nano models
+    GPT_41_MINI = auto()  # gpt-4.1-mini models
     
     # Anthropic models
-    CLAUDE_HAIKU = auto()    # claude-3-haiku models
-    CLAUDE_SONNET = auto()   # claude-3-sonnet models
-    CLAUDE_OPUS = auto()     # claude-3-opus models
+    CLAUDE_HAIKU = auto()    # claude-3-5-haiku models
+
+    # Gemini models
+    GEMINI_FLASH = auto()  # gemini-2.5-flash models
     
     # Ollama cost is based on compute time
     OLLAMA = auto()      # All Ollama models
@@ -30,17 +33,21 @@ class CostConfig:
     
     # OpenAI costs per million tokens
     GPT4_COSTS = {
-        ModelTier.GPT4_MINI: {"input": 0.15, "output": 0.6},   # $0.15/$0.60 per million
-        ModelTier.GPT4: {"input": 2.5, "output": 10.0},        # $2.50/$10.00 per million
+        ModelTier.GPT4_MINI: {"input": 0.15, "output": 0.6},
+        ModelTier.GPT4: {"input": 2.5, "output": 10.0},
+        ModelTier.GPT_41_NANO: {"input": 0.1, "output": 0.4},
+        ModelTier.GPT_41_MINI: {"input": 0.4, "output": 1.6},
     }
     
     # Anthropic costs per million tokens
     CLAUDE_COSTS = {
-        ModelTier.CLAUDE_HAIKU: {"input": 0.25, "output": 1.25},     # $0.25/$1.25 per million
-        ModelTier.CLAUDE_SONNET: {"input": 3.0, "output": 15.0},     # $3.00/$15.00 per million
-        ModelTier.CLAUDE_OPUS: {"input": 15.0, "output": 75.0},      # $15.00/$75.00 per million
+        ModelTier.CLAUDE_HAIKU: {"input": 0.8, "output": 4},
     }
     
+    GEMINI_COSTS = {
+        ModelTier.GEMINI_FLASH: {"input": 0.15, "output": 0.6},
+    }
+
     # Ollama cost per compute second (estimated)
     OLLAMA_COST_PER_SEC = 0.000_05  # $0.05 per thousand seconds
 
@@ -52,6 +59,10 @@ class CostConfig:
         # OpenAI models
         if "gpt-4o-mini" in model_lower:
             return ModelTier.GPT4_MINI
+        elif "gpt-4.1-nano" in model_lower:
+            return ModelTier.GPT_41_NANO
+        elif "gpt-4.1-mini" in model_lower:
+            return ModelTier.GPT_41_MINI
         elif "gpt-4o" in model_lower:
             return ModelTier.GPT4
             
@@ -59,10 +70,9 @@ class CostConfig:
         elif "claude" in model_lower:
             if "haiku" in model_lower:
                 return ModelTier.CLAUDE_HAIKU
-            elif "sonnet" in model_lower:
-                return ModelTier.CLAUDE_SONNET
-            elif "opus" in model_lower:
-                return ModelTier.CLAUDE_OPUS
+        elif "gemini" in model_lower:
+            if "flash" in model_lower:
+                return ModelTier.GEMINI_FLASH
                 
         # Default to Ollama for unknown models
         return ModelTier.OLLAMA

@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 # Model identifiers
 DEFAULT_MODEL = "gemini-2.5-flash"
 DEFAULT_TIMEOUT = 50
-API_BASE = "https://generativelanguage.googleapis.com/v1beta/openai/"
+API_BASE = "https://generativelanguage.googleapis.com/v1beta/models"
 
 def measure_completion(func):
     """Decorator to measure completion API call duration."""
@@ -44,7 +44,6 @@ class GeminiClient:
             logger.debug("Initialized GeminiClient in debug mode")
         self.api_key = self._load_key()
         self.headers = {
-            "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json"
         }
         # Use the same tokenizer as OpenAI for token counting consistency
@@ -60,9 +59,9 @@ class GeminiClient:
             return ""  # Return empty string if key file not found
 
     @measure_completion
-    def _create_completion(self, **kwargs) -> Dict:
+    def _create_completion(self, model: str, **kwargs) -> Dict:
         """Make direct HTTP request to Gemini chat completions endpoint."""
-        url = f"{API_BASE}/chat/completions"
+        url = f"{API_BASE}/{model}:generateContent?key={self.api_key}"
         
         if self.debug:
             logger.debug("Making request to %s", url)
@@ -87,45 +86,6 @@ class GeminiClient:
         if self.debug:
             logger.debug("Model warmup not required for Gemini: %s", model)
         return True
-
-    def generate_text(self, prompt: str, model: str = DEFAULT_MODEL) -> Response:
-        """Generate text completion using Gemini API."""
-        if self.debug:
-            logger.debug("Generating text with model: %s", model)
-            logger.debug("Prompt: %s", prompt)
-            
-        completion_data, duration_ms = self._create_completion(
-            model=model,
-            messages=[
-                {
-                    "role": "user",
-                    "content": prompt,
-                },
-            ],
-            max_tokens=1536,
-            temperature=0.15,
-        )
-        
-        usage = LLMUsage.from_api_response(
-            {
-                "prompt_tokens": completion_data["usage"]["prompt_tokens"],
-                "completion_tokens": completion_data["usage"]["completion_tokens"],
-                "total_duration": duration_ms
-            },
-            model=model
-        )
-        
-        result = completion_data["choices"][0]["message"]["content"]
-        
-        if self.debug:
-            logger.debug("Generated text: %s", result)
-            logger.debug("Usage metrics: %s", usage.to_dict())
-                
-        return Response(
-            response_text=result,
-            structured_data={},
-            usage=usage
-        )
 
     def generate_chat(
         self,
@@ -157,42 +117,31 @@ class GeminiClient:
             logger.debug("Context: %s", context)
             logger.debug("JSON schema: %s", json.dumps(json_schema, indent=2) if json_schema else None)
         
-        messages = []
-        if context:
-            messages.append({"role": "system", "content": context})
-        messages.append({"role": "user", "content": prompt})
-        
         kwargs = {
-            "model": model,
-            "messages": messages,
-            "max_tokens": 256 if brief else 1536,
-            "temperature": 0.45,
+            "contents": [{"role": "user", "parts": [{"text": prompt}]}],
+            "generationConfig": {"maxOutputTokens": 256 if brief else 1536},
         }
+        if context:
+            kwargs["system_instruction"] = {"parts": [{"text": context}]}
+        
         
         # If JSON schema provided, configure for structured response
         if json_schema:
-            # Remove any minimum/maximum constraints from schema properties
-            clean_schema = json_schema.copy()
-            if "properties" in clean_schema:
-                for prop in clean_schema["properties"].values():
-                    if isinstance(prop, dict):
-                        prop.pop("minimum", None)
-                        prop.pop("maximum", None)
+            kwargs["generationConfig"]["response_mime_type"] = "application/json"
             
-            clean_schema["additionalProperties"] = False
-            kwargs["temperature"] = 0.15  # Lower temperature for structured output
-            kwargs["response_format"] = {
-                "type": "json_schema",
-                "schema": clean_schema
+            kwargs["generationConfig"]["response_schema"] = {
+                "type": "array",
+                "items": json_schema,
+                "propertyOrdering": list(json_schema["properties"].keys())
             }
         
-        completion_data, duration_ms = self._create_completion(**kwargs)
-        
-        response_content = completion_data["choices"][0]["message"]["content"]
+        completion_data, duration_ms = self._create_completion(model=model, **kwargs)
+
+        response_content = completion_data["candidates"][0]["content"]["parts"][0]["text"]
         usage = LLMUsage.from_api_response(
             {
-                "prompt_tokens": completion_data["usage"]["prompt_tokens"],
-                "completion_tokens": completion_data["usage"]["completion_tokens"],
+                "prompt_tokens": completion_data["usageMetadata"]["promptTokenCount"],
+                "completion_tokens": completion_data["usageMetadata"]["candidatesTokenCount"],
                 "total_duration": duration_ms
             },
             model=model
@@ -201,7 +150,8 @@ class GeminiClient:
         # Parse JSON response if schema was provided
         if json_schema:
             try:
-                structured_data = json.loads(response_content)
+                # We seem to need the top-level response to be an array.
+                structured_data = json.loads(response_content)[0]
                 response_text = ""
             except json.JSONDecodeError:
                 error_msg = f"Failed to parse JSON response: {response_content}"
@@ -236,7 +186,7 @@ def generate_text(prompt: str, model: str = DEFAULT_MODEL) -> Response:
     Returns:
         Response containing response_text, structured_data (empty dict), and usage
     """
-    return client.generate_text(prompt, model)
+    raise Exception("Not implemented. Use generate_chat instead.")
 
 def generate_chat(
     prompt: str,
