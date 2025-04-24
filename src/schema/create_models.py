@@ -28,22 +28,11 @@ def create_models():
 
   # Remote models
   datastore.common.insert_model(s, "gpt-4o-mini-2024-07-18", "GPT-4o-mini", "2024-07-18", 2047, "Closed Model")
+  datastore.common.insert_model(s, "gpt-4.1-nano-2025-04-14", "GPT-4.1 nano", "2025-04-14", 2046, "Closed Model")
+  datastore.common.insert_model(s, "gpt-4.1-mini-2025-04-14", "GPT-4.1 mini", "2025-04-14", 4095, "Closed Model")
 
-def create_benchmarks():
-  dir = os.path.dirname(os.path.realpath(__file__))
-  s = datastore.common.create_database_and_session(os.path.join(dir, "benchmarks.db"))
-
-  datastore.common.insert_benchmark(
-    s, "0015_spell_check", "Spell Check / Complete Response",
-    "Given a sentence with one misspelled word, does the result identify the misspelled word and the correct spelling, in the requested format.", None)
-
-  datastore.common.insert_benchmark(
-    s, "0020_definitions", "Definitions",
-    "Given a one-sentence definition and ten possible words, does the model choose the correct word.", None)
-
-  datastore.common.insert_benchmark(
-    s, "0030_analyze_paragraph", "Analyze Paragraph",
-    "Given a paragraph and 4 possible answers for a question about that paragraph, does the model choose the correct answer.", None)
+def main():
+  create_models()
 
 if __name__ == "__main__":
   create_models()
