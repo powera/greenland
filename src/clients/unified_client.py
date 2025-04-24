@@ -4,7 +4,7 @@
 import logging
 from typing import Dict, Optional, Tuple, Any
 
-from clients import ollama_client, openai_client, anthropic_client, lmstudio_client
+from clients import ollama_client, openai_client, anthropic_client, lmstudio_client, gemini_client
 from telemetry import LLMUsage
 from clients.types import Response
 
@@ -37,10 +37,12 @@ class UnifiedLLMClient:
         self.ollama = lmstudio_client.LMStudioClient(timeout=timeout, debug=False)
         self.openai = openai_client.OpenAIClient(timeout=timeout, debug=False)
         self.anthropic = anthropic_client.AnthropicClient(timeout=timeout, debug=False)
-        
+        self.gemini = gemini_client.GeminiClient(timeout=timeout, debug=False)
+
         # Model name prefixes for routing
         self.openai_prefixes = ['gpt-']
         self.anthropic_prefixes = ['claude-']
+        self.gemini_prefixes = ['gemini-']
         
     def _get_client(self, model: str) -> Tuple[Any, str]:
         """
@@ -62,6 +64,9 @@ class UnifiedLLMClient:
         elif any(model.startswith(prefix) for prefix in self.anthropic_prefixes):
             client = self.anthropic
             client_name = "Anthropic"
+        elif any(model.startswith(prefix) for prefix in self.gemini_prefixes):
+            client = self.gemini
+            client_name = "Gemini"
         else:
             client = self.ollama
             client_name = "Ollama"
