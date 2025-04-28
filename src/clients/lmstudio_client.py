@@ -119,15 +119,12 @@ class LMStudioClient:
         except LMStudioError:
             return False
 
-    def generate_text(self, prompt: str, model: str = DEFAULT_MODEL) -> Response:
-        raise Exception("Not supported.")
-
     def generate_chat(
         self,
         prompt: str,
         model: str = DEFAULT_MODEL,
         brief: bool = False,
-        json_schema: Optional[Dict] = None,
+        json_schema: Optional[Any] = None,
         context: Optional[str] = None
     ) -> Response:
         """
@@ -212,14 +209,11 @@ client = LMStudioClient(debug=False)  # Set to True to enable debug logging
 def warm_model(model: str) -> bool:
     return client.warm_model(model)
 
-def generate_text(prompt: str, model: str = DEFAULT_MODEL) -> Response:
-    return client.generate_text(prompt, model)
-
 def generate_chat(
     prompt: str,
     model: str = DEFAULT_MODEL,
     brief: bool = False,
-    json_schema: Optional[Dict] = None,
+    json_schema: Optional[Any] = None,
     context: Optional[str] = None
 ) -> Response:
     """

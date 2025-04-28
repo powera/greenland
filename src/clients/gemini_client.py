@@ -13,6 +13,7 @@ import tiktoken
 import constants
 from telemetry import LLMUsage
 from clients.types import Response
+import clients.lib
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -92,7 +93,7 @@ class GeminiClient:
         prompt: str,
         model: str = DEFAULT_MODEL,
         brief: bool = False,
-        json_schema: Optional[Dict] = None,
+        json_schema: Optional[Any] = None,
         context: Optional[str] = None
     ) -> Response:
         """
@@ -115,7 +116,7 @@ class GeminiClient:
             logger.debug("Model: %s", model)
             logger.debug("Brief mode: %s", brief)
             logger.debug("Context: %s", context)
-            logger.debug("JSON schema: %s", json.dumps(json_schema, indent=2) if json_schema else None)
+            logger.debug("JSON schema: %s", json_schema)
         
         kwargs = {
             "contents": [{"role": "user", "parts": [{"text": prompt}]}],
@@ -127,12 +128,16 @@ class GeminiClient:
         
         # If JSON schema provided, configure for structured response
         if json_schema:
-            kwargs["generationConfig"]["response_mime_type"] = "application/json"
+            if isinstance(json_schema, clients.lib.Schema):
+                schema_obj = json_schema
+            else:
+                schema_obj = clients.lib.schema_from_dict(json_schema)
             
+            processed_schema = clients.lib.to_gemini_schema(schema_obj)
+            kwargs["generationConfig"]["response_mime_type"] = "application/json"
             kwargs["generationConfig"]["response_schema"] = {
-                "type": "array",
-                "items": json_schema,
-                "propertyOrdering": list(json_schema["properties"].keys())
+                "type": "ARRAY",
+                "items": processed_schema
             }
         
         completion_data, duration_ms = self._create_completion(model=model, **kwargs)
@@ -163,7 +168,12 @@ class GeminiClient:
             structured_data = {}
         
         if self.debug:
-            logger.debug("Response text: %s", response_text if response_text else "JSON response")
+            if response_text:
+                logger.debug("Response text: %s", response_text)
+            elif structured_data:
+                logger.debug("Structured data: %s", structured_data)
+            else:
+                logger.debug("No response text or structured data")
             logger.debug("Usage metrics: %s", usage.to_dict())
         
         return Response(
@@ -179,20 +189,11 @@ client = GeminiClient(debug=False)  # Set to True to enable debug logging
 def warm_model(model: str) -> bool:
     return client.warm_model(model)
 
-def generate_text(prompt: str, model: str = DEFAULT_MODEL) -> Response:
-    """
-    Generate text using Gemini API.
-    
-    Returns:
-        Response containing response_text, structured_data (empty dict), and usage
-    """
-    raise Exception("Not implemented. Use generate_chat instead.")
-
 def generate_chat(
     prompt: str,
     model: str = DEFAULT_MODEL,
     brief: bool = False,
-    json_schema: Optional[Dict] = None,
+    json_schema: Optional[Any] = None,
     context: Optional[str] = None
 ) -> Response:
     """
