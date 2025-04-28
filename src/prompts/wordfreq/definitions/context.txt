@@ -33,6 +33,10 @@ For Chinese translations:
 - When multiple translations are possible, choose the most common or appropriate one
 - Only provide translations into standard Mandarin Chinese (not regional variants)
 
+For Korean translations:
+- Provide a translation that specifically matches the given definition, not other meanings of the word
+- When multiple translations are possible, choose the most common or appropriate one
+
 For phonetic spellings:
 - Provide the pronuncation for the specific definition of the word.
 - Use simplified phonetic pronunciation using capital letters for stressed syllables
@@ -55,7 +59,8 @@ In summary: for each definition, provide in order:
 8. At least one example sentence
 9. Any additional notes about the definition
 10. The Chinese translation
-11. A confidence score (0-1) - the most common definition should have confidence of 1, less-common or domain specific definitions should have confidence around 0.9.
+11. The Korean translation
+12. A confidence score (0-1) - the most common definition should have confidence of 1, less-common or domain specific definitions should have confidence around 0.9.
 
 Remember to separate different definitions (e.g., "bank" as a financial institution vs. "bank" as the side of a river).
 
