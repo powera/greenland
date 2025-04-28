@@ -154,6 +154,10 @@ class LinguisticClient:
                                 "type": "string",
                                 "description": "The Chinese translation of the word"
                             },
+                            "korean_translation": {
+                                "type": "string",
+                                "description": "The Korean translation of the word"
+                            },
                             "confidence": {
                                 "type": "number",
                                 "description": "Confidence score from 0-1"
@@ -161,7 +165,8 @@ class LinguisticClient:
                         },
                         "additionalProperties": False,
                         "required": ["definition", "pos", "pos_subtype", "lemma", "confidence", 
-                                     "special_case", "notes", "examples", "chinese_translation", "phonetic_spelling", "ipa_spelling"]
+                                     "special_case", "notes", "examples", "chinese_translation",
+                                     "korean_translation", "phonetic_spelling", "ipa_spelling"]
                     }
                 }
             },
@@ -259,6 +264,7 @@ class LinguisticClient:
                         phonetic_pronunciation=def_data.get('phonetic_spelling', None),
                         ipa_pronunciation=def_data.get('ipa_spelling', None),
                         chinese_translation=def_data.get('chinese_translation', None),
+                        korean_translation=def_data.get('korean_translation', None),
                         multiple_meanings=def_data.get('multiple_meanings', False),
                         special_case=def_data.get('special_case', False),
                         notes=def_data.get('notes')

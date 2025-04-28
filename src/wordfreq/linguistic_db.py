@@ -121,7 +121,7 @@ class Definition(Base):
     pos_subtype: Mapped[Optional[str]] = mapped_column(String, nullable=True)  # Store the subtype as string for flexibility
     lemma: Mapped[str] = mapped_column(String, nullable=False)     # Lemma for this definition
     chinese_translation: Mapped[Optional[str]] = mapped_column(String, nullable=True)  # Chinese translation
-
+    korean_translation: Mapped[Optional[str]] = mapped_column(String, nullable=True)  # Korean translation
 
     # Special flags for handling complex cases (moved from POS to definition level)
     multiple_meanings: Mapped[bool] = mapped_column(Boolean, default=False)
@@ -282,6 +282,7 @@ def add_definition(
     ipa_pronunciation: Optional[str] = None,
     phonetic_pronunciation: Optional[str] = None,
     chinese_translation: Optional[str] = None,
+    korean_translation: Optional[str] = None,
     notes: Optional[str] = None
 ) -> Definition:
     """Add a definition for a word."""
@@ -296,6 +297,7 @@ def add_definition(
         ipa_pronunciation=ipa_pronunciation,
         phonetic_pronunciation=phonetic_pronunciation,
         chinese_translation=chinese_translation,
+        korean_translation=korean_translation,
         notes=notes
     )
     session.add(definition)
