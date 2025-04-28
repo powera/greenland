@@ -11,7 +11,8 @@ import requests
 
 import constants
 from telemetry import LLMUsage
-from clients.types import Response
+from clients.types import Response, Schema
+import clients.lib
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -102,18 +103,12 @@ class AnthropicClient:
             logger.debug("Model warmup not required for Anthropic: %s", model)
         return True
 
-    def generate_text(self, prompt: str, model: str = DEFAULT_MODEL, system_prompt: Optional[str] = None) -> Response:
-        """
-        Generate text completion using Anthropic API.
-        """
-        raise Exception("Text generation not supported. Use generate_chat instead.")
-
     def generate_chat(
         self,
         prompt: str,
         model: str = DEFAULT_MODEL,
         brief: bool = False,
-        json_schema: Optional[Dict] = None,
+        json_schema: Optional[Any] = None,
         context: Optional[str] = None
     ) -> Response:
         """
@@ -135,7 +130,7 @@ class AnthropicClient:
             logger.debug("Generating chat response")
             logger.debug("Model: %s", model)
             logger.debug("Brief mode: %s", brief)
-            logger.debug("JSON schema: %s", json.dumps(json_schema, indent=2) if json_schema else None)
+            logger.debug("JSON schema: %s", json_schema)
             
             if context:
                 logger.debug("Using provided context: %s", context)
@@ -143,39 +138,114 @@ class AnthropicClient:
         kwargs = {
             "model": model,
             "max_tokens": 512 if brief else 3192,
-            "system": [],
             "messages": [],
         }
 
+        system_content = []
         if context:
-            kwargs["system"].append({"type": "text", "text": context})
+            system_content.append({"type": "text", "text": context})
 
         if json_schema:
-            # Add the schema as a text prompt
-            schema_prefix = f"""Please provide a JSON response matching exactly this schema:
-{json.dumps(json_schema, indent=2)}
+            # Convert Schema to Anthropic format
+            if isinstance(json_schema, Schema):
+                anthropic_schema = clients.lib.to_anthropic_schema(json_schema)
+            elif isinstance(json_schema, dict):
+                # Convert dict to Schema object first, then to Anthropic format
+                schema_obj = clients.lib.schema_from_dict(json_schema)
+                anthropic_schema = clients.lib.to_anthropic_schema(schema_obj)
+            else:
+                raise ValueError(f"Unexpected json_schema type: {type(json_schema)}")
+            
+            # Set up tools parameter for structured output
+            kwargs["tools"] = [{
+                "type": "custom",
+                "name": json_schema.name if isinstance(json_schema, Schema) else "structured_response",
+                "description": json_schema.description if isinstance(json_schema, Schema) else "Structured response schema",
+                "input_schema": anthropic_schema
+            }]
+            
+            # Force the model to use the tool
+            kwargs["tool_choice"] = {
+                "type": "tool",
+                "name": json_schema.name if isinstance(json_schema, Schema) else "structured_response"
+            }
 
-Your response must be valid JSON that matches the schema above."""
+            # Add schema explanation to system prompt for better results
+            # Create a clean version of the schema for display, omitting unnecessary implementation details
+            display_schema = {
+                "type": "object",
+                "properties": anthropic_schema.get("properties", {}),
+                "required": anthropic_schema.get("required", [])
+            }
+            
+            schema_prefix = f"""Please provide a response that matches exactly this schema:
+{json.dumps(display_schema, indent=2)}
 
-            if self.cache and context:  # Only cache if also a (long) system prompt
-                kwargs["system"].append(
+Your response must be valid JSON that follows the above schema."""
+
+            if self.cache and context and len(context) > 512:  # Only cache if also a (long) system prompt
+                system_content.append(
                     {"type": "text", "text": schema_prefix, "cache_control": {"type": "ephemeral"}}
                 )
             else:
-                kwargs["system"].append(
+                system_content.append(
                     {"type": "text", "text": schema_prefix}
                 )
-            kwargs["messages"].append(
-                {"role": "user", "content": prompt}
-            )
-            
-        else:
-            kwargs["messages"] = [{"role": "user", "content": prompt}]
+        
+        # Add system content if we have any
+        if system_content:
+            kwargs["system"] = system_content
+        
+        # Add the user message
+        kwargs["messages"] = [{"role": "user", "content": prompt}]
 
         completion_data, duration_ms = self._create_message(**kwargs)
 
-        # Extract text from the first content block
-        response_content = completion_data["content"][0]["text"]
+        # Extract text or tool output from response
+        structured_data = {}
+        response_text = ""
+        
+        if "content" in completion_data and completion_data["content"]:
+            # Check if there's tool use in the response
+            tool_use = None
+            for content_item in completion_data["content"]:
+                if content_item.get("type") == "tool_use":
+                    tool_use = content_item
+                elif content_item.get("type") == "text":
+                    response_text = content_item.get("text", "")
+            
+            # If we got structured data via tool use
+            if tool_use and "input" in tool_use:
+                structured_data = tool_use["input"]
+            else:
+                # No tool use found, try to extract JSON from text
+                try:
+                    # Try to extract JSON from the response text
+                    import re
+                    json_pattern = r'```json\s*([\s\S]*?)\s*```|^\s*({[\s\S]*})\s*$'
+                    json_match = re.search(json_pattern, response_text)
+
+                    if json_match:
+                        # Use the first match group that isn't None
+                        json_str = next(group for group in json_match.groups() if group is not None)
+                        structured_data = json.loads(json_str)
+                        response_text = ""  # Clear text since we extracted JSON
+                    elif json_schema:
+                        # If schema was provided but no code block found, try to parse the entire response
+                        try:
+                            structured_data = json.loads(response_text)
+                            response_text = ""  # Clear text since we extracted JSON
+                        except json.JSONDecodeError:
+                            error_msg = f"Failed to parse JSON response from text: {response_text}"
+                            logger.error(error_msg)
+                            structured_data = {"error": error_msg}
+                except Exception as e:
+                    error_msg = f"Failed to parse JSON response: {str(e)}"
+                    logger.error(error_msg)
+                    structured_data = {"error": error_msg}
+        else:
+            logger.error("Unexpected response format from Anthropic API")
+            structured_data = {"error": "Unexpected response format"}
 
         usage = LLMUsage.from_api_response(
             {
@@ -186,36 +256,15 @@ Your response must be valid JSON that matches the schema above."""
             model=model
         )
 
-        # Parse JSON response if schema was provided
-        if json_schema:
-            try:
-                # Try to extract JSON from the response
-                import re
-                json_pattern = r'```json\s*([\s\S]*?)\s*```|^\s*({[\s\S]*})\s*$'
-                json_match = re.search(json_pattern, response_content)
-
-                if json_match:
-                    # Use the first match group that isn't None
-                    json_str = next(group for group in json_match.groups() if group is not None)
-                else:
-                    # If no code block, try to parse the entire response
-                    json_str = response_content
-
-                structured_data = json.loads(json_str)
-                response_text = ""
-            except json.JSONDecodeError:
-                error_msg = f"Failed to parse JSON response: {response_content}"
-                logger.error(error_msg)
-                structured_data = {"error": error_msg}
-                response_text = ""
-        else:
-            response_text = response_content
-            structured_data = {}
-
         if self.debug:
-            logger.debug("Response text: %s", response_text if response_text else "JSON response")
+            if response_text:
+                logger.debug("Response text: %s", response_text)
+            elif structured_data:
+                logger.debug("Structured data: %s", structured_data)
+            else:
+                logger.debug("No response text or structured data")
             logger.debug("Usage metrics: %s", usage.to_dict())
-
+        
         return Response(
             response_text=response_text,
             structured_data=structured_data,
@@ -233,7 +282,7 @@ def generate_chat(
     prompt: str,
     model: str = DEFAULT_MODEL,
     brief: bool = False,
-    json_schema: Optional[Dict] = None,
+    json_schema: Optional[Any] = None,
     context: Optional[str] = None
 ) -> Response:
     """

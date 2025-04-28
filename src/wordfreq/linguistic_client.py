@@ -8,6 +8,7 @@ import time
 import threading
 from typing import Dict, List, Optional, Any, Tuple
 
+import clients.lib
 from clients.unified_client import UnifiedLLMClient
 import util.prompt_loader
 from wordfreq import linguistic_db
@@ -308,40 +309,30 @@ class LinguisticClient:
         Returns:
             Tuple of (translation string, success flag)
         """
-        schema = {
-            "type": "object",
-            "properties": {
-                "translation": {
-                    "type": "object",
-                    "properties": {
-                        "chinese": {
-                            "type": "string",
-                            "description": "The Chinese translation (preferably two characters when possible)"
-                        },
-                        "pinyin": {
-                            "type": "string",
-                            "description": "The pinyin pronunciation of the Chinese translation"
-                        },
-                        "confidence": {
-                            "type": "number",
-                            "description": "Confidence score from 0-1"
-                        },
-                        "notes": {
-                            "type": "string",
-                            "description": "Additional notes about this translation"
-                        }
-                    },
-                    "additionalProperties": False,
-                    "required": ["chinese", "pinyin", "confidence", "notes"]
-                }
-            },
-            "additionalProperties": False,
-            "required": ["translation"]
-        }
+        schema = clients.lib.Schema(
+            name = "ChineseTranslation",
+            description= "Response schema for a Chinese translation",
+            properties={
+                "chinese_translation": clients.lib.SchemaProperty(
+                    type="string",
+                    description="The Chinese translation (preferably two characters when possible)"
+                ),
+                "pinyin": clients.lib.SchemaProperty(
+                    type="string",
+                    description="The pinyin pronunciation of the Chinese translation"
+                ),
+                "confidence": clients.lib.SchemaProperty(
+                    type="number",
+                    description="Confidence score from 0-1"
+                ),
+                "notes": clients.lib.SchemaProperty(
+                    type="string",
+                    description="Additional notes about this translation"
+                )
+            })
         
         context = util.prompt_loader.get_context("wordfreq", "chinese_translation")
 
-        
         prompt = f"""Provide a Chinese translation for the English word '{word}' with the following definition:
         
         Definition: {definition}
@@ -373,8 +364,8 @@ class LinguisticClient:
                 except Exception as e:
                     logger.error(f"Failed to log translation query: {e}")
                 
-                if response.structured_data and 'translation' in response.structured_data:
-                    return response.structured_data['translation']['chinese'], True
+                if response.structured_data:
+                    return response.structured_data['chinese_translation'], True
                 else:
                     logger.warning(f"Failed to get valid translation response for '{word}' (attempt {attempt+1})")
                     time.sleep(RETRY_DELAY)
