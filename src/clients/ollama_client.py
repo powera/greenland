@@ -11,6 +11,7 @@ from requests.exceptions import Timeout, RequestException
 
 from telemetry import LLMUsage
 from clients.types import Response
+import clients.lib
 
 # Configure logging with DEBUG level option
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -89,40 +90,12 @@ class OllamaClient:
         except OllamaError:
             return False
 
-    def generate_text(self, prompt: str, model: str = DEFAULT_MODEL) -> Response:
-        """Generate text completion using Ollama API."""
-        data = {
-            "model": model,
-            "prompt": prompt,
-            "stream": False,
-        }
-        
-        response = self._make_request("generate", data)
-        result = ""
-        usage = None
-        
-        for line in response.iter_lines():
-            if line:
-                response_data = json.loads(line.decode('utf-8'))
-                if "total_duration" in response_data:
-                    usage = LLMUsage.from_api_response(response_data, model=model)
-                result += response_data.get('response', '')
-                
-        if self.debug:
-            logger.debug("Generated %d characters", len(result))
-                
-        return Response(
-            response_text=result,
-            structured_data={},
-            usage=usage
-        )
-
     def generate_chat(
         self,
         prompt: str,
         model: str = DEFAULT_MODEL,
         brief: bool = False,
-        json_schema: Optional[Dict] = None,
+        json_schema: Optional[Any] = None,
         context: Optional[str] = None
     ) -> Response:
         """
@@ -152,11 +125,27 @@ class OllamaClient:
             messages.append({"role": "system", "content": context})
             
         if json_schema:
-            # Add schema to prompt for single-phase JSON response
-            schema_prompt = f"""Provide a JSON response matching this schema:
-{json.dumps(json_schema, indent=2)}
+            if isinstance(json_schema, clients.lib.Schema):
+                schema_obj = json_schema
+            else:
+                schema_obj = clients.lib.schema_from_dict(json_schema)
+            
+            clean_schema = clients.lib.to_ollama_schema(schema_obj)
 
-Query: {prompt}"""
+            # Add schema explanation to system prompt for better results
+            # Create a clean version of the schema for display, omitting unnecessary implementation details
+            display_schema = {
+                "type": "object",
+                "properties": clean_schema.get("properties", {}),
+                "required": clean_schema.get("required", [])
+            }
+            
+            schema_prompt = f"""Please provide a response that matches exactly this schema:
+{json.dumps(display_schema, indent=2)}
+
+Your response must be valid JSON that follows the above schema."""
+
+            messages.append({"role": "user", "content": prompt})
             messages.append({"role": "user", "content": schema_prompt})
         else:
             messages.append({"role": "user", "content": prompt})
@@ -171,7 +160,7 @@ Query: {prompt}"""
             data["options"] = {"num_predict": 256}
 
         if json_schema:
-            data["format"] = json_schema
+            data["format"] = clean_schema
             
         response = self._make_request("chat", data)
         response_text, response_usage = self._process_chat_response(response, model)
@@ -181,6 +170,7 @@ Query: {prompt}"""
             # Single-phase JSON response
             try:
                 structured_response = json.loads(response_text)
+                print(json.dumps(structured_response, indent=2))
                 return Response(
                     response_text="",
                     structured_data=structured_response,
@@ -194,6 +184,7 @@ Query: {prompt}"""
                 )
         else:
             # Text-only response
+            print(response_text)
             return Response(
                 response_text=response_text,
                 structured_data={},
@@ -207,14 +198,11 @@ client = OllamaClient(debug=False)  # Set to True to enable debug logging
 def warm_model(model: str) -> bool:
     return client.warm_model(model)
 
-def generate_text(prompt: str, model: str = DEFAULT_MODEL) -> Response:
-    return client.generate_text(prompt, model)
-
 def generate_chat(
     prompt: str,
     model: str = DEFAULT_MODEL,
     brief: bool = False,
-    json_schema: Optional[Dict] = None,
+    json_schema: Optional[Any] = None,
     context: Optional[str] = None
 ) -> Response:
     """

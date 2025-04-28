@@ -33,7 +33,7 @@ class UnifiedLLMClient:
             logger.debug("Initialized UnifiedLLMClient (timeout=%ds)", timeout)
             
         # Initialize backend clients - debug logs only in client used
-        self.ollama = ollama_client.OllamaClient(timeout=timeout, debug=False)
+        self.ollama = ollama_client.OllamaClient(timeout=timeout, debug=True)
         #self.ollama = lmstudio_client.LMStudioClient(timeout=timeout, debug=False)
         self.openai = openai_client.OpenAIClient(timeout=timeout, debug=False)
         self.anthropic = anthropic_client.AnthropicClient(timeout=timeout, debug=False)
@@ -93,46 +93,12 @@ class UnifiedLLMClient:
             logger.debug("Warming up model: %s", normalized_model)
         return client.warm_model(normalized_model)
 
-    def generate_text(self, prompt: str, model: str, timeout: Optional[float] = None) -> Response:
-        """
-        Generate text using appropriate backend.
-        
-        Args:
-            prompt: Text prompt for generation
-            model: Model name (determines backend)
-            timeout: Optional timeout override in seconds
-            
-        Returns:
-            Response data class containing response_text, structured_data, and usage
-            
-        Raises:
-            TimeoutError: If request exceeds configured timeout
-            ConnectionError: If connection to backend fails
-            RuntimeError: For other request failures
-        """
-        if self.debug:
-            logger.debug("Text generation request: model=%s", model)
-            
-        client, normalized_model = self._get_client(model)
-        try:
-            result = client.generate_text(prompt, normalized_model)
-            
-            if self.debug:
-                logger.debug("Generation complete: %d chars, %d tokens", 
-                            len(result.response_text), result.usage.total_tokens)
-                            
-            return result
-            
-        except Exception as e:
-            logger.error("Text generation failed: %s", str(e))
-            raise
-
     def generate_chat(
         self,
         prompt: str,
         model: str,
         brief: bool = False,
-        json_schema: Optional[Dict] = None,
+        json_schema: Optional[Any] = None,
         context: Optional[str] = None,
         timeout: Optional[float] = None
     ) -> Response:
@@ -143,7 +109,7 @@ class UnifiedLLMClient:
             prompt: The main prompt/question
             model: Model name (determines backend)
             brief: Whether to limit response length
-            json_schema: Schema for structured response (if provided, returns JSON)
+            json_schema: Schema for structured response (if provided, returns JSON) - either a dict (old) or a types.Schema
             context: Optional context to include before the prompt
             timeout: Optional timeout override in seconds
         
@@ -188,15 +154,6 @@ client = UnifiedLLMClient()  # Use defaults for timeout and debug
 # Expose key functions at module level for API compatibility
 def warm_model(model: str, timeout: Optional[float] = None) -> bool:
     return client.warm_model(model, timeout)
-
-def generate_text(prompt: str, model: str, timeout: Optional[float] = None) -> Response:
-    """
-    Generate text using appropriate backend based on model name.
-    
-    Returns:
-        Response data class containing response_text, structured_data, and usage
-    """
-    return client.generate_text(prompt, model, timeout)
 
 def generate_chat(
     prompt: str,
