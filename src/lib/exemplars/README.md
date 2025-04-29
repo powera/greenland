@@ -21,10 +21,6 @@ lib/
     │   ├── __init__.py
     │   ├── granite_definition_exemplar.py
     │   └── wars_of_roses_exemplar.py
-    └── reports/          # Generated HTML reports
-        ├── granite_definition.html
-        ├── wars_of_roses_essay.html
-        └── index.html
 ```
 
 ## Usage
@@ -118,7 +114,7 @@ if __name__ == "__main__":
 
 ## Viewing Reports
 
-After running exemplars, HTML reports are generated in the `lib/exemplars/reports/` directory. Open the `index.html` file in a web browser to see all available reports, or open individual report files directly.
+After running exemplars, HTML reports are generated in the `OUTPUT_DIR/reports/` directory. Open the `index.html` file in a web browser to see all available reports, or open individual report files directly.
 
 ## Initial Exemplars
 
