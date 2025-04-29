@@ -40,6 +40,8 @@ class BenchmarkRunner:
         # Handle quantization suffix in model names
         if "gpt-" in self.model or "claude-" in self.model or "gemini-" in self.model:
             self.remote_model = self.model
+        elif self.model.startswith("lmstudio/"):
+            self.remote_model = self.model
         else:
             # Strip quantization suffix if present (e.g., ":Q4_0")
             self.remote_model = ":".join(model.split(":")[:-1])

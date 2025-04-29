@@ -32,6 +32,9 @@ def create_models():
   datastore.common.insert_model(s, "gpt-4.1-nano-2025-04-14", "GPT-4.1 nano", "2025-04-14", 2046, "Closed Model")
   datastore.common.insert_model(s, "gpt-4.1-mini-2025-04-14", "GPT-4.1 mini", "2025-04-14", 4095, "Closed Model")
 
+  # LMStudio models
+  datastore.common.insert_model(s, "lmstudio/granite-3.3-8b-instruct", "Granite 3.3 8B", "2025-04-17", 4940, "Apache License")
+
 def main():
   create_models()
 

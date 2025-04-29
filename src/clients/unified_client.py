@@ -34,7 +34,7 @@ class UnifiedLLMClient:
             
         # Initialize backend clients - debug logs only in client used
         self.ollama = ollama_client.OllamaClient(timeout=timeout, debug=False)
-        #self.ollama = lmstudio_client.LMStudioClient(timeout=timeout, debug=False)
+        self.lmstudio = lmstudio_client.LMStudioClient(timeout=timeout, debug=False)
         self.openai = openai_client.OpenAIClient(timeout=timeout, debug=False)
         self.anthropic = anthropic_client.AnthropicClient(timeout=timeout, debug=False)
         self.gemini = gemini_client.GeminiClient(timeout=timeout, debug=False)
@@ -43,6 +43,7 @@ class UnifiedLLMClient:
         self.openai_prefixes = ['gpt-']
         self.anthropic_prefixes = ['claude-']
         self.gemini_prefixes = ['gemini-']
+        self.lmstudio_prefixes = ['lmstudio/']
         
     def _get_client(self, model: str) -> Tuple[Any, str]:
         """
@@ -67,6 +68,10 @@ class UnifiedLLMClient:
         elif any(model.startswith(prefix) for prefix in self.gemini_prefixes):
             client = self.gemini
             client_name = "Gemini"
+        elif any(model.startswith(prefix) for prefix in self.lmstudio_prefixes):
+            client = self.lmstudio
+            client_name = "LMStudio"
+            normalized_model = model[len("lmstudio/"):]
         else:
             client = self.ollama
             client_name = "Ollama"
