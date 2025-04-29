@@ -271,7 +271,7 @@ class ExemplarStorage:
         if not os.path.exists(file_path):
             return None
             
-        with open(file_path, 'r') as f:
+        with open(file_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
             
         return ExemplarResult(
@@ -359,7 +359,7 @@ class ExemplarReportGenerator:
             
         # Generate simple HTML report
         report_path = os.path.join(self.output_dir, f"{exemplar_id}.html")
-        with open(report_path, 'w') as f:
+        with open(report_path, 'w', encoding='utf-8') as f:
             f.write(f"""<!DOCTYPE html>
 <html>
 <head>
@@ -370,6 +370,7 @@ class ExemplarReportGenerator:
         .prompt {{ background-color: #f5f5f5; padding: 10px; margin-bottom: 20px; }}
         pre {{ white-space: pre-wrap; }}
     </style>
+    <meta charset="UTF-8">
 </head>
 <body>
     <h1>Exemplar: {exemplar.name}</h1>
@@ -545,11 +546,23 @@ def run_exemplar(exemplar_id: str, model_name: str) -> ExemplarResult:
     storage.save_result(result)
     return result
 
+def run_exemplar_for_all_models(exemplar_id: str) -> Dict[str, ExemplarResult]:
+    """Run an exemplar with all available models and save the results."""
+    model_names = runner.get_model_names()
+    results = []
+    for model in model_names:
+        results[model] = runner.run_exemplar(exemplar_id, model)
+        storage.save_result(results[model])
+    for result in results.values():
+        storage.save_result(result)
+    return results
+
 def compare_models(exemplar_id: str, model_names: List[str]) -> List[ExemplarResult]:
     """Run an exemplar with multiple models and save the results."""
     results = runner.run_exemplar_with_models(exemplar_id, model_names)
     for result in results:
         storage.save_result(result)
+    report_generator.generate_exemplar_report(exemplar_id)
     return results
 
 def generate_report(exemplar_id: str) -> str:
