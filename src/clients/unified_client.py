@@ -33,7 +33,7 @@ class UnifiedLLMClient:
             logger.debug("Initialized UnifiedLLMClient (timeout=%ds)", timeout)
             
         # Initialize backend clients - debug logs only in client used
-        self.ollama = ollama_client.OllamaClient(timeout=timeout, debug=True)
+        self.ollama = ollama_client.OllamaClient(timeout=timeout, debug=False)
         #self.ollama = lmstudio_client.LMStudioClient(timeout=timeout, debug=False)
         self.openai = openai_client.OpenAIClient(timeout=timeout, debug=False)
         self.anthropic = anthropic_client.AnthropicClient(timeout=timeout, debug=False)
