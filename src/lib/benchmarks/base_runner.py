@@ -229,7 +229,8 @@ class BenchmarkRunner:
                 question_id=question_id,
                 score=100 if is_correct else 0,
                 eval_msec=int(response.usage.total_msec),
-                debug_json=json.dumps(debug_info) if debug_info else None
+                debug_json=json.dumps(debug_info) if debug_info else None,
+                thought_process=response.additional_thought if response.additional_thought else None
             )
             
         except OllamaTimeoutError as e:

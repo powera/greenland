@@ -148,15 +148,21 @@
                         <td>{{ detail.eval_msec }}</td>
                         <td>{{ detail.debug_json }}</td>
                     </tr>
-                    {% if detail.question_info_json %}
+                    {% if detail.question_info_json or detail.thought_process %}
                     <tr>
                         <td colspan="4" class="question-info">
                             <div class="question-info-toggle" onclick="toggleQuestionInfo(this)">
                                 [+]
                             </div>
                             <div class="question-info-content hidden">
-                              <strong>Question Information:</strong>
-                              <pre>{{ detail.question_info_json }}</pre>
+                              {% if detail.question_info_json %}
+                                <strong>Question Information:</strong>
+                                <pre>{{ detail.question_info_json }}</pre>
+                              {% endif %}
+                              {% if detail.thought_process %}
+                                <strong>Thought Process:</strong>
+                                <pre>{{ detail.thought_process }}</pre>
+                              {% endif}
                             </div>
                         </td>
                     </tr>
