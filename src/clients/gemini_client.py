@@ -145,8 +145,8 @@ class GeminiClient:
         response_content = completion_data["candidates"][0]["content"]["parts"][0]["text"]
         usage = LLMUsage.from_api_response(
             {
-                "prompt_tokens": completion_data["usageMetadata"]["promptTokenCount"],
-                "completion_tokens": completion_data["usageMetadata"]["candidatesTokenCount"],
+                "prompt_tokens": completion_data["usageMetadata"].get("promptTokenCount", 0),
+                "completion_tokens": completion_data["usageMetadata"].get("candidatesTokenCount", 0),
                 "total_duration": duration_ms
             },
             model=model
