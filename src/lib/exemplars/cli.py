@@ -10,7 +10,7 @@ import os
 import sys
 from typing import List, Optional
 
-from lib.exemplars import (
+from lib.exemplars.base import (
     registry, runner, storage, report_generator,
     run_exemplar, compare_models, generate_report, generate_all_reports
 )
