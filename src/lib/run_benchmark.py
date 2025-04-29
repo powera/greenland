@@ -73,6 +73,54 @@ def run_benchmark(benchmark_code: str, model: str) -> Optional[int]:
         return None
 
 
+def run_all_benchmarks_for_model(
+    model: str, 
+    blacklist_benchmarks: Optional[Set[str]] = None
+) -> List[Tuple[str, Optional[int]]]:
+    """
+    Run all available benchmarks for a specific model.
+    
+    Args:
+        model: Model codename to benchmark
+        blacklist_benchmarks: Optional set of benchmarks to exclude
+        
+    Returns:
+        List of (benchmark_code, run_id) tuples, run_id is None if benchmark failed
+    """
+    logger.info("Running all benchmarks for model %s", model)
+    
+    blacklist_benchmarks = blacklist_benchmarks or set()
+    
+    # Get all available benchmarks excluding blacklisted ones
+    benchmarks = [b for b in get_all_benchmarks() if b not in blacklist_benchmarks]
+    
+    results = []
+    for benchmark_code in benchmarks:
+        logger.info("Running benchmark %s for model %s", benchmark_code, model)
+        try:
+            run_id = run_benchmark(benchmark_code, model)
+            results.append((benchmark_code, run_id))
+            
+            if run_id:
+                logger.info("Benchmark %s completed successfully (run_id=%s)", 
+                           benchmark_code, run_id)
+            else:
+                logger.warning("Benchmark %s failed for model %s", benchmark_code, model)
+                
+        except Exception as e:
+            logger.error("Error running benchmark %s for model %s: %s", 
+                        benchmark_code, model, str(e))
+            logger.error(traceback.format_exc())
+            results.append((benchmark_code, None))
+    
+    # Log summary
+    successful = sum(1 for _, run_id in results if run_id is not None)
+    logger.info("Completed %d/%d benchmarks for model %s", 
+               successful, len(results), model)
+               
+    return results
+
+
 def run_missing_benchmarks(
     blacklist_models: Optional[Set[str]] = None, 
     blacklist_benchmarks: Optional[Set[str]] = None,
