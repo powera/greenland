@@ -34,6 +34,8 @@ def create_models():
 
   # LMStudio models
   datastore.common.insert_model(s, "lmstudio/granite-3.3-8b-instruct", "Granite 3.3 8B", "2025-04-17", 4940, "Apache License")
+  datastore.common.insert_model(s, "lmstudio/lmstudio-community/yi-1.5-6b-chat-gguf/yi-1.5-6b-chat-q4_k_m.gguf", "Yi-1.5 6B", "2024-05-13", 3670, "Apache License")
+  datastore.common.insert_model(s, "lmstudio/lmstudio-community/qwen3-1.7b-gguf/qwen3-1.7b-q6_k.gguf", "QWEN3 1.7B", "2025-04-28", 1670, "Apache License")
 
 def main():
   create_models()
