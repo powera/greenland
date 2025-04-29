@@ -4,6 +4,7 @@
 
 import json
 import logging
+import re
 from dataclasses import dataclass
 from typing import Dict, Optional, Union, Any, List
 import requests
@@ -65,10 +66,14 @@ class OllamaClient:
                 error_msg = str(e)
             raise OllamaRequestError(error_msg) from e
 
-    def _process_chat_response(self, response: requests.Response, model: str) -> tuple[str, LLMUsage]:
-        """Process chat response and extract content and usage info."""
+    def _process_chat_response(self, response: requests.Response, model: str) -> tuple[str, LLMUsage, Optional[str]]:
+        """Process chat response and extract content, usage info, and additional thoughts."""
         result = ""
         usage = None
+        additional_thought = None
+        
+        # Pattern to extract content within <think> tags
+        think_pattern = re.compile(r'<think>(.*?)</think>', re.DOTALL)
             
         for line in response.iter_lines():
             if line:
@@ -78,9 +83,27 @@ class OllamaClient:
                     usage = LLMUsage.from_api_response(response_data, model=model)
                         
                 if "message" in response_data:
-                    result += response_data["message"]["content"]
+                    content = response_data["message"]["content"]
                     
-        return result, usage
+                    # Check for <think> tags
+                    think_match = think_pattern.search(content)
+                    while think_match:
+                        # Extract thought content
+                        thought_content = think_match.group(1).strip()
+                        if additional_thought is None:
+                            additional_thought = thought_content
+                        else:
+                            additional_thought += " " + thought_content
+                        
+                        # Remove <think> tags and their content from the response
+                        content = content.replace(f"<think>{think_match.group(1)}</think>", "")
+                        
+                        # Check for additional <think> tags
+                        think_match = think_pattern.search(content)
+                    
+                    result += content
+                    
+        return result, usage, additional_thought
 
     def warm_model(self, model: str) -> bool:
         """Initialize model for faster first inference."""
@@ -163,32 +186,39 @@ Your response must be valid JSON that follows the above schema."""
             data["format"] = clean_schema
             
         response = self._make_request("chat", data)
-        response_text, response_usage = self._process_chat_response(response, model)
-        
+        response_text, response_usage, additional_thought = self._process_chat_response(response, model)
+        if self.debug and additional_thought:
+            print("Thought process:", additional_thought)
+            
         # Handle JSON responses
         if json_schema:
             # Single-phase JSON response
             try:
                 structured_response = json.loads(response_text)
-                print(json.dumps(structured_response, indent=2))
+                if self.debug:
+                    print(json.dumps(structured_response, indent=2))
                 return Response(
                     response_text="",
                     structured_data=structured_response,
-                    usage=response_usage
+                    usage=response_usage,
+                    additional_thought=additional_thought
                 )
             except json.JSONDecodeError:
                 return Response(
                     response_text="",
                     structured_data={"error": f"Failed to parse JSON: {response_text}"},
-                    usage=response_usage
+                    usage=response_usage,
+                    additional_thought=additional_thought
                 )
         else:
             # Text-only response
-            print(response_text)
+            if self.debug:
+                print(response_text)
             return Response(
                 response_text=response_text,
                 structured_data={},
-                usage=response_usage
+                usage=response_usage,
+                additional_thought=additional_thought
             )
 
 # Create default client instance
@@ -209,6 +239,6 @@ def generate_chat(
     Generate a chat response.
     
     Returns:
-        Response data class containing response_text, structured_data, and usage_info
+        Response data class containing response_text, structured_data, usage_info, and additional_thought
     """
     return client.generate_chat(prompt, model, brief, json_schema, context)
