@@ -25,6 +25,7 @@ def create_models():
   datastore.common.insert_model(s, "gemma3:1b:Q4_K_M", "Gemma 3 Small", "2025-03-12", 815, "Gemma License")
   datastore.common.insert_model(s, "gemma2:2b:Q4_0", "Gemma2 Small", "2024-06-07", 1600, "Gemma License")
   datastore.common.insert_model(s, "qwen2.5:1.5b:Q4_K_M", "QWEN25 Small", "2024-09-15", 986, "Apache License")
+  datastore.common.insert_model(s, "qwen3:4b:Q4_K_M", "QWEN3 4B", "2025-04-28", 2600, "Apache License")
 
   # Remote models
   datastore.common.insert_model(s, "gpt-4o-mini-2024-07-18", "GPT-4o-mini", "2024-07-18", 2047, "Closed Model")
