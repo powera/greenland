@@ -31,12 +31,11 @@ core_files:
   - path: src/lib/benchmarks/run_benchmark.py
     description: Helpers to run benchmarks
 
-    # Sample benchmarks
-
-  - path: src/lib/benchmarks/part_of_speech_generator.py
-    description: Part-of-speech benchmark generator
-  - path: src/lib/benchmarks/part_of_speech_runner.py
-    description: Part-of-speech benchmark runner
+    # Exemplars
+  - path: src/lib/exemplars/base.py
+    description: Exemplar base class
+  - path: src/lib/exemplars/tasks/granite_definition_exemplar.py
+    description: Granite definition exemplar
 
     templates:
   - path: templates/model_scores.html
