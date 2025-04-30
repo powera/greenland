@@ -13,7 +13,7 @@ import logging
 import os
 from dataclasses import dataclass, asdict, field
 from enum import Enum
-from typing import Dict, List, Optional, Any, Union
+from typing import Dict, List, Optional, Any, Union, Tuple
 
 import constants
 import datastore.common
@@ -337,6 +337,56 @@ class ExemplarReportGenerator:
         self.storage = storage
         self.output_dir = os.path.join(constants.OUTPUT_DIR, "exemplar_reports")
         os.makedirs(self.output_dir, exist_ok=True)
+        self.session = datastore.common.create_dev_session()
+        
+    def _get_model_sizes(self) -> Dict[str, int]:
+        """
+        Get model sizes from the database.
+        
+        Returns:
+            Dictionary mapping model names (in filename-safe format) to sizes
+        """
+        models = datastore.common.list_all_models(self.session)
+        model_sizes = {}
+        
+        for model in models:
+            # Store the key in the same format used for filenames
+            filename_safe_key = model["codename"].replace("/", "_").replace(":", "_")
+            model_sizes[filename_safe_key] = model.get("filesize_mb", 0) or 0
+            
+            # Also store with the original key for direct lookups
+            model_sizes[model["codename"]] = model.get("filesize_mb", 0) or 0
+            
+        return model_sizes
+    
+    def _sort_results_by_size(self, results: Dict[str, ExemplarResult]) -> List[Tuple[str, ExemplarResult]]:
+        """
+        Sort results by model size.
+        
+        Args:
+            results: Dictionary mapping model names to ExemplarResult objects
+            
+        Returns:
+            List of (model_name, result) tuples sorted by model size (ascending)
+        """
+        model_sizes = self._get_model_sizes()
+        
+        def get_model_size(model_name):
+            # The model_name here is already in filename-safe format,
+            # so we should be able to look it up directly in model_sizes
+            if model_name in model_sizes:
+                return model_sizes[model_name]
+            
+            # Default to 0 for unknown models
+            return 0
+        
+        # Create list of (model_name, result) tuples sorted by model size
+        sorted_results = sorted(
+            results.items(),
+            key=lambda x: get_model_size(x[0])
+        )
+        
+        return sorted_results
         
     def generate_exemplar_report(self, exemplar_id: str) -> str:
         """
@@ -392,18 +442,26 @@ class ExemplarReportGenerator:
         return report_path
     
     def _generate_model_sections(self, results: Dict[str, ExemplarResult]) -> str:
-        """Generate HTML sections for each model result."""
+        """Generate HTML sections for each model result, sorted by model size."""
         sections = []
         
-        for model_name, result in results.items():
+        # Get model sizes and sort results
+        sorted_results = self._sort_results_by_size(results)
+        model_sizes = self._get_model_sizes()
+        
+        for model_name, result in sorted_results:
             if result.structured_data:
                 response = html.escape(json.dumps(result.structured_data, indent=2, ensure_ascii=False))
             else:
                 response = html.escape(result.response_text)
+                
+            # Get model size (handle model names that might have been normalized in filenames)
+            model_size = model_sizes.get(model_name, "Unknown")
+            
             # Create section for this model
             sections.append(f"""
     <div class="model-response">
-        <h2>Model: {model_name}</h2>
+        <h2>Model: {model_name} ({model_size} MB)</h2>
         <div class="metadata">
             <p>Tokens: {result.metadata.get('tokens', 'N/A')}</p>
             <p>Time: {result.metadata.get('timing_ms', 'N/A')}ms</p>
