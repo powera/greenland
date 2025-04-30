@@ -98,10 +98,6 @@ def to_openai_schema(schema: Schema) -> Dict[str, Any]:
             # Handle simple array items or array of objects with inline schema
             property_schema["items"] = prop.items
             
-        # Add default value if specified
-        if prop.default is not None:
-            property_schema["default"] = prop.default
-            
         result["properties"][name] = property_schema
     
     _recursive_clean_for_openai(result)

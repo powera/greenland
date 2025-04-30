@@ -7,6 +7,7 @@ Unlike benchmarks that test many questions with scoring, exemplars focus on qual
 comparison of responses from multiple models to the same prompt.
 """
 
+import html
 import json
 import logging
 import os
@@ -246,7 +247,7 @@ class ExemplarStorage:
         os.makedirs(exemplar_dir, exist_ok=True)
         
         # Generate filename based on model name
-        filename = f"{result.model_name}.json"
+        filename = f"{result.model_name}.json".replace("/", "_").replace(":", "_")  # Replace colon and slashes to avoid path issues
         file_path = os.path.join(exemplar_dir, filename)
         
         # Save result as JSON
@@ -267,7 +268,8 @@ class ExemplarStorage:
         Returns:
             ExemplarResult if found, None otherwise
         """
-        file_path = os.path.join(self.base_dir, exemplar_id, f"{model_name}.json")
+        model_filename = model_name.replace("/", "_").replace(":", "_") # Replace slashes and colons to avoid path issues
+        file_path = os.path.join(self.base_dir, exemplar_id, f"{model_filename}.json")
         if not os.path.exists(file_path):
             return None
             
@@ -394,6 +396,10 @@ class ExemplarReportGenerator:
         sections = []
         
         for model_name, result in results.items():
+            if result.structured_data:
+                response = html.escape(json.dumps(result.structured_data, indent=2, ensure_ascii=False))
+            else:
+                response = html.escape(result.response_text)
             # Create section for this model
             sections.append(f"""
     <div class="model-response">
@@ -403,7 +409,7 @@ class ExemplarReportGenerator:
             <p>Time: {result.metadata.get('timing_ms', 'N/A')}ms</p>
         </div>
         <h3>Response:</h3>
-        <pre>{result.response_text}</pre>
+        <pre>{response}</pre>
     </div>
 """)
             
@@ -549,12 +555,13 @@ def run_exemplar(exemplar_id: str, model_name: str) -> ExemplarResult:
 def run_exemplar_for_all_models(exemplar_id: str) -> Dict[str, ExemplarResult]:
     """Run an exemplar with all available models and save the results."""
     model_names = runner.get_model_names()
-    results = []
+    results = {}
     for model in model_names:
+        if report_generator.storage.load_result(exemplar_id, model):
+            logger.info(f"Result already exists for {exemplar_id} with model {model}")
+            continue
         results[model] = runner.run_exemplar(exemplar_id, model)
         storage.save_result(results[model])
-    for result in results.values():
-        storage.save_result(result)
     return results
 
 def compare_models(exemplar_id: str, model_names: List[str]) -> List[ExemplarResult]:
