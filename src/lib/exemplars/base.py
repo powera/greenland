@@ -340,7 +340,7 @@ class ExemplarReportGenerator:
         os.makedirs(self.output_dir, exist_ok=True)
         self.session = datastore.common.create_dev_session()
         
-    def _get_model_sizes(self) -> Dict[str, int]:
+    def get_model_sizes(self) -> Dict[str, int]:
         """
         Get model sizes from the database.
         
@@ -370,7 +370,7 @@ class ExemplarReportGenerator:
         Returns:
             List of (model_name, result) tuples sorted by model size (ascending)
         """
-        model_sizes = self._get_model_sizes()
+        model_sizes = self.get_model_sizes()
         
         def get_model_size(model_name):
             # The model_name here is already in filename-safe format,
@@ -448,7 +448,7 @@ class ExemplarReportGenerator:
         
         # Get model sizes and sort results
         sorted_results = self._sort_results_by_size(results)
-        model_sizes = self._get_model_sizes()
+        model_sizes = self.get_model_sizes()
         
         for model_name, result in sorted_results:
             if result.structured_data:
@@ -621,6 +621,21 @@ def run_exemplar_for_all_models(exemplar_id: str) -> Dict[str, ExemplarResult]:
             continue
         results[model] = runner.run_exemplar(exemplar_id, model)
         storage.save_result(results[model])
+    return results
+
+def run_all_exemplars_for_all_models(min_size=2400, max_size=36000) -> Dict[str, ExemplarResult]:
+    """Run all registered exemplars with all available models and save the results."""
+    model_names = runner.get_model_names()
+    sizes = report_generator.get_model_sizes()
+    results = {}
+    for model in model_names:
+        model_filename = model.replace("/", "_").replace(":", "_")  # Replace slashes and colons to avoid path issues
+        if model_filename in sizes and (sizes[model_filename] < min_size or sizes[model_filename] > max_size):
+            logger.info(f"Skipping model {model} due to size constraints: {sizes[model_filename]} MB")
+            continue
+        exemplar_results = runner.run_all_exemplars(model)
+        for result in exemplar_results:
+            storage.save_result(result)
     return results
 
 def compare_models(exemplar_id: str, model_names: List[str]) -> List[ExemplarResult]:
