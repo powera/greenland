@@ -37,9 +37,9 @@ def create_remote_models():
   dir = os.path.dirname(os.path.realpath(__file__))
   s = datastore.common.create_database_and_session(os.path.join(dir, "benchmarks.db"))
   # ChatGPT
-  datastore.common.insert_model(s, "gpt-4o-mini-2024-07-18", "GPT-4o-mini", "2024-07-18", 30000, "Closed Model")
+  datastore.common.insert_model(s, "gpt-4o-mini-2024-07-18", "GPT-4o-mini", "2024-07-18", 33000, "Closed Model")
   datastore.common.insert_model(s, "gpt-4.1-nano-2025-04-14", "GPT-4.1 nano", "2025-04-14", 20000, "Closed Model")
-  datastore.common.insert_model(s, "gpt-4.1-mini-2025-04-14", "GPT-4.1 mini", "2025-04-14", 32000, "Closed Model")
+  datastore.common.insert_model(s, "gpt-4.1-mini-2025-04-14", "GPT-4.1 mini", "2025-04-14", 45000, "Closed Model")
   # Claude
   datastore.common.insert_model(s, "claude-3-haiku-20240307", "Claude 3 Haiku", "2024-03-07", 18000, "Closed Model")
   datastore.common.insert_model(s, "claude-3-5-haiku-20241022", "Claude 3.5 Haiku", "2024-10-22", 25000, "Closed Model")
