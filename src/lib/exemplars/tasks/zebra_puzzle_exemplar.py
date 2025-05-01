@@ -26,7 +26,7 @@ Five people live in different colored houses in a row on Puzzle Lane. Each perso
 
 1. The person in the red house is a doctor.
 2. The engineer drinks water.
-3. The house with the green roof is immediately to the right of the white house.
+3. The green house is immediately to the right of the white house.
 4. The accountant lives in the yellow house.
 5. The person in the center house drinks milk.
 6. The lawyer lives in the rightmost house.
