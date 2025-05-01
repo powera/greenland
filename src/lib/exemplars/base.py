@@ -204,7 +204,7 @@ class ExemplarRunner:
             results.append(result)
         return results
     
-    def run_all_exemplars(self, model_name: str) -> Dict[str, ExemplarResult]:
+    def run_all_exemplars(self, model_name: str, store_results=False) -> Dict[str, ExemplarResult]:
         """
         Run all registered exemplars with a specific model.
         
@@ -216,7 +216,13 @@ class ExemplarRunner:
         """
         results = {}
         for exemplar_id in self.registry.exemplars:
+            if report_generator.storage.load_result(exemplar_id, model_name):
+                logger.info(f"Result already exists for {exemplar_id} with model {model_name}")
+                continue
             result = self.run_exemplar(exemplar_id, model_name)
+            if store_results:
+                # Save result to storage
+                storage.save_result(result)
             results[exemplar_id] = result
         return results
 
@@ -633,10 +639,9 @@ def run_all_exemplars_for_all_models(min_size=2400, max_size=36000) -> Dict[str,
         if model_filename in sizes and (sizes[model_filename] < min_size or sizes[model_filename] > max_size):
             logger.info(f"Skipping model {model} due to size constraints: {sizes[model_filename]} MB")
             continue
-        exemplar_results = runner.run_all_exemplars(model)
-        for result in exemplar_results:
-            storage.save_result(result)
-    return results
+        runner.run_all_exemplars(model, store_results=True)
+    report_generator.generate_all_reports()
+    report_generator.generate_index_report()
 
 def compare_models(exemplar_id: str, model_names: List[str]) -> List[ExemplarResult]:
     """Run an exemplar with multiple models and save the results."""
