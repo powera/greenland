@@ -23,7 +23,7 @@ Your response should include:
 
 Format your response clearly with appropriate headings and structure.
 """,
-    description="Tests the model's ability to provide comprehensive word definitions with translations and examples.",
+    description="Tests the model's ability to provide freeform word definitions, including translations and examples.",
     type=ExemplarType.LINGUISTIC,
     tags=["definition", "linguistics", "translation"],
     context="You are a linguistic assistant with expertise in definitions, etymology, and translations.",

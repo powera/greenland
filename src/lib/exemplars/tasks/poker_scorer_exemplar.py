@@ -28,7 +28,7 @@ Your solution should:
 
 Format your code with clean structure and readability in mind.
 """,
-    description="Tests the model's ability to create a complex algorithm involving card games, randomization, and pattern recognition.",
+    description="Tests the model's ability to create a basic algorithm involving playing cards, as well as knowledge of the common game of poker.",
     type=ExemplarType.CODING,
     tags=["python", "algorithms", "card games", "probability"],
     context="You are a programming assistant with expertise in game algorithms, probability, and software development.",

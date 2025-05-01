@@ -24,7 +24,7 @@ Your essay should:
 Ensure your essay is well-structured with an introduction, body paragraphs, and conclusion.
 Stay as close as possible to 400 words.
 """,
-    description="Tests the model's ability to write a concise, informative historical essay with proper structure.",
+    description="Tests the model's ability to write a concise, informative historical essay with proper structure on a well-known historical topic.",
     type=ExemplarType.KNOWLEDGE,
     tags=["history", "essay", "writing"],
     context="You are a history professor writing clear, accurate, and engaging content for students.",
