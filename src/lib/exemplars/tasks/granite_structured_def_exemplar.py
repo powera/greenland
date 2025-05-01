@@ -107,14 +107,14 @@ long_context = util.prompt_loader.get_context("wordfreq", "definitions")
 # Register the comprehensive word definition exemplar
 register_exemplar(
     id="comprehensive_definition",
-    name="Comprehensive Word Definition",
+    name="JSON-Schema Comprehensive Word Definition",
     prompt="""
 Define the word "granite" comprehensively, covering all its meanings.
 
 Please provide a detailed response that follows the schema I've provided.
 """,
     description="Tests the model's ability to provide comprehensive word definitions with detailed linguistic information.",
-    type=ExemplarType.INSTRUCTION,
+    type=ExemplarType.LINGUISTIC,
     tags=["definition", "linguistics", "translation", "structured_output"],
     context=long_context,
     temperature=0.3,  # Lower temperature for more factual responses
