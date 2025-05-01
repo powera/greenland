@@ -68,8 +68,6 @@ def create_lmstudio_models():
                                 "Llama 3.2 3B", "2024-09-25", 1820, "Llama 3.2 License")
   datastore.common.insert_model(s, "lmstudio/granite-3.3-8b-instruct",
                                 "Granite 3.3 8B", "2025-04-17", 4940, "Apache License")
-  datastore.common.insert_model(s, "lmstudio/lmstudio-community/mistral-7b-instruct-v0.3-gguf/mistral-7b-instruct-v0.3-q4_k_m.gguf",
-                                "Mistral 7B", "2023-09-27", 4370, "Apache License")
   datastore.common.insert_model(s, "lmstudio/lmstudio-community/gemma-3-4b-it-gguf/gemma-3-4b-it-q4_k_m.gguf",
                                 "Gemma3 4B", "2025-03-10", 3340, "Apache License")
   datastore.common.insert_model(s, "lmstudio/lmstudio-community/SmolLM2-1.7B-Instruct-GGUF",
