@@ -11,7 +11,7 @@ from lib.exemplars.base import (
 # Register the word definition exemplar
 register_exemplar(
     id="granite_definition",
-    name="Comprehensive Definition of 'Granite'",
+    name="Free-Form Definition of 'Granite'",
     prompt="""
 Write a comprehensive definition of the word "granite".
 
@@ -24,7 +24,7 @@ Your response should include:
 Format your response clearly with appropriate headings and structure.
 """,
     description="Tests the model's ability to provide comprehensive word definitions with translations and examples.",
-    type=ExemplarType.INSTRUCTION,
+    type=ExemplarType.LINGUISTIC,
     tags=["definition", "linguistics", "translation"],
     context="You are a linguistic assistant with expertise in definitions, etymology, and translations.",
     temperature=0.3  # Lower temperature for more factual responses

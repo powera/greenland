@@ -26,13 +26,14 @@ logger = logging.getLogger(__name__)
 
 class ExemplarType(str, Enum):
     """Types of exemplar tasks."""
-    OPEN_ENDED = "open_ended"     # Free-form responses, no correct answer
+    TOKENIZATION = "tokenization" # Tokenization tasks (e.g. counting letters)
+    LINGUISTIC = "linguistic"     # Linguistic tasks (e.g., definitions, translations)
     CREATIVE = "creative"         # Creative writing, storytelling, etc.
-    REASONING = "reasoning"       # Logical reasoning tasks
-    CODING = "coding"             # Code generation tasks
-    ANALYSIS = "analysis"         # Data or content analysis
-    DIALOGUE = "dialogue"         # Conversation simulation
     INSTRUCTION = "instruction"   # Following specific instructions
+    KNOWLEDGE = "knowledge"       # Factual knowledge tasks
+    CODING = "coding"             # Code generation tasks
+    REASONING = "reasoning"       # Logical reasoning tasks
+    ANALYSIS = "analysis"         # Data or content analysis
 
 @dataclass
 class ExemplarMetadata:
@@ -41,7 +42,7 @@ class ExemplarMetadata:
     name: str                     # Display name (e.g., "Metaphor Generation")
     prompt: str                   # The prompt to send to models
     description: Optional[str] = None  # Description of the exemplar
-    type: ExemplarType = ExemplarType.OPEN_ENDED  # Type of exemplar
+    type: ExemplarType = ExemplarType.CREATIVE  # Type of exemplar
     expected_output: Optional[str] = None  # Example of good output (optional)
     tags: List[str] = field(default_factory=list)  # Tags for categorization
     context: Optional[str] = None  # Optional system context for the prompt
@@ -560,7 +561,7 @@ def register_exemplar(
     name: str,
     prompt: str,
     description: Optional[str] = None,
-    type: Union[ExemplarType, str] = ExemplarType.OPEN_ENDED,
+    type: Union[ExemplarType, str] = ExemplarType.CREATIVE,
     expected_output: Optional[str] = None,
     tags: Optional[List[str]] = None,
     context: Optional[str] = None,
