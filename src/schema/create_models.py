@@ -54,22 +54,46 @@ def create_remote_models():
 def create_lmstudio_models():
   dir = os.path.dirname(os.path.realpath(__file__))
   s = datastore.common.create_database_and_session(os.path.join(dir, "benchmarks.db"))
+
+  # Miscellaneous models
   datastore.common.insert_model(s, "lmstudio/lmstudio-community/yi-1.5-6b-chat-gguf/yi-1.5-6b-chat-q4_k_m.gguf",
                                 "Yi-1.5 6B", "2024-05-13", 3670, "Apache License")
+  datastore.common.insert_model(s, "lmstudio/granite-3.3-8b-instruct",
+                                "Granite 3.3 8B", "2025-04-17", 4940, "Apache License")
+  
+  # QWEN2 models
   datastore.common.insert_model(s, "lmstudio/qwen2-7b-instruct",
                                 "QWEN2 7B", "2024-06-07", 4300, "Apache License")
+  
+  datastore.common.insert_model(s, "lmstudio/lmstudio-community/qwen2.5-7b-instruct-1m-gguf/qwen2.5-7b-instruct-1m-q4_k_m.gguf",
+                                "QWEN2.5 7B", "2024-09-19", 4680, "Apache License")
+
+  # QWEN3 Models
   datastore.common.insert_model(s, "lmstudio/lmstudio-community/qwen3-1.7b-gguf/qwen3-1.7b-q6_k.gguf",
                                 "QWEN3 1.7B", "2025-04-28", 1670, "Apache License")
   datastore.common.insert_model(s, "lmstudio/lmstudio-community/qwen3-4b-gguf/qwen3-4b-q4_k_m.gguf",
                                 "QWEN3 4B", "2025-04-28", 2500, "Apache License")
   datastore.common.insert_model(s, "lmstudio/lmstudio-community/qwen3-8b-gguf/qwen3-8b-q4_k_m.gguf",
                                 "QWEN3 8B", "2025-04-28", 5030, "Apache License")
+  
+  # Llama 3 Models
+  datastore.common.insert_model(s, "lmstudio/mlx-community/llama-3.2-1b-instruct",
+                                "Llama 3.2 1B", "2024-09-25", 710, "Llama 3.2 License")
   datastore.common.insert_model(s, "lmstudio/llama-3.2-3b-instruct",
                                 "Llama 3.2 3B", "2024-09-25", 1820, "Llama 3.2 License")
-  datastore.common.insert_model(s, "lmstudio/granite-3.3-8b-instruct",
-                                "Granite 3.3 8B", "2025-04-17", 4940, "Apache License")
+
+  # Gemma2 Models
+  datastore.common.insert_model(s, "lmstudio/lmstudio-community/gemma-2-2b-it-gguf/gemma-2-2b-it-q8_0.gguf",
+                                "Gemma2 2B", "2024-06-27", 2780, "Apache License")
+  datastore.common.insert_model(s, "lmstudio/lmstudio-community/gemma-2-9b-it-gguf/gemma-2-9b-it-q4_k_m.gguf",
+                                "Gemma2 9B", "2024-06-27", 5760, "Apache License")
+
+  # Gemma3 Models
   datastore.common.insert_model(s, "lmstudio/lmstudio-community/gemma-3-4b-it-gguf/gemma-3-4b-it-q4_k_m.gguf",
                                 "Gemma3 4B", "2025-03-10", 3340, "Apache License")
+  datastore.common.insert_model(s, "lmstudio/lmstudio-community/gemma-3-12b-it-qat-gguf/gemma-3-12b-it-qat-q4_0.gguf",
+                                "Gemma3 12B QAT", "2025-04-18", 7740, "Apache License")
+  
   datastore.common.insert_model(s, "lmstudio/lmstudio-community/SmolLM2-1.7B-Instruct-GGUF",
                                 "SmolLM2 1.7B", "2024-10-31", 1060, "Apache License")
 
