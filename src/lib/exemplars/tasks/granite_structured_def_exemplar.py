@@ -113,7 +113,7 @@ Define the word "granite" comprehensively, covering all its meanings.
 
 Please provide a detailed response that follows the schema I've provided.
 """,
-    description="Tests the model's ability to provide comprehensive word definitions with detailed linguistic information.",
+    description="Tests the model's ability to provide structured-JSON word definitions, including example sentences and translation.",
     type=ExemplarType.LINGUISTIC,
     tags=["definition", "linguistics", "translation", "structured_output"],
     context=long_context,

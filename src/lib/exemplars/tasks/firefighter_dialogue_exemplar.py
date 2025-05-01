@@ -13,7 +13,7 @@ register_exemplar(
     id="firefighter_conversation",
     name="Firefighter Break Room Dialogue",
     prompt="""
-Write a realistic scene of dialogue between two male firefighters (Rodriguez and Chen) who are talking during a quiet moment at the station. They should be discussing their romantic partners and relationships in a way that feels authentic and natural.
+Write a realistic scene of dialogue between two male firefighters (Rodriguez and Chen) who are talking during a quiet moment at the station. They should be discussing their (female) romantic partners and relationships in a way that feels authentic and natural.
 
 Your scene should:
 1. Show distinct personalities for both characters through their dialogue and speech patterns
@@ -25,7 +25,7 @@ Your scene should:
 The dialogue should be approximately 2-3 minutes if performed, so around 1-2 pages of script.
 Format it as a scene with character names before each line of dialogue and minimal stage directions.
 """,
-    description="Tests the model's ability to create authentic dialogue between professionals that reveals character and relationships.",
+    description="Tests the model's ability to create authentic dialogue.",
     type=ExemplarType.CREATIVE,
     tags=["dialogue", "relationships", "workplace", "character-development"],
     context="You are a skilled screenwriter who specializes in creating authentic dialogue between working professionals.",
