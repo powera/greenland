@@ -26,26 +26,29 @@ Example sentences for each definition
 - These should use the exact word provided, not a differently-formatted form.
 - Provide up to three example sentences for each definition.
 
-For Chinese translations:
-- Provide a translation that specifically matches the given definition, not other meanings of the word
-- Unless a one-character term is unambiguous, provide a two-character term (e.g., prefer '跳舞' over '舞')
-- Do not print the pinyin, just the characters.
+For translations:
+- For each language, provide a translation that specifically matches the given definition, not other meanings of the word
 - When multiple translations are possible, choose the most common or appropriate one
-- Only provide translations into standard Mandarin Chinese (not regional variants)
-
-For Korean translations:
-- Provide a translation that specifically matches the given definition, not other meanings of the word
-- When multiple translations are possible, choose the most common or appropriate one
+- For Chinese:
+  - Prefer two-character terms unless a one-character term is unambiguous
+  - Do not print the pinyin, just the characters
+  - Use standard Mandarin Chinese (not regional variants)
+- For French:
+  - Include articles (la table) where appropriate, and provide verbs in the infinitive (aller)
+- For Lithuanian:
+  - Use the nominative singular form for nouns and adjectives
+- For Vietnamese:
+  - Include diacritics and tone marks
 
 For phonetic spellings:
-- Provide the pronuncation for the specific definition of the word.
+- Provide the pronunciation for the specific definition of the word.
 - Use simplified phonetic pronunciation using capital letters for stressed syllables
 - Hyphenate between syllables
 - Use familiar English spelling patterns (e.g., "SOO-duh-nim" for "pseudonym", "MUH-ther" for "mother", "TRANS-port" for "transport", "duh-BREE" for "debris")
 - This should only use standard English letters
 
 For IPA:
-- Provide the pronuncation for the specific definition of the word.
+- Provide the pronunciation for the specific definition of the word.
 - Use American English pronunciations for words.
 
 In summary: for each definition, provide in order:
@@ -54,14 +57,11 @@ In summary: for each definition, provide in order:
 3. The part-of-speech subtype
 4. The phonetic spelling
 5. The lemma (base form)
-6. The IPA pronuncation of the word
+6. The IPA pronunciation of the word
 7. Whether this is a special case (foreign word, part of name, etc.)
 8. At least one example sentence
 9. Any additional notes about the definition
-10. The Chinese translation
-11. The Korean translation
-12. A confidence score (0-1) - the most common definition should have confidence of 1, less-common or domain specific definitions should have confidence around 0.9.
-
-Remember to separate different definitions (e.g., "bank" as a financial institution vs. "bank" as the side of a river).
+10. Translations in all supported languages (Chinese, French, Korean, Swahili, Lithuanian, Vietnamese)
+11. A confidence score (0-1) - the most common definition should have confidence of 1, less-common or domain specific definitions should have confidence around 0.9.
 
 Respond only with a structured JSON object following the schema provided.
