@@ -10,6 +10,7 @@ from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Mapped, mapped_column, relationship, DeclarativeBase, sessionmaker
 from sqlalchemy.sql import func
 
+from wordfreq.models.translations import TranslationSet
 import constants
 
 # Define the base class for SQLAlchemy models
@@ -120,8 +121,12 @@ class Definition(Base):
     pos_type: Mapped[str] = mapped_column(String, nullable=False)  # Part of speech for this definition
     pos_subtype: Mapped[Optional[str]] = mapped_column(String, nullable=True)  # Store the subtype as string for flexibility
     lemma: Mapped[str] = mapped_column(String, nullable=False)     # Lemma for this definition
-    chinese_translation: Mapped[Optional[str]] = mapped_column(String, nullable=True)  # Chinese translation
-    korean_translation: Mapped[Optional[str]] = mapped_column(String, nullable=True)  # Korean translation
+    chinese_translation: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    french_translation: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    korean_translation: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    swahili_translation: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    lithuanian_translation: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    vietnamese_translation: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
     # Special flags for handling complex cases (moved from POS to definition level)
     multiple_meanings: Mapped[bool] = mapped_column(Boolean, default=False)
@@ -281,28 +286,40 @@ def add_definition(
     special_case: bool = False,
     ipa_pronunciation: Optional[str] = None,
     phonetic_pronunciation: Optional[str] = None,
-    chinese_translation: Optional[str] = None,
-    korean_translation: Optional[str] = None,
+    translations: Optional[TranslationSet] = None,
     notes: Optional[str] = None
-) -> Definition:
+):
     """Add a definition for a word."""
-    definition = Definition(
-        word_id=word_obj.id,
-        definition_text=definition_text,
-        pos_type=pos_type,
-        lemma=lemma,
-        confidence=confidence,
-        multiple_meanings=multiple_meanings,
-        special_case=special_case,
-        ipa_pronunciation=ipa_pronunciation,
-        phonetic_pronunciation=phonetic_pronunciation,
-        chinese_translation=chinese_translation,
-        korean_translation=korean_translation,
-        notes=notes
-    )
-    session.add(definition)
-    session.commit()
-    return definition
+    try:
+        definition = Definition(
+            word_id=word_obj.id,
+            definition_text=definition_text,
+            pos_type=pos_type,
+            lemma=lemma,
+            confidence=confidence,
+            multiple_meanings=multiple_meanings,
+            special_case=special_case,
+            ipa_pronunciation=ipa_pronunciation,
+            phonetic_pronunciation=phonetic_pronunciation,
+            notes=notes
+        )
+        
+        # Add translations if provided
+        if translations:
+            definition.chinese_translation = translations.chinese.text if translations.chinese else None
+            definition.french_translation = translations.french.text if translations.french else None
+            definition.korean_translation = translations.korean.text if translations.korean else None
+            definition.swahili_translation = translations.swahili.text if translations.swahili else None
+            definition.lithuanian_translation = translations.lithuanian.text if translations.lithuanian else None
+            definition.vietnamese_translation = translations.vietnamese.text if translations.vietnamese else None
+        
+        session.add(definition)
+        session.commit()
+        return True
+    except Exception as e:
+        session.rollback()
+        logger.error(f"Error adding definition: {e}")
+        return False
 
 def add_example(
     session,
@@ -451,26 +468,113 @@ def update_definition(
     session.commit()
     return True
 
+def update_korean_translation(
+    session,
+    definition_id: int,
+    korean_translation: str
+):
+    """Update Korean translation for a definition."""
+    definition = session.query(Definition).filter_by(id=definition_id).first()
+    if definition:
+        definition.korean_translation = korean_translation
+        definition.updated_at = func.now()
+        session.commit()
+
+def get_definitions_without_korean_translations(session, limit: int = 100):
+    """Get definitions that need Korean translations."""
+    return session.query(Definition).filter(
+        Definition.korean_translation.is_(None)
+    ).limit(limit).all()
+
+def update_swahili_translation(
+    session,
+    definition_id: int,
+    swahili_translation: str
+):
+    """Update Swahili translation for a definition."""
+    definition = session.query(Definition).filter_by(id=definition_id).first()
+    if definition:
+        definition.swahili_translation = swahili_translation
+        definition.updated_at = func.now()
+        session.commit()
+
+def get_definitions_without_swahili_translations(session, limit: int = 100):
+    """Get definitions that need Swahili translations."""
+    return session.query(Definition).filter(
+        Definition.swahili_translation.is_(None)
+    ).limit(limit).all()
+
+def update_lithuanian_translation(
+    session,
+    definition_id: int,
+    lithuanian_translation: str
+):
+    """Update Lithuanian translation for a definition."""
+    definition = session.query(Definition).filter_by(id=definition_id).first()
+    if definition:
+        definition.lithuanian_translation = lithuanian_translation
+        definition.updated_at = func.now()
+        session.commit()
+
+def get_definitions_without_lithuanian_translations(session, limit: int = 100):
+    """Get definitions that need Lithuanian translations."""
+    return session.query(Definition).filter(
+        Definition.lithuanian_translation.is_(None)
+    ).limit(limit).all()
+
+def update_vietnamese_translation(
+    session,
+    definition_id: int,
+    vietnamese_translation: str
+):
+    """Update Vietnamese translation for a definition."""
+    definition = session.query(Definition).filter_by(id=definition_id).first()
+    if definition:
+        definition.vietnamese_translation = vietnamese_translation
+        definition.updated_at = func.now()
+        session.commit()
+
+def get_definitions_without_vietnamese_translations(session, limit: int = 100):
+    """Get definitions that need Vietnamese translations."""
+    return session.query(Definition).filter(
+        Definition.vietnamese_translation.is_(None)
+    ).limit(limit).all()
+
+def update_french_translation(
+    session,
+    definition_id: int,
+    french_translation: str
+):
+    """Update French translation for a definition."""
+    definition = session.query(Definition).filter_by(id=definition_id).first()
+    if definition:
+        definition.french_translation = french_translation
+        definition.updated_at = func.now()
+        session.commit()
+
+def get_definitions_without_french_translations(session, limit: int = 100):
+    """Get definitions that need French translations."""
+    return session.query(Definition).filter(
+        Definition.french_translation.is_(None)
+    ).limit(limit).all()
+
 def update_chinese_translation(
     session,
     definition_id: int,
     chinese_translation: str
-) -> bool:
+):
     """Update Chinese translation for a definition."""
-    definition = session.query(Definition).filter(Definition.id == definition_id).first()
-    if not definition:
-        return False
-        
-    definition.chinese_translation = chinese_translation
-    session.commit()
-    return True
+    definition = session.query(Definition).filter_by(id=definition_id).first()
+    if definition:
+        definition.chinese_translation = chinese_translation
+        definition.updated_at = func.now()
+        session.commit()
 
-def get_definitions_without_translations(session, limit: int = 100) -> List[Definition]:
+def get_definitions_without_chinese_translations(session, limit: int = 100):
     """Get definitions that need Chinese translations."""
-    return session.query(Definition)\
-        .filter(Definition.chinese_translation == None)\
-        .limit(limit)\
-        .all()
+    return session.query(Definition).filter(
+        Definition.chinese_translation.is_(None)
+    ).limit(limit).all()
 
 def get_definitions_without_subtypes(session, limit: int = 100) -> List[Definition]:
     """Get definitions that need POS subtypes."""
