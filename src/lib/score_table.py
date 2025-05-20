@@ -27,7 +27,6 @@ class ScoreTableGenerator:
         self.session = session or datastore.common.create_dev_session()
         self.template_env = Environment(loader=FileSystemLoader(constants.TEMPLATES_DIR))
        
-
     def _get_color(self, score: int) -> str:
         """
         Convert a score (0-100) to an RGB color value using a muted color scheme.
@@ -96,7 +95,13 @@ class ScoreTableGenerator:
 
         # Get scores and add color and timing information
         scores = datastore.benchmarks.get_highest_benchmark_scores(self.session)
+        
+        # Filter out models with zero benchmark results
+        models_with_results = set()
         for key in scores:
+            _, model_name = key
+            models_with_results.add(model_name)
+            
             score_data = scores[key]
             avg_time = self._calculate_avg_eval_time(score_data["run_id"])
             scores[key] = ScoreData(
@@ -105,6 +110,9 @@ class ScoreTableGenerator:
                 run_id=score_data["run_id"],
                 avg_eval_time=avg_time
             ).__dict__
+            
+        # Filter the models list to only include those with benchmark results
+        llms = [model for model in llms if model["codename"] in models_with_results]
 
         return {
             "llms": llms,
