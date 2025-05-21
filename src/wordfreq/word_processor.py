@@ -74,20 +74,19 @@ class WordProcessor:
         """Get a thread-local database session."""
         return get_session(self.db_path, echo=self.debug)
     
-    def process_single_word(self, word: str, extended: bool=False) -> bool:
+    def process_single_word(self, word: str) -> bool:
         """
         Process a single word to get linguistic information.
         
         Args:
             word: Word to process
-            extended: Whether to resolve extended properties (prounciations, etc.)
             
         Returns:
             Success flag
         """
         logger.info(f"Processing word: {word}")
         client = LinguisticClient.get_instance(model=self.model, db_path=self.db_path, debug=self.debug)
-        return client.process_word(word, extended=extended)
+        return client.process_word(word)
     
     def _worker(self, word_obj: Any) -> Tuple[str, bool]:
         """Worker function for thread pool."""
@@ -101,7 +100,7 @@ class WordProcessor:
         
         for attempt in range(self.max_retries):
             try:
-                success = client.process_word(word, extended=False)
+                success = client.process_word(word)
                 return (word, success)
             except Exception as e:
                 logger.error(f"[{thread_name}] Error processing '{word}' (attempt {attempt+1}): {e}")
