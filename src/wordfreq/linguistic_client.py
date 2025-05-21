@@ -105,6 +105,10 @@ class LinguisticClient:
         Returns:
             Tuple of (list of definition data, success flag)
         """
+        if not word or not isinstance(word, str):
+            logger.error("Invalid word parameter provided")
+            return [], False
+            
         schema = Schema(
             name="WordDefinitions",
             description="Definitions for a word",
@@ -130,12 +134,11 @@ class LinguisticClient:
                             ),
                             "notes": SchemaProperty("string", "Additional notes about this definition"),
                             "chinese_translation": SchemaProperty("string", "The Chinese translation of the word"),
-                            "korean_translation": SchemaProperty("string", "The Korean translation of the word"),                            "korean_translation": SchemaProperty("string", "The Korean translation of the word"),
+                            "korean_translation": SchemaProperty("string", "The Korean translation of the word"),
                             "french_translation": SchemaProperty("string", "The French translation of the word"),
                             "swahili_translation": SchemaProperty("string", "The Swahili translation of the word"),
                             "vietnamese_translation": SchemaProperty("string", "The Vietnamese translation of the word"),
                             "lithuanian_translation": SchemaProperty("string", "The Lithuanian translation of the word"),
-
                             "confidence": SchemaProperty("number", "Confidence score from 0-1"),
                         }
                     )
@@ -147,58 +150,44 @@ class LinguisticClient:
         
         prompt = f"Provide comprehensive dictionary definitions for the word '{word}'."
         
-        # Try multiple times in case of failure
-        for attempt in range(RETRY_COUNT):
+        try:
+            # Make a single API call without retries
+            response = self.client.generate_chat(
+                prompt=prompt,
+                model=self.model,
+                json_schema=schema,
+                context=context
+            )
+            
+            # Log successful query
+            session = self.get_session()
             try:
-                response = self.client.generate_chat(
+                linguistic_db.log_query(
+                    session,
+                    word=word,
+                    query_type='definitions',
                     prompt=prompt,
-                    model=self.model,
-                    json_schema=schema,
-                    context=context
+                    response=json.dumps(response.structured_data),
+                    model=self.model
                 )
+            except Exception as log_err:
+                logger.error(f"Failed to log successful query: {log_err}")
+            
+            # Validate and return response data
+            if (response.structured_data and 
+                isinstance(response.structured_data, dict) and 
+                'definitions' in response.structured_data and 
+                isinstance(response.structured_data['definitions'], list)):
+                return response.structured_data['definitions'], True
+            else:
+                logger.warning(f"Invalid response format for word '{word}'")
+                return [], False
                 
-                # Log the query
-                try:
-                    session = self.get_session()
-                    linguistic_db.log_query(
-                        session,
-                        word=word,
-                        query_type='definitions',
-                        prompt=prompt,
-                        response=json.dumps(response.structured_data),
-                        model=self.model
-                    )
-                except Exception as e:
-                    logger.error(f"Failed to log query: {e}")
-                
-                if response.structured_data and 'definitions' in response.structured_data:
-                    return response.structured_data['definitions'], True
-                else:
-                    logger.warning(f"Failed to get valid definitions response for '{word}' (attempt {attempt+1})")
-                    time.sleep(RETRY_DELAY)
-            except Exception as e:
-                logger.error(f"Error querying for definitions: {e} (attempt {attempt+1})")
-                
-                # Log the failed query
-                try:
-                    session = self.get_session()
-                    linguistic_db.log_query(
-                        session,
-                        word=word,
-                        query_type='definitions',
-                        prompt=prompt,
-                        response=str(e),
-                        model=self.model,
-                        success=False,
-                        error=str(e)
-                    )
-                except Exception as log_err:
-                    logger.error(f"Failed to log query error: {log_err}")
-                    
-                time.sleep(RETRY_DELAY)
-        
-        # Return empty list if all attempts failed
-        return [], False
+        except Exception as e:
+            # More specific error logging
+            logger.error(f"Error querying definitions for '{word}': {type(e).__name__}: {e}")
+            
+            return [], False
     
     def process_word(self, word: str, extended=False) -> bool:
         """
@@ -277,6 +266,10 @@ class LinguisticClient:
         Returns:
             Tuple of (translation string, success flag)
         """
+        if not word or not isinstance(word, str):
+            logger.error("Invalid word parameter provided")
+            return "", False
+            
         schema = clients.lib.Schema(
             name = "ChineseTranslation",
             description= "Response schema for a Chinese translation",
@@ -308,58 +301,42 @@ class LinguisticClient:
         
         Return only a JSON object with the translation, pinyin, confidence score, and any notes."""
         
-        # Try multiple times in case of failure
-        for attempt in range(RETRY_COUNT):
+        try:
+            response = self.client.generate_chat(
+                prompt=prompt,
+                model=self.model,
+                json_schema=schema,
+                context=context
+            )
+            
+            # Log successful query
+            session = self.get_session()
             try:
-                response = self.client.generate_chat(
+                linguistic_db.log_query(
+                    session,
+                    word=word,
+                    query_type='chinese_translation',
                     prompt=prompt,
-                    model=self.model,
-                    json_schema=schema,
-                    context=context
+                    response=json.dumps(response.structured_data),
+                    model=self.model
                 )
+            except Exception as log_err:
+                logger.error(f"Failed to log successful translation query: {log_err}")
+            
+            # Validate and return response data
+            if (response.structured_data and 
+                isinstance(response.structured_data, dict) and 
+                'chinese_translation' in response.structured_data):
+                return response.structured_data['chinese_translation'], True
+            else:
+                logger.warning(f"Invalid translation response format for word '{word}'")
+                return "", False
                 
-                # Log the query
-                try:
-                    session = self.get_session()
-                    linguistic_db.log_query(
-                        session,
-                        word=word,
-                        query_type='chinese_translation',
-                        prompt=prompt,
-                        response=json.dumps(response.structured_data),
-                        model=self.model
-                    )
-                except Exception as e:
-                    logger.error(f"Failed to log translation query: {e}")
-                
-                if response.structured_data:
-                    return response.structured_data['chinese_translation'], True
-                else:
-                    logger.warning(f"Failed to get valid translation response for '{word}' (attempt {attempt+1})")
-                    time.sleep(RETRY_DELAY)
-            except Exception as e:
-                logger.error(f"Error querying for translation: {e} (attempt {attempt+1})")
-                
-                # Log the failed query
-                try:
-                    session = self.get_session()
-                    linguistic_db.log_query(
-                        session,
-                        word=word,
-                        query_type='chinese_translation',
-                        prompt=prompt,
-                        response=str(e),
-                        model=self.model,
-                        success=False,
-                        error=str(e)
-                    )
-                except Exception as log_err:
-                    logger.error(f"Failed to log query error: {log_err}")
-                    
-                time.sleep(RETRY_DELAY)
-    
-        # Return empty string if all attempts failed
-        return "", False
+        except Exception as e:
+            # More specific error logging
+            logger.error(f"Error querying Chinese translation for '{word}': {type(e).__name__}: {e}")
+            
+            return "", False
 
     def query_word_forms(self, lemma: str, pos_type: str) -> Tuple[List[Dict[str, Any]], bool]:
         """
@@ -372,6 +349,10 @@ class LinguisticClient:
         Returns:
             Tuple of (list of word forms data, success flag)
         """
+        if not lemma or not isinstance(lemma, str) or not pos_type or not isinstance(pos_type, str):
+            logger.error("Invalid lemma or pos_type parameter provided")
+            return [], False
+            
         schema = Schema(
             name="WordForms",
             description="All forms of a lemma based on its part of speech",
@@ -400,58 +381,44 @@ class LinguisticClient:
         
         prompt = f"Provide all possible forms of the {pos_type} '{lemma}'."
         
-        # Try multiple times in case of failure
-        for attempt in range(RETRY_COUNT):
+        try:
+            # Make a single API call without retries
+            response = self.client.generate_chat(
+                prompt=prompt,
+                model=self.model,
+                json_schema=schema,
+                context=context
+            )
+            
+            # Log successful query
+            session = self.get_session()
             try:
-                response = self.client.generate_chat(
+                linguistic_db.log_query(
+                    session,
+                    word=lemma,
+                    query_type='word_forms',
                     prompt=prompt,
-                    model=self.model,
-                    json_schema=schema,
-                    context=context
+                    response=json.dumps(response.structured_data),
+                    model=self.model
                 )
+            except Exception as log_err:
+                logger.error(f"Failed to log successful word forms query: {log_err}")
+            
+            # Validate and return response data
+            if (response.structured_data and 
+                isinstance(response.structured_data, dict) and 
+                'word_forms' in response.structured_data and 
+                isinstance(response.structured_data['word_forms'], list)):
+                return response.structured_data['word_forms'], True
+            else:
+                logger.warning(f"Invalid word forms response format for lemma '{lemma}'")
+                return [], False
                 
-                # Log the query
-                try:
-                    session = self.get_session()
-                    linguistic_db.log_query(
-                        session,
-                        word=lemma,
-                        query_type='word_forms',
-                        prompt=prompt,
-                        response=json.dumps(response.structured_data),
-                        model=self.model
-                    )
-                except Exception as e:
-                    logger.error(f"Failed to log word forms query: {e}")
-                
-                if response.structured_data and 'word_forms' in response.structured_data:
-                    return response.structured_data['word_forms'], True
-                else:
-                    logger.warning(f"Failed to get valid word forms response for '{lemma}' (attempt {attempt+1})")
-                    time.sleep(RETRY_DELAY)
-            except Exception as e:
-                logger.error(f"Error querying for word forms: {e} (attempt {attempt+1})")
-                
-                # Log the failed query
-                try:
-                    session = self.get_session()
-                    linguistic_db.log_query(
-                        session,
-                        word=lemma,
-                        query_type='word_forms',
-                        prompt=prompt,
-                        response=str(e),
-                        model=self.model,
-                        success=False,
-                        error=str(e)
-                    )
-                except Exception as log_err:
-                    logger.error(f"Failed to log query error: {log_err}")
-                    
-                time.sleep(RETRY_DELAY)
-        
-        # Return empty list if all attempts failed
-        return [], False
+        except Exception as e:
+            # More specific error logging
+            logger.error(f"Error querying word forms for '{lemma}': {type(e).__name__}: {e}")
+            
+            return [], False
 
     def add_translation_for_definition(self, definition_id: int) -> bool:
         """
@@ -583,6 +550,10 @@ class LinguisticClient:
         Returns:
             Tuple of (subtype string, success flag)
         """
+        if not word or not isinstance(word, str) or not definition_text or not pos_type:
+            logger.error("Invalid parameters provided for POS subtype query")
+            return "other", False
+            
         # Normalize pos_type to lowercase for consistency
         pos_type = pos_type.lower()
         valid_subtypes = linguistic_db.get_subtype_values_for_pos(pos_type)
@@ -592,33 +563,31 @@ class LinguisticClient:
             logger.warning(f"No subtypes defined for part of speech: {pos_type}")
             return "other", True
         
-        schema = {
-            "type": "object",
-            "properties": {
-                "classification": {
-                    "type": "object",
-                    "properties": {
-                        "pos_subtype": {
-                            "type": "string",
-                            "description": "The specific subtype within the part of speech category",
-                            "enum": valid_subtypes
-                        },
-                        "confidence": {
-                            "type": "number",
-                            "description": "Confidence score from 0-1"
-                        },
-                        "reasoning": {
-                            "type": "string",
-                            "description": "Explanation for the classification"
-                        }
-                    },
-                    "additionalProperties": False,
-                    "required": ["pos_subtype", "confidence", "reasoning"]
-                }
-            },
-            "additionalProperties": False,
-            "required": ["classification"]
-        }
+        schema = Schema(
+            name="POSSubtype",
+            description="Classification of a word into a specific part of speech subtype",
+            properties={
+                "classification": SchemaProperty(
+                    type="object",
+                    description="The classification result",
+                    properties={
+                        "pos_subtype": SchemaProperty(
+                            type="string", 
+                            description="The specific subtype within the part of speech category",
+                            enum=valid_subtypes
+                        ),
+                        "confidence": SchemaProperty(
+                            type="number", 
+                            description="Confidence score from 0-1"
+                        ),
+                        "reasoning": SchemaProperty(
+                            type="string", 
+                            description="Explanation for the classification"
+                        )
+                    }
+                )
+            }
+        )
         
         # Select the appropriate context based on the part of speech
         context = util.prompt_loader.get_context("wordfreq", "pos_subtype", pos_type)
@@ -629,57 +598,43 @@ class LinguisticClient:
         Return only a JSON object with the classification.
         """
         
-        # Try multiple times in case of failure
-        for attempt in range(RETRY_COUNT):
+        try:
+            response = self.client.generate_chat(
+                prompt=prompt,
+                model=self.model,
+                json_schema=schema,
+                context=context
+            )
+            
+            # Log successful query
+            session = self.get_session()
             try:
-                response = self.client.generate_chat(
+                linguistic_db.log_query(
+                    session,
+                    word=word,
+                    query_type=f'pos_subtype_{pos_type}',
                     prompt=prompt,
-                    model=self.model,
-                    json_schema=schema,
-                    context=context
+                    response=json.dumps(response.structured_data),
+                    model=self.model
                 )
-                # Log the query
-                try:
-                    session = self.get_session()
-                    linguistic_db.log_query(
-                        session,
-                        word=word,
-                        query_type=f'pos_subtype_{pos_type}',
-                        prompt=prompt,
-                        response=json.dumps(response.structured_data),
-                        model=self.model
-                    )
-                except Exception as e:
-                    logger.error(f"Failed to log subtype query: {e}")
+            except Exception as log_err:
+                logger.error(f"Failed to log successful subtype query: {log_err}")
+            
+            # Validate and return response data
+            if (response.structured_data and 
+                isinstance(response.structured_data, dict) and 
+                'classification' in response.structured_data and
+                'pos_subtype' in response.structured_data['classification']):
+                return response.structured_data['classification']['pos_subtype'], True
+            else:
+                logger.warning(f"Invalid subtype response format for word '{word}'")
+                return "other", False
                 
-                if response.structured_data and 'classification' in response.structured_data:
-                    return response.structured_data['classification']['pos_subtype'], True
-                else:
-                    logger.warning(f"Failed to get valid subtype response for '{word}' (attempt {attempt+1})")
-                    time.sleep(RETRY_DELAY)
-            except Exception as e:
-                logger.error(f"Error querying for subtype: {e} (attempt {attempt+1})")
-                
-                # Log the failed query
-                try:
-                    session = self.get_session()
-                    linguistic_db.log_query(
-                        session,
-                        word=word,
-                        query_type=f'pos_subtype_{pos_type}',
-                        prompt=prompt,
-                        response=str(e),
-                        model=self.model,
-                        success=False,
-                        error=str(e)
-                    )
-                except Exception as log_err:
-                    logger.error(f"Failed to log query error: {log_err}")
-                    
-                time.sleep(RETRY_DELAY)
-        
-        # Return a default if all attempts failed
-        return "other", False
+        except Exception as e:
+            # More specific error logging
+            logger.error(f"Error querying POS subtype for '{word}': {type(e).__name__}: {e}")
+            
+            return "other", False
 
     def update_missing_subtypes_for_word(self, word_text: str, throttle: float = 1.0) -> Dict[str, Any]:
         """
@@ -837,55 +792,56 @@ class LinguisticClient:
         Returns:
             Tuple of (pronunciation data, success flag)
         """
-        schema = {
-            "type": "object",
-            "properties": {
-                "pronunciation": {
-                    "type": "object",
-                    "properties": {
-                        "ipa": {
-                            "type": "string",
-                            "description": "IPA pronunciation for the word in American English"
-                        },
-                        "phonetic": {
-                            "type": "string",
-                            "description": "Simple phonetic pronunciation (e.g. 'SOO-duh-nim' for 'pseudonym')"
-                        },
-                        "alternatives": {
-                            "type": "array",
-                            "items": {
-                                "type": "object",
-                                "properties": {
-                                    "variant": {
-                                        "type": "string",
-                                        "description": "Variant name (e.g. 'British', 'Australian', 'Alternative')"
-                                    },
-                                    "ipa": {
-                                        "type": "string",
-                                        "description": "IPA pronunciation for this variant"
-                                    }
-                                },
-                                "additionalProperties": False,
-                                "required": ["variant", "ipa"]
-                            },
-                            "description": "Alternative valid pronunciations (British, Australian, etc.)"
-                        },
-                        "confidence": {
-                            "type": "number",
-                            "description": "Confidence score from 0-1"
-                        },
-                        "notes": {
-                            "type": "string",
-                            "description": "Additional notes about the pronunciation"
-                        }
-                    },
-                    "additionalProperties": False,
-                    "required": ["ipa", "phonetic", "alternatives", "confidence", "notes"]
-                }
-            },
-            "additionalProperties": False,
-            "required": ["pronunciation"]
-        }
+        if not word or not isinstance(word, str) or not sentence or not isinstance(sentence, str):
+            logger.error("Invalid parameters provided for pronunciation query")
+            return {}, False
+            
+        schema = Schema(
+            name="Pronunciation",
+            description="Pronunciation information for a word",
+            properties={
+                "pronunciation": SchemaProperty(
+                    type="object",
+                    description="Pronunciation details",
+                    properties={
+                        "ipa": SchemaProperty(
+                            type="string", 
+                            description="IPA pronunciation for the word in American English"
+                        ),
+                        "phonetic": SchemaProperty(
+                            type="string", 
+                            description="Simple phonetic pronunciation (e.g. 'SOO-duh-nim' for 'pseudonym')"
+                        ),
+                        "alternatives": SchemaProperty(
+                            type="array",
+                            description="Alternative valid pronunciations (British, Australian, etc.)",
+                            array_items_schema=Schema(
+                                name="AlternativePronunciation",
+                                description="An alternative pronunciation variant",
+                                properties={
+                                    "variant": SchemaProperty(
+                                        type="string", 
+                                        description="Variant name (e.g. 'British', 'Australian', 'Alternative')"
+                                    ),
+                                    "ipa": SchemaProperty(
+                                        type="string", 
+                                        description="IPA pronunciation for this variant"
+                                    )
+                                }
+                            )
+                        ),
+                        "confidence": SchemaProperty(
+                            type="number", 
+                            description="Confidence score from 0-1"
+                        ),
+                        "notes": SchemaProperty(
+                            type="string", 
+                            description="Additional notes about the pronunciation"
+                        )
+                    }
+                )
+            }
+        )
         
         context = util.prompt_loader.get_context("wordfreq", "pronunciation")
         
@@ -896,58 +852,43 @@ class LinguisticClient:
         Return the IPA and simplified phonetic pronunciation, along with any alternative pronunciations.
         """
         
-        # Try multiple times in case of failure
-        for attempt in range(RETRY_COUNT):
+        try:
+            response = self.client.generate_chat(
+                prompt=prompt,
+                model=self.model,
+                json_schema=schema,
+                context=context
+            )
+            
+            # Log successful query
+            session = self.get_session()
             try:
-                response = self.client.generate_chat(
+                linguistic_db.log_query(
+                    session,
+                    word=word,
+                    query_type='pronunciation',
                     prompt=prompt,
-                    model=self.model,
-                    json_schema=schema,
-                    context=context
+                    response=json.dumps(response.structured_data),
+                    model=self.model
                 )
+            except Exception as log_err:
+                logger.error(f"Failed to log successful pronunciation query: {log_err}")
+            
+            # Validate and return response data
+            if (response.structured_data and 
+                isinstance(response.structured_data, dict) and 
+                'pronunciation' in response.structured_data and
+                isinstance(response.structured_data['pronunciation'], dict)):
+                return response.structured_data['pronunciation'], True
+            else:
+                logger.warning(f"Invalid pronunciation response format for word '{word}'")
+                return {}, False
                 
-                # Log the query
-                try:
-                    session = self.get_session()
-                    linguistic_db.log_query(
-                        session,
-                        word=word,
-                        query_type='pronunciation',
-                        prompt=prompt,
-                        response=json.dumps(response.structured_data),
-                        model=self.model
-                    )
-                except Exception as e:
-                    logger.error(f"Failed to log pronunciation query: {e}")
-                
-                if response.structured_data and 'pronunciation' in response.structured_data:
-                    return response.structured_data['pronunciation'], True
-                else:
-                    logger.warning(f"Failed to get valid pronunciation response for '{word}' (attempt {attempt+1})")
-                    time.sleep(RETRY_DELAY)
-            except Exception as e:
-                logger.error(f"Error querying for pronunciation: {e} (attempt {attempt+1})")
-                
-                # Log the failed query
-                try:
-                    session = self.get_session()
-                    linguistic_db.log_query(
-                        session,
-                        word=word,
-                        query_type='pronunciation',
-                        prompt=prompt,
-                        response=str(e),
-                        model=self.model,
-                        success=False,
-                        error=str(e)
-                    )
-                except Exception as log_err:
-                    logger.error(f"Failed to log query error: {log_err}")
-                    
-                time.sleep(RETRY_DELAY)
-        
-        # Return empty data if all attempts failed
-        return {}, False
+        except Exception as e:
+            # More specific error logging
+            logger.error(f"Error querying pronunciation for '{word}': {type(e).__name__}: {e}")
+            
+            return {}, False
 
     def update_pronunciation_for_definition(self, definition_id: int, sentence: Optional[str] = None) -> bool:
         """
