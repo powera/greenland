@@ -32,6 +32,7 @@ class NounSubtype(enum.Enum):
     
     # Abstract Concepts and Ideas
     CONCEPT_IDEA = "concept_idea"
+    SYMBOLIC_ELEMENT = "symbolic_element"
     QUALITY_ATTRIBUTE = "quality_attribute"
     MENTAL_CONSTRUCT = "mental_construct"
     KNOWLEDGE_DOMAIN = "knowledge_domain"
