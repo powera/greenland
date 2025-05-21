@@ -9,6 +9,7 @@ import threading
 from typing import Dict, List, Optional, Any, Tuple
 
 import clients.lib
+from clients.types import Schema, SchemaProperty
 from clients.unified_client import UnifiedLLMClient
 import util.prompt_loader
 from wordfreq import linguistic_db
@@ -104,76 +105,43 @@ class LinguisticClient:
         Returns:
             Tuple of (list of definition data, success flag)
         """
-        schema = {
-            "type": "object",
-            "properties": {
-                "definitions": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "definition": {
-                                "type": "string",
-                                "description": "The definition of the word for this specific meaning"
-                            },
-                            "pos": {
-                                "type": "string",
-                                "description": "The part of speech for this definition (noun, verb, etc.)"
-                            },
-                            "pos_subtype": {
-                                "type": "string",
-                                "description": "A subtype for the part of speech"
-                            },
-                            "phonetic_spelling": {  
-                                "type": "string",
-                                "description": "Phonetic spelling of the word"
-                            },
-                            "lemma": {
-                                "type": "string",
-                                "description": "The base form (lemma) for this definition"
-                            },
-                            "ipa_spelling": {  
-                                "type": "string",
-                                "description": "International Phonetic Alphabet for the word"
-                            },
-                            "special_case": {
-                                "type": "boolean",
-                                "description": "Whether this is a special case (foreign word, part of name, etc.)"
-                            },
-                            "examples": {
-                                "type": "array",
-                                "items": {
-                                    "type": "string",
-                                    "description": "Example sentence using this definition"
-                                }
-                            },
-                            "notes": {
-                                "type": "string",
-                                "description": "Additional notes about this definition"
-                            },
-                            "chinese_translation": {
-                                "type": "string",
-                                "description": "The Chinese translation of the word"
-                            },
-                            "korean_translation": {
-                                "type": "string",
-                                "description": "The Korean translation of the word"
-                            },
-                            "confidence": {
-                                "type": "number",
-                                "description": "Confidence score from 0-1"
-                            },
-                        },
-                        "additionalProperties": False,
-                        "required": ["definition", "pos", "pos_subtype", "lemma", "confidence", 
-                                     "special_case", "notes", "examples", "chinese_translation",
-                                     "korean_translation", "phonetic_spelling", "ipa_spelling"]
-                    }
-                }
-            },
-            "additionalProperties": False,
-            "required": ["definitions"]
-        }
+        schema = Schema(
+            name="WordDefinitions",
+            description="Definitions for a word",
+            properties={
+                "definitions": SchemaProperty(
+                    type="array",
+                    description="List of definitions for the word",
+                    array_items_schema=Schema(
+                        name="Definition",
+                        description="A single definition of the word",
+                        properties={
+                            "definition": SchemaProperty("string", "The definition of the word for this specific meaning"),
+                            "pos": SchemaProperty("string", "The part of speech for this definition (noun, verb, etc.)"),
+                            "pos_subtype": SchemaProperty("string", "A subtype for the part of speech"),
+                            "phonetic_spelling": SchemaProperty("string", "Phonetic spelling of the word"),
+                            "lemma": SchemaProperty("string", "The base form (lemma) for this definition"),
+                            "ipa_spelling": SchemaProperty("string", "International Phonetic Alphabet for the word"),
+                            "special_case": SchemaProperty("boolean", "Whether this is a special case (foreign word, part of name, etc.)"),
+                            "examples": SchemaProperty(
+                                type="array",
+                                description="Example sentences using this definition",
+                                items={"type": "string", "description": "Example sentence using this definition"}
+                            ),
+                            "notes": SchemaProperty("string", "Additional notes about this definition"),
+                            "chinese_translation": SchemaProperty("string", "The Chinese translation of the word"),
+                            "korean_translation": SchemaProperty("string", "The Korean translation of the word"),                            "korean_translation": SchemaProperty("string", "The Korean translation of the word"),
+                            "french_translation": SchemaProperty("string", "The French translation of the word"),
+                            "swahili_translation": SchemaProperty("string", "The Swahili translation of the word"),
+                            "vietnamese_translation": SchemaProperty("string", "The Vietnamese translation of the word"),
+                            "lithuanian_translation": SchemaProperty("string", "The Lithuanian translation of the word"),
+
+                            "confidence": SchemaProperty("number", "Confidence score from 0-1"),
+                        }
+                    )
+                )
+            }
+        )
         
         context = util.prompt_loader.get_context("wordfreq", "definitions")
         
@@ -404,38 +372,29 @@ class LinguisticClient:
         Returns:
             Tuple of (list of word forms data, success flag)
         """
-        schema = {
-            "type": "object",
-            "properties": {
-                "word_forms": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "form": {
-                                "type": "string",
-                                "description": "The inflected form of the word"
-                            },
-                            "form_type": {
-                                "type": "string",
-                                "description": "The grammatical form (e.g., past tense, plural, comparative)"
-                            },
-                            "examples": {
-                                "type": "array",
-                                "items": {
-                                    "type": "string",
-                                    "description": "Example sentence using this word form"
-                                }
-                            }
-                        },
-                        "additionalProperties": False,
-                        "required": ["form", "form_type", "examples"]
-                    }
-                }
-            },
-            "additionalProperties": False,
-            "required": ["word_forms"]
-        }
+        schema = Schema(
+            name="WordForms",
+            description="All forms of a lemma based on its part of speech",
+            properties={
+                "word_forms": SchemaProperty(
+                    type="array",
+                    description="List of word forms",
+                    array_items_schema=Schema(
+                        name="WordForm",
+                        description="A single word form",
+                        properties={
+                            "form": SchemaProperty("string", "The inflected form of the word"),
+                            "form_type": SchemaProperty("string", "The grammatical form (e.g., past tense, plural, comparative)"),
+                            "examples": SchemaProperty(
+                                type="array",
+                                description="Example sentences using this word form",
+                                items={"type": "string", "description": "Example sentence using this word form"}
+                            )
+                        }
+                    )
+                )
+            }
+        )
         
         context = util.prompt_loader.get_context("wordfreq", "word_forms")
         
