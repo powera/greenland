@@ -13,6 +13,12 @@ from sqlalchemy.sql import func
 from wordfreq.models.translations import TranslationSet
 import constants
 
+
+# Configure logging
+import logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
 # Define the base class for SQLAlchemy models
 class Base(DeclarativeBase):
     """Base class for all SQLAlchemy models."""
@@ -435,6 +441,7 @@ def update_definition(
     verified: Optional[bool] = None,
     ipa_pronunciation: Optional[str] = None,
     phonetic_pronunciation: Optional[str] = None,
+    translations: Optional[TranslationSet] = None,
     notes: Optional[str] = None
 ) -> bool:
     """Update definition information."""
@@ -464,6 +471,21 @@ def update_definition(
         definition.phonetic_pronunciation = phonetic_pronunciation
     if notes is not None:
         definition.notes = notes
+    
+    # Update translations if provided
+    if translations:
+        if translations.chinese:
+            definition.chinese_translation = translations.chinese.text
+        if translations.french:
+            definition.french_translation = translations.french.text
+        if translations.korean:
+            definition.korean_translation = translations.korean.text
+        if translations.swahili:
+            definition.swahili_translation = translations.swahili.text
+        if translations.lithuanian:
+            definition.lithuanian_translation = translations.lithuanian.text
+        if translations.vietnamese:
+            definition.vietnamese_translation = translations.vietnamese.text
         
     session.commit()
     return True
@@ -474,107 +496,119 @@ def update_korean_translation(
     korean_translation: str
 ):
     """Update Korean translation for a definition."""
-    definition = session.query(Definition).filter_by(id=definition_id).first()
-    if definition:
-        definition.korean_translation = korean_translation
-        definition.updated_at = func.now()
-        session.commit()
+    return update_translation(session, definition_id, 'korean', korean_translation)
 
-def get_definitions_without_korean_translations(session, limit: int = 100):
-    """Get definitions that need Korean translations."""
+def get_definitions_without_translation(session, language: str, limit: int = 100):
+    """
+    Get definitions that need translations for a specific language.
+    
+    Args:
+        session: Database session
+        language: Language name (chinese, french, korean, swahili, lithuanian, vietnamese)
+        limit: Maximum number of definitions to return
+        
+    Returns:
+        List of Definition objects without the specified translation
+    """
+    language = language.lower()
+    column_map = {
+        'chinese': Definition.chinese_translation,
+        'french': Definition.french_translation,
+        'korean': Definition.korean_translation,
+        'swahili': Definition.swahili_translation,
+        'lithuanian': Definition.lithuanian_translation,
+        'vietnamese': Definition.vietnamese_translation
+    }
+    
+    if language not in column_map:
+        raise ValueError(f"Unsupported language: {language}. Supported languages: {', '.join(column_map.keys())}")
+    
     return session.query(Definition).filter(
-        Definition.korean_translation.is_(None)
+        column_map[language].is_(None)
     ).limit(limit).all()
 
-def update_swahili_translation(
+def update_translation(
     session,
     definition_id: int,
-    swahili_translation: str
+    language: str,
+    translation: str
 ):
-    """Update Swahili translation for a definition."""
+    """
+    Update translation for a definition in a specific language.
+    
+    Args:
+        session: Database session
+        definition_id: ID of the definition to update
+        language: Language name (chinese, french, korean, swahili, lithuanian, vietnamese)
+        translation: Translation text
+    """
+    language = language.lower()
+    column_map = {
+        'chinese': 'chinese_translation',
+        'french': 'french_translation',
+        'korean': 'korean_translation',
+        'swahili': 'swahili_translation',
+        'lithuanian': 'lithuanian_translation',
+        'vietnamese': 'vietnamese_translation'
+    }
+    
+    if language not in column_map:
+        raise ValueError(f"Unsupported language: {language}. Supported languages: {', '.join(column_map.keys())}")
+    
     definition = session.query(Definition).filter_by(id=definition_id).first()
     if definition:
-        definition.swahili_translation = swahili_translation
+        setattr(definition, column_map[language], translation)
         definition.updated_at = func.now()
         session.commit()
+
+# Legacy functions for backward compatibility
+def get_definitions_without_korean_translations(session, limit: int = 100):
+    """Get definitions that need Korean translations."""
+    return get_definitions_without_translation(session, 'korean', limit)
+
+def update_korean_translation(session, definition_id: int, korean_translation: str):
+    """Update Korean translation for a definition."""
+    return update_translation(session, definition_id, 'korean', korean_translation)
 
 def get_definitions_without_swahili_translations(session, limit: int = 100):
     """Get definitions that need Swahili translations."""
-    return session.query(Definition).filter(
-        Definition.swahili_translation.is_(None)
-    ).limit(limit).all()
+    return get_definitions_without_translation(session, 'swahili', limit)
 
-def update_lithuanian_translation(
-    session,
-    definition_id: int,
-    lithuanian_translation: str
-):
-    """Update Lithuanian translation for a definition."""
-    definition = session.query(Definition).filter_by(id=definition_id).first()
-    if definition:
-        definition.lithuanian_translation = lithuanian_translation
-        definition.updated_at = func.now()
-        session.commit()
+def update_swahili_translation(session, definition_id: int, swahili_translation: str):
+    """Update Swahili translation for a definition."""
+    return update_translation(session, definition_id, 'swahili', swahili_translation)
 
 def get_definitions_without_lithuanian_translations(session, limit: int = 100):
     """Get definitions that need Lithuanian translations."""
-    return session.query(Definition).filter(
-        Definition.lithuanian_translation.is_(None)
-    ).limit(limit).all()
+    return get_definitions_without_translation(session, 'lithuanian', limit)
 
-def update_vietnamese_translation(
-    session,
-    definition_id: int,
-    vietnamese_translation: str
-):
-    """Update Vietnamese translation for a definition."""
-    definition = session.query(Definition).filter_by(id=definition_id).first()
-    if definition:
-        definition.vietnamese_translation = vietnamese_translation
-        definition.updated_at = func.now()
-        session.commit()
+def update_lithuanian_translation(session, definition_id: int, lithuanian_translation: str):
+    """Update Lithuanian translation for a definition."""
+    return update_translation(session, definition_id, 'lithuanian', lithuanian_translation)
 
 def get_definitions_without_vietnamese_translations(session, limit: int = 100):
     """Get definitions that need Vietnamese translations."""
-    return session.query(Definition).filter(
-        Definition.vietnamese_translation.is_(None)
-    ).limit(limit).all()
+    return get_definitions_without_translation(session, 'vietnamese', limit)
 
-def update_french_translation(
-    session,
-    definition_id: int,
-    french_translation: str
-):
-    """Update French translation for a definition."""
-    definition = session.query(Definition).filter_by(id=definition_id).first()
-    if definition:
-        definition.french_translation = french_translation
-        definition.updated_at = func.now()
-        session.commit()
+def update_vietnamese_translation(session, definition_id: int, vietnamese_translation: str):
+    """Update Vietnamese translation for a definition."""
+    return update_translation(session, definition_id, 'vietnamese', vietnamese_translation)
 
 def get_definitions_without_french_translations(session, limit: int = 100):
     """Get definitions that need French translations."""
-    return session.query(Definition).filter(
-        Definition.french_translation.is_(None)
-    ).limit(limit).all()
+    return get_definitions_without_translation(session, 'french', limit)
 
-def update_chinese_translation(
-    session,
-    definition_id: int,
-    chinese_translation: str
-):
-    """Update Chinese translation for a definition."""
-    definition = session.query(Definition).filter_by(id=definition_id).first()
-    if definition:
-        definition.chinese_translation = chinese_translation
-        definition.updated_at = func.now()
-        session.commit()
+def update_french_translation(session, definition_id: int, french_translation: str):
+    """Update French translation for a definition."""
+    return update_translation(session, definition_id, 'french', french_translation)
 
 def get_definitions_without_chinese_translations(session, limit: int = 100):
     """Get definitions that need Chinese translations."""
-    return session.query(Definition).filter(
-        Definition.chinese_translation.is_(None)
-    ).limit(limit).all()
+    return get_definitions_without_translation(session, 'chinese', limit)
+
+def update_chinese_translation(session, definition_id: int, chinese_translation: str):
+    """Update Chinese translation for a definition."""
+    return update_translation(session, definition_id, 'chinese', chinese_translation)
 
 def get_definitions_without_subtypes(session, limit: int = 100) -> List[Definition]:
     """Get definitions that need POS subtypes."""
