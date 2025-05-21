@@ -166,7 +166,40 @@ section h2 {
 
 /* Table styles */
 .word-table-section {
+    position: relative;
     overflow-x: auto;
+    margin-bottom: 30px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: white;
+}
+
+.scroll-indicator {
+    display: none;
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(52, 152, 219, 0.8);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+    z-index: 10;
+    animation: pulse 2s infinite;
+    pointer-events: none;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
+}
+
+.scroll-note {
+    margin-bottom: 10px;
+    font-style: italic;
+    color: #666;
 }
 
 .table-controls {
@@ -187,6 +220,24 @@ section h2 {
 .field-toggles label {
     margin-right: 15px;
     cursor: pointer;
+    display: inline-block;
+}
+
+.translations-toggles {
+    margin-top: 10px;
+    border-top: 1px solid #eee;
+    padding-top: 10px;
+}
+
+.translations-toggles h4 {
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+    color: var(--secondary-color);
+}
+
+.translations-toggles label {
+    margin-right: 12px;
+    margin-bottom: 5px;
 }
 
 .word-table {
@@ -243,6 +294,17 @@ section h2 {
     font-style: italic;
     color: #555;
     max-width: 300px;
+}
+
+/* Translation columns */
+.word-table td.chinese,
+.word-table td.french,
+.word-table td.korean,
+.word-table td.swahili,
+.word-table td.lithuanian,
+.word-table td.vietnamese {
+    color: #444;
+    font-family: var(--font-main);
 }
 
 /* Footer styles */
