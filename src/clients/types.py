@@ -6,7 +6,64 @@ from telemetry import LLMUsage
 
 @dataclass
 class SchemaProperty:
-    """A property in a JSON schema."""
+    """A property in a JSON schema.
+
+    To define nested schemas:
+    1. For nested objects:
+        Use `object_schema` to define a nested Schema object.
+        Example:
+        ```python
+        nested_schema = Schema(
+            "Address",
+            "A user's address",
+            {
+                "street": SchemaProperty("string", "Street address"),
+                "city": SchemaProperty("string", "City name"),
+                "postal_code": SchemaProperty("string", "Postal code")
+            }
+        )
+        
+        user_schema = Schema(
+            "User",
+            "A user profile",
+            {
+                "name": SchemaProperty("string", "User name"),
+                "address": SchemaProperty(
+                    "object",
+                    "User's address",
+                    object_schema=nested_schema
+                )
+            }
+        )
+        ```
+
+    2. For arrays of objects:
+        Use `array_items_schema` to define the schema for array items.
+        Example:
+        ```python
+        phone_schema = Schema(
+            "Phone",
+            "A phone number with type",
+            {
+                "type": SchemaProperty("string", "Phone type"),
+                "number": SchemaProperty("string", "Phone number")
+            }
+        )
+        
+        user_schema = Schema(
+            "User",
+            "A user profile",
+            {
+                "name": SchemaProperty("string", "User name"),
+                "phones": SchemaProperty(
+                    "array",
+                    "List of phone numbers",
+                    array_items_schema=phone_schema
+                )
+            }
+        )
+        ```
+    """
     type: str
     description: Optional[str] = None
     required: bool = True
