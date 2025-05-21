@@ -11,7 +11,11 @@ conjunction, interjection, determiner, article, numeral, auxiliary, modal.
 
 - The part-of-speech subtype, for "noun", "verb", "adjective", and "adverb".  For any other
 part-of-speech, return the part-of-speech (pronoun, preposition, etc.) as the subtype.
-NOUN SUBTYPES: human, animal, plant, building_structure, small_movable_object, natural_feature, tool_machine, material_substance, concept_idea, emotion_feeling, process_event, time_period, group_people, group_animal, collection_things, personal_name, place_name, organization_name, other
+NOUN SUBTYPES: human, animal, body_part, disease_condition, plant, food_drink,
+  building_structure, small_movable_object, clothing_accessory, artwork_artifact,
+  natural_feature, tool_machine, path_infrastructure, material_substance, chemical_compound, medication_remedy,
+  concept_idea, quality_attribute, mental_construct, knowledge_domain, quantitative_concept, emotion_feeling,
+  process_event, time_period, group_people, group_animal, collection_things, personal_name, place_name, organization_name, other
 VERB SUBTYPES: physical_action, creation_action, destruction_action, mental_state, emotional_state, possession, development, change, speaking, writing, expressing, directional_movement, manner_movement, other
 ADJECTIVE SUBTYPES: size, color, shape, texture, quality, aesthetic, importance, origin, purpose, material, definite_quantity, indefinite_quantity, duration, frequency, sequence, other
 ADVERB SUBTYPES: style, attitude, specific_time, relative_time, duration, direction, location, distance, intensity, completeness, approximation, definite_frequency, indefinite_frequency, other

@@ -11,26 +11,63 @@ conjunction, interjection, determiner, article, numeral, auxiliary, modal.
 
 - The part-of-speech subtype, for "noun", "verb", "adjective", and "adverb".  For any other
 part-of-speech, return the part-of-speech (pronoun, preposition, etc.).
+
+## Classification Guidelines
+1. Always choose the most specific category that applies
+2. For nouns with multiple potential classifications, select the category that best matches the specific definition context
+3. Some nouns may change category depending on their usage (e.g., "plant" as a living organism vs. "plant" as a factory)
+4. Use the "other" category only when no other category reasonably applies
+
 NOUN SUBTYPES:
-- human: People or roles (teacher, doctor, child)
-- animal: All animals (dog, tiger, fish)
-- plant: All plants (tree, flower, grass)
-- building_structure: Buildings and structures (laboratory, house, bridge)
-- small_movable_object: Portable items (pen, book, phone)
-- natural_feature: Natural elements (mountain, river, cloud)
-- tool_machine: Tools and machines (engine, hammer, computer)
-- material_substance: Materials and substances (water, metal, cloth)
-- concept_idea: Abstract concepts (freedom, justice, theory)
-- emotion_feeling: Emotions and feelings (happiness, anger, love)
-- process_event: Processes or events (meeting, evolution, war)
-- time_period: Time periods (month, century, season)
-- group_people: Groups of people (team, family, crowd)
-- group_animal: Groups of animals (flock, herd, swarm)
-- collection_things: Collections (set, bunch, pile)
-- personal_name: Personal names (John, Maria)
-- place_name: Place names (London, Amazon)
-- organization_name: Organization names (Microsoft, United Nations)
-- other: Any noun that doesn't fit the above categories
+## People and Living Things
+- **human**: People, roles, occupations, or designations for humans (teacher, doctor, child, teenager, citizen)
+- **animal**: All non-human animals, including mammals, birds, fish, insects, etc. (dog, tiger, goldfish, butterfly)
+- **body_part**: Any part of a human or animal body (arm, liver, finger, tail, wing)
+- **disease_condition**: Medical conditions, disorders, or ailments (diabetes, influenza, arthritis)
+- **plant**: All plant life forms and their components (tree, flower, grass, root, moss)
+
+## Food and Consumables
+- **food_drink**: Edible items and beverages (bread, cheese, water, wine, curry)
+
+## Physical Objects and Structures
+- **building_structure**: Buildings, structures, and permanent installations (laboratory, house, bridge, tower, stadium)
+- **small_movable_object**: Portable items and objects (pen, book, phone, cup, scissors)
+- **clothing_accessory**: Wearable items (shirt, hat, jewelry, shoes)
+- **artwork_artifact**: Creative works and culturally significant items (painting, sculpture, mask, trophy)
+- **natural_feature**: Natural elements and landscape features (mountain, river, cloud, forest, ocean)
+- **tool_machine**: Tools, machines, devices, and equipment (engine, hammer, computer, drill, microscope, boat)
+- **path_infrastructure**: Ways of travel or infrastructure (highway, road, bridge, railway)
+
+## Materials and Substances
+- **material_substance**: Raw materials, elements, substances, and matter (water, metal, cloth, plastic, oxygen)
+- **chemical_compound**: Specific chemicals (benzene, glucose, sodium chloride)
+- **medication_remedy**: Medical treatments and remedies (aspirin, antibiotic, vaccine)
+
+## Abstract Concepts and Ideas
+- **concept_idea**: General abstract concepts, principles, or theories (freedom, justice, gravity, democracy)
+- **quality_attribute**: Nouns that describe properties often used as adjectives (sweetness, redness, loudness)
+- **mental_construct**: Products of human thought, imagination, or cognitive processes (idea, thought, notion, fantasy)
+- **knowledge_domain**: Fields of study, disciplines, or areas of knowledge (biology, mathematics, linguistics, economics)
+- **quantitative_concept**: Numbers, measurements, or mathematical notions (dozen, percentage, fraction, infinity)
+- **emotion_feeling**: Emotions, feelings, and affective states (happiness, anger, love, despair, excitement)
+
+## Processes and Time
+- **process_event**: Processes, occurrences, or events (meeting, evolution, war, ceremony, rainfall)
+- **time_period**: Temporal units, durations, or specific time frames (month, century, season, era, midnight)
+
+## Groups and Collections
+- **group_people**: Groups of humans (team, family, crowd, committee, audience)
+- **animal_grouping_term**: Groups of animals or grouping terms (flock, herd, swarm, school, pack)
+- **collection_things**: Collections or assemblages of objects (set, bunch, pile, collection, series)
+
+## Named Entities
+- **personal_name**: Names of specific individuals (John, Maria, Shakespeare, Einstein)
+- **place_name**: Geographic locations, places, or regions (London, Amazon, Alps, Pacific)
+- **organization_name**: Names of companies, institutions, or formal groups (Microsoft, United Nations, Harvard)
+
+## Other
+- **other**: Any noun that doesn't clearly fit into the above categories
+
 VERB SUBTYPES:
 - physical_action: Physical actions (run, jump, build)
 - creation_action: Creating things (make, create, construct)
