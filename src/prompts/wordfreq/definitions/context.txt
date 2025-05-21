@@ -38,7 +38,7 @@ For translations:
 - For Lithuanian:
   - Use the nominative singular form for nouns and adjectives
 - For Vietnamese:
-  - Include diacritics and tone marks
+  - Include all diacritics and tone marks
 
 For phonetic spellings:
 - Provide the pronunciation for the specific definition of the word.

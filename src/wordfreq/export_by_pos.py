@@ -85,8 +85,8 @@ def get_words_by_pos_subtype(session, pos_type: str) -> Dict[str, List[Dict[str,
             
         # Truncate definition and example if too long
         def_text = definition.definition_text
-        if len(def_text) > 100:
-            def_text = def_text[:97] + "..."
+        if len(def_text) > 150:
+            def_text = def_text[:147] + "..."
             
         if len(example) > 120:
             example = example[:117] + "..."
@@ -99,7 +99,12 @@ def get_words_by_pos_subtype(session, pos_type: str) -> Dict[str, List[Dict[str,
             "example": example,
             "pronunciation": definition.phonetic_pronunciation or "",
             "ipa": definition.ipa_pronunciation or "",
-            "chinese": definition.chinese_translation or ""
+            "chinese": definition.chinese_translation or "",
+            "french": definition.french_translation or "",
+            "korean": definition.korean_translation or "",
+            "swahili": definition.swahili_translation or "",
+            "lithuanian": definition.lithuanian_translation or "",
+            "vietnamese": definition.vietnamese_translation or ""
         })
     
     return words_by_subtype
@@ -229,7 +234,7 @@ def generate_pos_type_page(env, pos_type: str, words_by_subtype: Dict[str, List[
         total_words += word_count
         
         # Get top 5 words by frequency rank
-        top_words = sorted(words, key=lambda w: w.get("rank", float("inf")))[:5]
+        top_words = sorted(words, key=lambda w: float("inf") if w.get("rank") is None else w.get("rank"))[:5]
         top_words = [word["word"] for word in top_words]
         
         subtype_stats[subtype] = {
