@@ -300,7 +300,7 @@ class LinguisticClient:
             
         except Exception as e:
             session.rollback()
-            logger.error(f"Error processing word '{word}': {e}")
+            logger.error(f"Error processing word '{word}': {e}", exc_info=True)
             return False
         finally:
             session.close()

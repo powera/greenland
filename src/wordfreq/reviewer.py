@@ -90,6 +90,16 @@ class LinguisticReviewer:
                     print(f"      {self.c.BLUE}Phonetic Pronunciation:{self.c.ENDC} {definition.phonetic_pronunciation}")
                 if definition.chinese_translation:
                     print(f"    {self.c.BLUE}Chinese:{self.c.ENDC} {definition.chinese_translation}")
+                if definition.french_translation:
+                    print(f"    {self.c.BLUE}French:{self.c.ENDC} {definition.french_translation}")
+                if definition.korean_translation:
+                    print(f"    {self.c.BLUE}Korean:{self.c.ENDC} {definition.korean_translation}")
+                if definition.swahili_translation:
+                    print(f"    {self.c.BLUE}Swahili:{self.c.ENDC} {definition.swahili_translation}")
+                if definition.lithuanian_translation:
+                    print(f"    {self.c.BLUE}Lithuanian:{self.c.ENDC} {definition.lithuanian_translation}")
+                if definition.vietnamese_translation:
+                    print(f"    {self.c.BLUE}Vietnamese:{self.c.ENDC} {definition.vietnamese_translation}")
 
                 if definition.notes:
                     print(f"    {self.c.BLUE}Notes:{self.c.ENDC} {definition.notes}")
@@ -98,7 +108,7 @@ class LinguisticReviewer:
                 examples = definition.examples
                 if examples:
                     print(f"    {self.c.BLUE}Examples:{self.c.ENDC}")
-                    for j, example in enumerate(examples):
+                    for example in examples:
                         print(f"      - {example.example_text}")
                 
                 # Add a separator between definitions
