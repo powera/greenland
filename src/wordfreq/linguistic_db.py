@@ -653,35 +653,3 @@ def get_processing_stats(session) -> Dict[str, Any]:
         "total_examples": total_examples or 0,
         "percent_complete": (words_with_definitions / total_words * 100) if total_words else 0
     }
-
-def list_problematic_words(session, limit: int = 100) -> List[Dict[str, Any]]:
-    """List words that have been flagged as problematic (special cases, multiple meanings, etc.)."""
-    query = session.query(Word).join(Definition)\
-        .filter(
-            (Definition.multiple_meanings == True) |
-            (Definition.special_case == True)
-        ).limit(limit)
-    
-    results = []
-    for word in query:
-        definitions_data = []
-        for definition in word.definitions:
-            examples = [example.example_text for example in definition.examples]
-            
-            definitions_data.append({
-                "text": definition.definition_text,
-                "pos": definition.pos_type,
-                "lemma": definition.lemma,
-                "multiple_meanings": definition.multiple_meanings,
-                "special_case": definition.special_case,
-                "notes": definition.notes,
-                "examples": examples
-            })
-        
-        results.append({
-            "word": word.word,
-            "rank": word.frequency_rank,
-            "definitions": definitions_data
-        })
-    
-    return results
