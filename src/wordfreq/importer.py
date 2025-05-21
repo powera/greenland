@@ -7,11 +7,13 @@ import csv
 import logging
 import os
 import re
-from typing import Dict, List, Optional, Any, Tuple
+import time
+from typing import Dict, List, Optional, Any, Tuple, Literal
 
 import constants
 from wordfreq import linguistic_db
 from wordfreq.connection_pool import get_session
+from wordfreq.linguistic_client import LinguisticClient
 from wordfreq.linguistic_db import Word, Corpus, WordFrequency
 
 # Configure logging
@@ -257,3 +259,165 @@ def import_frequency_data(
         logger.error(f"Error importing frequency data: {e}")
         session.rollback()
         raise
+
+def import_all_corpus_data(
+    word_limit: int = 5000,
+    data_dir: str = None
+) -> Dict[str, Tuple[int, int]]:
+    """
+    Import frequency data for all four corpus types defined in linguistic_db.py.
+    
+    Args:
+        word_limit: How many words to import from each corpus (defaults to 5000)
+        data_dir: Directory containing the corpus files (defaults to wordfreq/data)
+        
+    Returns:
+        Dictionary mapping corpus names to tuples of (words imported, total words)
+    """
+
+    # Set default data directory if not provided
+    if data_dir is None:
+        data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
+    
+    logger.info(f"Importing {word_limit} words for all corpus types from {data_dir}")
+    
+    # Define corpus configurations
+    corpus_configs = [
+        {
+            "name": "19th_books",
+            "file_name": "19th_books.json",
+            "file_type": "json",
+            "value_type": "auto"
+        },
+        {
+            "name": "20th_books",
+            "file_name": "20th_books.json",
+            "file_type": "json",
+            "value_type": "auto"
+        },
+        {
+            "name": "subtitles",
+            "file_name": "subtlex.txt",
+            "file_type": "subtlex",
+            "value_type": "auto"
+        },
+        {
+            "name": "wiki_vital",
+            "file_name": "wiki_vital.json",
+            "file_type": "json",
+            "value_type": "frequency"
+        }
+    ]
+    
+    # Initialize database session
+    session = get_session(constants.WORDFREQ_DB_PATH)
+    
+    # Ensure corpora exist in the database
+    linguistic_db.initialize_corpora(session)
+    
+    # Import each corpus
+    results = {}
+    
+    for config in corpus_configs:
+        corpus_name = config["name"]
+        file_path = os.path.join(data_dir, config["file_name"])
+        
+        if not os.path.exists(file_path):
+            logger.warning(f"Corpus file not found: {file_path}")
+            results[corpus_name] = (0, 0)
+            continue
+        
+        try:
+            logger.info(f"Importing {corpus_name} from {file_path} (limit: {word_limit} words)")
+            imported, total = import_frequency_data(
+                file_path=file_path,
+                corpus_name=corpus_name,
+                file_type=config["file_type"],
+                max_words=word_limit,
+                value_type=config["value_type"]
+            )
+            results[corpus_name] = (imported, total)
+            logger.info(f"Successfully imported {imported}/{total} words for {corpus_name}")
+        except Exception as e:
+            logger.error(f"Error importing {corpus_name}: {e}")
+            results[corpus_name] = (0, 0)
+    
+    # Log summary
+    logger.info("Import summary:")
+    for corpus_name, (imported, total) in results.items():
+        logger.info(f"  {corpus_name}: {imported}/{total} words imported")
+    
+    return results
+
+def process_stopwords(refresh: bool = False, model: str = None) -> Dict[str, bool]:
+    """
+    Process all stop words from util/stopwords.py using linguistic_client.process_word.
+    
+    Args:
+        refresh: If True, delete existing definitions and re-process all stop words
+        model: Model name to use for processing (defaults to the default model in linguistic_client)
+        
+    Returns:
+        Dictionary mapping words to success flags
+    """
+    from util.stopwords import all_stopwords, stopwords, CONTRACTIONS, COMMON_VERBS, COMMON_NOUNS, COMMON_ADVERBS, MISC_WORDS
+    
+    logger.info(f"Processing stop words (refresh={refresh})")
+    
+    # Initialize the linguistic client
+    client = LinguisticClient.get_instance(model=model) if model else LinguisticClient.get_instance()
+    
+    # Collect all words to process
+    all_words = set(all_stopwords)  # Start with the basic stopwords
+    
+    # Add other word categories
+    all_words.update(CONTRACTIONS)
+    all_words.update(COMMON_VERBS)
+    all_words.update(COMMON_NOUNS)
+    all_words.update(COMMON_ADVERBS)
+    all_words.update(MISC_WORDS)
+    
+    # Sort for consistent processing order
+    words_to_process = sorted(list(all_words))
+    
+    logger.info(f"Found {len(words_to_process)} unique stop words to process")
+    
+    # Process each word
+    results = {}
+    success_count = 0
+    failure_count = 0
+    
+    for i, word in enumerate(words_to_process):
+        logger.info(f"Processing word {i+1}/{len(words_to_process)}: '{word}'")
+        
+        try:
+            # Process the word
+            success = client.process_word(word, refresh=refresh)
+            results[word] = success
+            
+            if success:
+                success_count += 1
+                logger.info(f"Successfully processed '{word}'")
+            else:
+                failure_count += 1
+                logger.warning(f"Failed to process '{word}'")
+            
+            # Add a small delay to avoid overwhelming the API
+            time.sleep(0.1)
+            
+        except Exception as e:
+            logger.error(f"Error processing word '{word}': {e}")
+            results[word] = False
+            failure_count += 1
+        
+        # Log progress every 10 words
+        if (i + 1) % 10 == 0:
+            logger.info(f"Progress: {i+1}/{len(words_to_process)} words processed")
+    
+    # Log summary
+    logger.info("Stop words processing summary:")
+    logger.info(f"Total words: {len(words_to_process)}")
+    logger.info(f"Successfully processed: {success_count}")
+    logger.info(f"Failed to process: {failure_count}")
+    
+    return results

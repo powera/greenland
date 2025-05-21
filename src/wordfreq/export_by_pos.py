@@ -124,7 +124,7 @@ def generate_pos_subtype_pages(session) -> None:
     copy_static_files()
     
     # Parts of speech to process
-    pos_types = ["noun", "verb", "adjective", "adverb"]
+    pos_types = get_all_pos_types(session)
     
     # Set up Jinja environment
     env = Environment(loader=FileSystemLoader(constants.WORDFREQ_TEMPLATE_DIR))
@@ -311,21 +311,64 @@ def copy_static_files() -> None:
     logger.info(f"Copied JS file from templates to output directory: {JS_FILENAME}")
 
 
+def get_all_pos_types(session) -> List[str]:
+    """
+    Get all part of speech types from the database.
+    
+    Args:
+        session: Database session
+        
+    Returns:
+        List of all POS types found in the database
+    """
+    pos_types = session.query(linguistic_db.Definition.pos_type.distinct()).all()
+    return [pos_type[0] for pos_type in pos_types]
+
+def generate_index_page_only(session) -> None:
+    """
+    Generate only the index page with links to all POS type pages.
+    
+    Args:
+        session: Database session
+    """
+    # Ensure output directory exists
+    ensure_directory(POS_SUBTYPE_DIR)
+    
+    # Copy static files (CSS and JS)
+    copy_static_files()
+    
+    # Get all POS types from the database
+    pos_types = get_all_pos_types(session)
+    
+    # Set up Jinja environment
+    env = Environment(loader=FileSystemLoader(constants.WORDFREQ_TEMPLATE_DIR))
+    
+    # Generate index page
+    generate_index_page(session, env, pos_types)
+    
+    logger.info(f"Generated index page in {POS_SUBTYPE_DIR}")
+
 def main():
     """Main function to run the generator."""
     parser = argparse.ArgumentParser(description="Generate HTML pages for POS subtypes")
     parser.add_argument("--db-path", type=str, default=constants.WORDFREQ_DB_PATH,
                         help="Path to linguistic database")
+    parser.add_argument("--index-only", action="store_true",
+                        help="Generate only the index page")
     args = parser.parse_args()
 
-    
     # Create output directory
     ensure_directory(POS_SUBTYPE_DIR)
     
     # Connect to database and generate pages
     session = get_session(args.db_path)
     try:
-        generate_pos_subtype_pages(session)
+        if args.index_only:
+            # Generate only the index page
+            generate_index_page_only(session)
+        else:
+            # Generate all pages (index, POS types, and subtypes)
+            generate_pos_subtype_pages(session)
     finally:
         session.close()
     

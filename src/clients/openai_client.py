@@ -125,8 +125,8 @@ class OpenAIClient:
         kwargs = {
             "model": model,
             "messages": messages,
-            "max_tokens": 256 if brief else 1536,
-            "temperature": 0.45,
+            "max_tokens": 512 if brief else 4096,
+            "temperature": 0.35,
         }
         
         # If JSON schema provided, configure for structured response

@@ -2,7 +2,7 @@
 
 stopwords = {
     "pronouns": [
-        "I", "me", "my", "myself", "we", "our", "ours", "ourselves", "you", "your", 
+        "I", "me", "my", "myself", "we", "us", "our", "ours", "ourselves", "you", "your", 
         "yours", "yourself", "yourselves", "he", "him", "his", "himself", "she", "her", 
         "hers", "herself", "it", "its", "itself", "they", "them", "their", "theirs", 
         "themselves", "who", "whom", "whose", "which", "what", "that"
@@ -54,22 +54,22 @@ COMMON_VERBS = [
         "said", "came", "come", "get", "going", "got", "know", "look", "looked", 
         "make", "put", "say", "see", "tell", "think", "thought", "took", "went", 
         "asked", "began", "called", "felt", "found", "gave", "give", "heard", "let", 
-        "liked", "made", "seemed", "took"
+        "like", "liked", "made", "seemed", "took", "go", "take", "use", "want"
     ]
 COMMON_NOUNS = [
-        "way", "thing", "place", "room", "door", "eyes", "face", "head", "heart", 
+        "way", "thing", "place", "room", "door", "face", "head",
         "house", "man", "men", "mind", "moment", "mother", "father", "people", 
-        "person", "life", "nothing", "something", "love"
+        "person", "life", "nothing", "something", "anything", "love", "world"
     ]
 COMMON_ADVERBS = [
         "now", "then", "here", "there", "where", "when", "how", "why", "again", 
         "ever", "far", "forward", "only", "quite", "still", "too", "very", "always", 
-        "never", "not", "once", "more", "most"
+        "never", "not", "once", "more", "most", "good", "well", "new", "used", "yet"
     ]
 MISC_WORDS = [
         "yes", "no", "just", "right", "left", "same", "even", "down", "away", "back", 
         "much", "whatever", "enough", "also", "else", "other", "one", "two", "three", 
-        "great"
+        "great", "many", "little", "time", "first", "second", "next", "last"
     ]
 
 # Create a flat list of all stopwords for easier use
