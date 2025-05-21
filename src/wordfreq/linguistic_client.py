@@ -193,12 +193,13 @@ class LinguisticClient:
     # Define major parts of speech as a set for efficient lookup
     MAJOR_POS_TYPES = {"noun", "verb", "adjective", "adverb"}
     
-    def process_word(self, word: str) -> bool:
+    def process_word(self, word: str, refresh: bool = False) -> bool:
         """
         Process a word to get linguistic information and store in database.
         
         Args:
             word: Word to process
+            refresh: If True, delete existing definitions and re-populate the word
             
         Returns:
             Success flag
@@ -208,10 +209,18 @@ class LinguisticClient:
             # Add or get word in database
             word_obj = linguistic_db.add_word(session, word)
             
-            # If the word already has definitions, return early
+            # If the word already has definitions and refresh is False, return early
             if len(word_obj.definitions) > 0:
-                logger.info(f"Word '{word}' already exists in the database with {len(word_obj.definitions)} definitions")
-                return True
+                if not refresh:
+                    logger.info(f"Word '{word}' already exists in the database with {len(word_obj.definitions)} definitions")
+                    return True
+                else:  # len(word_obj.definitions) > 0 and refresh
+                    logger.info(f"Refreshing definitions for word '{word}'")
+                    if not linguistic_db.delete_word_definitions(session, word_obj.id):
+                        logger.error(f"Failed to delete existing definitions for word '{word}'")
+                        return False
+                    # Refresh the word object after deleting definitions
+                    session.refresh(word_obj)
                 
             # Query for definitions, POS, lemmas, and examples
             definitions, success = self.query_definitions(word)

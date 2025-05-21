@@ -427,6 +427,33 @@ def get_common_words_by_pos(session, pos_type: str, pos_subtype: str = None, lim
     return results
 
 
+def delete_word_definitions(session, word_id: int) -> bool:
+    """
+    Delete all definitions for a word.
+    
+    Args:
+        session: Database session
+        word_id: ID of the word to delete definitions for
+        
+    Returns:
+        Success flag
+    """
+    try:
+        # Query all definitions for the word
+        definitions = session.query(Definition).filter(Definition.word_id == word_id).all()
+        
+        # Delete each definition (cascade will handle examples)
+        for definition in definitions:
+            session.delete(definition)
+            
+        # Commit the transaction
+        session.commit()
+        return True
+    except Exception as e:
+        session.rollback()
+        logger.error(f"Error deleting definitions for word ID {word_id}: {e}")
+        return False
+
 def update_definition(
     session,
     definition_id: int,
