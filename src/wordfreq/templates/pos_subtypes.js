@@ -1,5 +1,29 @@
 // Simple table sorting and filtering
 document.addEventListener('DOMContentLoaded', function() {
+    // Scroll indicator for table
+    const tableSection = document.querySelector('.word-table-section');
+    const scrollIndicator = document.querySelector('.scroll-indicator');
+    
+    function checkScroll() {
+        if (tableSection) {
+            // Show indicator if there's horizontal scroll available
+            if (tableSection.scrollWidth > tableSection.clientWidth) {
+                scrollIndicator.style.display = 'block';
+                
+                // Hide indicator when scrolled to the end
+                if (tableSection.scrollLeft + tableSection.clientWidth >= tableSection.scrollWidth - 10) {
+                    scrollIndicator.style.display = 'none';
+                }
+            } else {
+                scrollIndicator.style.display = 'none';
+            }
+        }
+    }
+    
+    // Check on load and whenever columns are toggled
+    window.addEventListener('resize', checkScroll);
+    tableSection.addEventListener('scroll', checkScroll);
+    setTimeout(checkScroll, 500); // Initial check after page has fully rendered
     // Table sorting
     const table = document.querySelector('.word-table');
     const headers = table.querySelectorAll('th.sortable');
@@ -61,7 +85,23 @@ document.addEventListener('DOMContentLoaded', function() {
             const definition = row.querySelector('.definition').textContent.toLowerCase();
             const example = row.querySelector('.example').textContent.toLowerCase();
             
-            if (word.includes(searchTerm) || definition.includes(searchTerm) || example.includes(searchTerm)) {
+            // Include translations in search
+            const chinese = row.querySelector('.chinese').textContent.toLowerCase();
+            const french = row.querySelector('.french').textContent.toLowerCase();
+            const korean = row.querySelector('.korean').textContent.toLowerCase();
+            const swahili = row.querySelector('.swahili').textContent.toLowerCase();
+            const lithuanian = row.querySelector('.lithuanian').textContent.toLowerCase();
+            const vietnamese = row.querySelector('.vietnamese').textContent.toLowerCase();
+            
+            if (word.includes(searchTerm) || 
+                definition.includes(searchTerm) || 
+                example.includes(searchTerm) ||
+                chinese.includes(searchTerm) ||
+                french.includes(searchTerm) ||
+                korean.includes(searchTerm) ||
+                swahili.includes(searchTerm) ||
+                lithuanian.includes(searchTerm) ||
+                vietnamese.includes(searchTerm)) {
                 row.style.display = '';
             } else {
                 row.style.display = 'none';
@@ -71,14 +111,28 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Column visibility toggles
     const toggles = document.querySelectorAll('.field-toggles input');
+    
+    // Function to update column visibility
+    const updateColumnVisibility = (toggle) => {
+        const column = toggle.dataset.column;
+        const cells = document.querySelectorAll(`.${column}`);
+        
+        cells.forEach(cell => {
+            cell.style.display = toggle.checked ? '' : 'none';
+        });
+        
+        // Check if scroll indicator should be shown after column visibility changes
+        setTimeout(checkScroll, 100);
+    };
+    
+    // Initialize column visibility based on checkbox state
     toggles.forEach(toggle => {
+        // Set initial visibility
+        updateColumnVisibility(toggle);
+        
+        // Add change event listener
         toggle.addEventListener('change', function() {
-            const column = this.dataset.column;
-            const cells = document.querySelectorAll(`.${column}`);
-            
-            cells.forEach(cell => {
-                cell.style.display = this.checked ? '' : 'none';
-            });
+            updateColumnVisibility(this);
         });
     });
 });

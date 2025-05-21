@@ -17,17 +17,28 @@
             </nav>
         </header>
         
-        <section class="word-table-section">
-            <div class="table-controls">
-                <input type="text" id="searchInput" placeholder="Search words...">
-                <div class="field-toggles">
-                    <label><input type="checkbox" data-column="pronunciation" checked> Pronunciation</label>
-                    <label><input type="checkbox" data-column="ipa" checked> IPA</label>
+        <div class="table-controls">
+            <input type="text" id="searchInput" placeholder="Search words...">
+            <div class="field-toggles">
+                <label><input type="checkbox" data-column="pronunciation" checked> Pronunciation</label>
+                <label><input type="checkbox" data-column="ipa" checked> IPA</label>
+                <label><input type="checkbox" data-column="example" checked> Example</label>
+                <div class="translations-toggles">
+                    <h4>Translations:</h4>
                     <label><input type="checkbox" data-column="chinese" checked> Chinese</label>
-                    <label><input type="checkbox" data-column="example" checked> Example</label>
+                    <label><input type="checkbox" data-column="french" unchecked> French</label>
+                    <label><input type="checkbox" data-column="korean" unchecked> Korean</label>
+                    <label><input type="checkbox" data-column="swahili" unchecked> Swahili</label>
+                    <label><input type="checkbox" data-column="lithuanian" unchecked> Lithuanian</label>
+                    <label><input type="checkbox" data-column="vietnamese" unchecked> Vietnamese</label>
                 </div>
             </div>
-            
+        </div>
+        
+        <p class="scroll-note">Tip: Scroll horizontally to see all columns. More columns will appear when you check the boxes above.</p>
+        
+        <section class="word-table-section">
+            <div class="scroll-indicator">Scroll →</div>
             <table class="word-table">
                 <thead>
                     <tr>
@@ -37,8 +48,13 @@
                         <th>Definition</th>
                         <th class="pronunciation">Pronunciation</th>
                         <th class="ipa">IPA</th>
-                        <th class="chinese">Chinese</th>
                         <th class="example">Example</th>
+                        <th class="chinese">Chinese</th>
+                        <th class="french">French</th>
+                        <th class="korean">Korean</th>
+                        <th class="swahili">Swahili</th>
+                        <th class="lithuanian">Lithuanian</th>
+                        <th class="vietnamese">Vietnamese</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -50,8 +66,13 @@
                         <td class="definition">{{ word.definition }}</td>
                         <td class="pronunciation">{{ word.pronunciation }}</td>
                         <td class="ipa">{{ word.ipa }}</td>
-                        <td class="chinese">{{ word.chinese }}</td>
                         <td class="example">{{ word.example }}</td>
+                        <td class="chinese">{{ word.chinese }}</td>
+                        <td class="french">{{ word.french }}</td>
+                        <td class="korean">{{ word.korean }}</td>
+                        <td class="swahili">{{ word.swahili }}</td>
+                        <td class="lithuanian">{{ word.lithuanian }}</td>
+                        <td class="vietnamese">{{ word.vietnamese }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
