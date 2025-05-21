@@ -50,6 +50,7 @@ For phonetic spellings:
 For IPA:
 - Provide the pronunciation for the specific definition of the word.
 - Use American English pronunciations for words.
+- Include slashes ( /treɪn/ or /fɪt/ )
 
 In summary: for each definition, provide in order:
 1. The definition text
