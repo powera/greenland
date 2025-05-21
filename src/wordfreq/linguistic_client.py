@@ -122,8 +122,8 @@ class LinguisticClient:
                         description="A single definition of the word",
                         properties={
                             "definition": SchemaProperty("string", "The definition of the word for this specific meaning"),
-                            "pos": SchemaProperty("string", "The part of speech for this definition (noun, verb, etc.)"),
-                            "pos_subtype": SchemaProperty("string", "A subtype for the part of speech"),
+                            "pos": SchemaProperty("string", "The part of speech for this definition (noun, verb, etc.)", enum=list(VALID_POS_TYPES)),
+                            "pos_subtype": SchemaProperty("string", "A subtype for the part of speech", enum=linguistic_db.get_all_pos_subtypes()),
                             "phonetic_spelling": SchemaProperty("string", "Phonetic spelling of the word"),
                             "lemma": SchemaProperty("string", "The base form (lemma) for this definition"),
                             "ipa_spelling": SchemaProperty("string", "International Phonetic Alphabet for the word"),
