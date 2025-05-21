@@ -223,6 +223,10 @@ class LinguisticClient:
                         ipa_pronunciation=def_data.get('ipa_spelling', None),
                         chinese_translation=def_data.get('chinese_translation', None),
                         korean_translation=def_data.get('korean_translation', None),
+                        french_translation=def_data.get('french_translation', None),
+                        swahili_translation=def_data.get('swahili_translation', None),
+                        vietnamese_translation=def_data.get('vietnamese_translation', None),
+                        lithuanian_translation=def_data.get('lithuanian_translation', None),
                         multiple_meanings=def_data.get('multiple_meanings', False),
                         special_case=def_data.get('special_case', False),
                         notes=def_data.get('notes')
