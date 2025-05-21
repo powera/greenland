@@ -13,6 +13,7 @@ from clients.types import Schema, SchemaProperty
 from clients.unified_client import UnifiedLLMClient
 import util.prompt_loader
 from wordfreq import linguistic_db
+from wordfreq.models.translations import Translation, TranslationSet
 from wordfreq.connection_pool import get_session, close_thread_sessions
 import constants
 
@@ -189,74 +190,120 @@ class LinguisticClient:
             
             return [], False
     
-    def process_word(self, word: str, extended=False) -> bool:
+    # Define major parts of speech as a set for efficient lookup
+    MAJOR_POS_TYPES = {"noun", "verb", "adjective", "adverb"}
+    
+    def process_word(self, word: str) -> bool:
         """
         Process a word to get linguistic information and store in database.
         
         Args:
             word: Word to process
-            extended: Whether to populate subfields.
             
         Returns:
             Success flag
         """
         session = self.get_session()
-        
-        # Add or get word in database
-        word_obj = linguistic_db.add_word(session, word)
-        
-        if len(word_obj.definitions) == 0:
+        try:
+            # Add or get word in database
+            word_obj = linguistic_db.add_word(session, word)
+            
+            # If the word already has definitions, return early
+            if len(word_obj.definitions) > 0:
+                logger.info(f"Word '{word}' already exists in the database with {len(word_obj.definitions)} definitions")
+                return True
+                
             # Query for definitions, POS, lemmas, and examples
             definitions, success = self.query_definitions(word)
             
-            if success:
-                for def_data in definitions:
-                    # Add definition with POS and lemma
-                    definition = linguistic_db.add_definition(
-                        session,
-                        word_obj,
-                        definition_text=def_data.get('definition', f"Definition for {word}"),
-                        pos_type=def_data.get('pos', 'unknown'),
-                        lemma=def_data.get('lemma', word),
-                        confidence=def_data.get('confidence', 0.0),
-                        phonetic_pronunciation=def_data.get('phonetic_spelling', None),
-                        ipa_pronunciation=def_data.get('ipa_spelling', None),
-                        chinese_translation=def_data.get('chinese_translation', None),
-                        korean_translation=def_data.get('korean_translation', None),
-                        french_translation=def_data.get('french_translation', None),
-                        swahili_translation=def_data.get('swahili_translation', None),
-                        vietnamese_translation=def_data.get('vietnamese_translation', None),
-                        lithuanian_translation=def_data.get('lithuanian_translation', None),
-                        multiple_meanings=def_data.get('multiple_meanings', False),
-                        special_case=def_data.get('special_case', False),
-                        notes=def_data.get('notes')
-                    )
-                    if definition.pos_type in "noun verb adjective adverb".split():
-                        # Add subtype if available
-                        subtype = def_data.get('pos_subtype')
-                        if subtype:
-                            linguistic_db.update_definition(session, definition.id, pos_subtype=subtype)
-                    
-                    # Add examples
-                    for example_text in def_data.get('examples', []):
-                        linguistic_db.add_example(
-                            session,
-                            definition,
-                            example_text=example_text
-                        )
-            else:
+            if not success:
                 logger.warning(f"Failed to process word '{word}'")
                 return False
-        else:
-            logger.info(f"Word '{word}' already exists in the database with {len(word_obj.definitions)} definitions")
                 
-        if extended:
-            self.add_missing_translations_for_word(word)
-            self.update_missing_subtypes_for_word(word)
-            self.update_missing_pronunciations_for_word(word)
-
-        logger.info(f"Successfully processed word '{word}' with {len(word_obj.definitions)} definitions.")
-        return True
+            # Process each definition
+            for def_data in definitions:
+                # Validate POS type
+                pos_type = def_data.get('pos', 'unknown')
+                if pos_type != 'unknown' and pos_type not in VALID_POS_TYPES:
+                    logger.warning(f"Invalid POS type '{pos_type}' for word '{word}', defaulting to 'unknown'")
+                    pos_type = 'unknown'
+                
+                # Create Translation objects for each language
+                chinese_trans = None
+                if def_data.get('chinese_translation'):
+                    chinese_trans = Translation(text=def_data.get('chinese_translation'))
+                    
+                korean_trans = None
+                if def_data.get('korean_translation'):
+                    korean_trans = Translation(text=def_data.get('korean_translation'))
+                    
+                french_trans = None
+                if def_data.get('french_translation'):
+                    french_trans = Translation(text=def_data.get('french_translation'))
+                    
+                swahili_trans = None
+                if def_data.get('swahili_translation'):
+                    swahili_trans = Translation(text=def_data.get('swahili_translation'))
+                    
+                vietnamese_trans = None
+                if def_data.get('vietnamese_translation'):
+                    vietnamese_trans = Translation(text=def_data.get('vietnamese_translation'))
+                    
+                lithuanian_trans = None
+                if def_data.get('lithuanian_translation'):
+                    lithuanian_trans = Translation(text=def_data.get('lithuanian_translation'))
+                
+                # Create TranslationSet with Translation objects
+                translations = TranslationSet(
+                    chinese=chinese_trans,
+                    korean=korean_trans,
+                    french=french_trans,
+                    swahili=swahili_trans,
+                    vietnamese=vietnamese_trans,
+                    lithuanian=lithuanian_trans
+                )
+                
+                definition = linguistic_db.add_definition(
+                    session,
+                    word_obj,
+                    definition_text=def_data.get('definition', f"Definition for {word}"),
+                    pos_type=pos_type,
+                    lemma=def_data.get('lemma', word),
+                    confidence=def_data.get('confidence', 0.0),
+                    phonetic_pronunciation=def_data.get('phonetic_spelling', None),
+                    ipa_pronunciation=def_data.get('ipa_spelling', None),
+                    translations=translations,
+                    multiple_meanings=def_data.get('multiple_meanings', False),
+                    special_case=def_data.get('special_case', False),
+                    notes=def_data.get('notes')
+                )
+                
+                # Use set for efficient membership testing
+                if definition.pos_type in self.MAJOR_POS_TYPES:
+                    # Add subtype if available
+                    subtype = def_data.get('pos_subtype')
+                    if subtype:
+                        linguistic_db.update_definition(session, definition.id, pos_subtype=subtype)
+                
+                # Add examples
+                for example_text in def_data.get('examples', []):
+                    linguistic_db.add_example(
+                        session,
+                        definition,
+                        example_text=example_text
+                    )
+            
+            # Commit the transaction
+            session.commit()
+            logger.info(f"Successfully processed word '{word}' with {len(word_obj.definitions)} definitions.")
+            return True
+            
+        except Exception as e:
+            session.rollback()
+            logger.error(f"Error processing word '{word}': {e}")
+            return False
+        finally:
+            session.close()
 
     def query_chinese_translation(self, word: str, definition: str, example: str) -> Tuple[str, bool]:
         """
