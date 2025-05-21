@@ -320,12 +320,11 @@ def add_definition(
             definition.vietnamese_translation = translations.vietnamese.text if translations.vietnamese else None
         
         session.add(definition)
-        session.commit()
-        return True
+        return definition
     except Exception as e:
         session.rollback()
         logger.error(f"Error adding definition: {e}")
-        return False
+        return None
 
 def add_example(
     session,
