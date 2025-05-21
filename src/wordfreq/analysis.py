@@ -17,10 +17,10 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 # Constants
-DEFAULT_UNKNOWN_RANK = 7500  # Default rank for words not in a corpus
+DEFAULT_UNKNOWN_RANK = 12500  # Default rank for words not in a corpus
 
 def calculate_harmonic_mean_ranks(
-    db_path: Optional[str] = None, 
+    db_path: Optional[str] = constants.WORDFREQ_DB_PATH, 
     corpus_names: Optional[List[str]] = None,
     outlier_threshold: float = 2.0,
     unknown_rank: int = DEFAULT_UNKNOWN_RANK,
@@ -153,7 +153,7 @@ def calculate_harmonic_mean_ranks(
 
 def export_ranked_word_list(
     output_path: str,
-    db_path: Optional[str] = None,
+    db_path: Optional[str] = constants.WORDFREQ_DB_PATH,
     limit: Optional[int] = None,
     include_outliers: bool = True
 ) -> int:
@@ -195,7 +195,7 @@ def export_ranked_word_list(
 
 def export_frequency_data(
     output_path: str,
-    db_path: Optional[str] = None,
+    db_path: Optional[str] = constants.WORDFREQ_DB_PATH,
     format: str = "csv",
     limit: Optional[int] = None
 ) -> int:

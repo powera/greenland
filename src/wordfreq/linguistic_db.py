@@ -21,7 +21,12 @@ import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-
+# TODO: de-dupe
+VALID_POS_TYPES = {
+    "noun", "verb", "adjective", "adverb", "pronoun", 
+    "preposition", "conjunction", "interjection", "determiner",
+    "article", "numeral", "auxiliary", "modal"
+}
 
 # Helper functions to initialize corpus data
 def initialize_corpora(session):
@@ -69,6 +74,21 @@ def get_subtype_values_for_pos(pos_type: str) -> List[str]:
     if enum_class:
         return [e.value for e in enum_class]
     return []
+
+def get_all_pos_subtypes() -> Dict[str, List[str]]:
+    """
+    Get all possible POS subtypes for each part of speech.
+    
+    Returns:
+        Dictionary with part of speech as key and list of subtypes as value
+    """
+    all_subtypes = set()
+    all_subtypes.update(get_subtype_values_for_pos('noun'))
+    all_subtypes.update(get_subtype_values_for_pos('verb'))
+    all_subtypes.update(get_subtype_values_for_pos('adjective'))
+    all_subtypes.update(get_subtype_values_for_pos('adverb'))
+    all_subtypes.update(VALID_POS_TYPES)
+    return sorted(list(all_subtypes))
 
 def create_database_session(db_path: str = constants.WORDFREQ_DB_PATH):
     """Create a new database session."""
