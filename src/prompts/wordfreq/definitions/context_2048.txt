@@ -45,6 +45,7 @@ NOUN SUBTYPES:
 
 ## Abstract Concepts and Ideas
 - **concept_idea**: General abstract concepts, principles, or theories (freedom, justice, gravity, democracy)
+- **symbolic_element**: Characters, notations, and representational symbols used as nouns (A, &, ln, $)
 - **quality_attribute**: Nouns that describe properties often used as adjectives (sweetness, redness, loudness)
 - **mental_construct**: Products of human thought, imagination, or cognitive processes (idea, thought, notion, fantasy)
 - **knowledge_domain**: Fields of study, disciplines, or areas of knowledge (biology, mathematics, linguistics, economics)
