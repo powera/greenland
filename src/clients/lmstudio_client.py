@@ -8,7 +8,7 @@ import re
 from dataclasses import dataclass
 from typing import Dict, Optional, Union, Any, List
 import requests
-from requests.exceptions import Timeout, RequestException
+from requests.exceptions import RequestException, ConnectTimeout, ReadTimeout
 
 from telemetry import LLMUsage
 from clients.types import Response
@@ -44,7 +44,7 @@ class LMStudioClient:
         self.timeout = timeout
         self.base_url = f"http://{server}:{port}/v1"
         self.debug = debug
-        if debug:
+        if self.debug:
             logger.setLevel(logging.DEBUG)
 
     def _make_request(self, endpoint: str, data: Dict) -> requests.Response:
@@ -59,8 +59,10 @@ class LMStudioClient:
             response.raise_for_status()
             return response
             
-        except Timeout:
-            raise LMStudioTimeoutError(f"Request timed out after {self.timeout}s")
+        except requests.exceptions.ConnectTimeout:
+            raise LMStudioTimeoutError(f"Connection timed out after {self.timeout}s")
+        except requests.exceptions.ReadTimeout:
+            raise LMStudioTimeoutError(f"Response timed out after {self.timeout}s")
         except RequestException as e:
             if e.response is not None:
                 error_msg = f"Error {e.response.status_code}: {e.response.text}"
@@ -188,19 +190,15 @@ class LMStudioClient:
 
             # Add schema explanation to system prompt for better results
             # Create a clean version of the schema for display, omitting unnecessary implementation details
-            display_schema = {
-                "type": "object",
-                "properties": clean_schema.get("properties", {}),
-                "required": clean_schema.get("required", [])
-            }
+            display_schema = clean_schema.get("properties", {})
             
             schema_prompt = f"""Please provide a response that matches exactly this schema:
 {json.dumps(display_schema, indent=2)}
 
 Your response must be valid JSON that follows the above schema."""
 
-            messages.append({"role": "user", "content": prompt})
             messages.append({"role": "user", "content": schema_prompt})
+            messages.append({"role": "user", "content": prompt})
         else:
             messages.append({"role": "user", "content": prompt})
         
@@ -212,6 +210,17 @@ Your response must be valid JSON that follows the above schema."""
         
         if brief:
             data["max_tokens"] = 256
+
+        if json_schema:
+            data["response_format"] = {
+                "type": "json_schema",
+                "json_schema": {
+                    "name": "Details",
+                    "description": "N/A",
+                    "strict": True,
+                    "schema": clean_schema
+                }
+            }
             
         response = self._make_request("chat/completions", data)
         response_text, response_usage, additional_thought = self._process_chat_response(response, model)
@@ -223,21 +232,6 @@ Your response must be valid JSON that follows the above schema."""
                 structured_response = json.loads(response_text)
                 if self.debug:
                     print(json.dumps(structured_response, indent=2))
-                
-                # Check if the response is a schema format (with 'type', 'properties', etc.)
-                # and extract the actual data if needed
-                if (isinstance(structured_response, dict) and 
-                    'type' in structured_response and structured_response['type'] == 'object' and
-                    'properties' in structured_response):
-                    
-                    if self.debug:
-                        logger.debug("Detected schema-formatted response, extracting data from properties")
-                        logger.debug("Original response keys: %s", list(structured_response.keys()))
-                        logger.debug("Properties keys: %s", list(structured_response['properties'].keys()))
-                    
-                    # Extract the actual data from the properties
-                    # This handles the case where the model returns the schema itself
-                    structured_response = structured_response['properties']
                 
                 return Response(
                     response_text="",
