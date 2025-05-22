@@ -223,6 +223,22 @@ Your response must be valid JSON that follows the above schema."""
                 structured_response = json.loads(response_text)
                 if self.debug:
                     print(json.dumps(structured_response, indent=2))
+                
+                # Check if the response is a schema format (with 'type', 'properties', etc.)
+                # and extract the actual data if needed
+                if (isinstance(structured_response, dict) and 
+                    'type' in structured_response and structured_response['type'] == 'object' and
+                    'properties' in structured_response):
+                    
+                    if self.debug:
+                        logger.debug("Detected schema-formatted response, extracting data from properties")
+                        logger.debug("Original response keys: %s", list(structured_response.keys()))
+                        logger.debug("Properties keys: %s", list(structured_response['properties'].keys()))
+                    
+                    # Extract the actual data from the properties
+                    # This handles the case where the model returns the schema itself
+                    structured_response = structured_response['properties']
+                
                 return Response(
                     response_text="",
                     structured_data=structured_response,
