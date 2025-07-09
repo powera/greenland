@@ -28,7 +28,8 @@ def import_frequency_data(
     corpus_name: str, 
     file_type: str = "json", 
     max_words: int = 5000,
-    value_type: str = "auto"  # Parameter to specify what the numeric values represent: "rank", "frequency", or "auto"
+    value_type: str = "auto",  # Parameter to specify what the numeric values represent: "rank", "frequency", or "auto"
+    corpus_description: Optional[str] = None  # Optional description for new corpus
 ) -> Tuple[int, int]:
     """
     Import word frequency data from a file into the database.
@@ -42,6 +43,7 @@ def import_frequency_data(
                    - "rank": Values are treated as ranks (lower is more frequent)
                    - "frequency": Values are treated as frequencies (higher is more frequent)
                    - "auto": Auto-detect based on data characteristics
+        corpus_description: Optional description for the corpus if it needs to be created
         
     Returns:
         Tuple of (words imported, total words)
@@ -53,8 +55,12 @@ def import_frequency_data(
     corpus = session.query(Corpus).filter(Corpus.name == corpus_name).first()
     
     if not corpus:
-        logger.error(f"Corpus '{corpus_name}' not found")
-        raise ValueError(f"Corpus '{corpus_name}' not found")
+        logger.info(f"Corpus '{corpus_name}' not found, creating it...")
+        description = corpus_description or f"Corpus: {corpus_name}"
+        corpus = Corpus(name=corpus_name, description=description)
+        session.add(corpus)
+        session.commit()
+        logger.info(f"Created new corpus '{corpus_name}' with description: {description}")
     
     # Process the file based on type
     raw_words_data = {}
@@ -287,25 +293,29 @@ def import_all_corpus_data(
             "name": "19th_books",
             "file_name": "19th_books.json",
             "file_type": "json",
-            "value_type": "auto"
+            "value_type": "auto",
+            "description": "19th century books from Project Gutenberg"
         },
         {
             "name": "20th_books",
             "file_name": "20th_books.json",
             "file_type": "json",
-            "value_type": "auto"
+            "value_type": "auto",
+            "description": "20th century books (largely sci-fi)"
         },
         {
             "name": "subtitles",
             "file_name": "subtlex.txt",
             "file_type": "subtlex",
-            "value_type": "auto"
+            "value_type": "auto",
+            "description": "Various TV subtitles"
         },
         {
             "name": "wiki_vital",
             "file_name": "wiki_vital.json",
             "file_type": "json",
-            "value_type": "frequency"
+            "value_type": "frequency",
+            "description": "Vital 1000 Wikipedia articles from 2022"
         }
     ]
     
@@ -334,7 +344,8 @@ def import_all_corpus_data(
                 corpus_name=corpus_name,
                 file_type=config["file_type"],
                 max_words=word_limit,
-                value_type=config["value_type"]
+                value_type=config["value_type"],
+                corpus_description=config.get("description")
             )
             results[corpus_name] = (imported, total)
             logger.info(f"Successfully imported {imported}/{total} words for {corpus_name}")
