@@ -62,7 +62,7 @@ class LinguisticReviewer:
         print(f"\n{self.c.HEADER}{self.c.BOLD}Word:{self.c.ENDC} {word.word}")
         print(f"{self.c.BLUE}Rank:{self.c.ENDC} {word.frequency_rank}")
         
-        # Definitions
+        # Definitions (now derivative forms)
         definitions = word.definitions
         print(f"\n{self.c.HEADER}Definitions:{self.c.ENDC}")
         if not definitions:
@@ -78,12 +78,15 @@ class LinguisticReviewer:
                 flag_str = f" [{', '.join(flags)}]" if flags else ""
                 verified_str = f" {self.c.GREEN}[✓]{self.c.ENDC}" if definition.verified else ""
                 
-                print(f"  {self.c.CYAN}[{i+1}]{self.c.ENDC} {definition.definition_text}{flag_str}{verified_str}")
+                # In new schema, definition_text is in the lemma
+                definition_text = definition.lemma.definition_text
+                print(f"  {self.c.CYAN}[{i+1}]{self.c.ENDC} {definition_text}{flag_str}{verified_str}")
                 print(f"    {self.c.BLUE}Confidence:{self.c.ENDC} {definition.confidence:.2f}")
-                print(f"    {self.c.BLUE}Lemma:{self.c.ENDC} {definition.lemma}")
-                print(f"    {self.c.BLUE}Part of speech:{self.c.ENDC} {definition.pos_type}")
-                if definition.pos_subtype:
-                    print(f"    {self.c.BLUE}Subtype:{self.c.ENDC} {definition.pos_subtype}")
+                print(f"    {self.c.BLUE}Lemma:{self.c.ENDC} {definition.lemma.lemma_text}")
+                print(f"    {self.c.BLUE}Part of speech:{self.c.ENDC} {definition.lemma.pos_type}")
+                print(f"    {self.c.BLUE}Grammatical form:{self.c.ENDC} {definition.grammatical_form}")
+                if definition.lemma.pos_subtype:
+                    print(f"    {self.c.BLUE}Subtype:{self.c.ENDC} {definition.lemma.pos_subtype}")
                 if definition.ipa_pronunciation:
                     print(f"      {self.c.BLUE}IPA:{self.c.ENDC} {definition.ipa_pronunciation}")
                 if definition.phonetic_pronunciation:
@@ -104,8 +107,8 @@ class LinguisticReviewer:
                 if definition.notes:
                     print(f"    {self.c.BLUE}Notes:{self.c.ENDC} {definition.notes}")
                 
-                # Examples
-                examples = definition.examples
+                # Examples (now example_sentences)
+                examples = definition.example_sentences
                 if examples:
                     print(f"    {self.c.BLUE}Examples:{self.c.ENDC}")
                     for example in examples:
@@ -214,7 +217,7 @@ class LinguisticReviewer:
             return
         
         # Calculate column widths
-        word_width = max(len("Word"), max(len(item["word"]) for item in words))
+        word_width = max(len("Word"), max(len(item["token"]) for item in words))
         lemma_width = max(len("Lemma"), max(len(str(item["lemma"] or "")) for item in words))
         
         # Print header
@@ -236,7 +239,7 @@ class LinguisticReviewer:
                 item['rank'] = "N/A"
             row = (
                 f"{item['rank']:<6} "
-                f"{item['word']:<{word_width}} "
+                f"{item['token']:<{word_width}} "
                 f"{item['lemma'] or '':<{lemma_width}} "
                 f"{item['confidence']:<10.2f} "
                 f"{definition}"
@@ -249,6 +252,7 @@ class LinguisticReviewer:
         
         Args:
             pos_type: Part of speech to filter by
+            pos_subtype: Part of speech subtype to filter by
             limit: Maximum number of words to display
         """
         print(f"\n{self.c.HEADER}{self.c.BOLD}Most Common {pos_type.capitalize()}/{pos_subtype} Words:{self.c.ENDC}")
@@ -259,7 +263,7 @@ class LinguisticReviewer:
             return
         
         # Calculate column widths
-        word_width = max(len("Word"), max(len(item["word"]) for item in words))
+        word_width = max(len("Word"), max(len(item["token"]) for item in words))
         lemma_width = max(len("Lemma"), max(len(str(item["lemma"] or "")) for item in words))
         
         # Print header
@@ -281,7 +285,7 @@ class LinguisticReviewer:
                 item['rank'] = "N/A"
             row = (
                 f"{item['rank']:<6} "
-                f"{item['word']:<{word_width}} "
+                f"{item['token']:<{word_width}} "
                 f"{item['lemma'] or '':<{lemma_width}} "
                 f"{item['confidence']:<10.2f} "
                 f"{definition}"
@@ -303,7 +307,7 @@ class LinguisticReviewer:
             return
         
         for word in words:
-            print(f"{self.c.CYAN}{word.word}{self.c.ENDC} (rank: {word.frequency_rank}) - Missing: definitions")
+            print(f"{self.c.CYAN}{word.token}{self.c.ENDC} (rank: {word.frequency_rank}) - Missing: definitions")
     
     def interactive_menu(self) -> None:
         """Run interactive menu for reviewing and editing words."""
@@ -348,13 +352,14 @@ class LinguisticReviewer:
                 elif choice == 7:
                     stats = linguistic_db.get_processing_stats(self.session)
                     print(f"\n{self.c.HEADER}{self.c.BOLD}Database Statistics:{self.c.ENDC}")
-                    print(f"  Total words: {stats['total_words']}")
-                    percent_with_defs = stats['words_with_definitions']/stats['total_words']*100 if stats['total_words'] > 0 else 0
-                    print(f"  Words with definitions: {stats['words_with_definitions']} ({percent_with_defs:.1f}%)")
-                    percent_with_examples = stats['words_with_examples']/stats['total_words']*100 if stats['total_words'] > 0 else 0
-                    print(f"  Words with examples: {stats['words_with_examples']} ({percent_with_examples:.1f}%)")
-                    print(f"  Total definitions: {stats['total_definitions']}")
-                    print(f"  Total examples: {stats['total_examples']}")
+                    print(f"  Total word tokens: {stats['total_word_tokens']}")
+                    percent_with_defs = stats['tokens_with_derivative_forms']/stats['total_word_tokens']*100 if stats['total_word_tokens'] > 0 else 0
+                    print(f"  Tokens with derivative forms: {stats['tokens_with_derivative_forms']} ({percent_with_defs:.1f}%)")
+                    percent_with_examples = stats['tokens_with_examples']/stats['total_word_tokens']*100 if stats['total_word_tokens'] > 0 else 0
+                    print(f"  Tokens with examples: {stats['tokens_with_examples']} ({percent_with_examples:.1f}%)")
+                    print(f"  Total lemmas: {stats['total_lemmas']}")
+                    print(f"  Total derivative forms: {stats['total_derivative_forms']}")
+                    print(f"  Total example sentences: {stats['total_example_sentences']}")
                     print(f"  Overall completion: {stats['percent_complete']:.1f}%")
                 elif choice == 8:
                     pos_type = input(f"{self.c.BOLD}Enter part of speech (noun, verb, adjective, etc.): {self.c.ENDC}").strip().lower()
@@ -371,3 +376,11 @@ class LinguisticReviewer:
                     self.list_common_words_by_pos(pos_type, limit)
             except Exception as e:
                 logger.error(f"Error: {e}")
+
+def main():
+    """Main function to run the reviewer."""
+    reviewer = LinguisticReviewer()
+    reviewer.interactive_menu()
+
+if __name__ == "__main__":
+    main()

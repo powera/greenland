@@ -22,6 +22,7 @@ import shutil
 import constants
 from wordfreq import linguistic_db
 from wordfreq.connection_pool import get_session
+from wordfreq.models.schema import WordToken, Lemma, DerivativeForm, ExampleSentence
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -57,55 +58,77 @@ def get_words_by_pos_subtype(session, pos_type: str) -> Dict[str, List[Dict[str,
     # Get the available subtypes for this POS
     subtypes = linguistic_db.get_subtype_values_for_pos(pos_type)
     
-    # Query words with definitions of the specified part of speech
+    # Query word tokens with derivative forms and lemmas of the specified part of speech
     query = session.query(
-            linguistic_db.Word, 
-            linguistic_db.Definition
+            WordToken, 
+            DerivativeForm,
+            Lemma
         ).join(
-            linguistic_db.Definition
+            DerivativeForm, WordToken.id == DerivativeForm.word_token_id
+        ).join(
+            Lemma, DerivativeForm.lemma_id == Lemma.id
         ).filter(
-            linguistic_db.Definition.pos_type == pos_type
+            Lemma.pos_type == pos_type
         ).order_by(
-            linguistic_db.Word.frequency_rank.nullslast(), 
-            linguistic_db.Word.word
+            WordToken.frequency_rank.nullslast(), 
+            WordToken.token
         )
     
-    # Organize by subtype
+    # Organize by subtype, combining multiple derivative forms for the same word token
     words_by_subtype = defaultdict(list)
+    word_token_data = {}  # Track data by word token to combine forms
     
-    for word, definition in query:
-        subtype = definition.pos_subtype or "uncategorized"
+    for word_token, derivative_form, lemma in query:
+        subtype = lemma.pos_subtype or "uncategorized"
         if subtype not in subtypes:
             subtype = "uncategorized"
         
-        # Use the first example if available
-        example = ""
-        if definition.examples and len(definition.examples) > 0:
-            example = definition.examples[0].example_text
-            
-        # Truncate definition and example if too long
-        def_text = definition.definition_text
-        if len(def_text) > 150:
-            def_text = def_text[:147] + "..."
-            
-        if len(example) > 120:
-            example = example[:117] + "..."
+        # Create a unique key for this word token + lemma combination
+        word_key = (word_token.token, lemma.lemma_text, lemma.definition_text)
         
-        words_by_subtype[subtype].append({
-            "word": word.word,
-            "rank": word.frequency_rank,
-            "lemma": definition.lemma,
-            "definition": def_text,
-            "example": example,
-            "pronunciation": definition.phonetic_pronunciation or "",
-            "ipa": definition.ipa_pronunciation or "",
-            "chinese": definition.chinese_translation or "",
-            "french": definition.french_translation or "",
-            "korean": definition.korean_translation or "",
-            "swahili": definition.swahili_translation or "",
-            "lithuanian": definition.lithuanian_translation or "",
-            "vietnamese": definition.vietnamese_translation or ""
-        })
+        if word_key not in word_token_data:
+            # Get the first example if available
+            example = ""
+            if derivative_form.example_sentences and len(derivative_form.example_sentences) > 0:
+                example = derivative_form.example_sentences[0].example_text
+                
+            # Truncate definition and example if too long
+            def_text = lemma.definition_text
+            if len(def_text) > 150:
+                def_text = def_text[:147] + "..."
+                
+            if len(example) > 120:
+                example = example[:117] + "..."
+            
+            word_token_data[word_key] = {
+                "word": word_token.token,
+                "rank": word_token.frequency_rank,
+                "lemma": lemma.lemma_text,
+                "definition": def_text,
+                "example": example,
+                "pronunciation": derivative_form.phonetic_pronunciation or "",
+                "ipa": derivative_form.ipa_pronunciation or "",
+                "chinese": derivative_form.chinese_translation or "",
+                "french": derivative_form.french_translation or "",
+                "korean": derivative_form.korean_translation or "",
+                "swahili": derivative_form.swahili_translation or "",
+                "lithuanian": derivative_form.lithuanian_translation or "",
+                "vietnamese": derivative_form.vietnamese_translation or "",
+                "grammatical_forms": [derivative_form.grammatical_form],
+                "subtype": subtype
+            }
+        else:
+            # Add this grammatical form to the existing entry
+            if derivative_form.grammatical_form not in word_token_data[word_key]["grammatical_forms"]:
+                word_token_data[word_key]["grammatical_forms"].append(derivative_form.grammatical_form)
+    
+    # Group by subtype
+    for word_data in word_token_data.values():
+        subtype = word_data.pop("subtype")  # Remove subtype from the data dict
+        # Convert grammatical forms list to a readable string
+        word_data["forms"] = ", ".join(sorted(word_data["grammatical_forms"]))
+        del word_data["grammatical_forms"]  # Remove the list, keep the string
+        words_by_subtype[subtype].append(word_data)
     
     return words_by_subtype
 
@@ -165,29 +188,32 @@ def generate_index_page(session, env, pos_types: List[str]) -> None:
     pos_stats = {}
     
     for pos_type in pos_types:
-        # Count words and definitions for this POS
-        word_count = session.query(func.count(linguistic_db.Word.id.distinct()))\
-            .join(linguistic_db.Definition)\
-            .filter(linguistic_db.Definition.pos_type == pos_type)\
+        # Count word tokens and derivative forms for this POS
+        word_count = session.query(func.count(WordToken.id.distinct()))\
+            .join(DerivativeForm)\
+            .join(Lemma)\
+            .filter(Lemma.pos_type == pos_type)\
             .scalar() or 0
             
-        definition_count = session.query(func.count(linguistic_db.Definition.id))\
-            .filter(linguistic_db.Definition.pos_type == pos_type)\
+        derivative_form_count = session.query(func.count(DerivativeForm.id))\
+            .join(Lemma)\
+            .filter(Lemma.pos_type == pos_type)\
             .scalar() or 0
             
         # Count subtypes used
-        subtype_count = session.query(func.count(linguistic_db.Definition.pos_subtype.distinct()))\
+        subtype_count = session.query(func.count(Lemma.pos_subtype.distinct()))\
             .filter(
-                linguistic_db.Definition.pos_type == pos_type,
-                linguistic_db.Definition.pos_subtype != None
+                Lemma.pos_type == pos_type,
+                Lemma.pos_subtype != None
             ).scalar() or 0
         
         # Get top 5 most common words for this POS
         top_words = []
-        query = session.query(linguistic_db.Word.word)\
-            .join(linguistic_db.Definition)\
-            .filter(linguistic_db.Definition.pos_type == pos_type)\
-            .order_by(linguistic_db.Word.frequency_rank)\
+        query = session.query(WordToken.token)\
+            .join(DerivativeForm)\
+            .join(Lemma)\
+            .filter(Lemma.pos_type == pos_type)\
+            .order_by(WordToken.frequency_rank.nullslast())\
             .limit(5)
             
         for row in query:
@@ -195,7 +221,7 @@ def generate_index_page(session, env, pos_types: List[str]) -> None:
         
         pos_stats[pos_type] = {
             "word_count": word_count,
-            "definition_count": definition_count,
+            "definition_count": derivative_form_count,
             "subtype_count": subtype_count,
             "top_words": top_words
         }
@@ -321,7 +347,7 @@ def get_all_pos_types(session) -> List[str]:
     Returns:
         List of all POS types found in the database
     """
-    pos_types = session.query(linguistic_db.Definition.pos_type.distinct()).all()
+    pos_types = session.query(Lemma.pos_type.distinct()).all()
     return [pos_type[0] for pos_type in pos_types]
 
 def generate_index_page_only(session) -> None:
