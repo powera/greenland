@@ -17,6 +17,7 @@ class WordToken(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     token: Mapped[str] = mapped_column(String, unique=True, index=True, nullable=False)
+    frequency_rank: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)  # Combined harmonic mean rank
     added_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now())
     updated_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
     

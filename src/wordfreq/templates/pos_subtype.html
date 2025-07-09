@@ -20,6 +20,7 @@
         <div class="table-controls">
             <input type="text" id="searchInput" placeholder="Search words...">
             <div class="field-toggles">
+                <label><input type="checkbox" data-column="forms" checked> Forms</label>
                 <label><input type="checkbox" data-column="pronunciation" checked> Pronunciation</label>
                 <label><input type="checkbox" data-column="ipa" checked> IPA</label>
                 <label><input type="checkbox" data-column="example" checked> Example</label>
@@ -46,6 +47,7 @@
                         <th class="sortable" data-sort="rank">Rank</th>
                         <th class="sortable" data-sort="lemma">Lemma</th>
                         <th>Definition</th>
+                        <th class="forms">Forms</th>
                         <th class="pronunciation">Pronunciation</th>
                         <th class="ipa">IPA</th>
                         <th class="example">Example</th>
@@ -64,6 +66,7 @@
                         <td class="rank">{{ word.rank if word.rank else '-' }}</td>
                         <td class="lemma">{{ word.lemma }}</td>
                         <td class="definition">{{ word.definition }}</td>
+                        <td class="forms">{{ word.forms }}</td>
                         <td class="pronunciation">{{ word.pronunciation }}</td>
                         <td class="ipa">{{ word.ipa }}</td>
                         <td class="example">{{ word.example }}</td>

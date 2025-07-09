@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-"""Processor for loading and analyzing word lists."""
+"""Processor for loading and analyzing word token lists."""
 
 import json
 import csv
@@ -29,7 +29,7 @@ DEFAULT_MAX_RETRIES = 1
 DEFAULT_THROTTLE = 3.0  # seconds between API calls
 
 class WordProcessor:
-    """Processor for loading and analyzing word lists."""
+    """Processor for loading and analyzing word token lists."""
     
     def __init__(
         self, 
@@ -48,7 +48,7 @@ class WordProcessor:
             db_path: Path to SQLite database
             model: Model name to use for queries
             threads: Number of threads for parallel processing
-            batch_size: Number of words to process in a batch
+            batch_size: Number of word tokens to process in a batch
             throttle: Time to wait between API calls
             max_retries: Maximum number of retries for failed API calls
             debug: Whether to enable debug logging
@@ -76,15 +76,15 @@ class WordProcessor:
     
     def process_single_word(self, word: str) -> bool:
         """
-        Process a single word to get linguistic information.
+        Process a single word token to get linguistic information.
         
         Args:
-            word: Word to process
+            word: Word token to process
             
         Returns:
             Success flag
         """
-        logger.info(f"Processing word: {word}")
+        logger.info(f"Processing word token: {word}")
         client = LinguisticClient.get_instance(model=self.model, db_path=self.db_path, debug=self.debug)
         return client.process_word(word)
     
@@ -93,10 +93,11 @@ class WordProcessor:
         # Each thread gets its own client instance
         client = LinguisticClient.get_instance(model=self.model, db_path=self.db_path, debug=self.debug)
         
-        word = word_obj.word
+        # word_obj is now a WordToken object, so access the token attribute
+        word = word_obj.token
         thread_name = threading.current_thread().name
         
-        logger.debug(f"[{thread_name}] Processing word: {word}")
+        logger.debug(f"[{thread_name}] Processing word token: {word}")
         
         for attempt in range(self.max_retries):
             try:
@@ -110,10 +111,10 @@ class WordProcessor:
     
     def process_batch(self, words: List[Any]) -> Tuple[int, int]:
         """
-        Process a batch of words in parallel.
+        Process a batch of word tokens in parallel.
         
         Args:
-            words: List of Word objects to process
+            words: List of WordToken objects to process
             
         Returns:
             Tuple of (successful count, total count)
@@ -139,29 +140,27 @@ class WordProcessor:
     
     def process_all_words(self, limit: Optional[int] = None, skip_processed: bool = True) -> Dict[str, Any]:
         """
-        Process all words in the database.
+        Process all word tokens in the database.
         
         Args:
-            limit: Maximum number of words to process
-            skip_processed: Whether to skip words that have already been processed
+            limit: Maximum number of word tokens to process
+            skip_processed: Whether to skip word tokens that have already been processed
             
         Returns:
             Statistics about the processing
         """
-        logger.info("Starting batch processing of words")
+        logger.info("Starting batch processing of word tokens")
         
-        # Get words to process
+        # Get word tokens to process
         session = self.get_session()
         if skip_processed:
-            words = linguistic_db.get_words_needing_analysis(session, limit=limit or 100000)
+            words = linguistic_db.get_word_tokens_needing_analysis(session, limit=limit or 100000)
         else:
-            query = session.query(linguistic_db.Word).order_by(linguistic_db.Word.frequency_rank)
-            if limit:
-                query = query.limit(limit)
-            words = query.all()
+            # Get word tokens by frequency rank from the default corpus
+            words = linguistic_db.get_word_tokens_by_frequency_rank(session, "wiki_vital", limit=limit or 100000)
         
         total_words = len(words)
-        logger.info(f"Found {total_words} words to process")
+        logger.info(f"Found {total_words} word tokens to process")
         
         if total_words == 0:
             return {
@@ -180,7 +179,7 @@ class WordProcessor:
             batch = words[i:i + self.batch_size]
             batch_count += 1
             
-            logger.info(f"Processing batch {batch_count} ({len(batch)} words)")
+            logger.info(f"Processing batch {batch_count} ({len(batch)} word tokens)")
             success_count, batch_total = self.process_batch(batch)
             
             successful += success_count
@@ -188,7 +187,7 @@ class WordProcessor:
             
             # Log progress
             logger.info(f"Batch {batch_count} complete: {success_count}/{batch_total} successful")
-            logger.info(f"Overall progress: {processed}/{total_words} words processed ({successful} successful)")
+            logger.info(f"Overall progress: {processed}/{total_words} word tokens processed ({successful} successful)")
             
         return {
             "total": total_words,

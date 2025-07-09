@@ -14,7 +14,7 @@ import constants
 from wordfreq import linguistic_db
 from wordfreq.connection_pool import get_session
 from wordfreq.linguistic_client import LinguisticClient
-from wordfreq.linguistic_db import Word, Corpus, WordFrequency
+from wordfreq.linguistic_db import WordToken, Corpus, WordFrequency
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -191,15 +191,15 @@ def import_frequency_data(
         total_count = len(words_data)
         
         for word_text, data in words_data.items():
-            # Get or create the word
-            word_obj = linguistic_db.add_word(session, word_text)
+            # Get or create the word token
+            word_obj = linguistic_db.add_word_token(session, word_text)
             
             rank = data.get("rank")
             frequency = data.get("frequency")
             
             # Add or update the frequency record
             existing = session.query(WordFrequency).filter(
-                WordFrequency.word_id == word_obj.id,
+                WordFrequency.word_token_id == word_obj.id,
                 WordFrequency.corpus_id == corpus.id
             ).first()
             
@@ -210,7 +210,7 @@ def import_frequency_data(
                     existing.frequency = frequency
             else:
                 new_freq = WordFrequency(
-                    word_id=word_obj.id,
+                    word_token_id=word_obj.id,
                     corpus_id=corpus.id,
                     rank=rank,
                     frequency=frequency
