@@ -5,11 +5,8 @@
 import datetime
 from typing import Optional
 from sqlalchemy import String, Text, Boolean, TIMESTAMP, Integer, func
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
-
-class Base(DeclarativeBase):
-    """Base class for all SQLAlchemy models."""
-    pass
+from sqlalchemy.orm import Mapped, mapped_column
+from wordfreq.models.schema import Base
 
 class QueryLog(Base):
     """Model for tracking LLM queries for auditing and debugging."""
