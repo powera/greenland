@@ -25,6 +25,14 @@ REVIEWER = wordfreq.reviewer.LinguisticReviewer()
 # Create database session (from notebook cell)
 session = wordfreq.linguistic_db.create_database_session()
 
+# Ensure all database tables exist
+print("Initializing database tables...")
+wordfreq.linguistic_db.ensure_tables_exist(session)
+
+# Initialize corpora entries
+print("Initializing corpora...")
+wordfreq.linguistic_db.initialize_corpora(session)
+
 # Import additional modules (from notebook cells)
 import wordfreq.analysis
 import wordfreq.importer
