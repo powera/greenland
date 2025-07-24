@@ -10,7 +10,7 @@ from sqlalchemy import func, case, or_
 import constants
 from wordfreq import linguistic_db
 from wordfreq.connection_pool import get_session
-from wordfreq.linguistic_db import Word, Corpus, WordFrequency
+from wordfreq.linguistic_db import WordToken, Corpus, WordFrequency
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -34,7 +34,7 @@ def calculate_harmonic_mean_ranks(
         corpus_names: List of corpus names to include (or all if None)
         outlier_threshold: Z-score threshold for outlier detection
         unknown_rank: Rank to use for words not in a corpus
-        update_db: Whether to update the frequency_rank in the words table
+        update_db: Whether to update the frequency_rank in the word_tokens table
         
     Returns:
         List of words with their combined ranks and outlier information
@@ -59,28 +59,28 @@ def calculate_harmonic_mean_ranks(
     # Get all words with their ranks in each corpus
     word_data = {}
     
-    # Query all words
-    words = session.query(Word).all()
+    # Query all word tokens
+    word_tokens = session.query(WordToken).all()
     
     # Get all frequency data
     all_frequencies = session.query(WordFrequency).filter(WordFrequency.corpus_id.in_(corpus_ids)).all()
     
-    # Organize frequency data by word_id and corpus_id
-    freq_by_word = {}
+    # Organize frequency data by word_token_id and corpus_id
+    freq_by_word_token = {}
     for freq in all_frequencies:
-        if freq.word_id not in freq_by_word:
-            freq_by_word[freq.word_id] = {}
-        freq_by_word[freq.word_id][freq.corpus_id] = freq.rank
+        if freq.word_token_id not in freq_by_word_token:
+            freq_by_word_token[freq.word_token_id] = {}
+        freq_by_word_token[freq.word_token_id][freq.corpus_id] = freq.rank
     
-    # Process each word
-    for word in words:
+    # Process each word token
+    for word_token in word_tokens:
         word_ranks = []
         corpus_ranks = {}
         
         # Get ranks for each corpus
         for corpus_id in corpus_ids:
-            if word.id in freq_by_word and corpus_id in freq_by_word[word.id]:
-                corpus_ranks[corpus_id] = freq_by_word[word.id][corpus_id]
+            if word_token.id in freq_by_word_token and corpus_id in freq_by_word_token[word_token.id]:
+                corpus_ranks[corpus_id] = freq_by_word_token[word_token.id][corpus_id]
             else:
                 corpus_ranks[corpus_id] = unknown_rank
             word_ranks.append(corpus_ranks[corpus_id])
@@ -95,13 +95,13 @@ def calculate_harmonic_mean_ranks(
         except ZeroDivisionError:
             harmonic_mean = unknown_rank
             
-        word_data[word.id] = {
-            "word": word.word,
+        word_data[word_token.id] = {
+            "word": word_token.token,
             "ranks": corpus_ranks,
             "harmonic_mean": harmonic_mean,
             "is_outlier": False,
             "z_score": 0,
-            "current_rank": word.frequency_rank
+            "current_rank": word_token.frequency_rank
         }
     
     # Convert to list for sorting and outlier detection
@@ -134,9 +134,9 @@ def calculate_harmonic_mean_ranks(
     if update_db:
         updated_count = 0
         for word_info in word_list:
-            word = session.query(Word).filter(Word.word == word_info["word"]).first()
-            if word and word.frequency_rank != word_info["combined_rank"]:
-                word.frequency_rank = word_info["combined_rank"]
+            word_token = session.query(WordToken).filter(WordToken.token == word_info["word"]).first()
+            if word_token and word_token.frequency_rank != word_info["combined_rank"]:
+                word_token.frequency_rank = word_info["combined_rank"]
                 updated_count += 1
                 
                 # Commit in batches

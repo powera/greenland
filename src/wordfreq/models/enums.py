@@ -108,3 +108,48 @@ class AdverbSubtype(enum.Enum):
     DEFINITE_FREQUENCY = "definite_frequency"
     INDEFINITE_FREQUENCY = "indefinite_frequency"
     OTHER = "other"
+
+class GrammaticalForm(enum.Enum):
+    """Grammatical forms for derivative forms with part-of-speech prefixes."""
+    # Verb forms
+    VERB_INFINITIVE = "verb/infinitive"
+    VERB_PRESENT_TENSE = "verb/present_tense"
+    VERB_PAST_TENSE = "verb/past_tense"
+    VERB_PAST_PARTICIPLE = "verb/past_participle"
+    VERB_PRESENT_PARTICIPLE = "verb/present_participle"
+    VERB_GERUND = "verb/gerund"
+    VERB_IMPERATIVE = "verb/imperative"
+    VERB_SUBJUNCTIVE = "verb/subjunctive"
+    
+    # Noun forms
+    NOUN_SINGULAR = "noun/singular"
+    NOUN_PLURAL = "noun/plural"
+    NOUN_POSSESSIVE_SINGULAR = "noun/possessive_singular"
+    NOUN_POSSESSIVE_PLURAL = "noun/possessive_plural"
+    
+    # Adjective forms
+    ADJECTIVE_POSITIVE = "adjective/positive"
+    ADJECTIVE_COMPARATIVE = "adjective/comparative"
+    ADJECTIVE_SUPERLATIVE = "adjective/superlative"
+    
+    # Adverb forms
+    ADVERB_POSITIVE = "adverb/positive"
+    ADVERB_COMPARATIVE = "adverb/comparative"
+    ADVERB_SUPERLATIVE = "adverb/superlative"
+    
+    # Pronoun forms
+    PRONOUN_SUBJECTIVE = "pronoun/subjective"
+    PRONOUN_OBJECTIVE = "pronoun/objective"
+    PRONOUN_POSSESSIVE = "pronoun/possessive"
+    PRONOUN_REFLEXIVE = "pronoun/reflexive"
+    
+    # Other parts of speech (typically invariant)
+    PREPOSITION = "preposition/base"
+    CONJUNCTION = "conjunction/base"
+    INTERJECTION = "interjection/base"
+    DETERMINER = "determiner/base"
+    ARTICLE = "article/base"
+    
+    # Generic forms
+    BASE_FORM = "base_form"
+    OTHER = "other"
