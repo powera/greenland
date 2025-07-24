@@ -14,6 +14,7 @@ from clients.unified_client import UnifiedLLMClient
 import util.prompt_loader
 from wordfreq import linguistic_db
 from wordfreq.models.translations import Translation, TranslationSet
+from wordfreq.models.enums import GrammaticalForm
 from wordfreq.connection_pool import get_session, close_thread_sessions
 import constants
 
@@ -110,36 +111,41 @@ class LinguisticClient:
             logger.error("Invalid word parameter provided")
             return [], False
             
+        # Get valid grammatical forms for the schema
+        valid_grammatical_forms = [form.value for form in GrammaticalForm]
+        
         schema = Schema(
             name="WordDefinitions",
-            description="Definitions for a word",
+            description="Definitions and forms for a word",
             properties={
                 "definitions": SchemaProperty(
                     type="array",
-                    description="List of definitions for the word",
+                    description="List of definitions and forms for the word",
                     array_items_schema=Schema(
-                        name="Definition",
-                        description="A single definition of the word",
+                        name="WordForm",
+                        description="A single form/definition of the word",
                         properties={
                             "definition": SchemaProperty("string", "The definition of the word for this specific meaning"),
                             "pos": SchemaProperty("string", "The part of speech for this definition (noun, verb, etc.)", enum=list(VALID_POS_TYPES)),
                             "pos_subtype": SchemaProperty("string", "A subtype for the part of speech", enum=linguistic_db.get_all_pos_subtypes()),
-                            "phonetic_spelling": SchemaProperty("string", "Phonetic spelling of the word"),
                             "lemma": SchemaProperty("string", "The base form (lemma) for this definition"),
+                            "grammatical_form": SchemaProperty("string", "The specific grammatical form (e.g., verb/infinitive, noun/plural)", enum=valid_grammatical_forms),
+                            "is_base_form": SchemaProperty("boolean", "Whether this is the base form (infinitive, singular, etc.)"),
+                            "phonetic_spelling": SchemaProperty("string", "Phonetic spelling of the word"),
                             "ipa_spelling": SchemaProperty("string", "International Phonetic Alphabet for the word"),
                             "special_case": SchemaProperty("boolean", "Whether this is a special case (foreign word, part of name, etc.)"),
                             "examples": SchemaProperty(
                                 type="array",
-                                description="Example sentences using this definition",
-                                items={"type": "string", "description": "Example sentence using this definition"}
+                                description="Example sentences using this specific form",
+                                items={"type": "string", "description": "Example sentence using this form"}
                             ),
-                            "notes": SchemaProperty("string", "Additional notes about this definition"),
-                            "chinese_translation": SchemaProperty("string", "The Chinese translation of the word"),
-                            "korean_translation": SchemaProperty("string", "The Korean translation of the word"),
-                            "french_translation": SchemaProperty("string", "The French translation of the word"),
-                            "swahili_translation": SchemaProperty("string", "The Swahili translation of the word"),
-                            "vietnamese_translation": SchemaProperty("string", "The Vietnamese translation of the word"),
-                            "lithuanian_translation": SchemaProperty("string", "The Lithuanian translation of the word"),
+                            "notes": SchemaProperty("string", "Additional notes about this form"),
+                            "chinese_translation": SchemaProperty("string", "The Chinese translation of this form"),
+                            "korean_translation": SchemaProperty("string", "The Korean translation of this form"),
+                            "french_translation": SchemaProperty("string", "The French translation of this form"),
+                            "swahili_translation": SchemaProperty("string", "The Swahili translation of this form"),
+                            "vietnamese_translation": SchemaProperty("string", "The Vietnamese translation of this form"),
+                            "lithuanian_translation": SchemaProperty("string", "The Lithuanian translation of this form"),
                             "confidence": SchemaProperty("number", "Confidence score from 0-1"),
                         }
                     )
@@ -149,7 +155,15 @@ class LinguisticClient:
         
         context = util.prompt_loader.get_context("wordfreq", "definitions")
         
-        prompt = f"Provide comprehensive dictionary definitions for the word '{word}'."
+        prompt = f"""Provide comprehensive dictionary definitions for the word '{word}'. 
+
+For each definition, include:
+1. The specific grammatical form (e.g., verb/infinitive, noun/singular, verb/present_participle)
+2. Whether it's the base form (infinitive for verbs, singular for nouns, etc.)
+3. The lemma (base concept) this form represents
+4. Specific example sentences that demonstrate this exact form
+
+Pay special attention to distinguishing between different grammatical forms of the same lemma (e.g., "running" as gerund vs present participle)."""
         
         try:
             # Make a single API call without retries
@@ -195,32 +209,32 @@ class LinguisticClient:
     
     def process_word(self, word: str, refresh: bool = False) -> bool:
         """
-        Process a word to get linguistic information and store in database.
+        Process a word to get linguistic information and store in database using new schema.
         
         Args:
-            word: Word to process
-            refresh: If True, delete existing definitions and re-populate the word
+            word: Word token to process
+            refresh: If True, delete existing derivative forms and re-populate the word
             
         Returns:
             Success flag
         """
         session = self.get_session()
         try:
-            # Add or get word in database
-            word_obj = linguistic_db.add_word(session, word)
+            # Add or get word token in database
+            word_token = linguistic_db.add_word_token(session, word)
             
-            # If the word already has definitions and refresh is False, return early
-            if len(word_obj.definitions) > 0:
+            # If the word token already has derivative forms and refresh is False, return early
+            if len(word_token.derivative_forms) > 0:
                 if not refresh:
-                    logger.info(f"Word '{word}' already exists in the database with {len(word_obj.definitions)} definitions")
+                    logger.info(f"Word token '{word}' already exists in the database with {len(word_token.derivative_forms)} derivative forms")
                     return True
-                else:  # len(word_obj.definitions) > 0 and refresh
-                    logger.info(f"Refreshing definitions for word '{word}'")
-                    if not linguistic_db.delete_word_definitions(session, word_obj.id):
-                        logger.error(f"Failed to delete existing definitions for word '{word}'")
+                else:  # len(word_token.derivative_forms) > 0 and refresh
+                    logger.info(f"Refreshing derivative forms for word token '{word}'")
+                    if not linguistic_db.delete_derivative_forms_for_token(session, word_token.id):
+                        logger.error(f"Failed to delete existing derivative forms for word token '{word}'")
                         return False
-                    # Refresh the word object after deleting definitions
-                    session.refresh(word_obj)
+                    # Refresh the word token object after deleting derivative forms
+                    session.refresh(word_token)
                 
             # Query for definitions, POS, lemmas, and examples
             definitions, success = self.query_definitions(word)
@@ -229,13 +243,29 @@ class LinguisticClient:
                 logger.warning(f"Failed to process word '{word}'")
                 return False
                 
-            # Process each definition
+            # Process each definition/form
             for def_data in definitions:
                 # Validate POS type
                 pos_type = def_data.get('pos', 'unknown')
                 if pos_type != 'unknown' and pos_type not in VALID_POS_TYPES:
                     logger.warning(f"Invalid POS type '{pos_type}' for word '{word}', defaulting to 'unknown'")
                     pos_type = 'unknown'
+                
+                # Get grammatical form, defaulting based on POS if not provided
+                grammatical_form = def_data.get('grammatical_form')
+                if not grammatical_form:
+                    grammatical_form = self._determine_default_grammatical_form(word, pos_type, def_data.get('lemma', word))
+                
+                # Validate grammatical form
+                valid_forms = [form.value for form in GrammaticalForm]
+                if grammatical_form not in valid_forms:
+                    logger.warning(f"Invalid grammatical form '{grammatical_form}' for word '{word}', defaulting to 'other'")
+                    grammatical_form = GrammaticalForm.OTHER.value
+                
+                # Determine if this is a base form
+                is_base_form = def_data.get('is_base_form', False)
+                if not is_base_form:
+                    is_base_form = self._is_likely_base_form(word, def_data.get('lemma', word), pos_type)
                 
                 # Create Translation objects for each language
                 chinese_trans = None
@@ -272,47 +302,130 @@ class LinguisticClient:
                     lithuanian=lithuanian_trans
                 )
                 
-                definition = linguistic_db.add_definition(
-                    session,
-                    word_obj,
+                # Create complete word entry (WordToken + Lemma + DerivativeForm)
+                derivative_form = linguistic_db.add_complete_word_entry(
+                    session=session,
+                    token=word,
+                    lemma_text=def_data.get('lemma', word),
                     definition_text=def_data.get('definition', f"Definition for {word}"),
                     pos_type=pos_type,
-                    lemma=def_data.get('lemma', word),
-                    confidence=def_data.get('confidence', 0.0),
-                    phonetic_pronunciation=def_data.get('phonetic_spelling', None),
-                    ipa_pronunciation=def_data.get('ipa_spelling', None),
+                    grammatical_form=grammatical_form,
+                    pos_subtype=def_data.get('pos_subtype'),
+                    is_base_form=is_base_form,
+                    ipa_pronunciation=def_data.get('ipa_spelling'),
+                    phonetic_pronunciation=def_data.get('phonetic_spelling'),
                     translations=translations,
                     multiple_meanings=def_data.get('multiple_meanings', False),
                     special_case=def_data.get('special_case', False),
+                    confidence=def_data.get('confidence', 0.0),
                     notes=def_data.get('notes')
                 )
                 
-                # Use set for efficient membership testing
-                if definition.pos_type in self.MAJOR_POS_TYPES:
-                    # Add subtype if available
-                    subtype = def_data.get('pos_subtype')
-                    if subtype:
-                        linguistic_db.update_definition(session, definition.id, pos_subtype=subtype)
+                if not derivative_form:
+                    logger.error(f"Failed to create derivative form for word '{word}'")
+                    continue
                 
-                # Add examples
+                # Add example sentences
                 for example_text in def_data.get('examples', []):
-                    linguistic_db.add_example(
+                    linguistic_db.add_example_sentence(
                         session,
-                        definition,
+                        derivative_form,
                         example_text=example_text
                     )
             
             # Commit the transaction
             session.commit()
-            logger.info(f"Successfully processed word '{word}' with {len(word_obj.definitions)} definitions.")
+            logger.info(f"Successfully processed word token '{word}' with {len(word_token.derivative_forms)} derivative forms.")
             return True
             
         except Exception as e:
             session.rollback()
             logger.error(f"Error processing word '{word}': {e}", exc_info=True)
             return False
-        finally:
-            session.close()
+    
+    def _determine_default_grammatical_form(self, word_text: str, pos_type: str, lemma_text: str) -> str:
+        """
+        Determine a default grammatical form based on word, POS, and lemma.
+        
+        This is a heuristic fallback when the LLM doesn't provide grammatical_form.
+        """
+        pos_lower = pos_type.lower()
+        
+        if word_text == lemma_text:
+            # Word matches lemma, likely base form
+            if pos_lower == 'verb':
+                return GrammaticalForm.VERB_INFINITIVE.value
+            elif pos_lower == 'noun':
+                return GrammaticalForm.NOUN_SINGULAR.value
+            elif pos_lower == 'adjective':
+                return GrammaticalForm.ADJECTIVE_POSITIVE.value
+            elif pos_lower == 'adverb':
+                return GrammaticalForm.ADVERB_POSITIVE.value
+            elif pos_lower == 'preposition':
+                return GrammaticalForm.PREPOSITION.value
+            elif pos_lower == 'conjunction':
+                return GrammaticalForm.CONJUNCTION.value
+            elif pos_lower == 'interjection':
+                return GrammaticalForm.INTERJECTION.value
+            elif pos_lower == 'determiner':
+                return GrammaticalForm.DETERMINER.value
+            elif pos_lower == 'article':
+                return GrammaticalForm.ARTICLE.value
+            else:
+                return GrammaticalForm.BASE_FORM.value
+        
+        # Basic heuristics for English inflected forms
+        if pos_lower == 'verb':
+            if word_text.endswith('ing'):
+                return GrammaticalForm.VERB_PRESENT_PARTICIPLE.value  # Default to participle
+            elif word_text.endswith('ed'):
+                return GrammaticalForm.VERB_PAST_TENSE.value
+            elif word_text.endswith('s'):
+                return GrammaticalForm.VERB_PRESENT_TENSE.value
+        
+        elif pos_lower == 'noun':
+            if word_text.endswith('s') and not lemma_text.endswith('s'):
+                return GrammaticalForm.NOUN_PLURAL.value
+            elif word_text.endswith("'s"):
+                return GrammaticalForm.NOUN_POSSESSIVE_SINGULAR.value
+        
+        elif pos_lower == 'adjective':
+            if word_text.endswith('er'):
+                return GrammaticalForm.ADJECTIVE_COMPARATIVE.value
+            elif word_text.endswith('est'):
+                return GrammaticalForm.ADJECTIVE_SUPERLATIVE.value
+        
+        elif pos_lower == 'adverb':
+            if word_text.endswith('er'):
+                return GrammaticalForm.ADVERB_COMPARATIVE.value
+            elif word_text.endswith('est'):
+                return GrammaticalForm.ADVERB_SUPERLATIVE.value
+        
+        return GrammaticalForm.OTHER.value
+    
+    def _is_likely_base_form(self, word_text: str, lemma_text: str, pos_type: str) -> bool:
+        """
+        Determine if a word is likely the base form based on heuristics.
+        """
+        # If word matches lemma, it's likely the base form
+        if word_text == lemma_text:
+            return True
+        
+        # For some POS types, check specific patterns
+        pos_lower = pos_type.lower()
+        
+        if pos_lower == 'verb':
+            # Base form for verbs is typically the infinitive
+            return word_text == lemma_text
+        elif pos_lower == 'noun':
+            # Base form for nouns is typically the singular
+            return not (word_text.endswith('s') and not lemma_text.endswith('s'))
+        elif pos_lower in ['adjective', 'adverb']:
+            # Base form is the positive degree
+            return not (word_text.endswith('er') or word_text.endswith('est'))
+        
+        # For other POS types, assume base form if it matches lemma
+        return word_text == lemma_text
 
     def query_chinese_translation(self, word: str, definition: str, example: str) -> Tuple[str, bool]:
         """
@@ -1129,6 +1242,190 @@ class LinguisticClient:
             "successful": successful
         }
 
+    # New methods for working with the updated schema
+    
+    def get_word_token_info(self, token_text: str) -> Dict[str, Any]:
+        """
+        Get comprehensive information about a word token using the new schema.
+        
+        Args:
+            token_text: The word token to look up
+            
+        Returns:
+            Dictionary with token information including all derivative forms
+        """
+        session = self.get_session()
+        word_token = linguistic_db.get_word_token_by_text(session, token_text)
+        
+        if not word_token:
+            return {
+                "token": token_text,
+                "exists": False,
+                "derivative_forms": []
+            }
+        
+        forms_info = []
+        for derivative_form in word_token.derivative_forms:
+            lemma = derivative_form.lemma
+            examples = [ex.example_text for ex in derivative_form.example_sentences]
+            
+            form_info = {
+                "lemma_text": lemma.lemma_text,
+                "definition": lemma.definition_text,
+                "pos_type": lemma.pos_type,
+                "pos_subtype": lemma.pos_subtype,
+                "grammatical_form": derivative_form.grammatical_form,
+                "is_base_form": derivative_form.is_base_form,
+                "ipa_pronunciation": derivative_form.ipa_pronunciation,
+                "phonetic_pronunciation": derivative_form.phonetic_pronunciation,
+                "confidence": derivative_form.confidence,
+                "verified": derivative_form.verified,
+                "examples": examples,
+                "translations": {
+                    "chinese": derivative_form.chinese_translation,
+                    "korean": derivative_form.korean_translation,
+                    "french": derivative_form.french_translation,
+                    "swahili": derivative_form.swahili_translation,
+                    "vietnamese": derivative_form.vietnamese_translation,
+                    "lithuanian": derivative_form.lithuanian_translation
+                }
+            }
+            forms_info.append(form_info)
+        
+        return {
+            "token": token_text,
+            "exists": True,
+            "derivative_forms": forms_info
+        }
+    
+    def get_lemma_forms(self, lemma_text: str, pos_type: Optional[str] = None) -> List[Dict[str, Any]]:
+        """
+        Get all word tokens that represent forms of a specific lemma.
+        
+        Args:
+            lemma_text: The lemma to look up
+            pos_type: Optional POS filter
+            
+        Returns:
+            List of dictionaries with token and form information
+        """
+        session = self.get_session()
+        derivative_forms = linguistic_db.get_all_derivative_forms_for_lemma(session, lemma_text, pos_type)
+        
+        forms_info = []
+        for derivative_form in derivative_forms:
+            word_token = derivative_form.word_token
+            examples = [ex.example_text for ex in derivative_form.example_sentences]
+            
+            form_info = {
+                "token": word_token.token,
+                "grammatical_form": derivative_form.grammatical_form,
+                "is_base_form": derivative_form.is_base_form,
+                "ipa_pronunciation": derivative_form.ipa_pronunciation,
+                "phonetic_pronunciation": derivative_form.phonetic_pronunciation,
+                "confidence": derivative_form.confidence,
+                "verified": derivative_form.verified,
+                "examples": examples
+            }
+            forms_info.append(form_info)
+        
+        return forms_info
+    
+    def add_translation_for_derivative_form(self, derivative_form_id: int, language: str) -> bool:
+        """
+        Add a translation for a specific derivative form using the new schema.
+        
+        Args:
+            derivative_form_id: ID of the derivative form to translate
+            language: Language to translate to (chinese, korean, french, etc.)
+            
+        Returns:
+            Success flag
+        """
+        session = self.get_session()
+        
+        # Get the derivative form
+        derivative_form = session.query(linguistic_db.DerivativeForm).filter(
+            linguistic_db.DerivativeForm.id == derivative_form_id
+        ).first()
+        
+        if not derivative_form:
+            logger.warning(f"Derivative form with ID {derivative_form_id} not found")
+            return False
+        
+        # Get the word token and lemma
+        word_token = derivative_form.word_token
+        lemma = derivative_form.lemma
+        
+        # Get an example sentence if available
+        example_text = "No example available."
+        if derivative_form.example_sentences:
+            example_text = derivative_form.example_sentences[0].example_text
+        
+        # Query for translation (using existing translation method)
+        if language.lower() == 'chinese':
+            translation, success = self.query_chinese_translation(
+                word_token.token,
+                lemma.definition_text,
+                example_text
+            )
+            
+            if success and translation:
+                # Update the derivative form with the translation
+                linguistic_db.update_translation(session, derivative_form.id, 'chinese', translation)
+                logger.info(f"Added Chinese translation '{translation}' for '{word_token.token}' (derivative form ID: {derivative_form.id})")
+                return True
+            else:
+                logger.warning(f"Failed to get Chinese translation for '{word_token.token}' (derivative form ID: {derivative_form.id})")
+                return False
+        else:
+            logger.warning(f"Translation for language '{language}' not yet implemented")
+            return False
+    
+    def process_words_batch(self, word_list: List[str], refresh: bool = False, throttle: float = 1.0) -> Dict[str, Any]:
+        """
+        Process a batch of words using the new schema.
+        
+        Args:
+            word_list: List of word tokens to process
+            refresh: Whether to refresh existing entries
+            throttle: Time to wait between API calls
+            
+        Returns:
+            Dictionary with processing statistics
+        """
+        logger.info(f"Processing batch of {len(word_list)} words")
+        
+        successful = 0
+        failed = 0
+        skipped = 0
+        
+        for word in word_list:
+            try:
+                success = self.process_word(word, refresh=refresh)
+                if success:
+                    successful += 1
+                    logger.info(f"Successfully processed '{word}'")
+                else:
+                    failed += 1
+                    logger.warning(f"Failed to process '{word}'")
+                    
+                # Throttle to avoid overloading the API
+                time.sleep(throttle)
+                
+            except Exception as e:
+                failed += 1
+                logger.error(f"Error processing '{word}': {e}")
+        
+        logger.info(f"Batch processing complete: {successful} successful, {failed} failed, {skipped} skipped")
+        
+        return {
+            "total": len(word_list),
+            "successful": successful,
+            "failed": failed,
+            "skipped": skipped
+        }
+    
     @classmethod
     def close_all(cls):
         """
