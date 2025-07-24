@@ -91,6 +91,85 @@ def get_all_pos_subtypes() -> Dict[str, List[str]]:
     all_subtypes.update(VALID_POS_TYPES)
     return sorted(list(all_subtypes))
 
+# Category mapping for GUID generation
+CATEGORY_GUID_PREFIXES = {
+    'body_parts': 'N14',
+    'colors': 'N07',
+    'food_drink': 'N01',
+    'clothing': 'N02',
+    'family_relationships': 'N03',
+    'occupations': 'N04',
+    'animals': 'N05',
+    'plants': 'N06',
+    'transportation': 'N08',
+    'buildings': 'N09',
+    'emotions': 'N10',
+    'weather': 'N11',
+    'time_life': 'N12',
+    'technology': 'N13',
+    'countries': 'N15',
+    'cities': 'N16',
+    'geographic_features': 'N17',
+    'materials': 'N18',
+    'shapes': 'N19',
+    'numbers': 'N20',
+    'days_of_the_week': 'N21',
+    'months_of_the_year': 'N22',
+    'abstract_concepts': 'N23',
+    'descriptive_words': 'N24',
+    'personality': 'N25',
+    'hobbies': 'N26',
+    'social_political': 'N27',
+    'thinking_communication': 'N28',
+    'grammar_connectors': 'N29',
+    'grammar_adverbs_of_time_and_place': 'N30',
+    'grammar_adverbs_of_manner': 'N31',
+    'question_words': 'N32',
+    'places_direction': 'N33',
+    'people_relationships': 'N34',
+    'qualitative_adjectives': 'N35',
+    'small_physical_objects': 'N36',
+    'units_of_measurement': 'N37',
+    'nationalities': 'N38',
+    'common_proper_nouns': 'N39',
+    'additional_foods': 'N40'
+}
+
+def generate_guid(session, category: str) -> str:
+    """
+    Generate a unique GUID for a lemma in a specific category.
+    
+    Args:
+        session: Database session
+        category: Category name (e.g., 'body_parts', 'colors')
+        
+    Returns:
+        Unique GUID string (e.g., 'N14001')
+    """
+    if category not in CATEGORY_GUID_PREFIXES:
+        raise ValueError(f"Unknown category: {category}")
+    
+    prefix = CATEGORY_GUID_PREFIXES[category]
+    
+    # Find the highest existing GUID number for this category
+    existing_guids = session.query(Lemma.guid)\
+        .filter(Lemma.guid.like(f"{prefix}%"))\
+        .filter(Lemma.guid != None)\
+        .all()
+    
+    max_num = 0
+    for (guid,) in existing_guids:
+        if guid and len(guid) == 6 and guid.startswith(prefix):
+            try:
+                num = int(guid[3:])  # Extract the number part
+                max_num = max(max_num, num)
+            except ValueError:
+                continue
+    
+    # Generate next GUID
+    next_num = max_num + 1
+    return f"{prefix}{next_num:03d}"
+
 def create_database_session(db_path: str = constants.WORDFREQ_DB_PATH):
     """Create a new database session."""
     engine = create_engine(f'sqlite:///{db_path}')
@@ -160,9 +239,14 @@ def add_lemma(
     definition_text: str,
     pos_type: str,
     pos_subtype: Optional[str] = None,
+    category: Optional[str] = None,
+    difficulty_level: Optional[int] = None,
+    frequency_rank: Optional[int] = None,
+    tags: Optional[List[str]] = None,
     confidence: float = 0.0,
     verified: bool = False,
-    notes: Optional[str] = None
+    notes: Optional[str] = None,
+    auto_generate_guid: bool = True
 ) -> Lemma:
     """Add or get a lemma (concept/meaning)."""
     # Check if lemma already exists with same text, definition, and POS
@@ -175,11 +259,27 @@ def add_lemma(
     if existing:
         return existing
     
+    # Generate GUID if category is provided and auto_generate_guid is True
+    guid = None
+    if category and auto_generate_guid:
+        guid = generate_guid(session, category)
+    
+    # Convert tags list to JSON string
+    tags_json = None
+    if tags:
+        import json
+        tags_json = json.dumps(tags)
+    
     lemma = Lemma(
         lemma_text=lemma_text,
         definition_text=definition_text,
         pos_type=pos_type,
         pos_subtype=pos_subtype,
+        guid=guid,
+        category=category,
+        difficulty_level=difficulty_level,
+        frequency_rank=frequency_rank,
+        tags=tags_json,
         confidence=confidence,
         verified=verified,
         notes=notes
