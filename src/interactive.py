@@ -3,18 +3,18 @@
 #MODEL = "gpt-4o-mini"
 MODEL = "gpt-4.1-nano"
 
-import wordfreq.linguistic_client
-cl = wordfreq.linguistic_client.LinguisticClient(model=MODEL)
+import wordfreq.translation.client
+cl = wordfreq.translation.client.LinguisticClient(model=MODEL)
 get_session = cl.get_session
 session = get_session()
 
-import wordfreq.reviewer
-rv = wordfreq.reviewer.LinguisticReviewer()
+import wordfreq.dictionary.reviewer
+rv = wordfreq.dictionary.reviewer.LinguisticReviewer()
 
-import wordfreq.linguistic_db
+import wordfreq.storage.database
 
-import wordfreq.word_processor
-prcs = wordfreq.word_processor.WordProcessor(model=MODEL)
+import wordfreq.translation.processor
+prcs = wordfreq.translation.processor.WordProcessor(model=MODEL)
 
 # imports for benchmarks
 import lib.run_benchmark

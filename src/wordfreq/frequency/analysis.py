@@ -8,9 +8,9 @@ from typing import Dict, List, Optional, Any, Set, Tuple
 from sqlalchemy import func, case, or_
 
 import constants
-from wordfreq import linguistic_db
-from wordfreq.connection_pool import get_session
-from wordfreq.linguistic_db import WordToken, Corpus, WordFrequency
+from wordfreq.storage import database
+from wordfreq.storage.connection_pool import get_session
+from wordfreq.storage.database import WordToken, Corpus, WordFrequency
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')

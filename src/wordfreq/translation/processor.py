@@ -12,9 +12,9 @@ from typing import Dict, List, Optional, Any, Set, Tuple
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import constants
-from wordfreq import linguistic_db
-from wordfreq.linguistic_client import LinguisticClient
-from wordfreq.connection_pool import get_session, close_thread_sessions
+from wordfreq.storage import database as linguistic_db
+from wordfreq.translation.client import LinguisticClient
+from wordfreq.storage.connection_pool import get_session, close_thread_sessions
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')

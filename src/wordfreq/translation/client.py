@@ -12,10 +12,10 @@ import clients.lib
 from clients.types import Schema, SchemaProperty
 from clients.unified_client import UnifiedLLMClient
 import util.prompt_loader
-from wordfreq import linguistic_db
-from wordfreq.models.translations import Translation, TranslationSet
-from wordfreq.models.enums import GrammaticalForm
-from wordfreq.connection_pool import get_session, close_thread_sessions
+from wordfreq.storage import database as linguistic_db
+from wordfreq.storage.models.translations import Translation, TranslationSet
+from wordfreq.storage.models.enums import GrammaticalForm
+from wordfreq.storage.connection_pool import get_session, close_thread_sessions
 import constants
 
 # Configure logging

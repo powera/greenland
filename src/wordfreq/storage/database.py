@@ -11,10 +11,10 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql import func
 
 # Import models from the models package
-from wordfreq.models.schema import Base, WordToken, Lemma, DerivativeForm, ExampleSentence, Corpus, WordFrequency
-from wordfreq.models.query_log import QueryLog
-from wordfreq.models.enums import NounSubtype, VerbSubtype, AdjectiveSubtype, AdverbSubtype, GrammaticalForm
-from wordfreq.models.translations import TranslationSet
+from wordfreq.storage.models.schema import Base, WordToken, Lemma, DerivativeForm, ExampleSentence, Corpus, WordFrequency
+from wordfreq.storage.models.query_log import QueryLog
+from wordfreq.storage.models.enums import NounSubtype, VerbSubtype, AdjectiveSubtype, AdverbSubtype, GrammaticalForm
+from wordfreq.storage.models.translations import TranslationSet
 import constants
 
 # Configure logging
@@ -275,11 +275,11 @@ def add_lemma(
         definition_text=definition_text,
         pos_type=pos_type,
         pos_subtype=pos_subtype,
-        guid=guid,
-        category=category,
-        difficulty_level=difficulty_level,
-        frequency_rank=frequency_rank,
-        tags=tags_json,
+        #guid=guid,
+        #category=category,
+        #difficulty_level=difficulty_level,
+        #frequency_rank=frequency_rank,
+        #tags=tags_json,
         confidence=confidence,
         verified=verified,
         notes=notes
