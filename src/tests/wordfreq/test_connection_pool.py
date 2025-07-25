@@ -12,7 +12,7 @@ from unittest.mock import patch, MagicMock
 # Add the src directory to the path so we can import the module
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
-from wordfreq.connection_pool import ConnectionPool, get_session, close_thread_sessions
+from wordfreq.storage.connection_pool import ConnectionPool, get_session, close_thread_sessions
 
 
 class TestConnectionPool(unittest.TestCase):

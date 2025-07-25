@@ -11,8 +11,8 @@ import json
 import os
 from typing import Dict, List, Optional, Any
 from sqlalchemy.orm import Session
-from wordfreq.models.schema import Lemma, DerivativeForm, AlternativeForm
-from wordfreq.linguistic_db import create_database_session
+from wordfreq.storage.models.schema import Lemma, DerivativeForm, AlternativeForm
+from wordfreq.storage.database import create_database_session
 
 def get_lemmas_by_category(session: Session, category: str) -> List[Lemma]:
     """Get all lemmas for a specific category, ordered by GUID."""
