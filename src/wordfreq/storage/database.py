@@ -1036,3 +1036,20 @@ def get_words_needing_analysis(session, limit: int = 10) -> List:
     Returns WordToken objects that need analysis (no derivative forms).
     """
     return get_word_tokens_needing_analysis(session, limit)
+
+def get_word_tokens_by_combined_frequency_rank(session, limit: int = 1000) -> List[WordToken]:
+    """
+    Get word tokens ordered by their combined frequency rank.
+    
+    Args:
+        session: Database session
+        limit: Maximum number of words to retrieve
+        
+    Returns:
+        List of WordToken objects ordered by frequency_rank (combined harmonic mean rank)
+    """
+    return session.query(WordToken)\
+        .filter(WordToken.frequency_rank != None)\
+        .order_by(WordToken.frequency_rank)\
+        .limit(limit)\
+        .all()

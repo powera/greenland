@@ -321,6 +321,45 @@ class LinguisticReviewer:
         for word in words:
             print(f"{self.c.CYAN}{word.token}{self.c.ENDC} (rank: {word.frequency_rank}) - Missing: definitions")
     
+    def show_word_list_access_info(self) -> None:
+        """Show information about accessing word lists and the word categorizer tool."""
+        print(f"\n{self.c.HEADER}{self.c.BOLD}Word List Access Information{self.c.ENDC}")
+        print(f"\n{self.c.BLUE}Word Frequency Rankings:{self.c.ENDC}")
+        print(f"  • Words are ranked using combined harmonic mean across multiple corpora")
+        print(f"  • Lower rank numbers indicate higher frequency (rank 1 = most frequent)")
+        print(f"  • Rankings combine data from Wikipedia, news, and other text sources")
+        
+        print(f"\n{self.c.BLUE}Accessing Word Lists Programmatically:{self.c.ENDC}")
+        print(f"  {self.c.CYAN}from wordfreq.storage import database as linguistic_db{self.c.ENDC}")
+        print(f"  {self.c.CYAN}session = linguistic_db.create_database_session(){self.c.ENDC}")
+        print(f"  {self.c.CYAN}words = linguistic_db.get_word_tokens_by_combined_frequency_rank(session, limit=1000){self.c.ENDC}")
+        print(f"  {self.c.CYAN}word_list = [token.token for token in words]{self.c.ENDC}")
+        
+        print(f"\n{self.c.BLUE}Word Categorizer Tool:{self.c.ENDC}")
+        print(f"  A new tool is available for categorizing words using LLM analysis:")
+        print(f"  {self.c.GREEN}python -m src.wordfreq.tools.word_categorizer \"category_name\"{self.c.ENDC}")
+        
+        print(f"\n{self.c.BLUE}Examples:{self.c.ENDC}")
+        print(f"  {self.c.CYAN}# Categorize top 1000 words as animals{self.c.ENDC}")
+        print(f"  {self.c.GREEN}python -m src.wordfreq.tools.word_categorizer \"animals\"{self.c.ENDC}")
+        
+        print(f"  {self.c.CYAN}# Find past participles in top 500 words{self.c.ENDC}")
+        print(f"  {self.c.GREEN}python -m src.wordfreq.tools.word_categorizer \"past participles\" --limit 500{self.c.ENDC}")
+        
+        print(f"  {self.c.CYAN}# Find words similar to 'shiny' and save results{self.c.ENDC}")
+        print(f"  {self.c.GREEN}python -m src.wordfreq.tools.word_categorizer \"words like shiny\" --save-json results.json{self.c.ENDC}")
+        
+        print(f"\n{self.c.BLUE}Tool Options:{self.c.ENDC}")
+        print(f"  --limit N        Number of top words to analyze (default: 1000)")
+        print(f"  --model NAME     LLM model to use (default: claude-3-5-sonnet-20241022)")
+        print(f"  --no-explanations Hide explanations in output")
+        print(f"  --save-json FILE Save results to JSON file")
+        
+        print(f"\n{self.c.BLUE}Output Format:{self.c.ENDC}")
+        print(f"  The tool returns structured JSON with matching words, indicating whether")
+        print(f"  each match represents the 'primary' meaning of the word (most common usage).")
+        print(f"  Results are displayed in two sections: primary and secondary meanings.")
+    
     def interactive_menu(self) -> None:
         """Run interactive menu for reviewing and editing words."""
         while True:
@@ -331,6 +370,7 @@ class LinguisticReviewer:
             print(f"{self.c.CYAN}6.{self.c.ENDC} Find words with missing data")
             print(f"{self.c.CYAN}7.{self.c.ENDC} Show statistics")
             print(f"{self.c.CYAN}8.{self.c.ENDC} List common words by part of speech")
+            print(f"{self.c.CYAN}9.{self.c.ENDC} Show word list access information")
 
             print(f"{self.c.CYAN}0.{self.c.ENDC} Exit")
             
@@ -386,6 +426,8 @@ class LinguisticReviewer:
                         limit = 20
                     
                     self.list_common_words_by_pos(pos_type, limit)
+                elif choice == 9:
+                    self.show_word_list_access_info()
             except Exception as e:
                 logger.error(f"Error: {e}")
 
