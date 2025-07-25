@@ -111,8 +111,8 @@ class Corpus(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String, unique=True, nullable=False)
     description: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-    unknown_rank_weight: Mapped[float] = mapped_column(Float, default=1.0)  # Weight for unknown words (0.0-1.0)
-    max_unknown_rank: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)  # Max rank for unknown words
+    corpus_weight: Mapped[float] = mapped_column(Float, default=1.0)  # Overall weight of this corpus in calculations (0.0-1.0)
+    max_unknown_rank: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)  # Max rank for words not in this corpus (penalty/placeholder)
     enabled: Mapped[bool] = mapped_column(Boolean, default=True)  # Whether to include in calculations
     added_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now(), nullable=True)
     updated_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now(), onupdate=func.now(), nullable=True)
