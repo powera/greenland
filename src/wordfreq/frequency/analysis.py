@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 # Constants
 DEFAULT_UNKNOWN_RANK = 12500  # Default rank for words not in a corpus
 
-def calculate_harmonic_mean_ranks(
+def calculate_combined_ranks(
     db_path: Optional[str] = constants.WORDFREQ_DB_PATH, 
     corpus_names: Optional[List[str]] = None,
     outlier_threshold: float = 2.0,
@@ -28,19 +28,23 @@ def calculate_harmonic_mean_ranks(
     update_db: bool = True
 ) -> List[Dict[str, Any]]:
     """
-    Calculate harmonic mean of word ranks across different corpora.
+    Calculate combined word ranks using arithmetic mean of harmonic and geometric means.
+    
+    This approach balances the harmonic mean (which prevents outliers from dominating)
+    with the geometric mean (which prevents outliers from being completely ignored),
+    providing more robust rankings for domain-specific corpora.
     
     Args:
         db_path: Optional database path
         corpus_names: List of corpus names to include (or all if None)
         outlier_threshold: Z-score threshold for outlier detection
-        unknown_rank: Rank to use for words not in a corpus
+        unknown_rank: Default rank for words not in a corpus (used as penalty/placeholder)
         update_db: Whether to update the frequency_rank in the word_tokens table
         
     Returns:
         List of words with their combined ranks and outlier information
     """
-    logger.info("Calculating harmonic mean ranks")
+    logger.info("Calculating combined ranks using harmonic-geometric mean")
     
     # Get session
     session = get_session(db_path) if db_path else get_session()
@@ -64,7 +68,7 @@ def calculate_harmonic_mean_ranks(
         effective_unknown_rank = wordfreq.frequency.corpus.get_effective_unknown_rank(corpus.name, unknown_rank, session)
         corpus_info[corpus.id] = {
             'name': corpus.name,
-            'weight': corpus.unknown_rank_weight,
+            'weight': corpus.corpus_weight,
             'unknown_rank': effective_unknown_rank
         }
     
@@ -108,22 +112,33 @@ def calculate_harmonic_mean_ranks(
                 weighted_ranks.append(rank)
                 weights.append(corpus_config['weight'])
             
-        # Calculate weighted harmonic mean
+        # Calculate combined rank using arithmetic mean of harmonic and geometric means
         if weighted_ranks and weights:
             try:
                 # Weighted harmonic mean: sum(weights) / sum(weight_i / rank_i)
-                weighted_sum = sum(w / r for w, r in zip(weights, weighted_ranks))
-                harmonic_mean = sum(weights) / weighted_sum
-            except ZeroDivisionError:
-                harmonic_mean = max(corpus_info[cid]['unknown_rank'] for cid in corpus_ids)
+                weighted_sum_harmonic = sum(w / r for w, r in zip(weights, weighted_ranks))
+                harmonic_mean = sum(weights) / weighted_sum_harmonic
+                
+                # Weighted geometric mean: exp(sum(weight_i * log(rank_i)) / sum(weights))
+                weighted_log_sum = sum(w * np.log(r) for w, r in zip(weights, weighted_ranks))
+                geometric_mean = np.exp(weighted_log_sum / sum(weights))
+                
+                # Combined rank: arithmetic mean of harmonic and geometric means
+                combined_rank = (harmonic_mean + geometric_mean) / 2
+                
+            except (ZeroDivisionError, ValueError):
+                # Fallback to maximum unknown rank if calculation fails
+                combined_rank = max(corpus_info[cid]['unknown_rank'] for cid in corpus_ids)
         else:
             # No valid ranks, use the maximum unknown rank
-            harmonic_mean = max(corpus_info[cid]['unknown_rank'] for cid in corpus_ids)
+            combined_rank = max(corpus_info[cid]['unknown_rank'] for cid in corpus_ids)
             
         word_data[word_token.id] = {
             "word": word_token.token,
             "ranks": corpus_ranks,
-            "harmonic_mean": harmonic_mean,
+            "harmonic_mean": harmonic_mean if 'harmonic_mean' in locals() else combined_rank,
+            "geometric_mean": geometric_mean if 'geometric_mean' in locals() else combined_rank,
+            "combined_rank_value": combined_rank,
             "is_outlier": False,
             "z_score": 0,
             "current_rank": word_token.frequency_rank
@@ -132,8 +147,8 @@ def calculate_harmonic_mean_ranks(
     # Convert to list for sorting and outlier detection
     word_list = list(word_data.values())
     
-    # Sort by harmonic mean
-    word_list.sort(key=lambda x: x["harmonic_mean"])
+    # Sort by combined rank
+    word_list.sort(key=lambda x: x["combined_rank_value"])
     
     # Assign new ranks
     for i, word_info in enumerate(word_list):
@@ -141,16 +156,16 @@ def calculate_harmonic_mean_ranks(
     
     # Detect outliers
     if len(word_list) > 10:  # Need a minimum number for meaningful statistics
-        # Get log of harmonic means to normalize the distribution
-        log_means = np.log([w["harmonic_mean"] for w in word_list])
+        # Get log of combined ranks to normalize the distribution
+        log_ranks = np.log([w["combined_rank_value"] for w in word_list])
         
         # Calculate z-scores
-        mean = np.mean(log_means)
-        std = np.std(log_means)
+        mean = np.mean(log_ranks)
+        std = np.std(log_ranks)
         
         if std > 0:  # Avoid division by zero
             for i, word_info in enumerate(word_list):
-                log_value = np.log(word_info["harmonic_mean"])
+                log_value = np.log(word_info["combined_rank_value"])
                 z_score = (log_value - mean) / std
                 word_info["z_score"] = z_score
                 word_info["is_outlier"] = abs(z_score) > outlier_threshold
@@ -197,7 +212,7 @@ def export_ranked_word_list(
     logger.info(f"Exporting ranked word list to {output_path}")
     
     # Calculate combined ranks
-    word_list = calculate_harmonic_mean_ranks(db_path=db_path, update_db=False)
+    word_list = calculate_combined_ranks(db_path=db_path, update_db=False)
     
     # Filter out outliers if requested
     if not include_outliers:
@@ -239,7 +254,7 @@ def export_frequency_data(
     logger.info(f"Exporting detailed frequency data to {output_path}")
     
     # Get combined ranks and corpus information
-    word_list = calculate_harmonic_mean_ranks(db_path=db_path, update_db=False)
+    word_list = calculate_combined_ranks(db_path=db_path, update_db=False)
     
     # Sort by combined rank
     word_list.sort(key=lambda x: x["combined_rank"])
@@ -259,7 +274,7 @@ def export_frequency_data(
         import csv
         with open(output_path, 'w', newline='', encoding='utf-8') as f:
             # Create headers
-            headers = ["word", "combined_rank", "harmonic_mean", "is_outlier", "z_score"]
+            headers = ["word", "combined_rank", "combined_rank_value", "harmonic_mean", "geometric_mean", "is_outlier", "z_score"]
             for corpus in corpora:
                 headers.append(f"rank_{corpus.name}")
             
@@ -271,7 +286,9 @@ def export_frequency_data(
                 row = {
                     "word": word_info["word"],
                     "combined_rank": word_info["combined_rank"],
+                    "combined_rank_value": word_info["combined_rank_value"],
                     "harmonic_mean": word_info["harmonic_mean"],
+                    "geometric_mean": word_info["geometric_mean"],
                     "is_outlier": "1" if word_info["is_outlier"] else "0",
                     "z_score": word_info["z_score"]
                 }
@@ -298,7 +315,9 @@ def export_frequency_data(
             json_data.append({
                 "word": word_info["word"],
                 "combined_rank": word_info["combined_rank"],
+                "combined_rank_value": word_info["combined_rank_value"],
                 "harmonic_mean": word_info["harmonic_mean"],
+                "geometric_mean": word_info["geometric_mean"],
                 "is_outlier": word_info["is_outlier"],
                 "z_score": word_info["z_score"],
                 "corpus_ranks": named_ranks
@@ -326,7 +345,7 @@ def analyze_corpus_correlations() -> Dict[str, Any]:
     logger.info("Analyzing corpus correlations")
     
     # Calculate combined ranks
-    word_list = calculate_harmonic_mean_ranks(db_path=constants.WORDFREQ_DB_PATH, update_db=False)
+    word_list = calculate_combined_ranks(db_path=constants.WORDFREQ_DB_PATH, update_db=False)
     
     # Get session
     session = get_session(constants.WORDFREQ_DB_PATH)

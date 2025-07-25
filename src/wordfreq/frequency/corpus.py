@@ -27,7 +27,7 @@ class CorpusConfig:
     max_words: int  # Maximum number of words to import
     file_type: str = "json"  # File type (json, subtlex)
     value_type: str = "auto"  # How to interpret values: "rank", "frequency", or "auto"
-    unknown_rank_weight: float = 1.0  # Weight for unknown words (0.0 = exclude, 1.0 = full weight)
+    corpus_weight: float = 1.0  # Overall weight of this corpus in calculations (0.0 = exclude, 1.0 = full weight)
     max_unknown_rank: Optional[int] = None  # Maximum rank for unknown words (None = use corpus size)
     enabled: bool = True
     
@@ -62,7 +62,7 @@ CORPUS_CONFIGS = [
         max_words=4000,
         file_type="json",
         value_type="auto",
-        unknown_rank_weight=0.8,
+        corpus_weight=0.8,
         max_unknown_rank=10000,
         enabled=True
     ),
@@ -73,7 +73,7 @@ CORPUS_CONFIGS = [
         max_words=4000,
         file_type="json",
         value_type="auto",
-        unknown_rank_weight=0.9,
+        corpus_weight=0.9,
         max_unknown_rank=10000,
         enabled=True
     ),
@@ -84,7 +84,7 @@ CORPUS_CONFIGS = [
         max_words=7500,
         file_type="subtlex",
         value_type="auto",
-        unknown_rank_weight=1.0,
+        corpus_weight=1.0,
         max_unknown_rank=12000,
         enabled=True
     ),
@@ -95,7 +95,7 @@ CORPUS_CONFIGS = [
         max_words=6000,
         file_type="json",
         value_type="frequency",
-        unknown_rank_weight=1.0,
+        corpus_weight=1.0,
         max_unknown_rank=12000,
         enabled=True
     ),
@@ -106,7 +106,7 @@ CORPUS_CONFIGS = [
         max_words=1000,
         file_type="json",
         value_type="frequency",
-        unknown_rank_weight=0.7,
+        corpus_weight=0.7,
         max_unknown_rank=1500,
         enabled=True
     )
@@ -152,8 +152,8 @@ def validate_corpus_configs() -> List[str]:
         names.add(config.name)
         
         # Validate unknown rank weight
-        if not 0.0 <= config.unknown_rank_weight <= 1.0:
-            errors.append(f"Invalid unknown_rank_weight for {config.name}: {config.unknown_rank_weight} (must be 0.0-1.0)")
+        if not 0.0 <= config.corpus_weight <= 1.0:
+            errors.append(f"Invalid corpus_weight for {config.name}: {config.corpus_weight} (must be 0.0-1.0)")
             
         # Validate max unknown rank
         if config.max_unknown_rank is not None and config.max_unknown_rank <= 0:
@@ -219,8 +219,8 @@ def sync_corpus_configs_to_db(
                     corpus.description = config.description
                     updated = True
                     
-                if corpus.unknown_rank_weight != config.unknown_rank_weight:
-                    corpus.unknown_rank_weight = config.unknown_rank_weight
+                if corpus.corpus_weight != config.corpus_weight:
+                    corpus.corpus_weight = config.corpus_weight
                     updated = True
                     
                 if corpus.max_unknown_rank != config.max_unknown_rank:
@@ -239,7 +239,7 @@ def sync_corpus_configs_to_db(
                 new_corpus = wordfreq.storage.models.schema.Corpus(
                     name=config.name,
                     description=config.description,
-                    unknown_rank_weight=config.unknown_rank_weight,
+                    corpus_weight=config.corpus_weight,
                     max_unknown_rank=config.max_unknown_rank,
                     enabled=config.enabled
                 )
