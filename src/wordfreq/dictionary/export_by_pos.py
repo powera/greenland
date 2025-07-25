@@ -20,9 +20,9 @@ from sqlalchemy import func
 import shutil
 
 import constants
-from wordfreq import linguistic_db
-from wordfreq.connection_pool import get_session
-from wordfreq.models.schema import WordToken, Lemma, DerivativeForm, ExampleSentence
+from wordfreq.storage import database
+from wordfreq.storage.connection_pool import get_session
+from wordfreq.storage.models.schema import WordToken, Lemma, DerivativeForm, ExampleSentence
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')

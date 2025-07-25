@@ -6,7 +6,7 @@ import datetime
 from typing import Optional
 from sqlalchemy import String, Text, Boolean, TIMESTAMP, Integer, func
 from sqlalchemy.orm import Mapped, mapped_column
-from wordfreq.models.schema import Base
+from wordfreq.storage.models.schema import Base
 
 class QueryLog(Base):
     """Model for tracking LLM queries for auditing and debugging."""
