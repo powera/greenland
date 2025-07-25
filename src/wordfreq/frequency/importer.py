@@ -13,8 +13,9 @@ from typing import Dict, List, Optional, Any, Tuple, Literal
 import constants
 from wordfreq.storage import database
 from wordfreq.storage.connection_pool import get_session
+from wordfreq.storage.models.schema import WordToken, Corpus, WordFrequency
 from wordfreq.translation.client import LinguisticClient
-from wordfreq.storage.database import WordToken, Corpus, WordFrequency
+import wordfreq.frequency.corpus
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -50,17 +51,32 @@ def import_frequency_data(
     """
     logger.info(f"Importing frequency data from {file_path} for corpus '{corpus_name}'")
     
-    # Get session and corpus
+    # Get session and ensure corpus configurations are synced
     session = get_session(constants.WORDFREQ_DB_PATH)
+    
+    # Sync corpus configurations from config file to database
+    sync_result = wordfreq.frequency.corpus.sync_corpus_configs_to_db(session)
+    if not sync_result["success"]:
+        logger.warning(f"Failed to sync corpus configs: {sync_result['errors']}")
+    
+    # Get corpus from database
     corpus = session.query(Corpus).filter(Corpus.name == corpus_name).first()
     
     if not corpus:
-        logger.info(f"Corpus '{corpus_name}' not found, creating it...")
+        # If corpus doesn't exist and isn't in config, create it with provided description
+        logger.info(f"Corpus '{corpus_name}' not found in config or database, creating it...")
         description = corpus_description or f"Corpus: {corpus_name}"
-        corpus = Corpus(name=corpus_name, description=description)
+        corpus = Corpus(
+            name=corpus_name, 
+            description=description,
+            unknown_rank_weight=1.0,  # Default weight
+            enabled=True
+        )
         session.add(corpus)
         session.commit()
         logger.info(f"Created new corpus '{corpus_name}' with description: {description}")
+    elif not corpus.enabled:
+        logger.warning(f"Corpus '{corpus_name}' is disabled in configuration")
     
     # Process the file based on type
     raw_words_data = {}
@@ -198,7 +214,7 @@ def import_frequency_data(
         
         for word_text, data in words_data.items():
             # Get or create the word token
-            word_obj = linguistic_db.add_word_token(session, word_text)
+            word_obj = database.add_word_token(session, word_text)
             
             rank = data.get("rank")
             frequency = data.get("frequency")
@@ -266,99 +282,9 @@ def import_frequency_data(
         session.rollback()
         raise
 
-def import_all_corpus_data(
-    word_limit: int = 5000,
-    data_dir: str = None
-) -> Dict[str, Tuple[int, int]]:
-    """
-    Import frequency data for all four corpus types defined in linguistic_db.py.
-    
-    Args:
-        word_limit: How many words to import from each corpus (defaults to 5000)
-        data_dir: Directory containing the corpus files (defaults to wordfreq/data)
-        
-    Returns:
-        Dictionary mapping corpus names to tuples of (words imported, total words)
-    """
-
-    # Set default data directory if not provided
-    if data_dir is None:
-        data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
-    
-    logger.info(f"Importing {word_limit} words for all corpus types from {data_dir}")
-    
-    # Define corpus configurations
-    corpus_configs = [
-        {
-            "name": "19th_books",
-            "file_name": "19th_books.json",
-            "file_type": "json",
-            "value_type": "auto",
-            "description": "19th century books from Project Gutenberg"
-        },
-        {
-            "name": "20th_books",
-            "file_name": "20th_books.json",
-            "file_type": "json",
-            "value_type": "auto",
-            "description": "20th century books (largely sci-fi)"
-        },
-        {
-            "name": "subtitles",
-            "file_name": "subtlex.txt",
-            "file_type": "subtlex",
-            "value_type": "auto",
-            "description": "Various TV subtitles"
-        },
-        {
-            "name": "wiki_vital",
-            "file_name": "wiki_vital.json",
-            "file_type": "json",
-            "value_type": "frequency",
-            "description": "Vital 1000 Wikipedia articles from 2022"
-        }
-    ]
-    
-    # Initialize database session
-    session = get_session(constants.WORDFREQ_DB_PATH)
-    
-    # Ensure corpora exist in the database
-    linguistic_db.initialize_corpora(session)
-    
-    # Import each corpus
-    results = {}
-    
-    for config in corpus_configs:
-        corpus_name = config["name"]
-        file_path = os.path.join(data_dir, config["file_name"])
-        
-        if not os.path.exists(file_path):
-            logger.warning(f"Corpus file not found: {file_path}")
-            results[corpus_name] = (0, 0)
-            continue
-        
-        try:
-            logger.info(f"Importing {corpus_name} from {file_path} (limit: {word_limit} words)")
-            imported, total = import_frequency_data(
-                file_path=file_path,
-                corpus_name=corpus_name,
-                file_type=config["file_type"],
-                max_words=word_limit,
-                value_type=config["value_type"],
-                corpus_description=config.get("description")
-            )
-            results[corpus_name] = (imported, total)
-            logger.info(f"Successfully imported {imported}/{total} words for {corpus_name}")
-        except Exception as e:
-            logger.error(f"Error importing {corpus_name}: {e}")
-            results[corpus_name] = (0, 0)
-    
-    # Log summary
-    logger.info("Import summary:")
-    for corpus_name, (imported, total) in results.items():
-        logger.info(f"  {corpus_name}: {imported}/{total} words imported")
-    
-    return results
+# NOTE: The import_all_corpus_data function has been moved to corpus.py as load_all_corpora()
+# This provides better organization by keeping corpus configuration and loading logic together.
+# Use wordfreq.frequency.corpus.load_all_corpora() instead.
 
 def process_stopwords(refresh: bool = False, model: str = None) -> Dict[str, bool]:
     """

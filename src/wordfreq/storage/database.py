@@ -4,6 +4,7 @@
 
 import datetime
 import enum
+import logging
 from typing import Dict, List, Optional, Any, Set
 from sqlalchemy import create_engine, func
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
@@ -18,7 +19,6 @@ from wordfreq.storage.models.translations import TranslationSet
 import constants
 
 # Configure logging
-import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
@@ -31,21 +31,15 @@ VALID_POS_TYPES = {
 
 # Helper functions to initialize corpus data
 def initialize_corpora(session):
-    """Create the four corpus entries if they don't exist."""
-    corpora = [
-        {"name": "19th_books", "description": "19th century books from Project Gutenberg"},
-        {"name": "20th_books", "description": "20th century books (largely sci-fi)"},
-        {"name": "subtitles", "description": "Various TV subtitles"},
-        {"name": "wiki_vital", "description": "Vital 1000 Wikipedia articles from 2022"}
-    ]
+    """Initialize corpus configurations from the config file."""
+    import wordfreq.frequency.corpus
     
-    for corpus_data in corpora:
-        existing = session.query(Corpus).filter(Corpus.name == corpus_data["name"]).first()
-        if not existing:
-            new_corpus = Corpus(**corpus_data)
-            session.add(new_corpus)
+    result = wordfreq.frequency.corpus.initialize_corpus_configs(session)
+    if not result["success"]:
+        logger.error(f"Failed to initialize corpora: {result['errors']}")
+        raise RuntimeError(f"Corpus initialization failed: {result['errors']}")
     
-    session.commit()
+    logger.info(f"Corpus initialization completed: {result['added']} added, {result['updated']} updated")
 
 # Helper function to get subtype enum based on POS
 def get_subtype_enum(pos_type: str) -> Optional[enum.EnumMeta]:
@@ -179,13 +173,82 @@ def create_database_session(db_path: str = constants.WORDFREQ_DB_PATH):
 
 def ensure_tables_exist(session):
     """
-    Ensure tables exist in the database.
+    Ensure tables exist in the database and add any missing columns.
     
     Args:
         session: Database session
     """
     engine = session.get_bind().engine
+    
+    # First create any missing tables
     Base.metadata.create_all(engine)
+    
+    # Then check for missing columns and add them
+    _add_missing_columns(engine)
+
+def _add_missing_columns(engine):
+    """
+    Add any missing columns to existing tables based on the current schema.
+    
+    Args:
+        engine: SQLAlchemy engine
+    """
+    from sqlalchemy import inspect, text
+    
+    inspector = inspect(engine)
+    
+    # Get all table names from our models
+    for table_name, table in Base.metadata.tables.items():
+        if not inspector.has_table(table_name):
+            continue  # Table doesn't exist yet, create_all() will handle it
+            
+        # Get existing columns in the database
+        existing_columns = {col['name'] for col in inspector.get_columns(table_name)}
+        
+        # Get columns defined in the model
+        model_columns = {col.name for col in table.columns}
+        
+        # Find missing columns
+        missing_columns = model_columns - existing_columns
+        
+        if missing_columns:
+            logger.info(f"Adding missing columns to table '{table_name}': {missing_columns}")
+            
+            for col_name in missing_columns:
+                column = table.columns[col_name]
+                
+                # Build the ALTER TABLE statement
+                col_type = column.type.compile(engine.dialect)
+                
+                # Handle nullable/default constraints
+                nullable_clause = "" if column.nullable else " NOT NULL"
+                default_clause = ""
+                
+                if column.default is not None:
+                    if hasattr(column.default, 'arg'):
+                        # Scalar default value
+                        if isinstance(column.default.arg, str):
+                            default_clause = f" DEFAULT '{column.default.arg}'"
+                        elif isinstance(column.default.arg, bool):
+                            default_clause = f" DEFAULT {1 if column.default.arg else 0}"
+                        else:
+                            default_clause = f" DEFAULT {column.default.arg}"
+                    elif hasattr(column.default, 'name'):
+                        # Server default (like func.now())
+                        if column.default.name == 'now':
+                            default_clause = " DEFAULT CURRENT_TIMESTAMP"
+                
+                alter_sql = f"ALTER TABLE {table_name} ADD COLUMN {col_name} {col_type}{default_clause}{nullable_clause}"
+                
+                try:
+                    with engine.connect() as conn:
+                        conn.execute(text(alter_sql))
+                        conn.commit()
+                    logger.info(f"Successfully added column '{col_name}' to table '{table_name}'")
+                except Exception as e:
+                    logger.error(f"Failed to add column '{col_name}' to table '{table_name}': {e}")
+                    logger.error(f"SQL was: {alter_sql}")
+                    # Continue with other columns rather than failing completely
 
 def add_word_token(session, token: str) -> WordToken:
     """Add a word token to the database if it doesn't exist, or return existing one."""
