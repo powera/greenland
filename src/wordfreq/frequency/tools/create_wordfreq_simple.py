@@ -35,22 +35,17 @@ wordfreq.storage.database.initialize_corpora(session)
 
 # Import additional modules (from notebook cells)
 import wordfreq.frequency.analysis
-import wordfreq.frequency.importer
+import wordfreq.frequency.corpus
 
 # Import frequency data (from notebook cells)
 data_dir = os.path.join(src_dir, "wordfreq", "data")
 
-print("Importing 19th century books data...")
-wordfreq.frequency.importer.import_frequency_data(os.path.join(data_dir, "19th_books.json"), "19th_books", max_words=2000, corpus_description="Word frequency data from 19th century books")
+results = wordfreq.frequency.corpus.load_all_corpora()
 
-print("Importing 20th century books data...")
-wordfreq.frequency.importer.import_frequency_data(os.path.join(data_dir, "20th_books.json"), "20th_books", max_words=2000, corpus_description="Word frequency data from 20th century books")
-
-print("Importing subtitles data...")
-wordfreq.frequency.importer.import_frequency_data(os.path.join(data_dir, "subtlex.txt"), "subtitles", file_type="subtlex", max_words=2000, corpus_description="Word frequency data from movie and TV subtitles")
-
-print("Importing Wikipedia vital articles data...")
-wordfreq.frequency.importer.import_frequency_data(os.path.join(data_dir, "wiki_vital.json"), "wiki_vital", max_words=2000, value_type="frequency", corpus_description="Word frequency data from Wikipedia vital articles")
+# Print results
+print("\nResults:")
+for corpus_name, (imported, total) in results.items():
+    print(f"  {corpus_name}: {imported}/{total} words imported")
 
 # Import constants and calculate harmonic mean ranks (from notebook cells)
 import constants
