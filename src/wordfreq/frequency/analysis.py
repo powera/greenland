@@ -10,7 +10,8 @@ from sqlalchemy import func, case, or_
 import constants
 from wordfreq.storage import database
 from wordfreq.storage.connection_pool import get_session
-from wordfreq.storage.database import WordToken, Corpus, WordFrequency
+from wordfreq.storage.models.schema import WordToken, Corpus, WordFrequency
+import wordfreq.frequency.corpus
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -44,17 +45,30 @@ def calculate_harmonic_mean_ranks(
     # Get session
     session = get_session(db_path) if db_path else get_session()
     
-    # Get corpora to include
+    # Get corpora to include (only enabled ones)
     if corpus_names:
-        corpora = session.query(Corpus).filter(Corpus.name.in_(corpus_names)).all()
+        corpora = session.query(Corpus).filter(
+            Corpus.name.in_(corpus_names),
+            Corpus.enabled == True
+        ).all()
     else:
-        corpora = session.query(Corpus).all()
+        corpora = wordfreq.frequency.corpus.get_corpus_configs_from_db(session, enabled_only=True)
         
-    corpus_ids = [c.id for c in corpora]
-    
-    if not corpus_ids:
-        logger.error("No corpora found")
+    if not corpora:
+        logger.error("No enabled corpora found")
         return []
+    
+    # Create corpus info mapping
+    corpus_info = {}
+    for corpus in corpora:
+        effective_unknown_rank = wordfreq.frequency.corpus.get_effective_unknown_rank(corpus.name, unknown_rank, session)
+        corpus_info[corpus.id] = {
+            'name': corpus.name,
+            'weight': corpus.unknown_rank_weight,
+            'unknown_rank': effective_unknown_rank
+        }
+    
+    corpus_ids = list(corpus_info.keys())
     
     # Get all words with their ranks in each corpus
     word_data = {}
@@ -74,26 +88,37 @@ def calculate_harmonic_mean_ranks(
     
     # Process each word token
     for word_token in word_tokens:
-        word_ranks = []
         corpus_ranks = {}
+        weighted_ranks = []
+        weights = []
         
         # Get ranks for each corpus
         for corpus_id in corpus_ids:
-            if word_token.id in freq_by_word_token and corpus_id in freq_by_word_token[word_token.id]:
-                corpus_ranks[corpus_id] = freq_by_word_token[word_token.id][corpus_id]
-            else:
-                corpus_ranks[corpus_id] = unknown_rank
-            word_ranks.append(corpus_ranks[corpus_id])
-        
-        # If no ranks found, use unknown_rank for all corpora
-        if not word_ranks:
-            word_ranks = [unknown_rank] * len(corpus_ids)
+            corpus_config = corpus_info[corpus_id]
             
-        # Calculate harmonic mean
-        try:
-            harmonic_mean = len(word_ranks) / sum(1/r for r in word_ranks)
-        except ZeroDivisionError:
-            harmonic_mean = unknown_rank
+            if word_token.id in freq_by_word_token and corpus_id in freq_by_word_token[word_token.id]:
+                rank = freq_by_word_token[word_token.id][corpus_id]
+                corpus_ranks[corpus_id] = rank
+            else:
+                rank = corpus_config['unknown_rank']
+                corpus_ranks[corpus_id] = rank
+            
+            # Only include in weighted calculation if weight > 0
+            if corpus_config['weight'] > 0:
+                weighted_ranks.append(rank)
+                weights.append(corpus_config['weight'])
+            
+        # Calculate weighted harmonic mean
+        if weighted_ranks and weights:
+            try:
+                # Weighted harmonic mean: sum(weights) / sum(weight_i / rank_i)
+                weighted_sum = sum(w / r for w, r in zip(weights, weighted_ranks))
+                harmonic_mean = sum(weights) / weighted_sum
+            except ZeroDivisionError:
+                harmonic_mean = max(corpus_info[cid]['unknown_rank'] for cid in corpus_ids)
+        else:
+            # No valid ranks, use the maximum unknown rank
+            harmonic_mean = max(corpus_info[cid]['unknown_rank'] for cid in corpus_ids)
             
         word_data[word_token.id] = {
             "word": word_token.token,
@@ -306,8 +331,8 @@ def analyze_corpus_correlations() -> Dict[str, Any]:
     # Get session
     session = get_session(constants.WORDFREQ_DB_PATH)
     
-    # Get corpus information
-    corpora = session.query(Corpus).all()
+    # Get corpus information (only enabled corpora)
+    corpora = wordfreq.frequency.corpus.get_corpus_configs_from_db(session, enabled_only=True)
     corpus_ids = [c.id for c in corpora]
     corpus_names = {c.id: c.name for c in corpora}
     
@@ -334,8 +359,12 @@ def analyze_corpus_correlations() -> Dict[str, Any]:
                     rank1 = word_info["ranks"][corpus1_id]
                     rank2 = word_info["ranks"][corpus2_id]
                     
+                    # Get effective unknown ranks for each corpus
+                    unknown_rank1 = wordfreq.frequency.corpus.get_effective_unknown_rank(corpus_names[corpus1_id], DEFAULT_UNKNOWN_RANK, session)
+                    unknown_rank2 = wordfreq.frequency.corpus.get_effective_unknown_rank(corpus_names[corpus2_id], DEFAULT_UNKNOWN_RANK, session)
+                    
                     # Only include if neither is the unknown rank
-                    if rank1 != DEFAULT_UNKNOWN_RANK and rank2 != DEFAULT_UNKNOWN_RANK:
+                    if rank1 != unknown_rank1 and rank2 != unknown_rank2:
                         ranks1.append(rank1)
                         ranks2.append(rank2)
             
