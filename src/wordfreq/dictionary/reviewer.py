@@ -62,6 +62,18 @@ class LinguisticReviewer:
         print(f"\n{self.c.HEADER}{self.c.BOLD}Word:{self.c.ENDC} {word.word}")
         print(f"{self.c.BLUE}Rank:{self.c.ENDC} {word.frequency_rank}")
         
+        # Display frequency information from each corpus
+        frequencies = word._word_token.frequencies
+        if frequencies:
+            print(f"\n{self.c.HEADER}Corpus Frequencies:{self.c.ENDC}")
+            for freq in frequencies:
+                corpus_name = freq.corpus.name
+                rank_info = f"rank {freq.rank}" if freq.rank is not None else "no rank"
+                freq_info = f", frequency {freq.frequency:.6f}" if freq.frequency is not None else ""
+                print(f"  {self.c.CYAN}{corpus_name}:{self.c.ENDC} {rank_info}{freq_info}")
+        else:
+            print(f"\n{self.c.YELLOW}No corpus frequency data available{self.c.ENDC}")
+        
         # Definitions (now derivative forms)
         definitions = word.definitions
         print(f"\n{self.c.HEADER}Definitions:{self.c.ENDC}")
