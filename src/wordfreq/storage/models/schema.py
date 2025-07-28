@@ -40,7 +40,7 @@ class Lemma(Base):
     pos_subtype: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     
     # Dictionary generation fields
-    guid: Mapped[Optional[str]] = mapped_column(String, unique=True, nullable=True, index=True)  # e.g., N14001
+    guid: Mapped[Optional[str]] = mapped_column(String, unique=True, nullable=True, index=True)  # e.g., N14.001
     difficulty_level: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)  # For which Trakaido "level"
     frequency_rank: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)  # Combined frequency rank
     tags: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # JSON array of tags
