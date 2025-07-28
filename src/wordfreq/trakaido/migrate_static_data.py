@@ -21,14 +21,12 @@ import re
 from typing import Dict, List, Any, Optional
 
 # Configuration - Update these paths as needed
-TRAKAIDO_WORDLISTS_BASE_PATH = '/Users/powera/repo/greenland/data/trakaido_wordlists'
 GREENLAND_SRC_PATH = '/Users/powera/repo/greenland/src'
 
 # Add paths for imports
-sys.path.append(os.path.join(TRAKAIDO_WORDLISTS_BASE_PATH, 'lang_lt'))
 sys.path.append(GREENLAND_SRC_PATH)
 
-from nouns import nouns_one, nouns_two, nouns_three, nouns_four, nouns_five, common_words, common_words_two
+from wordfreq.trakaido.nouns import nouns_one, nouns_two, nouns_three, nouns_four, nouns_five, common_words, common_words_two
 from wordfreq.storage.database import (
     create_database_session, 
     get_word_token_by_text,
@@ -106,7 +104,8 @@ def get_pos_and_subtype_for_category(display_category_name: str) -> tuple[str, O
         "Additional Foods": ("noun", "food_drink"),
         
         # Living things
-        "Plants + Animals": ("noun", "animal"),  # Mixed category, defaulting to animal
+        "Animals": ("noun", "animal"),
+        "Plants": ("noun", "plant"),
         
         # Physical objects
         "Clothing": ("noun", "clothing_accessory"),
@@ -442,11 +441,11 @@ def main():
     corpus_mapping = {
         "nouns_one": (nouns_one, 1),
         "nouns_two": (nouns_two, 2),
-        "nouns_three": (nouns_three, 3),
-        "nouns_four": (nouns_four, 4),
-        "nouns_five": (nouns_five, 5),
-        "common_words": (common_words, 1),  # Treat as level 1
-        "common_words_two": (common_words_two, 2)  # Treat as level 2
+        "nouns_three": (nouns_three, 4), # Treat as level 4
+        "nouns_four": (nouns_four, 7), # Treat as level 7
+        "nouns_five": (nouns_five, 6), # Treat as level 6
+        "common_words": (common_words, 3),  # Treat as level 3
+        "common_words_two": (common_words_two, 5)  # Treat as level 5
     }
     
     total_successful = 0

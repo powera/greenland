@@ -25,7 +25,7 @@ nouns_one = {
     { "english": "cake", "lithuanian": "tortas" },
     { "english": "chocolate", "lithuanian": "šokoladas" }
   ],
-  "Plants + Animals": [
+  "Animals": [
     { "english": "dog", "lithuanian": "šuo" },
     { "english": "cat", "lithuanian": "katė" },
     { "english": "bird", "lithuanian": "paukštis" },
@@ -36,6 +36,8 @@ nouns_one = {
     { "english": "mouse", "lithuanian": "pelė" },
     { "english": "bear", "lithuanian": "lokys" },
     { "english": "wolf", "lithuanian": "vilkas" },
+  ],
+  "Plants": [
     { "english": "tree", "lithuanian": "medis" },
     { "english": "flower", "lithuanian": "gėlė" },
     { "english": "grass", "lithuanian": "žolė" },
