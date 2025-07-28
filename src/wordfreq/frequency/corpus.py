@@ -25,6 +25,7 @@ class CorpusConfig:
     description: str
     file_path: str  # Path to the data file
     max_words: int  # Maximum number of words to import
+    language_code: str = "en"  # Language code for the words in this corpus (e.g., "en", "lt", "zh", "fr")
     file_type: str = "json"  # File type (json, subtlex)
     value_type: str = "auto"  # How to interpret values: "rank", "frequency", or "auto"
     corpus_weight: float = 1.0  # Overall weight of this corpus in calculations (0.0 = exclude, 1.0 = full weight)
@@ -441,6 +442,7 @@ def load_corpus(corpus_name: str) -> tuple[int, int]:
     return wordfreq.frequency.importer.import_frequency_data(
         file_path=full_file_path,
         corpus_name=config.name,
+        language_code=config.language_code,
         file_type=config.file_type,
         max_words=config.max_words,
         value_type=config.value_type,
@@ -484,13 +486,13 @@ def load_all_corpora() -> Dict[str, tuple[int, int]]:
             logger.error(f"Failed to load corpus {config.name}: {e}")
             results[config.name] = (0, 0)
     
-    # Calculate harmonic mean ranks (from original script)
-    logger.info("Calculating harmonic mean ranks...")
+    # Calculate combined mean ranks (from original script)
+    logger.info("Calculating combined ranks...")
     try:
-        wordfreq.frequency.analysis.calculate_harmonic_mean_ranks(db_path=constants.WORDFREQ_DB_PATH)
+        wordfreq.frequency.analysis.calculate_combined_ranks(db_path=constants.WORDFREQ_DB_PATH)
         logger.info("Harmonic mean ranks calculation completed!")
     except Exception as e:
-        logger.error(f"Failed to calculate harmonic mean ranks: {e}")
+        logger.error(f"Failed to calculate combined ranks: {e}")
     
     logger.info("Word frequency data population completed!")
     return results

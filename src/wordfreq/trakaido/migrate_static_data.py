@@ -17,6 +17,7 @@ Usage:
 import sys
 import os
 import json
+import re
 from typing import Dict, List, Any, Optional
 
 # Configuration - Update these paths as needed
@@ -38,6 +39,27 @@ from wordfreq.storage.database import (
 )
 from wordfreq.storage.models.schema import WordToken, Lemma, DerivativeForm
 import constants
+
+def clean_english_word(english_word: str) -> str:
+    """
+    Clean English word by removing parenthetical information.
+    
+    Examples:
+        "orange (fruit)" -> "orange"
+        "cousin (m)" -> "cousin"
+        "head (body)" -> "head"
+        "Lithuanian (f)" -> "Lithuanian"
+    
+    Args:
+        english_word: The English word potentially containing parenthetical info
+        
+    Returns:
+        str: The cleaned English word without parenthetical information
+    """
+    # Remove parenthetical information using regex
+    cleaned = re.sub(r'\s*\([^)]+\)', '', english_word).strip()
+    return cleaned
+
 
 def get_pos_and_subtype_for_category(display_category_name: str) -> tuple[str, Optional[str]]:
     """
@@ -133,7 +155,7 @@ def find_or_create_lemma(session, english_word: str, lithuanian_word: str, displ
     
     Args:
         session: Database session
-        english_word: English word
+        english_word: English word (may contain parenthetical info)
         lithuanian_word: Lithuanian translation
         display_category_name: Display category name from nouns.py
         difficulty_level: Difficulty level to assign (1-5)
@@ -141,8 +163,8 @@ def find_or_create_lemma(session, english_word: str, lithuanian_word: str, displ
     Returns:
         Lemma object or None if creation failed
     """
-    # Clean the English word for lookup
-    clean_english = english_word.strip().lower()
+    # Clean the English word by removing parenthetical information and normalize
+    clean_english = clean_english_word(english_word).strip().lower()
     
     # Get the appropriate POS and subtype
     pos_type, pos_subtype = get_pos_and_subtype_for_category(display_category_name)
@@ -197,6 +219,7 @@ def find_or_create_lemma(session, english_word: str, lithuanian_word: str, displ
                 pos_type=pos_type,
                 pos_subtype=pos_subtype,
                 difficulty_level=difficulty_level,
+                frequency_rank=word_token.frequency_rank,  # Use word token's frequency rank
                 lithuanian_translation=lithuanian_word
             )
             
@@ -279,7 +302,8 @@ def migrate_corpus_data(session, corpus_name: str, corpus_data: Dict[str, List[D
             
             if lemma:
                 successful_migrations += 1
-                print(f"    ✅ {english_word} -> {lithuanian_word} (GUID: {lemma.guid})")
+                freq_info = f", freq_rank: {lemma.frequency_rank}" if lemma.frequency_rank else ""
+                print(f"    ✅ {english_word} -> {lithuanian_word} (GUID: {lemma.guid}{freq_info})")
             else:
                 print(f"    ❌ Failed to create lemma for: {english_word}")
     
