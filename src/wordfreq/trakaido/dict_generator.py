@@ -13,6 +13,7 @@ Usage:
     python dict_generator.py [--output-dir OUTPUT_DIR] [--level LEVEL] [--subtype SUBTYPE] [--type TYPE]
 """
 
+
 import os
 import json
 import argparse
@@ -241,7 +242,7 @@ def generate_structure_data(session, difficulty_level: int) -> Dict[str, List[st
 def generate_structure_file(session, difficulty_level: int, output_dir: str) -> str:
     """
     Generate a structure file for a specific difficulty level.
-    Structure files contain GUIDs organized by subtype.
+    Structure files contain word objects organized by subtype, imported from dictionary files.
     """
     level_data = generate_structure_data(session, difficulty_level)
     
@@ -263,24 +264,69 @@ def generate_structure_file(session, difficulty_level: int, output_dir: str) -> 
     filename = f"nouns_{level_name}_structure.py"
     filepath = os.path.join(output_dir, "structure", filename)
     
+    # Collect all subtypes that need to be imported
+    subtypes_to_import = set()
+    for display_subtype, guids in level_data.items():
+        # Convert display name back to subtype for import
+        subtype = display_subtype.lower().replace(' + ', '_and_').replace(' ', '_')
+        subtypes_to_import.add(subtype)
+    
+    # Generate imports
+    imports = []
+    for subtype in sorted(subtypes_to_import):
+        imports.append(f"from ..dictionary.{subtype}_dictionary import *")
+    
+    imports_section = '\n'.join(imports) + '\n\n' if imports else ''
+    
     # Create header
     header = f'''"""
 Nouns {level_name.title()} - Category Structure
 
-This file contains the organizational structure mapping categories to word GUIDs.
-Each GUID corresponds to a detailed entry in the companion dictionary files.
+This file contains the organizational structure mapping categories to word objects.
+Each category contains a list of word objects imported from the dictionary files.
 
-Format: "Category": [
-  "GUID",  # English word
-  ...
-]
+Structure:
+- Each category has a "display_name" for pretty printing
+- Each category has a "words" list containing the actual word objects
+- Word objects are imported from their respective dictionary files
+
+Format: "Category": {{
+  "display_name": "Pretty Category Name",
+  "words": [word_object1, word_object2, ...]
+}}
 """
 
-'''
+{imports_section}'''
     
-    # Format the data
-    formatted_data = format_python_dict(level_data, 0)
-    content = f"{header}{variable_name} = {formatted_data}\n"
+    # Generate structured data with word objects
+    structured_data = {}
+    for display_subtype, guids in level_data.items():
+        # Create pretty display name
+        pretty_name = display_subtype.replace('_', ' ').title()
+        if ' And ' in pretty_name:
+            pretty_name = pretty_name.replace(' And ', ' & ')
+        
+        # Create word list using the actual GUID variable names
+        word_list = ', '.join(guids)
+        
+        structured_data[display_subtype] = {
+            "display_name": pretty_name,
+            "words": f"[{word_list}]"  # This will be formatted as raw code
+        }
+    
+    # Format the structure data manually to handle the raw code
+    structure_lines = []
+    structure_lines.append(f"{variable_name} = {{")
+    
+    for category, data in structured_data.items():
+        structure_lines.append(f'  {repr(category)}: {{')
+        structure_lines.append(f'    "display_name": {repr(data["display_name"])},')
+        structure_lines.append(f'    "words": {data["words"]}')
+        structure_lines.append('  },')
+    
+    structure_lines.append('}')
+    
+    content = header + '\n'.join(structure_lines) + '\n'
     
     # Ensure output directory exists
     os.makedirs(os.path.dirname(filepath), exist_ok=True)
