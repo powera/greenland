@@ -34,8 +34,6 @@ from wordfreq.storage.database import (
     add_lemma,
     add_derivative_form,
     generate_guid,
-    assign_lemma_to_category,
-    get_lemmas_with_lithuanian_translation,
     update_lemma_translation
 )
 from wordfreq.storage.models.schema import WordToken, Lemma, DerivativeForm
@@ -110,20 +108,26 @@ def get_pos_and_subtype_for_category(display_category_name: str) -> tuple[str, O
         "Weather": ("noun", "natural_feature"),
         
         # Grammar categories
-        "Grammar - Connectors": ("conjunction", None),
+        "Grammar - Connectors": ("conjunction", "other"),
         "Grammar - Adverbs of Time and Place": ("adverb", "location"),
         "Grammar - Adverbs of Manner": ("adverb", "style"),
-        "Question Words": ("pronoun", None),
+        "Question Words": ("pronoun", "other"),
         
         # Proper nouns
         "Common Proper Nouns": ("noun", "personal_name"),
     }
     
-    return category_mapping.get(display_category_name, ("noun", "other"))
+    pos_type, pos_subtype = category_mapping.get(display_category_name, ("noun", "other"))
+    
+    # Convert generic "other" to POS-specific other for GUID generation
+    if pos_subtype == "other":
+        pos_subtype = f"{pos_type}_other"
+    
+    return pos_type, pos_subtype
 
 
 
-def find_or_create_lemma(session, english_word: str, lithuanian_word: str, display_category_name: str) -> Optional[Lemma]:
+def find_or_create_lemma(session, english_word: str, lithuanian_word: str, display_category_name: str, difficulty_level: int) -> Optional[Lemma]:
     """
     Find an existing lemma or create a new one for the given English/Lithuanian pair.
     
@@ -132,6 +136,7 @@ def find_or_create_lemma(session, english_word: str, lithuanian_word: str, displ
         english_word: English word
         lithuanian_word: Lithuanian translation
         display_category_name: Display category name from nouns.py
+        difficulty_level: Difficulty level to assign (1-5)
         
     Returns:
         Lemma object or None if creation failed
@@ -190,11 +195,10 @@ def find_or_create_lemma(session, english_word: str, lithuanian_word: str, displ
                 lemma_text=clean_english,
                 definition_text=f"Lithuanian: {lithuanian_word}",
                 pos_type=pos_type,
-                pos_subtype=pos_subtype
+                pos_subtype=pos_subtype,
+                difficulty_level=difficulty_level,
+                lithuanian_translation=lithuanian_word
             )
-            
-            # Set the Lithuanian translation on the lemma
-            update_lemma_translation(session, lemma.id, "lithuanian", lithuanian_word)
             
             # Add English derivative form
             add_derivative_form(
@@ -222,11 +226,10 @@ def find_or_create_lemma(session, english_word: str, lithuanian_word: str, displ
                 lemma_text=clean_english,
                 definition_text=f"Lithuanian: {lithuanian_word}",
                 pos_type=pos_type,
-                pos_subtype=pos_subtype
+                pos_subtype=pos_subtype,
+                difficulty_level=difficulty_level,
+                lithuanian_translation=lithuanian_word
             )
-            
-            # Set the Lithuanian translation on the lemma
-            update_lemma_translation(session, lemma.id, "lithuanian", lithuanian_word)
             
             # Add English derivative form without word token (for phrases/compound words)
             add_derivative_form(
@@ -272,15 +275,11 @@ def migrate_corpus_data(session, corpus_name: str, corpus_data: Dict[str, List[D
             total_words += 1
             
             # Find or create lemma
-            lemma = find_or_create_lemma(session, english_word, lithuanian_word, category_display_name)
+            lemma = find_or_create_lemma(session, english_word, lithuanian_word, category_display_name, difficulty_level)
             
             if lemma:
-                # Assign to category and set difficulty level (using original display name)
-                if assign_lemma_to_category(session, lemma.id, category_display_name, difficulty_level):
-                    successful_migrations += 1
-                    print(f"    ✅ {english_word} -> {lithuanian_word} (GUID: {lemma.guid})")
-                else:
-                    print(f"    ❌ Failed to assign category for: {english_word}")
+                successful_migrations += 1
+                print(f"    ✅ {english_word} -> {lithuanian_word} (GUID: {lemma.guid})")
             else:
                 print(f"    ❌ Failed to create lemma for: {english_word}")
     
@@ -324,15 +323,21 @@ def main():
         print(f"Successfully migrated: {total_successful}")
         print(f"Failed migrations: {total_words - total_successful}")
         
+        # Commit all changes to the database
+        session.commit()
+        print("✅ Changes committed to database")
+        
         # Show some statistics
         print(f"\nDatabase statistics after migration:")
-        lemmas_with_categories = session.query(Lemma).filter(Lemma.category != None).count()
+        lemmas_with_subtypes = session.query(Lemma).filter(Lemma.pos_subtype != None).count()
         lemmas_with_guids = session.query(Lemma).filter(Lemma.guid != None).count()
         lemmas_with_lithuanian = session.query(Lemma).filter(Lemma.lithuanian_translation != None).count()
+        lemmas_with_difficulty = session.query(Lemma).filter(Lemma.difficulty_level != None).count()
         english_derivative_forms = session.query(DerivativeForm).filter(DerivativeForm.language_code == "en").count()
-        print(f"Lemmas with categories: {lemmas_with_categories}")
+        print(f"Lemmas with subtypes: {lemmas_with_subtypes}")
         print(f"Lemmas with GUIDs: {lemmas_with_guids}")
         print(f"Lemmas with Lithuanian translations: {lemmas_with_lithuanian}")
+        print(f"Lemmas with difficulty levels: {lemmas_with_difficulty}")
         print(f"English derivative forms: {english_derivative_forms}")
         
     except Exception as e:
