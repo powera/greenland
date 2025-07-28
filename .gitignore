@@ -16,5 +16,13 @@ greenland.egg-info/
 .DS_Store
 devserver.spec
 
+# local datastores
+src/schema/benchmarks.db
+src/wordfreq/data/linguistics.sqlite
+
 # for claude staging
 claude/staging
+
+# wordfreq local data / tmp
+src/wordfreq/data_old/
+src/wordfreq/output/
