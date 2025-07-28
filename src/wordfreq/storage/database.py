@@ -1053,3 +1053,122 @@ def get_word_tokens_by_combined_frequency_rank(session, limit: int = 1000) -> Li
         .order_by(WordToken.frequency_rank)\
         .limit(limit)\
         .all()
+
+def get_lemmas_by_category_and_level(session, category: str = None, difficulty_level: int = None, limit: int = None) -> List[Lemma]:
+    """
+    Get lemmas filtered by category and/or difficulty level.
+    
+    Args:
+        session: Database session
+        category: Category to filter by (optional)
+        difficulty_level: Difficulty level to filter by (optional)
+        limit: Maximum number of lemmas to return (optional)
+        
+    Returns:
+        List of Lemma objects
+    """
+    query = session.query(Lemma)
+    
+    if category:
+        query = query.filter(Lemma.category == category)
+    
+    if difficulty_level:
+        query = query.filter(Lemma.difficulty_level == difficulty_level)
+    
+    # Order by frequency rank (lower is more frequent), then by GUID
+    query = query.order_by(Lemma.frequency_rank.nulls_last(), Lemma.guid)
+    
+    if limit:
+        query = query.limit(limit)
+    
+    return query.all()
+
+def get_all_categories(session) -> List[str]:
+    """
+    Get all unique categories that have lemmas.
+    
+    Args:
+        session: Database session
+        
+    Returns:
+        List of category names
+    """
+    categories = session.query(Lemma.category)\
+        .filter(Lemma.category != None)\
+        .distinct()\
+        .all()
+    
+    return [cat[0] for cat in categories if cat[0]]
+
+def assign_lemma_to_category(session, lemma_id: int, category: str, difficulty_level: int = None) -> bool:
+    """
+    Assign a lemma to a category and optionally set difficulty level.
+    
+    Args:
+        session: Database session
+        lemma_id: ID of the lemma to update
+        category: Category to assign
+        difficulty_level: Difficulty level to assign (optional)
+        
+    Returns:
+        True if successful, False otherwise
+    """
+    try:
+        lemma = session.query(Lemma).filter(Lemma.id == lemma_id).first()
+        if not lemma:
+            return False
+        
+        lemma.category = category
+        if difficulty_level:
+            lemma.difficulty_level = difficulty_level
+        
+        # Generate GUID if not already assigned
+        if not lemma.guid:
+            lemma.guid = generate_guid(session, category)
+        
+        session.commit()
+        return True
+    except Exception as e:
+        session.rollback()
+        print(f"Error assigning lemma to category: {e}")
+        return False
+
+def get_lemmas_with_lithuanian_translation(session, limit: int = None) -> List[Lemma]:
+    """
+    Get lemmas that have Lithuanian translations in their derivative forms.
+    
+    Args:
+        session: Database session
+        limit: Maximum number of lemmas to return (optional)
+        
+    Returns:
+        List of Lemma objects that have Lithuanian translations
+    """
+    query = session.query(Lemma)\
+        .join(DerivativeForm)\
+        .filter(DerivativeForm.lithuanian_translation != None)\
+        .distinct()
+    
+    if limit:
+        query = query.limit(limit)
+    
+    return query.all()
+
+def get_uncategorized_lemmas_with_lithuanian(session, limit: int = 100) -> List[Lemma]:
+    """
+    Get lemmas that have Lithuanian translations but no category assigned.
+    
+    Args:
+        session: Database session
+        limit: Maximum number of lemmas to return
+        
+    Returns:
+        List of uncategorized Lemma objects with Lithuanian translations
+    """
+    return session.query(Lemma)\
+        .join(DerivativeForm)\
+        .filter(DerivativeForm.lithuanian_translation != None)\
+        .filter(Lemma.category == None)\
+        .distinct()\
+        .limit(limit)\
+        .all()
