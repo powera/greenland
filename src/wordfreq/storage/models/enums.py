@@ -53,6 +53,13 @@ class NounSubtype(enum.Enum):
     PLACE_NAME = "place_name"
     ORGANIZATION_NAME = "organization_name"
     
+    # Temporal Names
+    TEMPORAL_NAME = "temporal_name"  # Days of week, months, etc.
+    
+    # Nationality and Measurement
+    NATIONALITY = "nationality"
+    UNIT_OF_MEASUREMENT = "unit_of_measurement"
+    
     # Other
     OTHER = "other"
 

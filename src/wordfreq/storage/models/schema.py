@@ -36,11 +36,11 @@ class Lemma(Base):
     pos_subtype: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     
     # Dictionary generation fields
-    #guid: Mapped[Optional[str]] = mapped_column(String, unique=True, nullable=True, index=True)  # e.g., N14001
-    #category: Mapped[Optional[str]] = mapped_column(String, nullable=True, index=True)  # e.g., body_parts, colors
-    #difficulty_level: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)  # For which Trakaido "level"
-    #frequency_rank: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)  # Combined frequency rank
-    #tags: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # JSON array of tags
+    guid: Mapped[Optional[str]] = mapped_column(String, unique=True, nullable=True, index=True)  # e.g., N14001
+    category: Mapped[Optional[str]] = mapped_column(String, nullable=True, index=True)  # e.g., body_parts, colors
+    difficulty_level: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)  # For which Trakaido "level"
+    frequency_rank: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)  # Combined frequency rank
+    tags: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # JSON array of tags
     
     # Metadata
     confidence: Mapped[float] = mapped_column(Float, default=0.0)  # 0-1 score from LLM
