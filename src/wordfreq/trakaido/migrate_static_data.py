@@ -35,30 +35,58 @@ from wordfreq.storage.database import (
     add_lemma,
     add_derivative_form,
     generate_guid,
-    update_lemma_translation
+    update_lemma_translation,
+    add_alternative_form
 )
 from wordfreq.storage.models.schema import WordToken, Lemma, DerivativeForm
 import constants
 
-def clean_english_word(english_word: str) -> str:
+english_alternative_map = {
+    "bicycle": ["bike"],
+    "automobile": ["car"],
+    "eyeglasses": ["glasses", "spectacles"],
+    "telephone": ["phone"],
+    "television": ["TV"],
+    "refrigerator": ["fridge"],
+    "motorcycle": ["motorbike"],
+    "airplane": ["plane"],
+    "photograph": ["photo"],
+    "automobile": ["vehicle"],
+    "smartphone": ["phone", "mobile"],
+    "laptop": ["notebook"],
+    "computer": ["PC"],
+    "fire station": ["firehouse"],
+    "police officer": ["policeman", "policewoman", "cop"],
+    "firefighter": ["fireman"],
+    "veterinarian": ["vet"],
+    "monitor (computer)": ["screen"],
+    "chicken meat": ["chicken"],
+}
+
+def clean_english_word(english_word: str) -> tuple[str, bool]:
     """
-    Clean English word by removing parenthetical information.
+    Clean English word by removing parenthetical information and indicate if parentheses were present.
     
     Examples:
-        "orange (fruit)" -> "orange"
-        "cousin (m)" -> "cousin"
-        "head (body)" -> "head"
-        "Lithuanian (f)" -> "Lithuanian"
+        "orange (fruit)" -> ("orange", True)
+        "cousin (m)" -> ("cousin", True)
+        "head (body)" -> ("head", True)
+        "Lithuanian (f)" -> ("lithuanian", True)
+        "simple" -> ("simple", False)
     
     Args:
         english_word: The English word potentially containing parenthetical info
         
     Returns:
-        str: The cleaned English word without parenthetical information
+        tuple: (cleaned_word, has_parentheses) where has_parentheses indicates if parentheses were found
     """
-    # Remove parenthetical information using regex
+    # Check if parenthetical information exists
+    has_parentheses = bool(re.search(r'\s*\([^)]+\)', english_word))
+    
+    # Remove parenthetical information
     cleaned = re.sub(r'\s*\([^)]+\)', '', english_word).strip()
-    return cleaned
+    
+    return cleaned, has_parentheses
 
 
 def get_pos_and_subtype_for_category(display_category_name: str) -> tuple[str, Optional[str]]:
@@ -164,7 +192,11 @@ def find_or_create_lemma(session, english_word: str, lithuanian_word: str, displ
         Lemma object or None if creation failed
     """
     # Clean the English word by removing parenthetical information and normalize
-    clean_english = clean_english_word(english_word).strip().lower()
+    clean_english, has_parentheses = clean_english_word(english_word)
+    clean_english = clean_english.strip().lower()
+    
+    # Store original form in notes if parentheses were present
+    notes = f"Original form: {english_word}" if has_parentheses else None
     
     # Get the appropriate POS and subtype
     pos_type, pos_subtype = get_pos_and_subtype_for_category(display_category_name)
@@ -180,7 +212,14 @@ def find_or_create_lemma(session, english_word: str, lithuanian_word: str, displ
         .all()
     
     if existing_lemmas:
-        return existing_lemmas[0]  # Return the first match
+        lemma = existing_lemmas[0]
+        
+        # Update notes if parenthetical info exists and lemma doesn't already have notes
+        if notes and not lemma.notes:
+            lemma.notes = notes
+            session.commit()
+        
+        return lemma  # Return the first match
     
     # Try to find by English word token only
     word_token = get_word_token_by_text(session, clean_english, "en")
@@ -194,7 +233,14 @@ def find_or_create_lemma(session, english_word: str, lithuanian_word: str, displ
             .all()
         
         if existing_lemmas:
-            return existing_lemmas[0]
+            lemma = existing_lemmas[0]
+            
+            # Update notes if parenthetical info exists and lemma doesn't already have notes
+            if notes and not lemma.notes:
+                lemma.notes = notes
+                session.commit()
+            
+            return lemma
         
         # Check if there's a lemma for this word token without Lithuanian translation
         existing_lemmas_no_lt = session.query(Lemma)\
@@ -208,6 +254,12 @@ def find_or_create_lemma(session, english_word: str, lithuanian_word: str, displ
             # Update the existing lemma with Lithuanian translation
             lemma = existing_lemmas_no_lt[0]
             update_lemma_translation(session, lemma.id, "lithuanian", lithuanian_word)
+            
+            # Update notes if parenthetical info exists and lemma doesn't already have notes
+            if notes and not lemma.notes:
+                lemma.notes = notes
+                session.commit()
+            
             return lemma
         
         # If we found the word token but no matching lemma, create a new lemma
@@ -220,7 +272,8 @@ def find_or_create_lemma(session, english_word: str, lithuanian_word: str, displ
                 pos_subtype=pos_subtype,
                 difficulty_level=difficulty_level,
                 frequency_rank=word_token.frequency_rank,  # Use word token's frequency rank
-                lithuanian_translation=lithuanian_word
+                lithuanian_translation=lithuanian_word,
+                notes=notes
             )
             
             # Add English derivative form
@@ -251,7 +304,8 @@ def find_or_create_lemma(session, english_word: str, lithuanian_word: str, displ
                 pos_type=pos_type,
                 pos_subtype=pos_subtype,
                 difficulty_level=difficulty_level,
-                lithuanian_translation=lithuanian_word
+                lithuanian_translation=lithuanian_word,
+                notes=notes
             )
             
             # Add English derivative form without word token (for phrases/compound words)
@@ -271,6 +325,61 @@ def find_or_create_lemma(session, english_word: str, lithuanian_word: str, displ
         except Exception as e:
             print(f"Error creating basic lemma for {english_word}: {e}")
             return None
+
+def create_alternatives_for_lemma(session, lemma: Lemma, english_word: str) -> int:
+    """
+    Create alternative forms for a lemma based on the english_alternative_map.
+    
+    Args:
+        session: Database session
+        lemma: The lemma to create alternatives for
+        english_word: The original English word (cleaned)
+        
+    Returns:
+        int: Number of alternatives created
+    """
+    alternatives_created = 0
+    
+    # Check if this word has alternatives defined
+    if english_word in english_alternative_map:
+        alternatives = english_alternative_map[english_word]
+        
+        for alternative in alternatives:
+            # Determine the grammatical form based on the alternative
+            if alternative in ["TV", "PC"]:
+                grammatical_form = "abbreviation"
+                explanation = f"Abbreviation for {english_word}"
+            elif alternative == "spectacles":
+                grammatical_form = "archaic"
+                explanation = f"Archaic term for {english_word}"
+            else:
+                grammatical_form = "informal"
+                explanation = f"Informal term for {english_word}"
+            
+            try:
+                # Try to find the word token for the alternative
+                alternative_word_token = get_word_token_by_text(session, alternative, "en")
+                
+                # Create the alternative form
+                add_alternative_form(
+                    session=session,
+                    lemma=lemma,
+                    alternative_text=alternative,
+                    language_code="en",
+                    alternative_type=grammatical_form,
+                    explanation=explanation,
+                    word_token=alternative_word_token
+                )
+                
+                alternatives_created += 1
+                freq_info = f", freq_rank: {alternative_word_token.frequency_rank}" if alternative_word_token and alternative_word_token.frequency_rank else ""
+                print(f"      ➕ Added alternative: {alternative} ({grammatical_form}{freq_info})")
+                
+            except Exception as e:
+                print(f"      ❌ Failed to create alternative '{alternative}' for {english_word}: {e}")
+    
+    return alternatives_created
+
 
 def migrate_corpus_data(session, corpus_name: str, corpus_data: Dict[str, List[Dict[str, str]]], difficulty_level: int):
     """
@@ -303,7 +412,14 @@ def migrate_corpus_data(session, corpus_name: str, corpus_data: Dict[str, List[D
             if lemma:
                 successful_migrations += 1
                 freq_info = f", freq_rank: {lemma.frequency_rank}" if lemma.frequency_rank else ""
-                print(f"    ✅ {english_word} -> {lithuanian_word} (GUID: {lemma.guid}{freq_info})")
+                notes_info = f", notes: {lemma.notes}" if lemma.notes else ""
+                print(f"    ✅ {english_word} -> {lithuanian_word} (GUID: {lemma.guid}{freq_info}{notes_info})")
+                
+                # Create alternatives for this lemma if they exist
+                clean_english, _ = clean_english_word(english_word)
+                clean_english = clean_english.strip().lower()
+                alternatives_created = create_alternatives_for_lemma(session, lemma, clean_english)
+                
             else:
                 print(f"    ❌ Failed to create lemma for: {english_word}")
     
@@ -358,11 +474,16 @@ def main():
         lemmas_with_lithuanian = session.query(Lemma).filter(Lemma.lithuanian_translation != None).count()
         lemmas_with_difficulty = session.query(Lemma).filter(Lemma.difficulty_level != None).count()
         english_derivative_forms = session.query(DerivativeForm).filter(DerivativeForm.language_code == "en").count()
+        alternative_forms = session.query(DerivativeForm).filter(
+            DerivativeForm.language_code == "en",
+            DerivativeForm.grammatical_form.like("alternative_%")
+        ).count()
         print(f"Lemmas with subtypes: {lemmas_with_subtypes}")
         print(f"Lemmas with GUIDs: {lemmas_with_guids}")
         print(f"Lemmas with Lithuanian translations: {lemmas_with_lithuanian}")
         print(f"Lemmas with difficulty levels: {lemmas_with_difficulty}")
         print(f"English derivative forms: {english_derivative_forms}")
+        print(f"Alternative forms created: {alternative_forms}")
         
     except Exception as e:
         print(f"❌ Migration failed: {e}")
