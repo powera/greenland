@@ -260,8 +260,8 @@ def generate_structure_file(session, difficulty_level: int, output_dir: str) -> 
     }
     
     level_name = level_names.get(difficulty_level, str(difficulty_level))
-    variable_name = f"nouns_{level_name}_structure"
-    filename = f"nouns_{level_name}_structure.py"
+    variable_name = f"words_{level_name}_structure"
+    filename = f"words_{level_name}_structure.py"
     filepath = os.path.join(output_dir, "structure", filename)
     
     # Collect all subtypes that need to be imported
