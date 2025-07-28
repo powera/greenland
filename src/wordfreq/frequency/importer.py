@@ -27,6 +27,7 @@ CONTAINS_NUMERAL_PATTERN = re.compile(r'[0-9]')
 def import_frequency_data(
     file_path: str, 
     corpus_name: str, 
+    language_code: str = "en",  # Language code for the words being imported (e.g., "en", "lt", "zh", "fr")
     file_type: str = "json", 
     max_words: int = 5000,
     value_type: str = "auto",  # Parameter to specify what the numeric values represent: "rank", "frequency", or "auto"
@@ -38,6 +39,7 @@ def import_frequency_data(
     Args:
         file_path: Path to the frequency data file
         corpus_name: Name of the corpus (gutenberg, books_20th, subtitles, wiki_vital)
+        language_code: Language code for the words being imported (e.g., "en", "lt", "zh", "fr")
         file_type: File type (json, subtlex)
         max_words: Maximum number of words to import
         value_type: How to interpret numeric values in simple word->number mappings:
@@ -49,7 +51,7 @@ def import_frequency_data(
     Returns:
         Tuple of (words imported, total words)
     """
-    logger.info(f"Importing frequency data from {file_path} for corpus '{corpus_name}'")
+    logger.info(f"Importing frequency data from {file_path} for corpus '{corpus_name}' (language: {language_code})")
     
     # Get session and ensure corpus configurations are synced
     session = get_session(constants.WORDFREQ_DB_PATH)
@@ -214,7 +216,7 @@ def import_frequency_data(
         
         for word_text, data in words_data.items():
             # Get or create the word token
-            word_obj = database.add_word_token(session, word_text)
+            word_obj = database.add_word_token(session, word_text, language_code)
             
             rank = data.get("rank")
             frequency = data.get("frequency")
