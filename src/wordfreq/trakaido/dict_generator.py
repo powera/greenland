@@ -256,7 +256,9 @@ def generate_structure_file(session, difficulty_level: int, output_dir: str) -> 
         2: "two", 
         3: "three",
         4: "four",
-        5: "five"
+        5: "five",
+        6: "six",
+        7: "seven",
     }
     
     level_name = level_names.get(difficulty_level, str(difficulty_level))
@@ -419,7 +421,7 @@ def generate_all_structure_files(session, output_dir: str) -> List[str]:
     """Generate structure files for all difficulty levels (1-5)."""
     generated_files = []
     
-    for level in range(1, 6):
+    for level in range(1, 8):
         filepath = generate_structure_file(session, level, output_dir)
         if filepath:
             generated_files.append(filepath)
