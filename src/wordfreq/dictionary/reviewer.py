@@ -74,60 +74,55 @@ class LinguisticReviewer:
         else:
             print(f"\n{self.c.YELLOW}No corpus frequency data available{self.c.ENDC}")
         
-        # Definitions (now derivative forms)
-        definitions = word.definitions
-        print(f"\n{self.c.HEADER}Definitions:{self.c.ENDC}")
-        if not definitions:
-            print(f"  {self.c.YELLOW}No definitions recorded{self.c.ENDC}")
+        # Derivative forms (now the main data structure)
+        derivative_forms = word.definitions  # This is actually derivative_forms due to the wrapper
+        print(f"\n{self.c.HEADER}Derivative Forms:{self.c.ENDC}")
+        if not derivative_forms:
+            print(f"  {self.c.YELLOW}No derivative forms recorded{self.c.ENDC}")
         else:
-            for i, definition in enumerate(definitions):
-                flags = []
-                if definition.multiple_meanings:
-                    flags.append("multiple meanings")
-                if definition.special_case:
-                    flags.append("special case")
+            for i, derivative_form in enumerate(derivative_forms):
+                verified_str = f" {self.c.GREEN}[✓]{self.c.ENDC}" if derivative_form.verified else ""
                 
-                flag_str = f" [{', '.join(flags)}]" if flags else ""
-                verified_str = f" {self.c.GREEN}[✓]{self.c.ENDC}" if definition.verified else ""
+                # Definition text is in the lemma
+                definition_text = derivative_form.lemma.definition_text
+                print(f"  {self.c.CYAN}[{i+1}]{self.c.ENDC} {definition_text}{verified_str}")
+                print(f"    {self.c.BLUE}Form:{self.c.ENDC} {derivative_form.derivative_form_text}")
+                print(f"    {self.c.BLUE}Lemma:{self.c.ENDC} {derivative_form.lemma.lemma_text}")
+                print(f"    {self.c.BLUE}Part of speech:{self.c.ENDC} {derivative_form.lemma.pos_type}")
+                print(f"    {self.c.BLUE}Grammatical form:{self.c.ENDC} {derivative_form.grammatical_form}")
+                if derivative_form.lemma.pos_subtype:
+                    print(f"    {self.c.BLUE}Subtype:{self.c.ENDC} {derivative_form.lemma.pos_subtype}")
+                if derivative_form.ipa_pronunciation:
+                    print(f"    {self.c.BLUE}IPA:{self.c.ENDC} {derivative_form.ipa_pronunciation}")
+                if derivative_form.phonetic_pronunciation:
+                    print(f"    {self.c.BLUE}Phonetic Pronunciation:{self.c.ENDC} {derivative_form.phonetic_pronunciation}")
                 
-                # In new schema, definition_text is in the lemma
-                definition_text = definition.lemma.definition_text
-                print(f"  {self.c.CYAN}[{i+1}]{self.c.ENDC} {definition_text}{flag_str}{verified_str}")
-                print(f"    {self.c.BLUE}Confidence:{self.c.ENDC} {definition.confidence:.2f}")
-                print(f"    {self.c.BLUE}Lemma:{self.c.ENDC} {definition.lemma.lemma_text}")
-                print(f"    {self.c.BLUE}Part of speech:{self.c.ENDC} {definition.lemma.pos_type}")
-                print(f"    {self.c.BLUE}Grammatical form:{self.c.ENDC} {definition.grammatical_form}")
-                if definition.lemma.pos_subtype:
-                    print(f"    {self.c.BLUE}Subtype:{self.c.ENDC} {definition.lemma.pos_subtype}")
-                if definition.ipa_pronunciation:
-                    print(f"      {self.c.BLUE}IPA:{self.c.ENDC} {definition.ipa_pronunciation}")
-                if definition.phonetic_pronunciation:
-                    print(f"      {self.c.BLUE}Phonetic Pronunciation:{self.c.ENDC} {definition.phonetic_pronunciation}")
-                if definition.chinese_translation:
-                    print(f"    {self.c.BLUE}Chinese:{self.c.ENDC} {definition.chinese_translation}")
-                if definition.french_translation:
-                    print(f"    {self.c.BLUE}French:{self.c.ENDC} {definition.french_translation}")
-                if definition.korean_translation:
-                    print(f"    {self.c.BLUE}Korean:{self.c.ENDC} {definition.korean_translation}")
-                if definition.swahili_translation:
-                    print(f"    {self.c.BLUE}Swahili:{self.c.ENDC} {definition.swahili_translation}")
-                if definition.lithuanian_translation:
-                    print(f"    {self.c.BLUE}Lithuanian:{self.c.ENDC} {definition.lithuanian_translation}")
-                if definition.vietnamese_translation:
-                    print(f"    {self.c.BLUE}Vietnamese:{self.c.ENDC} {definition.vietnamese_translation}")
+                # Translations are now in the lemma
+                if derivative_form.lemma.chinese_translation:
+                    print(f"    {self.c.BLUE}Chinese:{self.c.ENDC} {derivative_form.lemma.chinese_translation}")
+                if derivative_form.lemma.french_translation:
+                    print(f"    {self.c.BLUE}French:{self.c.ENDC} {derivative_form.lemma.french_translation}")
+                if derivative_form.lemma.korean_translation:
+                    print(f"    {self.c.BLUE}Korean:{self.c.ENDC} {derivative_form.lemma.korean_translation}")
+                if derivative_form.lemma.swahili_translation:
+                    print(f"    {self.c.BLUE}Swahili:{self.c.ENDC} {derivative_form.lemma.swahili_translation}")
+                if derivative_form.lemma.lithuanian_translation:
+                    print(f"    {self.c.BLUE}Lithuanian:{self.c.ENDC} {derivative_form.lemma.lithuanian_translation}")
+                if derivative_form.lemma.vietnamese_translation:
+                    print(f"    {self.c.BLUE}Vietnamese:{self.c.ENDC} {derivative_form.lemma.vietnamese_translation}")
 
-                if definition.notes:
-                    print(f"    {self.c.BLUE}Notes:{self.c.ENDC} {definition.notes}")
+                if derivative_form.notes:
+                    print(f"    {self.c.BLUE}Notes:{self.c.ENDC} {derivative_form.notes}")
                 
                 # Examples (now example_sentences)
-                examples = definition.example_sentences
+                examples = derivative_form.example_sentences
                 if examples:
                     print(f"    {self.c.BLUE}Examples:{self.c.ENDC}")
                     for example in examples:
                         print(f"      - {example.example_text}")
                 
-                # Add a separator between definitions
-                if i < len(definitions) - 1:
+                # Add a separator between derivative forms
+                if i < len(derivative_forms) - 1:
                     print()
         
         return True
@@ -150,22 +145,22 @@ class LinguisticReviewer:
         # Display current definitions
         self.display_word_info(word_text)
         
-        # Choose definition to add example to
-        definitions = word.definitions
-        if not definitions:
-            print(f"{self.c.YELLOW}No definitions to add examples to. Add a definition first.{self.c.ENDC}")
+        # Choose derivative form to add example to
+        derivative_forms = word.definitions  # This is actually derivative_forms due to the wrapper
+        if not derivative_forms:
+            print(f"{self.c.YELLOW}No derivative forms to add examples to. Add a derivative form first.{self.c.ENDC}")
             return False
         
         try:
-            choice = int(input(f"\n{self.c.BOLD}Enter definition number to add example to (1-{len(definitions)}) or 0 to cancel: {self.c.ENDC}"))
+            choice = int(input(f"\n{self.c.BOLD}Enter derivative form number to add example to (1-{len(derivative_forms)}) or 0 to cancel: {self.c.ENDC}"))
             if choice == 0:
                 return False
             
-            if choice < 1 or choice > len(definitions):
+            if choice < 1 or choice > len(derivative_forms):
                 print(f"{self.c.RED}Invalid choice.{self.c.ENDC}")
                 return False
             
-            definition = definitions[choice-1]
+            derivative_form = derivative_forms[choice-1]
             
             # Get example text
             example_text = input("Example sentence: ").strip()
@@ -174,7 +169,7 @@ class LinguisticReviewer:
                 return False
             
             # Add example
-            linguistic_db.add_example(self.session, definition, example_text)
+            linguistic_db.add_example_sentence(self.session, derivative_form, example_text)
             
             print(f"{self.c.GREEN}Example added successfully.{self.c.ENDC}")
             return True
@@ -198,20 +193,15 @@ class LinguisticReviewer:
             return
         
         for item in words:
-            # Collect flags from all definitions
-            all_flags = []
-            for definition in item['definitions']:
-                if definition['multiple_meanings']:
-                    all_flags.append("multiple meanings")
-                if definition['special_case']:
-                    all_flags.append("special case")
-            
-            flag_str = f" [{', '.join(set(all_flags))}]" if all_flags else ""
+            # Show unverified status
+            unverified_count = sum(1 for definition in item['definitions'] if not definition.get('verified', True))
+            flag_str = f" [unverified: {unverified_count}]" if unverified_count > 0 else ""
             
             print(f"{self.c.CYAN}{item['word']}{self.c.ENDC}{flag_str} (rank: {item['rank']})")
             # Show definition summaries
             for i, definition in enumerate(item['definitions']):
-                print(f"  {i+1}. {definition['pos']} - {definition['text'][:50]}...")
+                verified_str = f" {self.c.GREEN}[✓]{self.c.ENDC}" if definition.get('verified', False) else f" {self.c.RED}[✗]{self.c.ENDC}"
+                print(f"  {i+1}. {definition['pos']} - {definition['text'][:50]}...{verified_str}")
     
     def list_common_words_by_pos(self, pos_type: str, limit: int = 20) -> None:
         """
@@ -313,13 +303,13 @@ class LinguisticReviewer:
         """
         print(f"\n{self.c.HEADER}{self.c.BOLD}Words with Missing Data:{self.c.ENDC}")
         
-        words = linguistic_db.get_words_needing_analysis(self.session, limit=limit)
+        words = linguistic_db.get_word_tokens_needing_analysis(self.session, limit=limit)
         if not words:
             print(f"{self.c.GREEN}No words with missing data found.{self.c.ENDC}")
             return
         
         for word in words:
-            print(f"{self.c.CYAN}{word.token}{self.c.ENDC} (rank: {word.frequency_rank}) - Missing: definitions")
+            print(f"{self.c.CYAN}{word.token}{self.c.ENDC} (rank: {word.frequency_rank}) - Missing: derivative forms")
     
     def show_word_list_access_info(self) -> None:
         """Show information about accessing word lists and the word categorizer tool."""
@@ -365,7 +355,7 @@ class LinguisticReviewer:
         while True:
             print(f"\n{self.c.HEADER}{self.c.BOLD}Linguistic Data Reviewer{self.c.ENDC}")
             print(f"{self.c.CYAN}1.{self.c.ENDC} Display word information")
-            print(f"{self.c.CYAN}4.{self.c.ENDC} Add example to definition")
+            print(f"{self.c.CYAN}4.{self.c.ENDC} Add example to derivative form")
             print(f"{self.c.CYAN}5.{self.c.ENDC} List problematic words")
             print(f"{self.c.CYAN}6.{self.c.ENDC} Find words with missing data")
             print(f"{self.c.CYAN}7.{self.c.ENDC} Show statistics")
