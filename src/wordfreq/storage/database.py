@@ -201,7 +201,7 @@ def generate_guid(session, subtype: str) -> str:
         subtype: POS subtype name (e.g., 'body_part', 'color')
         
     Returns:
-        Unique GUID string (e.g., 'N14.001')
+        Unique GUID string (e.g., 'N14_001')
     """
     if subtype not in SUBTYPE_GUID_PREFIXES:
         raise ValueError(f"Unknown subtype: {subtype}")
@@ -218,9 +218,14 @@ def generate_guid(session, subtype: str) -> str:
     for (guid,) in existing_guids:
         if guid and guid.startswith(prefix):
             try:
-                # Handle both old format (A01001) and new format (A01.001)
-                if '.' in guid:
-                    # New format: A01.001
+                # Handle old format (A01001), dot format (A01.001), and new underscore format (A01_001)
+                if '_' in guid:
+                    # New format: A01_001
+                    if len(guid) >= 7 and guid[3] == '_':
+                        num = int(guid[4:])  # Extract the number part after the underscore
+                        max_num = max(max_num, num)
+                elif '.' in guid:
+                    # Dot format: A01.001 (for backward compatibility)
                     if len(guid) >= 7 and guid[3] == '.':
                         num = int(guid[4:])  # Extract the number part after the period
                         max_num = max(max_num, num)
@@ -232,9 +237,9 @@ def generate_guid(session, subtype: str) -> str:
             except ValueError:
                 continue
     
-    # Generate next GUID in new format
+    # Generate next GUID in new format (using underscore for valid Python variable names)
     next_num = max_num + 1
-    return f"{prefix}.{next_num:03d}"
+    return f"{prefix}_{next_num:03d}"
 
 def create_database_session(db_path: str = constants.WORDFREQ_DB_PATH):
     """Create a new database session."""
@@ -1164,5 +1169,63 @@ def get_lemmas_by_subtype_and_level(session, pos_subtype: str = None, difficulty
     
     if limit:
         query = query.limit(limit)
+    
+    return query.all()
+
+def add_alternative_form(
+    session,
+    lemma: Lemma,
+    alternative_text: str,
+    language_code: str,
+    alternative_type: str,
+    explanation: str,
+    word_token: Optional[WordToken] = None
+) -> DerivativeForm:
+    """
+    Add an alternative form for a lemma.
+    
+    Args:
+        session: Database session
+        lemma: The lemma this is an alternative for
+        alternative_text: The alternative text (e.g., "bike")
+        language_code: Language code (e.g., "en", "lt")
+        alternative_type: Type of alternative ("informal", "abbreviation", "formal", "variant", "technical")
+        explanation: Human-readable explanation (e.g., "Informal term for bicycle")
+        word_token: Optional WordToken for frequency data
+    
+    Returns:
+        DerivativeForm: The created alternative form
+    """
+    grammatical_form = f"alternative_{alternative_type}"
+    
+    return add_derivative_form(
+        session=session,
+        lemma=lemma,
+        derivative_form_text=alternative_text,
+        language_code=language_code,
+        grammatical_form=grammatical_form,
+        word_token=word_token,
+        is_base_form=False,
+        notes=explanation
+    )
+
+def get_alternative_forms_for_lemma(session, lemma: Lemma, language_code: str = None) -> List[DerivativeForm]:
+    """
+    Get all alternative forms for a lemma.
+    
+    Args:
+        session: Database session
+        lemma: The lemma to get alternatives for
+        language_code: Optional language filter
+    
+    Returns:
+        List[DerivativeForm]: List of alternative forms
+    """
+    query = session.query(DerivativeForm)\
+        .filter(DerivativeForm.lemma_id == lemma.id)\
+        .filter(DerivativeForm.grammatical_form.like('alternative_%'))
+    
+    if language_code:
+        query = query.filter(DerivativeForm.language_code == language_code)
     
     return query.all()

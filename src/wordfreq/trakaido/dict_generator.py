@@ -16,6 +16,8 @@ Usage:
 import os
 import json
 import argparse
+import keyword
+import re
 from typing import Dict, List, Any, Optional
 
 # Configuration
@@ -29,7 +31,7 @@ from wordfreq.storage.database import (
     create_database_session,
     get_lemmas_by_subtype_and_level,
 )
-from wordfreq.storage.models.schema import Lemma, DerivativeForm, AlternativeForm
+from wordfreq.storage.models.schema import Lemma, DerivativeForm
 import constants
 
 def get_all_subtypes(session) -> List[str]:
@@ -67,15 +69,19 @@ def get_english_word_for_lemma(session, lemma: Lemma) -> str:
 
 def get_lithuanian_word_for_lemma(session, lemma: Lemma) -> str:
     """Get the primary Lithuanian translation for a lemma."""
-    # First try to get from base forms
-    for form in lemma.derivative_forms:
-        if form.is_base_form and form.lithuanian_translation:
-            return form.lithuanian_translation
+    # First try to get from the lemma's direct translation field
+    if lemma.lithuanian_translation:
+        return lemma.lithuanian_translation
     
-    # Fallback to any form with Lithuanian translation
+    # Fallback to Lithuanian base forms
     for form in lemma.derivative_forms:
-        if form.lithuanian_translation:
-            return form.lithuanian_translation
+        if form.is_base_form and form.language_code == 'lt':
+            return form.derivative_form_text
+    
+    # Fallback to any Lithuanian derivative form
+    for form in lemma.derivative_forms:
+        if form.language_code == 'lt':
+            return form.derivative_form_text
     
     # Final fallback (shouldn't happen if data is properly migrated)
     return lemma.lemma_text
@@ -84,18 +90,19 @@ def get_alternatives_for_lemma(session, lemma: Lemma) -> Dict[str, List[str]]:
     """Get alternative forms for a lemma, organized by language."""
     alternatives = {'english': [], 'lithuanian': []}
     
-    # Try to get from AlternativeForm table if it exists
-    try:
-        alt_forms = session.query(AlternativeForm)\
-            .filter(AlternativeForm.lemma_id == lemma.id)\
-            .all()
-        
-        for alt in alt_forms:
-            if alt.language in alternatives:
-                alternatives[alt.language].append(alt.alternative_text)
-    except:
-        # AlternativeForm table might not exist yet, return empty alternatives
-        pass
+    # Get alternative forms from DerivativeForm table
+    # Alternative forms have grammatical_form starting with "alternative_"
+    alt_forms = session.query(DerivativeForm)\
+        .filter(DerivativeForm.lemma_id == lemma.id)\
+        .filter(DerivativeForm.grammatical_form.like('alternative_%'))\
+        .all()
+    
+    for alt_form in alt_forms:
+        if alt_form.language_code == 'en' and 'english' in alternatives:
+            alternatives['english'].append(alt_form.derivative_form_text)
+        elif alt_form.language_code == 'lt' and 'lithuanian' in alternatives:
+            alternatives['lithuanian'].append(alt_form.derivative_form_text)
+        # Can extend for other languages as needed
     
     return alternatives
 
@@ -138,6 +145,21 @@ def lemma_to_word_dict(session, lemma: Lemma) -> Dict[str, Any]:
             "notes": lemma.notes or ""
         }
     }
+
+def is_valid_python_identifier(name: str) -> bool:
+    """Check if a string is a valid Python identifier (variable name)."""
+    if not name:
+        return False
+    
+    # Check if it's a valid identifier and not a Python keyword
+    return name.isidentifier() and not keyword.iskeyword(name)
+
+def validate_guid_as_variable_name(guid: str) -> bool:
+    """Validate that a GUID can be used as a Python variable name."""
+    if not guid:
+        return False
+    
+    return is_valid_python_identifier(guid)
 
 def format_python_dict(data, indent=0):
     """Format a dictionary as proper Python code."""
@@ -197,11 +219,22 @@ def generate_structure_data(session, difficulty_level: int) -> Dict[str, List[st
             # Convert subtype name to display format
             display_subtype = subtype.replace('_', ' ').title().replace(' And ', ' + ')
             
-            # Extract just the GUIDs for structure files
-            guid_list = [lemma.guid for lemma in lemmas if lemma.guid]
+            # Extract just the GUIDs for structure files, validating each one
+            guid_list = []
+            skipped_guids = 0
+            
+            for lemma in lemmas:
+                if lemma.guid:
+                    if validate_guid_as_variable_name(lemma.guid):
+                        guid_list.append(lemma.guid)
+                    else:
+                        print(f"Warning: Skipping GUID '{lemma.guid}' in structure (not a valid Python identifier)")
+                        skipped_guids += 1
             
             if guid_list:
                 level_data[display_subtype] = guid_list
+                if skipped_guids > 0:
+                    print(f"Skipped {skipped_guids} invalid GUIDs in {display_subtype} for level {difficulty_level}")
     
     return level_data
 
@@ -285,11 +318,22 @@ Entry structure:
     
     # Generate entries
     entries = []
+    skipped_count = 0
+    
     for lemma in lemmas:
+        # Validate GUID as Python variable name
+        if not validate_guid_as_variable_name(lemma.guid):
+            print(f"Warning: Skipping lemma with invalid GUID '{lemma.guid}' (not a valid Python identifier)")
+            skipped_count += 1
+            continue
+            
         entry_data = lemma_to_word_dict(session, lemma)
         
+        # Use GUID directly as variable name since it's now validated
+        variable_name = lemma.guid
+        
         # Format the entry as Python code with proper escaping
-        entry_code = f"""{lemma.guid} = {{
+        entry_code = f"""{variable_name} = {{
   'guid': {repr(entry_data['guid'])},
   'english': {repr(entry_data['english'])},
   'lithuanian': {repr(entry_data['lithuanian'])},
@@ -305,6 +349,9 @@ Entry structure:
   }}
 }}"""
         entries.append(entry_code)
+    
+    if skipped_count > 0:
+        print(f"Skipped {skipped_count} lemmas with invalid GUIDs in subtype '{subtype}'")
     
     return header + '\n\n'.join(entries) + '\n'
 
