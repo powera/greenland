@@ -23,17 +23,83 @@ from typing import Dict, List, Any, Optional
 TRAKAIDO_WORDLISTS_BASE_PATH = '/Users/powera/repo/greenland/data/trakaido_wordlists'
 GREENLAND_SRC_PATH = '/Users/powera/repo/greenland/src'
 
-# Import the existing data
+# Add the src directory to path for wordfreq imports
 import sys
 import os
-sys.path.append(os.path.join(TRAKAIDO_WORDLISTS_BASE_PATH, 'lang_lt'))
-from .nouns import nouns_one, nouns_two, nouns_three, nouns_four, nouns_five, common_words, common_words_two
-
-# Add the src directory to path for wordfreq imports
 sys.path.append(GREENLAND_SRC_PATH)
-from wordfreq.storage.database import create_database_session, get_word_token_by_text
-from wordfreq.storage.models.schema import WordToken, WordFrequency
+from wordfreq.storage.database import (
+    create_database_session, 
+    get_lemmas_by_category_and_level,
+    get_all_categories
+)
+from wordfreq.storage.models.schema import Lemma, DerivativeForm
 import constants
+
+def get_english_word_for_lemma(lemma: Lemma) -> str:
+    """Get the primary English word for a lemma."""
+    # First try to get from derivative forms
+    for form in lemma.derivative_forms:
+        if form.word_token and form.is_base_form:
+            return form.word_token.token
+    
+    # Fallback to any derivative form with word token
+    for form in lemma.derivative_forms:
+        if form.word_token:
+            return form.word_token.token
+    
+    # Final fallback to lemma text
+    return lemma.lemma_text
+
+def get_lithuanian_word_for_lemma(lemma: Lemma) -> str:
+    """Get the primary Lithuanian translation for a lemma."""
+    # First try to get from base forms
+    for form in lemma.derivative_forms:
+        if form.is_base_form and form.lithuanian_translation:
+            return form.lithuanian_translation
+    
+    # Fallback to any form with Lithuanian translation
+    for form in lemma.derivative_forms:
+        if form.lithuanian_translation:
+            return form.lithuanian_translation
+    
+    # Final fallback (shouldn't happen if data is properly migrated)
+    return lemma.lemma_text
+
+def get_alternatives_for_lemma(lemma: Lemma) -> Dict[str, List[str]]:
+    """Get alternative translations for a lemma."""
+    # For now, return empty alternatives
+    # This can be enhanced later with actual alternative data
+    return {
+        "english": [],
+        "lithuanian": []
+    }
+
+def lemma_to_word_dict(lemma: Lemma) -> Dict[str, Any]:
+    """Convert a lemma to the word dictionary format used by trakaido."""
+    english_word = get_english_word_for_lemma(lemma)
+    lithuanian_word = get_lithuanian_word_for_lemma(lemma)
+    alternatives = get_alternatives_for_lemma(lemma)
+    
+    # Parse tags from JSON
+    tags = []
+    if lemma.tags:
+        try:
+            tags = json.loads(lemma.tags)
+        except json.JSONDecodeError:
+            tags = []
+    
+    return {
+        "guid": lemma.guid,
+        "english": english_word,
+        "lithuanian": lithuanian_word,
+        "alternatives": alternatives,
+        "metadata": {
+            "difficulty_level": lemma.difficulty_level,
+            "frequency_rank": lemma.frequency_rank,
+            "tags": tags,
+            "notes": lemma.notes or ""
+        }
+    }
 
 def generate_guid(prefix: str, counter: int) -> str:
     """Generate a GUID in format N01001, C01001, etc."""
@@ -307,7 +373,7 @@ def sanitize_filename(name: str) -> str:
     return sanitized.lower()
 
 def create_separated_files():
-    """Create the separated structure and dictionary files"""
+    """Create the separated structure and dictionary files from database"""
     
     # Create database session for wordfreq data
     print("Connecting to wordfreq database...")
@@ -315,9 +381,8 @@ def create_separated_files():
         session = create_database_session()
         print("✅ Connected to wordfreq database")
     except Exception as e:
-        print(f"⚠️  Warning: Could not connect to wordfreq database: {e}")
-        print("Proceeding without wordfreq data...")
-        session = None
+        print(f"❌ Could not connect to wordfreq database: {e}")
+        return
     
     # Create subdirectories for enhanced files
     enhanced_dir = os.path.join(TRAKAIDO_WORDLISTS_BASE_PATH, 'lang_lt', 'enhanced')
@@ -328,117 +393,116 @@ def create_separated_files():
     os.makedirs(dictionary_dir, exist_ok=True)
     print(f"Created directories: {structure_dir}, {dictionary_dir}")
     
-    # Dictionary to store all corpus data
-    corpus_data = {
-        "nouns_one": nouns_one,
-        "nouns_two": nouns_two,
-        "nouns_three": nouns_three,
-        "nouns_four": nouns_four,
-        "nouns_five": nouns_five,
-        "common_words": common_words,
-        "common_words_two": common_words_two
-    }
+    # Get all categories from database
+    categories = get_all_categories(session)
+    if not categories:
+        print("❌ No categories found in database. Run migration script first.")
+        return
     
-    total_wordfreq_found = 0
-    total_words = 0
-    category_counter = 1  # Global counter for dictionary files
+    print(f"Found {len(categories)} categories in database")
     
-    # First pass: collect all categories and assign GUID prefixes
-    all_categories = []
-    for corpus_name, corpus_dict in corpus_data.items():
-        for category in corpus_dict.keys():
-            all_categories.append((corpus_name, category))
+    # Generate files for each difficulty level (1-5)
+    level_names = {1: "one", 2: "two", 3: "three", 4: "four", 5: "five"}
     
-    for corpus_name, corpus_dict in corpus_data.items():
-        print(f"Transforming {corpus_name}...")
+    for level_num in range(1, 6):
+        level_name = level_names[level_num]
+        print(f"\nProcessing difficulty level {level_num} ({level_name})...")
         
-        # Determine prefix based on corpus type
-        if corpus_name.startswith('common_words'):
-            base_prefix = 'C'
-        else:
-            base_prefix = 'N'
+        # Get all lemmas for this difficulty level, organized by category
+        level_data = {}
+        level_structure = {}
+        all_dictionary_entries = []
         
-        # Transform each category separately with its own GUID sequence
-        structure_data = {}
+        for category in categories:
+            lemmas = get_lemmas_by_category_and_level(
+                session, 
+                category=category, 
+                difficulty_level=level_num
+            )
+            
+            if lemmas:
+                # Convert category name to display format
+                display_category = category.replace('_', ' ').title().replace(' And ', ' + ')
+                
+                # Convert lemmas to word dictionaries
+                word_list = []
+                guid_list = []
+                
+                for lemma in lemmas:
+                    if lemma.guid:  # Only include lemmas with GUIDs
+                        word_dict = lemma_to_word_dict(lemma)
+                        word_list.append(word_dict)
+                        all_dictionary_entries.append(word_dict)
+                        
+                        # Create GUID entry with English word comment
+                        english_word = get_english_word_for_lemma(lemma)
+                        guid_list.append(f'"{lemma.guid}"  # {english_word}')
+                
+                if word_list:
+                    level_data[display_category] = word_list
+                    level_structure[display_category] = guid_list
+                    print(f"  {display_category}: {len(word_list)} words")
         
-        for category, words in corpus_dict.items():
-            # Create GUID prefix for this category (e.g., N01, N02, C01, etc.)
-            guid_prefix = f"{base_prefix}{category_counter:02d}"
-            
-            # Transform this category (words will be sorted by frequency)
-            print(f"  Processing category '{category}' with {len(words)} words...")
-            dict_entries, guid_list, _, wordfreq_found = transform_category_separated(words, guid_prefix, 1, session)
-            total_wordfreq_found += wordfreq_found
-            total_words += len(words)
-            print(f"    Found frequency data for {wordfreq_found}/{len(words)} words")
-            
-            # Store structure data
-            structure_data[category] = guid_list
-            
-            # Create dictionary file for this category
-            category_filename = sanitize_filename(category)
-            
-            dictionary_content = f'''"""
-{category} - Dictionary Data
+        if not level_data:
+            print(f"  No data found for level {level_num}")
+            continue
+        
+        # Generate structure file for this level
+        structure_filename = f"nouns_{level_name}_structure.py"
+        structure_filepath = os.path.join(structure_dir, structure_filename)
+        
+        structure_header = f'''"""
+Structure file for difficulty level {level_num} ({level_name}) - Generated from database
 
-This file contains detailed word entries for the "{category}" category.
-Each entry is a variable assignment with the GUID as the variable name.
+This file contains the organizational structure mapping categories to GUIDs.
+Each category maps to a list of GUIDs that reference entries in the corresponding dictionary file.
 
-Entry structure:
-- guid: Unique identifier (e.g., {guid_prefix}001)
-- english: English word/phrase
-- lithuanian: Lithuanian translation
-- alternatives: Dictionary with separate lists for English and Lithuanian alternatives
-- metadata: Extensible object with difficulty_level, frequency_rank, tags, and notes
+Generated automatically from wordfreq database - do not edit manually.
 """
 
-{format_dictionary_entries(dict_entries)}
-'''
-            
-            dictionary_path = os.path.join(dictionary_dir, f'{category_filename}_dictionary.py')
-            with open(dictionary_path, 'w', encoding='utf-8') as f:
-                f.write(dictionary_content)
-            print(f"Created dictionary file: {dictionary_path}")
-            
-            category_counter += 1
-        
-        # Create structure file for this corpus
-        structure_content = f'''"""
-{corpus_name.replace('_', ' ').title()} - Category Structure
-
-This file contains the organizational structure mapping categories to word GUIDs.
-Each GUID corresponds to a detailed entry in the companion dictionary files.
-
-Format: "Category": [
-  "GUID",  # English word
-  ...
-]
-"""
-
-{corpus_name}_structure = {format_structure_dict(structure_data)}
 '''
         
-        structure_path = os.path.join(structure_dir, f'{corpus_name}_structure.py')
-        with open(structure_path, 'w', encoding='utf-8') as f:
+        structure_content = f"{structure_header}nouns_{level_name} = {format_structure_dict(level_structure, 0)}\n"
+        
+        with open(structure_filepath, 'w', encoding='utf-8') as f:
             f.write(structure_content)
-        print(f"Created structure file: {structure_path}")
+        
+        print(f"  ✅ Created structure file: {structure_filepath}")
+        
+        # Generate dictionary file for this level
+        dictionary_filename = f"nouns_{level_name}_dictionary.py"
+        dictionary_filepath = os.path.join(dictionary_dir, dictionary_filename)
+        
+        dictionary_header = f'''"""
+Dictionary file for difficulty level {level_num} ({level_name}) - Generated from database
+
+This file contains detailed word entries with the GUID as the variable name.
+Each entry includes English/Lithuanian translations, alternatives, and metadata.
+
+Generated automatically from wordfreq database - do not edit manually.
+"""
+
+'''
+        
+        dictionary_content = f"{dictionary_header}{format_dictionary_entries(all_dictionary_entries)}\n"
+        
+        with open(dictionary_filepath, 'w', encoding='utf-8') as f:
+            f.write(dictionary_content)
+        
+        print(f"  ✅ Created dictionary file: {dictionary_filepath}")
+        print(f"  📊 Total words in level {level_num}: {len(all_dictionary_entries)}")
     
-    print(f"\n✅ Processing complete!")
-    print(f"Total words processed: {total_words}")
-    print(f"Total dictionary files created: {category_counter - 1}")
-    if session:
-        print(f"Words found in wordfreq database: {total_wordfreq_found} ({total_wordfreq_found/total_words*100:.1f}%)")
-    else:
-        print("No wordfreq data included (database connection failed)")
+    # Generate summary statistics
+    total_lemmas = session.query(Lemma).filter(Lemma.category != None).count()
+    total_with_guids = session.query(Lemma).filter(Lemma.guid != None).count()
     
-    # Close database session
-    if session:
-        session.close()
-        print("Database session closed")
+    print(f"\n🎉 File generation completed!")
+    print(f"📊 Database statistics:")
+    print(f"  Total categorized lemmas: {total_lemmas}")
+    print(f"  Total lemmas with GUIDs: {total_with_guids}")
+    print(f"  Categories processed: {len(categories)}")
     
-    print(f"\nFiles created in:")
-    print(f"Structure files: {structure_dir}")
-    print(f"Dictionary files: {dictionary_dir}")
+    session.close()
 
 if __name__ == "__main__":
     create_separated_files()
