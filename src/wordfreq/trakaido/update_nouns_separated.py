@@ -27,7 +27,7 @@ GREENLAND_SRC_PATH = '/Users/powera/repo/greenland/src'
 import sys
 import os
 sys.path.append(os.path.join(TRAKAIDO_WORDLISTS_BASE_PATH, 'lang_lt'))
-from nouns import nouns_one, nouns_two, nouns_three, nouns_four, nouns_five, common_words, common_words_two
+from .nouns import nouns_one, nouns_two, nouns_three, nouns_four, nouns_five, common_words, common_words_two
 
 # Add the src directory to path for wordfreq imports
 sys.path.append(GREENLAND_SRC_PATH)
@@ -266,7 +266,20 @@ def format_structure_dict(structure_data: Dict[str, List[str]], indent=0) -> str
             guid_str = "[]"
         else:
             indent_str = " " * (indent + 4)
-            guid_items = f",\n{indent_str}".join(guid_list)
+            # Handle comma placement properly with comments
+            formatted_items = []
+            for i, guid_item in enumerate(guid_list):
+                if i < len(guid_list) - 1:  # Not the last item
+                    # Add comma after the GUID but before the comment
+                    if "  # " in guid_item:
+                        guid_part, comment_part = guid_item.split("  # ", 1)
+                        formatted_items.append(f"{guid_part},  # {comment_part}")
+                    else:
+                        formatted_items.append(f"{guid_item},")
+                else:  # Last item, no comma
+                    formatted_items.append(guid_item)
+            
+            guid_items = f"\n{indent_str}".join(formatted_items)
             guid_str = f"[\n{indent_str}{guid_items}\n{' ' * (indent + 2)}]"
         
         items.append(f"{category_str}: {guid_str}")
