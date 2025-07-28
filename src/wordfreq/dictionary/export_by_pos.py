@@ -20,7 +20,7 @@ from sqlalchemy import func
 import shutil
 
 import constants
-from wordfreq.storage import database
+from wordfreq.storage import database as linguistic_db
 from wordfreq.storage.connection_pool import get_session
 from wordfreq.storage.models.schema import WordToken, Lemma, DerivativeForm, ExampleSentence
 
@@ -108,12 +108,12 @@ def get_words_by_pos_subtype(session, pos_type: str) -> Dict[str, List[Dict[str,
                 "example": example,
                 "pronunciation": derivative_form.phonetic_pronunciation or "",
                 "ipa": derivative_form.ipa_pronunciation or "",
-                "chinese": derivative_form.chinese_translation or "",
-                "french": derivative_form.french_translation or "",
-                "korean": derivative_form.korean_translation or "",
-                "swahili": derivative_form.swahili_translation or "",
-                "lithuanian": derivative_form.lithuanian_translation or "",
-                "vietnamese": derivative_form.vietnamese_translation or "",
+                "chinese": lemma.chinese_translation or "",
+                "french": lemma.french_translation or "",
+                "korean": lemma.korean_translation or "",
+                "swahili": lemma.swahili_translation or "",
+                "lithuanian": lemma.lithuanian_translation or "",
+                "vietnamese": lemma.vietnamese_translation or "",
                 "grammatical_forms": [derivative_form.grammatical_form],
                 "subtype": subtype
             }

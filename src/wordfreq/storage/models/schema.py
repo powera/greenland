@@ -4,7 +4,7 @@
 
 import datetime
 from typing import Optional, List
-from sqlalchemy import String, Integer, Text, Float, ForeignKey, TIMESTAMP, Boolean, func
+from sqlalchemy import String, Integer, Text, Float, ForeignKey, TIMESTAMP, Boolean, func, UniqueConstraint, CheckConstraint
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 class Base(DeclarativeBase):
@@ -12,11 +12,15 @@ class Base(DeclarativeBase):
     pass
 
 class WordToken(Base):
-    """Model for storing word tokens - the specific letters/spelling of a word."""
+    """Model for storing word tokens - the specific letters/spelling of a word in a specific language."""
     __tablename__ = 'word_tokens'
+    __table_args__ = (
+        UniqueConstraint('token', 'language_code', name='uq_word_token_language'),
+    )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    token: Mapped[str] = mapped_column(String, unique=True, index=True, nullable=False)
+    token: Mapped[str] = mapped_column(String, nullable=False, index=True)
+    language_code: Mapped[str] = mapped_column(String, nullable=False, index=True)  # e.g., "en", "lt", "zh", "fr"
     frequency_rank: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)  # Combined harmonic mean rank
     added_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now())
     updated_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
@@ -37,10 +41,17 @@ class Lemma(Base):
     
     # Dictionary generation fields
     guid: Mapped[Optional[str]] = mapped_column(String, unique=True, nullable=True, index=True)  # e.g., N14001
-    category: Mapped[Optional[str]] = mapped_column(String, nullable=True, index=True)  # e.g., body_parts, colors
     difficulty_level: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)  # For which Trakaido "level"
     frequency_rank: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)  # Combined frequency rank
     tags: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # JSON array of tags
+    
+    # Language-specific translations of the lemma concept
+    chinese_translation: Mapped[Optional[str]] = mapped_column(String, nullable=True)  # e.g., 吃
+    french_translation: Mapped[Optional[str]] = mapped_column(String, nullable=True)  # e.g., manger
+    korean_translation: Mapped[Optional[str]] = mapped_column(String, nullable=True)  # e.g., 먹다
+    swahili_translation: Mapped[Optional[str]] = mapped_column(String, nullable=True)  # e.g., kula
+    lithuanian_translation: Mapped[Optional[str]] = mapped_column(String, nullable=True)  # e.g., valgyti
+    vietnamese_translation: Mapped[Optional[str]] = mapped_column(String, nullable=True)  # e.g., ăn
     
     # Metadata
     confidence: Mapped[float] = mapped_column(Float, default=0.0)  # 0-1 score from LLM
@@ -53,35 +64,40 @@ class Lemma(Base):
     derivative_forms = relationship("DerivativeForm", back_populates="lemma", cascade="all, delete-orphan")
 
 class DerivativeForm(Base):
-    """Model for storing derivative forms - specific combinations of WordToken and Lemma with grammatical information."""
+    """Model for storing derivative forms - language-specific combinations of WordToken and Lemma with grammatical information.
+    
+    For single-word forms (e.g., "eating"), word_token_id links to the WordToken for frequency data.
+    For multi-word forms (e.g., "to eat", "have eaten"), word_token_id is NULL and only derivative_form_text is used.
+    Application logic determines which single word (if any) to link for frequency purposes.
+    
+    Note: When word_token_id is present, the language_code must match the WordToken's language_code.
+    """
     __tablename__ = 'derivative_forms'
+    __table_args__ = (
+        UniqueConstraint('lemma_id', 'language_code', 'grammatical_form', 'derivative_form_text', name='uq_derivative_form'),
+    )
     
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    word_token_id: Mapped[int] = mapped_column(ForeignKey("word_tokens.id"), nullable=False)
     lemma_id: Mapped[int] = mapped_column(ForeignKey("lemmas.id"), nullable=False)
     
-    # Grammatical form information
-    grammatical_form: Mapped[str] = mapped_column(String, nullable=False)  # e.g., "gerund", "present_participle", "infinitive"
+    # The actual text of this derivative form (single or multi-word)
+    derivative_form_text: Mapped[str] = mapped_column(String, nullable=False, index=True)  # e.g., "eating", "to eat", "have eaten"
+    
+    # Optional link to WordToken for frequency data (single-word forms only)
+    word_token_id: Mapped[Optional[int]] = mapped_column(ForeignKey("word_tokens.id"), nullable=True)
+    
+    # Language specification - must match the WordToken's language_code when word_token_id is present
+    language_code: Mapped[str] = mapped_column(String, nullable=False, index=True)  # e.g., "en", "lt", "zh", "fr"
+    
+    # Grammatical form information (language-specific)
+    grammatical_form: Mapped[str] = mapped_column(String, nullable=False)  # e.g., "gerund", "1st_person_singular_present", "infinitive"
     is_base_form: Mapped[bool] = mapped_column(Boolean, default=False)  # True for infinitive verbs, singular nouns, etc.
     
     # Pronunciations for this specific form
     ipa_pronunciation: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     phonetic_pronunciation: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     
-    # Translations for this specific form
-    chinese_translation: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-    french_translation: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-    korean_translation: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-    swahili_translation: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-    lithuanian_translation: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-    vietnamese_translation: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-    
-    # Special flags
-    multiple_meanings: Mapped[bool] = mapped_column(Boolean, default=False)
-    special_case: Mapped[bool] = mapped_column(Boolean, default=False)
-    
     # Metadata
-    confidence: Mapped[float] = mapped_column(Float, default=0.0)
     verified: Mapped[bool] = mapped_column(Boolean, default=False)
     notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     added_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now())
