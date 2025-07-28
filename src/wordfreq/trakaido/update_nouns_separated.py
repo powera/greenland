@@ -29,7 +29,7 @@ import os
 sys.path.append(GREENLAND_SRC_PATH)
 from wordfreq.storage.database import (
     create_database_session, 
-    get_lemmas_by_category_and_level,
+    get_lemmas_by_subtype_and_level,
     get_all_categories
 )
 from wordfreq.storage.models.schema import Lemma, DerivativeForm
@@ -414,9 +414,9 @@ def create_separated_files():
         all_dictionary_entries = []
         
         for category in categories:
-            lemmas = get_lemmas_by_category_and_level(
+            lemmas = get_lemmas_by_subtype_and_level(
                 session, 
-                category=category, 
+                pos_subtype=category, 
                 difficulty_level=level_num
             )
             
