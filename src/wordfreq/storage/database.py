@@ -171,7 +171,25 @@ SUBTYPE_GUID_PREFIXES = {
     'approximation': 'D11',
     'definite_frequency': 'D12',
     'indefinite_frequency': 'D13',
-    'adverb_other': 'D99'
+    'adverb_other': 'D99',
+    
+    # Conjunction subtypes (C01-C99)
+    'conjunction_other': 'C99',
+    
+    # Pronoun subtypes (P01-P99)
+    'pronoun_other': 'P99',
+    
+    # Preposition subtypes (R01-R99)
+    'preposition_other': 'R99',
+    
+    # Interjection subtypes (I01-I99)
+    'interjection_other': 'I99',
+    
+    # Determiner subtypes (T01-T99)
+    'determiner_other': 'T99',
+    
+    # Article subtypes (L01-L99)
+    'article_other': 'L99'
 }
 
 def generate_guid(session, subtype: str) -> str:
@@ -183,7 +201,7 @@ def generate_guid(session, subtype: str) -> str:
         subtype: POS subtype name (e.g., 'body_part', 'color')
         
     Returns:
-        Unique GUID string (e.g., 'N14001')
+        Unique GUID string (e.g., 'N14.001')
     """
     if subtype not in SUBTYPE_GUID_PREFIXES:
         raise ValueError(f"Unknown subtype: {subtype}")
@@ -198,16 +216,25 @@ def generate_guid(session, subtype: str) -> str:
     
     max_num = 0
     for (guid,) in existing_guids:
-        if guid and len(guid) == 6 and guid.startswith(prefix):
+        if guid and guid.startswith(prefix):
             try:
-                num = int(guid[3:])  # Extract the number part
-                max_num = max(max_num, num)
+                # Handle both old format (A01001) and new format (A01.001)
+                if '.' in guid:
+                    # New format: A01.001
+                    if len(guid) >= 7 and guid[3] == '.':
+                        num = int(guid[4:])  # Extract the number part after the period
+                        max_num = max(max_num, num)
+                else:
+                    # Old format: A01001 (for backward compatibility)
+                    if len(guid) == 6:
+                        num = int(guid[3:])  # Extract the number part
+                        max_num = max(max_num, num)
             except ValueError:
                 continue
     
-    # Generate next GUID
+    # Generate next GUID in new format
     next_num = max_num + 1
-    return f"{prefix}{next_num:03d}"
+    return f"{prefix}.{next_num:03d}"
 
 def create_database_session(db_path: str = constants.WORDFREQ_DB_PATH):
     """Create a new database session."""
