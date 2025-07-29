@@ -55,18 +55,16 @@ def get_lemmas_by_subtype(session, pos_subtype: str) -> List[Lemma]:
 
 def get_english_word_for_lemma(session, lemma: Lemma) -> str:
     """Get the primary English word for a lemma."""
-    # First try to get from derivative forms
-    for form in lemma.derivative_forms:
-        if form.word_token and form.is_base_form:
-            return form.word_token.token
+    # Use lemma text
+    if lemma.lemma_text:
+        return lemma.lemma_text
     
-    # Fallback to any derivative form with word token
+    # If that somehow fails, try to get from English derivative forms that are base forms
     for form in lemma.derivative_forms:
-        if form.word_token:
-            return form.word_token.token
+        if form.language_code == 'en' and form.is_base_form:
+            return form.derivative_form_text
     
-    # Final fallback to lemma text
-    return lemma.lemma_text
+    return None # Should not happen if data is correct
 
 def get_lithuanian_word_for_lemma(session, lemma: Lemma) -> str:
     """Get the primary Lithuanian translation for a lemma."""
