@@ -41,7 +41,7 @@ import constants
 
 english_alternative_map = {
     "bicycle": ["bike"],
-    "automobile": ["car"],
+    "car": ["automobile"],
     "eyeglasses": ["glasses", "spectacles"],
     "telephone": ["phone"],
     "television": ["TV"],
@@ -49,7 +49,6 @@ english_alternative_map = {
     "motorcycle": ["motorbike"],
     "airplane": ["plane"],
     "photograph": ["photo"],
-    "automobile": ["vehicle"],
     "smartphone": ["phone", "mobile"],
     "laptop": ["notebook"],
     "computer": ["PC"],
@@ -120,27 +119,27 @@ def get_pos_and_subtype_for_category(display_category_name: str) -> tuple[str, O
         
         # People and relationships
         "Occupations": ("noun", "human"),
-        "Family + Relationships": ("noun", "human"),
-        "People + Relationships": ("noun", "human"),
+        "Family & Relationships": ("noun", "human"),
+        "People & Relationships": ("noun", "human"),
         "Nationalities": ("noun", "nationality"),
         
         # Places and geography
         "Countries": ("noun", "place_name"),
         "Cities": ("noun", "place_name"),
         "Geographic Features": ("noun", "natural_feature"),
-        "Places + Direction": ("noun", "place_name"),
+        "Places & Direction": ("noun", "place_name"),
         
         # Time and temporal
         "Days of the Week": ("noun", "temporal_name"),
         "Months of the Year": ("noun", "temporal_name"),
-        "Time + Life": ("noun", "time_period"),
+        "Time & Life": ("noun", "time_period"),
         
         # Abstract concepts
         "Emotions": ("noun", "emotion_feeling"),
         "Abstract Concepts": ("noun", "concept_idea"),
         "Hobbies": ("noun", "concept_idea"),
-        "Social + Political": ("noun", "concept_idea"),
-        "Thinking + Communication": ("noun", "concept_idea"),
+        "Social & Political": ("noun", "concept_idea"),
+        "Thinking & Communication": ("noun", "concept_idea"),
         
         # Measurements and quantities
         "Units of Measurement": ("noun", "unit_of_measurement"),
@@ -167,6 +166,10 @@ def get_pos_and_subtype_for_category(display_category_name: str) -> tuple[str, O
     }
     
     pos_type, pos_subtype = category_mapping.get(display_category_name, ("noun", "other"))
+    
+    # Log if category mapping was not found
+    if display_category_name not in category_mapping:
+        print(f"WARNING: No category mapping found for '{display_category_name}', using default (noun, other)")
     
     # Convert generic "other" to POS-specific other for GUID generation
     if pos_subtype == "other":
