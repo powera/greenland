@@ -250,18 +250,15 @@ def generate_structure_file(session, difficulty_level: int, output_dir: str) -> 
     
     # Generate file content
     level_names = {
-        1: "one",
-        2: "two", 
-        3: "three",
-        4: "four",
-        5: "five",
-        6: "six",
-        7: "seven",
+        1: "one", 2: "two", 3: "three", 4: "four", 5: "five",
+        6: "six", 7: "seven", 8: "eight", 9: "nine", 10: "ten",
+        11: "eleven", 12: "twelve", 13: "thirteen", 14: "fourteen", 15: "fifteen",
+        16: "sixteen", 17: "seventeen", 18: "eighteen", 19: "nineteen", 20: "twenty"
     }
     
     level_name = level_names.get(difficulty_level, str(difficulty_level))
-    variable_name = f"words_{level_name}_structure"
-    filename = f"words_{level_name}_structure.py"
+    variable_name = f"level_{level_name}_structure"
+    filename = f"level_{level_name}_structure.py"
     filepath = os.path.join(output_dir, "structure", filename)
     
     # Collect all subtypes that need to be imported
@@ -415,11 +412,25 @@ def generate_dictionary_file(session, subtype: str, output_dir: str) -> str:
     
     return filepath
 
+def get_difficulty_levels_with_data(session) -> List[int]:
+    """Get all difficulty levels that actually have data in the database."""
+    from sqlalchemy import func
+    levels = session.query(Lemma.difficulty_level.distinct())\
+        .filter(Lemma.difficulty_level != None)\
+        .order_by(Lemma.difficulty_level)\
+        .all()
+    
+    return [level[0] for level in levels if level[0] is not None]
+
 def generate_all_structure_files(session, output_dir: str) -> List[str]:
-    """Generate structure files for all difficulty levels (1-5)."""
+    """Generate structure files for all difficulty levels that have data."""
     generated_files = []
     
-    for level in range(1, 8):
+    # Get all levels that actually have data
+    levels = get_difficulty_levels_with_data(session)
+    print(f"Found difficulty levels with data: {levels}")
+    
+    for level in levels:
         filepath = generate_structure_file(session, level, output_dir)
         if filepath:
             generated_files.append(filepath)
@@ -459,8 +470,8 @@ def main():
     parser = argparse.ArgumentParser(description='Generate trakaido structure and dictionary files from wordfreq database')
     parser.add_argument('--output-dir', '-o', default=DEFAULT_OUTPUT_DIR, 
                        help='Output directory for generated files')
-    parser.add_argument('--level', '-l', type=int, choices=range(1, 6),
-                       help='Generate structure file for specific difficulty level only (1-5)')
+    parser.add_argument('--level', '-l', type=int,
+                       help='Generate structure file for specific difficulty level only')
     parser.add_argument('--subtype', '-s', 
                        help='Generate dictionary file for specific subtype only')
     parser.add_argument('--type', '-t', choices=['structure', 'dictionary', 'both'], default='both',
