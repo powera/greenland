@@ -1,17 +1,30 @@
 #!/usr/bin/env python3
 """
-Migration script to populate the wordfreq database with existing static trakaido data.
+Migration script to populate the wordfreq database with trakaido data from JSON export.
 
 This script:
-1. Reads the existing static word lists from nouns.py
+1. Reads trakaido data from nouns.json (exported from SQLite database)
 2. Finds or creates corresponding lemmas in the wordfreq database
 3. Sets Lithuanian translations on lemmas (using the new translation fields)
 4. Creates language-specific derivative forms for English words
-5. Assigns categories, difficulty levels, and GUIDs
+5. Assigns or updates GUIDs and difficulty levels
 6. Updates frequency ranks from the database
 
+Expected JSON format:
+[
+    {
+        "English": "word",
+        "Lithuanian": "žodis", 
+        "GUID": "some-guid-string",
+        "trakaido_level": 1,
+        "POS": "noun",
+        "subtype": "food_drink"
+    },
+    ...
+]
+
 Usage:
-    python migrate_static_data.py
+    python migrate_static_data.py [path_to_nouns.json]
 """
 
 import sys
@@ -22,11 +35,10 @@ from typing import Dict, List, Any, Optional
 
 # Configuration - Update these paths as needed
 GREENLAND_SRC_PATH = '/Users/powera/repo/greenland/src'
+DEFAULT_JSON_PATH = '/Users/powera/repo/greenland/src/wordfreq/trakaido/nouns.json'
 
 # Add paths for imports
 sys.path.append(GREENLAND_SRC_PATH)
-
-from wordfreq.trakaido.nouns import nouns_one, nouns_two, nouns_three, nouns_four, nouns_five, common_words, common_words_two
 from wordfreq.storage.database import (
     create_database_session, 
     get_word_token_by_text,
@@ -84,6 +96,60 @@ def clean_english_word(english_word: str) -> tuple[str, bool]:
     cleaned = re.sub(r'\s*\([^)]+\)', '', english_word).strip()
     
     return cleaned, has_parentheses
+
+
+def load_trakaido_json(json_path: str) -> List[Dict[str, Any]]:
+    """
+    Load trakaido data from JSON file.
+    
+    Args:
+        json_path: Path to the JSON file containing trakaido data
+        
+    Returns:
+        List of dictionaries with English, Lithuanian, GUID, and trakaido level data
+        
+    Raises:
+        FileNotFoundError: If the JSON file doesn't exist
+        json.JSONDecodeError: If the JSON file is malformed
+        KeyError: If required fields are missing from the JSON data
+    """
+    if not os.path.exists(json_path):
+        raise FileNotFoundError(f"JSON file not found: {json_path}")
+    
+    try:
+        with open(json_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+    except json.JSONDecodeError as e:
+        raise json.JSONDecodeError(f"Invalid JSON in {json_path}: {e}")
+    
+    if not isinstance(data, list):
+        raise ValueError(f"Expected JSON to contain a list, got {type(data)}")
+    
+    # Validate that each entry has the required fields
+    required_fields = ["English", "Lithuanian", "GUID", "trakaido_level"]
+    optional_fields = ["POS", "subtype"]  # These fields are optional but recommended
+    
+    for i, entry in enumerate(data):
+        if not isinstance(entry, dict):
+            raise ValueError(f"Entry {i} is not a dictionary: {entry}")
+        
+        missing_fields = [field for field in required_fields if field not in entry]
+        if missing_fields:
+            raise KeyError(f"Entry {i} missing required fields: {missing_fields}")
+        
+        # Validate POS type if provided
+        if "POS" in entry:
+            pos_type = entry["POS"].lower()
+            valid_pos_types = {
+                "noun", "verb", "adjective", "adverb", "pronoun", 
+                "preposition", "conjunction", "interjection", "determiner",
+                "article", "numeral", "auxiliary", "modal"
+            }
+            if pos_type not in valid_pos_types:
+                print(f"WARNING: Entry {i} has invalid POS type '{entry['POS']}', will use default")
+    
+    print(f"✅ Loaded {len(data)} entries from {json_path}")
+    return data
 
 
 def get_pos_and_subtype_for_category(display_category_name: str) -> tuple[str, Optional[str]]:
@@ -179,7 +245,7 @@ def get_pos_and_subtype_for_category(display_category_name: str) -> tuple[str, O
 
 
 
-def find_or_create_lemma(session, english_word: str, lithuanian_word: str, display_category_name: str, difficulty_level: int) -> Optional[Lemma]:
+def find_or_create_lemma(session, english_word: str, lithuanian_word: str, difficulty_level: int, existing_guid: Optional[str] = None, pos_type: Optional[str] = None, pos_subtype: Optional[str] = None) -> Optional[Lemma]:
     """
     Find an existing lemma or create a new one for the given English/Lithuanian pair.
     
@@ -187,8 +253,10 @@ def find_or_create_lemma(session, english_word: str, lithuanian_word: str, displ
         session: Database session
         english_word: English word (may contain parenthetical info)
         lithuanian_word: Lithuanian translation
-        display_category_name: Display category name from nouns.py
         difficulty_level: Difficulty level to assign (1-5)
+        existing_guid: GUID from the original trakaido database (optional)
+        pos_type: Part of speech (noun, verb, adjective, etc.) (optional)
+        pos_subtype: POS subtype (food_drink, physical_action, etc.) (optional)
         
     Returns:
         Lemma object or None if creation failed
@@ -200,8 +268,14 @@ def find_or_create_lemma(session, english_word: str, lithuanian_word: str, displ
     # Store original form in notes if parentheses were present
     notes = f"Original form: {english_word}" if has_parentheses else None
     
-    # Get the appropriate POS and subtype
-    pos_type, pos_subtype = get_pos_and_subtype_for_category(display_category_name)
+    # Use provided POS or default to noun
+    if not pos_type:
+        pos_type = "noun"
+    else:
+        pos_type = pos_type.lower()
+    
+    if not pos_subtype:
+        pos_subtype = "other"
     
     # First, try to find existing lemma by checking English derivative forms and Lithuanian translation
     existing_lemmas = session.query(Lemma)\
@@ -275,8 +349,14 @@ def find_or_create_lemma(session, english_word: str, lithuanian_word: str, displ
                 difficulty_level=difficulty_level,
                 frequency_rank=word_token.frequency_rank,  # Use word token's frequency rank
                 lithuanian_translation=lithuanian_word,
-                notes=notes
+                notes=notes,
+                auto_generate_guid=not existing_guid  # Don't auto-generate if we have an existing GUID
             )
+            
+            # Set the existing GUID if provided
+            if existing_guid:
+                lemma.guid = existing_guid
+                session.commit()
             
             # Add English derivative form
             add_derivative_form(
@@ -307,8 +387,14 @@ def find_or_create_lemma(session, english_word: str, lithuanian_word: str, displ
                 pos_subtype=pos_subtype,
                 difficulty_level=difficulty_level,
                 lithuanian_translation=lithuanian_word,
-                notes=notes
+                notes=notes,
+                auto_generate_guid=not existing_guid  # Don't auto-generate if we have an existing GUID
             )
+            
+            # Set the existing GUID if provided
+            if existing_guid:
+                lemma.guid = existing_guid
+                session.commit()
             
             # Add English derivative form without word token (for phrases/compound words)
             add_derivative_form(
@@ -383,54 +469,77 @@ def create_alternatives_for_lemma(session, lemma: Lemma, english_word: str) -> i
     return alternatives_created
 
 
-def migrate_corpus_data(session, corpus_name: str, corpus_data: Dict[str, List[Dict[str, str]]], difficulty_level: int):
+def migrate_json_data(session, trakaido_data: List[Dict[str, Any]]):
     """
-    Migrate data from a single corpus (e.g., nouns_one) to the database.
+    Migrate data from JSON export to the database.
     
     Args:
         session: Database session
-        corpus_name: Name of the corpus (e.g., "nouns_one")
-        corpus_data: Dictionary of categories and word lists
-        difficulty_level: Difficulty level to assign (1-5)
+        trakaido_data: List of dictionaries with English, Lithuanian, GUID, trakaido level, POS, and subtype data
     """
-    print(f"\nMigrating {corpus_name} (difficulty level {difficulty_level})...")
+    print(f"\nMigrating {len(trakaido_data)} entries from JSON data...")
     
-    total_words = 0
+    total_words = len(trakaido_data)
     successful_migrations = 0
     
-    for category_display_name, word_list in corpus_data.items():
-        pos_type, pos_subtype = get_pos_and_subtype_for_category(category_display_name)
-        subtype_info = f" ({pos_type}/{pos_subtype})" if pos_subtype else f" ({pos_type})"
-        print(f"  Processing category: {category_display_name}{subtype_info}")
+    for i, entry in enumerate(trakaido_data):
+        english_word = entry["English"]
+        lithuanian_word = entry["Lithuanian"]
+        existing_guid = entry.get("GUID")
+        difficulty_level = entry.get("trakaido_level", 1)
+        pos_type = entry.get("POS")
+        pos_subtype = entry.get("subtype")
         
-        for word_dict in word_list:
-            english_word = word_dict["english"]
-            lithuanian_word = word_dict["lithuanian"]
-            total_words += 1
+        # Find or create lemma
+        lemma = find_or_create_lemma(
+            session=session,
+            english_word=english_word,
+            lithuanian_word=lithuanian_word,
+            difficulty_level=difficulty_level,
+            existing_guid=existing_guid,
+            pos_type=pos_type,
+            pos_subtype=pos_subtype
+        )
+        
+        if lemma:
+            successful_migrations += 1
+            freq_info = f", freq_rank: {lemma.frequency_rank}" if lemma.frequency_rank else ""
+            notes_info = f", notes: {lemma.notes}" if lemma.notes else ""
+            pos_info = f", POS: {lemma.pos_type}/{lemma.pos_subtype}" if lemma.pos_subtype else f", POS: {lemma.pos_type}"
+            print(f"    ✅ {english_word} -> {lithuanian_word} (GUID: {lemma.guid}{pos_info}{freq_info}{notes_info})")
             
-            # Find or create lemma
-            lemma = find_or_create_lemma(session, english_word, lithuanian_word, category_display_name, difficulty_level)
+            # Create alternatives for this lemma if they exist
+            clean_english, _ = clean_english_word(english_word)
+            clean_english = clean_english.strip().lower()
+            alternatives_created = create_alternatives_for_lemma(session, lemma, clean_english)
             
-            if lemma:
-                successful_migrations += 1
-                freq_info = f", freq_rank: {lemma.frequency_rank}" if lemma.frequency_rank else ""
-                notes_info = f", notes: {lemma.notes}" if lemma.notes else ""
-                print(f"    ✅ {english_word} -> {lithuanian_word} (GUID: {lemma.guid}{freq_info}{notes_info})")
-                
-                # Create alternatives for this lemma if they exist
-                clean_english, _ = clean_english_word(english_word)
-                clean_english = clean_english.strip().lower()
-                alternatives_created = create_alternatives_for_lemma(session, lemma, clean_english)
-                
-            else:
-                print(f"    ❌ Failed to create lemma for: {english_word}")
+        else:
+            print(f"    ❌ Failed to create lemma for: {english_word}")
+        
+        # Progress indicator for large datasets
+        if (i + 1) % 100 == 0:
+            print(f"  Progress: {i + 1}/{total_words} entries processed...")
     
-    print(f"  Completed {corpus_name}: {successful_migrations}/{total_words} words migrated")
+    print(f"  Completed migration: {successful_migrations}/{total_words} words migrated")
     return successful_migrations, total_words
 
 def main():
     """Main migration function."""
-    print("Starting migration of static trakaido data to wordfreq database...")
+    print("Starting migration of trakaido data from JSON export to wordfreq database...")
+    
+    # Get JSON file path from command line argument or use default
+    json_path = DEFAULT_JSON_PATH
+    if len(sys.argv) > 1:
+        json_path = sys.argv[1]
+    
+    print(f"Using JSON file: {json_path}")
+    
+    # Load trakaido data from JSON
+    try:
+        trakaido_data = load_trakaido_json(json_path)
+    except Exception as e:
+        print(f"❌ Failed to load JSON data: {e}")
+        return
     
     # Create database session
     try:
@@ -440,30 +549,14 @@ def main():
         print(f"❌ Failed to connect to database: {e}")
         return
     
-    # Dictionary mapping corpus names to their data and difficulty levels
-    corpus_mapping = {
-        "nouns_one": (nouns_one, 1),
-        "nouns_two": (nouns_two, 2),
-        "nouns_three": (nouns_three, 4), # Treat as level 4
-        "nouns_four": (nouns_four, 7), # Treat as level 7
-        "nouns_five": (nouns_five, 6), # Treat as level 6
-        "common_words": (common_words, 3),  # Treat as level 3
-        "common_words_two": (common_words_two, 5)  # Treat as level 5
-    }
-    
-    total_successful = 0
-    total_words = 0
-    
     try:
-        for corpus_name, (corpus_data, difficulty_level) in corpus_mapping.items():
-            successful, words = migrate_corpus_data(session, corpus_name, corpus_data, difficulty_level)
-            total_successful += successful
-            total_words += words
+        # Migrate the JSON data
+        successful, total = migrate_json_data(session, trakaido_data)
         
         print(f"\n🎉 Migration completed!")
-        print(f"Total words processed: {total_words}")
-        print(f"Successfully migrated: {total_successful}")
-        print(f"Failed migrations: {total_words - total_successful}")
+        print(f"Total words processed: {total}")
+        print(f"Successfully migrated: {successful}")
+        print(f"Failed migrations: {total - successful}")
         
         # Commit all changes to the database
         session.commit()
