@@ -24,13 +24,18 @@ Expected JSON format:
 ]
 
 Usage:
-    python migrate_static_data.py [path_to_nouns.json]
+    python json_to_database.py [path_to_nouns.json] [--no-update-difficulty]
+    
+    Options:
+        path_to_nouns.json: Path to JSON file (optional, defaults to nouns.json in same directory)
+        --no-update-difficulty: Don't update difficulty levels on existing lemmas (default: update them)
 """
 
 import sys
 import os
 import json
 import re
+import argparse
 from typing import Dict, List, Any, Optional
 
 # Configuration - Update these paths as needed
@@ -245,7 +250,7 @@ def get_pos_and_subtype_for_category(display_category_name: str) -> tuple[str, O
 
 
 
-def find_or_create_lemma(session, english_word: str, lithuanian_word: str, difficulty_level: int, existing_guid: Optional[str] = None, pos_type: Optional[str] = None, pos_subtype: Optional[str] = None) -> Optional[Lemma]:
+def find_or_create_lemma(session, english_word: str, lithuanian_word: str, difficulty_level: int, existing_guid: Optional[str] = None, pos_type: Optional[str] = None, pos_subtype: Optional[str] = None, update_difficulty: bool = True) -> Optional[Lemma]:
     """
     Find an existing lemma or create a new one for the given English/Lithuanian pair.
     
@@ -257,6 +262,7 @@ def find_or_create_lemma(session, english_word: str, lithuanian_word: str, diffi
         existing_guid: GUID from the original trakaido database (optional)
         pos_type: Part of speech (noun, verb, adjective, etc.) (optional)
         pos_subtype: POS subtype (food_drink, physical_action, etc.) (optional)
+        update_difficulty: Whether to update difficulty level on existing lemmas (default: True)
         
     Returns:
         Lemma object or None if creation failed
@@ -290,6 +296,13 @@ def find_or_create_lemma(session, english_word: str, lithuanian_word: str, diffi
     if existing_lemmas:
         lemma = existing_lemmas[0]
         
+        # Update difficulty level if requested and different
+        if update_difficulty and lemma.difficulty_level != difficulty_level:
+            old_difficulty = lemma.difficulty_level
+            lemma.difficulty_level = difficulty_level
+            session.commit()
+            print(f"    Updated difficulty level for '{english_word}' from {old_difficulty} to {difficulty_level}")
+        
         # Update notes if parenthetical info exists and lemma doesn't already have notes
         if notes and not lemma.notes:
             lemma.notes = notes
@@ -311,6 +324,13 @@ def find_or_create_lemma(session, english_word: str, lithuanian_word: str, diffi
         if existing_lemmas:
             lemma = existing_lemmas[0]
             
+            # Update difficulty level if requested and different
+            if update_difficulty and lemma.difficulty_level != difficulty_level:
+                old_difficulty = lemma.difficulty_level
+                lemma.difficulty_level = difficulty_level
+                session.commit()
+                print(f"    Updated difficulty level for '{english_word}' from {old_difficulty} to {difficulty_level}")
+            
             # Update notes if parenthetical info exists and lemma doesn't already have notes
             if notes and not lemma.notes:
                 lemma.notes = notes
@@ -330,6 +350,13 @@ def find_or_create_lemma(session, english_word: str, lithuanian_word: str, diffi
             # Update the existing lemma with Lithuanian translation
             lemma = existing_lemmas_no_lt[0]
             update_lemma_translation(session, lemma.id, "lithuanian", lithuanian_word)
+            
+            # Update difficulty level if requested and different
+            if update_difficulty and lemma.difficulty_level != difficulty_level:
+                old_difficulty = lemma.difficulty_level
+                lemma.difficulty_level = difficulty_level
+                session.commit()
+                print(f"    Updated difficulty level for '{english_word}' from {old_difficulty} to {difficulty_level}")
             
             # Update notes if parenthetical info exists and lemma doesn't already have notes
             if notes and not lemma.notes:
@@ -469,13 +496,14 @@ def create_alternatives_for_lemma(session, lemma: Lemma, english_word: str) -> i
     return alternatives_created
 
 
-def migrate_json_data(session, trakaido_data: List[Dict[str, Any]]):
+def migrate_json_data(session, trakaido_data: List[Dict[str, Any]], update_difficulty: bool = True):
     """
     Migrate data from JSON export to the database.
     
     Args:
         session: Database session
         trakaido_data: List of dictionaries with English, Lithuanian, GUID, trakaido level, POS, and subtype data
+        update_difficulty: Whether to update difficulty level on existing lemmas (default: True)
     """
     print(f"\nMigrating {len(trakaido_data)} entries from JSON data...")
     
@@ -498,7 +526,8 @@ def migrate_json_data(session, trakaido_data: List[Dict[str, Any]]):
             difficulty_level=difficulty_level,
             existing_guid=existing_guid,
             pos_type=pos_type,
-            pos_subtype=pos_subtype
+            pos_subtype=pos_subtype,
+            update_difficulty=update_difficulty
         )
         
         if lemma:
@@ -525,18 +554,40 @@ def migrate_json_data(session, trakaido_data: List[Dict[str, Any]]):
 
 def main():
     """Main migration function."""
+    parser = argparse.ArgumentParser(
+        description="Migrate trakaido data from JSON export to wordfreq database",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  python json_to_database.py                                    # Use default JSON file, update difficulty levels
+  python json_to_database.py /path/to/nouns.json               # Use custom JSON file, update difficulty levels
+  python json_to_database.py --no-update-difficulty            # Don't update existing difficulty levels
+  python json_to_database.py /path/to/nouns.json --no-update-difficulty  # Custom file, no difficulty updates
+        """
+    )
+    
+    parser.add_argument(
+        'json_path',
+        nargs='?',
+        default=DEFAULT_JSON_PATH,
+        help=f'Path to JSON file containing trakaido data (default: {DEFAULT_JSON_PATH})'
+    )
+    
+    parser.add_argument(
+        '--no-update-difficulty',
+        action='store_true',
+        help='Do not update difficulty levels on existing lemmas (default: update difficulty levels)'
+    )
+    
+    args = parser.parse_args()
+    
     print("Starting migration of trakaido data from JSON export to wordfreq database...")
-    
-    # Get JSON file path from command line argument or use default
-    json_path = DEFAULT_JSON_PATH
-    if len(sys.argv) > 1:
-        json_path = sys.argv[1]
-    
-    print(f"Using JSON file: {json_path}")
+    print(f"Using JSON file: {args.json_path}")
+    print(f"Update difficulty levels: {'No' if args.no_update_difficulty else 'Yes'}")
     
     # Load trakaido data from JSON
     try:
-        trakaido_data = load_trakaido_json(json_path)
+        trakaido_data = load_trakaido_json(args.json_path)
     except Exception as e:
         print(f"❌ Failed to load JSON data: {e}")
         return
@@ -551,7 +602,8 @@ def main():
     
     try:
         # Migrate the JSON data
-        successful, total = migrate_json_data(session, trakaido_data)
+        update_difficulty = not args.no_update_difficulty
+        successful, total = migrate_json_data(session, trakaido_data, update_difficulty)
         
         print(f"\n🎉 Migration completed!")
         print(f"Total words processed: {total}")
