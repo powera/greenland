@@ -7,18 +7,21 @@ This script:
 2. Finds or creates corresponding lemmas in the wordfreq database
 3. Sets Lithuanian translations on lemmas (using the new translation fields)
 4. Creates language-specific derivative forms for English words
-5. Assigns or updates GUIDs and difficulty levels
+5. Assigns or updates GUIDs (auto-generates if not provided) and difficulty levels
 6. Updates frequency ranks from the database
+
+Required fields: English, Lithuanian, trakaido_level, POS, subtype
+Optional fields: GUID (will be auto-generated if not provided)
 
 Expected JSON format:
 [
     {
         "English": "word",
         "Lithuanian": "žodis", 
-        "GUID": "some-guid-string",
         "trakaido_level": 1,
         "POS": "noun",
-        "subtype": "food_drink"
+        "subtype": "food_drink",
+        "GUID": "some-guid-string"  // Optional - will be auto-generated if not provided
     },
     ...
 ]
@@ -131,8 +134,8 @@ def load_trakaido_json(json_path: str) -> List[Dict[str, Any]]:
         raise ValueError(f"Expected JSON to contain a list, got {type(data)}")
     
     # Validate that each entry has the required fields
-    required_fields = ["English", "Lithuanian", "GUID", "trakaido_level"]
-    optional_fields = ["POS", "subtype"]  # These fields are optional but recommended
+    required_fields = ["English", "Lithuanian", "trakaido_level", "POS", "subtype"]
+    optional_fields = ["GUID"]  # GUID is optional - will be auto-generated if not provided
     
     for i, entry in enumerate(data):
         if not isinstance(entry, dict):
@@ -142,16 +145,15 @@ def load_trakaido_json(json_path: str) -> List[Dict[str, Any]]:
         if missing_fields:
             raise KeyError(f"Entry {i} missing required fields: {missing_fields}")
         
-        # Validate POS type if provided
-        if "POS" in entry:
-            pos_type = entry["POS"].lower()
-            valid_pos_types = {
-                "noun", "verb", "adjective", "adverb", "pronoun", 
-                "preposition", "conjunction", "interjection", "determiner",
-                "article", "numeral", "auxiliary", "modal"
-            }
-            if pos_type not in valid_pos_types:
-                print(f"WARNING: Entry {i} has invalid POS type '{entry['POS']}', will use default")
+        # Validate POS type (now required)
+        pos_type = entry["POS"].lower()
+        valid_pos_types = {
+            "noun", "verb", "adjective", "adverb", "pronoun", 
+            "preposition", "conjunction", "interjection", "determiner",
+            "article", "numeral", "auxiliary", "modal"
+        }
+        if pos_type not in valid_pos_types:
+            raise ValueError(f"Entry {i} has invalid POS type '{entry['POS']}'. Valid types: {', '.join(sorted(valid_pos_types))}")
     
     print(f"✅ Loaded {len(data)} entries from {json_path}")
     return data
@@ -283,163 +285,72 @@ def find_or_create_lemma(session, english_word: str, lithuanian_word: str, diffi
     if not pos_subtype:
         pos_subtype = "other"
     
-    # First, try to find existing lemma by checking English derivative forms and Lithuanian translation
-    existing_lemmas = session.query(Lemma)\
-        .join(DerivativeForm)\
-        .join(WordToken)\
-        .filter(WordToken.token == clean_english)\
-        .filter(WordToken.language_code == "en")\
-        .filter(DerivativeForm.language_code == "en")\
+    # Step 1: Look for existing lemma with matching Lithuanian translation and lemma text
+    # This finds lemmas regardless of whether they have word tokens or derivative forms
+    existing_lemma = session.query(Lemma)\
+        .filter(Lemma.lemma_text == clean_english)\
         .filter(Lemma.lithuanian_translation == lithuanian_word)\
-        .all()
+        .first()
     
-    if existing_lemmas:
-        lemma = existing_lemmas[0]
-        
+    if existing_lemma:
         # Update difficulty level if requested and different
-        if update_difficulty and lemma.difficulty_level != difficulty_level:
-            old_difficulty = lemma.difficulty_level
-            lemma.difficulty_level = difficulty_level
+        if update_difficulty and existing_lemma.difficulty_level != difficulty_level:
+            old_difficulty = existing_lemma.difficulty_level
+            existing_lemma.difficulty_level = difficulty_level
             session.commit()
             print(f"    Updated difficulty level for '{english_word}' from {old_difficulty} to {difficulty_level}")
         
         # Update notes if parenthetical info exists and lemma doesn't already have notes
-        if notes and not lemma.notes:
-            lemma.notes = notes
+        if notes and not existing_lemma.notes:
+            existing_lemma.notes = notes
             session.commit()
         
-        return lemma  # Return the first match
+        return existing_lemma
     
-    # Try to find by English word token only
+    # Step 2: Check if we have a word token for frequency data
     word_token = get_word_token_by_text(session, clean_english, "en")
-    if word_token:
-        # Check if there's already a lemma for this word token with matching Lithuanian translation
-        existing_lemmas = session.query(Lemma)\
-            .join(DerivativeForm)\
-            .filter(DerivativeForm.word_token_id == word_token.id)\
-            .filter(DerivativeForm.language_code == "en")\
-            .filter(Lemma.lithuanian_translation == lithuanian_word)\
-            .all()
-        
-        if existing_lemmas:
-            lemma = existing_lemmas[0]
-            
-            # Update difficulty level if requested and different
-            if update_difficulty and lemma.difficulty_level != difficulty_level:
-                old_difficulty = lemma.difficulty_level
-                lemma.difficulty_level = difficulty_level
-                session.commit()
-                print(f"    Updated difficulty level for '{english_word}' from {old_difficulty} to {difficulty_level}")
-            
-            # Update notes if parenthetical info exists and lemma doesn't already have notes
-            if notes and not lemma.notes:
-                lemma.notes = notes
-                session.commit()
-            
-            return lemma
-        
-        # Check if there's a lemma for this word token without Lithuanian translation
-        existing_lemmas_no_lt = session.query(Lemma)\
-            .join(DerivativeForm)\
-            .filter(DerivativeForm.word_token_id == word_token.id)\
-            .filter(DerivativeForm.language_code == "en")\
-            .filter(Lemma.lithuanian_translation.is_(None))\
-            .all()
-        
-        if existing_lemmas_no_lt:
-            # Update the existing lemma with Lithuanian translation
-            lemma = existing_lemmas_no_lt[0]
-            update_lemma_translation(session, lemma.id, "lithuanian", lithuanian_word)
-            
-            # Update difficulty level if requested and different
-            if update_difficulty and lemma.difficulty_level != difficulty_level:
-                old_difficulty = lemma.difficulty_level
-                lemma.difficulty_level = difficulty_level
-                session.commit()
-                print(f"    Updated difficulty level for '{english_word}' from {old_difficulty} to {difficulty_level}")
-            
-            # Update notes if parenthetical info exists and lemma doesn't already have notes
-            if notes and not lemma.notes:
-                lemma.notes = notes
-                session.commit()
-            
-            return lemma
-        
-        # If we found the word token but no matching lemma, create a new lemma
-        try:
-            lemma = add_lemma(
-                session=session,
-                lemma_text=clean_english,
-                definition_text=f"Lithuanian: {lithuanian_word}",
-                pos_type=pos_type,
-                pos_subtype=pos_subtype,
-                difficulty_level=difficulty_level,
-                frequency_rank=word_token.frequency_rank,  # Use word token's frequency rank
-                lithuanian_translation=lithuanian_word,
-                notes=notes,
-                auto_generate_guid=not existing_guid  # Don't auto-generate if we have an existing GUID
-            )
-            
-            # Set the existing GUID if provided
-            if existing_guid:
-                lemma.guid = existing_guid
-                session.commit()
-            
-            # Add English derivative form
-            add_derivative_form(
-                session=session,
-                lemma=lemma,
-                derivative_form_text=clean_english,
-                language_code="en",
-                grammatical_form="singular" if pos_type == "noun" else "base_form",
-                word_token=word_token,
-                is_base_form=True
-            )
-            
-            return lemma
-            
-        except Exception as e:
-            print(f"Error creating lemma for {english_word}: {e}")
-            return None
     
-    else:
-        # Word token doesn't exist, this might be a compound word or phrase
-        # Create a basic lemma without word token association
-        try:
-            lemma = add_lemma(
-                session=session,
-                lemma_text=clean_english,
-                definition_text=f"Lithuanian: {lithuanian_word}",
-                pos_type=pos_type,
-                pos_subtype=pos_subtype,
-                difficulty_level=difficulty_level,
-                lithuanian_translation=lithuanian_word,
-                notes=notes,
-                auto_generate_guid=not existing_guid  # Don't auto-generate if we have an existing GUID
-            )
-            
-            # Set the existing GUID if provided
-            if existing_guid:
-                lemma.guid = existing_guid
-                session.commit()
-            
-            # Add English derivative form without word token (for phrases/compound words)
-            add_derivative_form(
-                session=session,
-                lemma=lemma,
-                derivative_form_text=clean_english,
-                language_code="en",
-                grammatical_form="singular" if pos_type == "noun" else "base_form",
-                word_token=None,  # No word token for multi-word expressions
-                is_base_form=True
-            )
-            
+    # Step 3: Create new lemma
+    try:
+        lemma = add_lemma(
+            session=session,
+            lemma_text=clean_english,
+            definition_text=f"Lithuanian: {lithuanian_word}",
+            pos_type=pos_type,
+            pos_subtype=pos_subtype,
+            difficulty_level=difficulty_level,
+            frequency_rank=word_token.frequency_rank if word_token else None,
+            lithuanian_translation=lithuanian_word,
+            notes=notes,
+            auto_generate_guid=not existing_guid  # Don't auto-generate if we have an existing GUID
+        )
+        
+        # Set the existing GUID if provided
+        if existing_guid:
+            lemma.guid = existing_guid
+            session.commit()
+        
+        # Add English derivative form
+        add_derivative_form(
+            session=session,
+            lemma=lemma,
+            derivative_form_text=clean_english,
+            language_code="en",
+            grammatical_form="singular" if pos_type == "noun" else "base_form",
+            word_token=word_token,  # Will be None if no word token exists
+            is_base_form=True
+        )
+        
+        if word_token:
+            print(f"Created lemma with word token for: {english_word}")
+        else:
             print(f"Created lemma without word token for: {english_word}")
-            return lemma
-            
-        except Exception as e:
-            print(f"Error creating basic lemma for {english_word}: {e}")
-            return None
+        
+        return lemma
+        
+    except Exception as e:
+        print(f"Error creating lemma for {english_word}: {e}")
+        return None
 
 def create_alternatives_for_lemma(session, lemma: Lemma, english_word: str) -> int:
     """
@@ -502,7 +413,7 @@ def migrate_json_data(session, trakaido_data: List[Dict[str, Any]], update_diffi
     
     Args:
         session: Database session
-        trakaido_data: List of dictionaries with English, Lithuanian, GUID, trakaido level, POS, and subtype data
+        trakaido_data: List of dictionaries with English, Lithuanian, trakaido level, POS, and subtype data (GUID is optional)
         update_difficulty: Whether to update difficulty level on existing lemmas (default: True)
     """
     print(f"\nMigrating {len(trakaido_data)} entries from JSON data...")
@@ -513,10 +424,10 @@ def migrate_json_data(session, trakaido_data: List[Dict[str, Any]], update_diffi
     for i, entry in enumerate(trakaido_data):
         english_word = entry["English"]
         lithuanian_word = entry["Lithuanian"]
-        existing_guid = entry.get("GUID")
-        difficulty_level = entry.get("trakaido_level", 1)
-        pos_type = entry.get("POS")
-        pos_subtype = entry.get("subtype")
+        existing_guid = entry.get("GUID")  # Optional - will be auto-generated if None
+        difficulty_level = entry["trakaido_level"]  # Now required
+        pos_type = entry["POS"]  # Now required
+        pos_subtype = entry["subtype"]  # Now required
         
         # Find or create lemma
         lemma = find_or_create_lemma(
