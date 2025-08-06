@@ -245,8 +245,7 @@ def generate_structure_file(session, difficulty_level: int, output_dir: str) -> 
     level_data = generate_structure_data(session, difficulty_level)
     
     if not level_data:
-        print(f"No data found for difficulty level {difficulty_level}")
-        return None
+        print(f"No data found for difficulty level {difficulty_level}, generating empty structure file")
     
     # Generate file content
     level_names = {
@@ -315,11 +314,15 @@ Format: "Category": {{
     structure_lines = []
     structure_lines.append(f"{variable_name} = {{")
     
-    for category, data in structured_data.items():
-        structure_lines.append(f'  {repr(category)}: {{')
-        structure_lines.append(f'    "display_name": {repr(data["display_name"])},')
-        structure_lines.append(f'    "words": {data["words"]}')
-        structure_lines.append('  },')
+    if structured_data:
+        for category, data in structured_data.items():
+            structure_lines.append(f'  {repr(category)}: {{')
+            structure_lines.append(f'    "display_name": {repr(data["display_name"])},')
+            structure_lines.append(f'    "words": {data["words"]}')
+            structure_lines.append('  },')
+    else:
+        # Empty level - add a comment
+        structure_lines.append('  # No words available at this difficulty level')
     
     structure_lines.append('}')
     
@@ -423,12 +426,14 @@ def get_difficulty_levels_with_data(session) -> List[int]:
     return [level[0] for level in levels if level[0] is not None]
 
 def generate_all_structure_files(session, output_dir: str) -> List[str]:
-    """Generate structure files for all difficulty levels that have data."""
+    """Generate structure files for all difficulty levels 1-15."""
     generated_files = []
     
-    # Get all levels that actually have data
-    levels = get_difficulty_levels_with_data(session)
-    print(f"Found difficulty levels with data: {levels}")
+    # Generate files for all levels 1-15, regardless of whether they have data
+    levels = list(range(1, 16))  # Levels 1 through 15
+    levels_with_data = get_difficulty_levels_with_data(session)
+    print(f"Found difficulty levels with data: {levels_with_data}")
+    print(f"Generating structure files for all levels: {levels}")
     
     for level in levels:
         filepath = generate_structure_file(session, level, output_dir)
