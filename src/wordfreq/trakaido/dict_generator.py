@@ -426,11 +426,11 @@ def get_difficulty_levels_with_data(session) -> List[int]:
     return [level[0] for level in levels if level[0] is not None]
 
 def generate_all_structure_files(session, output_dir: str) -> List[str]:
-    """Generate structure files for all difficulty levels 1-15."""
+    """Generate structure files for all difficulty levels 1-20."""
     generated_files = []
     
-    # Generate files for all levels 1-15, regardless of whether they have data
-    levels = list(range(1, 16))  # Levels 1 through 15
+    # Generate files for all levels 1-20, regardless of whether they have data
+    levels = list(range(1, 21))  # Levels 1 through 20
     levels_with_data = get_difficulty_levels_with_data(session)
     print(f"Found difficulty levels with data: {levels_with_data}")
     print(f"Generating structure files for all levels: {levels}")
