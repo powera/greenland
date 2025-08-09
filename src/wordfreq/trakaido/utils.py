@@ -8,6 +8,7 @@ difficulty levels with LLM assistance and user review.
 Features:
 - Add new words with GPT-4o-mini assistance for linguistic data
 - Set/update difficulty levels for existing words
+- Bulk move words by level and subtype to new difficulty levels
 - Interactive user review and approval process
 - GUID generation and management
 - Integration with existing database schema
@@ -18,6 +19,7 @@ Usage:
     manager = WordManager()
     manager.add_word("example")
     manager.set_level("N07_008", 2)
+    manager.move_words_by_subtype_and_level(8, "clothing", 14)
 """
 
 import json
@@ -754,6 +756,104 @@ Word to analyze: {english_word}"""
         else:
             print("\n❌ Both exports failed")
             return False
+    
+    def move_words_by_subtype_and_level(self, from_level: int, subtype: str, to_level: int, 
+                                       reason: str = "", dry_run: bool = False) -> bool:
+        """
+        Move all words matching a specific level and subtype to a new level.
+        
+        Args:
+            from_level: Current difficulty level to move from (1-20)
+            subtype: POS subtype to filter by (e.g., "clothing")
+            to_level: New difficulty level to move to (1-20)
+            reason: Reason for the bulk change
+            dry_run: If True, show what would be changed without making changes
+            
+        Returns:
+            Success flag
+        """
+        # Validate levels
+        if not (1 <= from_level <= 20):
+            logger.error(f"Invalid from_level: {from_level}. Must be 1-20.")
+            return False
+        if not (1 <= to_level <= 20):
+            logger.error(f"Invalid to_level: {to_level}. Must be 1-20.")
+            return False
+        
+        session = self.get_session()
+        try:
+            # Find all words matching the criteria
+            query = session.query(Lemma).filter(
+                Lemma.difficulty_level == from_level,
+                Lemma.pos_subtype == subtype,
+                Lemma.guid.isnot(None)
+            )
+            
+            matching_words = query.all()
+            
+            if not matching_words:
+                print(f"No words found with level {from_level} and subtype '{subtype}'")
+                return True
+            
+            print(f"Found {len(matching_words)} words with level {from_level} and subtype '{subtype}':")
+            print("-" * 80)
+            
+            # Display the words that will be affected
+            for word in matching_words:
+                status = "✓" if word.verified else "?"
+                print(f"{status} {word.guid:<10} L{word.difficulty_level:<2} "
+                      f"{word.lemma_text:<20} → {word.lithuanian_translation or 'N/A':<20}")
+            
+            if dry_run:
+                print(f"\n[DRY RUN] Would move {len(matching_words)} words from level {from_level} to level {to_level}")
+                return True
+            
+            # Confirm the operation
+            print(f"\nThis will move {len(matching_words)} words from level {from_level} to level {to_level}")
+            if reason:
+                print(f"Reason: {reason}")
+            
+            confirm = input("Continue? (y/N): ").strip().lower()
+            if confirm != 'y':
+                print("Operation cancelled.")
+                return False
+            
+            # Perform the bulk update
+            updated_count = 0
+            timestamp = datetime.now().strftime("%Y-%m-%d")
+            
+            for word in matching_words:
+                try:
+                    old_level = word.difficulty_level
+                    word.difficulty_level = to_level
+                    
+                    # Add to notes if reason provided
+                    if reason:
+                        current_notes = word.notes or ""
+                        level_note = f"[{timestamp}] Bulk level change from {old_level} to {to_level}: {reason}"
+                        word.notes = f"{current_notes}\n{level_note}".strip()
+                    
+                    updated_count += 1
+                    
+                except Exception as e:
+                    logger.error(f"Error updating word {word.guid}: {e}")
+                    continue
+            
+            # Commit all changes
+            session.commit()
+            
+            print(f"\n✅ Successfully moved {updated_count} words from level {from_level} to level {to_level}")
+            if reason:
+                print(f"   Reason: {reason}")
+            
+            return True
+            
+        except Exception as e:
+            session.rollback()
+            logger.error(f"Error moving words: {e}")
+            return False
+        finally:
+            session.close()
 
 # CLI interface functions
 def main():
@@ -779,6 +879,14 @@ def main():
     level_parser.add_argument('identifier', help='GUID or English word')
     level_parser.add_argument('level', type=int, help='New difficulty level (1-20)')
     level_parser.add_argument('--reason', help='Reason for the change')
+    
+    # Move words by subtype and level command
+    move_parser = subparsers.add_parser('move-words', help='Move all words with specific level and subtype to new level')
+    move_parser.add_argument('from_level', type=int, help='Current difficulty level (1-20)')
+    move_parser.add_argument('subtype', help='POS subtype (e.g., "clothing")')
+    move_parser.add_argument('to_level', type=int, help='New difficulty level (1-20)')
+    move_parser.add_argument('--reason', help='Reason for the bulk change')
+    move_parser.add_argument('--dry-run', action='store_true', help='Show what would be changed without making changes')
     
     # List words command
     list_parser = subparsers.add_parser('list', help='List words')
@@ -823,6 +931,16 @@ def main():
     elif args.command == 'set-level':
         success = manager.set_level(args.identifier, args.level, 
                                    reason=getattr(args, 'reason', ''))
+        sys.exit(0 if success else 1)
+    
+    elif args.command == 'move-words':
+        success = manager.move_words_by_subtype_and_level(
+            from_level=args.from_level,
+            subtype=args.subtype,
+            to_level=args.to_level,
+            reason=getattr(args, 'reason', ''),
+            dry_run=getattr(args, 'dry_run', False)
+        )
         sys.exit(0 if success else 1)
     
     elif args.command == 'list':
