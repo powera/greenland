@@ -122,12 +122,28 @@ class OpenAIClient:
             messages.append({"role": "system", "content": context})
         messages.append({"role": "user", "content": prompt})
         
+        # Determine which token limit parameter to use based on model
+        # Newer reasoning models (o1, gpt-5, o3) require max_completion_tokens
+        reasoning_models = ['o1-', 'gpt-5-', 'o3-']
+        uses_completion_tokens = any(model.startswith(prefix) for prefix in reasoning_models)
+        
+        # gpt-5 models don't support custom temperature (only default value of 1)
+        is_gpt5_model = model.startswith('gpt-5-')
+        
+        token_limit = 512 if brief else 4096
         kwargs = {
             "model": model,
             "messages": messages,
-            "max_tokens": 512 if brief else 4096,
-            "temperature": 0.35,
         }
+        
+        # Only set temperature for models that support it
+        if not is_gpt5_model:
+            kwargs["temperature"] = 0.35
+        
+        if uses_completion_tokens:
+            kwargs["max_completion_tokens"] = token_limit
+        else:
+            kwargs["max_tokens"] = token_limit
         
         # If JSON schema provided, configure for structured response
         if json_schema:
@@ -138,7 +154,9 @@ class OpenAIClient:
             
             clean_schema = clients.lib.to_openai_schema(schema_obj)
             
-            kwargs["temperature"] = 0.15  # Lower temperature for structured output
+            # Lower temperature for structured output (only for models that support it)
+            if not is_gpt5_model:
+                kwargs["temperature"] = 0.15
             kwargs["response_format"] = {
                 "type": "json_schema",
                 "json_schema": {
