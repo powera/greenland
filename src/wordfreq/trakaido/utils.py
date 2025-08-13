@@ -136,13 +136,14 @@ IMPORTANT REQUIREMENTS:
 
 Word to analyze: {english_word}"""
     
-    def _query_word_data(self, english_word: str, lithuanian_word: str = None) -> Tuple[Optional[WordData], bool]:
+    def _query_word_data(self, english_word: str, lithuanian_word: str = None, model_override: str = None) -> Tuple[Optional[WordData], bool]:
         """
         Query LLM for comprehensive word data.
         
         Args:
             english_word: English word to analyze
             lithuanian_word: Optional Lithuanian translation to clarify meaning
+            model_override: Override the default model (e.g., "gpt-5-nano")
             
         Returns:
             Tuple of (WordData object, success flag)
@@ -194,9 +195,10 @@ Word to analyze: {english_word}"""
         prompt = self._get_word_analysis_prompt(english_word, lithuanian_word)
         
         try:
+            model_to_use = model_override or self.model
             response = self.client.generate_chat(
                 prompt=prompt,
-                model=self.model,
+                model=model_to_use,
                 json_schema=schema
             )
             
@@ -854,6 +856,180 @@ Word to analyze: {english_word}"""
             return False
         finally:
             session.close()
+    
+    def update_word(self, identifier: str, auto_approve: bool = False, model: str = "gpt-5-nano") -> bool:
+        """
+        Update an entire Lemma entry using specified model.
+        
+        Args:
+            identifier: GUID or English word to update
+            auto_approve: Skip user review if True
+            model: LLM model to use for analysis
+            
+        Returns:
+            Success flag
+        """
+        session = self.get_session()
+        try:
+            # Find lemma by GUID or English text
+            if identifier.startswith(('N', 'V', 'A')):  # Looks like a GUID
+                lemma = session.query(Lemma).filter(Lemma.guid == identifier).first()
+            else:
+                lemma = session.query(Lemma).filter(
+                    Lemma.lemma_text.ilike(identifier)
+                ).first()
+            
+            if not lemma:
+                logger.error(f"Word not found: {identifier}")
+                return False
+            
+            print(f"Updating word: {lemma.lemma_text} ({lemma.guid})")
+            print(f"Current Lithuanian: {lemma.lithuanian_translation}")
+            
+            # Query LLM for updated word data using specified model
+            print(f"Analyzing word '{lemma.lemma_text}' with {model}...")
+            word_data, success = self._query_word_data(
+                lemma.lemma_text, 
+                lemma.lithuanian_translation,
+                model_override=model
+            )
+            
+            if not success or not word_data:
+                logger.error(f"Failed to get updated analysis for word '{lemma.lemma_text}'")
+                return False
+            
+            # User review (unless auto-approve)
+            if not auto_approve:
+                print("\n" + "="*60)
+                print("CURRENT ENTRY:")
+                print("="*60)
+                print(f"English: {lemma.lemma_text}")
+                print(f"Lithuanian: {lemma.lithuanian_translation}")
+                print(f"Part of Speech: {lemma.pos_type}")
+                print(f"Subtype: {lemma.pos_subtype}")
+                print(f"Definition: {lemma.definition_text}")
+                print(f"Level: {lemma.difficulty_level}")
+                print(f"Chinese: {lemma.chinese_translation or 'N/A'}")
+                print(f"Korean: {lemma.korean_translation or 'N/A'}")
+                print(f"French: {lemma.french_translation or 'N/A'}")
+                print(f"Swahili: {lemma.swahili_translation or 'N/A'}")
+                print(f"Vietnamese: {lemma.vietnamese_translation or 'N/A'}")
+                print(f"Notes: {lemma.notes or 'N/A'}")
+                print("="*60)
+                
+                review = self._get_user_review(word_data)
+                
+                if not review.approved:
+                    logger.info(f"Word update for '{lemma.lemma_text}' rejected by user: {review.notes}")
+                    return False
+                
+                # Apply modifications
+                for key, value in review.modifications.items():
+                    setattr(word_data, key, value)
+            
+            # Update the lemma with new data
+            old_values = {
+                'lithuanian_translation': lemma.lithuanian_translation,
+                'definition_text': lemma.definition_text,
+                'pos_type': lemma.pos_type,
+                'pos_subtype': lemma.pos_subtype,
+                'chinese_translation': lemma.chinese_translation,
+                'korean_translation': lemma.korean_translation,
+                'french_translation': lemma.french_translation,
+                'swahili_translation': lemma.swahili_translation,
+                'vietnamese_translation': lemma.vietnamese_translation,
+                'confidence': lemma.confidence
+            }
+            
+            # Update all fields
+            lemma.lithuanian_translation = word_data.lithuanian
+            lemma.definition_text = word_data.definition
+            lemma.pos_type = word_data.pos_type
+            lemma.pos_subtype = word_data.pos_subtype
+            lemma.chinese_translation = word_data.chinese_translation
+            lemma.korean_translation = word_data.korean_translation
+            lemma.french_translation = word_data.french_translation
+            lemma.swahili_translation = word_data.swahili_translation
+            lemma.vietnamese_translation = word_data.vietnamese_translation
+            lemma.confidence = word_data.confidence
+            lemma.verified = not auto_approve  # Mark as verified if user reviewed
+            
+            # Add update note
+            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
+            current_notes = lemma.notes or ""
+            update_note = f"[{timestamp}] Updated with {model}"
+            lemma.notes = f"{current_notes}\n{update_note}".strip()
+            
+            # Update derivative forms if needed
+            # Find existing English and Lithuanian base forms
+            english_form = session.query(DerivativeForm).filter(
+                DerivativeForm.lemma_id == lemma.id,
+                DerivativeForm.language_code == 'en',
+                DerivativeForm.is_base_form == True
+            ).first()
+            
+            lithuanian_form = session.query(DerivativeForm).filter(
+                DerivativeForm.lemma_id == lemma.id,
+                DerivativeForm.language_code == 'lt',
+                DerivativeForm.is_base_form == True
+            ).first()
+            
+            # Update English form if it exists and changed
+            if english_form and english_form.derivative_form_text != word_data.english:
+                english_token = add_word_token(session, word_data.english, 'en')
+                english_form.derivative_form_text = word_data.english
+                english_form.word_token_id = english_token.id
+                english_form.grammatical_form = self._get_default_grammatical_form(word_data.pos_type)
+                english_form.verified = not auto_approve
+            
+            # Update Lithuanian form if it exists and changed
+            if lithuanian_form and lithuanian_form.derivative_form_text != word_data.lithuanian:
+                lithuanian_token = add_word_token(session, word_data.lithuanian, 'lt')
+                lithuanian_form.derivative_form_text = word_data.lithuanian
+                lithuanian_form.word_token_id = lithuanian_token.id
+                lithuanian_form.grammatical_form = self._get_default_grammatical_form(word_data.pos_type)
+                lithuanian_form.verified = not auto_approve
+            
+            # Create Lithuanian form if it doesn't exist but we have translation
+            elif not lithuanian_form and word_data.lithuanian:
+                lithuanian_token = add_word_token(session, word_data.lithuanian, 'lt')
+                lithuanian_form = DerivativeForm(
+                    lemma_id=lemma.id,
+                    derivative_form_text=word_data.lithuanian,
+                    word_token_id=lithuanian_token.id,
+                    language_code='lt',
+                    grammatical_form=self._get_default_grammatical_form(word_data.pos_type),
+                    is_base_form=True,
+                    verified=not auto_approve
+                )
+                session.add(lithuanian_form)
+            
+            session.commit()
+            
+            print(f"\n✅ Successfully updated word '{lemma.lemma_text}' ({lemma.guid})")
+            
+            # Show what changed
+            changes = []
+            for field, old_value in old_values.items():
+                new_value = getattr(lemma, field)
+                if old_value != new_value:
+                    changes.append(f"   {field}: '{old_value}' → '{new_value}'")
+            
+            if changes:
+                print("Changes made:")
+                for change in changes:
+                    print(change)
+            else:
+                print("   No changes detected (data was already up to date)")
+            
+            return True
+            
+        except Exception as e:
+            session.rollback()
+            logger.error(f"Error updating word '{identifier}': {e}")
+            return False
+        finally:
+            session.close()
 
 # CLI interface functions
 def main():
@@ -879,6 +1055,14 @@ def main():
     level_parser.add_argument('identifier', help='GUID or English word')
     level_parser.add_argument('level', type=int, help='New difficulty level (1-20)')
     level_parser.add_argument('--reason', help='Reason for the change')
+    
+    # Update word command
+    update_parser = subparsers.add_parser('update', help='Update entire Lemma entry using specified model')
+    update_parser.add_argument('identifier', help='GUID or English word to update')
+    update_parser.add_argument('--auto-approve', action='store_true', 
+                              help='Skip user review')
+    update_parser.add_argument('--model', default='gpt-5-nano', 
+                              help='LLM model to use')
     
     # Move words by subtype and level command
     move_parser = subparsers.add_parser('move-words', help='Move all words with specific level and subtype to new level')
@@ -931,6 +1115,14 @@ def main():
     elif args.command == 'set-level':
         success = manager.set_level(args.identifier, args.level, 
                                    reason=getattr(args, 'reason', ''))
+        sys.exit(0 if success else 1)
+    
+    elif args.command == 'update':
+        success = manager.update_word(
+            identifier=args.identifier,
+            auto_approve=args.auto_approve,
+            model=args.model
+        )
         sys.exit(0 if success else 1)
     
     elif args.command == 'move-words':
