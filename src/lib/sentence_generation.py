@@ -339,3 +339,299 @@ class SentenceGenerator:
             tense_rules = conjugation_rules[tense]
             return tense_rules.get(subject, tense_rules.get("default", verb))
         return verb
+
+
+class LithuanianSentenceGenerator(SentenceGenerator):
+    """
+    Lithuanian-specific sentence generator with proper case system and gender handling.
+    
+    Extends the base SentenceGenerator with Lithuanian morphological rules,
+    including accusative case formation, gender agreement, and proper conjugations.
+    """
+    
+    def __init__(self, word_matrices: Dict[str, Dict[str, Dict]], 
+                 grammar_rules: Dict[str, Any],
+                 llm_client: Optional[UnifiedLLMClient] = None):
+        """
+        Initialize Lithuanian sentence generator.
+        
+        Args:
+            word_matrices: Dictionary of word categories with their entries
+            grammar_rules: Language-specific grammar rules and conjugations
+            llm_client: Optional LLM client for enhanced generation
+        """
+        super().__init__(word_matrices, grammar_rules, llm_client)
+        
+        # Lithuanian pronouns with full case declensions
+        self.lithuanian_pronouns = {
+            "I": {"nom": "aš", "acc": "mane", "gen": "manęs", "guid": "PRON_001"},
+            "you": {"nom": "tu", "acc": "tave", "gen": "tavęs", "guid": "PRON_002"},
+            "he": {"nom": "jis", "acc": "jį", "gen": "jo", "guid": "PRON_003"},
+            "she": {"nom": "ji", "acc": "ją", "gen": "jos", "guid": "PRON_004"},
+            "we": {"nom": "mes", "acc": "mus", "gen": "mūsų", "guid": "PRON_005"},
+            "they": {"nom": "jie", "acc": "juos", "gen": "jų", "guid": "PRON_006"},
+        }
+        
+        # Gender mapping for Lithuanian words (simplified but comprehensive)
+        self.word_genders = {
+            # Foods - mostly feminine
+            "bread": "f", "coffee": "f", "milk": "m", "water": "m", "apple": "m",
+            "cheese": "m", "fish": "f", "meat": "f", "soup": "f", "cake": "m",
+            "beer": "m", "tea": "f", "juice": "m", "wine": "m", "egg": "m",
+            
+            # Objects - mixed
+            "book": "f", "paper": "m", "pen": "m", "table": "m", "chair": "f",
+            "car": "m", "house": "m", "phone": "m", "computer": "m", "bag": "m",
+            
+            # Animals - based on Lithuanian gender
+            "dog": "m", "cat": "f", "horse": "m", "bird": "m", "cow": "f",
+            "pig": "f", "rabbit": "m", "mouse": "f",
+            
+            # Quality adjectives - Lithuanian gender
+            "big": "m", "small": "m", "good": "m", "bad": "m", "hot": "m", "cold": "m",
+            "new": "m", "long": "m", "short": "m", "high": "m", "low": "m", "dark": "m",
+            
+            # Numbers - Lithuanian gender (masculine forms)
+            "one": "m", "two": "m", "three": "m", "four": "m", 
+            "five": "m", "six": "m", "seven": "m", "eight": "m"
+        }
+        
+        # Lithuanian number accusative forms (irregular)
+        self.number_accusatives = {
+            "vienas": "vieną",
+            "du": "du",  # "du" stays the same in accusative
+            "trys": "tris",
+            "keturi": "keturis",
+            "penki": "penkis",
+            "šeši": "šešis",
+            "septyni": "septynis",
+            "aštuoni": "aštuonis"
+        }
+    
+    def get_accusative_form(self, word: str, lithuanian: str) -> str:
+        """
+        Get accusative form of Lithuanian word with proper morphological rules.
+        
+        Args:
+            word: English word for gender lookup
+            lithuanian: Lithuanian nominative form
+            
+        Returns:
+            Lithuanian accusative form
+        """
+        # Special cases for numbers (irregular accusative forms)
+        if lithuanian in self.number_accusatives:
+            return self.number_accusatives[lithuanian]
+        
+        gender = self.word_genders.get(word, "m")
+        
+        if gender == "m":
+            # Masculine declension patterns
+            if lithuanian.endswith("as"):
+                return lithuanian[:-2] + "ą"
+            elif lithuanian.endswith("is") or lithuanian.endswith("ys"):
+                return lithuanian[:-2] + "į"
+            elif lithuanian.endswith("us"):
+                return lithuanian[:-2] + "ų"
+            else:
+                return lithuanian + "ą"
+        else:
+            # Feminine declension patterns
+            if lithuanian.endswith("a"):
+                return lithuanian[:-1] + "ą"
+            elif lithuanian.endswith("ė"):
+                return lithuanian[:-1] + "ę"
+            elif lithuanian.endswith("is"):
+                return lithuanian[:-2] + "į"
+            else:
+                return lithuanian + "ą"
+    
+    def get_subject_type(self, subject_en: str) -> str:
+        """
+        Determine subject type for Lithuanian verb conjugation.
+        
+        Args:
+            subject_en: English subject word
+            
+        Returns:
+            Subject type for conjugation lookup
+        """
+        if subject_en in ["I", "you", "he", "she", "we", "they"]:
+            return subject_en
+        elif subject_en in self.word_matrices.get("animals", {}):
+            return "animal"
+        else:
+            return "person"
+    
+    def build_lithuanian_sentence(self, pattern: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Build a complete Lithuanian sentence from a pattern with proper grammar.
+        
+        Args:
+            pattern: Sentence pattern with subject, verb, object, tense
+            
+        Returns:
+            Dictionary with English and Lithuanian sentences plus word tracking
+        """
+        subject_en = pattern["subject"]["english"]
+        verb_en = pattern["verb"]["english"]
+        obj_en = pattern["object"]["english"]
+        tense = pattern["tense"]
+        
+        # Build English sentence first
+        english_sentence = self._build_english_sentence(pattern)
+        
+        # Build Lithuanian sentence
+        subject_type = self.get_subject_type(subject_en)
+        
+        # Get Lithuanian forms
+        if subject_en in self.lithuanian_pronouns:
+            subject_lt = self.lithuanian_pronouns[subject_en]["nom"]
+        else:
+            subject_lt = pattern["subject"]["data"]["lithuanian"]
+        
+        verb_lt = pattern["verb"]["data"][tense][subject_type]
+        obj_lt_nom = pattern["object"]["data"]["lithuanian"]
+        obj_lt_acc = self.get_accusative_form(obj_en, obj_lt_nom)
+        
+        lt_parts = []
+        lt_parts.append(subject_lt.capitalize())
+        lt_parts.append(verb_lt)
+        
+        # Handle adjectives with proper case agreement
+        if "adjective" in pattern:
+            adj_lt = pattern["adjective"]["data"]["lithuanian"]
+            adj_acc = self.get_accusative_form(pattern["adjective"]["english"], adj_lt)
+            lt_parts.append(adj_acc)
+        
+        lt_parts.append(obj_lt_acc)
+        
+        lithuanian_sentence = " ".join(lt_parts) + "."
+        
+        # Track words used with GUIDs
+        words_used = []
+        
+        words_used.extend([
+            {
+                "english": subject_en, 
+                "lithuanian": subject_lt, 
+                "type": "subject", 
+                "guid": pattern["subject"]["data"].get("guid", "")
+            },
+            {
+                "english": verb_en, 
+                "lithuanian": pattern["verb"]["data"]["infinitive"], 
+                "type": "verb"
+            },
+        ])
+        
+        if "adjective" in pattern:
+            words_used.append({
+                "english": pattern["adjective"]["english"],
+                "lithuanian": pattern["adjective"]["data"]["lithuanian"],
+                "type": "adjective",
+                "guid": pattern["adjective"]["data"]["guid"]
+            })
+        
+        words_used.append({
+            "english": obj_en,
+            "lithuanian": obj_lt_nom,
+            "type": "object",
+            "guid": pattern["object"]["data"]["guid"]
+        })
+        
+        return {
+            "english": english_sentence,
+            "lithuanian": lithuanian_sentence,
+            "words_used": words_used,
+            "pattern": "SVAO" if "adjective" in pattern else "SVO",
+            "tense": tense
+        }
+    
+    def generate_lithuanian_with_llm(self, pattern: Dict[str, Any], 
+                                   model: str = "gpt-4o-mini") -> Optional[Dict[str, Any]]:
+        """
+        Use LLM to generate a Lithuanian sentence with proper grammar checking.
+        
+        Args:
+            pattern: Sentence pattern with word components
+            model: LLM model to use
+            
+        Returns:
+            Dictionary with generated sentences and metadata, or None if failed
+        """
+        if not self.llm_client:
+            return None
+            
+        # Get context about the words
+        subject_info = pattern['subject']['data'] if 'data' in pattern['subject'] else {}
+        verb_info = pattern['verb']
+        object_info = pattern['object']['data'] if 'data' in pattern['object'] else {}
+        
+        prompt = f"""Create a natural Lithuanian sentence for language learning using these components:
+
+Subject: {pattern['subject']['english']} (Lithuanian: {subject_info.get('lithuanian', 'unknown')})
+Verb: {pattern['verb']['english']} ({verb_info.get('infinitive', 'unknown')})
+Tense: {pattern['tense']}
+Object: {pattern['object']['english']} (Lithuanian: {object_info.get('lithuanian', 'unknown')})
+
+Requirements:
+1. Create a grammatically correct Lithuanian sentence using proper cases (nominative for subject, accusative for object)
+2. Use the correct verb conjugation for the tense and subject
+3. Other forms of the verb (such as prefixed or modified forms) are permitted if they are more natural
+4. Make sure the sentence is logical and natural
+5. Provide both English and Lithuanian versions"""
+        
+        # Define response schema
+        schema = Schema(
+            "LithuanianSentenceGeneration",
+            "Generated Lithuanian sentence with proper grammar",
+            {
+                "makes_sense": SchemaProperty("boolean", "Whether the sentence combination makes logical sense"),
+                "english": SchemaProperty("string", "Natural English sentence", required=False),
+                "lithuanian": SchemaProperty("string", "Grammatically correct Lithuanian sentence", required=False)
+            }
+        )
+        
+        try:
+            response = self.llm_client.generate_chat(
+                prompt=prompt,
+                model=model,
+                json_schema=schema
+            )
+            
+            result = response.structured_data
+            
+            if result.get("makes_sense", False):
+                return {
+                    "english": result.get("english", ""),
+                    "lithuanian": result.get("lithuanian", ""),
+                    "llm_generated": True,
+                    "pattern": pattern
+                }
+            else:
+                logger.debug(f"LLM rejected Lithuanian pattern: {result.get('reason', 'Unknown reason')}")
+                return None
+                
+        except Exception as e:
+            logger.debug(f"Lithuanian LLM generation failed: {e}")
+            return None
+    
+    def _build_target_language_sentence(self, pattern: Dict[str, Any], lang_code: str) -> str:
+        """
+        Override to use Lithuanian-specific sentence building for 'lt' language code.
+        
+        Args:
+            pattern: Sentence pattern
+            lang_code: Target language code
+            
+        Returns:
+            Sentence in target language
+        """
+        if lang_code == "lt":
+            # Use Lithuanian-specific sentence building
+            result = self.build_lithuanian_sentence(pattern)
+            return result["lithuanian"]
+        else:
+            # Fall back to parent implementation for other languages
+            return super()._build_target_language_sentence(pattern, lang_code)
