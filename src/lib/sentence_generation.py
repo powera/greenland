@@ -71,6 +71,13 @@ class SentenceGenerator:
         compatible_subjects = self._get_compatible_words("subjects", verb_data)
         compatible_objects = self._get_compatible_words("objects", verb_data)
         
+        # Debug logging
+        logger.debug(f"Verb: {verb_key}, Compatible subjects: {len(compatible_subjects)}, Compatible objects: {len(compatible_objects)}")
+        if not compatible_subjects:
+            logger.debug(f"No compatible subjects found for verb {verb_key} with data: {verb_data}")
+        if not compatible_objects:
+            logger.debug(f"No compatible objects found for verb {verb_key} with data: {verb_data}")
+        
         if not compatible_subjects or not compatible_objects:
             return None
             
@@ -136,9 +143,14 @@ class SentenceGenerator:
             return None
             
         # Build context for LLM
-        subject_info = pattern['subject']['data']
-        verb_info = pattern['verb']['data']
-        object_info = pattern['object']['data']
+        subject_info = pattern['subject'].get('data', pattern['subject'])
+        verb_info = pattern['verb'].get('data', pattern['verb'])
+        object_info = pattern['object'].get('data', pattern['object'])
+        
+        # Get subject, verb, object keys
+        subject_key = pattern['subject'].get('key') or pattern['subject'].get('english')
+        verb_key = pattern['verb'].get('key') or pattern['verb'].get('english')
+        object_key = pattern['object'].get('key') or pattern['object'].get('english')
         
         # Get available adjectives for context
         available_adjectives = [key for key, _ in self._get_available_adjectives()]
@@ -147,9 +159,9 @@ class SentenceGenerator:
         prompt = f"""
         Create a natural {target_language} sentence for language learning using these components:
         
-        Subject: {pattern['subject']['key']} (Target: {subject_info.get(target_language, 'unknown')})
-        Verb: {pattern['verb']['key']} in {pattern['tense']} tense
-        Object: {pattern['object']['key']} (Target: {object_info.get(target_language, 'unknown')})
+        Subject: {subject_key} (Target: {subject_info.get(target_language, 'unknown')})
+        Verb: {verb_key} in {pattern['tense']} tense
+        Object: {object_key} (Target: {object_info.get(target_language, 'unknown')})
         
         Available adjectives to optionally include: {adj_list}
         
@@ -226,9 +238,35 @@ class SentenceGenerator:
         
     def _build_english_sentence(self, pattern: Dict[str, Any]) -> str:
         """Build English sentence from pattern."""
-        subject = pattern["subject"]["key"]
-        verb = pattern["verb"]["key"]
-        obj = pattern["object"]["key"]
+        # Defensive programming: check pattern structure
+        if "subject" not in pattern:
+            raise ValueError("Pattern missing 'subject' field")
+        if "verb" not in pattern:
+            raise ValueError("Pattern missing 'verb' field")
+        if "object" not in pattern:
+            raise ValueError("Pattern missing 'object' field")
+        if "tense" not in pattern:
+            raise ValueError("Pattern missing 'tense' field")
+            
+        # Check nested structure and extract keys
+        if not isinstance(pattern["subject"], dict):
+            raise ValueError(f"Pattern subject malformed: {pattern['subject']}")
+        if not isinstance(pattern["verb"], dict):
+            raise ValueError(f"Pattern verb malformed: {pattern['verb']}")
+        if not isinstance(pattern["object"], dict):
+            raise ValueError(f"Pattern object malformed: {pattern['object']}")
+        
+        # Handle both 'key' and 'english' field names for backward compatibility
+        subject = pattern["subject"].get("key") or pattern["subject"].get("english")
+        verb = pattern["verb"].get("key") or pattern["verb"].get("english")
+        obj = pattern["object"].get("key") or pattern["object"].get("english")
+        
+        if not subject:
+            raise ValueError(f"Pattern subject missing key/english field: {pattern['subject']}")
+        if not verb:
+            raise ValueError(f"Pattern verb missing key/english field: {pattern['verb']}")
+        if not obj:
+            raise ValueError(f"Pattern object missing key/english field: {pattern['object']}")
         tense = pattern["tense"]
         
         # Apply English grammar rules
@@ -246,8 +284,9 @@ class SentenceGenerator:
         
         # Handle adjectives
         if "adjective" in pattern:
-            adj = pattern["adjective"]["key"]
-            parts.append(adj)
+            adj = pattern["adjective"].get("key") or pattern["adjective"].get("english")
+            if adj:
+                parts.append(adj)
             
         # Handle object articles
         if self._needs_article(obj):
@@ -262,9 +301,10 @@ class SentenceGenerator:
         # This would use the grammar_rules to apply proper conjugations,
         # case endings, etc. for the target language
         
-        subject_data = pattern["subject"]["data"]
-        verb_data = pattern["verb"]["data"]
-        object_data = pattern["object"]["data"]
+        # Handle both pattern structures: {"key": x, "data": y} and {"english": x, "data": y}
+        subject_data = pattern["subject"].get("data", pattern["subject"])
+        verb_data = pattern["verb"].get("data", pattern["verb"])
+        object_data = pattern["object"].get("data", pattern["object"])
         
         # Get base forms
         subject_word = subject_data.get(lang_code, subject_data.get("english", ""))
@@ -288,7 +328,7 @@ class SentenceGenerator:
         
         # Handle adjectives
         if "adjective" in pattern:
-            adj_data = pattern["adjective"]["data"]
+            adj_data = pattern["adjective"].get("data", pattern["adjective"])
             adj_word = adj_data.get(lang_code, adj_data.get("english", ""))
             if lang_code in self.grammar_rules and "cases" in self.grammar_rules[lang_code]:
                 adj_word = self._apply_case(adj_word, "accusative", 
@@ -548,75 +588,7 @@ class LithuanianSentenceGenerator(SentenceGenerator):
             "tense": tense
         }
     
-    def generate_lithuanian_with_llm(self, pattern: Dict[str, Any], 
-                                   model: str = "gpt-4o-mini") -> Optional[Dict[str, Any]]:
-        """
-        Use LLM to generate a Lithuanian sentence with proper grammar checking.
-        
-        Args:
-            pattern: Sentence pattern with word components
-            model: LLM model to use
-            
-        Returns:
-            Dictionary with generated sentences and metadata, or None if failed
-        """
-        if not self.llm_client:
-            return None
-            
-        # Get context about the words
-        subject_info = pattern['subject']['data'] if 'data' in pattern['subject'] else {}
-        verb_info = pattern['verb']
-        object_info = pattern['object']['data'] if 'data' in pattern['object'] else {}
-        
-        prompt = f"""Create a natural Lithuanian sentence for language learning using these components:
 
-Subject: {pattern['subject']['english']} (Lithuanian: {subject_info.get('lithuanian', 'unknown')})
-Verb: {pattern['verb']['english']} ({verb_info.get('infinitive', 'unknown')})
-Tense: {pattern['tense']}
-Object: {pattern['object']['english']} (Lithuanian: {object_info.get('lithuanian', 'unknown')})
-
-Requirements:
-1. Create a grammatically correct Lithuanian sentence using proper cases (nominative for subject, accusative for object)
-2. Use the correct verb conjugation for the tense and subject
-3. Other forms of the verb (such as prefixed or modified forms) are permitted if they are more natural
-4. Make sure the sentence is logical and natural
-5. Provide both English and Lithuanian versions"""
-        
-        # Define response schema
-        schema = Schema(
-            "LithuanianSentenceGeneration",
-            "Generated Lithuanian sentence with proper grammar",
-            {
-                "makes_sense": SchemaProperty("boolean", "Whether the sentence combination makes logical sense"),
-                "english": SchemaProperty("string", "Natural English sentence", required=False),
-                "lithuanian": SchemaProperty("string", "Grammatically correct Lithuanian sentence", required=False)
-            }
-        )
-        
-        try:
-            response = self.llm_client.generate_chat(
-                prompt=prompt,
-                model=model,
-                json_schema=schema
-            )
-            
-            result = response.structured_data
-            
-            if result.get("makes_sense", False):
-                return {
-                    "english": result.get("english", ""),
-                    "lithuanian": result.get("lithuanian", ""),
-                    "llm_generated": True,
-                    "pattern": pattern
-                }
-            else:
-                logger.debug(f"LLM rejected Lithuanian pattern: {result.get('reason', 'Unknown reason')}")
-                return None
-                
-        except Exception as e:
-            logger.debug(f"Lithuanian LLM generation failed: {e}")
-            return None
-    
     def _build_target_language_sentence(self, pattern: Dict[str, Any], lang_code: str) -> str:
         """
         Override to use Lithuanian-specific sentence building for 'lt' language code.
