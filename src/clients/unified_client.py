@@ -44,6 +44,7 @@ class UnifiedLLMClient:
         self.anthropic_prefixes = ['claude-']
         self.gemini_prefixes = ['gemini-']
         self.lmstudio_prefixes = ['lmstudio/']
+        self.ollama_prefixes = ['gpt-oss']
         
     def _get_client(self, model: str) -> Tuple[Any, str]:
         """
@@ -59,7 +60,16 @@ class UnifiedLLMClient:
         client_name = None
         normalized_model = model
         
-        if any(model.startswith(prefix) for prefix in self.openai_prefixes):
+        # Check Ollama prefixes first to handle "gpt-oss" before "gpt-"
+        if any(model.startswith(prefix) for prefix in self.ollama_prefixes):
+            client = self.ollama
+            client_name = "Ollama"
+            # Strip quantization suffix if present (e.g. ":Q4_0")
+            # But preserve base model name if no quantization
+            parts = model.split(":")
+            if len(parts) > 2:  # Has quantization suffix
+                normalized_model = ":".join(parts[:-1])
+        elif any(model.startswith(prefix) for prefix in self.openai_prefixes):
             client = self.openai
             client_name = "OpenAI"
         elif any(model.startswith(prefix) for prefix in self.anthropic_prefixes):

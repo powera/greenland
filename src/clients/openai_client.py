@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-"""Client for interacting with OpenAI API using direct HTTP requests."""
+"""Client for interacting with OpenAI Responses API using direct HTTP requests."""
 
 import json
 import logging
@@ -36,7 +36,7 @@ def measure_completion(func):
     return wrapper
 
 class OpenAIClient:
-    """Client for making direct HTTP requests to OpenAI API."""
+    """Client for making direct HTTP requests to OpenAI Responses API."""
     
     def __init__(self, timeout: int = DEFAULT_TIMEOUT, debug: bool = False):
         """Initialize OpenAI client with API key."""
@@ -59,9 +59,9 @@ class OpenAIClient:
             return f.read().strip()
 
     @measure_completion
-    def _create_completion(self, **kwargs) -> Dict:
-        """Make direct HTTP request to OpenAI chat completions endpoint."""
-        url = f"{API_BASE}/chat/completions"
+    def _create_response(self, **kwargs) -> Dict:
+        """Make direct HTTP request to OpenAI responses endpoint."""
+        url = f"{API_BASE}/responses"
         
         if self.debug:
             logger.debug("Making request to %s", url)
@@ -96,7 +96,7 @@ class OpenAIClient:
         context: Optional[str] = None
     ) -> Response:
         """
-        Generate chat completion using OpenAI API.
+        Generate chat response using OpenAI Responses API.
         
         Args:
             prompt: The main prompt/question
@@ -117,33 +117,42 @@ class OpenAIClient:
             logger.debug("Context: %s", context)
             logger.debug("JSON schema: %s", json_schema)
         
-        messages = []
-        if context:
-            messages.append({"role": "system", "content": context})
-        messages.append({"role": "user", "content": prompt})
-        
         # Determine which token limit parameter to use based on model
-        # Newer reasoning models (o1, gpt-5, o3) require max_completion_tokens
+        # Newer reasoning models (o1, gpt-5, o3) require max_output_tokens
         reasoning_models = ['o1-', 'gpt-5-', 'o3-']
-        uses_completion_tokens = any(model.startswith(prefix) for prefix in reasoning_models)
+        uses_output_tokens = any(model.startswith(prefix) for prefix in reasoning_models)
         
         # gpt-5 models don't support custom temperature (only default value of 1)
         is_gpt5_model = model.startswith('gpt-5-')
+        is_gpt5_nano_or_mini = model.startswith('gpt-5-nano') or model.startswith('gpt-5-mini')
         
         token_limit = 512 if brief else 4096
         kwargs = {
             "model": model,
-            "messages": messages,
+            "input": prompt,
         }
+        
+        # Add instructions (system message) if context provided
+        if context:
+            kwargs["instructions"] = context
         
         # Only set temperature for models that support it
         if not is_gpt5_model:
             kwargs["temperature"] = 0.35
         
-        if uses_completion_tokens:
-            kwargs["max_completion_tokens"] = token_limit
+        # Set token limit parameter
+        if uses_output_tokens:
+            kwargs["max_output_tokens"] = token_limit
         else:
-            kwargs["max_tokens"] = token_limit
+            # For non-reasoning models, we still use max_output_tokens in Responses API
+            kwargs["max_output_tokens"] = token_limit
+        
+        # Set reasoning and text parameters for gpt-5-nano and gpt-5-mini
+        if is_gpt5_nano_or_mini:
+            kwargs["reasoning"] = {"effort": "minimal"}
+            # Only set text verbosity if not overridden by JSON schema below
+            if not json_schema:
+                kwargs["text"] = {"verbosity": "low"}
         
         # If JSON schema provided, configure for structured response
         if json_schema:
@@ -157,27 +166,48 @@ class OpenAIClient:
             # Lower temperature for structured output (only for models that support it)
             if not is_gpt5_model:
                 kwargs["temperature"] = 0.15
-            kwargs["response_format"] = {
-                "type": "json_schema",
-                "json_schema": {
+            
+            # Use text.format for structured outputs in Responses API
+            text_config = {
+                "format": {
+                    "type": "json_schema",
                     "name": "Details",
                     "description": "N/A",
                     "strict": True,
                     "schema": clean_schema
                 }
             }
+            
+            # For gpt-5-nano and gpt-5-mini, also include verbosity
+            if is_gpt5_nano_or_mini:
+                text_config["verbosity"] = "low"
+            
+            kwargs["text"] = text_config
         
-        completion_data, duration_ms = self._create_completion(**kwargs)
+        response_data, duration_ms = self._create_response(**kwargs)
         
-        response_content = completion_data["choices"][0]["message"]["content"]
+        # Extract response content from Responses API structure
+        response_content = ""
+        if response_data.get("output"):
+            # Look for the message output item (not reasoning)
+            for output_item in response_data["output"]:
+                if output_item.get("type") == "message" and output_item.get("content"):
+                    for content_item in output_item["content"]:
+                        if content_item.get("type") == "output_text":
+                            response_content = content_item.get("text", "")
+                            break
+                    if response_content:
+                        break
+        
         if self.debug:
             logger.debug("Response content: %s", response_content)
 
         # Calculate token usage
+        usage_data = response_data.get("usage", {})
         usage = LLMUsage.from_api_response(
             {
-                "prompt_tokens": completion_data["usage"]["prompt_tokens"],
-                "completion_tokens": completion_data["usage"]["completion_tokens"],
+                "prompt_tokens": usage_data.get("input_tokens", 0),
+                "completion_tokens": usage_data.get("output_tokens", 0),
                 "total_duration": duration_ms
             },
             model=model
@@ -227,7 +257,7 @@ def generate_chat(
     context: Optional[str] = None
 ) -> Response:
     """
-    Generate a chat response using OpenAI API.
+    Generate a chat response using OpenAI Responses API.
     
     Returns:
         Response containing response_text, structured_data, and usage
