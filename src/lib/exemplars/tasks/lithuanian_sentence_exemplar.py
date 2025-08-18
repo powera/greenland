@@ -107,11 +107,6 @@ def create_sentence_generation_schema() -> Schema:
                     "lithuanian": SchemaProperty("string", "Grammatically correct Lithuanian sentence with proper cases")
                 }
             ),
-            "grammar_notes": SchemaProperty(
-                type="array",
-                description="Notes about Lithuanian grammar applied",
-                items={"type": "string", "description": "Grammar rule or case applied"}
-            )
         }
     )
 
@@ -130,14 +125,9 @@ def create_sentence_prompt(subject: str, verb: str, obj: str, tense: str) -> str
     2. Use proper Lithuanian cases (nominative for subject, accusative for object)
     3. Conjugate the verb correctly for the subject and tense
     4. Provide both English and Lithuanian versions
-    5. Explain the grammar rules applied
     
     If this combination doesn't make logical sense, indicate that in your analysis.
-    
-    Example: "he" + "eat" + "banana" + "future" should become:
-    - English: "He will eat a banana."
-    - Lithuanian: "Jis valgys bananą." (jis=he/nominative, valgys=will eat/3rd person future, bananą=banana/accusative)
-    """
+   """
 
 # Register the exemplar
 register_exemplar(
