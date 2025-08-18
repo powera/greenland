@@ -6,3 +6,4 @@ import lib.exemplars.tasks.poker_scorer_exemplar
 import lib.exemplars.tasks.firefighter_dialogue_exemplar
 import lib.exemplars.tasks.zebra_puzzle_exemplar
 import lib.exemplars.tasks.wordfreq_translation_exemplar
+import lib.exemplars.tasks.lithuanian_sentence_exemplar
