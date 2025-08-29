@@ -1,6 +1,7 @@
 __pycache__/
 
 .ipynb*
+src/anaconda_projects/
 
 # vim temp files
 *.swp
@@ -15,6 +16,9 @@ dist/
 greenland.egg-info/
 .DS_Store
 devserver.spec
+
+# local input data
+input/
 
 # local datastores
 src/schema/benchmarks.db
