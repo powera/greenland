@@ -954,10 +954,15 @@ Word to analyze: {english_word}"""
             lemma.confidence = word_data.confidence
             lemma.verified = not auto_approve  # Mark as verified if user reviewed
             
-            # Add update note
+            # Add update note with LLM notes
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
             current_notes = lemma.notes or ""
             update_note = f"[{timestamp}] Updated with {model}"
+            
+            # Include LLM notes if available
+            if word_data.notes:
+                update_note += f": {word_data.notes}"
+            
             lemma.notes = f"{current_notes}\n{update_note}".strip()
             
             # Update derivative forms if needed
@@ -1003,6 +1008,66 @@ Word to analyze: {english_word}"""
                     verified=not auto_approve
                 )
                 session.add(lithuanian_form)
+            
+            # Add alternate forms (skip any with parentheses)
+            if word_data.alternatives:
+                # Process English alternatives
+                if 'english' in word_data.alternatives and word_data.alternatives['english']:
+                    for alt_form in word_data.alternatives['english']:
+                        # Skip forms with parentheses
+                        if '(' in alt_form or ')' in alt_form:
+                            continue
+                        
+                        # Check if this alternative form already exists
+                        existing_alt = session.query(DerivativeForm).filter(
+                            DerivativeForm.lemma_id == lemma.id,
+                            DerivativeForm.language_code == 'en',
+                            DerivativeForm.derivative_form_text == alt_form
+                        ).first()
+                        
+                        if not existing_alt:
+                            # Add the alternative form
+                            alt_token = add_word_token(session, alt_form, 'en')
+                            alt_derivative = DerivativeForm(
+                                lemma_id=lemma.id,
+                                derivative_form_text=alt_form,
+                                word_token_id=alt_token.id,
+                                language_code='en',
+                                grammatical_form=self._get_default_grammatical_form(word_data.pos_type),
+                                is_base_form=False,  # Alternative forms are not base forms
+                                verified=not auto_approve
+                            )
+                            session.add(alt_derivative)
+                            print(f"   Added English alternative: {alt_form}")
+                
+                # Process Lithuanian alternatives
+                if 'lithuanian' in word_data.alternatives and word_data.alternatives['lithuanian']:
+                    for alt_form in word_data.alternatives['lithuanian']:
+                        # Skip forms with parentheses
+                        if '(' in alt_form or ')' in alt_form:
+                            continue
+                        
+                        # Check if this alternative form already exists
+                        existing_alt = session.query(DerivativeForm).filter(
+                            DerivativeForm.lemma_id == lemma.id,
+                            DerivativeForm.language_code == 'lt',
+                            DerivativeForm.derivative_form_text == alt_form
+                        ).first()
+                        
+                        if not existing_alt:
+                            # Add the alternative form
+                            alt_token = add_word_token(session, alt_form, 'lt')
+                            alt_derivative = DerivativeForm(
+                                lemma_id=lemma.id,
+                                derivative_form_text=alt_form,
+                                word_token_id=alt_token.id,
+                                language_code='lt',
+                                grammatical_form=self._get_default_grammatical_form(word_data.pos_type),
+                                is_base_form=False,  # Alternative forms are not base forms
+                                verified=not auto_approve
+                            )
+                            session.add(alt_derivative)
+                            print(f"   Added Lithuanian alternative: {alt_form}")
             
             session.commit()
             
