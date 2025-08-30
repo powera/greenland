@@ -626,45 +626,29 @@ Word to analyze: {english_word}"""
         Returns:
             Success flag
         """
-        if not output_path:
-            output_path = Path(GREENLAND_SRC_PATH) / "wordfreq" / "trakaido" / "exported_nouns.json"
+        from wordfreq.trakaido.export_utils import TrakaideExporter
         
-        session = self.get_session()
+        if not output_path:
+            output_path = str(Path(GREENLAND_SRC_PATH) / "wordfreq" / "trakaido" / "exported_nouns.json")
+        
         try:
-            # Get all lemmas with GUIDs, ordered by GUID
-            lemmas = session.query(Lemma).filter(
-                Lemma.guid.isnot(None)
-            ).order_by(Lemma.guid).all()
+            exporter = TrakaideExporter(db_path=self.db_path, debug=self.debug)
+            success, stats = exporter.export_to_json(
+                output_path=output_path,
+                include_without_guid=False,  # Only include words with GUIDs
+                include_unverified=True,     # Include unverified entries
+                pretty_print=True
+            )
             
-            export_data = []
-            for lemma in lemmas:
-                # Convert POS type to match existing format
-                pos_display = lemma.pos_type
-                if lemma.pos_type in ['noun', 'verb', 'adjective', 'adverb']:
-                    pos_display = lemma.pos_type
-                
-                entry = {
-                    "English": lemma.lemma_text,
-                    "Lithuanian": lemma.lithuanian_translation or "",
-                    "GUID": lemma.guid,
-                    "trakaido_level": lemma.difficulty_level or 1,
-                    "POS": pos_display,
-                    "subtype": lemma.pos_subtype or ""
-                }
-                export_data.append(entry)
+            if success and stats:
+                logger.info(f"Exported {stats.total_entries} words to {output_path}")
+                logger.info(f"Entries with GUIDs: {stats.entries_with_guids}")
             
-            # Write to JSON file
-            with open(output_path, 'w', encoding='utf-8') as f:
-                json.dump(export_data, f, indent=2, ensure_ascii=False)
-            
-            logger.info(f"Exported {len(export_data)} words to {output_path}")
-            return True
+            return success
             
         except Exception as e:
             logger.error(f"Error exporting to JSON: {e}")
             return False
-        finally:
-            session.close()
     
     def export_to_lang_lt(self, output_dir: Optional[str] = None) -> bool:
         """
@@ -676,55 +660,25 @@ Word to analyze: {english_word}"""
         Returns:
             Success flag
         """
+        from wordfreq.trakaido.export_utils import TrakaideExporter
+        
+        if not output_dir:
+            output_dir = '/Users/powera/repo/greenland/data/trakaido_wordlists/lang_lt/generated'
+        
         try:
-            # Import dict_generator functions
-            from wordfreq.trakaido.dict_generator import (
-                generate_structure_file,
-                generate_dictionary_file
-            )
+            exporter = TrakaideExporter(db_path=self.db_path, debug=self.debug)
+            success, results = exporter.export_to_lang_lt(output_dir)
             
-            if not output_dir:
-                output_dir = '/Users/powera/repo/greenland/data/trakaido_wordlists/lang_lt/generated'
+            if success:
+                levels_generated = results.get('levels_generated', [])
+                dictionaries_generated = results.get('dictionaries_generated', [])
+                
+                print(f"\n✅ Export to lang_lt completed:")
+                print(f"   Structure files: {len(levels_generated)} levels")
+                print(f"   Dictionary files: {len(dictionaries_generated)} subtypes")
+                print(f"   Output directory: {output_dir}")
             
-            session = self.get_session()
-            
-            # Generate structure files for each level
-            levels_generated = []
-            for level in range(1, 21):  # Levels 1-20
-                try:
-                    filepath = generate_structure_file(session, level, output_dir)
-                    if filepath:
-                        levels_generated.append(level)
-                        logger.info(f"Generated structure file for level {level}")
-                except Exception as e:
-                    logger.warning(f"Failed to generate structure file for level {level}: {e}")
-            
-            # Generate dictionary files for each subtype
-            subtypes = session.query(Lemma.pos_subtype).filter(
-                Lemma.pos_subtype.isnot(None),
-                Lemma.guid.isnot(None)
-            ).distinct().all()
-            
-            dictionaries_generated = []
-            for subtype_tuple in subtypes:
-                subtype = subtype_tuple[0]
-                if subtype:
-                    try:
-                        filepath = generate_dictionary_file(session, subtype, output_dir)
-                        if filepath:
-                            dictionaries_generated.append(subtype)
-                            logger.info(f"Generated dictionary file for {subtype}")
-                    except Exception as e:
-                        logger.warning(f"Failed to generate dictionary file for {subtype}: {e}")
-            
-            session.close()
-            
-            print(f"\n✅ Export to lang_lt completed:")
-            print(f"   Structure files: {len(levels_generated)} levels")
-            print(f"   Dictionary files: {len(dictionaries_generated)} subtypes")
-            print(f"   Output directory: {output_dir}")
-            
-            return len(levels_generated) > 0 or len(dictionaries_generated) > 0
+            return success
             
         except Exception as e:
             logger.error(f"Error exporting to lang_lt: {e}")
