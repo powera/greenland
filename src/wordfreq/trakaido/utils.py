@@ -892,7 +892,8 @@ Word to analyze: {english_word}"""
                 'french_translation': lemma.french_translation,
                 'swahili_translation': lemma.swahili_translation,
                 'vietnamese_translation': lemma.vietnamese_translation,
-                'confidence': lemma.confidence
+                'confidence': lemma.confidence,
+                'notes': lemma.notes
             }
             
             # Update all fields
@@ -963,6 +964,9 @@ Word to analyze: {english_word}"""
                 )
                 session.add(lithuanian_form)
             
+            # Track alternate forms that will be added
+            added_alternatives = {'english': [], 'lithuanian': []}
+            
             # Add alternate forms (skip any with parentheses)
             if word_data.alternatives:
                 # Process English alternatives
@@ -992,7 +996,7 @@ Word to analyze: {english_word}"""
                                 verified=not auto_approve
                             )
                             session.add(alt_derivative)
-                            print(f"   Added English alternative: {alt_form}")
+                            added_alternatives['english'].append(alt_form)
                 
                 # Process Lithuanian alternatives
                 if 'lithuanian' in word_data.alternatives and word_data.alternatives['lithuanian']:
@@ -1021,7 +1025,7 @@ Word to analyze: {english_word}"""
                                 verified=not auto_approve
                             )
                             session.add(alt_derivative)
-                            print(f"   Added Lithuanian alternative: {alt_form}")
+                            added_alternatives['lithuanian'].append(alt_form)
             
             session.commit()
             
@@ -1033,6 +1037,12 @@ Word to analyze: {english_word}"""
                 new_value = getattr(lemma, field)
                 if old_value != new_value:
                     changes.append(f"   {field}: '{old_value}' → '{new_value}'")
+            
+            # Add information about added alternate forms
+            if added_alternatives['english']:
+                changes.append(f"   Added English alternatives: {', '.join(added_alternatives['english'])}")
+            if added_alternatives['lithuanian']:
+                changes.append(f"   Added Lithuanian alternatives: {', '.join(added_alternatives['lithuanian'])}")
             
             if changes:
                 print("Changes made:")
