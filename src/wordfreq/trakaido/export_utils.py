@@ -500,7 +500,7 @@ class TrakaidoExporter:
         **json_kwargs
     ) -> Tuple[bool, Dict[str, Any]]:
         """
-        Export to both JSON and lang_lt formats.
+        Export to JSON, lang_lt, and text formats.
         
         Args:
             json_path: Path for JSON export
@@ -515,6 +515,9 @@ class TrakaidoExporter:
         json_success, json_stats = self.export_to_json(json_path, **json_kwargs)
         lang_lt_success, lang_lt_results = self.export_to_lang_lt(lang_lt_dir)
         
+        # Export text files for all subtypes to lang_lt/generated/simple
+        text_success, text_results = self.export_all_text_files(lang_lt_dir)
+        
         results = {
             'json_export': {
                 'success': json_success,
@@ -526,20 +529,142 @@ class TrakaidoExporter:
                 'results': lang_lt_results,
                 'directory': lang_lt_dir
             },
-            'overall_success': json_success and lang_lt_success,
+            'text_export': {
+                'success': text_success,
+                'results': text_results,
+                'directory': f"{lang_lt_dir}/simple"
+            },
+            'overall_success': json_success and lang_lt_success and text_success,
             'export_time': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         }
         
-        if json_success and lang_lt_success:
+        if json_success and lang_lt_success and text_success:
             logger.info("✅ Full export completed successfully!")
-        elif json_success:
-            logger.warning("⚠️  JSON export succeeded, but lang_lt export failed")
-        elif lang_lt_success:
-            logger.warning("⚠️  lang_lt export succeeded, but JSON export failed")
         else:
-            logger.error("❌ Both exports failed")
+            failed_exports = []
+            if not json_success:
+                failed_exports.append("JSON")
+            if not lang_lt_success:
+                failed_exports.append("lang_lt")
+            if not text_success:
+                failed_exports.append("text")
+            
+            if len(failed_exports) == 3:
+                logger.error("❌ All exports failed")
+            else:
+                successful_exports = []
+                if json_success:
+                    successful_exports.append("JSON")
+                if lang_lt_success:
+                    successful_exports.append("lang_lt")
+                if text_success:
+                    successful_exports.append("text")
+                
+                logger.warning(f"⚠️  {', '.join(successful_exports)} export(s) succeeded, but {', '.join(failed_exports)} export(s) failed")
         
         return results['overall_success'], results
+    
+    def export_all_text_files(self, lang_lt_dir: str) -> Tuple[bool, Dict[str, Any]]:
+        """
+        Export text files for all available subtypes to lang_lt/generated/simple directory.
+        
+        Args:
+            lang_lt_dir: Base lang_lt directory
+            
+        Returns:
+            Tuple of (success flag, results dictionary)
+        """
+        logger.info("Starting text exports for all subtypes...")
+        
+        session = self.get_session()
+        try:
+            # Get all unique subtypes from the database
+            from sqlalchemy import func
+            
+            subtypes_query = session.query(
+                Lemma.pos_subtype,
+                func.count(Lemma.id).label('count')
+            ).filter(
+                Lemma.pos_subtype.isnot(None),
+                Lemma.pos_subtype != '',
+                Lemma.lithuanian_translation.isnot(None),
+                Lemma.lithuanian_translation != ''
+            ).group_by(
+                Lemma.pos_subtype
+            ).order_by(
+                Lemma.pos_subtype
+            )
+            
+            subtypes_data = subtypes_query.all()
+            
+            if not subtypes_data:
+                logger.warning("No subtypes found for text export")
+                return False, {'subtypes_exported': [], 'files_created': []}
+            
+            logger.info(f"Found {len(subtypes_data)} subtypes to export")
+            
+            # Create the simple directory
+            simple_dir = os.path.join(lang_lt_dir, 'simple')
+            os.makedirs(simple_dir, exist_ok=True)
+            
+            results = {
+                'subtypes_exported': [],
+                'files_created': [],
+                'failed_exports': [],
+                'total_entries': 0
+            }
+            
+            # Export each subtype
+            for subtype, count in subtypes_data:
+                logger.info(f"Exporting subtype '{subtype}' ({count} entries)...")
+                
+                # Create filename: subtype.txt
+                filename = f"{subtype}.txt"
+                output_path = os.path.join(simple_dir, filename)
+                
+                # Export this subtype
+                success, stats = self.export_to_text(
+                    output_path=output_path,
+                    pos_subtype=subtype,
+                    include_without_guid=False,  # Only include words with GUIDs
+                    include_unverified=True      # Include unverified entries
+                )
+                
+                if success and stats:
+                    results['subtypes_exported'].append({
+                        'subtype': subtype,
+                        'count': stats.total_entries,
+                        'entries_with_guids': stats.entries_with_guids,
+                        'filename': filename
+                    })
+                    results['files_created'].append(output_path)
+                    results['total_entries'] += stats.total_entries
+                    logger.info(f"✅ Exported {stats.total_entries} entries for '{subtype}' to {filename}")
+                else:
+                    results['failed_exports'].append(subtype)
+                    logger.error(f"❌ Failed to export subtype '{subtype}'")
+            
+            # Summary
+            successful_count = len(results['subtypes_exported'])
+            failed_count = len(results['failed_exports'])
+            
+            if successful_count > 0:
+                logger.info(f"✅ Text export completed: {successful_count} subtypes exported, {results['total_entries']} total entries")
+                logger.info(f"Files created in: {simple_dir}")
+                
+                if failed_count > 0:
+                    logger.warning(f"⚠️  {failed_count} subtypes failed to export: {', '.join(results['failed_exports'])}")
+                
+                return True, results
+            else:
+                logger.error("❌ No subtypes were successfully exported")
+                return False, results
+                
+        except Exception as e:
+            logger.error(f"Error during text export: {e}")
+            return False, {'error': str(e), 'subtypes_exported': [], 'files_created': []}
+        finally:
+            session.close()
 
 # Convenience functions for backward compatibility
 def export_trakaido_data(
