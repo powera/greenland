@@ -8,16 +8,18 @@ a single, maintainable library.
 
 Features:
 - Export to JSON format (compatible with migrate_static_data.py)
+- Export to simple text format with just "en" and "lt" keys
 - Export to lang_lt directory structure
 - Flexible filtering by level, POS type, subtype, etc.
 - Statistics and validation
 - Consistent formatting and error handling
 
 Usage:
-    from wordfreq.trakaido.export_utils import TrakaideExporter
+    from wordfreq.trakaido.export_utils import TrakaidoExporter
     
-    exporter = TrakaideExporter()
+    exporter = TrakaidoExporter()
     exporter.export_to_json("output.json", level=1)
+    exporter.export_to_text("clothing.json", pos_subtype="clothing")
     exporter.export_to_lang_lt("/path/to/output")
 """
 
@@ -46,12 +48,12 @@ class ExportStats:
     skipped_entries: int = 0
     export_time: Optional[str] = None
 
-class TrakaideExporter:
+class TrakaidoExporter:
     """Main class for exporting trakaido data in various formats."""
     
     def __init__(self, db_path: str = None, debug: bool = False):
         """
-        Initialize the TrakaideExporter.
+        Initialize the TrakaidoExporter.
         
         Args:
             db_path: Database path (uses default if None)
@@ -336,6 +338,88 @@ class TrakaideExporter:
         finally:
             session.close()
     
+    def export_to_text(
+        self,
+        output_path: str,
+        pos_subtype: str,
+        difficulty_level: Optional[int] = None,
+        include_without_guid: bool = False,
+        include_unverified: bool = True
+    ) -> Tuple[bool, Optional[ExportStats]]:
+        """
+        Export trakaido data to simple text format with just "en" and "lt" keys.
+        
+        Args:
+            output_path: Path to write the text file
+            pos_subtype: Specific POS subtype to export (required)
+            difficulty_level: Filter by specific difficulty level (optional)
+            include_without_guid: Include lemmas without GUIDs (default: False)
+            include_unverified: Include unverified entries (default: True)
+            
+        Returns:
+            Tuple of (success flag, export statistics)
+        """
+        session = self.get_session()
+        try:
+            # Query the data for the specific subtype
+            export_data = self.query_trakaido_data(
+                session=session,
+                difficulty_level=difficulty_level,
+                pos_subtype=pos_subtype,
+                include_without_guid=include_without_guid,
+                include_unverified=include_unverified
+            )
+            
+            if not export_data:
+                logger.warning(f"No data found for subtype '{pos_subtype}' matching the specified criteria")
+                return False, None
+            
+            # Convert to simple text format
+            text_data = []
+            for entry in export_data:
+                text_entry = {
+                    "en": entry["English"],
+                    "lt": entry["Lithuanian"]
+                }
+                text_data.append(text_entry)
+            
+            # Write to file
+            try:
+                # Ensure the directory exists
+                os.makedirs(os.path.dirname(output_path), exist_ok=True)
+                
+                with open(output_path, 'w', encoding='utf-8') as f:
+                    # Write as JSON array with nice formatting
+                    f.write('[\n')
+                    for i, entry in enumerate(text_data):
+                        line = json.dumps(entry, ensure_ascii=False, separators=(', ', ': '))
+                        if i < len(text_data) - 1:
+                            f.write(f'  {line},\n')
+                        else:
+                            f.write(f'  {line}\n')
+                    f.write(']\n')
+                
+                # Calculate statistics from original data
+                stats = self.calculate_export_stats(export_data)
+                
+                logger.info(f"✅ Successfully wrote {len(text_data)} entries to {output_path}")
+                logger.info(f"Subtype: {pos_subtype}")
+                logger.info(f"Entries with GUIDs: {stats.entries_with_guids}/{stats.total_entries}")
+                if difficulty_level is not None:
+                    logger.info(f"Difficulty level: {difficulty_level}")
+                
+                return True, stats
+                
+            except Exception as e:
+                logger.error(f"❌ Failed to write text file: {e}")
+                return False, None
+            
+        except Exception as e:
+            logger.error(f"Export to text failed: {e}")
+            return False, None
+        finally:
+            session.close()
+
     def export_to_lang_lt(self, output_dir: str) -> Tuple[bool, Dict[str, Any]]:
         """
         Export words to lang_lt directory structure using dict_generator.
@@ -478,7 +562,7 @@ def export_trakaido_data(
     Returns:
         List of dictionaries with trakaido data
     """
-    exporter = TrakaideExporter()
+    exporter = TrakaidoExporter()
     return exporter.query_trakaido_data(
         session=session,
         difficulty_level=difficulty_level,
@@ -495,7 +579,7 @@ def write_json_file(data: List[Dict[str, Any]], output_path: str) -> None:
         data: List of dictionaries to export
         output_path: Path to write the JSON file
     """
-    exporter = TrakaideExporter()
+    exporter = TrakaidoExporter()
     exporter.write_json_file(data, output_path, pretty_print=True)
 
 def get_english_word_from_lemma(session, lemma: Lemma) -> Optional[str]:
@@ -509,5 +593,5 @@ def get_english_word_from_lemma(session, lemma: Lemma) -> Optional[str]:
     Returns:
         English word string or None if not found
     """
-    exporter = TrakaideExporter()
+    exporter = TrakaidoExporter()
     return exporter.get_english_word_from_lemma(session, lemma)

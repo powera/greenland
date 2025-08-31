@@ -12,6 +12,7 @@ Features:
 - Interactive user review and approval process
 - GUID generation and management
 - Integration with existing database schema
+- Export functionality (JSON, text, lang_lt formats)
 
 Usage:
     from wordfreq.trakaido.utils import WordManager
@@ -20,33 +21,37 @@ Usage:
     manager.add_word("example")
     manager.set_level("N07_008", 2)
     manager.move_words_by_subtype_and_level(8, "clothing", 14)
+    manager.export_to_text("clothing.json", "clothing")
 """
 
-import json
+# Standard library imports
 import logging
 import sys
-from datetime import datetime
-from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
 
 # Add the src directory to the path for imports
 GREENLAND_SRC_PATH = '/Users/powera/repo/greenland/src'
 sys.path.append(GREENLAND_SRC_PATH)
 
-from wordfreq.storage.database import (
-    create_database_session,
-    add_word_token,
-    get_subtype_values_for_pos,
-    SUBTYPE_GUID_PREFIXES
-)
-from wordfreq.storage.models.schema import Lemma, DerivativeForm, WordToken
-from wordfreq.storage.models.enums import GrammaticalForm
-from wordfreq.translation.client import LinguisticClient
-from clients.unified_client import UnifiedLLMClient
-from clients.types import Schema, SchemaProperty
-import util.prompt_loader
+# Local application imports
 import constants
+import util.prompt_loader
+from clients.types import Schema, SchemaProperty
+from clients.unified_client import UnifiedLLMClient
+from wordfreq.storage.database import (
+    SUBTYPE_GUID_PREFIXES,
+    add_word_token,
+    create_database_session,
+    get_subtype_values_for_pos,
+)
+from wordfreq.storage.models.enums import GrammaticalForm
+from wordfreq.storage.models.schema import DerivativeForm, Lemma, WordToken
+from wordfreq.translation.client import LinguisticClient
+from wordfreq.trakaido.export_utils import TrakaidoExporter
+
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -626,13 +631,12 @@ Word to analyze: {english_word}"""
         Returns:
             Success flag
         """
-        from wordfreq.trakaido.export_utils import TrakaideExporter
         
         if not output_path:
             output_path = str(Path(GREENLAND_SRC_PATH) / "wordfreq" / "trakaido" / "exported_nouns.json")
         
         try:
-            exporter = TrakaideExporter(db_path=self.db_path, debug=self.debug)
+            exporter = TrakaidoExporter(db_path=self.db_path, debug=self.debug)
             success, stats = exporter.export_to_json(
                 output_path=output_path,
                 include_without_guid=False,  # Only include words with GUIDs
@@ -660,13 +664,12 @@ Word to analyze: {english_word}"""
         Returns:
             Success flag
         """
-        from wordfreq.trakaido.export_utils import TrakaideExporter
         
         if not output_dir:
             output_dir = '/Users/powera/repo/greenland/data/trakaido_wordlists/lang_lt/generated'
         
         try:
-            exporter = TrakaideExporter(db_path=self.db_path, debug=self.debug)
+            exporter = TrakaidoExporter(db_path=self.db_path, debug=self.debug)
             success, results = exporter.export_to_lang_lt(output_dir)
             
             if success:
@@ -682,6 +685,52 @@ Word to analyze: {english_word}"""
             
         except Exception as e:
             logger.error(f"Error exporting to lang_lt: {e}")
+            return False
+    
+    def export_to_text(
+        self, 
+        output_path: str, 
+        pos_subtype: str,
+        difficulty_level: Optional[int] = None,
+        include_without_guid: bool = False,
+        include_unverified: bool = True
+    ) -> bool:
+        """
+        Export words to simple text format with just "en" and "lt" keys for a specific subtype.
+        
+        Args:
+            output_path: Path to write the text file
+            pos_subtype: Specific POS subtype to export (required)
+            difficulty_level: Filter by specific difficulty level (optional)
+            include_without_guid: Include lemmas without GUIDs (default: False)
+            include_unverified: Include unverified entries (default: True)
+            
+        Returns:
+            Success flag
+        """
+        
+        try:
+            exporter = TrakaidoExporter(db_path=self.db_path, debug=self.debug)
+            success, stats = exporter.export_to_text(
+                output_path=output_path,
+                pos_subtype=pos_subtype,
+                difficulty_level=difficulty_level,
+                include_without_guid=include_without_guid,
+                include_unverified=include_unverified
+            )
+            
+            if success and stats:
+                print(f"\n✅ Text export completed:")
+                print(f"   Exported {stats.total_entries} words for subtype '{pos_subtype}'")
+                print(f"   Entries with GUIDs: {stats.entries_with_guids}")
+                if difficulty_level is not None:
+                    print(f"   Difficulty level: {difficulty_level}")
+                print(f"   Output file: {output_path}")
+            
+            return success
+            
+        except Exception as e:
+            logger.error(f"Error exporting to text: {e}")
             return False
     
     def export_all(self, json_path: Optional[str] = None, lang_lt_dir: Optional[str] = None) -> bool:
@@ -1119,6 +1168,16 @@ def main():
     lang_lt_parser = export_subparsers.add_parser('lang-lt', help='Export to lang_lt directory structure')
     lang_lt_parser.add_argument('--output-dir', help='Output directory path')
     
+    # Export to text
+    text_parser = export_subparsers.add_parser('text', help='Export to simple text format for specific subtype')
+    text_parser.add_argument('subtype', help='POS subtype to export (required)')
+    text_parser.add_argument('--output', help='Output text file path')
+    text_parser.add_argument('--level', type=int, help='Filter by specific difficulty level')
+    text_parser.add_argument('--include-without-guid', action='store_true', 
+                            help='Include lemmas without GUIDs')
+    text_parser.add_argument('--include-unverified', action='store_true', default=True,
+                            help='Include unverified entries (default: True)')
+    
     # Export all
     all_parser = export_subparsers.add_parser('all', help='Export to both JSON and lang_lt')
     all_parser.add_argument('--json-output', help='JSON output file path')
@@ -1190,6 +1249,21 @@ def main():
         
         elif args.export_type == 'lang-lt':
             success = manager.export_to_lang_lt(args.output_dir)
+            sys.exit(0 if success else 1)
+        
+        elif args.export_type == 'text':
+            # Generate default output filename if not provided
+            output_path = args.output
+            if not output_path:
+                output_path = f"{args.subtype}.txt"
+            
+            success = manager.export_to_text(
+                output_path=output_path,
+                pos_subtype=args.subtype,
+                difficulty_level=args.level,
+                include_without_guid=args.include_without_guid,
+                include_unverified=args.include_unverified
+            )
             sys.exit(0 if success else 1)
         
         elif args.export_type == 'all':
