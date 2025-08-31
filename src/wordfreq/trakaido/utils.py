@@ -12,16 +12,19 @@ Features:
 - Interactive user review and approval process
 - GUID generation and management
 - Integration with existing database schema
-- Export functionality (JSON, text, lang_lt formats)
 
 Usage:
     from wordfreq.trakaido.utils import WordManager
+    from wordfreq.trakaido.export_utils import TrakaidoExporter
     
     manager = WordManager()
     manager.add_word("example")
     manager.set_level("N07_008", 2)
     manager.move_words_by_subtype_and_level(8, "clothing", 14)
-    manager.export_to_text("clothing.json", "clothing")
+    
+    # For export functionality, use TrakaidoExporter
+    exporter = TrakaidoExporter()
+    exporter.export_to_text("clothing.txt", "clothing")
 """
 
 # Standard library imports
@@ -664,146 +667,7 @@ Word to analyze: {english_word}"""
         finally:
             session.close()
     
-    def export_to_json(self, output_path: Optional[str] = None) -> bool:
-        """
-        Export all trakaido words to JSON format (like exported_nouns.json).
-        
-        Args:
-            output_path: Path to output JSON file (uses default if None)
-            
-        Returns:
-            Success flag
-        """
-        
-        if not output_path:
-            output_path = str(Path(GREENLAND_SRC_PATH) / "wordfreq" / "trakaido" / "exported_nouns.json")
-        
-        try:
-            exporter = TrakaidoExporter(db_path=self.db_path, debug=self.debug)
-            success, stats = exporter.export_to_json(
-                output_path=output_path,
-                include_without_guid=False,  # Only include words with GUIDs
-                include_unverified=True,     # Include unverified entries
-                pretty_print=True
-            )
-            
-            if success and stats:
-                logger.info(f"Exported {stats.total_entries} words to {output_path}")
-                logger.info(f"Entries with GUIDs: {stats.entries_with_guids}")
-            
-            return success
-            
-        except Exception as e:
-            logger.error(f"Error exporting to JSON: {e}")
-            return False
-    
-    def export_to_lang_lt(self, output_dir: Optional[str] = None) -> bool:
-        """
-        Export words to lang_lt directory structure using dict_generator.
-        
-        Args:
-            output_dir: Output directory (uses default if None)
-            
-        Returns:
-            Success flag
-        """
-        
-        if not output_dir:
-            output_dir = f'{GREENLAND_SRC_PATH}/../data/trakaido_wordlists/lang_lt/generated'
-        
-        try:
-            exporter = TrakaidoExporter(db_path=self.db_path, debug=self.debug)
-            success, results = exporter.export_to_lang_lt(output_dir)
-            
-            if success:
-                levels_generated = results.get('levels_generated', [])
-                dictionaries_generated = results.get('dictionaries_generated', [])
-                
-                print(f"\n✅ Export to lang_lt completed:")
-                print(f"   Structure files: {len(levels_generated)} levels")
-                print(f"   Dictionary files: {len(dictionaries_generated)} subtypes")
-                print(f"   Output directory: {output_dir}")
-            
-            return success
-            
-        except Exception as e:
-            logger.error(f"Error exporting to lang_lt: {e}")
-            return False
-    
-    def export_to_text(
-        self, 
-        output_path: str, 
-        pos_subtype: str,
-        difficulty_level: Optional[int] = None,
-        include_without_guid: bool = False,
-        include_unverified: bool = True
-    ) -> bool:
-        """
-        Export words to simple text format with just "en" and "lt" keys for a specific subtype.
-        
-        Args:
-            output_path: Path to write the text file
-            pos_subtype: Specific POS subtype to export (required)
-            difficulty_level: Filter by specific difficulty level (optional)
-            include_without_guid: Include lemmas without GUIDs (default: False)
-            include_unverified: Include unverified entries (default: True)
-            
-        Returns:
-            Success flag
-        """
-        
-        try:
-            exporter = TrakaidoExporter(db_path=self.db_path, debug=self.debug)
-            success, stats = exporter.export_to_text(
-                output_path=output_path,
-                pos_subtype=pos_subtype,
-                difficulty_level=difficulty_level,
-                include_without_guid=include_without_guid,
-                include_unverified=include_unverified
-            )
-            
-            if success and stats:
-                print(f"\n✅ Text export completed:")
-                print(f"   Exported {stats.total_entries} words for subtype '{pos_subtype}'")
-                print(f"   Entries with GUIDs: {stats.entries_with_guids}")
-                if difficulty_level is not None:
-                    print(f"   Difficulty level: {difficulty_level}")
-                print(f"   Output file: {output_path}")
-            
-            return success
-            
-        except Exception as e:
-            logger.error(f"Error exporting to text: {e}")
-            return False
-    
-    def export_all(self, json_path: Optional[str] = None, lang_lt_dir: Optional[str] = None) -> bool:
-        """
-        Export to both JSON and lang_lt formats.
-        
-        Args:
-            json_path: Path for JSON export
-            lang_lt_dir: Directory for lang_lt export
-            
-        Returns:
-            Success flag
-        """
-        print("Starting full export...")
-        
-        json_success = self.export_to_json(json_path)
-        lang_lt_success = self.export_to_lang_lt(lang_lt_dir)
-        
-        if json_success and lang_lt_success:
-            print("\n✅ Full export completed successfully!")
-            return True
-        elif json_success:
-            print("\n⚠️  JSON export succeeded, but lang_lt export failed")
-            return False
-        elif lang_lt_success:
-            print("\n⚠️  lang_lt export succeeded, but JSON export failed")
-            return False
-        else:
-            print("\n❌ Both exports failed")
-            return False
+
     
     def move_words_by_subtype_and_level(self, from_level: int, subtype: str, to_level: int, 
                                        reason: str = "", dry_run: bool = False) -> bool:
@@ -1300,12 +1164,45 @@ def main():
             export_parser.print_help()
             sys.exit(1)
         
+        # Create TrakaidoExporter instance for export operations
+        exporter = TrakaidoExporter(db_path=manager.db_path, debug=manager.debug)
+        
         if args.export_type == 'json':
-            success = manager.export_to_json(args.output)
+            # Use default path if not provided
+            output_path = args.output
+            if not output_path:
+                output_path = str(Path(GREENLAND_SRC_PATH) / "wordfreq" / "trakaido" / "exported_nouns.json")
+            
+            success, stats = exporter.export_to_json(
+                output_path=output_path,
+                include_without_guid=False,  # Only include words with GUIDs
+                include_unverified=True,     # Include unverified entries
+                pretty_print=True
+            )
+            
+            if success and stats:
+                logger.info(f"Exported {stats.total_entries} words to {output_path}")
+                logger.info(f"Entries with GUIDs: {stats.entries_with_guids}")
+            
             sys.exit(0 if success else 1)
         
         elif args.export_type == 'lang-lt':
-            success = manager.export_to_lang_lt(args.output_dir)
+            # Use default directory if not provided
+            output_dir = args.output_dir
+            if not output_dir:
+                output_dir = f'{GREENLAND_SRC_PATH}/../data/trakaido_wordlists/lang_lt/generated'
+            
+            success, results = exporter.export_to_lang_lt(output_dir)
+            
+            if success:
+                levels_generated = results.get('levels_generated', [])
+                dictionaries_generated = results.get('dictionaries_generated', [])
+                
+                print(f"\n✅ Export to lang_lt completed:")
+                print(f"   Structure files: {len(levels_generated)} levels")
+                print(f"   Dictionary files: {len(dictionaries_generated)} subtypes")
+                print(f"   Output directory: {output_dir}")
+            
             sys.exit(0 if success else 1)
         
         elif args.export_type == 'text':
@@ -1317,17 +1214,35 @@ def main():
             # Convert to absolute path to avoid issues with directory creation
             output_path = str(Path(output_path).resolve())
             
-            success = manager.export_to_text(
+            success, stats = exporter.export_to_text(
                 output_path=output_path,
                 pos_subtype=args.subtype,
                 difficulty_level=args.level,
                 include_without_guid=args.include_without_guid,
                 include_unverified=args.include_unverified
             )
+            
+            if success and stats:
+                print(f"\n✅ Text export completed:")
+                print(f"   Exported {stats.total_entries} words for subtype '{args.subtype}'")
+                print(f"   Entries with GUIDs: {stats.entries_with_guids}")
+                if args.level is not None:
+                    print(f"   Difficulty level: {args.level}")
+                print(f"   Output file: {output_path}")
+            
             sys.exit(0 if success else 1)
         
         elif args.export_type == 'all':
-            success = manager.export_all(args.json_output, args.lang_lt_dir)
+            # Use default paths if not provided
+            json_path = args.json_output
+            if not json_path:
+                json_path = str(Path(GREENLAND_SRC_PATH) / "wordfreq" / "trakaido" / "exported_nouns.json")
+            
+            lang_lt_dir = args.lang_lt_dir
+            if not lang_lt_dir:
+                lang_lt_dir = f'{GREENLAND_SRC_PATH}/../data/trakaido_wordlists/lang_lt/generated'
+            
+            success, results = exporter.export_all(json_path, lang_lt_dir)
             sys.exit(0 if success else 1)
 
 if __name__ == '__main__':
