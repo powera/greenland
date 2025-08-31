@@ -85,7 +85,7 @@ class ReviewResult:
 class WordManager:
     """Main class for managing trakaido words."""
     
-    def __init__(self, model: str = "gpt-4o-mini", db_path: str = None, debug: bool = False):
+    def __init__(self, model: str = "gpt-5-mini", db_path: str = None, debug: bool = False):
         """
         Initialize the WordManager.
         
@@ -621,6 +621,49 @@ Word to analyze: {english_word}"""
         finally:
             session.close()
     
+    def list_subtypes(self) -> List[Dict[str, Any]]:
+        """
+        List all subtypes with their POS type and word counts.
+        
+        Returns:
+            List of dictionaries with subtype information
+        """
+        session = self.get_session()
+        try:
+            # Query to get counts by pos_type and pos_subtype
+            from sqlalchemy import func
+            
+            query = session.query(
+                Lemma.pos_type,
+                Lemma.pos_subtype,
+                func.count(Lemma.id).label('count')
+            ).filter(
+                Lemma.pos_subtype.isnot(None),
+                Lemma.pos_subtype != ''
+            ).group_by(
+                Lemma.pos_type,
+                Lemma.pos_subtype
+            ).order_by(
+                Lemma.pos_type,
+                Lemma.pos_subtype
+            )
+            
+            results = []
+            for pos_type, pos_subtype, count in query.all():
+                results.append({
+                    'pos_type': pos_type,
+                    'pos_subtype': pos_subtype,
+                    'count': count
+                })
+            
+            return results
+            
+        except Exception as e:
+            logger.error(f"Error listing subtypes: {e}")
+            return []
+        finally:
+            session.close()
+    
     def export_to_json(self, output_path: Optional[str] = None) -> bool:
         """
         Export all trakaido words to JSON format (like exported_nouns.json).
@@ -666,7 +709,7 @@ Word to analyze: {english_word}"""
         """
         
         if not output_dir:
-            output_dir = '/Users/powera/repo/greenland/data/trakaido_wordlists/lang_lt/generated'
+            output_dir = f'{GREENLAND_SRC_PATH}/../data/trakaido_wordlists/lang_lt/generated'
         
         try:
             exporter = TrakaidoExporter(db_path=self.db_path, debug=self.debug)
@@ -860,7 +903,7 @@ Word to analyze: {english_word}"""
         finally:
             session.close()
     
-    def update_word(self, identifier: str, auto_approve: bool = False, model: str = "gpt-5-nano") -> bool:
+    def update_word(self, identifier: str, auto_approve: bool = False, model: str = "gpt-5-mini") -> bool:
         """
         Update an entire Lemma entry using specified model.
         
@@ -1125,7 +1168,7 @@ def main():
     add_parser.add_argument('--level', type=int, help='Difficulty level (1-20)')
     add_parser.add_argument('--auto-approve', action='store_true', 
                            help='Skip user review')
-    add_parser.add_argument('--model', default='gpt-4o-mini', 
+    add_parser.add_argument('--model', default='gpt-5-mini', 
                            help='LLM model to use')
     
     # Set level command
@@ -1139,7 +1182,7 @@ def main():
     update_parser.add_argument('identifier', help='GUID or English word to update')
     update_parser.add_argument('--auto-approve', action='store_true', 
                               help='Skip user review')
-    update_parser.add_argument('--model', default='gpt-5-nano', 
+    update_parser.add_argument('--model', default='gpt-5-mini', 
                               help='LLM model to use')
     
     # Move words by subtype and level command
@@ -1155,6 +1198,9 @@ def main():
     list_parser.add_argument('--level', type=int, help='Filter by difficulty level')
     list_parser.add_argument('--subtype', help='Filter by POS subtype')
     list_parser.add_argument('--limit', type=int, default=50, help='Maximum results')
+    
+    # List subtypes command
+    subtypes_parser = subparsers.add_parser('subtypes', help='List all subtypes with counts')
     
     # Export commands
     export_parser = subparsers.add_parser('export', help='Export words to files')
@@ -1189,7 +1235,7 @@ def main():
         parser.print_help()
         return
     
-    manager = WordManager(model=args.model if hasattr(args, 'model') else 'gpt-4o-mini')
+    manager = WordManager(model=args.model if hasattr(args, 'model') else 'gpt-5-mini')
     
     if args.command == 'add':
         success = manager.add_word(
@@ -1238,6 +1284,17 @@ def main():
         else:
             print("No words found matching criteria.")
     
+    elif args.command == 'subtypes':
+        subtypes = manager.list_subtypes()
+        
+        if subtypes:
+            print(f"\nFound {len(subtypes)} subtypes:")
+            print("-" * 60)
+            for subtype_info in subtypes:
+                print(f"{subtype_info['pos_subtype']:<25} ({subtype_info['pos_type']:<10}) {subtype_info['count']:>6} words")
+        else:
+            print("No subtypes found.")
+    
     elif args.command == 'export':
         if not args.export_type:
             export_parser.print_help()
@@ -1256,6 +1313,9 @@ def main():
             output_path = args.output
             if not output_path:
                 output_path = f"{args.subtype}.txt"
+            
+            # Convert to absolute path to avoid issues with directory creation
+            output_path = str(Path(output_path).resolve())
             
             success = manager.export_to_text(
                 output_path=output_path,
