@@ -1143,7 +1143,31 @@ def get_word_tokens_by_combined_frequency_rank(session, limit: int = 1000) -> Li
         .limit(limit)\
         .all()
 
-def get_lemmas_by_subtype_and_level(session, pos_subtype: str = None, difficulty_level: int = None, limit: int = None) -> List[Lemma]:
+def get_all_subtypes(session, lang=None) -> List[str]:
+    """Get all pos_subtypes that have lemmas with GUIDs."""
+    query = session.query(Lemma.pos_subtype)\
+        .filter(Lemma.pos_subtype != None)\
+        .filter(Lemma.guid != None)
+    
+    if lang == "chinese":
+        query = query.filter(Lemma.chinese_translation != None)\
+        
+    subtypes = query.distinct().all()
+    return [subtype[0] for subtype in subtypes if subtype[0]]
+
+def get_lemmas_by_subtype(session, pos_subtype: str, lang=None) -> List[Lemma]:
+    """Get all lemmas for a specific subtype, ordered by GUID."""
+    query = session.query(Lemma)\
+        .filter(Lemma.pos_subtype == pos_subtype)\
+        .filter(Lemma.guid != None)
+    if lang == "chinese":
+        query = query.filter(Lemma.chinese_translation != None)
+    
+    return query.order_by(Lemma.guid)\
+        .all()
+
+
+def get_lemmas_by_subtype_and_level(session, pos_subtype: str = None, difficulty_level: int = None, limit: int = None, lang: str = None) -> List[Lemma]:
     """
     Get lemmas filtered by POS subtype and/or difficulty level.
     
@@ -1163,6 +1187,10 @@ def get_lemmas_by_subtype_and_level(session, pos_subtype: str = None, difficulty
     
     if difficulty_level:
         query = query.filter(Lemma.difficulty_level == difficulty_level)
+
+    if lang:
+        if lang == "chinese":
+            query = query.filter(Lemma.chinese_translation != None)
     
     # Order by frequency rank (lower is more frequent), then by GUID
     query = query.order_by(Lemma.frequency_rank.nulls_last(), Lemma.guid)

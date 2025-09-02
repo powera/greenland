@@ -35,6 +35,11 @@ from wordfreq.storage.database import create_database_session
 from wordfreq.storage.models.schema import WordToken, Lemma, DerivativeForm
 import constants
 
+from wordfreq.trakaido.dict_generator import (
+    generate_structure_file,
+    generate_dictionary_file
+)
+
 # Configure logging
 logger = logging.getLogger(__name__)
 
@@ -431,12 +436,6 @@ class TrakaidoExporter:
             Tuple of (success flag, export results dictionary)
         """
         try:
-            # Import dict_generator functions
-            from wordfreq.trakaido.dict_generator import (
-                generate_structure_file,
-                generate_dictionary_file
-            )
-            
             session = self.get_session()
             
             # Generate structure files for each level
@@ -492,7 +491,75 @@ class TrakaidoExporter:
         except Exception as e:
             logger.error(f"Error exporting to lang_lt: {e}")
             return False, {'error': str(e)}
-    
+
+    def export_to_lang_zh(self, output_dir: str) -> Tuple[bool, Dict[str, Any]]:
+        """
+        Export words to lang_zh directory structure using dict_generator.
+        
+        Args:
+            output_dir: Output directory for lang_zh files
+            
+        Returns:
+            Tuple of (success flag, export results dictionary)
+        """
+        try:
+            # Import dict_generator functions
+            session = self.get_session()
+            
+            # Generate structure files for each level
+            levels_generated = []
+            for level in range(1, 21):  # Levels 1-20
+                try:
+                    filepath = generate_structure_file(session, level, output_dir)
+                    if filepath:
+                        levels_generated.append(level)
+                        logger.info(f"Generated structure file for level {level}")
+                except Exception as e:
+                    logger.warning(f"Failed to generate structure file for level {level}: {e}")
+            
+            # Generate dictionary files for each subtype
+            subtypes = session.query(Lemma.pos_subtype).filter(
+                Lemma.pos_subtype.isnot(None),
+                Lemma.guid.isnot(None)
+            ).distinct().all()
+            
+            dictionaries_generated = []
+            for subtype_tuple in subtypes:
+                subtype = subtype_tuple[0]
+                if subtype:
+                    try:
+                        filepath = generate_dictionary_file(session, subtype, output_dir)
+                        if filepath:
+                            dictionaries_generated.append(subtype)
+                            logger.info(f"Generated dictionary file for {subtype}")
+                    except Exception as e:
+                        logger.warning(f"Failed to generate dictionary file for {subtype}: {e}")
+            
+            session.close()
+            
+            results = {
+                'levels_generated': levels_generated,
+                'dictionaries_generated': dictionaries_generated,
+                'output_directory': output_dir,
+                'export_time': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            }
+            
+            success = len(levels_generated) > 0 or len(dictionaries_generated) > 0
+            
+            if success:
+                logger.info(f"✅ Export to lang_lt completed:")
+                logger.info(f"   Structure files: {len(levels_generated)} levels")
+                logger.info(f"   Dictionary files: {len(dictionaries_generated)} subtypes")
+                logger.info(f"   Output directory: {output_dir}")
+            else:
+                logger.error("❌ No files were generated during lang_lt export")
+            
+            return success, results
+            
+        except Exception as e:
+            logger.error(f"Error exporting to lang_lt: {e}")
+            return False, {'error': str(e)}
+   
     def export_all(
         self,
         json_path: str,
