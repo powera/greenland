@@ -23,35 +23,20 @@ from typing import Dict, List, Any, Optional
 
 # Configuration
 GREENLAND_SRC_PATH = '/Users/powera/repo/greenland/src'
-DEFAULT_OUTPUT_DIR = '/Users/powera/repo/greenland/data/trakaido_wordlists/lang_lt/generated'
+DEFAULT_OUTPUT_BASE = '/Users/powera/repo/greenland/data/trakaido_wordlists/'
 
 import sys
 sys.path.append(GREENLAND_SRC_PATH)
 
 from wordfreq.storage.database import (
     create_database_session,
+    get_all_subtypes,
+    get_lemmas_by_subtype,
     get_lemmas_by_subtype_and_level,
 )
 from wordfreq.storage.models.schema import Lemma, DerivativeForm
 import constants
 
-def get_all_subtypes(session) -> List[str]:
-    """Get all pos_subtypes that have lemmas with GUIDs."""
-    subtypes = session.query(Lemma.pos_subtype)\
-        .filter(Lemma.pos_subtype != None)\
-        .filter(Lemma.guid != None)\
-        .distinct()\
-        .all()
-    
-    return [subtype[0] for subtype in subtypes if subtype[0]]
-
-def get_lemmas_by_subtype(session, pos_subtype: str) -> List[Lemma]:
-    """Get all lemmas for a specific subtype, ordered by GUID."""
-    return session.query(Lemma)\
-        .filter(Lemma.pos_subtype == pos_subtype)\
-        .filter(Lemma.guid != None)\
-        .order_by(Lemma.guid)\
-        .all()
 
 def get_english_word_for_lemma(session, lemma: Lemma) -> str:
     """Get the primary English word for a lemma."""
@@ -85,9 +70,15 @@ def get_lithuanian_word_for_lemma(session, lemma: Lemma) -> str:
     # Final fallback (shouldn't happen if data is properly migrated)
     return lemma.lemma_text
 
+def get_chinese_word_for_lemma(session, lemma: Lemma) -> str:
+    """Get the primary Lithuanian translation for a lemma."""
+    # First try to get from the lemma's direct translation field
+    if lemma.chinese_translation:
+        return lemma.chinese_translation
+
 def get_alternatives_for_lemma(session, lemma: Lemma) -> Dict[str, List[str]]:
     """Get alternative forms for a lemma, organized by language."""
-    alternatives = {'english': [], 'lithuanian': []}
+    alternatives = {'english': [], 'lithuanian': [], 'chinese': []}
     
     # Get alternative forms from DerivativeForm table
     # Alternative forms have grammatical_form starting with "alternative_"
@@ -101,6 +92,8 @@ def get_alternatives_for_lemma(session, lemma: Lemma) -> Dict[str, List[str]]:
             alternatives['english'].append(alt_form.derivative_form_text)
         elif alt_form.language_code == 'lt' and 'lithuanian' in alternatives:
             alternatives['lithuanian'].append(alt_form.derivative_form_text)
+        elif alt_form.language_code == 'zh' and 'chinese' in alternatives:
+            alternatives['chinese'].append(alt_form.derivative_form_text)
         # Can extend for other languages as needed
     
     return alternatives
@@ -117,10 +110,15 @@ def get_frequency_rank_for_lemma(session, lemma: Lemma) -> Optional[int]:
     
     return None
 
-def lemma_to_word_dict(session, lemma: Lemma) -> Dict[str, Any]:
+def lemma_to_word_dict(session, lemma: Lemma, lang: str = "lithuanian") -> Dict[str, Any]:
     """Convert a lemma to the word dictionary format used by trakaido."""
     english_word = get_english_word_for_lemma(session, lemma)
-    lithuanian_word = get_lithuanian_word_for_lemma(session, lemma)
+    if lang == "lithuanian":
+        foreign_word = get_lithuanian_word_for_lemma(session, lemma)
+    elif lang == "chinese":
+        foreign_word = get_chinese_word_for_lemma(session, lemma)
+    else:
+        raise Exception("Invalid language parameter.")
     alternatives = get_alternatives_for_lemma(session, lemma)
     frequency_rank = get_frequency_rank_for_lemma(session, lemma)
     
@@ -135,7 +133,7 @@ def lemma_to_word_dict(session, lemma: Lemma) -> Dict[str, Any]:
     return {
         "guid": lemma.guid,
         "english": english_word,
-        "lithuanian": lithuanian_word,
+        lang: foreign_word,
         "alternatives": alternatives,
         "metadata": {
             "difficulty_level": lemma.difficulty_level,
@@ -197,7 +195,7 @@ def format_python_dict(data, indent=0):
     else:
         return repr(data)
 
-def generate_structure_data(session, difficulty_level: int) -> Dict[str, List[str]]:
+def generate_structure_data(session, difficulty_level: int, lang: str = "lithuanian") -> Dict[str, List[str]]:
     """
     Generate structure data for a specific difficulty level, organized by subtype.
     Returns a dictionary mapping display names to lists of GUIDs.
@@ -205,13 +203,14 @@ def generate_structure_data(session, difficulty_level: int) -> Dict[str, List[st
     level_data = {}
     
     # Get all subtypes that have words at this level
-    subtypes = get_all_subtypes(session)
+    subtypes = get_all_subtypes(session, lang=lang)
     
     for subtype in subtypes:
         lemmas = get_lemmas_by_subtype_and_level(
             session, 
             pos_subtype=subtype, 
-            difficulty_level=difficulty_level
+            difficulty_level=difficulty_level,
+            lang=lang
         )
         
         if lemmas:
@@ -237,12 +236,12 @@ def generate_structure_data(session, difficulty_level: int) -> Dict[str, List[st
     
     return level_data
 
-def generate_structure_file(session, difficulty_level: int, output_dir: str) -> str:
+def generate_structure_file(session, difficulty_level: int, output_dir: str, lang: str = "lithuanian") -> str:
     """
     Generate a structure file for a specific difficulty level.
     Structure files contain word objects organized by subtype, imported from dictionary files.
     """
-    level_data = generate_structure_data(session, difficulty_level)
+    level_data = generate_structure_data(session, difficulty_level, lang=lang)
     
     if not level_data:
         print(f"No data found for difficulty level {difficulty_level}, generating empty structure file")
@@ -337,9 +336,11 @@ Format: "Category": {{
     
     return filepath
 
-def generate_dictionary_file_content(session, subtype: str) -> str:
-    """Generate the complete content for a dictionary file."""
-    lemmas = get_lemmas_by_subtype(session, subtype)
+def generate_dictionary_file_content(session, subtype: str, lang="lithuanian") -> str:
+    """Generate the complete content for a dictionary file.
+    
+    Needs to specify the language."""
+    lemmas = get_lemmas_by_subtype(session, subtype, lang=lang)
     
     if not lemmas:
         return f'"""\n{subtype.replace("_", " ").title()} - Dictionary Data\n\nNo entries found for this subtype.\n"""\n'
@@ -355,7 +356,7 @@ Each entry is a variable assignment with the GUID as the variable name.
 Entry structure:
 - guid: Unique identifier (e.g., N14001)
 - english: English word/phrase
-- lithuanian: Lithuanian translation
+- {lang}: {lang.capitalize()} translation
 - alternatives: Dictionary with separate lists for English and Lithuanian alternatives
 - metadata: Extensible object with difficulty_level, frequency_rank, tags, and notes
 """
@@ -373,7 +374,7 @@ Entry structure:
             skipped_count += 1
             continue
             
-        entry_data = lemma_to_word_dict(session, lemma)
+        entry_data = lemma_to_word_dict(session, lemma, lang=lang)
         
         # Use GUID directly as variable name since it's now validated
         variable_name = lemma.guid
@@ -382,10 +383,10 @@ Entry structure:
         entry_code = f"""{variable_name} = {{
   'guid': {repr(entry_data['guid'])},
   'english': {repr(entry_data['english'])},
-  'lithuanian': {repr(entry_data['lithuanian'])},
+  '{lang}': {repr(entry_data[lang])},
   'alternatives': {{
     'english': {entry_data['alternatives']['english']},
-    'lithuanian': {entry_data['alternatives']['lithuanian']}
+    '{lang}': {entry_data['alternatives'][lang]}
   }},
   'metadata': {{
     'difficulty_level': {entry_data['metadata']['difficulty_level']},
@@ -401,9 +402,9 @@ Entry structure:
     
     return header + '\n\n'.join(entries) + '\n'
 
-def generate_dictionary_file(session, subtype: str, output_dir: str) -> str:
+def generate_dictionary_file(session, subtype: str, output_dir: str, lang: str = "lithuanian") -> str:
     """Generate a dictionary file for a specific subtype."""
-    content = generate_dictionary_file_content(session, subtype)
+    content = generate_dictionary_file_content(session, subtype, lang=lang)
     filename = f"{subtype}_dictionary.py"
     filepath = os.path.join(output_dir, "dictionary", filename)
     
@@ -425,7 +426,7 @@ def get_difficulty_levels_with_data(session) -> List[int]:
     
     return [level[0] for level in levels if level[0] is not None]
 
-def generate_all_structure_files(session, output_dir: str) -> List[str]:
+def generate_all_structure_files(session, output_dir: str, lang: str) -> List[str]:
     """Generate structure files for all difficulty levels 1-20."""
     generated_files = []
     
@@ -436,36 +437,36 @@ def generate_all_structure_files(session, output_dir: str) -> List[str]:
     print(f"Generating structure files for all levels: {levels}")
     
     for level in levels:
-        filepath = generate_structure_file(session, level, output_dir)
+        filepath = generate_structure_file(session, level, output_dir, lang=lang)
         if filepath:
             generated_files.append(filepath)
             print(f"Generated structure file: {filepath}")
     
     return generated_files
 
-def generate_all_dictionary_files(session, output_dir: str) -> List[str]:
+def generate_all_dictionary_files(session, output_dir: str, lang: str) -> List[str]:
     """Generate dictionary files for all subtypes that have lemmas."""
-    subtypes = get_all_subtypes(session)
+    subtypes = get_all_subtypes(session, lang)
     generated_files = []
     
     for subtype in subtypes:
-        filepath = generate_dictionary_file(session, subtype, output_dir)
+        filepath = generate_dictionary_file(session, subtype, output_dir, lang=lang)
         if filepath:
             generated_files.append(filepath)
             print(f"Generated dictionary file: {filepath}")
     
     return generated_files
 
-def generate_all_files(session, output_dir: str) -> List[str]:
+def generate_all_files(session, output_dir: str, lang: str) -> List[str]:
     """Generate all structure and dictionary files."""
     generated_files = []
     
     # Generate structure files (organized by difficulty level)
-    structure_files = generate_all_structure_files(session, output_dir)
+    structure_files = generate_all_structure_files(session, output_dir, lang=lang)
     generated_files.extend(structure_files)
     
     # Generate dictionary files (organized by subtype)
-    dictionary_files = generate_all_dictionary_files(session, output_dir)
+    dictionary_files = generate_all_dictionary_files(session, output_dir, lang=lang)
     generated_files.extend(dictionary_files)
     
     return generated_files
@@ -473,8 +474,10 @@ def generate_all_files(session, output_dir: str) -> List[str]:
 def main():
     """Main function for command-line usage."""
     parser = argparse.ArgumentParser(description='Generate trakaido structure and dictionary files from wordfreq database')
-    parser.add_argument('--output-dir', '-o', default=DEFAULT_OUTPUT_DIR, 
+    parser.add_argument('--output-base', '-o', default=DEFAULT_OUTPUT_BASE, 
                        help='Output directory for generated files')
+    parser.add_argument('--language', choices=['lithuanian', 'chinese'], default='lithuanian',
+                       help='Choose language - lithuanian or chinese')
     parser.add_argument('--level', '-l', type=int,
                        help='Generate structure file for specific difficulty level only')
     parser.add_argument('--subtype', '-s', 
@@ -496,9 +499,11 @@ def main():
     try:
         generated_files = []
         
+        lang_code_map = {"lithuanian": "lang_lt", "chinese": "lang_zh"}
+        output_dir = os.path.join(args.output_base, lang_code_map[args.language], "generated")
         if args.level and args.type in ['structure', 'both']:
             # Generate specific level structure file
-            filepath = generate_structure_file(session, args.level, args.output_dir)
+            filepath = generate_structure_file(session, args.level, output_dir, lang=args.language)
             if filepath:
                 generated_files.append(filepath)
                 print(f"Generated: {filepath}")
@@ -507,7 +512,7 @@ def main():
         
         if args.subtype and args.type in ['dictionary', 'both']:
             # Generate specific subtype dictionary file
-            filepath = generate_dictionary_file(session, args.subtype, args.output_dir)
+            filepath = generate_dictionary_file(session, args.subtype, output_dir, lang=args.language)
             if filepath:
                 generated_files.append(filepath)
                 print(f"Generated: {filepath}")
@@ -517,13 +522,13 @@ def main():
         if not args.level and not args.subtype:
             # Generate all files based on type
             if args.type == 'structure':
-                generated_files = generate_all_structure_files(session, args.output_dir)
+                generated_files = generate_all_structure_files(session, output_dir, lang=args.language)
             elif args.type == 'dictionary':
-                generated_files = generate_all_dictionary_files(session, args.output_dir)
+                generated_files = generate_all_dictionary_files(session, output_dir, lang=args.language)
             else:  # both
-                generated_files = generate_all_files(session, args.output_dir)
+                generated_files = generate_all_files(session, output_dir, lang=args.language)
         
-        print(f"\n🎉 Generated {len(generated_files)} files in {args.output_dir}")
+        print(f"\n🎉 Generated {len(generated_files)} files in {output_dir}")
         
         if generated_files:
             print("\nGenerated files:")
