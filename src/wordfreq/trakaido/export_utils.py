@@ -560,6 +560,114 @@ class TrakaidoExporter:
             logger.error(f"Error exporting to lang_lt: {e}")
             return False, {'error': str(e)}
 
+    def export_wireword_directory(self, base_output_dir: str) -> Tuple[bool, Dict[str, Any]]:
+        """
+        Export WireWord format files to lang_lt/generated/wireword/ directory structure.
+        Creates separate files for each level and subtype.
+        
+        Args:
+            base_output_dir: Base output directory (e.g., lang_lt/generated)
+            
+        Returns:
+            Tuple of (success flag, export results dictionary)
+        """
+        try:
+            session = self.get_session()
+            
+            # Create wireword directory
+            wireword_dir = os.path.join(base_output_dir, 'wireword')
+            os.makedirs(wireword_dir, exist_ok=True)
+            
+            results = {
+                'files_created': [],
+                'levels_exported': [],
+                'subtypes_exported': [],
+                'total_words': 0,
+                'export_time': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            }
+            
+            # Export by levels (1-20)
+            level_dir = os.path.join(wireword_dir, 'by_level')
+            os.makedirs(level_dir, exist_ok=True)
+            
+            for level in range(1, 21):
+                level_file = os.path.join(level_dir, f"level_{level:02d}.json")
+                
+                success, stats = self.export_to_wireword_format(
+                    output_path=level_file,
+                    difficulty_level=level,
+                    include_without_guid=False,
+                    include_unverified=True,
+                    pretty_print=True
+                )
+                
+                if success and stats and stats.total_entries > 0:
+                    results['files_created'].append(level_file)
+                    results['levels_exported'].append(level)
+                    results['total_words'] += stats.total_entries
+                    logger.info(f"Created wireword file for level {level}: {stats.total_entries} words")
+            
+            # Export by subtypes
+            subtype_dir = os.path.join(wireword_dir, 'by_subtype')
+            os.makedirs(subtype_dir, exist_ok=True)
+            
+            # Get all unique subtypes
+            subtypes = session.query(Lemma.pos_subtype).filter(
+                Lemma.pos_subtype.isnot(None),
+                Lemma.pos_subtype != '',
+                Lemma.guid.isnot(None)
+            ).distinct().all()
+            
+            for subtype_tuple in subtypes:
+                subtype = subtype_tuple[0]
+                if subtype:
+                    subtype_file = os.path.join(subtype_dir, f"{subtype}.json")
+                    
+                    success, stats = self.export_to_wireword_format(
+                        output_path=subtype_file,
+                        pos_subtype=subtype,
+                        include_without_guid=False,
+                        include_unverified=True,
+                        pretty_print=True
+                    )
+                    
+                    if success and stats and stats.total_entries > 0:
+                        results['files_created'].append(subtype_file)
+                        results['subtypes_exported'].append(subtype)
+                        logger.info(f"Created wireword file for subtype '{subtype}': {stats.total_entries} words")
+            
+            # Export complete dataset
+            complete_file = os.path.join(wireword_dir, 'complete.json')
+            success, stats = self.export_to_wireword_format(
+                output_path=complete_file,
+                include_without_guid=False,
+                include_unverified=True,
+                pretty_print=True
+            )
+            
+            if success and stats:
+                results['files_created'].append(complete_file)
+                logger.info(f"Created complete wireword file: {stats.total_entries} words")
+            
+            session.close()
+            
+            success = len(results['files_created']) > 0
+            
+            if success:
+                logger.info(f"✅ WireWord directory export completed:")
+                logger.info(f"   Files created: {len(results['files_created'])}")
+                logger.info(f"   Levels exported: {len(results['levels_exported'])}")
+                logger.info(f"   Subtypes exported: {len(results['subtypes_exported'])}")
+                logger.info(f"   Output directory: {wireword_dir}")
+            else:
+                logger.error("❌ No wireword files were created")
+            
+            return success, results
+            
+        except Exception as e:
+            logger.error(f"Error exporting wireword directory: {e}")
+            return False, {'error': str(e)}
+
     def export_to_wireword_format(
         self,
         output_path: str,
@@ -761,6 +869,7 @@ class TrakaidoExporter:
         json_path: str,
         lang_lt_dir: str,
         wireword_path: str = None,
+        include_wireword_directory: bool = True,
         **json_kwargs
     ) -> Tuple[bool, Dict[str, Any]]:
         """
@@ -769,7 +878,8 @@ class TrakaidoExporter:
         Args:
             json_path: Path for JSON export
             lang_lt_dir: Directory for lang_lt export
-            wireword_path: Path for WireWord format export (optional)
+            wireword_path: Path for single WireWord format export (optional)
+            include_wireword_directory: Whether to create wireword directory structure (default: True)
             **json_kwargs: Additional arguments for JSON export
             
         Returns:
@@ -788,6 +898,11 @@ class TrakaidoExporter:
         if wireword_path:
             wireword_success, wireword_stats = self.export_to_wireword_format(wireword_path, **json_kwargs)
         
+        # Export WireWord directory structure
+        wireword_dir_success, wireword_dir_results = True, None
+        if include_wireword_directory:
+            wireword_dir_success, wireword_dir_results = self.export_wireword_directory(lang_lt_dir)
+        
         results = {
             'json_export': {
                 'success': json_success,
@@ -804,7 +919,12 @@ class TrakaidoExporter:
                 'results': text_results,
                 'directory': f"{lang_lt_dir}/simple"
             },
-            'overall_success': json_success and lang_lt_success and text_success and wireword_success,
+            'wireword_directory_export': {
+                'success': wireword_dir_success,
+                'results': wireword_dir_results,
+                'directory': f"{lang_lt_dir}/wireword"
+            },
+            'overall_success': json_success and lang_lt_success and text_success and wireword_success and wireword_dir_success,
             'export_time': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         }
         
@@ -815,7 +935,10 @@ class TrakaidoExporter:
                 'path': wireword_path
             }
         
-        if json_success and lang_lt_success and text_success and wireword_success:
+        # Update success tracking
+        all_exports_successful = json_success and lang_lt_success and text_success and wireword_success and wireword_dir_success
+        
+        if all_exports_successful:
             logger.info("✅ Full export completed successfully!")
         else:
             failed_exports = []
@@ -841,6 +964,12 @@ class TrakaidoExporter:
                     successful_exports.append("WireWord")
                 else:
                     failed_exports.append("WireWord")
+            
+            if include_wireword_directory:
+                if wireword_dir_success:
+                    successful_exports.append("WireWord Directory")
+                else:
+                    failed_exports.append("WireWord Directory")
             
             if len(failed_exports) == 0:
                 logger.info("✅ All exports completed successfully!")

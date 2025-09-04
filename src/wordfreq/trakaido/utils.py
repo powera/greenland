@@ -1088,10 +1088,25 @@ def main():
     text_parser.add_argument('--include-unverified', action='store_true', default=True,
                             help='Include unverified entries (default: True)')
     
+    # Export to wireword format
+    wireword_parser = export_subparsers.add_parser('wireword', help='Export to WireWord API format')
+    wireword_parser.add_argument('--output', help='Output JSON file path')
+    wireword_parser.add_argument('--level', type=int, help='Filter by specific difficulty level')
+    wireword_parser.add_argument('--subtype', help='Filter by specific POS subtype')
+    wireword_parser.add_argument('--include-without-guid', action='store_true',
+                                help='Include lemmas without GUIDs')
+    wireword_parser.add_argument('--include-unverified', action='store_true', default=True,
+                                help='Include unverified entries (default: True)')
+    
+    # Export wireword directory
+    wireword_dir_parser = export_subparsers.add_parser('wireword-dir', help='Export WireWord files to directory structure')
+    wireword_dir_parser.add_argument('--output-dir', help='Base output directory (will create wireword subdirectory)')
+    
     # Export all
-    all_parser = export_subparsers.add_parser('all', help='Export to both JSON and lang_lt')
+    all_parser = export_subparsers.add_parser('all', help='Export to all formats including wireword directory')
     all_parser.add_argument('--json-output', help='JSON output file path')
     all_parser.add_argument('--lang-lt-dir', help='lang_lt output directory path')
+    all_parser.add_argument('--no-wireword-dir', action='store_true', help='Skip wireword directory export')
     
     args = parser.parse_args()
     
@@ -1232,6 +1247,53 @@ def main():
             
             sys.exit(0 if success else 1)
         
+        elif args.export_type == 'wireword':
+            # Generate default output filename if not provided
+            output_path = args.output
+            if not output_path:
+                output_path = "wireword_export.json"
+            
+            # Convert to absolute path
+            output_path = str(Path(output_path).resolve())
+            
+            success, stats = exporter.export_to_wireword_format(
+                output_path=output_path,
+                difficulty_level=args.level,
+                pos_subtype=args.subtype,
+                include_without_guid=args.include_without_guid,
+                include_unverified=args.include_unverified
+            )
+            
+            if success and stats:
+                print(f"\n✅ WireWord export completed:")
+                print(f"   Exported {stats.total_entries} words")
+                print(f"   Entries with GUIDs: {stats.entries_with_guids}")
+                if args.level is not None:
+                    print(f"   Difficulty level: {args.level}")
+                if args.subtype:
+                    print(f"   POS subtype: {args.subtype}")
+                print(f"   Output file: {output_path}")
+            
+            sys.exit(0 if success else 1)
+        
+        elif args.export_type == 'wireword-dir':
+            # Use default directory if not provided
+            output_dir = args.output_dir
+            if not output_dir:
+                output_dir = f'{GREENLAND_SRC_PATH}/../data/trakaido_wordlists/lang_lt/generated'
+            
+            success, results = exporter.export_wireword_directory(output_dir)
+            
+            if success:
+                print(f"\n✅ WireWord directory export completed:")
+                print(f"   Files created: {len(results.get('files_created', []))}")
+                print(f"   Levels exported: {len(results.get('levels_exported', []))}")
+                print(f"   Subtypes exported: {len(results.get('subtypes_exported', []))}")
+                print(f"   Total words: {results.get('total_words', 0)}")
+                print(f"   Output directory: {output_dir}/wireword")
+            
+            sys.exit(0 if success else 1)
+        
         elif args.export_type == 'all':
             # Use default paths if not provided
             json_path = args.json_output
@@ -1242,7 +1304,14 @@ def main():
             if not lang_lt_dir:
                 lang_lt_dir = f'{GREENLAND_SRC_PATH}/../data/trakaido_wordlists/lang_lt/generated'
             
-            success, results = exporter.export_all(json_path, lang_lt_dir)
+            # Include wireword directory unless explicitly disabled
+            include_wireword_dir = not args.no_wireword_dir
+            
+            success, results = exporter.export_all(
+                json_path, 
+                lang_lt_dir, 
+                include_wireword_directory=include_wireword_dir
+            )
             sys.exit(0 if success else 1)
 
 if __name__ == '__main__':
