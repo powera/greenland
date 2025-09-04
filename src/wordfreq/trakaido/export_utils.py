@@ -559,19 +559,217 @@ class TrakaidoExporter:
         except Exception as e:
             logger.error(f"Error exporting to lang_lt: {e}")
             return False, {'error': str(e)}
+
+    def export_to_wireword_format(
+        self,
+        output_path: str,
+        difficulty_level: Optional[int] = None,
+        pos_type: Optional[str] = None,
+        pos_subtype: Optional[str] = None,
+        limit: Optional[int] = None,
+        include_without_guid: bool = False,
+        include_unverified: bool = True,
+        pretty_print: bool = True
+    ) -> Tuple[bool, Optional[ExportStats]]:
+        """
+        Export trakaido data to new WireWord API format.
+        
+        Args:
+            output_path: Path to write the JSON file
+            difficulty_level: Filter by specific difficulty level (optional)
+            pos_type: Filter by specific POS type (optional)
+            pos_subtype: Filter by specific POS subtype (optional)
+            limit: Limit number of results (optional)
+            include_without_guid: Include lemmas without GUIDs (default: False)
+            include_unverified: Include unverified entries (default: True)
+            pretty_print: Whether to format JSON with indentation (default: True)
+            
+        Returns:
+            Tuple of (success flag, export statistics)
+        """
+        session = self.get_session()
+        try:
+            # Query the data using existing method
+            export_data = self.query_trakaido_data(
+                session=session,
+                difficulty_level=difficulty_level,
+                pos_type=pos_type,
+                pos_subtype=pos_subtype,
+                limit=limit,
+                include_without_guid=include_without_guid,
+                include_unverified=include_unverified
+            )
+            
+            if not export_data:
+                logger.warning("No data found matching the specified criteria")
+                return False, None
+            
+            # Transform to WireWord format
+            wireword_data = []
+            for entry in export_data:
+                # Get all derivative forms for this lemma
+                lemma = session.query(Lemma).filter(Lemma.guid == entry['GUID']).first()
+                if not lemma:
+                    continue
+                
+                derivative_forms = session.query(DerivativeForm).filter(
+                    DerivativeForm.lemma_id == lemma.id
+                ).all()
+                
+                # Build grammatical forms dictionary
+                grammatical_forms = {}
+                english_alternatives = []
+                lithuanian_alternatives = []
+                
+                for form in derivative_forms:
+                    if form.is_base_form:
+                        # Skip base forms as they're already in base_lithuanian/base_english
+                        continue
+                    
+                    # Create grammatical form key based on form properties
+                    form_key = self._create_grammatical_form_key(form)
+                    
+                    if form.language_code == 'en' and form.grammatical_form == 'alternative_form':
+                        english_alternatives.append(form.derivative_form_text)
+                    elif form.language_code == 'lt' and form.grammatical_form == 'alternative_form':
+                        lithuanian_alternatives.append(form.derivative_form_text)
+                    else:
+                        # Add to grammatical forms
+                        if form_key not in grammatical_forms:
+                            grammatical_forms[form_key] = {
+                                'level': lemma.difficulty_level,
+                                'lithuanian': form.derivative_form_text
+                            }
+                        
+                        # Add English if available
+                        if form.language_code == 'en':
+                            grammatical_forms[form_key]['english'] = form.derivative_form_text
+                
+                # Create WireWord object
+                wireword = {
+                    'guid': entry['GUID'],
+                    'base_lithuanian': entry['Lithuanian'],
+                    'base_english': entry['English'],
+                    'corpus': 'trakaido',
+                    'group': entry['subtype'],
+                    'level': entry['trakaido_level'],
+                    'word_type': self._normalize_pos_type(entry['POS']),
+                    'grammatical_forms': grammatical_forms
+                }
+                
+                # Add optional fields
+                if english_alternatives:
+                    wireword['english_alternatives'] = english_alternatives
+                if lithuanian_alternatives:
+                    wireword['lithuanian_alternatives'] = lithuanian_alternatives
+                
+                if lemma.frequency_rank:
+                    wireword['frequency_rank'] = lemma.frequency_rank
+                if lemma.notes:
+                    wireword['notes'] = lemma.notes
+                
+                # Add tags based on subtype and level
+                tags = [entry['subtype'], f"level_{entry['trakaido_level']}"]
+                if lemma.verified:
+                    tags.append('verified')
+                wireword['tags'] = tags
+                
+                wireword_data.append(wireword)
+            
+            # Write to JSON file
+            stats = self.write_json_file(wireword_data, output_path, pretty_print)
+            
+            logger.info(f"✅ Successfully exported {len(wireword_data)} words in WireWord format")
+            
+            return True, stats
+            
+        except Exception as e:
+            logger.error(f"Export to WireWord format failed: {e}")
+            return False, None
+        finally:
+            session.close()
+    
+    def _create_grammatical_form_key(self, form: DerivativeForm) -> str:
+        """
+        Create a grammatical form key based on derivative form properties.
+        
+        Args:
+            form: DerivativeForm object
+            
+        Returns:
+            String key for grammatical form
+        """
+        # Map grammatical forms to standardized keys
+        form_mappings = {
+            'singular': 'sg',
+            'plural': 'pl',
+            'present': 'pres',
+            'past': 'past',
+            'future': 'fut',
+            'infinitive': 'inf',
+            'nominative': 'nom',
+            'accusative': 'acc',
+            'genitive': 'gen',
+            'dative': 'dat',
+            'instrumental': 'ins',
+            'locative': 'loc',
+            'vocative': 'voc',
+            '1st_person': '1',
+            '2nd_person': '2',
+            '3rd_person': '3',
+            'masculine': 'm',
+            'feminine': 'f',
+            'neuter': 'n'
+        }
+        
+        # Default key based on grammatical form
+        base_key = form.grammatical_form or 'base'
+        
+        # Apply mappings
+        for original, mapped in form_mappings.items():
+            base_key = base_key.replace(original, mapped)
+        
+        return base_key
+    
+    def _normalize_pos_type(self, pos_type: str) -> str:
+        """
+        Normalize POS type to match WireWord PartOfSpeech enum.
+        
+        Args:
+            pos_type: Original POS type
+            
+        Returns:
+            Normalized POS type
+        """
+        pos_mappings = {
+            'noun': 'noun',
+            'verb': 'verb', 
+            'adjective': 'adjective',
+            'adverb': 'adverb',
+            'pronoun': 'pronoun',
+            'preposition': 'preposition',
+            'conjunction': 'conjunction',
+            'interjection': 'interjection',
+            'numeral': 'numeral',
+            'particle': 'particle'
+        }
+        
+        return pos_mappings.get(pos_type.lower(), pos_type)
    
     def export_all(
         self,
         json_path: str,
         lang_lt_dir: str,
+        wireword_path: str = None,
         **json_kwargs
     ) -> Tuple[bool, Dict[str, Any]]:
         """
-        Export to JSON, lang_lt, and text formats.
+        Export to JSON, lang_lt, text, and WireWord formats.
         
         Args:
             json_path: Path for JSON export
             lang_lt_dir: Directory for lang_lt export
+            wireword_path: Path for WireWord format export (optional)
             **json_kwargs: Additional arguments for JSON export
             
         Returns:
@@ -584,6 +782,11 @@ class TrakaidoExporter:
         
         # Export text files for all subtypes to lang_lt/generated/simple
         text_success, text_results = self.export_all_text_files(lang_lt_dir)
+        
+        # Export WireWord format if path provided
+        wireword_success, wireword_stats = True, None
+        if wireword_path:
+            wireword_success, wireword_stats = self.export_to_wireword_format(wireword_path, **json_kwargs)
         
         results = {
             'json_export': {
@@ -601,32 +804,49 @@ class TrakaidoExporter:
                 'results': text_results,
                 'directory': f"{lang_lt_dir}/simple"
             },
-            'overall_success': json_success and lang_lt_success and text_success,
+            'overall_success': json_success and lang_lt_success and text_success and wireword_success,
             'export_time': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         }
         
-        if json_success and lang_lt_success and text_success:
+        if wireword_path:
+            results['wireword_export'] = {
+                'success': wireword_success,
+                'stats': wireword_stats,
+                'path': wireword_path
+            }
+        
+        if json_success and lang_lt_success and text_success and wireword_success:
             logger.info("✅ Full export completed successfully!")
         else:
             failed_exports = []
-            if not json_success:
-                failed_exports.append("JSON")
-            if not lang_lt_success:
-                failed_exports.append("lang_lt")
-            if not text_success:
-                failed_exports.append("text")
+            successful_exports = []
             
-            if len(failed_exports) == 3:
+            if json_success:
+                successful_exports.append("JSON")
+            else:
+                failed_exports.append("JSON")
+                
+            if lang_lt_success:
+                successful_exports.append("lang_lt")
+            else:
+                failed_exports.append("lang_lt")
+                
+            if text_success:
+                successful_exports.append("text")
+            else:
+                failed_exports.append("text")
+                
+            if wireword_path:
+                if wireword_success:
+                    successful_exports.append("WireWord")
+                else:
+                    failed_exports.append("WireWord")
+            
+            if len(failed_exports) == 0:
+                logger.info("✅ All exports completed successfully!")
+            elif len(successful_exports) == 0:
                 logger.error("❌ All exports failed")
             else:
-                successful_exports = []
-                if json_success:
-                    successful_exports.append("JSON")
-                if lang_lt_success:
-                    successful_exports.append("lang_lt")
-                if text_success:
-                    successful_exports.append("text")
-                
                 logger.warning(f"⚠️  {', '.join(successful_exports)} export(s) succeeded, but {', '.join(failed_exports)} export(s) failed")
         
         return results['overall_success'], results
