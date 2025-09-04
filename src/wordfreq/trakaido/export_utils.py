@@ -712,6 +712,9 @@ class TrakaidoExporter:
                 logger.warning("No data found matching the specified criteria")
                 return False, None
             
+            # Calculate corpus assignments based on levels and groups
+            corpus_assignments = self._calculate_corpus_assignments(export_data)
+            
             # Transform to WireWord format
             wireword_data = []
             for entry in export_data:
@@ -753,12 +756,16 @@ class TrakaidoExporter:
                         if form.language_code == 'en':
                             grammatical_forms[form_key]['english'] = form.derivative_form_text
                 
+                # Get corpus assignment for this entry
+                corpus_key = (entry['trakaido_level'], entry['subtype'])
+                assigned_corpus = corpus_assignments.get(corpus_key, 'Trakaido')
+                
                 # Create WireWord object
                 wireword = {
                     'guid': entry['GUID'],
                     'base_lithuanian': entry['Lithuanian'],
                     'base_english': entry['English'],
-                    'corpus': 'trakaido',
+                    'corpus': assigned_corpus,
                     'group': entry['subtype'],
                     'level': entry['trakaido_level'],
                     'word_type': self._normalize_pos_type(entry['POS']),
@@ -838,6 +845,80 @@ class TrakaidoExporter:
             base_key = base_key.replace(original, mapped)
         
         return base_key
+    
+    def _calculate_corpus_assignments(self, export_data: List[Dict[str, Any]]) -> Dict[Tuple[int, str], str]:
+        """
+        Calculate corpus assignments based on levels and group overflow logic.
+        
+        Args:
+            export_data: List of export entries
+            
+        Returns:
+            Dictionary mapping (level, subtype) tuples to corpus names
+        """
+        # Group data by subtype to track when groups appear across levels
+        groups_by_level = {}
+        for entry in export_data:
+            level = entry['trakaido_level']
+            subtype = entry['subtype']
+            
+            if level not in groups_by_level:
+                groups_by_level[level] = set()
+            groups_by_level[level].add(subtype)
+        
+        # Track which groups have been assigned to which WORDS level
+        group_assignments = {}  # group_name -> WORDS level
+        corpus_assignments = {}  # (level, subtype) -> corpus name
+        
+        # Define the level ranges for each WORDS corpus
+        words_ranges = {
+            'WORDS1': range(1, 4),   # Levels 1-3
+            'WORDS2': range(4, 7),   # Levels 4-6
+            'WORDS3': range(7, 11),  # Levels 7-10
+            'WORDS4': range(11, 15), # Levels 11-14
+            'WORDS5': range(15, 21)  # Levels 15-20 (overflow)
+        }
+        
+        # Process each level in order
+        for level in sorted(groups_by_level.keys()):
+            # Determine base WORDS level for this difficulty level
+            base_words_level = None
+            for words_name, level_range in words_ranges.items():
+                if level in level_range:
+                    base_words_level = words_name
+                    break
+            
+            if base_words_level is None:
+                # Level is outside normal ranges, assign to Trakaido
+                for subtype in groups_by_level[level]:
+                    corpus_assignments[(level, subtype)] = 'Trakaido'
+                continue
+            
+            # Process each subtype in this level
+            for subtype in groups_by_level[level]:
+                if subtype in group_assignments:
+                    # Group has already been assigned, kick to next WORDS level
+                    current_words_level = group_assignments[subtype]
+                    words_levels = list(words_ranges.keys())
+                    current_index = words_levels.index(current_words_level)
+                    
+                    if current_index + 1 < len(words_levels):
+                        # Assign to next WORDS level
+                        next_words_level = words_levels[current_index + 1]
+                        group_assignments[subtype] = next_words_level
+                        corpus_assignments[(level, subtype)] = next_words_level
+                        logger.debug(f"Group '{subtype}' at level {level} kicked from {current_words_level} to {next_words_level}")
+                    else:
+                        # No more WORDS levels available, assign to Trakaido
+                        corpus_assignments[(level, subtype)] = 'Trakaido'
+                        logger.debug(f"Group '{subtype}' at level {level} assigned to Trakaido (overflow)")
+                else:
+                    # First time seeing this group, assign to base WORDS level
+                    group_assignments[subtype] = base_words_level
+                    corpus_assignments[(level, subtype)] = base_words_level
+                    logger.debug(f"Group '{subtype}' at level {level} assigned to {base_words_level}")
+        
+        return corpus_assignments
     
     def _normalize_pos_type(self, pos_type: str) -> str:
         """
