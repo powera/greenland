@@ -54,6 +54,7 @@ from wordfreq.storage.models.enums import GrammaticalForm
 from wordfreq.storage.models.schema import DerivativeForm, Lemma, WordToken
 from wordfreq.translation.client import LinguisticClient
 from wordfreq.trakaido.export_utils import TrakaidoExporter
+from wordfreq.trakaido.verb_converter import export_wireword_verbs
 
 
 # Configure logging
@@ -1102,6 +1103,10 @@ def main():
     wireword_dir_parser = export_subparsers.add_parser('wireword-dir', help='Export WireWord files to directory structure')
     wireword_dir_parser.add_argument('--output-dir', help='Base output directory (will create wireword subdirectory)')
     
+    # Export wireword verbs
+    wireword_verbs_parser = export_subparsers.add_parser('wireword-verbs', help='Export verbs from verbs.py to wireword format')
+    wireword_verbs_parser.add_argument('--output', help='Output JSON file path')
+    
     # Export all
     all_parser = export_subparsers.add_parser('all', help='Export to all formats including wireword directory')
     all_parser.add_argument('--json-output', help='JSON output file path')
@@ -1291,6 +1296,30 @@ def main():
                 print(f"   Subtypes exported: {len(results.get('subtypes_exported', []))}")
                 print(f"   Total words: {results.get('total_words', 0)}")
                 print(f"   Output directory: {output_dir}/wireword")
+            
+            sys.exit(0 if success else 1)
+        
+        elif args.export_type == 'wireword-verbs':
+            # Use default output path if not provided
+            output_path = args.output
+            if not output_path:
+                output_path = f'{GREENLAND_SRC_PATH}/../wireword_verbs_export.json'
+            
+            success, results = export_wireword_verbs(output_path)
+            
+            if success:
+                print(f"\n✅ WireWord verbs export completed:")
+                print(f"   Total verbs: {results['total_verbs']}")
+                print(f"   Total grammatical forms: {results['total_forms']}")
+                print(f"   Levels: {results['levels']}")
+                print(f"   Level distribution: {results['level_distribution']}")
+                print(f"   Group distribution: {results['group_distribution']}")
+                print(f"   Output file: {results['output_path']}")
+                
+                if results['skipped_verbs']:
+                    print(f"   Skipped verbs ({len(results['skipped_verbs'])}): {', '.join(results['skipped_verbs'])}")
+            else:
+                print(f"\n❌ WireWord verbs export failed: {results.get('error', 'Unknown error')}")
             
             sys.exit(0 if success else 1)
         
