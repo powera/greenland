@@ -16,12 +16,12 @@ Features:
 Usage:
     from wordfreq.trakaido.utils import WordManager
     from wordfreq.trakaido.export_utils import TrakaidoExporter
-    
+
     manager = WordManager()
     manager.add_word("example")
     manager.set_level("N07_008", 2)
     manager.move_words_by_subtype_and_level(8, "clothing", 14)
-    
+
     # For export functionality, use TrakaidoExporter
     exporter = TrakaidoExporter()
     exporter.export_to_text("clothing.txt", "clothing")
@@ -53,6 +53,8 @@ from wordfreq.storage.database import (
 from wordfreq.storage.models.enums import GrammaticalForm
 from wordfreq.storage.models.schema import DerivativeForm, Lemma, WordToken
 from wordfreq.translation.client import LinguisticClient
+from wordfreq.translation.noun_forms import get_required_noun_forms
+from wordfreq.storage.database import add_noun_derivative_form, get_noun_derivative_forms
 from wordfreq.trakaido.export_utils import TrakaidoExporter
 from wordfreq.trakaido.verb_converter import export_wireword_verbs
 
@@ -88,11 +90,11 @@ class ReviewResult:
 
 class WordManager:
     """Main class for managing trakaido words."""
-    
+
     def __init__(self, model: str = "gpt-5-mini", db_path: str = None, debug: bool = False):
         """
         Initialize the WordManager.
-        
+
         Args:
             model: LLM model to use (default: gpt-4o-mini)
             db_path: Database path (uses default if None)
@@ -102,25 +104,25 @@ class WordManager:
         self.db_path = db_path or constants.WORDFREQ_DB_PATH
         self.debug = debug
         self.client = UnifiedLLMClient(debug=debug)
-        
+
         if debug:
             logger.setLevel(logging.DEBUG)
-    
+
     def get_session(self):
         """Get database session."""
         return create_database_session(self.db_path)
-    
+
     def _get_word_analysis_prompt(self, english_word: str, lithuanian_word: str = None) -> str:
         """Get the prompt for analyzing a new word."""
         context = util.prompt_loader.get_context("wordfreq", "word_analysis")
-        
+
         if lithuanian_word:
             word_specification = f"English word '{english_word}' with Lithuanian translation '{lithuanian_word}'"
             meaning_clarification = f"Focus on the specific meaning where '{english_word}' translates to '{lithuanian_word}' in Lithuanian."
         else:
             word_specification = f"English word '{english_word}'"
             meaning_clarification = "Provide the most common, basic meaning of this word."
-        
+
         return f"""{context}
 
 Analyze the {word_specification} and provide:
@@ -144,16 +146,16 @@ IMPORTANT REQUIREMENTS:
 - Ensure all translations are also in their base/lemma forms
 
 Word to analyze: {english_word}"""
-    
+
     def _query_word_data(self, english_word: str, lithuanian_word: str = None, model_override: str = None) -> Tuple[Optional[WordData], bool]:
         """
         Query LLM for comprehensive word data.
-        
+
         Args:
             english_word: English word to analyze
             lithuanian_word: Optional Lithuanian translation to clarify meaning
             model_override: Override the default model (e.g., "gpt-5-nano")
-            
+
         Returns:
             Tuple of (WordData object, success flag)
         """
@@ -161,20 +163,20 @@ Word to analyze: {english_word}"""
         all_subtypes = []
         for pos in ['noun', 'verb', 'adjective', 'adverb']:
             all_subtypes.extend(get_subtype_values_for_pos(pos))
-        
+
         schema = Schema(
             name="WordAnalysis",
             description="Comprehensive analysis of a word for language learning",
             properties={
                 "english": SchemaProperty("string", "The English word being analyzed"),
                 "lithuanian": SchemaProperty("string", "Lithuanian translation of the word"),
-                "pos_type": SchemaProperty("string", "Part of speech", 
-                    enum=["noun", "verb", "adjective", "adverb", "pronoun", "preposition", 
+                "pos_type": SchemaProperty("string", "Part of speech",
+                    enum=["noun", "verb", "adjective", "adverb", "pronoun", "preposition",
                           "conjunction", "interjection", "determiner", "article", "numeral"]),
-                "pos_subtype": SchemaProperty("string", "Specific subtype classification", 
+                "pos_subtype": SchemaProperty("string", "Specific subtype classification",
                     enum=all_subtypes),
                 "definition": SchemaProperty("string", "Clear definition for language learners"),
-                "confidence": SchemaProperty("number", "Confidence score from 0.0-1.0", 
+                "confidence": SchemaProperty("number", "Confidence score from 0.0-1.0",
                     minimum=0.0, maximum=1.0),
                 "chinese_translation": SchemaProperty("string", "Chinese translation (base form)"),
                 "korean_translation": SchemaProperty("string", "Korean translation (base form)"),
@@ -191,7 +193,7 @@ Word to analyze: {english_word}"""
                             items={"type": "string"}
                         ),
                         "lithuanian": SchemaProperty(
-                            type="array", 
+                            type="array",
                             description="Alternative Lithuanian forms",
                             items={"type": "string"}
                         )
@@ -200,9 +202,9 @@ Word to analyze: {english_word}"""
                 "notes": SchemaProperty("string", "Additional notes about the word")
             }
         )
-        
+
         prompt = self._get_word_analysis_prompt(english_word, lithuanian_word)
-        
+
         try:
             model_to_use = model_override or self.model
             response = self.client.generate_chat(
@@ -210,7 +212,7 @@ Word to analyze: {english_word}"""
                 model=model_to_use,
                 json_schema=schema
             )
-            
+
             if response.structured_data:
                 data = response.structured_data
                 return WordData(
@@ -231,30 +233,30 @@ Word to analyze: {english_word}"""
             else:
                 logger.error(f"No structured data received for word '{english_word}'")
                 return None, False
-                
+
         except Exception as e:
             logger.error(f"Error querying word data for '{english_word}': {e}")
             return None, False
-    
+
     def _generate_guid(self, pos_subtype: str, session) -> str:
         """
         Generate a unique GUID for a word.
-        
+
         Args:
             pos_subtype: The POS subtype for GUID prefix
             session: Database session
-            
+
         Returns:
             Unique GUID string
         """
         # Get prefix from subtype
         prefix = SUBTYPE_GUID_PREFIXES.get(pos_subtype, 'N99')  # Default to N99 for unknown
-        
+
         # Find the next available number for this prefix
         existing_guids = session.query(Lemma.guid).filter(
             Lemma.guid.like(f"{prefix}_%")
         ).all()
-        
+
         existing_numbers = []
         for guid_tuple in existing_guids:
             guid = guid_tuple[0]
@@ -264,14 +266,14 @@ Word to analyze: {english_word}"""
                     existing_numbers.append(number)
                 except (ValueError, IndexError):
                     continue
-        
+
         # Find next available number
         next_number = 1
         while next_number in existing_numbers:
             next_number += 1
-        
+
         return f"{prefix}_{next_number:03d}"
-    
+
     def _display_word_data(self, data: WordData) -> None:
         """Display word data for user review."""
         print("\n" + "="*60)
@@ -283,7 +285,7 @@ Word to analyze: {english_word}"""
         print(f"Subtype: {data.pos_subtype}")
         print(f"Definition: {data.definition}")
         print(f"Confidence: {data.confidence:.2f}")
-        
+
         # Show additional translations
         translations = []
         if data.chinese_translation:
@@ -296,131 +298,131 @@ Word to analyze: {english_word}"""
             translations.append(f"Swahili: {data.swahili_translation}")
         if data.vietnamese_translation:
             translations.append(f"Vietnamese: {data.vietnamese_translation}")
-        
+
         if translations:
             print("Other translations:")
             for trans in translations:
                 print(f"  {trans}")
-        
+
         if data.alternatives['english']:
             print(f"English Alternatives: {', '.join(data.alternatives['english'])}")
         if data.alternatives['lithuanian']:
             print(f"Lithuanian Alternatives: {', '.join(data.alternatives['lithuanian'])}")
-        
+
         if data.notes:
             print(f"Notes: {data.notes}")
         print("="*60)
-    
+
     def _get_user_review(self, data: WordData) -> ReviewResult:
         """
         Get user review and approval for word data.
-        
+
         Args:
             data: WordData to review
-            
+
         Returns:
             ReviewResult with user decisions
         """
         self._display_word_data(data)
-        
+
         while True:
             choice = input("\nOptions:\n"
                           "1. Approve as-is\n"
                           "2. Modify before approval\n"
                           "3. Reject\n"
                           "Enter choice (1-3): ").strip()
-            
+
             if choice == '1':
                 return ReviewResult(approved=True, modifications={}, notes="")
-            
+
             elif choice == '2':
                 modifications = {}
-                
+
                 # Allow modification of key fields
                 new_lithuanian = input(f"Lithuanian [{data.lithuanian}]: ").strip()
                 if new_lithuanian:
                     modifications['lithuanian'] = new_lithuanian
-                
+
                 new_definition = input(f"Definition [{data.definition}]: ").strip()
                 if new_definition:
                     modifications['definition'] = new_definition
-                
+
                 # Allow modification of difficulty level during review
                 new_level = input("Difficulty Level (1-20, leave blank to set later): ").strip()
                 if new_level and new_level.isdigit():
                     level = int(new_level)
                     if 1 <= level <= 20:
                         modifications['difficulty_level'] = level
-                
+
                 new_subtype = input(f"Subtype [{data.pos_subtype}]: ").strip()
                 if new_subtype:
                     modifications['pos_subtype'] = new_subtype
-                
+
                 notes = input("Review notes: ").strip()
-                
+
                 return ReviewResult(approved=True, modifications=modifications, notes=notes)
-            
+
             elif choice == '3':
                 notes = input("Rejection reason: ").strip()
                 return ReviewResult(approved=False, modifications={}, notes=notes)
-            
+
             else:
                 print("Invalid choice. Please enter 1, 2, or 3.")
-    
-    def add_word(self, english_word: str, lithuanian_word: str = None, 
+
+    def add_word(self, english_word: str, lithuanian_word: str = None,
                  difficulty_level: int = None, auto_approve: bool = False) -> bool:
         """
         Add a new word to the trakaido system.
-        
+
         Args:
             english_word: English word to add
             lithuanian_word: Optional Lithuanian translation to clarify meaning
             difficulty_level: Optional difficulty level (1-20)
             auto_approve: Skip user review if True
-            
+
         Returns:
             Success flag
         """
-        logger.info(f"Adding word: {english_word}" + 
+        logger.info(f"Adding word: {english_word}" +
                    (f" → {lithuanian_word}" if lithuanian_word else ""))
-        
+
         session = self.get_session()
         try:
             # Check if word already exists
             existing = session.query(Lemma).filter(
                 Lemma.lemma_text.ilike(english_word)
             ).first()
-            
+
             if existing:
                 print(f"Word '{english_word}' already exists in database with GUID: {existing.guid}")
                 return False
-            
+
             # Query LLM for word data
             print(f"Analyzing word '{english_word}' with {self.model}...")
             word_data, success = self._query_word_data(english_word, lithuanian_word)
-            
+
             if not success or not word_data:
                 logger.error(f"Failed to get analysis for word '{english_word}'")
                 return False
-            
+
             # User review (unless auto-approve)
             if not auto_approve:
                 review = self._get_user_review(word_data)
-                
+
                 if not review.approved:
                     logger.info(f"Word '{english_word}' rejected by user: {review.notes}")
                     return False
-                
+
                 # Apply modifications
                 for key, value in review.modifications.items():
                     setattr(word_data, key, value)
-            
+
             # Use provided difficulty level or default to 1 if not set
             final_difficulty_level = difficulty_level or getattr(word_data, 'difficulty_level', None) or 1
-            
+
             # Generate GUID
             guid = self._generate_guid(word_data.pos_subtype, session)
-            
+
             # Create lemma with all translation fields
             lemma = Lemma(
                 lemma_text=word_data.english,
@@ -439,10 +441,10 @@ Word to analyze: {english_word}"""
                 notes=word_data.notes,
                 verified=not auto_approve  # Mark as verified if user reviewed
             )
-            
+
             session.add(lemma)
             session.flush()  # Get the ID
-            
+
             # Create English derivative form (base form)
             english_token = add_word_token(session, word_data.english, 'en')
             english_form = DerivativeForm(
@@ -455,7 +457,7 @@ Word to analyze: {english_word}"""
                 verified=not auto_approve
             )
             session.add(english_form)
-            
+
             # Create Lithuanian derivative form (base form)
             if word_data.lithuanian:
                 lithuanian_token = add_word_token(session, word_data.lithuanian, 'lt')
@@ -469,7 +471,7 @@ Word to analyze: {english_word}"""
                     verified=not auto_approve
                 )
                 session.add(lithuanian_form)
-            
+
             # Add alternative forms
             for alt_english in word_data.alternatives.get('english', []):
                 if alt_english != word_data.english:
@@ -484,7 +486,7 @@ Word to analyze: {english_word}"""
                         verified=not auto_approve
                     )
                     session.add(alt_form)
-            
+
             for alt_lithuanian in word_data.alternatives.get('lithuanian', []):
                 if alt_lithuanian != word_data.lithuanian:
                     alt_token = add_word_token(session, alt_lithuanian, 'lt')
@@ -498,23 +500,23 @@ Word to analyze: {english_word}"""
                         verified=not auto_approve
                     )
                     session.add(alt_form)
-            
+
             session.commit()
-            
+
             print(f"\n✅ Successfully added word '{english_word}' with GUID: {guid}")
             print(f"   Lithuanian: {word_data.lithuanian}")
             print(f"   Level: {final_difficulty_level}")
             print(f"   Subtype: {word_data.pos_subtype}")
-            
+
             return True
-            
+
         except Exception as e:
             session.rollback()
             logger.error(f"Error adding word '{english_word}': {e}")
             return False
         finally:
             session.close()
-    
+
     def _get_default_grammatical_form(self, pos_type: str) -> str:
         """Get default grammatical form for a POS type."""
         defaults = {
@@ -524,23 +526,23 @@ Word to analyze: {english_word}"""
             'adverb': 'base_form'
         }
         return defaults.get(pos_type, 'base_form')
-    
+
     def set_level(self, identifier: str, new_level: int, reason: str = "") -> bool:
         """
         Set or update the difficulty level for a word.
-        
+
         Args:
             identifier: GUID or English word to update
             new_level: New difficulty level (1-20)
             reason: Reason for the change
-            
+
         Returns:
             Success flag
         """
         if not (1 <= new_level <= 20):
             logger.error(f"Invalid difficulty level: {new_level}. Must be 1-20.")
             return False
-        
+
         session = self.get_session()
         try:
             # Find lemma by GUID or English text
@@ -550,62 +552,62 @@ Word to analyze: {english_word}"""
                 lemma = session.query(Lemma).filter(
                     Lemma.lemma_text.ilike(identifier)
                 ).first()
-            
+
             if not lemma:
                 logger.error(f"Word not found: {identifier}")
                 return False
-            
+
             old_level = lemma.difficulty_level
             lemma.difficulty_level = new_level
-            
+
             # Add to notes if reason provided
             if reason:
                 current_notes = lemma.notes or ""
                 timestamp = datetime.now().strftime("%Y-%m-%d")
                 level_note = f"[{timestamp}] Level changed from {old_level} to {new_level}: {reason}"
                 lemma.notes = f"{current_notes}\n{level_note}".strip()
-            
+
             session.commit()
-            
+
             print(f"✅ Updated level for '{lemma.lemma_text}' ({lemma.guid})")
             print(f"   Old level: {old_level} → New level: {new_level}")
             if reason:
                 print(f"   Reason: {reason}")
-            
+
             return True
-            
+
         except Exception as e:
             session.rollback()
             logger.error(f"Error setting level for '{identifier}': {e}")
             return False
         finally:
             session.close()
-    
-    def list_words(self, level: Optional[int] = None, subtype: Optional[str] = None, 
+
+    def list_words(self, level: Optional[int] = None, subtype: Optional[str] = None,
                    limit: int = 50) -> List[Dict[str, Any]]:
         """
         List words with optional filtering.
-        
+
         Args:
             level: Filter by difficulty level
             subtype: Filter by POS subtype
             limit: Maximum number of results
-            
+
         Returns:
             List of word dictionaries
         """
         session = self.get_session()
         try:
             query = session.query(Lemma).filter(Lemma.guid.isnot(None))
-            
+
             if level:
                 query = query.filter(Lemma.difficulty_level == level)
             if subtype:
                 query = query.filter(Lemma.pos_subtype == subtype)
-            
+
             query = query.order_by(Lemma.guid).limit(limit)
             lemmas = query.all()
-            
+
             results = []
             for lemma in lemmas:
                 results.append({
@@ -616,19 +618,19 @@ Word to analyze: {english_word}"""
                     'subtype': lemma.pos_subtype,
                     'verified': lemma.verified
                 })
-            
+
             return results
-            
+
         except Exception as e:
             logger.error(f"Error listing words: {e}")
             return []
         finally:
             session.close()
-    
+
     def list_subtypes(self) -> List[Dict[str, Any]]:
         """
         List all subtypes with their POS type and word counts.
-        
+
         Returns:
             List of dictionaries with subtype information
         """
@@ -636,7 +638,7 @@ Word to analyze: {english_word}"""
         try:
             # Query to get counts by pos_type and pos_subtype
             from sqlalchemy import func
-            
+
             query = session.query(
                 Lemma.pos_type,
                 Lemma.pos_subtype,
@@ -651,7 +653,7 @@ Word to analyze: {english_word}"""
                 Lemma.pos_type,
                 Lemma.pos_subtype
             )
-            
+
             results = []
             for pos_type, pos_subtype, count in query.all():
                 results.append({
@@ -659,29 +661,29 @@ Word to analyze: {english_word}"""
                     'pos_subtype': pos_subtype,
                     'count': count
                 })
-            
+
             return results
-            
+
         except Exception as e:
             logger.error(f"Error listing subtypes: {e}")
             return []
         finally:
             session.close()
-    
 
-    
-    def move_words_by_subtype_and_level(self, from_level: int, subtype: str, to_level: int, 
+
+
+    def move_words_by_subtype_and_level(self, from_level: int, subtype: str, to_level: int,
                                        reason: str = "", dry_run: bool = False) -> bool:
         """
         Move all words matching a specific level and subtype to a new level.
-        
+
         Args:
             from_level: Current difficulty level to move from (1-20)
             subtype: POS subtype to filter by (e.g., "clothing")
             to_level: New difficulty level to move to (1-20)
             reason: Reason for the bulk change
             dry_run: If True, show what would be changed without making changes
-            
+
         Returns:
             Success flag
         """
@@ -692,7 +694,7 @@ Word to analyze: {english_word}"""
         if not (1 <= to_level <= 20):
             logger.error(f"Invalid to_level: {to_level}. Must be 1-20.")
             return False
-        
+
         session = self.get_session()
         try:
             # Find all words matching the criteria
@@ -701,82 +703,82 @@ Word to analyze: {english_word}"""
                 Lemma.pos_subtype == subtype,
                 Lemma.guid.isnot(None)
             )
-            
+
             matching_words = query.all()
-            
+
             if not matching_words:
                 print(f"No words found with level {from_level} and subtype '{subtype}'")
                 return True
-            
+
             print(f"Found {len(matching_words)} words with level {from_level} and subtype '{subtype}':")
             print("-" * 80)
-            
+
             # Display the words that will be affected
             for word in matching_words:
                 status = "✓" if word.verified else "?"
                 print(f"{status} {word.guid:<10} L{word.difficulty_level:<2} "
                       f"{word.lemma_text:<20} → {word.lithuanian_translation or 'N/A':<20}")
-            
+
             if dry_run:
                 print(f"\n[DRY RUN] Would move {len(matching_words)} words from level {from_level} to level {to_level}")
                 return True
-            
+
             # Confirm the operation
             print(f"\nThis will move {len(matching_words)} words from level {from_level} to level {to_level}")
             if reason:
                 print(f"Reason: {reason}")
-            
+
             confirm = input("Continue? (y/N): ").strip().lower()
             if confirm != 'y':
                 print("Operation cancelled.")
                 return False
-            
+
             # Perform the bulk update
             updated_count = 0
             timestamp = datetime.now().strftime("%Y-%m-%d")
-            
+
             for word in matching_words:
                 try:
                     old_level = word.difficulty_level
                     word.difficulty_level = to_level
-                    
+
                     # Add to notes if reason provided
                     if reason:
                         current_notes = word.notes or ""
                         level_note = f"[{timestamp}] Bulk level change from {old_level} to {to_level}: {reason}"
                         word.notes = f"{current_notes}\n{level_note}".strip()
-                    
+
                     updated_count += 1
-                    
+
                 except Exception as e:
                     logger.error(f"Error updating word {word.guid}: {e}")
                     continue
-            
+
             # Commit all changes
             session.commit()
-            
+
             print(f"\n✅ Successfully moved {updated_count} words from level {from_level} to level {to_level}")
             if reason:
                 print(f"   Reason: {reason}")
-            
+
             return True
-            
+
         except Exception as e:
             session.rollback()
             logger.error(f"Error moving words: {e}")
             return False
         finally:
             session.close()
-    
+
     def update_word(self, identifier: str, auto_approve: bool = False, model: str = "gpt-5-mini") -> bool:
         """
         Update an entire Lemma entry using specified model.
-        
+
         Args:
             identifier: GUID or English word to update
             auto_approve: Skip user review if True
             model: LLM model to use for analysis
-            
+
         Returns:
             Success flag
         """
@@ -789,26 +791,26 @@ Word to analyze: {english_word}"""
                 lemma = session.query(Lemma).filter(
                     Lemma.lemma_text.ilike(identifier)
                 ).first()
-            
+
             if not lemma:
                 logger.error(f"Word not found: {identifier}")
                 return False
-            
+
             print(f"Updating word: {lemma.lemma_text} ({lemma.guid})")
             print(f"Current Lithuanian: {lemma.lithuanian_translation}")
-            
+
             # Query LLM for updated word data using specified model
             print(f"Analyzing word '{lemma.lemma_text}' with {model}...")
             word_data, success = self._query_word_data(
-                lemma.lemma_text, 
+                lemma.lemma_text,
                 lemma.lithuanian_translation,
                 model_override=model
             )
-            
+
             if not success or not word_data:
                 logger.error(f"Failed to get updated analysis for word '{lemma.lemma_text}'")
                 return False
-            
+
             # User review (unless auto-approve)
             if not auto_approve:
                 print("\n" + "="*60)
@@ -827,17 +829,17 @@ Word to analyze: {english_word}"""
                 print(f"Vietnamese: {lemma.vietnamese_translation or 'N/A'}")
                 print(f"Notes: {lemma.notes or 'N/A'}")
                 print("="*60)
-                
+
                 review = self._get_user_review(word_data)
-                
+
                 if not review.approved:
                     logger.info(f"Word update for '{lemma.lemma_text}' rejected by user: {review.notes}")
                     return False
-                
+
                 # Apply modifications
                 for key, value in review.modifications.items():
                     setattr(word_data, key, value)
-            
+
             # Update the lemma with new data
             old_values = {
                 'lithuanian_translation': lemma.lithuanian_translation,
@@ -852,7 +854,7 @@ Word to analyze: {english_word}"""
                 'confidence': lemma.confidence,
                 'notes': lemma.notes
             }
-            
+
             # Update all fields
             lemma.lithuanian_translation = word_data.lithuanian
             lemma.definition_text = word_data.definition
@@ -865,18 +867,18 @@ Word to analyze: {english_word}"""
             lemma.vietnamese_translation = word_data.vietnamese_translation
             lemma.confidence = word_data.confidence
             lemma.verified = not auto_approve  # Mark as verified if user reviewed
-            
+
             # Add update note with LLM notes
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
             current_notes = lemma.notes or ""
             update_note = f"[{timestamp}] Updated with {model}"
-            
+
             # Include LLM notes if available
             if word_data.notes:
                 update_note += f": {word_data.notes}"
-            
+
             lemma.notes = f"{current_notes}\n{update_note}".strip()
-            
+
             # Update derivative forms if needed
             # Find existing English and Lithuanian base forms
             english_form = session.query(DerivativeForm).filter(
@@ -884,13 +886,13 @@ Word to analyze: {english_word}"""
                 DerivativeForm.language_code == 'en',
                 DerivativeForm.is_base_form == True
             ).first()
-            
+
             lithuanian_form = session.query(DerivativeForm).filter(
                 DerivativeForm.lemma_id == lemma.id,
                 DerivativeForm.language_code == 'lt',
                 DerivativeForm.is_base_form == True
             ).first()
-            
+
             # Update English form if it exists and changed
             if english_form and english_form.derivative_form_text != word_data.english:
                 english_token = add_word_token(session, word_data.english, 'en')
@@ -898,7 +900,7 @@ Word to analyze: {english_word}"""
                 english_form.word_token_id = english_token.id
                 english_form.grammatical_form = self._get_default_grammatical_form(word_data.pos_type)
                 english_form.verified = not auto_approve
-            
+
             # Update Lithuanian form if it exists and changed
             if lithuanian_form and lithuanian_form.derivative_form_text != word_data.lithuanian:
                 lithuanian_token = add_word_token(session, word_data.lithuanian, 'lt')
@@ -906,7 +908,7 @@ Word to analyze: {english_word}"""
                 lithuanian_form.word_token_id = lithuanian_token.id
                 lithuanian_form.grammatical_form = self._get_default_grammatical_form(word_data.pos_type)
                 lithuanian_form.verified = not auto_approve
-            
+
             # Create Lithuanian form if it doesn't exist but we have translation
             elif not lithuanian_form and word_data.lithuanian:
                 lithuanian_token = add_word_token(session, word_data.lithuanian, 'lt')
@@ -920,10 +922,10 @@ Word to analyze: {english_word}"""
                     verified=not auto_approve
                 )
                 session.add(lithuanian_form)
-            
+
             # Track alternate forms that will be added
             added_alternatives = {'english': [], 'lithuanian': []}
-            
+
             # Add alternate forms (skip any with parentheses)
             if word_data.alternatives:
                 # Process English alternatives
@@ -932,14 +934,14 @@ Word to analyze: {english_word}"""
                         # Skip forms with parentheses
                         if '(' in alt_form or ')' in alt_form:
                             continue
-                        
+
                         # Check if this alternative form already exists
                         existing_alt = session.query(DerivativeForm).filter(
                             DerivativeForm.lemma_id == lemma.id,
                             DerivativeForm.language_code == 'en',
                             DerivativeForm.derivative_form_text == alt_form
                         ).first()
-                        
+
                         if not existing_alt:
                             # Add the alternative form
                             alt_token = add_word_token(session, alt_form, 'en')
@@ -954,21 +956,21 @@ Word to analyze: {english_word}"""
                             )
                             session.add(alt_derivative)
                             added_alternatives['english'].append(alt_form)
-                
+
                 # Process Lithuanian alternatives
                 if 'lithuanian' in word_data.alternatives and word_data.alternatives['lithuanian']:
                     for alt_form in word_data.alternatives['lithuanian']:
                         # Skip forms with parentheses
                         if '(' in alt_form or ')' in alt_form:
                             continue
-                        
+
                         # Check if this alternative form already exists
                         existing_alt = session.query(DerivativeForm).filter(
                             DerivativeForm.lemma_id == lemma.id,
                             DerivativeForm.language_code == 'lt',
                             DerivativeForm.derivative_form_text == alt_form
                         ).first()
-                        
+
                         if not existing_alt:
                             # Add the alternative form
                             alt_token = add_word_token(session, alt_form, 'lt')
@@ -983,33 +985,33 @@ Word to analyze: {english_word}"""
                             )
                             session.add(alt_derivative)
                             added_alternatives['lithuanian'].append(alt_form)
-            
+
             session.commit()
-            
+
             print(f"\n✅ Successfully updated word '{lemma.lemma_text}' ({lemma.guid})")
-            
+
             # Show what changed
             changes = []
             for field, old_value in old_values.items():
                 new_value = getattr(lemma, field)
                 if old_value != new_value:
                     changes.append(f"   {field}: '{old_value}' → '{new_value}'")
-            
+
             # Add information about added alternate forms
             if added_alternatives['english']:
                 changes.append(f"   Added English alternatives: {', '.join(added_alternatives['english'])}")
             if added_alternatives['lithuanian']:
                 changes.append(f"   Added Lithuanian alternatives: {', '.join(added_alternatives['lithuanian'])}")
-            
+
             if changes:
                 print("Changes made:")
                 for change in changes:
                     print(change)
             else:
                 print("   No changes detected (data was already up to date)")
-            
+
             return True
-            
+
         except Exception as e:
             session.rollback()
             logger.error(f"Error updating word '{identifier}': {e}")
@@ -1018,38 +1020,174 @@ Word to analyze: {english_word}"""
             session.close()
 
 # CLI interface functions
+
+def generate_noun_forms(limit: int = 50, pos_subtype: str = None, dry_run: bool = False, force: bool = False) -> bool:
+    """
+    Generate derivative forms for Lithuanian nouns.
+
+    Args:
+        limit: Maximum number of nouns to process
+        pos_subtype: Filter by specific POS subtype (optional)
+        dry_run: If True, show what would be generated without saving
+        force: If True, regenerate forms even if they already exist
+
+    Returns:
+        True if successful, False otherwise
+    """
+    from wordfreq.storage.database import create_database_session
+    from wordfreq.storage.models.schema import Lemma
+
+    print("🔄 Generating Lithuanian noun forms...")
+
+    try:
+        session = create_database_session()
+        linguistic_client = LinguisticClient()
+
+        # Query Lithuanian nouns that need forms
+        query = session.query(Lemma).filter(
+            Lemma.pos_type == 'noun',
+            Lemma.lithuanian_translation.isnot(None),
+            Lemma.lithuanian_translation != ''
+        )
+
+        if pos_subtype:
+            query = query.filter(Lemma.pos_subtype == pos_subtype)
+            print(f"Filtering by POS subtype: {pos_subtype}")
+
+        query = query.limit(limit)
+        lemmas = query.all()
+
+        print(f"Found {len(lemmas)} Lithuanian nouns to process")
+
+        successful_generations = 0
+        skipped_count = 0
+        error_count = 0
+
+        for i, lemma in enumerate(lemmas, 1):
+            print(f"\n[{i}/{len(lemmas)}] Processing: {lemma.lithuanian_translation}")
+
+            try:
+                # Check if forms already exist (unless force is specified)
+                if not force:
+                    existing_forms = get_noun_derivative_forms(session, lemma.id)
+                    if existing_forms:
+                        print(f"  ⏭️  Skipping - forms already exist ({len(existing_forms)} forms)")
+                        skipped_count += 1
+                        continue
+
+                # Generate forms using LLM
+                print(f"  🤖 Generating forms for '{lemma.lithuanian_translation}'...")
+                noun_forms = linguistic_client.query_noun_forms(
+                    lemma.lithuanian_translation,
+                    lemma.pos_subtype
+                )
+
+                if not noun_forms:
+                    print(f"  ❌ Failed to generate forms")
+                    error_count += 1
+                    continue
+
+                if dry_run:
+                    print(f"  📋 DRY RUN - Would generate:")
+                    if noun_forms.plural_nominative:
+                        print(f"    plural_nominative: {noun_forms.plural_nominative}")
+                    successful_generations += 1
+                    continue
+
+                # Store the generated forms
+                forms_added = 0
+
+                if noun_forms.plural_nominative:
+                    derivative_form = add_noun_derivative_form(
+                        session=session,
+                        lemma=lemma,
+                        form_text=noun_forms.plural_nominative,
+                        grammatical_form="plural_nominative",
+                        language_code="lt",
+                        is_base_form=False,
+                        verified=False,  # Will need manual verification
+                        notes="Generated by LLM"
+                    )
+
+                    if derivative_form:
+                        print(f"  ✅ Added plural_nominative: {noun_forms.plural_nominative}")
+                        forms_added += 1
+                    else:
+                        print(f"  ⚠️  Failed to store plural_nominative: {noun_forms.plural_nominative}")
+
+                if forms_added > 0:
+                    successful_generations += 1
+                    print(f"  📝 Successfully added {forms_added} form(s)")
+                else:
+                    print(f"  ❌ No forms were stored")
+                    error_count += 1
+
+            except Exception as e:
+                print(f"  💥 Error processing {lemma.lithuanian_translation}: {e}")
+                error_count += 1
+                continue
+
+        # Summary
+        print(f"\n{'='*50}")
+        print(f"📊 Noun forms generation complete!")
+        print(f"✅ Successful: {successful_generations}")
+        print(f"⏭️  Skipped: {skipped_count}")
+        print(f"❌ Errors: {error_count}")
+        print(f"📝 Total processed: {len(lemmas)}")
+
+        if dry_run:
+            print("🔍 This was a dry run - no forms were actually saved")
+
+        session.close()
+        return True
+
+    except Exception as e:
+        print(f"💥 Error during noun forms generation: {e}")
+        return False
+
+
+def create_custom_export(pos_subtype: str, output_path: str) -> bool:
+    """
+    Create a custom export for a specific POS subtype.
+    (This function seems to be a placeholder or for a different purpose,
+    as the current request focuses on noun forms generation and wireword export.)
+    """
+    logger.warning("create_custom_export function called, but it's not implemented in this context.")
+    return False
+
+
 def main():
     """Command-line interface for word management."""
     import argparse
     from datetime import datetime
-    
+
     parser = argparse.ArgumentParser(description="Trakaido Word Management Tool")
     subparsers = parser.add_subparsers(dest='command', help='Available commands')
-    
+
     # Add word command
     add_parser = subparsers.add_parser('add', help='Add a new word')
     add_parser.add_argument('english_word', help='English word to add')
     add_parser.add_argument('--lithuanian', help='Lithuanian translation to clarify meaning')
     add_parser.add_argument('--level', type=int, help='Difficulty level (1-20)')
-    add_parser.add_argument('--auto-approve', action='store_true', 
+    add_parser.add_argument('--auto-approve', action='store_true',
                            help='Skip user review')
-    add_parser.add_argument('--model', default='gpt-5-mini', 
+    add_parser.add_argument('--model', default='gpt-5-mini',
                            help='LLM model to use')
-    
+
     # Set level command
     level_parser = subparsers.add_parser('set-level', help='Set word difficulty level')
     level_parser.add_argument('identifier', help='GUID or English word')
     level_parser.add_argument('level', type=int, help='New difficulty level (1-20)')
     level_parser.add_argument('--reason', help='Reason for the change')
-    
+
     # Update word command
     update_parser = subparsers.add_parser('update', help='Update entire Lemma entry using specified model')
     update_parser.add_argument('identifier', help='GUID or English word to update')
-    update_parser.add_argument('--auto-approve', action='store_true', 
+    update_parser.add_argument('--auto-approve', action='store_true',
                               help='Skip user review')
-    update_parser.add_argument('--model', default='gpt-5-mini', 
+    update_parser.add_argument('--model', default='gpt-5-mini',
                               help='LLM model to use')
-    
+
     # Move words by subtype and level command
     move_parser = subparsers.add_parser('move-words', help='Move all words with specific level and subtype to new level')
     move_parser.add_argument('from_level', type=int, help='Current difficulty level (1-20)')
@@ -1057,38 +1195,45 @@ def main():
     move_parser.add_argument('to_level', type=int, help='New difficulty level (1-20)')
     move_parser.add_argument('--reason', help='Reason for the bulk change')
     move_parser.add_argument('--dry-run', action='store_true', help='Show what would be changed without making changes')
-    
+
     # List words command
     list_parser = subparsers.add_parser('list', help='List words')
     list_parser.add_argument('--level', type=int, help='Filter by difficulty level')
     list_parser.add_argument('--subtype', help='Filter by POS subtype')
     list_parser.add_argument('--limit', type=int, default=50, help='Maximum results')
-    
+
     # List subtypes command
     subtypes_parser = subparsers.add_parser('subtypes', help='List all subtypes with counts')
-    
+
+    # Generate noun forms command
+    generate_forms_parser = subparsers.add_parser('generate-noun-forms', help='Generate derivative forms for Lithuanian nouns')
+    generate_forms_parser.add_argument('--limit', type=int, default=50, help='Maximum number of nouns to process')
+    generate_forms_parser.add_argument('--pos-subtype', help='Filter by specific POS subtype (optional)')
+    generate_forms_parser.add_argument('--dry-run', action='store_true', help='Show what would be generated without saving')
+    generate_forms_parser.add_argument('--force', action='store_true', help='Regenerate forms even if they already exist')
+
     # Export commands
     export_parser = subparsers.add_parser('export', help='Export words to files')
     export_subparsers = export_parser.add_subparsers(dest='export_type', help='Export formats')
-    
+
     # Export to JSON
     json_parser = export_subparsers.add_parser('json', help='Export to JSON format')
     json_parser.add_argument('--output', help='Output JSON file path')
-    
+
     # Export to lang_lt
     lang_lt_parser = export_subparsers.add_parser('lang-lt', help='Export to lang_lt directory structure')
     lang_lt_parser.add_argument('--output-dir', help='Output directory path')
-    
+
     # Export to text
     text_parser = export_subparsers.add_parser('text', help='Export to simple text format for specific subtype')
     text_parser.add_argument('subtype', help='POS subtype to export (required)')
     text_parser.add_argument('--output', help='Output text file path')
     text_parser.add_argument('--level', type=int, help='Filter by specific difficulty level')
-    text_parser.add_argument('--include-without-guid', action='store_true', 
+    text_parser.add_argument('--include-without-guid', action='store_true',
                             help='Include lemmas without GUIDs')
     text_parser.add_argument('--include-unverified', action='store_true', default=True,
                             help='Include unverified entries (default: True)')
-    
+
     # Export to wireword format
     wireword_parser = export_subparsers.add_parser('wireword', help='Export to WireWord API format')
     wireword_parser.add_argument('--output', help='Output JSON file path')
@@ -1098,29 +1243,29 @@ def main():
                                 help='Include lemmas without GUIDs')
     wireword_parser.add_argument('--include-unverified', action='store_true', default=True,
                                 help='Include unverified entries (default: True)')
-    
+
     # Export wireword directory
     wireword_dir_parser = export_subparsers.add_parser('wireword-dir', help='Export WireWord files to directory structure')
     wireword_dir_parser.add_argument('--output-dir', help='Base output directory (will create wireword subdirectory)')
-    
+
     # Export wireword verbs
     wireword_verbs_parser = export_subparsers.add_parser('wireword-verbs', help='Export verbs from verbs.py to wireword format')
     wireword_verbs_parser.add_argument('--output', help='Output JSON file path')
-    
+
     # Export all
     all_parser = export_subparsers.add_parser('all', help='Export to all formats including wireword directory')
     all_parser.add_argument('--json-output', help='JSON output file path')
     all_parser.add_argument('--lang-lt-dir', help='lang_lt output directory path')
     all_parser.add_argument('--no-wireword-dir', action='store_true', help='Skip wireword directory export')
-    
+
     args = parser.parse_args()
-    
+
     if not args.command:
         parser.print_help()
         return
-    
+
     manager = WordManager(model=args.model if hasattr(args, 'model') else 'gpt-5-mini')
-    
+
     if args.command == 'add':
         success = manager.add_word(
             english_word=args.english_word,
@@ -1129,12 +1274,12 @@ def main():
             auto_approve=args.auto_approve
         )
         sys.exit(0 if success else 1)
-    
+
     elif args.command == 'set-level':
-        success = manager.set_level(args.identifier, args.level, 
+        success = manager.set_level(args.identifier, args.level,
                                    reason=getattr(args, 'reason', ''))
         sys.exit(0 if success else 1)
-    
+
     elif args.command == 'update':
         success = manager.update_word(
             identifier=args.identifier,
@@ -1142,7 +1287,7 @@ def main():
             model=args.model
         )
         sys.exit(0 if success else 1)
-    
+
     elif args.command == 'move-words':
         success = manager.move_words_by_subtype_and_level(
             from_level=args.from_level,
@@ -1152,11 +1297,11 @@ def main():
             dry_run=getattr(args, 'dry_run', False)
         )
         sys.exit(0 if success else 1)
-    
+
     elif args.command == 'list':
-        words = manager.list_words(level=args.level, subtype=args.subtype, 
+        words = manager.list_words(level=args.level, subtype=args.subtype,
                                   limit=args.limit)
-        
+
         if words:
             print(f"\nFound {len(words)} words:")
             print("-" * 80)
@@ -1167,10 +1312,10 @@ def main():
                       f"({word['subtype']})")
         else:
             print("No words found matching criteria.")
-    
+
     elif args.command == 'subtypes':
         subtypes = manager.list_subtypes()
-        
+
         if subtypes:
             print(f"\nFound {len(subtypes)} subtypes:")
             print("-" * 60)
@@ -1178,62 +1323,71 @@ def main():
                 print(f"{subtype_info['pos_subtype']:<25} ({subtype_info['pos_type']:<10}) {subtype_info['count']:>6} words")
         else:
             print("No subtypes found.")
-    
+
+    elif args.command == 'generate-noun-forms':
+        success = generate_noun_forms(
+            limit=args.limit,
+            pos_subtype=args.pos_subtype,
+            dry_run=args.dry_run,
+            force=args.force
+        )
+        sys.exit(0 if success else 1)
+
     elif args.command == 'export':
         if not args.export_type:
             export_parser.print_help()
-            sys.exit(1)
-        
+            return
+
         # Create TrakaidoExporter instance for export operations
         exporter = TrakaidoExporter(db_path=manager.db_path, debug=manager.debug)
-        
+
         if args.export_type == 'json':
             # Use default path if not provided
             output_path = args.output
             if not output_path:
                 output_path = str(Path(GREENLAND_SRC_PATH) / "wordfreq" / "trakaido" / "exported_nouns.json")
-            
+
             success, stats = exporter.export_to_json(
                 output_path=output_path,
                 include_without_guid=False,  # Only include words with GUIDs
                 include_unverified=True,     # Include unverified entries
                 pretty_print=True
             )
-            
+
             if success and stats:
                 logger.info(f"Exported {stats.total_entries} words to {output_path}")
                 logger.info(f"Entries with GUIDs: {stats.entries_with_guids}")
-            
+
             sys.exit(0 if success else 1)
-        
+
         elif args.export_type == 'lang-lt':
             # Use default directory if not provided
             output_dir = args.output_dir
             if not output_dir:
                 output_dir = f'{GREENLAND_SRC_PATH}/../data/trakaido_wordlists/lang_lt/generated'
-            
+
             success, results = exporter.export_to_lang_lt(output_dir)
-            
+
             if success:
                 levels_generated = results.get('levels_generated', [])
                 dictionaries_generated = results.get('dictionaries_generated', [])
-                
+
                 print(f"\n✅ Export to lang_lt completed:")
                 print(f"   Structure files: {len(levels_generated)} levels")
                 print(f"   Dictionary files: {len(dictionaries_generated)} subtypes")
                 print(f"   Output directory: {output_dir}")
-            
+
             sys.exit(0 if success else 1)
-        
+
         elif args.export_type == 'text':
             # Generate default output filename if not provided
             output_path = args.output
             if not output_path:
                 output_path = f"{args.subtype}.txt"
-            
+
             # Convert to absolute path to avoid issues with directory creation
             output_path = str(Path(output_path).resolve())
-            
+
             success, stats = exporter.export_to_text(
                 output_path=output_path,
                 pos_subtype=args.subtype,
@@ -1241,7 +1395,7 @@ def main():
                 include_without_guid=args.include_without_guid,
                 include_unverified=args.include_unverified
             )
-            
+
             if success and stats:
                 print(f"\n✅ Text export completed:")
                 print(f"   Exported {stats.total_entries} words for subtype '{args.subtype}'")
@@ -1249,18 +1403,18 @@ def main():
                 if args.level is not None:
                     print(f"   Difficulty level: {args.level}")
                 print(f"   Output file: {output_path}")
-            
+
             sys.exit(0 if success else 1)
-        
+
         elif args.export_type == 'wireword':
             # Generate default output filename if not provided
             output_path = args.output
             if not output_path:
                 output_path = "wireword_export.json"
-            
+
             # Convert to absolute path
             output_path = str(Path(output_path).resolve())
-            
+
             success, stats = exporter.export_to_wireword_format(
                 output_path=output_path,
                 difficulty_level=args.level,
@@ -1268,7 +1422,7 @@ def main():
                 include_without_guid=args.include_without_guid,
                 include_unverified=args.include_unverified
             )
-            
+
             if success and stats:
                 print(f"\n✅ WireWord export completed:")
                 print(f"   Exported {stats.total_entries} words")
@@ -1278,17 +1432,17 @@ def main():
                 if args.subtype:
                     print(f"   POS subtype: {args.subtype}")
                 print(f"   Output file: {output_path}")
-            
+
             sys.exit(0 if success else 1)
-        
+
         elif args.export_type == 'wireword-dir':
             # Use default directory if not provided
             output_dir = args.output_dir
             if not output_dir:
                 output_dir = f'{GREENLAND_SRC_PATH}/../data/trakaido_wordlists/lang_lt/generated'
-            
+
             success, results = exporter.export_wireword_directory(output_dir)
-            
+
             if success:
                 print(f"\n✅ WireWord directory export completed:")
                 print(f"   Files created: {len(results.get('files_created', []))}")
@@ -1296,17 +1450,17 @@ def main():
                 print(f"   Subtypes exported: {len(results.get('subtypes_exported', []))}")
                 print(f"   Total words: {results.get('total_words', 0)}")
                 print(f"   Output directory: {output_dir}/wireword")
-            
+
             sys.exit(0 if success else 1)
-        
+
         elif args.export_type == 'wireword-verbs':
             # Use default output path if not provided
             output_path = args.output
             if not output_path:
                 output_path = f'{GREENLAND_SRC_PATH}/../wireword_verbs_export.json'
-            
+
             success, results = export_wireword_verbs(output_path)
-            
+
             if success:
                 print(f"\n✅ WireWord verbs export completed:")
                 print(f"   Total verbs: {results['total_verbs']}")
@@ -1315,30 +1469,30 @@ def main():
                 print(f"   Level distribution: {results['level_distribution']}")
                 print(f"   Group distribution: {results['group_distribution']}")
                 print(f"   Output file: {results['output_path']}")
-                
+
                 if results['skipped_verbs']:
                     print(f"   Skipped verbs ({len(results['skipped_verbs'])}): {', '.join(results['skipped_verbs'])}")
             else:
                 print(f"\n❌ WireWord verbs export failed: {results.get('error', 'Unknown error')}")
-            
+
             sys.exit(0 if success else 1)
-        
+
         elif args.export_type == 'all':
             # Use default paths if not provided
             json_path = args.json_output
             if not json_path:
                 json_path = str(Path(GREENLAND_SRC_PATH) / "wordfreq" / "trakaido" / "exported_nouns.json")
-            
+
             lang_lt_dir = args.lang_lt_dir
             if not lang_lt_dir:
                 lang_lt_dir = f'{GREENLAND_SRC_PATH}/../data/trakaido_wordlists/lang_lt/generated'
-            
+
             # Include wireword directory unless explicitly disabled
             include_wireword_dir = not args.no_wireword_dir
-            
+
             success, results = exporter.export_all(
-                json_path, 
-                lang_lt_dir, 
+                json_path,
+                lang_lt_dir,
                 include_wireword_directory=include_wireword_dir
             )
             sys.exit(0 if success else 1)
