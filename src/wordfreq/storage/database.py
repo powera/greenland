@@ -1052,6 +1052,88 @@ def get_base_forms_only(session, limit: int = 100) -> List[DerivativeForm]:
         .limit(limit)\
         .all()
 
+def add_noun_derivative_form(
+    session, 
+    lemma: Lemma, 
+    form_text: str, 
+    grammatical_form: str,
+    language_code: str = "lt",
+    is_base_form: bool = False,
+    verified: bool = False,
+    notes: str = None
+) -> Optional[DerivativeForm]:
+    """
+    Add a derivative form for a noun (e.g., plural form).
+    
+    Args:
+        session: Database session
+        lemma: The lemma this form belongs to
+        form_text: The actual form text (e.g., "vilkai")
+        grammatical_form: The grammatical form type (e.g., "plural_nominative")
+        language_code: Language code (default: "lt")
+        is_base_form: Whether this is a base form (default: False)
+        verified: Whether this form is verified (default: False)
+        notes: Optional notes
+        
+    Returns:
+        DerivativeForm object or None if creation failed
+    """
+    try:
+        # Get or create word token
+        word_token = add_word_token(session, form_text, language_code)
+        
+        # Check if this derivative form already exists
+        existing_form = session.query(DerivativeForm).filter(
+            DerivativeForm.lemma_id == lemma.id,
+            DerivativeForm.derivative_form_text == form_text,
+            DerivativeForm.language_code == language_code,
+            DerivativeForm.grammatical_form == grammatical_form
+        ).first()
+        
+        if existing_form:
+            logger.debug(f"Derivative form already exists: {form_text} ({grammatical_form})")
+            return existing_form
+        
+        # Create new derivative form
+        derivative_form = DerivativeForm(
+            lemma_id=lemma.id,
+            derivative_form_text=form_text,
+            word_token_id=word_token.id,
+            language_code=language_code,
+            grammatical_form=grammatical_form,
+            is_base_form=is_base_form,
+            verified=verified,
+            notes=notes
+        )
+        
+        session.add(derivative_form)
+        session.commit()
+        
+        logger.info(f"Added noun derivative form: {form_text} ({grammatical_form}) for lemma {lemma.lemma_text}")
+        return derivative_form
+        
+    except Exception as e:
+        session.rollback()
+        logger.error(f"Failed to add noun derivative form {form_text}: {e}")
+        return None
+
+def get_noun_derivative_forms(session, lemma_id: int, language_code: str = "lt") -> List[DerivativeForm]:
+    """
+    Get all derivative forms for a noun lemma.
+    
+    Args:
+        session: Database session
+        lemma_id: ID of the lemma
+        language_code: Language code (default: "lt")
+        
+    Returns:
+        List of DerivativeForm objects
+    """
+    return session.query(DerivativeForm).filter(
+        DerivativeForm.lemma_id == lemma_id,
+        DerivativeForm.language_code == language_code
+    ).all()
+
 def get_grammatical_forms_for_token(session, token_text: str, language_code: str) -> List[str]:
     """Get all grammatical forms available for a specific token."""
     word_token = get_word_token_by_text(session, token_text, language_code)
