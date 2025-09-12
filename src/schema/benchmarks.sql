@@ -5,7 +5,9 @@ CREATE TABLE model (
   displayname TEXT NOT NULL,
   launch_date TEXT,
   filesize_mb INTEGER,
-  license_name TEXT
+  license_name TEXT,
+  model_path TEXT,
+  model_type TEXT DEFAULT 'local'
 );
 
 CREATE TABLE benchmark (
