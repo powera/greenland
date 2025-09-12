@@ -832,12 +832,22 @@ class TrakaidoExporter:
                             lithuanian_alternatives.append(form.derivative_form_text)
                         elif form.grammatical_form == 'synonym':
                             lithuanian_synonyms.append(form.derivative_form_text)
-                        elif form.grammatical_form in ['plural_nominative']:
-                            # Add specific grammatical forms for nouns (currently just plural_nominative)
+                        elif form.grammatical_form == 'plural_nominative':
+                            # Add plural nominative form with appropriate level (minimum level 4)
+                            form_level = max(entry['trakaido_level'], 4)
                             grammatical_forms[form.grammatical_form] = {
-                                "level": entry['trakaido_level'],  # Use same level as base word
+                                "level": form_level,
                                 "lithuanian": form.derivative_form_text,
                                 "english": f"{entry['English']} (plural)"  # Simple plural English form
+                            }
+                        elif form.grammatical_form in ['singular_accusative', 'plural_accusative']:
+                            # Add accusative forms with appropriate level (minimum level 9)
+                            form_level = max(entry['trakaido_level'], 9)
+                            english_suffix = " (accusative singular)" if form.grammatical_form == 'singular_accusative' else " (accusative plural)"
+                            grammatical_forms[form.grammatical_form] = {
+                                "level": form_level,
+                                "lithuanian": form.derivative_form_text,
+                                "english": f"{entry['English']}{english_suffix}"
                             }
                 
                 # Get corpus assignment for this entry

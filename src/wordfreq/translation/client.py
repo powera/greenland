@@ -1430,12 +1430,13 @@ Pay special attention to distinguishing between different grammatical forms of t
             "skipped": skipped
         }
 
-    def query_noun_forms(self, noun: str, pos_subtype: str = None) -> Optional[LithuanianNounForms]:
+    def query_noun_forms(self, noun: str, required_forms: Dict[str, int], pos_subtype: str = None) -> Optional[LithuanianNounForms]:
         """
         Query Lithuanian noun forms generation.
 
         Args:
             noun: The Lithuanian noun in nominative singular
+            required_forms: Dictionary of form names to minimum levels
             pos_subtype: Optional POS subtype for context
 
         Returns:
@@ -1444,7 +1445,19 @@ Pay special attention to distinguishing between different grammatical forms of t
         try:
             context = util.prompt_loader.get_context("wordfreq", "definitions")  # Reuse definitions context
 
-            prompt = create_noun_forms_prompt(noun, pos_subtype)
+            prompt = create_noun_forms_prompt(noun, required_forms, pos_subtype)
+
+            # Build schema properties dynamically based on required forms
+            form_properties = {
+                "singular_nominative": SchemaProperty("string", "Base nominative singular form")
+            }
+            
+            if "plural_nominative" in required_forms:
+                form_properties["plural_nominative"] = SchemaProperty("string", "Nominative plural form")
+            if "singular_accusative" in required_forms:
+                form_properties["singular_accusative"] = SchemaProperty("string", "Accusative singular form")
+            if "plural_accusative" in required_forms:
+                form_properties["plural_accusative"] = SchemaProperty("string", "Accusative plural form")
 
             schema = Schema(
                 name="LithuanianNounForms",
@@ -1453,30 +1466,22 @@ Pay special attention to distinguishing between different grammatical forms of t
                     "forms": SchemaProperty(
                         type="object",
                         description="Dictionary of noun forms",
-                        properties={
-                            "singular_nominative": SchemaProperty("string", "Base nominative singular form"),
-                            "plural_nominative": SchemaProperty("string", "Nominative plural form"),
-                        }
+                        properties=form_properties
                     ),
                     "confidence": SchemaProperty("number", "Confidence score from 0-1"),
                     "notes": SchemaProperty("string", "Notes about the declension pattern")
                 }
             )
 
-            response = self.client.generate_completion(
+            response = self.client.generate_chat(
                 prompt=prompt,
-                context=context,
-                temperature=0.3,
-                structured_output=schema
+                model=self.model,
+                json_schema=schema,
+                context=context
             )
 
-            if response and response.content:
-                try:
-                    response_data = json.loads(response.content)
-                    return parse_noun_forms_response(response_data)
-                except json.JSONDecodeError:
-                    logger.warning(f"Failed to parse noun forms response for {noun}")
-                    return None
+            if response and response.structured_data:
+                return parse_noun_forms_response(response.structured_data)
 
         except Exception as e:
             logger.error(f"Error querying noun forms for {noun}: {e}")
