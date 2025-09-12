@@ -17,14 +17,15 @@ class Base(DeclarativeBase):
     pass
 
 class Model(Base):
-    """Shared model class used by both benchmarks and qualitative tests."""
+    """Model definition."""
     __tablename__ = 'model'
-
     codename: Mapped[str] = mapped_column(String, primary_key=True)
     displayname: Mapped[str] = mapped_column(String, nullable=False)
     launch_date: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     filesize_mb: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     license_name: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    model_path: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    model_type: Mapped[str] = mapped_column(String, nullable=False, default='local')
 
     # benchmark runs and qual runs are populated in those files.
 
@@ -48,8 +49,10 @@ def insert_model(
     displayname: str,
     launch_date: str = None,
     filesize_mb: int = None,
-    license_name: str = None
-) -> tuple[bool, str]:
+    license_name: str = None,
+    model_path: str = None,
+    model_type: str = 'local'
+):
     """Insert a new model into the database."""
     try:
         new_model = Model(
@@ -57,7 +60,9 @@ def insert_model(
             displayname=displayname,
             launch_date=launch_date,
             filesize_mb=filesize_mb,
-            license_name=license_name
+            license_name=license_name,
+            model_path=model_path,
+            model_type=model_type
         )
         session.add(new_model)
         session.commit()
@@ -70,19 +75,46 @@ def insert_model(
         session.rollback()
         return False, f"Error inserting model: {str(e)}"
 
-def list_all_models(session) -> List[Dict]:
-    """List all models in the database."""
-    models = session.query(Model).all()
+def list_all_models(session):
+    """List all models in the database.
+
+    :param session: SQLAlchemy session
+    :return: List of model details
+    """
+    models = session.query(Model).order_by(Model.displayname).all()
     return [
         {
             'codename': model.codename,
             'displayname': model.displayname,
             'launch_date': model.launch_date,
             'filesize_mb': model.filesize_mb,
-            'license_name': model.license_name
+            'license_name': model.license_name,
+            'model_path': model.model_path,
+            'model_type': model.model_type
         }
         for model in models
     ]
+
+def get_model_by_codename(session, codename: str):
+    """Get model details by codename.
+
+    :param session: SQLAlchemy session
+    :param codename: Model codename
+    :return: Model details dictionary or None
+    """
+    model = session.query(Model).filter(Model.codename == codename).first()
+    if not model:
+        return None
+
+    return {
+        'codename': model.codename,
+        'displayname': model.displayname,
+        'launch_date': model.launch_date,
+        'filesize_mb': model.filesize_mb,
+        'license_name': model.license_name,
+        'model_path': model.model_path,
+        'model_type': model.model_type
+    }
 
 def decode_json(text: Optional[str]) -> Dict:
     """Safely decode JSON text with proper Unicode handling."""
