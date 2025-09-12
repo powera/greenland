@@ -39,6 +39,7 @@ from wordfreq.trakaido.dict_generator import (
     generate_structure_file,
     generate_dictionary_file
 )
+from wordfreq.storage.database import get_noun_derivative_forms
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -808,11 +809,12 @@ class TrakaidoExporter:
                     DerivativeForm.lemma_id == lemma.id
                 ).all()
                 
-                # Build alternatives and synonyms (no grammatical_forms for non-verbs)
+                # Build alternatives, synonyms, and grammatical forms
                 english_alternatives = []
                 lithuanian_alternatives = []
                 english_synonyms = []
                 lithuanian_synonyms = []
+                grammatical_forms = {}
                 
                 for form in derivative_forms:
                     if form.is_base_form:
@@ -825,15 +827,18 @@ class TrakaidoExporter:
                             english_alternatives.append(form.derivative_form_text)
                         elif form.grammatical_form == 'synonym':
                             english_synonyms.append(form.derivative_form_text)
-                        # Note: grammatical forms like plurals, cases, etc. are NOT added here
-                        # Only verbs should use grammatical_forms
                     elif form.language_code == 'lt':
                         if form.grammatical_form == 'alternative_form':
                             lithuanian_alternatives.append(form.derivative_form_text)
                         elif form.grammatical_form == 'synonym':
                             lithuanian_synonyms.append(form.derivative_form_text)
-                        # Note: grammatical forms like plurals, cases, etc. are NOT added here
-                        # Only verbs should use grammatical_forms
+                        elif form.grammatical_form in ['plural_nominative']:
+                            # Add specific grammatical forms for nouns (currently just plural_nominative)
+                            grammatical_forms[form.grammatical_form] = {
+                                "level": entry['trakaido_level'],  # Use same level as base word
+                                "lithuanian": form.derivative_form_text,
+                                "english": f"{entry['English']} (plural)"  # Simple plural English form
+                            }
                 
                 # Get corpus assignment for this entry
                 corpus_key = (entry['trakaido_level'], entry['subtype'])
@@ -859,6 +864,10 @@ class TrakaidoExporter:
                     wireword['english_synonyms'] = english_synonyms
                 if lithuanian_synonyms:
                     wireword['lithuanian_synonyms'] = lithuanian_synonyms
+                
+                # Add grammatical forms (for both verbs and nouns with declensions)
+                if grammatical_forms:
+                    wireword['grammatical_forms'] = grammatical_forms
                 
                 if lemma.frequency_rank:
                     wireword['frequency_rank'] = lemma.frequency_rank
