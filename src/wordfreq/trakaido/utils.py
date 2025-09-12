@@ -34,6 +34,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
+import time
 
 # Add the src directory to the path for imports
 GREENLAND_SRC_PATH = '/Users/powera/repo/greenland/src'
@@ -54,7 +55,7 @@ from wordfreq.storage.models.enums import GrammaticalForm
 from wordfreq.storage.models.schema import DerivativeForm, Lemma, WordToken
 from wordfreq.translation.client import LinguisticClient
 from wordfreq.translation.noun_forms import get_required_noun_forms
-from wordfreq.storage.database import add_noun_derivative_form, get_noun_derivative_forms
+from wordfreq.storage.database import add_noun_derivative_form, get_noun_derivative_forms, has_specific_noun_forms
 from wordfreq.trakaido.export_utils import TrakaidoExporter
 from wordfreq.trakaido.verb_converter import export_wireword_verbs
 
@@ -1019,66 +1020,104 @@ Word to analyze: {english_word}"""
         finally:
             session.close()
 
-# CLI interface functions
-
-def generate_noun_forms(limit: int = 50, pos_subtype: str = None, dry_run: bool = False, force: bool = False) -> bool:
+def generate_noun_forms_for_lemmas(
+    db_path: str = None,
+    limit: int = None,
+    level_filter: int = None,
+    dry_run: bool = False,
+    force: bool = False
+) -> None:
     """
-    Generate derivative forms for Lithuanian nouns.
+    Generate Lithuanian noun forms for lemmas in the database.
 
     Args:
-        limit: Maximum number of nouns to process
-        pos_subtype: Filter by specific POS subtype (optional)
-        dry_run: If True, show what would be generated without saving
+        db_path: Path to database (uses default if None)
+        limit: Maximum number of lemmas to process
+        level_filter: Only process lemmas at this difficulty level
+        dry_run: If True, show what would be generated without storing
         force: If True, regenerate forms even if they already exist
-
-    Returns:
-        True if successful, False otherwise
     """
-    from wordfreq.storage.database import create_database_session
-    from wordfreq.storage.models.schema import Lemma
+    from wordfreq.translation.client import LinguisticClient
+    from wordfreq.translation.noun_forms import get_required_noun_forms
+    from wordfreq.storage.database import has_specific_noun_forms, add_noun_derivative_form
 
-    print("🔄 Generating Lithuanian noun forms...")
+    session = create_database_session(db_path)
+    linguistic_client = LinguisticClient.get_instance()
 
     try:
-        session = create_database_session()
-        linguistic_client = LinguisticClient()
-
-        # Query Lithuanian nouns that need forms
+        # Build query for Lithuanian noun lemmas
         query = session.query(Lemma).filter(
             Lemma.pos_type == 'noun',
             Lemma.lithuanian_translation.isnot(None),
             Lemma.lithuanian_translation != ''
         )
 
-        if pos_subtype:
-            query = query.filter(Lemma.pos_subtype == pos_subtype)
-            print(f"Filtering by POS subtype: {pos_subtype}")
+        if level_filter:
+            query = query.filter(Lemma.difficulty_level == level_filter)
 
-        query = query.limit(limit)
+        query = query.order_by(Lemma.difficulty_level, Lemma.lemma_text)
+
+        if limit:
+            query = query.limit(limit)
+
         lemmas = query.all()
 
-        print(f"Found {len(lemmas)} Lithuanian nouns to process")
+        print(f"🔍 Found {len(lemmas)} noun lemmas to process")
+        if level_filter:
+            print(f"📊 Filtering by level: {level_filter}")
+        if limit:
+            print(f"📝 Limited to: {limit} lemmas")
+        if dry_run:
+            print("🏃‍♂️ DRY RUN MODE - No changes will be made")
+        if force:
+            print("💪 FORCE MODE - Will regenerate existing forms")
 
-        successful_generations = 0
+        print()
+
+        processed_count = 0
         skipped_count = 0
+        successful_generations = 0
         error_count = 0
 
-        for i, lemma in enumerate(lemmas, 1):
-            print(f"\n[{i}/{len(lemmas)}] Processing: {lemma.lithuanian_translation}")
+        for lemma in lemmas:
+            processed_count += 1
+            print(f"[{processed_count}/{len(lemmas)}] Processing: {lemma.lithuanian_translation} (Level {lemma.difficulty_level}, ID: {lemma.id}, GUID: {lemma.guid or 'None'})")
 
             try:
-                # Check if forms already exist (unless force is specified)
+                # Get required forms based on lemma difficulty level
+                all_required_forms = get_required_noun_forms()
+                lemma_level = lemma.difficulty_level or 1
+
+                # Filter forms that are appropriate for this lemma's level
+                required_forms_for_lemma = {
+                    form: min_level for form, min_level in all_required_forms.items()
+                    if lemma_level >= min_level
+                }
+
+                if not required_forms_for_lemma:
+                    print(f"  ⏭️  Skipping - level {lemma_level} doesn't require any derivative forms")
+                    skipped_count += 1
+                    continue
+
+                # Check which specific forms already exist (unless force is specified)
                 if not force:
-                    existing_forms = get_noun_derivative_forms(session, lemma.id)
-                    if existing_forms:
-                        print(f"  ⏭️  Skipping - forms already exist ({len(existing_forms)} forms)")
+                    existing_forms = has_specific_noun_forms(session, lemma.id, list(required_forms_for_lemma.keys()))
+                    missing_forms = {form: min_level for form, min_level in required_forms_for_lemma.items()
+                                   if not existing_forms.get(form, False)}
+
+                    if not missing_forms:
+                        print(f"  ⏭️  Skipping - all required forms already exist")
                         skipped_count += 1
                         continue
 
+                    print(f"  📋 Missing forms: {list(missing_forms.keys())}")
+                    required_forms_for_lemma = missing_forms
+
                 # Generate forms using LLM
-                print(f"  🤖 Generating forms for '{lemma.lithuanian_translation}'...")
+                print(f"  🤖 Generating forms for '{lemma.lithuanian_translation}' (forms: {list(required_forms_for_lemma.keys())})")
                 noun_forms = linguistic_client.query_noun_forms(
                     lemma.lithuanian_translation,
+                    required_forms_for_lemma,
                     lemma.pos_subtype
                 )
 
@@ -1091,13 +1130,17 @@ def generate_noun_forms(limit: int = 50, pos_subtype: str = None, dry_run: bool 
                     print(f"  📋 DRY RUN - Would generate:")
                     if noun_forms.plural_nominative:
                         print(f"    plural_nominative: {noun_forms.plural_nominative}")
+                    if noun_forms.singular_accusative:
+                        print(f"    singular_accusative: {noun_forms.singular_accusative}")
+                    if noun_forms.plural_accusative:
+                        print(f"    plural_accusative: {noun_forms.plural_accusative}")
                     successful_generations += 1
                     continue
 
                 # Store the generated forms
                 forms_added = 0
 
-                if noun_forms.plural_nominative:
+                if "plural_nominative" in required_forms_for_lemma and noun_forms.plural_nominative:
                     derivative_form = add_noun_derivative_form(
                         session=session,
                         lemma=lemma,
@@ -1105,15 +1148,48 @@ def generate_noun_forms(limit: int = 50, pos_subtype: str = None, dry_run: bool 
                         grammatical_form="plural_nominative",
                         language_code="lt",
                         is_base_form=False,
-                        verified=False,  # Will need manual verification
+                        verified=False,
                         notes="Generated by LLM"
                     )
-
                     if derivative_form:
                         print(f"  ✅ Added plural_nominative: {noun_forms.plural_nominative}")
                         forms_added += 1
                     else:
                         print(f"  ⚠️  Failed to store plural_nominative: {noun_forms.plural_nominative}")
+
+                if "singular_accusative" in required_forms_for_lemma and noun_forms.singular_accusative:
+                    derivative_form = add_noun_derivative_form(
+                        session=session,
+                        lemma=lemma,
+                        form_text=noun_forms.singular_accusative,
+                        grammatical_form="singular_accusative",
+                        language_code="lt",
+                        is_base_form=False,
+                        verified=False,
+                        notes="Generated by LLM"
+                    )
+                    if derivative_form:
+                        print(f"  ✅ Added singular_accusative: {noun_forms.singular_accusative}")
+                        forms_added += 1
+                    else:
+                        print(f"  ⚠️  Failed to store singular_accusative: {noun_forms.singular_accusative}")
+
+                if "plural_accusative" in required_forms_for_lemma and noun_forms.plural_accusative:
+                    derivative_form = add_noun_derivative_form(
+                        session=session,
+                        lemma=lemma,
+                        form_text=noun_forms.plural_accusative,
+                        grammatical_form="plural_accusative",
+                        language_code="lt",
+                        is_base_form=False,
+                        verified=False,
+                        notes="Generated by LLM"
+                    )
+                    if derivative_form:
+                        print(f"  ✅ Added plural_accusative: {noun_forms.plural_accusative}")
+                        forms_added += 1
+                    else:
+                        print(f"  ⚠️  Failed to store plural_accusative: {noun_forms.plural_accusative}")
 
                 if forms_added > 0:
                     successful_generations += 1
@@ -1125,25 +1201,29 @@ def generate_noun_forms(limit: int = 50, pos_subtype: str = None, dry_run: bool 
             except Exception as e:
                 print(f"  💥 Error processing {lemma.lithuanian_translation}: {e}")
                 error_count += 1
-                continue
 
-        # Summary
-        print(f"\n{'='*50}")
-        print(f"📊 Noun forms generation complete!")
-        print(f"✅ Successful: {successful_generations}")
-        print(f"⏭️  Skipped: {skipped_count}")
-        print(f"❌ Errors: {error_count}")
-        print(f"📝 Total processed: {len(lemmas)}")
+            # Small delay to be nice to the API
+            time.sleep(0.5)
 
-        if dry_run:
-            print("🔍 This was a dry run - no forms were actually saved")
+        print()
+        print(f"📊 Summary:")
+        print(f"   Total processed: {processed_count}")
+        print(f"   Skipped (existing): {skipped_count}")
+        print(f"   Successful generations: {successful_generations}")
+        print(f"   Errors: {error_count}")
 
-        session.close()
-        return True
+        if not dry_run:
+            session.commit()
+            print(f"💾 Changes committed to database")
+        else:
+            print(f"🏃‍♂️ DRY RUN - No changes made")
 
     except Exception as e:
+        session.rollback()
         print(f"💥 Error during noun forms generation: {e}")
-        return False
+        raise
+    finally:
+        session.close()
 
 
 def create_custom_export(pos_subtype: str, output_path: str) -> bool:
@@ -1325,8 +1405,9 @@ def main():
             print("No subtypes found.")
 
     elif args.command == 'generate-noun-forms':
-        success = generate_noun_forms(
+        success = generate_noun_forms_for_lemmas(
             limit=args.limit,
+            level_filter=args.level,
             pos_subtype=args.pos_subtype,
             dry_run=args.dry_run,
             force=args.force

@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 # TODO: de-dupe
 VALID_POS_TYPES = {
-    "noun", "verb", "adjective", "adverb", "pronoun", 
+    "noun", "verb", "adjective", "adverb", "pronoun",
     "preposition", "conjunction", "interjection", "determiner",
     "article", "numeral", "auxiliary", "modal"
 }
@@ -32,12 +32,12 @@ VALID_POS_TYPES = {
 def initialize_corpora(session):
     """Initialize corpus configurations from the config file."""
     import wordfreq.frequency.corpus
-    
+
     result = wordfreq.frequency.corpus.initialize_corpus_configs(session)
     if not result["success"]:
         logger.error(f"Failed to initialize corpora: {result['errors']}")
         raise RuntimeError(f"Corpus initialization failed: {result['errors']}")
-    
+
     logger.info(f"Corpus initialization completed: {result['added']} added, {result['updated']} updated")
 
 # Helper function to get subtype enum based on POS
@@ -57,10 +57,10 @@ def get_subtype_enum(pos_type: str) -> Optional[enum.EnumMeta]:
 def get_subtype_values_for_pos(pos_type: str) -> List[str]:
     """
     Get all possible subtype values for a given part of speech.
-    
+
     Args:
         pos_type: Part of speech (noun, verb, adjective, adverb)
-        
+
     Returns:
         List of possible subtype values
     """
@@ -72,7 +72,7 @@ def get_subtype_values_for_pos(pos_type: str) -> List[str]:
 def get_all_pos_subtypes() -> Dict[str, List[str]]:
     """
     Get all possible POS subtypes for each part of speech.
-    
+
     Returns:
         Dictionary with part of speech as key and list of subtypes as value
     """
@@ -122,7 +122,7 @@ SUBTYPE_GUID_PREFIXES = {
     'nationality': 'N33',
     'unit_of_measurement': 'N34',
     'noun_other': 'N99',
-    
+
     # Verb subtypes (V01-V99)
     'physical_action': 'V01',
     'creation_action': 'V02',
@@ -138,7 +138,7 @@ SUBTYPE_GUID_PREFIXES = {
     'directional_movement': 'V12',
     'manner_movement': 'V13',
     'verb_other': 'V99',
-    
+
     # Adjective subtypes (A01-A99)
     'size': 'A01',
     'color': 'A02',
@@ -156,7 +156,7 @@ SUBTYPE_GUID_PREFIXES = {
     'frequency': 'A14',
     'sequence': 'A15',
     'adjective_other': 'A99',
-    
+
     # Adverb subtypes (D01-D99)
     'style': 'D01',
     'attitude': 'D02',
@@ -172,22 +172,22 @@ SUBTYPE_GUID_PREFIXES = {
     'definite_frequency': 'D12',
     'indefinite_frequency': 'D13',
     'adverb_other': 'D99',
-    
+
     # Conjunction subtypes (C01-C99)
     'conjunction_other': 'C99',
-    
+
     # Pronoun subtypes (P01-P99)
     'pronoun_other': 'P99',
-    
+
     # Preposition subtypes (R01-R99)
     'preposition_other': 'R99',
-    
+
     # Interjection subtypes (I01-I99)
     'interjection_other': 'I99',
-    
+
     # Determiner subtypes (T01-T99)
     'determiner_other': 'T99',
-    
+
     # Article subtypes (L01-L99)
     'article_other': 'L99'
 }
@@ -195,25 +195,25 @@ SUBTYPE_GUID_PREFIXES = {
 def generate_guid(session, subtype: str) -> str:
     """
     Generate a unique GUID for a lemma in a specific subtype.
-    
+
     Args:
         session: Database session
         subtype: POS subtype name (e.g., 'body_part', 'color')
-        
+
     Returns:
         Unique GUID string (e.g., 'N14_001')
     """
     if subtype not in SUBTYPE_GUID_PREFIXES:
         raise ValueError(f"Unknown subtype: {subtype}")
-    
+
     prefix = SUBTYPE_GUID_PREFIXES[subtype]
-    
+
     # Find the highest existing GUID number for this subtype
     existing_guids = session.query(Lemma.guid)\
         .filter(Lemma.guid.like(f"{prefix}%"))\
         .filter(Lemma.guid != None)\
         .all()
-    
+
     max_num = 0
     for (guid,) in existing_guids:
         if guid and guid.startswith(prefix):
@@ -236,7 +236,7 @@ def generate_guid(session, subtype: str) -> str:
                         max_num = max(max_num, num)
             except ValueError:
                 continue
-    
+
     # Generate next GUID in new format (using underscore for valid Python variable names)
     next_num = max_num + 1
     return f"{prefix}_{next_num:03d}"
@@ -251,56 +251,56 @@ def create_database_session(db_path: str = constants.WORDFREQ_DB_PATH):
 def ensure_tables_exist(session):
     """
     Ensure tables exist in the database and add any missing columns.
-    
+
     Args:
         session: Database session
     """
     engine = session.get_bind().engine
-    
+
     # First create any missing tables
     Base.metadata.create_all(engine)
-    
+
     # Then check for missing columns and add them
     _add_missing_columns(engine)
 
 def _add_missing_columns(engine):
     """
     Add any missing columns to existing tables based on the current schema.
-    
+
     Args:
         engine: SQLAlchemy engine
     """
     from sqlalchemy import inspect, text
-    
+
     inspector = inspect(engine)
-    
+
     # Get all table names from our models
     for table_name, table in Base.metadata.tables.items():
         if not inspector.has_table(table_name):
             continue  # Table doesn't exist yet, create_all() will handle it
-            
+
         # Get existing columns in the database
         existing_columns = {col['name'] for col in inspector.get_columns(table_name)}
-        
+
         # Get columns defined in the model
         model_columns = {col.name for col in table.columns}
-        
+
         # Find missing columns
         missing_columns = model_columns - existing_columns
-        
+
         if missing_columns:
             logger.info(f"Adding missing columns to table '{table_name}': {missing_columns}")
-            
+
             for col_name in missing_columns:
                 column = table.columns[col_name]
-                
+
                 # Build the ALTER TABLE statement
                 col_type = column.type.compile(engine.dialect)
-                
+
                 # Handle nullable/default constraints
                 nullable_clause = "" if column.nullable else " NOT NULL"
                 default_clause = ""
-                
+
                 if column.default is not None:
                     if hasattr(column.default, 'arg'):
                         # Scalar default value
@@ -314,9 +314,9 @@ def _add_missing_columns(engine):
                         # Server default (like func.now())
                         if column.default.name == 'now':
                             default_clause = " DEFAULT CURRENT_TIMESTAMP"
-                
+
                 alter_sql = f"ALTER TABLE {table_name} ADD COLUMN {col_name} {col_type}{default_clause}{nullable_clause}"
-                
+
                 try:
                     with engine.connect() as conn:
                         conn.execute(text(alter_sql))
@@ -335,7 +335,7 @@ def add_word_token(session, token: str, language_code: str) -> WordToken:
     ).first()
     if existing:
         return existing
-        
+
     new_token = WordToken(token=token, language_code=language_code)
     session.add(new_token)
     session.commit()
@@ -349,13 +349,13 @@ def add_word_frequency(session, word_token: WordToken, corpus_name: str, rank: O
         corpus = Corpus(name=corpus_name)
         session.add(corpus)
         session.flush()
-    
+
     # Check if frequency already exists
     existing = session.query(WordFrequency).filter(
         WordFrequency.word_token_id == word_token.id,
         WordFrequency.corpus_id == corpus.id
     ).first()
-    
+
     if existing:
         # Update existing frequency
         if rank is not None:
@@ -364,7 +364,7 @@ def add_word_frequency(session, word_token: WordToken, corpus_name: str, rank: O
             existing.frequency = frequency
         session.commit()
         return existing
-    
+
     # Create new frequency record
     word_freq = WordFrequency(
         word_token_id=word_token.id,
@@ -403,21 +403,21 @@ def add_lemma(
         Lemma.definition_text == definition_text,
         Lemma.pos_type == pos_type
     ).first()
-    
+
     if existing:
         return existing
-    
+
     # Generate GUID if pos_subtype is provided and auto_generate_guid is True
     guid = None
     if pos_subtype and auto_generate_guid:
         guid = generate_guid(session, pos_subtype)
-    
+
     # Convert tags list to JSON string
     tags_json = None
     if tags:
         import json
         tags_json = json.dumps(tags)
-    
+
     lemma = Lemma(
         lemma_text=lemma_text,
         definition_text=definition_text,
@@ -463,14 +463,14 @@ def add_derivative_form(
             DerivativeForm.grammatical_form == grammatical_form,
             DerivativeForm.derivative_form_text == derivative_form_text
         ).first()
-        
+
         if existing:
             return existing
-        
+
         # Validate that word_token language matches if provided
         if word_token and word_token.language_code != language_code:
             raise ValueError(f"WordToken language_code '{word_token.language_code}' does not match derivative form language_code '{language_code}'")
-        
+
         derivative_form = DerivativeForm(
             lemma_id=lemma.id,
             derivative_form_text=derivative_form_text,
@@ -483,7 +483,7 @@ def add_derivative_form(
             verified=verified,
             notes=notes
         )
-        
+
         session.add(derivative_form)
         session.flush()
         return derivative_form
@@ -524,7 +524,7 @@ def add_complete_word_entry(
     """
     # Add or get word token
     word_token = add_word_token(session, token, language_code)
-    
+
     # Add or get lemma
     lemma = add_lemma(
         session=session,
@@ -546,7 +546,7 @@ def add_complete_word_entry(
         notes=notes,
         auto_generate_guid=auto_generate_guid
     )
-    
+
     # Add derivative form
     derivative_form = add_derivative_form(
         session=session,
@@ -561,7 +561,7 @@ def add_complete_word_entry(
         verified=verified,
         notes=notes
     )
-    
+
     return derivative_form
 
 def add_example_sentence(
@@ -640,10 +640,10 @@ def get_all_derivative_forms_for_lemma(session, lemma_text: str, pos_type: Optio
     query = session.query(DerivativeForm)\
         .join(Lemma)\
         .filter(Lemma.lemma_text == lemma_text)
-    
+
     if pos_type:
         query = query.filter(Lemma.pos_type == pos_type)
-    
+
     return query.all()
 
 def get_base_forms_for_lemma(session, lemma_text: str, pos_type: Optional[str] = None) -> List[DerivativeForm]:
@@ -652,16 +652,16 @@ def get_base_forms_for_lemma(session, lemma_text: str, pos_type: Optional[str] =
         .join(Lemma)\
         .filter(Lemma.lemma_text == lemma_text)\
         .filter(DerivativeForm.is_base_form == True)
-    
+
     if pos_type:
         query = query.filter(Lemma.pos_type == pos_type)
-    
+
     return query.all()
 
 def get_common_words_by_pos(session, pos_type: str, language_code: str = "en", pos_subtype: str = None, corpus_name: str = "wiki_vital", limit: int = 50) -> List[Dict[str, Any]]:
     """
     Get the most common word tokens for a specified part of speech.
-    
+
     Args:
         session: Database session
         pos_type: Part of speech type to filter by
@@ -669,7 +669,7 @@ def get_common_words_by_pos(session, pos_type: str, language_code: str = "en", p
         pos_subtype: Optional POS subtype to filter by
         corpus_name: Corpus to use for frequency ranking
         limit: Maximum number of words to return
-        
+
     Returns:
         List of dictionaries containing word information
     """
@@ -683,12 +683,12 @@ def get_common_words_by_pos(session, pos_type: str, language_code: str = "en", p
         .filter(DerivativeForm.language_code == language_code)\
         .filter(Corpus.name == corpus_name)\
         .filter(WordFrequency.rank != None)
-    
+
     if pos_subtype:
         query = query.filter(Lemma.pos_subtype == pos_subtype)
-    
+
     query = query.order_by(WordFrequency.rank).limit(limit)
-    
+
     results = []
     for word_token, derivative_form, lemma, word_frequency in query:
         results.append({
@@ -703,13 +703,13 @@ def get_common_words_by_pos(session, pos_type: str, language_code: str = "en", p
             "is_base_form": derivative_form.is_base_form,
             "verified": derivative_form.verified
         })
-    
+
     return results
 
 def get_common_base_forms_by_pos(session, pos_type: str, language_code: str = "en", pos_subtype: str = None, corpus_name: str = "wiki_vital", limit: int = 50) -> List[Dict[str, Any]]:
     """
     Get the most common base forms for a specified part of speech.
-    
+
     Args:
         session: Database session
         pos_type: Part of speech type to filter by
@@ -717,7 +717,7 @@ def get_common_base_forms_by_pos(session, pos_type: str, language_code: str = "e
         pos_subtype: Optional POS subtype to filter by
         corpus_name: Corpus to use for frequency ranking
         limit: Maximum number of words to return
-        
+
     Returns:
         List of dictionaries containing base form information
     """
@@ -731,12 +731,12 @@ def get_common_base_forms_by_pos(session, pos_type: str, language_code: str = "e
         .filter(DerivativeForm.language_code == language_code)\
         .filter(Corpus.name == corpus_name)\
         .filter(WordFrequency.rank != None)
-    
+
     if pos_subtype:
         query = query.filter(Lemma.pos_subtype == pos_subtype)
-    
+
     query = query.order_by(WordFrequency.rank).limit(limit)
-    
+
     results = []
     for word_token, derivative_form, lemma, word_frequency in query:
         results.append({
@@ -750,29 +750,29 @@ def get_common_base_forms_by_pos(session, pos_type: str, language_code: str = "e
             "grammatical_form": derivative_form.grammatical_form,
             "verified": derivative_form.verified
         })
-    
+
     return results
 
 
 def delete_derivative_forms_for_token(session, word_token_id: int) -> bool:
     """
     Delete all derivative forms for a word token.
-    
+
     Args:
         session: Database session
         word_token_id: ID of the word token to delete derivative forms for
-        
+
     Returns:
         Success flag
     """
     try:
         # Query all derivative forms for the word token
         derivative_forms = session.query(DerivativeForm).filter(DerivativeForm.word_token_id == word_token_id).all()
-        
+
         # Delete each derivative form (cascade will handle example sentences)
         for derivative_form in derivative_forms:
             session.delete(derivative_form)
-            
+
         # Commit the transaction
         session.commit()
         return True
@@ -784,11 +784,11 @@ def delete_derivative_forms_for_token(session, word_token_id: int) -> bool:
 def delete_derivative_form(session, derivative_form_id: int) -> bool:
     """
     Delete a specific derivative form.
-    
+
     Args:
         session: Database session
         derivative_form_id: ID of the derivative form to delete
-        
+
     Returns:
         Success flag
     """
@@ -828,7 +828,7 @@ def update_lemma(
     lemma = session.query(Lemma).filter(Lemma.id == lemma_id).first()
     if not lemma:
         return False
-        
+
     if lemma_text is not None:
         lemma.lemma_text = lemma_text
     if definition_text is not None:
@@ -862,7 +862,7 @@ def update_lemma(
         lemma.verified = verified
     if notes is not None:
         lemma.notes = notes
-        
+
     session.commit()
     return True
 
@@ -881,7 +881,7 @@ def update_derivative_form(
     derivative_form = session.query(DerivativeForm).filter(DerivativeForm.id == derivative_form_id).first()
     if not derivative_form:
         return False
-        
+
     if derivative_form_text is not None:
         derivative_form.derivative_form_text = derivative_form_text
     if grammatical_form is not None:
@@ -896,7 +896,7 @@ def update_derivative_form(
         derivative_form.verified = verified
     if notes is not None:
         derivative_form.notes = notes
-        
+
     session.commit()
     return True
 
@@ -910,7 +910,7 @@ def update_lemma_translation(
     lemma = session.query(Lemma).filter(Lemma.id == lemma_id).first()
     if not lemma:
         return False
-    
+
     language = language.lower()
     if language == 'chinese':
         lemma.chinese_translation = translation_text
@@ -926,19 +926,19 @@ def update_lemma_translation(
         lemma.vietnamese_translation = translation_text
     else:
         return False
-    
+
     session.commit()
     return True
 
 def get_lemmas_without_translation(session, language: str, limit: int = 100):
     """
     Get lemmas that need translations for a specific language.
-    
+
     Args:
         session: Database session
         language: Language name (chinese, french, korean, swahili, lithuanian, vietnamese)
         limit: Maximum number of lemmas to return
-        
+
     Returns:
         List of Lemma objects without the specified translation
     """
@@ -951,10 +951,10 @@ def get_lemmas_without_translation(session, language: str, limit: int = 100):
         'lithuanian': Lemma.lithuanian_translation,
         'vietnamese': Lemma.vietnamese_translation
     }
-    
+
     if language not in column_map:
         raise ValueError(f"Unsupported language: {language}. Supported languages: {', '.join(column_map.keys())}")
-    
+
     return session.query(Lemma).filter(
         column_map[language].is_(None)
     ).limit(limit).all()
@@ -1004,7 +1004,7 @@ def get_derivative_forms_without_pronunciation(session, limit: int = 100) -> Lis
     """Get derivative forms that need pronunciation information."""
     return session.query(DerivativeForm)\
         .filter(
-            (DerivativeForm.ipa_pronunciation == None) | 
+            (DerivativeForm.ipa_pronunciation == None) |
             (DerivativeForm.phonetic_pronunciation == None)
         )\
         .limit(limit)\
@@ -1015,24 +1015,24 @@ def get_processing_stats(session) -> Dict[str, Any]:
     total_word_tokens = session.query(func.count(WordToken.id)).scalar()
     tokens_with_derivative_forms = session.query(func.count(WordToken.id))\
         .join(DerivativeForm).scalar()
-    
+
     # Count tokens with at least one example sentence
     tokens_with_examples = session.query(func.count(WordToken.id))\
         .join(DerivativeForm)\
         .join(ExampleSentence)\
         .scalar()
-    
+
     # Count totals
     total_lemmas = session.query(func.count(Lemma.id)).scalar()
     total_derivative_forms = session.query(func.count(DerivativeForm.id)).scalar()
     total_example_sentences = session.query(func.count(ExampleSentence.id)).scalar()
-    
+
     return {
         "total_word_tokens": total_word_tokens or 0,
         "tokens_with_derivative_forms": tokens_with_derivative_forms or 0,
         "tokens_with_examples": tokens_with_examples or 0,
         "total_lemmas": total_lemmas or 0,
-        "total_derivative_forms": total_derivative_forms or 0, 
+        "total_derivative_forms": total_derivative_forms or 0,
         "total_example_sentences": total_example_sentences or 0,
         "percent_complete": (tokens_with_derivative_forms / total_word_tokens * 100) if total_word_tokens else 0
     }
@@ -1053,9 +1053,9 @@ def get_base_forms_only(session, limit: int = 100) -> List[DerivativeForm]:
         .all()
 
 def add_noun_derivative_form(
-    session, 
-    lemma: Lemma, 
-    form_text: str, 
+    session,
+    lemma: Lemma,
+    form_text: str,
     grammatical_form: str,
     language_code: str = "lt",
     is_base_form: bool = False,
@@ -1064,7 +1064,7 @@ def add_noun_derivative_form(
 ) -> Optional[DerivativeForm]:
     """
     Add a derivative form for a noun (e.g., plural form).
-    
+
     Args:
         session: Database session
         lemma: The lemma this form belongs to
@@ -1074,14 +1074,14 @@ def add_noun_derivative_form(
         is_base_form: Whether this is a base form (default: False)
         verified: Whether this form is verified (default: False)
         notes: Optional notes
-        
+
     Returns:
         DerivativeForm object or None if creation failed
     """
     try:
         # Get or create word token
         word_token = add_word_token(session, form_text, language_code)
-        
+
         # Check if this derivative form already exists
         existing_form = session.query(DerivativeForm).filter(
             DerivativeForm.lemma_id == lemma.id,
@@ -1089,11 +1089,11 @@ def add_noun_derivative_form(
             DerivativeForm.language_code == language_code,
             DerivativeForm.grammatical_form == grammatical_form
         ).first()
-        
+
         if existing_form:
             logger.debug(f"Derivative form already exists: {form_text} ({grammatical_form})")
             return existing_form
-        
+
         # Create new derivative form
         derivative_form = DerivativeForm(
             lemma_id=lemma.id,
@@ -1105,46 +1105,68 @@ def add_noun_derivative_form(
             verified=verified,
             notes=notes
         )
-        
+
         session.add(derivative_form)
         session.commit()
-        
+
         logger.info(f"Added noun derivative form: {form_text} ({grammatical_form}) for lemma {lemma.lemma_text}")
         return derivative_form
-        
+
     except Exception as e:
         session.rollback()
         logger.error(f"Failed to add noun derivative form {form_text}: {e}")
         return None
 
-def get_noun_derivative_forms(session, lemma_id: int, language_code: str = "lt") -> List[DerivativeForm]:
+def get_noun_derivative_forms(session, lemma_id: int) -> List[DerivativeForm]:
     """
-    Get all derivative forms for a noun lemma.
-    
+    Get all noun derivative forms for a lemma.
+
     Args:
         session: Database session
-        lemma_id: ID of the lemma
-        language_code: Language code (default: "lt")
-        
+        lemma_id: Lemma ID to get forms for
+
     Returns:
         List of DerivativeForm objects
     """
     return session.query(DerivativeForm).filter(
         DerivativeForm.lemma_id == lemma_id,
-        DerivativeForm.language_code == language_code
+        DerivativeForm.language_code == 'lt'
     ).all()
+
+def has_specific_noun_forms(session, lemma_id: int, required_forms: List[str]) -> Dict[str, bool]:
+    """
+    Check if specific noun forms exist for a lemma.
+
+    Args:
+        session: Database session
+        lemma_id: Lemma ID to check
+        required_forms: List of grammatical form names to check for
+
+    Returns:
+        Dictionary mapping form names to whether they exist
+    """
+    existing_forms = session.query(DerivativeForm.grammatical_form).filter(
+        DerivativeForm.lemma_id == lemma_id,
+        DerivativeForm.language_code == 'lt',
+        DerivativeForm.grammatical_form.in_(required_forms)
+    ).all()
+
+    existing_form_names = {form[0] for form in existing_forms}
+
+    return {form: form in existing_form_names for form in required_forms}
+
 
 def get_grammatical_forms_for_token(session, token_text: str, language_code: str) -> List[str]:
     """Get all grammatical forms available for a specific token."""
     word_token = get_word_token_by_text(session, token_text, language_code)
     if not word_token:
         return []
-    
+
     forms = session.query(DerivativeForm.grammatical_form)\
         .filter(DerivativeForm.word_token_id == word_token.id)\
         .distinct()\
         .all()
-    
+
     return [form[0] for form in forms]
 
 # Legacy compatibility functions for reviewer.py
@@ -1156,19 +1178,19 @@ def get_word_by_text(session, word_text: str, language_code: str = "en"):
     word_token = get_word_token_by_text(session, word_text, language_code)
     if not word_token:
         return None
-    
+
     # Create a wrapper object that mimics the old Word model
     class WordWrapper:
         def __init__(self, word_token):
             self.word = word_token.token
             self.frequency_rank = word_token.frequency_rank
             self._word_token = word_token
-        
+
         @property
         def definitions(self):
             """Return derivative forms as 'definitions' for backward compatibility."""
             return self._word_token.derivative_forms
-    
+
     return WordWrapper(word_token)
 
 def list_problematic_words(session, limit: int = 10) -> List[Dict[str, Any]]:
@@ -1186,10 +1208,10 @@ def list_problematic_words(session, limit: int = 10) -> List[Dict[str, Any]]:
         .filter((Corpus.name == "wiki_vital") | (Corpus.name == None))\
         .order_by(WordFrequency.rank.nullslast())\
         .limit(limit)
-    
+
     results = []
     word_groups = {}
-    
+
     # Group by word token
     for word_token, derivative_form, lemma, word_frequency in query:
         word_text = word_token.token
@@ -1199,23 +1221,23 @@ def list_problematic_words(session, limit: int = 10) -> List[Dict[str, Any]]:
                 'rank': word_frequency.rank if word_frequency else None,
                 'definitions': []
             }
-        
+
         word_groups[word_text]['definitions'].append({
             'text': lemma.definition_text,
             'pos': lemma.pos_type,
             'verified': derivative_form.verified
         })
-    
+
     return list(word_groups.values())
 
 def get_word_tokens_by_combined_frequency_rank(session, limit: int = 1000) -> List[WordToken]:
     """
     Get word tokens ordered by their combined frequency rank.
-    
+
     Args:
         session: Database session
         limit: Maximum number of words to retrieve
-        
+
     Returns:
         List of WordToken objects ordered by frequency_rank (combined harmonic mean rank)
     """
@@ -1230,10 +1252,10 @@ def get_all_subtypes(session, lang=None) -> List[str]:
     query = session.query(Lemma.pos_subtype)\
         .filter(Lemma.pos_subtype != None)\
         .filter(Lemma.guid != None)
-    
+
     if lang == "chinese":
-        query = query.filter(Lemma.chinese_translation != None)\
-        
+        query = query.filter(Lemma.chinese_translation != None)
+
     subtypes = query.distinct().all()
     return [subtype[0] for subtype in subtypes if subtype[0]]
 
@@ -1244,7 +1266,7 @@ def get_lemmas_by_subtype(session, pos_subtype: str, lang=None) -> List[Lemma]:
         .filter(Lemma.guid != None)
     if lang == "chinese":
         query = query.filter(Lemma.chinese_translation != None)
-    
+
     return query.order_by(Lemma.guid)\
         .all()
 
@@ -1252,34 +1274,34 @@ def get_lemmas_by_subtype(session, pos_subtype: str, lang=None) -> List[Lemma]:
 def get_lemmas_by_subtype_and_level(session, pos_subtype: str = None, difficulty_level: int = None, limit: int = None, lang: str = None) -> List[Lemma]:
     """
     Get lemmas filtered by POS subtype and/or difficulty level.
-    
+
     Args:
         session: Database session
         pos_subtype: POS subtype to filter by (optional)
         difficulty_level: Difficulty level to filter by (optional)
         limit: Maximum number of lemmas to return (optional)
-        
+
     Returns:
         List of Lemma objects
     """
     query = session.query(Lemma)
-    
+
     if pos_subtype:
         query = query.filter(Lemma.pos_subtype == pos_subtype)
-    
+
     if difficulty_level:
         query = query.filter(Lemma.difficulty_level == difficulty_level)
 
     if lang:
         if lang == "chinese":
             query = query.filter(Lemma.chinese_translation != None)
-    
+
     # Order by frequency rank (lower is more frequent), then by GUID
     query = query.order_by(Lemma.frequency_rank.nulls_last(), Lemma.guid)
-    
+
     if limit:
         query = query.limit(limit)
-    
+
     return query.all()
 
 def add_alternative_form(
@@ -1293,7 +1315,7 @@ def add_alternative_form(
 ) -> DerivativeForm:
     """
     Add an alternative form for a lemma.
-    
+
     Args:
         session: Database session
         lemma: The lemma this is an alternative for
@@ -1302,12 +1324,12 @@ def add_alternative_form(
         alternative_type: Type of alternative ("informal", "abbreviation", "formal", "variant", "technical")
         explanation: Human-readable explanation (e.g., "Informal term for bicycle")
         word_token: Optional WordToken for frequency data
-    
+
     Returns:
         DerivativeForm: The created alternative form
     """
     grammatical_form = f"alternative_{alternative_type}"
-    
+
     return add_derivative_form(
         session=session,
         lemma=lemma,
@@ -1322,20 +1344,20 @@ def add_alternative_form(
 def get_alternative_forms_for_lemma(session, lemma: Lemma, language_code: str = None) -> List[DerivativeForm]:
     """
     Get all alternative forms for a lemma.
-    
+
     Args:
         session: Database session
         lemma: The lemma to get alternatives for
         language_code: Optional language filter
-    
+
     Returns:
         List[DerivativeForm]: List of alternative forms
     """
     query = session.query(DerivativeForm)\
         .filter(DerivativeForm.lemma_id == lemma.id)\
         .filter(DerivativeForm.grammatical_form.like('alternative_%'))
-    
+
     if language_code:
         query = query.filter(DerivativeForm.language_code == language_code)
-    
+
     return query.all()
