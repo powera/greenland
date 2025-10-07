@@ -96,19 +96,14 @@ def get_level_for_group_and_tense(group_name: str, tense: str) -> Optional[int]:
     return None
 
 def convert_person_format(person_key: str) -> str:
-    """Convert person format from verbs.py to wireword format."""
-    # Map from verbs.py format to wireword format
-    mapping = {
-        '1s': '1sg',
-        '2s': '2sg', 
-        '3s-m': '3sg_m',
-        '3s-f': '3sg_f',
-        '1p': '1pl',
-        '2p': '2pl',
-        '3p-m': '3pl_m',
-        '3p-f': '3pl_f'
-    }
-    return mapping.get(person_key, person_key)
+    """Convert person format from verbs.py to wireword format.
+
+    Now uses the same format as the Word/Stats API (1s, 3s-m, etc.)
+    instead of the old format (1sg, 3sg_m, etc.)
+    """
+    # Person format is already in the correct format (1s, 3s-m, etc.)
+    # No conversion needed
+    return person_key
 
 def convert_tense_format(tense_key: str) -> str:
     """Convert tense format from verbs.py to wireword format."""
