@@ -116,6 +116,16 @@ def get_model_by_codename(session, codename: str):
         'model_type': model.model_type
     }
 
+def get_default_model_codename(session):
+    """Get the default model codename from the database.
+
+    :param session: SQLAlchemy session
+    :return: Default model codename or None
+    """
+    # Get the first model from the database as the default
+    model = session.query(Model).first()
+    return model.codename if model else None
+
 def decode_json(text: Optional[str]) -> Dict:
     """Safely decode JSON text with proper Unicode handling."""
     if text is None:
