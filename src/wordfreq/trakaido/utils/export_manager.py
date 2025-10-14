@@ -540,7 +540,16 @@ class TrakaidoExporter:
                                 "lithuanian": form.derivative_form_text,
                                 "english": f"{entry['English']}{english_suffix}"
                             }
-                
+
+                # Generate derivative noun phrases (e.g., "where is X") for appropriate nouns
+                derivative_phrases = self._generate_derivative_noun_phrases(
+                    lemma,
+                    entry['English'],
+                    entry['Lithuanian'],
+                    entry['trakaido_level']
+                )
+                grammatical_forms.update(derivative_phrases)
+
                 # Get corpus assignment for this entry
                 corpus_key = (entry['trakaido_level'], entry['subtype'])
                 assigned_corpus = corpus_assignments.get(corpus_key, 'Trakaido')
@@ -702,16 +711,16 @@ class TrakaidoExporter:
     def _normalize_pos_type(self, pos_type: str) -> str:
         """
         Normalize POS type to match WireWord PartOfSpeech enum.
-        
+
         Args:
             pos_type: Original POS type
-            
+
         Returns:
             Normalized POS type
         """
         pos_mappings = {
             'noun': 'noun',
-            'verb': 'verb', 
+            'verb': 'verb',
             'adjective': 'adjective',
             'adverb': 'adverb',
             'pronoun': 'pronoun',
@@ -721,8 +730,67 @@ class TrakaidoExporter:
             'numeral': 'numeral',
             'particle': 'particle'
         }
-        
+
         return pos_mappings.get(pos_type.lower(), pos_type)
+
+    def _generate_derivative_noun_phrases(self, lemma: Lemma, base_english: str, base_lithuanian: str, entry_level: int) -> Dict[str, Dict[str, any]]:
+        """
+        Generate derivative noun phrases like "where is X" and "this is my X" for nouns.
+        These are constructed phrases, not stored in the database.
+        Only generates for noun subtypes where these phrases make sense.
+
+        Args:
+            lemma: The Lemma object
+            base_english: Base English form
+            base_lithuanian: Base Lithuanian form (nominative)
+            entry_level: The base level of the word
+
+        Returns:
+            Dictionary of derivative phrases to add to grammatical_forms
+        """
+        derivative_phrases = {}
+
+        # Only generate for nouns
+        if lemma.pos_type != 'noun':
+            return derivative_phrases
+
+        # Generate "where is X?" phrase for location-related nouns
+        # Uses nominative case (dictionary form)
+        where_is_subtypes = {
+            'building_structure',  # where is the bank, hospital, school
+            'location',            # where is the park, city
+            'place_name'          # where is Paris, etc.
+        }
+
+        if lemma.pos_subtype in where_is_subtypes:
+            where_is_level = max(entry_level, 19)
+            derivative_phrases['where_is'] = {
+                "level": where_is_level,
+                "lithuanian": f"Kur yra {base_lithuanian}?",
+                "english": f"Where is the {base_english}?"
+            }
+
+        # Generate "this is my X" phrase for possessable items
+        # Uses nominative case (dictionary form) - "Tai mano X"
+        # TODO: Disabled until we can handle plural-only nouns (pants, scissors, etc.)
+        # Requires adding grammatical_number field to database to properly generate
+        # "These are my pants" vs "This is my shirt"
+        if False:  # Temporarily disabled
+            this_is_my_subtypes = {
+                'clothing_accessory',     # this is my shirt, hat
+                'small_movable_object',   # this is my book, phone
+                'body_part'              # this is my hand, foot
+            }
+
+            if lemma.pos_subtype in this_is_my_subtypes:
+                this_is_my_level = max(entry_level, 19)
+                derivative_phrases['this_is_my'] = {
+                    "level": this_is_my_level,
+                    "lithuanian": f"Tai mano {base_lithuanian}",
+                    "english": f"This is my {base_english}"
+                }
+
+        return derivative_phrases
 
     def export_wireword_directory(self, base_output_dir: str) -> Tuple[bool, Dict[str, Any]]:
         """
