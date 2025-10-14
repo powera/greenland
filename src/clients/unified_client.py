@@ -57,8 +57,14 @@ class UnifiedLLMClient:
         # Get the actual model path from database
         session = datastore.common.create_dev_session()
         model_info = datastore.common.get_model_by_codename(session, model)
-        model_path = model_info.get('model_path', model) if model_info else model
-        model_type = model_info.get('model_type', 'local') if model_info else 'local'
+        if not model_info:
+            raise ValueError(f"Model '{model}' not found in database")
+
+        model_path = model_info.get('model_path')
+        model_type = model_info.get('model_type')
+
+        if not model_path or not model_type:
+            raise ValueError(f"Model '{model}' has incomplete configuration (path={model_path}, type={model_type})")
 
         # Route to appropriate client based on model type and path
         if model_type == 'remote':
