@@ -19,28 +19,19 @@ DEFAULT_TIMEOUT = 150
 class UnifiedLLMClient:
     """Client for routing requests to appropriate LLM backend based on model name."""
 
-    def __init__(self, model_name: str, timeout: int = DEFAULT_TIMEOUT, debug: bool = True):
+    def __init__(self, timeout: int = DEFAULT_TIMEOUT, debug: bool = True):
         """
         Initialize client with configurable timeout and debug mode.
 
         Args:
-            model_name: The codename of the model (e.g., "llama3.2:3b:Q4_K_M").
             timeout: Request timeout in seconds for all backends
             debug: Whether to enable debug logging
         """
-        self.model_name = model_name
-        # Get the actual model path from database
-        session = datastore.common.create_dev_session()
-        model_info = datastore.common.get_model_by_codename(session, model_name)
-        self.model_path = model_info.get('model_path', model_name) if model_info else model_name
-        self.model_type = model_info.get('model_type', 'local') if model_info else 'local'
-
         self.timeout = timeout
         self.debug = debug
         if debug:
             logger.setLevel(logging.DEBUG)
-            logger.debug("Initialized UnifiedLLMClient for model '%s' (path='%s', type='%s', timeout=%ds)", 
-                         model_name, self.model_path, self.model_type, timeout)
+            logger.debug("Initialized UnifiedLLMClient (timeout=%ds)", timeout)
 
         # Initialize backend clients - debug logs only in client used
         self.ollama = ollama_client.OllamaClient(timeout=timeout, debug=False)
@@ -54,7 +45,7 @@ class UnifiedLLMClient:
         Get appropriate client for model and normalize model name.
 
         Args:
-            model: Original model name/identifier
+            model: Original model name/identifier (codename)
 
         Returns:
             Tuple of (client, normalized_model_name)
@@ -63,38 +54,48 @@ class UnifiedLLMClient:
         client_name = None
         normalized_model = model
 
+        # Get the actual model path from database
+        session = datastore.common.create_dev_session()
+        model_info = datastore.common.get_model_by_codename(session, model)
+        model_path = model_info.get('model_path', model) if model_info else model
+        model_type = model_info.get('model_type', 'local') if model_info else 'local'
+
         # Route to appropriate client based on model type and path
-        if self.model_type == 'remote':
-            if self.model_path.startswith('gpt-'):
+        if model_type == 'remote':
+            if model_path.startswith('gpt-'):
                 client = self.openai
                 client_name = "OpenAI"
-            elif self.model_path.startswith('claude-'):
+                normalized_model = model_path
+            elif model_path.startswith('claude-'):
                 client = self.anthropic
                 client_name = "Anthropic"
-            elif self.model_path.startswith('gemini-'):
+                normalized_model = model_path
+            elif model_path.startswith('gemini-'):
                 client = self.gemini
                 client_name = "Gemini"
+                normalized_model = model_path
             else:
-                raise ValueError(f"Unknown remote model type for {self.model_path}")
+                raise ValueError(f"Unknown remote model type for {model_path}")
         else:  # local models
-            if self.model_path.startswith('lmstudio/'):
+            if model_path.startswith('lmstudio/'):
                 client = self.lmstudio
                 client_name = "LMStudio"
-                normalized_model = model[len("lmstudio/"):]
+                normalized_model = model_path[len("lmstudio/"):]
             else:
                 # Default to Ollama for local models
                 client = self.ollama
                 client_name = "Ollama"
+                normalized_model = model_path
                 # Strip quantization suffix if present (e.g. ":Q4_0")
                 # But preserve base model name if no quantization
-                parts = model.split(":")
+                parts = model_path.split(":")
                 if len(parts) > 1:  # Has quantization suffix or other params
                     normalized_model = ":".join(parts[:-1])
 
 
         if self.debug:
             if normalized_model != model:
-                logger.debug("Using %s client for model: %s (normalized from %s)", 
+                logger.debug("Using %s client for model: %s (normalized from %s)",
                            client_name, normalized_model, model)
             else:
                 logger.debug("Using %s client for model: %s", client_name, model)
@@ -140,12 +141,11 @@ class UnifiedLLMClient:
             RuntimeError: For other request failures
         """
         if self.debug:
-            logger.debug("Chat request: model=%s, brief=%s, schema=%s", 
+            logger.debug("Chat request: model=%s, brief=%s, schema=%s",
                         model, brief, bool(json_schema))
 
-        # Use the model_path for the actual client call
-        # The `model` argument here is the codename used to initialize the client
-        client, normalized_model = self._get_client(self.model_path) 
+        # Get the appropriate client for this model
+        client, normalized_model = self._get_client(model) 
 
         try:
             result = client.generate_chat(
@@ -167,54 +167,13 @@ class UnifiedLLMClient:
             logger.error("Chat generation failed: %s", str(e))
             raise
 
-# Default client instance initialization needs to be adjusted
-# to accept the model name as per the new __init__ signature.
-# Assuming a default model name is needed or passed from configuration.
-# For demonstration, let's assume a default model name like 'default-local-model'.
-# In a real scenario, this would likely come from configuration or an argument.
-
-# Fetch a default model name from the datastore or configuration
-try:
-    session = datastore.common.create_dev_session()
-    # Assuming a function to get a default model codename
-    default_model_codename = datastore.common.get_default_model_codename(session) 
-    if not default_model_codename:
-        raise ValueError("No default model codename found in the datastore.")
-except Exception as e:
-    logger.warning(f"Could not fetch default model codename: {e}. Using a placeholder 'default-local-model'.")
-    default_model_codename = 'default-local-model' # Fallback
-
-# Create default client instance using the default model codename
-client = UnifiedLLMClient(model_name=default_model_codename)  # Use defaults for timeout and debug
+# Create default client instance
+client = UnifiedLLMClient()  # Use defaults for timeout and debug
 
 # Expose key functions at module level for API compatibility
 def warm_model(model: str, timeout: Optional[float] = None) -> bool:
-    # The warm_model function in the UnifiedLLMClient expects the codename.
-    # We need to get the client instance correctly based on this codename.
-    # Re-instantiating client here would be inefficient.
-    # A better approach would be to have a way to get the correct client instance
-    # for a given codename without re-initializing the whole UnifiedLLMClient.
-    # For now, let's assume the module-level 'client' can handle routing if provided with the codename.
-    # However, the current UnifiedLLMClient is initialized with ONE model.
-    # This implies the module-level functions should potentially create/manage UnifiedLLMClient instances per model if needed.
-
-    # A simpler approach for module-level functions is to create a temporary client instance
-    # to perform the action, or to have a manager that holds multiple UnifiedLLMClient instances.
-
-    # Let's adapt to create a temporary client for the specific model if the module-level client
-    # is not sufficient, or if we need to support multiple models via these functions.
-    # Given the original structure, it seems like the module-level functions are meant to use the single 'client' instance.
-    # This means the original design might have implicitly assumed all calls go through the *same* model's client.
-    # If we need to support multiple models via module-level functions, the design needs more significant changes.
-
-    # For now, let's assume these module-level functions are called in a context where the 'client' variable
-    # is already set up for the relevant model, or that they are intended to operate on the default client.
-    # If `warm_model` is called with a *different* model than the default client was initialized with, it will fail.
-
-    # A more robust approach:
-    # Create a UnifiedLLMClient instance specifically for the model being requested.
-    temp_client = UnifiedLLMClient(model_name=model, timeout=client.timeout, debug=client.debug)
-    return temp_client.warm_model(model, timeout)
+    """Warm up a model for faster first inference."""
+    return client.warm_model(model, timeout)
 
 
 def generate_chat(
@@ -233,7 +192,4 @@ def generate_chat(
         For text responses, structured_data will be empty dict
         For JSON responses, response_text will be empty string
     """
-    # Similar to warm_model, we need to ensure this operates on the correct model.
-    # Create a temporary client instance for the requested model.
-    temp_client = UnifiedLLMClient(model_name=model, timeout=client.timeout, debug=client.debug)
-    return temp_client.generate_chat(prompt, model, brief, json_schema, context, timeout)
+    return client.generate_chat(prompt, model, brief, json_schema, context, timeout)
