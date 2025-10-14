@@ -7,6 +7,7 @@ Provides argument parsing and command dispatch for all trakaido operations.
 """
 
 import argparse
+import os
 import sys
 from pathlib import Path
 
@@ -17,7 +18,7 @@ sys.path.append(GREENLAND_SRC_PATH)
 import constants
 from .word_manager import WordManager
 from .export_manager import TrakaidoExporter
-from .noun_forms import generate_noun_forms_for_lemmas
+# from .noun_forms import generate_noun_forms_for_lemmas  # Function not implemented
 from wordfreq.trakaido.verb_converter import export_wireword_verbs
 
 
@@ -25,6 +26,9 @@ def create_parser():
     """Create and configure the argument parser."""
     parser = argparse.ArgumentParser(description="Trakaido Word Management Tool")
     subparsers = parser.add_subparsers(dest='command', help='Available commands')
+
+    # Store subparsers for later access
+    parser.subparsers_map = {}
 
     # Add word command
     add_parser = subparsers.add_parser('add', help='Add a new word')
@@ -78,6 +82,9 @@ def create_parser():
     export_parser = subparsers.add_parser('export', help='Export words to files')
     export_subparsers = export_parser.add_subparsers(dest='export_type', help='Export formats')
 
+    # Store export parser for later access to show help
+    parser.subparsers_map['export'] = export_parser
+
     # Export to JSON
     json_parser = export_subparsers.add_parser('json', help='Export to JSON format')
     json_parser.add_argument('--output', help='Output JSON file path')
@@ -97,7 +104,7 @@ def create_parser():
                             help='Include unverified entries (default: True)')
 
     # Export to wireword format
-    wireword_parser = export_subparsers.add_parser('wireword', help='Export to WireWord API format')
+    wireword_parser = export_subparsers.add_parser('wireword', help='Export nouns/adjectives/etc to single WireWord JSON file')
     wireword_parser.add_argument('--output', help='Output JSON file path')
     wireword_parser.add_argument('--level', type=int, help='Filter by specific difficulty level')
     wireword_parser.add_argument('--subtype', help='Filter by specific POS subtype')
@@ -106,12 +113,13 @@ def create_parser():
     wireword_parser.add_argument('--include-unverified', action='store_true', default=True,
                                 help='Include unverified entries (default: True)')
 
-    # Export wireword directory
-    wireword_dir_parser = export_subparsers.add_parser('wireword-dir', help='Export WireWord files to directory structure')
+    # Export wireword directory (DEPRECATED)
+    wireword_dir_parser = export_subparsers.add_parser('wireword-dir',
+                                                       help='[DEPRECATED] Export WireWord nouns/adjectives to separate files by level/subtype')
     wireword_dir_parser.add_argument('--output-dir', help='Base output directory (will create wireword subdirectory)')
 
     # Export wireword verbs
-    wireword_verbs_parser = export_subparsers.add_parser('wireword-verbs', help='Export verbs from verbs.py to wireword format')
+    wireword_verbs_parser = export_subparsers.add_parser('wireword-verbs', help='Export verbs from verbs.py to WireWord JSON file')
     wireword_verbs_parser.add_argument('--output', help='Output JSON file path')
 
     # Export all
@@ -193,9 +201,13 @@ def handle_list_commands(args, manager):
     return False
 
 
-def handle_export_commands(args, manager):
+def handle_export_commands(args, manager, export_parser=None):
     """Handle export commands."""
     if not args.export_type:
+        if export_parser:
+            export_parser.print_help()
+        else:
+            print("Error: No export type specified. Use 'utils.py export -h' for help.")
         return False
 
     # Create TrakaidoExporter instance for export operations
@@ -270,10 +282,11 @@ def handle_export_commands(args, manager):
         # Generate default output filename if not provided
         output_path = args.output
         if not output_path:
-            output_path = "wireword_export.json"
+            output_path = f'{GREENLAND_SRC_PATH}/../data/trakaido_wordlists/lang_lt/generated/wireword/wireword_nouns.json'
 
-        # Convert to absolute path
+        # Ensure directory exists
         output_path = str(Path(output_path).resolve())
+        os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
         success, stats = exporter.export_to_wireword_format(
             output_path=output_path,
@@ -309,7 +322,7 @@ def handle_export_commands(args, manager):
             print(f"   Levels exported: {len(results.get('levels_exported', []))}")
             print(f"   Subtypes exported: {len(results.get('subtypes_exported', []))}")
             print(f"   Total words: {results.get('total_words', 0)}")
-            print(f"   Output directory: {output_dir}/wireword")
+            print(f"   Output directory: {os.path.abspath(os.path.join(output_dir, 'wireword'))}")
 
         return success
 
@@ -317,7 +330,11 @@ def handle_export_commands(args, manager):
         # Use default output path if not provided
         output_path = args.output
         if not output_path:
-            output_path = f'{GREENLAND_SRC_PATH}/../wireword_verbs_export.json'
+            output_path = f'{GREENLAND_SRC_PATH}/../data/trakaido_wordlists/lang_lt/generated/wireword/wireword_verbs.json'
+
+        # Ensure directory exists
+        output_path = str(Path(output_path).resolve())
+        os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
         success, results = export_wireword_verbs(output_path)
 
@@ -381,15 +398,13 @@ def main():
         success = handle_list_commands(args, manager)
 
     elif args.command == 'generate-noun-forms':
-        success = generate_noun_forms_for_lemmas(
-            limit=args.limit,
-            level_filter=args.level,
-            dry_run=args.dry_run,
-            force=args.force
-        )
+        # Function not implemented yet
+        print("Error: generate-noun-forms command is not yet implemented")
+        success = False
 
     elif args.command == 'export':
-        success = handle_export_commands(args, manager)
+        export_parser = parser.subparsers_map.get('export')
+        success = handle_export_commands(args, manager, export_parser)
 
     sys.exit(0 if success else 1)
 
