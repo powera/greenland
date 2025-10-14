@@ -582,12 +582,41 @@ class TrakaidoExporter:
                 wireword['tags'] = tags
                 
                 wireword_data.append(wireword)
-            
-            # Write to JSON file
-            stats = self.write_json_file(wireword_data, output_path, pretty_print)
-            
+
+            # Calculate stats from the original export_data (before transformation)
+            stats = create_export_stats(export_data)
+
+            # Write to JSON file (without recalculating stats)
+            try:
+                # Ensure the directory exists
+                os.makedirs(os.path.dirname(output_path), exist_ok=True)
+
+                with open(output_path, 'w', encoding='utf-8') as f:
+                    if pretty_print:
+                        # Write with nice formatting, one entry per line
+                        f.write('[\n')
+                        for i, entry in enumerate(wireword_data):
+                            line = json.dumps(entry, ensure_ascii=False, separators=(', ', ': '))
+                            if i < len(wireword_data) - 1:
+                                f.write(f'  {line},\n')
+                            else:
+                                f.write(f'  {line}\n')
+                        f.write(']\n')
+                    else:
+                        # Compact format
+                        json.dump(wireword_data, f, ensure_ascii=False, separators=(',', ':'))
+
+                logger.info(f"✅ Successfully wrote {len(wireword_data)} entries to {output_path}")
+                logger.info(f"Entries with GUIDs: {stats.entries_with_guids}/{stats.total_entries}")
+                logger.info(f"POS distribution: {stats.pos_distribution}")
+                logger.info(f"Level distribution: {stats.level_distribution}")
+
+            except Exception as e:
+                logger.error(f"❌ Failed to write JSON file: {e}")
+                raise
+
             logger.info(f"✅ Successfully exported {len(wireword_data)} words in WireWord format")
-            
+
             return True, stats
             
         except Exception as e:
@@ -787,13 +816,13 @@ class TrakaidoExporter:
             session.close()
             
             success = len(results['files_created']) > 0
-            
+
             if success:
                 logger.info(f"✅ WireWord directory export completed:")
                 logger.info(f"   Files created: {len(results['files_created'])}")
                 logger.info(f"   Levels exported: {len(results['levels_exported'])}")
                 logger.info(f"   Subtypes exported: {len(results['subtypes_exported'])}")
-                logger.info(f"   Output directory: {wireword_dir}")
+                logger.info(f"   Output directory: {os.path.abspath(wireword_dir)}")
             else:
                 logger.error("❌ No wireword files were created")
             
