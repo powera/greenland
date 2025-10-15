@@ -128,11 +128,28 @@ class GrammaticalForm(enum.Enum):
     VERB_IMPERATIVE = "verb/imperative"
     VERB_SUBJUNCTIVE = "verb/subjunctive"
     
-    # Noun forms
+    # Noun forms (English)
     NOUN_SINGULAR = "noun/singular"
     NOUN_PLURAL = "noun/plural"
     NOUN_POSSESSIVE_SINGULAR = "noun/possessive_singular"
     NOUN_POSSESSIVE_PLURAL = "noun/possessive_plural"
+
+    # Lithuanian noun forms (7 cases × 2 numbers)
+    NOUN_LT_NOMINATIVE_SINGULAR = "noun/lt_nominative_singular"
+    NOUN_LT_GENITIVE_SINGULAR = "noun/lt_genitive_singular"
+    NOUN_LT_DATIVE_SINGULAR = "noun/lt_dative_singular"
+    NOUN_LT_ACCUSATIVE_SINGULAR = "noun/lt_accusative_singular"
+    NOUN_LT_INSTRUMENTAL_SINGULAR = "noun/lt_instrumental_singular"
+    NOUN_LT_LOCATIVE_SINGULAR = "noun/lt_locative_singular"
+    NOUN_LT_VOCATIVE_SINGULAR = "noun/lt_vocative_singular"
+
+    NOUN_LT_NOMINATIVE_PLURAL = "noun/lt_nominative_plural"
+    NOUN_LT_GENITIVE_PLURAL = "noun/lt_genitive_plural"
+    NOUN_LT_DATIVE_PLURAL = "noun/lt_dative_plural"
+    NOUN_LT_ACCUSATIVE_PLURAL = "noun/lt_accusative_plural"
+    NOUN_LT_INSTRUMENTAL_PLURAL = "noun/lt_instrumental_plural"
+    NOUN_LT_LOCATIVE_PLURAL = "noun/lt_locative_plural"
+    NOUN_LT_VOCATIVE_PLURAL = "noun/lt_vocative_plural"
     
     # Adjective forms
     ADJECTIVE_POSITIVE = "adjective/positive"
