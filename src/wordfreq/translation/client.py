@@ -1488,6 +1488,157 @@ Pay special attention to distinguishing between different grammatical forms of t
             return None
 
 
+    def query_lithuanian_noun_declensions(self, lemma_id: int) -> Tuple[Dict[str, str], bool]:
+        """
+        Query LLM for all Lithuanian noun declensions (7 cases × 2 numbers).
+
+        Args:
+            lemma_id: The ID of the lemma to generate declensions for
+
+        Returns:
+            Tuple of (dict mapping form names to declensions, success flag)
+        """
+        session = self.get_session()
+
+        # Get the lemma
+        lemma = session.query(linguistic_db.Lemma).filter(linguistic_db.Lemma.id == lemma_id).first()
+        if not lemma:
+            logger.error(f"Lemma with ID {lemma_id} not found")
+            return {}, False
+
+        if not lemma.lithuanian_translation:
+            logger.error(f"Lemma ID {lemma_id} has no Lithuanian translation")
+            return {}, False
+
+        if lemma.pos_type.lower() != 'noun':
+            logger.error(f"Lemma ID {lemma_id} is not a noun (pos_type: {lemma.pos_type})")
+            return {}, False
+
+        noun = lemma.lithuanian_translation
+        english_word = lemma.lemma_text
+        definition = lemma.definition_text
+        pos_subtype = lemma.pos_subtype
+
+        # All 14 forms (7 cases × 2 numbers)
+        # For plurale tantum, use empty string for singular forms
+        # For singulare tantum, use empty string for plural forms
+        singular_fields = [
+            "nominative_singular", "genitive_singular", "dative_singular", "accusative_singular",
+            "instrumental_singular", "locative_singular", "vocative_singular"
+        ]
+        plural_fields = [
+            "nominative_plural", "genitive_plural", "dative_plural", "accusative_plural",
+            "instrumental_plural", "locative_plural", "vocative_plural"
+        ]
+
+        # Build schema properties for all forms (all required, but can be empty string for tantum cases)
+        form_properties = {}
+        for form in singular_fields + plural_fields:
+            form_properties[form] = SchemaProperty(
+                "string",
+                f"Lithuanian {form.replace('_', ' ')} (use empty string if not applicable)"
+            )
+
+        schema = Schema(
+            name="LithuanianNounDeclensions",
+            description="All declension forms for a Lithuanian noun",
+            properties={
+                "number_type": SchemaProperty(
+                    "string",
+                    "The number type of this noun",
+                    enum=["regular", "plurale_tantum", "singulare_tantum"]
+                ),
+                "forms": SchemaProperty(
+                    type="object",
+                    description="Dictionary of all noun declension forms. Use empty string for forms that don't exist (e.g., singular forms for plurale tantum)",
+                    properties=form_properties
+                ),
+                "confidence": SchemaProperty("number", "Confidence score from 0-1"),
+                "notes": SchemaProperty("string", "Notes about the declension pattern")
+            }
+        )
+
+        subtype_context = f" (category: {pos_subtype})" if pos_subtype else ""
+
+        prompt = f"""Generate all Lithuanian noun declension forms for the Lithuanian word "{noun}".
+
+English word: {english_word}
+Definition: {definition}{subtype_context}
+
+Lithuanian has 7 cases and 2 numbers (singular and plural):
+
+**Cases:**
+1. Nominative (kas? - who/what?) - subject of sentence
+2. Genitive (ko? - of whom/what?) - possession, negation
+3. Dative (kam? - to whom/what?) - indirect object
+4. Accusative (ką? - whom/what?) - direct object
+5. Instrumental (kuo? - by/with whom/what?) - means/instrument
+6. Locative (kame? - in/on whom/what?) - location
+7. Vocative (calling/addressing)
+
+**Number types:**
+- "regular": Normal noun with both singular and plural forms (most nouns)
+  - English example: "book" -> "books"
+  - Lithuanian example: "knyga" -> "knygos"
+- "plurale_tantum": Plural-only noun - provide the 7 plural forms and use empty string ("") for all singular forms
+  - English example: "scissors", "pants"
+  - Lithuanian example: "kelnės" (pants), "žirklės" (scissors)
+- "singulare_tantum": Singular-only noun - provide the 7 singular forms and use empty string ("") for all plural forms
+  - English example: "milk", "information"
+  - Lithuanian example: "pienas" (milk), "informacija" (information)
+
+Please specify the number_type and provide all forms for "{noun}", using empty strings for forms that don't exist."""
+
+        try:
+            context = util.prompt_loader.get_context("wordfreq", "definitions")
+
+            response = self.client.generate_chat(
+                prompt=prompt,
+                model=self.model,
+                json_schema=schema,
+                context=context
+            )
+
+            # Log successful query
+            try:
+                linguistic_db.log_query(
+                    session,
+                    word=noun,
+                    query_type='lithuanian_noun_declensions',
+                    prompt=prompt,
+                    response=json.dumps(response.structured_data),
+                    model=self.model
+                )
+            except Exception as log_err:
+                logger.error(f"Failed to log Lithuanian declension query: {log_err}")
+
+            # Validate and return response data
+            if (response.structured_data and
+                isinstance(response.structured_data, dict) and
+                'forms' in response.structured_data and
+                isinstance(response.structured_data['forms'], dict)):
+                # Filter out forms based on number_type
+                forms = response.structured_data['forms']
+                number_type = response.structured_data.get('number_type', 'regular')
+
+                # For plurale_tantum, remove all singular forms
+                if number_type == 'plurale_tantum':
+                    forms = {k: v for k, v in forms.items() if not k.endswith('_singular')}
+                    logger.info(f"Filtered singular forms for plurale_tantum noun '{noun}'")
+                # For singulare_tantum, remove all plural forms
+                elif number_type == 'singulare_tantum':
+                    forms = {k: v for k, v in forms.items() if not k.endswith('_plural')}
+                    logger.info(f"Filtered plural forms for singulare_tantum noun '{noun}'")
+
+                return forms, True
+            else:
+                logger.warning(f"Invalid response format for Lithuanian noun '{noun}'")
+                return {}, False
+
+        except Exception as e:
+            logger.error(f"Error querying Lithuanian declensions for '{noun}': {type(e).__name__}: {e}")
+            return {}, False
+
     @classmethod
     def close_all(cls):
         """
