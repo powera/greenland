@@ -1,0 +1,18 @@
+Check if the following word is in its correct lemma (dictionary/base) form:
+
+Word: "{word}"
+Part of Speech: {pos_type}
+
+{pos_guidance}
+
+Determine:
+1. Is "{word}" already in lemma form?
+2. If not, what is the correct lemma form?
+3. Explain your reasoning
+
+Examples:
+- "shoes" (noun) → NOT lemma, should be "shoe"
+- "eating" (verb) → NOT lemma, should be "eat"
+- "better" (adjective) → NOT lemma, should be "good"
+- "shoe" (noun) → IS lemma
+- "eat" (verb) → IS lemma
