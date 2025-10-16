@@ -1639,6 +1639,33 @@ Please specify the number_type and provide all forms for "{noun}", using empty s
             logger.error(f"Error querying Lithuanian declensions for '{noun}': {type(e).__name__}: {e}")
             return {}, False
 
+    def get_lithuanian_noun_forms(self, word: str = None, lemma_id: int = None, source: str = 'llm') -> Tuple[Dict[str, str], bool]:
+        """
+        Get Lithuanian noun declensions using either LLM or Wiktionary.
+
+        This is a unified API wrapper that supports both implementations.
+
+        Args:
+            word: The Lithuanian word to decline (required if source='wiki')
+            lemma_id: The lemma ID (required if source='llm')
+            source: Source for noun forms - 'llm' (default) or 'wiki'
+
+        Returns:
+            Tuple of (dictionary mapping case names to forms, success flag)
+            Forms use keys like: nominative_singular, genitive_plural, etc.
+        """
+        if source == 'wiki':
+            if word is None:
+                raise ValueError("word parameter is required when source='wiki'")
+            from wordfreq.translation.wiki import get_lithuanian_noun_forms
+            return get_lithuanian_noun_forms(word)
+        elif source == 'llm':
+            if lemma_id is None:
+                raise ValueError("lemma_id parameter is required when source='llm'")
+            return self.query_lithuanian_noun_declensions(lemma_id)
+        else:
+            raise ValueError(f"Invalid source: {source}. Must be 'llm' or 'wiki'")
+
     @classmethod
     def close_all(cls):
         """

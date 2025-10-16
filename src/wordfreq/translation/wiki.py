@@ -484,6 +484,8 @@ def get_lithuanian_declensions(word: str) -> Tuple[Dict[str, str], bool]:
 
     This is the main entry point that coordinates the fetch and parse operations.
 
+    DEPRECATED: Use get_lithuanian_noun_forms() instead for unified API.
+
     Args:
         word: The Lithuanian word to look up
 
@@ -523,6 +525,23 @@ def get_lithuanian_declensions(word: str) -> Tuple[Dict[str, str], bool]:
     else:
         logger.warning(f"No declensions extracted for '{word}'")
         return {}, False
+
+
+def get_lithuanian_noun_forms(word: str) -> Tuple[Dict[str, str], bool]:
+    """
+    Get Lithuanian noun declensions for a word from Wiktionary.
+
+    This is the unified API entry point that matches the interface expected
+    by the generate tool and client code.
+
+    Args:
+        word: The Lithuanian word to look up
+
+    Returns:
+        Tuple of (dictionary mapping case names to forms, success flag)
+        Forms use keys like: nominative_singular, genitive_plural, etc.
+    """
+    return get_lithuanian_declensions(word)
 
 
 def test_wiktionary_fetch():

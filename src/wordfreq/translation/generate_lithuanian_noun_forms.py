@@ -85,14 +85,15 @@ def get_lithuanian_noun_lemmas(db_path: str, limit: int = None) -> List[Dict]:
     return result
 
 
-def process_lemma_declensions(client: LinguisticClient, lemma_id: int, db_path: str) -> bool:
+def process_lemma_declensions(client: LinguisticClient, lemma_id: int, db_path: str, source: str = 'llm') -> bool:
     """
     Process a single lemma to generate and store all its declensions.
 
     Args:
-        client: LinguisticClient instance
+        client: LinguisticClient instance (only used if source='llm')
         lemma_id: ID of the lemma to process
         db_path: Path to the database
+        source: Source for noun forms - 'llm' or 'wiki'
 
     Returns:
         Success flag
@@ -110,18 +111,32 @@ def process_lemma_declensions(client: LinguisticClient, lemma_id: int, db_path: 
             return False
 
         # Check if we already have Lithuanian derivative forms for this lemma
+        # Only skip if we have at least 3 forms that are in FORM_MAPPING
         existing_forms = session.query(linguistic_db.DerivativeForm).filter(
             linguistic_db.DerivativeForm.lemma_id == lemma_id,
             linguistic_db.DerivativeForm.language_code == 'lt'
-        ).count()
+        ).all()
 
-        if existing_forms > 0:
-            logger.info(f"Lemma ID {lemma_id} ({lemma.lemma_text}) already has {existing_forms} Lithuanian forms, skipping")
+        # Count how many of the existing forms are actual declension forms (in FORM_MAPPING)
+        declension_forms_count = sum(
+            1 for form in existing_forms
+            if form.grammatical_form in [gf.value for gf in FORM_MAPPING.values()]
+        )
+
+        if declension_forms_count >= 3:
+            logger.info(f"Lemma ID {lemma_id} ({lemma.lemma_text}) already has {declension_forms_count} Lithuanian declension forms, skipping")
             return True
 
-        # Query for declensions
-        logger.info(f"Querying declensions for lemma ID {lemma_id}: {lemma.lemma_text} -> {lemma.lithuanian_translation}")
-        forms_dict, success = client.query_lithuanian_noun_declensions(lemma_id)
+        # Query for declensions based on source
+        logger.info(f"Querying declensions for lemma ID {lemma_id}: {lemma.lemma_text} -> {lemma.lithuanian_translation} (source: {source})")
+
+        if source == 'wiki':
+            # Use Wiktionary-based implementation
+            from wordfreq.translation.wiki import get_lithuanian_noun_forms
+            forms_dict, success = get_lithuanian_noun_forms(lemma.lithuanian_translation)
+        else:  # source == 'llm'
+            # Use LLM-based implementation (existing behavior)
+            forms_dict, success = client.query_lithuanian_noun_declensions(lemma_id)
 
         if not success or not forms_dict:
             logger.error(f"Failed to get declensions for lemma ID {lemma_id}")
@@ -207,6 +222,13 @@ def main():
         action='store_true',
         help='Skip confirmation prompt'
     )
+    parser.add_argument(
+        '--source',
+        type=str,
+        choices=['llm', 'wiki'],
+        default='llm',
+        help='Source for noun forms: llm (default) or wiki (Wiktionary)'
+    )
 
     args = parser.parse_args()
 
@@ -225,8 +247,10 @@ def main():
     # Confirmation prompt
     if not args.yes:
         print(f"\n{'='*60}")
-        print(f"Ready to run LLM queries for {len(lemmas)} words")
-        print(f"Model: {args.model}")
+        print(f"Ready to run queries for {len(lemmas)} words")
+        print(f"Source: {args.source}")
+        if args.source == 'llm':
+            print(f"Model: {args.model}")
         print(f"Throttle: {args.throttle}s between calls")
         print(f"{'='*60}")
         response = input("\nContinue? [y/N]: ")
@@ -245,7 +269,7 @@ def main():
     for i, lemma_info in enumerate(lemmas, 1):
         logger.info(f"\n[{i}/{len(lemmas)}] Processing: {lemma_info['english']} -> {lemma_info['lithuanian']}")
 
-        success = process_lemma_declensions(client, lemma_info['id'], args.db_path)
+        success = process_lemma_declensions(client, lemma_info['id'], args.db_path, source=args.source)
 
         if success:
             successful += 1
