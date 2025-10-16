@@ -17,7 +17,6 @@ from wordfreq.storage.models.translations import Translation, TranslationSet
 from wordfreq.storage.models.enums import GrammaticalForm
 from wordfreq.storage.connection_pool import get_session, close_thread_sessions
 import constants
-from wordfreq.translation.noun_forms import LithuanianNounForms
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
