@@ -462,8 +462,69 @@ def main():
                        help='Fraction of items to sample (0.0-1.0, default: 1.0)')
     parser.add_argument('--confidence-threshold', type=float, default=0.7,
                        help='Minimum confidence to flag issues (0.0-1.0, default: 0.7)')
+    parser.add_argument('--yes', '-y', action='store_true',
+                       help='Skip confirmation prompt before running LLM queries')
 
     args = parser.parse_args()
+
+    # Confirm before running LLM queries (unless --yes was provided)
+    if not args.yes:
+        # Calculate estimated number of LLM calls
+        agent_temp = LokysAgent(db_path=args.db_path, debug=args.debug, model=args.model)
+        session = agent_temp.get_session()
+        try:
+            estimated_calls = 0
+
+            if args.check in ['lemmas', 'all']:
+                query = session.query(Lemma).filter(Lemma.guid.isnot(None))
+                if args.limit:
+                    query = query.limit(args.limit)
+                lemma_count = query.count()
+                if args.sample_rate < 1.0:
+                    lemma_count = int(lemma_count * args.sample_rate)
+                estimated_calls += lemma_count
+
+            if args.check in ['translations', 'all']:
+                if args.language:
+                    # Single language
+                    field_name, _ = LANGUAGE_FIELDS[args.language]
+                    query = session.query(Lemma).filter(
+                        Lemma.guid.isnot(None),
+                        getattr(Lemma, field_name).isnot(None),
+                        getattr(Lemma, field_name) != ''
+                    )
+                    if args.limit:
+                        query = query.limit(args.limit)
+                    translation_count = query.count()
+                    if args.sample_rate < 1.0:
+                        translation_count = int(translation_count * args.sample_rate)
+                    estimated_calls += translation_count
+                else:
+                    # All languages
+                    for lang_code, (field_name, _) in LANGUAGE_FIELDS.items():
+                        query = session.query(Lemma).filter(
+                            Lemma.guid.isnot(None),
+                            getattr(Lemma, field_name).isnot(None),
+                            getattr(Lemma, field_name) != ''
+                        )
+                        if args.limit:
+                            query = query.limit(args.limit)
+                        translation_count = query.count()
+                        if args.sample_rate < 1.0:
+                            translation_count = int(translation_count * args.sample_rate)
+                        estimated_calls += translation_count
+        finally:
+            session.close()
+
+        print(f"\nThis will make approximately {estimated_calls} LLM API calls using model '{args.model}'.")
+        print("This may incur costs and take some time to complete.")
+        response = input("Do you want to proceed? [y/N]: ").strip().lower()
+
+        if response not in ['y', 'yes']:
+            print("Aborted.")
+            sys.exit(0)
+
+        print()  # Extra newline for readability
 
     agent = LokysAgent(db_path=args.db_path, debug=args.debug, model=args.model)
 

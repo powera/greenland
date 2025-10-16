@@ -12,7 +12,7 @@ Autonomous agents for data quality monitoring and maintenance tasks. These agent
 
 **Usage:**
 ```bash
-python lokys.py [--check CHECK_TYPE] [--language LANG] [--output REPORT.json] [--model MODEL]
+python lokys.py [--check CHECK_TYPE] [--language LANG] [--output REPORT.json] [--model MODEL] [--yes]
 ```
 
 **Check Types:**
@@ -27,6 +27,7 @@ python lokys.py [--check CHECK_TYPE] [--language LANG] [--output REPORT.json] [-
 - `--limit N` - Maximum items to check
 - `--sample-rate RATE` - Fraction of items to sample (0.0-1.0, default: 1.0)
 - `--confidence-threshold THRESHOLD` - Minimum confidence to flag issues (0.0-1.0, default: 0.7)
+- `--yes`, `-y` - Skip confirmation prompt before running LLM queries
 - `--db-path PATH` - Use custom database path
 - `--debug` - Enable debug logging
 
@@ -111,6 +112,383 @@ MULTI-LINGUAL TRANSLATIONS:
 **LLM Integration:**
 
 Lokys uses the LLM validation helpers from `wordfreq/tools/llm_validators.py`, which load prompts from `wordfreq/prompts/lemma_validation/` and `wordfreq/prompts/translation_validation/`. This ensures consistent, configurable validation across different runs.
+
+---
+
+### Dramblys (Missing Words Detector)
+
+**Name:** "Dramblys" means "elephant" in Lithuanian - never forgets what's missing!
+
+**Purpose:** Identifies missing words that should be in the dictionary by scanning frequency corpora, checking category coverage, and finding gaps.
+
+**Usage:**
+```bash
+python dramblys.py [--check CHECK_TYPE] [--output REPORT.json] [--top-n N]
+```
+
+**Check Types:**
+- `--check frequency` - Find high-frequency words missing from the database
+- `--check orphaned` - Find derivative forms without parent lemmas
+- `--check subtypes` - Check POS subtype coverage and identify under-represented categories
+- `--check levels` - Check difficulty level distribution for gaps and imbalances
+- `--check all` - Run all checks (default)
+
+**Options:**
+- `--output FILE` - Write detailed JSON report to specified file
+- `--top-n N` - Number of top frequency words to check (default: 5000)
+- `--min-subtype-count N` - Minimum expected words per subtype (default: 10)
+- `--db-path PATH` - Use custom database path
+- `--debug` - Enable debug logging
+
+**Example Usage:**
+
+Run full check with report:
+```bash
+python dramblys.py --check all --output /tmp/dramblys_report.json
+```
+
+Check top 10000 frequency words:
+```bash
+python dramblys.py --check frequency --top-n 10000
+```
+
+Find under-covered subtypes:
+```bash
+python dramblys.py --check subtypes --min-subtype-count 20
+```
+
+Run as a weekly cron job:
+```bash
+# Add to crontab: Run weekly on Monday at 1 AM
+0 1 * * 1 cd /Users/powera/repo/greenland/src/wordfreq/agents && python dramblys.py --output /var/log/dramblys_weekly.json
+```
+
+**Output:**
+
+The agent provides:
+- Lists of high-frequency missing words with rank information
+- Orphaned derivative forms needing parent lemmas
+- Under-covered POS subtypes that need more words
+- Difficulty level gaps and imbalances
+- Priority recommendations for adding new words
+
+Example console output:
+```
+================================================================================
+DRAMBLYS AGENT REPORT - Missing Words Detection
+================================================================================
+Timestamp: 2025-01-15 01:00:00
+Duration: 12.34 seconds
+
+HIGH-FREQUENCY MISSING WORDS:
+  Frequency tokens checked: 5000
+  Missing words found: 342
+  Existing words in database: 1234
+  Top 10 missing by rank:
+    1. 'example' (rank: 245)
+    2. 'another' (rank: 389)
+    ...
+
+ORPHANED DERIVATIVE FORMS:
+  Total forms checked: 5678
+  Orphaned forms: 12
+
+POS SUBTYPE COVERAGE:
+  Total subtypes: 45
+  Well-covered: 32
+  Under-covered: 13
+  Most under-covered subtypes:
+    1. kitchen_utensils (noun): 3 words
+    2. weather_phenomena (noun): 5 words
+    ...
+
+DIFFICULTY LEVEL DISTRIBUTION:
+  Total trakaido words: 1234
+  Average per level: 61.7
+  Empty levels: [18, 19]
+  Imbalanced levels:
+    Level 1: 25 words (expected ~62)
+    Level 15: 15 words (expected ~62)
+================================================================================
+```
+
+**What It Checks:**
+
+1. **High-Frequency Missing Words:** Scans frequency corpora for common words not yet in the database, automatically excluding stopwords and invalid tokens.
+
+2. **Orphaned Derivative Forms:** Finds derivative forms that reference non-existent lemma IDs.
+
+3. **POS Subtype Coverage:** Identifies semantic categories (subtypes) that are under-represented, helping prioritize which types of words to add next.
+
+4. **Difficulty Level Distribution:** Checks that trakaido words are evenly distributed across levels 1-20, identifying gaps and imbalances.
+
+---
+
+### Bebras (Database Integrity Checker)
+
+**Name:** "Bebras" means "beaver" in Lithuanian - industrious builder of solid structures!
+
+**Purpose:** Ensures database structural integrity by identifying orphaned records, missing required fields, and constraint violations.
+
+**Usage:**
+```bash
+python bebras.py [--check CHECK_TYPE] [--output REPORT.json]
+```
+
+**Check Types:**
+- `--check orphaned` - Find orphaned records (invalid foreign keys)
+- `--check missing-fields` - Find records with missing required fields
+- `--check no-derivatives` - Find lemmas without any derivative forms
+- `--check duplicates` - Find duplicate GUIDs
+- `--check invalid-levels` - Find difficulty levels outside valid range (1-20)
+- `--check all` - Run all checks (default)
+
+**Options:**
+- `--output FILE` - Write detailed JSON report to specified file
+- `--db-path PATH` - Use custom database path
+- `--debug` - Enable debug logging
+
+**Example Usage:**
+
+Run full integrity check:
+```bash
+python bebras.py --check all --output /tmp/bebras_report.json
+```
+
+Check only for orphaned records:
+```bash
+python bebras.py --check orphaned
+```
+
+Find missing required fields:
+```bash
+python bebras.py --check missing-fields
+```
+
+Run as a daily cron job:
+```bash
+# Add to crontab: Run daily at 4 AM
+0 4 * * * cd /Users/powera/repo/greenland/src/wordfreq/agents && python bebras.py --output /var/log/bebras_daily.json
+```
+
+**Output:**
+
+The agent provides:
+- Counts of integrity violations by category
+- Details of problematic records with IDs for manual cleanup
+- Severity ratings (high/medium) for prioritization
+- Total issues summary
+
+Example console output:
+```
+================================================================================
+BEBRAS AGENT REPORT - Database Integrity Check
+================================================================================
+Timestamp: 2025-01-15 04:00:00
+Duration: 5.67 seconds
+
+ORPHANED RECORDS:
+  Derivative forms: 3
+  Word frequencies: 0
+  Example sentences: 1
+
+MISSING REQUIRED FIELDS:
+  High severity: 8
+  Medium severity: 12
+
+LEMMAS WITHOUT DERIVATIVE FORMS:
+  Count: 45
+
+DUPLICATE GUIDs:
+  Count: 2
+
+INVALID DIFFICULTY LEVELS:
+  Count: 0
+
+TOTAL ISSUES FOUND: 71
+================================================================================
+```
+
+**What It Checks:**
+
+1. **Orphaned Records:**
+   - Derivative forms with invalid lemma_id references
+   - Word frequencies with invalid word_token_id or corpus_id
+   - Example sentences with invalid derivative_form_id
+
+2. **Missing Required Fields:**
+   - Lemmas without definitions or POS types (high severity)
+   - Trakaido words (with GUIDs) missing difficulty levels (medium severity)
+   - Derivative forms without text or language codes (high severity)
+
+3. **Lemmas Without Derivatives:** Lemmas that have no derivative forms at all, which means they can't be used in practice.
+
+4. **Duplicate GUIDs:** Multiple lemmas sharing the same GUID, which violates uniqueness constraints.
+
+5. **Invalid Difficulty Levels:** Difficulty levels outside the valid range of 1-20.
+
+**When to Run:**
+
+Bebras should be run regularly (e.g., daily) to catch integrity issues early. It's especially useful:
+- After bulk imports or migrations
+- Before major exports
+- When debugging unexpected behavior
+- As part of continuous integration checks
+
+---
+
+### Voras (Multi-lingual Translation Coverage Reporter)
+
+**Name:** "Voras" means "spider" in Lithuanian - weaving together the web of translations!
+
+**Purpose:** Reports on the coverage of multi-lingual translations across all languages in the database. Identifies gaps, calculates statistics, and provides insights into translation completeness. Can also generate missing translations using LLM.
+
+**Usage:**
+```bash
+python voras.py [--check CHECK_TYPE] [--language LANG] [--output REPORT.json] [--fix] [--yes]
+```
+
+**Check Types:**
+- `--check overall` - Check overall translation coverage across all languages
+- `--check language` - Check coverage for a specific language (requires --language)
+- `--check difficulty` - Check translation coverage by difficulty level
+- `--check all` - Run all checks (default)
+
+**Options:**
+- `--language LANG` - Specific language to check (lt, zh, ko, fr, sw, vi) - required for language check
+- `--output FILE` - Write detailed JSON report to specified file
+- `--fix` - Generate missing translations using LLM and update the database
+- `--yes`, `-y` - Skip confirmation prompt before running LLM queries (for --fix mode)
+- `--model MODEL` - LLM model to use for translations (default: from constants)
+- `--limit N` - Maximum translations to generate per language (for --fix mode)
+- `--dry-run` - Show what would be fixed without making changes (for --fix mode)
+- `--db-path PATH` - Use custom database path
+- `--debug` - Enable debug logging
+
+**Example Usage:**
+
+Check all coverage metrics:
+```bash
+python voras.py --check all --output /tmp/voras_report.json
+```
+
+Check coverage for a specific language:
+```bash
+python voras.py --check language --language lt
+```
+
+Check overall coverage across all languages:
+```bash
+python voras.py --check overall
+```
+
+Generate missing Lithuanian translations (with confirmation):
+```bash
+python voras.py --fix --language lt
+```
+
+Generate all missing translations without confirmation:
+```bash
+python voras.py --fix --yes
+```
+
+Generate up to 50 missing French translations (dry run):
+```bash
+python voras.py --fix --language fr --limit 50 --dry-run
+```
+
+Run as a weekly cron job:
+```bash
+# Add to crontab: Run weekly on Friday at 6 AM
+0 6 * * 5 cd /Users/powera/repo/greenland/src/wordfreq/agents && python voras.py --output /var/log/voras_weekly.json
+```
+
+**Output:**
+
+The agent provides:
+- Overall translation coverage statistics (fully translated, partially translated, not translated)
+- Per-language coverage percentages
+- Coverage breakdown by part of speech (POS) type
+- Translation coverage across difficulty levels
+- Lists of lemmas missing translations for each language
+
+Example console output:
+```
+================================================================================
+VORAS AGENT REPORT - Multi-lingual Translation Coverage
+================================================================================
+Timestamp: 2025-01-15 06:00:00
+Duration: 2.34 seconds
+
+OVERALL COVERAGE:
+  Total curated lemmas: 1234
+  Fully translated (all languages): 987 (80.0%)
+  Partially translated: 234 (19.0%)
+  Not translated: 13 (1.0%)
+
+COVERAGE BY LANGUAGE:
+  Lithuanian (lt):
+    Translated: 1200/1234 (97.2%)
+    Missing: 34
+  Chinese (zh):
+    Translated: 1150/1234 (93.2%)
+    Missing: 84
+  Korean (ko):
+    Translated: 1100/1234 (89.1%)
+    Missing: 134
+  French (fr):
+    Translated: 1180/1234 (95.6%)
+    Missing: 54
+  Swahili (sw):
+    Translated: 1050/1234 (85.1%)
+    Missing: 184
+  Vietnamese (vi):
+    Translated: 1120/1234 (90.8%)
+    Missing: 114
+
+COVERAGE BY DIFFICULTY LEVEL:
+  Total levels with data: 20
+  Sample (first 5 levels):
+    Level 1 (62 words):
+      Lithuanian: 100.0%
+      Chinese: 98.4%
+      Korean: 96.8%
+      French: 100.0%
+      Swahili: 93.5%
+      Vietnamese: 95.2%
+    ...
+================================================================================
+```
+
+**What It Checks:**
+
+1. **Overall Coverage:** Counts how many lemmas are fully translated (in all languages), partially translated (in some languages), or not translated at all.
+
+2. **Per-Language Coverage:** For each language, calculates what percentage of curated lemmas have translations and identifies missing ones.
+
+3. **Coverage by POS Type:** When checking a specific language, breaks down coverage by part of speech (noun, verb, adjective, etc.).
+
+4. **Coverage by Difficulty Level:** Shows translation coverage across difficulty levels 1-20, helping identify if certain levels need more translation work.
+
+**What It Can Fix (with `--fix` flag):**
+
+When run with the `--fix` flag, Voras can automatically generate missing translations:
+- Uses LLM to query for word definitions including translations for all languages
+- Matches the LLM response to existing lemmas by part of speech
+- Updates the database with the generated translations
+- Provides detailed progress reporting and error handling
+- Supports dry-run mode to preview changes before applying them
+
+**When to Run:**
+
+Voras should be run regularly (e.g., weekly) to monitor translation progress and identify gaps. It's especially useful:
+- **Reporting mode**: After adding new lemmas to identify what needs translation
+- **Reporting mode**: Before releases to ensure translation quality
+- **Reporting mode**: To track progress on translation efforts over time
+- **Reporting mode**: To prioritize translation work by identifying the least-covered languages or difficulty levels
+- **Fix mode**: To batch-generate missing translations for new lemmas
+- **Fix mode**: To fill in gaps for specific languages that are under-translated
+- **Fix mode**: To quickly bootstrap translations for a new language
 
 ---
 

@@ -423,6 +423,9 @@ class LinguisticClient:
         """
         Query LLM for a Chinese translation of a specific word definition.
 
+        DEPRECATED: Use query_definitions() instead, which returns translations
+        for all languages in a single call.
+
         Args:
             word: The English word to translate
             definition: The specific definition of the word
@@ -431,6 +434,14 @@ class LinguisticClient:
         Returns:
             Tuple of (translation string, success flag)
         """
+        import warnings
+        warnings.warn(
+            "query_chinese_translation() is deprecated. Use query_definitions() instead, "
+            "which returns translations for all languages in a single call.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+
         if not word or not isinstance(word, str):
             logger.error("Invalid word parameter provided")
             return "", False
