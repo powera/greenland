@@ -12,8 +12,8 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 import constants
-# Determine the project root directory
-PROMPTS_DIR = Path(constants.SRC_DIR) / "prompts"
+# Prompts are now stored within the wordfreq module
+PROMPTS_DIR = Path(constants.SRC_DIR) / "wordfreq" / "prompts"
 
 # Cache for loaded prompts to avoid redundant file reads
 _prompt_cache: Dict[str, str] = {}
@@ -21,23 +21,26 @@ _prompt_cache: Dict[str, str] = {}
 def get_context(category: str, prompt_type: str, subtype: Optional[str] = None) -> str:
     """
     Load a context prompt from a text file.
-    
+
     Args:
-        category: Main category (e.g., 'benchmarks', 'wordfreq')
+        category: Main category (currently only 'wordfreq' is supported)
         prompt_type: Type of prompt (e.g., 'antonym', 'definitions')
         subtype: Optional subtype for further categorization (e.g., 'noun' for POS subtypes)
-        
+
     Returns:
         The prompt text as a string
-        
+
     Raises:
         FileNotFoundError: If the prompt file doesn't exist
     """
+    # Only wordfreq category is supported
+    assert category == "wordfreq", f"Only 'wordfreq' category is supported, got '{category}'"
+
     # Determine the file path
     if subtype:
-        file_path = PROMPTS_DIR / category / prompt_type / f"{subtype}.txt"
+        file_path = PROMPTS_DIR / prompt_type / f"{subtype}.txt"
     else:
-        file_path = PROMPTS_DIR / category / prompt_type / "context.txt"
+        file_path = PROMPTS_DIR / prompt_type / "context.txt"
     
     # Convert to string for cache key
     cache_key = str(file_path)
