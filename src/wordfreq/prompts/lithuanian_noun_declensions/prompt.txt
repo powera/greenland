@@ -1,0 +1,28 @@
+Generate all Lithuanian noun declension forms for the Lithuanian word "{noun}".
+
+English word: {english_word}
+Definition: {definition}{subtype_context}
+
+Lithuanian has 7 cases and 2 numbers (singular and plural):
+
+**Cases:**
+1. Nominative (kas? - who/what?) - subject of sentence
+2. Genitive (ko? - of whom/what?) - possession, negation
+3. Dative (kam? - to whom/what?) - indirect object
+4. Accusative (ką? - whom/what?) - direct object
+5. Instrumental (kuo? - by/with whom/what?) - means/instrument
+6. Locative (kame? - in/on whom/what?) - location
+7. Vocative (calling/addressing)
+
+**Number types:**
+- "regular": Normal noun with both singular and plural forms (most nouns)
+  - English example: "book" -> "books"
+  - Lithuanian example: "knyga" -> "knygos"
+- "plurale_tantum": Plural-only noun - provide the 7 plural forms and use empty string ("") for all singular forms
+  - English example: "scissors", "pants"
+  - Lithuanian example: "kelnės" (pants), "žirklės" (scissors)
+- "singulare_tantum": Singular-only noun - provide the 7 singular forms and use empty string ("") for all plural forms
+  - English example: "milk", "information"
+  - Lithuanian example: "pienas" (milk), "informacija" (information)
+
+Please specify the number_type and provide all forms for "{noun}", using empty strings for forms that don't exist.

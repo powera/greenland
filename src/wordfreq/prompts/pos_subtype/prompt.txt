@@ -1,0 +1,5 @@
+Classify the word '{word}' into the appropriate subtype of {pos_type}.
+
+Definition: {definition_text}
+
+Return only a JSON object with the classification.
