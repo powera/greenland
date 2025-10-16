@@ -1,0 +1,15 @@
+Validate the following translation:
+
+English: "{english_word}" (lemma form)
+{target_language} Translation: "{translation}"
+Part of Speech: {pos_type}
+
+Check:
+1. Is the translation semantically correct for the English word?
+2. Is the translation in lemma (dictionary/base) form for {target_language}?
+   - For nouns: singular nominative
+   - For verbs: infinitive
+   - For adjectives: positive/base form
+3. List any issues found
+
+If there are issues, provide the correct lemma form translation.
