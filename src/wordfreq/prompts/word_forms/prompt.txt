@@ -1,0 +1,1 @@
+Provide all possible forms of the {pos_type} '{lemma}'.

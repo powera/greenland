@@ -17,7 +17,7 @@ from wordfreq.storage.models.translations import Translation, TranslationSet
 from wordfreq.storage.models.enums import GrammaticalForm
 from wordfreq.storage.connection_pool import get_session, close_thread_sessions
 import constants
-from wordfreq.translation.noun_forms import create_noun_forms_prompt, parse_noun_forms_response, LithuanianNounForms
+from wordfreq.translation.noun_forms import LithuanianNounForms
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -155,16 +155,8 @@ class LinguisticClient:
         )
 
         context = util.prompt_loader.get_context("wordfreq", "definitions")
-
-        prompt = f"""Provide comprehensive dictionary definitions for the word '{word}'. 
-
-For each definition, include:
-1. The specific grammatical form (e.g., verb/infinitive, noun/singular, verb/present_participle)
-2. Whether it's the base form (infinitive for verbs, singular for nouns, etc.)
-3. The lemma (base concept) this form represents
-4. Specific example sentences that demonstrate this exact form
-
-Pay special attention to distinguishing between different grammatical forms of the same lemma (e.g., "running" as gerund vs present participle)."""
+        prompt_template = util.prompt_loader.get_prompt("wordfreq", "definitions")
+        prompt = prompt_template.format(word=word)
 
         try:
             # Make a single API call without retries
@@ -467,13 +459,8 @@ Pay special attention to distinguishing between different grammatical forms of t
             })
 
         context = util.prompt_loader.get_context("wordfreq", "chinese_translation")
-
-        prompt = f"""Provide a Chinese translation for the English word '{word}' with the following definition:
-
-        Definition: {definition}
-        Example sentence: {example}
-
-        Return only a JSON object with the translation, pinyin, confidence score, and any notes."""
+        prompt_template = util.prompt_loader.get_prompt("wordfreq", "chinese_translation")
+        prompt = prompt_template.format(word=word, definition=definition, example=example)
 
         try:
             response = self.client.generate_chat(
@@ -552,8 +539,8 @@ Pay special attention to distinguishing between different grammatical forms of t
         )
 
         context = util.prompt_loader.get_context("wordfreq", "word_forms")
-
-        prompt = f"Provide all possible forms of the {pos_type} '{lemma}'."
+        prompt_template = util.prompt_loader.get_prompt("wordfreq", "word_forms")
+        prompt = prompt_template.format(pos_type=pos_type, lemma=lemma)
 
         try:
             # Make a single API call without retries
@@ -765,12 +752,8 @@ Pay special attention to distinguishing between different grammatical forms of t
 
         # Select the appropriate context based on the part of speech
         context = util.prompt_loader.get_context("wordfreq", "pos_subtype", pos_type)
-        prompt = f"""Classify the word '{word}' into the appropriate subtype of {pos_type}.
-
-        Definition: {definition_text}
-
-        Return only a JSON object with the classification.
-        """
+        prompt_template = util.prompt_loader.get_prompt("wordfreq", "pos_subtype")
+        prompt = prompt_template.format(word=word, pos_type=pos_type, definition_text=definition_text)
 
         try:
             response = self.client.generate_chat(
@@ -1018,13 +1001,8 @@ Pay special attention to distinguishing between different grammatical forms of t
         )
 
         context = util.prompt_loader.get_context("wordfreq", "pronunciation")
-
-        prompt = f"""Provide the pronunciation for the word '{word}' as used in this sentence:
-
-        "{sentence}"
-
-        Return the IPA and simplified phonetic pronunciation, along with any alternative pronunciations.
-        """
+        prompt_template = util.prompt_loader.get_prompt("wordfreq", "pronunciation")
+        prompt = prompt_template.format(word=word, sentence=sentence)
 
         try:
             response = self.client.generate_chat(
@@ -1430,64 +1408,6 @@ Pay special attention to distinguishing between different grammatical forms of t
             "skipped": skipped
         }
 
-    def query_noun_forms(self, noun: str, required_forms: Dict[str, int], pos_subtype: str = None) -> Optional[LithuanianNounForms]:
-        """
-        Query Lithuanian noun forms generation.
-
-        Args:
-            noun: The Lithuanian noun in nominative singular
-            required_forms: Dictionary of form names to minimum levels
-            pos_subtype: Optional POS subtype for context
-
-        Returns:
-            LithuanianNounForms object or None
-        """
-        try:
-            context = util.prompt_loader.get_context("wordfreq", "definitions")  # Reuse definitions context
-
-            prompt = create_noun_forms_prompt(noun, required_forms, pos_subtype)
-
-            # Build schema properties dynamically based on required forms
-            form_properties = {
-                "singular_nominative": SchemaProperty("string", "Base nominative singular form")
-            }
-            
-            if "plural_nominative" in required_forms:
-                form_properties["plural_nominative"] = SchemaProperty("string", "Nominative plural form")
-            if "singular_accusative" in required_forms:
-                form_properties["singular_accusative"] = SchemaProperty("string", "Accusative singular form")
-            if "plural_accusative" in required_forms:
-                form_properties["plural_accusative"] = SchemaProperty("string", "Accusative plural form")
-
-            schema = Schema(
-                name="LithuanianNounForms",
-                description="Lithuanian noun declension forms",
-                properties={
-                    "forms": SchemaProperty(
-                        type="object",
-                        description="Dictionary of noun forms",
-                        properties=form_properties
-                    ),
-                    "confidence": SchemaProperty("number", "Confidence score from 0-1"),
-                    "notes": SchemaProperty("string", "Notes about the declension pattern")
-                }
-            )
-
-            response = self.client.generate_chat(
-                prompt=prompt,
-                model=self.model,
-                json_schema=schema,
-                context=context
-            )
-
-            if response and response.structured_data:
-                return parse_noun_forms_response(response.structured_data)
-
-        except Exception as e:
-            logger.error(f"Error querying noun forms for {noun}: {e}")
-            return None
-
-
     def query_lithuanian_noun_declensions(self, lemma_id: int) -> Tuple[Dict[str, str], bool]:
         """
         Query LLM for all Lithuanian noun declensions (7 cases × 2 numbers).
@@ -1560,37 +1480,15 @@ Pay special attention to distinguishing between different grammatical forms of t
 
         subtype_context = f" (category: {pos_subtype})" if pos_subtype else ""
 
-        prompt = f"""Generate all Lithuanian noun declension forms for the Lithuanian word "{noun}".
-
-English word: {english_word}
-Definition: {definition}{subtype_context}
-
-Lithuanian has 7 cases and 2 numbers (singular and plural):
-
-**Cases:**
-1. Nominative (kas? - who/what?) - subject of sentence
-2. Genitive (ko? - of whom/what?) - possession, negation
-3. Dative (kam? - to whom/what?) - indirect object
-4. Accusative (ką? - whom/what?) - direct object
-5. Instrumental (kuo? - by/with whom/what?) - means/instrument
-6. Locative (kame? - in/on whom/what?) - location
-7. Vocative (calling/addressing)
-
-**Number types:**
-- "regular": Normal noun with both singular and plural forms (most nouns)
-  - English example: "book" -> "books"
-  - Lithuanian example: "knyga" -> "knygos"
-- "plurale_tantum": Plural-only noun - provide the 7 plural forms and use empty string ("") for all singular forms
-  - English example: "scissors", "pants"
-  - Lithuanian example: "kelnės" (pants), "žirklės" (scissors)
-- "singulare_tantum": Singular-only noun - provide the 7 singular forms and use empty string ("") for all plural forms
-  - English example: "milk", "information"
-  - Lithuanian example: "pienas" (milk), "informacija" (information)
-
-Please specify the number_type and provide all forms for "{noun}", using empty strings for forms that don't exist."""
-
         try:
-            context = util.prompt_loader.get_context("wordfreq", "definitions")
+            context = util.prompt_loader.get_context("wordfreq", "lithuanian_noun_declensions")
+            prompt_template = util.prompt_loader.get_prompt("wordfreq", "lithuanian_noun_declensions")
+            prompt = prompt_template.format(
+                noun=noun,
+                english_word=english_word,
+                definition=definition,
+                subtype_context=subtype_context
+            )
 
             response = self.client.generate_chat(
                 prompt=prompt,
