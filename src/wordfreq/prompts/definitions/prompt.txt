@@ -1,0 +1,9 @@
+Provide comprehensive dictionary definitions for the word '{word}'.
+
+For each definition, include:
+1. The specific grammatical form (e.g., verb/infinitive, noun/singular, verb/present_participle)
+2. Whether it's the base form (infinitive for verbs, singular for nouns, etc.)
+3. The lemma (base concept) this form represents
+4. Specific example sentences that demonstrate this exact form
+
+Pay special attention to distinguishing between different grammatical forms of the same lemma (e.g., "running" as gerund vs present participle).

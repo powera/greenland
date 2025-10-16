@@ -64,6 +64,7 @@ class WordManager:
     def _get_word_analysis_prompt(self, english_word: str, lithuanian_word: str = None) -> str:
         """Get the prompt for analyzing a new word."""
         context = util.prompt_loader.get_context("wordfreq", "word_analysis")
+        prompt_template = util.prompt_loader.get_prompt("wordfreq", "word_analysis")
 
         if lithuanian_word:
             word_specification = f"English word '{english_word}' with Lithuanian translation '{lithuanian_word}'"
@@ -72,29 +73,13 @@ class WordManager:
             word_specification = f"English word '{english_word}'"
             meaning_clarification = "Provide the most common, basic meaning of this word."
 
-        return f"""{context}
+        prompt = prompt_template.format(
+            word_specification=word_specification,
+            meaning_clarification=meaning_clarification,
+            english_word=english_word
+        )
 
-Analyze the {word_specification} and provide:
-
-1. Part of speech (noun, verb, adjective, adverb, etc.) - for the LEMMA form only
-2. Specific subtype classification
-3. Lithuanian translation (lemma/base form)
-4. Definition suitable for language learners
-5. Translations to other languages (Chinese, Korean, French, Swahili, Vietnamese)
-6. Alternative forms in both languages (if any)
-7. Confidence score (0.0-1.0)
-8. Any special notes
-
-IMPORTANT REQUIREMENTS:
-- {meaning_clarification}
-- Provide only the LEMMA (base) form - not conjugations, plurals, or alternative meanings
-- For nouns: singular form (e.g., "cheese" not "cheeses")
-- For verbs: infinitive form (e.g., "to eat" not "eating" or "ate")
-- For adjectives: positive form (e.g., "big" not "bigger" or "biggest")
-- Focus on the primary, most common meaning of the word
-- Ensure all translations are also in their base/lemma forms
-
-Word to analyze: {english_word}"""
+        return f"{context}\n\n{prompt}"
 
     def _query_word_data(self, english_word: str, lithuanian_word: str = None, model_override: str = None) -> Tuple[Optional[WordData], bool]:
         """

@@ -1,0 +1,5 @@
+Provide the pronunciation for the word '{word}' as used in this sentence:
+
+"{sentence}"
+
+Return the IPA and simplified phonetic pronunciation, along with any alternative pronunciations.
