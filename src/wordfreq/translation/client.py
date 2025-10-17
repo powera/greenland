@@ -1904,6 +1904,69 @@ class LinguisticClient:
             logger.error(f"Error querying Lithuanian adjective declensions for '{adjective}': {type(e).__name__}: {e}")
             return {}, False
 
+    def query_french_noun_forms(self, lemma_id: int) -> Tuple[Dict[str, str], bool]:
+        """Query LLM for French noun forms (2 genders × 2 numbers = 4 forms)."""
+        session = self.get_session()
+        lemma = session.query(linguistic_db.Lemma).filter(linguistic_db.Lemma.id == lemma_id).first()
+        if not lemma or not lemma.french_translation or lemma.pos_type.lower() != 'noun':
+            logger.error(f"Invalid lemma for French noun forms: {lemma_id}")
+            return {}, False
+
+        noun, english_noun, definition, pos_subtype = lemma.french_translation, lemma.lemma_text, lemma.definition_text, lemma.pos_subtype
+        fields = ["singular_m", "plural_m", "singular_f", "plural_f"]
+        form_properties = {f: SchemaProperty("string", f"French {f.replace('_', ' ')}") for f in fields}
+
+        schema = Schema(name="FrenchNounForms", description="French noun forms", properties={
+            "forms": SchemaProperty("object", "Dictionary of noun forms", properties=form_properties),
+            "confidence": SchemaProperty("number", "Confidence 0-1"), "notes": SchemaProperty("string", "Notes")})
+
+        try:
+            context = util.prompt_loader.get_context("wordfreq", "french_noun_forms")
+            prompt = util.prompt_loader.get_prompt("wordfreq", "french_noun_forms").format(
+                noun=noun, english_noun=english_noun, definition=definition,
+                subtype_context=f" (category: {pos_subtype})" if pos_subtype else "")
+            response = self.client.generate_chat(prompt=prompt, model=self.model, json_schema=schema, context=context)
+            linguistic_db.log_query(session, word=noun, query_type='french_noun_forms', prompt=prompt,
+                                   response=json.dumps(response.structured_data), model=self.model)
+            if response.structured_data and 'forms' in response.structured_data:
+                return response.structured_data['forms'], True
+            return {}, False
+        except Exception as e:
+            logger.error(f"Error querying French noun forms for '{noun}': {e}")
+            return {}, False
+
+    def query_french_verb_conjugations(self, lemma_id: int) -> Tuple[Dict[str, str], bool]:
+        """Query LLM for French verb conjugations (6 persons × 6 tenses = 36 forms)."""
+        session = self.get_session()
+        lemma = session.query(linguistic_db.Lemma).filter(linguistic_db.Lemma.id == lemma_id).first()
+        if not lemma or not lemma.french_translation or lemma.pos_type.lower() != 'verb':
+            logger.error(f"Invalid lemma for French verb conjugations: {lemma_id}")
+            return {}, False
+
+        verb, english_verb, definition, pos_subtype = lemma.french_translation, lemma.lemma_text, lemma.definition_text, lemma.pos_subtype
+        tenses = [("pres", "present"), ("impf", "imperfect"), ("fut", "future"), ("cond", "conditional"), ("subj", "subjunctive"), ("pc", "passé composé")]
+        fields = [f"{p}_{t}" for t, _ in tenses for p in ["1s", "2s", "3s", "1p", "2p", "3p"]]
+        form_properties = {f: SchemaProperty("string", f"French {f.replace('_', ' ')}") for f in fields}
+
+        schema = Schema(name="FrenchVerbConjugations", description="French verb conjugations", properties={
+            "forms": SchemaProperty("object", "Dictionary of verb forms", properties=form_properties),
+            "confidence": SchemaProperty("number", "Confidence 0-1"), "notes": SchemaProperty("string", "Notes")})
+
+        try:
+            context = util.prompt_loader.get_context("wordfreq", "french_verb_conjugations")
+            prompt = util.prompt_loader.get_prompt("wordfreq", "french_verb_conjugations").format(
+                verb=verb, english_verb=english_verb, definition=definition,
+                subtype_context=f" (category: {pos_subtype})" if pos_subtype else "")
+            response = self.client.generate_chat(prompt=prompt, model=self.model, json_schema=schema, context=context)
+            linguistic_db.log_query(session, word=verb, query_type='french_verb_conjugations', prompt=prompt,
+                                   response=json.dumps(response.structured_data), model=self.model)
+            if response.structured_data and 'forms' in response.structured_data:
+                return response.structured_data['forms'], True
+            return {}, False
+        except Exception as e:
+            logger.error(f"Error querying French verb conjugations for '{verb}': {e}")
+            return {}, False
+
     @classmethod
     def close_all(cls):
         """
