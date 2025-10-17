@@ -12,6 +12,7 @@ high-priority words to add.
 import argparse
 import logging
 import sys
+import time
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Set
@@ -25,6 +26,7 @@ import constants
 import util.stopwords
 from wordfreq.storage.database import create_database_session
 from wordfreq.storage.models.schema import Lemma, WordToken, WordFrequency, Corpus, DerivativeForm
+from wordfreq.translation.client import LinguisticClient
 
 # Configure logging
 logging.basicConfig(
@@ -406,6 +408,128 @@ class DramblysAgent:
         finally:
             session.close()
 
+    def fix_missing_words(
+        self,
+        top_n: int = 5000,
+        limit: Optional[int] = None,
+        model: str = 'gpt-5-mini',
+        throttle: float = 1.0,
+        dry_run: bool = False
+    ) -> Dict[str, any]:
+        """
+        Process high-frequency missing words using LLM to add them to the database.
+
+        This handles various types of missing words:
+        - Plurals (e.g., "years" when "year" exists as lemma)
+        - Polysemous words (e.g., "set", "light", "part" - may have multiple meanings/lemmas)
+        - Grammatical words (e.g., "since") that aren't always base forms
+
+        The LLM will identify:
+        - The lemma(s) for each word token
+        - Whether it's a base form or not
+        - POS type and grammatical form
+        - Potentially multiple lemmas for polysemous words
+
+        Args:
+            top_n: Check top N words by frequency (default: 5000)
+            limit: Maximum number of words to process
+            model: LLM model to use
+            throttle: Seconds to wait between API calls
+            dry_run: If True, show what would be fixed WITHOUT making any LLM calls
+
+        Returns:
+            Dictionary with fix results
+        """
+        logger.info("Finding high-frequency missing words to process...")
+
+        # Get missing words check results
+        check_results = self.check_high_frequency_missing_words(top_n=top_n)
+
+        if 'error' in check_results:
+            return check_results
+
+        missing_words = check_results['missing_words']
+        total_missing = len(missing_words)
+
+        if total_missing == 0:
+            logger.info("No high-frequency missing words found!")
+            return {
+                'total_missing': 0,
+                'processed': 0,
+                'successful': 0,
+                'failed': 0,
+                'dry_run': dry_run
+            }
+
+        logger.info(f"Found {total_missing} high-frequency missing words")
+
+        # Apply limit if specified
+        if limit:
+            words_to_process = missing_words[:limit]
+            logger.info(f"Processing limited to {limit} words")
+        else:
+            words_to_process = missing_words
+
+        if dry_run:
+            logger.info(f"DRY RUN: Would process {len(words_to_process)} words:")
+            for word_info in words_to_process[:20]:  # Show first 20
+                corpus_str = ", ".join([f"{c['corpus']}:{c['rank']}" for c in word_info['corpus_frequencies'][:2]])
+                logger.info(f"  - '{word_info['word']}' (overall rank: {word_info['overall_rank']}, {corpus_str})")
+            if len(words_to_process) > 20:
+                logger.info(f"  ... and {len(words_to_process) - 20} more")
+            return {
+                'total_missing': total_missing,
+                'would_process': len(words_to_process),
+                'dry_run': True,
+                'sample': words_to_process[:20]
+            }
+
+        # Initialize client for LLM-based processing
+        client = LinguisticClient(model=model, db_path=self.db_path, debug=self.debug)
+
+        # Process each word
+        successful = 0
+        failed = 0
+
+        for i, word_info in enumerate(words_to_process, 1):
+            word = word_info['word']
+            logger.info(f"\n[{i}/{len(words_to_process)}] Processing: '{word}' (rank: {word_info['overall_rank']})")
+
+            # Use LinguisticClient.process_word to query definitions and store in database
+            # This will:
+            # - Query the LLM for definitions, POS, lemmas, grammatical forms
+            # - Handle multiple definitions for polysemous words
+            # - Correctly identify whether this is a base form or derived form
+            # - Create WordToken, Lemma(s), and DerivativeForm entries
+            success = client.process_word(word, refresh=False)
+
+            if success:
+                successful += 1
+                logger.info(f"Successfully processed '{word}'")
+            else:
+                failed += 1
+                logger.error(f"Failed to process '{word}'")
+
+            # Throttle to avoid overloading the API
+            if i < len(words_to_process):  # Don't sleep after the last one
+                time.sleep(throttle)
+
+        logger.info(f"\n{'='*60}")
+        logger.info(f"Fix complete:")
+        logger.info(f"  Total missing: {total_missing}")
+        logger.info(f"  Processed: {len(words_to_process)}")
+        logger.info(f"  Successful: {successful}")
+        logger.info(f"  Failed: {failed}")
+        logger.info(f"{'='*60}")
+
+        return {
+            'total_missing': total_missing,
+            'processed': len(words_to_process),
+            'successful': successful,
+            'failed': failed,
+            'dry_run': dry_run
+        }
+
     def run_full_check(
         self,
         output_file: Optional[str] = None,
@@ -528,19 +652,82 @@ def main():
     parser.add_argument('--db-path', help='Database path (uses default if not specified)')
     parser.add_argument('--debug', action='store_true', help='Enable debug logging')
     parser.add_argument('--output', help='Output JSON file for report')
+
+    # Check mode options (reporting only, no changes)
     parser.add_argument('--check',
                        choices=['frequency', 'orphaned', 'subtypes', 'levels', 'all'],
                        default='all',
-                       help='Which check to run (default: all)')
+                       help='Which check to run in reporting mode (default: all)')
     parser.add_argument('--top-n', type=int, default=5000,
                        help='Number of top frequency words to check (default: 5000)')
     parser.add_argument('--min-subtype-count', type=int, default=10,
                        help='Minimum expected words per subtype (default: 10)')
 
+    # Fix mode options (process missing words)
+    parser.add_argument('--fix', action='store_true',
+                       help='Fix mode: Process high-frequency missing words using LLM')
+    parser.add_argument('--limit', type=int, default=20,
+                       help='[Fix mode] Maximum number of words to process (default: 20)')
+    parser.add_argument('--model', default='gpt-5-mini',
+                       help='[Fix mode] LLM model to use (default: gpt-5-mini)')
+    parser.add_argument('--throttle', type=float, default=1.0,
+                       help='[Fix mode] Seconds to wait between API calls (default: 1.0)')
+    parser.add_argument('--dry-run', action='store_true',
+                       help='[Fix mode] Show what would be fixed WITHOUT making any LLM calls')
+    parser.add_argument('--yes', '-y', action='store_true',
+                       help='[Fix mode] Skip confirmation prompt')
+
     args = parser.parse_args()
 
     agent = DramblysAgent(db_path=args.db_path, debug=args.debug)
 
+    # Handle --fix mode
+    if args.fix:
+        # Confirmation prompt (unless --yes or --dry-run)
+        if not args.yes and not args.dry_run:
+            check_results = agent.check_high_frequency_missing_words(top_n=args.top_n)
+            total_missing = check_results.get('missing_count', 0)
+
+            print(f"\n{'='*60}")
+            print(f"Ready to process high-frequency missing words using LLM")
+            print(f"Total missing words found: {total_missing}")
+            if args.limit:
+                print(f"Limit: {args.limit} words")
+            print(f"Model: {args.model}")
+            print(f"Throttle: {args.throttle}s between calls")
+            print(f"\nThis will:")
+            print(f"  - Query LLM for definitions, lemmas, and POS info")
+            print(f"  - Handle plurals, polysemous words, and grammatical words")
+            print(f"  - Create multiple lemmas for words with multiple meanings")
+            print(f"  - Correctly identify base forms vs. inflected forms")
+            print(f"{'='*60}")
+            response = input("\nContinue? [y/N]: ")
+            if response.lower() not in ['y', 'yes']:
+                print("Aborted.")
+                return
+
+        results = agent.fix_missing_words(
+            top_n=args.top_n,
+            limit=args.limit,
+            model=args.model,
+            throttle=args.throttle,
+            dry_run=args.dry_run
+        )
+
+        if 'error' in results:
+            print(f"\nError: {results['error']}")
+        else:
+            if args.dry_run:
+                print(f"\nDRY RUN: Would process {results['would_process']} words out of {results['total_missing']} total")
+            else:
+                print(f"\nFix complete:")
+                print(f"  Total missing: {results['total_missing']}")
+                print(f"  Processed: {results['processed']}")
+                print(f"  Successful: {results['successful']}")
+                print(f"  Failed: {results['failed']}")
+        return
+
+    # Handle check mode (existing functionality)
     if args.check == 'frequency':
         results = agent.check_high_frequency_missing_words(top_n=args.top_n)
         print(f"\nMissing high-frequency words: {results['missing_count']} out of {results['total_checked']} checked")
