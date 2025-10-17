@@ -248,7 +248,66 @@ class GrammaticalForm(enum.Enum):
     ADJ_LT_INSTRUMENTAL_PLURAL_F = "adjective/lt_instrumental_plural_f"
     ADJ_LT_LOCATIVE_PLURAL_F = "adjective/lt_locative_plural_f"
     ADJ_LT_VOCATIVE_PLURAL_F = "adjective/lt_vocative_plural_f"
-    
+
+    # French noun forms (singular/plural only - each noun has a fixed gender)
+    NOUN_FR_SINGULAR = "noun/fr_singular"
+    NOUN_FR_PLURAL = "noun/fr_plural"
+
+    # French adjective forms (2 genders × 2 numbers = 4 forms)
+    ADJ_FR_SINGULAR_M = "adjective/fr_singular_m"
+    ADJ_FR_PLURAL_M = "adjective/fr_plural_m"
+    ADJ_FR_SINGULAR_F = "adjective/fr_singular_f"
+    ADJ_FR_PLURAL_F = "adjective/fr_plural_f"
+
+    # French verb forms (6 persons × 6 tenses = 36 forms)
+    # Present tense (présent de l'indicatif)
+    VERB_FR_1S_PRES = "verb/fr_1s_pres"
+    VERB_FR_2S_PRES = "verb/fr_2s_pres"
+    VERB_FR_3S_PRES = "verb/fr_3s_pres"
+    VERB_FR_1P_PRES = "verb/fr_1p_pres"
+    VERB_FR_2P_PRES = "verb/fr_2p_pres"
+    VERB_FR_3P_PRES = "verb/fr_3p_pres"
+
+    # Imperfect (imparfait)
+    VERB_FR_1S_IMPF = "verb/fr_1s_impf"
+    VERB_FR_2S_IMPF = "verb/fr_2s_impf"
+    VERB_FR_3S_IMPF = "verb/fr_3s_impf"
+    VERB_FR_1P_IMPF = "verb/fr_1p_impf"
+    VERB_FR_2P_IMPF = "verb/fr_2p_impf"
+    VERB_FR_3P_IMPF = "verb/fr_3p_impf"
+
+    # Future (futur simple)
+    VERB_FR_1S_FUT = "verb/fr_1s_fut"
+    VERB_FR_2S_FUT = "verb/fr_2s_fut"
+    VERB_FR_3S_FUT = "verb/fr_3s_fut"
+    VERB_FR_1P_FUT = "verb/fr_1p_fut"
+    VERB_FR_2P_FUT = "verb/fr_2p_fut"
+    VERB_FR_3P_FUT = "verb/fr_3p_fut"
+
+    # Conditional (conditionnel présent)
+    VERB_FR_1S_COND = "verb/fr_1s_cond"
+    VERB_FR_2S_COND = "verb/fr_2s_cond"
+    VERB_FR_3S_COND = "verb/fr_3s_cond"
+    VERB_FR_1P_COND = "verb/fr_1p_cond"
+    VERB_FR_2P_COND = "verb/fr_2p_cond"
+    VERB_FR_3P_COND = "verb/fr_3p_cond"
+
+    # Subjunctive present (subjonctif présent)
+    VERB_FR_1S_SUBJ = "verb/fr_1s_subj"
+    VERB_FR_2S_SUBJ = "verb/fr_2s_subj"
+    VERB_FR_3S_SUBJ = "verb/fr_3s_subj"
+    VERB_FR_1P_SUBJ = "verb/fr_1p_subj"
+    VERB_FR_2P_SUBJ = "verb/fr_2p_subj"
+    VERB_FR_3P_SUBJ = "verb/fr_3p_subj"
+
+    # Passé composé (compound past with auxiliary)
+    VERB_FR_1S_PC = "verb/fr_1s_pc"
+    VERB_FR_2S_PC = "verb/fr_2s_pc"
+    VERB_FR_3S_PC = "verb/fr_3s_pc"
+    VERB_FR_1P_PC = "verb/fr_1p_pc"
+    VERB_FR_2P_PC = "verb/fr_2p_pc"
+    VERB_FR_3P_PC = "verb/fr_3p_pc"
+
     # Adverb forms
     ADVERB_POSITIVE = "adverb/positive"
     ADVERB_COMPARATIVE = "adverb/comparative"
