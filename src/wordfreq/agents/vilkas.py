@@ -12,6 +12,7 @@ and reports on data quality issues.
 import argparse
 import logging
 import sys
+import time
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
@@ -24,6 +25,7 @@ if GREENLAND_SRC_PATH not in sys.path:
 import constants
 from wordfreq.storage.database import create_database_session
 from wordfreq.storage.models.schema import Lemma, DerivativeForm
+from wordfreq.translation.client import LinguisticClient
 
 # Configure logging
 logging.basicConfig(
@@ -259,6 +261,198 @@ class VilkasAgent:
         finally:
             session.close()
 
+    def fix_missing_forms(
+        self,
+        language_code: str = 'lt',
+        pos_type: Optional[str] = None,
+        limit: Optional[int] = None,
+        model: str = 'gpt-5-mini',
+        throttle: float = 1.0,
+        dry_run: bool = False,
+        source: str = 'llm'
+    ) -> Dict[str, any]:
+        """
+        Generate and store missing word forms for a specific language.
+
+        Currently supports:
+        - Lithuanian (lt): noun declensions
+
+        Future support planned for:
+        - English (en): noun plurals, verb conjugations, etc.
+        - Other languages as needed
+
+        Args:
+            language_code: Language code (currently only 'lt' supported)
+            pos_type: Part of speech to fix (e.g., 'noun', 'verb'). If None, fixes all supported POS types.
+            limit: Maximum number of lemmas to process
+            model: LLM model to use for generation
+            throttle: Seconds to wait between API calls
+            dry_run: If True, show what would be fixed without making changes
+            source: Source for forms - 'llm' or 'wiki' (for Lithuanian)
+
+        Returns:
+            Dictionary with fix results
+        """
+        if language_code != 'lt':
+            logger.error(f"Language '{language_code}' is not yet supported for form generation")
+            return {
+                'error': f"Language '{language_code}' not supported",
+                'supported_languages': ['lt']
+            }
+
+        # For Lithuanian, currently only nouns are fully implemented
+        if pos_type and pos_type != 'noun':
+            logger.warning(f"POS type '{pos_type}' is not fully implemented for Lithuanian. Only nouns are supported.")
+            if not dry_run:
+                return {
+                    'error': f"POS type '{pos_type}' not fully implemented for Lithuanian",
+                    'supported_pos_types': ['noun']
+                }
+
+        # Default to nouns if no POS type specified
+        if not pos_type:
+            pos_type = 'noun'
+            logger.info("No POS type specified, defaulting to 'noun'")
+
+        return self._fix_lithuanian_noun_declensions(
+            limit=limit,
+            model=model,
+            throttle=throttle,
+            dry_run=dry_run,
+            source=source
+        )
+
+    def _fix_lithuanian_noun_declensions(
+        self,
+        limit: Optional[int] = None,
+        model: str = 'gpt-5-mini',
+        throttle: float = 1.0,
+        dry_run: bool = False,
+        source: str = 'llm'
+    ) -> Dict[str, any]:
+        """
+        Generate missing Lithuanian noun declensions.
+
+        This method uses the existing infrastructure from
+        wordfreq.translation.generate_lithuanian_noun_forms.
+
+        Args:
+            limit: Maximum number of lemmas to process
+            model: LLM model to use
+            throttle: Seconds to wait between API calls
+            dry_run: If True, show what would be fixed without making changes
+            source: Source for forms - 'llm' or 'wiki'
+
+        Returns:
+            Dictionary with fix results
+        """
+        from wordfreq.translation.generate_lithuanian_noun_forms import (
+            process_lemma_declensions,
+            get_lithuanian_noun_lemmas
+        )
+
+        logger.info("Finding Lithuanian nouns needing declensions...")
+
+        # Get noun declension coverage check results
+        check_results = self.check_noun_declension_coverage()
+
+        if 'error' in check_results:
+            return check_results
+
+        nouns_needing_declensions = check_results['nouns_needing_declensions']
+        total_needs_fix = len(nouns_needing_declensions)
+
+        if total_needs_fix == 0:
+            logger.info("No Lithuanian nouns need declensions!")
+            return {
+                'total_needing_fix': 0,
+                'processed': 0,
+                'successful': 0,
+                'failed': 0,
+                'dry_run': dry_run
+            }
+
+        logger.info(f"Found {total_needs_fix} Lithuanian nouns needing declensions")
+
+        # Apply limit if specified
+        if limit:
+            nouns_to_process = nouns_needing_declensions[:limit]
+            logger.info(f"Processing limited to {limit} nouns")
+        else:
+            nouns_to_process = nouns_needing_declensions
+
+        if dry_run:
+            logger.info(f"DRY RUN: Would process {len(nouns_to_process)} nouns:")
+            for noun in nouns_to_process[:10]:  # Show first 10
+                logger.info(f"  - {noun['english']} -> {noun['lithuanian']} (level {noun['difficulty_level']})")
+            if len(nouns_to_process) > 10:
+                logger.info(f"  ... and {len(nouns_to_process) - 10} more")
+            return {
+                'total_needing_fix': total_needs_fix,
+                'would_process': len(nouns_to_process),
+                'dry_run': True,
+                'sample': nouns_to_process[:10]
+            }
+
+        # Initialize client for LLM-based generation
+        client = LinguisticClient(model=model, db_path=self.db_path, debug=self.debug)
+
+        # Process each noun
+        successful = 0
+        failed = 0
+
+        # Get lemma objects for processing
+        session = self.get_session()
+        try:
+            for i, noun_info in enumerate(nouns_to_process, 1):
+                logger.info(f"\n[{i}/{len(nouns_to_process)}] Processing: {noun_info['english']} -> {noun_info['lithuanian']}")
+
+                # Get the full lemma object
+                lemma = session.query(Lemma).filter(Lemma.guid == noun_info['guid']).first()
+
+                if not lemma:
+                    logger.error(f"Could not find lemma with GUID {noun_info['guid']}")
+                    failed += 1
+                    continue
+
+                # Use the process_lemma_declensions function from generate_lithuanian_noun_forms
+                success = process_lemma_declensions(
+                    client=client,
+                    lemma_id=lemma.id,
+                    db_path=self.db_path,
+                    source=source
+                )
+
+                if success:
+                    successful += 1
+                    logger.info(f"Successfully generated declensions for '{noun_info['english']}'")
+                else:
+                    failed += 1
+                    logger.error(f"Failed to generate declensions for '{noun_info['english']}'")
+
+                # Throttle to avoid overloading the API
+                if i < len(nouns_to_process):  # Don't sleep after the last one
+                    time.sleep(throttle)
+
+        finally:
+            session.close()
+
+        logger.info(f"\n{'='*60}")
+        logger.info(f"Fix complete:")
+        logger.info(f"  Total needing fix: {total_needs_fix}")
+        logger.info(f"  Processed: {len(nouns_to_process)}")
+        logger.info(f"  Successful: {successful}")
+        logger.info(f"  Failed: {failed}")
+        logger.info(f"{'='*60}")
+
+        return {
+            'total_needing_fix': total_needs_fix,
+            'processed': len(nouns_to_process),
+            'successful': successful,
+            'failed': failed,
+            'dry_run': dry_run
+        }
+
     def run_full_check(self, output_file: Optional[str] = None) -> Dict[str, any]:
         """
         Run all checks and generate a comprehensive report.
@@ -341,15 +535,85 @@ def main():
     parser.add_argument('--db-path', help='Database path (uses default if not specified)')
     parser.add_argument('--debug', action='store_true', help='Enable debug logging')
     parser.add_argument('--output', help='Output JSON file for report')
+    # Check mode options (reporting only, no changes)
     parser.add_argument('--check',
                        choices=['base-forms', 'noun-declensions', 'verb-conjugations', 'all'],
                        default='all',
-                       help='Which check to run (default: all)')
+                       help='Which check to run in reporting mode (default: all)')
+
+    # Fix mode options (generate missing forms)
+    parser.add_argument('--fix', action='store_true',
+                       help='Fix mode: Generate missing word forms (currently supports Lithuanian noun declensions)')
+    parser.add_argument('--language', default='lt',
+                       help='[Fix mode] Language code for form generation (default: lt)')
+    parser.add_argument('--pos-type',
+                       help='[Fix mode] Part of speech to fix (e.g., noun, verb). If not specified, fixes all supported types.')
+    parser.add_argument('--limit', type=int, default=20,
+                       help='[Fix mode] Maximum number of lemmas to process (default: 20)')
+    parser.add_argument('--model', default='gpt-5-mini',
+                       help='[Fix mode] LLM model to use for form generation (default: gpt-5-mini)')
+    parser.add_argument('--throttle', type=float, default=1.0,
+                       help='[Fix mode] Seconds to wait between API calls (default: 1.0)')
+    parser.add_argument('--dry-run', action='store_true',
+                       help='[Fix mode] Show what would be fixed WITHOUT making any LLM calls or database changes')
+    parser.add_argument('--source', choices=['llm', 'wiki'], default='llm',
+                       help='[Fix mode] Source for Lithuanian noun forms: llm (default) or wiki (Wiktionary)')
+    parser.add_argument('--yes', '-y', action='store_true',
+                       help='[Fix mode] Skip confirmation prompt when fixing')
 
     args = parser.parse_args()
 
     agent = VilkasAgent(db_path=args.db_path, debug=args.debug)
 
+    # Handle --fix mode
+    if args.fix:
+        # Confirmation prompt (unless --yes or --dry-run)
+        if not args.yes and not args.dry_run:
+            check_results = agent.check_noun_declension_coverage()
+            needs_fix = check_results.get('needs_declensions', 0)
+
+            print(f"\n{'='*60}")
+            print(f"Ready to generate missing Lithuanian noun declensions")
+            print(f"Total nouns needing declensions: {needs_fix}")
+            if args.limit:
+                print(f"Limit: {args.limit} nouns")
+            print(f"Model: {args.model}")
+            print(f"Source: {args.source}")
+            print(f"Throttle: {args.throttle}s between calls")
+            print(f"{'='*60}")
+            response = input("\nContinue? [y/N]: ")
+            if response.lower() not in ['y', 'yes']:
+                print("Aborted.")
+                return
+
+        results = agent.fix_missing_forms(
+            language_code=args.language,
+            pos_type=args.pos_type,
+            limit=args.limit,
+            model=args.model,
+            throttle=args.throttle,
+            dry_run=args.dry_run,
+            source=args.source
+        )
+
+        if 'error' in results:
+            print(f"\nError: {results['error']}")
+            if 'supported_languages' in results:
+                print(f"Supported languages: {', '.join(results['supported_languages'])}")
+            if 'supported_pos_types' in results:
+                print(f"Supported POS types: {', '.join(results['supported_pos_types'])}")
+        else:
+            if args.dry_run:
+                print(f"\nDRY RUN: Would process {results['would_process']} nouns out of {results['total_needing_fix']} total")
+            else:
+                print(f"\nFix complete:")
+                print(f"  Total needing fix: {results['total_needing_fix']}")
+                print(f"  Processed: {results['processed']}")
+                print(f"  Successful: {results['successful']}")
+                print(f"  Failed: {results['failed']}")
+        return
+
+    # Handle check mode (existing functionality)
     if args.check == 'base-forms':
         results = agent.check_missing_lithuanian_base_forms()
         print(f"\nMissing base forms: {results['missing_count']} out of {results['total_with_translation']}")
