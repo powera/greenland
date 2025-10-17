@@ -2,4 +2,7 @@ Provide the pronunciation for the word '{word}' as used in this sentence:
 
 "{sentence}"
 
+Important: Pay attention to the context sentence to determine the correct pronunciation,
+especially for words with multiple pronunciations depending on usage (e.g., "read", "tear", "wind").
+
 Return the IPA and simplified phonetic pronunciation, along with any alternative pronunciations.
