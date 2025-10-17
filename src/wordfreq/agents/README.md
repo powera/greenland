@@ -12,6 +12,7 @@ Autonomous agents for data quality monitoring and maintenance tasks. These agent
 - **Papuga** - Validates and generates pronunciations (both IPA and simplified phonetic) for derivative forms.
 - **Povas** - Generates HTML pages displaying words organized by part-of-speech subtypes with comprehensive linguistic information.
 - **Pradzia** - Initializes and maintains the wordfreq database, including corpus configuration synchronization, data loading, and rank calculation.
+- **Ungurys** - Exports word data to WireWord API format for external system integration.
 
 ## Available Agents
 
@@ -571,6 +572,116 @@ When running `--init-full`, the agent performs these steps:
 2. Syncs corpus configurations from config to database
 3. Loads all enabled corpora
 4. Calculates combined ranks using harmonic mean
+
+---
+
+### Ungurys (WireWord Export Agent)
+
+**Name:** "Ungurys" means "eel" in Lithuanian - swimming data downstream to external systems!
+
+**Purpose:** Exports word data to WireWord API format for external system integration. Replaces the legacy "export wireword" functionality from trakaido/utils.py.
+
+**Usage:**
+```bash
+# Directory export (default) - creates organized file structure
+python ungurys.py [--output-dir DIR]
+
+# Single-file export
+python ungurys.py --mode single --output FILE.json
+
+# Both modes
+python ungurys.py --mode both --output FILE.json --output-dir DIR
+```
+
+**Modes:**
+- `--mode directory` - Export to organized directory structure (default)
+  - Creates `{OUTPUT_DIR}/wireword/by_level/` with files for each level (level_01.json, level_02.json, etc.)
+  - Creates `{OUTPUT_DIR}/wireword/by_subtype/` with files for each subtype
+  - Creates `{OUTPUT_DIR}/wireword/complete.json` with all words
+- `--mode single` - Export to a single JSON file
+- `--mode both` - Perform both single-file and directory exports
+
+**Options:**
+- `--output FILE` - Output path for single-file export (required for single/both modes)
+- `--output-dir DIR` - Output directory for directory export (defaults to constants.OUTPUT_DIR)
+- `--level N` - Filter by specific difficulty level
+- `--pos-type TYPE` - Filter by specific POS type (e.g., noun, verb)
+- `--pos-subtype SUBTYPE` - Filter by specific POS subtype
+- `--limit N` - Limit number of results
+- `--include-without-guid` - Include lemmas without GUIDs (default: False)
+- `--include-unverified` - Include unverified entries (default: True)
+- `--db-path PATH` - Use custom database path
+- `--debug` - Enable debug logging
+
+**Example Usage:**
+
+Export all words to directory structure:
+```bash
+python ungurys.py
+```
+
+Export to custom directory:
+```bash
+python ungurys.py --output-dir /path/to/output
+```
+
+Export single file with all words:
+```bash
+python ungurys.py --mode single --output /tmp/wireword.json
+```
+
+Export only level 5 words:
+```bash
+python ungurys.py --mode single --output /tmp/level5.json --level 5
+```
+
+Export only nouns:
+```bash
+python ungurys.py --mode single --output /tmp/nouns.json --pos-type noun
+```
+
+Export both formats:
+```bash
+python ungurys.py --mode both --output /tmp/wireword.json --output-dir /tmp/wireword_dir
+```
+
+**Output:**
+
+The agent provides:
+- **Directory mode**: Organized file structure with separate files for each level and subtype
+- **Single-file mode**: Complete export in one JSON file
+- Export statistics including file counts, word counts, and level/subtype coverage
+- WireWord format includes:
+  - GUID, base Lithuanian/English forms
+  - Corpus and group assignments
+  - Difficulty levels
+  - Word types (POS)
+  - Alternative forms and synonyms
+  - Grammatical forms (verb conjugations, noun declensions)
+  - Frequency ranks and notes
+  - Tags for filtering and organization
+
+**WireWord Format Structure:**
+```json
+{
+  "guid": "550e8400-e29b-41d4-a716-446655440000",
+  "base_lithuanian": "katė",
+  "base_english": "cat",
+  "corpus": "WORDS1",
+  "group": "Animal",
+  "level": 2,
+  "word_type": "noun",
+  "grammatical_forms": {
+    "plural_nominative": {
+      "level": 4,
+      "lithuanian": "katės",
+      "english": "cats"
+    }
+  },
+  "frequency_rank": 1234,
+  "tags": ["animal", "level_2", "verified"]
+}
+```
 
 ---
 
