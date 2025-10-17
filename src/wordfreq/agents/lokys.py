@@ -372,7 +372,8 @@ def main():
             lemma_count = query.count()
             if args.sample_rate < 1.0:
                 lemma_count = int(lemma_count * args.sample_rate)
-            estimated_calls = lemma_count
+            # run_full_check runs 2 checks: lemma_forms + definitions
+            estimated_calls = lemma_count * 2
         finally:
             session.close()
 
