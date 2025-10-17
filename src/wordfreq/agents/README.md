@@ -9,6 +9,9 @@ Autonomous agents for data quality monitoring and maintenance tasks. These agent
 - **Bebras** - Ensures database structural integrity by identifying orphaned records, missing fields, and constraint violations.
 - **Voras** - Validates multi-lingual translations for correctness, reports on coverage, and can populate missing translations using LLM.
 - **Vilkas** - Monitors the presence and completeness of Lithuanian word forms in the database and can automatically generate missing forms.
+- **Papuga** - Validates and generates pronunciations (both IPA and simplified phonetic) for derivative forms.
+- **Povas** - Generates HTML pages displaying words organized by part-of-speech subtypes with comprehensive linguistic information.
+- **Pradzia** - Initializes and maintains the wordfreq database, including corpus configuration synchronization, data loading, and rank calculation.
 
 ## Available Agents
 
@@ -338,6 +341,236 @@ In fix mode:
 - Number of forms successfully generated
 - Number of failures
 - Detailed logs of each generation attempt
+
+---
+
+### Papuga (Pronunciation Validation and Generation)
+
+**Name:** "Papuga" means "parrot" in Lithuanian - repeating sounds with perfect accuracy!
+
+**Purpose:** Validates existing pronunciations (IPA and simplified phonetic) for correctness and generates missing pronunciations for derivative forms.
+
+**Usage:**
+```bash
+# Check/reporting mode (no changes made)
+python papuga.py [--check] [--output REPORT.json]
+
+# Populate mode (generate missing pronunciations)
+python papuga.py --populate [--limit N] [--dry-run]
+
+# Both modes (check existing AND populate missing)
+python papuga.py --both [--limit N] [--dry-run]
+```
+
+**Modes:**
+- `--check` - Validate existing pronunciations only (default, no database changes)
+- `--populate` - Generate missing pronunciations and update database
+- `--both` - Validate existing pronunciations AND populate missing ones
+
+**Options:**
+- `--output FILE` - Write detailed JSON report to specified file
+- `--model MODEL` - LLM model to use (default: gpt-5-mini)
+- `--limit N` - Maximum items to check/process
+- `--sample-rate RATE` - Fraction of items to sample for validation (0.0-1.0, default: 1.0)
+- `--confidence-threshold THRESHOLD` - Minimum confidence to flag issues (0.0-1.0, default: 0.7)
+- `--all-languages` - Check all languages (default: English only)
+- `--base-forms-only` - Only process base forms (populate mode only)
+- `--dry-run` - Show what would be done without making changes (populate mode only)
+- `--yes`, `-y` - Skip confirmation prompt before running LLM queries
+- `--db-path PATH` - Use custom database path
+- `--debug` - Enable debug logging
+
+**Example Usage:**
+
+Check existing pronunciations with report:
+```bash
+python papuga.py --check --output /tmp/papuga_report.json
+```
+
+Check with sampling:
+```bash
+python papuga.py --check --sample-rate 0.1 --yes
+```
+
+Generate missing pronunciations (dry run):
+```bash
+python papuga.py --populate --dry-run
+```
+
+Generate missing pronunciations for base forms only:
+```bash
+python papuga.py --populate --base-forms-only --limit 50 --yes
+```
+
+Validate and populate:
+```bash
+python papuga.py --both --limit 100 --yes
+```
+
+**Output:**
+
+The agent provides:
+- **Check mode**:
+  - Count of pronunciations validated
+  - Issues found with existing pronunciations
+  - Suggested corrections for IPA and phonetic pronunciations
+  - Count of forms missing pronunciations
+- **Populate mode**:
+  - Number of pronunciations successfully generated
+  - Number of failures
+  - Generated IPA and phonetic pronunciations
+
+**Pronunciation Formats:**
+- **IPA**: International Phonetic Alphabet with stress markers (e.g., `/ˈwɜːrd/`)
+- **Phonetic**: Simplified readable format with hyphens and CAPS for stress (e.g., `WURD`)
+
+---
+
+### Povas (HTML Generation for POS Subtypes)
+
+**Name:** "Povas" means "peacock" in Lithuanian - beautiful displays of information!
+
+**Purpose:** Generates static HTML pages displaying all words organized by part-of-speech subtypes in tabular form with comprehensive linguistic information including definitions, translations, pronunciations, and example sentences.
+
+**Usage:**
+```bash
+python povas.py [--index-only] [--db-path PATH] [--debug]
+```
+
+**Options:**
+- `--index-only` - Generate only the index page (faster, useful for quick updates)
+- `--db-path PATH` - Use custom database path
+- `--debug` - Enable debug logging
+
+**Example Usage:**
+
+Generate all POS subtype HTML pages:
+```bash
+python povas.py
+```
+
+Generate only the index page:
+```bash
+python povas.py --index-only
+```
+
+Generate with debug logging:
+```bash
+python povas.py --debug
+```
+
+**Output:**
+
+The agent generates:
+- **Index page** (`pos_subtypes/index.html`) - Overview of all parts of speech with statistics
+- **POS type pages** (e.g., `pos_subtypes/noun.html`) - Lists all subtypes for a specific POS
+- **POS subtype pages** (e.g., `pos_subtypes/noun_common.html`) - Detailed word tables for each subtype
+- **Static assets** - CSS and JavaScript files for interactive features
+
+All files are written to `{OUTPUT_DIR}/pos_subtypes/` (configured in `constants.OUTPUT_DIR`).
+
+**Features:**
+- Sortable and filterable word tables
+- Multiple translations (Chinese, French, Korean, Swahili, Lithuanian, Vietnamese)
+- Phonetic and IPA pronunciations
+- Example sentences
+- Frequency rankings
+- Grammatical form information
+
+---
+
+### Pradzia (Database Initialization Agent)
+
+**Name:** "Pradzia" means "beginning" in Lithuanian - the starting point for all data!
+
+**Purpose:** Initializes and maintains the wordfreq database, including corpus configuration synchronization, data loading, and rank calculation.
+
+**Usage:**
+```bash
+# Check configuration and database state (no changes)
+python pradzia.py --check [--output REPORT.json]
+
+# Sync corpus configurations to database
+python pradzia.py --sync-config [--dry-run]
+
+# Load corpora
+python pradzia.py --load [CORPUS1 CORPUS2 ...] [--dry-run]
+
+# Calculate combined ranks
+python pradzia.py --calc-ranks [--dry-run]
+
+# Full initialization (sync + load + calc ranks)
+python pradzia.py --init-full [--dry-run]
+```
+
+**Modes:**
+- `--check` - Check configuration and database state without making changes
+- `--sync-config` - Synchronize corpus configurations from config file to database
+- `--load [CORPUS...]` - Load specified corpora (or all enabled if none specified)
+- `--calc-ranks` - Calculate combined ranks for all words across corpora
+- `--init-full` - Perform complete database initialization (all steps)
+
+**Options:**
+- `--dry-run` - Report what would be done without making changes
+- `--output FILE` - Write detailed JSON report to specified file
+- `--db-path PATH` - Use custom database path
+- `--debug` - Enable debug logging
+
+**Example Usage:**
+
+Check configuration and database state:
+```bash
+python pradzia.py --check --output /tmp/pradzia_report.json
+```
+
+Sync corpus configurations (dry run):
+```bash
+python pradzia.py --sync-config --dry-run
+```
+
+Load specific corpora:
+```bash
+python pradzia.py --load subtlex_uk coca
+```
+
+Load all enabled corpora:
+```bash
+python pradzia.py --load
+```
+
+Calculate combined ranks:
+```bash
+python pradzia.py --calc-ranks
+```
+
+Full database initialization (dry run):
+```bash
+python pradzia.py --init-full --dry-run
+```
+
+Full database initialization:
+```bash
+python pradzia.py --init-full
+```
+
+**Output:**
+
+The agent provides:
+- Configuration validation results
+- File existence status for corpus data files
+- Database corpus information
+- Synchronization results (added, updated, disabled corpora)
+- Corpus loading results (imported counts per corpus)
+- Rank calculation success/failure status
+- Optional JSON report with full details
+
+**Initialization Steps:**
+
+When running `--init-full`, the agent performs these steps:
+1. Ensures database tables exist
+2. Syncs corpus configurations from config to database
+3. Loads all enabled corpora
+4. Calculates combined ranks using harmonic mean
 
 ---
 

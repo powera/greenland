@@ -498,3 +498,174 @@ def batch_validate_translations(
             })
 
     return issues
+
+
+def validate_pronunciation(
+    word: str,
+    ipa_pronunciation: Optional[str],
+    phonetic_pronunciation: Optional[str],
+    pos_type: str,
+    example_sentence: Optional[str] = None,
+    definition: Optional[str] = None,
+    model: str = "gpt-5-mini"
+) -> Dict[str, any]:
+    """
+    Validate or generate pronunciations (both IPA and simplified phonetic).
+
+    Args:
+        word: The word to validate/generate pronunciation for
+        ipa_pronunciation: Current IPA pronunciation (or None to generate)
+        phonetic_pronunciation: Current simplified phonetic (or None to generate)
+        pos_type: Part of speech
+        example_sentence: Optional example sentence for context (preferred)
+        definition: Optional definition text for context (used if no example sentence)
+        model: LLM model to use
+
+    Returns:
+        Dictionary with validation/generation results:
+        - needs_update: bool indicating if current pronunciation needs fixing
+        - suggested_ipa: str with correct IPA pronunciation
+        - suggested_phonetic: str with correct simplified phonetic
+        - issues: list of issues found (if validating existing pronunciation)
+        - confidence: float 0-1
+        - notes: str with additional pronunciation notes
+    """
+    client = UnifiedLLMClient()
+
+    schema = Schema(
+        name="PronunciationValidation",
+        description="Validation or generation of word pronunciations",
+        properties={
+            "needs_update": SchemaProperty("boolean", "True if the current pronunciation is incorrect or missing"),
+            "suggested_ipa": SchemaProperty("string", "Correct IPA pronunciation (e.g., /ˈwɜːrd/)"),
+            "suggested_phonetic": SchemaProperty("string", "Simplified phonetic pronunciation (e.g., WURD)"),
+            "issues": SchemaProperty(
+                type="array",
+                description="List of issues found with current pronunciation (if any)",
+                items={"type": "string"}
+            ),
+            "confidence": SchemaProperty("number", "Confidence score 0.0-1.0", minimum=0.0, maximum=1.0),
+            "notes": SchemaProperty("string", "Additional notes about pronunciation (e.g., alternative pronunciations, regional variations)")
+        }
+    )
+
+    # Load prompt from files
+    context = util.prompt_loader.get_context("wordfreq", "pronunciation")
+    prompt_template = util.prompt_loader.get_prompt("wordfreq", "pronunciation")
+
+    # Build the validation/generation request with context
+    # Priority: example sentence > definition > generic sentence
+    if example_sentence:
+        sentence = example_sentence
+        context_type = "sentence"
+    elif definition:
+        sentence = f"Definition: {definition}"
+        context_type = "definition"
+    else:
+        sentence = f"The word '{word}' is used here."
+        context_type = "generic"
+
+    if ipa_pronunciation or phonetic_pronunciation:
+        # Validation mode
+        current_info = []
+        if ipa_pronunciation:
+            current_info.append(f"IPA: {ipa_pronunciation}")
+        if phonetic_pronunciation:
+            current_info.append(f"Phonetic: {phonetic_pronunciation}")
+        current_text = ", ".join(current_info)
+
+        prompt = f"""Validate the pronunciation for the word '{word}' (POS: {pos_type}):
+
+Current pronunciation: {current_text}
+
+Context sentence: "{sentence}"
+
+Check if the pronunciation is accurate and follows proper conventions:
+- IPA should use correct symbols with stress markers (ˈ for primary, ˌ for secondary)
+- Phonetic should be readable, hyphenated, with CAPS for stressed syllables
+- Both should match American English pronunciation by default
+
+If incorrect, provide the correct pronunciations. If correct, confirm them."""
+    else:
+        # Generation mode
+        prompt = prompt_template.format(
+            word=word,
+            sentence=sentence
+        )
+
+    full_prompt = f"{context}\n\n{prompt}"
+
+    logger.debug(f"Validating/generating pronunciation for word: '{word}' (POS: {pos_type})")
+
+    try:
+        response = client.generate_chat(
+            prompt=full_prompt,
+            model=model,
+            json_schema=schema
+        )
+
+        if response.structured_data:
+            return response.structured_data
+        else:
+            logger.error(f"No structured data received for pronunciation validation of '{word}'")
+            return {
+                'needs_update': False,
+                'suggested_ipa': ipa_pronunciation or "",
+                'suggested_phonetic': phonetic_pronunciation or "",
+                'issues': ['Validation failed'],
+                'confidence': 0.0,
+                'notes': ""
+            }
+
+    except Exception as e:
+        logger.error(f"Error validating pronunciation for '{word}': {e}")
+        return {
+            'needs_update': False,
+            'suggested_ipa': ipa_pronunciation or "",
+            'suggested_phonetic': phonetic_pronunciation or "",
+            'issues': [f'Error: {str(e)}'],
+            'confidence': 0.0,
+            'notes': ""
+        }
+
+
+def generate_pronunciation(
+    word: str,
+    pos_type: str,
+    example_sentence: Optional[str] = None,
+    definition: Optional[str] = None,
+    model: str = "gpt-5-mini"
+) -> Dict[str, any]:
+    """
+    Generate both IPA and simplified phonetic pronunciations for a word.
+
+    Args:
+        word: The word to generate pronunciation for
+        pos_type: Part of speech
+        example_sentence: Optional example sentence for context (preferred)
+        definition: Optional definition text for context (used if no example sentence)
+        model: LLM model to use
+
+    Returns:
+        Dictionary with generation results:
+        - ipa_pronunciation: str with IPA pronunciation
+        - phonetic_pronunciation: str with simplified phonetic
+        - confidence: float 0-1
+        - notes: str with additional pronunciation notes
+    """
+    result = validate_pronunciation(
+        word=word,
+        ipa_pronunciation=None,
+        phonetic_pronunciation=None,
+        pos_type=pos_type,
+        example_sentence=example_sentence,
+        definition=definition,
+        model=model
+    )
+
+    return {
+        'ipa_pronunciation': result['suggested_ipa'],
+        'phonetic_pronunciation': result['suggested_phonetic'],
+        'confidence': result['confidence'],
+        'notes': result['notes']
+    }
