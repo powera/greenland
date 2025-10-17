@@ -212,8 +212,8 @@ class LinguisticClient:
         """
         session = self.get_session()
         try:
-            # Add or get word token in database
-            word_token = linguistic_db.add_word_token(session, word)
+            # Add or get word token in database (assuming English)
+            word_token = linguistic_db.add_word_token(session, word, 'en')
 
             # If the word token already has derivative forms and refresh is False, return early
             if len(word_token.derivative_forms) > 0:

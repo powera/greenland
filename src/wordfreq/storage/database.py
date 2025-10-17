@@ -507,6 +507,7 @@ def add_complete_word_entry(
     difficulty_level: Optional[int] = None,
     frequency_rank: Optional[int] = None,
     tags: Optional[List[str]] = None,
+    translations = None,  # Can be TranslationSet or None
     chinese_translation: Optional[str] = None,
     french_translation: Optional[str] = None,
     korean_translation: Optional[str] = None,
@@ -521,7 +522,22 @@ def add_complete_word_entry(
     """
     Convenience function to add a complete word entry (token + lemma + derivative form).
     This replaces the old add_definition function for most use cases.
+
+    Args:
+        translations: Optional TranslationSet object. If provided, individual translation
+                     parameters are ignored.
     """
+    # Extract translations from TranslationSet if provided
+    if translations is not None:
+        from wordfreq.storage.models.translations import TranslationSet
+        if isinstance(translations, TranslationSet):
+            chinese_translation = translations.chinese.text if translations.chinese else None
+            french_translation = translations.french.text if translations.french else None
+            korean_translation = translations.korean.text if translations.korean else None
+            swahili_translation = translations.swahili.text if translations.swahili else None
+            lithuanian_translation = translations.lithuanian.text if translations.lithuanian else None
+            vietnamese_translation = translations.vietnamese.text if translations.vietnamese else None
+
     # Add or get word token
     word_token = add_word_token(session, token, language_code)
 
