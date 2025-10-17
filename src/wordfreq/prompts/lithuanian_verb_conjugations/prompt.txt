@@ -1,0 +1,6 @@
+Generate all Lithuanian verb conjugation forms for the Lithuanian verb "{verb}".
+
+English verb: {english_verb}
+Definition: {definition}{subtype_context}
+
+Please provide all 24 forms (3 tenses × 8 persons with gender distinction), using empty strings for forms that are not standard or don't exist.

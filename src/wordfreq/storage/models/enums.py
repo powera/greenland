@@ -118,15 +118,71 @@ class AdverbSubtype(enum.Enum):
 
 class GrammaticalForm(enum.Enum):
     """Grammatical forms for derivative forms with part-of-speech prefixes."""
-    # Verb forms
+    # Verb forms - generic/language-neutral
     VERB_INFINITIVE = "verb/infinitive"
-    VERB_PRESENT_TENSE = "verb/present_tense"
-    VERB_PAST_TENSE = "verb/past_tense"
     VERB_PAST_PARTICIPLE = "verb/past_participle"
     VERB_PRESENT_PARTICIPLE = "verb/present_participle"
     VERB_GERUND = "verb/gerund"
-    VERB_IMPERATIVE = "verb/imperative"
-    VERB_SUBJUNCTIVE = "verb/subjunctive"
+
+    # English verb forms (person_tense)
+    # Present tense
+    VERB_EN_1S_PRES = "verb/en_1s_pres"
+    VERB_EN_2S_PRES = "verb/en_2s_pres"
+    VERB_EN_3S_PRES = "verb/en_3s_pres"
+    VERB_EN_1P_PRES = "verb/en_1p_pres"
+    VERB_EN_2P_PRES = "verb/en_2p_pres"
+    VERB_EN_3P_PRES = "verb/en_3p_pres"
+
+    # Past tense
+    VERB_EN_1S_PAST = "verb/en_1s_past"
+    VERB_EN_2S_PAST = "verb/en_2s_past"
+    VERB_EN_3S_PAST = "verb/en_3s_past"
+    VERB_EN_1P_PAST = "verb/en_1p_past"
+    VERB_EN_2P_PAST = "verb/en_2p_past"
+    VERB_EN_3P_PAST = "verb/en_3p_past"
+
+    # Future tense
+    VERB_EN_1S_FUT = "verb/en_1s_fut"
+    VERB_EN_2S_FUT = "verb/en_2s_fut"
+    VERB_EN_3S_FUT = "verb/en_3s_fut"
+    VERB_EN_1P_FUT = "verb/en_1p_fut"
+    VERB_EN_2P_FUT = "verb/en_2p_fut"
+    VERB_EN_3P_FUT = "verb/en_3p_fut"
+
+    # Imperative
+    VERB_EN_2S_IMP = "verb/en_2s_imp"
+    VERB_EN_2P_IMP = "verb/en_2p_imp"
+
+    # Lithuanian verb forms (person_tense with gender distinction)
+    # Present tense
+    VERB_LT_1S_PRES = "verb/lt_1s_pres"
+    VERB_LT_2S_PRES = "verb/lt_2s_pres"
+    VERB_LT_3S_M_PRES = "verb/lt_3s-m_pres"
+    VERB_LT_3S_F_PRES = "verb/lt_3s-f_pres"
+    VERB_LT_1P_PRES = "verb/lt_1p_pres"
+    VERB_LT_2P_PRES = "verb/lt_2p_pres"
+    VERB_LT_3P_M_PRES = "verb/lt_3p-m_pres"
+    VERB_LT_3P_F_PRES = "verb/lt_3p-f_pres"
+
+    # Past tense
+    VERB_LT_1S_PAST = "verb/lt_1s_past"
+    VERB_LT_2S_PAST = "verb/lt_2s_past"
+    VERB_LT_3S_M_PAST = "verb/lt_3s-m_past"
+    VERB_LT_3S_F_PAST = "verb/lt_3s-f_past"
+    VERB_LT_1P_PAST = "verb/lt_1p_past"
+    VERB_LT_2P_PAST = "verb/lt_2p_past"
+    VERB_LT_3P_M_PAST = "verb/lt_3p-m_past"
+    VERB_LT_3P_F_PAST = "verb/lt_3p-f_past"
+
+    # Future tense
+    VERB_LT_1S_FUT = "verb/lt_1s_fut"
+    VERB_LT_2S_FUT = "verb/lt_2s_fut"
+    VERB_LT_3S_M_FUT = "verb/lt_3s-m_fut"
+    VERB_LT_3S_F_FUT = "verb/lt_3s-f_fut"
+    VERB_LT_1P_FUT = "verb/lt_1p_fut"
+    VERB_LT_2P_FUT = "verb/lt_2p_fut"
+    VERB_LT_3P_M_FUT = "verb/lt_3p-m_fut"
+    VERB_LT_3P_F_FUT = "verb/lt_3p-f_fut"
     
     # Noun forms (English)
     NOUN_SINGULAR = "noun/singular"
@@ -151,10 +207,47 @@ class GrammaticalForm(enum.Enum):
     NOUN_LT_LOCATIVE_PLURAL = "noun/lt_locative_plural"
     NOUN_LT_VOCATIVE_PLURAL = "noun/lt_vocative_plural"
     
-    # Adjective forms
+    # Adjective forms (English)
     ADJECTIVE_POSITIVE = "adjective/positive"
     ADJECTIVE_COMPARATIVE = "adjective/comparative"
     ADJECTIVE_SUPERLATIVE = "adjective/superlative"
+
+    # Lithuanian adjective forms (7 cases × 2 numbers × 2 genders = 28 forms)
+    # Masculine singular
+    ADJ_LT_NOMINATIVE_SINGULAR_M = "adjective/lt_nominative_singular_m"
+    ADJ_LT_GENITIVE_SINGULAR_M = "adjective/lt_genitive_singular_m"
+    ADJ_LT_DATIVE_SINGULAR_M = "adjective/lt_dative_singular_m"
+    ADJ_LT_ACCUSATIVE_SINGULAR_M = "adjective/lt_accusative_singular_m"
+    ADJ_LT_INSTRUMENTAL_SINGULAR_M = "adjective/lt_instrumental_singular_m"
+    ADJ_LT_LOCATIVE_SINGULAR_M = "adjective/lt_locative_singular_m"
+    ADJ_LT_VOCATIVE_SINGULAR_M = "adjective/lt_vocative_singular_m"
+
+    # Feminine singular
+    ADJ_LT_NOMINATIVE_SINGULAR_F = "adjective/lt_nominative_singular_f"
+    ADJ_LT_GENITIVE_SINGULAR_F = "adjective/lt_genitive_singular_f"
+    ADJ_LT_DATIVE_SINGULAR_F = "adjective/lt_dative_singular_f"
+    ADJ_LT_ACCUSATIVE_SINGULAR_F = "adjective/lt_accusative_singular_f"
+    ADJ_LT_INSTRUMENTAL_SINGULAR_F = "adjective/lt_instrumental_singular_f"
+    ADJ_LT_LOCATIVE_SINGULAR_F = "adjective/lt_locative_singular_f"
+    ADJ_LT_VOCATIVE_SINGULAR_F = "adjective/lt_vocative_singular_f"
+
+    # Masculine plural
+    ADJ_LT_NOMINATIVE_PLURAL_M = "adjective/lt_nominative_plural_m"
+    ADJ_LT_GENITIVE_PLURAL_M = "adjective/lt_genitive_plural_m"
+    ADJ_LT_DATIVE_PLURAL_M = "adjective/lt_dative_plural_m"
+    ADJ_LT_ACCUSATIVE_PLURAL_M = "adjective/lt_accusative_plural_m"
+    ADJ_LT_INSTRUMENTAL_PLURAL_M = "adjective/lt_instrumental_plural_m"
+    ADJ_LT_LOCATIVE_PLURAL_M = "adjective/lt_locative_plural_m"
+    ADJ_LT_VOCATIVE_PLURAL_M = "adjective/lt_vocative_plural_m"
+
+    # Feminine plural
+    ADJ_LT_NOMINATIVE_PLURAL_F = "adjective/lt_nominative_plural_f"
+    ADJ_LT_GENITIVE_PLURAL_F = "adjective/lt_genitive_plural_f"
+    ADJ_LT_DATIVE_PLURAL_F = "adjective/lt_dative_plural_f"
+    ADJ_LT_ACCUSATIVE_PLURAL_F = "adjective/lt_accusative_plural_f"
+    ADJ_LT_INSTRUMENTAL_PLURAL_F = "adjective/lt_instrumental_plural_f"
+    ADJ_LT_LOCATIVE_PLURAL_F = "adjective/lt_locative_plural_f"
+    ADJ_LT_VOCATIVE_PLURAL_F = "adjective/lt_vocative_plural_f"
     
     # Adverb forms
     ADVERB_POSITIVE = "adverb/positive"
