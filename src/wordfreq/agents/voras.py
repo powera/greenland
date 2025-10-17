@@ -1,10 +1,16 @@
 #!/usr/bin/env python3
 """
-Voras - Multi-lingual Translation Coverage Reporter
+Voras - Multi-lingual Translation Validator and Populator
 
-This agent runs autonomously to report on the coverage of multi-lingual
-translations across all languages in the database. It identifies gaps,
-calculates statistics, and provides insights into translation completeness.
+This agent runs autonomously to:
+1. Validate multi-lingual translations for correctness and proper lemma form
+2. Report on translation coverage across all languages
+3. Generate missing translations using LLM
+
+Modes:
+- check-only: Validate existing translations without populating missing ones
+- populate-only: Add missing translations without validating existing ones
+- both: Validate existing translations AND populate missing ones
 
 "Voras" means "spider" in Lithuanian - weaving together the web of translations!
 """
@@ -25,6 +31,11 @@ import constants
 from wordfreq.storage.database import create_database_session
 from wordfreq.storage.models.schema import Lemma
 from wordfreq.translation.client import LinguisticClient
+from wordfreq.tools.llm_validators import (
+    validate_translation,
+    validate_all_translations_for_word,
+    batch_validate_translations
+)
 
 # Configure logging
 logging.basicConfig(
@@ -46,7 +57,7 @@ LANGUAGE_FIELDS = {
 
 
 class VorasAgent:
-    """Agent for reporting multi-lingual translation coverage."""
+    """Agent for validating and populating multi-lingual translations."""
 
     def __init__(self, db_path: str = None, debug: bool = False, model: str = None):
         """
@@ -55,11 +66,12 @@ class VorasAgent:
         Args:
             db_path: Database path (uses default if None)
             debug: Enable debug logging
-            model: LLM model to use for generating translations (default: from constants)
+            model: LLM model to use for validation and generation (default: gpt-5-mini for validation)
         """
         self.db_path = db_path or constants.WORDFREQ_DB_PATH
         self.debug = debug
-        self.model = model or constants.DEFAULT_MODEL
+        # Default to gpt-5-mini for translation validation (like lokys), but allow override
+        self.model = model or "gpt-5-mini"
         self.linguistic_client = None  # Lazy initialization
 
         if debug:
@@ -79,6 +91,295 @@ class VorasAgent:
             )
         return self.linguistic_client
 
+    def validate_translations(
+        self,
+        language_code: str,
+        limit: Optional[int] = None,
+        sample_rate: float = 1.0,
+        confidence_threshold: float = 0.7
+    ) -> Dict[str, any]:
+        """
+        Validate translations for a specific language using efficient single-call-per-word approach.
+        Note: This validates ALL translations for each word, but only reports on the specified language.
+
+        Args:
+            language_code: Language code to check (lt, zh, ko, fr, sw, vi)
+            limit: Maximum number of words to check
+            sample_rate: Fraction of words to sample (0.0-1.0)
+            confidence_threshold: Minimum confidence to flag issues
+
+        Returns:
+            Dictionary with validation results for the specified language
+        """
+        if language_code not in LANGUAGE_FIELDS:
+            raise ValueError(f"Unsupported language code: {language_code}")
+
+        field_name, language_name = LANGUAGE_FIELDS[language_code]
+        logger.info(f"Validating {language_name} translations (efficient mode: 1 LLM call per word)...")
+
+        session = self.get_session()
+        try:
+            # Get lemmas with this language translation
+            query = session.query(Lemma).filter(
+                Lemma.guid.isnot(None),
+                getattr(Lemma, field_name).isnot(None),
+                getattr(Lemma, field_name) != ''
+            ).order_by(Lemma.id)
+
+            if limit:
+                query = query.limit(limit)
+
+            lemmas = query.all()
+            logger.info(f"Found {len(lemmas)} lemmas with {language_name} translations")
+
+            # Sample if needed
+            if sample_rate < 1.0:
+                import random
+                sample_size = int(len(lemmas) * sample_rate)
+                lemmas = random.sample(lemmas, sample_size)
+                logger.info(f"Sampling {len(lemmas)} words ({sample_rate*100:.0f}%)")
+
+            # Validate translations
+            issues_found = []
+            checked_count = 0
+
+            for lemma in lemmas:
+                checked_count += 1
+                if checked_count % 10 == 0:
+                    logger.info(f"Validated {checked_count}/{len(lemmas)} words...")
+
+                # Gather all translations for this lemma (efficient: validate all at once)
+                translations = {}
+                for lang_code, (field_name_iter, _) in LANGUAGE_FIELDS.items():
+                    translation = getattr(lemma, field_name_iter)
+                    if translation and translation.strip():
+                        translations[lang_code] = translation
+
+                if not translations:
+                    continue  # Skip if no translations
+
+                # Log which word is being validated
+                logger.debug(f"Validating word '{lemma.lemma_text}' (GUID: {lemma.guid}), checking {language_name}: '{translations.get(language_code, 'N/A')}'")
+
+                # Validate all translations in one call
+                validation_results = validate_all_translations_for_word(
+                    lemma.lemma_text,
+                    translations,
+                    lemma.pos_type,
+                    self.model
+                )
+
+                # Only process results for the requested language
+                if language_code in validation_results:
+                    lang_validation = validation_results[language_code]
+
+                    has_issues = (
+                        (not lang_validation['is_correct'] or not lang_validation['is_lemma_form'])
+                        and lang_validation['confidence'] >= confidence_threshold
+                    )
+
+                    if has_issues:
+                        issues_found.append({
+                            'guid': lemma.guid,
+                            'english': lemma.lemma_text,
+                            'current_translation': translations[language_code],
+                            'suggested_translation': lang_validation['suggested_translation'],
+                            'pos_type': lemma.pos_type,
+                            'is_correct': lang_validation['is_correct'],
+                            'is_lemma_form': lang_validation['is_lemma_form'],
+                            'issues': lang_validation['issues'],
+                            'confidence': lang_validation['confidence']
+                        })
+                        logger.debug(f"  Issue found: '{translations[language_code]}' → '{lang_validation['suggested_translation']}' (confidence: {lang_validation['confidence']:.2f})")
+                        logger.warning(
+                            f"Translation issue ({lemma.guid}): '{lemma.lemma_text}' → '{translations[language_code]}' "
+                            f"(suggested: '{lang_validation['suggested_translation']}', confidence: {lang_validation['confidence']:.2f})"
+                        )
+                    else:
+                        logger.debug(f"  No issues found for '{lemma.lemma_text}'")
+
+            logger.info(f"Found {len(issues_found)} {language_name} translations with potential issues")
+
+            return {
+                'language_code': language_code,
+                'language_name': language_name,
+                'total_checked': checked_count,
+                'issues_found': len(issues_found),
+                'issue_rate': (len(issues_found) / checked_count * 100) if checked_count else 0,
+                'issues': issues_found,
+                'confidence_threshold': confidence_threshold
+            }
+
+        except Exception as e:
+            logger.error(f"Error validating {language_name} translations: {e}")
+            return {
+                'error': str(e),
+                'language_code': language_code,
+                'language_name': language_name,
+                'total_checked': 0,
+                'issues_found': 0,
+                'issue_rate': 0,
+                'issues': []
+            }
+        finally:
+            session.close()
+
+    def validate_all_translations(
+        self,
+        limit: Optional[int] = None,
+        sample_rate: float = 1.0,
+        confidence_threshold: float = 0.7
+    ) -> Dict[str, any]:
+        """
+        Validate all multi-lingual translations using efficient single-call-per-word approach.
+
+        Args:
+            limit: Maximum number of lemmas to check
+            sample_rate: Fraction of lemmas to sample
+            confidence_threshold: Minimum confidence to flag issues
+
+        Returns:
+            Dictionary with results for all languages
+        """
+        logger.info("Validating all multi-lingual translations (efficient mode: 1 LLM call per word)...")
+
+        session = self.get_session()
+        try:
+            # Get lemmas that have at least one translation
+            query = session.query(Lemma).filter(
+                Lemma.guid.isnot(None)
+            )
+
+            # Filter to lemmas with at least one translation
+            has_translation_filter = None
+            for lang_code, (field_name, _) in LANGUAGE_FIELDS.items():
+                field_filter = (
+                    (getattr(Lemma, field_name).isnot(None)) &
+                    (getattr(Lemma, field_name) != '')
+                )
+                if has_translation_filter is None:
+                    has_translation_filter = field_filter
+                else:
+                    has_translation_filter = has_translation_filter | field_filter
+
+            query = query.filter(has_translation_filter).order_by(Lemma.id)
+
+            if limit:
+                query = query.limit(limit)
+
+            lemmas = query.all()
+            logger.info(f"Found {len(lemmas)} lemmas with translations")
+
+            # Sample if needed
+            if sample_rate < 1.0:
+                import random
+                sample_size = int(len(lemmas) * sample_rate)
+                lemmas = random.sample(lemmas, sample_size)
+                logger.info(f"Sampling {len(lemmas)} lemmas ({sample_rate*100:.0f}%)")
+
+            # Initialize results structure
+            results_by_language = {
+                lang_code: {
+                    'language_code': lang_code,
+                    'language_name': language_name,
+                    'total_checked': 0,
+                    'issues_found': 0,
+                    'issue_rate': 0.0,
+                    'issues': [],
+                    'confidence_threshold': confidence_threshold
+                }
+                for lang_code, (_, language_name) in LANGUAGE_FIELDS.items()
+            }
+
+            # Validate all translations for each lemma in one LLM call
+            checked_count = 0
+            for lemma in lemmas:
+                checked_count += 1
+                if checked_count % 10 == 0:
+                    logger.info(f"Validated {checked_count}/{len(lemmas)} lemmas...")
+
+                # Gather all translations for this lemma
+                translations = {}
+                for lang_code, (field_name, _) in LANGUAGE_FIELDS.items():
+                    translation = getattr(lemma, field_name)
+                    if translation and translation.strip():
+                        translations[lang_code] = translation
+
+                if not translations:
+                    continue  # Skip if no translations
+
+                # Log which word is being validated
+                logger.debug(f"Validating word '{lemma.lemma_text}' (GUID: {lemma.guid}) with {len(translations)} translations")
+
+                # Validate all translations in one call
+                validation_results = validate_all_translations_for_word(
+                    lemma.lemma_text,
+                    translations,
+                    lemma.pos_type,
+                    self.model
+                )
+
+                # Process results for each language
+                issues_for_this_word = []
+                for lang_code, lang_validation in validation_results.items():
+                    lang_result = results_by_language[lang_code]
+                    lang_result['total_checked'] += 1
+
+                    has_issues = (
+                        (not lang_validation['is_correct'] or not lang_validation['is_lemma_form'])
+                        and lang_validation['confidence'] >= confidence_threshold
+                    )
+
+                    if has_issues:
+                        lang_result['issues_found'] += 1
+                        lang_result['issues'].append({
+                            'guid': lemma.guid,
+                            'english': lemma.lemma_text,
+                            'current_translation': translations[lang_code],
+                            'suggested_translation': lang_validation['suggested_translation'],
+                            'pos_type': lemma.pos_type,
+                            'is_correct': lang_validation['is_correct'],
+                            'is_lemma_form': lang_validation['is_lemma_form'],
+                            'issues': lang_validation['issues'],
+                            'confidence': lang_validation['confidence']
+                        })
+                        issues_for_this_word.append(f"{lang_code}: {translations[lang_code]} → {lang_validation['suggested_translation']}")
+
+                # Log issues found for this word
+                if issues_for_this_word:
+                    logger.debug(f"  Issues found for '{lemma.lemma_text}': {', '.join(issues_for_this_word)}")
+                else:
+                    logger.debug(f"  No issues found for '{lemma.lemma_text}'")
+
+            # Calculate issue rates
+            total_issues = 0
+            for lang_result in results_by_language.values():
+                if lang_result['total_checked'] > 0:
+                    lang_result['issue_rate'] = (
+                        lang_result['issues_found'] / lang_result['total_checked'] * 100
+                    )
+                total_issues += lang_result['issues_found']
+                logger.info(
+                    f"{lang_result['language_name']}: "
+                    f"{lang_result['issues_found']}/{lang_result['total_checked']} issues "
+                    f"({lang_result['issue_rate']:.1f}%)"
+                )
+
+            return {
+                'by_language': results_by_language,
+                'total_issues_all_languages': total_issues
+            }
+
+        except Exception as e:
+            logger.error(f"Error validating all translations: {e}")
+            return {
+                'error': str(e),
+                'by_language': {},
+                'total_issues_all_languages': 0
+            }
+        finally:
+            session.close()
+
     def fix_missing_translations(
         self,
         language_code: Optional[str] = None,
@@ -87,110 +388,166 @@ class VorasAgent:
     ) -> Dict[str, any]:
         """
         Generate missing translations using LLM and update the database.
+        Uses efficient batching: 1 LLM call per word for all missing translations.
 
         Args:
             language_code: Specific language to fix (None = all languages)
-            limit: Maximum number of translations to generate per language
+            limit: Maximum number of words to process
             dry_run: If True, only report what would be fixed without making changes
 
         Returns:
             Dictionary with fix results
         """
-        logger.info("Starting translation generation...")
+        logger.info("Starting translation generation (efficient mode: 1 LLM call per word)...")
 
         session = self.get_session()
         client = self.get_linguistic_client()
 
         languages_to_fix = [language_code] if language_code else list(LANGUAGE_FIELDS.keys())
 
+        # Initialize results structure
         results = {
             'total_fixed': 0,
             'total_failed': 0,
-            'by_language': {}
+            'by_language': {
+                lang_code: {
+                    'language_name': LANGUAGE_FIELDS[lang_code][1],
+                    'total_missing': 0,
+                    'fixed': 0,
+                    'failed': 0
+                }
+                for lang_code in languages_to_fix
+            }
         }
 
         try:
+            # Build query to find words missing ANY of the target translations
+            missing_filter = None
             for lang_code in languages_to_fix:
-                field_name, language_name = LANGUAGE_FIELDS[lang_code]
-                logger.info(f"Processing {language_name} translations...")
-
-                # Get lemmas missing this translation
-                query = session.query(Lemma).filter(
-                    Lemma.guid.isnot(None),
+                field_name, _ = LANGUAGE_FIELDS[lang_code]
+                lang_filter = (
                     (getattr(Lemma, field_name).is_(None)) |
                     (getattr(Lemma, field_name) == '')
                 )
+                if missing_filter is None:
+                    missing_filter = lang_filter
+                else:
+                    missing_filter = missing_filter | lang_filter
 
-                if limit:
-                    query = query.limit(limit)
+            query = session.query(Lemma).filter(
+                Lemma.guid.isnot(None),
+                missing_filter
+            ).order_by(Lemma.id)
 
-                missing_lemmas = query.all()
-                total_missing = len(missing_lemmas)
+            if limit:
+                query = query.limit(limit)
 
-                logger.info(f"Found {total_missing} lemmas missing {language_name} translations")
+            words_to_process = query.all()
+            total_words = len(words_to_process)
 
-                fixed = 0
-                failed = 0
+            logger.info(f"Found {total_words} words with missing translations in target languages")
 
-                for i, lemma in enumerate(missing_lemmas, 1):
-                    if i % 10 == 0:
-                        logger.info(f"Progress: {i}/{total_missing} ({language_name})")
+            # Count missing translations per language
+            for lemma in words_to_process:
+                for lang_code in languages_to_fix:
+                    field_name, _ = LANGUAGE_FIELDS[lang_code]
+                    translation = getattr(lemma, field_name)
+                    if not translation or not translation.strip():
+                        results['by_language'][lang_code]['total_missing'] += 1
 
-                    try:
-                        if dry_run:
+            # Process each word once
+            for i, lemma in enumerate(words_to_process, 1):
+                if i % 10 == 0:
+                    logger.info(f"Progress: {i}/{total_words} words processed")
+
+                # Find which languages are missing for this word
+                missing_languages = []
+                for lang_code in languages_to_fix:
+                    field_name, language_name = LANGUAGE_FIELDS[lang_code]
+                    translation = getattr(lemma, field_name)
+                    if not translation or not translation.strip():
+                        missing_languages.append((lang_code, field_name, language_name))
+
+                if not missing_languages:
+                    continue
+
+                logger.debug(f"Processing word '{lemma.lemma_text}' (GUID: {lemma.guid}), missing {len(missing_languages)} translations")
+
+                try:
+                    if dry_run:
+                        for lang_code, _, language_name in missing_languages:
                             logger.info(f"[DRY RUN] Would generate {language_name} translation for '{lemma.lemma_text}'")
-                            fixed += 1
-                            continue
+                            results['by_language'][lang_code]['fixed'] += 1
+                            results['total_fixed'] += 1
+                        continue
 
-                        # Query LLM for full definition data (includes all translations)
-                        definitions, success = client.query_definitions(lemma.lemma_text)
+                    # Query LLM for full definition data (includes all translations) - ONE CALL
+                    definitions, success = client.query_definitions(lemma.lemma_text)
 
-                        if not success or not definitions:
-                            logger.warning(f"Failed to get definitions for '{lemma.lemma_text}'")
-                            failed += 1
-                            continue
+                    if not success or not definitions:
+                        logger.warning(f"Failed to get definitions for '{lemma.lemma_text}'")
+                        for lang_code, _, _ in missing_languages:
+                            results['by_language'][lang_code]['failed'] += 1
+                            results['total_failed'] += 1
+                        continue
 
-                        # Find the matching definition (by POS and definition text similarity)
-                        matching_def = None
-                        for def_data in definitions:
-                            if def_data.get('pos') == lemma.pos_type:
-                                matching_def = def_data
-                                break
+                    # Find the matching definition (by POS and definition text similarity)
+                    matching_def = None
+                    for def_data in definitions:
+                        if def_data.get('pos') == lemma.pos_type:
+                            matching_def = def_data
+                            break
 
-                        # If no POS match, use the first definition
-                        if not matching_def and definitions:
-                            matching_def = definitions[0]
+                    # If no POS match, use the first definition
+                    if not matching_def and definitions:
+                        matching_def = definitions[0]
 
-                        # Extract the translation for the target language
-                        translation_field = f"{lang_code}_translation"
-                        translation = matching_def.get(translation_field, '').strip()
+                    # Update all missing translations for this word
+                    # Map language codes to the field names used by LinguisticClient
+                    translation_field_map = {
+                        'lt': 'lithuanian_translation',
+                        'zh': 'chinese_translation',
+                        'ko': 'korean_translation',
+                        'fr': 'french_translation',
+                        'sw': 'swahili_translation',
+                        'vi': 'vietnamese_translation'
+                    }
+
+                    for lang_code, field_name, language_name in missing_languages:
+                        llm_field = translation_field_map.get(lang_code)
+                        translation = matching_def.get(llm_field, '').strip()
 
                         if translation:
                             # Update the lemma with the new translation
                             setattr(lemma, field_name, translation)
-                            session.commit()
-
-                            logger.info(f"Added {language_name} translation '{translation}' for '{lemma.lemma_text}' (GUID: {lemma.guid})")
-                            fixed += 1
+                            logger.debug(f"  Added {language_name} translation: '{translation}'")
+                            results['by_language'][lang_code]['fixed'] += 1
+                            results['total_fixed'] += 1
                         else:
-                            logger.warning(f"LLM returned empty {language_name} translation for '{lemma.lemma_text}'")
-                            failed += 1
+                            logger.warning(f"  LLM returned empty {language_name} translation for '{lemma.lemma_text}'")
+                            results['by_language'][lang_code]['failed'] += 1
+                            results['total_failed'] += 1
 
-                    except Exception as e:
-                        logger.error(f"Error processing '{lemma.lemma_text}': {e}")
-                        session.rollback()
-                        failed += 1
+                    # Commit all updates for this word at once
+                    session.commit()
+                    added_count = len([lc for lc, _, _ in missing_languages if matching_def.get(translation_field_map.get(lc), '').strip()])
+                    logger.info(f"Added {added_count} translations for '{lemma.lemma_text}' (GUID: {lemma.guid})")
 
-                results['by_language'][lang_code] = {
-                    'language_name': language_name,
-                    'total_missing': total_missing,
-                    'fixed': fixed,
-                    'failed': failed
-                }
-                results['total_fixed'] += fixed
-                results['total_failed'] += failed
+                except Exception as e:
+                    logger.error(f"Error processing '{lemma.lemma_text}': {e}")
+                    session.rollback()
+                    for lang_code, _, _ in missing_languages:
+                        results['by_language'][lang_code]['failed'] += 1
+                        results['total_failed'] += 1
 
-                logger.info(f"Completed {language_name}: {fixed} fixed, {failed} failed")
+            # Log summary per language
+            for lang_code in languages_to_fix:
+                lang_result = results['by_language'][lang_code]
+                logger.info(
+                    f"Completed {lang_result['language_name']}: "
+                    f"{lang_result['fixed']} fixed, {lang_result['failed']} failed "
+                    f"(of {lang_result['total_missing']} missing)"
+                )
 
         finally:
             session.close()
@@ -554,123 +911,224 @@ class VorasAgent:
 def main():
     """Main entry point for the voras agent."""
     parser = argparse.ArgumentParser(
-        description="Voras - Multi-lingual Translation Coverage Reporter"
+        description="Voras - Multi-lingual Translation Validator and Populator"
     )
     parser.add_argument('--db-path', help='Database path (uses default if not specified)')
     parser.add_argument('--debug', action='store_true', help='Enable debug logging')
     parser.add_argument('--output', help='Output JSON file for report')
-    parser.add_argument('--check',
-                       choices=['overall', 'language', 'difficulty', 'all'],
-                       default='all',
-                       help='Which check to run (default: all)')
+    parser.add_argument('--mode',
+                       choices=['check-only', 'populate-only', 'both', 'coverage'],
+                       default='coverage',
+                       help='Operation mode: check-only (validate existing), populate-only (add missing), both (validate + populate), coverage (report only, default)')
     parser.add_argument('--language',
                        choices=list(LANGUAGE_FIELDS.keys()),
-                       help='Specific language to check (for language check)')
-    parser.add_argument('--fix', action='store_true',
-                       help='Generate missing translations using LLM')
+                       help='Specific language to process (lt, zh, ko, fr, sw, vi)')
     parser.add_argument('--yes', '-y', action='store_true',
                        help='Skip confirmation prompt before running LLM queries')
-    parser.add_argument('--model', default=constants.DEFAULT_MODEL,
-                       help=f'LLM model to use for translations (default: {constants.DEFAULT_MODEL})')
+    parser.add_argument('--model', default='gpt-5-mini',
+                       help='LLM model to use (default: gpt-5-mini)')
     parser.add_argument('--limit', type=int,
-                       help='Maximum translations to generate per language (for --fix)')
+                       help='Maximum items to process per language')
+    parser.add_argument('--sample-rate', type=float, default=1.0,
+                       help='Fraction of items to sample for validation (0.0-1.0, default: 1.0)')
+    parser.add_argument('--confidence-threshold', type=float, default=0.7,
+                       help='Minimum confidence to flag issues (0.0-1.0, default: 0.7)')
     parser.add_argument('--dry-run', action='store_true',
-                       help='Show what would be fixed without making changes (for --fix)')
+                       help='Show what would be done without making changes')
 
     args = parser.parse_args()
 
-    # Handle --fix mode with confirmation
-    if args.fix:
-        # Create agent with model parameter
-        agent = VorasAgent(db_path=args.db_path, debug=args.debug, model=args.model)
+    # Create agent with model parameter
+    agent = VorasAgent(db_path=args.db_path, debug=args.debug, model=args.model)
 
-        # Confirm before running LLM queries (unless --yes was provided)
-        if not args.yes and not args.dry_run:
-            # Calculate estimated number of LLM calls
-            session = agent.get_session()
-            try:
-                estimated_calls = 0
-                languages_to_fix = [args.language] if args.language else list(LANGUAGE_FIELDS.keys())
+    # Handle different modes
+    if args.mode == 'coverage':
+        # Coverage reporting mode (no LLM calls)
+        agent.run_full_check(output_file=args.output)
+        return
 
-                for lang_code in languages_to_fix:
-                    field_name, language_name = LANGUAGE_FIELDS[lang_code]
+    # For modes requiring LLM, confirm before running (unless --yes was provided)
+    if not args.yes and not args.dry_run:
+        session = agent.get_session()
+        try:
+            estimated_calls = 0
+            languages_to_process = [args.language] if args.language else list(LANGUAGE_FIELDS.keys())
+
+            if args.mode in ['check-only', 'both']:
+                # Calculate validation calls
+                if args.language:
+                    # Single language: still validates all languages per word, just filters which words
+                    field_name, language_name = LANGUAGE_FIELDS[args.language]
                     query = session.query(Lemma).filter(
                         Lemma.guid.isnot(None),
-                        (getattr(Lemma, field_name).is_(None)) |
-                        (getattr(Lemma, field_name) == '')
+                        getattr(Lemma, field_name).isnot(None),
+                        getattr(Lemma, field_name) != ''
                     )
                     if args.limit:
                         query = query.limit(args.limit)
-
                     count = query.count()
+                    if args.sample_rate < 1.0:
+                        count = int(count * args.sample_rate)
                     estimated_calls += count
-                    logger.info(f"{language_name}: {count} missing translations")
+                    logger.info(f"{language_name}: {count} words to validate (all translations per word)")
+                else:
+                    # All languages: one call per word with any translation
+                    has_translation_filter = None
+                    for lang_code, (field_name, _) in LANGUAGE_FIELDS.items():
+                        field_filter = (
+                            (getattr(Lemma, field_name).isnot(None)) &
+                            (getattr(Lemma, field_name) != '')
+                        )
+                        if has_translation_filter is None:
+                            has_translation_filter = field_filter
+                        else:
+                            has_translation_filter = has_translation_filter | field_filter
 
-            finally:
-                session.close()
+                    query = session.query(Lemma).filter(
+                        Lemma.guid.isnot(None),
+                        has_translation_filter
+                    )
+                    if args.limit:
+                        query = query.limit(args.limit)
+                    count = query.count()
+                    if args.sample_rate < 1.0:
+                        count = int(count * args.sample_rate)
+                    estimated_calls += count
+                    logger.info(f"All languages: {count} words to validate (all translations per word)")
 
-            print(f"\nThis will make approximately {estimated_calls} LLM API calls using model '{args.model}'.")
-            print("This may incur costs and take some time to complete.")
-            response = input("Do you want to proceed? [y/N]: ").strip().lower()
+            if args.mode in ['populate-only', 'both']:
+                # Calculate population calls - one call per word with any missing translation
+                missing_filter = None
+                for lang_code in languages_to_process:
+                    field_name, language_name = LANGUAGE_FIELDS[lang_code]
+                    lang_filter = (
+                        (getattr(Lemma, field_name).is_(None)) |
+                        (getattr(Lemma, field_name) == '')
+                    )
+                    if missing_filter is None:
+                        missing_filter = lang_filter
+                    else:
+                        missing_filter = missing_filter | lang_filter
 
-            if response not in ['y', 'yes']:
-                print("Aborted.")
-                sys.exit(0)
+                query = session.query(Lemma).filter(
+                    Lemma.guid.isnot(None),
+                    missing_filter
+                )
+                if args.limit:
+                    query = query.limit(args.limit)
 
-            print()  # Extra newline for readability
+                words_to_populate = query.all()
+                count = len(words_to_populate)
+                estimated_calls += count
 
-        # Run the fix
+                # Count missing per language for reporting
+                for lang_code in languages_to_process:
+                    field_name, language_name = LANGUAGE_FIELDS[lang_code]
+                    missing_count = sum(
+                        1 for lemma in words_to_populate
+                        if not getattr(lemma, field_name) or not getattr(lemma, field_name).strip()
+                    )
+                    logger.info(f"{language_name}: {missing_count} missing translations to populate")
+
+                logger.info(f"Total: {count} words to populate (1 LLM call per word for all missing translations)")
+
+        finally:
+            session.close()
+
+        print(f"\nThis will make approximately {estimated_calls} LLM API calls using model '{args.model}'.")
+        print("This may incur costs and take some time to complete.")
+        response = input("Do you want to proceed? [y/N]: ").strip().lower()
+
+        if response not in ['y', 'yes']:
+            print("Aborted.")
+            sys.exit(0)
+
+        print()  # Extra newline for readability
+
+    # Execute the requested mode
+    results = {}
+
+    if args.mode == 'check-only':
+        # Validate existing translations
+        if args.language:
+            results = agent.validate_translations(
+                args.language,
+                limit=args.limit,
+                sample_rate=args.sample_rate,
+                confidence_threshold=args.confidence_threshold
+            )
+            print(f"\n{results['language_name']} validation results:")
+            print(f"  Issues found: {results['issues_found']} out of {results['total_checked']}")
+            print(f"  Issue rate: {results['issue_rate']:.1f}%")
+        else:
+            results = agent.validate_all_translations(
+                limit=args.limit,
+                sample_rate=args.sample_rate,
+                confidence_threshold=args.confidence_threshold
+            )
+            print(f"\nTotal translation issues (all languages): {results['total_issues_all_languages']}")
+
+    elif args.mode == 'populate-only':
+        # Generate missing translations only
         results = agent.fix_missing_translations(
             language_code=args.language,
             limit=args.limit,
             dry_run=args.dry_run
         )
-
-        # Print summary
         print("\n" + "=" * 80)
-        print("TRANSLATION GENERATION SUMMARY")
+        print("TRANSLATION POPULATION SUMMARY")
         print("=" * 80)
         for lang_code, lang_results in results['by_language'].items():
             print(f"\n{lang_results['language_name']}:")
             print(f"  Total missing: {lang_results['total_missing']}")
-            print(f"  Fixed: {lang_results['fixed']}")
+            print(f"  Populated: {lang_results['fixed']}")
             print(f"  Failed: {lang_results['failed']}")
-
-        print(f"\nTotal fixed: {results['total_fixed']}")
+        print(f"\nTotal populated: {results['total_fixed']}")
         print(f"Total failed: {results['total_failed']}")
         print("=" * 80)
 
-        return
+    elif args.mode == 'both':
+        # First validate existing translations
+        print("\n=== STEP 1: Validating Existing Translations ===\n")
+        if args.language:
+            validation_results = agent.validate_translations(
+                args.language,
+                limit=args.limit,
+                sample_rate=args.sample_rate,
+                confidence_threshold=args.confidence_threshold
+            )
+        else:
+            validation_results = agent.validate_all_translations(
+                limit=args.limit,
+                sample_rate=args.sample_rate,
+                confidence_threshold=args.confidence_threshold
+            )
 
-    # Normal reporting mode (no --fix)
-    agent = VorasAgent(db_path=args.db_path, debug=args.debug)
+        # Then populate missing translations
+        print("\n=== STEP 2: Populating Missing Translations ===\n")
+        population_results = agent.fix_missing_translations(
+            language_code=args.language,
+            limit=args.limit,
+            dry_run=args.dry_run
+        )
 
-    if args.check == 'overall':
-        results = agent.check_overall_coverage()
-        print(f"\nOverall translation coverage:")
-        print(f"  Fully translated: {results['fully_translated_count']}/{results['total_lemmas']}")
-        print(f"  Partially translated: {results['partially_translated_count']}/{results['total_lemmas']}")
-        print(f"  Not translated: {results['not_translated_count']}/{results['total_lemmas']}")
+        # Combined summary
+        print("\n" + "=" * 80)
+        print("COMBINED VALIDATION + POPULATION SUMMARY")
+        print("=" * 80)
 
-    elif args.check == 'language':
-        if not args.language:
-            print("Error: --language is required for language-specific checks")
-            sys.exit(1)
+        if args.language:
+            print(f"\nValidation ({validation_results['language_name']}):")
+            print(f"  Issues found: {validation_results['issues_found']} out of {validation_results['total_checked']}")
+            print(f"  Issue rate: {validation_results['issue_rate']:.1f}%")
+        else:
+            print(f"\nValidation (all languages):")
+            print(f"  Total issues: {validation_results['total_issues_all_languages']}")
 
-        results = agent.check_language_coverage(args.language)
-        print(f"\n{results['language_name']} translation coverage:")
-        print(f"  Translated: {results['with_translation']}/{results['total_lemmas']} ({results['coverage_percentage']:.1f}%)")
-        print(f"\nCoverage by POS type:")
-        for pos_type, stats in results['coverage_by_pos'].items():
-            print(f"  {pos_type}: {stats['with_translation']}/{stats['total']} ({stats['coverage_percentage']:.1f}%)")
-
-    elif args.check == 'difficulty':
-        results = agent.check_difficulty_level_coverage()
-        print(f"\nTranslation coverage by difficulty level:")
-        print(f"  Total levels: {results['total_levels']}")
-
-    else:  # all
-        agent.run_full_check(output_file=args.output)
+        print(f"\nPopulation:")
+        for lang_code, lang_results in population_results['by_language'].items():
+            print(f"  {lang_results['language_name']}: {lang_results['fixed']} populated, {lang_results['failed']} failed")
+        print("=" * 80)
 
 
 if __name__ == '__main__':
