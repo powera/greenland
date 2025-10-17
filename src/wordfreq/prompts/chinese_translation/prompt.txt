@@ -1,6 +1,0 @@
-Provide a Chinese translation for the English word '{word}' with the following definition:
-
-Definition: {definition}
-Example sentence: {example}
-
-Return only a JSON object with the translation, pinyin, confidence score, and any notes.
