@@ -495,7 +495,6 @@ def add_derivative_form(
 def add_complete_word_entry(
     session,
     token: str,
-    language_code: str,
     lemma_text: str,
     definition_text: str,
     pos_type: str,
@@ -522,11 +521,15 @@ def add_complete_word_entry(
     """
     Convenience function to add a complete word entry (token + lemma + derivative form).
     This replaces the old add_definition function for most use cases.
+    
+    Note: Lemmas are always English ('en').
 
     Args:
         translations: Optional TranslationSet object. If provided, individual translation
                      parameters are ignored.
     """
+    language_code = 'en'
+    
     # Extract translations from TranslationSet if provided
     if translations is not None:
         from wordfreq.storage.models.translations import TranslationSet

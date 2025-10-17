@@ -307,8 +307,6 @@ class LinguisticClient:
                     ipa_pronunciation=def_data.get('ipa_spelling'),
                     phonetic_pronunciation=def_data.get('phonetic_spelling'),
                     translations=translations,
-                    multiple_meanings=def_data.get('multiple_meanings', False),
-                    special_case=def_data.get('special_case', False),
                     confidence=def_data.get('confidence', 0.0),
                     notes=def_data.get('notes')
                 )
