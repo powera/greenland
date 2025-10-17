@@ -417,96 +417,6 @@ class LinguisticClient:
         # For other POS types, assume base form if it matches lemma
         return word_text == lemma_text
 
-    def query_chinese_translation(self, word: str, definition: str, example: str) -> Tuple[str, bool]:
-        """
-        Query LLM for a Chinese translation of a specific word definition.
-
-        DEPRECATED: Use query_definitions() instead, which returns translations
-        for all languages in a single call.
-
-        Args:
-            word: The English word to translate
-            definition: The specific definition of the word
-            example: An example sentence using the word
-
-        Returns:
-            Tuple of (translation string, success flag)
-        """
-        import warnings
-        warnings.warn(
-            "query_chinese_translation() is deprecated. Use query_definitions() instead, "
-            "which returns translations for all languages in a single call.",
-            DeprecationWarning,
-            stacklevel=2
-        )
-
-        if not word or not isinstance(word, str):
-            logger.error("Invalid word parameter provided")
-            return "", False
-
-        schema = clients.lib.Schema(
-            name = "ChineseTranslation",
-            description= "Response schema for a Chinese translation",
-            properties={
-                "chinese_translation": clients.lib.SchemaProperty(
-                    type="string",
-                    description="The Chinese translation (preferably two characters when possible)"
-                ),
-                "pinyin": clients.lib.SchemaProperty(
-                    type="string",
-                    description="The pinyin pronunciation of the Chinese translation"
-                ),
-                "confidence": clients.lib.SchemaProperty(
-                    type="number",
-                    description="Confidence score from 0-1"
-                ),
-                "notes": clients.lib.SchemaProperty(
-                    type="string",
-                    description="Additional notes about this translation"
-                )
-            })
-
-        context = util.prompt_loader.get_context("wordfreq", "chinese_translation")
-        prompt_template = util.prompt_loader.get_prompt("wordfreq", "chinese_translation")
-        prompt = prompt_template.format(word=word, definition=definition, example=example)
-
-        try:
-            response = self.client.generate_chat(
-                prompt=prompt,
-                model=self.model,
-                json_schema=schema,
-                context=context
-            )
-
-            # Log successful query
-            session = self.get_session()
-            try:
-                linguistic_db.log_query(
-                    session,
-                    word=word,
-                    query_type='chinese_translation',
-                    prompt=prompt,
-                    response=json.dumps(response.structured_data),
-                    model=self.model
-                )
-            except Exception as log_err:
-                logger.error(f"Failed to log successful translation query: {log_err}")
-
-            # Validate and return response data
-            if (response.structured_data and 
-                isinstance(response.structured_data, dict) and 
-                'chinese_translation' in response.structured_data):
-                return response.structured_data['chinese_translation'], True
-            else:
-                logger.warning(f"Invalid translation response format for word '{word}'")
-                return "", False
-
-        except Exception as e:
-            # More specific error logging
-            logger.error(f"Error querying Chinese translation for '{word}': {type(e).__name__}: {e}")
-
-            return "", False
-
     def query_word_forms(self, lemma: str, pos_type: str) -> Tuple[List[Dict[str, Any]], bool]:
         """
         Query LLM for all forms of a lemma based on its part of speech.
@@ -588,124 +498,6 @@ class LinguisticClient:
             logger.error(f"Error querying word forms for '{lemma}': {type(e).__name__}: {e}")
 
             return [], False
-
-    def add_translation_for_definition(self, definition_id: int) -> bool:
-        """
-        Add a Chinese translation for a specific definition.
-
-        Args:
-            definition_id: The ID of the definition to translate
-
-        Returns:
-            Success flag
-        """
-        session = self.get_session()
-
-        # Get the definition
-        definition = session.query(linguistic_db.Definition).filter(linguistic_db.Definition.id == definition_id).first()
-        if not definition:
-            logger.warning(f"Definition with ID {definition_id} not found")
-            return False
-
-        # Get the word
-        word = definition.word
-
-        # Get an example sentence if available
-        example_text = "No example available."
-        if definition.examples and len(definition.examples) > 0:
-            example_text = definition.examples[0].example_text
-
-        # Query for translation
-        translation, success = self.query_chinese_translation(
-            word.word, 
-            definition.definition_text,
-            example_text
-        )
-
-        if success and translation:
-            # Update the definition with the translation
-            linguistic_db.update_chinese_translation(session, definition.id, translation)
-            logger.info(f"Added Chinese translation '{translation}' for '{word.word}' (definition ID: {definition.id})")
-            return True
-        else:
-            logger.warning(f"Failed to get Chinese translation for '{word.word}' (definition ID: {definition.id})")
-            return False
-
-    def add_missing_translations_for_word(self, word_text: str, throttle: float = 1.0) -> Dict[str, Any]:
-        """
-        Add Chinese translations for all definitions of a word that don't have translations yet.
-
-        Args:
-            word_text: Word to add translations for
-            throttle: Time to wait between API calls (seconds)
-
-        Returns:
-            Dictionary with statistics about the processing
-        """
-        logger.info(f"Adding missing Chinese translations for definitions of '{word_text}'")
-
-        session = self.get_session()
-        word = linguistic_db.get_word_by_text(session, word_text)
-
-        if not word:
-            logger.warning(f"Word '{word_text}' not found in the database")
-            return {
-                "word": word_text,
-                "total_definitions": 0,
-                "missing_translations": 0,
-                "processed": 0,
-                "successful": 0
-            }
-
-        # Get all definitions for the word
-        definitions = word.definitions
-        total_definitions = len(definitions)
-
-        if total_definitions == 0:
-            logger.warning(f"No definitions found for word '{word_text}'")
-            return {
-                "word": word_text,
-                "total_definitions": 0,
-                "missing_translations": 0,
-                "processed": 0,
-                "successful": 0
-            }
-
-        # Filter for definitions without translations
-        definitions_without_translations = [
-            d for d in definitions 
-            if not d.chinese_translation or not d.chinese_translation.strip()
-        ]
-
-        missing_translations = len(definitions_without_translations)
-        logger.info(f"Found {missing_translations} definitions without translations (out of {total_definitions} total)")
-
-        successful = 0
-        processed = 0
-
-        for definition in definitions_without_translations:
-            success = self.add_translation_for_definition(definition.id)
-            processed += 1
-
-            if success:
-                successful += 1
-                logger.info(f"Added translation for definition ID {definition.id}")
-            else:
-                logger.warning(f"Failed to add translation for definition ID {definition.id}")
-
-            # Throttle to avoid overloading the API
-            time.sleep(throttle)
-
-        logger.info(f"Processing complete for '{word_text}': {successful}/{processed} successful " 
-                    f"({missing_translations} missing, {total_definitions} total)")
-
-        return {
-            "word": word_text,
-            "total_definitions": total_definitions,
-            "missing_translations": missing_translations,
-            "processed": processed,
-            "successful": successful
-        }
 
     def query_pos_subtype(self, word: str, definition_text: str, pos_type: str) -> Tuple[str, bool]:
         """
@@ -1347,29 +1139,34 @@ class LinguisticClient:
         word_token = derivative_form.word_token
         lemma = derivative_form.lemma
 
-        # Get an example sentence if available
-        example_text = "No example available."
-        if derivative_form.example_sentences:
-            example_text = derivative_form.example_sentences[0].example_text
+        # Query for definitions (which includes all translations)
+        definitions, success = self.query_definitions(word_token.token)
 
-        # Query for translation (using existing translation method)
-        if language.lower() == 'chinese':
-            translation, success = self.query_chinese_translation(
-                word_token.token,
-                lemma.definition_text,
-                example_text
-            )
+        if not success or not definitions:
+            logger.warning(f"Failed to get definitions and translations for '{word_token.token}' (derivative form ID: {derivative_form.id})")
+            return False
 
-            if success and translation:
-                # Update the derivative form with the translation
-                linguistic_db.update_translation(session, derivative_form.id, 'chinese', translation)
-                logger.info(f"Added Chinese translation '{translation}' for '{word_token.token}' (derivative form ID: {derivative_form.id})")
-                return True
-            else:
-                logger.warning(f"Failed to get Chinese translation for '{word_token.token}' (derivative form ID: {derivative_form.id})")
-                return False
+        # Find the matching definition and extract the requested translation
+        translation = None
+        language_key = f'{language.lower()}_translation'
+
+        for def_data in definitions:
+            # If we find a matching definition, use its translation
+            if def_data.get('definition', '').lower().strip() == lemma.definition_text.lower().strip():
+                translation = def_data.get(language_key)
+                break
+
+        # If no exact match, use the first available translation
+        if not translation and definitions:
+            translation = definitions[0].get(language_key)
+
+        if translation:
+            # Update the derivative form with the translation
+            linguistic_db.update_translation(session, derivative_form.id, language.lower(), translation)
+            logger.info(f"Added {language} translation '{translation}' for '{word_token.token}' (derivative form ID: {derivative_form.id})")
+            return True
         else:
-            logger.warning(f"Translation for language '{language}' not yet implemented")
+            logger.warning(f"No {language} translation found for '{word_token.token}' (derivative form ID: {derivative_form.id})")
             return False
 
     def process_words_batch(self, word_list: List[str], refresh: bool = False, throttle: float = 1.0) -> Dict[str, Any]:
