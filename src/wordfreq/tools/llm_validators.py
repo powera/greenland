@@ -73,6 +73,8 @@ def validate_lemma_form(word: str, pos_type: str, model: str = "gpt-5-mini") -> 
 
     full_prompt = f"{context}\n\n{prompt}"
 
+    logger.debug(f"Validating lemma form for word: '{word}' (POS: {pos_type})")
+
     try:
         response = client.generate_chat(
             prompt=full_prompt,
@@ -157,6 +159,8 @@ def validate_translation(
 
     full_prompt = f"{context}\n\n{prompt}"
 
+    logger.debug(f"Validating translation: '{english_word}' → '{translation}' ({target_language}, POS: {pos_type})")
+
     try:
         response = client.generate_chat(
             prompt=full_prompt,
@@ -183,6 +187,94 @@ def validate_translation(
             'is_lemma_form': True,
             'suggested_translation': translation,
             'issues': [f'Error: {str(e)}'],
+            'confidence': 0.0
+        }
+
+
+def validate_definition(
+    word: str,
+    definition: str,
+    pos_type: str,
+    model: str = "gpt-5-mini"
+) -> Dict[str, any]:
+    """
+    Validate that a definition is well-formed and appropriate.
+
+    Args:
+        word: The word being defined
+        definition: The definition text to validate
+        pos_type: Part of speech
+        model: LLM model to use
+
+    Returns:
+        Dictionary with validation results:
+        - is_valid: bool indicating if definition is well-formed
+        - issues: list of problems found (e.g., "Contains translation", "Too vague", "Empty")
+        - suggested_definition: str with better definition if needed
+        - confidence: float 0-1
+    """
+    client = UnifiedLLMClient()
+
+    schema = Schema(
+        name="DefinitionValidation",
+        description="Validation of definition text quality",
+        properties={
+            "is_valid": SchemaProperty("boolean", "True if the definition is well-formed and appropriate"),
+            "issues": SchemaProperty(
+                type="array",
+                description="List of issues found (e.g., 'Contains translation only', 'Too vague', 'Empty', 'Circular definition')",
+                items={"type": "string"}
+            ),
+            "suggested_definition": SchemaProperty("string", "A better definition if the current one has issues, otherwise empty string"),
+            "confidence": SchemaProperty("number", "Confidence score 0.0-1.0", minimum=0.0, maximum=1.0)
+        }
+    )
+
+    prompt = f"""Validate the definition for the English word "{word}" (POS: {pos_type}):
+
+Definition: "{definition}"
+
+Check for these issues:
+1. Empty or nearly empty definitions
+2. Definitions that only contain translations (e.g., "Lithuanian: višta", "Chinese: 鸡")
+3. Circular definitions (defines word using itself)
+4. Too vague or unhelpful definitions
+5. Definitions that don't match the part of speech
+
+A good definition should:
+- Explain the meaning in English
+- Be specific and clear
+- Match the part of speech
+- Not just be a translation to another language
+
+Provide a better definition if issues are found."""
+
+    logger.debug(f"Validating definition for word: '{word}' (POS: {pos_type})")
+
+    try:
+        response = client.generate_chat(
+            prompt=prompt,
+            model=model,
+            json_schema=schema
+        )
+
+        if response.structured_data:
+            return response.structured_data
+        else:
+            logger.error(f"No structured data received for definition validation of '{word}'")
+            return {
+                'is_valid': True,  # Assume valid if validation fails
+                'issues': ['Validation failed'],
+                'suggested_definition': '',
+                'confidence': 0.0
+            }
+
+    except Exception as e:
+        logger.error(f"Error validating definition for '{word}': {e}")
+        return {
+            'is_valid': True,
+            'issues': [f'Error: {str(e)}'],
+            'suggested_definition': '',
             'confidence': 0.0
         }
 
@@ -219,6 +311,148 @@ def batch_validate_lemmas(
             })
 
     return issues
+
+
+def validate_all_translations_for_word(
+    english_word: str,
+    translations: Dict[str, str],
+    pos_type: str,
+    model: str = "gpt-5-mini"
+) -> Dict[str, any]:
+    """
+    Validate all translations for a single word in one LLM call.
+
+    Args:
+        english_word: English word (should be in lemma form)
+        translations: Dict mapping language codes to translations
+                     e.g., {'lt': 'batai', 'zh': '鞋子', 'ko': '신발', ...}
+        pos_type: Part of speech
+        model: LLM model to use
+
+    Returns:
+        Dictionary with validation results for each language:
+        {
+            'language_code': {
+                'is_correct': bool,
+                'is_lemma_form': bool,
+                'suggested_translation': str,
+                'issues': list,
+                'confidence': float
+            },
+            ...
+        }
+    """
+    client = UnifiedLLMClient()
+
+    # Build schema for all translations
+    language_properties = {}
+    for lang_code in translations.keys():
+        language_properties[f"{lang_code}_is_correct"] = SchemaProperty(
+            "boolean",
+            f"True if the {lang_code} translation is semantically correct"
+        )
+        language_properties[f"{lang_code}_is_lemma_form"] = SchemaProperty(
+            "boolean",
+            f"True if the {lang_code} translation is in lemma/dictionary form"
+        )
+        language_properties[f"{lang_code}_suggested"] = SchemaProperty(
+            "string",
+            f"Better {lang_code} translation if current one has issues, otherwise empty string"
+        )
+        language_properties[f"{lang_code}_issues"] = SchemaProperty(
+            type="array",
+            description=f"List of issues found for {lang_code} translation",
+            items={"type": "string"}
+        )
+
+    language_properties["confidence"] = SchemaProperty(
+        "number",
+        "Overall confidence score 0.0-1.0",
+        minimum=0.0,
+        maximum=1.0
+    )
+
+    schema = Schema(
+        name="MultilingualTranslationValidation",
+        description="Validation of multiple translations for one word",
+        properties=language_properties
+    )
+
+    # Build prompt with all translations
+    translations_text = "\n".join([
+        f"- {lang_code}: {trans}"
+        for lang_code, trans in translations.items()
+    ])
+
+    language_names = {
+        'lt': 'Lithuanian',
+        'zh': 'Chinese',
+        'ko': 'Korean',
+        'fr': 'French',
+        'sw': 'Swahili',
+        'vi': 'Vietnamese'
+    }
+
+    language_list = ", ".join([language_names.get(lc, lc) for lc in translations.keys()])
+
+    prompt = f"""Validate the following translations of the English word "{english_word}" (POS: {pos_type}):
+
+{translations_text}
+
+For each translation, determine:
+1. Is it semantically correct for the English word?
+2. Is it in lemma/dictionary form (not inflected)?
+3. If there are issues, what would be a better translation?
+
+Language guidance: Validate for {language_list}.
+"""
+
+    logger.debug(f"Validating all translations for word: '{english_word}' ({len(translations)} languages)")
+
+    try:
+        response = client.generate_chat(
+            prompt=prompt,
+            model=model,
+            json_schema=schema
+        )
+
+        if response.structured_data:
+            # Parse the flat structure into per-language results
+            results = {}
+            for lang_code in translations.keys():
+                results[lang_code] = {
+                    'is_correct': response.structured_data.get(f"{lang_code}_is_correct", True),
+                    'is_lemma_form': response.structured_data.get(f"{lang_code}_is_lemma_form", True),
+                    'suggested_translation': response.structured_data.get(f"{lang_code}_suggested", ""),
+                    'issues': response.structured_data.get(f"{lang_code}_issues", []),
+                    'confidence': response.structured_data.get("confidence", 0.0)
+                }
+            return results
+        else:
+            logger.error(f"No structured data received for multi-lingual validation of '{english_word}'")
+            return {
+                lang_code: {
+                    'is_correct': True,
+                    'is_lemma_form': True,
+                    'suggested_translation': "",
+                    'issues': ['Validation failed'],
+                    'confidence': 0.0
+                }
+                for lang_code in translations.keys()
+            }
+
+    except Exception as e:
+        logger.error(f"Error validating translations for '{english_word}': {e}")
+        return {
+            lang_code: {
+                'is_correct': True,
+                'is_lemma_form': True,
+                'suggested_translation': "",
+                'issues': [f'Error: {str(e)}'],
+                'confidence': 0.0
+            }
+            for lang_code in translations.keys()
+        }
 
 
 def batch_validate_translations(
