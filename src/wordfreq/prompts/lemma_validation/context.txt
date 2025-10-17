@@ -6,4 +6,11 @@ A lemma is the canonical or dictionary form of a word:
 - For adjectives: positive/base form (e.g., "good" not "better" or "best")
 - For adverbs: base form (e.g., "quickly" not "more quickly")
 
+Examples:
+- "shoes" (noun) → NOT lemma, should be "shoe"
+- "eating" (verb) → NOT lemma, should be "eat"
+- "better" (adjective) → NOT lemma, should be "good"
+- "shoe" (noun) → IS lemma
+- "eat" (verb) → IS lemma
+
 You must be precise and confident in your assessments. Consider irregular forms, especially irregular plurals and verb conjugations.

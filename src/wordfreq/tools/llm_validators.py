@@ -56,19 +56,9 @@ def validate_lemma_form(word: str, pos_type: str, model: str = "gpt-5-mini") -> 
     context = util.prompt_loader.get_context("wordfreq", "lemma_validation")
     prompt_template = util.prompt_loader.get_prompt("wordfreq", "lemma_validation")
 
-    pos_examples = {
-        'noun': 'For nouns, the lemma is singular form (e.g., "shoe" not "shoes", "child" not "children")',
-        'verb': 'For verbs, the lemma is infinitive form (e.g., "eat" not "eating" or "ate")',
-        'adjective': 'For adjectives, the lemma is positive form (e.g., "good" not "better" or "best")',
-        'adverb': 'For adverbs, the lemma is base form (e.g., "quickly" not "more quickly")'
-    }
-
-    pos_guidance = pos_examples.get(pos_type, 'The lemma is the dictionary/base form')
-
     prompt = prompt_template.format(
         word=word,
-        pos_type=pos_type,
-        pos_guidance=pos_guidance
+        pos_type=pos_type
     )
 
     logger.debug(f"Validating lemma form for word: '{word}' (POS: {pos_type})")

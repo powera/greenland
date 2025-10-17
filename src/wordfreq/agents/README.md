@@ -4,17 +4,112 @@ Autonomous agents for data quality monitoring and maintenance tasks. These agent
 
 ## Quick Reference
 
-- **Lokys** - Validates English lemma forms and other English-language properties (definitions, POS types).
-- **Dramblys** - Identifies missing words by scanning frequency corpora and can automatically process them using LLM to add to the database.
-- **Bebras** - Ensures database structural integrity by identifying orphaned records, missing fields, and constraint violations.
-- **Voras** - Validates multi-lingual translations for correctness, reports on coverage, and can populate missing translations using LLM.
-- **Vilkas** - Monitors the presence and completeness of Lithuanian word forms in the database and can automatically generate missing forms.
-- **Papuga** - Validates and generates pronunciations (both IPA and simplified phonetic) for derivative forms.
-- **Povas** - Generates HTML pages displaying words organized by part-of-speech subtypes with comprehensive linguistic information.
-- **Pradzia** - Initializes and maintains the wordfreq database, including corpus configuration synchronization, data loading, and rank calculation.
-- **Ungurys** - Exports word data to WireWord API format for external system integration.
+- **Pradzia** (beginning) - Initializes and maintains the wordfreq database, including corpus configuration synchronization, data loading, and rank calculation.
+- **Lokys** (bear) - Validates English lemma forms and other English-language properties (definitions, POS types).
+- **Dramblys** (elephant) - Identifies missing words by scanning frequency corpora and can automatically process them using LLM to add to the database.
+- **Bebras** (beaver) - Ensures database structural integrity by identifying orphaned records, missing fields, and constraint violations.
+- **Voras** (spider) - Validates multi-lingual translations for correctness, reports on coverage, and can populate missing translations using LLM.
+- **Vilkas** (wolf) - Monitors the presence and completeness of Lithuanian word forms in the database and can automatically generate missing forms.
+- **Papuga** (parrot) - Validates and generates pronunciations (both IPA and simplified phonetic) for derivative forms.
+- **Povas** (peacock) - Generates HTML pages displaying words organized by part-of-speech subtypes with comprehensive linguistic information.
+- **Ungurys** (eel) - Exports word data to WireWord API format for external system integration.
 
 ## Available Agents
+
+### Pradzia (Database Initialization Agent)
+
+**Name:** "Pradzia" means "beginning" in Lithuanian - the starting point for all data!
+
+**Purpose:** Initializes and maintains the wordfreq database, including corpus configuration synchronization, data loading, and rank calculation.
+
+**Usage:**
+```bash
+# Check configuration and database state (no changes)
+python pradzia.py --check [--output REPORT.json]
+
+# Sync corpus configurations to database
+python pradzia.py --sync-config [--dry-run]
+
+# Load corpora
+python pradzia.py --load [CORPUS1 CORPUS2 ...] [--dry-run]
+
+# Calculate combined ranks
+python pradzia.py --calc-ranks [--dry-run]
+
+# Full initialization (sync + load + calc ranks)
+python pradzia.py --init-full [--dry-run]
+```
+
+**Modes:**
+- `--check` - Check configuration and database state without making changes
+- `--sync-config` - Synchronize corpus configurations from config file to database
+- `--load [CORPUS...]` - Load specified corpora (or all enabled if none specified)
+- `--calc-ranks` - Calculate combined ranks for all words across corpora
+- `--init-full` - Perform complete database initialization (all steps)
+
+**Options:**
+- `--dry-run` - Report what would be done without making changes
+- `--output FILE` - Write detailed JSON report to specified file
+- `--db-path PATH` - Use custom database path
+- `--debug` - Enable debug logging
+
+**Example Usage:**
+
+Check configuration and database state:
+```bash
+python pradzia.py --check --output /tmp/pradzia_report.json
+```
+
+Sync corpus configurations (dry run):
+```bash
+python pradzia.py --sync-config --dry-run
+```
+
+Load specific corpora:
+```bash
+python pradzia.py --load subtlex_uk coca
+```
+
+Load all enabled corpora:
+```bash
+python pradzia.py --load
+```
+
+Calculate combined ranks:
+```bash
+python pradzia.py --calc-ranks
+```
+
+Full database initialization (dry run):
+```bash
+python pradzia.py --init-full --dry-run
+```
+
+Full database initialization:
+```bash
+python pradzia.py --init-full
+```
+
+**Output:**
+
+The agent provides:
+- Configuration validation results
+- File existence status for corpus data files
+- Database corpus information
+- Synchronization results (added, updated, disabled corpora)
+- Corpus loading results (imported counts per corpus)
+- Rank calculation success/failure status
+- Optional JSON report with full details
+
+**Initialization Steps:**
+
+When running `--init-full`, the agent performs these steps:
+1. Ensures database tables exist
+2. Syncs corpus configurations from config to database
+3. Loads all enabled corpora
+4. Calculates combined ranks using harmonic mean
+
+---
 
 ### Lokys (English Lemma Validation)
 
@@ -477,101 +572,6 @@ All files are written to `{OUTPUT_DIR}/pos_subtypes/` (configured in `constants.
 - Example sentences
 - Frequency rankings
 - Grammatical form information
-
----
-
-### Pradzia (Database Initialization Agent)
-
-**Name:** "Pradzia" means "beginning" in Lithuanian - the starting point for all data!
-
-**Purpose:** Initializes and maintains the wordfreq database, including corpus configuration synchronization, data loading, and rank calculation.
-
-**Usage:**
-```bash
-# Check configuration and database state (no changes)
-python pradzia.py --check [--output REPORT.json]
-
-# Sync corpus configurations to database
-python pradzia.py --sync-config [--dry-run]
-
-# Load corpora
-python pradzia.py --load [CORPUS1 CORPUS2 ...] [--dry-run]
-
-# Calculate combined ranks
-python pradzia.py --calc-ranks [--dry-run]
-
-# Full initialization (sync + load + calc ranks)
-python pradzia.py --init-full [--dry-run]
-```
-
-**Modes:**
-- `--check` - Check configuration and database state without making changes
-- `--sync-config` - Synchronize corpus configurations from config file to database
-- `--load [CORPUS...]` - Load specified corpora (or all enabled if none specified)
-- `--calc-ranks` - Calculate combined ranks for all words across corpora
-- `--init-full` - Perform complete database initialization (all steps)
-
-**Options:**
-- `--dry-run` - Report what would be done without making changes
-- `--output FILE` - Write detailed JSON report to specified file
-- `--db-path PATH` - Use custom database path
-- `--debug` - Enable debug logging
-
-**Example Usage:**
-
-Check configuration and database state:
-```bash
-python pradzia.py --check --output /tmp/pradzia_report.json
-```
-
-Sync corpus configurations (dry run):
-```bash
-python pradzia.py --sync-config --dry-run
-```
-
-Load specific corpora:
-```bash
-python pradzia.py --load subtlex_uk coca
-```
-
-Load all enabled corpora:
-```bash
-python pradzia.py --load
-```
-
-Calculate combined ranks:
-```bash
-python pradzia.py --calc-ranks
-```
-
-Full database initialization (dry run):
-```bash
-python pradzia.py --init-full --dry-run
-```
-
-Full database initialization:
-```bash
-python pradzia.py --init-full
-```
-
-**Output:**
-
-The agent provides:
-- Configuration validation results
-- File existence status for corpus data files
-- Database corpus information
-- Synchronization results (added, updated, disabled corpora)
-- Corpus loading results (imported counts per corpus)
-- Rank calculation success/failure status
-- Optional JSON report with full details
-
-**Initialization Steps:**
-
-When running `--init-full`, the agent performs these steps:
-1. Ensures database tables exist
-2. Syncs corpus configurations from config to database
-3. Loads all enabled corpora
-4. Calculates combined ranks using harmonic mean
 
 ---
 
