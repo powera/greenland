@@ -107,6 +107,80 @@ class BebrasAgent:
         finally:
             session.close()
 
+    def check_derivative_form_word_tokens(self) -> Dict[str, any]:
+        """
+        Check for derivative forms with invalid word_token_id references or mismatched text.
+
+        Verifies:
+        1. word_token_id (when not NULL) references a valid word token
+        2. derivative_form_text matches the word_token.token when word_token_id is set
+
+        Returns:
+            Dictionary with invalid derivative form info
+        """
+        logger.info("Checking derivative form word token references...")
+
+        session = self.get_session()
+        try:
+            # Build a dict of word token id -> token text
+            word_tokens_dict = {}
+            tokens = session.query(WordToken.id, WordToken.token).all()
+            for token_id, token_text in tokens:
+                word_tokens_dict[token_id] = token_text
+
+            logger.info(f"Found {len(word_tokens_dict)} valid word tokens")
+
+            # Check all derivative forms with word_token_id set
+            derivative_forms = session.query(DerivativeForm).filter(
+                DerivativeForm.word_token_id.isnot(None)
+            ).all()
+
+            issues = []
+
+            for form in derivative_forms:
+                form_issues = []
+
+                # Check if word_token_id is valid
+                if form.word_token_id not in word_tokens_dict:
+                    form_issues.append(f"invalid_word_token_id: {form.word_token_id}")
+                else:
+                    # Check if derivative_form_text matches word_token.token
+                    expected_token = word_tokens_dict[form.word_token_id]
+                    if form.derivative_form_text != expected_token:
+                        form_issues.append(
+                            f"text_mismatch: derivative_form_text='{form.derivative_form_text}' "
+                            f"but word_token.token='{expected_token}'"
+                        )
+
+                if form_issues:
+                    issues.append({
+                        'id': form.id,
+                        'derivative_form_text': form.derivative_form_text,
+                        'word_token_id': form.word_token_id,
+                        'lemma_id': form.lemma_id,
+                        'language_code': form.language_code,
+                        'issues': form_issues
+                    })
+
+            logger.info(f"Found {len(issues)} derivative forms with word token issues")
+
+            return {
+                'total_checked': len(derivative_forms),
+                'issue_count': len(issues),
+                'issues': issues
+            }
+
+        except Exception as e:
+            logger.error(f"Error checking derivative form word tokens: {e}")
+            return {
+                'error': str(e),
+                'total_checked': 0,
+                'issue_count': 0,
+                'issues': []
+            }
+        finally:
+            session.close()
+
     def check_orphaned_word_frequencies(self) -> Dict[str, any]:
         """
         Check for word frequencies with invalid word_token_id or corpus_id.
@@ -515,6 +589,7 @@ class BebrasAgent:
             'database_path': self.db_path,
             'checks': {
                 'orphaned_derivative_forms': self.check_orphaned_derivative_forms(),
+                'derivative_form_word_tokens': self.check_derivative_form_word_tokens(),
                 'orphaned_word_frequencies': self.check_orphaned_word_frequencies(),
                 'orphaned_example_sentences': self.check_orphaned_example_sentences(),
                 'missing_required_fields': self.check_missing_required_fields(),
@@ -556,7 +631,8 @@ class BebrasAgent:
 
         # Orphaned records
         logger.info("ORPHANED RECORDS:")
-        logger.info(f"  Derivative forms: {checks['orphaned_derivative_forms']['orphaned_count']}")
+        logger.info(f"  Derivative forms (invalid lemma_id): {checks['orphaned_derivative_forms']['orphaned_count']}")
+        logger.info(f"  Derivative forms (invalid/mismatched word_token): {checks['derivative_form_word_tokens']['issue_count']}")
         logger.info(f"  Word frequencies: {checks['orphaned_word_frequencies']['orphaned_count']}")
         logger.info(f"  Example sentences: {checks['orphaned_example_sentences']['orphaned_count']}")
         logger.info("")
@@ -585,6 +661,7 @@ class BebrasAgent:
         # Overall assessment
         total_issues = (
             checks['orphaned_derivative_forms']['orphaned_count'] +
+            checks['derivative_form_word_tokens']['issue_count'] +
             checks['orphaned_word_frequencies']['orphaned_count'] +
             checks['orphaned_example_sentences']['orphaned_count'] +
             missing_fields['total_issues'] +
@@ -619,10 +696,12 @@ def main():
     if args.check == 'orphaned':
         results = {
             'derivative_forms': agent.check_orphaned_derivative_forms(),
+            'derivative_form_word_tokens': agent.check_derivative_form_word_tokens(),
             'word_frequencies': agent.check_orphaned_word_frequencies(),
             'example_sentences': agent.check_orphaned_example_sentences()
         }
         total = (results['derivative_forms']['orphaned_count'] +
+                results['derivative_form_word_tokens']['issue_count'] +
                 results['word_frequencies']['orphaned_count'] +
                 results['example_sentences']['orphaned_count'])
         print(f"\nTotal orphaned records: {total}")
