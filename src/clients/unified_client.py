@@ -54,49 +54,53 @@ class UnifiedLLMClient:
         client_name = None
         normalized_model = model
 
-        # Get the actual model path from database
-        session = datastore.common.create_dev_session()
-        model_info = datastore.common.get_model_by_codename(session, model)
-        if not model_info:
-            raise ValueError(f"Model '{model}' not found in database")
+        # Check if this is a GPT or Claude model first (skip database lookup)
+        # These models can be routed directly based on their name
+        # Exception: gpt-oss models should use database lookup
+        if model.startswith('gpt-') and not model.startswith('gpt-oss'):
+            client = self.openai
+            client_name = "OpenAI"
+            normalized_model = model
+        elif model.startswith('claude-'):
+            client = self.anthropic
+            client_name = "Anthropic"
+            normalized_model = model
+        else:
+            # For all other models, get the actual model path from database
+            session = datastore.common.create_dev_session()
+            model_info = datastore.common.get_model_by_codename(session, model)
+            if not model_info:
+                raise ValueError(f"Model '{model}' not found in database")
 
-        model_path = model_info.get('model_path')
-        model_type = model_info.get('model_type')
+            model_path = model_info.get('model_path')
+            model_type = model_info.get('model_type')
 
-        if not model_path or not model_type:
-            raise ValueError(f"Model '{model}' has incomplete configuration (path={model_path}, type={model_type})")
+            if not model_path or not model_type:
+                raise ValueError(f"Model '{model}' has incomplete configuration (path={model_path}, type={model_type})")
 
-        # Route to appropriate client based on model type and path
-        if model_type == 'remote':
-            if model_path.startswith('gpt-'):
-                client = self.openai
-                client_name = "OpenAI"
-                normalized_model = model_path
-            elif model_path.startswith('claude-'):
-                client = self.anthropic
-                client_name = "Anthropic"
-                normalized_model = model_path
-            elif model_path.startswith('gemini-'):
-                client = self.gemini
-                client_name = "Gemini"
-                normalized_model = model_path
-            else:
-                raise ValueError(f"Unknown remote model type for {model_path}")
-        else:  # local models
-            if model_path.startswith('lmstudio/'):
-                client = self.lmstudio
-                client_name = "LMStudio"
-                normalized_model = model_path[len("lmstudio/"):]
-            else:
-                # Default to Ollama for local models
-                client = self.ollama
-                client_name = "Ollama"
-                normalized_model = model_path
-                # Strip quantization suffix if present (e.g. ":Q4_0")
-                # But preserve base model name if no quantization
-                parts = model_path.split(":")
-                if len(parts) > 1:  # Has quantization suffix or other params
-                    normalized_model = ":".join(parts[:-1])
+            # Route to appropriate client based on model type and path
+            if model_type == 'remote':
+                if model_path.startswith('gemini-'):
+                    client = self.gemini
+                    client_name = "Gemini"
+                    normalized_model = model_path
+                else:
+                    raise ValueError(f"Unknown remote model type for {model_path}")
+            else:  # local models
+                if model_path.startswith('lmstudio/'):
+                    client = self.lmstudio
+                    client_name = "LMStudio"
+                    normalized_model = model_path[len("lmstudio/"):]
+                else:
+                    # Default to Ollama for local models
+                    client = self.ollama
+                    client_name = "Ollama"
+                    normalized_model = model_path
+                    # Strip quantization suffix if present (e.g. ":Q4_0")
+                    # But preserve base model name if no quantization
+                    parts = model_path.split(":")
+                    if len(parts) > 1:  # Has quantization suffix or other params
+                        normalized_model = ":".join(parts[:-1])
 
 
         if self.debug:
