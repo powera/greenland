@@ -54,7 +54,7 @@ class UnifiedLLMClient:
         client_name = None
         normalized_model = model
 
-        # Check if this is a GPT or Claude model first (skip database lookup)
+        # Check if this is a commercial API model first (skip database lookup)
         # These models can be routed directly based on their name
         # Exception: gpt-oss models should use database lookup
         if model.startswith('gpt-') and not model.startswith('gpt-oss'):
@@ -64,6 +64,10 @@ class UnifiedLLMClient:
         elif model.startswith('claude-'):
             client = self.anthropic
             client_name = "Anthropic"
+            normalized_model = model
+        elif model.startswith('gemini-'):
+            client = self.gemini
+            client_name = "Gemini"
             normalized_model = model
         else:
             # For all other models, get the actual model path from database
@@ -80,12 +84,7 @@ class UnifiedLLMClient:
 
             # Route to appropriate client based on model type and path
             if model_type == 'remote':
-                if model_path.startswith('gemini-'):
-                    client = self.gemini
-                    client_name = "Gemini"
-                    normalized_model = model_path
-                else:
-                    raise ValueError(f"Unknown remote model type for {model_path}")
+                raise ValueError(f"Unknown remote model type for {model_path}")
             else:  # local models
                 if model_path.startswith('lmstudio/'):
                     client = self.lmstudio
