@@ -4,32 +4,26 @@ Autonomous agents for data quality monitoring and maintenance tasks. These agent
 
 ## Quick Reference
 
-- **Lokys** - Validates multi-lingual translations for correctness and ensures English lemmas are in proper dictionary/base form.
+- **Lokys** - Validates English lemma forms and other English-language properties (definitions, POS types).
 - **Dramblys** - Identifies missing words by scanning frequency corpora and can automatically process them using LLM to add to the database.
 - **Bebras** - Ensures database structural integrity by identifying orphaned records, missing fields, and constraint violations.
-- **Voras** - Reports on multi-lingual translation coverage across all languages and can generate missing translations using LLM.
+- **Voras** - Validates multi-lingual translations for correctness, reports on coverage, and can populate missing translations using LLM.
 - **Vilkas** - Monitors the presence and completeness of Lithuanian word forms in the database and can automatically generate missing forms.
 
 ## Available Agents
 
-### Lokys (Translation and Lemma Validation)
+### Lokys (English Lemma Validation)
 
 **Name:** "Lokys" means "bear" in Lithuanian - thorough and careful in checking quality.
 
-**Purpose:** Validates multi-lingual translations for correctness and ensures English lemma forms are in proper dictionary/base form (e.g., "shoe" not "shoes").
+**Purpose:** Validates English-language properties including lemma forms (ensuring they're in proper dictionary/base form like "shoe" not "shoes"), definitions, and POS types.
 
 **Usage:**
 ```bash
-python lokys.py [--check CHECK_TYPE] [--language LANG] [--output REPORT.json] [--model MODEL] [--yes]
+python lokys.py [--output REPORT.json] [--model MODEL] [--limit N] [--sample-rate RATE] [--yes]
 ```
 
-**Check Types:**
-- `--check lemmas` - Validate English lemma_text values are in base form
-- `--check translations` - Validate multi-lingual translations
-- `--check all` - Run both lemma and translation checks (default)
-
 **Options:**
-- `--language LANG` - Check specific language (lt, zh, ko, fr, sw, vi)
 - `--output FILE` - Write detailed JSON report to specified file
 - `--model MODEL` - LLM model to use (default: gpt-5-mini)
 - `--limit N` - Maximum items to check
@@ -41,19 +35,19 @@ python lokys.py [--check CHECK_TYPE] [--language LANG] [--output REPORT.json] [-
 
 **Example Usage:**
 
-Check all lemmas and translations:
+Check all English lemmas:
 ```bash
-python lokys.py --check all --output /tmp/lokys_report.json
+python lokys.py --output /tmp/lokys_report.json
 ```
 
-Check only Lithuanian translations with sampling:
+Check English lemma forms with sampling:
 ```bash
-python lokys.py --check translations --language lt --sample-rate 0.1
+python lokys.py --sample-rate 0.1 --yes
 ```
 
-Check English lemma forms with custom model:
+Check with custom model and limit:
 ```bash
-python lokys.py --check lemmas --model gpt-4o --limit 100
+python lokys.py --model gpt-4o --limit 100
 ```
 
 **Output:**
@@ -61,7 +55,7 @@ python lokys.py --check lemmas --model gpt-4o --limit 100
 The agent provides:
 - Issue rates (percentage of problems found)
 - Counts of validated vs. problematic entries
-- Suggested corrections for lemmas and translations
+- Suggested corrections for English lemmas
 - Confidence scores for each finding
 - Optional JSON report with full details
 
@@ -196,74 +190,75 @@ The agent provides:
 
 ---
 
-### Voras (Multi-lingual Translation Coverage Reporter)
+### Voras (Multi-lingual Translation Validator and Populator)
 
 **Name:** "Voras" means "spider" in Lithuanian - weaving together the web of translations!
 
-**Purpose:** Reports on the coverage of multi-lingual translations across all languages in the database. Identifies gaps, calculates statistics, and provides insights into translation completeness. Can also generate missing translations using LLM.
+**Purpose:** Validates multi-lingual translations for correctness and proper lemma form, reports on translation coverage, and generates missing translations using LLM.
+
+**Modes:**
+- `coverage` - Report on translation coverage (default, no LLM calls)
+- `check-only` - Validate existing translations without populating missing ones
+- `populate-only` - Add missing translations without validating existing ones
+- `both` - Validate existing translations AND populate missing ones
 
 **Usage:**
 ```bash
-python voras.py [--check CHECK_TYPE] [--language LANG] [--output REPORT.json] [--fix] [--yes]
+python voras.py [--mode MODE] [--language LANG] [--output REPORT.json] [--yes]
 ```
 
-**Check Types:**
-- `--check overall` - Check overall translation coverage across all languages
-- `--check language` - Check coverage for a specific language (requires --language)
-- `--check difficulty` - Check translation coverage by difficulty level
-- `--check all` - Run all checks (default)
-
 **Options:**
-- `--language LANG` - Specific language to check (lt, zh, ko, fr, sw, vi) - required for language check
+- `--mode MODE` - Operation mode: coverage (default), check-only, populate-only, both
+- `--language LANG` - Specific language to process (lt, zh, ko, fr, sw, vi)
 - `--output FILE` - Write detailed JSON report to specified file
-- `--fix` - Generate missing translations using LLM and update the database
-- `--yes`, `-y` - Skip confirmation prompt before running LLM queries (for --fix mode)
-- `--model MODEL` - LLM model to use for translations (default: from constants)
-- `--limit N` - Maximum translations to generate per language (for --fix mode)
-- `--dry-run` - Show what would be fixed without making changes (for --fix mode)
+- `--yes`, `-y` - Skip confirmation prompt before running LLM queries
+- `--model MODEL` - LLM model to use (default: from constants)
+- `--limit N` - Maximum items to process per language
+- `--sample-rate RATE` - Fraction of items to sample for validation (0.0-1.0, default: 1.0)
+- `--confidence-threshold THRESHOLD` - Minimum confidence to flag issues (0.0-1.0, default: 0.7)
+- `--dry-run` - Show what would be done without making changes
 - `--db-path PATH` - Use custom database path
 - `--debug` - Enable debug logging
 
 **Example Usage:**
 
-Check all coverage metrics:
+Report on translation coverage (no LLM calls):
 ```bash
-python voras.py --check all --output /tmp/voras_report.json
+python voras.py --mode coverage --output /tmp/voras_report.json
 ```
 
-Check coverage for a specific language:
+Validate Lithuanian translations only:
 ```bash
-python voras.py --check language --language lt
+python voras.py --mode check-only --language lt
 ```
 
-Check overall coverage across all languages:
+Populate missing French translations only:
 ```bash
-python voras.py --check overall
+python voras.py --mode populate-only --language fr --limit 50
 ```
 
-Generate missing Lithuanian translations (with confirmation):
+Validate all existing translations AND populate missing ones:
 ```bash
-python voras.py --fix --language lt
+python voras.py --mode both --yes
 ```
 
-Generate all missing translations without confirmation:
+Validate with sampling and custom confidence threshold:
 ```bash
-python voras.py --fix --yes
+python voras.py --mode check-only --sample-rate 0.1 --confidence-threshold 0.8
 ```
 
-Generate up to 50 missing French translations (dry run):
+Dry run to see what would be populated:
 ```bash
-python voras.py --fix --language fr --limit 50 --dry-run
+python voras.py --mode populate-only --language lt --dry-run
 ```
 
 **Output:**
 
 The agent provides:
-- Overall translation coverage statistics (fully translated, partially translated, not translated)
-- Per-language coverage percentages
-- Coverage breakdown by part of speech (POS) type
-- Translation coverage across difficulty levels
-- Lists of lemmas missing translations for each language
+- **Coverage mode**: Overall statistics, per-language coverage, difficulty level breakdown
+- **Check-only mode**: Translation validation issues with suggested corrections and confidence scores
+- **Populate-only mode**: Number of translations populated and any failures
+- **Both mode**: Combined validation issues and population statistics
 
 ---
 
