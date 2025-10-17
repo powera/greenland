@@ -407,20 +407,25 @@ def create_alternatives_for_lemma(session, lemma: Lemma, english_word: str) -> i
     return alternatives_created
 
 
-def migrate_json_data(session, trakaido_data: List[Dict[str, Any]], update_difficulty: bool = True):
+def migrate_json_data(session, trakaido_data: List[Dict[str, Any]], update_difficulty: bool = True, verbose: bool = True):
     """
     Migrate data from JSON export to the database.
-    
+
     Args:
         session: Database session
         trakaido_data: List of dictionaries with English, Lithuanian, trakaido level, POS, and subtype data (GUID is optional)
         update_difficulty: Whether to update difficulty level on existing lemmas (default: True)
+        verbose: Whether to print detailed progress messages (default: True)
+
+    Returns:
+        tuple: (successful_migrations, total_words) counts
     """
-    print(f"\nMigrating {len(trakaido_data)} entries from JSON data...")
-    
+    if verbose:
+        print(f"\nMigrating {len(trakaido_data)} entries from JSON data...")
+
     total_words = len(trakaido_data)
     successful_migrations = 0
-    
+
     for i, entry in enumerate(trakaido_data):
         english_word = entry["English"]
         lithuanian_word = entry["Lithuanian"]
@@ -428,7 +433,7 @@ def migrate_json_data(session, trakaido_data: List[Dict[str, Any]], update_diffi
         difficulty_level = entry["trakaido_level"]  # Now required
         pos_type = entry["POS"]  # Now required
         pos_subtype = entry["subtype"]  # Now required
-        
+
         # Find or create lemma
         lemma = find_or_create_lemma(
             session=session,
@@ -440,27 +445,30 @@ def migrate_json_data(session, trakaido_data: List[Dict[str, Any]], update_diffi
             pos_subtype=pos_subtype,
             update_difficulty=update_difficulty
         )
-        
+
         if lemma:
             successful_migrations += 1
-            freq_info = f", freq_rank: {lemma.frequency_rank}" if lemma.frequency_rank else ""
-            notes_info = f", notes: {lemma.notes}" if lemma.notes else ""
-            pos_info = f", POS: {lemma.pos_type}/{lemma.pos_subtype}" if lemma.pos_subtype else f", POS: {lemma.pos_type}"
-            print(f"    ✅ {english_word} -> {lithuanian_word} (GUID: {lemma.guid}{pos_info}{freq_info}{notes_info})")
-            
+            if verbose:
+                freq_info = f", freq_rank: {lemma.frequency_rank}" if lemma.frequency_rank else ""
+                notes_info = f", notes: {lemma.notes}" if lemma.notes else ""
+                pos_info = f", POS: {lemma.pos_type}/{lemma.pos_subtype}" if lemma.pos_subtype else f", POS: {lemma.pos_type}"
+                print(f"    ✅ {english_word} -> {lithuanian_word} (GUID: {lemma.guid}{pos_info}{freq_info}{notes_info})")
+
             # Create alternatives for this lemma if they exist
             clean_english, _ = clean_english_word(english_word)
             clean_english = clean_english.strip().lower()
             alternatives_created = create_alternatives_for_lemma(session, lemma, clean_english)
-            
+
         else:
-            print(f"    ❌ Failed to create lemma for: {english_word}")
-        
+            if verbose:
+                print(f"    ❌ Failed to create lemma for: {english_word}")
+
         # Progress indicator for large datasets
-        if (i + 1) % 100 == 0:
+        if verbose and (i + 1) % 100 == 0:
             print(f"  Progress: {i + 1}/{total_words} entries processed...")
-    
-    print(f"  Completed migration: {successful_migrations}/{total_words} words migrated")
+
+    if verbose:
+        print(f"  Completed migration: {successful_migrations}/{total_words} words migrated")
     return successful_migrations, total_words
 
 def main():
