@@ -96,7 +96,20 @@ def to_openai_schema(schema: Schema) -> Dict[str, Any]:
             property_schema["items"] = to_openai_schema(prop.array_items_schema)
         elif prop.type == "array" and prop.items:
             # Handle simple array items or array of objects with inline schema
-            property_schema["items"] = prop.items
+            if isinstance(prop.items, dict) and prop.items.get("type") == "object":
+                # Ensure additionalProperties is set for object schemas
+                items_copy = copy.deepcopy(prop.items)
+                if "additionalProperties" not in items_copy:
+                    items_copy["additionalProperties"] = False
+                # OpenAI requires all properties to be in the required array
+                if "properties" in items_copy and "required" not in items_copy:
+                    items_copy["required"] = list(items_copy["properties"].keys())
+                elif "properties" in items_copy and "required" in items_copy:
+                    # Ensure all properties are in required array for OpenAI
+                    items_copy["required"] = list(items_copy["properties"].keys())
+                property_schema["items"] = items_copy
+            else:
+                property_schema["items"] = prop.items
             
         result["properties"][name] = property_schema
     
