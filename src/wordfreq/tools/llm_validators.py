@@ -71,15 +71,14 @@ def validate_lemma_form(word: str, pos_type: str, model: str = "gpt-5-mini") -> 
         pos_guidance=pos_guidance
     )
 
-    full_prompt = f"{context}\n\n{prompt}"
-
     logger.debug(f"Validating lemma form for word: '{word}' (POS: {pos_type})")
 
     try:
         response = client.generate_chat(
-            prompt=full_prompt,
+            prompt=prompt,
             model=model,
-            json_schema=schema
+            json_schema=schema,
+            context=context
         )
 
         if response.structured_data:
@@ -157,15 +156,14 @@ def validate_translation(
         pos_type=pos_type
     )
 
-    full_prompt = f"{context}\n\n{prompt}"
-
     logger.debug(f"Validating translation: '{english_word}' → '{translation}' ({target_language}, POS: {pos_type})")
 
     try:
         response = client.generate_chat(
-            prompt=full_prompt,
+            prompt=prompt,
             model=model,
-            json_schema=schema
+            json_schema=schema,
+            context=context
         )
 
         if response.structured_data:
@@ -526,6 +524,10 @@ def validate_pronunciation(
         - needs_update: bool indicating if current pronunciation needs fixing
         - suggested_ipa: str with correct IPA pronunciation
         - suggested_phonetic: str with correct simplified phonetic
+        - alternative_pronunciations: list of dicts with keys:
+            - dialect: str (e.g., "British", "Australian")
+            - ipa: str (IPA pronunciation for this dialect)
+            - phonetic: str (simplified phonetic for this dialect, optional)
         - issues: list of issues found (if validating existing pronunciation)
         - confidence: float 0-1
         - notes: str with additional pronunciation notes
@@ -539,13 +541,26 @@ def validate_pronunciation(
             "needs_update": SchemaProperty("boolean", "True if the current pronunciation is incorrect or missing"),
             "suggested_ipa": SchemaProperty("string", "Correct IPA pronunciation (e.g., /ˈwɜːrd/)"),
             "suggested_phonetic": SchemaProperty("string", "Simplified phonetic pronunciation (e.g., WURD)"),
+            "alternative_pronunciations": SchemaProperty(
+                type="array",
+                description="List of alternative pronunciations (British English, regional variations, etc.)",
+                items={
+                    "type": "object",
+                    "properties": {
+                        "dialect": {"type": "string", "description": "The dialect or variant (e.g., 'British', 'Australian', 'Southern US')"},
+                        "ipa": {"type": "string", "description": "IPA pronunciation for this dialect"},
+                        "phonetic": {"type": "string", "description": "Simplified phonetic pronunciation for this dialect"}
+                    },
+                    "required": ["dialect", "ipa", "phonetic"]
+                }
+            ),
             "issues": SchemaProperty(
                 type="array",
                 description="List of issues found with current pronunciation (if any)",
                 items={"type": "string"}
             ),
             "confidence": SchemaProperty("number", "Confidence score 0.0-1.0", minimum=0.0, maximum=1.0),
-            "notes": SchemaProperty("string", "Additional notes about pronunciation (e.g., alternative pronunciations, regional variations)")
+            "notes": SchemaProperty("string", "Additional notes about pronunciation")
         }
     )
 
@@ -593,15 +608,14 @@ If incorrect, provide the correct pronunciations. If correct, confirm them."""
             sentence=sentence
         )
 
-    full_prompt = f"{context}\n\n{prompt}"
-
     logger.debug(f"Validating/generating pronunciation for word: '{word}' (POS: {pos_type})")
 
     try:
         response = client.generate_chat(
-            prompt=full_prompt,
+            prompt=prompt,
             model=model,
-            json_schema=schema
+            json_schema=schema,
+            context=context
         )
 
         if response.structured_data:
@@ -612,6 +626,7 @@ If incorrect, provide the correct pronunciations. If correct, confirm them."""
                 'needs_update': False,
                 'suggested_ipa': ipa_pronunciation or "",
                 'suggested_phonetic': phonetic_pronunciation or "",
+                'alternative_pronunciations': [],
                 'issues': ['Validation failed'],
                 'confidence': 0.0,
                 'notes': ""
@@ -623,6 +638,7 @@ If incorrect, provide the correct pronunciations. If correct, confirm them."""
             'needs_update': False,
             'suggested_ipa': ipa_pronunciation or "",
             'suggested_phonetic': phonetic_pronunciation or "",
+            'alternative_pronunciations': [],
             'issues': [f'Error: {str(e)}'],
             'confidence': 0.0,
             'notes': ""
@@ -650,6 +666,10 @@ def generate_pronunciation(
         Dictionary with generation results:
         - ipa_pronunciation: str with IPA pronunciation
         - phonetic_pronunciation: str with simplified phonetic
+        - alternative_pronunciations: list of dicts with keys:
+            - dialect: str (e.g., "British", "Australian")
+            - ipa: str (IPA pronunciation for this dialect)
+            - phonetic: str (simplified phonetic for this dialect, optional)
         - confidence: float 0-1
         - notes: str with additional pronunciation notes
     """
@@ -666,6 +686,7 @@ def generate_pronunciation(
     return {
         'ipa_pronunciation': result['suggested_ipa'],
         'phonetic_pronunciation': result['suggested_phonetic'],
+        'alternative_pronunciations': result.get('alternative_pronunciations', []),
         'confidence': result['confidence'],
         'notes': result['notes']
     }
