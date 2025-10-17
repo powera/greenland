@@ -18,7 +18,6 @@ Source data files for word frequency analysis:
 ### `dictionary/`
 Word list export and review tools:
 - `export_wordlist.py` - Export words to plain text lists
-- `export_by_pos.py` - Export words grouped by part of speech
 - `reviewer.py` - Interactive word review and verification interface
 
 ### `frequency/`
@@ -113,7 +112,6 @@ All LLM queries go through `clients.unified_client.UnifiedLLMClient` and use pro
 
 ### Dictionary Export
 - **`dictionary/export_wordlist.py`** - Export words to plain text lists
-- **`dictionary/export_by_pos.py`** - Export words grouped by part of speech
 - **`dictionary/reviewer.py`** - Interactive word review and verification interface
 
 ### Word Categorization
