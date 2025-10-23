@@ -335,6 +335,245 @@ class DramblysAgent:
         finally:
             session.close()
 
+    def find_words_for_subtype(
+        self,
+        pos_type: str,
+        pos_subtype: str,
+        top_n: int = 250,
+        model: str = 'gpt-5-mini'
+    ) -> Dict[str, any]:
+        """
+        Use LLM to identify which high-frequency words have meanings in a specific POS subtype.
+
+        Args:
+            pos_type: Part of speech (noun, verb, adjective, adverb)
+            pos_subtype: Specific subtype (e.g., 'animals', 'physical_action')
+            top_n: Number of top frequency words to review
+            model: LLM model to use
+
+        Returns:
+            Dictionary with words that fit the subtype
+        """
+        logger.info(f"Finding {pos_type} words for subtype '{pos_subtype}' in top {top_n} words...")
+
+        session = self.get_session()
+        try:
+            # Get all high-frequency tokens (we'll filter to top N after removing stopwords/existing)
+            all_tokens = session.query(WordToken).filter(
+                WordToken.language_code == 'en',
+                WordToken.frequency_rank.isnot(None)
+            ).order_by(WordToken.frequency_rank).all()
+
+            # Get existing words with derivative forms
+            existing_tokens = set()
+            for token in all_tokens:
+                if len(token.derivative_forms) > 0:
+                    existing_tokens.add(token.token.lower())
+
+            # Filter: valid words, not stopwords, not already defined, then take top N
+            word_list = []
+            for token in all_tokens:
+                if len(word_list) >= top_n:
+                    break
+                if not self._is_valid_word(token.token):
+                    continue
+                if token.token.lower() in existing_tokens:
+                    continue
+                word_list.append(token.token)
+
+            logger.info(f"After filtering stopwords and existing words, reviewing top {len(word_list)} undefined words")
+            logger.info(f"Querying LLM to identify {pos_type}/{pos_subtype} words in this list...")
+
+            # Query LLM
+            from clients.unified_client import UnifiedLLMClient
+            from clients.types import Schema, SchemaProperty
+
+            client = UnifiedLLMClient(debug=self.debug)
+
+            schema = Schema(
+                name="SubtypeWords",
+                description=f"Words that have meanings in the {pos_subtype} {pos_type} category",
+                properties={
+                    "matches": SchemaProperty(
+                        type="array",
+                        description=f"Words from the list that have at least one meaning as a {pos_subtype} {pos_type}",
+                        array_items_schema=Schema(
+                            name="Match",
+                            description=f"A word that matches the {pos_subtype} {pos_type} category",
+                            properties={
+                                "word": SchemaProperty("string", "The word from the list"),
+                                "definition": SchemaProperty("string", f"The specific definition that fits {pos_subtype} {pos_type}"),
+                                "confidence": SchemaProperty("number", "Confidence 0-1 that this word fits the category")
+                            }
+                        )
+                    )
+                }
+            )
+
+            prompt = f"""Review this list of high-frequency English words and identify which ones have at least one meaning that fits the category: {pos_type} / {pos_subtype}.
+
+Word list:
+{', '.join(word_list[:100])}
+
+For each word that has a meaning in this category, provide:
+1. The word
+2. The specific definition that fits the category
+3. Your confidence (0-1)
+
+Only include words where you're confident they have a {pos_subtype} {pos_type} meaning.
+"""
+
+            response = client.generate_chat(
+                prompt=prompt,
+                model=model,
+                json_schema=schema
+            )
+
+            if response.structured_data and 'matches' in response.structured_data:
+                matches = response.structured_data['matches']
+                logger.info(f"Found {len(matches)} words with {pos_type}/{pos_subtype} meanings")
+
+                return {
+                    'pos_type': pos_type,
+                    'pos_subtype': pos_subtype,
+                    'total_words_reviewed': len(word_list),
+                    'matches_found': len(matches),
+                    'matches': matches
+                }
+            else:
+                logger.error("Invalid response from LLM")
+                return {
+                    'error': 'Invalid LLM response',
+                    'pos_type': pos_type,
+                    'pos_subtype': pos_subtype,
+                    'matches_found': 0,
+                    'matches': []
+                }
+
+        except Exception as e:
+            logger.error(f"Error finding words for subtype: {e}")
+            return {
+                'error': str(e),
+                'pos_type': pos_type,
+                'pos_subtype': pos_subtype,
+                'matches_found': 0,
+                'matches': []
+            }
+        finally:
+            session.close()
+
+    def add_words_for_subtype(
+        self,
+        pos_type: str,
+        pos_subtype: str,
+        top_n: int = 250,
+        model: str = 'gpt-5-mini',
+        throttle: float = 1.0,
+        dry_run: bool = False
+    ) -> Dict[str, any]:
+        """
+        Find and add words for a specific POS subtype.
+
+        Args:
+            pos_type: Part of speech (noun, verb, adjective, adverb)
+            pos_subtype: Specific subtype (e.g., 'animals', 'physical_action')
+            top_n: Number of top frequency words to review
+            model: LLM model to use
+            throttle: Seconds to wait between API calls
+            dry_run: If True, show what would be added without making changes
+
+        Returns:
+            Dictionary with results
+        """
+        logger.info(f"Adding {pos_type}/{pos_subtype} words from top {top_n}...")
+
+        # Find matching words
+        find_results = self.find_words_for_subtype(pos_type, pos_subtype, top_n, model)
+
+        if 'error' in find_results:
+            return find_results
+
+        matches = find_results['matches']
+
+        if dry_run:
+            logger.info(f"DRY RUN: Would add {len(matches)} words:")
+            for match in matches[:20]:
+                logger.info(f"  - '{match['word']}': {match['definition'][:60]}...")
+            if len(matches) > 20:
+                logger.info(f"  ... and {len(matches) - 20} more")
+            return {
+                'pos_type': pos_type,
+                'pos_subtype': pos_subtype,
+                'would_add': len(matches),
+                'dry_run': True,
+                'sample': matches[:20]
+            }
+
+        # Process each matched word
+        session = self.get_session()
+        client = LinguisticClient(model=model, db_path=self.db_path, debug=self.debug)
+
+        successful = 0
+        failed = 0
+        skipped = 0
+
+        for i, match in enumerate(matches, 1):
+            word = match['word']
+            target_definition = match['definition']
+
+            logger.info(f"[{i}/{len(matches)}] Processing '{word}' for {pos_type}/{pos_subtype}")
+
+            # Check if this word already has this specific meaning
+            word_token = session.query(WordToken).filter(
+                WordToken.token == word,
+                WordToken.language_code == 'en'
+            ).first()
+
+            if word_token:
+                # Check if this specific meaning already exists
+                has_meaning = False
+                for df in word_token.derivative_forms:
+                    if (df.lemma.pos_type == pos_type and
+                        df.lemma.pos_subtype == pos_subtype and
+                        target_definition.lower() in df.lemma.definition_text.lower()):
+                        has_meaning = True
+                        break
+
+                if has_meaning:
+                    logger.info(f"Word '{word}' already has this {pos_type}/{pos_subtype} meaning, skipping")
+                    skipped += 1
+                    continue
+
+            # Process the word to get all definitions
+            success = client.process_word(word, refresh=False)
+
+            if success:
+                successful += 1
+                logger.info(f"Successfully added '{word}'")
+            else:
+                failed += 1
+                logger.error(f"Failed to add '{word}'")
+
+            # Throttle
+            if i < len(matches):
+                time.sleep(throttle)
+
+        logger.info(f"\nComplete:")
+        logger.info(f"  Matches found: {len(matches)}")
+        logger.info(f"  Successful: {successful}")
+        logger.info(f"  Failed: {failed}")
+        logger.info(f"  Skipped (already exist): {skipped}")
+
+        return {
+            'pos_type': pos_type,
+            'pos_subtype': pos_subtype,
+            'matches_found': len(matches),
+            'successful': successful,
+            'failed': failed,
+            'skipped': skipped,
+            'dry_run': dry_run
+        }
+
     def check_difficulty_level_distribution(self) -> Dict[str, any]:
         """
         Check distribution of words across difficulty levels.
@@ -584,6 +823,30 @@ class DramblysAgent:
 
         return results
 
+    def _print_frequency_check(self, freq_check: Dict, max_words: int = 10):
+        """
+        Print high-frequency missing words check results.
+
+        Args:
+            freq_check: Results from check_high_frequency_missing_words()
+            max_words: Maximum number of words to display
+        """
+        print(f"\n{'='*80}")
+        print(f"HIGH-FREQUENCY MISSING WORDS:")
+        print(f"  Frequency tokens checked: {freq_check['total_checked']}")
+        print(f"  Missing words found: {freq_check['missing_count']}")
+        print(f"  Existing words in database: {freq_check.get('existing_word_count', 'N/A')}")
+
+        if freq_check['missing_count'] > 0:
+            print(f"\n  Top {min(max_words, freq_check['missing_count'])} missing by rank:")
+            for i, word_info in enumerate(freq_check['missing_words'][:max_words], 1):
+                corpus_str = ", ".join([
+                    f"{c['corpus']}:{c['rank']}"
+                    for c in word_info.get('corpus_frequencies', [])[:2]
+                ])
+                print(f"    {i}. '{word_info['word']}' (rank: {word_info['overall_rank']}) [{corpus_str}]")
+        print(f"{'='*80}\n")
+
     def _print_summary(self, results: Dict, start_time: datetime, duration: float):
         """Print a summary of the check results."""
         logger.info("=" * 80)
@@ -677,9 +940,102 @@ def main():
     parser.add_argument('--yes', '-y', action='store_true',
                        help='[Fix mode] Skip confirmation prompt')
 
+    # Subtype mode options
+    parser.add_argument('--add-subtype', action='store_true',
+                       help='Add words for a specific POS subtype from high-frequency words')
+    parser.add_argument('--pos-type', type=str,
+                       help='[Subtype mode] Part of speech: noun, verb, adjective, adverb')
+    parser.add_argument('--pos-subtype', type=str,
+                       help='[Subtype mode] Specific subtype (e.g., animals, physical_action)')
+    parser.add_argument('--find-only', action='store_true',
+                       help='[Subtype mode] Only find matching words, do not add them')
+
     args = parser.parse_args()
 
     agent = DramblysAgent(db_path=args.db_path, debug=args.debug)
+
+    # Handle --add-subtype mode
+    if args.add_subtype:
+        if not args.pos_type or not args.pos_subtype:
+            print("Error: --add-subtype requires --pos-type and --pos-subtype")
+            return
+
+        if args.find_only:
+            # Just find and display
+            results = agent.find_words_for_subtype(
+                pos_type=args.pos_type,
+                pos_subtype=args.pos_subtype,
+                top_n=args.top_n,
+                model=args.model
+            )
+
+            if 'error' in results:
+                print(f"\nError: {results['error']}")
+            else:
+                print(f"\n{'='*80}")
+                print(f"FOUND {results['matches_found']} {args.pos_type.upper()} WORDS FOR SUBTYPE: {args.pos_subtype}")
+                print(f"Reviewed top {results['total_words_reviewed']} frequency words")
+                print(f"{'='*80}\n")
+
+                for i, match in enumerate(results['matches'], 1):
+                    print(f"{i}. '{match['word']}' - {match['definition']}")
+                    print(f"   Confidence: {match.get('confidence', 'N/A')}\n")
+
+                # Write to output file if requested
+                if args.output:
+                    import json
+                    with open(args.output, 'w', encoding='utf-8') as f:
+                        json.dump(results, f, indent=2, ensure_ascii=False)
+                    print(f"Full results written to: {args.output}")
+        else:
+            # Find and add
+            if not args.yes and not args.dry_run:
+                # Preview first
+                preview = agent.find_words_for_subtype(
+                    pos_type=args.pos_type,
+                    pos_subtype=args.pos_subtype,
+                    top_n=args.top_n,
+                    model=args.model
+                )
+
+                if 'error' in preview:
+                    print(f"\nError: {preview['error']}")
+                    return
+
+                print(f"\n{'='*60}")
+                print(f"Found {preview['matches_found']} {args.pos_type} words for subtype '{args.pos_subtype}'")
+                print(f"Model: {args.model}")
+                print(f"Throttle: {args.throttle}s between calls")
+                print(f"\nSample words:")
+                for match in preview['matches'][:5]:
+                    print(f"  - '{match['word']}': {match['definition'][:60]}...")
+                print(f"{'='*60}")
+                response = input("\nContinue to add these words? [y/N]: ")
+                if response.lower() not in ['y', 'yes']:
+                    print("Aborted.")
+                    return
+
+            results = agent.add_words_for_subtype(
+                pos_type=args.pos_type,
+                pos_subtype=args.pos_subtype,
+                top_n=args.top_n,
+                model=args.model,
+                throttle=args.throttle,
+                dry_run=args.dry_run
+            )
+
+            if 'error' in results:
+                print(f"\nError: {results['error']}")
+            else:
+                if args.dry_run:
+                    print(f"\nDRY RUN: Would add {results['would_add']} words")
+                else:
+                    print(f"\nComplete:")
+                    print(f"  Matches found: {results['matches_found']}")
+                    print(f"  Successfully added: {results['successful']}")
+                    print(f"  Failed: {results['failed']}")
+                    print(f"  Skipped (already exist): {results['skipped']}")
+        return
 
     # Handle --fix mode
     if args.fix:
@@ -730,7 +1086,14 @@ def main():
     # Handle check mode (existing functionality)
     if args.check == 'frequency':
         results = agent.check_high_frequency_missing_words(top_n=args.top_n)
-        print(f"\nMissing high-frequency words: {results['missing_count']} out of {results['total_checked']} checked")
+        agent._print_frequency_check(results, max_words=200)
+
+        # Write to output file if requested
+        if args.output:
+            import json
+            with open(args.output, 'w', encoding='utf-8') as f:
+                json.dump(results, f, indent=2, ensure_ascii=False)
+            print(f"Full results written to: {args.output}")
 
     elif args.check == 'orphaned':
         results = agent.check_orphaned_derivative_forms()
