@@ -1213,7 +1213,7 @@ class LinguisticClient:
             "skipped": skipped
         }
 
-    def query_lithuanian_noun_declensions(self, lemma_id: int) -> Tuple[Dict[str, str], bool]:
+    def query_lithuanian_noun_declensions(self, lemma_id: int) -> Tuple[Dict[str, str], bool, str]:
         """
         Query LLM for all Lithuanian noun declensions (7 cases × 2 numbers).
 
@@ -1221,7 +1221,8 @@ class LinguisticClient:
             lemma_id: The ID of the lemma to generate declensions for
 
         Returns:
-            Tuple of (dict mapping form names to declensions, success flag)
+            Tuple of (dict mapping form names to declensions, success flag, number_type)
+            where number_type is one of: 'regular', 'plurale_tantum', 'singulare_tantum'
         """
         session = self.get_session()
 
@@ -1229,15 +1230,15 @@ class LinguisticClient:
         lemma = session.query(linguistic_db.Lemma).filter(linguistic_db.Lemma.id == lemma_id).first()
         if not lemma:
             logger.error(f"Lemma with ID {lemma_id} not found")
-            return {}, False
+            return {}, False, 'regular'
 
         if not lemma.lithuanian_translation:
             logger.error(f"Lemma ID {lemma_id} has no Lithuanian translation")
-            return {}, False
+            return {}, False, 'regular'
 
         if lemma.pos_type.lower() != 'noun':
             logger.error(f"Lemma ID {lemma_id} is not a noun (pos_type: {lemma.pos_type})")
-            return {}, False
+            return {}, False, 'regular'
 
         noun = lemma.lithuanian_translation
         english_word = lemma.lemma_text
@@ -1333,14 +1334,14 @@ class LinguisticClient:
                     forms = {k: v for k, v in forms.items() if not k.endswith('_plural')}
                     logger.info(f"Filtered plural forms for singulare_tantum noun '{noun}'")
 
-                return forms, True
+                return forms, True, number_type
             else:
                 logger.warning(f"Invalid response format for Lithuanian noun '{noun}'")
-                return {}, False
+                return {}, False, 'regular'
 
         except Exception as e:
             logger.error(f"Error querying Lithuanian declensions for '{noun}': {type(e).__name__}: {e}")
-            return {}, False
+            return {}, False, 'regular'
 
     def get_lithuanian_noun_forms(self, word: str = None, lemma_id: int = None, source: str = 'llm') -> Tuple[Dict[str, str], bool]:
         """
