@@ -130,13 +130,26 @@ def process_lemma_declensions(client: LinguisticClient, lemma_id: int, db_path: 
         # Query for declensions based on source
         logger.info(f"Querying declensions for lemma ID {lemma_id}: {lemma.lemma_text} -> {lemma.lithuanian_translation} (source: {source})")
 
+        number_type = 'regular'  # Default value
         if source == 'wiki':
             # Use Wiktionary-based implementation
             from wordfreq.translation.wiki import get_lithuanian_noun_forms
             forms_dict, success = get_lithuanian_noun_forms(lemma.lithuanian_translation)
+            # Wiki implementation doesn't return number_type, so we'll try to detect it
+            # from the forms: if all singular forms are missing/empty, it's plurale_tantum
+            if success and forms_dict:
+                singular_forms = [f for f in forms_dict.keys() if f.endswith('_singular')]
+                plural_forms = [f for f in forms_dict.keys() if f.endswith('_plural')]
+                has_singular = any(forms_dict.get(f) for f in singular_forms)
+                has_plural = any(forms_dict.get(f) for f in plural_forms)
+
+                if has_plural and not has_singular:
+                    number_type = 'plurale_tantum'
+                elif has_singular and not has_plural:
+                    number_type = 'singulare_tantum'
         else:  # source == 'llm'
             # Use LLM-based implementation (existing behavior)
-            forms_dict, success = client.query_lithuanian_noun_declensions(lemma_id)
+            forms_dict, success, number_type = client.query_lithuanian_noun_declensions(lemma_id)
 
         if not success or not forms_dict:
             logger.error(f"Failed to get declensions for lemma ID {lemma_id}")
@@ -173,6 +186,22 @@ def process_lemma_declensions(client: LinguisticClient, lemma_id: int, db_path: 
 
             session.add(derivative_form)
             stored_forms += 1
+
+        # Store grammar fact if the noun is plurale tantum or singulare tantum
+        if number_type != 'regular':
+            grammar_fact = linguistic_db.add_grammar_fact(
+                session,
+                lemma_id=lemma_id,
+                language_code='lt',
+                fact_type='number_type',
+                fact_value=number_type,
+                notes=f"Detected during declension generation (source: {source})",
+                verified=False
+            )
+            if grammar_fact:
+                logger.info(f"Added grammar_fact for lemma ID {lemma_id}: number_type={number_type}")
+            else:
+                logger.debug(f"Grammar fact for number_type={number_type} already exists for lemma ID {lemma_id}")
 
         session.commit()
         logger.info(f"Successfully added {stored_forms} forms for lemma ID {lemma_id}")
