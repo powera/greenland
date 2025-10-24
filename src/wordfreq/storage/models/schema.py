@@ -62,6 +62,7 @@ class Lemma(Base):
     
     # Relationships
     derivative_forms = relationship("DerivativeForm", back_populates="lemma", cascade="all, delete-orphan")
+    grammar_facts = relationship("GrammarFact", back_populates="lemma", cascade="all, delete-orphan")
 
 class DerivativeForm(Base):
     """Model for storing derivative forms - language-specific combinations of WordToken and Lemma with grammatical information.

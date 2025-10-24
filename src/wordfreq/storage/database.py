@@ -14,6 +14,7 @@ from sqlalchemy.sql import func
 # Import models from the models package
 from wordfreq.storage.models.schema import Base, WordToken, Lemma, DerivativeForm, ExampleSentence, Corpus, WordFrequency
 from wordfreq.storage.models.query_log import QueryLog
+from wordfreq.storage.models.grammar_fact import GrammarFact
 from wordfreq.storage.models.enums import NounSubtype, VerbSubtype, AdjectiveSubtype, AdverbSubtype, GrammaticalForm
 import constants
 
@@ -1380,3 +1381,329 @@ def get_alternative_forms_for_lemma(session, lemma: Lemma, language_code: str = 
         query = query.filter(DerivativeForm.language_code == language_code)
 
     return query.all()
+
+def get_lemma_by_guid(session, guid: str) -> Optional[Lemma]:
+    """
+    Get a lemma by its GUID.
+
+    Args:
+        session: Database session
+        guid: The lemma's GUID (e.g., "N02_001")
+
+    Returns:
+        Lemma object or None if not found
+    """
+    return session.query(Lemma).filter(Lemma.guid == guid).first()
+
+def get_noun_form(session, guid: str, grammatical_form: str) -> Optional[str]:
+    """
+    Get a specific declined form of a noun from the database.
+
+    Args:
+        session: Database session
+        guid: The noun's GUID (e.g., "N02_001" for dog)
+        grammatical_form: Form like "accusative_singular", "locative_singular", etc.
+
+    Returns:
+        The declined form text, or None if not found
+    """
+    lemma = get_lemma_by_guid(session, guid)
+    if not lemma:
+        logger.warning(f"No lemma found for GUID {guid}")
+        return None
+
+    # Try both formats: "noun_lt_" and "noun/lt_"
+    full_form_underscore = f"noun_lt_{grammatical_form}"
+    full_form_slash = f"noun/lt_{grammatical_form}"
+
+    form = session.query(DerivativeForm).filter(
+        DerivativeForm.lemma_id == lemma.id,
+        DerivativeForm.language_code == 'lt',
+        (DerivativeForm.grammatical_form == full_form_underscore) |
+        (DerivativeForm.grammatical_form == full_form_slash)
+    ).first()
+
+    if not form:
+        logger.warning(f"No {grammatical_form} form found for {lemma.lemma_text} (GUID: {guid})")
+        return None
+
+    return form.derivative_form_text
+
+def get_all_noun_forms(session, guid: str) -> Dict[str, str]:
+    """
+    Get all declined forms of a noun from the database.
+
+    Args:
+        session: Database session
+        guid: The noun's GUID (e.g., "N02_001")
+
+    Returns:
+        Dictionary mapping grammatical form names to declined text
+    """
+    lemma = get_lemma_by_guid(session, guid)
+    if not lemma:
+        return {}
+
+    # Check both formats: "noun_lt_" and "noun/lt_"
+    forms = session.query(DerivativeForm).filter(
+        DerivativeForm.lemma_id == lemma.id,
+        DerivativeForm.language_code == 'lt',
+        (DerivativeForm.grammatical_form.like('noun_lt_%') |
+         DerivativeForm.grammatical_form.like('noun/lt_%'))
+    ).all()
+
+    result = {}
+    for form in forms:
+        # Strip the "noun_lt_" or "noun/lt_" prefix to get the short form name
+        short_name = form.grammatical_form.replace('noun_lt_', '').replace('noun/lt_', '')
+        result[short_name] = form.derivative_form_text
+
+    return result
+
+def check_noun_forms_coverage(session, guid: str) -> Dict[str, Any]:
+    """
+    Check which noun forms are available in the database for a given GUID.
+
+    Args:
+        session: Database session
+        guid: The noun's GUID
+
+    Returns:
+        Dictionary with coverage information
+    """
+    lemma = get_lemma_by_guid(session, guid)
+    if not lemma:
+        return {
+            "guid": guid,
+            "found": False,
+            "lemma_text": None,
+            "lithuanian": None,
+            "forms_count": 0,
+            "missing_forms": [],
+            "is_plurale_tantum": False
+        }
+
+    all_forms = get_all_noun_forms(session, guid)
+
+    # Check if this is a plurale tantum (plural-only noun)
+    # These will only have plural forms (7 forms instead of 14)
+    singular_forms = [f for f in all_forms.keys() if "singular" in f]
+    plural_forms = [f for f in all_forms.keys() if "plural" in f]
+    is_plurale_tantum = len(singular_forms) == 0 and len(plural_forms) > 0
+
+    if is_plurale_tantum:
+        expected_forms = [
+            "nominative_plural", "genitive_plural", "dative_plural",
+            "accusative_plural", "instrumental_plural", "locative_plural", "vocative_plural"
+        ]
+    else:
+        expected_forms = [
+            "nominative_singular", "genitive_singular", "dative_singular",
+            "accusative_singular", "instrumental_singular", "locative_singular", "vocative_singular",
+            "nominative_plural", "genitive_plural", "dative_plural",
+            "accusative_plural", "instrumental_plural", "locative_plural", "vocative_plural"
+        ]
+
+    missing = [f for f in expected_forms if f not in all_forms]
+
+    return {
+        "guid": guid,
+        "found": True,
+        "lemma_text": lemma.lemma_text,
+        "lithuanian": lemma.lithuanian_translation,
+        "forms_count": len(all_forms),
+        "expected_count": len(expected_forms),
+        "missing_forms": missing,
+        "has_all_forms": len(missing) == 0,
+        "is_plurale_tantum": is_plurale_tantum
+    }
+
+# ========================================
+# Grammar Fact Functions
+# ========================================
+
+def add_grammar_fact(
+    session,
+    lemma_id: int,
+    language_code: str,
+    fact_type: str,
+    fact_value: Optional[str] = None,
+    notes: Optional[str] = None,
+    verified: bool = False
+) -> Optional[GrammarFact]:
+    """
+    Add a grammar fact to a lemma.
+
+    Args:
+        session: Database session
+        lemma_id: ID of the lemma
+        language_code: Language code (e.g., "en", "lt", "fr")
+        fact_type: Type of fact (e.g., "number_type", "gender", "declension")
+        fact_value: Value for the fact (e.g., "plurale_tantum", "masculine", "1")
+        notes: Optional notes
+        verified: Whether this fact has been verified
+
+    Returns:
+        The created GrammarFact, or None if creation failed
+
+    Examples:
+        # Mark "scissors" as plurale tantum in English
+        add_grammar_fact(session, lemma_id=123, language_code="en",
+                        fact_type="number_type", fact_value="plurale_tantum")
+
+        # Mark a French noun as masculine
+        add_grammar_fact(session, lemma_id=456, language_code="fr",
+                        fact_type="gender", fact_value="masculine")
+
+        # Mark a Lithuanian noun's declension class
+        add_grammar_fact(session, lemma_id=789, language_code="lt",
+                        fact_type="declension", fact_value="1")
+    """
+    try:
+        grammar_fact = GrammarFact(
+            lemma_id=lemma_id,
+            language_code=language_code,
+            fact_type=fact_type,
+            fact_value=fact_value,
+            notes=notes,
+            verified=verified
+        )
+        session.add(grammar_fact)
+        session.commit()
+        logger.info(f"Added grammar fact: lemma_id={lemma_id}, {fact_type}={fact_value} ({language_code})")
+        return grammar_fact
+    except IntegrityError as e:
+        session.rollback()
+        logger.warning(f"Grammar fact already exists or constraint violated: {e}")
+        return None
+    except Exception as e:
+        session.rollback()
+        logger.error(f"Error adding grammar fact: {e}")
+        return None
+
+def get_grammar_facts(
+    session,
+    lemma_id: int,
+    language_code: Optional[str] = None,
+    fact_type: Optional[str] = None
+) -> List[GrammarFact]:
+    """
+    Get grammar facts for a lemma.
+
+    Args:
+        session: Database session
+        lemma_id: ID of the lemma
+        language_code: Optional filter by language
+        fact_type: Optional filter by fact type
+
+    Returns:
+        List of matching GrammarFact objects
+
+    Examples:
+        # Get all grammar facts for a lemma
+        facts = get_grammar_facts(session, lemma_id=123)
+
+        # Get all English grammar facts
+        facts = get_grammar_facts(session, lemma_id=123, language_code="en")
+
+        # Get gender facts across all languages
+        facts = get_grammar_facts(session, lemma_id=123, fact_type="gender")
+    """
+    query = session.query(GrammarFact).filter(GrammarFact.lemma_id == lemma_id)
+
+    if language_code:
+        query = query.filter(GrammarFact.language_code == language_code)
+
+    if fact_type:
+        query = query.filter(GrammarFact.fact_type == fact_type)
+
+    return query.all()
+
+def get_grammar_fact_value(
+    session,
+    lemma_id: int,
+    language_code: str,
+    fact_type: str
+) -> Optional[str]:
+    """
+    Get a specific grammar fact value for a lemma.
+
+    Args:
+        session: Database session
+        lemma_id: ID of the lemma
+        language_code: Language code
+        fact_type: Type of fact to retrieve
+
+    Returns:
+        The fact_value string, or None if not found
+
+    Examples:
+        # Check if a word is plurale tantum
+        number_type = get_grammar_fact_value(session, lemma_id=123,
+                                            language_code="en",
+                                            fact_type="number_type")
+        is_plurale_tantum = (number_type == "plurale_tantum")
+
+        # Get the gender of a French noun
+        gender = get_grammar_fact_value(session, lemma_id=456,
+                                       language_code="fr",
+                                       fact_type="gender")
+    """
+    fact = session.query(GrammarFact).filter(
+        GrammarFact.lemma_id == lemma_id,
+        GrammarFact.language_code == language_code,
+        GrammarFact.fact_type == fact_type
+    ).first()
+
+    return fact.fact_value if fact else None
+
+def is_plurale_tantum(session, lemma_id: int, language_code: str) -> bool:
+    """
+    Check if a lemma is plurale tantum (plural-only) in a given language.
+
+    Args:
+        session: Database session
+        lemma_id: ID of the lemma
+        language_code: Language code
+
+    Returns:
+        True if the word is plurale tantum, False otherwise
+
+    Example:
+        if is_plurale_tantum(session, lemma_id=123, language_code="en"):
+            print("This word only has plural forms")
+    """
+    number_type = get_grammar_fact_value(session, lemma_id, language_code, "number_type")
+    return number_type == "plurale_tantum"
+
+def delete_grammar_fact(
+    session,
+    lemma_id: int,
+    language_code: str,
+    fact_type: str
+) -> bool:
+    """
+    Delete a specific grammar fact.
+
+    Args:
+        session: Database session
+        lemma_id: ID of the lemma
+        language_code: Language code
+        fact_type: Type of fact to delete
+
+    Returns:
+        True if a fact was deleted, False if not found
+    """
+    fact = session.query(GrammarFact).filter(
+        GrammarFact.lemma_id == lemma_id,
+        GrammarFact.language_code == language_code,
+        GrammarFact.fact_type == fact_type
+    ).first()
+
+    if fact:
+        session.delete(fact)
+        session.commit()
+        logger.info(f"Deleted grammar fact: lemma_id={lemma_id}, {fact_type} ({language_code})")
+        return True
+
+    return False
