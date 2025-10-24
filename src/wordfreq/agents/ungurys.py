@@ -41,30 +41,49 @@ logger = logging.getLogger(__name__)
 class UngurysAgent:
     """Agent for exporting word data to WireWord format."""
 
-    def __init__(self, db_path: str = None, debug: bool = False, language: str = 'lt'):
+    def __init__(self, db_path: str = None, debug: bool = False, language: str = 'lt',
+                 simplified_chinese: bool = True):
         """
         Initialize the Ungurys agent.
 
         Args:
             db_path: Database path (uses default if None)
             debug: Enable debug logging
-            language: Language code ('lt' for Lithuanian, 'zh' for Chinese)
+            language: Language code ('lt' for Lithuanian, 'zh' for Chinese, 'zh-Hant' for Traditional Chinese)
+            simplified_chinese: For 'zh', whether to convert to Simplified (default: True)
         """
         self.db_path = db_path or constants.WORDFREQ_DB_PATH
         self.debug = debug
-        self.language = language
+        self.simplified_chinese = simplified_chinese
+
+        # Handle language variants
+        if language == 'zh-Hant':
+            self.language = 'zh'
+            self.simplified_chinese = False
+            self.language_suffix = 'zh_Hant'
+        else:
+            self.language = language
+            self.language_suffix = language
 
         if debug:
             logger.setLevel(logging.DEBUG)
 
         # Validate language
-        if language not in SUPPORTED_LANGUAGES:
-            raise ValueError(f"Unsupported language: {language}. Supported: {', '.join(SUPPORTED_LANGUAGES.keys())}")
+        if self.language not in SUPPORTED_LANGUAGES:
+            raise ValueError(f"Unsupported language: {self.language}. Supported: {', '.join(SUPPORTED_LANGUAGES.keys())}")
 
-        # Initialize exporter with language parameter
-        self.exporter = TrakaidoExporter(db_path=self.db_path, debug=debug, language=language)
+        # Initialize exporter with language parameter and Chinese variant
+        self.exporter = TrakaidoExporter(
+            db_path=self.db_path,
+            debug=debug,
+            language=self.language,
+            simplified_chinese=self.simplified_chinese if self.language == 'zh' else True
+        )
 
-        logger.info(f"Initialized Ungurys agent for {SUPPORTED_LANGUAGES[language]} (lang_{language})")
+        variant_info = ""
+        if self.language == 'zh':
+            variant_info = f" ({'Simplified' if self.simplified_chinese else 'Traditional'})"
+        logger.info(f"Initialized Ungurys agent for {SUPPORTED_LANGUAGES[self.language]}{variant_info} (lang_{self.language_suffix})")
 
     def get_language_output_dir(self) -> str:
         """
@@ -72,12 +91,14 @@ class UngurysAgent:
 
         Returns:
             Path to data/trakaido_wordlists/lang_{code}/generated/
+            For Traditional Chinese: lang_zh_Hant/generated/
+            For Simplified Chinese: lang_zh/generated/
         """
         # Get project root (greenland directory)
         project_root = constants.PROJECT_ROOT
 
-        # Build path to data/trakaido_wordlists/lang_{code}/generated/
-        lang_dir = os.path.join(project_root, "data", "trakaido_wordlists", f"lang_{self.language}", "generated")
+        # Build path to data/trakaido_wordlists/lang_{suffix}/generated/
+        lang_dir = os.path.join(project_root, "data", "trakaido_wordlists", f"lang_{self.language_suffix}", "generated")
 
         return lang_dir
 
@@ -243,7 +264,10 @@ class UngurysAgent:
         logger.info("=" * 80)
         logger.info("UNGURYS AGENT REPORT - WireWord Export")
         logger.info("=" * 80)
-        logger.info(f"Language: {SUPPORTED_LANGUAGES[self.language]} (lang_{self.language})")
+        variant_info = ""
+        if self.language == 'zh':
+            variant_info = f" ({'Simplified' if self.simplified_chinese else 'Traditional'})"
+        logger.info(f"Language: {SUPPORTED_LANGUAGES[self.language]}{variant_info} (lang_{self.language_suffix})")
         logger.info(f"Timestamp: {start_time.strftime('%Y-%m-%d %H:%M:%S')}")
         logger.info(f"Export Mode: {results['export_mode']}")
         logger.info(f"Duration: {duration:.2f} seconds")
@@ -295,8 +319,13 @@ def main():
     )
     parser.add_argument('--db-path', help='Database path (uses default if not specified)')
     parser.add_argument('--debug', action='store_true', help='Enable debug logging')
-    parser.add_argument('--language', choices=list(SUPPORTED_LANGUAGES.keys()), default='lt',
-                       help=f'Language code (default: lt). Supported: {", ".join(f"{k}={v}" for k, v in SUPPORTED_LANGUAGES.items())}')
+
+    # Language options
+    language_help = f'Language code (default: lt). Supported: {", ".join(f"{k}={v}" for k, v in SUPPORTED_LANGUAGES.items())}, zh-Hant=Chinese (Traditional)'
+    parser.add_argument('--language', choices=['lt', 'zh', 'zh-Hant'], default='lt',
+                       help=language_help)
+    parser.add_argument('--traditional', action='store_true',
+                       help='For Chinese (zh): export Traditional characters instead of Simplified (exports to lang_zh_Hant/)')
 
     # Export mode
     parser.add_argument('--mode', choices=['single', 'directory', 'both'], default='directory',
@@ -324,8 +353,13 @@ def main():
     if args.mode in ['single', 'both'] and not args.output:
         parser.error("--output is required when using --mode single or both")
 
+    # Handle Traditional Chinese flag
+    language = args.language
+    if args.traditional and args.language == 'zh':
+        language = 'zh-Hant'
+
     # Create agent
-    agent = UngurysAgent(db_path=args.db_path, debug=args.debug, language=args.language)
+    agent = UngurysAgent(db_path=args.db_path, debug=args.debug, language=language)
 
     # If output_dir not specified for directory mode, it will use language-specific default
     if args.mode in ['directory', 'both'] and not args.output_dir:

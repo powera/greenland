@@ -26,6 +26,7 @@ from wordfreq.trakaido.dict_generator import (
     generate_structure_file,
     generate_dictionary_file
 )
+from wordfreq.tools.chinese_converter import to_simplified
 
 from .data_models import ExportStats, create_export_stats
 from .text_rendering import format_subtype_display_name
@@ -36,18 +37,40 @@ logger = logging.getLogger(__name__)
 
 class TrakaidoExporter:
     """Main class for exporting trakaido data in various formats."""
-    
-    def __init__(self, db_path: str = None, debug: bool = False):
+
+    # Language configuration mapping
+    LANGUAGE_CONFIG = {
+        'lt': {
+            'name': 'Lithuanian',
+            'field': 'lithuanian_translation'
+        },
+        'zh': {
+            'name': 'Chinese',
+            'field': 'chinese_translation'
+        }
+    }
+
+    def __init__(self, db_path: str = None, debug: bool = False, language: str = 'lt', simplified_chinese: bool = True):
         """
         Initialize the TrakaidoExporter.
-        
+
         Args:
             db_path: Database path (uses default if None)
             debug: Enable debug logging
+            language: Target language code ('lt' for Lithuanian, 'zh' for Chinese)
+            simplified_chinese: If True and language is 'zh', convert to Simplified Chinese (default: True)
         """
         self.db_path = db_path or constants.WORDFREQ_DB_PATH
         self.debug = debug
-        
+        self.language = language
+        self.simplified_chinese = simplified_chinese
+
+        if language not in self.LANGUAGE_CONFIG:
+            raise ValueError(f"Unsupported language: {language}. Supported: {', '.join(self.LANGUAGE_CONFIG.keys())}")
+
+        self.language_name = self.LANGUAGE_CONFIG[language]['name']
+        self.language_field = self.LANGUAGE_CONFIG[language]['field']
+
         if debug:
             logger.setLevel(logging.DEBUG)
     
@@ -115,13 +138,16 @@ class TrakaidoExporter:
         Returns:
             List of dictionaries with trakaido data
         """
-        logger.info("Querying database for trakaido data...")
-        
+        logger.info(f"Querying database for trakaido data (language: {self.language_name})...")
+
+        # Get the language field to query
+        language_column = getattr(Lemma, self.language_field)
+
         # Build the query
         query = session.query(Lemma)\
-            .filter(Lemma.lithuanian_translation != None)\
-            .filter(Lemma.lithuanian_translation != "")
-        
+            .filter(language_column != None)\
+            .filter(language_column != "")
+
         # Apply filters
         if not include_without_guid:
             query = query.filter(Lemma.guid != None)
@@ -158,22 +184,29 @@ class TrakaidoExporter:
         for lemma in lemmas:
             # Get the English word
             english_word = self.get_english_word_from_lemma(session, lemma)
-            
+
             if not english_word:
                 logger.warning(f"No English word found for lemma ID {lemma.id} (GUID: {lemma.guid})")
                 skipped_count += 1
                 continue
-            
+
+            # Get the target language translation
+            target_translation = getattr(lemma, self.language_field)
+
+            # For Chinese, optionally convert to simplified
+            if self.language == 'zh' and self.simplified_chinese and target_translation:
+                target_translation = to_simplified(target_translation)
+
             # Create the export entry with standardized key names
             entry = {
                 "English": english_word,
-                "Lithuanian": lemma.lithuanian_translation,
+                "Target": target_translation,  # Use "Target" instead of language-specific name
                 "GUID": lemma.guid or "",
                 "trakaido_level": lemma.difficulty_level or 1,
                 "POS": lemma.pos_type or "noun",
                 "subtype": lemma.pos_subtype or "other"
             }
-            
+
             export_data.append(entry)
         
         if skipped_count > 0:
@@ -502,33 +535,33 @@ class TrakaidoExporter:
                 
                 # Build alternatives, synonyms, and grammatical forms
                 english_alternatives = []
-                lithuanian_alternatives = []
+                target_alternatives = []
                 english_synonyms = []
-                lithuanian_synonyms = []
+                target_synonyms = []
                 grammatical_forms = {}
                 
                 for form in derivative_forms:
                     if form.is_base_form:
-                        # Skip base forms as they're already in base_lithuanian/base_english
+                        # Skip base forms as they're already in base_target/base_english
                         continue
-                    
+
                     # Handle different types of derivative forms
                     if form.language_code == 'en':
                         if form.grammatical_form == 'alternative_form':
                             english_alternatives.append(form.derivative_form_text)
                         elif form.grammatical_form == 'synonym':
                             english_synonyms.append(form.derivative_form_text)
-                    elif form.language_code == 'lt':
+                    elif form.language_code == self.language:
                         if form.grammatical_form == 'alternative_form':
-                            lithuanian_alternatives.append(form.derivative_form_text)
+                            target_alternatives.append(form.derivative_form_text)
                         elif form.grammatical_form == 'synonym':
-                            lithuanian_synonyms.append(form.derivative_form_text)
+                            target_synonyms.append(form.derivative_form_text)
                         elif form.grammatical_form == 'plural_nominative':
                             # Add plural nominative form with appropriate level (minimum level 4)
                             form_level = max(entry['trakaido_level'], 4)
                             grammatical_forms[form.grammatical_form] = {
                                 "level": form_level,
-                                "lithuanian": form.derivative_form_text,
+                                "target": form.derivative_form_text,
                                 "english": f"{entry['English']} (plural)"  # Simple plural English form
                             }
                         elif form.grammatical_form in ['singular_accusative', 'plural_accusative']:
@@ -537,7 +570,7 @@ class TrakaidoExporter:
                             english_suffix = " (accusative singular)" if form.grammatical_form == 'singular_accusative' else " (accusative plural)"
                             grammatical_forms[form.grammatical_form] = {
                                 "level": form_level,
-                                "lithuanian": form.derivative_form_text,
+                                "target": form.derivative_form_text,
                                 "english": f"{entry['English']}{english_suffix}"
                             }
 
@@ -545,7 +578,7 @@ class TrakaidoExporter:
                 derivative_phrases = self._generate_derivative_noun_phrases(
                     lemma,
                     entry['English'],
-                    entry['Lithuanian'],
+                    entry['Target'],
                     entry['trakaido_level']
                 )
                 grammatical_forms.update(derivative_phrases)
@@ -553,27 +586,27 @@ class TrakaidoExporter:
                 # Get corpus assignment for this entry
                 corpus_key = (entry['trakaido_level'], entry['subtype'])
                 assigned_corpus = corpus_assignments.get(corpus_key, 'Trakaido')
-                
+
                 # Create WireWord object
                 wireword = {
                     'guid': entry['GUID'],
-                    'base_lithuanian': entry['Lithuanian'],
+                    'base_target': entry['Target'],
                     'base_english': entry['English'],
                     'corpus': assigned_corpus,
                     'group': format_subtype_display_name(entry['subtype']),
                     'level': entry['trakaido_level'],
                     'word_type': self._normalize_pos_type(entry['POS'])
                 }
-                
+
                 # Add optional fields
                 if english_alternatives:
                     wireword['english_alternatives'] = english_alternatives
-                if lithuanian_alternatives:
-                    wireword['lithuanian_alternatives'] = lithuanian_alternatives
+                if target_alternatives:
+                    wireword['target_alternatives'] = target_alternatives
                 if english_synonyms:
                     wireword['english_synonyms'] = english_synonyms
-                if lithuanian_synonyms:
-                    wireword['lithuanian_synonyms'] = lithuanian_synonyms
+                if target_synonyms:
+                    wireword['target_synonyms'] = target_synonyms
                 
                 # Add grammatical forms (for both verbs and nouns with declensions)
                 if grammatical_forms:
@@ -733,7 +766,7 @@ class TrakaidoExporter:
 
         return pos_mappings.get(pos_type.lower(), pos_type)
 
-    def _generate_derivative_noun_phrases(self, lemma: Lemma, base_english: str, base_lithuanian: str, entry_level: int) -> Dict[str, Dict[str, any]]:
+    def _generate_derivative_noun_phrases(self, lemma: Lemma, base_english: str, base_target: str, entry_level: int) -> Dict[str, Dict[str, any]]:
         """
         Generate derivative noun phrases like "where is X" and "this is my X" for nouns.
         These are constructed phrases, not stored in the database.
@@ -742,7 +775,7 @@ class TrakaidoExporter:
         Args:
             lemma: The Lemma object
             base_english: Base English form
-            base_lithuanian: Base Lithuanian form (nominative)
+            base_target: Base target language form (nominative)
             entry_level: The base level of the word
 
         Returns:
@@ -754,21 +787,23 @@ class TrakaidoExporter:
         if lemma.pos_type != 'noun':
             return derivative_phrases
 
-        # Generate "where is X?" phrase for location-related nouns
+        # Generate "where is X?" phrase for location-related nouns (Lithuanian only for now)
         # Uses nominative case (dictionary form)
-        where_is_subtypes = {
-            'building_structure',  # where is the bank, hospital, school
-            'location',            # where is the park, city
-            'place_name'          # where is Paris, etc.
-        }
-
-        if lemma.pos_subtype in where_is_subtypes:
-            where_is_level = max(entry_level, 19)
-            derivative_phrases['where_is'] = {
-                "level": where_is_level,
-                "lithuanian": f"Kur yra {base_lithuanian}?",
-                "english": f"Where is the {base_english}?"
+        # Note: This is Lithuanian-specific and disabled for other languages
+        if self.language == 'lt':
+            where_is_subtypes = {
+                'building_structure',  # where is the bank, hospital, school
+                'location',            # where is the park, city
+                'place_name'          # where is Paris, etc.
             }
+
+            if lemma.pos_subtype in where_is_subtypes:
+                where_is_level = max(entry_level, 19)
+                derivative_phrases['where_is'] = {
+                    "level": where_is_level,
+                    "target": f"Kur yra {base_target}?",
+                    "english": f"Where is the {base_english}?"
+                }
 
         # Generate "this is my X" phrase for possessable items
         # Uses nominative case (dictionary form) - "Tai mano X"
