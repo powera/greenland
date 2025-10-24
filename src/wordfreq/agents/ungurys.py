@@ -10,6 +10,7 @@ It replaces the legacy "export wireword" functionality from trakaido/utils.py.
 
 import argparse
 import logging
+import os
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -23,6 +24,12 @@ if GREENLAND_SRC_PATH not in sys.path:
 import constants
 from wordfreq.trakaido.utils.export_manager import TrakaidoExporter
 
+# Supported languages and their codes
+SUPPORTED_LANGUAGES = {
+    'lt': 'Lithuanian',
+    'zh': 'Chinese'
+}
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
@@ -34,20 +41,45 @@ logger = logging.getLogger(__name__)
 class UngurysAgent:
     """Agent for exporting word data to WireWord format."""
 
-    def __init__(self, db_path: str = None, debug: bool = False):
+    def __init__(self, db_path: str = None, debug: bool = False, language: str = 'lt'):
         """
         Initialize the Ungurys agent.
 
         Args:
             db_path: Database path (uses default if None)
             debug: Enable debug logging
+            language: Language code ('lt' for Lithuanian, 'zh' for Chinese)
         """
         self.db_path = db_path or constants.WORDFREQ_DB_PATH
         self.debug = debug
-        self.exporter = TrakaidoExporter(db_path=self.db_path, debug=debug)
+        self.language = language
 
         if debug:
             logger.setLevel(logging.DEBUG)
+
+        # Validate language
+        if language not in SUPPORTED_LANGUAGES:
+            raise ValueError(f"Unsupported language: {language}. Supported: {', '.join(SUPPORTED_LANGUAGES.keys())}")
+
+        # Initialize exporter with language parameter
+        self.exporter = TrakaidoExporter(db_path=self.db_path, debug=debug, language=language)
+
+        logger.info(f"Initialized Ungurys agent for {SUPPORTED_LANGUAGES[language]} (lang_{language})")
+
+    def get_language_output_dir(self) -> str:
+        """
+        Get the output directory path for the current language.
+
+        Returns:
+            Path to data/trakaido_wordlists/lang_{code}/generated/
+        """
+        # Get project root (greenland directory)
+        project_root = constants.PROJECT_ROOT
+
+        # Build path to data/trakaido_wordlists/lang_{code}/generated/
+        lang_dir = os.path.join(project_root, "data", "trakaido_wordlists", f"lang_{self.language}", "generated")
+
+        return lang_dir
 
     def export_wireword_single(
         self,
@@ -96,19 +128,25 @@ class UngurysAgent:
 
     def export_wireword_directory(
         self,
-        output_dir: str
+        output_dir: Optional[str] = None
     ) -> Tuple[bool, Dict[str, Any]]:
         """
         Export WireWord format files to directory structure.
         Creates separate files for each level and subtype.
 
         Args:
-            output_dir: Base output directory (e.g., lang_lt/generated)
+            output_dir: Base output directory (e.g., lang_lt/generated).
+                       If None, uses language-specific path from get_language_output_dir()
 
         Returns:
             Tuple of (success flag, export results dictionary)
         """
-        logger.info("Starting WireWord directory export...")
+        # Use language-specific directory if not provided
+        if output_dir is None:
+            output_dir = self.get_language_output_dir()
+
+        logger.info(f"Starting WireWord directory export for {SUPPORTED_LANGUAGES[self.language]}...")
+        logger.info(f"Output directory: {output_dir}/wireword/")
 
         success, results = self.exporter.export_wireword_directory(output_dir)
 
@@ -182,16 +220,14 @@ class UngurysAgent:
 
         # Directory export
         if export_mode in ['directory', 'both']:
-            if not output_dir:
-                logger.error("output_dir is required for directory export")
-                results['exports']['directory'] = {'success': False, 'error': 'No output_dir specified'}
-            else:
-                success, export_results = self.export_wireword_directory(output_dir)
-                results['exports']['directory'] = {
-                    'success': success,
-                    'results': export_results,
-                    'directory': output_dir
-                }
+            success, export_results = self.export_wireword_directory(output_dir)
+            # Get the actual directory used (in case output_dir was None and default was used)
+            actual_dir = output_dir if output_dir else self.get_language_output_dir()
+            results['exports']['directory'] = {
+                'success': success,
+                'results': export_results,
+                'directory': actual_dir
+            }
 
         end_time = datetime.now()
         duration = (end_time - start_time).total_seconds()
@@ -207,6 +243,7 @@ class UngurysAgent:
         logger.info("=" * 80)
         logger.info("UNGURYS AGENT REPORT - WireWord Export")
         logger.info("=" * 80)
+        logger.info(f"Language: {SUPPORTED_LANGUAGES[self.language]} (lang_{self.language})")
         logger.info(f"Timestamp: {start_time.strftime('%Y-%m-%d %H:%M:%S')}")
         logger.info(f"Export Mode: {results['export_mode']}")
         logger.info(f"Duration: {duration:.2f} seconds")
@@ -258,6 +295,8 @@ def main():
     )
     parser.add_argument('--db-path', help='Database path (uses default if not specified)')
     parser.add_argument('--debug', action='store_true', help='Enable debug logging')
+    parser.add_argument('--language', choices=list(SUPPORTED_LANGUAGES.keys()), default='lt',
+                       help=f'Language code (default: lt). Supported: {", ".join(f"{k}={v}" for k, v in SUPPORTED_LANGUAGES.items())}')
 
     # Export mode
     parser.add_argument('--mode', choices=['single', 'directory', 'both'], default='directory',
@@ -265,7 +304,7 @@ def main():
 
     # Output paths
     parser.add_argument('--output', help='Output path for single-file export')
-    parser.add_argument('--output-dir', help='Output directory for directory export (default: from constants)')
+    parser.add_argument('--output-dir', help='Output directory for directory export (default: data/trakaido_wordlists/lang_{language}/generated/)')
 
     # Filtering options
     parser.add_argument('--level', type=int, help='Filter by specific difficulty level')
@@ -285,12 +324,12 @@ def main():
     if args.mode in ['single', 'both'] and not args.output:
         parser.error("--output is required when using --mode single or both")
 
-    if args.mode in ['directory', 'both'] and not args.output_dir:
-        # Use default output directory
-        args.output_dir = constants.OUTPUT_DIR
-
     # Create agent
-    agent = UngurysAgent(db_path=args.db_path, debug=args.debug)
+    agent = UngurysAgent(db_path=args.db_path, debug=args.debug, language=args.language)
+
+    # If output_dir not specified for directory mode, it will use language-specific default
+    if args.mode in ['directory', 'both'] and not args.output_dir:
+        args.output_dir = None  # Will trigger use of get_language_output_dir() in export_wireword_directory
 
     # Run export
     agent.run_export(
