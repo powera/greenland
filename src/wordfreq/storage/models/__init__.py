@@ -4,6 +4,7 @@ from wordfreq.storage.models.schema import Base, WordToken, Lemma, DerivativeFor
 from wordfreq.storage.models.query_log import QueryLog
 from wordfreq.storage.models.operation_log import OperationLog
 from wordfreq.storage.models.translations import Translation, TranslationSet
+from wordfreq.storage.models.grammar_fact import GrammarFact
 from wordfreq.storage.models.enums import NounSubtype, VerbSubtype, AdjectiveSubtype, AdverbSubtype, GrammaticalForm
 
 __all__ = [
@@ -18,6 +19,7 @@ __all__ = [
     'OperationLog',
     'Translation',
     'TranslationSet',
+    'GrammarFact',
     'NounSubtype',
     'VerbSubtype',
     'AdjectiveSubtype',
