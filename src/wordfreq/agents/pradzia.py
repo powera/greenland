@@ -23,7 +23,6 @@ if GREENLAND_SRC_PATH not in sys.path:
 import constants
 from wordfreq.storage.database import create_database_session, ensure_tables_exist, initialize_corpora
 from wordfreq.frequency import corpus, analysis
-from wordfreq.trakaido import json_to_database
 
 # Configure logging
 logging.basicConfig(
@@ -357,9 +356,9 @@ class PradziaAgent:
 
         return result
 
-    def bootstrap_from_json(self, json_path: str, update_difficulty: bool = True, dry_run: bool = False) -> Dict[str, Any]:
+    def bootstrap_from_json(self, json_path: str, levels_path: Optional[str] = None, dry_run: bool = False) -> Dict[str, Any]:
         """
-        Bootstrap the database with trakaido data from JSON export.
+        Bootstrap the database with trakaido data from JSON export using the VOVERE agent.
 
         This operation is intended for initial database setup only. If words with Lithuanian
         translations already exist in the database, the operation will be aborted to prevent
@@ -367,7 +366,7 @@ class PradziaAgent:
 
         Args:
             json_path: Path to JSON file containing trakaido data
-            update_difficulty: Whether to update difficulty level on existing lemmas (default: True)
+            levels_path: Optional path to JSON file with difficulty levels (GUID -> level mapping)
             dry_run: If True, report what would be done without making changes
 
         Returns:
@@ -387,7 +386,7 @@ class PradziaAgent:
                 Lemma.lithuanian_translation != ''
             ).count()
 
-            if existing_lithuanian_count > 0:
+            if existing_lithuanian_count > 0 and not dry_run:
                 logger.warning(f"Database already contains {existing_lithuanian_count} lemmas with Lithuanian translations")
                 logger.warning("Bootstrap operation aborted to prevent accidental data modification")
                 return {
@@ -403,59 +402,55 @@ class PradziaAgent:
         finally:
             session.close()
 
-        # Step 2: Load and validate JSON data
+        # Step 2: Use VOVERE agent to import data
         try:
-            logger.info(f"Loading trakaido data from: {json_path}")
-            trakaido_data = json_to_database.load_trakaido_json(json_path)
+            from wordfreq.agents.vovere import VovereAgent
 
+            # Load difficulty levels if provided
+            difficulty_levels = None
+            if levels_path:
+                logger.info(f"Loading difficulty levels from: {levels_path}")
+                import json
+                with open(levels_path, 'r', encoding='utf-8') as f:
+                    difficulty_levels = json.load(f)
+
+            # Create VOVERE agent and import
+            vovere = VovereAgent(db_path=self.db_path, debug=self.debug)
+            import_result = vovere.import_data(
+                json_path=json_path,
+                difficulty_levels=difficulty_levels,
+                dry_run=dry_run
+            )
+
+            # Transform result to match expected format
             result = {
                 'dry_run': dry_run,
                 'json_path': json_path,
-                'json_entries_loaded': len(trakaido_data),
-                'timestamp': start_time.isoformat()
+                'timestamp': start_time.isoformat(),
+                'success': import_result.get('success', False)
             }
+
+            if dry_run:
+                result['would_migrate'] = import_result.get('total_entries', 0)
+                result['message'] = import_result.get('message', '')
+            else:
+                result['successful_migrations'] = import_result.get('successful_imports', 0)
+                result['total_entries'] = import_result.get('total_entries', 0)
+                result['failed_migrations'] = import_result.get('failed_imports', 0)
+                result['created'] = import_result.get('created', 0)
+                result['updated'] = import_result.get('updated', 0)
+                result['alternatives_created'] = import_result.get('alternatives_created', 0)
+
+            if 'error' in import_result:
+                result['error'] = import_result['error']
+
         except Exception as e:
-            logger.error(f"Failed to load JSON data: {e}")
+            logger.error(f"Bootstrap failed: {e}")
             return {
                 'success': False,
                 'error': str(e),
-                'message': f'Failed to load JSON data from {json_path}'
+                'message': f'Failed to bootstrap from {json_path}'
             }
-
-        if dry_run:
-            # For dry run, just report what would happen
-            result['would_migrate'] = len(trakaido_data)
-            result['update_difficulty'] = update_difficulty
-            result['message'] = f'Would migrate {len(trakaido_data)} entries from JSON'
-        else:
-            # Actually perform the migration
-            session = self.get_session()
-            try:
-                logger.info(f"Migrating {len(trakaido_data)} entries to database...")
-                successful, total = json_to_database.migrate_json_data(
-                    session=session,
-                    trakaido_data=trakaido_data,
-                    update_difficulty=update_difficulty,
-                    verbose=False  # Use logging instead of print statements
-                )
-
-                # Commit the changes
-                session.commit()
-
-                result['successful_migrations'] = successful
-                result['total_entries'] = total
-                result['failed_migrations'] = total - successful
-                result['success'] = successful > 0
-
-                logger.info(f"Bootstrap complete: {successful}/{total} entries migrated")
-
-            except Exception as e:
-                logger.error(f"Bootstrap failed: {e}")
-                session.rollback()
-                result['success'] = False
-                result['error'] = str(e)
-            finally:
-                session.close()
 
         end_time = datetime.now()
         duration = (end_time - start_time).total_seconds()
@@ -631,8 +626,8 @@ def main():
                            help='Bootstrap database from trakaido JSON export (initial setup only)')
 
     # Bootstrap-specific options
-    parser.add_argument('--no-update-difficulty', action='store_true',
-                       help='Do not update difficulty levels on existing lemmas (only with --bootstrap)')
+    parser.add_argument('--levels', metavar='LEVELS_FILE',
+                       help='JSON file with difficulty levels (GUID -> level mapping) (only with --bootstrap)')
 
     args = parser.parse_args()
 
@@ -687,10 +682,9 @@ def main():
         print(f"\nInitialization complete in {result['duration_seconds']:.2f} seconds")
 
     elif args.bootstrap:
-        update_difficulty = not args.no_update_difficulty
         result = agent.bootstrap_from_json(
             json_path=args.bootstrap,
-            update_difficulty=update_difficulty,
+            levels_path=args.levels,
             dry_run=args.dry_run
         )
 
@@ -704,6 +698,8 @@ def main():
         elif result.get('success'):
             if not args.dry_run:
                 print(f"\n✅ Bootstrap complete: {result['successful_migrations']}/{result['total_entries']} entries migrated")
+                print(f"   Created: {result.get('created', 0)}, Updated: {result.get('updated', 0)}")
+                print(f"   Alternatives created: {result.get('alternatives_created', 0)}")
                 print(f"   Duration: {result['duration_seconds']:.2f} seconds")
             else:
                 print(f"\n✅ Dry run: Would migrate {result['would_migrate']} entries")
