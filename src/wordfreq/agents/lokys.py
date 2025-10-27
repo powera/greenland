@@ -219,10 +219,21 @@ class LokysAgent:
                         'issues': result['issues'],
                         'confidence': result['confidence']
                     })
-                    logger.warning(
-                        f"Definition issue: '{lemma.lemma_text}' (GUID: {lemma.guid}) - {', '.join(result['issues'])} "
-                        f"(confidence: {result['confidence']:.2f})"
-                    )
+
+                    # Update the database with the suggested definition
+                    if result['suggested_definition']:
+                        old_definition = lemma.definition_text
+                        lemma.definition_text = result['suggested_definition']
+                        session.commit()
+                        logger.info(
+                            f"Updated definition for '{lemma.lemma_text}' (GUID: {lemma.guid}): "
+                            f"'{old_definition}' → '{result['suggested_definition']}'"
+                        )
+                    else:
+                        logger.warning(
+                            f"Definition issue: '{lemma.lemma_text}' (GUID: {lemma.guid}) - {', '.join(result['issues'])} "
+                            f"(confidence: {result['confidence']:.2f}) - No suggested definition provided"
+                        )
 
             logger.info(f"Found {len(issues_found)} definitions with potential issues")
 
@@ -251,7 +262,8 @@ class LokysAgent:
         output_file: Optional[str] = None,
         limit: Optional[int] = None,
         sample_rate: float = 1.0,
-        confidence_threshold: float = 0.7
+        confidence_threshold: float = 0.7,
+        check_type: str = "both"
     ) -> Dict[str, any]:
         """
         Run English lemma validation and generate a comprehensive report.
@@ -261,6 +273,7 @@ class LokysAgent:
             limit: Maximum items to check
             sample_rate: Fraction to sample (0.0-1.0)
             confidence_threshold: Minimum confidence to flag issues
+            check_type: Type of check to run ("lemma", "definitions", or "both")
 
         Returns:
             Dictionary with all check results
@@ -274,22 +287,25 @@ class LokysAgent:
             'model': self.model,
             'sample_rate': sample_rate,
             'confidence_threshold': confidence_threshold,
+            'check_type': check_type,
             'checks': {}
         }
 
         # Check English lemma forms
-        results['checks']['lemma_forms'] = self.check_lemma_forms(
-            limit=limit,
-            sample_rate=sample_rate,
-            confidence_threshold=confidence_threshold
-        )
+        if check_type in ["lemma", "both"]:
+            results['checks']['lemma_forms'] = self.check_lemma_forms(
+                limit=limit,
+                sample_rate=sample_rate,
+                confidence_threshold=confidence_threshold
+            )
 
         # Check English definitions
-        results['checks']['definitions'] = self.check_definitions(
-            limit=limit,
-            sample_rate=sample_rate,
-            confidence_threshold=confidence_threshold
-        )
+        if check_type in ["definitions", "both"]:
+            results['checks']['definitions'] = self.check_definitions(
+                limit=limit,
+                sample_rate=sample_rate,
+                confidence_threshold=confidence_threshold
+            )
 
         end_time = datetime.now()
         duration = (end_time - start_time).total_seconds()
@@ -357,6 +373,8 @@ def main():
                        help='Fraction of items to sample (0.0-1.0, default: 1.0)')
     parser.add_argument('--confidence-threshold', type=float, default=0.7,
                        help='Minimum confidence to flag issues (0.0-1.0, default: 0.7)')
+    parser.add_argument('--check-type', choices=['lemma', 'definitions', 'both'], default='both',
+                       help='Type of checks to run: "lemma" (lemma form validation), "definitions" (definition validation), or "both" (default: both)')
     parser.add_argument('--yes', '-y', action='store_true',
                        help='Skip confirmation prompt before running LLM queries')
 
@@ -374,12 +392,16 @@ def main():
             lemma_count = query.count()
             if args.sample_rate < 1.0:
                 lemma_count = int(lemma_count * args.sample_rate)
-            # run_full_check runs 2 checks: lemma_forms + definitions
-            estimated_calls = lemma_count * 2
+            # Calculate based on check_type
+            if args.check_type == 'both':
+                estimated_calls = lemma_count * 2
+            else:
+                estimated_calls = lemma_count
         finally:
             session.close()
 
         print(f"\nThis will make approximately {estimated_calls} LLM API calls using model '{args.model}'.")
+        print(f"Check type: {args.check_type}")
         print("This may incur costs and take some time to complete.")
         response = input("Do you want to proceed? [y/N]: ").strip().lower()
 
@@ -395,7 +417,8 @@ def main():
         output_file=args.output,
         limit=args.limit,
         sample_rate=args.sample_rate,
-        confidence_threshold=args.confidence_threshold
+        confidence_threshold=args.confidence_threshold,
+        check_type=args.check_type
     )
 
 

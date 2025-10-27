@@ -104,6 +104,16 @@ class UngurysAgent:
 
         return lang_dir
 
+    def get_default_single_file_path(self) -> str:
+        """
+        Get the default single-file output path for the current language.
+
+        Returns:
+            Path to data/trakaido_wordlists/lang_{code}/generated/wireword/wireword_nouns.json
+        """
+        lang_dir = self.get_language_output_dir()
+        return os.path.join(lang_dir, "wireword", "wireword_nouns.json")
+
     def export_wireword_single(
         self,
         output_path: str,
@@ -330,11 +340,11 @@ def main():
                        help='For Chinese (zh): export Traditional characters instead of Simplified (exports to lang_zh_Hant/)')
 
     # Export mode
-    parser.add_argument('--mode', choices=['single', 'directory', 'both'], default='directory',
-                       help='Export mode: single file, directory structure, or both (default: directory)')
+    parser.add_argument('--mode', choices=['single', 'directory', 'both'], default='single',
+                       help='Export mode: single file, directory structure, or both (default: single)')
 
     # Output paths
-    parser.add_argument('--output', help='Output path for single-file export')
+    parser.add_argument('--output', help='Output path for single-file export (default: data/trakaido_wordlists/lang_{language}/generated/wireword/wireword_nouns.json)')
     parser.add_argument('--output-dir', help='Output directory for directory export (default: data/trakaido_wordlists/lang_{language}/generated/)')
 
     # Filtering options
@@ -351,10 +361,6 @@ def main():
 
     args = parser.parse_args()
 
-    # Validate arguments based on mode
-    if args.mode in ['single', 'both'] and not args.output:
-        parser.error("--output is required when using --mode single or both")
-
     # Handle Traditional Chinese flag
     language = args.language
     if args.traditional and args.language == 'zh':
@@ -362,6 +368,11 @@ def main():
 
     # Create agent
     agent = UngurysAgent(db_path=args.db_path, debug=args.debug, language=language)
+
+    # Set default paths if not specified
+    if args.mode in ['single', 'both'] and not args.output:
+        args.output = agent.get_default_single_file_path()
+        logger.info(f"Using default output path: {args.output}")
 
     # If output_dir not specified for directory mode, it will use language-specific default
     if args.mode in ['directory', 'both'] and not args.output_dir:
