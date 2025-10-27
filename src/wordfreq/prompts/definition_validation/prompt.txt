@@ -4,11 +4,4 @@ Part of Speech: {pos_type}
 Current Definition: "{definition}"
 {translation_info}
 
-Check for these issues:
-1. Empty or nearly empty definitions
-2. Definitions that only contain translations (e.g., "Lithuanian: višta", "Chinese: 鸡")
-3. Circular definitions (defines word using itself)
-4. Too vague or unhelpful definitions
-5. Definitions that don't match the part of speech
-
 Provide a better definition if issues are found.
