@@ -140,9 +140,12 @@ For translations:
 - For each language, provide a translation that specifically matches the given definition, not other meanings of the word
 - When multiple translations are possible, choose the most common or appropriate one
 - For Chinese:
-  - Prefer two-character terms unless a one-character term is unambiguous (e.g., prefer '跳舞' over '舞')
-  - Do not print the pinyin, just the characters
+  - Prefer two-character terms for clarity and naturalness
+  - Use single-character terms for common basic vocabulary (e.g., 酒 for wine, 牛 for cow, 茶 for tea, 水 for water)
+  - Match the generality level of the English word (avoid overly specific translations like 葡萄酒 for wine)
+  - Use Traditional Chinese characters (繁體字)
   - Use standard Mandarin Chinese (not regional variants)
+  - Do not print the pinyin, just the characters
 - For French:
   - Include articles (la table) where appropriate, and provide verbs in the infinitive (aller)
 - For Lithuanian:

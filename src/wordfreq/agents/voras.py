@@ -11,16 +11,20 @@ Modes:
 - check-only: Validate existing translations without populating missing ones
 - populate-only: Add missing translations without validating existing ones
 - both: Validate existing translations AND populate missing ones
+- coverage: Report translation coverage only (no LLM calls, default)
+- regenerate: Delete all non-Lithuanian translations and regenerate them fresh (supports --batch)
 
 "Voras" means "spider" in Lithuanian - weaving together the web of translations!
 """
 
 import argparse
+import json
 import logging
+import random
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 # Add src directory to path
 GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent)
@@ -28,14 +32,16 @@ if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
 import constants
+from clients import openai_batch_client
+from clients.batch_queue import BatchRequestMetadata, get_batch_manager
 from wordfreq.storage.database import create_database_session
 from wordfreq.storage.models.schema import Lemma
-from wordfreq.translation.client import LinguisticClient
 from wordfreq.tools.llm_validators import (
-    validate_translation,
+    batch_validate_translations,
     validate_all_translations_for_word,
-    batch_validate_translations
+    validate_translation,
 )
+from wordfreq.translation.client import LinguisticClient
 
 # Configure logging
 logging.basicConfig(
@@ -134,7 +140,6 @@ class VorasAgent:
 
             # Sample if needed
             if sample_rate < 1.0:
-                import random
                 sample_size = int(len(lemmas) * sample_rate)
                 lemmas = random.sample(lemmas, sample_size)
                 logger.info(f"Sampling {len(lemmas)} words ({sample_rate*100:.0f}%)")
@@ -272,7 +277,6 @@ class VorasAgent:
 
             # Sample if needed
             if sample_rate < 1.0:
-                import random
                 sample_size = int(len(lemmas) * sample_rate)
                 lemmas = random.sample(lemmas, sample_size)
                 logger.info(f"Sampling {len(lemmas)} lemmas ({sample_rate*100:.0f}%)")
@@ -377,6 +381,454 @@ class VorasAgent:
                 'by_language': {},
                 'total_issues_all_languages': 0
             }
+        finally:
+            session.close()
+
+    def regenerate_all_translations(
+        self,
+        limit: Optional[int] = None,
+        dry_run: bool = False,
+        batch_mode: bool = False
+    ) -> Dict[str, any]:
+        """
+        Delete all non-Lithuanian translations and regenerate them fresh.
+        Makes exactly 1 LLM call per word (or queues batch requests if batch_mode=True).
+
+        Args:
+            limit: Maximum number of words to process
+            dry_run: If True, only report what would be done without making changes
+            batch_mode: If True, queue batch requests instead of making synchronous calls
+
+        Returns:
+            Dictionary with regeneration results
+        """
+        if batch_mode:
+            logger.info("Starting translation regeneration in BATCH MODE (queueing requests)...")
+        else:
+            logger.info("Starting translation regeneration (delete + regenerate all non-LT)...")
+
+        session = self.get_session()
+        client = self.get_linguistic_client()
+        batch_manager = get_batch_manager(debug=self.debug) if batch_mode else None
+
+        # All languages except Lithuanian
+        languages_to_regenerate = [lc for lc in LANGUAGE_FIELDS.keys() if lc != 'lt']
+
+        # Initialize results structure
+        results = {
+            'total_words_processed': 0,
+            'total_translations_added': 0,
+            'total_failed': 0,
+            'batch_requests_queued': 0,
+            'by_language': {
+                lang_code: {
+                    'language_name': LANGUAGE_FIELDS[lang_code][1],
+                    'deleted': 0,
+                    'added': 0,
+                    'failed': 0
+                }
+                for lang_code in languages_to_regenerate
+            }
+        }
+
+        try:
+            # Get all lemmas with GUIDs (curated words)
+            query = session.query(Lemma).filter(
+                Lemma.guid.isnot(None)
+            ).order_by(Lemma.id)
+
+            if limit:
+                query = query.limit(limit)
+
+            words_to_process = query.all()
+            total_words = len(words_to_process)
+
+            logger.info(f"Found {total_words} curated words to process")
+
+            # First pass: delete existing non-Lithuanian translations
+            logger.info("Deleting existing non-Lithuanian translations...")
+            for lemma in words_to_process:
+                for lang_code in languages_to_regenerate:
+                    field_name, _ = LANGUAGE_FIELDS[lang_code]
+                    existing = getattr(lemma, field_name)
+                    if existing and existing.strip():
+                        if not dry_run:
+                            setattr(lemma, field_name, None)
+                        results['by_language'][lang_code]['deleted'] += 1
+
+            if not dry_run:
+                session.commit()
+                logger.info("Deleted all non-Lithuanian translations")
+            else:
+                logger.info("[DRY RUN] Would delete all non-Lithuanian translations")
+
+            # Second pass: regenerate all translations
+            logger.info("Regenerating translations...")
+            for i, lemma in enumerate(words_to_process, 1):
+                if i % 10 == 0:
+                    logger.info(f"Progress: {i}/{total_words} words processed")
+
+                results['total_words_processed'] += 1
+
+                try:
+                    if dry_run:
+                        for lang_code in languages_to_regenerate:
+                            results['by_language'][lang_code]['added'] += 1
+                            results['total_translations_added'] += 1
+                        logger.info(f"[DRY RUN] Would generate all translations for '{lemma.lemma_text}'")
+                        continue
+
+                    if batch_mode:
+                        # Queue batch request instead of making synchronous call
+                        custom_id = f"voras-regenerate-{lemma.id}"
+
+                        # Create request body for translation generation
+                        # This will be the prompt sent to OpenAI
+                        metadata = BatchRequestMetadata(
+                            custom_id=custom_id,
+                            agent_name="voras",
+                            operation_type="regenerate_translations",
+                            entity_id=lemma.id,
+                            entity_type="lemma"
+                        )
+
+                        # Build the prompt for translation generation
+                        from clients.lib import Schema, SchemaProperty
+                        schema = Schema(
+                            name="Translations",
+                            description="Translations for a word to multiple languages",
+                            properties={
+                                "chinese_translation": SchemaProperty("string", "Chinese translation in lemma form (simplified characters)"),
+                                "korean_translation": SchemaProperty("string", "Korean translation in lemma form (Hangul)"),
+                                "french_translation": SchemaProperty("string", "French translation in lemma form"),
+                                "swahili_translation": SchemaProperty("string", "Swahili translation in lemma form"),
+                                "vietnamese_translation": SchemaProperty("string", "Vietnamese translation in lemma form"),
+                            }
+                        )
+
+                        import util.prompt_loader
+                        import clients.lib
+                        context = util.prompt_loader.get_context("wordfreq", "translation_generation")
+                        prompt_template = util.prompt_loader.get_prompt("wordfreq", "translation_generation")
+                        subtype_info = f"Subtype: {lemma.pos_subtype}" if lemma.pos_subtype else ""
+                        prompt = prompt_template.format(
+                            english_word=lemma.lemma_text,
+                            lithuanian_word=lemma.lithuanian_translation or "",
+                            definition=lemma.definition_text,
+                            pos_type=lemma.pos_type,
+                            subtype_info=subtype_info
+                        )
+
+                        # Convert schema to OpenAI format
+                        clean_schema = clients.lib.to_openai_schema(schema)
+
+                        # Create request body matching OpenAI Responses API format
+                        request_body = {
+                            "model": self.model,
+                            "input": prompt,
+                            "instructions": context,
+                            "max_output_tokens": 512,
+                            "text": {
+                                "format": {
+                                    "type": "json_schema",
+                                    "name": "Translations",
+                                    "description": "N/A",
+                                    "strict": True,
+                                    "schema": clean_schema
+                                }
+                            }
+                        }
+
+                        # Only set temperature for non-gpt-5 models
+                        if not self.model.startswith('gpt-5-'):
+                            request_body["temperature"] = 0.15
+
+                        # For gpt-5-nano and gpt-5-mini, set reasoning and verbosity
+                        if self.model.startswith('gpt-5-nano') or self.model.startswith('gpt-5-mini'):
+                            request_body["reasoning"] = {"effort": "minimal"}
+                            request_body["text"]["verbosity"] = "low"
+
+                        # Queue the request
+                        batch_manager.queue_request(
+                            custom_id=custom_id,
+                            request_body=request_body,
+                            metadata=metadata,
+                            endpoint="/v1/responses"
+                        )
+
+                        results['batch_requests_queued'] += 1
+                        if i % 100 == 0:
+                            logger.info(f"Queued {results['batch_requests_queued']} batch requests...")
+
+                    else:
+                        # Synchronous mode: use new query_translations method - ONE CALL
+                        translations, success = client.query_translations(
+                            english_word=lemma.lemma_text,
+                            lithuanian_word=lemma.lithuanian_translation or "",
+                            definition=lemma.definition_text,
+                            pos_type=lemma.pos_type,
+                            pos_subtype=lemma.pos_subtype
+                        )
+
+                        if not success or not translations:
+                            logger.warning(f"Failed to get translations for '{lemma.lemma_text}'")
+                            for lang_code in languages_to_regenerate:
+                                results['by_language'][lang_code]['failed'] += 1
+                            results['total_failed'] += 1
+                            continue
+
+                        # Map language codes to the field names used by LinguisticClient
+                        translation_field_map = {
+                            'zh': 'chinese_translation',
+                            'ko': 'korean_translation',
+                            'fr': 'french_translation',
+                            'sw': 'swahili_translation',
+                            'vi': 'vietnamese_translation'
+                        }
+
+                        # Add all non-Lithuanian translations
+                        added_this_word = 0
+                        for lang_code in languages_to_regenerate:
+                            field_name, language_name = LANGUAGE_FIELDS[lang_code]
+                            llm_field = translation_field_map.get(lang_code)
+                            translation = translations.get(llm_field, '').strip()
+
+                            if translation:
+                                setattr(lemma, field_name, translation)
+                                logger.debug(f"  Added {language_name}: '{translation}'")
+                                results['by_language'][lang_code]['added'] += 1
+                                results['total_translations_added'] += 1
+                                added_this_word += 1
+                            else:
+                                logger.warning(f"  LLM returned empty {language_name} translation for '{lemma.lemma_text}'")
+                                results['by_language'][lang_code]['failed'] += 1
+                                results['total_failed'] += 1
+
+                        # Commit all updates for this word at once
+                        session.commit()
+                        logger.info(f"Added {added_this_word}/{len(languages_to_regenerate)} translations for '{lemma.lemma_text}' (GUID: {lemma.guid})")
+
+                except Exception as e:
+                    logger.error(f"Error processing '{lemma.lemma_text}': {e}")
+                    session.rollback()
+                    for lang_code in languages_to_regenerate:
+                        results['by_language'][lang_code]['failed'] += 1
+                    results['total_failed'] += 1
+
+            # Log summary per language
+            logger.info("\n" + "=" * 80)
+            if batch_mode:
+                logger.info("BATCH QUEUE SUMMARY")
+            else:
+                logger.info("REGENERATION SUMMARY")
+            logger.info("=" * 80)
+
+            if batch_mode:
+                logger.info(f"Total batch requests queued: {results['batch_requests_queued']}")
+                logger.info(f"Words processed: {results['total_words_processed']}")
+                logger.info("\nNext steps:")
+                logger.info("  1. Submit the batch: use --batch-submit")
+                logger.info("  2. Wait for completion (check status with OpenAI)")
+                logger.info("  3. Retrieve results: use --batch-retrieve <batch_id>")
+            else:
+                for lang_code in languages_to_regenerate:
+                    lang_result = results['by_language'][lang_code]
+                    logger.info(
+                        f"{lang_result['language_name']}: "
+                        f"deleted {lang_result['deleted']}, "
+                        f"added {lang_result['added']}, "
+                        f"failed {lang_result['failed']}"
+                    )
+            logger.info("=" * 80)
+
+        finally:
+            session.close()
+
+        return results
+
+    def submit_batch(self, agent_name: str = "voras", metadata: Optional[Dict[str, str]] = None) -> Dict[str, str]:
+        """Submit all pending batch requests to OpenAI.
+
+        Args:
+            agent_name: Filter by agent name (default: "voras")
+            metadata: Optional metadata to attach to the batch
+
+        Returns:
+            Dictionary with batch_id and file_id
+        """
+        batch_manager = get_batch_manager(debug=self.debug)
+
+        # Get all pending requests for this agent
+        pending = batch_manager.get_pending_requests(agent_name=agent_name)
+
+        if not pending:
+            logger.warning("No pending batch requests found")
+            return {"batch_id": None, "file_id": None, "count": 0}
+
+        logger.info(f"Submitting {len(pending)} pending requests as a batch...")
+
+        # Submit batch
+        batch_id, file_id = batch_manager.submit_batch(pending, batch_metadata=metadata)
+
+        logger.info(f"Batch submitted successfully!")
+        logger.info(f"  Batch ID: {batch_id}")
+        logger.info(f"  File ID: {file_id}")
+        logger.info(f"  Request count: {len(pending)}")
+        logger.info(f"\nTo check status: use --batch-status {batch_id}")
+        logger.info(f"To retrieve results: use --batch-retrieve {batch_id}")
+
+        return {
+            "batch_id": batch_id,
+            "file_id": file_id,
+            "count": len(pending)
+        }
+
+    def check_batch_status(self, batch_id: str) -> Dict[str, Any]:
+        """Check the status of a submitted batch.
+
+        Args:
+            batch_id: OpenAI batch ID
+
+        Returns:
+            Batch status information
+        """
+        batch_manager = get_batch_manager(debug=self.debug)
+        batch_info = batch_manager.check_batch_status(batch_id)
+
+        status = batch_info['status']
+        counts = batch_info.get('request_counts', {})
+
+        logger.info(f"Batch {batch_id} status: {status}")
+        logger.info(f"  Total requests: {counts.get('total', 0)}")
+        logger.info(f"  Completed: {counts.get('completed', 0)}")
+        logger.info(f"  Failed: {counts.get('failed', 0)}")
+
+        return batch_info
+
+    def retrieve_batch_results(self, batch_id: str) -> Dict[str, Any]:
+        """Retrieve and process results from a completed batch.
+
+        Args:
+            batch_id: OpenAI batch ID
+
+        Returns:
+            Dictionary with processing results
+        """
+        batch_manager = get_batch_manager(debug=self.debug)
+        session = self.get_session()
+
+        try:
+            # Download results from OpenAI and store in batch queue database
+            result_count = batch_manager.retrieve_batch_results(batch_id)
+            logger.info(f"Retrieved {result_count} results from batch {batch_id}")
+
+            # Get completed requests
+            completed = batch_manager.get_completed_requests(
+                agent_name="voras",
+                batch_id=batch_id
+            )
+
+            # Process each result and update the linguistics database
+            results = {
+                'total_processed': 0,
+                'total_updated': 0,
+                'total_failed': 0,
+                'by_language': {}
+            }
+
+            # Initialize language tracking
+            languages_to_update = [lc for lc in LANGUAGE_FIELDS.keys() if lc != 'lt']
+            for lang_code in languages_to_update:
+                results['by_language'][lang_code] = {
+                    'language_name': LANGUAGE_FIELDS[lang_code][1],
+                    'updated': 0,
+                    'failed': 0
+                }
+
+            translation_field_map = {
+                'zh': 'chinese_translation',
+                'ko': 'korean_translation',
+                'fr': 'french_translation',
+                'sw': 'swahili_translation',
+                'vi': 'vietnamese_translation'
+            }
+
+            for req in completed:
+                results['total_processed'] += 1
+
+                try:
+                    # Parse response
+                    response_data = json.loads(req.response_body)
+
+                    # Extract translations from the response
+                    # The response structure matches OpenAI Responses API
+                    translations = {}
+                    if response_data.get('output'):
+                        for output_item in response_data['output']:
+                            if output_item.get('type') == 'message' and output_item.get('content'):
+                                for content_item in output_item['content']:
+                                    if content_item.get('type') == 'output_text':
+                                        text_content = content_item.get('text', '')
+                                        if text_content:
+                                            translations = json.loads(text_content)
+                                        break
+
+                    if not translations:
+                        logger.warning(f"No translations found in response for request {req.custom_id}")
+                        results['total_failed'] += 1
+                        continue
+
+                    # Get the lemma from database
+                    lemma_id = req.entity_id
+                    lemma = session.query(Lemma).filter_by(id=lemma_id).first()
+
+                    if not lemma:
+                        logger.warning(f"Lemma {lemma_id} not found for request {req.custom_id}")
+                        results['total_failed'] += 1
+                        continue
+
+                    # Update translations
+                    updated_count = 0
+                    for lang_code in languages_to_update:
+                        field_name, language_name = LANGUAGE_FIELDS[lang_code]
+                        llm_field = translation_field_map.get(lang_code)
+                        translation = translations.get(llm_field, '').strip()
+
+                        if translation:
+                            setattr(lemma, field_name, translation)
+                            results['by_language'][lang_code]['updated'] += 1
+                            updated_count += 1
+                        else:
+                            results['by_language'][lang_code]['failed'] += 1
+
+                    if updated_count > 0:
+                        session.commit()
+                        results['total_updated'] += 1
+                        logger.info(f"Updated {updated_count} translations for '{lemma.lemma_text}' (ID: {lemma_id})")
+
+                except Exception as e:
+                    logger.error(f"Error processing result for {req.custom_id}: {e}")
+                    results['total_failed'] += 1
+                    session.rollback()
+
+            # Print summary
+            logger.info("\n" + "=" * 80)
+            logger.info("BATCH RESULTS SUMMARY")
+            logger.info("=" * 80)
+            logger.info(f"Total requests processed: {results['total_processed']}")
+            logger.info(f"Lemmas updated: {results['total_updated']}")
+            logger.info(f"Failed: {results['total_failed']}")
+            logger.info("\nBy language:")
+            for lang_code in languages_to_update:
+                lang_result = results['by_language'][lang_code]
+                logger.info(
+                    f"  {lang_result['language_name']}: "
+                    f"{lang_result['updated']} updated, {lang_result['failed']} failed"
+                )
+            logger.info("=" * 80)
+
+            return results
+
         finally:
             session.close()
 
@@ -917,9 +1369,9 @@ def main():
     parser.add_argument('--debug', action='store_true', help='Enable debug logging')
     parser.add_argument('--output', help='Output JSON file for report')
     parser.add_argument('--mode',
-                       choices=['check-only', 'populate-only', 'both', 'coverage'],
+                       choices=['check-only', 'populate-only', 'both', 'coverage', 'regenerate'],
                        default='coverage',
-                       help='Operation mode: check-only (validate existing), populate-only (add missing), both (validate + populate), coverage (report only, default)')
+                       help='Operation mode: check-only (validate existing), populate-only (add missing), both (validate + populate), coverage (report only, default), regenerate (delete and regenerate, supports --batch)')
     parser.add_argument('--language',
                        choices=list(LANGUAGE_FIELDS.keys()),
                        help='Specific language to process (lt, zh, ko, fr, sw, vi)')
@@ -935,11 +1387,99 @@ def main():
                        help='Minimum confidence to flag issues (0.0-1.0, default: 0.7)')
     parser.add_argument('--dry-run', action='store_true',
                        help='Show what would be done without making changes')
+    parser.add_argument('--batch', action='store_true',
+                       help='Use batch mode (supported by --mode regenerate only): queue requests instead of making synchronous API calls')
+    parser.add_argument('--batch-submit', action='store_true',
+                       help='Submit all pending batch requests to OpenAI')
+    parser.add_argument('--batch-status', type=str, metavar='BATCH_ID',
+                       help='Check status of a submitted batch (requires only batch ID)')
+    parser.add_argument('--batch-retrieve', type=str, metavar='BATCH_ID',
+                       help='Retrieve and process results from a completed batch (requires only batch ID)')
 
     args = parser.parse_args()
 
     # Create agent with model parameter
     agent = VorasAgent(db_path=args.db_path, debug=args.debug, model=args.model)
+
+    # Handle batch operations first (special cases)
+    if args.batch_submit:
+        agent.submit_batch()
+        return
+
+    if args.batch_status:
+        agent.check_batch_status(args.batch_status)
+        return
+
+    if args.batch_retrieve:
+        agent.retrieve_batch_results(args.batch_retrieve)
+        return
+
+    # Handle regenerate mode (special case)
+    if args.mode == 'regenerate':
+        # Estimate LLM calls for regeneration
+        if not args.yes and not args.dry_run:
+            session = agent.get_session()
+            try:
+                query = session.query(Lemma).filter(Lemma.guid.isnot(None))
+                if args.limit:
+                    query = query.limit(args.limit)
+                word_count = query.count()
+
+                print(f"\nREGENERATION MODE")
+                print(f"This will:")
+                print(f"  1. Delete all non-Lithuanian translations")
+                if args.batch:
+                    print(f"  2. Queue {word_count} batch requests (1 per word) for later submission")
+                    print(f"\nModel: {args.model}")
+                    print(f"Words to process: {word_count}")
+                    print(f"\nBatch mode: Requests will be queued locally, then submitted with --batch-submit")
+                else:
+                    print(f"  2. Regenerate them fresh using {word_count} LLM API calls (1 per word)")
+                    print(f"\nModel: {args.model}")
+                    print(f"Words to process: {word_count}")
+                    print("\nThis may incur costs and take some time to complete.")
+                response = input("Do you want to proceed? [y/N]: ").strip().lower()
+
+                if response not in ['y', 'yes']:
+                    print("Aborted.")
+                    sys.exit(0)
+                print()
+            finally:
+                session.close()
+
+        # Execute regeneration
+        results = agent.regenerate_all_translations(
+            limit=args.limit,
+            dry_run=args.dry_run,
+            batch_mode=args.batch
+        )
+
+        # Print summary
+        print("\n" + "=" * 80)
+        if args.batch:
+            print("BATCH QUEUE COMPLETE")
+            print("=" * 80)
+            print(f"Words processed: {results['total_words_processed']}")
+            print(f"Batch requests queued: {results.get('batch_requests_queued', 0)}")
+            print()
+            print("Next steps:")
+            print(f"  1. Submit batch: python -m wordfreq.agents.voras --batch-submit")
+            print(f"  2. Check status: python -m wordfreq.agents.voras --batch-status <batch_id>")
+            print(f"  3. Retrieve results: python -m wordfreq.agents.voras --batch-retrieve <batch_id>")
+        else:
+            print("REGENERATION COMPLETE")
+            print("=" * 80)
+            print(f"Words processed: {results['total_words_processed']}")
+            print(f"Total translations added: {results['total_translations_added']}")
+            print(f"Total failed: {results['total_failed']}")
+            print()
+            for lang_code, lang_results in results['by_language'].items():
+                print(f"{lang_results['language_name']}:")
+                print(f"  Deleted: {lang_results['deleted']}")
+                print(f"  Added: {lang_results['added']}")
+                print(f"  Failed: {lang_results['failed']}")
+        print("=" * 80)
+        return
 
     # Handle different modes
     if args.mode == 'coverage':

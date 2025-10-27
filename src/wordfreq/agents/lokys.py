@@ -204,7 +204,9 @@ class LokysAgent:
                     lemma.lemma_text,
                     lemma.definition_text or "",
                     lemma.pos_type,
-                    self.model
+                    self.model,
+                    translation_language="Lithuanian",
+                    translation_text=lemma.lithuanian_translation
                 )
 
                 if not result['is_valid'] and result['confidence'] >= confidence_threshold:

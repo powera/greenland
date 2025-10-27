@@ -196,6 +196,94 @@ class LinguisticClient:
 
             return [], False
 
+    def query_translations(
+        self,
+        english_word: str,
+        lithuanian_word: str,
+        definition: str,
+        pos_type: str,
+        pos_subtype: Optional[str] = None
+    ) -> Tuple[Dict[str, str], bool]:
+        """
+        Query LLM to generate translations for a word with known English, Lithuanian, and definition.
+
+        This is used when you already have the English lemma, Lithuanian translation, and definition
+        in the database, and you just need to generate translations to other languages.
+
+        Args:
+            english_word: English lemma form
+            lithuanian_word: Lithuanian lemma form
+            definition: Definition of the word
+            pos_type: Part of speech (noun, verb, etc.)
+            pos_subtype: Optional part of speech subtype
+
+        Returns:
+            Tuple of (translations dict, success flag)
+            translations dict has keys: chinese_translation, korean_translation,
+            french_translation, swahili_translation, vietnamese_translation
+        """
+        if not english_word or not lithuanian_word:
+            logger.error("English and Lithuanian words are required")
+            return {}, False
+
+        schema = Schema(
+            name="Translations",
+            description="Translations for a word to multiple languages",
+            properties={
+                "chinese_translation": SchemaProperty("string", "Chinese translation in lemma form (simplified characters)"),
+                "korean_translation": SchemaProperty("string", "Korean translation in lemma form (Hangul)"),
+                "french_translation": SchemaProperty("string", "French translation in lemma form"),
+                "swahili_translation": SchemaProperty("string", "Swahili translation in lemma form"),
+                "vietnamese_translation": SchemaProperty("string", "Vietnamese translation in lemma form"),
+            }
+        )
+
+        context = util.prompt_loader.get_context("wordfreq", "translation_generation")
+        prompt_template = util.prompt_loader.get_prompt("wordfreq", "translation_generation")
+
+        subtype_info = f"Subtype: {pos_subtype}" if pos_subtype else ""
+
+        prompt = prompt_template.format(
+            english_word=english_word,
+            lithuanian_word=lithuanian_word,
+            definition=definition,
+            pos_type=pos_type,
+            subtype_info=subtype_info
+        )
+
+        try:
+            response = self.client.generate_chat(
+                prompt=prompt,
+                model=self.model,
+                json_schema=schema,
+                context=context
+            )
+
+            # Log successful query
+            session = self.get_session()
+            try:
+                linguistic_db.log_query(
+                    session,
+                    word=english_word,
+                    query_type='translation_generation',
+                    prompt=prompt,
+                    response=json.dumps(response.structured_data),
+                    model=self.model
+                )
+            except Exception as log_err:
+                logger.error(f"Failed to log successful query: {log_err}")
+
+            # Validate and return response data
+            if response.structured_data and isinstance(response.structured_data, dict):
+                return response.structured_data, True
+            else:
+                logger.warning(f"Invalid response format for word '{english_word}'")
+                return {}, False
+
+        except Exception as e:
+            logger.error(f"Error generating translations for '{english_word}': {type(e).__name__}: {e}")
+            return {}, False
+
     # Define major parts of speech as a set for efficient lookup
     MAJOR_POS_TYPES = {"noun", "verb", "adjective", "adverb"}
 
