@@ -28,6 +28,14 @@ from wordfreq.trakaido.dict_generator import (
 )
 from wordfreq.tools.chinese_converter import to_simplified
 
+# Import pypinyin for Chinese pinyin generation
+try:
+    from pypinyin import lazy_pinyin, Style
+    PYPINYIN_AVAILABLE = True
+except ImportError:
+    PYPINYIN_AVAILABLE = False
+    logger.warning("pypinyin not available - pinyin generation will be disabled")
+
 from .data_models import ExportStats, create_export_stats
 from .text_rendering import format_subtype_display_name
 
@@ -536,10 +544,12 @@ class TrakaidoExporter:
                 # Build alternatives, synonyms, and grammatical forms
                 english_alternatives = []
                 target_alternatives = []
+                target_alternatives_pinyin = []  # For Chinese pinyin
                 english_synonyms = []
                 target_synonyms = []
+                target_synonyms_pinyin = []  # For Chinese pinyin
                 grammatical_forms = {}
-                
+
                 for form in derivative_forms:
                     if form.is_base_form:
                         # Skip base forms as they're already in base_target/base_english
@@ -554,25 +564,45 @@ class TrakaidoExporter:
                     elif form.language_code == self.language:
                         if form.grammatical_form == 'alternative_form':
                             target_alternatives.append(form.derivative_form_text)
+                            # Generate pinyin for Chinese alternatives (keep arrays parallel)
+                            if self.language == 'zh':
+                                pinyin = self._generate_pinyin(form.derivative_form_text)
+                                target_alternatives_pinyin.append(pinyin if pinyin else '')
                         elif form.grammatical_form == 'synonym':
                             target_synonyms.append(form.derivative_form_text)
+                            # Generate pinyin for Chinese synonyms (keep arrays parallel)
+                            if self.language == 'zh':
+                                pinyin = self._generate_pinyin(form.derivative_form_text)
+                                target_synonyms_pinyin.append(pinyin if pinyin else '')
                         elif form.grammatical_form == 'plural_nominative':
                             # Add plural nominative form with appropriate level (minimum level 4)
                             form_level = max(entry['trakaido_level'], 4)
-                            grammatical_forms[form.grammatical_form] = {
+                            gram_form = {
                                 "level": form_level,
                                 "target": form.derivative_form_text,
                                 "english": f"{entry['English']} (plural)"  # Simple plural English form
                             }
+                            # Add pinyin for Chinese grammatical forms
+                            if self.language == 'zh':
+                                pinyin = self._generate_pinyin(form.derivative_form_text)
+                                if pinyin:
+                                    gram_form['target_pinyin'] = pinyin
+                            grammatical_forms[form.grammatical_form] = gram_form
                         elif form.grammatical_form in ['singular_accusative', 'plural_accusative']:
                             # Add accusative forms with appropriate level (minimum level 9)
                             form_level = max(entry['trakaido_level'], 9)
                             english_suffix = " (accusative singular)" if form.grammatical_form == 'singular_accusative' else " (accusative plural)"
-                            grammatical_forms[form.grammatical_form] = {
+                            gram_form = {
                                 "level": form_level,
                                 "target": form.derivative_form_text,
                                 "english": f"{entry['English']}{english_suffix}"
                             }
+                            # Add pinyin for Chinese grammatical forms
+                            if self.language == 'zh':
+                                pinyin = self._generate_pinyin(form.derivative_form_text)
+                                if pinyin:
+                                    gram_form['target_pinyin'] = pinyin
+                            grammatical_forms[form.grammatical_form] = gram_form
 
                 # Generate derivative noun phrases (e.g., "where is X") for appropriate nouns
                 derivative_phrases = self._generate_derivative_noun_phrases(
@@ -598,15 +628,27 @@ class TrakaidoExporter:
                     'word_type': self._normalize_pos_type(entry['POS'])
                 }
 
+                # Add pinyin for Chinese language exports
+                if self.language == 'zh' and entry['Target']:
+                    pinyin = self._generate_pinyin(entry['Target'])
+                    if pinyin:
+                        wireword['target_pinyin'] = pinyin
+
                 # Add optional fields
                 if english_alternatives:
                     wireword['english_alternatives'] = english_alternatives
                 if target_alternatives:
                     wireword['target_alternatives'] = target_alternatives
+                    # Add pinyin for Chinese alternatives
+                    if self.language == 'zh' and target_alternatives_pinyin:
+                        wireword['target_alternatives_pinyin'] = target_alternatives_pinyin
                 if english_synonyms:
                     wireword['english_synonyms'] = english_synonyms
                 if target_synonyms:
                     wireword['target_synonyms'] = target_synonyms
+                    # Add pinyin for Chinese synonyms
+                    if self.language == 'zh' and target_synonyms_pinyin:
+                        wireword['target_synonyms_pinyin'] = target_synonyms_pinyin
                 
                 # Add grammatical forms (for both verbs and nouns with declensions)
                 if grammatical_forms:
@@ -765,6 +807,27 @@ class TrakaidoExporter:
         }
 
         return pos_mappings.get(pos_type.lower(), pos_type)
+
+    def _generate_pinyin(self, chinese_text: str) -> Optional[str]:
+        """
+        Generate pinyin for Chinese text.
+
+        Args:
+            chinese_text: Chinese text to convert to pinyin
+
+        Returns:
+            Pinyin string with tone marks, or None if pypinyin is not available
+        """
+        if not PYPINYIN_AVAILABLE or not chinese_text:
+            return None
+
+        try:
+            # Use Style.TONE to get pinyin with tone marks (e.g., "nǐ hǎo")
+            pinyin_list = lazy_pinyin(chinese_text, style=Style.TONE)
+            return ' '.join(pinyin_list)
+        except Exception as e:
+            logger.warning(f"Failed to generate pinyin for '{chinese_text}': {e}")
+            return None
 
     def _generate_derivative_noun_phrases(self, lemma: Lemma, base_english: str, base_target: str, entry_level: int) -> Dict[str, Dict[str, any]]:
         """
