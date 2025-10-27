@@ -27,7 +27,9 @@ from wordfreq.trakaido.utils.export_manager import TrakaidoExporter
 # Supported languages and their codes
 SUPPORTED_LANGUAGES = {
     'lt': 'Lithuanian',
-    'zh': 'Chinese'
+    'zh': 'Chinese',
+    'ko': 'Korean',
+    'fr': 'French'
 }
 
 # Configure logging
@@ -322,7 +324,7 @@ def main():
 
     # Language options
     language_help = f'Language code (default: lt). Supported: {", ".join(f"{k}={v}" for k, v in SUPPORTED_LANGUAGES.items())}, zh-Hant=Chinese (Traditional)'
-    parser.add_argument('--language', choices=['lt', 'zh', 'zh-Hant'], default='lt',
+    parser.add_argument('--language', choices=['lt', 'zh', 'zh-Hant', 'ko', 'fr'], default='lt',
                        help=language_help)
     parser.add_argument('--traditional', action='store_true',
                        help='For Chinese (zh): export Traditional characters instead of Simplified (exports to lang_zh_Hant/)')
