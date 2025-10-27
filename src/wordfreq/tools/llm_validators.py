@@ -183,7 +183,9 @@ def validate_definition(
     word: str,
     definition: str,
     pos_type: str,
-    model: str = "gpt-5-mini"
+    model: str = "gpt-5-mini",
+    translation_language: Optional[str] = None,
+    translation_text: Optional[str] = None
 ) -> Dict[str, any]:
     """
     Validate that a definition is well-formed and appropriate.
@@ -193,6 +195,8 @@ def validate_definition(
         definition: The definition text to validate
         pos_type: Part of speech
         model: LLM model to use
+        translation_language: Optional language name (e.g., "Lithuanian") for translation context
+        translation_text: Optional translation text to include in validation context
 
     Returns:
         Dictionary with validation results:
@@ -218,24 +222,22 @@ def validate_definition(
         }
     )
 
-    prompt = f"""Validate the definition for the English word "{word}" (POS: {pos_type}):
+    # Load prompt from files
+    context = util.prompt_loader.get_context("wordfreq", "definition_validation")
+    prompt_template = util.prompt_loader.get_prompt("wordfreq", "definition_validation")
 
-Definition: "{definition}"
+    # Format translation info
+    if translation_language and translation_text:
+        translation_info = f"{translation_language} Translation: {translation_text}"
+    else:
+        translation_info = "No translation available"
 
-Check for these issues:
-1. Empty or nearly empty definitions
-2. Definitions that only contain translations (e.g., "Lithuanian: višta", "Chinese: 鸡")
-3. Circular definitions (defines word using itself)
-4. Too vague or unhelpful definitions
-5. Definitions that don't match the part of speech
-
-A good definition should:
-- Explain the meaning in English
-- Be specific and clear
-- Match the part of speech
-- Not just be a translation to another language
-
-Provide a better definition if issues are found."""
+    prompt = prompt_template.format(
+        word=word,
+        pos_type=pos_type,
+        definition=definition,
+        translation_info=translation_info
+    )
 
     logger.debug(f"Validating definition for word: '{word}' (POS: {pos_type})")
 
@@ -243,7 +245,8 @@ Provide a better definition if issues are found."""
         response = client.generate_chat(
             prompt=prompt,
             model=model,
-            json_schema=schema
+            json_schema=schema,
+            context=context
         )
 
         if response.structured_data:

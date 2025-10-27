@@ -23,6 +23,7 @@ input/
 # local datastores
 src/schema/benchmarks.db
 src/wordfreq/data/linguistics.sqlite
+src/clients/data/batch_tracking.sqlite
 
 # for claude staging
 claude/staging
