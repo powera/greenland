@@ -22,6 +22,7 @@ sys.path.append(GREENLAND_SRC_PATH)
 import constants
 from wordfreq.storage.database import create_database_session
 from wordfreq.storage.models.schema import WordToken, Lemma, DerivativeForm
+from wordfreq.storage.models.grammar_fact import GrammarFact
 from wordfreq.trakaido.dict_generator import (
     generate_structure_file,
     generate_dictionary_file
@@ -55,6 +56,14 @@ class TrakaidoExporter:
         'zh': {
             'name': 'Chinese',
             'field': 'chinese_translation'
+        },
+        'ko': {
+            'name': 'Korean',
+            'field': 'korean_translation'
+        },
+        'fr': {
+            'name': 'French',
+            'field': 'french_translation'
         }
     }
 
@@ -603,6 +612,30 @@ class TrakaidoExporter:
                                 if pinyin:
                                     gram_form['target_pinyin'] = pinyin
                             grammatical_forms[form.grammatical_form] = gram_form
+                        else:
+                            # Generic handler for other grammatical forms (French verbs, Korean forms, etc.)
+                            # Skip alternative_form and synonym as they're handled separately above
+                            if form.grammatical_form not in ['alternative_form', 'synonym']:
+                                form_level = max(entry['trakaido_level'], 4)
+
+                                # Generate a readable English label from the grammatical form
+                                english_label = self._generate_grammatical_form_label(
+                                    form.grammatical_form,
+                                    entry['English'],
+                                    lemma.pos_type
+                                )
+
+                                gram_form = {
+                                    "level": form_level,
+                                    "target": form.derivative_form_text,
+                                    "english": english_label
+                                }
+                                # Add pinyin for Chinese grammatical forms
+                                if self.language == 'zh':
+                                    pinyin = self._generate_pinyin(form.derivative_form_text)
+                                    if pinyin:
+                                        gram_form['target_pinyin'] = pinyin
+                                grammatical_forms[form.grammatical_form] = gram_form
 
                 # Generate derivative noun phrases (e.g., "where is X") for appropriate nouns
                 derivative_phrases = self._generate_derivative_noun_phrases(
@@ -653,7 +686,20 @@ class TrakaidoExporter:
                 # Add grammatical forms (for both verbs and nouns with declensions)
                 if grammatical_forms:
                     wireword['grammatical_forms'] = grammatical_forms
-                
+
+                # Add grammar facts (gender, declension, etc.) as metadata
+                grammar_facts = session.query(GrammarFact).filter(
+                    GrammarFact.lemma_id == lemma.id,
+                    GrammarFact.language_code == self.language
+                ).all()
+
+                if grammar_facts:
+                    grammar_metadata = {}
+                    for fact in grammar_facts:
+                        # Store grammar facts as key-value pairs
+                        grammar_metadata[fact.fact_type] = fact.fact_value
+                    wireword['grammar_metadata'] = grammar_metadata
+
                 if lemma.frequency_rank:
                     wireword['frequency_rank'] = lemma.frequency_rank
                 if lemma.notes:
@@ -828,6 +874,87 @@ class TrakaidoExporter:
         except Exception as e:
             logger.warning(f"Failed to generate pinyin for '{chinese_text}': {e}")
             return None
+
+    def _generate_grammatical_form_label(self, grammatical_form: str, base_english: str, pos_type: str) -> str:
+        """
+        Generate a readable English label for a grammatical form.
+
+        Args:
+            grammatical_form: The grammatical form identifier (e.g., "verb/fr_1s_pres", "noun/fr_plural")
+            base_english: The base English word
+            pos_type: Part of speech type
+
+        Returns:
+            Readable English label for the grammatical form
+        """
+        # French verb tenses
+        french_verb_forms = {
+            'verb/fr_1s_pres': f'{base_english} (I, present)',
+            'verb/fr_2s_pres': f'{base_english} (you, present)',
+            'verb/fr_3s_pres': f'{base_english} (he/she, present)',
+            'verb/fr_1p_pres': f'{base_english} (we, present)',
+            'verb/fr_2p_pres': f'{base_english} (you all, present)',
+            'verb/fr_3p_pres': f'{base_english} (they, present)',
+            'verb/fr_1s_impf': f'{base_english} (I, imperfect)',
+            'verb/fr_2s_impf': f'{base_english} (you, imperfect)',
+            'verb/fr_3s_impf': f'{base_english} (he/she, imperfect)',
+            'verb/fr_1p_impf': f'{base_english} (we, imperfect)',
+            'verb/fr_2p_impf': f'{base_english} (you all, imperfect)',
+            'verb/fr_3p_impf': f'{base_english} (they, imperfect)',
+            'verb/fr_1s_fut': f'{base_english} (I, future)',
+            'verb/fr_2s_fut': f'{base_english} (you, future)',
+            'verb/fr_3s_fut': f'{base_english} (he/she, future)',
+            'verb/fr_1p_fut': f'{base_english} (we, future)',
+            'verb/fr_2p_fut': f'{base_english} (you all, future)',
+            'verb/fr_3p_fut': f'{base_english} (they, future)',
+            'verb/fr_1s_cond': f'{base_english} (I, conditional)',
+            'verb/fr_2s_cond': f'{base_english} (you, conditional)',
+            'verb/fr_3s_cond': f'{base_english} (he/she, conditional)',
+            'verb/fr_1p_cond': f'{base_english} (we, conditional)',
+            'verb/fr_2p_cond': f'{base_english} (you all, conditional)',
+            'verb/fr_3p_cond': f'{base_english} (they, conditional)',
+            'verb/fr_1s_subj': f'{base_english} (I, subjunctive)',
+            'verb/fr_2s_subj': f'{base_english} (you, subjunctive)',
+            'verb/fr_3s_subj': f'{base_english} (he/she, subjunctive)',
+            'verb/fr_1p_subj': f'{base_english} (we, subjunctive)',
+            'verb/fr_2p_subj': f'{base_english} (you all, subjunctive)',
+            'verb/fr_3p_subj': f'{base_english} (they, subjunctive)',
+            'verb/fr_1s_pc': f'{base_english} (I, perfect)',
+            'verb/fr_2s_pc': f'{base_english} (you, perfect)',
+            'verb/fr_3s_pc': f'{base_english} (he/she, perfect)',
+            'verb/fr_1p_pc': f'{base_english} (we, perfect)',
+            'verb/fr_2p_pc': f'{base_english} (you all, perfect)',
+            'verb/fr_3p_pc': f'{base_english} (they, perfect)',
+            'verb/fr_inf': f'{base_english} (infinitive)',
+            'verb/fr_pres_part': f'{base_english} (present participle)',
+            'verb/fr_past_part': f'{base_english} (past participle)',
+        }
+
+        # French noun forms (with gender from grammar_facts)
+        french_noun_forms = {
+            'noun/fr_singular': f'{base_english} (singular)',
+            'noun/fr_plural': f'{base_english} (plural)',
+        }
+
+        # French adjective forms (with gender)
+        french_adj_forms = {
+            'adjective/fr_singular_m': f'{base_english} (masculine singular)',
+            'adjective/fr_plural_m': f'{base_english} (masculine plural)',
+            'adjective/fr_singular_f': f'{base_english} (feminine singular)',
+            'adjective/fr_plural_f': f'{base_english} (feminine plural)',
+        }
+
+        # Check for exact matches
+        if grammatical_form in french_verb_forms:
+            return french_verb_forms[grammatical_form]
+        elif grammatical_form in french_noun_forms:
+            return french_noun_forms[grammatical_form]
+        elif grammatical_form in french_adj_forms:
+            return french_adj_forms[grammatical_form]
+
+        # Generic fallback: convert underscores to spaces and add base word
+        readable_form = grammatical_form.replace('_', ' ').replace('/', ' ')
+        return f'{base_english} ({readable_form})'
 
     def _generate_derivative_noun_phrases(self, lemma: Lemma, base_english: str, base_target: str, entry_level: int) -> Dict[str, Dict[str, any]]:
         """
