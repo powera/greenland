@@ -193,6 +193,53 @@ class UngurysAgent:
 
         return success, results
 
+    def export_wireword_verbs(
+        self,
+        output_path: Optional[str] = None,
+        difficulty_level: Optional[int] = None,
+        pos_subtype: Optional[str] = None,
+        limit: Optional[int] = None,
+        include_without_guid: bool = False,
+        include_unverified: bool = True
+    ) -> Tuple[bool, Optional[Any]]:
+        """
+        Export verbs to a single WireWord format JSON file.
+
+        Args:
+            output_path: Path to write the JSON file (if None, uses default)
+            difficulty_level: Filter by specific difficulty level (optional)
+            pos_subtype: Filter by specific verb subtype (optional)
+            limit: Limit number of results (optional)
+            include_without_guid: Include lemmas without GUIDs (default: False)
+            include_unverified: Include unverified entries (default: True)
+
+        Returns:
+            Tuple of (success flag, export statistics)
+        """
+        # Use default path if not provided
+        if output_path is None:
+            lang_dir = self.get_language_output_dir()
+            output_path = os.path.join(lang_dir, "wireword", "wireword_verbs.json")
+
+        logger.info("Starting WireWord verbs export...")
+
+        success, stats = self.exporter.export_verbs_to_wireword_format(
+            output_path=output_path,
+            difficulty_level=difficulty_level,
+            pos_subtype=pos_subtype,
+            limit=limit,
+            include_without_guid=include_without_guid,
+            include_unverified=include_unverified,
+            pretty_print=True
+        )
+
+        if success:
+            logger.info(f"Successfully exported verbs to {output_path}")
+        else:
+            logger.error(f"Failed to export verbs to {output_path}")
+
+        return success, stats
+
     def run_export(
         self,
         output_path: Optional[str] = None,
@@ -262,6 +309,19 @@ class UngurysAgent:
                 'directory': actual_dir
             }
 
+        # Always export verbs to separate file (regardless of export mode)
+        logger.info("Exporting verbs to separate wireword_verbs.json file...")
+        verb_success, verb_stats = self.export_wireword_verbs(
+            output_path=None,  # Use default path
+            include_without_guid=include_without_guid,
+            include_unverified=include_unverified
+        )
+        results['exports']['verbs'] = {
+            'success': verb_success,
+            'stats': verb_stats,
+            'note': 'Verbs are always exported to separate wireword_verbs.json file'
+        }
+
         end_time = datetime.now()
         duration = (end_time - start_time).total_seconds()
         results['duration_seconds'] = duration
@@ -319,6 +379,21 @@ class UngurysAgent:
                 logger.info(f"  Status: FAILED")
                 if 'error' in directory:
                     logger.info(f"  Error: {directory['error']}")
+            logger.info("")
+
+        # Verb export (separate file)
+        if 'verbs' in results['exports']:
+            verbs = results['exports']['verbs']
+            logger.info(f"VERB EXPORT (separate file):")
+            if verbs['success']:
+                logger.info(f"  Status: SUCCESS")
+                if verbs.get('stats'):
+                    stats = verbs['stats']
+                    logger.info(f"  Total verb entries: {stats.total_entries}")
+                    logger.info(f"  Entries with GUIDs: {stats.entries_with_guids}")
+                logger.info(f"  File: wireword_verbs.json")
+            else:
+                logger.info(f"  Status: FAILED")
             logger.info("")
 
         logger.info("=" * 80)
