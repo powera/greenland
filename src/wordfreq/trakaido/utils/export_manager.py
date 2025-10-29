@@ -1478,6 +1478,18 @@ class TrakaidoExporter:
                             # This is a conjugated form
                             form_level = max(lemma.difficulty_level or 1, 1)
 
+                            # Apply tense-specific minimum levels for Lithuanian
+                            if self.language == 'lt':
+                                # Extract tense from grammatical_form (format: "1s_past", "3p-m_fut", etc.)
+                                if '_' in form.grammatical_form:
+                                    tense_suffix = form.grammatical_form.split('_')[-1]
+                                    if tense_suffix == 'past':
+                                        # Past tense minimum level is 7
+                                        form_level = max(form_level, 7)
+                                    elif tense_suffix == 'fut':
+                                        # Future tense minimum level is 12
+                                        form_level = max(form_level, 12)
+
                             # Try to find corresponding English conjugation in database
                             english_conjugation = session.query(DerivativeForm).filter(
                                 DerivativeForm.lemma_id == lemma.id,
