@@ -175,7 +175,7 @@ def convert_verbs_to_wireword_format() -> List[Dict]:
                 # Add the form with level information
                 converted_forms[form_key] = {
                     "level": form_level,
-                    "lithuanian": person_data['lithuanian'],
+                    "target": person_data['lithuanian'],
                     "english": person_data['english']
                 }
         
@@ -210,7 +210,7 @@ def convert_verbs_to_wireword_format() -> List[Dict]:
         # Create the entry for this verb
         entry = {
             "guid": guid,
-            "base_lithuanian": verb_infinitive,
+            "base_target": verb_infinitive,
             "base_english": base_english,
             "corpus": "VERBS",
             "group": group,
