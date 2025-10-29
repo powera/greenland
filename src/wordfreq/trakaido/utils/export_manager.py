@@ -97,37 +97,20 @@ class TrakaidoExporter:
     
     def get_english_word_from_lemma(self, session, lemma: Lemma) -> Optional[str]:
         """
-        Get the primary English word for a lemma from its derivative forms.
-        
+        Get the primary English word for a lemma.
+
+        Uses lemma_text directly to preserve proper capitalization
+        (e.g., "Christmas", "Monday", "Lithuania").
+
         Args:
             session: Database session
             lemma: Lemma object
-            
+
         Returns:
             English word string or None if not found
         """
-        # Look for English derivative forms for this lemma
-        english_forms = session.query(DerivativeForm)\
-            .filter(DerivativeForm.lemma_id == lemma.id)\
-            .filter(DerivativeForm.language_code == "en")\
-            .filter(DerivativeForm.is_base_form == True)\
-            .all()
-        
-        if english_forms:
-            # Return the first base form
-            return english_forms[0].derivative_form_text
-        
-        # If no base form found, look for any English derivative form
-        any_english_forms = session.query(DerivativeForm)\
-            .filter(DerivativeForm.lemma_id == lemma.id)\
-            .filter(DerivativeForm.language_code == "en")\
-            .all()
-        
-        if any_english_forms:
-            # Return the first available form
-            return any_english_forms[0].derivative_form_text
-        
-        # Fallback to lemma text if no derivative forms found
+        # Use lemma_text directly - it has the correct capitalization
+        # Derivative forms are typically lowercase for tokenization/matching
         return lemma.lemma_text
     
     def query_trakaido_data(
@@ -163,7 +146,8 @@ class TrakaidoExporter:
         # Build the query
         query = session.query(Lemma)\
             .filter(language_column != None)\
-            .filter(language_column != "")
+            .filter(language_column != "")\
+            .filter(Lemma.pos_type != 'verb')  # Exclude verbs - they go in separate file
 
         # Apply filters
         if not include_without_guid:
@@ -584,6 +568,9 @@ class TrakaidoExporter:
                                 pinyin = self._generate_pinyin(form.derivative_form_text)
                                 target_synonyms_pinyin.append(pinyin if pinyin else '')
                         elif form.grammatical_form == 'plural_nominative':
+                            # Skip derivative forms for Lithuanian nouns (they're handled by special cases like "where is X")
+                            if self.language == 'lt' and lemma.pos_type == 'noun':
+                                continue
                             # Add plural nominative form with appropriate level (minimum level 4)
                             form_level = max(entry['trakaido_level'], 4)
                             gram_form = {
@@ -598,6 +585,9 @@ class TrakaidoExporter:
                                     gram_form['target_pinyin'] = pinyin
                             grammatical_forms[form.grammatical_form] = gram_form
                         elif form.grammatical_form in ['singular_accusative', 'plural_accusative']:
+                            # Skip derivative forms for Lithuanian nouns (they're handled by special cases like "where is X")
+                            if self.language == 'lt' and lemma.pos_type == 'noun':
+                                continue
                             # Add accusative forms with appropriate level (minimum level 9)
                             form_level = max(entry['trakaido_level'], 9)
                             english_suffix = " (accusative singular)" if form.grammatical_form == 'singular_accusative' else " (accusative plural)"
@@ -613,6 +603,9 @@ class TrakaidoExporter:
                                     gram_form['target_pinyin'] = pinyin
                             grammatical_forms[form.grammatical_form] = gram_form
                         else:
+                            # Skip derivative forms for Lithuanian nouns (they're handled by special cases like "where is X")
+                            if self.language == 'lt' and lemma.pos_type == 'noun':
+                                continue
                             # Generic handler for other grammatical forms (French verbs, Korean forms, etc.)
                             # Skip alternative_form and synonym as they're handled separately above
                             if form.grammatical_form not in ['alternative_form', 'synonym']:
@@ -887,6 +880,37 @@ class TrakaidoExporter:
         Returns:
             Readable English label for the grammatical form
         """
+        # Lithuanian verb forms - proper conjugations with tense
+        lithuanian_verb_forms = {
+            # Present tense
+            'verb/lt_1s_pres': f'I {base_english}',
+            'verb/lt_2s_pres': f'you(s.) {base_english}',
+            'verb/lt_3s_m_pres': f'he {base_english}s',
+            'verb/lt_3s_f_pres': f'she {base_english}s',
+            'verb/lt_1p_pres': f'we {base_english}',
+            'verb/lt_2p_pres': f'you(pl.) {base_english}',
+            'verb/lt_3p_m_pres': f'they(m.) {base_english}',
+            'verb/lt_3p_f_pres': f'they(f.) {base_english}',
+            # Past tense - handle irregular verbs
+            'verb/lt_1s_past': f'I {base_english}' if base_english.endswith('e') else f'I {base_english}ed',
+            'verb/lt_2s_past': f'you(s.) {base_english}' if base_english.endswith('e') else f'you(s.) {base_english}ed',
+            'verb/lt_3s_m_past': f'he {base_english}' if base_english.endswith('e') else f'he {base_english}ed',
+            'verb/lt_3s_f_past': f'she {base_english}' if base_english.endswith('e') else f'she {base_english}ed',
+            'verb/lt_1p_past': f'we {base_english}' if base_english.endswith('e') else f'we {base_english}ed',
+            'verb/lt_2p_past': f'you(pl.) {base_english}' if base_english.endswith('e') else f'you(pl.) {base_english}ed',
+            'verb/lt_3p_m_past': f'they(m.) {base_english}' if base_english.endswith('e') else f'they(m.) {base_english}ed',
+            'verb/lt_3p_f_past': f'they(f.) {base_english}' if base_english.endswith('e') else f'they(f.) {base_english}ed',
+            # Future tense
+            'verb/lt_1s_fut': f'I will {base_english}',
+            'verb/lt_2s_fut': f'you(s.) will {base_english}',
+            'verb/lt_3s_m_fut': f'he will {base_english}',
+            'verb/lt_3s_f_fut': f'she will {base_english}',
+            'verb/lt_1p_fut': f'we will {base_english}',
+            'verb/lt_2p_fut': f'you(pl.) will {base_english}',
+            'verb/lt_3p_m_fut': f'they(m.) will {base_english}',
+            'verb/lt_3p_f_fut': f'they(f.) will {base_english}',
+        }
+
         # French verb tenses
         french_verb_forms = {
             'verb/fr_1s_pres': f'{base_english} (I, present)',
@@ -945,7 +969,9 @@ class TrakaidoExporter:
         }
 
         # Check for exact matches
-        if grammatical_form in french_verb_forms:
+        if grammatical_form in lithuanian_verb_forms:
+            return lithuanian_verb_forms[grammatical_form]
+        elif grammatical_form in french_verb_forms:
             return french_verb_forms[grammatical_form]
         elif grammatical_form in french_noun_forms:
             return french_noun_forms[grammatical_form]
@@ -1342,6 +1368,241 @@ class TrakaidoExporter:
                 logger.warning(f"⚠️  {', '.join(successful_exports)} export(s) succeeded, but {', '.join(failed_exports)} export(s) failed")
         
         return results['overall_success'], results
+
+    def export_verbs_to_wireword_format(
+        self,
+        output_path: str,
+        difficulty_level: Optional[int] = None,
+        pos_subtype: Optional[str] = None,
+        limit: Optional[int] = None,
+        include_without_guid: bool = False,
+        include_unverified: bool = True,
+        pretty_print: bool = True
+    ) -> Tuple[bool, Optional[ExportStats]]:
+        """
+        Export verbs from database to WireWord API format.
+
+        Args:
+            output_path: Path to write the JSON file
+            difficulty_level: Filter by specific difficulty level (optional)
+            pos_subtype: Filter by specific verb subtype (optional)
+            limit: Limit number of results (optional)
+            include_without_guid: Include lemmas without GUIDs (default: False)
+            include_unverified: Include unverified entries (default: True)
+            pretty_print: Whether to format JSON with indentation (default: True)
+
+        Returns:
+            Tuple of (success flag, export statistics)
+        """
+        session = self.get_session()
+        try:
+            # Get the language field to query
+            language_column = getattr(Lemma, self.language_field)
+
+            # Build the query for verbs
+            query = session.query(Lemma)\
+                .filter(Lemma.pos_type == 'verb')\
+                .filter(language_column != None)\
+                .filter(language_column != "")
+
+            # Apply filters
+            if not include_without_guid:
+                query = query.filter(Lemma.guid != None)
+
+            if not include_unverified:
+                query = query.filter(Lemma.verified == True)
+
+            if difficulty_level is not None:
+                query = query.filter(Lemma.difficulty_level == difficulty_level)
+                logger.info(f"Filtering by difficulty level: {difficulty_level}")
+
+            if pos_subtype:
+                query = query.filter(Lemma.pos_subtype == pos_subtype)
+                logger.info(f"Filtering by verb subtype: {pos_subtype}")
+
+            # Order by GUID for consistent output
+            query = query.order_by(Lemma.guid.asc().nullslast())
+
+            if limit:
+                query = query.limit(limit)
+                logger.info(f"Limiting results to: {limit}")
+
+            lemmas = query.all()
+            logger.info(f"Found {len(lemmas)} verbs matching criteria")
+
+            if not lemmas:
+                logger.warning("No verbs found matching the specified criteria")
+                return False, None
+
+            # Transform to WireWord format
+            wireword_data = []
+            for lemma in lemmas:
+                # Get all derivative forms for this verb
+                derivative_forms = session.query(DerivativeForm).filter(
+                    DerivativeForm.lemma_id == lemma.id
+                ).all()
+
+                # Get base English and target language forms
+                base_english = self.get_english_word_from_lemma(session, lemma)
+                base_target = getattr(lemma, self.language_field)
+
+                # For Chinese, optionally convert to simplified
+                if self.language == 'zh' and self.simplified_chinese and base_target:
+                    base_target = to_simplified(base_target)
+
+                # Build grammatical forms (conjugations)
+                grammatical_forms = {}
+                target_alternatives = []
+                target_alternatives_pinyin = []
+                english_synonyms = []
+                target_synonyms = []
+                target_synonyms_pinyin = []
+
+                for form in derivative_forms:
+                    if form.is_base_form:
+                        # Skip base forms as they're already in base_target/base_english
+                        continue
+
+                    # Handle different types of derivative forms
+                    if form.language_code == 'en':
+                        if form.grammatical_form == 'synonym':
+                            english_synonyms.append(form.derivative_form_text)
+                    elif form.language_code == self.language:
+                        if form.grammatical_form == 'synonym':
+                            target_synonyms.append(form.derivative_form_text)
+                            # Generate pinyin for Chinese synonyms
+                            if self.language == 'zh':
+                                pinyin = self._generate_pinyin(form.derivative_form_text)
+                                target_synonyms_pinyin.append(pinyin if pinyin else '')
+                        elif form.grammatical_form != 'infinitive':
+                            # This is a conjugated form
+                            form_level = max(lemma.difficulty_level or 1, 1)
+
+                            # Try to find corresponding English conjugation in database
+                            english_conjugation = session.query(DerivativeForm).filter(
+                                DerivativeForm.lemma_id == lemma.id,
+                                DerivativeForm.language_code == 'en',
+                                DerivativeForm.grammatical_form == form.grammatical_form
+                            ).first()
+
+                            if english_conjugation:
+                                # Use the stored English conjugation
+                                english_label = english_conjugation.derivative_form_text
+                            else:
+                                # Generate readable English label for the form
+                                english_label = self._generate_grammatical_form_label(
+                                    form.grammatical_form,
+                                    base_english,
+                                    'verb'
+                                )
+
+                            gram_form = {
+                                "level": form_level,
+                                "target": form.derivative_form_text,
+                                "english": english_label
+                            }
+
+                            # Add pinyin for Chinese grammatical forms
+                            if self.language == 'zh':
+                                pinyin = self._generate_pinyin(form.derivative_form_text)
+                                if pinyin:
+                                    gram_form['target_pinyin'] = pinyin
+
+                            grammatical_forms[form.grammatical_form] = gram_form
+
+                # Create WireWord object
+                wireword = {
+                    'guid': lemma.guid,
+                    'base_target': base_target,
+                    'base_english': base_english,
+                    'corpus': 'VERBS',
+                    'group': format_subtype_display_name(lemma.pos_subtype or 'action'),
+                    'level': lemma.difficulty_level or 1,
+                    'word_type': 'verb'
+                }
+
+                # Add pinyin for Chinese language exports
+                if self.language == 'zh' and base_target:
+                    pinyin = self._generate_pinyin(base_target)
+                    if pinyin:
+                        wireword['target_pinyin'] = pinyin
+
+                # Add optional fields
+                if english_synonyms:
+                    wireword['english_synonyms'] = english_synonyms
+                if target_synonyms:
+                    wireword['target_synonyms'] = target_synonyms
+                    # Add pinyin for Chinese synonyms
+                    if self.language == 'zh' and target_synonyms_pinyin:
+                        wireword['target_synonyms_pinyin'] = target_synonyms_pinyin
+
+                # Add grammatical forms (conjugations)
+                if grammatical_forms:
+                    wireword['grammatical_forms'] = grammatical_forms
+
+                if lemma.notes:
+                    wireword['notes'] = lemma.notes
+
+                # Add tags
+                tags = [lemma.pos_subtype or 'action', f"level_{lemma.difficulty_level or 1}"]
+                if lemma.verified:
+                    tags.append('verified')
+                wireword['tags'] = tags
+
+                wireword_data.append(wireword)
+
+            # Calculate basic stats
+            from .data_models import ExportStats
+
+            # Calculate level distribution
+            level_dist = {}
+            for w in wireword_data:
+                level = str(w.get('level', 0))
+                level_dist[level] = level_dist.get(level, 0) + 1
+
+            stats = ExportStats(
+                total_entries=len(wireword_data),
+                entries_with_guids=sum(1 for w in wireword_data if w.get('guid')),
+                pos_distribution={'verb': len(wireword_data)},
+                level_distribution=level_dist
+            )
+
+            # Write to JSON file
+            try:
+                # Ensure the directory exists
+                os.makedirs(os.path.dirname(output_path), exist_ok=True)
+
+                with open(output_path, 'w', encoding='utf-8') as f:
+                    if pretty_print:
+                        # Write with nice formatting, one entry per line
+                        f.write('[\n')
+                        for i, entry in enumerate(wireword_data):
+                            line = json.dumps(entry, ensure_ascii=False, separators=(', ', ': '))
+                            if i < len(wireword_data) - 1:
+                                f.write(f'  {line},\n')
+                            else:
+                                f.write(f'  {line}\n')
+                        f.write(']\n')
+                    else:
+                        # Compact format
+                        json.dump(wireword_data, f, ensure_ascii=False, separators=(',', ':'))
+
+                logger.info(f"✅ Successfully wrote {len(wireword_data)} verb entries to {output_path}")
+                logger.info(f"Entries with GUIDs: {stats.entries_with_guids}/{stats.total_entries}")
+
+            except Exception as e:
+                logger.error(f"❌ Failed to write JSON file: {e}")
+                raise
+
+            logger.info(f"✅ Successfully exported {len(wireword_data)} verbs in WireWord format")
+
+            return True, stats
+
+        except Exception as e:
+            logger.error(f"Export verbs to WireWord format failed: {e}")
+            return False, None
+        finally:
+            session.close()
 
 
 # Convenience functions for backward compatibility

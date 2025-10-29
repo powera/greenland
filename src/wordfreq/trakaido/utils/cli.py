@@ -17,7 +17,9 @@ sys.path.append(GREENLAND_SRC_PATH)
 
 import constants
 from .word_manager import WordManager
+from .verb_manager import VerbManager
 from .export_manager import TrakaidoExporter
+from .bulk_import_verbs import bulk_import_verbs
 # from .noun_forms import generate_noun_forms_for_lemmas  # Function not implemented
 from wordfreq.trakaido.verb_converter import export_wireword_verbs
 
@@ -77,6 +79,35 @@ def create_parser():
     generate_forms_parser.add_argument('--level', type=int, help='Filter by specific difficulty level')
     generate_forms_parser.add_argument('--dry-run', action='store_true', help='Show what would be generated without saving')
     generate_forms_parser.add_argument('--force', action='store_true', help='Regenerate forms even if they already exist')
+
+    # Verb commands
+    add_verb_parser = subparsers.add_parser('add-verb', help='Add a new verb')
+    add_verb_parser.add_argument('english_verb', help='English verb to add (infinitive form)')
+    add_verb_parser.add_argument('--translation', help='Translation in target language to clarify meaning')
+    add_verb_parser.add_argument('--language', choices=['lt', 'zh', 'ko', 'fr'], default='lt',
+                                 help='Target language (default: lt)')
+    add_verb_parser.add_argument('--level', type=int, help='Difficulty level (1-20)')
+    add_verb_parser.add_argument('--auto-approve', action='store_true',
+                                 help='Skip user review')
+    add_verb_parser.add_argument('--no-forms', action='store_true',
+                                 help='Skip generating conjugation forms')
+    add_verb_parser.add_argument('--model', default='gpt-5-mini',
+                                 help='LLM model to use')
+
+    list_verbs_parser = subparsers.add_parser('list-verbs', help='List verbs in database')
+    list_verbs_parser.add_argument('--language', choices=['lt', 'zh', 'ko', 'fr'], default='lt',
+                                   help='Filter by language (default: lt)')
+    list_verbs_parser.add_argument('--level', type=int, help='Filter by difficulty level')
+    list_verbs_parser.add_argument('--subtype', help='Filter by verb subtype')
+    list_verbs_parser.add_argument('--limit', type=int, default=50, help='Maximum results')
+
+    import_verbs_parser = subparsers.add_parser('import-verbs', help='Bulk import verbs from verbs.py file')
+    import_verbs_parser.add_argument('--language', choices=['lt'], default='lt',
+                                     help='Language code (default: lt)')
+    import_verbs_parser.add_argument('--limit', type=int,
+                                     help='Limit number of verbs to import')
+    import_verbs_parser.add_argument('--dry-run', action='store_true',
+                                     help='Show what would be imported without saving')
 
     # Export commands
     export_parser = subparsers.add_parser('export', help='Export words to files')
@@ -197,6 +228,52 @@ def handle_list_commands(args, manager):
         else:
             print("No subtypes found.")
         return True
+
+    return False
+
+
+def handle_verb_commands(args, model='gpt-5-mini'):
+    """Handle verb management commands."""
+    verb_manager = VerbManager(model=args.model if hasattr(args, 'model') else model, debug=False)
+
+    if args.command == 'add-verb':
+        success = verb_manager.add_verb(
+            english_verb=args.english_verb,
+            target_translation=args.translation,
+            difficulty_level=args.level,
+            auto_approve=args.auto_approve,
+            language=args.language,
+            generate_forms=not args.no_forms
+        )
+        return success
+
+    elif args.command == 'list-verbs':
+        verbs = verb_manager.list_verbs(
+            language=args.language,
+            level=args.level,
+            subtype=args.subtype,
+            limit=args.limit
+        )
+
+        if verbs:
+            print(f"\nFound {len(verbs)} verbs:")
+            print("-" * 80)
+            for verb in verbs:
+                status = "✓" if verb['verified'] else "?"
+                print(f"{status} {verb['guid']:<10} L{verb['level']:<2} "
+                      f"{verb['english']:<20} → {verb['translation']:<20} "
+                      f"({verb['subtype']})")
+        else:
+            print("No verbs found matching criteria.")
+        return True
+
+    elif args.command == 'import-verbs':
+        results = bulk_import_verbs(
+            language=args.language,
+            limit=args.limit,
+            dry_run=args.dry_run
+        )
+        return results.get('success', False)
 
     return False
 
@@ -396,6 +473,9 @@ def main():
 
     elif args.command in ['list', 'subtypes']:
         success = handle_list_commands(args, manager)
+
+    elif args.command in ['add-verb', 'list-verbs', 'import-verbs']:
+        success = handle_verb_commands(args, model=args.model if hasattr(args, 'model') else 'gpt-5-mini')
 
     elif args.command == 'generate-noun-forms':
         # Function not implemented yet
