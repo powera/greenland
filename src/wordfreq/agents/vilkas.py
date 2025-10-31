@@ -190,57 +190,75 @@ class VilkasAgent:
         finally:
             session.close()
 
-    def check_verb_conjugation_coverage(self) -> Dict[str, any]:
+    def check_verb_conjugation_coverage(self, language_code: str = 'lt') -> Dict[str, any]:
         """
-        Check for Lithuanian verbs that have base forms but missing conjugations.
+        Check for verbs that have base forms but missing conjugations.
+
+        Args:
+            language_code: Language code to check ('lt' for Lithuanian, 'fr' for French)
 
         Returns:
             Dictionary with check results
         """
-        logger.info("Checking Lithuanian verb conjugation coverage...")
+        language_names = {'lt': 'Lithuanian', 'fr': 'French'}
+        language_name = language_names.get(language_code, language_code.upper())
+
+        logger.info(f"Checking {language_name} verb conjugation coverage...")
 
         session = self.get_session()
         try:
-            # Find lemmas that are verbs with Lithuanian translations
+            # Get the appropriate translation field name
+            translation_field_map = {
+                'lt': 'lithuanian_translation',
+                'fr': 'french_translation'
+            }
+            translation_field = translation_field_map.get(language_code)
+
+            if not translation_field:
+                raise ValueError(f"Unsupported language code: {language_code}")
+
+            # Find lemmas that are verbs with translations in the target language
             verb_lemmas = session.query(Lemma).filter(
                 Lemma.pos_type == 'verb',
-                Lemma.lithuanian_translation.isnot(None),
-                Lemma.lithuanian_translation != ''
+                getattr(Lemma, translation_field).isnot(None),
+                getattr(Lemma, translation_field) != ''
             ).all()
 
-            logger.info(f"Found {len(verb_lemmas)} verb lemmas with Lithuanian translations")
+            logger.info(f"Found {len(verb_lemmas)} verb lemmas with {language_name} translations")
 
             # Check conjugation coverage
             needs_conjugations = []
             has_conjugations = []
 
             for lemma in verb_lemmas:
-                # Count Lithuanian derivative forms for this verb
-                lt_forms = session.query(DerivativeForm).filter(
+                # Count derivative forms for this verb in the target language
+                forms = session.query(DerivativeForm).filter(
                     DerivativeForm.lemma_id == lemma.id,
-                    DerivativeForm.language_code == 'lt'
+                    DerivativeForm.language_code == language_code
                 ).all()
 
                 # If we only have 1 form (the infinitive), it needs conjugations
-                if len(lt_forms) <= 1:
+                if len(forms) <= 1:
                     needs_conjugations.append({
                         'guid': lemma.guid,
                         'english': lemma.lemma_text,
-                        'lithuanian': lemma.lithuanian_translation,
+                        'translation': getattr(lemma, translation_field),
                         'pos_subtype': lemma.pos_subtype,
                         'difficulty_level': lemma.difficulty_level,
-                        'current_form_count': len(lt_forms)
+                        'current_form_count': len(forms)
                     })
                 else:
                     has_conjugations.append({
                         'guid': lemma.guid,
-                        'form_count': len(lt_forms)
+                        'form_count': len(forms)
                     })
 
             logger.info(f"Verbs with conjugations: {len(has_conjugations)}")
             logger.info(f"Verbs needing conjugations: {len(needs_conjugations)}")
 
             return {
+                'language_code': language_code,
+                'language_name': language_name,
                 'total_verbs': len(verb_lemmas),
                 'with_conjugations': len(has_conjugations),
                 'needs_conjugations': len(needs_conjugations),
@@ -252,6 +270,8 @@ class VilkasAgent:
             logger.error(f"Error checking verb conjugation coverage: {e}")
             return {
                 'error': str(e),
+                'language_code': language_code,
+                'language_name': language_name,
                 'total_verbs': 0,
                 'with_conjugations': 0,
                 'needs_conjugations': 0,
@@ -275,52 +295,78 @@ class VilkasAgent:
         Generate and store missing word forms for a specific language.
 
         Currently supports:
-        - Lithuanian (lt): noun declensions
+        - Lithuanian (lt): noun declensions, verb conjugations
+        - French (fr): verb conjugations
 
         Future support planned for:
         - English (en): noun plurals, verb conjugations, etc.
         - Other languages as needed
 
         Args:
-            language_code: Language code (currently only 'lt' supported)
+            language_code: Language code ('lt' for Lithuanian, 'fr' for French)
             pos_type: Part of speech to fix (e.g., 'noun', 'verb'). If None, fixes all supported POS types.
             limit: Maximum number of lemmas to process
             model: LLM model to use for generation
             throttle: Seconds to wait between API calls
             dry_run: If True, show what would be fixed without making changes
-            source: Source for forms - 'llm' or 'wiki' (for Lithuanian)
+            source: Source for forms - 'llm' or 'wiki' (for Lithuanian only)
 
         Returns:
             Dictionary with fix results
         """
-        if language_code != 'lt':
+        if language_code not in ['lt', 'fr']:
             logger.error(f"Language '{language_code}' is not yet supported for form generation")
             return {
                 'error': f"Language '{language_code}' not supported",
-                'supported_languages': ['lt']
+                'supported_languages': ['lt', 'fr']
             }
 
-        # For Lithuanian, currently only nouns are fully implemented
-        if pos_type and pos_type != 'noun':
-            logger.warning(f"POS type '{pos_type}' is not fully implemented for Lithuanian. Only nouns are supported.")
-            if not dry_run:
-                return {
-                    'error': f"POS type '{pos_type}' not fully implemented for Lithuanian",
-                    'supported_pos_types': ['noun']
-                }
+        # Handle Lithuanian
+        if language_code == 'lt':
+            # For Lithuanian, currently only nouns are fully implemented
+            if pos_type and pos_type != 'noun':
+                logger.warning(f"POS type '{pos_type}' is not fully implemented for Lithuanian. Only nouns are supported.")
+                if not dry_run:
+                    return {
+                        'error': f"POS type '{pos_type}' not fully implemented for Lithuanian",
+                        'supported_pos_types': ['noun']
+                    }
 
-        # Default to nouns if no POS type specified
-        if not pos_type:
-            pos_type = 'noun'
-            logger.info("No POS type specified, defaulting to 'noun'")
+            # Default to nouns if no POS type specified
+            if not pos_type:
+                pos_type = 'noun'
+                logger.info("No POS type specified, defaulting to 'noun'")
 
-        return self._fix_lithuanian_noun_declensions(
-            limit=limit,
-            model=model,
-            throttle=throttle,
-            dry_run=dry_run,
-            source=source
-        )
+            return self._fix_lithuanian_noun_declensions(
+                limit=limit,
+                model=model,
+                throttle=throttle,
+                dry_run=dry_run,
+                source=source
+            )
+
+        # Handle French
+        elif language_code == 'fr':
+            # For French, currently only verbs are implemented
+            if pos_type and pos_type != 'verb':
+                logger.warning(f"POS type '{pos_type}' is not fully implemented for French. Only verbs are supported.")
+                if not dry_run:
+                    return {
+                        'error': f"POS type '{pos_type}' not fully implemented for French",
+                        'supported_pos_types': ['verb']
+                    }
+
+            # Default to verbs if no POS type specified
+            if not pos_type:
+                pos_type = 'verb'
+                logger.info("No POS type specified, defaulting to 'verb'")
+
+            return self._fix_french_verb_conjugations(
+                limit=limit,
+                model=model,
+                throttle=throttle,
+                dry_run=dry_run
+            )
 
     def _fix_lithuanian_noun_declensions(
         self,
@@ -453,6 +499,134 @@ class VilkasAgent:
             'dry_run': dry_run
         }
 
+    def _fix_french_verb_conjugations(
+        self,
+        limit: Optional[int] = None,
+        model: str = 'gpt-5-mini',
+        throttle: float = 1.0,
+        dry_run: bool = False
+    ) -> Dict[str, any]:
+        """
+        Generate missing French verb conjugations.
+
+        This method uses the existing infrastructure from
+        wordfreq.translation.generate_french_verb_forms.
+
+        Args:
+            limit: Maximum number of lemmas to process
+            model: LLM model to use
+            throttle: Seconds to wait between API calls
+            dry_run: If True, show what would be fixed without making changes
+
+        Returns:
+            Dictionary with fix results
+        """
+        from wordfreq.translation.generate_french_verb_forms import (
+            process_lemma_conjugations,
+            get_french_verb_lemmas
+        )
+
+        logger.info("Finding French verbs needing conjugations...")
+
+        # Get verb conjugation coverage check results
+        check_results = self.check_verb_conjugation_coverage(language_code='fr')
+
+        if 'error' in check_results:
+            return check_results
+
+        verbs_needing_conjugations = check_results['verbs_needing_conjugations']
+        total_needs_fix = len(verbs_needing_conjugations)
+
+        if total_needs_fix == 0:
+            logger.info("No French verbs need conjugations!")
+            return {
+                'total_needing_fix': 0,
+                'processed': 0,
+                'successful': 0,
+                'failed': 0,
+                'dry_run': dry_run
+            }
+
+        logger.info(f"Found {total_needs_fix} French verbs needing conjugations")
+
+        # Apply limit if specified
+        if limit:
+            verbs_to_process = verbs_needing_conjugations[:limit]
+            logger.info(f"Processing limited to {limit} verbs")
+        else:
+            verbs_to_process = verbs_needing_conjugations
+
+        if dry_run:
+            logger.info(f"DRY RUN: Would process {len(verbs_to_process)} verbs:")
+            for verb in verbs_to_process[:10]:  # Show first 10
+                logger.info(f"  - {verb['english']} -> {verb['translation']} (level {verb['difficulty_level']})")
+            if len(verbs_to_process) > 10:
+                logger.info(f"  ... and {len(verbs_to_process) - 10} more")
+            return {
+                'total_needing_fix': total_needs_fix,
+                'would_process': len(verbs_to_process),
+                'dry_run': True,
+                'sample': verbs_to_process[:10]
+            }
+
+        # Initialize client for LLM-based generation
+        client = LinguisticClient(model=model, db_path=self.db_path, debug=self.debug)
+
+        # Process each verb
+        successful = 0
+        failed = 0
+
+        # Get lemma objects for processing
+        session = self.get_session()
+        try:
+            for i, verb_info in enumerate(verbs_to_process, 1):
+                logger.info(f"\n[{i}/{len(verbs_to_process)}] Processing: {verb_info['english']} -> {verb_info['translation']}")
+
+                # Get the full lemma object
+                lemma = session.query(Lemma).filter(Lemma.guid == verb_info['guid']).first()
+
+                if not lemma:
+                    logger.error(f"Could not find lemma with GUID {verb_info['guid']}")
+                    failed += 1
+                    continue
+
+                # Use the process_lemma_conjugations function from generate_french_verb_forms
+                success = process_lemma_conjugations(
+                    client=client,
+                    lemma_id=lemma.id,
+                    db_path=self.db_path
+                )
+
+                if success:
+                    successful += 1
+                    logger.info(f"Successfully generated conjugations for '{verb_info['english']}'")
+                else:
+                    failed += 1
+                    logger.error(f"Failed to generate conjugations for '{verb_info['english']}'")
+
+                # Throttle to avoid overloading the API
+                if i < len(verbs_to_process):  # Don't sleep after the last one
+                    time.sleep(throttle)
+
+        finally:
+            session.close()
+
+        logger.info(f"\n{'='*60}")
+        logger.info(f"Fix complete:")
+        logger.info(f"  Total needing fix: {total_needs_fix}")
+        logger.info(f"  Processed: {len(verbs_to_process)}")
+        logger.info(f"  Successful: {successful}")
+        logger.info(f"  Failed: {failed}")
+        logger.info(f"{'='*60}")
+
+        return {
+            'total_needing_fix': total_needs_fix,
+            'processed': len(verbs_to_process),
+            'successful': successful,
+            'failed': failed,
+            'dry_run': dry_run
+        }
+
     def run_full_check(self, output_file: Optional[str] = None) -> Dict[str, any]:
         """
         Run all checks and generate a comprehensive report.
@@ -543,9 +717,9 @@ def main():
 
     # Fix mode options (generate missing forms)
     parser.add_argument('--fix', action='store_true',
-                       help='Fix mode: Generate missing word forms (currently supports Lithuanian noun declensions)')
+                       help='Fix mode: Generate missing word forms (supports Lithuanian nouns, French verbs)')
     parser.add_argument('--language', default='lt',
-                       help='[Fix mode] Language code for form generation (default: lt)')
+                       help='Language code for operations (lt=Lithuanian, fr=French, default: lt)')
     parser.add_argument('--pos-type',
                        help='[Fix mode] Part of speech to fix (e.g., noun, verb). If not specified, fixes all supported types.')
     parser.add_argument('--limit', type=int, default=20,
@@ -569,16 +743,35 @@ def main():
     if args.fix:
         # Confirmation prompt (unless --yes or --dry-run)
         if not args.yes and not args.dry_run:
-            check_results = agent.check_noun_declension_coverage()
-            needs_fix = check_results.get('needs_declensions', 0)
+            # Determine what we're fixing based on language and pos-type
+            language_names = {'lt': 'Lithuanian', 'fr': 'French'}
+            lang_name = language_names.get(args.language, args.language.upper())
+
+            # Get appropriate check results based on language and POS type
+            if args.language == 'lt' and (not args.pos_type or args.pos_type == 'noun'):
+                check_results = agent.check_noun_declension_coverage()
+                needs_fix = check_results.get('needs_declensions', 0)
+                form_type = 'noun declensions'
+            elif args.language == 'fr' and (not args.pos_type or args.pos_type == 'verb'):
+                check_results = agent.check_verb_conjugation_coverage(language_code='fr')
+                needs_fix = check_results.get('needs_conjugations', 0)
+                form_type = 'verb conjugations'
+            elif args.language == 'lt' and args.pos_type == 'verb':
+                check_results = agent.check_verb_conjugation_coverage(language_code='lt')
+                needs_fix = check_results.get('needs_conjugations', 0)
+                form_type = 'verb conjugations'
+            else:
+                needs_fix = 0
+                form_type = 'forms'
 
             print(f"\n{'='*60}")
-            print(f"Ready to generate missing Lithuanian noun declensions")
-            print(f"Total nouns needing declensions: {needs_fix}")
+            print(f"Ready to generate missing {lang_name} {form_type}")
+            print(f"Total needing fix: {needs_fix}")
             if args.limit:
-                print(f"Limit: {args.limit} nouns")
+                print(f"Limit: {args.limit}")
             print(f"Model: {args.model}")
-            print(f"Source: {args.source}")
+            if args.language == 'lt':
+                print(f"Source: {args.source}")
             print(f"Throttle: {args.throttle}s between calls")
             print(f"{'='*60}")
             response = input("\nContinue? [y/N]: ")
@@ -615,18 +808,22 @@ def main():
 
     # Handle check mode (existing functionality)
     if args.check == 'base-forms':
+        # Only Lithuanian has base forms check currently
         results = agent.check_missing_lithuanian_base_forms()
         print(f"\nMissing base forms: {results['missing_count']} out of {results['total_with_translation']}")
         print(f"Coverage: {results['coverage_percentage']:.1f}%")
 
     elif args.check == 'noun-declensions':
+        # Only Lithuanian has noun declensions currently
         results = agent.check_noun_declension_coverage()
         print(f"\nNouns needing declensions: {results['needs_declensions']} out of {results['total_nouns']}")
         print(f"Coverage: {results['declension_coverage_percentage']:.1f}%")
 
     elif args.check == 'verb-conjugations':
-        results = agent.check_verb_conjugation_coverage()
-        print(f"\nVerbs needing conjugations: {results['needs_conjugations']} out of {results['total_verbs']}")
+        # Support both Lithuanian and French verb conjugations
+        results = agent.check_verb_conjugation_coverage(language_code=args.language)
+        lang_name = results.get('language_name', args.language.upper())
+        print(f"\n{lang_name} Verbs needing conjugations: {results['needs_conjugations']} out of {results['total_verbs']}")
         print(f"Coverage: {results['conjugation_coverage_percentage']:.1f}%")
 
     else:  # all
