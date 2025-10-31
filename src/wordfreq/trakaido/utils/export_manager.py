@@ -611,12 +611,20 @@ class TrakaidoExporter:
                             if form.grammatical_form not in ['alternative_form', 'synonym']:
                                 form_level = max(entry['trakaido_level'], 4)
 
-                                # Generate a readable English label from the grammatical form
-                                english_label = self._generate_grammatical_form_label(
-                                    form.grammatical_form,
-                                    entry['English'],
-                                    lemma.pos_type
+                                # Try to look up English translation from database first
+                                english_label = self._get_english_translation_from_db(
+                                    session,
+                                    lemma.id,
+                                    form.grammatical_form
                                 )
+
+                                # If not found in database, generate it
+                                if not english_label:
+                                    english_label = self._generate_grammatical_form_label(
+                                        form.grammatical_form,
+                                        entry['English'],
+                                        lemma.pos_type
+                                    )
 
                                 gram_form = {
                                     "level": form_level,
@@ -867,6 +875,71 @@ class TrakaidoExporter:
         except Exception as e:
             logger.warning(f"Failed to generate pinyin for '{chinese_text}': {e}")
             return None
+
+    def _get_english_translation_from_db(self, session, lemma_id: int, grammatical_form: str) -> Optional[str]:
+        """
+        Look up the English translation for a grammatical form from the database.
+        Maps French/other language grammatical forms to their Lithuanian equivalents
+        since English translations are stored with Lithuanian form labels.
+
+        Args:
+            session: Database session
+            lemma_id: The lemma ID
+            grammatical_form: The grammatical form (e.g., "verb/fr_1p_impf")
+
+        Returns:
+            English translation string, or None if not found
+        """
+        # Map French verb forms to Lithuanian verb forms (which have English translations)
+        fr_to_lt_mapping = {
+            # Present tense
+            'verb/fr_1s_pres': 'verb/lt_1s_pres',
+            'verb/fr_2s_pres': 'verb/lt_2s_pres',
+            'verb/fr_3s_pres': 'verb/lt_3s_m_pres',  # Use masculine for he/she
+            'verb/fr_1p_pres': 'verb/lt_1p_pres',
+            'verb/fr_2p_pres': 'verb/lt_2p_pres',
+            'verb/fr_3p_pres': 'verb/lt_3p_m_pres',  # Use masculine for they
+            # Imperfect → Past tense (closest equivalent)
+            'verb/fr_1s_impf': 'verb/lt_1s_past',
+            'verb/fr_2s_impf': 'verb/lt_2s_past',
+            'verb/fr_3s_impf': 'verb/lt_3s_m_past',
+            'verb/fr_1p_impf': 'verb/lt_1p_past',
+            'verb/fr_2p_impf': 'verb/lt_2p_past',
+            'verb/fr_3p_impf': 'verb/lt_3p_m_past',
+            # Future tense
+            'verb/fr_1s_fut': 'verb/lt_1s_fut',
+            'verb/fr_2s_fut': 'verb/lt_2s_fut',
+            'verb/fr_3s_fut': 'verb/lt_3s_m_fut',
+            'verb/fr_1p_fut': 'verb/lt_1p_fut',
+            'verb/fr_2p_fut': 'verb/lt_2p_fut',
+            'verb/fr_3p_fut': 'verb/lt_3p_m_fut',
+            # Passé composé → Past tense
+            'verb/fr_1s_pc': 'verb/lt_1s_past',
+            'verb/fr_2s_pc': 'verb/lt_2s_past',
+            'verb/fr_3s_pc': 'verb/lt_3s_m_past',
+            'verb/fr_1p_pc': 'verb/lt_1p_past',
+            'verb/fr_2p_pc': 'verb/lt_2p_past',
+            'verb/fr_3p_pc': 'verb/lt_3p_m_past',
+            # Conditional and subjunctive don't have direct Lithuanian equivalents
+            # Leave those to fall through to generation
+        }
+
+        # Check if we have a mapping for this form
+        mapped_form = fr_to_lt_mapping.get(grammatical_form)
+        if not mapped_form:
+            return None
+
+        # Look up the English derivative form with the mapped grammatical form
+        english_form = session.query(DerivativeForm).filter(
+            DerivativeForm.lemma_id == lemma_id,
+            DerivativeForm.language_code == 'en',
+            DerivativeForm.grammatical_form == mapped_form
+        ).first()
+
+        if english_form:
+            return english_form.derivative_form_text
+
+        return None
 
     def _generate_grammatical_form_label(self, grammatical_form: str, base_english: str, pos_type: str) -> str:
         """
@@ -1478,8 +1551,25 @@ class TrakaidoExporter:
                             # This is a conjugated form
                             form_level = max(lemma.difficulty_level or 1, 1)
 
+                            # For French, only export present, passé composé (past), and future
+                            if self.language == 'fr':
+                                # Extract tense from grammatical_form (format: "verb/fr_1s_pres", "verb/fr_1p_pc", etc.)
+                                if '_' in form.grammatical_form:
+                                    tense_suffix = form.grammatical_form.split('_')[-1]
+                                    # Only allow pres (present), pc (passé composé), and fut (future)
+                                    if tense_suffix not in ['pres', 'pc', 'fut']:
+                                        continue  # Skip imperfect, conditional, subjunctive
+
+                                    # Apply tense-specific minimum levels
+                                    if tense_suffix == 'pc':
+                                        # Passé composé (past) minimum level is 7
+                                        form_level = max(form_level, 7)
+                                    elif tense_suffix == 'fut':
+                                        # Future tense minimum level is 12
+                                        form_level = max(form_level, 12)
+
                             # Apply tense-specific minimum levels for Lithuanian
-                            if self.language == 'lt':
+                            elif self.language == 'lt':
                                 # Extract tense from grammatical_form (format: "1s_past", "3p-m_fut", etc.)
                                 if '_' in form.grammatical_form:
                                     tense_suffix = form.grammatical_form.split('_')[-1]
@@ -1490,18 +1580,15 @@ class TrakaidoExporter:
                                         # Future tense minimum level is 12
                                         form_level = max(form_level, 12)
 
-                            # Try to find corresponding English conjugation in database
-                            english_conjugation = session.query(DerivativeForm).filter(
-                                DerivativeForm.lemma_id == lemma.id,
-                                DerivativeForm.language_code == 'en',
-                                DerivativeForm.grammatical_form == form.grammatical_form
-                            ).first()
+                            # Try to look up English translation from database first
+                            english_label = self._get_english_translation_from_db(
+                                session,
+                                lemma.id,
+                                form.grammatical_form
+                            )
 
-                            if english_conjugation:
-                                # Use the stored English conjugation
-                                english_label = english_conjugation.derivative_form_text
-                            else:
-                                # Generate readable English label for the form
+                            # If not found in database, generate it
+                            if not english_label:
                                 english_label = self._generate_grammatical_form_label(
                                     form.grammatical_form,
                                     base_english,
