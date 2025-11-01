@@ -662,6 +662,10 @@ class TrakaidoExporter:
                     'word_type': self._normalize_pos_type(entry['POS'])
                 }
 
+                # Add filename field for Chinese to use GUID in URL instead of Chinese characters
+                if self.language == 'zh' and entry['GUID']:
+                    wireword['filename'] = entry['GUID']
+
                 # Add pinyin for Chinese language exports
                 if self.language == 'zh' and entry['Target']:
                     pinyin = self._generate_pinyin(entry['Target'])
@@ -1619,6 +1623,10 @@ class TrakaidoExporter:
                     'level': lemma.difficulty_level or 1,
                     'word_type': 'verb'
                 }
+
+                # Add filename field for Chinese to use GUID in URL instead of Chinese characters
+                if self.language == 'zh' and lemma.guid:
+                    wireword['filename'] = lemma.guid
 
                 # Add pinyin for Chinese language exports
                 if self.language == 'zh' and base_target:
