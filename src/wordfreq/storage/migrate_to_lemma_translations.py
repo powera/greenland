@@ -21,6 +21,9 @@ logger = logging.getLogger(__name__)
 # Mapping of old column names to language codes
 TRANSLATION_COLUMNS = {
     'french_translation': 'fr',
+    'spanish_translation': 'es',
+    'german_translation': 'de',
+    'portuguese_translation': 'pt',
     'chinese_translation': 'zh',
     'korean_translation': 'ko',
     'swahili_translation': 'sw',

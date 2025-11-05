@@ -1,0 +1,6 @@
+Generate all Portuguese verb conjugation forms for the Portuguese verb "{verb}".
+
+English verb: {english_verb}
+Definition: {definition}{subtype_context}
+
+Please provide all forms (6 persons × 3 tenses = 18 forms), using empty strings for forms that are non-standard.

@@ -378,6 +378,41 @@ class GrammaticalForm(enum.Enum):
     VERB_DE_2P_FUT = "verb/de_2p_fut"
     VERB_DE_3P_FUT = "verb/de_3p_fut"
 
+    # Portuguese noun forms (singular/plural only - each noun has a fixed gender)
+    NOUN_PT_SINGULAR = "noun/pt_singular"
+    NOUN_PT_PLURAL = "noun/pt_plural"
+
+    # Portuguese adjective forms (2 genders × 2 numbers = 4 forms)
+    ADJ_PT_SINGULAR_M = "adjective/pt_singular_m"
+    ADJ_PT_PLURAL_M = "adjective/pt_plural_m"
+    ADJ_PT_SINGULAR_F = "adjective/pt_singular_f"
+    ADJ_PT_PLURAL_F = "adjective/pt_plural_f"
+
+    # Portuguese verb forms (6 persons × 3 tenses = 18 forms)
+    # Present tense (presente do indicativo)
+    VERB_PT_1S_PRES = "verb/pt_1s_pres"
+    VERB_PT_2S_PRES = "verb/pt_2s_pres"
+    VERB_PT_3S_PRES = "verb/pt_3s_pres"
+    VERB_PT_1P_PRES = "verb/pt_1p_pres"
+    VERB_PT_2P_PRES = "verb/pt_2p_pres"
+    VERB_PT_3P_PRES = "verb/pt_3p_pres"
+
+    # Preterite (pretérito perfeito - simple past)
+    VERB_PT_1S_PAST = "verb/pt_1s_past"
+    VERB_PT_2S_PAST = "verb/pt_2s_past"
+    VERB_PT_3S_PAST = "verb/pt_3s_past"
+    VERB_PT_1P_PAST = "verb/pt_1p_past"
+    VERB_PT_2P_PAST = "verb/pt_2p_past"
+    VERB_PT_3P_PAST = "verb/pt_3p_past"
+
+    # Future (futuro do presente)
+    VERB_PT_1S_FUT = "verb/pt_1s_fut"
+    VERB_PT_2S_FUT = "verb/pt_2s_fut"
+    VERB_PT_3S_FUT = "verb/pt_3s_fut"
+    VERB_PT_1P_FUT = "verb/pt_1p_fut"
+    VERB_PT_2P_FUT = "verb/pt_2p_fut"
+    VERB_PT_3P_FUT = "verb/pt_3p_fut"
+
     # Adverb forms
     ADVERB_POSITIVE = "adverb/positive"
     ADVERB_COMPARATIVE = "adverb/comparative"

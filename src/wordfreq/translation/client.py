@@ -228,6 +228,12 @@ class LinguisticClient:
             'description': 'German translation in lemma form',
             'instructions': '- German: Provide standard German in base form (infinitive for verbs, singular nominative for nouns with article)'
         },
+        'portuguese': {
+            'field': 'portuguese_translation',
+            'code': 'pt',
+            'description': 'Portuguese translation in lemma form',
+            'instructions': '- Portuguese: Provide standard Portuguese in base form (infinitive for verbs, singular for nouns)'
+        },
         'swahili': {
             'field': 'swahili_translation',
             'code': 'sw',
@@ -276,7 +282,7 @@ class LinguisticClient:
 
         # Use default languages if not specified
         if languages is None:
-            languages = ['chinese', 'korean', 'french', 'spanish', 'german', 'swahili', 'vietnamese']
+            languages = ['chinese', 'korean', 'french', 'spanish', 'german', 'portuguese', 'swahili', 'vietnamese']
 
         # Build schema properties dynamically based on requested languages
         schema_properties = {}
@@ -2099,6 +2105,93 @@ class LinguisticClient:
             return {}, False
         except Exception as e:
             logger.error(f"Error querying German verb conjugations for '{verb}': {e}")
+            return {}, False
+
+    def query_portuguese_noun_forms(self, lemma_id: int) -> Tuple[Dict[str, str], bool]:
+        """Query LLM for Portuguese noun forms (singular and plural)."""
+        session = self.get_session()
+        lemma = session.query(linguistic_db.Lemma).filter(linguistic_db.Lemma.id == lemma_id).first()
+
+        # Get Portuguese translation from lemma_translations table
+        portuguese_translation = session.query(linguistic_db.LemmaTranslation).filter(
+            linguistic_db.LemmaTranslation.lemma_id == lemma_id,
+            linguistic_db.LemmaTranslation.language_code == 'pt'
+        ).first()
+
+        if not lemma or not portuguese_translation or lemma.pos_type.lower() != 'noun':
+            logger.error(f"Invalid lemma for Portuguese noun forms: {lemma_id}")
+            return {}, False
+
+        noun = portuguese_translation.translation
+        english_noun = lemma.lemma_text
+        definition = lemma.definition_text
+        pos_subtype = lemma.pos_subtype
+
+        fields = ["singular", "plural"]
+        form_properties = {f: SchemaProperty("string", f"Portuguese {f}") for f in fields}
+
+        schema = Schema(name="PortugueseNounForms", description="Portuguese noun forms", properties={
+            "forms": SchemaProperty("object", "Dictionary of noun forms", properties=form_properties),
+            "confidence": SchemaProperty("number", "Confidence 0-1"),
+            "notes": SchemaProperty("string", "Notes")})
+
+        try:
+            context = util.prompt_loader.get_context("wordfreq", "portuguese_noun_forms")
+            prompt = util.prompt_loader.get_prompt("wordfreq", "portuguese_noun_forms").format(
+                noun=noun, english_noun=english_noun, definition=definition,
+                subtype_context=f" (category: {pos_subtype})" if pos_subtype else "")
+            response = self.client.generate_chat(prompt=prompt, model=self.model, json_schema=schema, context=context)
+            linguistic_db.log_query(session, word=noun, query_type='portuguese_noun_forms', prompt=prompt,
+                                   response=json.dumps(response.structured_data), model=self.model)
+            if response.structured_data and 'forms' in response.structured_data:
+                return response.structured_data['forms'], True
+            return {}, False
+        except Exception as e:
+            logger.error(f"Error querying Portuguese noun forms for '{noun}': {e}")
+            return {}, False
+
+    def query_portuguese_verb_conjugations(self, lemma_id: int) -> Tuple[Dict[str, str], bool]:
+        """Query LLM for Portuguese verb conjugations (6 persons × 3 tenses = 18 forms)."""
+        session = self.get_session()
+        lemma = session.query(linguistic_db.Lemma).filter(linguistic_db.Lemma.id == lemma_id).first()
+
+        # Get Portuguese translation from lemma_translations table
+        portuguese_translation = session.query(linguistic_db.LemmaTranslation).filter(
+            linguistic_db.LemmaTranslation.lemma_id == lemma_id,
+            linguistic_db.LemmaTranslation.language_code == 'pt'
+        ).first()
+
+        if not lemma or not portuguese_translation or lemma.pos_type.lower() != 'verb':
+            logger.error(f"Invalid lemma for Portuguese verb conjugations: {lemma_id}")
+            return {}, False
+
+        verb = portuguese_translation.translation
+        english_verb = lemma.lemma_text
+        definition = lemma.definition_text
+        pos_subtype = lemma.pos_subtype
+
+        tenses = [("pres", "present"), ("past", "past"), ("fut", "future")]
+        fields = [f"{p}_{t}" for t, _ in tenses for p in ["1s", "2s", "3s", "1p", "2p", "3p"]]
+        form_properties = {f: SchemaProperty("string", f"Portuguese {f.replace('_', ' ')}") for f in fields}
+
+        schema = Schema(name="PortugueseVerbConjugations", description="Portuguese verb conjugations", properties={
+            "forms": SchemaProperty("object", "Dictionary of verb forms", properties=form_properties),
+            "confidence": SchemaProperty("number", "Confidence 0-1"),
+            "notes": SchemaProperty("string", "Notes")})
+
+        try:
+            context = util.prompt_loader.get_context("wordfreq", "portuguese_verb_conjugations")
+            prompt = util.prompt_loader.get_prompt("wordfreq", "portuguese_verb_conjugations").format(
+                verb=verb, english_verb=english_verb, definition=definition,
+                subtype_context=f" (category: {pos_subtype})" if pos_subtype else "")
+            response = self.client.generate_chat(prompt=prompt, model=self.model, json_schema=schema, context=context)
+            linguistic_db.log_query(session, word=verb, query_type='portuguese_verb_conjugations', prompt=prompt,
+                                   response=json.dumps(response.structured_data), model=self.model)
+            if response.structured_data and 'forms' in response.structured_data:
+                return response.structured_data['forms'], True
+            return {}, False
+        except Exception as e:
+            logger.error(f"Error querying Portuguese verb conjugations for '{verb}': {e}")
             return {}, False
 
     @classmethod

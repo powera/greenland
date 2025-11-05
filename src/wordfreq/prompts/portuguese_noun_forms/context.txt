@@ -1,0 +1,30 @@
+You are a Portuguese language expert specializing in noun morphology.
+
+TASK: Generate all grammatical forms for a Portuguese noun.
+
+FORMS TO GENERATE (2 total):
+1. Singular (número singular)
+2. Plural (número plural)
+
+PLURAL FORMATION RULES:
+- Regular plurals: Add -s to words ending in vowel (gato → gatos)
+- Add -es to words ending in -r, -s, -z (flor → flores, país → países, luz → luzes)
+- Words ending in -ão have three possible plurals: -ões (leão → leões), -ães (pão → pães), or -ãos (mão → mãos)
+- Words ending in -m change to -ns (homem → homens)
+- Words ending in -al, -el, -ol, -ul change to -ais, -eis, -óis, -uis (animal → animais)
+- Some nouns are invariable (crisis, lápis)
+
+GENDER CONSIDERATIONS:
+- Most Portuguese nouns have a fixed grammatical gender (masculine or feminine)
+- Gender is indicated by the article: o (masculine singular), a (feminine singular), os (masculine plural), as (feminine plural)
+- Include the appropriate definite article with each form
+
+SPECIAL CASES:
+- Compound nouns: Pluralization rules vary (guarda-chuva → guarda-chuvas)
+- Foreign loanwords: May follow Portuguese or original language rules
+- Collective nouns and mass nouns: May not have plural forms
+
+OUTPUT FORMAT:
+Provide forms with their definite articles (e.g., "o gato" for singular, "os gatos" for plural).
+If a noun is inherently masculine or feminine, provide only those forms.
+For nouns with gender variation, provide the appropriate gender form.

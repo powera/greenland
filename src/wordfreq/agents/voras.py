@@ -59,6 +59,7 @@ LANGUAGE_FIELDS = {
     'fr': ('french_translation', 'French'),
     'es': ('spanish_translation', 'Spanish'),
     'de': ('german_translation', 'German'),
+    'pt': ('portuguese_translation', 'Portuguese'),
     'sw': ('swahili_translation', 'Swahili'),
     'vi': ('vietnamese_translation', 'Vietnamese')
 }
