@@ -7,10 +7,6 @@ Part of Speech: {pos_type}
 {subtype_info}
 
 Provide translations in lemma/base form for:
-- Chinese (simplified characters)
-- Korean (Hangul)
-- French
-- Swahili
-- Vietnamese
+{languages_list}
 
 Ensure all translations match the specific meaning indicated by the English and Lithuanian translations.

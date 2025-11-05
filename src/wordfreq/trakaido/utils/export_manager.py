@@ -64,6 +64,18 @@ class TrakaidoExporter:
         'fr': {
             'name': 'French',
             'field': 'french_translation'
+        },
+        'es': {
+            'name': 'Spanish',
+            'field': 'spanish_translation'
+        },
+        'de': {
+            'name': 'German',
+            'field': 'german_translation'
+        },
+        'pt': {
+            'name': 'Portuguese',
+            'field': 'portuguese_translation'
         }
     }
 

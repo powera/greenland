@@ -11,15 +11,6 @@ CRITICAL REQUIREMENTS:
 6. Ensure translations match the specific meaning indicated by the English and Lithuanian
 
 Languages to translate to:
-- Chinese: Provide Traditional Chinese characters (繁體字) in base form
-  - Prefer two-character terms for clarity and naturalness
-  - Use single-character terms for common basic vocabulary (e.g., 酒 for wine, 牛 for cow, 茶 for tea, 水 for water)
-  - Match the generality level of the English word (avoid overly specific translations like 葡萄酒 for wine)
-  - Use standard Mandarin Chinese (not regional variants)
-  - Do not include pinyin, just the characters
-- Korean: Provide Hangul in base form
-- French: Provide standard French in base form (infinitive for verbs, singular for nouns)
-- Swahili: Provide standard Swahili in base form
-- Vietnamese: Provide standard Vietnamese in base form
+{language_instructions}
 
 Ensure accuracy and cultural appropriateness for all languages. Use the most common translation that matches the intended meaning.
