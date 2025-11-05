@@ -33,16 +33,6 @@ FORM_MAPPING = {
     "3s-m_fut": GrammaticalForm.VERB_FR_3S_M_FUT, "3s-f_fut": GrammaticalForm.VERB_FR_3S_F_FUT,
     "1p_fut": GrammaticalForm.VERB_FR_1P_FUT, "2p_fut": GrammaticalForm.VERB_FR_2P_FUT,
     "3p-m_fut": GrammaticalForm.VERB_FR_3P_M_FUT, "3p-f_fut": GrammaticalForm.VERB_FR_3P_F_FUT,
-    # Conditional (8 persons)
-    "1s_cond": GrammaticalForm.VERB_FR_1S_COND, "2s_cond": GrammaticalForm.VERB_FR_2S_COND,
-    "3s-m_cond": GrammaticalForm.VERB_FR_3S_M_COND, "3s-f_cond": GrammaticalForm.VERB_FR_3S_F_COND,
-    "1p_cond": GrammaticalForm.VERB_FR_1P_COND, "2p_cond": GrammaticalForm.VERB_FR_2P_COND,
-    "3p-m_cond": GrammaticalForm.VERB_FR_3P_M_COND, "3p-f_cond": GrammaticalForm.VERB_FR_3P_F_COND,
-    # Subjunctive (8 persons)
-    "1s_subj": GrammaticalForm.VERB_FR_1S_SUBJ, "2s_subj": GrammaticalForm.VERB_FR_2S_SUBJ,
-    "3s-m_subj": GrammaticalForm.VERB_FR_3S_M_SUBJ, "3s-f_subj": GrammaticalForm.VERB_FR_3S_F_SUBJ,
-    "1p_subj": GrammaticalForm.VERB_FR_1P_SUBJ, "2p_subj": GrammaticalForm.VERB_FR_2P_SUBJ,
-    "3p-m_subj": GrammaticalForm.VERB_FR_3P_M_SUBJ, "3p-f_subj": GrammaticalForm.VERB_FR_3P_F_SUBJ,
     # Passé composé (8 persons)
     "1s_pc": GrammaticalForm.VERB_FR_1S_PC, "2s_pc": GrammaticalForm.VERB_FR_2S_PC,
     "3s-m_pc": GrammaticalForm.VERB_FR_3S_M_PC, "3s-f_pc": GrammaticalForm.VERB_FR_3S_F_PC,
@@ -71,7 +61,7 @@ def process_lemma_conjugations(client: LinguisticClient, lemma_id: int, db_path:
             linguistic_db.DerivativeForm.lemma_id == lemma_id,
             linguistic_db.DerivativeForm.language_code == 'fr'
         ).all()
-        if sum(1 for f in existing_forms if f.grammatical_form in [g.value for g in FORM_MAPPING.values()]) >= 3:
+        if sum(1 for f in existing_forms if f.grammatical_form in [g.value for g in FORM_MAPPING.values()]) >= 25:
             logger.info(f"Lemma ID {lemma_id} already has French conjugations, skipping")
             return True
 

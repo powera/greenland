@@ -259,7 +259,7 @@ class GrammaticalForm(enum.Enum):
     ADJ_FR_SINGULAR_F = "adjective/fr_singular_f"
     ADJ_FR_PLURAL_F = "adjective/fr_plural_f"
 
-    # French verb forms (8 persons × 6 tenses = 48 forms)
+    # French verb forms (8 persons × 4 tenses = 32 forms)
     # Present tense (présent de l'indicatif)
     VERB_FR_1S_PRES = "verb/fr_1s_pres"
     VERB_FR_2S_PRES = "verb/fr_2s_pres"
@@ -289,26 +289,6 @@ class GrammaticalForm(enum.Enum):
     VERB_FR_2P_FUT = "verb/fr_2p_fut"
     VERB_FR_3P_M_FUT = "verb/fr_3p-m_fut"
     VERB_FR_3P_F_FUT = "verb/fr_3p-f_fut"
-
-    # Conditional (conditionnel présent)
-    VERB_FR_1S_COND = "verb/fr_1s_cond"
-    VERB_FR_2S_COND = "verb/fr_2s_cond"
-    VERB_FR_3S_M_COND = "verb/fr_3s-m_cond"
-    VERB_FR_3S_F_COND = "verb/fr_3s-f_cond"
-    VERB_FR_1P_COND = "verb/fr_1p_cond"
-    VERB_FR_2P_COND = "verb/fr_2p_cond"
-    VERB_FR_3P_M_COND = "verb/fr_3p-m_cond"
-    VERB_FR_3P_F_COND = "verb/fr_3p-f_cond"
-
-    # Subjunctive present (subjonctif présent)
-    VERB_FR_1S_SUBJ = "verb/fr_1s_subj"
-    VERB_FR_2S_SUBJ = "verb/fr_2s_subj"
-    VERB_FR_3S_M_SUBJ = "verb/fr_3s-m_subj"
-    VERB_FR_3S_F_SUBJ = "verb/fr_3s-f_subj"
-    VERB_FR_1P_SUBJ = "verb/fr_1p_subj"
-    VERB_FR_2P_SUBJ = "verb/fr_2p_subj"
-    VERB_FR_3P_M_SUBJ = "verb/fr_3p-m_subj"
-    VERB_FR_3P_F_SUBJ = "verb/fr_3p-f_subj"
 
     # Passé composé (compound past with auxiliary)
     VERB_FR_1S_PC = "verb/fr_1s_pc"

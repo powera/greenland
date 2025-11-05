@@ -3,5 +3,6 @@ Generate all French verb conjugation forms for the French verb "{verb}".
 English verb: {english_verb}
 Definition: {definition}{subtype_context}
 
-Please provide all forms (8 persons × 6 tenses = 48 forms), using empty strings for forms that are non-standard.
+Please provide all forms (8 persons × 4 tenses = 32 forms), using empty strings for forms that are non-standard.
+Tenses: present (présent), imperfect (imparfait), future (futur simple), passé composé.
 Note: Provide separate forms for 3rd person singular masculine (il) and feminine (elle), and 3rd person plural masculine (ils) and feminine (elles).

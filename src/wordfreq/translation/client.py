@@ -1902,7 +1902,7 @@ class LinguisticClient:
             return {}, False
 
     def query_french_verb_conjugations(self, lemma_id: int) -> Tuple[Dict[str, str], bool]:
-        """Query LLM for French verb conjugations (8 persons × 6 tenses = 48 forms)."""
+        """Query LLM for French verb conjugations (8 persons × 4 tenses = 32 forms)."""
         session = self.get_session()
         lemma = session.query(linguistic_db.Lemma).filter(linguistic_db.Lemma.id == lemma_id).first()
         if not lemma or not lemma.french_translation or lemma.pos_type.lower() != 'verb':
@@ -1910,7 +1910,7 @@ class LinguisticClient:
             return {}, False
 
         verb, english_verb, definition, pos_subtype = lemma.french_translation, lemma.lemma_text, lemma.definition_text, lemma.pos_subtype
-        tenses = [("pres", "present"), ("impf", "imperfect"), ("fut", "future"), ("cond", "conditional"), ("subj", "subjunctive"), ("pc", "passé composé")]
+        tenses = [("pres", "present"), ("impf", "imperfect"), ("fut", "future"), ("pc", "passé composé")]
         fields = [f"{p}_{t}" for t, _ in tenses for p in ["1s", "2s", "3s-m", "3s-f", "1p", "2p", "3p-m", "3p-f"]]
         form_properties = {f: SchemaProperty("string", f"French {f.replace('_', ' ')}") for f in fields}
 
