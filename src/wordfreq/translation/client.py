@@ -1902,7 +1902,7 @@ class LinguisticClient:
             return {}, False
 
     def query_french_verb_conjugations(self, lemma_id: int) -> Tuple[Dict[str, str], bool]:
-        """Query LLM for French verb conjugations (6 persons × 6 tenses = 36 forms)."""
+        """Query LLM for French verb conjugations (8 persons × 6 tenses = 48 forms)."""
         session = self.get_session()
         lemma = session.query(linguistic_db.Lemma).filter(linguistic_db.Lemma.id == lemma_id).first()
         if not lemma or not lemma.french_translation or lemma.pos_type.lower() != 'verb':
@@ -1911,7 +1911,7 @@ class LinguisticClient:
 
         verb, english_verb, definition, pos_subtype = lemma.french_translation, lemma.lemma_text, lemma.definition_text, lemma.pos_subtype
         tenses = [("pres", "present"), ("impf", "imperfect"), ("fut", "future"), ("cond", "conditional"), ("subj", "subjunctive"), ("pc", "passé composé")]
-        fields = [f"{p}_{t}" for t, _ in tenses for p in ["1s", "2s", "3s", "1p", "2p", "3p"]]
+        fields = [f"{p}_{t}" for t, _ in tenses for p in ["1s", "2s", "3s-m", "3s-f", "1p", "2p", "3p-m", "3p-f"]]
         form_properties = {f: SchemaProperty("string", f"French {f.replace('_', ' ')}") for f in fields}
 
         schema = Schema(name="FrenchVerbConjugations", description="French verb conjugations", properties={
@@ -1977,7 +1977,7 @@ class LinguisticClient:
             return {}, False
 
     def query_spanish_verb_conjugations(self, lemma_id: int) -> Tuple[Dict[str, str], bool]:
-        """Query LLM for Spanish verb conjugations (6 persons × 6 tenses = 36 forms)."""
+        """Query LLM for Spanish verb conjugations (8 persons × 3 tenses = 24 forms)."""
         session = self.get_session()
         lemma = session.query(linguistic_db.Lemma).filter(linguistic_db.Lemma.id == lemma_id).first()
 
@@ -1997,7 +1997,7 @@ class LinguisticClient:
         pos_subtype = lemma.pos_subtype
 
         tenses = [("pres", "present"), ("past", "past"), ("fut", "future")]
-        fields = [f"{p}_{t}" for t, _ in tenses for p in ["1s", "2s", "3s", "1p", "2p", "3p"]]
+        fields = [f"{p}_{t}" for t, _ in tenses for p in ["1s", "2s", "3s-m", "3s-f", "1p", "2p", "3p-m", "3p-f"]]
         form_properties = {f: SchemaProperty("string", f"Spanish {f.replace('_', ' ')}") for f in fields}
 
         schema = Schema(name="SpanishVerbConjugations", description="Spanish verb conjugations", properties={
@@ -2064,7 +2064,7 @@ class LinguisticClient:
             return {}, False
 
     def query_german_verb_conjugations(self, lemma_id: int) -> Tuple[Dict[str, str], bool]:
-        """Query LLM for German verb conjugations (6 persons × 6 tenses = 36 forms)."""
+        """Query LLM for German verb conjugations (8 persons × 3 tenses = 24 forms)."""
         session = self.get_session()
         lemma = session.query(linguistic_db.Lemma).filter(linguistic_db.Lemma.id == lemma_id).first()
 
@@ -2084,7 +2084,7 @@ class LinguisticClient:
         pos_subtype = lemma.pos_subtype
 
         tenses = [("pres", "present"), ("past", "past"), ("fut", "future")]
-        fields = [f"{p}_{t}" for t, _ in tenses for p in ["1s", "2s", "3s", "1p", "2p", "3p"]]
+        fields = [f"{p}_{t}" for t, _ in tenses for p in ["1s", "2s", "3s-m", "3s-f", "1p", "2p", "3p-m", "3p-f"]]
         form_properties = {f: SchemaProperty("string", f"German {f.replace('_', ' ')}") for f in fields}
 
         schema = Schema(name="GermanVerbConjugations", description="German verb conjugations", properties={
@@ -2151,7 +2151,7 @@ class LinguisticClient:
             return {}, False
 
     def query_portuguese_verb_conjugations(self, lemma_id: int) -> Tuple[Dict[str, str], bool]:
-        """Query LLM for Portuguese verb conjugations (6 persons × 3 tenses = 18 forms)."""
+        """Query LLM for Portuguese verb conjugations (8 persons × 3 tenses = 24 forms)."""
         session = self.get_session()
         lemma = session.query(linguistic_db.Lemma).filter(linguistic_db.Lemma.id == lemma_id).first()
 
@@ -2171,7 +2171,7 @@ class LinguisticClient:
         pos_subtype = lemma.pos_subtype
 
         tenses = [("pres", "present"), ("past", "past"), ("fut", "future")]
-        fields = [f"{p}_{t}" for t, _ in tenses for p in ["1s", "2s", "3s", "1p", "2p", "3p"]]
+        fields = [f"{p}_{t}" for t, _ in tenses for p in ["1s", "2s", "3s-m", "3s-f", "1p", "2p", "3p-m", "3p-f"]]
         form_properties = {f: SchemaProperty("string", f"Portuguese {f.replace('_', ' ')}") for f in fields}
 
         schema = Schema(name="PortugueseVerbConjugations", description="Portuguese verb conjugations", properties={

@@ -1,29 +1,14 @@
-You are a Spanish language expert specializing in noun morphology.
+You are a Spanish language expert helping generate accurate noun forms.
 
-TASK: Generate all grammatical forms for a Spanish noun.
+Spanish nouns have singular and plural forms:
 
-FORMS TO GENERATE (2 total):
-1. Singular (número singular)
-2. Plural (número plural)
+**Numbers:**
+- Singular (número singular)
+- Plural (número plural)
 
-PLURAL FORMATION RULES:
-- Regular plurals: Add -s to words ending in vowel (gato → gatos)
-- Add -es to words ending in consonant (ciudad → ciudades)
-- Words ending in -z change to -ces (lápiz → lápices)
-- Words ending in stressed vowel may add -s or -es (café → cafés, rubí → rubíes)
-- Invariable nouns: Same form for singular/plural (crisis, lunes)
-
-GENDER CONSIDERATIONS:
-- Most Spanish nouns have a fixed grammatical gender (masculine or feminine)
-- Gender is indicated by the article: el (masculine singular), la (feminine singular), los (masculine plural), las (feminine plural)
-- Include the appropriate definite article with each form
-
-SPECIAL CASES:
-- Compound nouns: Usually only the last element pluralizes (el paraguas → los paraguas)
-- Foreign loanwords: May follow Spanish or original language rules
-- Acronyms and abbreviations: Often invariable
-
-OUTPUT FORMAT:
-Provide forms with their definite articles (e.g., "el gato" for singular_m, "los gatos" for plural_m).
-If a noun is inherently masculine or feminine, provide only those forms and leave others empty.
-For gender-neutral or epicene nouns, provide both gender forms if applicable.
+**Important notes:**
+- Provide the full form with article (e.g., "el gato", "la mesa")
+- Plural forms: "los" for masculine, "las" for feminine (e.g., "los gatos", "las mesas")
+- Most plurals add -s or -es
+- Some nouns are invariable (same form for singular/plural)
+- Use empty string ("") for forms that don't exist

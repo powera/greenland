@@ -3,4 +3,5 @@ Generate all Portuguese verb conjugation forms for the Portuguese verb "{verb}".
 English verb: {english_verb}
 Definition: {definition}{subtype_context}
 
-Please provide all forms (6 persons × 3 tenses = 18 forms), using empty strings for forms that are non-standard.
+Please provide all forms (8 persons × 3 tenses = 24 forms), using empty strings for forms that are non-standard.
+Note: Provide separate forms for 3rd person singular masculine (ele) and feminine (ela), and 3rd person plural masculine (eles) and feminine (elas).

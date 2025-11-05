@@ -17,15 +17,21 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 FORM_MAPPING = {
-    # Present
-    "1s_pres": GrammaticalForm.VERB_ES_1S_PRES, "2s_pres": GrammaticalForm.VERB_ES_2S_PRES, "3s_pres": GrammaticalForm.VERB_ES_3S_PRES,
-    "1p_pres": GrammaticalForm.VERB_ES_1P_PRES, "2p_pres": GrammaticalForm.VERB_ES_2P_PRES, "3p_pres": GrammaticalForm.VERB_ES_3P_PRES,
-    # Past (Preterite)
-    "1s_past": GrammaticalForm.VERB_ES_1S_PAST, "2s_past": GrammaticalForm.VERB_ES_2S_PAST, "3s_past": GrammaticalForm.VERB_ES_3S_PAST,
-    "1p_past": GrammaticalForm.VERB_ES_1P_PAST, "2p_past": GrammaticalForm.VERB_ES_2P_PAST, "3p_past": GrammaticalForm.VERB_ES_3P_PAST,
-    # Future
-    "1s_fut": GrammaticalForm.VERB_ES_1S_FUT, "2s_fut": GrammaticalForm.VERB_ES_2S_FUT, "3s_fut": GrammaticalForm.VERB_ES_3S_FUT,
-    "1p_fut": GrammaticalForm.VERB_ES_1P_FUT, "2p_fut": GrammaticalForm.VERB_ES_2P_FUT, "3p_fut": GrammaticalForm.VERB_ES_3P_FUT,
+    # Present (8 persons)
+    "1s_pres": GrammaticalForm.VERB_ES_1S_PRES, "2s_pres": GrammaticalForm.VERB_ES_2S_PRES,
+    "3s-m_pres": GrammaticalForm.VERB_ES_3S_M_PRES, "3s-f_pres": GrammaticalForm.VERB_ES_3S_F_PRES,
+    "1p_pres": GrammaticalForm.VERB_ES_1P_PRES, "2p_pres": GrammaticalForm.VERB_ES_2P_PRES,
+    "3p-m_pres": GrammaticalForm.VERB_ES_3P_M_PRES, "3p-f_pres": GrammaticalForm.VERB_ES_3P_F_PRES,
+    # Past (Preterite) (8 persons)
+    "1s_past": GrammaticalForm.VERB_ES_1S_PAST, "2s_past": GrammaticalForm.VERB_ES_2S_PAST,
+    "3s-m_past": GrammaticalForm.VERB_ES_3S_M_PAST, "3s-f_past": GrammaticalForm.VERB_ES_3S_F_PAST,
+    "1p_past": GrammaticalForm.VERB_ES_1P_PAST, "2p_past": GrammaticalForm.VERB_ES_2P_PAST,
+    "3p-m_past": GrammaticalForm.VERB_ES_3P_M_PAST, "3p-f_past": GrammaticalForm.VERB_ES_3P_F_PAST,
+    # Future (8 persons)
+    "1s_fut": GrammaticalForm.VERB_ES_1S_FUT, "2s_fut": GrammaticalForm.VERB_ES_2S_FUT,
+    "3s-m_fut": GrammaticalForm.VERB_ES_3S_M_FUT, "3s-f_fut": GrammaticalForm.VERB_ES_3S_F_FUT,
+    "1p_fut": GrammaticalForm.VERB_ES_1P_FUT, "2p_fut": GrammaticalForm.VERB_ES_2P_FUT,
+    "3p-m_fut": GrammaticalForm.VERB_ES_3P_M_FUT, "3p-f_fut": GrammaticalForm.VERB_ES_3P_F_FUT,
 }
 
 def get_spanish_verb_lemmas(db_path: str, limit: int = None) -> List[Dict]:
@@ -71,7 +77,7 @@ def process_lemma_conjugations(client: LinguisticClient, lemma_id: int, db_path:
             linguistic_db.DerivativeForm.language_code == 'es'
         ).all()
 
-        if sum(1 for f in existing_forms if f.grammatical_form in [g.value for g in FORM_MAPPING.values()]) >= 15:
+        if sum(1 for f in existing_forms if f.grammatical_form in [g.value for g in FORM_MAPPING.values()]) >= 20:
             logger.info(f"Lemma ID {lemma_id} already has Spanish verb forms, skipping")
             return True
 

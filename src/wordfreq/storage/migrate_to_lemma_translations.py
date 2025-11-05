@@ -6,10 +6,15 @@ to the lemma_translations table.
 
 This migrates:
 - french_translation -> lemma_translations (language_code='fr')
-- chinese_translation -> lemma_translations (language_code='zh')
+- spanish_translation -> lemma_translations (language_code='es')
+- german_translation -> lemma_translations (language_code='de')
+- portuguese_translation -> lemma_translations (language_code='pt')
 - korean_translation -> lemma_translations (language_code='ko')
 - swahili_translation -> lemma_translations (language_code='sw')
 - vietnamese_translation -> lemma_translations (language_code='vi')
+
+Note: chinese_translation and lithuanian_translation are kept in the lemmas table
+to provide context for what the lemma represents.
 """
 
 import logging
@@ -19,16 +24,15 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 # Mapping of old column names to language codes
+# Note: chinese_translation and lithuanian_translation are kept in lemmas table for context
 TRANSLATION_COLUMNS = {
     'french_translation': 'fr',
     'spanish_translation': 'es',
     'german_translation': 'de',
     'portuguese_translation': 'pt',
-    'chinese_translation': 'zh',
     'korean_translation': 'ko',
     'swahili_translation': 'sw',
     'vietnamese_translation': 'vi',
-    'lithuanian_translation': 'lt',
 }
 
 def migrate_translations(session, dry_run=False):

@@ -259,54 +259,66 @@ class GrammaticalForm(enum.Enum):
     ADJ_FR_SINGULAR_F = "adjective/fr_singular_f"
     ADJ_FR_PLURAL_F = "adjective/fr_plural_f"
 
-    # French verb forms (6 persons × 6 tenses = 36 forms)
+    # French verb forms (8 persons × 6 tenses = 48 forms)
     # Present tense (présent de l'indicatif)
     VERB_FR_1S_PRES = "verb/fr_1s_pres"
     VERB_FR_2S_PRES = "verb/fr_2s_pres"
-    VERB_FR_3S_PRES = "verb/fr_3s_pres"
+    VERB_FR_3S_M_PRES = "verb/fr_3s-m_pres"
+    VERB_FR_3S_F_PRES = "verb/fr_3s-f_pres"
     VERB_FR_1P_PRES = "verb/fr_1p_pres"
     VERB_FR_2P_PRES = "verb/fr_2p_pres"
-    VERB_FR_3P_PRES = "verb/fr_3p_pres"
+    VERB_FR_3P_M_PRES = "verb/fr_3p-m_pres"
+    VERB_FR_3P_F_PRES = "verb/fr_3p-f_pres"
 
     # Imperfect (imparfait)
     VERB_FR_1S_IMPF = "verb/fr_1s_impf"
     VERB_FR_2S_IMPF = "verb/fr_2s_impf"
-    VERB_FR_3S_IMPF = "verb/fr_3s_impf"
+    VERB_FR_3S_M_IMPF = "verb/fr_3s-m_impf"
+    VERB_FR_3S_F_IMPF = "verb/fr_3s-f_impf"
     VERB_FR_1P_IMPF = "verb/fr_1p_impf"
     VERB_FR_2P_IMPF = "verb/fr_2p_impf"
-    VERB_FR_3P_IMPF = "verb/fr_3p_impf"
+    VERB_FR_3P_M_IMPF = "verb/fr_3p-m_impf"
+    VERB_FR_3P_F_IMPF = "verb/fr_3p-f_impf"
 
     # Future (futur simple)
     VERB_FR_1S_FUT = "verb/fr_1s_fut"
     VERB_FR_2S_FUT = "verb/fr_2s_fut"
-    VERB_FR_3S_FUT = "verb/fr_3s_fut"
+    VERB_FR_3S_M_FUT = "verb/fr_3s-m_fut"
+    VERB_FR_3S_F_FUT = "verb/fr_3s-f_fut"
     VERB_FR_1P_FUT = "verb/fr_1p_fut"
     VERB_FR_2P_FUT = "verb/fr_2p_fut"
-    VERB_FR_3P_FUT = "verb/fr_3p_fut"
+    VERB_FR_3P_M_FUT = "verb/fr_3p-m_fut"
+    VERB_FR_3P_F_FUT = "verb/fr_3p-f_fut"
 
     # Conditional (conditionnel présent)
     VERB_FR_1S_COND = "verb/fr_1s_cond"
     VERB_FR_2S_COND = "verb/fr_2s_cond"
-    VERB_FR_3S_COND = "verb/fr_3s_cond"
+    VERB_FR_3S_M_COND = "verb/fr_3s-m_cond"
+    VERB_FR_3S_F_COND = "verb/fr_3s-f_cond"
     VERB_FR_1P_COND = "verb/fr_1p_cond"
     VERB_FR_2P_COND = "verb/fr_2p_cond"
-    VERB_FR_3P_COND = "verb/fr_3p_cond"
+    VERB_FR_3P_M_COND = "verb/fr_3p-m_cond"
+    VERB_FR_3P_F_COND = "verb/fr_3p-f_cond"
 
     # Subjunctive present (subjonctif présent)
     VERB_FR_1S_SUBJ = "verb/fr_1s_subj"
     VERB_FR_2S_SUBJ = "verb/fr_2s_subj"
-    VERB_FR_3S_SUBJ = "verb/fr_3s_subj"
+    VERB_FR_3S_M_SUBJ = "verb/fr_3s-m_subj"
+    VERB_FR_3S_F_SUBJ = "verb/fr_3s-f_subj"
     VERB_FR_1P_SUBJ = "verb/fr_1p_subj"
     VERB_FR_2P_SUBJ = "verb/fr_2p_subj"
-    VERB_FR_3P_SUBJ = "verb/fr_3p_subj"
+    VERB_FR_3P_M_SUBJ = "verb/fr_3p-m_subj"
+    VERB_FR_3P_F_SUBJ = "verb/fr_3p-f_subj"
 
     # Passé composé (compound past with auxiliary)
     VERB_FR_1S_PC = "verb/fr_1s_pc"
     VERB_FR_2S_PC = "verb/fr_2s_pc"
-    VERB_FR_3S_PC = "verb/fr_3s_pc"
+    VERB_FR_3S_M_PC = "verb/fr_3s-m_pc"
+    VERB_FR_3S_F_PC = "verb/fr_3s-f_pc"
     VERB_FR_1P_PC = "verb/fr_1p_pc"
     VERB_FR_2P_PC = "verb/fr_2p_pc"
-    VERB_FR_3P_PC = "verb/fr_3p_pc"
+    VERB_FR_3P_M_PC = "verb/fr_3p-m_pc"
+    VERB_FR_3P_F_PC = "verb/fr_3p-f_pc"
 
     # Spanish noun forms (singular/plural only - each noun has a fixed gender)
     NOUN_ES_SINGULAR = "noun/es_singular"
@@ -318,30 +330,36 @@ class GrammaticalForm(enum.Enum):
     ADJ_ES_SINGULAR_F = "adjective/es_singular_f"
     ADJ_ES_PLURAL_F = "adjective/es_plural_f"
 
-    # Spanish verb forms (6 persons × 3 tenses = 18 forms)
+    # Spanish verb forms (8 persons × 3 tenses = 24 forms)
     # Present tense (presente de indicativo)
     VERB_ES_1S_PRES = "verb/es_1s_pres"
     VERB_ES_2S_PRES = "verb/es_2s_pres"
-    VERB_ES_3S_PRES = "verb/es_3s_pres"
+    VERB_ES_3S_M_PRES = "verb/es_3s-m_pres"
+    VERB_ES_3S_F_PRES = "verb/es_3s-f_pres"
     VERB_ES_1P_PRES = "verb/es_1p_pres"
     VERB_ES_2P_PRES = "verb/es_2p_pres"
-    VERB_ES_3P_PRES = "verb/es_3p_pres"
+    VERB_ES_3P_M_PRES = "verb/es_3p-m_pres"
+    VERB_ES_3P_F_PRES = "verb/es_3p-f_pres"
 
     # Preterite (pretérito perfecto simple - simple past)
     VERB_ES_1S_PAST = "verb/es_1s_past"
     VERB_ES_2S_PAST = "verb/es_2s_past"
-    VERB_ES_3S_PAST = "verb/es_3s_past"
+    VERB_ES_3S_M_PAST = "verb/es_3s-m_past"
+    VERB_ES_3S_F_PAST = "verb/es_3s-f_past"
     VERB_ES_1P_PAST = "verb/es_1p_past"
     VERB_ES_2P_PAST = "verb/es_2p_past"
-    VERB_ES_3P_PAST = "verb/es_3p_past"
+    VERB_ES_3P_M_PAST = "verb/es_3p-m_past"
+    VERB_ES_3P_F_PAST = "verb/es_3p-f_past"
 
     # Future (futuro simple)
     VERB_ES_1S_FUT = "verb/es_1s_fut"
     VERB_ES_2S_FUT = "verb/es_2s_fut"
-    VERB_ES_3S_FUT = "verb/es_3s_fut"
+    VERB_ES_3S_M_FUT = "verb/es_3s-m_fut"
+    VERB_ES_3S_F_FUT = "verb/es_3s-f_fut"
     VERB_ES_1P_FUT = "verb/es_1p_fut"
     VERB_ES_2P_FUT = "verb/es_2p_fut"
-    VERB_ES_3P_FUT = "verb/es_3p_fut"
+    VERB_ES_3P_M_FUT = "verb/es_3p-m_fut"
+    VERB_ES_3P_F_FUT = "verb/es_3p-f_fut"
 
     # German noun forms (singular/plural only)
     NOUN_DE_SINGULAR = "noun/de_singular"
@@ -353,30 +371,36 @@ class GrammaticalForm(enum.Enum):
     ADJ_DE_SINGULAR_F = "adjective/de_singular_f"
     ADJ_DE_PLURAL_F = "adjective/de_plural_f"
 
-    # German verb forms (6 persons × 3 tenses = 18 forms)
+    # German verb forms (8 persons × 3 tenses = 24 forms)
     # Present tense (Präsens)
     VERB_DE_1S_PRES = "verb/de_1s_pres"
     VERB_DE_2S_PRES = "verb/de_2s_pres"
-    VERB_DE_3S_PRES = "verb/de_3s_pres"
+    VERB_DE_3S_M_PRES = "verb/de_3s-m_pres"
+    VERB_DE_3S_F_PRES = "verb/de_3s-f_pres"
     VERB_DE_1P_PRES = "verb/de_1p_pres"
     VERB_DE_2P_PRES = "verb/de_2p_pres"
-    VERB_DE_3P_PRES = "verb/de_3p_pres"
+    VERB_DE_3P_M_PRES = "verb/de_3p-m_pres"
+    VERB_DE_3P_F_PRES = "verb/de_3p-f_pres"
 
     # Perfect (Perfekt - compound past, most common in spoken German)
     VERB_DE_1S_PAST = "verb/de_1s_past"
     VERB_DE_2S_PAST = "verb/de_2s_past"
-    VERB_DE_3S_PAST = "verb/de_3s_past"
+    VERB_DE_3S_M_PAST = "verb/de_3s-m_past"
+    VERB_DE_3S_F_PAST = "verb/de_3s-f_past"
     VERB_DE_1P_PAST = "verb/de_1p_past"
     VERB_DE_2P_PAST = "verb/de_2p_past"
-    VERB_DE_3P_PAST = "verb/de_3p_past"
+    VERB_DE_3P_M_PAST = "verb/de_3p-m_past"
+    VERB_DE_3P_F_PAST = "verb/de_3p-f_past"
 
     # Future (Futur I)
     VERB_DE_1S_FUT = "verb/de_1s_fut"
     VERB_DE_2S_FUT = "verb/de_2s_fut"
-    VERB_DE_3S_FUT = "verb/de_3s_fut"
+    VERB_DE_3S_M_FUT = "verb/de_3s-m_fut"
+    VERB_DE_3S_F_FUT = "verb/de_3s-f_fut"
     VERB_DE_1P_FUT = "verb/de_1p_fut"
     VERB_DE_2P_FUT = "verb/de_2p_fut"
-    VERB_DE_3P_FUT = "verb/de_3p_fut"
+    VERB_DE_3P_M_FUT = "verb/de_3p-m_fut"
+    VERB_DE_3P_F_FUT = "verb/de_3p-f_fut"
 
     # Portuguese noun forms (singular/plural only - each noun has a fixed gender)
     NOUN_PT_SINGULAR = "noun/pt_singular"
@@ -388,30 +412,36 @@ class GrammaticalForm(enum.Enum):
     ADJ_PT_SINGULAR_F = "adjective/pt_singular_f"
     ADJ_PT_PLURAL_F = "adjective/pt_plural_f"
 
-    # Portuguese verb forms (6 persons × 3 tenses = 18 forms)
+    # Portuguese verb forms (8 persons × 3 tenses = 24 forms)
     # Present tense (presente do indicativo)
     VERB_PT_1S_PRES = "verb/pt_1s_pres"
     VERB_PT_2S_PRES = "verb/pt_2s_pres"
-    VERB_PT_3S_PRES = "verb/pt_3s_pres"
+    VERB_PT_3S_M_PRES = "verb/pt_3s-m_pres"
+    VERB_PT_3S_F_PRES = "verb/pt_3s-f_pres"
     VERB_PT_1P_PRES = "verb/pt_1p_pres"
     VERB_PT_2P_PRES = "verb/pt_2p_pres"
-    VERB_PT_3P_PRES = "verb/pt_3p_pres"
+    VERB_PT_3P_M_PRES = "verb/pt_3p-m_pres"
+    VERB_PT_3P_F_PRES = "verb/pt_3p-f_pres"
 
     # Preterite (pretérito perfeito - simple past)
     VERB_PT_1S_PAST = "verb/pt_1s_past"
     VERB_PT_2S_PAST = "verb/pt_2s_past"
-    VERB_PT_3S_PAST = "verb/pt_3s_past"
+    VERB_PT_3S_M_PAST = "verb/pt_3s-m_past"
+    VERB_PT_3S_F_PAST = "verb/pt_3s-f_past"
     VERB_PT_1P_PAST = "verb/pt_1p_past"
     VERB_PT_2P_PAST = "verb/pt_2p_past"
-    VERB_PT_3P_PAST = "verb/pt_3p_past"
+    VERB_PT_3P_M_PAST = "verb/pt_3p-m_past"
+    VERB_PT_3P_F_PAST = "verb/pt_3p-f_past"
 
     # Future (futuro do presente)
     VERB_PT_1S_FUT = "verb/pt_1s_fut"
     VERB_PT_2S_FUT = "verb/pt_2s_fut"
-    VERB_PT_3S_FUT = "verb/pt_3s_fut"
+    VERB_PT_3S_M_FUT = "verb/pt_3s-m_fut"
+    VERB_PT_3S_F_FUT = "verb/pt_3s-f_fut"
     VERB_PT_1P_FUT = "verb/pt_1p_fut"
     VERB_PT_2P_FUT = "verb/pt_2p_fut"
-    VERB_PT_3P_FUT = "verb/pt_3p_fut"
+    VERB_PT_3P_M_FUT = "verb/pt_3p-m_fut"
+    VERB_PT_3P_F_FUT = "verb/pt_3p-f_fut"
 
     # Adverb forms
     ADVERB_POSITIVE = "adverb/positive"
