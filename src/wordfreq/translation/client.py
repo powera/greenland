@@ -196,13 +196,60 @@ class LinguisticClient:
 
             return [], False
 
+    # Default languages and their configurations
+    DEFAULT_TRANSLATION_LANGUAGES = {
+        'chinese': {
+            'field': 'chinese_translation',
+            'code': 'zh',
+            'description': 'Chinese translation in lemma form (Traditional characters)',
+            'instructions': '- Chinese: Provide Traditional Chinese characters (繁體字) in base form\n  - Prefer two-character terms for clarity and naturalness\n  - Use single-character terms for common basic vocabulary (e.g., 酒 for wine, 牛 for cow, 茶 for tea, 水 for water)\n  - Match the generality level of the English word (avoid overly specific translations like 葡萄酒 for wine)\n  - Use standard Mandarin Chinese (not regional variants)\n  - Do not include pinyin, just the characters'
+        },
+        'korean': {
+            'field': 'korean_translation',
+            'code': 'ko',
+            'description': 'Korean translation in lemma form (Hangul)',
+            'instructions': '- Korean: Provide Hangul in base form'
+        },
+        'french': {
+            'field': 'french_translation',
+            'code': 'fr',
+            'description': 'French translation in lemma form',
+            'instructions': '- French: Provide standard French in base form (infinitive for verbs, singular for nouns)'
+        },
+        'spanish': {
+            'field': 'spanish_translation',
+            'code': 'es',
+            'description': 'Spanish translation in lemma form',
+            'instructions': '- Spanish: Provide standard Spanish in base form (infinitive for verbs, singular for nouns)'
+        },
+        'german': {
+            'field': 'german_translation',
+            'code': 'de',
+            'description': 'German translation in lemma form',
+            'instructions': '- German: Provide standard German in base form (infinitive for verbs, singular nominative for nouns with article)'
+        },
+        'swahili': {
+            'field': 'swahili_translation',
+            'code': 'sw',
+            'description': 'Swahili translation in lemma form',
+            'instructions': '- Swahili: Provide standard Swahili in base form'
+        },
+        'vietnamese': {
+            'field': 'vietnamese_translation',
+            'code': 'vi',
+            'description': 'Vietnamese translation in lemma form',
+            'instructions': '- Vietnamese: Provide standard Vietnamese in base form'
+        }
+    }
+
     def query_translations(
         self,
         english_word: str,
         lithuanian_word: str,
         definition: str,
         pos_type: str,
-        pos_subtype: Optional[str] = None
+        pos_subtype: Optional[str] = None,
+        languages: Optional[List[str]] = None
     ) -> Tuple[Dict[str, str], bool]:
         """
         Query LLM to generate translations for a word with known English, Lithuanian, and definition.
@@ -216,39 +263,66 @@ class LinguisticClient:
             definition: Definition of the word
             pos_type: Part of speech (noun, verb, etc.)
             pos_subtype: Optional part of speech subtype
+            languages: List of language names to translate to (e.g., ['french', 'spanish', 'german']).
+                      If None, uses default set: ['chinese', 'korean', 'french', 'spanish', 'german', 'swahili', 'vietnamese']
 
         Returns:
             Tuple of (translations dict, success flag)
-            translations dict has keys: chinese_translation, korean_translation,
-            french_translation, swahili_translation, vietnamese_translation
+            translations dict has keys like: chinese_translation, french_translation, spanish_translation, etc.
         """
         if not english_word or not lithuanian_word:
             logger.error("English and Lithuanian words are required")
             return {}, False
 
+        # Use default languages if not specified
+        if languages is None:
+            languages = ['chinese', 'korean', 'french', 'spanish', 'german', 'swahili', 'vietnamese']
+
+        # Build schema properties dynamically based on requested languages
+        schema_properties = {}
+        languages_list_lines = []
+        language_instructions_lines = []
+
+        for lang in languages:
+            if lang in self.DEFAULT_TRANSLATION_LANGUAGES:
+                lang_config = self.DEFAULT_TRANSLATION_LANGUAGES[lang]
+                schema_properties[lang_config['field']] = SchemaProperty("string", lang_config['description'])
+                # Add to languages list (e.g., "- French")
+                languages_list_lines.append(f"- {lang.capitalize()}")
+                # Add language instructions
+                language_instructions_lines.append(lang_config['instructions'])
+            else:
+                logger.warning(f"Unknown language '{lang}' requested, skipping")
+
+        if not schema_properties:
+            logger.error("No valid languages specified")
+            return {}, False
+
         schema = Schema(
             name="Translations",
             description="Translations for a word to multiple languages",
-            properties={
-                "chinese_translation": SchemaProperty("string", "Chinese translation in lemma form (simplified characters)"),
-                "korean_translation": SchemaProperty("string", "Korean translation in lemma form (Hangul)"),
-                "french_translation": SchemaProperty("string", "French translation in lemma form"),
-                "swahili_translation": SchemaProperty("string", "Swahili translation in lemma form"),
-                "vietnamese_translation": SchemaProperty("string", "Vietnamese translation in lemma form"),
-            }
+            properties=schema_properties
         )
 
-        context = util.prompt_loader.get_context("wordfreq", "translation_generation")
+        context_template = util.prompt_loader.get_context("wordfreq", "translation_generation")
         prompt_template = util.prompt_loader.get_prompt("wordfreq", "translation_generation")
 
         subtype_info = f"Subtype: {pos_subtype}" if pos_subtype else ""
+        languages_list = "\n".join(languages_list_lines)
+        language_instructions = "\n".join(language_instructions_lines)
+
+        # Format context with language instructions
+        context = context_template.format(
+            language_instructions=language_instructions
+        )
 
         prompt = prompt_template.format(
             english_word=english_word,
             lithuanian_word=lithuanian_word,
             definition=definition,
             pos_type=pos_type,
-            subtype_info=subtype_info
+            subtype_info=subtype_info,
+            languages_list=languages_list
         )
 
         try:
@@ -1851,6 +1925,182 @@ class LinguisticClient:
             return {}, False
         except Exception as e:
             logger.error(f"Error querying French verb conjugations for '{verb}': {e}")
+            return {}, False
+
+    def query_spanish_noun_forms(self, lemma_id: int) -> Tuple[Dict[str, str], bool]:
+        """Query LLM for Spanish noun forms (singular and plural)."""
+        session = self.get_session()
+        lemma = session.query(linguistic_db.Lemma).filter(linguistic_db.Lemma.id == lemma_id).first()
+
+        # Get Spanish translation from lemma_translations table
+        spanish_translation = session.query(linguistic_db.LemmaTranslation).filter(
+            linguistic_db.LemmaTranslation.lemma_id == lemma_id,
+            linguistic_db.LemmaTranslation.language_code == 'es'
+        ).first()
+
+        if not lemma or not spanish_translation or lemma.pos_type.lower() != 'noun':
+            logger.error(f"Invalid lemma for Spanish noun forms: {lemma_id}")
+            return {}, False
+
+        noun = spanish_translation.translation
+        english_noun = lemma.lemma_text
+        definition = lemma.definition_text
+        pos_subtype = lemma.pos_subtype
+
+        fields = ["singular", "plural"]
+        form_properties = {f: SchemaProperty("string", f"Spanish {f}") for f in fields}
+
+        schema = Schema(name="SpanishNounForms", description="Spanish noun forms", properties={
+            "forms": SchemaProperty("object", "Dictionary of noun forms", properties=form_properties),
+            "confidence": SchemaProperty("number", "Confidence 0-1"),
+            "notes": SchemaProperty("string", "Notes")})
+
+        try:
+            context = util.prompt_loader.get_context("wordfreq", "spanish_noun_forms")
+            prompt = util.prompt_loader.get_prompt("wordfreq", "spanish_noun_forms").format(
+                noun=noun, english_noun=english_noun, definition=definition,
+                subtype_context=f" (category: {pos_subtype})" if pos_subtype else "")
+            response = self.client.generate_chat(prompt=prompt, model=self.model, json_schema=schema, context=context)
+            linguistic_db.log_query(session, word=noun, query_type='spanish_noun_forms', prompt=prompt,
+                                   response=json.dumps(response.structured_data), model=self.model)
+            if response.structured_data and 'forms' in response.structured_data:
+                return response.structured_data['forms'], True
+            return {}, False
+        except Exception as e:
+            logger.error(f"Error querying Spanish noun forms for '{noun}': {e}")
+            return {}, False
+
+    def query_spanish_verb_conjugations(self, lemma_id: int) -> Tuple[Dict[str, str], bool]:
+        """Query LLM for Spanish verb conjugations (6 persons × 6 tenses = 36 forms)."""
+        session = self.get_session()
+        lemma = session.query(linguistic_db.Lemma).filter(linguistic_db.Lemma.id == lemma_id).first()
+
+        # Get Spanish translation from lemma_translations table
+        spanish_translation = session.query(linguistic_db.LemmaTranslation).filter(
+            linguistic_db.LemmaTranslation.lemma_id == lemma_id,
+            linguistic_db.LemmaTranslation.language_code == 'es'
+        ).first()
+
+        if not lemma or not spanish_translation or lemma.pos_type.lower() != 'verb':
+            logger.error(f"Invalid lemma for Spanish verb conjugations: {lemma_id}")
+            return {}, False
+
+        verb = spanish_translation.translation
+        english_verb = lemma.lemma_text
+        definition = lemma.definition_text
+        pos_subtype = lemma.pos_subtype
+
+        tenses = [("pres", "present"), ("pret", "preterite"), ("impf", "imperfect"),
+                  ("fut", "future"), ("cond", "conditional"), ("subj", "subjunctive")]
+        fields = [f"{p}_{t}" for t, _ in tenses for p in ["1s", "2s", "3s", "1p", "2p", "3p"]]
+        form_properties = {f: SchemaProperty("string", f"Spanish {f.replace('_', ' ')}") for f in fields}
+
+        schema = Schema(name="SpanishVerbConjugations", description="Spanish verb conjugations", properties={
+            "forms": SchemaProperty("object", "Dictionary of verb forms", properties=form_properties),
+            "confidence": SchemaProperty("number", "Confidence 0-1"),
+            "notes": SchemaProperty("string", "Notes")})
+
+        try:
+            context = util.prompt_loader.get_context("wordfreq", "spanish_verb_conjugations")
+            prompt = util.prompt_loader.get_prompt("wordfreq", "spanish_verb_conjugations").format(
+                verb=verb, english_verb=english_verb, definition=definition,
+                subtype_context=f" (category: {pos_subtype})" if pos_subtype else "")
+            response = self.client.generate_chat(prompt=prompt, model=self.model, json_schema=schema, context=context)
+            linguistic_db.log_query(session, word=verb, query_type='spanish_verb_conjugations', prompt=prompt,
+                                   response=json.dumps(response.structured_data), model=self.model)
+            if response.structured_data and 'forms' in response.structured_data:
+                return response.structured_data['forms'], True
+            return {}, False
+        except Exception as e:
+            logger.error(f"Error querying Spanish verb conjugations for '{verb}': {e}")
+            return {}, False
+
+    def query_german_noun_forms(self, lemma_id: int) -> Tuple[Dict[str, str], bool]:
+        """Query LLM for German noun forms (singular and plural)."""
+        session = self.get_session()
+        lemma = session.query(linguistic_db.Lemma).filter(linguistic_db.Lemma.id == lemma_id).first()
+
+        # Get German translation from lemma_translations table
+        german_translation = session.query(linguistic_db.LemmaTranslation).filter(
+            linguistic_db.LemmaTranslation.lemma_id == lemma_id,
+            linguistic_db.LemmaTranslation.language_code == 'de'
+        ).first()
+
+        if not lemma or not german_translation or lemma.pos_type.lower() != 'noun':
+            logger.error(f"Invalid lemma for German noun forms: {lemma_id}")
+            return {}, False
+
+        noun = german_translation.translation
+        english_noun = lemma.lemma_text
+        definition = lemma.definition_text
+        pos_subtype = lemma.pos_subtype
+
+        fields = ["singular", "plural"]
+        form_properties = {f: SchemaProperty("string", f"German {f}") for f in fields}
+
+        schema = Schema(name="GermanNounForms", description="German noun forms", properties={
+            "forms": SchemaProperty("object", "Dictionary of noun forms", properties=form_properties),
+            "confidence": SchemaProperty("number", "Confidence 0-1"),
+            "notes": SchemaProperty("string", "Notes")})
+
+        try:
+            context = util.prompt_loader.get_context("wordfreq", "german_noun_forms")
+            prompt = util.prompt_loader.get_prompt("wordfreq", "german_noun_forms").format(
+                noun=noun, english_noun=english_noun, definition=definition,
+                subtype_context=f" (category: {pos_subtype})" if pos_subtype else "")
+            response = self.client.generate_chat(prompt=prompt, model=self.model, json_schema=schema, context=context)
+            linguistic_db.log_query(session, word=noun, query_type='german_noun_forms', prompt=prompt,
+                                   response=json.dumps(response.structured_data), model=self.model)
+            if response.structured_data and 'forms' in response.structured_data:
+                return response.structured_data['forms'], True
+            return {}, False
+        except Exception as e:
+            logger.error(f"Error querying German noun forms for '{noun}': {e}")
+            return {}, False
+
+    def query_german_verb_conjugations(self, lemma_id: int) -> Tuple[Dict[str, str], bool]:
+        """Query LLM for German verb conjugations (6 persons × 6 tenses = 36 forms)."""
+        session = self.get_session()
+        lemma = session.query(linguistic_db.Lemma).filter(linguistic_db.Lemma.id == lemma_id).first()
+
+        # Get German translation from lemma_translations table
+        german_translation = session.query(linguistic_db.LemmaTranslation).filter(
+            linguistic_db.LemmaTranslation.lemma_id == lemma_id,
+            linguistic_db.LemmaTranslation.language_code == 'de'
+        ).first()
+
+        if not lemma or not german_translation or lemma.pos_type.lower() != 'verb':
+            logger.error(f"Invalid lemma for German verb conjugations: {lemma_id}")
+            return {}, False
+
+        verb = german_translation.translation
+        english_verb = lemma.lemma_text
+        definition = lemma.definition_text
+        pos_subtype = lemma.pos_subtype
+
+        tenses = [("pres", "present"), ("past", "simple past"), ("perf", "perfect"),
+                  ("fut", "future"), ("cond", "conditional"), ("subj", "subjunctive")]
+        fields = [f"{p}_{t}" for t, _ in tenses for p in ["1s", "2s", "3s", "1p", "2p", "3p"]]
+        form_properties = {f: SchemaProperty("string", f"German {f.replace('_', ' ')}") for f in fields}
+
+        schema = Schema(name="GermanVerbConjugations", description="German verb conjugations", properties={
+            "forms": SchemaProperty("object", "Dictionary of verb forms", properties=form_properties),
+            "confidence": SchemaProperty("number", "Confidence 0-1"),
+            "notes": SchemaProperty("string", "Notes")})
+
+        try:
+            context = util.prompt_loader.get_context("wordfreq", "german_verb_conjugations")
+            prompt = util.prompt_loader.get_prompt("wordfreq", "german_verb_conjugations").format(
+                verb=verb, english_verb=english_verb, definition=definition,
+                subtype_context=f" (category: {pos_subtype})" if pos_subtype else "")
+            response = self.client.generate_chat(prompt=prompt, model=self.model, json_schema=schema, context=context)
+            linguistic_db.log_query(session, word=verb, query_type='german_verb_conjugations', prompt=prompt,
+                                   response=json.dumps(response.structured_data), model=self.model)
+            if response.structured_data and 'forms' in response.structured_data:
+                return response.structured_data['forms'], True
+            return {}, False
+        except Exception as e:
+            logger.error(f"Error querying German verb conjugations for '{verb}': {e}")
             return {}, False
 
     @classmethod

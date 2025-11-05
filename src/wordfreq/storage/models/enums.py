@@ -308,6 +308,124 @@ class GrammaticalForm(enum.Enum):
     VERB_FR_2P_PC = "verb/fr_2p_pc"
     VERB_FR_3P_PC = "verb/fr_3p_pc"
 
+    # Spanish noun forms (singular/plural only - each noun has a fixed gender)
+    NOUN_ES_SINGULAR = "noun/es_singular"
+    NOUN_ES_PLURAL = "noun/es_plural"
+
+    # Spanish adjective forms (2 genders × 2 numbers = 4 forms)
+    ADJ_ES_SINGULAR_M = "adjective/es_singular_m"
+    ADJ_ES_PLURAL_M = "adjective/es_plural_m"
+    ADJ_ES_SINGULAR_F = "adjective/es_singular_f"
+    ADJ_ES_PLURAL_F = "adjective/es_plural_f"
+
+    # Spanish verb forms (6 persons × 6 tenses = 36 forms)
+    # Present tense (presente de indicativo)
+    VERB_ES_1S_PRES = "verb/es_1s_pres"
+    VERB_ES_2S_PRES = "verb/es_2s_pres"
+    VERB_ES_3S_PRES = "verb/es_3s_pres"
+    VERB_ES_1P_PRES = "verb/es_1p_pres"
+    VERB_ES_2P_PRES = "verb/es_2p_pres"
+    VERB_ES_3P_PRES = "verb/es_3p_pres"
+
+    # Preterite (pretérito)
+    VERB_ES_1S_PRET = "verb/es_1s_pret"
+    VERB_ES_2S_PRET = "verb/es_2s_pret"
+    VERB_ES_3S_PRET = "verb/es_3s_pret"
+    VERB_ES_1P_PRET = "verb/es_1p_pret"
+    VERB_ES_2P_PRET = "verb/es_2p_pret"
+    VERB_ES_3P_PRET = "verb/es_3p_pret"
+
+    # Imperfect (imperfecto)
+    VERB_ES_1S_IMPF = "verb/es_1s_impf"
+    VERB_ES_2S_IMPF = "verb/es_2s_impf"
+    VERB_ES_3S_IMPF = "verb/es_3s_impf"
+    VERB_ES_1P_IMPF = "verb/es_1p_impf"
+    VERB_ES_2P_IMPF = "verb/es_2p_impf"
+    VERB_ES_3P_IMPF = "verb/es_3p_impf"
+
+    # Future (futuro simple)
+    VERB_ES_1S_FUT = "verb/es_1s_fut"
+    VERB_ES_2S_FUT = "verb/es_2s_fut"
+    VERB_ES_3S_FUT = "verb/es_3s_fut"
+    VERB_ES_1P_FUT = "verb/es_1p_fut"
+    VERB_ES_2P_FUT = "verb/es_2p_fut"
+    VERB_ES_3P_FUT = "verb/es_3p_fut"
+
+    # Conditional (condicional simple)
+    VERB_ES_1S_COND = "verb/es_1s_cond"
+    VERB_ES_2S_COND = "verb/es_2s_cond"
+    VERB_ES_3S_COND = "verb/es_3s_cond"
+    VERB_ES_1P_COND = "verb/es_1p_cond"
+    VERB_ES_2P_COND = "verb/es_2p_cond"
+    VERB_ES_3P_COND = "verb/es_3p_cond"
+
+    # Subjunctive present (presente de subjuntivo)
+    VERB_ES_1S_SUBJ = "verb/es_1s_subj"
+    VERB_ES_2S_SUBJ = "verb/es_2s_subj"
+    VERB_ES_3S_SUBJ = "verb/es_3s_subj"
+    VERB_ES_1P_SUBJ = "verb/es_1p_subj"
+    VERB_ES_2P_SUBJ = "verb/es_2p_subj"
+    VERB_ES_3P_SUBJ = "verb/es_3p_subj"
+
+    # German noun forms (singular/plural only)
+    NOUN_DE_SINGULAR = "noun/de_singular"
+    NOUN_DE_PLURAL = "noun/de_plural"
+
+    # German adjective forms (2 genders × 2 numbers = 4 forms, simplified)
+    ADJ_DE_SINGULAR_M = "adjective/de_singular_m"
+    ADJ_DE_PLURAL_M = "adjective/de_plural_m"
+    ADJ_DE_SINGULAR_F = "adjective/de_singular_f"
+    ADJ_DE_PLURAL_F = "adjective/de_plural_f"
+
+    # German verb forms (6 persons × 6 tenses = 36 forms)
+    # Present tense (Präsens)
+    VERB_DE_1S_PRES = "verb/de_1s_pres"
+    VERB_DE_2S_PRES = "verb/de_2s_pres"
+    VERB_DE_3S_PRES = "verb/de_3s_pres"
+    VERB_DE_1P_PRES = "verb/de_1p_pres"
+    VERB_DE_2P_PRES = "verb/de_2p_pres"
+    VERB_DE_3P_PRES = "verb/de_3p_pres"
+
+    # Simple past (Präteritum)
+    VERB_DE_1S_PAST = "verb/de_1s_past"
+    VERB_DE_2S_PAST = "verb/de_2s_past"
+    VERB_DE_3S_PAST = "verb/de_3s_past"
+    VERB_DE_1P_PAST = "verb/de_1p_past"
+    VERB_DE_2P_PAST = "verb/de_2p_past"
+    VERB_DE_3P_PAST = "verb/de_3p_past"
+
+    # Perfect (Perfekt - compound tense)
+    VERB_DE_1S_PERF = "verb/de_1s_perf"
+    VERB_DE_2S_PERF = "verb/de_2s_perf"
+    VERB_DE_3S_PERF = "verb/de_3s_perf"
+    VERB_DE_1P_PERF = "verb/de_1p_perf"
+    VERB_DE_2P_PERF = "verb/de_2p_perf"
+    VERB_DE_3P_PERF = "verb/de_3p_perf"
+
+    # Future (Futur I)
+    VERB_DE_1S_FUT = "verb/de_1s_fut"
+    VERB_DE_2S_FUT = "verb/de_2s_fut"
+    VERB_DE_3S_FUT = "verb/de_3s_fut"
+    VERB_DE_1P_FUT = "verb/de_1p_fut"
+    VERB_DE_2P_FUT = "verb/de_2p_fut"
+    VERB_DE_3P_FUT = "verb/de_3p_fut"
+
+    # Conditional (Konjunktiv II / würde + infinitive)
+    VERB_DE_1S_COND = "verb/de_1s_cond"
+    VERB_DE_2S_COND = "verb/de_2s_cond"
+    VERB_DE_3S_COND = "verb/de_3s_cond"
+    VERB_DE_1P_COND = "verb/de_1p_cond"
+    VERB_DE_2P_COND = "verb/de_2p_cond"
+    VERB_DE_3P_COND = "verb/de_3p_cond"
+
+    # Subjunctive present (Konjunktiv I)
+    VERB_DE_1S_SUBJ = "verb/de_1s_subj"
+    VERB_DE_2S_SUBJ = "verb/de_2s_subj"
+    VERB_DE_3S_SUBJ = "verb/de_3s_subj"
+    VERB_DE_1P_SUBJ = "verb/de_1p_subj"
+    VERB_DE_2P_SUBJ = "verb/de_2p_subj"
+    VERB_DE_3P_SUBJ = "verb/de_3s_subj"
+
     # Adverb forms
     ADVERB_POSITIVE = "adverb/positive"
     ADVERB_COMPARATIVE = "adverb/comparative"
