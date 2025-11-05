@@ -36,6 +36,8 @@ class FormGenerationConfig:
     base_form_identifier: str  # Form name that should be marked as base form
     use_legacy_translation: bool = False  # Use old schema (e.g., french_translation column)
     translation_field_name: Optional[str] = None  # Field name for legacy translation (e.g., 'french_translation')
+    detect_number_type: bool = True  # Detect plurale_tantum/singulare_tantum for nouns
+    extract_gender: bool = False  # Extract grammatical gender from forms (for gendered languages)
 
 
 def get_lemmas_with_translation(
@@ -148,6 +150,80 @@ def get_lemmas_without_translation(
     ]
 
 
+def detect_number_type_from_forms(forms_dict: Dict[str, str], config: FormGenerationConfig) -> str:
+    """
+    Detect if a noun is plurale tantum, singulare tantum, or regular.
+
+    Args:
+        forms_dict: Dictionary of form names to form texts
+        config: Configuration with form mappings
+
+    Returns:
+        One of: 'plurale_tantum', 'singulare_tantum', or 'regular'
+    """
+    # Only detect for nouns and adjectives, not verbs
+    if config.pos_type not in ['noun', 'adjective']:
+        return 'regular'
+
+    # Identify which forms are singular vs plural based on form names
+    singular_forms = [name for name in forms_dict.keys() if 'singular' in name.lower()]
+    plural_forms = [name for name in forms_dict.keys() if 'plural' in name.lower()]
+
+    # Check if we have non-empty forms
+    has_singular = any(forms_dict.get(f) and forms_dict.get(f).strip() for f in singular_forms)
+    has_plural = any(forms_dict.get(f) and forms_dict.get(f).strip() for f in plural_forms)
+
+    if has_plural and not has_singular:
+        return 'plurale_tantum'
+    elif has_singular and not has_plural:
+        return 'singulare_tantum'
+    else:
+        return 'regular'
+
+
+def extract_gender_from_forms(forms_dict: Dict[str, str], config: FormGenerationConfig) -> Optional[str]:
+    """
+    Extract grammatical gender from form names.
+
+    For languages like French that have gendered forms (singular_m, singular_f),
+    we can infer the gender by checking which gender forms are populated.
+
+    Args:
+        forms_dict: Dictionary of form names to form texts
+        config: Configuration with form mappings
+
+    Returns:
+        One of: 'masculine', 'feminine', 'neuter', or None if cannot be determined
+    """
+    # Only extract for nouns and adjectives
+    if config.pos_type not in ['noun', 'adjective']:
+        return None
+
+    # Check for gender markers in form names
+    masculine_forms = [name for name in forms_dict.keys() if '_m' in name.lower()]
+    feminine_forms = [name for name in forms_dict.keys() if '_f' in name.lower()]
+    neuter_forms = [name for name in forms_dict.keys() if '_n' in name.lower()]
+
+    # Count non-empty forms for each gender
+    has_masculine = any(forms_dict.get(f) and forms_dict.get(f).strip() for f in masculine_forms)
+    has_feminine = any(forms_dict.get(f) and forms_dict.get(f).strip() for f in feminine_forms)
+    has_neuter = any(forms_dict.get(f) and forms_dict.get(f).strip() for f in neuter_forms)
+
+    # If only one gender has forms, that's the word's gender
+    gender_count = sum([has_masculine, has_feminine, has_neuter])
+
+    if gender_count == 1:
+        if has_masculine:
+            return 'masculine'
+        elif has_feminine:
+            return 'feminine'
+        elif has_neuter:
+            return 'neuter'
+
+    # If multiple genders or no gender markers, return None
+    return None
+
+
 def process_lemma_forms(
     client: LinguisticClient,
     lemma_id: int,
@@ -231,6 +307,43 @@ def process_lemma_forms(
                 verified=False
             ))
             stored += 1
+
+        # Detect and store grammatical properties
+        # Detect number type (plurale_tantum, singulare_tantum) for nouns
+        if config.detect_number_type:
+            number_type = detect_number_type_from_forms(forms_dict, config)
+            if number_type != 'regular':
+                grammar_fact = linguistic_db.add_grammar_fact(
+                    session,
+                    lemma_id=lemma_id,
+                    language_code=config.language_code,
+                    fact_type='number_type',
+                    fact_value=number_type,
+                    notes=f"Detected during {config.pos_type} form generation",
+                    verified=False
+                )
+                if grammar_fact:
+                    logger.info(f"Added grammar_fact for lemma ID {lemma_id}: number_type={number_type}")
+                else:
+                    logger.debug(f"Grammar fact for number_type={number_type} already exists for lemma ID {lemma_id}")
+
+        # Extract and store grammatical gender for gendered languages
+        if config.extract_gender:
+            gender = extract_gender_from_forms(forms_dict, config)
+            if gender:
+                grammar_fact = linguistic_db.add_grammar_fact(
+                    session,
+                    lemma_id=lemma_id,
+                    language_code=config.language_code,
+                    fact_type='gender',
+                    fact_value=gender,
+                    notes=f"Extracted from {config.pos_type} forms",
+                    verified=False
+                )
+                if grammar_fact:
+                    logger.info(f"Added grammar_fact for lemma ID {lemma_id}: gender={gender}")
+                else:
+                    logger.debug(f"Grammar fact for gender={gender} already exists for lemma ID {lemma_id}")
 
         session.commit()
         logger.info(f"Added {stored} forms for lemma ID {lemma_id}")

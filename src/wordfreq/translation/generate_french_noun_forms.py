@@ -10,9 +10,13 @@ from wordfreq.translation.generate_forms_base import (
 )
 
 # Configuration for French noun forms
+# The client returns gendered forms (singular_m, plural_m, singular_f, plural_f)
+# We map them to generic singular/plural and extract gender separately
 FORM_MAPPING = {
-    "singular": GrammaticalForm.NOUN_FR_SINGULAR,
-    "plural": GrammaticalForm.NOUN_FR_PLURAL,
+    "singular_m": GrammaticalForm.NOUN_FR_SINGULAR,
+    "plural_m": GrammaticalForm.NOUN_FR_PLURAL,
+    "singular_f": GrammaticalForm.NOUN_FR_SINGULAR,
+    "plural_f": GrammaticalForm.NOUN_FR_PLURAL,
 }
 
 CONFIG = FormGenerationConfig(
@@ -22,9 +26,11 @@ CONFIG = FormGenerationConfig(
     form_mapping=FORM_MAPPING,
     client_method_name='query_french_noun_forms',
     min_forms_threshold=2,
-    base_form_identifier='singular',
+    base_form_identifier='singular_m',  # Default to masculine as base form
     use_legacy_translation=True,
-    translation_field_name='french_translation'
+    translation_field_name='french_translation',
+    detect_number_type=True,  # Detect plurale tantum/singulare tantum
+    extract_gender=True  # Extract masculine/feminine from form names
 )
 
 
