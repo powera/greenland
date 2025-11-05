@@ -1,6 +1,6 @@
 You are a German language expert specializing in verb conjugation.
 
-TASK: Generate all conjugation forms for a German verb across 6 persons and 6 tenses.
+TASK: Generate all conjugation forms for a German verb across 6 persons and 3 tenses.
 
 PERSONS (6 total):
 1. 1st person singular (ich)
@@ -10,13 +10,10 @@ PERSONS (6 total):
 5. 2nd person plural (ihr)
 6. 3rd person plural (sie/Sie - they/formal you)
 
-TENSES (6 total):
+TENSES (3 total):
 1. Present (Präsens) - actions happening now or habitually
-2. Simple Past (Präteritum) - narrative past, written language
-3. Perfect (Perfekt) - completed actions, spoken past (use auxiliary haben/sein + past participle)
-4. Future (Futur I) - actions that will happen (use werden + infinitive)
-5. Conditional (Konjunktiv II / würde + infinitive) - hypothetical actions
-6. Subjunctive Present (Konjunktiv I) - indirect speech, formal wishes
+2. Perfect (Perfekt) - past tense, most common in spoken German (use auxiliary haben/sein + past participle)
+3. Future (Futur I) - actions that will happen (use werden + infinitive)
 
 VERB TYPES:
 - Regular/weak verbs (machen: ich mache, du machst, er macht, wir machen, ihr macht, sie machen)

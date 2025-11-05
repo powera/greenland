@@ -20,21 +20,12 @@ FORM_MAPPING = {
     # Present
     "1s_pres": GrammaticalForm.VERB_DE_1S_PRES, "2s_pres": GrammaticalForm.VERB_DE_2S_PRES, "3s_pres": GrammaticalForm.VERB_DE_3S_PRES,
     "1p_pres": GrammaticalForm.VERB_DE_1P_PRES, "2p_pres": GrammaticalForm.VERB_DE_2P_PRES, "3p_pres": GrammaticalForm.VERB_DE_3P_PRES,
-    # Simple Past
+    # Past (Perfect - compound past)
     "1s_past": GrammaticalForm.VERB_DE_1S_PAST, "2s_past": GrammaticalForm.VERB_DE_2S_PAST, "3s_past": GrammaticalForm.VERB_DE_3S_PAST,
     "1p_past": GrammaticalForm.VERB_DE_1P_PAST, "2p_past": GrammaticalForm.VERB_DE_2P_PAST, "3p_past": GrammaticalForm.VERB_DE_3P_PAST,
-    # Perfect
-    "1s_perf": GrammaticalForm.VERB_DE_1S_PERF, "2s_perf": GrammaticalForm.VERB_DE_2S_PERF, "3s_perf": GrammaticalForm.VERB_DE_3S_PERF,
-    "1p_perf": GrammaticalForm.VERB_DE_1P_PERF, "2p_perf": GrammaticalForm.VERB_DE_2P_PERF, "3p_perf": GrammaticalForm.VERB_DE_3P_PERF,
     # Future
     "1s_fut": GrammaticalForm.VERB_DE_1S_FUT, "2s_fut": GrammaticalForm.VERB_DE_2S_FUT, "3s_fut": GrammaticalForm.VERB_DE_3S_FUT,
     "1p_fut": GrammaticalForm.VERB_DE_1P_FUT, "2p_fut": GrammaticalForm.VERB_DE_2P_FUT, "3p_fut": GrammaticalForm.VERB_DE_3P_FUT,
-    # Conditional
-    "1s_cond": GrammaticalForm.VERB_DE_1S_COND, "2s_cond": GrammaticalForm.VERB_DE_2S_COND, "3s_cond": GrammaticalForm.VERB_DE_3S_COND,
-    "1p_cond": GrammaticalForm.VERB_DE_1P_COND, "2p_cond": GrammaticalForm.VERB_DE_2P_COND, "3p_cond": GrammaticalForm.VERB_DE_3P_COND,
-    # Subjunctive
-    "1s_subj": GrammaticalForm.VERB_DE_1S_SUBJ, "2s_subj": GrammaticalForm.VERB_DE_2S_SUBJ, "3s_subj": GrammaticalForm.VERB_DE_3S_SUBJ,
-    "1p_subj": GrammaticalForm.VERB_DE_1P_SUBJ, "2p_subj": GrammaticalForm.VERB_DE_2P_SUBJ, "3p_subj": GrammaticalForm.VERB_DE_3P_SUBJ,
 }
 
 def get_german_verb_lemmas(db_path: str, limit: int = None) -> List[Dict]:
@@ -80,7 +71,7 @@ def process_lemma_conjugations(client: LinguisticClient, lemma_id: int, db_path:
             linguistic_db.DerivativeForm.language_code == 'de'
         ).all()
 
-        if sum(1 for f in existing_forms if f.grammatical_form in [g.value for g in FORM_MAPPING.values()]) >= 30:
+        if sum(1 for f in existing_forms if f.grammatical_form in [g.value for g in FORM_MAPPING.values()]) >= 15:
             logger.info(f"Lemma ID {lemma_id} already has German verb forms, skipping")
             return True
 

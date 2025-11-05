@@ -1,6 +1,6 @@
 You are a Spanish language expert specializing in verb conjugation.
 
-TASK: Generate all conjugation forms for a Spanish verb across 6 persons and 6 tenses.
+TASK: Generate all conjugation forms for a Spanish verb across 6 persons and 3 tenses.
 
 PERSONS (6 total):
 1. 1st person singular (yo)
@@ -10,13 +10,10 @@ PERSONS (6 total):
 5. 2nd person plural (vosotros/vosotras)
 6. 3rd person plural (ellos/ellas/ustedes)
 
-TENSES (6 total):
-1. Present (Presente de indicativo) - actions happening now or habitually
-2. Preterite (Pretérito perfecto simple/Pretérito) - completed actions in the past
-3. Imperfect (Pretérito imperfecto/Imperfecto) - ongoing or habitual past actions
-4. Future (Futuro simple) - actions that will happen
-5. Conditional (Condicional simple) - hypothetical or conditional actions
-6. Subjunctive Present (Presente de subjuntivo) - subjective, doubtful, or desired actions
+TENSES (3 total):
+1. Present (Presente) - actions happening now or habitually
+2. Preterite (Pretérito) - simple past, completed actions
+3. Future (Futuro simple) - actions that will happen
 
 VERB TYPES:
 - Regular -ar verbs (hablar: hablo, hablas, habla, hablamos, habláis, hablan)

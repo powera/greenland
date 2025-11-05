@@ -20,21 +20,12 @@ FORM_MAPPING = {
     # Present
     "1s_pres": GrammaticalForm.VERB_ES_1S_PRES, "2s_pres": GrammaticalForm.VERB_ES_2S_PRES, "3s_pres": GrammaticalForm.VERB_ES_3S_PRES,
     "1p_pres": GrammaticalForm.VERB_ES_1P_PRES, "2p_pres": GrammaticalForm.VERB_ES_2P_PRES, "3p_pres": GrammaticalForm.VERB_ES_3P_PRES,
-    # Preterite
-    "1s_pret": GrammaticalForm.VERB_ES_1S_PRET, "2s_pret": GrammaticalForm.VERB_ES_2S_PRET, "3s_pret": GrammaticalForm.VERB_ES_3S_PRET,
-    "1p_pret": GrammaticalForm.VERB_ES_1P_PRET, "2p_pret": GrammaticalForm.VERB_ES_2P_PRET, "3p_pret": GrammaticalForm.VERB_ES_3P_PRET,
-    # Imperfect
-    "1s_impf": GrammaticalForm.VERB_ES_1S_IMPF, "2s_impf": GrammaticalForm.VERB_ES_2S_IMPF, "3s_impf": GrammaticalForm.VERB_ES_3S_IMPF,
-    "1p_impf": GrammaticalForm.VERB_ES_1P_IMPF, "2p_impf": GrammaticalForm.VERB_ES_2P_IMPF, "3p_impf": GrammaticalForm.VERB_ES_3P_IMPF,
+    # Past (Preterite)
+    "1s_past": GrammaticalForm.VERB_ES_1S_PAST, "2s_past": GrammaticalForm.VERB_ES_2S_PAST, "3s_past": GrammaticalForm.VERB_ES_3S_PAST,
+    "1p_past": GrammaticalForm.VERB_ES_1P_PAST, "2p_past": GrammaticalForm.VERB_ES_2P_PAST, "3p_past": GrammaticalForm.VERB_ES_3P_PAST,
     # Future
     "1s_fut": GrammaticalForm.VERB_ES_1S_FUT, "2s_fut": GrammaticalForm.VERB_ES_2S_FUT, "3s_fut": GrammaticalForm.VERB_ES_3S_FUT,
     "1p_fut": GrammaticalForm.VERB_ES_1P_FUT, "2p_fut": GrammaticalForm.VERB_ES_2P_FUT, "3p_fut": GrammaticalForm.VERB_ES_3P_FUT,
-    # Conditional
-    "1s_cond": GrammaticalForm.VERB_ES_1S_COND, "2s_cond": GrammaticalForm.VERB_ES_2S_COND, "3s_cond": GrammaticalForm.VERB_ES_3S_COND,
-    "1p_cond": GrammaticalForm.VERB_ES_1P_COND, "2p_cond": GrammaticalForm.VERB_ES_2P_COND, "3p_cond": GrammaticalForm.VERB_ES_3P_COND,
-    # Subjunctive
-    "1s_subj": GrammaticalForm.VERB_ES_1S_SUBJ, "2s_subj": GrammaticalForm.VERB_ES_2S_SUBJ, "3s_subj": GrammaticalForm.VERB_ES_3S_SUBJ,
-    "1p_subj": GrammaticalForm.VERB_ES_1P_SUBJ, "2p_subj": GrammaticalForm.VERB_ES_2P_SUBJ, "3p_subj": GrammaticalForm.VERB_ES_3P_SUBJ,
 }
 
 def get_spanish_verb_lemmas(db_path: str, limit: int = None) -> List[Dict]:
@@ -80,7 +71,7 @@ def process_lemma_conjugations(client: LinguisticClient, lemma_id: int, db_path:
             linguistic_db.DerivativeForm.language_code == 'es'
         ).all()
 
-        if sum(1 for f in existing_forms if f.grammatical_form in [g.value for g in FORM_MAPPING.values()]) >= 30:
+        if sum(1 for f in existing_forms if f.grammatical_form in [g.value for g in FORM_MAPPING.values()]) >= 15:
             logger.info(f"Lemma ID {lemma_id} already has Spanish verb forms, skipping")
             return True
 

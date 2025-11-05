@@ -27,12 +27,14 @@ SPECIAL CASES:
 
 OUTPUT FORMAT:
 Provide forms with their definite articles in nominative case:
-- Singular: Use der/die/das based on the noun's grammatical gender
+- Singular: MUST include der/die/das based on the noun's grammatical gender (CRITICAL!)
 - Plural: Always use "die" for plural nominative
 
 Examples:
 - "der Hund" (singular), "die Hunde" (plural)
 - "die Katze" (singular), "die Katzen" (plural)
 - "das Kind" (singular), "die Kinder" (plural)
+
+IMPORTANT: The gender (der/die/das) is an essential part of learning German nouns. ALWAYS include the correct article!
 
 Note: German nouns are always capitalized.

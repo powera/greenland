@@ -1990,8 +1990,7 @@ class LinguisticClient:
         definition = lemma.definition_text
         pos_subtype = lemma.pos_subtype
 
-        tenses = [("pres", "present"), ("pret", "preterite"), ("impf", "imperfect"),
-                  ("fut", "future"), ("cond", "conditional"), ("subj", "subjunctive")]
+        tenses = [("pres", "present"), ("past", "past"), ("fut", "future")]
         fields = [f"{p}_{t}" for t, _ in tenses for p in ["1s", "2s", "3s", "1p", "2p", "3p"]]
         form_properties = {f: SchemaProperty("string", f"Spanish {f.replace('_', ' ')}") for f in fields}
 
@@ -2078,8 +2077,7 @@ class LinguisticClient:
         definition = lemma.definition_text
         pos_subtype = lemma.pos_subtype
 
-        tenses = [("pres", "present"), ("past", "simple past"), ("perf", "perfect"),
-                  ("fut", "future"), ("cond", "conditional"), ("subj", "subjunctive")]
+        tenses = [("pres", "present"), ("past", "past"), ("fut", "future")]
         fields = [f"{p}_{t}" for t, _ in tenses for p in ["1s", "2s", "3s", "1p", "2p", "3p"]]
         form_properties = {f: SchemaProperty("string", f"German {f.replace('_', ' ')}") for f in fields}
 

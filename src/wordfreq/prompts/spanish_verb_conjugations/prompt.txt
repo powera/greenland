@@ -3,4 +3,4 @@ Generate all Spanish verb conjugation forms for the Spanish verb "{verb}".
 English verb: {english_verb}
 Definition: {definition}{subtype_context}
 
-Please provide all forms (6 persons × 6 tenses = 36 forms), using empty strings for forms that are non-standard.
+Please provide all forms (6 persons × 3 tenses = 18 forms), using empty strings for forms that are non-standard.
