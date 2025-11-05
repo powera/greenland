@@ -63,6 +63,31 @@ class Lemma(Base):
     # Relationships
     derivative_forms = relationship("DerivativeForm", back_populates="lemma", cascade="all, delete-orphan")
     grammar_facts = relationship("GrammarFact", back_populates="lemma", cascade="all, delete-orphan")
+    translations = relationship("LemmaTranslation", back_populates="lemma", cascade="all, delete-orphan")
+
+class LemmaTranslation(Base):
+    """Model for storing translations of lemmas in various languages.
+
+    This table replaces the individual language columns (french_translation, etc.)
+    on the Lemma table to support scalable multi-language translations.
+    """
+    __tablename__ = 'lemma_translations'
+    __table_args__ = (
+        UniqueConstraint('lemma_id', 'language_code', name='uq_lemma_translation'),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    lemma_id: Mapped[int] = mapped_column(ForeignKey("lemmas.id"), nullable=False)
+    language_code: Mapped[str] = mapped_column(String, nullable=False, index=True)  # e.g., "fr", "es", "de"
+    translation: Mapped[str] = mapped_column(String, nullable=False)  # Base form of the translation
+
+    # Metadata
+    verified: Mapped[bool] = mapped_column(Boolean, default=False)
+    added_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now())
+    updated_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+
+    # Relationships
+    lemma = relationship("Lemma", back_populates="translations")
 
 class DerivativeForm(Base):
     """Model for storing derivative forms - language-specific combinations of WordToken and Lemma with grammatical information.

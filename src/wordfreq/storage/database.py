@@ -12,7 +12,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql import func
 
 # Import models from the models package
-from wordfreq.storage.models.schema import Base, WordToken, Lemma, DerivativeForm, ExampleSentence, Corpus, WordFrequency
+from wordfreq.storage.models.schema import Base, WordToken, Lemma, LemmaTranslation, DerivativeForm, ExampleSentence, Corpus, WordFrequency
 from wordfreq.storage.models.query_log import QueryLog
 from wordfreq.storage.models.grammar_fact import GrammarFact
 from wordfreq.storage.models.enums import NounSubtype, VerbSubtype, AdjectiveSubtype, AdverbSubtype, GrammaticalForm

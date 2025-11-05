@@ -18,24 +18,26 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 FORM_MAPPING = {
-    # Present
-    "1s_pres": GrammaticalForm.VERB_FR_1S_PRES, "2s_pres": GrammaticalForm.VERB_FR_2S_PRES, "3s_pres": GrammaticalForm.VERB_FR_3S_PRES,
-    "1p_pres": GrammaticalForm.VERB_FR_1P_PRES, "2p_pres": GrammaticalForm.VERB_FR_2P_PRES, "3p_pres": GrammaticalForm.VERB_FR_3P_PRES,
-    # Imperfect
-    "1s_impf": GrammaticalForm.VERB_FR_1S_IMPF, "2s_impf": GrammaticalForm.VERB_FR_2S_IMPF, "3s_impf": GrammaticalForm.VERB_FR_3S_IMPF,
-    "1p_impf": GrammaticalForm.VERB_FR_1P_IMPF, "2p_impf": GrammaticalForm.VERB_FR_2P_IMPF, "3p_impf": GrammaticalForm.VERB_FR_3P_IMPF,
-    # Future
-    "1s_fut": GrammaticalForm.VERB_FR_1S_FUT, "2s_fut": GrammaticalForm.VERB_FR_2S_FUT, "3s_fut": GrammaticalForm.VERB_FR_3S_FUT,
-    "1p_fut": GrammaticalForm.VERB_FR_1P_FUT, "2p_fut": GrammaticalForm.VERB_FR_2P_FUT, "3p_fut": GrammaticalForm.VERB_FR_3P_FUT,
-    # Conditional
-    "1s_cond": GrammaticalForm.VERB_FR_1S_COND, "2s_cond": GrammaticalForm.VERB_FR_2S_COND, "3s_cond": GrammaticalForm.VERB_FR_3S_COND,
-    "1p_cond": GrammaticalForm.VERB_FR_1P_COND, "2p_cond": GrammaticalForm.VERB_FR_2P_COND, "3p_cond": GrammaticalForm.VERB_FR_3P_COND,
-    # Subjunctive
-    "1s_subj": GrammaticalForm.VERB_FR_1S_SUBJ, "2s_subj": GrammaticalForm.VERB_FR_2S_SUBJ, "3s_subj": GrammaticalForm.VERB_FR_3S_SUBJ,
-    "1p_subj": GrammaticalForm.VERB_FR_1P_SUBJ, "2p_subj": GrammaticalForm.VERB_FR_2P_SUBJ, "3p_subj": GrammaticalForm.VERB_FR_3P_SUBJ,
-    # Passé composé
-    "1s_pc": GrammaticalForm.VERB_FR_1S_PC, "2s_pc": GrammaticalForm.VERB_FR_2S_PC, "3s_pc": GrammaticalForm.VERB_FR_3S_PC,
-    "1p_pc": GrammaticalForm.VERB_FR_1P_PC, "2p_pc": GrammaticalForm.VERB_FR_2P_PC, "3p_pc": GrammaticalForm.VERB_FR_3P_PC,
+    # Present (8 persons)
+    "1s_pres": GrammaticalForm.VERB_FR_1S_PRES, "2s_pres": GrammaticalForm.VERB_FR_2S_PRES,
+    "3s-m_pres": GrammaticalForm.VERB_FR_3S_M_PRES, "3s-f_pres": GrammaticalForm.VERB_FR_3S_F_PRES,
+    "1p_pres": GrammaticalForm.VERB_FR_1P_PRES, "2p_pres": GrammaticalForm.VERB_FR_2P_PRES,
+    "3p-m_pres": GrammaticalForm.VERB_FR_3P_M_PRES, "3p-f_pres": GrammaticalForm.VERB_FR_3P_F_PRES,
+    # Imperfect (8 persons)
+    "1s_impf": GrammaticalForm.VERB_FR_1S_IMPF, "2s_impf": GrammaticalForm.VERB_FR_2S_IMPF,
+    "3s-m_impf": GrammaticalForm.VERB_FR_3S_M_IMPF, "3s-f_impf": GrammaticalForm.VERB_FR_3S_F_IMPF,
+    "1p_impf": GrammaticalForm.VERB_FR_1P_IMPF, "2p_impf": GrammaticalForm.VERB_FR_2P_IMPF,
+    "3p-m_impf": GrammaticalForm.VERB_FR_3P_M_IMPF, "3p-f_impf": GrammaticalForm.VERB_FR_3P_F_IMPF,
+    # Future (8 persons)
+    "1s_fut": GrammaticalForm.VERB_FR_1S_FUT, "2s_fut": GrammaticalForm.VERB_FR_2S_FUT,
+    "3s-m_fut": GrammaticalForm.VERB_FR_3S_M_FUT, "3s-f_fut": GrammaticalForm.VERB_FR_3S_F_FUT,
+    "1p_fut": GrammaticalForm.VERB_FR_1P_FUT, "2p_fut": GrammaticalForm.VERB_FR_2P_FUT,
+    "3p-m_fut": GrammaticalForm.VERB_FR_3P_M_FUT, "3p-f_fut": GrammaticalForm.VERB_FR_3P_F_FUT,
+    # Passé composé (8 persons)
+    "1s_pc": GrammaticalForm.VERB_FR_1S_PC, "2s_pc": GrammaticalForm.VERB_FR_2S_PC,
+    "3s-m_pc": GrammaticalForm.VERB_FR_3S_M_PC, "3s-f_pc": GrammaticalForm.VERB_FR_3S_F_PC,
+    "1p_pc": GrammaticalForm.VERB_FR_1P_PC, "2p_pc": GrammaticalForm.VERB_FR_2P_PC,
+    "3p-m_pc": GrammaticalForm.VERB_FR_3P_M_PC, "3p-f_pc": GrammaticalForm.VERB_FR_3P_F_PC,
 }
 
 def get_french_verb_lemmas(db_path: str, limit: int = None) -> List[Dict]:
@@ -59,7 +61,7 @@ def process_lemma_conjugations(client: LinguisticClient, lemma_id: int, db_path:
             linguistic_db.DerivativeForm.lemma_id == lemma_id,
             linguistic_db.DerivativeForm.language_code == 'fr'
         ).all()
-        if sum(1 for f in existing_forms if f.grammatical_form in [g.value for g in FORM_MAPPING.values()]) >= 3:
+        if sum(1 for f in existing_forms if f.grammatical_form in [g.value for g in FORM_MAPPING.values()]) >= 25:
             logger.info(f"Lemma ID {lemma_id} already has French conjugations, skipping")
             return True
 

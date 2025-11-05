@@ -13,6 +13,9 @@ class TranslationSet:
     """Represents translations across multiple languages."""
     chinese: Optional[Translation] = None
     french: Optional[Translation] = None
+    spanish: Optional[Translation] = None
+    german: Optional[Translation] = None
+    portuguese: Optional[Translation] = None
     korean: Optional[Translation] = None
     swahili: Optional[Translation] = None
     lithuanian: Optional[Translation] = None
@@ -23,6 +26,9 @@ class TranslationSet:
         return {
             'chinese': self.chinese,
             'french': self.french,
+            'spanish': self.spanish,
+            'german': self.german,
+            'portuguese': self.portuguese,
             'korean': self.korean,
             'swahili': self.swahili,
             'lithuanian': self.lithuanian,
