@@ -1,0 +1,109 @@
+"""GUID prefix mappings for different POS subtypes."""
+
+# Subtype mapping for GUID generation based on POS subtypes from enums
+SUBTYPE_GUID_PREFIXES = {
+    # Noun subtypes (N01-N99)
+    'human': 'N01',
+    'animal': 'N02',
+    'body_part': 'N03',
+    'disease_condition': 'N04',
+    'plant': 'N05',
+    'food_drink': 'N06',
+    'building_structure': 'N07',
+    'small_movable_object': 'N08',
+    'clothing_accessory': 'N09',
+    'artwork_artifact': 'N10',
+    'natural_feature': 'N11',
+    'tool_machine': 'N12',
+    'path_infrastructure': 'N13',
+    'material_substance': 'N14',
+    'chemical_compound': 'N15',
+    'medication_remedy': 'N16',
+    'concept_idea': 'N17',
+    'symbolic_element': 'N18',
+    'quality_attribute': 'N19',
+    'mental_construct': 'N20',
+    'knowledge_domain': 'N21',
+    'quantitative_concept': 'N22',
+    'emotion_feeling': 'N23',
+    'process_event': 'N24',
+    'time_period': 'N25',
+    'group_people': 'N26',
+    'animal_grouping_term': 'N27',
+    'collection_things': 'N28',
+    'personal_name': 'N29',
+    'place_name': 'N30',
+    'organization_name': 'N31',
+    'temporal_name': 'N32',
+    'nationality': 'N33',
+    'unit_of_measurement': 'N34',
+    'noun_other': 'N99',
+
+    # Verb subtypes (V01-V99)
+    'physical_action': 'V01',
+    'creation_action': 'V02',
+    'destruction_action': 'V03',
+    'mental_state': 'V04',
+    'emotional_state': 'V05',
+    'possession': 'V06',
+    'development': 'V07',
+    'change': 'V08',
+    'speaking': 'V09',
+    'writing': 'V10',
+    'expressing': 'V11',
+    'directional_movement': 'V12',
+    'manner_movement': 'V13',
+    'verb_other': 'V99',
+
+    # Adjective subtypes (A01-A99)
+    'size': 'A01',
+    'color': 'A02',
+    'shape': 'A03',
+    'texture': 'A04',
+    'quality': 'A05',
+    'aesthetic': 'A06',
+    'importance': 'A07',
+    'origin': 'A08',
+    'purpose': 'A09',
+    'material': 'A10',
+    'definite_quantity': 'A11',
+    'indefinite_quantity': 'A12',
+    'duration': 'A13',
+    'frequency': 'A14',
+    'sequence': 'A15',
+    'adjective_other': 'A99',
+
+    # Adverb subtypes (D01-D99)
+    'style': 'D01',
+    'attitude': 'D02',
+    'specific_time': 'D03',
+    'relative_time': 'D04',
+    'adverb_duration': 'D05',  # Prefixed to avoid conflict with adjective duration
+    'direction': 'D06',
+    'location': 'D07',
+    'distance': 'D08',
+    'intensity': 'D09',
+    'completeness': 'D10',
+    'approximation': 'D11',
+    'definite_frequency': 'D12',
+    'indefinite_frequency': 'D13',
+    'adverb_other': 'D99',
+
+    # Conjunction subtypes (C01-C99)
+    'conjunction_other': 'C99',
+
+    # Pronoun subtypes (P01-P99)
+    'pronoun_other': 'P99',
+
+    # Preposition subtypes (R01-R99)
+    'preposition_other': 'R99',
+
+    # Interjection subtypes (I01-I99)
+    'interjection_other': 'I99',
+
+    # Determiner subtypes (T01-T99)
+    'determiner_other': 'T99',
+
+    # Article subtypes (L01-L99)
+    'article_other': 'L99'
+}
