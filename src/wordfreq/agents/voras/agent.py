@@ -26,7 +26,7 @@ if GREENLAND_SRC_PATH not in sys.path:
 import constants
 from clients.batch_queue import BatchRequestMetadata, get_batch_manager
 from wordfreq.storage.database import create_database_session
-from wordfreq.storage.models.schema import Lemma
+from wordfreq.storage.models.schema import Lemma, LemmaTranslation
 from wordfreq.tools.llm_validators import validate_all_translations_for_word
 from wordfreq.translation.client import LinguisticClient
 
@@ -42,16 +42,19 @@ logger = logging.getLogger(__name__)
 
 
 # Language mappings
+# Format: 'code': (field_name_or_code, display_name, use_lemma_translation_table)
+# If use_lemma_translation_table is True, field_name_or_code is the language_code for LemmaTranslation table
+# If False, field_name_or_code is the column name in Lemma table
 LANGUAGE_FIELDS = {
-    'lt': ('lithuanian_translation', 'Lithuanian'),
-    'zh': ('chinese_translation', 'Chinese'),
-    'ko': ('korean_translation', 'Korean'),
-    'fr': ('french_translation', 'French'),
-    'es': ('spanish_translation', 'Spanish'),
-    'de': ('german_translation', 'German'),
-    'pt': ('portuguese_translation', 'Portuguese'),
-    'sw': ('swahili_translation', 'Swahili'),
-    'vi': ('vietnamese_translation', 'Vietnamese')
+    'lt': ('lithuanian_translation', 'Lithuanian', False),
+    'zh': ('chinese_translation', 'Chinese', False),
+    'ko': ('korean_translation', 'Korean', False),
+    'fr': ('french_translation', 'French', False),
+    'es': ('es', 'Spanish', True),
+    'de': ('de', 'German', True),
+    'pt': ('pt', 'Portuguese', True),
+    'sw': ('swahili_translation', 'Swahili', False),
+    'vi': ('vietnamese_translation', 'Vietnamese', False)
 }
 
 
@@ -89,6 +92,53 @@ class VorasAgent:
                 debug=self.debug
             )
         return self.linguistic_client
+
+    def get_translation(self, session, lemma: Lemma, lang_code: str) -> Optional[str]:
+        """
+        Get translation for a lemma in the specified language.
+
+        Handles both Lemma table columns and LemmaTranslation table.
+        """
+        field_name, _, use_translation_table = LANGUAGE_FIELDS[lang_code]
+
+        if use_translation_table:
+            # Query LemmaTranslation table
+            translation_obj = session.query(LemmaTranslation).filter(
+                LemmaTranslation.lemma_id == lemma.id,
+                LemmaTranslation.language_code == field_name
+            ).first()
+            return translation_obj.translation if translation_obj else None
+        else:
+            # Get from Lemma table column
+            return getattr(lemma, field_name, None)
+
+    def set_translation(self, session, lemma: Lemma, lang_code: str, translation: str):
+        """
+        Set translation for a lemma in the specified language.
+
+        Handles both Lemma table columns and LemmaTranslation table.
+        """
+        field_name, _, use_translation_table = LANGUAGE_FIELDS[lang_code]
+
+        if use_translation_table:
+            # Insert or update in LemmaTranslation table
+            translation_obj = session.query(LemmaTranslation).filter(
+                LemmaTranslation.lemma_id == lemma.id,
+                LemmaTranslation.language_code == field_name
+            ).first()
+
+            if translation_obj:
+                translation_obj.translation = translation
+            else:
+                translation_obj = LemmaTranslation(
+                    lemma_id=lemma.id,
+                    language_code=field_name,
+                    translation=translation
+                )
+                session.add(translation_obj)
+        else:
+            # Set Lemma table column
+            setattr(lemma, field_name, translation)
 
     def validate_translations(
         self,
@@ -524,7 +574,7 @@ class VorasAgent:
 
     def fix_missing_translations(
         self,
-        language_code: Optional[str] = None,
+        language_code: Optional[str | List[str]] = None,
         limit: Optional[int] = None,
         dry_run: bool = False
     ) -> Dict[str, any]:
@@ -532,7 +582,8 @@ class VorasAgent:
         Generate missing translations using LLM and update the database.
 
         Args:
-            language_code: Specific language to fix (None = all languages)
+            language_code: Specific language(s) to fix. Can be a single code (str),
+                          a list of codes, or None (all languages)
             limit: Maximum number of words to process
             dry_run: If True, only report what would be fixed without making changes
 
@@ -544,7 +595,13 @@ class VorasAgent:
         session = self.get_session()
         client = self.get_linguistic_client()
 
-        languages_to_fix = [language_code] if language_code else list(LANGUAGE_FIELDS.keys())
+        # Handle language_code as string, list, or None
+        if language_code is None:
+            languages_to_fix = list(LANGUAGE_FIELDS.keys())
+        elif isinstance(language_code, str):
+            languages_to_fix = [language_code]
+        else:
+            languages_to_fix = language_code
 
         # Initialize results structure
         results = {
@@ -563,36 +620,36 @@ class VorasAgent:
 
         try:
             # Build query to find words missing ANY of the target translations
-            missing_filter = None
-            for lang_code in languages_to_fix:
-                field_name, _ = LANGUAGE_FIELDS[lang_code]
-                lang_filter = (
-                    (getattr(Lemma, field_name).is_(None)) |
-                    (getattr(Lemma, field_name) == '')
-                )
-                if missing_filter is None:
-                    missing_filter = lang_filter
-                else:
-                    missing_filter = missing_filter | lang_filter
-
+            # For simplicity, we'll get all lemmas and check missing translations using helper method
+            # This is less efficient but handles both storage types uniformly
             query = session.query(Lemma).filter(
-                Lemma.guid.isnot(None),
-                missing_filter
+                Lemma.guid.isnot(None)
             ).order_by(Lemma.id)
 
             if limit:
                 query = query.limit(limit)
 
-            words_to_process = query.all()
-            total_words = len(words_to_process)
+            all_lemmas = query.all()
 
+            # Filter to lemmas missing at least one target translation
+            words_to_process = []
+            for lemma in all_lemmas:
+                has_missing = False
+                for lang_code in languages_to_fix:
+                    translation = self.get_translation(session, lemma, lang_code)
+                    if not translation or not translation.strip():
+                        has_missing = True
+                        break
+                if has_missing:
+                    words_to_process.append(lemma)
+
+            total_words = len(words_to_process)
             logger.info(f"Found {total_words} words with missing translations in target languages")
 
             # Count missing translations per language
             for lemma in words_to_process:
                 for lang_code in languages_to_fix:
-                    field_name, _ = LANGUAGE_FIELDS[lang_code]
-                    translation = getattr(lemma, field_name)
+                    translation = self.get_translation(session, lemma, lang_code)
                     if not translation or not translation.strip():
                         results['by_language'][lang_code]['total_missing'] += 1
 
@@ -604,10 +661,10 @@ class VorasAgent:
                 # Find which languages are missing for this word
                 missing_languages = []
                 for lang_code in languages_to_fix:
-                    field_name, language_name = LANGUAGE_FIELDS[lang_code]
-                    translation = getattr(lemma, field_name)
+                    _, language_name, _ = LANGUAGE_FIELDS[lang_code]
+                    translation = self.get_translation(session, lemma, lang_code)
                     if not translation or not translation.strip():
-                        missing_languages.append((lang_code, field_name, language_name))
+                        missing_languages.append((lang_code, language_name))
 
                 if not missing_languages:
                     continue
@@ -616,38 +673,60 @@ class VorasAgent:
 
                 try:
                     if dry_run:
-                        for lang_code, _, language_name in missing_languages:
+                        for lang_code, language_name in missing_languages:
                             logger.info(f"[DRY RUN] Would generate {language_name} translation for '{lemma.lemma_text}'")
                             results['by_language'][lang_code]['fixed'] += 1
                             results['total_fixed'] += 1
                         continue
 
-                    # Query LLM for translations - ONE CALL
+                    # Build list of language names (lowercase) for only the missing languages
+                    # Map language codes to language names for query_translations
+                    lang_code_to_name = {
+                        'zh': 'chinese',
+                        'ko': 'korean',
+                        'fr': 'french',
+                        'es': 'spanish',
+                        'de': 'german',
+                        'pt': 'portuguese',
+                        'sw': 'swahili',
+                        'vi': 'vietnamese'
+                    }
+                    missing_lang_names = [
+                        lang_code_to_name[lang_code]
+                        for lang_code, _ in missing_languages
+                        if lang_code in lang_code_to_name  # Skip 'lt' which isn't in the map
+                    ]
+
+                    # Query LLM for translations - ONE CALL for only missing languages
                     translations, success = client.query_translations(
                         english_word=lemma.lemma_text,
                         lithuanian_word=lemma.lithuanian_translation or "",
                         definition=lemma.definition_text,
                         pos_type=lemma.pos_type,
-                        pos_subtype=lemma.pos_subtype
+                        pos_subtype=lemma.pos_subtype,
+                        languages=missing_lang_names
                     )
 
                     if not success or not translations:
                         logger.warning(f"Failed to get translations for '{lemma.lemma_text}'")
-                        for lang_code, _, _ in missing_languages:
+                        for lang_code, _ in missing_languages:
                             results['by_language'][lang_code]['failed'] += 1
                             results['total_failed'] += 1
                         continue
 
-                    # Map language codes to field names
+                    # Map language codes to LLM response field names
                     translation_field_map = {
                         'zh': 'chinese_translation',
                         'ko': 'korean_translation',
                         'fr': 'french_translation',
+                        'es': 'spanish_translation',
+                        'de': 'german_translation',
+                        'pt': 'portuguese_translation',
                         'sw': 'swahili_translation',
                         'vi': 'vietnamese_translation'
                     }
 
-                    for lang_code, field_name, language_name in missing_languages:
+                    for lang_code, language_name in missing_languages:
                         # Skip Lithuanian since query_translations doesn't generate it
                         if lang_code == 'lt':
                             logger.warning(f"Skipping Lithuanian translation for '{lemma.lemma_text}' - not generated by translation_generation prompt")
@@ -659,8 +738,8 @@ class VorasAgent:
                         translation = translations.get(llm_field, '').strip()
 
                         if translation:
-                            # Update the lemma with the new translation
-                            setattr(lemma, field_name, translation)
+                            # Update the translation using helper method
+                            self.set_translation(session, lemma, lang_code, translation)
                             logger.debug(f"  Added {language_name} translation: '{translation}'")
                             results['by_language'][lang_code]['fixed'] += 1
                             results['total_fixed'] += 1
@@ -671,13 +750,13 @@ class VorasAgent:
 
                     # Commit all updates for this word at once
                     session.commit()
-                    added_count = len([lc for lc, _, _ in missing_languages if lc != 'lt' and translations.get(translation_field_map.get(lc), '').strip()])
+                    added_count = len([lc for lc, _ in missing_languages if lc != 'lt' and translations.get(translation_field_map.get(lc), '').strip()])
                     logger.info(f"Added {added_count} translations for '{lemma.lemma_text}' (GUID: {lemma.guid})")
 
                 except Exception as e:
                     logger.error(f"Error processing '{lemma.lemma_text}': {e}")
                     session.rollback()
-                    for lang_code, _, _ in missing_languages:
+                    for lang_code, _ in missing_languages:
                         results['by_language'][lang_code]['failed'] += 1
                         results['total_failed'] += 1
 

@@ -29,7 +29,7 @@ VERB_FORM_MAPPING = {
     "1s_past": GrammaticalForm.VERB_DE_1S_PAST, "2s_past": GrammaticalForm.VERB_DE_2S_PAST,
     "3s-m_past": GrammaticalForm.VERB_DE_3S_M_PAST, "3s-f_past": GrammaticalForm.VERB_DE_3S_F_PAST,
     "1p_past": GrammaticalForm.VERB_DE_1P_PAST, "2p_past": GrammaticalForm.VERB_DE_2P_PAST,
-    "3p-m_past": GrammaticalForm.VERB_DE_3P_M_PAST, "3p-f_past": GrammaticalForm.VERB_DE_3S_F_PAST,
+    "3p-m_past": GrammaticalForm.VERB_DE_3P_M_PAST, "3p-f_past": GrammaticalForm.VERB_DE_3P_F_PAST,
     # Future (8 persons)
     "1s_fut": GrammaticalForm.VERB_DE_1S_FUT, "2s_fut": GrammaticalForm.VERB_DE_2S_FUT,
     "3s-m_fut": GrammaticalForm.VERB_DE_3S_M_FUT, "3s-f_fut": GrammaticalForm.VERB_DE_3S_F_FUT,
