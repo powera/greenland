@@ -2,24 +2,18 @@
 
 """Batch script to generate Spanish noun forms for all nouns in the database."""
 
-from wordfreq.storage.models.enums import GrammaticalForm
+from wordfreq.translation.language_forms.spanish import NOUN_FORM_MAPPING
 from wordfreq.translation.generate_forms_base import (
     FormGenerationConfig,
     get_lemmas_with_translation,
     run_form_generation
 )
 
-# Configuration for Spanish noun forms
-FORM_MAPPING = {
-    "singular": GrammaticalForm.NOUN_ES_SINGULAR,
-    "plural": GrammaticalForm.NOUN_ES_PLURAL,
-}
-
 CONFIG = FormGenerationConfig(
     language_code='es',
     language_name='Spanish',
     pos_type='noun',
-    form_mapping=FORM_MAPPING,
+    form_mapping=NOUN_FORM_MAPPING,
     client_method_name='query_spanish_noun_forms',
     min_forms_threshold=2,
     base_form_identifier='singular',
