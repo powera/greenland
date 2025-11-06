@@ -22,7 +22,8 @@ def query_translations(
     pos_type: str,
     get_session_func,
     pos_subtype: Optional[str] = None,
-    languages: Optional[List[str]] = None
+    languages: Optional[List[str]] = None,
+    model: str = None
 ) -> Tuple[Dict[str, str], bool]:
     """
     Query LLM to generate translations for a word with known English, Lithuanian, and definition.
@@ -103,7 +104,7 @@ def query_translations(
     try:
         response = client.generate_chat(
             prompt=prompt,
-            model=client.model,
+            model=model,
             json_schema=schema,
             context=context
         )
@@ -117,7 +118,7 @@ def query_translations(
                 query_type='translation_generation',
                 prompt=prompt,
                 response=json.dumps(response.structured_data),
-                model=client.model
+                model=model
             )
         except Exception as log_err:
             logger.error(f"Failed to log successful query: {log_err}")

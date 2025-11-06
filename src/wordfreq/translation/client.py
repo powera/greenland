@@ -115,7 +115,7 @@ class LinguisticClient:
         """Query LLM to generate translations for a word."""
         return translations.query_translations(
             self.client, english_word, lithuanian_word, definition, pos_type,
-            self.get_session, pos_subtype, languages
+            self.get_session, pos_subtype, languages, self.model
         )
 
     # Word processing

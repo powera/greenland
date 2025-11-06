@@ -8,6 +8,14 @@ The actual implementation is in wordfreq/agents/dramblys/
 "Dramblys" means "elephant" in Lithuanian - never forgets what's missing!
 """
 
+import sys
+from pathlib import Path
+
+# Add src directory to path
+GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent)
+if GREENLAND_SRC_PATH not in sys.path:
+    sys.path.insert(0, GREENLAND_SRC_PATH)
+
 from wordfreq.agents.dramblys.agent import DramblysAgent
 from wordfreq.agents.dramblys.cli import main
 

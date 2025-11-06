@@ -14,11 +14,10 @@ from wordfreq.storage import database as linguistic_db
 logger = logging.getLogger(__name__)
 
 # Form mappings
+# Note: French nouns have fixed gender, so only singular/plural distinction
 NOUN_FORM_MAPPING = {
-    "singular_m": GrammaticalForm.NOUN_FR_S_M,
-    "plural_m": GrammaticalForm.NOUN_FR_P_M,
-    "singular_f": GrammaticalForm.NOUN_FR_S_F,
-    "plural_f": GrammaticalForm.NOUN_FR_P_F,
+    "singular": GrammaticalForm.NOUN_FR_SINGULAR,
+    "plural": GrammaticalForm.NOUN_FR_PLURAL,
 }
 
 VERB_FORM_MAPPING = {
