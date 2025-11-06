@@ -2,24 +2,18 @@
 
 """Batch script to generate Portuguese noun forms for all nouns in the database."""
 
-from wordfreq.storage.models.enums import GrammaticalForm
+from wordfreq.translation.language_forms.portuguese import NOUN_FORM_MAPPING
 from wordfreq.translation.generate_forms_base import (
     FormGenerationConfig,
     get_lemmas_with_translation,
     run_form_generation
 )
 
-# Configuration for Portuguese noun forms
-FORM_MAPPING = {
-    "singular": GrammaticalForm.NOUN_PT_SINGULAR,
-    "plural": GrammaticalForm.NOUN_PT_PLURAL,
-}
-
 CONFIG = FormGenerationConfig(
     language_code='pt',
     language_name='Portuguese',
     pos_type='noun',
-    form_mapping=FORM_MAPPING,
+    form_mapping=NOUN_FORM_MAPPING,
     client_method_name='query_portuguese_noun_forms',
     min_forms_threshold=2,
     base_form_identifier='singular',
