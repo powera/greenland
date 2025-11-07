@@ -20,21 +20,14 @@ if GREENLAND_SRC_PATH not in sys.path:
 
 from clients.batch_queue import get_batch_manager
 from wordfreq.storage.crud.operation_log import log_translation_change
+from wordfreq.storage.translation_helpers import (
+    LANGUAGE_FIELDS,
+    get_translation,
+    set_translation,
+    get_language_name
+)
 
 logger = logging.getLogger(__name__)
-
-# Language mappings
-LANGUAGE_FIELDS = {
-    'lt': ('lithuanian_translation', 'Lithuanian'),
-    'zh': ('chinese_translation', 'Chinese'),
-    'ko': ('korean_translation', 'Korean'),
-    'fr': ('french_translation', 'French'),
-    'es': ('spanish_translation', 'Spanish'),
-    'de': ('german_translation', 'German'),
-    'pt': ('portuguese_translation', 'Portuguese'),
-    'sw': ('swahili_translation', 'Swahili'),
-    'vi': ('vietnamese_translation', 'Vietnamese')
-}
 
 
 def submit_batch(debug: bool = False, agent_name: str = "voras", metadata: Optional[Dict[str, str]] = None) -> Dict[str, str]:
@@ -137,7 +130,7 @@ def retrieve_batch_results(batch_id: str, session, debug: bool = False) -> Dict[
     languages_to_update = [lc for lc in LANGUAGE_FIELDS.keys() if lc != 'lt']
     for lang_code in languages_to_update:
         results['by_language'][lang_code] = {
-            'language_name': LANGUAGE_FIELDS[lang_code][1],
+            'language_name': get_language_name(lang_code),
             'updated': 0,
             'failed': 0
         }
@@ -187,16 +180,12 @@ def retrieve_batch_results(batch_id: str, session, debug: bool = False) -> Dict[
             # Update translations
             updated_count = 0
             for lang_code in languages_to_update:
-                field_name, language_name = LANGUAGE_FIELDS[lang_code]
                 llm_field = translation_field_map.get(lang_code)
                 translation = translations.get(llm_field, '').strip()
 
                 if translation:
-                    # Get old value for logging
-                    old_translation = getattr(lemma, field_name, None)
-
-                    # Update the translation
-                    setattr(lemma, field_name, translation)
+                    # Use helper function which returns (old_translation, new_translation)
+                    old_translation, new_translation = set_translation(session, lemma, lang_code, translation)
 
                     # Log the change
                     log_translation_change(
@@ -206,7 +195,7 @@ def retrieve_batch_results(batch_id: str, session, debug: bool = False) -> Dict[
                         lemma_id=lemma.id,
                         language_code=lang_code,
                         old_translation=old_translation,
-                        new_translation=translation
+                        new_translation=new_translation
                     )
 
                     results['by_language'][lang_code]['updated'] += 1

@@ -12,19 +12,7 @@ GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent.parent)
 if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
-
-# Language mappings
-LANGUAGE_FIELDS = {
-    'lt': ('lithuanian_translation', 'Lithuanian'),
-    'zh': ('chinese_translation', 'Chinese'),
-    'ko': ('korean_translation', 'Korean'),
-    'fr': ('french_translation', 'French'),
-    'es': ('spanish_translation', 'Spanish'),
-    'de': ('german_translation', 'German'),
-    'pt': ('portuguese_translation', 'Portuguese'),
-    'sw': ('swahili_translation', 'Swahili'),
-    'vi': ('vietnamese_translation', 'Vietnamese')
-}
+from wordfreq.storage.translation_helpers import LANGUAGE_FIELDS, get_language_name
 
 
 def print_regeneration_summary(results, batch_mode=False):
