@@ -9,6 +9,8 @@ The actual implementation is in wordfreq/agents/vilkas/
 """
 
 # Add src directory to path
+import sys
+from pathlib import Path
 GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent)
 if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
