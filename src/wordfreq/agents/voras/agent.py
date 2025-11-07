@@ -27,6 +27,7 @@ import constants
 from clients.batch_queue import BatchRequestMetadata, get_batch_manager
 from wordfreq.storage.database import create_database_session
 from wordfreq.storage.models.schema import Lemma, LemmaTranslation
+from wordfreq.storage.crud.operation_log import log_translation_change
 from wordfreq.tools.llm_validators import validate_all_translations_for_word
 from wordfreq.translation.client import LinguisticClient
 
@@ -120,6 +121,9 @@ class VorasAgent:
         """
         field_name, _, use_translation_table = LANGUAGE_FIELDS[lang_code]
 
+        # Get old translation for logging
+        old_translation = self.get_translation(session, lemma, lang_code)
+
         if use_translation_table:
             # Insert or update in LemmaTranslation table
             translation_obj = session.query(LemmaTranslation).filter(
@@ -139,6 +143,17 @@ class VorasAgent:
         else:
             # Set Lemma table column
             setattr(lemma, field_name, translation)
+
+        # Log the translation change
+        log_translation_change(
+            session=session,
+            source=f"voras-agent/{self.model}",
+            operation_type="translation",
+            lemma_id=lemma.id,
+            language_code=lang_code,
+            old_translation=old_translation,
+            new_translation=translation
+        )
 
     def validate_translations(
         self,

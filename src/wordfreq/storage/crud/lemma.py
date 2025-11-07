@@ -5,6 +5,7 @@ from typing import List, Optional
 
 from wordfreq.storage.models.schema import Lemma
 from wordfreq.storage.utils.guid import generate_guid
+from wordfreq.storage.crud.operation_log import log_translation_change
 
 
 def add_lemma(
@@ -25,7 +26,8 @@ def add_lemma(
     confidence: float = 0.0,
     verified: bool = False,
     notes: Optional[str] = None,
-    auto_generate_guid: bool = True
+    auto_generate_guid: bool = True,
+    source: Optional[str] = None
 ) -> Lemma:
     """Add or get a lemma (concept/meaning)."""
     # Check if lemma already exists with same text, definition, and POS
@@ -69,6 +71,29 @@ def add_lemma(
     )
     session.add(lemma)
     session.flush()
+
+    # Log translation additions
+    translation_map = {
+        'zh': chinese_translation,
+        'fr': french_translation,
+        'ko': korean_translation,
+        'sw': swahili_translation,
+        'lt': lithuanian_translation,
+        'vi': vietnamese_translation
+    }
+
+    for lang_code, translation in translation_map.items():
+        if translation:
+            log_translation_change(
+                session=session,
+                source=source or "lemma-crud/add",
+                operation_type="translation",
+                lemma_id=lemma.id,
+                language_code=lang_code,
+                old_translation=None,
+                new_translation=translation
+            )
+
     return lemma
 
 
@@ -90,12 +115,46 @@ def update_lemma(
     vietnamese_translation: Optional[str] = None,
     confidence: Optional[float] = None,
     verified: Optional[bool] = None,
-    notes: Optional[str] = None
+    notes: Optional[str] = None,
+    source: Optional[str] = None
 ) -> bool:
-    """Update lemma information."""
+    """Update lemma information.
+
+    Args:
+        session: Database session
+        lemma_id: ID of the lemma to update
+        source: Source of the update (for operation logging)
+        ... (other parameters as before)
+    """
     lemma = session.query(Lemma).filter(Lemma.id == lemma_id).first()
     if not lemma:
         return False
+
+    # Map of translation parameters to language codes
+    translation_updates = {
+        'zh': ('chinese_translation', chinese_translation),
+        'fr': ('french_translation', french_translation),
+        'ko': ('korean_translation', korean_translation),
+        'sw': ('swahili_translation', swahili_translation),
+        'lt': ('lithuanian_translation', lithuanian_translation),
+        'vi': ('vietnamese_translation', vietnamese_translation)
+    }
+
+    # Track translation changes for logging
+    for lang_code, (field_name, new_value) in translation_updates.items():
+        if new_value is not None:
+            old_value = getattr(lemma, field_name, None)
+            if old_value != new_value:
+                # Log the translation change
+                log_translation_change(
+                    session=session,
+                    source=source or "lemma-crud/update",
+                    operation_type="translation",
+                    lemma_id=lemma.id,
+                    language_code=lang_code,
+                    old_translation=old_value,
+                    new_translation=new_value
+                )
 
     if lemma_text is not None:
         lemma.lemma_text = lemma_text
