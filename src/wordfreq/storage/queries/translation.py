@@ -3,6 +3,7 @@
 from typing import List
 
 from wordfreq.storage.models.schema import Lemma
+from wordfreq.storage.crud.operation_log import log_translation_change
 
 
 def get_lemmas_without_translation(session, language: str, limit: int = 100) -> List[Lemma]:
@@ -39,28 +40,55 @@ def update_lemma_translation(
     session,
     lemma_id: int,
     language: str,
-    translation_text: str
+    translation_text: str,
+    source: str = None
 ) -> bool:
-    """Update translation for a specific language in a lemma."""
+    """Update translation for a specific language in a lemma.
+
+    Args:
+        session: Database session
+        lemma_id: ID of the lemma to update
+        language: Language name (chinese, french, korean, swahili, lithuanian, vietnamese)
+        translation_text: New translation text
+        source: Source of the update (for operation logging)
+    """
     lemma = session.query(Lemma).filter(Lemma.id == lemma_id).first()
     if not lemma:
         return False
 
     language = language.lower()
-    if language == 'chinese':
-        lemma.chinese_translation = translation_text
-    elif language == 'french':
-        lemma.french_translation = translation_text
-    elif language == 'korean':
-        lemma.korean_translation = translation_text
-    elif language == 'swahili':
-        lemma.swahili_translation = translation_text
-    elif language == 'lithuanian':
-        lemma.lithuanian_translation = translation_text
-    elif language == 'vietnamese':
-        lemma.vietnamese_translation = translation_text
-    else:
+
+    # Map language names to field names and language codes
+    language_map = {
+        'chinese': ('chinese_translation', 'zh'),
+        'french': ('french_translation', 'fr'),
+        'korean': ('korean_translation', 'ko'),
+        'swahili': ('swahili_translation', 'sw'),
+        'lithuanian': ('lithuanian_translation', 'lt'),
+        'vietnamese': ('vietnamese_translation', 'vi')
+    }
+
+    if language not in language_map:
         return False
+
+    field_name, lang_code = language_map[language]
+
+    # Get old value for logging
+    old_translation = getattr(lemma, field_name, None)
+
+    # Update the translation
+    setattr(lemma, field_name, translation_text)
+
+    # Log the change
+    log_translation_change(
+        session=session,
+        source=source or f"translation-query/update_{language}",
+        operation_type="translation",
+        lemma_id=lemma.id,
+        language_code=lang_code,
+        old_translation=old_translation,
+        new_translation=translation_text
+    )
 
     session.commit()
     return True
