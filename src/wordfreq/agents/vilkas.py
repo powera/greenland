@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 """
-Vilkas - Lithuanian Word Forms Checker Agent
+Vilkas - Multi-language Word Forms Checker Agent
 
 This is a compatibility wrapper that imports from the refactored vilkas package.
 The actual implementation is in wordfreq/agents/vilkas/
 
 "Vilkas" means "wolf" in Lithuanian - a watchful guardian of the word database.
+
+Supports word form generation across multiple languages including Lithuanian, French,
+German, Spanish, Portuguese, and English.
 """
 
 # Add src directory to path
