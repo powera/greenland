@@ -9,7 +9,7 @@ Autonomous agents for data quality monitoring and maintenance tasks. These agent
 - **Dramblys** (elephant) - Identifies missing words by scanning frequency corpora and can automatically process them using LLM to add to the database.
 - **Bebras** (beaver) - Ensures database structural integrity by identifying orphaned records, missing fields, and constraint violations.
 - **Voras** (spider) - Validates multi-lingual translations for correctness, reports on coverage, and can populate missing translations using LLM.
-- **Vilkas** (wolf) - Monitors the presence and completeness of Lithuanian word forms in the database and can automatically generate missing forms.
+- **Vilkas** (wolf) - Monitors the presence and completeness of word forms across multiple languages in the database and can automatically generate missing forms.
 - **Papuga** (parrot) - Validates and generates pronunciations (both IPA and simplified phonetic) for derivative forms.
 - **Povas** (peacock) - Generates HTML pages displaying words organized by part-of-speech subtypes with comprehensive linguistic information.
 - **Ungurys** (eel) - Exports word data to WireWord API format for external system integration.
@@ -361,11 +361,19 @@ The agent provides:
 
 ---
 
-### Vilkas (Lithuanian Word Forms Checker)
+### Vilkas (Multi-language Word Forms Checker)
 
 **Name:** "Vilkas" means "wolf" in Lithuanian - a watchful guardian of the word database.
 
-**Purpose:** Monitors the presence and completeness of Lithuanian word forms in the database, and can automatically generate missing forms.
+**Purpose:** Monitors the presence and completeness of word forms across multiple languages in the database, and can automatically generate missing forms.
+
+**Supported Languages:**
+- Lithuanian (lt): noun declensions, verb conjugations, adjective forms
+- French (fr): verb conjugations, noun declensions
+- German (de): verb conjugations, noun declensions
+- Spanish (es): verb conjugations, noun declensions
+- Portuguese (pt): verb conjugations, noun declensions
+- English (en): verb conjugations
 
 **Usage:**
 ```bash
@@ -377,19 +385,19 @@ python vilkas.py --fix [--pos-type TYPE] [--limit N] [--dry-run]
 ```
 
 **Check Mode (Reporting Only):**
-- `--check base-forms` - Check for lemmas with Lithuanian translations but missing derivative forms
-- `--check noun-declensions` - Check Lithuanian noun declension coverage (nouns with only base forms)
-- `--check verb-conjugations` - Check Lithuanian verb conjugation coverage (verbs with only infinitive)
+- `--check base-forms` - Check for lemmas with translations but missing derivative forms (default: Lithuanian)
+- `--check noun-declensions` - Check noun declension coverage (nouns with only base forms)
+- `--check verb-conjugations` - Check verb conjugation coverage (verbs with only infinitive)
 - `--check all` - Run all checks and generate comprehensive report (default)
 
 **Fix Mode (Generate Missing Forms):**
 - `--fix` - Enable fix mode to generate missing word forms
-- `--pos-type TYPE` - Part of speech to fix (e.g., noun, verb). Defaults to 'noun' for Lithuanian.
-- `--language LANG` - Language code for form generation (default: lt, currently only lt supported)
+- `--language LANG` - Language code for form generation (default: lt). Supported: lt, fr, de, es, pt, en
+- `--pos-type TYPE` - Part of speech to fix (e.g., noun, verb, adjective). Defaults vary by language.
 - `--limit N` - Maximum number of lemmas to process
 - `--model MODEL` - LLM model to use for generation (default: gpt-5-mini)
 - `--throttle SECONDS` - Seconds to wait between API calls (default: 1.0)
-- `--source SOURCE` - Source for Lithuanian noun forms: llm (default) or wiki (Wiktionary)
+- `--source SOURCE` - Source for forms: llm (default) or wiki (Wiktionary, for Lithuanian nouns only)
 - `--dry-run` - Show what would be fixed **WITHOUT making any LLM calls or database changes**
 - `--yes`, `-y` - Skip confirmation prompt
 
@@ -412,17 +420,22 @@ python vilkas.py --check noun-declensions
 
 Generate missing Lithuanian noun declensions (dry run):
 ```bash
-python vilkas.py --fix --dry-run
+python vilkas.py --fix --language lt --dry-run
 ```
 
-Generate missing Lithuanian noun declensions with limit:
+Generate missing French verb conjugations:
 ```bash
-python vilkas.py --fix --limit 50 --yes
+python vilkas.py --fix --language fr --pos-type verb --limit 50 --yes
 ```
 
-Generate forms using Wiktionary instead of LLM:
+Generate missing German noun declensions:
 ```bash
-python vilkas.py --fix --source wiki --yes
+python vilkas.py --fix --language de --pos-type noun --yes
+```
+
+Generate forms using Wiktionary instead of LLM (Lithuanian nouns only):
+```bash
+python vilkas.py --fix --language lt --source wiki --yes
 ```
 
 **Output:**
