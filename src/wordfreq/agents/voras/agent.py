@@ -28,6 +28,12 @@ from clients.batch_queue import BatchRequestMetadata, get_batch_manager
 from wordfreq.storage.database import create_database_session
 from wordfreq.storage.models.schema import Lemma, LemmaTranslation
 from wordfreq.storage.crud.operation_log import log_translation_change
+from wordfreq.storage.translation_helpers import (
+    LANGUAGE_FIELDS,
+    get_translation as get_translation_helper,
+    set_translation as set_translation_helper,
+    get_language_name
+)
 from wordfreq.tools.llm_validators import validate_all_translations_for_word
 from wordfreq.translation.client import LinguisticClient
 
@@ -40,23 +46,6 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
-
-
-# Language mappings
-# Format: 'code': (field_name_or_code, display_name, use_lemma_translation_table)
-# If use_lemma_translation_table is True, field_name_or_code is the language_code for LemmaTranslation table
-# If False, field_name_or_code is the column name in Lemma table
-LANGUAGE_FIELDS = {
-    'lt': ('lithuanian_translation', 'Lithuanian', False),
-    'zh': ('chinese_translation', 'Chinese', False),
-    'ko': ('korean_translation', 'Korean', False),
-    'fr': ('french_translation', 'French', False),
-    'es': ('es', 'Spanish', True),
-    'de': ('de', 'German', True),
-    'pt': ('pt', 'Portuguese', True),
-    'sw': ('swahili_translation', 'Swahili', False),
-    'vi': ('vietnamese_translation', 'Vietnamese', False)
-}
 
 
 class VorasAgent:
@@ -100,49 +89,17 @@ class VorasAgent:
 
         Handles both Lemma table columns and LemmaTranslation table.
         """
-        field_name, _, use_translation_table = LANGUAGE_FIELDS[lang_code]
-
-        if use_translation_table:
-            # Query LemmaTranslation table
-            translation_obj = session.query(LemmaTranslation).filter(
-                LemmaTranslation.lemma_id == lemma.id,
-                LemmaTranslation.language_code == field_name
-            ).first()
-            return translation_obj.translation if translation_obj else None
-        else:
-            # Get from Lemma table column
-            return getattr(lemma, field_name, None)
+        return get_translation_helper(session, lemma, lang_code)
 
     def set_translation(self, session, lemma: Lemma, lang_code: str, translation: str):
         """
         Set translation for a lemma in the specified language.
 
         Handles both Lemma table columns and LemmaTranslation table.
+        Includes operation logging for audit trail.
         """
-        field_name, _, use_translation_table = LANGUAGE_FIELDS[lang_code]
-
-        # Get old translation for logging
-        old_translation = self.get_translation(session, lemma, lang_code)
-
-        if use_translation_table:
-            # Insert or update in LemmaTranslation table
-            translation_obj = session.query(LemmaTranslation).filter(
-                LemmaTranslation.lemma_id == lemma.id,
-                LemmaTranslation.language_code == field_name
-            ).first()
-
-            if translation_obj:
-                translation_obj.translation = translation
-            else:
-                translation_obj = LemmaTranslation(
-                    lemma_id=lemma.id,
-                    language_code=field_name,
-                    translation=translation
-                )
-                session.add(translation_obj)
-        else:
-            # Set Lemma table column
-            setattr(lemma, field_name, translation)
+        # Use helper function which returns (old_translation, new_translation)
+        old_translation, new_translation = set_translation_helper(session, lemma, lang_code, translation)
 
         # Log the translation change
         log_translation_change(
@@ -152,7 +109,7 @@ class VorasAgent:
             lemma_id=lemma.id,
             language_code=lang_code,
             old_translation=old_translation,
-            new_translation=translation
+            new_translation=new_translation
         )
 
     def validate_translations(
@@ -212,8 +169,8 @@ class VorasAgent:
 
                 # Gather all translations for this lemma
                 translations = {}
-                for lang_code, (field_name_iter, _) in LANGUAGE_FIELDS.items():
-                    translation = getattr(lemma, field_name_iter)
+                for lang_code in LANGUAGE_FIELDS.keys():
+                    translation = self.get_translation(session, lemma, lang_code)
                     if translation and translation.strip():
                         translations[lang_code] = translation
 
@@ -303,29 +260,29 @@ class VorasAgent:
 
         session = self.get_session()
         try:
-            # Get lemmas that have at least one translation
+            # Get all lemmas with GUIDs
             query = session.query(Lemma).filter(
                 Lemma.guid.isnot(None)
-            )
-
-            # Filter to lemmas with at least one translation
-            has_translation_filter = None
-            for lang_code, (field_name, _) in LANGUAGE_FIELDS.items():
-                field_filter = (
-                    (getattr(Lemma, field_name).isnot(None)) &
-                    (getattr(Lemma, field_name) != '')
-                )
-                if has_translation_filter is None:
-                    has_translation_filter = field_filter
-                else:
-                    has_translation_filter = has_translation_filter | field_filter
-
-            query = query.filter(has_translation_filter).order_by(Lemma.id)
+            ).order_by(Lemma.id)
 
             if limit:
-                query = query.limit(limit)
+                query = query.limit(limit * 2)  # Get extra to account for filtering
 
-            lemmas = query.all()
+            all_lemmas = query.all()
+
+            # Filter to lemmas with at least one translation (handles both column and table storage)
+            lemmas = []
+            for lemma in all_lemmas:
+                has_translation = False
+                for lang_code in LANGUAGE_FIELDS.keys():
+                    if self.get_translation(session, lemma, lang_code):
+                        has_translation = True
+                        break
+                if has_translation:
+                    lemmas.append(lemma)
+                if limit and len(lemmas) >= limit:
+                    break
+
             logger.info(f"Found {len(lemmas)} lemmas with translations")
 
             # Sample if needed
@@ -345,7 +302,7 @@ class VorasAgent:
                     'issues': [],
                     'confidence_threshold': confidence_threshold
                 }
-                for lang_code, (_, language_name) in LANGUAGE_FIELDS.items()
+                for lang_code in LANGUAGE_FIELDS.keys()
             }
 
             # Validate all translations for each lemma in one LLM call
@@ -357,8 +314,8 @@ class VorasAgent:
 
                 # Gather all translations for this lemma
                 translations = {}
-                for lang_code, (field_name, _) in LANGUAGE_FIELDS.items():
-                    translation = getattr(lemma, field_name)
+                for lang_code in LANGUAGE_FIELDS.keys():
+                    translation = self.get_translation(session, lemma, lang_code)
                     if translation and translation.strip():
                         translations[lang_code] = translation
 
@@ -465,7 +422,7 @@ class VorasAgent:
             'batch_requests_queued': 0,
             'by_language': {
                 lang_code: {
-                    'language_name': LANGUAGE_FIELDS[lang_code][1],
+                    'language_name': get_language_name(lang_code),
                     'deleted': 0,
                     'added': 0,
                     'failed': 0
@@ -624,7 +581,7 @@ class VorasAgent:
             'total_failed': 0,
             'by_language': {
                 lang_code: {
-                    'language_name': LANGUAGE_FIELDS[lang_code][1],
+                    'language_name': get_language_name(lang_code),
                     'total_missing': 0,
                     'fixed': 0,
                     'failed': 0
@@ -676,7 +633,7 @@ class VorasAgent:
                 # Find which languages are missing for this word
                 missing_languages = []
                 for lang_code in languages_to_fix:
-                    _, language_name, _ = LANGUAGE_FIELDS[lang_code]
+                    language_name = get_language_name(lang_code)
                     translation = self.get_translation(session, lemma, lang_code)
                     if not translation or not translation.strip():
                         missing_languages.append((lang_code, language_name))

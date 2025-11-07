@@ -16,21 +16,13 @@ if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
 from wordfreq.storage.models.schema import Lemma
+from wordfreq.storage.translation_helpers import (
+    LANGUAGE_FIELDS,
+    get_translation,
+    get_language_name
+)
 
 logger = logging.getLogger(__name__)
-
-# Language mappings
-LANGUAGE_FIELDS = {
-    'lt': ('lithuanian_translation', 'Lithuanian'),
-    'zh': ('chinese_translation', 'Chinese'),
-    'ko': ('korean_translation', 'Korean'),
-    'fr': ('french_translation', 'French'),
-    'es': ('spanish_translation', 'Spanish'),
-    'de': ('german_translation', 'German'),
-    'pt': ('portuguese_translation', 'Portuguese'),
-    'sw': ('swahili_translation', 'Swahili'),
-    'vi': ('vietnamese_translation', 'Vietnamese')
-}
 
 
 def check_overall_coverage(session) -> Dict[str, any]:
@@ -56,12 +48,13 @@ def check_overall_coverage(session) -> Dict[str, any]:
 
         # Calculate coverage for each language
         language_coverage = {}
-        for lang_code, (field_name, language_name) in LANGUAGE_FIELDS.items():
+        for lang_code in LANGUAGE_FIELDS.keys():
+            language_name = get_language_name(lang_code)
             with_translation = 0
             without_translation = []
 
             for lemma in all_lemmas:
-                translation = getattr(lemma, field_name)
+                translation = get_translation(session, lemma, lang_code)
                 if translation and translation.strip():
                     with_translation += 1
                 else:
@@ -95,11 +88,12 @@ def check_overall_coverage(session) -> Dict[str, any]:
             translation_count = 0
             missing_languages = []
 
-            for lang_code, (field_name, language_name) in LANGUAGE_FIELDS.items():
-                translation = getattr(lemma, field_name)
+            for lang_code in LANGUAGE_FIELDS.keys():
+                translation = get_translation(session, lemma, lang_code)
                 if translation and translation.strip():
                     translation_count += 1
                 else:
+                    language_name = get_language_name(lang_code)
                     missing_languages.append(language_name)
 
             if translation_count == len(LANGUAGE_FIELDS):
@@ -158,7 +152,7 @@ def check_language_coverage(session, language_code: str) -> Dict[str, any]:
     if language_code not in LANGUAGE_FIELDS:
         raise ValueError(f"Unsupported language code: {language_code}")
 
-    field_name, language_name = LANGUAGE_FIELDS[language_code]
+    language_name = get_language_name(language_code)
     logger.info(f"Checking {language_name} translation coverage...")
 
     try:
@@ -182,7 +176,7 @@ def check_language_coverage(session, language_code: str) -> Dict[str, any]:
 
             coverage_by_pos[pos_type]['total'] += 1
 
-            translation = getattr(lemma, field_name)
+            translation = get_translation(session, lemma, language_code)
             if translation and translation.strip():
                 coverage_by_pos[pos_type]['with_translation'] += 1
             else:
@@ -268,8 +262,8 @@ def check_difficulty_level_coverage(session) -> Dict[str, any]:
 
             coverage_by_level[level]['total'] += 1
 
-            for lang_code, (field_name, _) in LANGUAGE_FIELDS.items():
-                translation = getattr(lemma, field_name)
+            for lang_code in LANGUAGE_FIELDS.keys():
+                translation = get_translation(session, lemma, lang_code)
                 if translation and translation.strip():
                     coverage_by_level[level]['language_coverage'][lang_code] += 1
 
@@ -341,7 +335,7 @@ def print_summary(results: Dict, start_time: datetime, duration: float):
                 stats = level_data['coverage_by_level'][level]
                 logger.info(f"    Level {level} ({stats['total_lemmas']} words):")
                 for lang_code, percentage in stats['language_percentages'].items():
-                    lang_name = LANGUAGE_FIELDS[lang_code][1]
+                    lang_name = get_language_name(lang_code)
                     logger.info(f"      {lang_name}: {percentage:.1f}%")
 
     logger.info("=" * 80)
