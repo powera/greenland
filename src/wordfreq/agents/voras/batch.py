@@ -19,6 +19,7 @@ if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
 from clients.batch_queue import get_batch_manager
+from wordfreq.storage.crud.operation_log import log_translation_change
 
 logger = logging.getLogger(__name__)
 
@@ -191,7 +192,23 @@ def retrieve_batch_results(batch_id: str, session, debug: bool = False) -> Dict[
                 translation = translations.get(llm_field, '').strip()
 
                 if translation:
+                    # Get old value for logging
+                    old_translation = getattr(lemma, field_name, None)
+
+                    # Update the translation
                     setattr(lemma, field_name, translation)
+
+                    # Log the change
+                    log_translation_change(
+                        session=session,
+                        source=f"voras-agent/batch",
+                        operation_type="translation",
+                        lemma_id=lemma.id,
+                        language_code=lang_code,
+                        old_translation=old_translation,
+                        new_translation=translation
+                    )
+
                     results['by_language'][lang_code]['updated'] += 1
                     updated_count += 1
                 else:
