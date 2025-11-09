@@ -13,11 +13,12 @@ from pathlib import Path
 from typing import Dict, List, Tuple, Optional
 
 # Add the src directory to the path for imports
-GREENLAND_SRC_PATH = '/Users/powera/repo/greenland/src'
+GREENLAND_SRC_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
+GREENLAND_REPO_ROOT = os.path.abspath(os.path.join(GREENLAND_SRC_PATH, '..'))
 sys.path.append(GREENLAND_SRC_PATH)
 
 # Add the data directory to the path for imports
-sys.path.append('/Users/powera/repo/greenland/data/trakaido_wordlists/lang_lt')
+sys.path.append(os.path.join(GREENLAND_REPO_ROOT, 'data', 'trakaido_wordlists', 'lang_lt'))
 
 try:
     from verbs import verbs_new
@@ -236,7 +237,7 @@ def export_wireword_verbs(output_path: str = None) -> Tuple[bool, Dict]:
     """
     try:
         if output_path is None:
-            output_path = '/Users/powera/repo/greenland/wireword_verbs_export.json'
+            output_path = os.path.join(GREENLAND_REPO_ROOT, 'wireword_verbs_export.json')
         
         # Convert verbs
         converted_entries = convert_verbs_to_wireword_format()
