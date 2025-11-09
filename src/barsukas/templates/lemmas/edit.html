@@ -54,6 +54,17 @@
                         </div>
                     </div>
 
+                    <!-- GUID -->
+                    <div class="mb-3">
+                        <label for="guid" class="form-label">GUID</label>
+                        <input type="text" class="form-control" id="guid" name="guid"
+                               value="{{ lemma.guid or '' }}"
+                               placeholder="e.g., 550e8400-e29b-41d4-a716-446655440000">
+                        <small class="form-text text-muted">
+                            Unique identifier for this word. Leave empty for new words, or set manually if needed.
+                        </small>
+                    </div>
+
                     <!-- Difficulty Level -->
                     <div class="mb-3">
                         <label for="difficulty_level" class="form-label">Base Difficulty Level</label>

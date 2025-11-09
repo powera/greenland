@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block title %}Translation Check Results - {{ lemma.lemma_text }}{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('lemmas.list_lemmas') }}">Lemmas</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('lemmas.view_lemma', lemma_id=lemma.id) }}">{{ lemma.lemma_text }}</a></li>
+                <li class="breadcrumb-item active">Translation Check Results</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-clipboard-check"></i> Translation Check Results for "{{ lemma.lemma_text }}"
+            </div>
+            <div class="card-body">
+                {% if all_good %}
+                    <div class="alert alert-success">
+                        <i class="bi bi-check-circle"></i> All translations look good!
+                    </div>
+                {% else %}
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle"></i> Found {{ issues|length }} potential translation issues
+                    </div>
+
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Language</th>
+                                <th>Current Translation</th>
+                                <th>Suggested Translation</th>
+                                <th>Issues</th>
+                                <th>Confidence</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for issue in issues %}
+                                <tr>
+                                    <td><strong>{{ issue.language_name }}</strong></td>
+                                    <td>{{ issue.current }}</td>
+                                    <td>
+                                        <strong>{{ issue.suggested }}</strong>
+                                        {% if not issue.is_correct %}
+                                            <span class="badge bg-danger" title="Translation may be incorrect">Incorrect</span>
+                                        {% endif %}
+                                        {% if not issue.is_lemma_form %}
+                                            <span class="badge bg-warning text-dark" title="Not in lemma form">Not Lemma Form</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <ul class="mb-0" style="padding-left: 1rem;">
+                                            {% for problem in issue.issues %}
+                                                <li><small>{{ problem }}</small></li>
+                                            {% endfor %}
+                                        </ul>
+                                    </td>
+                                    <td>{{ "%.0f"|format(issue.confidence * 100) }}%</td>
+                                    <td>
+                                        <button type="button" class="btn btn-sm btn-primary"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#fixModal{{ loop.index }}">
+                                            <i class="bi bi-check"></i> Apply Fix
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <!-- Fix Modal -->
+                                <div class="modal fade" id="fixModal{{ loop.index }}" tabindex="-1">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Update {{ issue.language_name }} Translation</h5>
+                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <form method="post" action="{{ url_for('translations.update_translation', lemma_id=lemma.id, lang_code=issue.language_code) }}">
+                                                <div class="modal-body">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Current Translation</label>
+                                                        <p class="form-control-plaintext">{{ issue.current }}</p>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label for="translation{{ loop.index }}" class="form-label">New Translation</label>
+                                                        <input type="text" class="form-control" id="translation{{ loop.index }}"
+                                                               name="translation" value="{{ issue.suggested }}" required>
+                                                    </div>
+                                                    <div class="alert alert-info">
+                                                        <strong>Issues found:</strong>
+                                                        <ul class="mb-0">
+                                                            {% for problem in issue.issues %}
+                                                                <li>{{ problem }}</li>
+                                                            {% endfor %}
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                    <button type="submit" class="btn btn-primary">Update Translation</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% endif %}
+
+                <div class="mt-3">
+                    <a href="{{ url_for('lemmas.view_lemma', lemma_id=lemma.id) }}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Back to Lemma
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

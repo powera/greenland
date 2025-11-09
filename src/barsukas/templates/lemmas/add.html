@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+
+{% block title %}Add New Lemma{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('lemmas.list_lemmas') }}">Lemmas</a></li>
+                <li class="breadcrumb-item active">Add New</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-plus-circle"></i> Add New Lemma
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    <div class="mb-3">
+                        <label for="lemma_text" class="form-label">Lemma Text <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="lemma_text" name="lemma_text" required
+                               placeholder="e.g., eat" onblur="checkWordExists()">
+                        <small class="form-text text-muted">The base form of the word in English</small>
+                        <div id="word_check_result" class="mt-2"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="definition_text" class="form-label">Definition <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="definition_text" name="definition_text" rows="3" required
+                                  placeholder="e.g., To consume food by mouth"></textarea>
+                        <small class="form-text text-muted">Clear definition of the word</small>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="pos_type" class="form-label">POS Type <span class="text-danger">*</span></label>
+                            <select class="form-select" id="pos_type" name="pos_type" required onchange="updateSubtypeOptions()">
+                                <option value="">Select POS type...</option>
+                                <option value="noun">noun</option>
+                                <option value="verb">verb</option>
+                                <option value="adjective">adjective</option>
+                                <option value="adverb">adverb</option>
+                                <option value="pronoun">pronoun</option>
+                                <option value="preposition">preposition</option>
+                                <option value="conjunction">conjunction</option>
+                                <option value="interjection">interjection</option>
+                                <option value="determiner">determiner</option>
+                                <option value="numeral">numeral</option>
+                            </select>
+                            <small class="form-text text-muted">Part of speech</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="pos_subtype" class="form-label">POS Subtype <span class="text-danger">*</span></label>
+                            <select class="form-select" id="pos_subtype" name="pos_subtype" required>
+                                <option value="">Select POS type first...</option>
+                            </select>
+                            <small class="form-text text-muted">Required for GUID generation</small>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> <strong>Note:</strong> After creating the lemma, you can add translations, difficulty levels, and other details on the lemma view page.
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('lemmas.list_lemmas') }}" class="btn btn-secondary">
+                            <i class="bi bi-x"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save"></i> Create Lemma
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// POS subtype mapping
+const posSubtypes = {
+    'noun': [
+        'animal', 'body_part', 'building_structure', 'clothing_accessory',
+        'concept_idea', 'emotion_feeling', 'food_drink', 'human',
+        'material_substance', 'nationality', 'natural_feature', 'personal_name',
+        'place_name', 'plant', 'small_movable_object', 'temporal_name',
+        'time_period', 'tool_machine', 'unit_of_measurement'
+    ],
+    'verb': [
+        'directional_movement', 'emotional_state', 'mental_state',
+        'physical_action', 'possession'
+    ],
+    'adjective': [
+        'color', 'definite_quantity', 'quality', 'sequence', 'shape'
+    ],
+    'adverb': [
+        'location', 'other', 'style'
+    ],
+    'pronoun': [
+        'pronoun_other'
+    ],
+    'conjunction': [
+        'conjunction_other'
+    ],
+    'interjection': [
+        'other'
+    ],
+    'numeral': [
+        'definite_quantity'
+    ],
+    'preposition': [
+        'preposition_other'
+    ],
+    'determiner': [
+        'determiner_other'
+    ]
+};
+
+// Format subtype for display (convert underscores to spaces, capitalize)
+function formatSubtype(subtype) {
+    return subtype.split('_').map(word =>
+        word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
+}
+
+function updateSubtypeOptions() {
+    const posType = document.getElementById('pos_type').value;
+    const subtypeSelect = document.getElementById('pos_subtype');
+
+    // Clear current options
+    subtypeSelect.innerHTML = '<option value="">None</option>';
+
+    if (posType && posSubtypes[posType]) {
+        const subtypes = posSubtypes[posType];
+        if (subtypes.length > 0) {
+            subtypes.forEach(subtype => {
+                const option = document.createElement('option');
+                option.value = subtype;
+                option.textContent = formatSubtype(subtype);
+                subtypeSelect.appendChild(option);
+            });
+        }
+    }
+
+    // Also trigger word check when POS type changes
+    checkWordExists();
+}
+
+function checkWordExists() {
+    const lemmaText = document.getElementById('lemma_text').value.trim();
+    const posType = document.getElementById('pos_type').value;
+    const resultDiv = document.getElementById('word_check_result');
+
+    if (!lemmaText) {
+        resultDiv.innerHTML = '';
+        return;
+    }
+
+    // Show loading indicator
+    resultDiv.innerHTML = '<small class="text-muted"><i class="bi bi-hourglass-split"></i> Checking...</small>';
+
+    // Build query parameters
+    const params = new URLSearchParams({
+        search: lemmaText
+    });
+    if (posType) {
+        params.append('pos_type', posType);
+    }
+
+    // Fetch results
+    fetch(`{{ url_for('api.check_lemma_exists') }}?${params.toString()}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.exact_match) {
+                resultDiv.innerHTML = `
+                    <div class="alert alert-warning py-2">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <strong>Exact match found:</strong>
+                        <a href="{{ url_for('lemmas.view_lemma', lemma_id=0) }}".replace('0', data.exact_match.id) target="_blank">
+                            ${data.exact_match.lemma_text} (${data.exact_match.pos_type})
+                        </a>
+                    </div>
+                `;
+            } else if (data.similar_matches && data.similar_matches.length > 0) {
+                const matches = data.similar_matches.slice(0, 3).map(m =>
+                    `<a href="{{ url_for('lemmas.view_lemma', lemma_id=0) }}".replace('0', m.id) target="_blank">${m.lemma_text} (${m.pos_type})</a>`
+                ).join(', ');
+                resultDiv.innerHTML = `
+                    <div class="alert alert-info py-2">
+                        <i class="bi bi-info-circle"></i>
+                        <strong>Similar words found:</strong> ${matches}
+                    </div>
+                `;
+            } else {
+                resultDiv.innerHTML = '<small class="text-success"><i class="bi bi-check-circle"></i> No existing matches found</small>';
+            }
+        })
+        .catch(error => {
+            console.error('Error checking word:', error);
+            resultDiv.innerHTML = '';
+        });
+}
+</script>
+{% endblock %}

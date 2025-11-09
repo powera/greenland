@@ -46,6 +46,15 @@
                                 <dd class="col-sm-7"><span class="badge bg-light text-dark">{{ lemma.pos_subtype }}</span></dd>
                             {% endif %}
 
+                            <dt class="col-sm-5">GUID:</dt>
+                            <dd class="col-sm-7">
+                                {% if lemma.guid %}
+                                    <code>{{ lemma.guid }}</code>
+                                {% else %}
+                                    <span class="text-warning"><i class="bi bi-exclamation-triangle"></i> Not set</span>
+                                {% endif %}
+                            </dd>
+
                             <dt class="col-sm-5">Base Difficulty:</dt>
                             <dd class="col-sm-7">
                                 {% if lemma.difficulty_level is not none %}
@@ -97,8 +106,13 @@
 <div class="row mb-4">
     <div class="col">
         <div class="card">
-            <div class="card-header">
-                <i class="bi bi-translate"></i> Translations
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-translate"></i> Translations</span>
+                <form method="post" action="{{ url_for('agents.check_translations', lemma_id=lemma.id) }}" style="display: inline;">
+                    <button type="submit" class="btn btn-sm btn-light" title="Check translations using AI">
+                        <i class="bi bi-robot"></i> Check Translations
+                    </button>
+                </form>
             </div>
             <div class="card-body">
                 <table class="table table-hover translation-table">

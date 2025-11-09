@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block title %}Operation Logs{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2><i class="bi bi-journal-text"></i> Operation Logs</h2>
+        <p class="text-muted">View all operations performed on the database</p>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="row mb-4">
+    <div class="col">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-funnel"></i> Filters
+            </div>
+            <div class="card-body">
+                <form method="get" class="row g-3">
+                    <div class="col-md-3">
+                        <label for="source" class="form-label">Source</label>
+                        <select class="form-select" id="source" name="source">
+                            <option value="">All sources</option>
+                            {% for source in sources %}
+                                <option value="{{ source }}" {% if source == source_filter %}selected{% endif %}>{{ source }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="operation_type" class="form-label">Operation Type</label>
+                        <select class="form-select" id="operation_type" name="operation_type">
+                            <option value="">All types</option>
+                            {% for op_type in operation_types %}
+                                <option value="{{ op_type }}" {% if op_type == operation_type_filter %}selected{% endif %}>{{ op_type }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="lemma_id" class="form-label">Lemma ID</label>
+                        <input type="text" class="form-control" id="lemma_id" name="lemma_id" value="{{ lemma_id_filter }}" placeholder="Filter by lemma ID">
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary me-2">
+                            <i class="bi bi-search"></i> Filter
+                        </button>
+                        <a href="{{ url_for('operation_logs.list_logs') }}" class="btn btn-secondary">
+                            <i class="bi bi-x"></i> Clear
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Results -->
+<div class="row mb-4">
+    <div class="col">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>
+                    <i class="bi bi-list"></i> Logs
+                    <span class="badge bg-secondary">{{ total }} total</span>
+                </span>
+            </div>
+            <div class="card-body">
+                {% if logs %}
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Timestamp</th>
+                                    <th>Source</th>
+                                    <th>Operation</th>
+                                    <th>Lemma</th>
+                                    <th>Summary</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in logs %}
+                                    <tr>
+                                        <td>{{ item.log.id }}</td>
+                                        <td><small>{{ item.log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</small></td>
+                                        <td><span class="badge bg-info">{{ item.log.source }}</span></td>
+                                        <td><span class="badge bg-secondary">{{ item.log.operation_type }}</span></td>
+                                        <td>
+                                            {% if item.lemma %}
+                                                <a href="{{ url_for('lemmas.view_lemma', lemma_id=item.lemma.id) }}">
+                                                    {{ item.lemma.lemma_text }}
+                                                </a>
+                                            {% elif item.log.lemma_id %}
+                                                ID: {{ item.log.lemma_id }}
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <small>
+                                                {% if 'language_code' in item.fact_data %}
+                                                    {{ item.fact_data.language_code }}:
+                                                {% endif %}
+                                                {% if 'old_value' in item.fact_data and 'new_value' in item.fact_data %}
+                                                    "{{ item.fact_data.old_value or 'null' }}" → "{{ item.fact_data.new_value or 'null' }}"
+                                                {% elif 'field_name' in item.fact_data %}
+                                                    {{ item.fact_data.field_name }}
+                                                {% else %}
+                                                    {{ item.fact_data | truncate(50) }}
+                                                {% endif %}
+                                            </small>
+                                        </td>
+                                        <td>
+                                            <a href="{{ url_for('operation_logs.view_log', log_id=item.log.id) }}" class="btn btn-sm btn-outline-primary">
+                                                <i class="bi bi-eye"></i> View
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    {% if total_pages > 1 %}
+                        <nav>
+                            <ul class="pagination justify-content-center">
+                                <li class="page-item {% if page == 1 %}disabled{% endif %}">
+                                    <a class="page-link" href="?page={{ page - 1 }}{% if source_filter %}&source={{ source_filter }}{% endif %}{% if operation_type_filter %}&operation_type={{ operation_type_filter }}{% endif %}{% if lemma_id_filter %}&lemma_id={{ lemma_id_filter }}{% endif %}">Previous</a>
+                                </li>
+                                {% for p in range(1, total_pages + 1) %}
+                                    {% if p == page %}
+                                        <li class="page-item active"><span class="page-link">{{ p }}</span></li>
+                                    {% elif p == 1 or p == total_pages or (p >= page - 2 and p <= page + 2) %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ p }}{% if source_filter %}&source={{ source_filter }}{% endif %}{% if operation_type_filter %}&operation_type={{ operation_type_filter }}{% endif %}{% if lemma_id_filter %}&lemma_id={{ lemma_id_filter }}{% endif %}">{{ p }}</a>
+                                        </li>
+                                    {% elif p == page - 3 or p == page + 3 %}
+                                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                                    {% endif %}
+                                {% endfor %}
+                                <li class="page-item {% if page == total_pages %}disabled{% endif %}">
+                                    <a class="page-link" href="?page={{ page + 1 }}{% if source_filter %}&source={{ source_filter }}{% endif %}{% if operation_type_filter %}&operation_type={{ operation_type_filter }}{% endif %}{% if lemma_id_filter %}&lemma_id={{ lemma_id_filter }}{% endif %}">Next</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    {% endif %}
+                {% else %}
+                    <p class="text-muted">No operation logs found.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
