@@ -8,10 +8,11 @@ in the trakaido database with conjugation/derivative forms.
 
 import logging
 import sys
+import os
 from typing import Any, Dict, List, Optional, Tuple
 
 # Add the src directory to the path for imports
-GREENLAND_SRC_PATH = '/Users/powera/repo/greenland/src'
+GREENLAND_SRC_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..'))
 sys.path.append(GREENLAND_SRC_PATH)
 
 import constants
