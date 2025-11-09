@@ -16,7 +16,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 
 from config import Config
-from routes import lemmas, translations, overrides
+from routes import lemmas, translations, overrides, agents, operation_logs, wireword, api
 from wordfreq.storage.utils.session import ensure_tables_exist
 
 
@@ -42,6 +42,10 @@ def create_app(config_class=Config):
     app.register_blueprint(lemmas.bp)
     app.register_blueprint(translations.bp)
     app.register_blueprint(overrides.bp)
+    app.register_blueprint(agents.bp)
+    app.register_blueprint(operation_logs.bp)
+    app.register_blueprint(wireword.bp)
+    app.register_blueprint(api.bp)
 
     @app.before_request
     def before_request():
@@ -91,6 +95,8 @@ def main():
                        help=f'Port to run on (default: {Config.PORT})')
     parser.add_argument('--debug', action='store_true',
                        help='Enable debug mode')
+    parser.add_argument('--readonly', action='store_true',
+                       help='Run in read-only mode (no edits allowed)')
     args = parser.parse_args()
 
     app = create_app()
@@ -98,8 +104,13 @@ def main():
     if args.debug:
         app.config['DEBUG'] = True
 
+    if args.readonly:
+        app.config['READONLY'] = True
+
     print(f"Starting Barsukas on http://{Config.HOST}:{args.port}")
     print(f"Database: {app.config['DB_PATH']}")
+    if args.readonly:
+        print("Running in READ-ONLY mode - no edits allowed")
     print(f"Press Ctrl+C to stop")
 
     app.run(host=Config.HOST, port=args.port, debug=app.config['DEBUG'])

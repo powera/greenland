@@ -533,20 +533,20 @@ class TrakaidoExporter:
     def export_all_text_files(self, lang_lt_dir: str) -> Tuple[bool, Dict[str, Any]]:
         """
         Export text files for all available subtypes to lang_lt/generated/simple directory.
-        
+
         Args:
             lang_lt_dir: Base lang_lt directory
-            
+
         Returns:
             Tuple of (success flag, results dictionary)
         """
         logger.info("Starting text exports for all subtypes...")
-        
+
         session = self.get_session()
         try:
             # Get all unique subtypes from the database
             from sqlalchemy import func
-            
+
             subtypes_query = session.query(
                 Lemma.pos_subtype,
                 func.count(Lemma.id).label('count')
@@ -560,34 +560,34 @@ class TrakaidoExporter:
             ).order_by(
                 Lemma.pos_subtype
             )
-            
+
             subtypes_data = subtypes_query.all()
-            
+
             if not subtypes_data:
                 logger.warning("No subtypes found for text export")
                 return False, {'subtypes_exported': [], 'files_created': []}
-            
+
             logger.info(f"Found {len(subtypes_data)} subtypes to export")
-            
+
             # Create the simple directory
             simple_dir = os.path.join(lang_lt_dir, 'simple')
             os.makedirs(simple_dir, exist_ok=True)
-            
+
             results = {
                 'subtypes_exported': [],
                 'files_created': [],
                 'failed_exports': [],
                 'total_entries': 0
             }
-            
+
             # Export each subtype
             for subtype, count in subtypes_data:
                 logger.info(f"Exporting subtype '{subtype}' ({count} entries)...")
-                
+
                 # Create filename: subtype.txt
                 filename = f"{subtype}.txt"
                 output_path = os.path.join(simple_dir, filename)
-                
+
                 # Export this subtype
                 success, stats = self.export_to_text(
                     output_path=output_path,
@@ -595,7 +595,7 @@ class TrakaidoExporter:
                     include_without_guid=False,  # Only include words with GUIDs
                     include_unverified=True      # Include unverified entries
                 )
-                
+
                 if success and stats:
                     results['subtypes_exported'].append({
                         'subtype': subtype,
@@ -609,28 +609,40 @@ class TrakaidoExporter:
                 else:
                     results['failed_exports'].append(subtype)
                     logger.error(f"❌ Failed to export subtype '{subtype}'")
-            
+
             # Summary
             successful_count = len(results['subtypes_exported'])
             failed_count = len(results['failed_exports'])
-            
+
             if successful_count > 0:
                 logger.info(f"✅ Text export completed: {successful_count} subtypes exported, {results['total_entries']} total entries")
                 logger.info(f"Files created in: {simple_dir}")
-                
+
                 if failed_count > 0:
                     logger.warning(f"⚠️  {failed_count} subtypes failed to export: {', '.join(results['failed_exports'])}")
-                
+
                 return True, results
             else:
                 logger.error("❌ No subtypes were successfully exported")
                 return False, results
-                
+
         except Exception as e:
             logger.error(f"Error during text export: {e}")
             return False, {'error': str(e), 'subtypes_exported': [], 'files_created': []}
         finally:
             session.close()
+
+    def export_to_wireword_format(self, output_path: str, **kwargs) -> Tuple[bool, Optional[ExportStats]]:
+        """Delegate to WirewordExporter. See export_wireword.py for details."""
+        from .export_wireword import WirewordExporter
+        exporter = WirewordExporter(self.db_path, self.debug, self.language, self.simplified_chinese)
+        return exporter.export_to_wireword_format(output_path, **kwargs)
+
+    def export_wireword_directory(self, output_dir: str) -> Tuple[bool, Dict[str, Any]]:
+        """Delegate to WirewordExporter. See export_wireword.py for details."""
+        from .export_wireword import WirewordExporter
+        exporter = WirewordExporter(self.db_path, self.debug, self.language, self.simplified_chinese)
+        return exporter.export_wireword_directory(output_dir)
 
     def export_all(
         self,
