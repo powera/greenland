@@ -64,6 +64,7 @@ class Lemma(Base):
     derivative_forms = relationship("DerivativeForm", back_populates="lemma", cascade="all, delete-orphan")
     grammar_facts = relationship("GrammarFact", back_populates="lemma", cascade="all, delete-orphan")
     translations = relationship("LemmaTranslation", back_populates="lemma", cascade="all, delete-orphan")
+    difficulty_overrides = relationship("LemmaDifficultyOverride", back_populates="lemma", cascade="all, delete-orphan")
 
 class LemmaTranslation(Base):
     """Model for storing translations of lemmas in various languages.
@@ -88,6 +89,31 @@ class LemmaTranslation(Base):
 
     # Relationships
     lemma = relationship("Lemma", back_populates="translations")
+
+class LemmaDifficultyOverride(Base):
+    """Model for storing per-language difficulty level overrides for lemmas.
+
+    This allows different Trakaido levels for the same word across languages.
+    For example, 筷子 (chopsticks) might be level 2 in Chinese but level 8 in German.
+    A difficulty_level of -1 means the word should be excluded from that language's wordlist.
+    """
+    __tablename__ = 'lemma_difficulty_overrides'
+    __table_args__ = (
+        UniqueConstraint('lemma_id', 'language_code', name='uq_lemma_difficulty_override'),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    lemma_id: Mapped[int] = mapped_column(ForeignKey("lemmas.id"), nullable=False)
+    language_code: Mapped[str] = mapped_column(String, nullable=False, index=True)  # e.g., "zh", "fr", "de"
+    difficulty_level: Mapped[int] = mapped_column(Integer, nullable=False)  # Trakaido level (1-20) or -1 to exclude
+
+    # Metadata
+    notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # Reason for override
+    added_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now())
+    updated_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+
+    # Relationships
+    lemma = relationship("Lemma", back_populates="difficulty_overrides")
 
 class DerivativeForm(Base):
     """Model for storing derivative forms - language-specific combinations of WordToken and Lemma with grammatical information.
