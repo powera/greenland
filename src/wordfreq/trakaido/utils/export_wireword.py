@@ -87,7 +87,7 @@ class WirewordExporter:
 
 
     def query_trakaido_data_for_wireword(
-        self, 
+        self,
         session,
         difficulty_level: Optional[int] = None,
         pos_type: Optional[str] = None,
@@ -99,12 +99,18 @@ class WirewordExporter:
         """
         Query trakaido data from the database with flexible filtering.
         Filters by translation availability using translation_helpers.
-        
+
+        Uses language-specific difficulty level overrides when available.
+
         Note: This queries all lemmas then filters in Python, which is less efficient
         than SQL filtering but works correctly with the LemmaTranslation table.
         """
+        from sqlalchemy import func
+        from wordfreq.storage.models.schema import LemmaDifficultyOverride
+        from wordfreq.storage.crud.difficulty_override import get_effective_difficulty_level
+
         logger.info(f"Querying database for trakaido data (language: {self.language_name})...")
-        
+
         # Build the query without language filtering (we'll filter in Python)
         query = session.query(Lemma)\
             .filter(Lemma.pos_type != 'verb')  # Exclude verbs - they go in separate file
@@ -112,12 +118,24 @@ class WirewordExporter:
         # Apply filters
         if not include_without_guid:
             query = query.filter(Lemma.guid != None)
-        
+
         if not include_unverified:
             query = query.filter(Lemma.verified == True)
-        
+
+        # Handle difficulty level filtering with language-specific overrides
         if difficulty_level is not None:
-            query = query.filter(Lemma.difficulty_level == difficulty_level)
+            # Left join with overrides to get language-specific levels
+            query = query.outerjoin(
+                LemmaDifficultyOverride,
+                (LemmaDifficultyOverride.lemma_id == Lemma.id) &
+                (LemmaDifficultyOverride.language_code == self.language)
+            )
+            # Use override if exists, otherwise use default
+            effective_level = func.coalesce(
+                LemmaDifficultyOverride.difficulty_level,
+                Lemma.difficulty_level
+            )
+            query = query.filter(effective_level == difficulty_level)
         
         if pos_type:
             query = query.filter(Lemma.pos_type == pos_type)
@@ -149,11 +167,16 @@ class WirewordExporter:
         export_data = []
         for lemma in lemmas:
             target_translation = get_translation(session, lemma, self.language)
-            
+
             # For Chinese, optionally convert to simplified
             if self.language == 'zh' and self.simplified_chinese and target_translation:
                 target_translation = to_simplified(target_translation)
-            
+
+            # Get effective difficulty level for this language
+            effective_level = get_effective_difficulty_level(session, lemma, self.language)
+            if effective_level is None:
+                effective_level = 0
+
             entry = {
                 'GUID': lemma.guid,
                 'english': self.get_english_word_from_lemma(session, lemma),
@@ -162,7 +185,7 @@ class WirewordExporter:
                 'pos_type': lemma.pos_type,
                 'pos_subtype': lemma.pos_subtype or 'general',
                 'subtype': lemma.pos_subtype or 'general',
-                'trakaido_level': lemma.difficulty_level or 0,
+                'trakaido_level': effective_level,
                 'verified': lemma.verified,
                 'confidence': lemma.confidence
             }
@@ -947,6 +970,8 @@ class WirewordExporter:
         """
         Export verbs from database to WireWord API format.
 
+        Uses language-specific difficulty level overrides when available.
+
         Args:
             output_path: Path to write the JSON file
             difficulty_level: Filter by specific difficulty level (optional)
@@ -959,6 +984,10 @@ class WirewordExporter:
         Returns:
             Tuple of (success flag, export statistics)
         """
+        from sqlalchemy import func
+        from wordfreq.storage.models.schema import LemmaDifficultyOverride
+        from wordfreq.storage.crud.difficulty_override import get_effective_difficulty_level
+
         session = self.get_session()
         try:
             # NOTE: For languages in LemmaTranslation table (es, de, pt), we need special handling
@@ -975,9 +1004,21 @@ class WirewordExporter:
             if not include_unverified:
                 query = query.filter(Lemma.verified == True)
 
+            # Handle difficulty level filtering with language-specific overrides
             if difficulty_level is not None:
-                query = query.filter(Lemma.difficulty_level == difficulty_level)
-                logger.info(f"Filtering by difficulty level: {difficulty_level}")
+                # Left join with overrides to get language-specific levels
+                query = query.outerjoin(
+                    LemmaDifficultyOverride,
+                    (LemmaDifficultyOverride.lemma_id == Lemma.id) &
+                    (LemmaDifficultyOverride.language_code == self.language)
+                )
+                # Use override if exists, otherwise use default
+                effective_level = func.coalesce(
+                    LemmaDifficultyOverride.difficulty_level,
+                    Lemma.difficulty_level
+                )
+                query = query.filter(effective_level == difficulty_level)
+                logger.info(f"Filtering by effective difficulty level: {difficulty_level} for language: {self.language}")
 
             if pos_subtype:
                 query = query.filter(Lemma.pos_subtype == pos_subtype)
@@ -1000,6 +1041,11 @@ class WirewordExporter:
             # Transform to WireWord format
             wireword_data = []
             for lemma in lemmas:
+                # Get effective difficulty level for this language
+                effective_lemma_level = get_effective_difficulty_level(session, lemma, self.language)
+                if effective_lemma_level is None:
+                    effective_lemma_level = 1  # Default to level 1 if not set
+
                 # Get all derivative forms for this verb
                 derivative_forms = session.query(DerivativeForm).filter(
                     DerivativeForm.lemma_id == lemma.id
@@ -1039,7 +1085,7 @@ class WirewordExporter:
                                 target_synonyms_pinyin.append(pinyin if pinyin else '')
                         elif form.grammatical_form != 'infinitive':
                             # This is a conjugated form
-                            form_level = max(lemma.difficulty_level or 1, 1)
+                            form_level = max(effective_lemma_level, 1)
 
                             # For French, only export present, passé composé (past), and future
                             if self.language == 'fr':
@@ -1106,7 +1152,7 @@ class WirewordExporter:
                     'base_english': base_english,
                     'corpus': 'VERBS',
                     'group': format_subtype_display_name(lemma.pos_subtype or 'action'),
-                    'level': lemma.difficulty_level or 1,
+                    'level': effective_lemma_level,
                     'word_type': 'verb'
                 }
 
@@ -1137,7 +1183,7 @@ class WirewordExporter:
                     wireword['notes'] = lemma.notes
 
                 # Add tags
-                tags = [lemma.pos_subtype or 'action', f"level_{lemma.difficulty_level or 1}"]
+                tags = [lemma.pos_subtype or 'action', f"level_{effective_lemma_level}"]
                 if lemma.verified:
                     tags.append('verified')
                 wireword['tags'] = tags

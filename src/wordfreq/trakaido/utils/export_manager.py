@@ -120,7 +120,7 @@ class TrakaidoExporter:
         return lemma.lemma_text
     
     def query_trakaido_data(
-        self, 
+        self,
         session,
         difficulty_level: Optional[int] = None,
         pos_type: Optional[str] = None,
@@ -131,7 +131,10 @@ class TrakaidoExporter:
     ) -> List[Dict[str, Any]]:
         """
         Query trakaido data from the database with flexible filtering.
-        
+
+        Uses language-specific difficulty level overrides when available.
+        Excludes lemmas with effective difficulty level of -1 for this language.
+
         Args:
             session: Database session
             difficulty_level: Filter by specific difficulty level (optional)
@@ -140,10 +143,14 @@ class TrakaidoExporter:
             limit: Limit number of results (optional)
             include_without_guid: Include lemmas without GUIDs (default: False)
             include_unverified: Include unverified entries (default: True)
-            
+
         Returns:
             List of dictionaries with trakaido data
         """
+        from sqlalchemy import func
+        from wordfreq.storage.models.schema import LemmaDifficultyOverride
+        from wordfreq.storage.crud.difficulty_override import get_effective_difficulty_level
+
         logger.info(f"Querying database for trakaido data (language: {self.language_name})...")
 
         # Check if language uses column (can filter in SQL) or table (filter in Python)
@@ -162,31 +169,56 @@ class TrakaidoExporter:
         # Apply filters
         if not include_without_guid:
             query = query.filter(Lemma.guid != None)
-        
+
         if not include_unverified:
             query = query.filter(Lemma.verified == True)
-        
+
+        # Handle difficulty level filtering with language-specific overrides
         if difficulty_level is not None:
-            query = query.filter(Lemma.difficulty_level == difficulty_level)
-            logger.info(f"Filtering by difficulty level: {difficulty_level}")
-        
+            # Left join with overrides to get language-specific levels
+            query = query.outerjoin(
+                LemmaDifficultyOverride,
+                (LemmaDifficultyOverride.lemma_id == Lemma.id) &
+                (LemmaDifficultyOverride.language_code == self.language)
+            )
+            # Use override if exists, otherwise use default
+            # COALESCE returns first non-null value
+            effective_level = func.coalesce(
+                LemmaDifficultyOverride.difficulty_level,
+                Lemma.difficulty_level
+            )
+            query = query.filter(effective_level == difficulty_level)
+            logger.info(f"Filtering by effective difficulty level: {difficulty_level} for language: {self.language}")
+
         if pos_type:
             query = query.filter(Lemma.pos_type == pos_type.lower())
             logger.info(f"Filtering by POS type: {pos_type}")
-        
+
         if pos_subtype:
             query = query.filter(Lemma.pos_subtype == pos_subtype)
             logger.info(f"Filtering by POS subtype: {pos_subtype}")
-        
+
         # Order by GUID for consistent output
         query = query.order_by(Lemma.guid.asc().nullslast())
-        
+
         if limit:
             query = query.limit(limit)
             logger.info(f"Limiting results to: {limit}")
-        
+
         all_lemmas = query.all()
         logger.info(f"Found {len(all_lemmas)} lemmas matching criteria")
+
+        # Filter out lemmas with effective level -1 (excluded from this language)
+        # This is important when difficulty_level is not specified
+        if difficulty_level != -1:  # Unless we're explicitly querying for excluded items
+            filtered_lemmas = []
+            for lemma in all_lemmas:
+                effective = get_effective_difficulty_level(session, lemma, self.language)
+                if effective != -1:
+                    filtered_lemmas.append(lemma)
+            if len(filtered_lemmas) < len(all_lemmas):
+                logger.info(f"Filtered out {len(all_lemmas) - len(filtered_lemmas)} lemmas with level -1 (excluded from {self.language})")
+            all_lemmas = filtered_lemmas
 
         # For table-based translations, filter by translation availability
         if use_translation_table:

@@ -245,27 +245,67 @@ def get_lemmas_by_subtype_and_level(session, pos_subtype: str = None, difficulty
     """
     Get lemmas filtered by POS subtype and/or difficulty level.
 
+    When lang is specified and difficulty_level is provided, uses language-specific
+    overrides if available, otherwise uses the default difficulty_level.
+    Excludes lemmas with effective difficulty level of -1 (excluded from language).
+
     Args:
         session: Database session
         pos_subtype: POS subtype to filter by (optional)
         difficulty_level: Difficulty level to filter by (optional)
         limit: Maximum number of lemmas to return (optional)
-        lang: Language filter (optional)
+        lang: Language code (e.g., 'zh', 'lt', 'fr') for filtering by effective difficulty (optional)
 
     Returns:
         List of Lemma objects
     """
+    from sqlalchemy import func
+    from wordfreq.storage.models.schema import LemmaDifficultyOverride
+
+    # Convert lang parameter to language code if needed
+    lang_code = None
+    if lang:
+        lang_map = {
+            'chinese': 'zh',
+            'lithuanian': 'lt',
+            'french': 'fr',
+            'german': 'de',
+            'korean': 'ko',
+            'vietnamese': 'vi',
+            'swahili': 'sw'
+        }
+        lang_code = lang_map.get(lang, lang)
+
     query = session.query(Lemma)
 
     if pos_subtype:
         query = query.filter(Lemma.pos_subtype == pos_subtype)
 
-    if difficulty_level:
+    # Handle difficulty level filtering with language-specific overrides
+    if difficulty_level is not None and lang_code:
+        # Left join with overrides to get language-specific levels
+        query = query.outerjoin(
+            LemmaDifficultyOverride,
+            (LemmaDifficultyOverride.lemma_id == Lemma.id) &
+            (LemmaDifficultyOverride.language_code == lang_code)
+        )
+        # Use override if exists, otherwise use default
+        # COALESCE returns first non-null value
+        effective_level = func.coalesce(
+            LemmaDifficultyOverride.difficulty_level,
+            Lemma.difficulty_level
+        )
+        query = query.filter(effective_level == difficulty_level)
+    elif difficulty_level is not None:
+        # No language specified, just use default difficulty level
         query = query.filter(Lemma.difficulty_level == difficulty_level)
 
-    if lang:
-        if lang == "chinese":
-            query = query.filter(Lemma.chinese_translation != None)
+    # Exclude lemmas that are marked as excluded (-1) for this language
+    if lang_code:
+        # Also need to exclude lemmas with override level of -1
+        # This is a bit tricky - we need another left join check
+        # For now, we'll filter this in Python after the query
+        pass
 
     # Order by frequency rank (lower is more frequent), then by GUID
     query = query.order_by(Lemma.frequency_rank.nulls_last(), Lemma.guid)
@@ -273,4 +313,18 @@ def get_lemmas_by_subtype_and_level(session, pos_subtype: str = None, difficulty
     if limit:
         query = query.limit(limit)
 
-    return query.all()
+    results = query.all()
+
+    # Post-process to exclude lemmas marked with level -1 for this language
+    # (only when lang is specified but difficulty_level is not, or when we want to be safe)
+    if lang_code and difficulty_level != -1:
+        from wordfreq.storage.crud.difficulty_override import get_effective_difficulty_level
+        filtered_results = []
+        for lemma in results:
+            effective = get_effective_difficulty_level(session, lemma, lang_code)
+            # Exclude if effective level is -1 (unless we're explicitly querying for -1)
+            if effective != -1 or difficulty_level == -1:
+                filtered_results.append(lemma)
+        return filtered_results
+
+    return results
