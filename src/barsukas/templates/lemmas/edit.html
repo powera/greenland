@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}Edit {{ lemma.lemma_text }}{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('lemmas.list_lemmas') }}">Lemmas</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('lemmas.view_lemma', lemma_id=lemma.id) }}">{{ lemma.lemma_text }}</a></li>
+                <li class="breadcrumb-item active">Edit</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8 offset-lg-2">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-pencil-square"></i> Edit Lemma
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    <!-- Lemma Text -->
+                    <div class="mb-3">
+                        <label for="lemma_text" class="form-label">Lemma Text <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="lemma_text" name="lemma_text"
+                               value="{{ lemma.lemma_text }}" required>
+                    </div>
+
+                    <!-- Definition -->
+                    <div class="mb-3">
+                        <label for="definition_text" class="form-label">Definition <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="definition_text" name="definition_text"
+                                  rows="3" required>{{ lemma.definition_text }}</textarea>
+                    </div>
+
+                    <!-- POS Type and Subtype -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="pos_type" class="form-label">POS Type <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="pos_type" name="pos_type"
+                                   value="{{ lemma.pos_type }}" required
+                                   placeholder="e.g., verb, noun, adjective">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="pos_subtype" class="form-label">POS Subtype</label>
+                            <input type="text" class="form-control" id="pos_subtype" name="pos_subtype"
+                                   value="{{ lemma.pos_subtype or '' }}"
+                                   placeholder="e.g., transitive, intransitive">
+                        </div>
+                    </div>
+
+                    <!-- Difficulty Level -->
+                    <div class="mb-3">
+                        <label for="difficulty_level" class="form-label">Base Difficulty Level</label>
+                        <input type="number" class="form-control" id="difficulty_level" name="difficulty_level"
+                               value="{{ lemma.difficulty_level if lemma.difficulty_level is not none else '' }}"
+                               min="-1" max="20" placeholder="-1 or 1-20">
+                        <small class="form-text text-muted">
+                            Enter -1 to exclude from all languages, 1-20 for Trakaido level, or leave empty for no base level
+                        </small>
+                        {% if difficulty_stats %}
+                            <div class="mt-2 p-2 bg-light border rounded">
+                                <small class="text-muted">
+                                    <strong>Difficulty levels for {{ lemma.pos_type }}{% if lemma.pos_subtype %} ({{ lemma.pos_subtype }}){% endif %}:</strong><br>
+                                    {% for level in range(-1, 21) %}
+                                        {% if level in difficulty_stats %}
+                                            {% if level == -1 %}
+                                                <span class="badge bg-warning text-dark me-1" title="{{ difficulty_stats[level] }} words">Excluded: {{ difficulty_stats[level] }}</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary me-1" title="{{ difficulty_stats[level] }} words">L{{ level }}: {{ difficulty_stats[level] }}</span>
+                                            {% endif %}
+                                        {% endif %}
+                                    {% endfor %}
+                                </small>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Verified and Confidence -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="verified" name="verified"
+                                       {% if lemma.verified %}checked{% endif %}>
+                                <label class="form-check-label" for="verified">
+                                    Verified
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="confidence" class="form-label">Confidence (0-1)</label>
+                            <input type="number" class="form-control" id="confidence" name="confidence"
+                                   value="{{ lemma.confidence }}" step="0.01" min="0" max="1">
+                        </div>
+                    </div>
+
+                    <!-- Tags -->
+                    <div class="mb-3">
+                        <label for="tags" class="form-label">Tags (JSON)</label>
+                        <input type="text" class="form-control" id="tags" name="tags"
+                               value="{{ lemma.tags or '' }}"
+                               placeholder="Optional JSON array">
+                        <small class="form-text text-muted">JSON array format, e.g., ["tag1", "tag2"]</small>
+                    </div>
+
+                    <!-- Notes -->
+                    <div class="mb-3">
+                        <label for="notes" class="form-label">Notes</label>
+                        <textarea class="form-control" id="notes" name="notes" rows="3">{{ lemma.notes or '' }}</textarea>
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('lemmas.view_lemma', lemma_id=lemma.id) }}" class="btn btn-secondary">
+                            <i class="bi bi-x-circle"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save"></i> Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Help Text -->
+        <div class="card mt-3">
+            <div class="card-body">
+                <h6><i class="bi bi-info-circle"></i> Editing Tips</h6>
+                <ul class="mb-0">
+                    <li>Changes are logged to the operation_log table</li>
+                    <li>Difficulty level: Use -1 to exclude, 1-20 for levels, or leave empty</li>
+                    <li>Per-language difficulty overrides can be set on the view page</li>
+                    <li>Translations can be edited from the view page</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
