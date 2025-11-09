@@ -12,11 +12,13 @@ This script:
 import argparse
 import logging
 import sys
+import os
 from pathlib import Path
 from typing import Dict, List, Tuple
 
 # Add the src directory to the path for imports
-GREENLAND_SRC_PATH = '/Users/powera/repo/greenland/src'
+GREENLAND_SRC_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..'))
+GREENLAND_REPO_ROOT = os.path.abspath(os.path.join(GREENLAND_SRC_PATH, '..'))
 sys.path.append(GREENLAND_SRC_PATH)
 
 import constants
@@ -39,7 +41,7 @@ logger = logging.getLogger(__name__)
 LANGUAGE_CONFIGS = {
     'lt': {
         'name': 'Lithuanian',
-        'verbs_path': '/Users/powera/repo/greenland/data/trakaido_wordlists/lang_lt',
+        'verbs_path': os.path.join(GREENLAND_REPO_ROOT, 'data', 'trakaido_wordlists', 'lang_lt'),
         'translation_field': 'lithuanian_translation',
         'has_conjugations': True,
         'form_mapping': {

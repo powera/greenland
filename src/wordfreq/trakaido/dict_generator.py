@@ -22,8 +22,9 @@ import re
 from typing import Dict, List, Any, Optional
 
 # Configuration
-GREENLAND_SRC_PATH = '/Users/powera/repo/greenland/src'
-DEFAULT_OUTPUT_BASE = '/Users/powera/repo/greenland/data/trakaido_wordlists/'
+GREENLAND_SRC_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
+GREENLAND_REPO_ROOT = os.path.abspath(os.path.join(GREENLAND_SRC_PATH, '..'))
+DEFAULT_OUTPUT_BASE = os.path.join(GREENLAND_REPO_ROOT, 'data', 'trakaido_wordlists')
 
 import sys
 sys.path.append(GREENLAND_SRC_PATH)
