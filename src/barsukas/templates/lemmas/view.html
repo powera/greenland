@@ -1,0 +1,285 @@
+{% extends "base.html" %}
+
+{% block title %}{{ lemma.lemma_text }}{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('lemmas.list_lemmas') }}">Lemmas</a></li>
+                <li class="breadcrumb-item active">{{ lemma.lemma_text }}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<!-- Lemma Details -->
+<div class="row mb-4">
+    <div class="col">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-book"></i> Lemma Details</span>
+                <a href="{{ url_for('lemmas.edit_lemma', lemma_id=lemma.id) }}" class="btn btn-sm btn-light">
+                    <i class="bi bi-pencil"></i> Edit
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <h3>
+                            {{ lemma.lemma_text }}
+                            {% if lemma.verified %}
+                                <i class="bi bi-check-circle-fill text-success" title="Verified"></i>
+                            {% endif %}
+                        </h3>
+                        <p class="lead lemma-definition">{{ lemma.definition_text }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <dl class="row">
+                            <dt class="col-sm-5">POS Type:</dt>
+                            <dd class="col-sm-7"><span class="badge bg-secondary">{{ lemma.pos_type }}</span></dd>
+
+                            {% if lemma.pos_subtype %}
+                                <dt class="col-sm-5">POS Subtype:</dt>
+                                <dd class="col-sm-7"><span class="badge bg-light text-dark">{{ lemma.pos_subtype }}</span></dd>
+                            {% endif %}
+
+                            <dt class="col-sm-5">Base Difficulty:</dt>
+                            <dd class="col-sm-7">
+                                {% if lemma.difficulty_level is not none %}
+                                    {% if lemma.difficulty_level == -1 %}
+                                        <span class="badge bg-warning difficulty-badge">Excluded</span>
+                                    {% else %}
+                                        <span class="badge bg-info difficulty-badge">Level {{ lemma.difficulty_level }}</span>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="text-muted">Not set</span>
+                                {% endif %}
+                                {% if difficulty_stats %}
+                                    <br><small class="text-muted">
+                                        Levels for {{ lemma.pos_type }}{% if lemma.pos_subtype %} ({{ lemma.pos_subtype }}){% endif %}:
+                                        {% for level in range(-1, 21) %}
+                                            {% if level in difficulty_stats %}
+                                                {% if level == -1 %}
+                                                    <span class="badge bg-warning text-dark" title="{{ difficulty_stats[level] }} words" style="font-size: 0.7rem;">-1: {{ difficulty_stats[level] }}</span>
+                                                {% else %}
+                                                    <span class="badge bg-secondary" title="{{ difficulty_stats[level] }} words" style="font-size: 0.7rem;">{{ level }}: {{ difficulty_stats[level] }}</span>
+                                                {% endif %}
+                                            {% endif %}
+                                        {% endfor %}
+                                    </small>
+                                {% endif %}
+                            </dd>
+
+                            <dt class="col-sm-5">Confidence:</dt>
+                            <dd class="col-sm-7">{{ "%.2f"|format(lemma.confidence) }}</dd>
+
+                            {% if lemma.tags %}
+                                <dt class="col-sm-5">Tags:</dt>
+                                <dd class="col-sm-7"><code>{{ lemma.tags }}</code></dd>
+                            {% endif %}
+
+                            {% if lemma.notes %}
+                                <dt class="col-sm-5">Notes:</dt>
+                                <dd class="col-sm-7">{{ lemma.notes }}</dd>
+                            {% endif %}
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Translations -->
+<div class="row mb-4">
+    <div class="col">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-translate"></i> Translations
+            </div>
+            <div class="card-body">
+                <table class="table table-hover translation-table">
+                    <thead>
+                        <tr>
+                            <th>Language</th>
+                            <th>Translation</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for lang_code, lang_name in language_names.items() %}
+                            <tr>
+                                <td><strong>{{ lang_name }}</strong> <small class="text-muted">({{ lang_code }})</small></td>
+                                <td>
+                                    {% if translations[lang_code] %}
+                                        {{ translations[lang_code] }}
+                                        {% if '/' in translations[lang_code] %}
+                                            <span class="badge bg-warning text-dark" title="Contains slash">
+                                                <i class="bi bi-exclamation-triangle"></i>
+                                            </span>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="text-muted fst-italic">Not set</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-sm btn-outline-primary"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#translationModal{{ lang_code }}">
+                                        <i class="bi bi-pencil"></i> Edit
+                                    </button>
+                                </td>
+                            </tr>
+
+                            <!-- Translation Edit Modal -->
+                            <div class="modal fade" id="translationModal{{ lang_code }}" tabindex="-1">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Edit {{ lang_name }} Translation</h5>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <form method="post" action="{{ url_for('translations.update_translation', lemma_id=lemma.id, lang_code=lang_code) }}">
+                                            <div class="modal-body">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Lemma</label>
+                                                    <p class="form-control-plaintext"><strong>{{ lemma.lemma_text }}</strong> - {{ lemma.definition_text[:50] }}...</p>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="translation{{ lang_code }}" class="form-label">
+                                                        {{ lang_name }} Translation
+                                                    </label>
+                                                    <input type="text" class="form-control" id="translation{{ lang_code }}"
+                                                           name="translation" value="{{ translations[lang_code] or '' }}"
+                                                           onkeyup="checkTranslationSlash(this, 'slashWarning{{ lang_code }}')"
+                                                           required>
+                                                    <div id="slashWarning{{ lang_code }}" class="slash-warning" style="display: {% if translations[lang_code] and '/' in translations[lang_code] %}block{% else %}none{% endif %};">
+                                                        <i class="bi bi-exclamation-triangle"></i>
+                                                        Warning: Translation contains "/" character
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                <button type="submit" class="btn btn-primary">Save</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Difficulty Overrides -->
+<div class="row mb-4">
+    <div class="col">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-bar-chart"></i> Per-Language Difficulty Overrides
+            </div>
+            <div class="card-body">
+                {% if overrides %}
+                    <table class="table table-hover override-table mb-3">
+                        <thead>
+                            <tr>
+                                <th>Language</th>
+                                <th>Override Level</th>
+                                <th>Effective Level</th>
+                                <th>Notes</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for override in overrides %}
+                                <tr>
+                                    <td><strong>{{ language_names[override.language_code] }}</strong></td>
+                                    <td>
+                                        {% if override.difficulty_level == -1 %}
+                                            <span class="badge bg-warning">Excluded</span>
+                                        {% else %}
+                                            <span class="badge bg-primary">Level {{ override.difficulty_level }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="effective-level">
+                                            {% if effective_levels[override.language_code] == -1 %}
+                                                Excluded
+                                            {% else %}
+                                                Level {{ effective_levels[override.language_code] }}
+                                            {% endif %}
+                                        </span>
+                                    </td>
+                                    <td>{{ override.notes or '-' }}</td>
+                                    <td>
+                                        <form method="post" action="{{ url_for('overrides.delete_override', lemma_id=lemma.id, lang_code=override.language_code) }}"
+                                              style="display: inline;"
+                                              onsubmit="return confirmDelete('Delete difficulty override for {{ language_names[override.language_code] }}?');">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                <i class="bi bi-trash"></i> Delete
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p class="text-muted">No difficulty overrides set. The base difficulty level will be used for all languages.</p>
+                {% endif %}
+
+                <!-- Add Override Form -->
+                <button type="button" class="btn btn-primary" data-bs-toggle="collapse" data-bs-target="#addOverrideForm">
+                    <i class="bi bi-plus-circle"></i> Add Difficulty Override
+                </button>
+
+                <div class="collapse mt-3" id="addOverrideForm">
+                    <div class="override-form">
+                        <h5>Add Difficulty Override</h5>
+                        <form method="post" action="{{ url_for('overrides.add_override', lemma_id=lemma.id) }}">
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label for="language_code" class="form-label">Language</label>
+                                    <select class="form-select" id="language_code" name="language_code" required>
+                                        <option value="">Select language...</option>
+                                        {% for lang_code, lang_name in language_names.items() %}
+                                            <option value="{{ lang_code }}">{{ lang_name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="difficulty_level" class="form-label">Difficulty Level</label>
+                                    <input type="number" class="form-control" id="difficulty_level" name="difficulty_level"
+                                           min="-1" max="20" required
+                                           placeholder="-1 or 1-20">
+                                    <small class="form-text text-muted">-1 to exclude, 1-20 for level</small>
+                                </div>
+                                <div class="col-md-5">
+                                    <label for="notes" class="form-label">Notes (optional)</label>
+                                    <input type="text" class="form-control" id="notes" name="notes"
+                                           placeholder="Reason for override...">
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-save"></i> Save Override
+                                </button>
+                                <button type="button" class="btn btn-secondary" data-bs-toggle="collapse" data-bs-target="#addOverrideForm">
+                                    Cancel
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
