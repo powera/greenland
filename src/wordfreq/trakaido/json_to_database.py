@@ -42,8 +42,8 @@ import argparse
 from typing import Dict, List, Any, Optional
 
 # Configuration - Update these paths as needed
-GREENLAND_SRC_PATH = '/Users/powera/repo/greenland/src'
-DEFAULT_JSON_PATH = '/Users/powera/repo/greenland/src/wordfreq/trakaido/nouns.json'
+GREENLAND_SRC_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
+DEFAULT_JSON_PATH = os.path.join(os.path.dirname(__file__), 'nouns.json')
 
 # Add paths for imports
 sys.path.append(GREENLAND_SRC_PATH)

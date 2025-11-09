@@ -7,10 +7,12 @@ to verbs that are already in the database but missing English conjugation forms.
 """
 
 import sys
+import os
 from pathlib import Path
 
 # Add the src directory to the path for imports
-GREENLAND_SRC_PATH = '/Users/powera/repo/greenland/src'
+GREENLAND_SRC_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..'))
+GREENLAND_REPO_ROOT = os.path.abspath(os.path.join(GREENLAND_SRC_PATH, '..'))
 sys.path.append(GREENLAND_SRC_PATH)
 
 import constants
@@ -21,7 +23,7 @@ from wordfreq.storage.database import (
 from wordfreq.storage.models.schema import DerivativeForm, Lemma
 
 # Add verbs.py directory to path
-sys.path.insert(0, '/Users/powera/repo/greenland/data/trakaido_wordlists/lang_lt')
+sys.path.insert(0, os.path.join(GREENLAND_REPO_ROOT, 'data', 'trakaido_wordlists', 'lang_lt'))
 from verbs import verbs_new
 
 

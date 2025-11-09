@@ -1,6 +1,7 @@
 # based from README for whisper
 
 # intended to run a single regression test of speech2txt
+import os
 import torch
 import librosa
 from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
@@ -11,7 +12,7 @@ model_id = "openai/whisper-large-v3-turbo"
 device = torch.device("mps")
 torch_dtype = torch.float16 if (model_id == "openai/whisper-large-v3-turbo") else torch.float32
 
-model_dir = "/Users/powera/repo/whisper_turbo"
+model_dir = os.getenv("WHISPER_TURBO_PATH", "whisper_turbo")  # Set WHISPER_TURBO_PATH env var to model directory
 model = AutoModelForSpeechSeq2Seq.from_pretrained(
     model_dir, torch_dtype=torch_dtype, low_cpu_mem_usage=True
 )
@@ -28,7 +29,7 @@ pipe = pipeline(
     device=device,
 )
 
-audio_path = "/Users/powera/repo/greenland/audioshoe/sample/test.mp3"
+audio_path = os.path.join(os.path.dirname(__file__), "sample", "test.mp3")
 audio_data, sample_rate = librosa.load(audio_path, sr=None)
 
 result = pipe({"array": audio_data, "sampling_rate": sample_rate})

@@ -4,13 +4,14 @@
 
 import asyncio
 import gc
+import os
 
 from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
 import torch
 
 
 async def text_completion(prompt):
-    model_dir = "/Users/powera/repo/smollm-360M"  # smollm is decent and fast
+    model_dir = os.getenv("SMOLLM_360M_PATH", "smollm-360M")  # Set SMOLLM_360M_PATH env var to model directory
     model = AutoModelForCausalLM.from_pretrained(
         model_dir,
         torch_dtype=torch.float16,
@@ -34,7 +35,7 @@ async def text_completion(prompt):
     return response
 
 async def text_chat(prompt):
-    model_dir = "/Users/powera/repo/smollm-instruct-360M"  # smollm is decent and fast
+    model_dir = os.getenv("SMOLLM_INSTRUCT_360M_PATH", "smollm-instruct-360M")  # Set SMOLLM_INSTRUCT_360M_PATH env var to model directory
     model = AutoModelForCausalLM.from_pretrained(
         model_dir,
         torch_dtype=torch.float16,
@@ -61,7 +62,7 @@ async def text_chat(prompt):
 
 
 def text_completion_interactive(prompt):
-    model_dir = "/Users/powera/repo/smollm-360M"
+    model_dir = os.getenv("SMOLLM_360M_PATH", "smollm-360M")  # Set SMOLLM_360M_PATH env var to model directory
     model = AutoModelForCausalLM.from_pretrained(
         model_dir,
     )
@@ -103,7 +104,7 @@ def text_completion_interactive(prompt):
     return response
 
 def text_chat_interactive(prompt):
-    model_dir = "/Users/powera/repo/smollm-instruct-360M"  # smollm is decent and fast
+    model_dir = os.getenv("SMOLLM_INSTRUCT_360M_PATH", "smollm-instruct-360M")  # Set SMOLLM_INSTRUCT_360M_PATH env var to model directory
     model = AutoModelForCausalLM.from_pretrained(
         model_dir,
         torch_dtype=torch.float16,
