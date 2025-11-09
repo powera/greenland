@@ -52,7 +52,10 @@ class Lemma(Base):
     swahili_translation: Mapped[Optional[str]] = mapped_column(String, nullable=True)  # e.g., kula
     lithuanian_translation: Mapped[Optional[str]] = mapped_column(String, nullable=True)  # e.g., valgyti
     vietnamese_translation: Mapped[Optional[str]] = mapped_column(String, nullable=True)  # e.g., ăn
-    
+
+    # Disambiguation for polysemes (e.g., "mouse (animal)" vs "mouse (computer)")
+    disambiguation: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+
     # Metadata
     confidence: Mapped[float] = mapped_column(Float, default=0.0)  # 0-1 score from LLM
     verified: Mapped[bool] = mapped_column(Boolean, default=False)
