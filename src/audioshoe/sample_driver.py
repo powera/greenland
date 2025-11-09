@@ -12,7 +12,9 @@ model_id = "openai/whisper-large-v3-turbo"
 device = torch.device("mps")
 torch_dtype = torch.float16 if (model_id == "openai/whisper-large-v3-turbo") else torch.float32
 
-model_dir = os.getenv("WHISPER_TURBO_PATH", "whisper_turbo")  # Set WHISPER_TURBO_PATH env var to model directory
+# Assume whisper repo is a sibling directory to greenland
+GREENLAND_REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
+model_dir = os.path.join(GREENLAND_REPO_ROOT, '..', 'whisper_turbo')
 model = AutoModelForSpeechSeq2Seq.from_pretrained(
     model_dir, torch_dtype=torch_dtype, low_cpu_mem_usage=True
 )

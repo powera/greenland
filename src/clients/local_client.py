@@ -10,8 +10,14 @@ from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
 import torch
 
 
-async def text_completion(prompt):
-    model_dir = os.getenv("SMOLLM_360M_PATH", "smollm-360M")  # Set SMOLLM_360M_PATH env var to model directory
+async def text_completion(prompt, model_dir):
+    """
+    Run text completion with a local LLM model.
+
+    Args:
+        prompt: Text prompt for completion
+        model_dir: Path to the model directory
+    """
     model = AutoModelForCausalLM.from_pretrained(
         model_dir,
         torch_dtype=torch.float16,
@@ -34,8 +40,14 @@ async def text_completion(prompt):
     response = tokenizer.decode(output[0], skip_special_tokens=True)
     return response
 
-async def text_chat(prompt):
-    model_dir = os.getenv("SMOLLM_INSTRUCT_360M_PATH", "smollm-instruct-360M")  # Set SMOLLM_INSTRUCT_360M_PATH env var to model directory
+async def text_chat(prompt, model_dir):
+    """
+    Run text chat with a local instruction-tuned LLM model.
+
+    Args:
+        prompt: Text prompt for chat
+        model_dir: Path to the instruction-tuned model directory
+    """
     model = AutoModelForCausalLM.from_pretrained(
         model_dir,
         torch_dtype=torch.float16,
@@ -61,8 +73,14 @@ async def text_chat(prompt):
     return response
 
 
-def text_completion_interactive(prompt):
-    model_dir = os.getenv("SMOLLM_360M_PATH", "smollm-360M")  # Set SMOLLM_360M_PATH env var to model directory
+def text_completion_interactive(prompt, model_dir):
+    """
+    Run interactive text completion with a local LLM model (token-by-token generation).
+
+    Args:
+        prompt: Text prompt for completion
+        model_dir: Path to the model directory
+    """
     model = AutoModelForCausalLM.from_pretrained(
         model_dir,
     )
@@ -103,8 +121,14 @@ def text_completion_interactive(prompt):
     response = tokenizer.decode(generated_ids[0], skip_special_tokens=True)
     return response
 
-def text_chat_interactive(prompt):
-    model_dir = os.getenv("SMOLLM_INSTRUCT_360M_PATH", "smollm-instruct-360M")  # Set SMOLLM_INSTRUCT_360M_PATH env var to model directory
+def text_chat_interactive(prompt, model_dir):
+    """
+    Run interactive text chat with a local instruction-tuned LLM model (token-by-token generation).
+
+    Args:
+        prompt: Text prompt for chat
+        model_dir: Path to the instruction-tuned model directory
+    """
     model = AutoModelForCausalLM.from_pretrained(
         model_dir,
         torch_dtype=torch.float16,
