@@ -38,6 +38,17 @@
                                   rows="3" required>{{ lemma.definition_text }}</textarea>
                     </div>
 
+                    <!-- Disambiguation -->
+                    <div class="mb-3">
+                        <label for="disambiguation" class="form-label">Disambiguation</label>
+                        <input type="text" class="form-control" id="disambiguation" name="disambiguation"
+                               value="{{ lemma.disambiguation or '' }}"
+                               placeholder="e.g., animal, computer, tool">
+                        <small class="form-text text-muted">
+                            Optional: Used to distinguish polysemes (e.g., "mouse (animal)" vs "mouse (computer)")
+                        </small>
+                    </div>
+
                     <!-- POS Type and Subtype -->
                     <div class="row mb-3">
                         <div class="col-md-6">

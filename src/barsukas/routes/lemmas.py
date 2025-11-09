@@ -100,6 +100,8 @@ def add_lemma():
 @bp.route('/')
 def list_lemmas():
     """List all lemmas with pagination and filtering."""
+    from wordfreq.storage.models.schema import LemmaTranslation
+
     page = request.args.get('page', 1, type=int)
     search = request.args.get('search', '').strip()
     pos_type = request.args.get('pos_type', '').strip()
@@ -110,12 +112,29 @@ def list_lemmas():
 
     # Apply filters
     if search:
-        query = query.filter(
-            or_(
-                Lemma.lemma_text.ilike(f'%{search}%'),
-                Lemma.definition_text.ilike(f'%{search}%')
-            )
-        )
+        # Search in lemma text, definition, disambiguation, and ALL translations
+        search_conditions = [
+            Lemma.lemma_text.ilike(f'%{search}%'),
+            Lemma.definition_text.ilike(f'%{search}%'),
+            Lemma.disambiguation.ilike(f'%{search}%'),
+            # Search in legacy translation columns
+            Lemma.chinese_translation.ilike(f'%{search}%'),
+            Lemma.french_translation.ilike(f'%{search}%'),
+            Lemma.korean_translation.ilike(f'%{search}%'),
+            Lemma.swahili_translation.ilike(f'%{search}%'),
+            Lemma.lithuanian_translation.ilike(f'%{search}%'),
+            Lemma.vietnamese_translation.ilike(f'%{search}%'),
+        ]
+
+        # Also search in LemmaTranslation table
+        # Join with LemmaTranslation and search those translations too
+        translation_subquery = g.db.query(LemmaTranslation.lemma_id).filter(
+            LemmaTranslation.translation.ilike(f'%{search}%')
+        ).subquery()
+
+        search_conditions.append(Lemma.id.in_(translation_subquery))
+
+        query = query.filter(or_(*search_conditions))
 
     if pos_type:
         query = query.filter(Lemma.pos_type == pos_type)
@@ -133,11 +152,19 @@ def list_lemmas():
     if search:
         search_lower = search.lower()
         relevance = case(
-            (func.lower(Lemma.lemma_text) == search_lower, 1),  # Exact match
-            (func.lower(Lemma.lemma_text).startswith(search_lower), 2),  # Starts with
+            (func.lower(Lemma.lemma_text) == search_lower, 1),  # Exact match in lemma
+            (func.lower(Lemma.lemma_text).startswith(search_lower), 2),  # Starts with in lemma
             (func.lower(Lemma.lemma_text).contains(search_lower), 3),  # Contains in lemma
             (func.lower(Lemma.definition_text).contains(search_lower), 4),  # Contains in definition
-            else_=5
+            (func.lower(Lemma.disambiguation).contains(search_lower), 5),  # Contains in disambiguation
+            # Translation matches
+            (func.lower(Lemma.lithuanian_translation).contains(search_lower), 6),
+            (func.lower(Lemma.chinese_translation).contains(search_lower), 6),
+            (func.lower(Lemma.french_translation).contains(search_lower), 6),
+            (func.lower(Lemma.korean_translation).contains(search_lower), 6),
+            (func.lower(Lemma.swahili_translation).contains(search_lower), 6),
+            (func.lower(Lemma.vietnamese_translation).contains(search_lower), 6),
+            else_=7
         )
         query = query.order_by(relevance, Lemma.lemma_text)
     else:
@@ -169,6 +196,8 @@ def list_lemmas():
 @bp.route('/<int:lemma_id>')
 def view_lemma(lemma_id):
     """View a single lemma with all details."""
+    from wordfreq.storage.models.schema import DerivativeForm
+
     lemma = g.db.query(Lemma).get(lemma_id)
     if not lemma:
         flash('Lemma not found', 'error')
@@ -189,13 +218,30 @@ def view_lemma(lemma_id):
     # Get difficulty level distribution for same POS type/subtype
     difficulty_stats = _get_difficulty_stats(g.db, lemma.pos_type, lemma.pos_subtype)
 
+    # Get derivative forms grouped by language
+    derivative_forms = g.db.query(DerivativeForm).filter(
+        DerivativeForm.lemma_id == lemma_id
+    ).order_by(
+        DerivativeForm.language_code,
+        DerivativeForm.is_base_form.desc(),
+        DerivativeForm.grammatical_form
+    ).all()
+
+    # Group forms by language
+    forms_by_language = {}
+    for form in derivative_forms:
+        if form.language_code not in forms_by_language:
+            forms_by_language[form.language_code] = []
+        forms_by_language[form.language_code].append(form)
+
     return render_template('lemmas/view.html',
                          lemma=lemma,
                          translations=translations,
                          language_names=language_names,
                          overrides=overrides,
                          effective_levels=effective_levels,
-                         difficulty_stats=difficulty_stats)
+                         difficulty_stats=difficulty_stats,
+                         forms_by_language=forms_by_language)
 
 
 @bp.route('/<int:lemma_id>/edit', methods=['GET', 'POST'])
@@ -288,6 +334,12 @@ def edit_lemma(lemma_id):
         if new_tags != lemma.tags:
             changes.append(('tags', lemma.tags, new_tags))
             lemma.tags = new_tags
+
+        # Handle disambiguation
+        new_disambiguation = request.form.get('disambiguation', '').strip() or None
+        if new_disambiguation != lemma.disambiguation:
+            changes.append(('disambiguation', lemma.disambiguation, new_disambiguation))
+            lemma.disambiguation = new_disambiguation
 
         # Log all changes
         for field_name, old_value, new_value in changes:

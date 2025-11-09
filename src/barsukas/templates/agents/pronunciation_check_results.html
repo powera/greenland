@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}Pronunciation Check Results - {{ lemma.lemma_text }}{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('lemmas.list_lemmas') }}">Lemmas</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('lemmas.view_lemma', lemma_id=lemma.id) }}">{{ lemma.lemma_text }}</a></li>
+                <li class="breadcrumb-item active">Pronunciation Check Results</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-volume-up"></i> Pronunciation Check Results for "{{ lemma.lemma_text }}"</span>
+                <a href="{{ url_for('lemmas.view_lemma', lemma_id=lemma.id) }}" class="btn btn-sm btn-light">
+                    <i class="bi bi-arrow-left"></i> Back to Lemma
+                </a>
+            </div>
+            <div class="card-body">
+                {% if issues %}
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        Found {{ issues|length }} pronunciation issue(s) that need attention.
+                    </div>
+
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Form</th>
+                                <th>Grammatical Form</th>
+                                <th>Current</th>
+                                <th>Suggested</th>
+                                <th>Issues</th>
+                                <th>Confidence</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for issue in issues %}
+                                <tr>
+                                    <td><strong>{{ issue.form_text }}</strong></td>
+                                    <td><code>{{ issue.grammatical_form }}</code></td>
+                                    <td>
+                                        {% if issue.current_ipa %}
+                                            <strong>IPA:</strong> {{ issue.current_ipa }}<br>
+                                        {% endif %}
+                                        {% if issue.current_phonetic %}
+                                            <strong>Phonetic:</strong> {{ issue.current_phonetic }}
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if issue.suggested_ipa %}
+                                            <strong>IPA:</strong> {{ issue.suggested_ipa }}<br>
+                                        {% endif %}
+                                        {% if issue.suggested_phonetic %}
+                                            <strong>Phonetic:</strong> {{ issue.suggested_phonetic }}
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <ul class="mb-0">
+                                            {% for prob in issue.issues %}
+                                                <li>{{ prob }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    </td>
+                                    <td>
+                                        <span class="badge {% if issue.confidence >= 0.9 %}bg-danger{% elif issue.confidence >= 0.7 %}bg-warning{% else %}bg-info{% endif %}">
+                                            {{ "%.0f"|format(issue.confidence * 100) }}%
+                                        </span>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i>
+                        <strong>Note:</strong> These are AI-generated suggestions. Please review them carefully before making manual changes to the pronunciations.
+                    </div>
+                {% else %}
+                    <div class="alert alert-success">
+                        <i class="bi bi-check-circle"></i>
+                        All pronunciations look good! No issues found.
+                    </div>
+                {% endif %}
+
+                <div class="mt-3">
+                    <a href="{{ url_for('lemmas.view_lemma', lemma_id=lemma.id) }}" class="btn btn-primary">
+                        <i class="bi bi-arrow-left"></i> Return to Lemma
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

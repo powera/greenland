@@ -4,9 +4,12 @@
 
 from flask import Blueprint, request, redirect, url_for, flash, g, jsonify, render_template
 
-from wordfreq.storage.models.schema import Lemma
+from wordfreq.storage.models.schema import Lemma, DerivativeForm
 from wordfreq.storage.translation_helpers import get_supported_languages
 from wordfreq.agents.voras.agent import VorasAgent
+from wordfreq.agents.papuga import PapugaAgent
+from wordfreq.agents.vilkas.agent import VilkasAgent
+from wordfreq.agents.lokys import LokysAgent
 from config import Config
 
 bp = Blueprint('agents', __name__, url_prefix='/agents')
@@ -202,5 +205,341 @@ def add_missing_translations(lemma_id):
 
     except Exception as e:
         flash(f'Error adding missing translations: {str(e)}', 'error')
+
+    return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
+
+
+@bp.route('/check-pronunciations/<int:lemma_id>', methods=['POST'])
+def check_pronunciations(lemma_id):
+    """Check pronunciations for a lemma's derivative forms using the PAPUGA agent."""
+    lemma = g.db.query(Lemma).get(lemma_id)
+    if not lemma:
+        flash('Lemma not found', 'error')
+        return redirect(url_for('lemmas.list_lemmas'))
+
+    try:
+        # Get all derivative forms for this lemma that have pronunciations
+        forms_with_pronunciations = g.db.query(DerivativeForm).filter(
+            DerivativeForm.lemma_id == lemma_id,
+            ((DerivativeForm.ipa_pronunciation.isnot(None)) |
+             (DerivativeForm.phonetic_pronunciation.isnot(None)))
+        ).all()
+
+        if not forms_with_pronunciations:
+            flash('No pronunciations found to check', 'warning')
+            return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
+
+        # Initialize PAPUGA agent
+        agent = PapugaAgent(db_path=Config.DB_PATH, debug=Config.DEBUG)
+
+        # Check pronunciations (using dry_run=False to actually validate)
+        from wordfreq.tools.llm_validators import validate_pronunciation
+        from wordfreq.storage.models.schema import ExampleSentence
+
+        issues = []
+        for form in forms_with_pronunciations:
+            # Get example sentence for context
+            example = g.db.query(ExampleSentence).filter(
+                ExampleSentence.derivative_form_id == form.id
+            ).first()
+            example_text = example.example_text if example else None
+
+            result = validate_pronunciation(
+                word=form.derivative_form_text,
+                ipa_pronunciation=form.ipa_pronunciation,
+                phonetic_pronunciation=form.phonetic_pronunciation,
+                pos_type=lemma.pos_type,
+                example_sentence=example_text,
+                definition=lemma.definition_text,
+                model='gpt-5-mini'
+            )
+
+            if result['needs_update'] and result['confidence'] >= 0.7:
+                issues.append({
+                    'form_id': form.id,
+                    'form_text': form.derivative_form_text,
+                    'grammatical_form': form.grammatical_form,
+                    'current_ipa': form.ipa_pronunciation,
+                    'current_phonetic': form.phonetic_pronunciation,
+                    'suggested_ipa': result['suggested_ipa'],
+                    'suggested_phonetic': result['suggested_phonetic'],
+                    'issues': result['issues'],
+                    'confidence': result['confidence']
+                })
+
+        if not issues:
+            flash('All pronunciations look good!', 'success')
+        else:
+            flash(f'Found {len(issues)} pronunciation issues', 'warning')
+            return render_template('agents/pronunciation_check_results.html',
+                                 lemma=lemma,
+                                 issues=issues)
+
+    except Exception as e:
+        flash(f'Error checking pronunciations: {str(e)}', 'error')
+
+    return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
+
+
+@bp.route('/generate-pronunciations/<int:lemma_id>', methods=['POST'])
+def generate_pronunciations(lemma_id):
+    """Generate missing pronunciations for a lemma's derivative forms using the PAPUGA agent."""
+    lemma = g.db.query(Lemma).get(lemma_id)
+    if not lemma:
+        flash('Lemma not found', 'error')
+        return redirect(url_for('lemmas.list_lemmas'))
+
+    # Get language code from form (default to English)
+    lang_code = request.form.get('lang_code', 'en')
+
+    try:
+        # Get derivative forms without pronunciations for this lemma
+        forms_missing_pronunciations = g.db.query(DerivativeForm).filter(
+            DerivativeForm.lemma_id == lemma_id,
+            DerivativeForm.language_code == lang_code,
+            DerivativeForm.ipa_pronunciation.is_(None),
+            DerivativeForm.phonetic_pronunciation.is_(None)
+        ).all()
+
+        if not forms_missing_pronunciations:
+            flash(f'No missing pronunciations for {lang_code} forms', 'success')
+            return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
+
+        # Initialize PAPUGA agent
+        agent = PapugaAgent(db_path=Config.DB_PATH, debug=Config.DEBUG)
+
+        # Generate pronunciations
+        from wordfreq.tools.llm_validators import generate_pronunciation
+        from wordfreq.storage.models.schema import ExampleSentence
+
+        generated_count = 0
+        for form in forms_missing_pronunciations:
+            # Get example sentence for context
+            example = g.db.query(ExampleSentence).filter(
+                ExampleSentence.derivative_form_id == form.id
+            ).first()
+            example_text = example.example_text if example else None
+
+            result = generate_pronunciation(
+                word=form.derivative_form_text,
+                pos_type=lemma.pos_type,
+                definition=lemma.definition_text,
+                example_sentence=example_text,
+                model='gpt-5-mini'
+            )
+
+            if result['success']:
+                # Update the form with generated pronunciations
+                if result['ipa_pronunciation']:
+                    form.ipa_pronunciation = result['ipa_pronunciation']
+                if result['phonetic_pronunciation']:
+                    form.phonetic_pronunciation = result['phonetic_pronunciation']
+                generated_count += 1
+
+        if generated_count > 0:
+            g.db.commit()
+            flash(f'Successfully generated pronunciations for {generated_count} form(s)!', 'success')
+        else:
+            flash('Could not generate any pronunciations', 'warning')
+
+    except Exception as e:
+        g.db.rollback()
+        flash(f'Error generating pronunciations: {str(e)}', 'error')
+
+    return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
+
+
+@bp.route('/generate-forms/<int:lemma_id>', methods=['POST'])
+def generate_forms(lemma_id):
+    """Generate missing grammatical forms for a lemma using the VILKAS agent."""
+    lemma = g.db.query(Lemma).get(lemma_id)
+    if not lemma:
+        flash('Lemma not found', 'error')
+        return redirect(url_for('lemmas.list_lemmas'))
+
+    # Get language code and pos_type from form
+    lang_code = request.form.get('lang_code', 'lt')
+    pos_type = request.form.get('pos_type', lemma.pos_type)
+
+    try:
+        # Initialize VILKAS agent
+        agent = VilkasAgent(db_path=Config.DB_PATH, debug=Config.DEBUG)
+
+        # Check if the language/pos_type combination is supported
+        SUPPORTED_LANGUAGES = {
+            'lt': ['noun', 'verb', 'adjective'],
+            'fr': ['noun', 'verb'],
+            'de': ['noun', 'verb'],
+            'es': ['noun', 'verb'],
+            'pt': ['noun', 'verb'],
+            'en': ['verb']
+        }
+
+        if lang_code not in SUPPORTED_LANGUAGES:
+            flash(f'Language {lang_code} is not yet supported for form generation', 'error')
+            return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
+
+        if pos_type not in SUPPORTED_LANGUAGES[lang_code]:
+            flash(f'POS type {pos_type} is not supported for {lang_code}', 'error')
+            return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
+
+        # Check if translation exists for this language
+        from wordfreq.storage.translation_helpers import LANGUAGE_FIELDS
+        translation = None
+        if lang_code in LANGUAGE_FIELDS:
+            field_name, _, uses_table = LANGUAGE_FIELDS[lang_code]
+            if uses_table:
+                from wordfreq.storage.models.schema import LemmaTranslation
+                trans_obj = g.db.query(LemmaTranslation).filter(
+                    LemmaTranslation.lemma_id == lemma_id,
+                    LemmaTranslation.language_code == lang_code
+                ).first()
+                translation = trans_obj.translation if trans_obj else None
+            else:
+                translation = getattr(lemma, field_name, None)
+
+        if not translation or not translation.strip():
+            flash(f'No {lang_code} translation found for this lemma. Add a translation first.', 'warning')
+            return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
+
+        # For now, we'll use the language-specific generators directly
+        # This is a simplified version - a more complete implementation would call
+        # the agent's fix_missing_forms for individual lemmas
+        from wordfreq.translation.client import LinguisticClient
+
+        client = LinguisticClient(
+            model='gpt-5-mini',
+            db_path=Config.DB_PATH,
+            debug=Config.DEBUG
+        )
+
+        # Route to appropriate generator based on language and POS type
+        handler_key = f"{lang_code}_{pos_type}"
+
+        # Import the appropriate generator
+        if handler_key == 'lt_noun':
+            from wordfreq.translation.generate_lithuanian_noun_forms import process_lemma_declensions
+            success = process_lemma_declensions(g.db, lemma, client, source='llm')
+        elif handler_key == 'lt_verb':
+            from wordfreq.translation.generate_lithuanian_verb_forms import process_lemma_conjugations
+            success = process_lemma_conjugations(g.db, lemma, client)
+        elif handler_key == 'lt_adjective':
+            from wordfreq.translation.generate_lithuanian_adjective_forms import process_lemma_adjective_forms
+            success = process_lemma_adjective_forms(g.db, lemma, client)
+        elif handler_key == 'fr_verb':
+            from wordfreq.translation.generate_french_verb_forms import process_lemma_conjugations
+            success = process_lemma_conjugations(g.db, lemma, client)
+        elif handler_key == 'fr_noun':
+            from wordfreq.translation.generate_french_noun_forms import process_lemma_declensions
+            success = process_lemma_declensions(g.db, lemma, client)
+        elif handler_key == 'de_verb':
+            from wordfreq.translation.generate_german_verb_forms import process_lemma_conjugations
+            success = process_lemma_conjugations(g.db, lemma, client)
+        elif handler_key == 'de_noun':
+            from wordfreq.translation.generate_german_noun_forms import process_lemma_declensions
+            success = process_lemma_declensions(g.db, lemma, client)
+        elif handler_key == 'es_verb':
+            from wordfreq.translation.generate_spanish_verb_forms import process_lemma_conjugations
+            success = process_lemma_conjugations(g.db, lemma, client)
+        elif handler_key == 'es_noun':
+            from wordfreq.translation.generate_spanish_noun_forms import process_lemma_declensions
+            success = process_lemma_declensions(g.db, lemma, client)
+        elif handler_key == 'pt_verb':
+            from wordfreq.translation.generate_portuguese_verb_forms import process_lemma_conjugations
+            success = process_lemma_conjugations(g.db, lemma, client)
+        elif handler_key == 'pt_noun':
+            from wordfreq.translation.generate_portuguese_noun_forms import process_lemma_declensions
+            success = process_lemma_declensions(g.db, lemma, client)
+        elif handler_key == 'en_verb':
+            from wordfreq.translation.generate_english_verb_forms import process_lemma_conjugations
+            success = process_lemma_conjugations(g.db, lemma, client)
+        else:
+            flash(f'Handler not implemented for {lang_code} {pos_type}', 'error')
+            return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
+
+        if success:
+            flash(f'Successfully generated {lang_code} {pos_type} forms!', 'success')
+        else:
+            flash(f'Could not generate {lang_code} {pos_type} forms', 'warning')
+
+    except Exception as e:
+        flash(f'Error generating forms: {str(e)}', 'error')
+
+    return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
+
+
+@bp.route('/check-definition/<int:lemma_id>', methods=['POST'])
+def check_definition(lemma_id):
+    """Check/improve the definition of a lemma using the LOKYS agent."""
+    lemma = g.db.query(Lemma).get(lemma_id)
+    if not lemma:
+        flash('Lemma not found', 'error')
+        return redirect(url_for('lemmas.list_lemmas'))
+
+    try:
+        # Initialize LOKYS agent
+        agent = LokysAgent(db_path=Config.DB_PATH, debug=Config.DEBUG)
+
+        # Validate definition
+        from wordfreq.tools.llm_validators import validate_definition
+
+        result = validate_definition(
+            lemma_text=lemma.lemma_text,
+            definition=lemma.definition_text,
+            pos_type=lemma.pos_type,
+            model='gpt-5-mini'
+        )
+
+        if result['is_valid'] and result['confidence'] >= 0.7:
+            flash('Definition looks good!', 'success')
+        else:
+            # Show issues and suggested improvement
+            return render_template('agents/definition_check_results.html',
+                                 lemma=lemma,
+                                 result=result)
+
+    except Exception as e:
+        flash(f'Error checking definition: {str(e)}', 'error')
+
+    return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
+
+
+@bp.route('/apply-definition/<int:lemma_id>', methods=['POST'])
+def apply_definition(lemma_id):
+    """Apply a suggested definition improvement."""
+    lemma = g.db.query(Lemma).get(lemma_id)
+    if not lemma:
+        flash('Lemma not found', 'error')
+        return redirect(url_for('lemmas.list_lemmas'))
+
+    new_definition = request.form.get('new_definition')
+    if not new_definition:
+        flash('No new definition provided', 'error')
+        return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
+
+    try:
+        old_definition = lemma.definition_text
+        lemma.definition_text = new_definition
+        g.db.commit()
+
+        # Log the change
+        from wordfreq.storage.crud.operation_log import log_operation
+        log_operation(
+            g.db,
+            source='barsukas-web-interface',
+            operation_type='definition_update',
+            fact={
+                'lemma_id': lemma_id,
+                'lemma_text': lemma.lemma_text,
+                'old_definition': old_definition,
+                'new_definition': new_definition
+            },
+            lemma_id=lemma_id
+        )
+
+        flash('Definition updated successfully!', 'success')
+    except Exception as e:
+        g.db.rollback()
+        flash(f'Error updating definition: {str(e)}', 'error')
 
     return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
