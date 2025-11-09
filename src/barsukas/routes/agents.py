@@ -328,12 +328,14 @@ def generate_pronunciations(lemma_id):
                 model='gpt-5-mini'
             )
 
-            if result['success']:
-                # Update the form with generated pronunciations
-                if result['ipa_pronunciation']:
-                    form.ipa_pronunciation = result['ipa_pronunciation']
-                if result['phonetic_pronunciation']:
-                    form.phonetic_pronunciation = result['phonetic_pronunciation']
+            # Update the form with generated pronunciations
+            if result.get('ipa_pronunciation'):
+                form.ipa_pronunciation = result['ipa_pronunciation']
+            if result.get('phonetic_pronunciation'):
+                form.phonetic_pronunciation = result['phonetic_pronunciation']
+
+            # Count as generated if we got at least one pronunciation
+            if result.get('ipa_pronunciation') or result.get('phonetic_pronunciation'):
                 generated_count += 1
 
         if generated_count > 0:
