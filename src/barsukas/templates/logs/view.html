@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block title %}Operation Log #{{ log.id }}{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('operation_logs.list_logs') }}">Operation Logs</a></li>
+                <li class="breadcrumb-item active">Log #{{ log.id }}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<!-- Log Details -->
+<div class="row mb-4">
+    <div class="col">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-journal-text"></i> Operation Log Details
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-3">Log ID:</dt>
+                    <dd class="col-sm-9"><code>{{ log.id }}</code></dd>
+
+                    <dt class="col-sm-3">Timestamp:</dt>
+                    <dd class="col-sm-9">{{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') if log.timestamp else 'N/A' }}</dd>
+
+                    <dt class="col-sm-3">Source:</dt>
+                    <dd class="col-sm-9"><span class="badge bg-secondary">{{ log.source }}</span></dd>
+
+                    <dt class="col-sm-3">Operation Type:</dt>
+                    <dd class="col-sm-9"><span class="badge bg-primary">{{ log.operation_type }}</span></dd>
+
+                    {% if log.lemma_id %}
+                        <dt class="col-sm-3">Lemma:</dt>
+                        <dd class="col-sm-9">
+                            {% if lemma %}
+                                <a href="{{ url_for('lemmas.view_lemma', lemma_id=lemma.id) }}">
+                                    {{ lemma.lemma_text }}
+                                </a>
+                                <small class="text-muted">(ID: {{ log.lemma_id }})</small>
+                            {% else %}
+                                <span class="text-muted">Lemma ID {{ log.lemma_id }} (not found)</span>
+                            {% endif %}
+                        </dd>
+                    {% endif %}
+
+                    {% if log.language_code %}
+                        <dt class="col-sm-3">Language:</dt>
+                        <dd class="col-sm-9"><span class="badge bg-info">{{ log.language_code }}</span></dd>
+                    {% endif %}
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Fact Data -->
+<div class="row mb-4">
+    <div class="col">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-file-earmark-code"></i> Operation Details (Fact)
+            </div>
+            <div class="card-body">
+                {% if 'error' in fact_data %}
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-triangle"></i> {{ fact_data.error }}
+                    </div>
+                {% else %}
+                    <table class="table table-sm">
+                        <tbody>
+                            {% for key, value in fact_data.items() %}
+                                <tr>
+                                    <th style="width: 30%;">{{ key }}</th>
+                                    <td>
+                                        {% if value is mapping %}
+                                            <pre class="mb-0"><code>{{ value | tojson(indent=2) }}</code></pre>
+                                        {% elif value is iterable and value is not string %}
+                                            <pre class="mb-0"><code>{{ value | tojson(indent=2) }}</code></pre>
+                                        {% else %}
+                                            {{ value }}
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Raw JSON -->
+<div class="row mb-4">
+    <div class="col">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-code-square"></i> Raw JSON
+            </div>
+            <div class="card-body">
+                <pre><code>{{ log.fact }}</code></pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Actions -->
+<div class="row">
+    <div class="col">
+        <a href="{{ url_for('operation_logs.list_logs') }}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Logs
+        </a>
+        {% if lemma %}
+            <a href="{{ url_for('lemmas.view_lemma', lemma_id=lemma.id) }}" class="btn btn-primary">
+                <i class="bi bi-box-arrow-up-right"></i> View Lemma
+            </a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

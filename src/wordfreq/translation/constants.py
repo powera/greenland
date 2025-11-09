@@ -21,6 +21,12 @@ MAJOR_POS_TYPES = {"noun", "verb", "adjective", "adverb"}
 
 # Default languages and their configurations
 DEFAULT_TRANSLATION_LANGUAGES = {
+    'lithuanian': {
+        'field': 'lithuanian_translation',
+        'code': 'lt',
+        'description': 'Lithuanian translation in lemma form',
+        'instructions': '- Lithuanian: Provide standard Lithuanian in base form (infinitive for verbs, singular nominative for nouns)'
+    },
     'chinese': {
         'field': 'chinese_translation',
         'code': 'zh',

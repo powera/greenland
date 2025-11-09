@@ -108,11 +108,18 @@
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span><i class="bi bi-translate"></i> Translations</span>
-                <form method="post" action="{{ url_for('agents.check_translations', lemma_id=lemma.id) }}" style="display: inline;">
-                    <button type="submit" class="btn btn-sm btn-light" title="Check translations using AI">
-                        <i class="bi bi-robot"></i> Check Translations
-                    </button>
-                </form>
+                <div>
+                    <form method="post" action="{{ url_for('agents.check_translations', lemma_id=lemma.id) }}" style="display: inline;">
+                        <button type="submit" class="btn btn-sm btn-light" title="Check translations using AI">
+                            <i class="bi bi-robot"></i> Check Translations
+                        </button>
+                    </form>
+                    <form method="post" action="{{ url_for('agents.add_missing_translations', lemma_id=lemma.id) }}" style="display: inline;">
+                        <button type="submit" class="btn btn-sm btn-success" title="Add missing translations using AI">
+                            <i class="bi bi-plus-circle"></i> Add Missing Translations
+                        </button>
+                    </form>
+                </div>
             </div>
             <div class="card-body">
                 <table class="table table-hover translation-table">
