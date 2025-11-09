@@ -957,6 +957,76 @@ class WirewordExporter:
 
         return derivative_phrases
 
+    def export_wireword_directory(self, output_dir: str) -> Tuple[bool, Dict[str, Any]]:
+        """
+        Export WireWord format files to directory structure.
+        Creates two files: wireword_verbs.json and wireword_nouns.json
+
+        Args:
+            output_dir: Base output directory (e.g., lang_lt/generated)
+
+        Returns:
+            Tuple of (success flag, export results dictionary)
+        """
+        # Create wireword subdirectory
+        wireword_dir = os.path.join(output_dir, 'wireword')
+        os.makedirs(wireword_dir, exist_ok=True)
+
+        results = {
+            'files_created': [],
+            'levels_exported': set(),
+            'subtypes_exported': set()
+        }
+
+        # Export verbs to wireword_verbs.json
+        verbs_path = os.path.join(wireword_dir, 'wireword_verbs.json')
+        logger.info(f"Exporting verbs to {verbs_path}...")
+        verbs_success, verbs_stats = self.export_verbs_to_wireword_format(
+            output_path=verbs_path,
+            include_without_guid=False,
+            include_unverified=True,
+            pretty_print=True
+        )
+
+        if verbs_success:
+            results['files_created'].append(verbs_path)
+            if verbs_stats:
+                for level in verbs_stats.level_distribution.keys():
+                    results['levels_exported'].add(int(level))
+            logger.info(f"✅ Exported verbs to {verbs_path}")
+        else:
+            logger.error(f"❌ Failed to export verbs")
+            return False, results
+
+        # Export non-verbs to wireword_nouns.json
+        nouns_path = os.path.join(wireword_dir, 'wireword_nouns.json')
+        logger.info(f"Exporting non-verbs to {nouns_path}...")
+        nouns_success, nouns_stats = self.export_to_wireword_format(
+            output_path=nouns_path,
+            include_without_guid=False,
+            include_unverified=True,
+            pretty_print=True
+        )
+
+        if nouns_success:
+            results['files_created'].append(nouns_path)
+            if nouns_stats:
+                for level in nouns_stats.level_distribution.keys():
+                    results['levels_exported'].add(int(level))
+                for pos_type in nouns_stats.pos_distribution.keys():
+                    results['subtypes_exported'].add(pos_type)
+            logger.info(f"✅ Exported non-verbs to {nouns_path}")
+        else:
+            logger.error(f"❌ Failed to export non-verbs")
+            return False, results
+
+        # Convert sets to sorted lists for JSON serialization
+        results['levels_exported'] = sorted(list(results['levels_exported']))
+        results['subtypes_exported'] = sorted(list(results['subtypes_exported']))
+
+        logger.info(f"✅ WireWord directory export completed: {len(results['files_created'])} files created")
+        return True, results
+
     def export_verbs_to_wireword_format(
         self,
         output_path: str,

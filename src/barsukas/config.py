@@ -32,3 +32,6 @@ class Config:
     MIN_DIFFICULTY_LEVEL = 1
     MAX_DIFFICULTY_LEVEL = 20
     EXCLUDE_DIFFICULTY_LEVEL = -1
+
+    # Access control
+    READONLY = False  # Can be overridden at runtime

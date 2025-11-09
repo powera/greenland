@@ -20,6 +20,11 @@ bp = Blueprint('overrides', __name__, url_prefix='/overrides')
 @bp.route('/<int:lemma_id>/add', methods=['POST'])
 def add_override(lemma_id):
     """Add or update a difficulty override."""
+    from flask import current_app
+    if current_app.config.get('READONLY', False):
+        flash('Cannot add override: running in read-only mode', 'error')
+        return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
+
     lemma = g.db.query(Lemma).get(lemma_id)
     if not lemma:
         flash('Lemma not found', 'error')
@@ -83,6 +88,11 @@ def add_override(lemma_id):
 @bp.route('/<int:lemma_id>/<lang_code>/delete', methods=['POST'])
 def delete_override(lemma_id, lang_code):
     """Delete a difficulty override."""
+    from flask import current_app
+    if current_app.config.get('READONLY', False):
+        flash('Cannot delete override: running in read-only mode', 'error')
+        return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
+
     lemma = g.db.query(Lemma).get(lemma_id)
     if not lemma:
         flash('Lemma not found', 'error')

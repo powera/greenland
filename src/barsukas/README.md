@@ -1,15 +1,29 @@
 # Barsukas - Word Frequency Database Web Editor
 
-**Barsukas** (Lithuanian for "badger") is a lightweight Flask web interface for manual edits and fixes to the linguistics database. It provides a user-friendly way to manage lemmas, translations, and difficulty levels without directly editing the database.
+**Barsukas** (Lithuanian for "badger") is a lightweight Flask web interface for managing the linguistics database. It provides a user-friendly way to browse, edit, and export word data with AI-powered translation validation and comprehensive operation logging.
+
+## What's New
+
+Recent additions include:
+- ✅ **AI Translation Checking** - Validate translations with the Voras agent
+- ✅ **Add New Lemmas** - Create words directly from the web interface
+- ✅ **Operation Log Viewer** - Full audit trail with filtering
+- ✅ **WireWord Export** - Export to WireWord API format (4 languages, 3 export types)
+- ✅ **Read-Only Mode** - `--readonly` flag for safe browsing
+- ✅ **Smart Search** - Exact matches appear first in search results
 
 ## Features
 
 ### Core Functionality
-- **Browse and Search Lemmas** - Paginated list with search and filtering
+- **Browse and Search Lemmas** - Paginated list with intelligent search (exact matches first) and filtering
+- **Add New Lemmas** - Create new words directly from the web interface
 - **Edit Lemma Details** - Update lemma text, definitions, POS types, and base difficulty levels
 - **Manage Translations** - Edit translations across 9 supported languages with automatic storage handling
+- **AI Translation Checking** - Validate translations using the Voras agent with AI-powered suggestions
 - **Difficulty Overrides** - Set per-language difficulty level overrides for Trakaido wordlists
-- **Operation Logging** - All changes are automatically logged to the `operation_logs` table
+- **Operation Logging** - All changes are automatically logged with full audit trail viewer
+- **WireWord Export** - Export word data to WireWord API format for multiple languages
+- **Read-Only Mode** - Optional `--readonly` flag to prevent any database modifications
 
 ### Supported Languages
 - Chinese (zh)
@@ -52,6 +66,9 @@ You can pass command-line arguments to the launch script:
 
 # Enable debug mode
 ./launch.sh --debug
+
+# Read-only mode (no edits allowed)
+./launch.sh --readonly
 ```
 
 Or use environment variables:
@@ -107,9 +124,31 @@ Example:
 ### Operation Logging
 All changes are logged to `operation_logs` table with:
 - **Source**: `barsukas-web-interface`
-- **Operation Type**: `translation`, `lemma_update`, `difficulty_override_add`, etc.
+- **Operation Type**: `translation`, `lemma_update`, `difficulty_override_add`, `lemma_create`, etc.
 - **Fact JSON**: Contains old/new values and metadata
 - **Entity IDs**: Links to affected lemma, language, etc.
+
+You can view the operation log through the web interface:
+- Navigate to **Operation Logs** in the navigation menu
+- Filter by source, operation type, or lemma ID
+- View detailed information about each change
+
+### AI Translation Checking
+The **Check Translations** feature uses the Voras agent to validate translations:
+- Click the "Check Translations" button on any lemma view page
+- AI analyzes all translations for correctness and proper lemma form
+- Displays issues with confidence scores and suggested fixes
+- One-click application of suggested translations
+
+### WireWord Export
+Export word data to WireWord API format for language learning applications:
+- Navigate to **WireWord Export** in the navigation menu
+- Choose from **4 supported languages**: Lithuanian, Chinese (Simplified/Traditional), Korean, French
+- **Three export types**:
+  - **Directory Structure**: Creates organized files in `data/trakaido_wordlists/lang_XX/generated/wireword/`
+  - **Single File**: Downloads one JSON file with optional filters (difficulty level, POS type)
+  - **Verbs Only**: Downloads just verb conjugations
+- Uses the Ungurys agent for fast, reliable exports
 
 ## Security
 
@@ -147,13 +186,19 @@ barsukas/
 ├── app.py              # Flask application entry point
 ├── config.py           # Configuration settings
 ├── routes/             # Blueprint routes
-│   ├── lemmas.py       # Lemma CRUD operations
+│   ├── lemmas.py       # Lemma CRUD operations (browse, add, edit)
 │   ├── translations.py # Translation management
-│   └── overrides.py    # Difficulty override management
+│   ├── overrides.py    # Difficulty override management
+│   ├── agents.py       # AI agent operations (Voras translation checking)
+│   ├── operation_logs.py # Operation log viewer
+│   └── wireword.py     # WireWord export functionality
 ├── templates/          # Jinja2 HTML templates
-│   ├── base.html       # Base layout
+│   ├── base.html       # Base layout with navigation
 │   ├── index.html      # Home page
-│   └── lemmas/         # Lemma-related templates
+│   ├── lemmas/         # Lemma-related templates (list, view, edit, add)
+│   ├── agents/         # Agent results templates
+│   ├── logs/           # Operation log viewer templates
+│   └── wireword/       # WireWord export templates
 ├── static/             # CSS and JavaScript
 └── requirements.txt    # Python dependencies
 ```
@@ -167,17 +212,16 @@ barsukas/
 
 The following features are not currently implemented but could be added:
 
-- [ ] Add new lemmas via web interface
-- [ ] View operation log history for a specific lemma
+- [ ] Pronunciation management and validation (using Papuga agent)
+- [ ] Grammatical forms/derivative forms viewer and editor
 - [ ] Bulk translation operations (update multiple translations at once)
-- [ ] Export lemma data as JSON
 - [ ] Search by translation text (not just lemma text)
 - [ ] Advanced filtering (by verified status, confidence range, etc.)
 - [ ] Undo recent changes
 - [ ] Batch import translations from CSV/JSON
-- [ ] Audit trail viewer (who changed what and when)
-- [ ] Readonly mode (view-only access)
 - [ ] API endpoints for programmatic access
+- [ ] Batch AI translation checking (validate multiple words at once)
+- [ ] WireWord export history/scheduling
 
 ## Contributing
 

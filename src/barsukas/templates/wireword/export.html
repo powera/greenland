@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block title %}WireWord Export{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2><i class="bi bi-cloud-download"></i> WireWord Export</h2>
+        <p class="text-muted">Export word data to WireWord API format</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-gear"></i> Export Configuration
+            </div>
+            <div class="card-body">
+                <form method="post" action="{{ url_for('wireword.export_wireword') }}">
+                    <div class="mb-4">
+                        <label for="language" class="form-label">Language <span class="text-danger">*</span></label>
+                        <select class="form-select" id="language" name="language" required onchange="toggleChineseOptions()">
+                            <option value="">Select language...</option>
+                            {% for code, name in languages.items() %}
+                                <option value="{{ code }}">{{ name }}</option>
+                            {% endfor %}
+                        </select>
+                        <small class="form-text text-muted">Select the target language for export</small>
+                    </div>
+
+                    <div class="mb-4" id="chinese_variant_group" style="display: none;">
+                        <label class="form-label">Chinese Variant</label>
+                        <div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="chinese_variant" id="simplified" value="simplified" checked>
+                                <label class="form-check-label" for="simplified">Simplified (简体)</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="chinese_variant" id="traditional" value="traditional">
+                                <label class="form-check-label" for="traditional">Traditional (繁體)</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="export_type" class="form-label">Export Type <span class="text-danger">*</span></label>
+                        <select class="form-select" id="export_type" name="export_type" required onchange="toggleFilterOptions()">
+                            <option value="directory" selected>Split Files - Verbs and Non-Verbs (recommended)</option>
+                            <option value="single">Single File (filtered)</option>
+                            <option value="verbs">Verbs Only</option>
+                        </select>
+                        <small class="form-text text-muted">
+                            <strong>Split Files:</strong> Creates two files (wireword_verbs.json and wireword_nouns.json) in data/trakaido_wordlists/lang_XX/generated/wireword/<br>
+                            <strong>Single File:</strong> Downloads one JSON file with optional filters<br>
+                            <strong>Verbs Only:</strong> Downloads just the verbs file
+                        </small>
+                    </div>
+
+                    <div id="filter_options" style="display: none;">
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> Optional filters for Single File or Verbs Only exports
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="difficulty_level" class="form-label">Difficulty Level</label>
+                                <select class="form-select" id="difficulty_level" name="difficulty_level">
+                                    <option value="all">All levels</option>
+                                    {% for i in range(1, 21) %}
+                                        <option value="{{ i }}">Level {{ i }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="pos_type" class="form-label">POS Type</label>
+                                <select class="form-select" id="pos_type" name="pos_type">
+                                    <option value="all">All types</option>
+                                    <option value="noun">noun</option>
+                                    <option value="verb">verb</option>
+                                    <option value="adjective">adjective</option>
+                                    <option value="adverb">adverb</option>
+                                    <option value="pronoun">pronoun</option>
+                                    <option value="preposition">preposition</option>
+                                    <option value="conjunction">conjunction</option>
+                                    <option value="interjection">interjection</option>
+                                    <option value="determiner">determiner</option>
+                                    <option value="numeral">numeral</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('index') }}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Back to Home
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-download"></i> Export WireWord Files
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header">
+                <i class="bi bi-info-circle"></i> About WireWord Export
+            </div>
+            <div class="card-body">
+                <p>The WireWord export creates JSON files in the format expected by the WireWord API for language learning applications.</p>
+
+                <h6>Export Types:</h6>
+                <ul>
+                    <li><strong>Split Files (recommended):</strong> Creates two files in <code>data/trakaido_wordlists/lang_XX/generated/wireword/</code>:
+                        <ul>
+                            <li><code>wireword_verbs.json</code> - All verb conjugations</li>
+                            <li><code>wireword_nouns.json</code> - All non-verbs (nouns, adjectives, etc.)</li>
+                        </ul>
+                        This is what Trakaido expects.
+                    </li>
+                    <li><strong>Single File:</strong> Downloads a single JSON file with all words (or filtered subset)</li>
+                    <li><strong>Verbs Only:</strong> Downloads just the verb conjugations file</li>
+                </ul>
+
+                <h6>Supported Languages:</h6>
+                <ul>
+                    {% for code, name in languages.items() %}
+                        <li><strong>{{ name }}</strong> ({{ code }})</li>
+                    {% endfor %}
+                    <li><strong>Chinese Traditional</strong> (zh-Hant) - Traditional character variant</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleChineseOptions() {
+    const language = document.getElementById('language').value;
+    const chineseGroup = document.getElementById('chinese_variant_group');
+    chineseGroup.style.display = (language === 'zh') ? 'block' : 'none';
+}
+
+function toggleFilterOptions() {
+    const exportType = document.getElementById('export_type').value;
+    const filterOptions = document.getElementById('filter_options');
+    filterOptions.style.display = (exportType === 'single' || exportType === 'verbs') ? 'block' : 'none';
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    toggleChineseOptions();
+    toggleFilterOptions();
+});
+</script>
+{% endblock %}

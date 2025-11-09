@@ -15,6 +15,11 @@ bp = Blueprint('translations', __name__, url_prefix='/translations')
 @bp.route('/<int:lemma_id>/<lang_code>', methods=['POST'])
 def update_translation(lemma_id, lang_code):
     """Update a translation for a lemma."""
+    from flask import current_app
+    if current_app.config.get('READONLY', False):
+        flash('Cannot update: running in read-only mode', 'error')
+        return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
+
     lemma = g.db.query(Lemma).get(lemma_id)
     if not lemma:
         flash('Lemma not found', 'error')
