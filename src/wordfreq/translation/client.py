@@ -106,15 +106,28 @@ class LinguisticClient:
     def query_translations(
         self,
         english_word: str,
-        lithuanian_word: str,
+        reference_translation: Tuple[str, str],
         definition: str,
         pos_type: str,
         pos_subtype: Optional[str] = None,
         languages: Optional[List[str]] = None
     ) -> Tuple[Dict[str, str], bool]:
-        """Query LLM to generate translations for a word."""
+        """
+        Query LLM to generate translations for a word.
+
+        Args:
+            english_word: English lemma form
+            reference_translation: Tuple of (language_code, translation) for context
+            definition: Definition of the word
+            pos_type: Part of speech
+            pos_subtype: Optional POS subtype
+            languages: List of language names to generate translations for
+
+        Returns:
+            Tuple of (translations dict, success flag)
+        """
         return translations.query_translations(
-            self.client, english_word, lithuanian_word, definition, pos_type,
+            self.client, english_word, reference_translation, definition, pos_type,
             self.get_session, pos_subtype, languages, self.model
         )
 
