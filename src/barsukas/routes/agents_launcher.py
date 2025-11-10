@@ -7,6 +7,7 @@ import subprocess
 import os
 from pathlib import Path
 from config import Config
+from barsukas.utils.argparse_introspection import introspect_agent_parser, get_agent_cli_module_path, group_arguments_by_mode
 
 bp = Blueprint('agents_launcher', __name__, url_prefix='/agents-launcher')
 
@@ -73,12 +74,7 @@ AGENTS = [
         'description': 'Validates multi-lingual translations for correctness and proper lemma form, reports on coverage.',
         'script': 'voras.py',
         'icon': 'bi-globe',
-        'modes': [
-            {'label': 'Coverage Report', 'args': '--mode coverage', 'description': 'Report on translation coverage (no LLM calls)'},
-            {'label': 'Check Only', 'args': '--mode check-only', 'description': 'Validate existing translations'},
-            {'label': 'Populate Only', 'args': '--mode populate-only', 'description': 'Add missing translations'},
-            {'label': 'Check & Populate', 'args': '--mode both', 'description': 'Validate and populate translations'},
-        ],
+        'use_dynamic_form': True,  # Use argparse introspection instead of predefined modes
     },
     {
         'name': 'VILKAS',
@@ -192,7 +188,24 @@ def launch_form(agent_name):
     if 'redirect_to' in agent:
         return redirect(url_for(agent['redirect_to']))
 
-    return render_template('agents_launcher/launch.html', agent=agent)
+    # If agent uses dynamic form, introspect its argparse
+    parser_info = None
+    argument_groups = None
+    if agent.get('use_dynamic_form'):
+        try:
+            module_path = get_agent_cli_module_path(agent['script'])
+            parser_info = introspect_agent_parser(module_path)
+            argument_groups = group_arguments_by_mode(parser_info['arguments'])
+        except Exception as e:
+            flash(f'Error introspecting agent arguments: {str(e)}', 'error')
+            # Fall back to basic form
+            parser_info = None
+            argument_groups = None
+
+    return render_template('agents_launcher/launch.html',
+                         agent=agent,
+                         parser_info=parser_info,
+                         argument_groups=argument_groups)
 
 
 @bp.route('/execute/<agent_name>', methods=['POST'])
@@ -202,11 +215,6 @@ def execute_agent(agent_name):
     agent = next((a for a in AGENTS if a['name'] == agent_name), None)
     if not agent:
         return jsonify({'success': False, 'error': f'Agent {agent_name} not found'}), 404
-
-    # Get parameters from form
-    mode = request.form.get('mode', '')
-    custom_args = request.form.get('custom_args', '')
-    dry_run = request.form.get('dry_run') == 'true'
 
     # Build command
     agents_dir = Path(Config.DB_PATH).parent.parent / 'agents'
@@ -218,22 +226,53 @@ def execute_agent(agent_name):
     # Build arguments
     args = ['python3', str(script_path)]
 
-    # Add mode arguments if provided
-    if mode:
-        # Find the mode in agent config
-        mode_config = next((m for m in agent.get('modes', []) if m['label'] == mode), None)
-        if mode_config and mode_config['args']:
-            args.extend(mode_config['args'].split())
+    # Handle dynamic form (introspected arguments)
+    if agent.get('use_dynamic_form'):
+        # Get all form data and convert to command-line arguments
+        for key, value in request.form.items():
+            if key.startswith('arg_'):
+                # Extract argument name (e.g., 'arg_mode' -> 'mode')
+                arg_name = key[4:]  # Remove 'arg_' prefix
 
-    # Add custom arguments
-    if custom_args:
-        args.extend(custom_args.split())
+                # Skip empty values
+                if not value or value == '':
+                    continue
 
-    # Add dry-run flag if requested
-    if dry_run:
-        args.append('--dry-run')
+                # Add the argument
+                if value == 'true':
+                    # Boolean flag
+                    args.append(f'--{arg_name}')
+                elif ',' in value:
+                    # List argument (comma-separated)
+                    args.append(f'--{arg_name}')
+                    args.extend(value.split(','))
+                else:
+                    # Regular argument
+                    args.append(f'--{arg_name}')
+                    args.append(value)
 
-    # Add database path
+    else:
+        # Handle static form (predefined modes)
+        mode = request.form.get('mode', '')
+        custom_args = request.form.get('custom_args', '')
+        dry_run = request.form.get('dry_run') == 'true'
+
+        # Add mode arguments if provided
+        if mode:
+            # Find the mode in agent config
+            mode_config = next((m for m in agent.get('modes', []) if m['label'] == mode), None)
+            if mode_config and mode_config['args']:
+                args.extend(mode_config['args'].split())
+
+        # Add custom arguments
+        if custom_args:
+            args.extend(custom_args.split())
+
+        # Add dry-run flag if requested
+        if dry_run:
+            args.append('--dry-run')
+
+    # Add database path (always)
     args.extend(['--db-path', Config.DB_PATH])
 
     try:
