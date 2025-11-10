@@ -21,56 +21,170 @@
         <div class="card-body">
             <h5 class="card-title">Launch Agent</h5>
 
-            <form id="launchForm">
-                <!-- Mode Selection -->
-                <div class="mb-3">
-                    <label for="mode" class="form-label">Select Mode</label>
-                    <select class="form-select" id="mode" name="mode">
-                        <option value="">-- Select a mode --</option>
-                        {% for mode in agent.modes %}
-                        <option value="{{ mode.label }}"
-                                data-requires-input="{{ 'true' if mode.get('requires_input') else 'false' }}"
-                                data-input-placeholder="{{ mode.get('input_placeholder', '') }}">
-                            {{ mode.label }} - {{ mode.description }}
-                        </option>
-                        {% endfor %}
-                    </select>
-                </div>
+            {% if parser_info %}
+                <!-- Dynamic Form (from argparse introspection) -->
+                <form id="launchForm">
+                    {% if parser_info.description %}
+                    <p class="text-muted">{{ parser_info.description }}</p>
+                    {% endif %}
 
-                <!-- Dynamic Input (for modes that require input like GUID or level) -->
-                <div class="mb-3" id="modeInputContainer" style="display: none;">
-                    <label for="modeInput" class="form-label" id="modeInputLabel">Input</label>
-                    <input type="text" class="form-control" id="modeInput" name="mode_input" placeholder="">
-                </div>
+                    {% for group_name, group_args in argument_groups.items() %}
+                        {% if group_args %}
+                        <div class="argument-group mb-4">
+                            {% if group_name != 'common' %}
+                            <h6 class="text-capitalize">{{ group_name }} Mode Arguments</h6>
+                            {% else %}
+                            <h6>Common Arguments</h6>
+                            {% endif %}
 
-                <!-- Custom Arguments -->
-                <div class="mb-3">
-                    <label for="customArgs" class="form-label">Additional Arguments (optional)</label>
-                    <input type="text" class="form-control" id="customArgs" name="custom_args"
-                           placeholder="e.g., --limit 10 --yes">
-                    <div class="form-text">
-                        Add any additional command-line arguments. Use --help to see all available options.
+                            {% for arg in group_args %}
+                            <div class="mb-3">
+                                {% if arg.type == 'boolean' %}
+                                    <!-- Boolean / Checkbox -->
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox"
+                                               id="arg_{{ arg.dest }}" name="arg_{{ arg.dest }}" value="true"
+                                               {% if arg.default %}checked{% endif %}>
+                                        <label class="form-check-label" for="arg_{{ arg.dest }}">
+                                            {{ arg.names[0] }}
+                                            {% if arg.help %}<span class="text-muted small">- {{ arg.help }}</span>{% endif %}
+                                        </label>
+                                    </div>
+                                {% elif arg.type == 'choice' %}
+                                    <!-- Choice / Dropdown -->
+                                    <label for="arg_{{ arg.dest }}" class="form-label">
+                                        {{ arg.names[0] }}
+                                        {% if arg.required %}<span class="text-danger">*</span>{% endif %}
+                                    </label>
+                                    <select class="form-select" id="arg_{{ arg.dest }}" name="arg_{{ arg.dest }}"
+                                            {% if arg.required %}required{% endif %}>
+                                        <option value="">-- Select {{ arg.dest }} --</option>
+                                        {% for choice in arg.choices %}
+                                        <option value="{{ choice }}" {% if choice == arg.default %}selected{% endif %}>
+                                            {{ choice }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                    {% if arg.help %}
+                                    <div class="form-text">{{ arg.help }}</div>
+                                    {% endif %}
+                                {% elif arg.type == 'list' %}
+                                    <!-- List / Multi-select -->
+                                    <label for="arg_{{ arg.dest }}" class="form-label">
+                                        {{ arg.names[0] }}
+                                        {% if arg.required %}<span class="text-danger">*</span>{% endif %}
+                                    </label>
+                                    {% if arg.choices %}
+                                        <select class="form-select" id="arg_{{ arg.dest }}" name="arg_{{ arg.dest }}"
+                                                multiple {% if arg.required %}required{% endif %}>
+                                            {% for choice in arg.choices %}
+                                            <option value="{{ choice }}">{{ choice }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    {% else %}
+                                        <input type="text" class="form-control" id="arg_{{ arg.dest }}" name="arg_{{ arg.dest }}"
+                                               placeholder="Comma-separated values"
+                                               {% if arg.required %}required{% endif %}>
+                                    {% endif %}
+                                    {% if arg.help %}
+                                    <div class="form-text">{{ arg.help }}</div>
+                                    {% endif %}
+                                {% elif arg.type in ['integer', 'float'] %}
+                                    <!-- Number Input -->
+                                    <label for="arg_{{ arg.dest }}" class="form-label">
+                                        {{ arg.names[0] }}
+                                        {% if arg.required %}<span class="text-danger">*</span>{% endif %}
+                                    </label>
+                                    <input type="number" class="form-control" id="arg_{{ arg.dest }}" name="arg_{{ arg.dest }}"
+                                           {% if arg.default %}value="{{ arg.default }}"{% endif %}
+                                           {% if arg.type == 'float' %}step="0.01"{% endif %}
+                                           {% if arg.required %}required{% endif %}>
+                                    {% if arg.help %}
+                                    <div class="form-text">{{ arg.help }}</div>
+                                    {% endif %}
+                                {% else %}
+                                    <!-- Text Input -->
+                                    <label for="arg_{{ arg.dest }}" class="form-label">
+                                        {{ arg.names[0] }}
+                                        {% if arg.required %}<span class="text-danger">*</span>{% endif %}
+                                    </label>
+                                    <input type="text" class="form-control" id="arg_{{ arg.dest }}" name="arg_{{ arg.dest }}"
+                                           {% if arg.default %}value="{{ arg.default }}"{% endif %}
+                                           {% if arg.metavar %}placeholder="{{ arg.metavar }}"{% endif %}
+                                           {% if arg.required %}required{% endif %}>
+                                    {% if arg.help %}
+                                    <div class="form-text">{{ arg.help }}</div>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary" id="launchBtn">
+                            <i class="bi bi-play-circle"></i> Launch Agent
+                        </button>
+                        <a href="{{ url_for('agents_launcher.list_agents') }}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Back to Agents
+                        </a>
                     </div>
-                </div>
+                </form>
+            {% else %}
+                <!-- Static Form (predefined modes) -->
+                <form id="launchForm">
+                    <!-- Mode Selection -->
+                    <div class="mb-3">
+                        <label for="mode" class="form-label">Select Mode</label>
+                        <select class="form-select" id="mode" name="mode">
+                            <option value="">-- Select a mode --</option>
+                            {% for mode in agent.modes %}
+                            <option value="{{ mode.label }}"
+                                    data-requires-input="{{ 'true' if mode.get('requires_input') else 'false' }}"
+                                    data-input-placeholder="{{ mode.get('input_placeholder', '') }}">
+                                {{ mode.label }} - {{ mode.description }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
 
-                <!-- Dry Run Option -->
-                <div class="form-check mb-3">
-                    <input class="form-check-input" type="checkbox" id="dryRun" name="dry_run" value="true">
-                    <label class="form-check-label" for="dryRun">
-                        Dry run (show what would be done without making changes)
-                    </label>
-                </div>
+                    <!-- Dynamic Input (for modes that require input like GUID or level) -->
+                    <div class="mb-3" id="modeInputContainer" style="display: none;">
+                        <label for="modeInput" class="form-label" id="modeInputLabel">Input</label>
+                        <input type="text" class="form-control" id="modeInput" name="mode_input" placeholder="">
+                    </div>
 
-                <!-- Action Buttons -->
-                <div class="d-flex gap-2">
-                    <button type="submit" class="btn btn-primary" id="launchBtn">
-                        <i class="bi bi-play-circle"></i> Launch Agent
-                    </button>
-                    <a href="{{ url_for('agents_launcher.list_agents') }}" class="btn btn-secondary">
-                        <i class="bi bi-arrow-left"></i> Back to Agents
-                    </a>
-                </div>
-            </form>
+                    <!-- Custom Arguments -->
+                    <div class="mb-3">
+                        <label for="customArgs" class="form-label">Additional Arguments (optional)</label>
+                        <input type="text" class="form-control" id="customArgs" name="custom_args"
+                               placeholder="e.g., --limit 10 --yes">
+                        <div class="form-text">
+                            Add any additional command-line arguments. Use --help to see all available options.
+                        </div>
+                    </div>
+
+                    <!-- Dry Run Option -->
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="dryRun" name="dry_run" value="true">
+                        <label class="form-check-label" for="dryRun">
+                            Dry run (show what would be done without making changes)
+                        </label>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary" id="launchBtn">
+                            <i class="bi bi-play-circle"></i> Launch Agent
+                        </button>
+                        <a href="{{ url_for('agents_launcher.list_agents') }}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Back to Agents
+                        </a>
+                    </div>
+                </form>
+            {% endif %}
         </div>
     </div>
 
@@ -138,8 +252,11 @@ document.addEventListener('DOMContentLoaded', function() {
     form.addEventListener('submit', async function(e) {
         e.preventDefault();
 
-        // Validate mode selection
-        if (!modeSelect.value) {
+        // Build form data
+        const formData = new FormData(form);
+
+        // For static forms, validate mode selection
+        if (modeSelect && !modeSelect.value) {
             alert('Please select a mode');
             return;
         }
@@ -149,17 +266,21 @@ document.addEventListener('DOMContentLoaded', function() {
         launchBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Launching...';
         outputContainer.style.display = 'none';
 
-        // Build form data
-        const formData = new FormData();
-        formData.append('mode', modeSelect.value);
-        formData.append('dry_run', document.getElementById('dryRun').checked);
-
-        // Add custom args with mode input if provided
-        let customArgs = document.getElementById('customArgs').value;
-        if (modeInput.value) {
+        // For static forms with mode input
+        if (modeSelect && modeInput && modeInput.value) {
+            let customArgs = document.getElementById('customArgs').value;
             customArgs = modeInput.value + (customArgs ? ' ' + customArgs : '');
+            formData.set('custom_args', customArgs);
         }
-        formData.append('custom_args', customArgs);
+
+        // Handle multi-select fields (convert to comma-separated string)
+        const multiSelects = form.querySelectorAll('select[multiple]');
+        multiSelects.forEach(select => {
+            const selectedOptions = Array.from(select.selectedOptions).map(opt => opt.value);
+            if (selectedOptions.length > 0) {
+                formData.set(select.name, selectedOptions.join(','));
+            }
+        });
 
         try {
             // Execute agent

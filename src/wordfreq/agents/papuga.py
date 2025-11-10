@@ -510,8 +510,12 @@ class PapugaAgent:
         logger.info("=" * 80)
 
 
-def main():
-    """Main entry point for the papuga agent."""
+def get_argument_parser():
+    """Return the argument parser for introspection.
+
+    This function allows external tools to introspect the available
+    command-line arguments without executing the main function.
+    """
     parser = argparse.ArgumentParser(
         description="Papuga - Pronunciation Validation and Generation Agent"
     )
@@ -543,6 +547,12 @@ def main():
     parser.add_argument('--base-forms-only', action='store_true',
                        help='Only process base forms (populate mode only)')
 
+    return parser
+
+
+def main():
+    """Main entry point for the papuga agent."""
+    parser = get_argument_parser()
     args = parser.parse_args()
 
     # Determine mode

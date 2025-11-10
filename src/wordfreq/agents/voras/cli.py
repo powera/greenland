@@ -29,12 +29,12 @@ LANGUAGE_FIELDS = {
 }
 
 
-def main():
-    """Main entry point for the voras agent."""
-    # Import here to avoid circular imports
-    from wordfreq.agents.voras.agent import VorasAgent
-    from wordfreq.storage.models.schema import Lemma, LemmaTranslation
+def get_argument_parser():
+    """Return the argument parser for introspection.
 
+    This function allows external tools to introspect the available
+    command-line arguments without executing the main function.
+    """
     parser = argparse.ArgumentParser(
         description="Voras - Multi-lingual Translation Validator and Populator"
     )
@@ -69,7 +69,16 @@ def main():
                        help='Check status of a submitted batch (requires only batch ID)')
     parser.add_argument('--batch-retrieve', type=str, metavar='BATCH_ID',
                        help='Retrieve and process results from a completed batch (requires only batch ID)')
+    return parser
 
+
+def main():
+    """Main entry point for the voras agent."""
+    # Import here to avoid circular imports
+    from wordfreq.agents.voras.agent import VorasAgent
+    from wordfreq.storage.models.schema import Lemma, LemmaTranslation
+
+    parser = get_argument_parser()
     args = parser.parse_args()
 
     # Create agent with model parameter
