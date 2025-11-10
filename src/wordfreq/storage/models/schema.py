@@ -166,14 +166,111 @@ class DerivativeForm(Base):
 class ExampleSentence(Base):
     """Model for storing example sentences for a derivative form."""
     __tablename__ = 'example_sentences'
-    
+
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     derivative_form_id: Mapped[int] = mapped_column(ForeignKey("derivative_forms.id"), nullable=False)
     example_text: Mapped[str] = mapped_column(Text, nullable=False)
     added_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now())
-    
+
     # Relationships
     derivative_form = relationship("DerivativeForm", back_populates="example_sentences")
+
+class Sentence(Base):
+    """Model for storing sentence metadata.
+
+    This table stores language-agnostic metadata about sentences.
+    The actual sentence text in various languages is stored in SentenceTranslation.
+    Words used in the sentence are tracked in SentenceWord for difficulty calculation.
+    """
+    __tablename__ = 'sentences'
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+
+    # Sentence pattern metadata
+    pattern_type: Mapped[Optional[str]] = mapped_column(String, nullable=True, index=True)  # e.g., "SVO", "SVAO"
+    tense: Mapped[Optional[str]] = mapped_column(String, nullable=True)  # e.g., "past", "present", "future"
+
+    # Difficulty level - calculated as the maximum difficulty of all words used
+    # NULL means difficulty hasn't been calculated yet
+    minimum_level: Mapped[Optional[int]] = mapped_column(Integer, nullable=True, index=True)
+
+    # Source tracking
+    source_filename: Mapped[Optional[str]] = mapped_column(String, nullable=True)  # e.g., "sentence_a1_1"
+
+    # Metadata
+    verified: Mapped[bool] = mapped_column(Boolean, default=False)
+    notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    added_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now())
+    updated_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+
+    # Relationships
+    translations = relationship("SentenceTranslation", back_populates="sentence", cascade="all, delete-orphan")
+    words = relationship("SentenceWord", back_populates="sentence", cascade="all, delete-orphan")
+
+class SentenceTranslation(Base):
+    """Model for storing translations of sentences in various languages.
+
+    Unlike the Lemma table which has legacy translation columns, this table stores
+    ALL language versions including the original/source language.
+    """
+    __tablename__ = 'sentence_translations'
+    __table_args__ = (
+        UniqueConstraint('sentence_id', 'language_code', name='uq_sentence_translation'),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    sentence_id: Mapped[int] = mapped_column(ForeignKey("sentences.id"), nullable=False)
+    language_code: Mapped[str] = mapped_column(String, nullable=False, index=True)  # e.g., "en", "lt", "zh"
+    translation_text: Mapped[str] = mapped_column(Text, nullable=False)
+
+    # Metadata
+    verified: Mapped[bool] = mapped_column(Boolean, default=False)
+    added_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now())
+    updated_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+
+    # Relationships
+    sentence = relationship("Sentence", back_populates="translations")
+
+class SentenceWord(Base):
+    """Model for tracking which words/lemmas are used in a sentence.
+
+    This junction table links sentences to the lemmas (words) they contain,
+    enabling calculation of minimum difficulty level (don't show a sentence until
+    all its words are known).
+
+    The lemma_id may be NULL for function words (pronouns, particles) that aren't
+    tracked as separate vocabulary items.
+    """
+    __tablename__ = 'sentence_words'
+    __table_args__ = (
+        UniqueConstraint('sentence_id', 'position', name='uq_sentence_word_position'),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    sentence_id: Mapped[int] = mapped_column(ForeignKey("sentences.id"), nullable=False)
+    lemma_id: Mapped[Optional[int]] = mapped_column(ForeignKey("lemmas.id"), nullable=True)
+
+    # Position in the sentence (0-indexed, matches order in words_used JSON array)
+    position: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    # Word role in the sentence (semantic, not grammatical)
+    word_role: Mapped[str] = mapped_column(String, nullable=False)  # e.g., "subject", "verb", "object", "pronoun", "adjective"
+
+    # Reference text in both languages (from words_used JSON)
+    english_text: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    target_language_text: Mapped[Optional[str]] = mapped_column(String, nullable=True)  # Base form in target language
+
+    # Grammatical metadata (how the word is used in this specific sentence)
+    grammatical_form: Mapped[Optional[str]] = mapped_column(String, nullable=True)  # e.g., "1s_past", "gerund"
+    grammatical_case: Mapped[Optional[str]] = mapped_column(String, nullable=True)  # e.g., "accusative", "nominative"
+    declined_form: Mapped[Optional[str]] = mapped_column(String, nullable=True)  # Actual form used in sentence (e.g., "banką")
+
+    # Metadata
+    added_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now())
+
+    # Relationships
+    sentence = relationship("Sentence", back_populates="words")
+    lemma = relationship("Lemma")
 
 class Corpus(Base):
     """Model for storing corpus information."""
