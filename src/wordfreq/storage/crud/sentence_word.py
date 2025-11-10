@@ -11,6 +11,7 @@ def add_sentence_word(
     sentence: Sentence,
     position: int,
     word_role: str,
+    language_code: str,
     lemma: Optional[Lemma] = None,
     english_text: Optional[str] = None,
     target_language_text: Optional[str] = None,
@@ -25,6 +26,7 @@ def add_sentence_word(
         sentence: Sentence object
         position: Position in the sentence (0-indexed)
         word_role: Semantic role (e.g., "subject", "verb", "object", "pronoun")
+        language_code: Language code (e.g., 'lt', 'fr', 'zh')
         lemma: Optional Lemma object this word refers to
         english_text: English form of the word
         target_language_text: Base form in target language
@@ -40,6 +42,7 @@ def add_sentence_word(
         lemma_id=lemma.id if lemma else None,
         position=position,
         word_role=word_role,
+        language_code=language_code,
         english_text=english_text,
         target_language_text=target_language_text,
         grammatical_form=grammatical_form,

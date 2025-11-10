@@ -486,7 +486,7 @@ def check_definition(lemma_id):
         from wordfreq.tools.llm_validators import validate_definition
 
         result = validate_definition(
-            lemma_text=lemma.lemma_text,
+            word=lemma.lemma_text,
             definition=lemma.definition_text,
             pos_type=lemma.pos_type,
             model='gpt-5-mini'
@@ -556,7 +556,12 @@ def generate_sentences(lemma_id):
 
     # Get parameters from form
     num_sentences = int(request.form.get('num_sentences', 3))
-    languages = request.form.get('languages', 'en,lt').split(',')
+    # Get languages from checkboxes (multiple values with same name)
+    languages = request.form.getlist('languages')
+    # Always include English as the source language
+    if 'en' not in languages:
+        languages = ['en'] + languages
+    # Remove empty strings
     languages = [lang.strip() for lang in languages if lang.strip()]
 
     try:

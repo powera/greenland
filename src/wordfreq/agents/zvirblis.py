@@ -56,7 +56,7 @@ class ZvirblisAgent:
         self,
         db_path: str = None,
         debug: bool = False,
-        model: str = "gpt-4o-mini"
+        model: str = "gpt-5-mini"
     ):
         """
         Initialize the Žvirblis agent.
@@ -123,17 +123,36 @@ class ZvirblisAgent:
             # Build context for LLM
             context = self._build_sentence_context(lemma, difficulty_context)
 
-            # Generate sentences using LLM
-            result = self._call_llm_for_sentences(
-                lemma=lemma,
-                noun_translations=noun_translations,
-                target_languages=target_languages,
-                num_sentences=num_sentences,
-                context=context
-            )
+            # Generate sentences one at a time using LLM
+            generated_sentences = []
+            previous_sentences = []
 
-            if not result or not result.get('sentences'):
-                logger.error(f"LLM failed to generate sentences for {lemma.lemma_text}")
+            for i in range(num_sentences):
+                logger.info(f"Generating sentence {i+1}/{num_sentences} for {lemma.lemma_text}")
+
+                result = self._call_llm_for_sentence(
+                    lemma=lemma,
+                    noun_translations=noun_translations,
+                    target_languages=target_languages,
+                    context=context,
+                    previous_sentences=previous_sentences
+                )
+
+                if not result:
+                    logger.error(f"LLM failed to generate sentence {i+1} for {lemma.lemma_text}")
+                    # Continue with what we have so far
+                    break
+
+                # Result is the sentence data directly (no nesting)
+                generated_sentences.append(result)
+
+                # Add to previous sentences for context
+                english_text = result.get('translations', {}).get('en', '')
+                if english_text:
+                    previous_sentences.append(english_text)
+
+            if not generated_sentences:
+                logger.error(f"LLM failed to generate any sentences for {lemma.lemma_text}")
                 return {
                     'success': False,
                     'error': 'LLM generation failed'
@@ -141,7 +160,7 @@ class ZvirblisAgent:
 
             return {
                 'success': True,
-                'sentences': result['sentences'],
+                'sentences': generated_sentences,
                 'lemma_guid': lemma.guid
             }
 
@@ -170,115 +189,156 @@ class ZvirblisAgent:
 
         return "\n".join(context_parts)
 
-    def _call_llm_for_sentences(
+    def _call_llm_for_sentence(
         self,
         lemma: Lemma,
         noun_translations: Dict[str, str],
         target_languages: List[str],
-        num_sentences: int,
-        context: str
+        context: str,
+        previous_sentences: List[str] = None
     ) -> Optional[Dict]:
         """
-        Call LLM to generate sentences.
+        Call LLM to generate a single sentence.
 
         Args:
             lemma: Lemma object
             noun_translations: Dictionary of language_code -> translation
             target_languages: List of language codes
-            num_sentences: Number of sentences to generate
             context: Context string with word information
+            previous_sentences: List of previously generated sentences for variety
 
         Returns:
-            Dictionary with generated sentences or None if failed
+            Dictionary with generated sentence or None if failed
         """
         # Build the prompt
         langs_str = ", ".join(target_languages)
         translations_str = json.dumps(noun_translations, indent=2)
 
-        prompt = f"""Generate {num_sentences} English example sentences for language learning that feature the following noun.
+        # Include previous sentences if any
+        previous_context = ""
+        if previous_sentences:
+            previous_context = "\n\nPreviously generated sentences (make sure this new sentence is different):\n" + "\n".join(f"- {s}" for s in previous_sentences)
+
+        prompt = f"""Generate 1 English example sentence for language learning that features the following noun.
 
 {context}
 
 Translations of the noun in target languages:
 {translations_str}
+{previous_context}
 
 Requirements:
-1. Create {num_sentences} different ENGLISH sentences using the noun "{lemma.lemma_text}"
-2. Vary the sentence patterns:
-   - Use the noun as a subject (e.g., "The book is on the table")
-   - Use the noun as an object (e.g., "He read the book")
-   - Include different verbs and contexts
+1. Create 1 ENGLISH sentence using the noun "{lemma.lemma_text}"
+2. Vary the sentence pattern (SVO, SOV, etc.) and use different verbs/contexts
 3. Keep sentences simple and natural (appropriate for language learners)
 4. Use common, everyday vocabulary for other words in the sentence
-5. Translate each English sentence to ALL target languages: {langs_str}
+5. Translate the English sentence to ALL target languages: {langs_str}
    - Provide natural, idiomatic translations (not word-for-word)
    - Ensure grammatical correctness in each language
 
-For each sentence, provide:
+For the sentence, provide:
 - Pattern type (SVO, SVAO, etc.) - based on English structure
 - Tense used (present, past, future)
 - Translations in all languages (keys are language codes like 'en', 'lt', etc.)
-- For each TARGET LANGUAGE (not English), list ALL words used with their:
-  - Base form (lemma) in the target language
+- For EACH target language sentence, list ALL words in order with their:
+  - The actual word/phrase as it appears (e.g., "Le chocolat", "초콜릿은")
+  - English translation of this word/phrase (e.g., "the chocolate", "chocolate")
+  - Base/lemma form in that language (e.g., "chocolat", "초콜릿")
   - Role in sentence (subject, verb, object, adjective, preposition, article, etc.)
-  - For nouns/adjectives: grammatical case if applicable (e.g., "accusative", "nominative")
-  - For verbs: grammatical form (e.g., "3s_present" = 3rd person singular present)
-  - Actual declined/conjugated form used in the sentence
+  - For nouns/adjectives: grammatical case (e.g., "accusative", "nominative")
+  - For verbs: grammatical form (e.g., "3s_present", "1s_past")
+  - English lemma for vocabulary linking (e.g., "chocolate", "melt", "sun")
+
+Important: List words in the order they appear in that language's sentence, not English order.
+Include ALL words including articles, prepositions, particles.
 
 Focus on variety, natural language usage, and accurate translations."""
 
-        # Define response schema
+        # Build translations and words_by_language properties dynamically
+        # OpenAI strict mode doesn't support dynamic maps, so we create explicit properties
+        translations_properties = {}
+        words_by_language_properties = {}
+
+        for lang_code in target_languages:
+            translations_properties[lang_code] = {
+                "type": "string",
+                "description": f"Sentence in {lang_code}"
+            }
+
+            # Define word list schema for this language
+            words_by_language_properties[f"words_{lang_code}"] = {
+                "type": "array",
+                "description": f"All words in the {lang_code} sentence, in order",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "word": {"type": "string", "description": "The word/phrase as it appears in sentence"},
+                        "english": {"type": "string", "description": "English translation of this word"},
+                        "lemma": {"type": "string", "description": "Base/lemma form in this language"},
+                        "role": {"type": "string", "description": "Role in sentence"},
+                        "grammatical_form": {"type": "string", "description": "Grammatical form (e.g., '3s_present')"},
+                        "grammatical_case": {"type": "string", "description": "Grammatical case if applicable"},
+                        "english_lemma": {"type": "string", "description": "English lemma for linking to vocabulary"}
+                    },
+                    "required": ["word", "english", "lemma", "role"]
+                }
+            }
+
+        # Build a nested Schema for translations since it has explicit properties
+        translations_schema_props = {}
+        for lang_code, lang_def in translations_properties.items():
+            translations_schema_props[lang_code] = SchemaProperty(
+                type=lang_def["type"],
+                description=lang_def.get("description", "")
+            )
+
+        translations_schema = Schema(
+            name="Translations",
+            description="Sentence in each language",
+            properties=translations_schema_props
+        )
+
+        # Define response schema for a single sentence
+        # Put all properties at the top level (no nesting) for simplicity
+        top_level_properties = {
+            "translations": SchemaProperty(
+                type="object",
+                description="Sentence in each language",
+                object_schema=translations_schema
+            ),
+            "pattern": SchemaProperty(
+                type="string",
+                description="Sentence pattern type (SVO, SVAO, etc.)"
+            ),
+            "tense": SchemaProperty(
+                type="string",
+                description="Verb tense (present, past, future)"
+            )
+        }
+
+        # Add per-language word lists
+        for lang_code in target_languages:
+            if lang_code == 'en':
+                continue  # Skip English
+            words_key = f"words_{lang_code}"
+            top_level_properties[words_key] = SchemaProperty(
+                type="array",
+                description=f"All words in the {lang_code} sentence, in order",
+                items=words_by_language_properties[words_key]
+            )
+
         schema = Schema(
             name="SentenceGeneration",
-            description="Generated sentences with grammatical analysis",
-            properties={
-                "sentences": SchemaProperty(
-                    type="array",
-                    description="List of generated sentences",
-                    items={
-                        "type": "object",
-                        "properties": {
-                            "translations": {
-                                "type": "object",
-                                "description": "Sentence in each language (keys are language codes)",
-                                "additionalProperties": {"type": "string"}
-                            },
-                            "pattern": {
-                                "type": "string",
-                                "description": "Sentence pattern type (SVO, SVAO, etc.)"
-                            },
-                            "tense": {
-                                "type": "string",
-                                "description": "Verb tense (present, past, future)"
-                            },
-                            "words_used": {
-                                "type": "array",
-                                "description": "All words used in the TARGET LANGUAGE sentence (not English)",
-                                "items": {
-                                    "type": "object",
-                                    "properties": {
-                                        "lemma": {"type": "string", "description": "Base form of the word in target language"},
-                                        "role": {"type": "string", "description": "Role in sentence (subject, verb, object, etc.)"},
-                                        "language_code": {"type": "string", "description": "Target language code (e.g., 'lt', 'zh')"},
-                                        "grammatical_form": {"type": "string", "description": "Form used (e.g., '3s_present', 'past_participle')"},
-                                        "grammatical_case": {"type": "string", "description": "Case if applicable (nominative, accusative, etc.)"},
-                                        "declined_form": {"type": "string", "description": "Actual form used in sentence"}
-                                    },
-                                    "required": ["lemma", "role"]
-                                }
-                            }
-                        },
-                        "required": ["translations", "pattern", "words_used"]
-                    }
-                )
-            }
+            description="Generated sentence with grammatical analysis",
+            properties=top_level_properties
         )
 
         try:
             response = self.llm_client.generate_chat(
                 prompt=prompt,
                 model=self.model,
-                json_schema=schema
+                json_schema=schema,
+                timeout=60  # 60 seconds for web UX - reasonable for single sentence
             )
 
             if response.structured_data:
@@ -335,28 +395,58 @@ Focus on variety, natural language usage, and accurate translations."""
                         verified=False
                     )
 
-                # Add word linkages
-                words_used = sentence_data.get('words_used', [])
-                for position, word_data in enumerate(words_used):
-                    # Try to find the lemma by matching the base form
-                    word_lemma = self._find_lemma_for_word(
-                        session,
-                        word_data.get('lemma'),
-                        word_data.get('role')
-                    )
+                # Add word linkages for each language
+                # Get list of languages from translations
+                translations = sentence_data.get('translations', {})
+                for lang_code in translations.keys():
+                    if lang_code == 'en':
+                        continue  # Skip English, we only store target language words
 
-                    add_sentence_word(
-                        session=session,
-                        sentence=sentence,
-                        position=position,
-                        word_role=word_data.get('role', 'unknown'),
-                        lemma=word_lemma,
-                        english_text=word_data.get('lemma'),
-                        target_language_text=word_data.get('lemma'),
-                        grammatical_form=word_data.get('grammatical_form'),
-                        grammatical_case=word_data.get('grammatical_case'),
-                        declined_form=word_data.get('declined_form')
-                    )
+                    # Get the words list for this language
+                    words_key = f'words_{lang_code}'
+                    words_used = sentence_data.get(words_key, [])
+
+                    # Flatten if LLM returned nested structure (array of arrays instead of array of objects)
+                    flattened_words = []
+                    for item in words_used:
+                        if isinstance(item, list):
+                            # If item is a list, extend with its contents
+                            flattened_words.extend(item)
+                        elif isinstance(item, dict):
+                            # If item is already a dict, append it
+                            flattened_words.append(item)
+                        else:
+                            logger.error(f"Unexpected item type in {words_key}: {type(item)}")
+
+                    words_used = flattened_words
+
+                    for position, word_data in enumerate(words_used):
+                        if not isinstance(word_data, dict):
+                            logger.error(f"Expected dict at position {position} in {words_key}, got {type(word_data)}: {word_data}")
+                            continue
+                        # Try to find the lemma by matching the English lemma
+                        english_lemma = word_data.get('english_lemma')
+                        word_lemma = None
+                        if english_lemma:
+                            word_lemma = self._find_lemma_for_word(
+                                session,
+                                english_lemma,
+                                word_data.get('role')
+                            )
+
+                        add_sentence_word(
+                            session=session,
+                            sentence=sentence,
+                            position=position,
+                            word_role=word_data.get('role', 'unknown'),
+                            lemma=word_lemma,
+                            english_text=word_data.get('english'),
+                            target_language_text=word_data.get('lemma'),
+                            grammatical_form=word_data.get('grammatical_form'),
+                            grammatical_case=word_data.get('grammatical_case'),
+                            declined_form=word_data.get('word'),
+                            language_code=lang_code
+                        )
 
                 # Calculate minimum difficulty level
                 min_level = calculate_minimum_level(session, sentence)
@@ -578,8 +668,8 @@ def main():
     )
     parser.add_argument(
         '--model',
-        default='gpt-4o-mini',
-        help='LLM model to use (default: gpt-4o-mini)'
+        default='gpt-5-mini',
+        help='LLM model to use (default: gpt-5-mini)'
     )
     parser.add_argument(
         '--dry-run',
