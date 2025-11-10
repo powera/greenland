@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+
+{% block title %}POVAS HTML Generation{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('exports.exports_page') }}">Exports</a></li>
+                <li class="breadcrumb-item active">HTML Generation</li>
+            </ol>
+        </nav>
+        <h2><i class="bi bi-file-earmark-code"></i> POVAS HTML Generation</h2>
+        <p class="text-muted">Generate static HTML pages for word database</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-gear"></i> Generation Configuration
+            </div>
+            <div class="card-body">
+                <form id="povasForm">
+                    <div class="mb-4">
+                        <label for="generation_mode" class="form-label">Generation Mode <span class="text-danger">*</span></label>
+                        <select class="form-select" id="generation_mode" name="generation_mode" required>
+                            <option value="all" selected>Generate All Pages (Full Set)</option>
+                            <option value="index-only">Index Page Only</option>
+                        </select>
+                        <small class="form-text text-muted">
+                            <strong>Generate All:</strong> Creates complete set of HTML pages organized by POS subtypes<br>
+                            <strong>Index Only:</strong> Generates just the main index page
+                        </small>
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="dry_run" name="dry_run" value="true">
+                            <label class="form-check-label" for="dry_run">
+                                Dry Run (preview what would be generated)
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> <strong>Output Location:</strong>
+                        HTML files will be generated in the configured output directory.
+                    </div>
+
+                    <hr>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('exports.exports_page') }}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Back to Exports
+                        </a>
+                        <button type="submit" class="btn btn-success" id="generateBtn">
+                            <i class="bi bi-play-circle"></i> Generate HTML
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Output Display -->
+        <div id="outputContainer" style="display: none;" class="mt-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-terminal"></i> Generation Output
+                        <span id="statusBadge" class="badge ms-2"></span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="outputContent"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+#outputContent pre {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.spinner-border {
+    width: 1rem;
+    height: 1rem;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('povasForm');
+    const generateBtn = document.getElementById('generateBtn');
+    const outputContainer = document.getElementById('outputContainer');
+    const outputContent = document.getElementById('outputContent');
+    const statusBadge = document.getElementById('statusBadge');
+
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        // Show loading state
+        generateBtn.disabled = true;
+        generateBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Generating...';
+        outputContainer.style.display = 'none';
+
+        // Build form data
+        const formData = new FormData();
+        formData.append('generation_mode', document.getElementById('generation_mode').value);
+        formData.append('dry_run', document.getElementById('dry_run').checked);
+
+        try {
+            // Execute generation
+            const response = await fetch('{{ url_for("exports.povas_generate") }}', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+
+            // Show output
+            outputContainer.style.display = 'block';
+
+            if (result.success) {
+                statusBadge.className = 'badge bg-success';
+                statusBadge.textContent = 'Success';
+                outputContent.innerHTML = `<pre>${escapeHtml(result.stdout)}</pre>`;
+            } else {
+                statusBadge.className = 'badge bg-danger';
+                statusBadge.textContent = 'Error';
+                outputContent.innerHTML = `
+                    <div class="alert alert-danger">
+                        <strong>Error:</strong> ${escapeHtml(result.error || 'Unknown error')}
+                    </div>
+                    ${result.stdout ? '<h6>Standard Output:</h6><pre>' + escapeHtml(result.stdout) + '</pre>' : ''}
+                    ${result.stderr ? '<h6>Error Output:</h6><pre>' + escapeHtml(result.stderr) + '</pre>' : ''}
+                `;
+            }
+
+            // Scroll to output
+            outputContainer.scrollIntoView({ behavior: 'smooth' });
+
+        } catch (error) {
+            outputContainer.style.display = 'block';
+            statusBadge.className = 'badge bg-danger';
+            statusBadge.textContent = 'Error';
+            outputContent.innerHTML = `
+                <div class="alert alert-danger">
+                    <strong>Error:</strong> ${escapeHtml(error.message)}
+                </div>
+            `;
+        } finally {
+            // Reset button
+            generateBtn.disabled = false;
+            generateBtn.innerHTML = '<i class="bi bi-play-circle"></i> Generate HTML';
+        }
+    });
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+});
+</script>
+{% endblock %}

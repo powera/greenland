@@ -9,12 +9,13 @@ import argparse
 import sys
 from pathlib import Path
 
-def main():
-    """Main entry point for the vilkas agent."""
-    # Import here to avoid circular imports
-    from wordfreq.agents.vilkas.agent import VilkasAgent
-    from wordfreq.agents.vilkas import display
 
+def get_argument_parser():
+    """Return the argument parser for introspection.
+
+    This function allows external tools to introspect the available
+    command-line arguments without executing the main function.
+    """
     parser = argparse.ArgumentParser(
         description="Vilkas - Lithuanian Word Forms Checker Agent"
     )
@@ -47,6 +48,16 @@ def main():
     parser.add_argument('--yes', '-y', action='store_true',
                        help='[Fix mode] Skip confirmation prompt when fixing')
 
+    return parser
+
+
+def main():
+    """Main entry point for the vilkas agent."""
+    # Import here to avoid circular imports
+    from wordfreq.agents.vilkas.agent import VilkasAgent
+    from wordfreq.agents.vilkas import display
+
+    parser = get_argument_parser()
     args = parser.parse_args()
 
     agent = VilkasAgent(db_path=args.db_path, debug=args.debug)

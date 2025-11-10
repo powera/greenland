@@ -359,8 +359,12 @@ class LokysAgent:
         logger.info("=" * 80)
 
 
-def main():
-    """Main entry point for the lokys agent."""
+def get_argument_parser():
+    """Return the argument parser for introspection.
+
+    This function allows external tools to introspect the available
+    command-line arguments without executing the main function.
+    """
     parser = argparse.ArgumentParser(
         description="Lokys - English Lemma Validation Agent"
     )
@@ -378,6 +382,12 @@ def main():
     parser.add_argument('--yes', '-y', action='store_true',
                        help='Skip confirmation prompt before running LLM queries')
 
+    return parser
+
+
+def main():
+    """Main entry point for the lokys agent."""
+    parser = get_argument_parser()
     args = parser.parse_args()
 
     # Confirm before running LLM queries (unless --yes was provided)

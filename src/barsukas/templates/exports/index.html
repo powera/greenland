@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Data Exports{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2><i class="bi bi-cloud-download"></i> Data Exports</h2>
+        <p class="text-muted">Export word data in various formats for external use</p>
+    </div>
+</div>
+
+<div class="row">
+    <!-- UNGURYS - WireWord Export -->
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-cloud-download"></i> WireWord Export
+                </h5>
+            </div>
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-muted">UNGURYS Agent</h6>
+                <p class="card-text">
+                    Export word data to WireWord API format for external system integration.
+                    Supports multiple languages and various export configurations.
+                </p>
+                <ul class="mb-3">
+                    <li>Split by POS type (verbs/non-verbs)</li>
+                    <li>Single file with filters</li>
+                    <li>Verb-only exports</li>
+                    <li>Multi-language support</li>
+                </ul>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="badge bg-info">Quick Operation</span>
+                    <a href="{{ url_for('wireword.export_page') }}" class="btn btn-primary">
+                        <i class="bi bi-arrow-right-circle"></i> Export WireWord Data
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- POVAS - HTML Generation -->
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-file-earmark-code"></i> HTML Generation
+                </h5>
+            </div>
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-muted">POVAS Agent</h6>
+                <p class="card-text">
+                    Generate static HTML pages displaying words organized by part-of-speech subtypes.
+                    Creates browsable documentation of the word database.
+                </p>
+                <ul class="mb-3">
+                    <li>Organized by POS subtypes</li>
+                    <li>Static HTML files</li>
+                    <li>Searchable index pages</li>
+                    <li>Quick reference format</li>
+                </ul>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="badge bg-info">Quick Operation</span>
+                    <a href="{{ url_for('exports.povas_form') }}" class="btn btn-success">
+                        <i class="bi bi-arrow-right-circle"></i> Generate HTML Pages
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col">
+        <div class="card">
+            <div class="card-body">
+                <h6><i class="bi bi-info-circle"></i> About Export Operations</h6>
+                <p class="mb-0">
+                    Export operations are quick, non-destructive processes that don't modify the database.
+                    They generate files based on current database content and can be run repeatedly without side effects.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col">
+        <a href="{{ url_for('agents_launcher.list_agents') }}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Agents
+        </a>
+    </div>
+</div>
+{% endblock %}
