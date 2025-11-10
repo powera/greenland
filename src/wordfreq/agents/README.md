@@ -11,6 +11,7 @@ Autonomous agents for data quality monitoring and maintenance tasks. These agent
 - **Voras** (spider) - Validates multi-lingual translations for correctness, reports on coverage, and can populate missing translations using LLM.
 - **Vilkas** (wolf) - Monitors the presence and completeness of word forms across multiple languages in the database and can automatically generate missing forms.
 - **Papuga** (parrot) - Validates and generates pronunciations (both IPA and simplified phonetic) for derivative forms.
+- **Žvirblis** (sparrow) - Generates example sentences for vocabulary words using LLM, with automatic difficulty calculation and word linkage.
 - **Povas** (peacock) - Generates HTML pages displaying words organized by part-of-speech subtypes with comprehensive linguistic information.
 - **Ungurys** (eel) - Exports word data to WireWord API format for external system integration.
 
@@ -715,3 +716,119 @@ To create a new autonomous agent:
 - Informative: Clear logging and reporting
 - Configurable: Command-line arguments for flexibility
 - Error-tolerant: Handle database issues gracefully
+
+### Žvirblis (Sentence Generation Agent)
+
+**Name:** "Žvirblis" means "sparrow" in Lithuanian - small but prolific, creating many examples!
+
+**Purpose:** Generates example sentences for vocabulary words using LLM, with automatic difficulty calculation and word linkage.
+
+**Usage:**
+```bash
+# Generate sentences for a specific word by GUID
+python zvirblis.py --guid N07_008 [--num-sentences 5]
+
+# Generate sentences for all nouns at a difficulty level
+python zvirblis.py --level 3 [--limit 10] [--num-sentences 3]
+
+# Specify target languages
+python zvirblis.py --level 1 --languages en lt zh
+
+# Dry run to see what would be generated
+python zvirblis.py --level 2 --dry-run
+```
+
+**Modes:**
+- `--guid GUID` - Generate sentences for a specific lemma by GUID
+- `--level LEVEL` - Generate sentences for all nouns at a difficulty level (1-20)
+
+**Options:**
+- `--limit N` - Limit number of nouns to process (when using --level)
+- `--num-sentences N` - Number of sentences to generate per noun (default: 3)
+- `--languages LANG1 LANG2` - Target languages for generation (default: en lt)
+- `--model MODEL` - LLM model to use (default: gpt-4o-mini)
+- `--dry-run` - Show what would be done without actually generating
+- `--debug` - Enable debug logging
+
+**Example Usage:**
+
+Generate 5 sentences for a specific word:
+```bash
+python zvirblis.py --guid N07_008 --num-sentences 5
+```
+
+Generate sentences for all level 1 nouns:
+```bash
+python zvirblis.py --level 1 --num-sentences 3
+```
+
+Generate sentences for first 10 level 2 nouns in English and Lithuanian:
+```bash
+python zvirblis.py --level 2 --limit 10 --languages en lt
+```
+
+Preview what would be generated (dry run):
+```bash
+python zvirblis.py --level 3 --dry-run
+```
+
+**How It Works:**
+
+1. **Word Selection**: Selects a noun from the database by GUID or difficulty level
+2. **LLM Generation**: Uses LLM to generate natural, contextual sentences featuring the noun
+   - Varies sentence patterns (SVO, SVAO, etc.)
+   - Uses noun in different roles (subject, object)
+   - Includes common, everyday vocabulary
+3. **Multi-language**: Generates translations in all specified languages simultaneously
+4. **Grammatical Analysis**: LLM identifies all words used with their:
+   - Base form (lemma)
+   - Role in sentence (subject, verb, object, etc.)
+   - Grammatical form (tense, person, number)
+   - Grammatical case (for languages with case systems)
+5. **Word Linking**: Attempts to link each word to existing lemmas in the database
+6. **Difficulty Calculation**: Automatically calculates minimum difficulty level based on hardest word used
+7. **Storage**: Stores sentences in normalized database tables:
+   - `sentences` - Sentence metadata
+   - `sentence_translations` - Translations in multiple languages
+   - `sentence_words` - Links to vocabulary words used
+
+**Output:**
+
+The agent provides:
+- Number of sentences generated
+- Number of sentences successfully stored
+- Automatic difficulty level calculation
+- Word linkage statistics
+- Error reporting for failed generations
+
+**Example Output:**
+
+```
+[1/10] Processing: book (N07_008)
+✓ Stored sentence 1: He read the book yesterday... (level: 3)
+✓ Stored sentence 2: The book is on the table... (level: 2)
+✓ Stored sentence 3: She gave me an interesting book... (level: 4)
+
+Generation complete!
+Nouns processed: 10
+Sentences generated: 30
+Sentences stored: 28
+Sentences failed: 2
+```
+
+**Integration with Sentence Tables:**
+
+The agent integrates with the new sentence support added to the database:
+- Creates entries in `sentences` table with pattern and tense metadata
+- Stores translations in `sentence_translations` for all target languages
+- Links to vocabulary via `sentence_words` table with grammatical metadata
+- Enables querying sentences by difficulty level for progressive learning
+
+**Best Practices:**
+
+1. Start with lower difficulty levels (1-5) to build a foundation
+2. Use 3-5 sentences per noun for variety without overwhelming
+3. Generate for multiple languages to maximize utility
+4. Review generated sentences periodically and mark as verified
+5. Use dry-run mode to preview before committing to large batches
+

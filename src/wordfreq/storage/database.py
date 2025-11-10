@@ -10,7 +10,7 @@ It now serves as a backward-compatible convenience import module.
 import logging
 
 # Import models from the models package
-from wordfreq.storage.models.schema import Base, WordToken, Lemma, LemmaTranslation, DerivativeForm, ExampleSentence, Corpus, WordFrequency
+from wordfreq.storage.models.schema import Base, WordToken, Lemma, LemmaTranslation, DerivativeForm, ExampleSentence, Sentence, SentenceTranslation, SentenceWord, Corpus, WordFrequency
 from wordfreq.storage.models.query_log import QueryLog
 from wordfreq.storage.models.grammar_fact import GrammarFact
 from wordfreq.storage.models.enums import NounSubtype, VerbSubtype, AdjectiveSubtype, AdverbSubtype, GrammaticalForm
@@ -68,6 +68,32 @@ from wordfreq.storage.crud.derivative_form import (
 from wordfreq.storage.crud.word_frequency import add_word_frequency
 
 from wordfreq.storage.crud.example_sentence import add_example_sentence
+
+from wordfreq.storage.crud.sentence import (
+    add_sentence,
+    get_sentence_by_id,
+    get_sentences_by_level,
+    calculate_minimum_level,
+    update_sentence,
+    delete_sentence
+)
+
+from wordfreq.storage.crud.sentence_translation import (
+    add_sentence_translation,
+    get_sentence_translation,
+    update_sentence_translation,
+    delete_sentence_translation,
+    get_or_create_sentence_translation
+)
+
+from wordfreq.storage.crud.sentence_word import (
+    add_sentence_word,
+    get_sentence_words,
+    get_lemmas_for_sentence,
+    update_sentence_word,
+    delete_sentence_word,
+    find_lemma_by_guid
+)
 
 from wordfreq.storage.crud.grammar_fact import (
     add_grammar_fact,
@@ -145,6 +171,9 @@ __all__ = [
     'LemmaTranslation',
     'DerivativeForm',
     'ExampleSentence',
+    'Sentence',
+    'SentenceTranslation',
+    'SentenceWord',
     'Corpus',
     'WordFrequency',
     'QueryLog',
@@ -210,6 +239,29 @@ __all__ = [
 
     # Example Sentence CRUD
     'add_example_sentence',
+
+    # Sentence CRUD
+    'add_sentence',
+    'get_sentence_by_id',
+    'get_sentences_by_level',
+    'calculate_minimum_level',
+    'update_sentence',
+    'delete_sentence',
+
+    # Sentence Translation CRUD
+    'add_sentence_translation',
+    'get_sentence_translation',
+    'update_sentence_translation',
+    'delete_sentence_translation',
+    'get_or_create_sentence_translation',
+
+    # Sentence Word CRUD
+    'add_sentence_word',
+    'get_sentence_words',
+    'get_lemmas_for_sentence',
+    'update_sentence_word',
+    'delete_sentence_word',
+    'find_lemma_by_guid',
 
     # Grammar Fact CRUD
     'add_grammar_fact',
