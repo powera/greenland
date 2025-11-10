@@ -25,7 +25,7 @@ if GREENLAND_SRC_PATH not in sys.path:
 
 import constants
 from wordfreq.storage.database import create_database_session
-from wordfreq.storage.models.schema import DerivativeForm, Lemma
+from wordfreq.storage.models.schema import DerivativeForm, Lemma, Sentence, SentenceTranslation, SentenceWord
 from wordfreq.tools.llm_validators import (
     validate_pronunciation,
     generate_pronunciation
@@ -61,6 +61,39 @@ class PapugaAgent:
     def get_session(self):
         """Get database session."""
         return create_database_session(self.db_path)
+
+    def _get_example_sentence(self, session, lemma: Lemma) -> Optional[str]:
+        """
+        Get an example sentence featuring this lemma from the new sentences system.
+
+        Args:
+            session: Database session
+            lemma: Lemma object to find sentences for
+
+        Returns:
+            English sentence text, or None if no sentences found
+        """
+        if not lemma:
+            return None
+
+        # Query for sentences that use this lemma
+        sentence_word = session.query(SentenceWord).filter(
+            SentenceWord.lemma_id == lemma.id
+        ).first()
+
+        if not sentence_word:
+            return None
+
+        # Get the English translation of this sentence
+        sentence_translation = session.query(SentenceTranslation).filter(
+            SentenceTranslation.sentence_id == sentence_word.sentence_id,
+            SentenceTranslation.language_code == 'en'
+        ).first()
+
+        if sentence_translation:
+            return sentence_translation.translation_text
+
+        return None
 
     def check_pronunciations(
         self,
@@ -130,12 +163,15 @@ class PapugaAgent:
                     if not lemma:
                         continue
 
+                    # Get example sentence from the new sentences system if available
+                    example_text = self._get_example_sentence(session, lemma)
+
                     result = validate_pronunciation(
                         word=form.derivative_form_text,
                         ipa_pronunciation=form.ipa_pronunciation,
                         phonetic_pronunciation=form.phonetic_pronunciation,
                         pos_type=lemma.pos_type,
-                        example_sentence=None,
+                        example_sentence=example_text,
                         definition=lemma.definition_text,
                         model=self.model
                     )
@@ -318,11 +354,14 @@ class PapugaAgent:
                         failed_count += 1
                         continue
 
+                    # Get example sentence from the new sentences system if available
+                    example_text = self._get_example_sentence(session, lemma)
+
                     try:
                         result = generate_pronunciation(
                             word=form.derivative_form_text,
                             pos_type=lemma.pos_type,
-                            example_sentence=None,
+                            example_sentence=example_text,
                             definition=lemma.definition_text,
                             model=self.model
                         )
