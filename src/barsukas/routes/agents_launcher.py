@@ -20,13 +20,7 @@ AGENTS = [
         'description': 'Initializes and maintains the wordfreq database, including corpus configuration synchronization, data loading, and rank calculation.',
         'script': 'pradzia.py',
         'icon': 'bi-play-circle',
-        'modes': [
-            {'label': 'Check Status', 'args': '--check', 'description': 'Check configuration and database state without making changes'},
-            {'label': 'Sync Config', 'args': '--sync-config', 'description': 'Synchronize corpus configurations from config file to database'},
-            {'label': 'Load Corpora', 'args': '--load', 'description': 'Load all enabled corpora'},
-            {'label': 'Calculate Ranks', 'args': '--calc-ranks', 'description': 'Calculate combined ranks for all words'},
-            {'label': 'Full Init', 'args': '--init-full', 'description': 'Perform complete database initialization'},
-        ],
+        'use_dynamic_form': True,
         'show_if_empty': True  # Only show if database is empty
     },
     {
@@ -36,10 +30,7 @@ AGENTS = [
         'description': 'Validates English-language properties including lemma forms, definitions, and POS types.',
         'script': 'lokys.py',
         'icon': 'bi-check-circle',
-        'modes': [
-            {'label': 'Run Validation', 'args': '', 'description': 'Validate all English lemmas'},
-            {'label': 'Sample Check', 'args': '--sample-rate 0.1', 'description': 'Check 10% sample of lemmas'},
-        ],
+        'use_dynamic_form': True,
     },
     {
         'name': 'DRAMBLYS',
@@ -48,11 +39,7 @@ AGENTS = [
         'description': 'Identifies missing words that should be in the dictionary by scanning frequency corpora.',
         'script': 'dramblys.py',
         'icon': 'bi-search',
-        'modes': [
-            {'label': 'Check All', 'args': '--check all', 'description': 'Run all checks (reporting only)'},
-            {'label': 'Check Frequency', 'args': '--check frequency', 'description': 'Find high-frequency words missing from database'},
-            {'label': 'Fix Missing', 'args': '--fix', 'description': 'Process high-frequency missing words using LLM'},
-        ],
+        'use_dynamic_form': True,
     },
     {
         'name': 'BEBRAS',
@@ -61,11 +48,7 @@ AGENTS = [
         'description': 'Ensures database structural integrity by identifying orphaned records, missing fields, and constraint violations.',
         'script': 'bebras.py',
         'icon': 'bi-shield-check',
-        'modes': [
-            {'label': 'Check All', 'args': '--check all', 'description': 'Run all integrity checks'},
-            {'label': 'Check Orphaned', 'args': '--check orphaned', 'description': 'Find orphaned records'},
-            {'label': 'Check Missing Fields', 'args': '--check missing-fields', 'description': 'Find records with missing required fields'},
-        ],
+        'use_dynamic_form': True,
     },
     {
         'name': 'VORAS',
@@ -83,10 +66,7 @@ AGENTS = [
         'description': 'Monitors the presence and completeness of word forms across multiple languages.',
         'script': 'vilkas.py',
         'icon': 'bi-pencil-square',
-        'modes': [
-            {'label': 'Check All', 'args': '--check all', 'description': 'Run all checks and generate report'},
-            {'label': 'Fix Forms', 'args': '--fix', 'description': 'Generate missing word forms'},
-        ],
+        'use_dynamic_form': True,
     },
     {
         'name': 'PAPUGA',
@@ -95,11 +75,7 @@ AGENTS = [
         'description': 'Validates and generates pronunciations (IPA and simplified phonetic) for derivative forms.',
         'script': 'papuga.py',
         'icon': 'bi-mic',
-        'modes': [
-            {'label': 'Check Pronunciations', 'args': '--check', 'description': 'Validate existing pronunciations'},
-            {'label': 'Populate Missing', 'args': '--populate', 'description': 'Generate missing pronunciations'},
-            {'label': 'Check & Populate', 'args': '--both', 'description': 'Validate and populate pronunciations'},
-        ],
+        'use_dynamic_form': True,
     },
     {
         'name': 'ZVIRBLIS',
@@ -108,10 +84,7 @@ AGENTS = [
         'description': 'Generates example sentences for vocabulary words using LLM, with automatic difficulty calculation.',
         'script': 'zvirblis.py',
         'icon': 'bi-chat-quote',
-        'modes': [
-            {'label': 'Generate by GUID', 'args': '--guid', 'description': 'Generate sentences for specific word by GUID', 'requires_input': True, 'input_placeholder': 'Enter GUID (e.g., N07_008)'},
-            {'label': 'Generate by Level', 'args': '--level', 'description': 'Generate sentences for all nouns at difficulty level', 'requires_input': True, 'input_placeholder': 'Enter level (1-20)'},
-        ],
+        'use_dynamic_form': True,
     },
     {
         'name': 'POVAS',
@@ -120,10 +93,7 @@ AGENTS = [
         'description': 'Generates static HTML pages displaying words organized by part-of-speech subtypes.',
         'script': 'povas.py',
         'icon': 'bi-file-earmark-code',
-        'modes': [
-            {'label': 'Generate All', 'args': '', 'description': 'Generate all POS subtype HTML pages'},
-            {'label': 'Index Only', 'args': '--index-only', 'description': 'Generate only the index page'},
-        ],
+        'redirect_to': 'exports.exports_page',  # Redirect to unified exports page
     },
     {
         'name': 'UNGURYS',
@@ -132,7 +102,7 @@ AGENTS = [
         'description': 'Exports word data to WireWord API format for external system integration.',
         'script': 'ungurys.py',
         'icon': 'bi-cloud-download',
-        'redirect_to': 'wireword.export_page',  # Redirect to existing wireword export page
+        'redirect_to': 'exports.exports_page',  # Redirect to unified exports page
     },
 ]
 

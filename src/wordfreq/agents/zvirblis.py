@@ -635,8 +635,12 @@ Focus on variety, natural language usage, and accurate translations."""
             session.close()
 
 
-def main():
-    """Main entry point for the sentence generation agent."""
+def get_argument_parser():
+    """Return the argument parser for introspection.
+
+    This function allows external tools to introspect the available
+    command-line arguments without executing the main function.
+    """
     parser = argparse.ArgumentParser(
         description='Generate example sentences for vocabulary words'
     )
@@ -682,6 +686,12 @@ def main():
         help='Enable debug logging'
     )
 
+    return parser
+
+
+def main():
+    """Main entry point for the sentence generation agent."""
+    parser = get_argument_parser()
     args = parser.parse_args()
 
     # Initialize agent

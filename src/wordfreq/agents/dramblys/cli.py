@@ -17,11 +17,12 @@ if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
 
-def main():
-    """Main entry point for the dramblys agent."""
-    # Import here to avoid circular imports
-    from wordfreq.agents.dramblys.agent import DramblysAgent
+def get_argument_parser():
+    """Return the argument parser for introspection.
 
+    This function allows external tools to introspect the available
+    command-line arguments without executing the main function.
+    """
     parser = argparse.ArgumentParser(
         description="Dramblys - Missing Words Detection Agent"
     )
@@ -83,6 +84,15 @@ def main():
     parser.add_argument('--stage-only', action='store_true',
                        help='[Subtype mode] Stage to pending_imports instead of processing directly')
 
+    return parser
+
+
+def main():
+    """Main entry point for the dramblys agent."""
+    # Import here to avoid circular imports
+    from wordfreq.agents.dramblys.agent import DramblysAgent
+
+    parser = get_argument_parser()
     args = parser.parse_args()
 
     agent = DramblysAgent(db_path=args.db_path, debug=args.debug)

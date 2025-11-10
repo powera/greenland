@@ -16,7 +16,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 
 from config import Config
-from routes import lemmas, translations, overrides, agents, operation_logs, wireword, api, agents_launcher
+from routes import lemmas, translations, overrides, agents, operation_logs, wireword, api, agents_launcher, exports
 from wordfreq.storage.utils.session import ensure_tables_exist
 from pinyin_helper import generate_pinyin, generate_pinyin_ruby_html, is_chinese
 
@@ -47,6 +47,7 @@ def create_app(config_class=Config):
     app.register_blueprint(agents_launcher.bp)
     app.register_blueprint(operation_logs.bp)
     app.register_blueprint(wireword.bp)
+    app.register_blueprint(exports.bp)
     app.register_blueprint(api.bp)
 
     # Register Jinja2 filters for Pinyin

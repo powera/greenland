@@ -622,8 +622,12 @@ class BebrasAgent:
         logger.info("=" * 80)
 
 
-def main():
-    """Main entry point for the bebras agent."""
+def get_argument_parser():
+    """Return the argument parser for introspection.
+
+    This function allows external tools to introspect the available
+    command-line arguments without executing the main function.
+    """
     parser = argparse.ArgumentParser(
         description="Bebras - Database Integrity Checker Agent"
     )
@@ -636,6 +640,12 @@ def main():
                        default='all',
                        help='Which check to run (default: all)')
 
+    return parser
+
+
+def main():
+    """Main entry point for the bebras agent."""
+    parser = get_argument_parser()
     args = parser.parse_args()
 
     agent = BebrasAgent(db_path=args.db_path, debug=args.debug)
