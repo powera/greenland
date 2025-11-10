@@ -16,7 +16,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 
 from config import Config
-from routes import lemmas, translations, overrides, agents, operation_logs, wireword, api
+from routes import lemmas, translations, overrides, agents, operation_logs, wireword, api, agents_launcher
 from wordfreq.storage.utils.session import ensure_tables_exist
 
 
@@ -43,6 +43,7 @@ def create_app(config_class=Config):
     app.register_blueprint(translations.bp)
     app.register_blueprint(overrides.bp)
     app.register_blueprint(agents.bp)
+    app.register_blueprint(agents_launcher.bp)
     app.register_blueprint(operation_logs.bp)
     app.register_blueprint(wireword.bp)
     app.register_blueprint(api.bp)
