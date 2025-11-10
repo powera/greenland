@@ -82,7 +82,7 @@
                     {% for translation in sentence.translations|sort(attribute='language_code') %}
                         <div class="mb-2">
                             <strong class="text-uppercase text-primary">{{ translation.language_code }}:</strong>
-                            <span class="ms-2">{{ translation.translation_text }}</span>
+                            <span class="ms-2 chinese-with-pinyin">{{ translation.translation_text|pinyin_ruby|safe }}</span>
                             {% if not translation.verified %}
                                 <small class="text-muted">(unverified)</small>
                             {% endif %}

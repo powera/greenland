@@ -261,7 +261,7 @@
                                 <td><strong>{{ lang_name }}</strong> <small class="text-muted">({{ lang_code }})</small></td>
                                 <td>
                                     {% if translations[lang_code] %}
-                                        {{ translations[lang_code] }}
+                                        <span class="chinese-with-pinyin">{{ translations[lang_code]|pinyin_ruby|safe }}</span>
                                         {% if '/' in translations[lang_code] %}
                                             <span class="badge bg-warning text-dark" title="Contains slash">
                                                 <i class="bi bi-exclamation-triangle"></i>
