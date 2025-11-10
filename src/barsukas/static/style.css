@@ -146,16 +146,20 @@ body {
 /* Elegant, minimal display inspired by Japanese furigana */
 
 ruby {
-    ruby-align: center;
+    /* Safari compatibility: use -webkit prefix and remove unsupported ruby-align */
+    -webkit-ruby-position: before;
     ruby-position: over;
 }
 
 rt {
-    font-size: 0.5em;
+    font-size: 0.7em;
     color: #6c757d;
     font-weight: normal;
     letter-spacing: 0.05em;
     line-height: 1.2;
+    /* Safari needs explicit display and positioning */
+    display: block;
+    text-align: center;
 }
 
 /* Ensure proper spacing for Chinese text with pinyin */
@@ -166,7 +170,7 @@ rt {
 
 /* Make pinyin slightly larger in headings for better readability */
 h1 ruby rt, h2 ruby rt, h3 ruby rt {
-    font-size: 0.4em;
+    font-size: 0.55em;
 }
 
 /* Ensure pinyin doesn't get too large in very small text */
