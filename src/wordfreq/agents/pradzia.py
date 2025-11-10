@@ -604,8 +604,12 @@ class PradziaAgent:
         logger.info("=" * 80)
 
 
-def main():
-    """Main entry point for the pradzia agent."""
+def get_argument_parser():
+    """Return the argument parser for introspection.
+
+    This function allows external tools to introspect the available
+    command-line arguments without executing the main function.
+    """
     parser = argparse.ArgumentParser(
         description="Pradzia - Database Initialization Agent"
     )
@@ -634,6 +638,12 @@ def main():
     parser.add_argument('--no-update-difficulty', action='store_true',
                        help='Do not update difficulty levels on existing lemmas (only with --bootstrap)')
 
+    return parser
+
+
+def main():
+    """Main entry point for the pradzia agent."""
+    parser = get_argument_parser()
     args = parser.parse_args()
 
     agent = PradziaAgent(db_path=args.db_path, debug=args.debug)
