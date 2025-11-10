@@ -196,7 +196,7 @@ def list_lemmas():
 @bp.route('/<int:lemma_id>')
 def view_lemma(lemma_id):
     """View a single lemma with all details."""
-    from wordfreq.storage.models.schema import DerivativeForm
+    from wordfreq.storage.models.schema import DerivativeForm, SentenceWord
 
     lemma = g.db.query(Lemma).get(lemma_id)
     if not lemma:
@@ -234,6 +234,13 @@ def view_lemma(lemma_id):
             forms_by_language[form.language_code] = []
         forms_by_language[form.language_code].append(form)
 
+    # Get count of sentences using this lemma (for nouns)
+    sentence_count = 0
+    if lemma.pos_type == 'noun':
+        sentence_count = g.db.query(SentenceWord).filter(
+            SentenceWord.lemma_id == lemma_id
+        ).count()
+
     return render_template('lemmas/view.html',
                          lemma=lemma,
                          translations=translations,
@@ -241,7 +248,8 @@ def view_lemma(lemma_id):
                          overrides=overrides,
                          effective_levels=effective_levels,
                          difficulty_stats=difficulty_stats,
-                         forms_by_language=forms_by_language)
+                         forms_by_language=forms_by_language,
+                         sentence_count=sentence_count)
 
 
 @bp.route('/<int:lemma_id>/edit', methods=['GET', 'POST'])

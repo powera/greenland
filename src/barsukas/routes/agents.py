@@ -543,3 +543,109 @@ def apply_definition(lemma_id):
         flash(f'Error updating definition: {str(e)}', 'error')
 
     return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
+
+@bp.route('/generate-sentences/<int:lemma_id>', methods=['POST'])
+def generate_sentences(lemma_id):
+    """Generate example sentences for a lemma using the Žvirblis agent."""
+    lemma = g.db.query(Lemma).get(lemma_id)
+    if not lemma:
+        flash('Lemma not found', 'error')
+        return redirect(url_for('lemmas.list_lemmas'))
+
+    # Get parameters from form
+    num_sentences = int(request.form.get('num_sentences', 3))
+    languages = request.form.get('languages', 'en,lt').split(',')
+    languages = [lang.strip() for lang in languages if lang.strip()]
+
+    try:
+        # Import Žvirblis agent
+        from wordfreq.agents.zvirblis import ZvirblisAgent
+        from wordfreq.storage.models.schema import Sentence
+
+        # Initialize agent
+        agent = ZvirblisAgent(db_path=Config.DB_PATH, debug=Config.DEBUG)
+
+        # Generate sentences
+        result = agent.generate_sentences_for_noun(
+            lemma=lemma,
+            target_languages=languages,
+            num_sentences=num_sentences,
+            difficulty_context=lemma.difficulty_level
+        )
+
+        if not result.get('success'):
+            flash(f'Failed to generate sentences: {result.get("error", "Unknown error")}', 'error')
+            return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
+
+        # Store the generated sentences
+        sentences_data = result.get('sentences', [])
+        if not sentences_data:
+            flash('No sentences were generated', 'warning')
+            return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
+
+        store_result = agent.store_sentences(
+            sentences_data=sentences_data,
+            source_lemma=lemma,
+            session=g.db
+        )
+
+        if store_result['stored'] > 0:
+            flash(f'Successfully generated and stored {store_result["stored"]} sentence(s)!', 'success')
+            
+            # Query the newly created sentences to display them
+            from wordfreq.storage.models.schema import SentenceWord
+            sentence_ids = g.db.query(Sentence.id).join(SentenceWord).filter(
+                SentenceWord.lemma_id == lemma_id
+            ).order_by(Sentence.id.desc()).limit(num_sentences).all()
+            
+            sentences = g.db.query(Sentence).filter(
+                Sentence.id.in_([s[0] for s in sentence_ids])
+            ).all()
+
+            # Show the results
+            return render_template('agents/sentence_generation_results.html',
+                                 lemma=lemma,
+                                 sentences=sentences,
+                                 generated_count=store_result['stored'])
+        else:
+            flash('Failed to store generated sentences', 'error')
+            if store_result.get('errors'):
+                for error in store_result['errors'][:3]:  # Show first 3 errors
+                    flash(f'Error: {error}', 'error')
+
+    except Exception as e:
+        flash(f'Error generating sentences: {str(e)}', 'error')
+        import traceback
+        if Config.DEBUG:
+            flash(f'Debug: {traceback.format_exc()}', 'error')
+
+    return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
+
+
+@bp.route('/view-sentences/<int:lemma_id>')
+def view_sentences(lemma_id):
+    """View all sentences that use a specific lemma."""
+    lemma = g.db.query(Lemma).get(lemma_id)
+    if not lemma:
+        flash('Lemma not found', 'error')
+        return redirect(url_for('lemmas.list_lemmas'))
+
+    try:
+        # Query sentences that use this lemma
+        from wordfreq.storage.models.schema import Sentence, SentenceWord
+        from sqlalchemy.orm import joinedload
+
+        sentences = g.db.query(Sentence).join(SentenceWord).filter(
+            SentenceWord.lemma_id == lemma_id
+        ).options(
+            joinedload(Sentence.translations),
+            joinedload(Sentence.words)
+        ).order_by(Sentence.id.desc()).all()
+
+        return render_template('agents/view_sentences.html',
+                             lemma=lemma,
+                             sentences=sentences)
+
+    except Exception as e:
+        flash(f'Error viewing sentences: {str(e)}', 'error')
+        return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
