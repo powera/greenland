@@ -141,3 +141,46 @@ body {
     font-family: monospace;
     font-size: 0.85rem;
 }
+
+/* Pinyin Ruby Text Styling */
+/* Elegant, minimal display inspired by Japanese furigana */
+
+ruby {
+    ruby-align: center;
+    ruby-position: over;
+}
+
+rt {
+    font-size: 0.5em;
+    color: #6c757d;
+    font-weight: normal;
+    letter-spacing: 0.05em;
+    line-height: 1.2;
+}
+
+/* Ensure proper spacing for Chinese text with pinyin */
+.chinese-with-pinyin ruby {
+    display: inline-block;
+    margin-right: 0.1em;
+}
+
+/* Make pinyin slightly larger in headings for better readability */
+h1 ruby rt, h2 ruby rt, h3 ruby rt {
+    font-size: 0.4em;
+}
+
+/* Ensure pinyin doesn't get too large in very small text */
+.small ruby rt, small ruby rt {
+    font-size: 0.6em;
+}
+
+/* Optional: Add a subtle separator line between Chinese and pinyin */
+ruby.with-separator {
+    position: relative;
+}
+
+ruby.with-separator rt {
+    border-top: 1px solid rgba(108, 117, 125, 0.2);
+    padding-top: 0.1em;
+    margin-top: 0.1em;
+}
