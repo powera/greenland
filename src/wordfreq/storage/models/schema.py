@@ -243,14 +243,17 @@ class SentenceWord(Base):
     """
     __tablename__ = 'sentence_words'
     __table_args__ = (
-        UniqueConstraint('sentence_id', 'position', name='uq_sentence_word_position'),
+        UniqueConstraint('sentence_id', 'language_code', 'position', name='uq_sentence_word_lang_position'),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     sentence_id: Mapped[int] = mapped_column(ForeignKey("sentences.id"), nullable=False)
     lemma_id: Mapped[Optional[int]] = mapped_column(ForeignKey("lemmas.id"), nullable=True)
 
-    # Position in the sentence (0-indexed, matches order in words_used JSON array)
+    # Language code for this word (e.g., 'lt', 'fr', 'zh')
+    language_code: Mapped[str] = mapped_column(String, nullable=False, index=True)
+
+    # Position in the sentence (0-indexed, matches order in target language sentence)
     position: Mapped[int] = mapped_column(Integer, nullable=False)
 
     # Word role in the sentence (semantic, not grammatical)

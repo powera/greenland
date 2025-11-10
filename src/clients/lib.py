@@ -16,6 +16,55 @@ from typing import Dict, Any
 from clients.types import Schema, SchemaProperty
 
 
+def _ensure_additional_properties(schema_dict: Dict[str, Any]) -> None:
+    """
+    Recursively ensure all object types have additionalProperties set to False
+    and all properties are listed in the required array.
+    This is required by OpenAI's strict schema validation.
+
+    Args:
+        schema_dict: Schema dictionary to modify in-place
+    """
+    if not isinstance(schema_dict, dict):
+        return
+
+    # If this is an object type, ensure it has additionalProperties and required
+    if schema_dict.get("type") == "object":
+        # OpenAI strict mode requires additionalProperties to be false (not a schema)
+        # If it's currently set to a schema like {"type": "string"}, convert to false
+        if "additionalProperties" in schema_dict:
+            if isinstance(schema_dict["additionalProperties"], dict):
+                # This is trying to use dynamic properties (map/dictionary)
+                # OpenAI strict mode doesn't support this - convert to false
+                # The caller should have defined explicit properties instead
+                schema_dict["additionalProperties"] = False
+        else:
+            schema_dict["additionalProperties"] = False
+
+        # OpenAI requires all properties to be in the required array
+        if "properties" in schema_dict and len(schema_dict["properties"]) > 0:
+            all_prop_keys = list(schema_dict["properties"].keys())
+            if "required" not in schema_dict:
+                schema_dict["required"] = all_prop_keys
+            else:
+                # Ensure the required array includes ONLY the properties that exist
+                # (no extras, no missing)
+                schema_dict["required"] = all_prop_keys
+
+            # Recurse into properties
+            for prop_value in schema_dict["properties"].values():
+                _ensure_additional_properties(prop_value)
+
+    # If this has items (array), recurse into items
+    if "items" in schema_dict:
+        _ensure_additional_properties(schema_dict["items"])
+
+    # Recurse into all nested dictionaries
+    for key, value in schema_dict.items():
+        if isinstance(value, dict) and key not in ["additionalProperties", "required"]:
+            _ensure_additional_properties(value)
+
+
 def to_openai_schema(schema: Schema) -> Dict[str, Any]:
     """
     Convert Schema to OpenAI's schema format.
@@ -112,8 +161,10 @@ def to_openai_schema(schema: Schema) -> Dict[str, Any]:
                 property_schema["items"] = prop.items
             
         result["properties"][name] = property_schema
-    
+
     _recursive_clean_for_openai(result)
+    # Ensure all nested objects have additionalProperties set (required by OpenAI)
+    _ensure_additional_properties(result)
     return result
 
 

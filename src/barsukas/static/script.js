@@ -53,3 +53,50 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
+// Prevent double-submission of forms (especially for LLM operations)
+document.addEventListener('DOMContentLoaded', function() {
+    // Track submitted forms to prevent double-submission
+    const submittedForms = new Set();
+
+    // Add submit handler to all forms
+    const forms = document.querySelectorAll('form');
+    forms.forEach(form => {
+        form.addEventListener('submit', function(event) {
+            // Create a unique identifier for this form
+            const formId = form.action + form.method;
+
+            // Check if this form was already submitted
+            if (submittedForms.has(formId)) {
+                event.preventDefault();
+                console.log('Form submission prevented (already submitted):', formId);
+                return false;
+            }
+
+            // Mark this form as submitted
+            submittedForms.add(formId);
+
+            // Disable the submit button to prevent additional clicks
+            const submitButton = form.querySelector('button[type="submit"]');
+            if (submitButton) {
+                submitButton.disabled = true;
+
+                // Add a spinner to the button to show activity
+                const originalHTML = submitButton.innerHTML;
+                submitButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>' +
+                                        (submitButton.textContent || 'Processing...');
+
+                // Store original state for potential reset
+                submitButton.dataset.originalHtml = originalHTML;
+            }
+
+            // Allow form submission to proceed
+            return true;
+        });
+    });
+
+    // Clean up submitted forms set when navigating away
+    window.addEventListener('beforeunload', function() {
+        submittedForms.clear();
+    });
+});
