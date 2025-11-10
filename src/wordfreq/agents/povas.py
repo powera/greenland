@@ -32,7 +32,7 @@ if GREENLAND_SRC_PATH not in sys.path:
 import constants
 from wordfreq.storage import database as linguistic_db
 from wordfreq.storage.connection_pool import get_session
-from wordfreq.storage.models.schema import WordToken, Lemma, DerivativeForm, ExampleSentence
+from wordfreq.storage.models.schema import WordToken, Lemma, DerivativeForm
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -118,18 +118,10 @@ class PovasAgent:
             lemma_key = (lemma.id, lemma.lemma_text, lemma.definition_text)
 
             if lemma_key not in lemma_data:
-                # Get the first example if available
-                example = ""
-                if derivative_form.example_sentences and len(derivative_form.example_sentences) > 0:
-                    example = derivative_form.example_sentences[0].example_text
-
-                # Truncate definition and example if too long
+                # Truncate definition if too long
                 def_text = lemma.definition_text
                 if len(def_text) > 150:
                     def_text = def_text[:147] + "..."
-
-                if len(example) > 120:
-                    example = example[:117] + "..."
 
                 lemma_data[lemma_key] = {
                     "word": lemma.lemma_text,  # Display the lemma as the main word
