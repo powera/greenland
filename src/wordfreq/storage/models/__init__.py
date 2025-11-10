@@ -1,6 +1,6 @@
 """Models package for wordfreq."""
 
-from wordfreq.storage.models.schema import Base, WordToken, Lemma, LemmaTranslation, LemmaDifficultyOverride, DerivativeForm, ExampleSentence, Sentence, SentenceTranslation, SentenceWord, Corpus, WordFrequency
+from wordfreq.storage.models.schema import Base, WordToken, Lemma, LemmaTranslation, LemmaDifficultyOverride, DerivativeForm, Sentence, SentenceTranslation, SentenceWord, Corpus, WordFrequency
 from wordfreq.storage.models.query_log import QueryLog
 from wordfreq.storage.models.operation_log import OperationLog
 from wordfreq.storage.models.translations import Translation, TranslationSet
@@ -14,7 +14,6 @@ __all__ = [
     'LemmaTranslation',
     'LemmaDifficultyOverride',
     'DerivativeForm',
-    'ExampleSentence',
     'Sentence',
     'SentenceTranslation',
     'SentenceWord',

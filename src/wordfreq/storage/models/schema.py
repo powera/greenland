@@ -161,19 +161,6 @@ class DerivativeForm(Base):
     # Relationships
     word_token = relationship("WordToken", back_populates="derivative_forms")
     lemma = relationship("Lemma", back_populates="derivative_forms")
-    example_sentences = relationship("ExampleSentence", back_populates="derivative_form", cascade="all, delete-orphan")
-
-class ExampleSentence(Base):
-    """Model for storing example sentences for a derivative form."""
-    __tablename__ = 'example_sentences'
-
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    derivative_form_id: Mapped[int] = mapped_column(ForeignKey("derivative_forms.id"), nullable=False)
-    example_text: Mapped[str] = mapped_column(Text, nullable=False)
-    added_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now())
-
-    # Relationships
-    derivative_form = relationship("DerivativeForm", back_populates="example_sentences")
 
 class Sentence(Base):
     """Model for storing sentence metadata.

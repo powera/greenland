@@ -24,7 +24,7 @@ if GREENLAND_SRC_PATH not in sys.path:
 import constants
 from wordfreq.storage.database import create_database_session
 from wordfreq.storage.models.schema import (
-    Lemma, WordToken, DerivativeForm, Corpus, WordFrequency, ExampleSentence
+    Lemma, WordToken, DerivativeForm, Corpus, WordFrequency
 )
 
 # Configure logging
@@ -240,56 +240,6 @@ class BebrasAgent:
                 'total_checked': 0,
                 'orphaned_count': 0,
                 'orphaned_frequencies': []
-            }
-        finally:
-            session.close()
-
-    def check_orphaned_example_sentences(self) -> Dict[str, any]:
-        """
-        Check for example sentences with invalid derivative_form_id.
-
-        Returns:
-            Dictionary with orphaned sentences info
-        """
-        logger.info("Checking for orphaned example sentences...")
-
-        session = self.get_session()
-        try:
-            # Get all valid derivative form IDs
-            valid_form_ids = set()
-            forms = session.query(DerivativeForm.id).all()
-            for form_id_tuple in forms:
-                valid_form_ids.add(form_id_tuple[0])
-
-            logger.info(f"Found {len(valid_form_ids)} valid derivative form IDs")
-
-            # Check all example sentences
-            sentences = session.query(ExampleSentence).all()
-            orphaned = []
-
-            for sentence in sentences:
-                if sentence.derivative_form_id not in valid_form_ids:
-                    orphaned.append({
-                        'id': sentence.id,
-                        'example_text': sentence.example_text[:100],  # Truncate for display
-                        'invalid_derivative_form_id': sentence.derivative_form_id
-                    })
-
-            logger.info(f"Found {len(orphaned)} orphaned example sentences")
-
-            return {
-                'total_checked': len(sentences),
-                'orphaned_count': len(orphaned),
-                'orphaned_sentences': orphaned
-            }
-
-        except Exception as e:
-            logger.error(f"Error checking orphaned example sentences: {e}")
-            return {
-                'error': str(e),
-                'total_checked': 0,
-                'orphaned_count': 0,
-                'orphaned_sentences': []
             }
         finally:
             session.close()
@@ -591,7 +541,6 @@ class BebrasAgent:
                 'orphaned_derivative_forms': self.check_orphaned_derivative_forms(),
                 'derivative_form_word_tokens': self.check_derivative_form_word_tokens(),
                 'orphaned_word_frequencies': self.check_orphaned_word_frequencies(),
-                'orphaned_example_sentences': self.check_orphaned_example_sentences(),
                 'missing_required_fields': self.check_missing_required_fields(),
                 'lemmas_without_derivatives': self.check_lemmas_without_derivatives(),
                 'duplicate_guids': self.check_duplicate_guids(),
@@ -634,7 +583,6 @@ class BebrasAgent:
         logger.info(f"  Derivative forms (invalid lemma_id): {checks['orphaned_derivative_forms']['orphaned_count']}")
         logger.info(f"  Derivative forms (invalid/mismatched word_token): {checks['derivative_form_word_tokens']['issue_count']}")
         logger.info(f"  Word frequencies: {checks['orphaned_word_frequencies']['orphaned_count']}")
-        logger.info(f"  Example sentences: {checks['orphaned_example_sentences']['orphaned_count']}")
         logger.info("")
 
         # Missing required fields
@@ -663,7 +611,6 @@ class BebrasAgent:
             checks['orphaned_derivative_forms']['orphaned_count'] +
             checks['derivative_form_word_tokens']['issue_count'] +
             checks['orphaned_word_frequencies']['orphaned_count'] +
-            checks['orphaned_example_sentences']['orphaned_count'] +
             missing_fields['total_issues'] +
             checks['lemmas_without_derivatives']['without_forms_count'] +
             checks['duplicate_guids']['duplicate_count'] +
@@ -697,13 +644,11 @@ def main():
         results = {
             'derivative_forms': agent.check_orphaned_derivative_forms(),
             'derivative_form_word_tokens': agent.check_derivative_form_word_tokens(),
-            'word_frequencies': agent.check_orphaned_word_frequencies(),
-            'example_sentences': agent.check_orphaned_example_sentences()
+            'word_frequencies': agent.check_orphaned_word_frequencies()
         }
         total = (results['derivative_forms']['orphaned_count'] +
                 results['derivative_form_word_tokens']['issue_count'] +
-                results['word_frequencies']['orphaned_count'] +
-                results['example_sentences']['orphaned_count'])
+                results['word_frequencies']['orphaned_count'])
         print(f"\nTotal orphaned records: {total}")
 
     elif args.check == 'missing-fields':

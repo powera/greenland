@@ -10,7 +10,7 @@ It now serves as a backward-compatible convenience import module.
 import logging
 
 # Import models from the models package
-from wordfreq.storage.models.schema import Base, WordToken, Lemma, LemmaTranslation, DerivativeForm, ExampleSentence, Sentence, SentenceTranslation, SentenceWord, Corpus, WordFrequency
+from wordfreq.storage.models.schema import Base, WordToken, Lemma, LemmaTranslation, DerivativeForm, Sentence, SentenceTranslation, SentenceWord, Corpus, WordFrequency
 from wordfreq.storage.models.query_log import QueryLog
 from wordfreq.storage.models.grammar_fact import GrammarFact
 from wordfreq.storage.models.enums import NounSubtype, VerbSubtype, AdjectiveSubtype, AdverbSubtype, GrammaticalForm
@@ -66,8 +66,6 @@ from wordfreq.storage.crud.derivative_form import (
 )
 
 from wordfreq.storage.crud.word_frequency import add_word_frequency
-
-from wordfreq.storage.crud.example_sentence import add_example_sentence
 
 from wordfreq.storage.crud.sentence import (
     add_sentence,
@@ -170,7 +168,6 @@ __all__ = [
     'Lemma',
     'LemmaTranslation',
     'DerivativeForm',
-    'ExampleSentence',
     'Sentence',
     'SentenceTranslation',
     'SentenceWord',
@@ -236,9 +233,6 @@ __all__ = [
 
     # Word Frequency CRUD
     'add_word_frequency',
-
-    # Example Sentence CRUD
-    'add_example_sentence',
 
     # Sentence CRUD
     'add_sentence',

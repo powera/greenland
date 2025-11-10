@@ -113,71 +113,13 @@ class LinguisticReviewer:
 
                 if derivative_form.notes:
                     print(f"    {self.c.BLUE}Notes:{self.c.ENDC} {derivative_form.notes}")
-                
-                # Examples (now example_sentences)
-                examples = derivative_form.example_sentences
-                if examples:
-                    print(f"    {self.c.BLUE}Examples:{self.c.ENDC}")
-                    for example in examples:
-                        print(f"      - {example.example_text}")
-                
+
                 # Add a separator between derivative forms
                 if i < len(derivative_forms) - 1:
                     print()
         
         return True
         
-    def add_example(self, word_text: str) -> bool:
-        """
-        Add an example sentence to a definition.
-        
-        Args:
-            word_text: Word containing the definition
-            
-        Returns:
-            Whether the addition was successful
-        """
-        word = linguistic_db.get_word_by_text(self.session, word_text)
-        if not word:
-            print(f"{self.c.RED}Word '{word_text}' not found in the database.{self.c.ENDC}")
-            return False
-        
-        # Display current definitions
-        self.display_word_info(word_text)
-        
-        # Choose derivative form to add example to
-        derivative_forms = word.definitions  # This is actually derivative_forms due to the wrapper
-        if not derivative_forms:
-            print(f"{self.c.YELLOW}No derivative forms to add examples to. Add a derivative form first.{self.c.ENDC}")
-            return False
-        
-        try:
-            choice = int(input(f"\n{self.c.BOLD}Enter derivative form number to add example to (1-{len(derivative_forms)}) or 0 to cancel: {self.c.ENDC}"))
-            if choice == 0:
-                return False
-            
-            if choice < 1 or choice > len(derivative_forms):
-                print(f"{self.c.RED}Invalid choice.{self.c.ENDC}")
-                return False
-            
-            derivative_form = derivative_forms[choice-1]
-            
-            # Get example text
-            example_text = input("Example sentence: ").strip()
-            if not example_text:
-                print(f"{self.c.RED}Example cannot be empty.{self.c.ENDC}")
-                return False
-            
-            # Add example
-            linguistic_db.add_example_sentence(self.session, derivative_form, example_text)
-            
-            print(f"{self.c.GREEN}Example added successfully.{self.c.ENDC}")
-            return True
-            
-        except ValueError:
-            print(f"{self.c.RED}Invalid input.{self.c.ENDC}")
-            return False
-    
     def list_problematic_words(self, limit: int = 10) -> None:
         """
         List problematic words.
@@ -355,7 +297,6 @@ class LinguisticReviewer:
         while True:
             print(f"\n{self.c.HEADER}{self.c.BOLD}Linguistic Data Reviewer{self.c.ENDC}")
             print(f"{self.c.CYAN}1.{self.c.ENDC} Display word information")
-            print(f"{self.c.CYAN}4.{self.c.ENDC} Add example to derivative form")
             print(f"{self.c.CYAN}5.{self.c.ENDC} List problematic words")
             print(f"{self.c.CYAN}6.{self.c.ENDC} Find words with missing data")
             print(f"{self.c.CYAN}7.{self.c.ENDC} Show statistics")
@@ -363,20 +304,16 @@ class LinguisticReviewer:
             print(f"{self.c.CYAN}9.{self.c.ENDC} Show word list access information")
 
             print(f"{self.c.CYAN}0.{self.c.ENDC} Exit")
-            
+
             try:
                 choice = int(input(f"\n{self.c.BOLD}Enter your choice: {self.c.ENDC}"))
-                
+
                 if choice == 0:
                     break
                 elif choice == 1:
                     word = input(f"{self.c.BOLD}Enter word: {self.c.ENDC}").strip()
                     if word:
                         self.display_word_info(word)
-                elif choice == 4:
-                    word = input(f"{self.c.BOLD}Enter word: {self.c.ENDC}").strip()
-                    if word:
-                        self.add_example(word)
                 elif choice == 5:
                     limit = input(f"{self.c.BOLD}Enter limit (default: 10): {self.c.ENDC}").strip()
                     try:
@@ -397,11 +334,8 @@ class LinguisticReviewer:
                     print(f"  Total word tokens: {stats['total_word_tokens']}")
                     percent_with_defs = stats['tokens_with_derivative_forms']/stats['total_word_tokens']*100 if stats['total_word_tokens'] > 0 else 0
                     print(f"  Tokens with derivative forms: {stats['tokens_with_derivative_forms']} ({percent_with_defs:.1f}%)")
-                    percent_with_examples = stats['tokens_with_examples']/stats['total_word_tokens']*100 if stats['total_word_tokens'] > 0 else 0
-                    print(f"  Tokens with examples: {stats['tokens_with_examples']} ({percent_with_examples:.1f}%)")
                     print(f"  Total lemmas: {stats['total_lemmas']}")
                     print(f"  Total derivative forms: {stats['total_derivative_forms']}")
-                    print(f"  Total example sentences: {stats['total_example_sentences']}")
                     print(f"  Overall completion: {stats['percent_complete']:.1f}%")
                 elif choice == 8:
                     pos_type = input(f"{self.c.BOLD}Enter part of speech (noun, verb, adjective, etc.): {self.c.ENDC}").strip().lower()
