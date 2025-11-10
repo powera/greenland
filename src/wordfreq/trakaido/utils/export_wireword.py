@@ -177,6 +177,10 @@ class WirewordExporter:
             if effective_level is None:
                 effective_level = 0
 
+            # Skip words at level -1 (excluded from all wireword exports)
+            if effective_level == -1:
+                continue
+
             entry = {
                 'GUID': lemma.guid,
                 'english': self.get_english_word_from_lemma(session, lemma),
@@ -413,7 +417,7 @@ class WirewordExporter:
                             gram_form = {
                                 "level": form_level,
                                 "target": form.derivative_form_text,
-                                "english": f"{entry['English']} (plural)"  # Simple plural English form
+                                "english": f"{entry['english']} (plural)"  # Simple plural English form
                             }
                             # Add pinyin for Chinese grammatical forms
                             if self.language == 'zh':
@@ -431,7 +435,7 @@ class WirewordExporter:
                             gram_form = {
                                 "level": form_level,
                                 "target": form.derivative_form_text,
-                                "english": f"{entry['English']}{english_suffix}"
+                                "english": f"{entry['english']}{english_suffix}"
                             }
                             # Add pinyin for Chinese grammatical forms
                             if self.language == 'zh':
@@ -459,7 +463,7 @@ class WirewordExporter:
                                 if not english_label:
                                     english_label = self._generate_grammatical_form_label(
                                         form.grammatical_form,
-                                        entry['English'],
+                                        entry['english'],
                                         lemma.pos_type
                                     )
 
@@ -478,8 +482,8 @@ class WirewordExporter:
                 # Generate derivative noun phrases (e.g., "where is X") for appropriate nouns
                 derivative_phrases = self._generate_derivative_noun_phrases(
                     lemma,
-                    entry['English'],
-                    entry['Target'],
+                    entry['english'],
+                    entry['target_language'],
                     entry['trakaido_level']
                 )
                 grammatical_forms.update(derivative_phrases)
@@ -491,12 +495,12 @@ class WirewordExporter:
                 # Create WireWord object
                 wireword = {
                     'guid': entry['GUID'],
-                    'base_target': entry['Target'],
-                    'base_english': entry['English'],
+                    'base_target': entry['target_language'],
+                    'base_english': entry['english'],
                     'corpus': assigned_corpus,
                     'group': format_subtype_display_name(entry['subtype']),
                     'level': entry['trakaido_level'],
-                    'word_type': self._normalize_pos_type(entry['POS'])
+                    'word_type': self._normalize_pos_type(entry['pos_type'])
                 }
 
                 # Add filename field for Chinese to use GUID in URL instead of Chinese characters
@@ -504,8 +508,8 @@ class WirewordExporter:
                     wireword['filename'] = entry['GUID']
 
                 # Add pinyin for Chinese language exports
-                if self.language == 'zh' and entry['Target']:
-                    pinyin = self._generate_pinyin(entry['Target'])
+                if self.language == 'zh' and entry['target_language']:
+                    pinyin = self._generate_pinyin(entry['target_language'])
                     if pinyin:
                         wireword['target_pinyin'] = pinyin
 
@@ -1115,6 +1119,10 @@ class WirewordExporter:
                 effective_lemma_level = get_effective_difficulty_level(session, lemma, self.language)
                 if effective_lemma_level is None:
                     effective_lemma_level = 1  # Default to level 1 if not set
+
+                # Skip words at level -1 (excluded from all wireword exports)
+                if effective_lemma_level == -1:
+                    continue
 
                 # Get all derivative forms for this verb
                 derivative_forms = session.query(DerivativeForm).filter(
