@@ -41,7 +41,7 @@
                             {{ lemma.definition_text }}
                             <form method="post" action="{{ url_for('agents.check_definition', lemma_id=lemma.id) }}" style="display: inline;">
                                 <button type="submit" class="btn btn-sm btn-outline-primary" title="Check/improve definition using AI">
-                                    <i class="bi bi-robot"></i>
+                                    <i class="bi bi-robot"></i> Validate Definition
                                 </button>
                             </form>
                         </p>
@@ -383,10 +383,33 @@
                         <small class="text-muted">Generate between 1-10 example sentences</small>
                     </div>
                     <div class="mb-3">
-                        <label for="languages" class="form-label">Target Languages</label>
-                        <input type="text" class="form-control" id="languages" name="languages" 
-                               value="en,lt" required>
-                        <small class="text-muted">Comma-separated language codes (e.g., en,lt,zh)</small>
+                        <label class="form-label">Target Languages</label>
+                        <div class="row">
+                            {% set target_languages = [
+                                ('lt', 'Lithuanian'),
+                                ('zh', 'Chinese'),
+                                ('ko', 'Korean'),
+                                ('fr', 'French'),
+                                ('es', 'Spanish'),
+                                ('de', 'German'),
+                                ('pt', 'Portuguese'),
+                                ('sw', 'Swahili'),
+                                ('vi', 'Vietnamese')
+                            ] %}
+                            {% for lang_code, lang_name in target_languages %}
+                            <div class="col-md-6 col-lg-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="languages"
+                                           value="{{ lang_code }}" id="lang_{{ lang_code }}"
+                                           {% if lang_code in ['lt', 'zh', 'ko', 'fr'] %}checked{% endif %}>
+                                    <label class="form-check-label" for="lang_{{ lang_code }}">
+                                        {{ lang_name }}
+                                    </label>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <small class="text-muted">Select languages for sentence translations (English is always included)</small>
                     </div>
                     <div class="alert alert-info">
                         <i class="bi bi-robot"></i> The Žvirblis agent will use AI to generate natural, contextual sentences

@@ -108,10 +108,12 @@ class SchemaConversionTestCase(unittest.TestCase):
         self.assertIn("zip", openai_schema["properties"]["address"]["properties"])
         
         # Check that required fields are correctly propagated
+        # NOTE: OpenAI strict mode requires ALL properties to be in required array
+        # (no optional fields supported)
         self.assertIn("required", openai_schema["properties"]["address"])
         self.assertIn("street", openai_schema["properties"]["address"]["required"])
         self.assertIn("city", openai_schema["properties"]["address"]["required"])
-        self.assertNotIn("zip", openai_schema["properties"]["address"]["required"])
+        self.assertIn("zip", openai_schema["properties"]["address"]["required"])  # OpenAI requires all properties
 
         # Verify Gemini has propertyOrdering at both levels
         self.assertIn("propertyOrdering", gemini_schema)
