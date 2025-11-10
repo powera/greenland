@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Agents{% endblock %}
+
+{% block content %}
+<div class="py-4">
+    <h1><i class="bi bi-robot"></i> Autonomous Agents</h1>
+    <p class="lead">Launch data quality and maintenance agents for the wordfreq database</p>
+
+    {% if db_empty %}
+    <div class="alert alert-warning">
+        <i class="bi bi-exclamation-triangle"></i>
+        <strong>Database is empty or not initialized.</strong>
+        Run the PRADZIA agent to initialize the database before using other agents.
+    </div>
+    {% endif %}
+
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mt-2">
+        {% for agent in agents %}
+        <div class="col">
+            <div class="card h-100 agent-card">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="{{ agent.icon }}"></i>
+                        {{ agent.display_name }}
+                        {% if agent.show_if_empty %}
+                        <span class="badge bg-primary ms-2">Init Required</span>
+                        {% endif %}
+                    </h5>
+                    <h6 class="card-subtitle mb-2 text-muted">{{ agent.subtitle }}</h6>
+                    <p class="card-text">{{ agent.description }}</p>
+                </div>
+                <div class="card-footer bg-transparent">
+                    {% if agent.redirect_to %}
+                        <a href="{{ url_for(agent.redirect_to) }}" class="btn btn-primary">
+                            <i class="bi bi-arrow-right-circle"></i> Open Export Page
+                        </a>
+                    {% else %}
+                        <a href="{{ url_for('agents_launcher.launch_form', agent_name=agent.name) }}"
+                           class="btn btn-primary">
+                            <i class="bi bi-play-circle"></i> Launch Agent
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if not agents %}
+    <div class="alert alert-info mt-4">
+        <i class="bi bi-info-circle"></i>
+        {% if db_empty %}
+        Initialize the database first by running the PRADZIA agent.
+        {% else %}
+        All agents are available. Database is initialized.
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.agent-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.agent-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.agent-card .card-title {
+    color: #0d6efd;
+}
+</style>
+{% endblock %}
