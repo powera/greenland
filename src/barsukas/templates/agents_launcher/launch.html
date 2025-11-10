@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+
+{% block title %}Launch {{ agent.display_name }}{% endblock %}
+
+{% block content %}
+<div class="py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('agents_launcher.list_agents') }}">Agents</a></li>
+            <li class="breadcrumb-item active">{{ agent.display_name }}</li>
+        </ol>
+    </nav>
+
+    <h1><i class="{{ agent.icon }}"></i> {{ agent.display_name }}</h1>
+    <p class="lead">{{ agent.subtitle }}</p>
+    <p>{{ agent.description }}</p>
+
+    <hr class="my-4">
+
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Launch Agent</h5>
+
+            <form id="launchForm">
+                <!-- Mode Selection -->
+                <div class="mb-3">
+                    <label for="mode" class="form-label">Select Mode</label>
+                    <select class="form-select" id="mode" name="mode">
+                        <option value="">-- Select a mode --</option>
+                        {% for mode in agent.modes %}
+                        <option value="{{ mode.label }}"
+                                data-requires-input="{{ 'true' if mode.get('requires_input') else 'false' }}"
+                                data-input-placeholder="{{ mode.get('input_placeholder', '') }}">
+                            {{ mode.label }} - {{ mode.description }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Dynamic Input (for modes that require input like GUID or level) -->
+                <div class="mb-3" id="modeInputContainer" style="display: none;">
+                    <label for="modeInput" class="form-label" id="modeInputLabel">Input</label>
+                    <input type="text" class="form-control" id="modeInput" name="mode_input" placeholder="">
+                </div>
+
+                <!-- Custom Arguments -->
+                <div class="mb-3">
+                    <label for="customArgs" class="form-label">Additional Arguments (optional)</label>
+                    <input type="text" class="form-control" id="customArgs" name="custom_args"
+                           placeholder="e.g., --limit 10 --yes">
+                    <div class="form-text">
+                        Add any additional command-line arguments. Use --help to see all available options.
+                    </div>
+                </div>
+
+                <!-- Dry Run Option -->
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="dryRun" name="dry_run" value="true">
+                    <label class="form-check-label" for="dryRun">
+                        Dry run (show what would be done without making changes)
+                    </label>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary" id="launchBtn">
+                        <i class="bi bi-play-circle"></i> Launch Agent
+                    </button>
+                    <a href="{{ url_for('agents_launcher.list_agents') }}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Back to Agents
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Output Display -->
+    <div id="outputContainer" style="display: none;" class="mt-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-terminal"></i> Agent Output
+                    <span id="statusBadge" class="badge ms-2"></span>
+                </h5>
+            </div>
+            <div class="card-body">
+                <div id="outputContent"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+#outputContent pre {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.spinner-border {
+    width: 1rem;
+    height: 1rem;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('launchForm');
+    const modeSelect = document.getElementById('mode');
+    const modeInputContainer = document.getElementById('modeInputContainer');
+    const modeInput = document.getElementById('modeInput');
+    const modeInputLabel = document.getElementById('modeInputLabel');
+    const launchBtn = document.getElementById('launchBtn');
+    const outputContainer = document.getElementById('outputContainer');
+    const outputContent = document.getElementById('outputContent');
+    const statusBadge = document.getElementById('statusBadge');
+
+    // Handle mode selection - show/hide input based on mode requirements
+    modeSelect.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        const requiresInput = selectedOption.getAttribute('data-requires-input') === 'true';
+        const placeholder = selectedOption.getAttribute('data-input-placeholder');
+
+        if (requiresInput) {
+            modeInputContainer.style.display = 'block';
+            modeInput.placeholder = placeholder;
+            modeInput.required = true;
+        } else {
+            modeInputContainer.style.display = 'none';
+            modeInput.required = false;
+            modeInput.value = '';
+        }
+    });
+
+    // Handle form submission
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        // Validate mode selection
+        if (!modeSelect.value) {
+            alert('Please select a mode');
+            return;
+        }
+
+        // Show loading state
+        launchBtn.disabled = true;
+        launchBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Launching...';
+        outputContainer.style.display = 'none';
+
+        // Build form data
+        const formData = new FormData();
+        formData.append('mode', modeSelect.value);
+        formData.append('dry_run', document.getElementById('dryRun').checked);
+
+        // Add custom args with mode input if provided
+        let customArgs = document.getElementById('customArgs').value;
+        if (modeInput.value) {
+            customArgs = modeInput.value + (customArgs ? ' ' + customArgs : '');
+        }
+        formData.append('custom_args', customArgs);
+
+        try {
+            // Execute agent
+            const response = await fetch('{{ url_for("agents_launcher.execute_agent", agent_name=agent.name) }}', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+
+            // Show output
+            outputContainer.style.display = 'block';
+
+            if (result.success) {
+                statusBadge.className = 'badge bg-success';
+                statusBadge.textContent = 'Success';
+                outputContent.innerHTML = `<pre>${escapeHtml(result.stdout)}</pre>`;
+            } else {
+                statusBadge.className = 'badge bg-danger';
+                statusBadge.textContent = 'Error';
+                outputContent.innerHTML = `
+                    <div class="alert alert-danger">
+                        <strong>Error:</strong> ${escapeHtml(result.error || 'Unknown error')}
+                    </div>
+                    ${result.stdout ? '<h6>Standard Output:</h6><pre>' + escapeHtml(result.stdout) + '</pre>' : ''}
+                    ${result.stderr ? '<h6>Error Output:</h6><pre>' + escapeHtml(result.stderr) + '</pre>' : ''}
+                `;
+            }
+
+            // Scroll to output
+            outputContainer.scrollIntoView({ behavior: 'smooth' });
+
+        } catch (error) {
+            outputContainer.style.display = 'block';
+            statusBadge.className = 'badge bg-danger';
+            statusBadge.textContent = 'Error';
+            outputContent.innerHTML = `
+                <div class="alert alert-danger">
+                    <strong>Error:</strong> ${escapeHtml(error.message)}
+                </div>
+            `;
+        } finally {
+            // Reset button
+            launchBtn.disabled = false;
+            launchBtn.innerHTML = '<i class="bi bi-play-circle"></i> Launch Agent';
+        }
+    });
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+});
+</script>
+{% endblock %}
