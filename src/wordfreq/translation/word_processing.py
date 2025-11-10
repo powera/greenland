@@ -224,14 +224,6 @@ def process_word(
                 logger.error(f"Failed to create derivative form for word '{word}'")
                 continue
 
-            # Add example sentences
-            for example_text in def_data.get('examples', []):
-                linguistic_db.add_example_sentence(
-                    session,
-                    derivative_form,
-                    example_text=example_text
-                )
-
         # Commit the transaction
         session.commit()
         logger.info(f"Successfully processed word token '{word}' with {len(word_token.derivative_forms)} derivative forms.")

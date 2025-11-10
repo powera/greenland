@@ -313,7 +313,6 @@ class LinguisticClient:
         forms_info = []
         for derivative_form in word_token.derivative_forms:
             lemma = derivative_form.lemma
-            examples = [ex.example_text for ex in derivative_form.example_sentences]
 
             form_info = {
                 "lemma_text": lemma.lemma_text,
@@ -326,7 +325,7 @@ class LinguisticClient:
                 "phonetic_pronunciation": derivative_form.phonetic_pronunciation,
                 "confidence": derivative_form.confidence,
                 "verified": derivative_form.verified,
-                "examples": examples,
+                "examples": [],
                 "translations": {
                     "chinese": derivative_form.chinese_translation,
                     "korean": derivative_form.korean_translation,
@@ -352,7 +351,6 @@ class LinguisticClient:
         forms_info = []
         for derivative_form in derivative_forms:
             word_token = derivative_form.word_token
-            examples = [ex.example_text for ex in derivative_form.example_sentences]
 
             form_info = {
                 "token": word_token.token,

@@ -25,7 +25,7 @@ if GREENLAND_SRC_PATH not in sys.path:
 
 import constants
 from wordfreq.storage.database import create_database_session
-from wordfreq.storage.models.schema import DerivativeForm, Lemma, ExampleSentence
+from wordfreq.storage.models.schema import DerivativeForm, Lemma
 from wordfreq.tools.llm_validators import (
     validate_pronunciation,
     generate_pronunciation
@@ -130,18 +130,12 @@ class PapugaAgent:
                     if not lemma:
                         continue
 
-                    # Get example sentence for context (preferred)
-                    example = session.query(ExampleSentence).filter(
-                        ExampleSentence.derivative_form_id == form.id
-                    ).first()
-                    example_text = example.example_text if example else None
-
                     result = validate_pronunciation(
                         word=form.derivative_form_text,
                         ipa_pronunciation=form.ipa_pronunciation,
                         phonetic_pronunciation=form.phonetic_pronunciation,
                         pos_type=lemma.pos_type,
-                        example_sentence=example_text,
+                        example_sentence=None,
                         definition=lemma.definition_text,
                         model=self.model
                     )
@@ -324,17 +318,11 @@ class PapugaAgent:
                         failed_count += 1
                         continue
 
-                    # Get example sentence for context (preferred)
-                    example = session.query(ExampleSentence).filter(
-                        ExampleSentence.derivative_form_id == form.id
-                    ).first()
-                    example_text = example.example_text if example else None
-
                     try:
                         result = generate_pronunciation(
                             word=form.derivative_form_text,
                             pos_type=lemma.pos_type,
-                            example_sentence=example_text,
+                            example_sentence=None,
                             definition=lemma.definition_text,
                             model=self.model
                         )
