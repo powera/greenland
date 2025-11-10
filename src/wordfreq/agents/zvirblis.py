@@ -39,6 +39,7 @@ from wordfreq.storage.database import (
     calculate_minimum_level,
     find_lemma_by_guid
 )
+from wordfreq.storage.translation_helpers import get_translation, get_all_translations
 
 # Configure logging
 logging.basicConfig(
@@ -105,18 +106,24 @@ class ZvirblisAgent:
 
         logger.info(f"Generating {num_sentences} sentences for noun: {lemma.lemma_text} (GUID: {lemma.guid})")
 
-        # Get translations for the noun in target languages
-        noun_translations = {}
-        for lang_code in target_languages:
-            translation = self._get_translation_for_language(lemma, lang_code)
-            if translation:
-                noun_translations[lang_code] = translation
-
-        # Build context for LLM
-        context = self._build_sentence_context(lemma, difficulty_context)
-
-        # Generate sentences using LLM
+        # Get a database session for translation lookups
+        session = self.get_session()
         try:
+            # Get translations for the noun in target languages
+            noun_translations = {}
+            for lang_code in target_languages:
+                if lang_code == 'en':
+                    # For English, use the lemma text itself
+                    noun_translations[lang_code] = lemma.lemma_text
+                else:
+                    translation = get_translation(session, lemma, lang_code)
+                    if translation:
+                        noun_translations[lang_code] = translation
+
+            # Build context for LLM
+            context = self._build_sentence_context(lemma, difficulty_context)
+
+            # Generate sentences using LLM
             result = self._call_llm_for_sentences(
                 lemma=lemma,
                 noun_translations=noun_translations,
@@ -144,32 +151,8 @@ class ZvirblisAgent:
                 'success': False,
                 'error': str(e)
             }
-
-    def _get_translation_for_language(self, lemma: Lemma, language_code: str) -> Optional[str]:
-        """Get translation for a lemma in a specific language."""
-        # Try legacy columns first
-        legacy_map = {
-            'zh': lemma.chinese_translation,
-            'fr': lemma.french_translation,
-            'ko': lemma.korean_translation,
-            'sw': lemma.swahili_translation,
-            'lt': lemma.lithuanian_translation,
-            'vi': lemma.vietnamese_translation
-        }
-
-        if language_code in legacy_map and legacy_map[language_code]:
-            return legacy_map[language_code]
-
-        # Try LemmaTranslation table
-        for translation in lemma.translations:
-            if translation.language_code == language_code:
-                return translation.translation
-
-        # For English, use the lemma text itself
-        if language_code == 'en':
-            return lemma.lemma_text
-
-        return None
+        finally:
+            session.close()
 
     def _build_sentence_context(self, lemma: Lemma, difficulty_level: Optional[int]) -> str:
         """Build context string for LLM prompt."""
@@ -212,33 +195,37 @@ class ZvirblisAgent:
         langs_str = ", ".join(target_languages)
         translations_str = json.dumps(noun_translations, indent=2)
 
-        prompt = f"""Generate {num_sentences} example sentences for language learning that feature the following noun.
+        prompt = f"""Generate {num_sentences} English example sentences for language learning that feature the following noun.
 
 {context}
 
-Translations available:
+Translations of the noun in target languages:
 {translations_str}
 
 Requirements:
-1. Create {num_sentences} different sentences using the noun "{lemma.lemma_text}"
+1. Create {num_sentences} different ENGLISH sentences using the noun "{lemma.lemma_text}"
 2. Vary the sentence patterns:
    - Use the noun as a subject (e.g., "The book is on the table")
    - Use the noun as an object (e.g., "He read the book")
    - Include different verbs and contexts
 3. Keep sentences simple and natural (appropriate for language learners)
 4. Use common, everyday vocabulary for other words in the sentence
-5. Provide translations for ALL languages: {langs_str}
+5. Translate each English sentence to ALL target languages: {langs_str}
+   - Provide natural, idiomatic translations (not word-for-word)
+   - Ensure grammatical correctness in each language
 
-For each sentence, also identify:
-- Pattern type (SVO, SVAO, etc.)
+For each sentence, provide:
+- Pattern type (SVO, SVAO, etc.) - based on English structure
 - Tense used (present, past, future)
-- ALL words used in the sentence with their:
-  - Base form (lemma)
+- Translations in all languages (keys are language codes like 'en', 'lt', etc.)
+- For each TARGET LANGUAGE (not English), list ALL words used with their:
+  - Base form (lemma) in the target language
   - Role in sentence (subject, verb, object, adjective, preposition, article, etc.)
-  - For nouns/adjectives: grammatical case if applicable
+  - For nouns/adjectives: grammatical case if applicable (e.g., "accusative", "nominative")
   - For verbs: grammatical form (e.g., "3s_present" = 3rd person singular present)
+  - Actual declined/conjugated form used in the sentence
 
-Focus on variety and natural language usage."""
+Focus on variety, natural language usage, and accurate translations."""
 
         # Define response schema
         schema = Schema(
@@ -266,12 +253,13 @@ Focus on variety and natural language usage."""
                             },
                             "words_used": {
                                 "type": "array",
-                                "description": "All words used in the sentence",
+                                "description": "All words used in the TARGET LANGUAGE sentence (not English)",
                                 "items": {
                                     "type": "object",
                                     "properties": {
-                                        "lemma": {"type": "string", "description": "Base form of the word"},
+                                        "lemma": {"type": "string", "description": "Base form of the word in target language"},
                                         "role": {"type": "string", "description": "Role in sentence (subject, verb, object, etc.)"},
+                                        "language_code": {"type": "string", "description": "Target language code (e.g., 'lt', 'zh')"},
                                         "grammatical_form": {"type": "string", "description": "Form used (e.g., '3s_present', 'past_participle')"},
                                         "grammatical_case": {"type": "string", "description": "Case if applicable (nominative, accusative, etc.)"},
                                         "declined_form": {"type": "string", "description": "Actual form used in sentence"}
