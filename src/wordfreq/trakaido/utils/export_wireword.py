@@ -389,20 +389,25 @@ class WirewordExporter:
                         # Skip base forms as they're already in base_target/base_english
                         continue
 
+                    # Determine if this form is an alternative form or synonym
+                    # Alternative forms include: abbreviation, expanded_form, alternate_spelling, and legacy 'alternative_form'
+                    is_alternative = form.grammatical_form in ['abbreviation', 'expanded_form', 'alternate_spelling', 'alternative_form']
+                    is_synonym = form.grammatical_form == 'synonym'
+
                     # Handle different types of derivative forms
                     if form.language_code == 'en':
-                        if form.grammatical_form == 'alternative_form':
+                        if is_alternative:
                             english_alternatives.append(form.derivative_form_text)
-                        elif form.grammatical_form == 'synonym':
+                        elif is_synonym:
                             english_synonyms.append(form.derivative_form_text)
                     elif form.language_code == self.language:
-                        if form.grammatical_form == 'alternative_form':
+                        if is_alternative:
                             target_alternatives.append(form.derivative_form_text)
                             # Generate pinyin for Chinese alternatives (keep arrays parallel)
                             if self.language == 'zh':
                                 pinyin = self._generate_pinyin(form.derivative_form_text)
                                 target_alternatives_pinyin.append(pinyin if pinyin else '')
-                        elif form.grammatical_form == 'synonym':
+                        elif is_synonym:
                             target_synonyms.append(form.derivative_form_text)
                             # Generate pinyin for Chinese synonyms (keep arrays parallel)
                             if self.language == 'zh':
