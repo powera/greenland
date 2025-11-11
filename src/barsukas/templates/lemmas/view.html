@@ -228,50 +228,66 @@
 {% endif %}
 
 <!-- Synonyms & Alternative Forms -->
-{% if synonyms_by_language or alternative_forms_by_language %}
 <div class="row mb-4">
     <div class="col">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span><i class="bi bi-shuffle"></i> Synonyms & Alternative Forms</span>
                 <div>
-                    <button type="button" class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#generateSynonymsModal">
+                    <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#generateSynonymsModal">
                         <i class="bi bi-plus-circle"></i> Generate Synonyms
                     </button>
                 </div>
             </div>
             <div class="card-body">
-                {% for lang_code in all_synonym_languages %}
-                    {% set synonyms = synonyms_by_language.get(lang_code, []) %}
-                    {% set alternatives = alternative_forms_by_language.get(lang_code, []) %}
-                    {% if synonyms or alternatives %}
-                        <h5 class="mt-3">
-                            {{ language_names.get(lang_code, lang_code) }}
-                        </h5>
+                <div class="alert alert-info mb-3">
+                    <strong><i class="bi bi-info-circle"></i> What's the difference?</strong>
+                    <ul class="mb-0 mt-2 small">
+                        <li><strong>Alternative Forms:</strong> Different ways to write or say the <em>same</em> word (e.g., "TV" ↔ "television", "gray" ↔ "grey", "thousand" ↔ "one thousand")</li>
+                        <li><strong>Synonyms:</strong> <em>Different words</em> with similar meanings (e.g., "street" ↔ "road", "mad" ↔ "angry", "big" ↔ "large")</li>
+                    </ul>
+                </div>
 
-                        {% if synonyms %}
-                            <div class="mb-3">
-                                <strong>Synonyms:</strong>
-                                <div class="d-flex flex-wrap gap-2 mt-2">
-                                    {% for syn in synonyms %}
-                                        <span class="badge bg-primary" style="font-size: 0.9rem;">{{ syn.derivative_form_text }}</span>
-                                    {% endfor %}
-                                </div>
-                            </div>
-                        {% endif %}
+                {% if synonyms_by_language or alternative_forms_by_language %}
+                    {% for lang_code in all_synonym_languages %}
+                        {% set synonyms = synonyms_by_language.get(lang_code, []) %}
+                        {% set alternatives = alternative_forms_by_language.get(lang_code, []) %}
+                        {% if synonyms or alternatives %}
+                            <h5 class="mt-3">
+                                {{ language_names.get(lang_code, lang_code) }}
+                            </h5>
 
-                        {% if alternatives %}
-                            <div class="mb-3">
-                                <strong>Alternative Forms:</strong>
-                                <div class="d-flex flex-wrap gap-2 mt-2">
-                                    {% for alt in alternatives %}
-                                        <span class="badge bg-secondary" style="font-size: 0.9rem;">{{ alt.derivative_form_text }}</span>
-                                    {% endfor %}
+                            {% if alternatives %}
+                                <div class="mb-3">
+                                    <strong>Alternative Forms:</strong>
+                                    <span class="text-muted small">(same word, different form)</span>
+                                    <div class="d-flex flex-wrap gap-2 mt-2">
+                                        {% for alt in alternatives %}
+                                            <span class="badge bg-secondary" style="font-size: 0.9rem;">{{ alt.derivative_form_text }}</span>
+                                        {% endfor %}
+                                    </div>
                                 </div>
-                            </div>
+                            {% endif %}
+
+                            {% if synonyms %}
+                                <div class="mb-3">
+                                    <strong>Synonyms:</strong>
+                                    <span class="text-muted small">(different word, similar meaning)</span>
+                                    <div class="d-flex flex-wrap gap-2 mt-2">
+                                        {% for syn in synonyms %}
+                                            <span class="badge bg-primary" style="font-size: 0.9rem;">{{ syn.derivative_form_text }}</span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            {% endif %}
                         {% endif %}
-                    {% endif %}
-                {% endfor %}
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted">
+                        <i class="bi bi-info-circle"></i> No synonyms or alternative forms have been generated yet.
+                        Use the <strong>ŠERNAS agent</strong> to generate them automatically.
+                    </p>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -321,7 +337,6 @@
         </div>
     </div>
 </div>
-{% endif %}
 
 <!-- Translations -->
 <div class="row mb-4">
