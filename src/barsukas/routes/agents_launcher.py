@@ -69,6 +69,15 @@ AGENTS = [
         'use_dynamic_form': True,
     },
     {
+        'name': 'SERNAS',
+        'display_name': 'Šernas',
+        'subtitle': 'Synonym Generator',
+        'description': 'Generates synonyms and alternative forms for vocabulary words across all supported languages.',
+        'script': 'sernas.py',
+        'icon': 'bi-shuffle',
+        'use_dynamic_form': True,
+    },
+    {
         'name': 'PAPUGA',
         'display_name': 'Papuga',
         'subtitle': 'Pronunciation Validator',

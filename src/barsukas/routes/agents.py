@@ -470,6 +470,62 @@ def generate_forms(lemma_id):
     return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
 
 
+@bp.route('/generate-synonyms/<int:lemma_id>', methods=['POST'])
+def generate_synonyms(lemma_id):
+    """Generate synonyms and alternative forms for a lemma using the ŠERNAS agent."""
+    lemma = g.db.query(Lemma).get(lemma_id)
+    if not lemma:
+        flash('Lemma not found', 'error')
+        return redirect(url_for('lemmas.list_lemmas'))
+
+    # Get language code from form
+    lang_code = request.form.get('lang_code', 'en')
+
+    try:
+        # Initialize ŠERNAS agent
+        from wordfreq.agents.sernas.agent import SernasAgent
+        agent = SernasAgent(db_path=Config.DB_PATH, debug=Config.DEBUG)
+
+        # Check if translation exists for this language (skip for English since that's the lemma itself)
+        if lang_code != 'en':
+            from wordfreq.storage.translation_helpers import get_translation
+            translation = get_translation(g.db, lemma, lang_code)
+
+            if not translation or not translation.strip():
+                flash(f'No {lang_code} translation found for this lemma. Add a translation first.', 'warning')
+                return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
+
+        # Generate synonyms for this lemma and language
+        result = agent.generate_synonyms_for_lemma(
+            lemma_id=lemma_id,
+            language_code=lang_code,
+            model='gpt-5-mini',
+            dry_run=False
+        )
+
+        if 'error' in result:
+            flash(f'Error: {result["error"]}', 'error')
+            return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
+
+        # Show results
+        synonyms_count = result.get('stored_synonyms', 0)
+        alternatives_count = result.get('stored_alternatives', 0)
+        total_count = synonyms_count + alternatives_count
+
+        if total_count > 0:
+            flash(f'Successfully generated {synonyms_count} synonym(s) and {alternatives_count} alternative form(s)!', 'success')
+        else:
+            flash('No synonyms or alternative forms were generated. This word may not have common synonyms.', 'info')
+
+    except Exception as e:
+        flash(f'Error generating synonyms: {str(e)}', 'error')
+        import traceback
+        if Config.DEBUG:
+            flash(f'Debug: {traceback.format_exc()}', 'error')
+
+    return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
+
+
 @bp.route('/check-definition/<int:lemma_id>', methods=['POST'])
 def check_definition(lemma_id):
     """Check/improve the definition of a lemma using the LOKYS agent."""
