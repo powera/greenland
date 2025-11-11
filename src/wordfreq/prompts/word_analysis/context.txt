@@ -14,7 +14,7 @@ The Trakaido system organizes words by:
 
 For translations:
 - Lithuanian: Provide the most common, standard Lithuanian equivalent in base form
-- Chinese: Provide simplified Chinese characters in base form
+- Chinese: Provide Traditional Chinese characters (繁體字) in base form
 - Korean: Provide Hangul in base form
 - French: Provide standard French in base form (infinitive for verbs, singular for nouns)
 - Swahili: Provide standard Swahili in base form
