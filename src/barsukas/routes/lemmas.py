@@ -130,7 +130,7 @@ def list_lemmas():
         # Join with LemmaTranslation and search those translations too
         translation_subquery = g.db.query(LemmaTranslation.lemma_id).filter(
             LemmaTranslation.translation.ilike(f'%{search}%')
-        ).subquery()
+        )
 
         search_conditions.append(Lemma.id.in_(translation_subquery))
 

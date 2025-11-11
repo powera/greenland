@@ -234,15 +234,16 @@ def check_pronunciations(lemma_id):
 
         # Check pronunciations (using dry_run=False to actually validate)
         from wordfreq.tools.llm_validators import validate_pronunciation
-        from wordfreq.storage.models.schema import ExampleSentence
+        from wordfreq.storage.models.schema import Sentence, SentenceTranslation, SentenceWord
 
         issues = []
         for form in forms_with_pronunciations:
-            # Get example sentence for context
-            example = g.db.query(ExampleSentence).filter(
-                ExampleSentence.derivative_form_id == form.id
+            # Get example sentence for context - find sentences that use the lemma
+            example_translation = g.db.query(SentenceTranslation).join(Sentence).join(SentenceWord).filter(
+                SentenceWord.lemma_id == lemma_id,
+                SentenceTranslation.language_code == 'en'  # Get English version for context
             ).first()
-            example_text = example.example_text if example else None
+            example_text = example_translation.translation_text if example_translation else None
 
             result = validate_pronunciation(
                 word=form.derivative_form_text,
@@ -310,15 +311,16 @@ def generate_pronunciations(lemma_id):
 
         # Generate pronunciations
         from wordfreq.tools.llm_validators import generate_pronunciation
-        from wordfreq.storage.models.schema import ExampleSentence
+        from wordfreq.storage.models.schema import Sentence, SentenceTranslation, SentenceWord
 
         generated_count = 0
         for form in forms_missing_pronunciations:
-            # Get example sentence for context
-            example = g.db.query(ExampleSentence).filter(
-                ExampleSentence.derivative_form_id == form.id
+            # Get example sentence for context - find sentences that use the lemma
+            example_translation = g.db.query(SentenceTranslation).join(Sentence).join(SentenceWord).filter(
+                SentenceWord.lemma_id == lemma_id,
+                SentenceTranslation.language_code == 'en'  # Get English version for context
             ).first()
-            example_text = example.example_text if example else None
+            example_text = example_translation.translation_text if example_translation else None
 
             result = generate_pronunciation(
                 word=form.derivative_form_text,
