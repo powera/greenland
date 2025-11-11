@@ -227,12 +227,31 @@ def view_lemma(lemma_id):
         DerivativeForm.grammatical_form
     ).all()
 
-    # Group forms by language
+    # Group forms by language and type
     forms_by_language = {}
+    synonyms_by_language = {}
+    alternative_forms_by_language = {}
+
     for form in derivative_forms:
-        if form.language_code not in forms_by_language:
-            forms_by_language[form.language_code] = []
-        forms_by_language[form.language_code].append(form)
+        lang_code = form.language_code
+
+        # Separate synonyms and alternative forms
+        if form.grammatical_form == 'synonym':
+            if lang_code not in synonyms_by_language:
+                synonyms_by_language[lang_code] = []
+            synonyms_by_language[lang_code].append(form)
+        elif form.grammatical_form == 'alternative_form':
+            if lang_code not in alternative_forms_by_language:
+                alternative_forms_by_language[lang_code] = []
+            alternative_forms_by_language[lang_code].append(form)
+        else:
+            # Regular grammatical forms (conjugations, declensions, etc.)
+            if lang_code not in forms_by_language:
+                forms_by_language[lang_code] = []
+            forms_by_language[lang_code].append(form)
+
+    # Get all languages that have synonyms or alternatives
+    all_synonym_languages = sorted(set(list(synonyms_by_language.keys()) + list(alternative_forms_by_language.keys())))
 
     # Get count of sentences using this lemma (for nouns)
     sentence_count = 0
@@ -249,6 +268,9 @@ def view_lemma(lemma_id):
                          effective_levels=effective_levels,
                          difficulty_stats=difficulty_stats,
                          forms_by_language=forms_by_language,
+                         synonyms_by_language=synonyms_by_language,
+                         alternative_forms_by_language=alternative_forms_by_language,
+                         all_synonym_languages=all_synonym_languages,
                          sentence_count=sentence_count)
 
 
