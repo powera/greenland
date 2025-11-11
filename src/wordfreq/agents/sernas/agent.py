@@ -341,7 +341,7 @@ class SernasAgent:
 """
 
         if language_code == 'zh':
-            prompt += "\n- For Chinese, provide simplified Chinese characters (e.g., 街道, 马路 for 'street')"
+            prompt += "\n- For Chinese, provide Traditional Chinese characters (繁體字) (e.g., 街道, 馬路 for 'street')"
         elif language_code == 'ko':
             prompt += "\n- For Korean, provide words in Hangul (e.g., 거리, 길 for 'street')"
 
