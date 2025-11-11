@@ -60,6 +60,42 @@ class SernasAgent:
         """Get database session."""
         return create_database_session(self.db_path)
 
+    def _is_numeral(self, text: str) -> bool:
+        """
+        Check if a string is primarily a numeral or numeral variant.
+
+        Args:
+            text: The text to check
+
+        Returns:
+            True if the text is a numeral (e.g., "1000", "42", "1K", "4th"), False otherwise
+        """
+        if not text:
+            return False
+
+        # Strip whitespace
+        text = text.strip()
+
+        # Check if it's purely digits
+        if text.isdigit():
+            return True
+
+        import re
+
+        # Check if it's a number with common separators (1,000 or 1.000)
+        if re.match(r'^[\d,.\s]+$', text):
+            return True
+
+        # Check for abbreviated numbers with K/M/B suffix (1K, 2.5M, etc.)
+        if re.match(r'^\d+[.,]?\d*[KMBkmb]$', text):
+            return True
+
+        # Check for ordinal numbers (1st, 2nd, 3rd, 4th, etc.)
+        if re.match(r'^\d+(st|nd|rd|th)$', text, re.IGNORECASE):
+            return True
+
+        return False
+
     def check_missing_synonyms(
         self,
         language_code: Optional[str] = None,
@@ -211,9 +247,9 @@ class SernasAgent:
                     'language_code': language_code
                 }
 
-            # Extract results
-            synonyms = result.get('synonyms', [])
-            alternative_forms = result.get('alternative_forms', [])
+            # Extract results and filter out numerals
+            synonyms = [s for s in result.get('synonyms', []) if not self._is_numeral(s)]
+            alternative_forms = [a for a in result.get('alternative_forms', []) if not self._is_numeral(a)]
 
             if dry_run:
                 return {
@@ -336,6 +372,7 @@ class SernasAgent:
 - For synonyms: Include words with similar meanings, but be mindful of context appropriateness
 - Return 0-5 items for each category (not all words have synonyms or alternative forms)
 - Do NOT include the original word itself
+- Do NOT include pure numerals (e.g., "1000", "42") - only word forms
 - Prefer common, useful words over rare or archaic ones
 - Consider the part of speech and usage context
 """
@@ -357,22 +394,37 @@ class SernasAgent:
 Respond ONLY with valid JSON, no other text."""
 
         try:
-            # Query the LLM
-            response = client.client.query(
+            # Query the LLM using generate_chat with JSON schema
+            json_schema = {
+                "type": "object",
+                "properties": {
+                    "alternative_forms": {
+                        "type": "array",
+                        "items": {"type": "string"}
+                    },
+                    "synonyms": {
+                        "type": "array",
+                        "items": {"type": "string"}
+                    },
+                    "explanation": {"type": "string"}
+                },
+                "required": ["alternative_forms", "synonyms"]
+            }
+
+            response = client.client.generate_chat(
+                prompt=prompt,
                 model=client.model,
-                system_prompt="You are a linguistic expert. Respond only with valid JSON.",
-                user_prompt=prompt,
-                response_format='json'
+                json_schema=json_schema
             )
 
-            if not response or not response.strip():
+            if not response.structured_data:
                 return {
                     'success': False,
                     'error': 'Empty response from LLM'
                 }
 
-            # Parse JSON response
-            result = json.loads(response)
+            # Use structured data from response
+            result = response.structured_data
 
             return {
                 'success': True,
