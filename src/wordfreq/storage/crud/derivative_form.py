@@ -373,7 +373,8 @@ def add_alternative_form(
 
 def get_alternative_forms_for_lemma(session, lemma: Lemma, language_code: str = None) -> List[DerivativeForm]:
     """
-    Get all alternative forms for a lemma.
+    Get all alternative forms for a lemma (abbreviations, expanded forms, and alternate spellings).
+    This excludes synonyms, which are a separate category.
 
     Args:
         session: Database session
@@ -383,9 +384,16 @@ def get_alternative_forms_for_lemma(session, lemma: Lemma, language_code: str = 
     Returns:
         List[DerivativeForm]: List of alternative forms
     """
+    # Alternative forms include: abbreviation, expanded_form, alternate_spelling
+    # Also handle legacy 'alternative_form' values for backward compatibility
     query = session.query(DerivativeForm)\
         .filter(DerivativeForm.lemma_id == lemma.id)\
-        .filter(DerivativeForm.grammatical_form.like('alternative_%'))
+        .filter(DerivativeForm.grammatical_form.in_([
+            'abbreviation',
+            'expanded_form',
+            'alternate_spelling',
+            'alternative_form'  # Legacy value
+        ]))
 
     if language_code:
         query = query.filter(DerivativeForm.language_code == language_code)

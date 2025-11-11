@@ -3,7 +3,9 @@
 
 This agent generates synonyms and alternative forms for lemmas across all supported
 languages. It distinguishes between:
-- Alternative forms: Shortened versions, spelling variants (e.g., "one thousand" → "thousand", "gray" → "grey")
+- Abbreviations: Shortened forms (e.g., "television" → "TV", "Doctor" → "Dr.")
+- Expanded forms: Longer/fuller forms (e.g., "thousand" → "one thousand", "TV" → "television")
+- Alternate spellings: Spelling variants (e.g., "gray" → "grey", "color" → "colour")
 - Synonyms: Different words with similar meanings (e.g., "street" → "road", "mad" → "angry")
 
 "Šernas" means "boar" in Lithuanian - persistent in finding similar things.
@@ -106,7 +108,8 @@ class SernasAgent:
 
         Args:
             language_code: Language to check (e.g., 'en', 'lt'). If None, check all.
-            form_type: Type to check ('synonym' or 'alternative_form'). If None, check both.
+            form_type: Type to check (e.g., 'synonym', 'abbreviation', 'expanded_form', 'alternate_spelling').
+                      If None, checks all types.
 
         Returns:
             Dictionary with check results
@@ -129,7 +132,8 @@ class SernasAgent:
             if form_type:
                 form_types = [form_type]
             else:
-                form_types = ['synonym', 'alternative_form']
+                # Check all types (including legacy 'alternative_form')
+                form_types = ['synonym', 'abbreviation', 'expanded_form', 'alternate_spelling', 'alternative_form']
 
             missing_by_language = {}
             for lang in lang_codes:
@@ -249,7 +253,9 @@ class SernasAgent:
 
             # Extract results and filter out numerals
             synonyms = [s for s in result.get('synonyms', []) if not self._is_numeral(s)]
-            alternative_forms = [a for a in result.get('alternative_forms', []) if not self._is_numeral(a)]
+            abbreviations = [a for a in result.get('abbreviations', []) if not self._is_numeral(a)]
+            expanded_forms = [e for e in result.get('expanded_forms', []) if not self._is_numeral(e)]
+            alternate_spellings = [a for a in result.get('alternate_spellings', []) if not self._is_numeral(a)]
 
             if dry_run:
                 return {
@@ -258,13 +264,17 @@ class SernasAgent:
                     'language_code': language_code,
                     'word': word,
                     'synonyms': synonyms,
-                    'alternative_forms': alternative_forms,
-                    'total_count': len(synonyms) + len(alternative_forms)
+                    'abbreviations': abbreviations,
+                    'expanded_forms': expanded_forms,
+                    'alternate_spellings': alternate_spellings,
+                    'total_count': len(synonyms) + len(abbreviations) + len(expanded_forms) + len(alternate_spellings)
                 }
 
             # Store the forms in the database
             stored_synonyms = 0
-            stored_alternatives = 0
+            stored_abbreviations = 0
+            stored_expanded = 0
+            stored_spellings = 0
 
             for synonym in synonyms:
                 try:
@@ -282,25 +292,57 @@ class SernasAgent:
                 except Exception as e:
                     logger.warning(f"Failed to store synonym '{synonym}': {e}")
 
-            for alt_form in alternative_forms:
+            for abbr in abbreviations:
                 try:
-                    word_token = add_word_token(session, alt_form, language_code)
+                    word_token = add_word_token(session, abbr, language_code)
                     add_derivative_form(
                         session=session,
                         lemma=lemma,
-                        derivative_form_text=alt_form,
+                        derivative_form_text=abbr,
                         language_code=language_code,
-                        grammatical_form='alternative_form',
+                        grammatical_form='abbreviation',
                         word_token=word_token,
                         verified=False
                     )
-                    stored_alternatives += 1
+                    stored_abbreviations += 1
                 except Exception as e:
-                    logger.warning(f"Failed to store alternative form '{alt_form}': {e}")
+                    logger.warning(f"Failed to store abbreviation '{abbr}': {e}")
+
+            for exp_form in expanded_forms:
+                try:
+                    word_token = add_word_token(session, exp_form, language_code)
+                    add_derivative_form(
+                        session=session,
+                        lemma=lemma,
+                        derivative_form_text=exp_form,
+                        language_code=language_code,
+                        grammatical_form='expanded_form',
+                        word_token=word_token,
+                        verified=False
+                    )
+                    stored_expanded += 1
+                except Exception as e:
+                    logger.warning(f"Failed to store expanded form '{exp_form}': {e}")
+
+            for alt_spelling in alternate_spellings:
+                try:
+                    word_token = add_word_token(session, alt_spelling, language_code)
+                    add_derivative_form(
+                        session=session,
+                        lemma=lemma,
+                        derivative_form_text=alt_spelling,
+                        language_code=language_code,
+                        grammatical_form='alternate_spelling',
+                        word_token=word_token,
+                        verified=False
+                    )
+                    stored_spellings += 1
+                except Exception as e:
+                    logger.warning(f"Failed to store alternate spelling '{alt_spelling}': {e}")
 
             session.commit()
 
-            logger.info(f"Stored {stored_synonyms} synonyms and {stored_alternatives} alternative forms")
+            logger.info(f"Stored {stored_synonyms} synonyms, {stored_abbreviations} abbreviations, {stored_expanded} expanded forms, and {stored_spellings} alternate spellings")
 
             return {
                 'success': True,
@@ -308,9 +350,13 @@ class SernasAgent:
                 'language_code': language_code,
                 'word': word,
                 'synonyms': synonyms,
-                'alternative_forms': alternative_forms,
+                'abbreviations': abbreviations,
+                'expanded_forms': expanded_forms,
+                'alternate_spellings': alternate_spellings,
                 'stored_synonyms': stored_synonyms,
-                'stored_alternatives': stored_alternatives
+                'stored_abbreviations': stored_abbreviations,
+                'stored_expanded': stored_expanded,
+                'stored_spellings': stored_spellings
             }
 
         except Exception as e:
@@ -358,22 +404,26 @@ class SernasAgent:
         prompt = f"""You are a linguistic expert helping to generate synonyms and alternative forms for vocabulary learning software called Trakaido.
 
 **Task:** For the {language_name} word "{word}" (part of speech: {pos_type}), generate:
-1. **Alternative forms**: Shortened versions, abbreviations, or spelling variants of the SAME word (e.g., "one thousand" → "thousand", "gray" → "grey", "TV" for "television")
-2. **Synonyms**: Different words with similar or related meanings that would be appropriate for language learners (e.g., "street" → "road", "mad" → "angry")
+1. **Abbreviations**: Shortened forms of the word (e.g., "television" → "TV", "Doctor" → "Dr.", "Avenue" → "Ave")
+2. **Expanded forms**: Longer/fuller forms of the word (e.g., "thousand" → "one thousand", "TV" → "television", "Dr." → "Doctor")
+3. **Alternate spellings**: Spelling variants of the SAME word (e.g., "gray" → "grey", "color" → "colour", "doughnut" → "donut")
+4. **Synonyms**: Different words with similar or related meanings that would be appropriate for language learners (e.g., "street" → "road", "mad" → "angry")
 
 **Context:**
 - English lemma: {english_word}
 - Definition: {definition}
-- This is for language learning, so focus on common, useful synonyms that learners might encounter
-- Consider whether synonyms would be appropriate/correct in Trakaido learning context
+- This is for language learning, so focus on common, useful forms that learners might encounter
+- Consider whether forms would be appropriate/correct in Trakaido learning context
 
 **Guidelines:**
-- For alternative_forms: Only include forms that are essentially the same word (shortened, abbreviated, or variant spellings)
+- For abbreviations: Only include shortened forms of the same word (initialisms, truncations, contractions)
+- For expanded_forms: Only include longer/fuller versions of the same word or phrase
+- For alternate_spellings: Only include different spelling variations (regional, historical, informal spellings)
 - For synonyms: Include words with similar meanings, but be mindful of context appropriateness
-- Return 0-5 items for each category (not all words have synonyms or alternative forms)
+- Return 0-5 items for each category (not all words have abbreviations, expanded forms, alternate spellings, or synonyms)
 - Do NOT include the original word itself
 - Do NOT include pure numerals (e.g., "1000", "42") - only word forms
-- Prefer common, useful words over rare or archaic ones
+- Prefer common, useful forms over rare or archaic ones
 - Consider the part of speech and usage context
 """
 
@@ -386,7 +436,9 @@ class SernasAgent:
 
 **Output Format (JSON):**
 {
-  "alternative_forms": ["form1", "form2"],
+  "abbreviations": ["abbr1", "abbr2"],
+  "expanded_forms": ["expanded1", "expanded2"],
+  "alternate_spellings": ["spelling1", "spelling2"],
   "synonyms": ["syn1", "syn2", "syn3"],
   "explanation": "Brief note about your choices"
 }
@@ -398,7 +450,15 @@ Respond ONLY with valid JSON, no other text."""
             json_schema = {
                 "type": "object",
                 "properties": {
-                    "alternative_forms": {
+                    "abbreviations": {
+                        "type": "array",
+                        "items": {"type": "string"}
+                    },
+                    "expanded_forms": {
+                        "type": "array",
+                        "items": {"type": "string"}
+                    },
+                    "alternate_spellings": {
                         "type": "array",
                         "items": {"type": "string"}
                     },
@@ -408,7 +468,7 @@ Respond ONLY with valid JSON, no other text."""
                     },
                     "explanation": {"type": "string"}
                 },
-                "required": ["alternative_forms", "synonyms"]
+                "required": ["abbreviations", "expanded_forms", "alternate_spellings", "synonyms"]
             }
 
             response = client.client.generate_chat(
@@ -429,7 +489,9 @@ Respond ONLY with valid JSON, no other text."""
             return {
                 'success': True,
                 'synonyms': result.get('synonyms', []),
-                'alternative_forms': result.get('alternative_forms', []),
+                'abbreviations': result.get('abbreviations', []),
+                'expanded_forms': result.get('expanded_forms', []),
+                'alternate_spellings': result.get('alternate_spellings', []),
                 'explanation': result.get('explanation', '')
             }
 
