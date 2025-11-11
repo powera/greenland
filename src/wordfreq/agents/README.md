@@ -10,6 +10,7 @@ Autonomous agents for data quality monitoring and maintenance tasks. These agent
 - **Bebras** (beaver) - Ensures database structural integrity by identifying orphaned records, missing fields, and constraint violations.
 - **Voras** (spider) - Validates multi-lingual translations for correctness, reports on coverage, and can populate missing translations using LLM.
 - **Vilkas** (wolf) - Monitors the presence and completeness of word forms across multiple languages in the database and can automatically generate missing forms.
+- **Šernas** (boar) - Generates synonyms and alternative forms for vocabulary words across all supported languages.
 - **Papuga** (parrot) - Validates and generates pronunciations (both IPA and simplified phonetic) for derivative forms.
 - **Žvirblis** (sparrow) - Generates example sentences for vocabulary words using LLM, with automatic difficulty calculation and word linkage.
 - **Povas** (peacock) - Generates HTML pages displaying words organized by part-of-speech subtypes with comprehensive linguistic information.
@@ -451,6 +452,113 @@ In fix mode:
 - Number of forms successfully generated
 - Number of failures
 - Detailed logs of each generation attempt
+
+---
+
+### Šernas (Synonym and Alternative Form Generator)
+
+**Name:** "Šernas" means "boar" in Lithuanian - persistent in finding similar things.
+
+**Purpose:** Generates synonyms and alternative forms for vocabulary words across all supported languages, distinguishing between true synonyms (different words with similar meanings) and alternative forms (shortened versions, spelling variants).
+
+**Supported Languages:**
+- English (en)
+- Lithuanian (lt)
+- Chinese (zh)
+- Korean (ko)
+- French (fr)
+- Spanish (es)
+- German (de)
+- Portuguese (pt)
+- Swahili (sw)
+- Vietnamese (vi)
+
+**Form Types:**
+1. **Synonyms** - Different words with similar or related meanings
+   - Examples: "street" → "road", "mad" → "angry", "big" → "large"
+   - Appropriate for language learners in Trakaido context
+
+2. **Alternative Forms** - Shortened versions, abbreviations, or spelling variants
+   - Examples: "one thousand" → "thousand", "gray" → "grey", "television" → "TV"
+   - Essentially the same word in different forms
+
+**Usage:**
+```bash
+# Check/reporting mode (no changes made)
+python sernas.py --check [CHECK_TYPE] [--language LANG] [--type TYPE]
+
+# Fix mode (generate synonyms and alternatives)
+python sernas.py --fix [--language LANG] [--type TYPE] [--limit N] [--dry-run]
+```
+
+**Check Mode (Reporting Only):**
+- `--check all` - Check all languages for missing synonyms/alternatives (default)
+- `--check by-language` - Check specific language only
+- `--language LANG` - Language code to check (default: en)
+- `--type TYPE` - Type to check: 'synonym', 'alternative_form', or 'both' (default: both)
+
+**Fix Mode (Generate Forms):**
+- `--fix` - Enable fix mode to generate missing synonyms and alternatives
+- `--language LANG` - Language code for generation (default: en). Supports: en, lt, zh, ko, fr, es, de, pt, sw, vi
+- `--type TYPE` - Type to generate: 'synonym', 'alternative_form', or 'both' (default: both)
+- `--limit N` - Maximum number of lemmas to process (default: 10)
+- `--model MODEL` - LLM model to use for generation (default: gpt-5-mini)
+- `--throttle SECONDS` - Seconds to wait between API calls (default: 1.0)
+- `--dry-run` - Show what would be generated **WITHOUT making any LLM calls or database changes**
+- `--yes`, `-y` - Skip confirmation prompt
+
+**Options:**
+- `--db-path PATH` - Use custom database path (defaults to `constants.WORDFREQ_DB_PATH`)
+- `--debug` - Enable debug logging
+
+**Example Usage:**
+
+Check all languages for missing synonyms:
+```bash
+python sernas.py --check all
+```
+
+Check English lemmas only:
+```bash
+python sernas.py --check by-language --language en
+```
+
+Generate English synonyms (dry run):
+```bash
+python sernas.py --fix --language en --dry-run
+```
+
+Generate Lithuanian synonyms only (not alternatives):
+```bash
+python sernas.py --fix --language lt --type synonym --limit 20 --yes
+```
+
+Generate Chinese synonyms and alternatives:
+```bash
+python sernas.py --fix --language zh --limit 10 --yes
+```
+
+**Output:**
+
+The agent provides:
+- Count of lemmas missing synonyms/alternatives per language
+- Sample lemmas needing forms
+- Lists with POS type, difficulty level, and current translation
+
+In fix mode:
+- Number of synonyms generated
+- Number of alternative forms generated
+- Number of successful/failed generations
+- Detailed logs of each generation attempt
+
+**Per-Language Generation:**
+Each language generates its synonyms independently - English word "street" gets English synonyms ("road", "avenue"), and Lithuanian translation "gatvė" gets Lithuanian synonyms separately. No cross-language mapping is attempted.
+
+**BARSUKAS Web Interface:**
+On individual lemma pages, you can:
+- View existing synonyms and alternative forms grouped by language
+- Click "Generate Synonyms" to generate for a specific language
+- Forms are displayed with badges (synonyms in blue, alternatives in gray)
 
 ---
 
