@@ -70,6 +70,36 @@
             </div>
         </div>
     </div>
+
+    <!-- ELNIAS - Bootstrap Export -->
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0">
+                    <i class="bi bi-download"></i> Bootstrap Export
+                </h5>
+            </div>
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-muted">ELNIAS Agent</h6>
+                <p class="card-text">
+                    Export minimal word data for bootstrapping external systems.
+                    Contains only essential fields: translations, GUIDs, and categorization.
+                </p>
+                <ul class="mb-3">
+                    <li>Minimal bootstrap format</li>
+                    <li>Two languages + GUID</li>
+                    <li>POS categorization (no verbs)</li>
+                    <li>Multi-language support</li>
+                </ul>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="badge bg-info">Quick Operation</span>
+                    <a href="{{ url_for('exports.elnias_form') }}" class="btn btn-warning">
+                        <i class="bi bi-arrow-right-circle"></i> Generate Bootstrap File
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <div class="row mt-4">
