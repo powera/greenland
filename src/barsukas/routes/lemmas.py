@@ -236,11 +236,15 @@ def view_lemma(lemma_id):
         lang_code = form.language_code
 
         # Separate synonyms and alternative forms
-        if form.grammatical_form == 'synonym':
+        # Alternative forms include: abbreviation, expanded_form, alternate_spelling, and legacy 'alternative_form'
+        is_alternative = form.grammatical_form in ['abbreviation', 'expanded_form', 'alternate_spelling', 'alternative_form']
+        is_synonym = form.grammatical_form == 'synonym'
+
+        if is_synonym:
             if lang_code not in synonyms_by_language:
                 synonyms_by_language[lang_code] = []
             synonyms_by_language[lang_code].append(form)
-        elif form.grammatical_form == 'alternative_form':
+        elif is_alternative:
             if lang_code not in alternative_forms_by_language:
                 alternative_forms_by_language[lang_code] = []
             alternative_forms_by_language[lang_code].append(form)

@@ -33,8 +33,8 @@ def get_argument_parser():
     parser.add_argument('--language', default='en',
                        help='Language code for operations (en=English, lt=Lithuanian, etc., default: en)')
     parser.add_argument('--type',
-                       choices=['synonym', 'alternative_form', 'both'],
-                       help='[Check/Fix mode] Type to check/generate (synonym, alternative_form, or both). Default: both')
+                       choices=['synonym', 'abbreviation', 'expanded_form', 'alternate_spelling', 'alternative_form', 'all'],
+                       help='[Check/Fix mode] Type to check/generate. Options: synonym, abbreviation, expanded_form, alternate_spelling, alternative_form (legacy), or all. Default: all')
     parser.add_argument('--limit', type=int, default=10,
                        help='[Fix mode] Maximum number of lemmas to process (default: 10)')
     parser.add_argument('--model', default='gpt-5-mini',
@@ -61,7 +61,7 @@ def main():
 
     # Convert --type argument to form_type
     form_type = None
-    if args.type and args.type != 'both':
+    if args.type and args.type != 'all':
         form_type = args.type
 
     # Handle --fix mode

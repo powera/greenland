@@ -263,7 +263,17 @@
                                     <span class="text-muted small">(same word, different form)</span>
                                     <div class="d-flex flex-wrap gap-2 mt-2">
                                         {% for alt in alternatives %}
-                                            <span class="badge bg-secondary" style="font-size: 0.9rem;">{{ alt.derivative_form_text }}</span>
+                                            <span class="badge bg-secondary" style="font-size: 0.9rem;"
+                                                  title="Type: {{ alt.grammatical_form.replace('_', ' ').title() }}">
+                                                {{ alt.derivative_form_text }}
+                                                {% if alt.grammatical_form == 'abbreviation' %}
+                                                    <small class="ms-1" style="opacity: 0.7;">[abbr]</small>
+                                                {% elif alt.grammatical_form == 'expanded_form' %}
+                                                    <small class="ms-1" style="opacity: 0.7;">[expanded]</small>
+                                                {% elif alt.grammatical_form == 'alternate_spelling' %}
+                                                    <small class="ms-1" style="opacity: 0.7;">[spelling]</small>
+                                                {% endif %}
+                                            </span>
                                         {% endfor %}
                                     </div>
                                 </div>
