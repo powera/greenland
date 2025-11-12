@@ -1,7 +1,7 @@
 """CRUD operations for GrammarFact model."""
 
 import logging
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from sqlalchemy.exc import IntegrityError
 
@@ -234,8 +234,6 @@ def get_alternate_forms_facts(session, lemma_id: int, language_code: str) -> Opt
         else:
             print(f"Has: {', '.join(k for k, v in facts.items() if v)}")
     """
-    from typing import Dict
-
     # Check if any alternate forms facts exist
     fact = session.query(GrammarFact).filter(
         GrammarFact.lemma_id == lemma_id,

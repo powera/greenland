@@ -150,7 +150,28 @@ document.addEventListener('DOMContentLoaded', function() {
             if (result.success) {
                 statusBadge.className = 'badge bg-success';
                 statusBadge.textContent = 'Success';
-                outputContent.innerHTML = `<pre>${escapeHtml(result.stdout)}</pre>`;
+
+                let outputHtml = '';
+
+                // Show file path and download button if available
+                if (result.output_path) {
+                    outputHtml += `
+                        <div class="alert alert-success mb-3">
+                            <h6><i class="bi bi-check-circle"></i> Export Complete</h6>
+                            <p class="mb-2"><strong>File saved to:</strong></p>
+                            <code class="d-block mb-3 p-2 bg-light border rounded">${escapeHtml(result.output_path)}</code>
+                            <a href="{{ url_for('exports.elnias_download') }}?path=${encodeURIComponent(result.output_path)}"
+                               class="btn btn-primary btn-sm">
+                                <i class="bi bi-download"></i> Download File
+                            </a>
+                        </div>
+                    `;
+                }
+
+                // Show stdout output
+                outputHtml += `<h6>Output:</h6><pre>${escapeHtml(result.stdout)}</pre>`;
+
+                outputContent.innerHTML = outputHtml;
             } else {
                 statusBadge.className = 'badge bg-danger';
                 statusBadge.textContent = 'Error';

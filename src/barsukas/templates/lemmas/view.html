@@ -192,22 +192,17 @@
             <form method="post" action="{{ url_for('agents.generate_forms', lemma_id=lemma.id) }}">
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label for="lang_code" class="form-label">Language</label>
-                        <select class="form-select" id="lang_code" name="lang_code" required>
-                            <option value="lt">Lithuanian</option>
-                            <option value="fr">French</option>
-                            <option value="de">German</option>
-                            <option value="es">Spanish</option>
-                            <option value="pt">Portuguese</option>
-                            <option value="en">English</option>
+                        <label for="pos_type" class="form-label">POS Type</label>
+                        <select class="form-select" id="pos_type" name="pos_type" required>
+                            <option value="noun" {% if lemma.pos_type == 'noun' %}selected{% endif %}>Noun</option>
+                            <option value="verb" {% if lemma.pos_type == 'verb' %}selected{% endif %}>Verb</option>
+                            <option value="adjective" {% if lemma.pos_type == 'adjective' %}selected{% endif %}>Adjective</option>
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label for="pos_type" class="form-label">POS Type</label>
-                        <select class="form-select" id="pos_type" name="pos_type" required>
-                            <option value="noun">Noun</option>
-                            <option value="verb" selected>Verb</option>
-                            <option value="adjective">Adjective</option>
+                        <label for="lang_code" class="form-label">Language</label>
+                        <select class="form-select" id="lang_code" name="lang_code" required>
+                            <!-- Options will be populated by JavaScript based on POS type -->
                         </select>
                     </div>
                     <div class="alert alert-info">
@@ -225,6 +220,57 @@
         </div>
     </div>
 </div>
+
+<script>
+// Supported language/POS combinations for form generation
+const SUPPORTED_FORM_GENERATION = {
+    'noun': ['lt'],
+    'verb': ['lt', 'fr', 'de', 'es', 'pt', 'en'],
+    'adjective': ['lt']
+};
+
+const LANGUAGE_NAMES = {
+    'lt': 'Lithuanian',
+    'fr': 'French',
+    'de': 'German',
+    'es': 'Spanish',
+    'pt': 'Portuguese',
+    'en': 'English'
+};
+
+function updateLanguageOptions() {
+    const posType = document.getElementById('pos_type').value;
+    const langSelect = document.getElementById('lang_code');
+    const supportedLangs = SUPPORTED_FORM_GENERATION[posType] || [];
+
+    // Clear existing options
+    langSelect.innerHTML = '';
+
+    if (supportedLangs.length === 0) {
+        langSelect.innerHTML = '<option value="">No languages available for this POS type</option>';
+        langSelect.disabled = true;
+        return;
+    }
+
+    langSelect.disabled = false;
+
+    // Add supported language options
+    supportedLangs.forEach(langCode => {
+        const option = document.createElement('option');
+        option.value = langCode;
+        option.textContent = LANGUAGE_NAMES[langCode];
+        langSelect.appendChild(option);
+    });
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    updateLanguageOptions();
+
+    // Update when POS type changes
+    document.getElementById('pos_type').addEventListener('change', updateLanguageOptions);
+});
+</script>
 {% endif %}
 
 <!-- Synonyms & Alternative Forms -->

@@ -366,11 +366,12 @@ Focus on variety, natural language usage, and accurate translations."""
             session: Database session
 
         Returns:
-            Dictionary with storage results
+            Dictionary with storage results including sentence IDs
         """
         stored_count = 0
         failed_count = 0
         errors = []
+        sentence_ids = []
 
         for sentence_data in sentences_data:
             try:
@@ -453,6 +454,7 @@ Focus on variety, natural language usage, and accurate translations."""
 
                 session.flush()
                 stored_count += 1
+                sentence_ids.append(sentence.id)
 
                 logger.info(
                     f"✓ Stored sentence {sentence.id}: "
@@ -473,7 +475,8 @@ Focus on variety, natural language usage, and accurate translations."""
         return {
             'stored': stored_count,
             'failed': failed_count,
-            'errors': errors
+            'errors': errors,
+            'sentence_ids': sentence_ids
         }
 
     def _find_lemma_for_word(

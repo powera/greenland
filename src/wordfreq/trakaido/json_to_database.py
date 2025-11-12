@@ -82,28 +82,30 @@ english_alternative_map = {
 
 def clean_english_word(english_word: str) -> tuple[str, bool]:
     """
-    Clean English word by removing parenthetical information and indicate if parentheses were present.
-    
+    Normalize English word while preserving parenthetical disambiguation.
+
+    This function does NOT strip parentheticals - those are needed for disambiguation!
+    It only normalizes whitespace.
+
     Examples:
-        "orange (fruit)" -> ("orange", True)
-        "cousin (m)" -> ("cousin", True)
-        "head (body)" -> ("head", True)
-        "Lithuanian (f)" -> ("lithuanian", True)
+        "orange (fruit)" -> ("orange (fruit)", True)
+        "cousin (male)" -> ("cousin (male)", True)
+        "  mouse  " -> ("mouse", False)
         "simple" -> ("simple", False)
-    
+
     Args:
         english_word: The English word potentially containing parenthetical info
-        
+
     Returns:
-        tuple: (cleaned_word, has_parentheses) where has_parentheses indicates if parentheses were found
+        tuple: (normalized_word, has_parentheses) where has_parentheses indicates if parentheses were found
     """
     # Check if parenthetical information exists
     has_parentheses = bool(re.search(r'\s*\([^)]+\)', english_word))
-    
-    # Remove parenthetical information
-    cleaned = re.sub(r'\s*\([^)]+\)', '', english_word).strip()
-    
-    return cleaned, has_parentheses
+
+    # Just normalize whitespace, DO NOT strip parentheticals
+    normalized = ' '.join(english_word.split())
+
+    return normalized, has_parentheses
 
 
 def load_trakaido_json(json_path: str) -> List[Dict[str, Any]]:
@@ -269,12 +271,9 @@ def find_or_create_lemma(session, english_word: str, lithuanian_word: str, diffi
     Returns:
         Lemma object or None if creation failed
     """
-    # Clean the English word by removing parenthetical information and normalize
+    # Normalize the English word (preserves parentheticals for disambiguation)
+    # DO NOT lowercase - proper nouns like "Christmas" and "North America" need capitalization
     clean_english, has_parentheses = clean_english_word(english_word)
-    clean_english = clean_english.strip().lower()
-    
-    # Store original form in notes if parentheses were present
-    notes = f"Original form: {english_word}" if has_parentheses else None
     
     # Use provided POS or default to noun
     if not pos_type:
@@ -456,7 +455,6 @@ def migrate_json_data(session, trakaido_data: List[Dict[str, Any]], update_diffi
 
             # Create alternatives for this lemma if they exist
             clean_english, _ = clean_english_word(english_word)
-            clean_english = clean_english.strip().lower()
             alternatives_created = create_alternatives_for_lemma(session, lemma, clean_english)
 
         else:

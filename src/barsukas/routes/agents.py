@@ -370,12 +370,15 @@ def generate_forms(lemma_id):
         agent = VilkasAgent(db_path=Config.DB_PATH, debug=Config.DEBUG)
 
         # Check if the language/pos_type combination is supported
+        # Only languages/POS combinations with individual lemma processing support
+        # Note: German, French, Spanish, Portuguese nouns use the new base system
+        # and only support batch processing (not available in web interface yet)
         SUPPORTED_LANGUAGES = {
             'lt': ['noun', 'verb', 'adjective'],
-            'fr': ['noun', 'verb'],
-            'de': ['noun', 'verb'],
-            'es': ['noun', 'verb'],
-            'pt': ['noun', 'verb'],
+            'fr': ['verb'],
+            'de': ['verb'],
+            'es': ['verb'],
+            'pt': ['verb'],
             'en': ['verb']
         }
 
@@ -433,27 +436,15 @@ def generate_forms(lemma_id):
         elif handler_key == 'fr_verb':
             from wordfreq.translation.generate_french_verb_forms import process_lemma_conjugations
             success = process_lemma_conjugations(g.db, lemma, client)
-        elif handler_key == 'fr_noun':
-            from wordfreq.translation.generate_french_noun_forms import process_lemma_declensions
-            success = process_lemma_declensions(g.db, lemma, client)
         elif handler_key == 'de_verb':
             from wordfreq.translation.generate_german_verb_forms import process_lemma_conjugations
             success = process_lemma_conjugations(g.db, lemma, client)
-        elif handler_key == 'de_noun':
-            from wordfreq.translation.generate_german_noun_forms import process_lemma_declensions
-            success = process_lemma_declensions(g.db, lemma, client)
         elif handler_key == 'es_verb':
             from wordfreq.translation.generate_spanish_verb_forms import process_lemma_conjugations
             success = process_lemma_conjugations(g.db, lemma, client)
-        elif handler_key == 'es_noun':
-            from wordfreq.translation.generate_spanish_noun_forms import process_lemma_declensions
-            success = process_lemma_declensions(g.db, lemma, client)
         elif handler_key == 'pt_verb':
             from wordfreq.translation.generate_portuguese_verb_forms import process_lemma_conjugations
             success = process_lemma_conjugations(g.db, lemma, client)
-        elif handler_key == 'pt_noun':
-            from wordfreq.translation.generate_portuguese_noun_forms import process_lemma_declensions
-            success = process_lemma_declensions(g.db, lemma, client)
         elif handler_key == 'en_verb':
             from wordfreq.translation.generate_english_verb_forms import process_lemma_conjugations
             success = process_lemma_conjugations(g.db, lemma, client)
@@ -662,16 +653,15 @@ def generate_sentences(lemma_id):
 
         if store_result['stored'] > 0:
             flash(f'Successfully generated and stored {store_result["stored"]} sentence(s)!', 'success')
-            
-            # Query the newly created sentences to display them
-            from wordfreq.storage.models.schema import SentenceWord
-            sentence_ids = g.db.query(Sentence.id).join(SentenceWord).filter(
-                SentenceWord.lemma_id == lemma_id
-            ).order_by(Sentence.id.desc()).limit(num_sentences).all()
-            
-            sentences = g.db.query(Sentence).filter(
-                Sentence.id.in_([s[0] for s in sentence_ids])
-            ).all()
+
+            # Get the newly created sentences using the IDs returned from store_sentences
+            sentence_ids = store_result.get('sentence_ids', [])
+            if sentence_ids:
+                sentences = g.db.query(Sentence).filter(
+                    Sentence.id.in_(sentence_ids)
+                ).all()
+            else:
+                sentences = []
 
             # Show the results
             return render_template('agents/sentence_generation_results.html',
