@@ -1,0 +1,7 @@
+Given the word "{lemma_text}" with context hint "{disambiguation_hint}", select the best matching definition from the candidates below.
+
+Candidates:
+{candidate_descriptions}
+
+Which candidate number (1-{num_candidates}) best matches the context "{disambiguation_hint}"?
+Consider the hint carefully and select the most appropriate meaning.
