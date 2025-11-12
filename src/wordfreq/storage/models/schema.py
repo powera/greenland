@@ -281,13 +281,13 @@ class Corpus(Base):
 class WordFrequency(Base):
     """Model for storing word frequency in different corpora - tied to WordToken."""
     __tablename__ = 'word_frequencies'
-    
+
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     word_token_id: Mapped[int] = mapped_column(ForeignKey("word_tokens.id"), nullable=False)
     corpus_id: Mapped[int] = mapped_column(ForeignKey("corpus.id"), nullable=False)
     rank: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     frequency: Mapped[Optional[float]] = mapped_column(Float, nullable=True)  # Optional raw frequency
-    
+
     # Relationships
     word_token = relationship("WordToken", back_populates="frequencies")
     corpus = relationship("Corpus", back_populates="word_frequencies")

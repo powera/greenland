@@ -511,7 +511,13 @@ def generate_synonyms(lemma_id):
 
         # Show results
         synonyms_count = result.get('stored_synonyms', 0)
-        alternatives_count = result.get('stored_alternatives', 0)
+        # Sum all alternative form types (new specific types + legacy)
+        alternatives_count = (
+            result.get('stored_abbreviations', 0) +
+            result.get('stored_expanded', 0) +
+            result.get('stored_spellings', 0) +
+            result.get('stored_alternatives', 0)  # Legacy field for backward compatibility
+        )
         total_count = synonyms_count + alternatives_count
 
         if total_count > 0:
