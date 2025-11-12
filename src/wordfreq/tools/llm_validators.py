@@ -348,7 +348,7 @@ def validate_all_translations_for_word(
         )
         language_properties[f"{lang_code}_suggested"] = SchemaProperty(
             "string",
-            f"Better {lang_code} translation if current one has issues, otherwise empty string"
+            f"ONLY the corrected {lang_code} translation word/phrase (no explanations or alternatives). Empty string if current translation is correct."
         )
         language_properties[f"{lang_code}_issues"] = SchemaProperty(
             type="array",
@@ -394,6 +394,12 @@ For each translation, determine:
 1. Is it semantically correct for the English word?
 2. Is it in lemma/dictionary form (not inflected)?
 3. If there are issues, what would be a better translation?
+
+IMPORTANT FORMATTING RULES:
+- For the "suggested_translation" field, provide ONLY the corrected translation word/phrase itself
+- Do NOT include explanations, alternatives, or additional context in the suggested_translation
+- Put all explanations, context, and alternative options in the "issues" field instead
+- Example: If the correct translation is "valgomojo lazdelės", the suggested_translation should be exactly "valgomojo lazdelės", not "valgomojo lazdelės or valgomojo lazdelės (singular: valgomoji lazdelė)"
 
 Language guidance: Validate for {language_list}.
 """

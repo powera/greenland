@@ -29,6 +29,9 @@ def add_lemma():
         definition_text = request.form.get('definition_text', '').strip()
         pos_type = request.form.get('pos_type', '').strip()
         pos_subtype = request.form.get('pos_subtype', '').strip() or None
+        difficulty_level_str = request.form.get('difficulty_level', '').strip()
+        initial_translation_lang = request.form.get('initial_translation_lang', '').strip()
+        initial_translation_text = request.form.get('initial_translation_text', '').strip()
 
         # Validate required fields
         if not lemma_text:
@@ -65,6 +68,20 @@ def add_lemma():
             flash(f'Invalid POS subtype for GUID generation: {e}', 'error')
             return render_template('lemmas/add.html')
 
+        # Parse difficulty level
+        difficulty_level = None
+        if difficulty_level_str:
+            try:
+                difficulty_level = int(difficulty_level_str)
+                # Validate difficulty level
+                if difficulty_level != Config.EXCLUDE_DIFFICULTY_LEVEL and \
+                   (difficulty_level < Config.MIN_DIFFICULTY_LEVEL or difficulty_level > Config.MAX_DIFFICULTY_LEVEL):
+                    flash(f'Difficulty level must be -1 or between {Config.MIN_DIFFICULTY_LEVEL} and {Config.MAX_DIFFICULTY_LEVEL}', 'error')
+                    return render_template('lemmas/add.html')
+            except ValueError:
+                flash('Invalid difficulty level', 'error')
+                return render_template('lemmas/add.html')
+
         # Create new lemma
         new_lemma = Lemma(
             lemma_text=lemma_text,
@@ -72,6 +89,7 @@ def add_lemma():
             pos_type=pos_type,
             pos_subtype=pos_subtype,
             guid=guid,
+            difficulty_level=difficulty_level,
             confidence=0.0,
             verified=False
         )
@@ -90,8 +108,32 @@ def add_lemma():
             new_value=f'{lemma_text} ({pos_type})'
         )
 
+        # Save initial translation if provided
+        if initial_translation_lang and initial_translation_text:
+            from wordfreq.storage.translation_helpers import set_translation
+            try:
+                set_translation(g.db, new_lemma, initial_translation_lang, initial_translation_text)
+                # Log the translation
+                log_translation_change(
+                    session=g.db,
+                    source=Config.OPERATION_LOG_SOURCE,
+                    operation_type='translation_add',
+                    lemma_id=new_lemma.id,
+                    field_name=f'{initial_translation_lang}_translation',
+                    old_value=None,
+                    new_value=initial_translation_text
+                )
+            except Exception as e:
+                # Don't fail lemma creation if translation fails
+                flash(f'Warning: Failed to save translation: {str(e)}', 'warning')
+
         g.db.commit()
-        flash(f'Created new lemma: {lemma_text}', 'success')
+
+        success_message = f'Created new lemma: {lemma_text}'
+        if initial_translation_lang and initial_translation_text:
+            success_message += f' (with {initial_translation_lang.upper()} translation)'
+        flash(success_message, 'success')
+
         return redirect(url_for('lemmas.view_lemma', lemma_id=new_lemma.id))
 
     return render_template('lemmas/add.html')
