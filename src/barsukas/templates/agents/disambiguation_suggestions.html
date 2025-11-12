@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block title %}Disambiguation Suggestions - {{ lemma_text }}{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('lemmas.list_lemmas') }}">Lemmas</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('lemmas.view_lemma', lemma_id=lemma.id) }}">{{ lemma.lemma_text }}</a></li>
+                <li class="breadcrumb-item active">Disambiguation Suggestions</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+        <div class="card border-warning">
+            <div class="card-header bg-warning text-dark">
+                <h4 class="mb-0">
+                    <i class="bi bi-exclamation-triangle"></i> Disambiguation Needed: "{{ lemma_text }}"
+                </h4>
+            </div>
+            <div class="card-body">
+                <p class="lead">
+                    Found <strong>{{ duplicates|length }}</strong> different meanings for "{{ lemma_text }}" with different translations.
+                    Each needs a unique disambiguation term in parentheses.
+                </p>
+                <div class="alert alert-info">
+                    <i class="bi bi-lightbulb"></i> <strong>How to fix:</strong>
+                    Click "Edit Lemma" on each entry below to add the suggested parenthetical to the lemma_text field.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Suggestions for each duplicate -->
+{% for dup in duplicates %}
+<div class="row mb-3">
+    <div class="col">
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span>
+                        <i class="bi bi-file-text"></i> <strong>{{ dup.guid }}</strong>
+                    </span>
+                    <div>
+                        <span class="badge bg-secondary">{{ dup.pos_type }}</span>
+                        {% if dup.pos_subtype %}
+                            <span class="badge bg-light text-dark">{{ dup.pos_subtype }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Current lemma text -->
+                <div class="mb-3">
+                    <strong>Current:</strong> <code>{{ dup.lemma_text }}</code>
+                </div>
+
+                <!-- AI Suggestion -->
+                {% if dup.guid in suggestions %}
+                <div class="card bg-success bg-opacity-10 border-success mb-3">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="bi bi-robot text-success"></i> <strong class="text-success">AI Suggested:</strong>
+                                <code class="ms-2 fs-5 bg-white p-2 rounded border border-success">{{ lemma_text }} ({{ suggestions[dup.guid] }})</code>
+                            </div>
+                            <form method="post" action="{{ url_for('agents.apply_disambiguation', lemma_id=dup.id) }}" style="display: inline;">
+                                <input type="hidden" name="new_lemma_text" value="{{ lemma_text }} ({{ suggestions[dup.guid] }})">
+                                <input type="hidden" name="return_to_suggestions" value="true">
+                                <input type="hidden" name="original_lemma_id" value="{{ lemma.id }}">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="bi bi-check-circle"></i> Apply Suggestion
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Definition -->
+                <div class="mb-3">
+                    <strong>Definition:</strong>
+                    <p class="mb-2">{{ dup.definition_text }}</p>
+                </div>
+
+                <!-- Sample Translations -->
+                <div class="mb-3">
+                    <strong>Sample Translations:</strong>
+                    <div class="row">
+                        {% if dup.lithuanian_translation %}
+                        <div class="col-md-6">
+                            <small><span class="text-uppercase">LT:</span> {{ dup.lithuanian_translation }}</small>
+                        </div>
+                        {% endif %}
+                        {% if dup.chinese_translation %}
+                        <div class="col-md-6">
+                            <small><span class="text-uppercase">ZH:</span> {{ dup.chinese_translation }}</small>
+                        </div>
+                        {% endif %}
+                        {% if dup.korean_translation %}
+                        <div class="col-md-6">
+                            <small><span class="text-uppercase">KO:</span> {{ dup.korean_translation }}</small>
+                        </div>
+                        {% endif %}
+                        {% if dup.french_translation %}
+                        <div class="col-md-6">
+                            <small><span class="text-uppercase">FR:</span> {{ dup.french_translation }}</small>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Action buttons -->
+                <div class="mt-3">
+                    <a href="{{ url_for('lemmas.edit_lemma', lemma_id=dup.id) }}" class="btn btn-primary">
+                        <i class="bi bi-pencil"></i> Edit Lemma
+                    </a>
+                    <a href="{{ url_for('lemmas.view_lemma', lemma_id=dup.id) }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-eye"></i> View Details
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<!-- Instructions -->
+<div class="row mb-4">
+    <div class="col">
+        <div class="card bg-light">
+            <div class="card-body">
+                <h5><i class="bi bi-info-circle"></i> Next Steps</h5>
+                <ol>
+                    <li>Review the AI suggestions above for each meaning</li>
+                    <li>Click "Edit Lemma" for each entry</li>
+                    <li>Update the "Lemma Text" field to include the parenthetical (e.g., "{{ lemma_text }} (animal)")</li>
+                    <li>Save the changes</li>
+                </ol>
+                <p class="mb-0">
+                    <strong>Note:</strong> The parentheticals will appear in WireWord exports and help distinguish these words in the Trakaido app.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Back button -->
+<div class="row">
+    <div class="col">
+        <a href="{{ url_for('lemmas.view_lemma', lemma_id=lemma.id) }}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Lemma
+        </a>
+    </div>
+</div>
+
+{% endblock %}

@@ -683,3 +683,98 @@ def generate_pronunciation(
         'confidence': result['confidence'],
         'notes': result['notes']
     }
+
+
+def suggest_disambiguation(
+    word: str,
+    definitions: List[Dict[str, str]],
+    model: str = "gpt-5-mini"
+) -> Dict[str, any]:
+    """
+    Suggest short disambiguation terms for multiple meanings of the same word.
+
+    Args:
+        word: The English word that needs disambiguation
+        definitions: List of dicts with 'guid', 'definition', and optionally 'translations'
+        model: LLM model to use
+
+    Returns:
+        Dictionary mapping GUIDs to suggested disambiguators:
+        {
+            'guid1': 'animal',
+            'guid2': 'computer',
+            ...
+        }
+    """
+    client = UnifiedLLMClient()
+
+    # Build the prompt with all definitions
+    definitions_text = []
+    for i, item in enumerate(definitions, 1):
+        def_text = f"{i}. GUID: {item['guid']}\n   Definition: {item['definition']}"
+        if 'translations' in item and item['translations']:
+            trans_examples = ', '.join([f"{lang}: {trans}" for lang, trans in list(item['translations'].items())[:3]])
+            def_text += f"\n   Example translations: {trans_examples}"
+        definitions_text.append(def_text)
+
+    prompt = f"""You are helping to disambiguate different meanings of the English word "{word}".
+
+Below are {len(definitions)} different definitions for this word. For each one, suggest a SHORT disambiguation term (1-2 words maximum) that would be placed in parentheses after the word.
+
+The disambiguation should be:
+- Very short (1-2 words, preferably 1)
+- Clear and descriptive
+- Use lowercase unless it's a proper noun
+- Examples: "animal", "computer", "tool", "body part", "verb", "plant"
+
+Definitions:
+{chr(10).join(definitions_text)}
+
+Provide a short disambiguation term for each definition."""
+
+    schema = Schema(
+        name="DisambiguationSuggestions",
+        description="Suggested disambiguation terms for each meaning",
+        properties={
+            f"disambiguation_{i+1}": SchemaProperty(
+                "string",
+                f"Short disambiguation term for definition {i+1} (GUID: {item['guid']})"
+            )
+            for i, item in enumerate(definitions)
+        }
+    )
+
+    try:
+        response = client.generate_chat(
+            prompt=prompt,
+            model=model,
+            json_schema=schema
+        )
+
+        if not response.structured_data:
+            logger.error("No structured data received for disambiguation suggestions")
+            return {
+                'success': False,
+                'error': 'No structured data received',
+                'suggestions': {}
+            }
+
+        # Map results back to GUIDs
+        suggestions = {}
+        for i, item in enumerate(definitions):
+            key = f"disambiguation_{i+1}"
+            if key in response.structured_data:
+                suggestions[item['guid']] = response.structured_data[key].strip()
+
+        return {
+            'success': True,
+            'suggestions': suggestions
+        }
+
+    except Exception as e:
+        logger.error(f"Error getting disambiguation suggestions: {e}")
+        return {
+            'success': False,
+            'error': str(e),
+            'suggestions': {}
+        }
