@@ -432,7 +432,8 @@ Focus on variety, natural language usage, and accurate translations."""
                             word_lemma = self._find_lemma_for_word(
                                 session,
                                 english_lemma,
-                                word_data.get('role')
+                                word_data.get('role'),
+                                source_lemma=source_lemma
                             )
 
                         add_sentence_word(
@@ -483,7 +484,8 @@ Focus on variety, natural language usage, and accurate translations."""
         self,
         session,
         word_text: str,
-        word_role: str
+        word_role: str,
+        source_lemma: Optional[Lemma] = None
     ) -> Optional[Lemma]:
         """
         Try to find a lemma matching a word.
@@ -492,12 +494,29 @@ Focus on variety, natural language usage, and accurate translations."""
             session: Database session
             word_text: Word text (lemma form)
             word_role: Role in sentence (helps with POS filtering)
+            source_lemma: The lemma this sentence was generated for (helps with disambiguation)
 
         Returns:
             Lemma object if found, None otherwise
         """
         if not word_text:
             return None
+
+        # FIRST: If this word matches the source lemma (ignoring disambiguation), use the source lemma
+        # This handles cases like "mouse (computer)" where the word is "mouse"
+        if source_lemma:
+            # Strip disambiguation from source lemma text to compare
+            source_text = source_lemma.lemma_text
+            # Remove parenthetical disambiguation if present
+            if '(' in source_text:
+                source_base = source_text.split('(')[0].strip()
+            else:
+                source_base = source_text
+
+            # Check if word matches the base text of source lemma
+            if word_text.lower() == source_base.lower():
+                logger.debug(f"Matched word '{word_text}' to source lemma: {source_lemma.guid} ({source_lemma.lemma_text})")
+                return source_lemma
 
         # Map roles to POS types
         role_to_pos = {
