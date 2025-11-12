@@ -22,7 +22,53 @@
                 <i class="bi bi-plus-circle"></i> Add New Lemma
             </div>
             <div class="card-body">
+                <!-- Auto-populate section -->
+                <div class="card bg-light mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="bi bi-robot"></i> Auto-Populate (Optional)</h5>
+                        <p class="text-muted small">Use AI to automatically fill in definition, POS type, and subtype based on the word.</p>
+
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label for="auto_word" class="form-label">Word</label>
+                                <input type="text" class="form-control" id="auto_word">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="auto_lang" class="form-label">Translation Language (Optional)</label>
+                                <select class="form-select" id="auto_lang">
+                                    <option value="">None</option>
+                                    <option value="lt">Lithuanian</option>
+                                    <option value="zh">Chinese</option>
+                                    <option value="ko">Korean</option>
+                                    <option value="fr">French</option>
+                                    <option value="es">Spanish</option>
+                                    <option value="de">German</option>
+                                    <option value="pt">Portuguese</option>
+                                    <option value="sw">Swahili</option>
+                                    <option value="vi">Vietnamese</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="auto_translation" class="form-label">Translation (Optional)</label>
+                                <input type="text" class="form-control" id="auto_translation">
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <button type="button" class="btn btn-success" onclick="autoPopulate()" id="auto_populate_btn">
+                                <i class="bi bi-magic"></i> Auto-Populate Fields
+                            </button>
+                            <small class="text-muted ms-2" id="auto_populate_status"></small>
+                        </div>
+                    </div>
+                </div>
+
                 <form method="post">
+                    <!-- Hidden fields to pass translation info -->
+                    <input type="hidden" id="initial_translation_lang" name="initial_translation_lang">
+                    <input type="hidden" id="initial_translation_text" name="initial_translation_text">
+
                     <div class="mb-3">
                         <label for="lemma_text" class="form-label">Lemma Text <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="lemma_text" name="lemma_text" required
@@ -65,8 +111,20 @@
                         </div>
                     </div>
 
+                    <div class="mb-3">
+                        <label for="difficulty_level" class="form-label">Difficulty Level (Optional)</label>
+                        <select class="form-select" id="difficulty_level" name="difficulty_level">
+                            <option value="">Not set</option>
+                            <option value="-1">Excluded (-1)</option>
+                            {% for i in range(1, 21) %}
+                                <option value="{{ i }}">Level {{ i }}</option>
+                            {% endfor %}
+                        </select>
+                        <small class="form-text text-muted">Trakaido difficulty level (1-20), or -1 to exclude from wordlists</small>
+                    </div>
+
                     <div class="alert alert-info">
-                        <i class="bi bi-info-circle"></i> <strong>Note:</strong> After creating the lemma, you can add translations, difficulty levels, and other details on the lemma view page.
+                        <i class="bi bi-info-circle"></i> <strong>Note:</strong> After creating the lemma, you can add translations and other details on the lemma view page.
                     </div>
 
                     <div class="d-flex justify-content-between">
@@ -205,6 +263,85 @@ function checkWordExists() {
         .catch(error => {
             console.error('Error checking word:', error);
             resultDiv.innerHTML = '';
+        });
+}
+
+function autoPopulate() {
+    const word = document.getElementById('auto_word').value.trim();
+    const langCode = document.getElementById('auto_lang').value;
+    const translation = document.getElementById('auto_translation').value.trim();
+    const statusDiv = document.getElementById('auto_populate_status');
+    const btn = document.getElementById('auto_populate_btn');
+
+    if (!word) {
+        statusDiv.innerHTML = '<span class="text-danger">Please enter a word</span>';
+        return;
+    }
+
+    // Disable button and show loading
+    btn.disabled = true;
+    btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Processing...';
+    statusDiv.innerHTML = '<i class="bi bi-hourglass-split"></i> Calling AI...';
+
+    // Build query parameters
+    const params = new URLSearchParams({ word });
+    if (langCode && translation) {
+        params.append('lang_code', langCode);
+        params.append('translation', translation);
+    }
+
+    // Call API
+    fetch(`{{ url_for('api.auto_populate_lemma') }}?${params.toString()}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Fill in the form fields
+                document.getElementById('lemma_text').value = word;
+                document.getElementById('definition_text').value = data.definition;
+                document.getElementById('pos_type').value = data.pos_type;
+
+                // Update subtypes dropdown and select the appropriate one
+                updateSubtypeOptions();
+                // Give the dropdown a moment to update
+                setTimeout(() => {
+                    document.getElementById('pos_subtype').value = data.pos_subtype;
+                }, 100);
+
+                // Set difficulty level if suggested
+                if (data.suggested_difficulty_level) {
+                    document.getElementById('difficulty_level').value = data.suggested_difficulty_level;
+                }
+
+                // Store translation info in hidden fields if provided
+                if (langCode && translation) {
+                    document.getElementById('initial_translation_lang').value = langCode;
+                    document.getElementById('initial_translation_text').value = translation;
+                }
+
+                // Show success message with difficulty suggestion
+                let message = '<span class="text-success"><i class="bi bi-check-circle"></i> Fields populated!</span>';
+                if (data.suggested_difficulty_level) {
+                    message += `<br><small>Set difficulty level to ${data.suggested_difficulty_level} (max for this subtype)</small>`;
+                }
+                if (langCode && translation) {
+                    message += `<br><small>Translation (${langCode.toUpperCase()}: ${translation}) will be saved</small>`;
+                }
+                statusDiv.innerHTML = message;
+
+                // Trigger word existence check
+                checkWordExists();
+            } else {
+                statusDiv.innerHTML = `<span class="text-danger"><i class="bi bi-exclamation-triangle"></i> Error: ${data.error}</span>`;
+            }
+        })
+        .catch(error => {
+            console.error('Error auto-populating:', error);
+            statusDiv.innerHTML = `<span class="text-danger"><i class="bi bi-exclamation-triangle"></i> Error: ${error.message}</span>`;
+        })
+        .finally(() => {
+            // Re-enable button
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-magic"></i> Auto-Populate Fields';
         });
 }
 </script>

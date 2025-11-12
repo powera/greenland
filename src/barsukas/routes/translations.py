@@ -30,8 +30,9 @@ def update_translation(lemma_id, lang_code):
         flash('Invalid language code', 'error')
         return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
 
-    # Get new translation value
+    # Get new translation value and optional return_to parameter
     new_translation = request.form.get('translation', '').strip()
+    return_to = request.form.get('return_to', '').strip()
 
     if not new_translation:
         flash('Translation cannot be empty', 'error')
@@ -69,7 +70,11 @@ def update_translation(lemma_id, lang_code):
         flash(str(e), 'error')
         return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
 
-    return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
+    # Redirect based on return_to parameter
+    if return_to == 'check_translations':
+        return redirect(url_for('agents.check_translations', lemma_id=lemma_id))
+    else:
+        return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
 
 
 @bp.route('/<int:lemma_id>/<lang_code>/check', methods=['GET'])
