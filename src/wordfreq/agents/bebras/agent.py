@@ -11,6 +11,7 @@ import logging
 from typing import Dict, List, Optional, Tuple
 
 import constants
+import util.prompt_loader
 from clients.types import Schema, SchemaProperty
 from clients.unified_client import UnifiedLLMClient
 from wordfreq.storage.database import (
@@ -116,40 +117,21 @@ class BebrasAgent:
         context: Optional[str]
     ) -> str:
         """Build the LLM prompt for sentence analysis."""
-        context_str = f"\n\nContext: {context}" if context else ""
+        # Load prompt templates
+        prompt_context = util.prompt_loader.get_context("wordfreq", "sentence_analysis")
+        prompt_template = util.prompt_loader.get_prompt("wordfreq", "sentence_analysis")
 
-        prompt = f"""Analyze the following sentence to extract vocabulary words suitable for language learning.
+        # Format the prompt with parameters
+        context_info = f"\n\nContext: {context}" if context else ""
+        formatted_prompt = prompt_template.format(
+            sentence_text=sentence_text,
+            source_language=source_language,
+            context_info=context_info
+        )
 
-Sentence: "{sentence_text}"
-Language: {source_language}{context_str}
-
-Task:
-1. Identify all CONTENT WORDS (nouns, verbs, adjectives, adverbs) in the sentence
-2. For each content word, provide:
-   - The word as it appears in the sentence (e.g., "eating", "bananas")
-   - The base form/lemma (e.g., "eat", "banana")
-   - Part of speech (noun, verb, adjective, adverb)
-   - Role in the sentence (subject, verb, object, adjective, adverb)
-   - A brief context or disambiguation hint if the word has multiple meanings
-     (e.g., for "mouse": "animal" or "computer device")
-   - Grammatical form (e.g., "present_participle", "plural", "base_form")
-
-3. Also provide:
-   - Sentence pattern (e.g., "SVO", "SVAO")
-   - Main verb tense (e.g., "present", "past", "future")
-
-IMPORTANT:
-- Focus on CONTENT WORDS only (skip articles, pronouns, prepositions like "I", "a", "the")
-- Include words that learners need to know to understand the sentence
-- For ambiguous words, provide disambiguation hints (e.g., "bank" could be "financial institution" or "river bank")
-- List words in the order they appear in the sentence
-
-Example for "The cat sleeps on the mat":
-- Word: "cat", Lemma: "cat", POS: "noun", Role: "subject", Disambiguation: "animal"
-- Word: "sleeps", Lemma: "sleep", POS: "verb", Role: "verb", Disambiguation: "rest"
-- Word: "mat", Lemma: "mat", POS: "noun", Role: "object", Disambiguation: "floor covering"
-"""
-        return prompt
+        # Combine context (system instructions) and user prompt
+        combined_prompt = f"{prompt_context}\n\n{formatted_prompt}"
+        return combined_prompt
 
     def _build_analysis_schema(self) -> Schema:
         """Build the response schema for sentence analysis."""

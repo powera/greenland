@@ -9,6 +9,7 @@ in multiple target languages using LLM-based translation.
 import logging
 from typing import List, Dict, Optional
 
+import util.prompt_loader
 from clients.unified_client import UnifiedLLMClient
 from clients.types import Schema, SchemaProperty
 from wordfreq.storage.database import (
@@ -138,19 +139,20 @@ def translate_sentence(
         LANGUAGE_NAMES.get(lang, lang) for lang in target_languages
     ]
 
-    # Build prompt
-    prompt = f"""Translate the following {source_lang_name} sentence to {', '.join(target_lang_names)}.
+    # Load prompt templates
+    prompt_context = util.prompt_loader.get_context("wordfreq", "sentence_translation")
+    prompt_template = util.prompt_loader.get_prompt("wordfreq", "sentence_translation")
 
-Source sentence ({source_lang_name}): "{source_text}"
+    # Format the prompt with parameters
+    formatted_prompt = prompt_template.format(
+        source_lang_name=source_lang_name,
+        target_lang_names=', '.join(target_lang_names),
+        source_text=source_text,
+        target_lang_codes=', '.join(target_languages)
+    )
 
-Requirements:
-1. Provide natural, idiomatic translations (not word-for-word)
-2. Ensure grammatical correctness in each target language
-3. Maintain the same meaning and tone as the original
-4. Use simple, clear language appropriate for language learners
-
-Provide translations for each target language using the language codes: {', '.join(target_languages)}
-"""
+    # Combine context and prompt
+    prompt = f"{prompt_context}\n\n{formatted_prompt}"
 
     # Build schema with properties for each target language
     properties = {}

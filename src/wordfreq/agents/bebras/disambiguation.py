@@ -9,6 +9,7 @@ lemmas in the database, especially when there are multiple candidates (polysemes
 import logging
 from typing import Optional, List
 
+import util.prompt_loader
 from wordfreq.storage.database import Lemma
 from clients.unified_client import UnifiedLLMClient
 from clients.types import Schema, SchemaProperty
@@ -119,15 +120,20 @@ def disambiguate_lemma(
         desc += f": {lemma.definition_text}"
         candidate_descriptions.append(desc)
 
-    prompt = f"""Given the word "{lemma_text}" with context hint "{disambiguation_hint}",
-select the best matching definition from the candidates below.
+    # Load prompt templates
+    prompt_context = util.prompt_loader.get_context("wordfreq", "word_disambiguation")
+    prompt_template = util.prompt_loader.get_prompt("wordfreq", "word_disambiguation")
 
-Candidates:
-{chr(10).join(candidate_descriptions)}
+    # Format the prompt with parameters
+    formatted_prompt = prompt_template.format(
+        lemma_text=lemma_text,
+        disambiguation_hint=disambiguation_hint,
+        candidate_descriptions="\n".join(candidate_descriptions),
+        num_candidates=len(candidates)
+    )
 
-Which candidate number (1-{len(candidates)}) best matches the context "{disambiguation_hint}"?
-Consider the hint carefully and select the most appropriate meaning.
-"""
+    # Combine context and prompt
+    prompt = f"{prompt_context}\n\n{formatted_prompt}"
 
     # Build schema
     schema = Schema(
