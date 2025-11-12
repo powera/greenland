@@ -36,6 +36,13 @@
                             {% if lemma.disambiguation %}
                                 <small class="text-muted">({{ lemma.disambiguation }})</small>
                             {% endif %}
+                            {% if needs_disambiguation_check %}
+                            <form method="post" action="{{ url_for('agents.check_disambiguation', lemma_id=lemma.id) }}" style="display: inline;">
+                                <button type="submit" class="btn btn-sm btn-outline-warning" title="Other lemmas exist with this word - check if disambiguation is needed">
+                                    <i class="bi bi-exclamation-triangle"></i> Check Disambiguation
+                                </button>
+                            </form>
+                            {% endif %}
                         </h3>
                         <p class="lead lemma-definition">
                             {{ lemma.definition_text }}
