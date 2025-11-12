@@ -200,3 +200,60 @@ def delete_grammar_fact(
         return True
 
     return False
+
+
+def get_alternate_forms_facts(session, lemma_id: int, language_code: str) -> Optional[Dict[str, bool]]:
+    """
+    Get the alternate forms grammar facts for a lemma in a specific language.
+
+    These facts describe whether the word linguistically has synonyms, abbreviations,
+    expanded forms, or alternate spellings - NOT whether they're stored in the database.
+
+    Args:
+        session: Database session
+        lemma_id: ID of the lemma
+        language_code: Language code
+
+    Returns:
+        Dictionary with boolean values for each category, or None if facts not recorded
+        Example: {
+            'has_synonyms': False,          # Word has no synonyms
+            'has_abbreviations': True,      # Word has abbreviations
+            'has_expanded_forms': False,    # Word has no expanded forms
+            'has_alternate_spellings': True # Word has alternate spellings
+        }
+
+        Returns None if no facts have been recorded (we don't know yet)
+
+    Example:
+        facts = get_alternate_forms_facts(session, lemma_id=123, language_code="en")
+        if facts is None:
+            print("Unknown - facts not yet recorded")
+        elif not any(facts.values()):
+            print("This word has no alternate forms")
+        else:
+            print(f"Has: {', '.join(k for k, v in facts.items() if v)}")
+    """
+    from typing import Dict
+
+    # Check if any alternate forms facts exist
+    fact = session.query(GrammarFact).filter(
+        GrammarFact.lemma_id == lemma_id,
+        GrammarFact.language_code == language_code,
+        GrammarFact.fact_type.in_([
+            'has_synonyms',
+            'has_abbreviations',
+            'has_expanded_forms',
+            'has_alternate_spellings'
+        ])
+    ).first()
+
+    if not fact:
+        return None
+
+    results = {}
+    for fact_type in ['has_synonyms', 'has_abbreviations', 'has_expanded_forms', 'has_alternate_spellings']:
+        value = get_grammar_fact_value(session, lemma_id, language_code, fact_type)
+        results[fact_type] = (value == "true")
+
+    return results

@@ -34,6 +34,7 @@ from wordfreq.storage.database import create_database_session
 from wordfreq.storage.models.schema import Lemma, DerivativeForm
 from wordfreq.storage.crud.derivative_form import add_derivative_form
 from wordfreq.storage.crud.word_token import add_word_token
+from wordfreq.storage.crud.grammar_fact import add_grammar_fact, get_alternate_forms_facts
 from wordfreq.storage.translation_helpers import get_translation, get_supported_languages
 from wordfreq.translation.client import LinguisticClient
 
@@ -151,14 +152,11 @@ class SernasAgent:
                     if not translation or not translation.strip():
                         continue
 
-                    # Check for existing synonyms/alternatives
-                    existing_forms = session.query(DerivativeForm).filter(
-                        DerivativeForm.lemma_id == lemma.id,
-                        DerivativeForm.language_code == lang,
-                        DerivativeForm.grammatical_form.in_(form_types)
-                    ).all()
+                    # Check if alternate forms facts have been recorded for this lemma/language
+                    facts = get_alternate_forms_facts(session, lemma.id, lang)
 
-                    if not existing_forms:
+                    # If no facts recorded, we need to run ŠERNAS
+                    if facts is None:
                         missing_by_language[lang].append({
                             'guid': lemma.guid,
                             'english': lemma.lemma_text,
@@ -167,6 +165,18 @@ class SernasAgent:
                             'pos_subtype': lemma.pos_subtype,
                             'difficulty_level': lemma.difficulty_level
                         })
+                    # If form_type is specified, check if that specific fact is missing
+                    elif form_type:
+                        fact_key = f"has_{form_type}s" if not form_type.endswith('s') else f"has_{form_type}"
+                        if fact_key not in facts:
+                            missing_by_language[lang].append({
+                                'guid': lemma.guid,
+                                'english': lemma.lemma_text,
+                                'translation': translation,
+                                'pos_type': lemma.pos_type,
+                                'pos_subtype': lemma.pos_subtype,
+                                'difficulty_level': lemma.difficulty_level
+                            })
 
             # Calculate statistics
             total_missing = sum(len(items) for items in missing_by_language.values())
@@ -340,6 +350,16 @@ class SernasAgent:
                 except Exception as e:
                     logger.warning(f"Failed to store alternate spelling '{alt_spelling}': {e}")
 
+            # Record grammar facts to track what ŠERNAS found (or didn't find)
+            add_grammar_fact(session, lemma.id, language_code, "has_synonyms",
+                           "true" if stored_synonyms > 0 else "false", verified=True)
+            add_grammar_fact(session, lemma.id, language_code, "has_abbreviations",
+                           "true" if stored_abbreviations > 0 else "false", verified=True)
+            add_grammar_fact(session, lemma.id, language_code, "has_expanded_forms",
+                           "true" if stored_expanded > 0 else "false", verified=True)
+            add_grammar_fact(session, lemma.id, language_code, "has_alternate_spellings",
+                           "true" if stored_spellings > 0 else "false", verified=True)
+
             session.commit()
 
             logger.info(f"Stored {stored_synonyms} synonyms, {stored_abbreviations} abbreviations, {stored_expanded} expanded forms, and {stored_spellings} alternate spellings")
@@ -407,7 +427,7 @@ class SernasAgent:
 1. **Abbreviations**: Shortened forms of the word (e.g., "television" → "TV", "Doctor" → "Dr.", "Avenue" → "Ave")
 2. **Expanded forms**: Longer/fuller forms of the word (e.g., "thousand" → "one thousand", "TV" → "television", "Dr." → "Doctor")
 3. **Alternate spellings**: Spelling variants of the SAME word (e.g., "gray" → "grey", "color" → "colour", "doughnut" → "donut")
-4. **Synonyms**: Different words with similar or related meanings that would be appropriate for language learners (e.g., "street" → "road", "mad" → "angry")
+4. **Synonyms**: Words that can be used INTERCHANGEABLY in most contexts (e.g., "street" → "road", "mad" → "angry", "start" → "begin")
 
 **Context:**
 - English lemma: {english_word}
@@ -415,12 +435,19 @@ class SernasAgent:
 - This is for language learning, so focus on common, useful forms that learners might encounter
 - Consider whether forms would be appropriate/correct in Trakaido learning context
 
-**Guidelines:**
+**IMPORTANT Guidelines:**
 - For abbreviations: Only include shortened forms of the same word (initialisms, truncations, contractions)
 - For expanded_forms: Only include longer/fuller versions of the same word or phrase
 - For alternate_spellings: Only include different spelling variations (regional, historical, informal spellings)
-- For synonyms: Include words with similar meanings, but be mindful of context appropriateness
-- Return 0-5 items for each category (not all words have abbreviations, expanded forms, alternate spellings, or synonyms)
+- For synonyms: ONLY include words that can replace the original in MOST contexts
+  * Do NOT include hyponyms (specific types): "cheddar" is NOT a synonym of "cheese"
+  * Do NOT include hypernyms (categories): "dairy product" is NOT a synonym of "cheese"
+  * Do NOT include related words: "fromage" is NOT a synonym of "cheese" (it's the same word in another language)
+  * Do NOT include examples or variants of the thing
+  * TRUE synonyms are rare - most words will have ZERO synonyms
+- **RETURN EMPTY ARRAYS when no valid forms exist** - this is completely normal and expected
+- Most words will have ZERO items in most categories - only return items when they genuinely exist
+- Do NOT make up forms, add explanations, or include text like "(no common alternate spelling)"
 - Do NOT include the original word itself
 - Do NOT include pure numerals (e.g., "1000", "42") - only word forms
 - Prefer common, useful forms over rare or archaic ones
