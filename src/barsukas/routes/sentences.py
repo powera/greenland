@@ -137,3 +137,31 @@ def view_sentence(sentence_id):
                          translations=translations,
                          language_names=language_names,
                          words_by_language=words_by_language)
+
+
+@bp.route('/<int:sentence_id>/update_level', methods=['POST'])
+def update_level(sentence_id):
+    """Update the minimum level for a sentence."""
+    sentence = g.db.query(Sentence).get(sentence_id)
+    if not sentence:
+        flash('Sentence not found', 'error')
+        return redirect(url_for('sentences.list_sentences'))
+
+    new_level = request.form.get('minimum_level', '').strip()
+
+    try:
+        if new_level == '' or new_level.lower() == 'null':
+            sentence.minimum_level = None
+            flash(f'Sentence level cleared', 'success')
+        else:
+            sentence.minimum_level = int(new_level)
+            flash(f'Sentence level updated to {sentence.minimum_level}', 'success')
+
+        g.db.commit()
+    except ValueError:
+        flash('Invalid level value. Must be a number or empty.', 'error')
+    except Exception as e:
+        flash(f'Error updating sentence level: {e}', 'error')
+        g.db.rollback()
+
+    return redirect(url_for('sentences.view_sentence', sentence_id=sentence_id))

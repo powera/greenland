@@ -450,8 +450,11 @@ Focus on variety, natural language usage, and accurate translations."""
                             language_code=lang_code
                         )
 
-                # Calculate minimum difficulty level
-                min_level = calculate_minimum_level(session, sentence)
+                # Calculate minimum difficulty level (for potential future use)
+                # but hard-code all new sentences to level -1 (disabled by default)
+                calculate_minimum_level(session, sentence)
+                sentence.minimum_level = -1
+                min_level = -1
 
                 session.flush()
                 stored_count += 1
