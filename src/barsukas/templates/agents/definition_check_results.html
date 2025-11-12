@@ -29,27 +29,33 @@
                 <div class="row mb-4">
                     <div class="col-md-6">
                         <h5>Current Definition</h5>
-                        <div class="alert alert-secondary">
-                            {{ lemma.definition_text }}
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                {{ lemma.definition_text }}
+                            </div>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <h5>Suggested Improvement</h5>
-                        <div class="alert alert-success">
-                            {{ result.suggested_definition or result.definition }}
+                        <div class="card bg-success bg-opacity-10 border-success">
+                            <div class="card-body">
+                                {{ result.suggested_definition or result.definition }}
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 {% if not result.is_valid %}
-                    <div class="alert alert-warning">
-                        <i class="bi bi-exclamation-triangle"></i>
-                        <strong>Issues Found:</strong>
-                        <ul class="mb-0 mt-2">
-                            {% for issue in result.issues %}
-                                <li>{{ issue }}</li>
-                            {% endfor %}
-                        </ul>
+                    <div class="card border-warning mb-3">
+                        <div class="card-body">
+                            <i class="bi bi-exclamation-triangle text-warning"></i>
+                            <strong>Issues Found:</strong>
+                            <ul class="mb-0 mt-2">
+                                {% for issue in result.issues %}
+                                    <li>{{ issue }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
                     </div>
                 {% endif %}
 
@@ -78,9 +84,11 @@
                     </div>
                 {% endif %}
 
-                <div class="alert alert-info mt-4">
-                    <i class="bi bi-info-circle"></i>
-                    <strong>Note:</strong> This is an AI-generated suggestion. Please review it carefully before applying.
+                <div class="card bg-info bg-opacity-10 border-info mt-4">
+                    <div class="card-body">
+                        <i class="bi bi-info-circle text-info"></i>
+                        <strong>Note:</strong> This is an AI-generated suggestion. Please review it carefully before applying.
+                    </div>
                 </div>
             </div>
         </div>
