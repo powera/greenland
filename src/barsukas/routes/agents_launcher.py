@@ -95,24 +95,6 @@ AGENTS = [
         'icon': 'bi-chat-quote',
         'use_dynamic_form': True,
     },
-    {
-        'name': 'POVAS',
-        'display_name': 'Povas',
-        'subtitle': 'HTML Generator',
-        'description': 'Generates static HTML pages displaying words organized by part-of-speech subtypes.',
-        'script': 'povas.py',
-        'icon': 'bi-file-earmark-code',
-        'redirect_to': 'exports.exports_page',  # Redirect to unified exports page
-    },
-    {
-        'name': 'UNGURYS',
-        'display_name': 'Ungurys',
-        'subtitle': 'WireWord Export',
-        'description': 'Exports word data to WireWord API format for external system integration.',
-        'script': 'ungurys.py',
-        'icon': 'bi-cloud-download',
-        'redirect_to': 'exports.exports_page',  # Redirect to unified exports page
-    },
 ]
 
 

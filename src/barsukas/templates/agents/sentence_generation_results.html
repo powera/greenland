@@ -77,35 +77,61 @@
 
                 <!-- Words Used -->
                 {% if sentence.words %}
-                <div class="mt-3 pt-3 border-top">
-                    <h6 class="text-muted">Words Used:</h6>
-                    <div class="row">
-                        {% for word in sentence.words|sort(attribute='position') %}
-                        <div class="col-md-6 mb-2">
-                            <small>
-                                <span class="badge bg-light text-dark">{{ word.position + 1 }}</span>
-                                <strong>{{ word.word_role }}:</strong>
-                                {% if word.lemma %}
-                                    <a href="{{ url_for('lemmas.view_lemma', lemma_id=word.lemma.id) }}">
-                                        {{ word.lemma.lemma_text }}
-                                    </a>
-                                    {% if word.lemma.guid %}
-                                        <code class="small">{{ word.lemma.guid }}</code>
-                                    {% endif %}
-                                {% else %}
-                                    <em>{{ word.english_text or word.target_language_text }}</em>
-                                {% endif %}
-                                {% if word.declined_form %}
-                                    → <em>{{ word.declined_form }}</em>
-                                {% endif %}
-                                {% if word.grammatical_case %}
-                                    <span class="text-muted small">({{ word.grammatical_case }})</span>
-                                {% endif %}
-                            </small>
+                <details class="mt-3" open>
+                    <summary class="text-muted" style="cursor: pointer;">
+                        <i class="bi bi-chevron-down"></i> Words Used:
+                    </summary>
+                    <div class="mt-2 pt-2 border-top">
+                        {# Group words by language #}
+                        {% set words_by_lang = {} %}
+                        {% for word in sentence.words %}
+                            {% set _ = words_by_lang.setdefault(word.language_code, []).append(word) %}
+                        {% endfor %}
+
+                        {# Display each language group #}
+                        {% for lang_code in words_by_lang.keys()|sort %}
+                        <div class="mb-3">
+                            <h6 class="text-uppercase text-primary mb-2">{{ lang_code }}:</h6>
+                            <div class="row">
+                                {% for word in words_by_lang[lang_code]|sort(attribute='position') %}
+                                <div class="col-md-6 mb-2">
+                                    <small>
+                                        <span class="badge bg-light text-dark">{{ word.position + 1 }}</span>
+                                        <strong>{{ word.word_role }}:</strong>
+                                        {% if word.lemma %}
+                                            {% if word.lemma.id == lemma.id %}
+                                                <strong class="text-success">{{ word.lemma.lemma_text }}</strong>
+                                                {% if word.lemma.guid %}
+                                                    <code class="small">{{ word.lemma.guid }}</code>
+                                                {% endif %}
+                                            {% else %}
+                                                <a href="{{ url_for('lemmas.view_lemma', lemma_id=word.lemma.id) }}">
+                                                    {{ word.lemma.lemma_text }}
+                                                </a>
+                                                {% if word.lemma.guid %}
+                                                    <code class="small">{{ word.lemma.guid }}</code>
+                                                {% endif %}
+                                            {% endif %}
+                                        {% else %}
+                                            <em class="text-muted">{{ word.english_text or word.target_language_text }}</em>
+                                        {% endif %}
+                                        {% if word.declined_form %}
+                                            → <em>{{ word.declined_form }}</em>
+                                        {% endif %}
+                                        {% if word.grammatical_case %}
+                                            <span class="text-muted small">({{ word.grammatical_case }})</span>
+                                        {% endif %}
+                                        {% if word.grammatical_form %}
+                                            <span class="text-muted small">[{{ word.grammatical_form }}]</span>
+                                        {% endif %}
+                                    </small>
+                                </div>
+                                {% endfor %}
+                            </div>
                         </div>
                         {% endfor %}
                     </div>
-                </div>
+                </details>
                 {% endif %}
 
                 <!-- Metadata -->

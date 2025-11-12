@@ -2,8 +2,10 @@
 
 """Routes for data export functionality (POVAS HTML generation and UNGURYS WireWord exports)."""
 
-from flask import Blueprint, render_template, request, flash, redirect, url_for, jsonify
+from flask import Blueprint, render_template, request, flash, redirect, url_for, jsonify, send_file
 import subprocess
+import os
+import re
 from pathlib import Path
 from config import Config
 
@@ -126,12 +128,25 @@ def elnias_generate():
 
         success = process.returncode == 0
 
-        return jsonify({
+        # Parse the output to extract the file path
+        output_path = None
+        if success and stdout:
+            # Look for "Successfully wrote X entries to /path/to/file" in stdout
+            match = re.search(r'Successfully wrote \d+ entries to (.+)', stdout)
+            if match:
+                output_path = match.group(1).strip()
+
+        response_data = {
             'success': success,
             'stdout': stdout,
             'stderr': stderr,
             'returncode': process.returncode
-        })
+        }
+
+        if output_path:
+            response_data['output_path'] = output_path
+
+        return jsonify(response_data)
 
     except subprocess.TimeoutExpired:
         process.kill()
@@ -145,3 +160,35 @@ def elnias_generate():
             'success': False,
             'error': str(e)
         }), 500
+
+
+@bp.route('/elnias/download')
+def elnias_download():
+    """Download the generated ELNIAS bootstrap file."""
+    file_path = request.args.get('path')
+
+    if not file_path:
+        flash('No file path provided', 'error')
+        return redirect(url_for('exports.elnias_form'))
+
+    # Security: Ensure the file path is within the project directory
+    project_root = Path(Config.DB_PATH).parent.parent
+    abs_file_path = Path(file_path).resolve()
+
+    try:
+        # Check if file is within project root
+        abs_file_path.relative_to(project_root)
+    except ValueError:
+        flash('Invalid file path', 'error')
+        return redirect(url_for('exports.elnias_form'))
+
+    if not abs_file_path.exists():
+        flash('File not found', 'error')
+        return redirect(url_for('exports.elnias_form'))
+
+    return send_file(
+        abs_file_path,
+        as_attachment=True,
+        download_name=abs_file_path.name,
+        mimetype='application/json'
+    )

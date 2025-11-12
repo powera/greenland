@@ -166,10 +166,16 @@ def list_lemmas():
             (func.lower(Lemma.vietnamese_translation).contains(search_lower), 6),
             else_=7
         )
-        query = query.order_by(relevance, Lemma.lemma_text)
+        query = query.order_by(relevance, func.lower(Lemma.lemma_text))
     else:
-        # No search, just order alphabetically
-        query = query.order_by(Lemma.lemma_text)
+        # No search: order by difficulty level first, then case-insensitive alphabetically
+        # Put NULL levels at the end, then -1 (not applicable), then levels 1-9
+        level_order = case(
+            (Lemma.difficulty_level.is_(None), 99),  # NULL levels last
+            (Lemma.difficulty_level == -1, 98),  # -1 (not applicable) second to last
+            else_=Lemma.difficulty_level
+        )
+        query = query.order_by(level_order, func.lower(Lemma.lemma_text))
 
     # Paginate
     total = query.count()
