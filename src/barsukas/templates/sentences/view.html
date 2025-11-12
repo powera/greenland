@@ -49,6 +49,14 @@
                                 {% else %}
                                     <span class="text-muted">Not set</span>
                                 {% endif %}
+                                <form method="POST" action="{{ url_for('sentences.update_level', sentence_id=sentence.id) }}" class="d-inline-block ms-2">
+                                    <div class="input-group input-group-sm" style="max-width: 200px;">
+                                        <input type="number" name="minimum_level" class="form-control form-control-sm"
+                                               placeholder="New level" value="{{ sentence.minimum_level if sentence.minimum_level is not none else '' }}"
+                                               style="max-width: 80px;">
+                                        <button type="submit" class="btn btn-sm btn-primary">Update</button>
+                                    </div>
+                                </form>
                             </dd>
 
                             <dt class="col-sm-5">Verified:</dt>

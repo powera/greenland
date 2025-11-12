@@ -134,6 +134,7 @@ def import_sentence_from_dict(session, sentence_data: dict, source_file: Optiona
             sentence=sentence,
             position=position,
             word_role=word_data.get('type', 'unknown'),
+            language_code='lt',  # Lithuanian language code
             lemma=lemma,
             english_text=word_data.get('english'),
             target_language_text=word_data.get('lithuanian'),  # Could be made dynamic based on target language
