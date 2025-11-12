@@ -1,25 +1,15 @@
 #!/usr/bin/env python3
 """
-Bebras - Database Integrity Checker Agent
+Database Integrity Checker
 
-This agent runs autonomously to ensure database structural integrity and
-identify data quality issues like orphaned records, missing required fields,
-and constraint violations.
-
-"Bebras" means "beaver" in Lithuanian - industrious builder of solid structures!
+Checks database structural integrity and identifies data quality issues like
+orphaned records, missing required fields, and constraint violations.
 """
 
 import argparse
 import logging
-import sys
 from datetime import datetime
-from pathlib import Path
 from typing import Dict, List, Optional
-
-# Add src directory to path
-GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent)
-if GREENLAND_SRC_PATH not in sys.path:
-    sys.path.insert(0, GREENLAND_SRC_PATH)
 
 import constants
 from wordfreq.storage.database import create_database_session
@@ -27,20 +17,15 @@ from wordfreq.storage.models.schema import (
     Lemma, WordToken, DerivativeForm, Corpus, WordFrequency
 )
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
 logger = logging.getLogger(__name__)
 
 
-class BebrasAgent:
-    """Agent for checking database integrity."""
+class IntegrityChecker:
+    """Database integrity checker."""
 
     def __init__(self, db_path: str = None, debug: bool = False):
         """
-        Initialize the Bebras agent.
+        Initialize the integrity checker.
 
         Args:
             db_path: Database path (uses default if None)
@@ -57,36 +42,25 @@ class BebrasAgent:
         return create_database_session(self.db_path)
 
     def check_orphaned_derivative_forms(self) -> Dict[str, any]:
-        """
-        Check for derivative forms with invalid lemma_id references.
-
-        Returns:
-            Dictionary with orphaned forms info
-        """
+        """Check for derivative forms with invalid lemma_id references."""
         logger.info("Checking for orphaned derivative forms...")
 
         session = self.get_session()
         try:
-            # Get all valid lemma IDs
-            valid_lemma_ids = set()
-            lemmas = session.query(Lemma.id).all()
-            for lemma_id_tuple in lemmas:
-                valid_lemma_ids.add(lemma_id_tuple[0])
-
+            valid_lemma_ids = set(lemma_id for lemma_id, in session.query(Lemma.id).all())
             logger.info(f"Found {len(valid_lemma_ids)} valid lemma IDs")
 
-            # Check all derivative forms
             derivative_forms = session.query(DerivativeForm).all()
-            orphaned = []
-
-            for form in derivative_forms:
-                if form.lemma_id not in valid_lemma_ids:
-                    orphaned.append({
-                        'id': form.id,
-                        'derivative_form_text': form.derivative_form_text,
-                        'language_code': form.language_code,
-                        'invalid_lemma_id': form.lemma_id
-                    })
+            orphaned = [
+                {
+                    'id': form.id,
+                    'derivative_form_text': form.derivative_form_text,
+                    'language_code': form.language_code,
+                    'invalid_lemma_id': form.lemma_id
+                }
+                for form in derivative_forms
+                if form.lemma_id not in valid_lemma_ids
+            ]
 
             logger.info(f"Found {len(orphaned)} orphaned derivative forms")
 
@@ -108,49 +82,29 @@ class BebrasAgent:
             session.close()
 
     def check_derivative_form_word_tokens(self) -> Dict[str, any]:
-        """
-        Check for derivative forms with invalid word_token_id references or mismatched text.
-
-        Verifies:
-        1. word_token_id (when not NULL) references a valid word token
-        2. derivative_form_text matches the word_token.token when word_token_id is set
-
-        Returns:
-            Dictionary with invalid derivative form info
-        """
+        """Check for derivative forms with invalid word_token_id references or mismatched text."""
         logger.info("Checking derivative form word token references...")
 
         session = self.get_session()
         try:
-            # Build a dict of word token id -> token text
-            word_tokens_dict = {}
-            tokens = session.query(WordToken.id, WordToken.token).all()
-            for token_id, token_text in tokens:
-                word_tokens_dict[token_id] = token_text
-
+            word_tokens_dict = {token_id: token_text for token_id, token_text in session.query(WordToken.id, WordToken.token).all()}
             logger.info(f"Found {len(word_tokens_dict)} valid word tokens")
 
-            # Check all derivative forms with word_token_id set
             derivative_forms = session.query(DerivativeForm).filter(
                 DerivativeForm.word_token_id.isnot(None)
             ).all()
 
             issues = []
-
             for form in derivative_forms:
                 form_issues = []
-
-                # Check if word_token_id is valid
                 if form.word_token_id not in word_tokens_dict:
                     form_issues.append(f"invalid_word_token_id: {form.word_token_id}")
-                else:
-                    # Check if derivative_form_text matches word_token.token
+                elif form.derivative_form_text != word_tokens_dict[form.word_token_id]:
                     expected_token = word_tokens_dict[form.word_token_id]
-                    if form.derivative_form_text != expected_token:
-                        form_issues.append(
-                            f"text_mismatch: derivative_form_text='{form.derivative_form_text}' "
-                            f"but word_token.token='{expected_token}'"
-                        )
+                    form_issues.append(
+                        f"text_mismatch: derivative_form_text='{form.derivative_form_text}' "
+                        f"but word_token.token='{expected_token}'"
+                    )
 
                 if form_issues:
                     issues.append({
@@ -182,31 +136,16 @@ class BebrasAgent:
             session.close()
 
     def check_orphaned_word_frequencies(self) -> Dict[str, any]:
-        """
-        Check for word frequencies with invalid word_token_id or corpus_id.
-
-        Returns:
-            Dictionary with orphaned frequencies info
-        """
+        """Check for word frequencies with invalid word_token_id or corpus_id."""
         logger.info("Checking for orphaned word frequencies...")
 
         session = self.get_session()
         try:
-            # Get all valid word token IDs
-            valid_token_ids = set()
-            tokens = session.query(WordToken.id).all()
-            for token_id_tuple in tokens:
-                valid_token_ids.add(token_id_tuple[0])
-
-            # Get all valid corpus IDs
-            valid_corpus_ids = set()
-            corpora = session.query(Corpus.id).all()
-            for corpus_id_tuple in corpora:
-                valid_corpus_ids.add(corpus_id_tuple[0])
+            valid_token_ids = set(token_id for token_id, in session.query(WordToken.id).all())
+            valid_corpus_ids = set(corpus_id for corpus_id, in session.query(Corpus.id).all())
 
             logger.info(f"Found {len(valid_token_ids)} valid token IDs and {len(valid_corpus_ids)} valid corpus IDs")
 
-            # Check all word frequencies
             frequencies = session.query(WordFrequency).all()
             orphaned = []
 
@@ -245,24 +184,17 @@ class BebrasAgent:
             session.close()
 
     def check_missing_required_fields(self) -> Dict[str, any]:
-        """
-        Check for records with missing required fields.
-
-        Returns:
-            Dictionary with missing fields info
-        """
+        """Check for records with missing required fields."""
         logger.info("Checking for missing required fields...")
 
         session = self.get_session()
         try:
             issues = []
 
-            # Check Lemmas
-            lemmas_missing_definition = session.query(Lemma).filter(
+            # Check Lemmas for missing fields
+            for lemma in session.query(Lemma).filter(
                 (Lemma.definition_text.is_(None)) | (Lemma.definition_text == '')
-            ).all()
-
-            for lemma in lemmas_missing_definition:
+            ).all():
                 issues.append({
                     'table': 'lemmas',
                     'id': lemma.id,
@@ -272,11 +204,9 @@ class BebrasAgent:
                     'severity': 'high'
                 })
 
-            lemmas_missing_pos = session.query(Lemma).filter(
+            for lemma in session.query(Lemma).filter(
                 (Lemma.pos_type.is_(None)) | (Lemma.pos_type == '')
-            ).all()
-
-            for lemma in lemmas_missing_pos:
+            ).all():
                 issues.append({
                     'table': 'lemmas',
                     'id': lemma.id,
@@ -286,13 +216,10 @@ class BebrasAgent:
                     'severity': 'high'
                 })
 
-            # Check lemmas with GUIDs but no difficulty level
-            lemmas_missing_level = session.query(Lemma).filter(
+            for lemma in session.query(Lemma).filter(
                 Lemma.guid.isnot(None),
                 Lemma.difficulty_level.is_(None)
-            ).all()
-
-            for lemma in lemmas_missing_level:
+            ).all():
                 issues.append({
                     'table': 'lemmas',
                     'id': lemma.id,
@@ -302,38 +229,8 @@ class BebrasAgent:
                     'severity': 'medium'
                 })
 
-            # Check DerivativeForms
-            forms_missing_text = session.query(DerivativeForm).filter(
-                (DerivativeForm.derivative_form_text.is_(None)) |
-                (DerivativeForm.derivative_form_text == '')
-            ).all()
-
-            for form in forms_missing_text:
-                issues.append({
-                    'table': 'derivative_forms',
-                    'id': form.id,
-                    'lemma_id': form.lemma_id,
-                    'missing_field': 'derivative_form_text',
-                    'severity': 'high'
-                })
-
-            forms_missing_language = session.query(DerivativeForm).filter(
-                (DerivativeForm.language_code.is_(None)) |
-                (DerivativeForm.language_code == '')
-            ).all()
-
-            for form in forms_missing_language:
-                issues.append({
-                    'table': 'derivative_forms',
-                    'id': form.id,
-                    'derivative_form_text': form.derivative_form_text,
-                    'missing_field': 'language_code',
-                    'severity': 'high'
-                })
-
             logger.info(f"Found {len(issues)} records with missing required fields")
 
-            # Group by severity
             high_severity = [i for i in issues if i['severity'] == 'high']
             medium_severity = [i for i in issues if i['severity'] == 'medium']
 
@@ -359,43 +256,26 @@ class BebrasAgent:
             session.close()
 
     def check_lemmas_without_derivatives(self) -> Dict[str, any]:
-        """
-        Check for lemmas that have no derivative forms at all.
-
-        Returns:
-            Dictionary with lemmas without forms
-        """
+        """Check for lemmas that have no derivative forms at all."""
         logger.info("Checking for lemmas without derivative forms...")
 
         session = self.get_session()
         try:
-            # Get all lemma IDs
-            all_lemma_ids = set()
-            lemmas = session.query(Lemma).all()
-            for lemma in lemmas:
-                all_lemma_ids.add(lemma.id)
-
-            # Get lemma IDs that have derivative forms
-            lemmas_with_forms = set()
-            forms = session.query(DerivativeForm.lemma_id).distinct().all()
-            for lemma_id_tuple in forms:
-                lemmas_with_forms.add(lemma_id_tuple[0])
-
-            # Find lemmas without forms
+            all_lemma_ids = set(lemma.id for lemma in session.query(Lemma).all())
+            lemmas_with_forms = set(lemma_id for lemma_id, in session.query(DerivativeForm.lemma_id).distinct().all())
             lemmas_without_forms_ids = all_lemma_ids - lemmas_with_forms
 
-            # Get details
-            lemmas_without_forms = []
-            for lemma_id in lemmas_without_forms_ids:
-                lemma = session.query(Lemma).filter(Lemma.id == lemma_id).first()
-                if lemma:
-                    lemmas_without_forms.append({
-                        'id': lemma.id,
-                        'guid': lemma.guid,
-                        'lemma_text': lemma.lemma_text,
-                        'pos_type': lemma.pos_type,
-                        'difficulty_level': lemma.difficulty_level
-                    })
+            lemmas_without_forms = [
+                {
+                    'id': lemma.id,
+                    'guid': lemma.guid,
+                    'lemma_text': lemma.lemma_text,
+                    'pos_type': lemma.pos_type,
+                    'difficulty_level': lemma.difficulty_level
+                }
+                for lemma_id in lemmas_without_forms_ids
+                if (lemma := session.query(Lemma).filter(Lemma.id == lemma_id).first())
+            ]
 
             logger.info(f"Found {len(lemmas_without_forms)} lemmas without derivative forms")
 
@@ -417,19 +297,13 @@ class BebrasAgent:
             session.close()
 
     def check_duplicate_guids(self) -> Dict[str, any]:
-        """
-        Check for duplicate GUIDs in lemmas table.
-
-        Returns:
-            Dictionary with duplicate GUIDs info
-        """
+        """Check for duplicate GUIDs in lemmas table."""
         logger.info("Checking for duplicate GUIDs...")
 
         session = self.get_session()
         try:
             from sqlalchemy import func
 
-            # Find GUIDs that appear more than once
             guid_counts = session.query(
                 Lemma.guid,
                 func.count(Lemma.id).label('count')
@@ -443,9 +317,7 @@ class BebrasAgent:
 
             duplicates = []
             for guid, count in guid_counts:
-                # Get all lemmas with this GUID
                 lemmas = session.query(Lemma).filter(Lemma.guid == guid).all()
-
                 duplicate_entry = {
                     'guid': guid,
                     'count': count,
@@ -479,30 +351,25 @@ class BebrasAgent:
             session.close()
 
     def check_invalid_difficulty_levels(self) -> Dict[str, any]:
-        """
-        Check for difficulty levels outside the valid range (1-20).
-
-        Returns:
-            Dictionary with invalid levels info
-        """
+        """Check for difficulty levels outside the valid range (1-20)."""
         logger.info("Checking for invalid difficulty levels...")
 
         session = self.get_session()
         try:
-            # Find lemmas with invalid difficulty levels
             invalid_lemmas = session.query(Lemma).filter(
                 Lemma.difficulty_level.isnot(None),
                 ((Lemma.difficulty_level < 1) | (Lemma.difficulty_level > 20))
             ).all()
 
-            invalid_entries = []
-            for lemma in invalid_lemmas:
-                invalid_entries.append({
+            invalid_entries = [
+                {
                     'id': lemma.id,
                     'guid': lemma.guid,
                     'lemma_text': lemma.lemma_text,
                     'invalid_level': lemma.difficulty_level
-                })
+                }
+                for lemma in invalid_lemmas
+            ]
 
             logger.info(f"Found {len(invalid_entries)} lemmas with invalid difficulty levels")
 
@@ -522,15 +389,7 @@ class BebrasAgent:
             session.close()
 
     def run_full_check(self, output_file: Optional[str] = None) -> Dict[str, any]:
-        """
-        Run all integrity checks and generate a comprehensive report.
-
-        Args:
-            output_file: Optional path to write JSON report
-
-        Returns:
-            Dictionary with all check results
-        """
+        """Run all integrity checks and generate a comprehensive report."""
         logger.info("Starting full database integrity check...")
         start_time = datetime.now()
 
@@ -552,10 +411,8 @@ class BebrasAgent:
         duration = (end_time - start_time).total_seconds()
         results['duration_seconds'] = duration
 
-        # Print summary
         self._print_summary(results, start_time, duration)
 
-        # Write to output file if requested
         if output_file:
             import json
             try:
@@ -570,7 +427,7 @@ class BebrasAgent:
     def _print_summary(self, results: Dict, start_time: datetime, duration: float):
         """Print a summary of the check results."""
         logger.info("=" * 80)
-        logger.info("BEBRAS AGENT REPORT - Database Integrity Check")
+        logger.info("BEBRAS INTEGRITY CHECK REPORT")
         logger.info("=" * 80)
         logger.info(f"Timestamp: {start_time.strftime('%Y-%m-%d %H:%M:%S')}")
         logger.info(f"Duration: {duration:.2f} seconds")
@@ -578,35 +435,29 @@ class BebrasAgent:
 
         checks = results['checks']
 
-        # Orphaned records
         logger.info("ORPHANED RECORDS:")
         logger.info(f"  Derivative forms (invalid lemma_id): {checks['orphaned_derivative_forms']['orphaned_count']}")
         logger.info(f"  Derivative forms (invalid/mismatched word_token): {checks['derivative_form_word_tokens']['issue_count']}")
         logger.info(f"  Word frequencies: {checks['orphaned_word_frequencies']['orphaned_count']}")
         logger.info("")
 
-        # Missing required fields
         missing_fields = checks['missing_required_fields']
         logger.info("MISSING REQUIRED FIELDS:")
         logger.info(f"  High severity: {missing_fields['high_severity_count']}")
         logger.info(f"  Medium severity: {missing_fields['medium_severity_count']}")
         logger.info("")
 
-        # Lemmas without derivatives
         logger.info("LEMMAS WITHOUT DERIVATIVE FORMS:")
         logger.info(f"  Count: {checks['lemmas_without_derivatives']['without_forms_count']}")
         logger.info("")
 
-        # Duplicate GUIDs
         logger.info("DUPLICATE GUIDs:")
         logger.info(f"  Count: {checks['duplicate_guids']['duplicate_count']}")
         logger.info("")
 
-        # Invalid difficulty levels
         logger.info("INVALID DIFFICULTY LEVELS:")
         logger.info(f"  Count: {checks['invalid_difficulty_levels']['invalid_count']}")
 
-        # Overall assessment
         total_issues = (
             checks['orphaned_derivative_forms']['orphaned_count'] +
             checks['derivative_form_word_tokens']['issue_count'] +
@@ -623,13 +474,9 @@ class BebrasAgent:
 
 
 def get_argument_parser():
-    """Return the argument parser for introspection.
-
-    This function allows external tools to introspect the available
-    command-line arguments without executing the main function.
-    """
+    """Return the argument parser for introspection."""
     parser = argparse.ArgumentParser(
-        description="Bebras - Database Integrity Checker Agent"
+        description="Bebras Database Integrity Checker"
     )
     parser.add_argument('--db-path', help='Database path (uses default if not specified)')
     parser.add_argument('--debug', action='store_true', help='Enable debug logging')
@@ -644,17 +491,17 @@ def get_argument_parser():
 
 
 def main():
-    """Main entry point for the bebras agent."""
+    """Main entry point for the integrity checker."""
     parser = get_argument_parser()
     args = parser.parse_args()
 
-    agent = BebrasAgent(db_path=args.db_path, debug=args.debug)
+    checker = IntegrityChecker(db_path=args.db_path, debug=args.debug)
 
     if args.check == 'orphaned':
         results = {
-            'derivative_forms': agent.check_orphaned_derivative_forms(),
-            'derivative_form_word_tokens': agent.check_derivative_form_word_tokens(),
-            'word_frequencies': agent.check_orphaned_word_frequencies()
+            'derivative_forms': checker.check_orphaned_derivative_forms(),
+            'derivative_form_word_tokens': checker.check_derivative_form_word_tokens(),
+            'word_frequencies': checker.check_orphaned_word_frequencies()
         }
         total = (results['derivative_forms']['orphaned_count'] +
                 results['derivative_form_word_tokens']['issue_count'] +
@@ -662,24 +509,24 @@ def main():
         print(f"\nTotal orphaned records: {total}")
 
     elif args.check == 'missing-fields':
-        results = agent.check_missing_required_fields()
+        results = checker.check_missing_required_fields()
         print(f"\nMissing required fields: {results['total_issues']} " +
               f"(High: {results['high_severity_count']}, Medium: {results['medium_severity_count']})")
 
     elif args.check == 'no-derivatives':
-        results = agent.check_lemmas_without_derivatives()
+        results = checker.check_lemmas_without_derivatives()
         print(f"\nLemmas without derivative forms: {results['without_forms_count']} out of {results['total_lemmas']}")
 
     elif args.check == 'duplicates':
-        results = agent.check_duplicate_guids()
+        results = checker.check_duplicate_guids()
         print(f"\nDuplicate GUIDs: {results['duplicate_count']}")
 
     elif args.check == 'invalid-levels':
-        results = agent.check_invalid_difficulty_levels()
+        results = checker.check_invalid_difficulty_levels()
         print(f"\nInvalid difficulty levels: {results['invalid_count']}")
 
     else:  # all
-        agent.run_full_check(output_file=args.output)
+        checker.run_full_check(output_file=args.output)
 
 
 if __name__ == '__main__':

@@ -8,13 +8,6 @@ in multiple target languages using LLM-based translation.
 
 import logging
 from typing import List, Dict, Optional
-from pathlib import Path
-import sys
-
-# Add src directory to path
-GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent.parent)
-if GREENLAND_SRC_PATH not in sys.path:
-    sys.path.insert(0, GREENLAND_SRC_PATH)
 
 from clients.unified_client import UnifiedLLMClient
 from clients.types import Schema, SchemaProperty

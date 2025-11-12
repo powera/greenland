@@ -8,14 +8,7 @@ word-to-lemma matching, and database linking.
 
 import json
 import logging
-from pathlib import Path
 from typing import Dict, List, Optional, Tuple
-import sys
-
-# Add src directory to path
-GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent.parent)
-if GREENLAND_SRC_PATH not in sys.path:
-    sys.path.insert(0, GREENLAND_SRC_PATH)
 
 import constants
 from clients.types import Schema, SchemaProperty

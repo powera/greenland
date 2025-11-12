@@ -8,13 +8,6 @@ lemmas in the database, especially when there are multiple candidates (polysemes
 
 import logging
 from typing import Optional, List
-from pathlib import Path
-import sys
-
-# Add src directory to path
-GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent.parent)
-if GREENLAND_SRC_PATH not in sys.path:
-    sys.path.insert(0, GREENLAND_SRC_PATH)
 
 from wordfreq.storage.database import Lemma
 from clients.unified_client import UnifiedLLMClient

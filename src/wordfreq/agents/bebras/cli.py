@@ -9,13 +9,7 @@ allowing users to process sentences, manage word links, and add translations.
 import argparse
 import logging
 import sys
-from pathlib import Path
 from typing import List, Optional
-
-# Add src directory to path
-GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent.parent)
-if GREENLAND_SRC_PATH not in sys.path:
-    sys.path.insert(0, GREENLAND_SRC_PATH)
 
 from .agent import BebrasAgent
 from .translation import get_language_name, validate_language_codes
