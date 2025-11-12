@@ -601,6 +601,163 @@ def apply_definition(lemma_id):
 
     return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
 
+
+@bp.route('/check-disambiguation/<int:lemma_id>', methods=['POST'])
+def check_disambiguation(lemma_id):
+    """Check if a lemma needs disambiguation (parentheticals) using the LOKYS agent."""
+    lemma = g.db.query(Lemma).get(lemma_id)
+    if not lemma:
+        flash('Lemma not found', 'error')
+        return redirect(url_for('lemmas.list_lemmas'))
+
+    try:
+        # Initialize LOKYS agent
+        agent = LokysAgent(db_path=Config.DB_PATH, debug=Config.DEBUG)
+
+        # Check for lemmas with the same lemma_text
+        duplicates = g.db.query(Lemma).filter(
+            Lemma.lemma_text == lemma.lemma_text,
+            Lemma.guid.isnot(None)
+        ).all()
+
+        if len(duplicates) <= 1:
+            flash(f'No other lemmas found with lemma_text "{lemma.lemma_text}" - disambiguation not needed', 'info')
+            return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
+
+        # Check if translations differ
+        from wordfreq.storage.translation_helpers import get_supported_languages, get_translation
+
+        supported_languages = get_supported_languages()
+        translations_by_guid = {}
+
+        for dup in duplicates:
+            translations = {}
+            for lang_code in supported_languages.keys():
+                try:
+                    translation = get_translation(g.db, dup, lang_code)
+                    if translation:
+                        translations[lang_code] = translation
+                except ValueError:
+                    continue
+            translations_by_guid[dup.guid] = translations
+
+        # Check if any translations differ
+        translations_differ = False
+        if len(translations_by_guid) > 1:
+            guids = list(translations_by_guid.keys())
+            for i in range(len(guids)):
+                for j in range(i + 1, len(guids)):
+                    trans_i = translations_by_guid[guids[i]]
+                    trans_j = translations_by_guid[guids[j]]
+
+                    # Check if any shared language has different translations
+                    for lang in set(trans_i.keys()) & set(trans_j.keys()):
+                        if trans_i[lang] != trans_j[lang]:
+                            translations_differ = True
+                            break
+                    if translations_differ:
+                        break
+
+        if not translations_differ:
+            flash(f'Found {len(duplicates)} lemmas with "{lemma.lemma_text}", but translations are the same - may be duplicates', 'warning')
+            return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
+
+        # Check if this lemma has parentheticals
+        has_parenthetical = '(' in lemma.lemma_text and ')' in lemma.lemma_text
+
+        if has_parenthetical:
+            flash(f'This lemma already has disambiguation: "{lemma.lemma_text}"', 'success')
+            return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
+
+        # Get LLM suggestions for disambiguation
+        from wordfreq.tools.llm_validators import suggest_disambiguation
+
+        definitions_data = []
+        for dup in duplicates:
+            item = {
+                'guid': dup.guid,
+                'definition': dup.definition_text or 'No definition',
+                'translations': {}
+            }
+            for lang_code in supported_languages.keys():
+                try:
+                    trans = get_translation(g.db, dup, lang_code)
+                    if trans:
+                        item['translations'][lang_code] = trans
+                except ValueError:
+                    continue
+            definitions_data.append(item)
+
+        llm_result = suggest_disambiguation(
+            word=lemma.lemma_text,
+            definitions=definitions_data,
+            model='gpt-5-mini'
+        )
+
+        if llm_result['success'] and llm_result['suggestions']:
+            # Render a results page with suggestions
+            return render_template('agents/disambiguation_suggestions.html',
+                                 lemma=lemma,
+                                 duplicates=duplicates,
+                                 suggestions=llm_result['suggestions'],
+                                 lemma_text=lemma.lemma_text)
+        else:
+            flash(f'⚠️ This lemma needs disambiguation! Found {len(duplicates)} different meanings for "{lemma.lemma_text}" with different translations', 'warning')
+            flash(f'Consider adding parentheticals like: "{lemma.lemma_text} (animal)", "{lemma.lemma_text} (computer)", etc.', 'info')
+
+    except Exception as e:
+        flash(f'Error checking disambiguation: {str(e)}', 'error')
+
+    return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
+
+
+@bp.route('/apply-disambiguation/<int:lemma_id>', methods=['POST'])
+def apply_disambiguation(lemma_id):
+    """Apply an AI-suggested disambiguation to a lemma."""
+    lemma = g.db.query(Lemma).get(lemma_id)
+    if not lemma:
+        flash('Lemma not found', 'error')
+        return redirect(url_for('lemmas.list_lemmas'))
+
+    new_lemma_text = request.form.get('new_lemma_text')
+    return_to_suggestions = request.form.get('return_to_suggestions') == 'true'
+    original_lemma_id = request.form.get('original_lemma_id', type=int)
+
+    if not new_lemma_text:
+        flash('No disambiguation provided', 'error')
+        return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
+
+    try:
+        old_lemma_text = lemma.lemma_text
+        lemma.lemma_text = new_lemma_text
+        g.db.commit()
+
+        # Log the change
+        from wordfreq.storage.crud.operation_log import log_translation_change
+        log_translation_change(
+            g.db,
+            source='barsukas-web-interface',
+            operation_type='lemma_text_update',
+            lemma_id=lemma_id,
+            old_lemma_text=old_lemma_text,
+            new_lemma_text=new_lemma_text,
+            guid=lemma.guid,
+            change_source='ai_disambiguation_suggestion'
+        )
+
+        flash(f'✓ Updated GUID {lemma.guid}: "{old_lemma_text}" → "{new_lemma_text}"', 'success')
+    except Exception as e:
+        g.db.rollback()
+        flash(f'Error applying disambiguation: {str(e)}', 'error')
+
+    # Stay on suggestions page if requested, otherwise go to the updated lemma
+    if return_to_suggestions and original_lemma_id:
+        # Re-run the check to show updated suggestions page
+        return redirect(url_for('agents.check_disambiguation', lemma_id=original_lemma_id))
+
+    return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
+
+
 @bp.route('/generate-sentences/<int:lemma_id>', methods=['POST'])
 def generate_sentences(lemma_id):
     """Generate example sentences for a lemma using the Žvirblis agent."""

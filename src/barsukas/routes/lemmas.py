@@ -270,6 +270,18 @@ def view_lemma(lemma_id):
             SentenceWord.lemma_id == lemma_id
         ).count()
 
+    # Check if disambiguation check button should be shown
+    # Show if: (1) no parenthetical in current lemma_text AND (2) other lemmas exist with same base text
+    needs_disambiguation_check = False
+    if lemma.lemma_text and '(' not in lemma.lemma_text:
+        # Quick check: are there other lemmas with this exact lemma_text?
+        duplicate_count = g.db.query(Lemma).filter(
+            Lemma.lemma_text == lemma.lemma_text,
+            Lemma.guid.isnot(None),
+            Lemma.id != lemma_id
+        ).count()
+        needs_disambiguation_check = duplicate_count > 0
+
     return render_template('lemmas/view.html',
                          lemma=lemma,
                          translations=translations,
@@ -281,7 +293,8 @@ def view_lemma(lemma_id):
                          synonyms_by_language=synonyms_by_language,
                          alternative_forms_by_language=alternative_forms_by_language,
                          all_synonym_languages=all_synonym_languages,
-                         sentence_count=sentence_count)
+                         sentence_count=sentence_count,
+                         needs_disambiguation_check=needs_disambiguation_check)
 
 
 @bp.route('/<int:lemma_id>/edit', methods=['GET', 'POST'])

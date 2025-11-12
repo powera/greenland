@@ -257,6 +257,144 @@ class LokysAgent:
         finally:
             session.close()
 
+    def check_disambiguation(
+        self,
+        limit: Optional[int] = None
+    ) -> Dict[str, any]:
+        """
+        Check for lemmas that need disambiguation (parentheticals).
+
+        Detects when multiple lemmas share the same base English word but have
+        different translations, indicating they need parenthetical disambiguation
+        like "mouse (animal)" vs "mouse (computer)".
+
+        Args:
+            limit: Maximum number of lemma groups to check
+
+        Returns:
+            Dictionary with check results including lemmas needing disambiguation
+        """
+        logger.info("Checking for lemmas needing disambiguation...")
+
+        session = self.get_session()
+        try:
+            from sqlalchemy import func
+            from wordfreq.storage.translation_helpers import get_supported_languages, get_translation
+
+            # Find lemma_text values that appear multiple times
+            duplicates_query = session.query(
+                Lemma.lemma_text,
+                func.count(Lemma.id).label('count')
+            ).filter(
+                Lemma.guid.isnot(None)  # Only curated lemmas
+            ).group_by(
+                Lemma.lemma_text
+            ).having(
+                func.count(Lemma.id) > 1
+            ).order_by(
+                func.count(Lemma.id).desc()
+            )
+
+            if limit:
+                duplicates_query = duplicates_query.limit(limit)
+
+            duplicate_groups = duplicates_query.all()
+            logger.info(f"Found {len(duplicate_groups)} lemma_text values with duplicates")
+
+            # Get all supported languages
+            supported_languages = get_supported_languages()
+
+            issues = []
+            total_checked = 0
+            needs_disambiguation = 0
+
+            for lemma_text, count in duplicate_groups:
+                # Get all lemmas with this lemma_text
+                lemmas = session.query(Lemma).filter(
+                    Lemma.lemma_text == lemma_text,
+                    Lemma.guid.isnot(None)
+                ).all()
+
+                total_checked += len(lemmas)
+
+                # Check if translations differ (indicating different meanings)
+                translations_differ = False
+                translation_map = {}
+
+                for lemma in lemmas:
+                    # Collect non-null translations for each lemma using the helper
+                    lemma_translations = []
+                    for lang_code in supported_languages.keys():
+                        try:
+                            translation = get_translation(session, lemma, lang_code)
+                            if translation:
+                                lemma_translations.append((lang_code, translation))
+                        except ValueError:
+                            # Language not supported, skip
+                            continue
+
+                    translation_map[lemma.guid] = lemma_translations
+
+                # Compare translations across lemmas
+                if len(translation_map) > 1:
+                    guids = list(translation_map.keys())
+                    for i in range(len(guids)):
+                        for j in range(i + 1, len(guids)):
+                            trans_i = dict(translation_map[guids[i]])
+                            trans_j = dict(translation_map[guids[j]])
+
+                            # Check if any shared language has different translations
+                            for lang in set(trans_i.keys()) & set(trans_j.keys()):
+                                if trans_i[lang] != trans_j[lang]:
+                                    translations_differ = True
+                                    break
+                            if translations_differ:
+                                break
+
+                # If translations differ, check if lemmas have parentheticals
+                if translations_differ:
+                    missing_parentheticals = []
+                    for lemma in lemmas:
+                        has_parenthetical = '(' in lemma.lemma_text and ')' in lemma.lemma_text
+                        if not has_parenthetical:
+                            missing_parentheticals.append({
+                                'guid': lemma.guid,
+                                'lemma_text': lemma.lemma_text,
+                                'definition': lemma.definition_text[:100] if lemma.definition_text else None,
+                                'pos_type': lemma.pos_type,
+                                'disambiguation': lemma.disambiguation
+                            })
+
+                    if missing_parentheticals:
+                        needs_disambiguation += len(missing_parentheticals)
+                        issues.append({
+                            'lemma_text': lemma_text,
+                            'total_count': count,
+                            'missing_disambiguation': missing_parentheticals,
+                            'all_guids': [l.guid for l in lemmas]
+                        })
+
+            logger.info(f"Checked {total_checked} lemmas in {len(duplicate_groups)} groups")
+            logger.info(f"Found {needs_disambiguation} lemmas needing disambiguation")
+
+            return {
+                'total_checked': total_checked,
+                'duplicate_groups': len(duplicate_groups),
+                'needs_disambiguation': needs_disambiguation,
+                'issues': issues
+            }
+
+        except Exception as e:
+            logger.error(f"Error checking disambiguation: {e}", exc_info=True)
+            return {
+                'error': str(e),
+                'total_checked': 0,
+                'needs_disambiguation': 0,
+                'issues': []
+            }
+        finally:
+            session.close()
+
     def run_full_check(
         self,
         output_file: Optional[str] = None,
