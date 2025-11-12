@@ -16,7 +16,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 
 from config import Config
-from routes import lemmas, translations, overrides, agents, operation_logs, wireword, api, agents_launcher, exports
+from routes import lemmas, translations, overrides, agents, operation_logs, wireword, api, agents_launcher, exports, sentences
 from wordfreq.storage.utils.session import ensure_tables_exist
 from pinyin_helper import generate_pinyin, generate_pinyin_ruby_html, is_chinese
 
@@ -41,6 +41,7 @@ def create_app(config_class=Config):
 
     # Register blueprints
     app.register_blueprint(lemmas.bp)
+    app.register_blueprint(sentences.bp)
     app.register_blueprint(translations.bp)
     app.register_blueprint(overrides.bp)
     app.register_blueprint(agents.bp)
@@ -74,17 +75,19 @@ def create_app(config_class=Config):
     @app.route('/')
     def index():
         """Home page with search and quick stats."""
-        from wordfreq.storage.models.schema import Lemma
+        from wordfreq.storage.models.schema import Lemma, Sentence
 
         # Get some basic stats
         total_lemmas = g.db.query(Lemma).count()
         verified_lemmas = g.db.query(Lemma).filter(Lemma.verified == True).count()
         with_difficulty = g.db.query(Lemma).filter(Lemma.difficulty_level != None).count()
+        total_sentences = g.db.query(Sentence).count()
 
         return render_template('index.html',
                              total_lemmas=total_lemmas,
                              verified_lemmas=verified_lemmas,
-                             with_difficulty=with_difficulty)
+                             with_difficulty=with_difficulty,
+                             total_sentences=total_sentences)
 
     @app.context_processor
     def utility_processor():
