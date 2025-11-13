@@ -255,3 +255,65 @@ def get_alternate_forms_facts(session, lemma_id: int, language_code: str) -> Opt
         results[fact_type] = (value == "true")
 
     return results
+
+
+def get_measure_word(session, lemma_id: int, language_code: str = "zh") -> Optional[str]:
+    """
+    Get the measure word (classifier) for a Chinese noun.
+
+    Args:
+        session: Database session
+        lemma_id: ID of the lemma
+        language_code: Language code (default: "zh" for Chinese)
+
+    Returns:
+        The measure word string, or None if not found
+
+    Example:
+        measure_word = get_measure_word(session, lemma_id=123, language_code="zh")
+        if measure_word:
+            print(f"Use: 一{measure_word}...")  # e.g., "一个..." (one [classifier]...)
+    """
+    return get_grammar_fact_value(session, lemma_id, language_code, "measure_words")
+
+
+def get_grammatical_gender(session, lemma_id: int, language_code: str) -> Optional[str]:
+    """
+    Get the grammatical gender for a noun in gendered languages.
+
+    Args:
+        session: Database session
+        lemma_id: ID of the lemma
+        language_code: Language code (e.g., "fr", "es", "de", "ru")
+
+    Returns:
+        The gender string ("masculine", "feminine", "neuter"), or None if not found
+
+    Example:
+        gender = get_grammatical_gender(session, lemma_id=456, language_code="fr")
+        if gender == "masculine":
+            print("Use: le/un")  # masculine articles in French
+        elif gender == "feminine":
+            print("Use: la/une")  # feminine articles in French
+    """
+    return get_grammar_fact_value(session, lemma_id, language_code, "gender")
+
+
+def get_declension_class(session, lemma_id: int, language_code: str) -> Optional[str]:
+    """
+    Get the declension class for a noun in languages with declensions.
+
+    Args:
+        session: Database session
+        lemma_id: ID of the lemma
+        language_code: Language code (e.g., "lt", "la", "ru", "de")
+
+    Returns:
+        The declension class string (e.g., "1", "2", "3"), or None if not found
+
+    Example:
+        declension = get_declension_class(session, lemma_id=789, language_code="lt")
+        if declension:
+            print(f"This noun follows declension pattern {declension}")
+    """
+    return get_grammar_fact_value(session, lemma_id, language_code, "declension")
