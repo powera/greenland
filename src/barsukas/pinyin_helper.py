@@ -92,6 +92,11 @@ def generate_pinyin_ruby_html(chinese_text: str) -> str:
     Example:
         Input: "你好世界"
         Output: '<ruby>你好<rt>nǐ hǎo</rt></ruby><ruby>世界<rt>shì jiè</rt></ruby>'
+
+    Note:
+        Pinyin is generated character-by-character to avoid contextual pronunciation
+        changes (e.g., 会 is always "huì" not "kuài"), but characters are grouped by
+        word boundaries for better readability.
     """
     if not PYPINYIN_AVAILABLE or not chinese_text:
         return chinese_text
@@ -109,11 +114,18 @@ def generate_pinyin_ruby_html(chinese_text: str) -> str:
 
             for segment in segments:
                 if is_chinese(segment):
-                    # Get pinyin for the entire word/segment
-                    pinyin_list = lazy_pinyin(segment, style=Style.TONE)
-                    if pinyin_list:
+                    # Get pinyin character-by-character to avoid contextual pronunciation changes
+                    # This ensures 会 is always "huì" not "kuài" even in compound words like 会计
+                    pinyin_parts = []
+                    for char in segment:
+                        if is_chinese(char):
+                            char_pinyin = lazy_pinyin(char, style=Style.TONE)
+                            if char_pinyin:
+                                pinyin_parts.append(char_pinyin[0])
+
+                    if pinyin_parts:
                         # Join pinyin with spaces for multi-character words
-                        pinyin = ' '.join(pinyin_list)
+                        pinyin = ' '.join(pinyin_parts)
                         result.append(f'<ruby>{segment}<rt>{pinyin}</rt></ruby>')
                     else:
                         result.append(segment)
