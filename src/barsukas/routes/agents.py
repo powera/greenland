@@ -6,10 +6,10 @@ from flask import Blueprint, request, redirect, url_for, flash, g, jsonify, rend
 
 from wordfreq.storage.models.schema import Lemma, DerivativeForm
 from wordfreq.storage.translation_helpers import get_supported_languages
-from wordfreq.agents.voras.agent import VorasAgent
-from wordfreq.agents.papuga import PapugaAgent
-from wordfreq.agents.vilkas.agent import VilkasAgent
-from wordfreq.agents.lokys import LokysAgent
+from agents.voras.agent import VorasAgent
+from agents.papuga import PapugaAgent
+from agents.vilkas.agent import VilkasAgent
+from agents.lokys import LokysAgent
 from config import Config
 
 bp = Blueprint('agents', __name__, url_prefix='/agents')
@@ -476,7 +476,7 @@ def generate_synonyms(lemma_id):
 
     try:
         # Initialize ŠERNAS agent
-        from wordfreq.agents.sernas.agent import SernasAgent
+        from agents.sernas.agent import SernasAgent
         agent = SernasAgent(db_path=Config.DB_PATH, debug=Config.DEBUG)
 
         # Check if translation exists for this language (skip for English since that's the lemma itself)
@@ -778,7 +778,7 @@ def generate_sentences(lemma_id):
 
     try:
         # Import Žvirblis agent
-        from wordfreq.agents.zvirblis import ZvirblisAgent
+        from agents.zvirblis import ZvirblisAgent
         from wordfreq.storage.models.schema import Sentence
 
         # Initialize agent
@@ -854,7 +854,7 @@ def generate_grammar_fact(lemma_id):
 
     try:
         # Import LAPE agent
-        from wordfreq.agents.lape import LapeAgent
+        from agents.lape import LapeAgent
 
         # Initialize agent
         agent = LapeAgent(db_path=Config.DB_PATH, debug=Config.DEBUG)
