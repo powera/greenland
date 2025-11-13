@@ -90,7 +90,7 @@ def get_argument_parser():
 def main():
     """Main entry point for the dramblys agent."""
     # Import here to avoid circular imports
-    from wordfreq.agents.dramblys.agent import DramblysAgent
+    from agents.dramblys.agent import DramblysAgent
 
     parser = get_argument_parser()
     args = parser.parse_args()
