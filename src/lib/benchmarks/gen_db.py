@@ -1,12 +1,12 @@
 import constants
 
-import schema.load_schema
-schema.load_schema.create_tables()
+import benchmarks.schema.load_schema
+benchmarks.schema.load_schema.create_tables()
 
-import schema.create_models
-schema.create_models.create_models()
+import benchmarks.schema.create_models
+benchmarks.schema.create_models.create_models()
 
 import benchmarks.datastore.common
 from lib.benchmarks.factory import get_generator
 
-session = datastore.common.create_dev_session()
+session = benchmarks.datastore.common.create_dev_session()
