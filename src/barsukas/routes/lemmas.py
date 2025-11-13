@@ -5,10 +5,11 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, g
 from sqlalchemy import or_, func, case
 
-from wordfreq.storage.models.schema import Lemma
+from wordfreq.storage.models.schema import Lemma, DerivativeForm
 from wordfreq.storage.crud.operation_log import log_translation_change
 from wordfreq.storage.crud.difficulty_override import get_all_overrides_for_lemma, get_effective_difficulty_level
 from wordfreq.storage.translation_helpers import get_all_translations, get_supported_languages
+from wordfreq.storage.crud.derivative_form import delete_derivative_form
 from config import Config
 
 bp = Blueprint('lemmas', __name__, url_prefix='/lemmas')
@@ -483,3 +484,116 @@ def _get_difficulty_stats(session, pos_type, pos_subtype):
         stats[level] = count
 
     return stats
+
+
+@bp.route('/<int:lemma_id>/delete-synonym/<int:form_id>', methods=['POST'])
+def delete_synonym(lemma_id, form_id):
+    """Delete a single synonym or alternative form."""
+    from flask import current_app
+
+    if current_app.config.get('READONLY', False):
+        flash('Cannot delete: running in read-only mode', 'error')
+        return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
+
+    # Verify the form belongs to this lemma
+    form = g.db.query(DerivativeForm).filter(
+        DerivativeForm.id == form_id,
+        DerivativeForm.lemma_id == lemma_id
+    ).first()
+
+    if not form:
+        flash('Synonym or alternative form not found', 'error')
+        return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
+
+    # Store form details for flash message
+    form_text = form.derivative_form_text
+    form_type = form.grammatical_form.replace('_', ' ').title()
+
+    # Delete the form
+    if delete_derivative_form(g.db, form_id):
+        # Log the deletion
+        log_translation_change(
+            session=g.db,
+            source=Config.OPERATION_LOG_SOURCE,
+            operation_type='derivative_form_delete',
+            lemma_id=lemma_id,
+            field_name=f'{form.language_code}_{form.grammatical_form}',
+            old_value=form_text,
+            new_value=None
+        )
+        flash(f'Deleted {form_type}: "{form_text}"', 'success')
+    else:
+        flash(f'Failed to delete {form_type}: "{form_text}"', 'error')
+
+    return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
+
+
+@bp.route('/<int:lemma_id>/delete-all-synonyms', methods=['POST'])
+def delete_all_synonyms(lemma_id):
+    """Delete all synonyms and/or alternative forms for a lemma."""
+    from flask import current_app
+
+    if current_app.config.get('READONLY', False):
+        flash('Cannot delete: running in read-only mode', 'error')
+        return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
+
+    # Get optional filters from request
+    lang_code = request.form.get('lang_code')  # Optional: filter by language
+    form_category = request.form.get('form_category')  # 'synonyms', 'alternatives', or 'all'
+
+    # Verify lemma exists
+    lemma = g.db.query(Lemma).get(lemma_id)
+    if not lemma:
+        flash('Lemma not found', 'error')
+        return redirect(url_for('lemmas.list_lemmas'))
+
+    # Build query for forms to delete
+    query = g.db.query(DerivativeForm).filter(DerivativeForm.lemma_id == lemma_id)
+
+    # Apply language filter if provided
+    if lang_code:
+        query = query.filter(DerivativeForm.language_code == lang_code)
+
+    # Apply form category filter
+    if form_category == 'synonyms':
+        query = query.filter(DerivativeForm.grammatical_form == 'synonym')
+    elif form_category == 'alternatives':
+        query = query.filter(DerivativeForm.grammatical_form.in_([
+            'abbreviation', 'expanded_form', 'alternate_spelling', 'alternative_form'
+        ]))
+    # If 'all' or not specified, delete both synonyms and alternatives
+
+    forms_to_delete = query.all()
+
+    if not forms_to_delete:
+        flash('No matching forms found to delete', 'warning')
+        return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
+
+    # Delete all matching forms
+    deleted_count = 0
+    for form in forms_to_delete:
+        if delete_derivative_form(g.db, form.id):
+            deleted_count += 1
+            # Log each deletion
+            log_translation_change(
+                session=g.db,
+                source=Config.OPERATION_LOG_SOURCE,
+                operation_type='derivative_form_delete',
+                lemma_id=lemma_id,
+                field_name=f'{form.language_code}_{form.grammatical_form}',
+                old_value=form.derivative_form_text,
+                new_value=None
+            )
+
+    # Create success message
+    if deleted_count > 0:
+        msg = f'Deleted {deleted_count} form(s)'
+        if lang_code:
+            from wordfreq.storage.translation_helpers import get_supported_languages
+            language_names = get_supported_languages()
+            msg += f' for {language_names.get(lang_code, lang_code)}'
+        flash(msg, 'success')
+    else:
+        flash('Failed to delete forms', 'error')
+
+    return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
