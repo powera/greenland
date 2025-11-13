@@ -20,6 +20,14 @@ except ImportError:
     PYPINYIN_AVAILABLE = False
     logger.warning("pypinyin not available - Chinese pinyin transliteration will be disabled")
 
+# Try to import jieba for word segmentation, gracefully handle if not available
+try:
+    import jieba
+    JIEBA_AVAILABLE = True
+except ImportError:
+    JIEBA_AVAILABLE = False
+    logger.warning("jieba not available - Chinese word segmentation will fall back to character-by-character")
+
 
 def is_chinese(text: str) -> bool:
     """
@@ -71,7 +79,7 @@ def generate_pinyin_ruby_html(chinese_text: str) -> str:
     Generate HTML with ruby annotations for Chinese text with Pinyin.
 
     This creates elegant ruby text similar to Japanese furigana, with Pinyin
-    displayed above each Chinese character.
+    displayed above each Chinese word (using jieba segmentation) or character.
 
     Args:
         chinese_text: Chinese text to annotate with pinyin
@@ -82,8 +90,8 @@ def generate_pinyin_ruby_html(chinese_text: str) -> str:
         - text doesn't contain Chinese characters
 
     Example:
-        Input: "你好"
-        Output: '<ruby>你<rt>nǐ</rt></ruby><ruby>好<rt>hǎo</rt></ruby>'
+        Input: "你好世界"
+        Output: '<ruby>你好<rt>nǐ hǎo</rt></ruby><ruby>世界<rt>shì jiè</rt></ruby>'
     """
     if not PYPINYIN_AVAILABLE or not chinese_text:
         return chinese_text
@@ -93,20 +101,39 @@ def generate_pinyin_ruby_html(chinese_text: str) -> str:
         return chinese_text
 
     try:
-        # Generate pinyin for each character separately
         result = []
-        for char in chinese_text:
-            if is_chinese(char):
-                # Get pinyin for this character
-                pinyin_list = lazy_pinyin(char, style=Style.TONE)
-                if pinyin_list:
-                    pinyin = pinyin_list[0]
-                    result.append(f'<ruby>{char}<rt>{pinyin}</rt></ruby>')
+
+        if JIEBA_AVAILABLE:
+            # Use jieba to segment text into words for better readability
+            segments = jieba.cut(chinese_text, cut_all=False)
+
+            for segment in segments:
+                if is_chinese(segment):
+                    # Get pinyin for the entire word/segment
+                    pinyin_list = lazy_pinyin(segment, style=Style.TONE)
+                    if pinyin_list:
+                        # Join pinyin with spaces for multi-character words
+                        pinyin = ' '.join(pinyin_list)
+                        result.append(f'<ruby>{segment}<rt>{pinyin}</rt></ruby>')
+                    else:
+                        result.append(segment)
                 else:
+                    # Non-Chinese segment (punctuation, space, etc.)
+                    result.append(segment)
+        else:
+            # Fallback to character-by-character if jieba is not available
+            for char in chinese_text:
+                if is_chinese(char):
+                    # Get pinyin for this character
+                    pinyin_list = lazy_pinyin(char, style=Style.TONE)
+                    if pinyin_list:
+                        pinyin = pinyin_list[0]
+                        result.append(f'<ruby>{char}<rt>{pinyin}</rt></ruby>')
+                    else:
+                        result.append(char)
+                else:
+                    # Non-Chinese character (punctuation, space, etc.)
                     result.append(char)
-            else:
-                # Non-Chinese character (punctuation, space, etc.)
-                result.append(char)
 
         return ''.join(result)
     except Exception as e:
