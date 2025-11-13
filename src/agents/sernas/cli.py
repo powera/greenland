@@ -52,7 +52,7 @@ def get_argument_parser():
 def main():
     """Main entry point for the šernas agent."""
     # Import here to avoid circular imports
-    from wordfreq.agents.sernas.agent import SernasAgent
+    from agents.sernas.agent import SernasAgent
 
     parser = get_argument_parser()
     args = parser.parse_args()

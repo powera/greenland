@@ -38,7 +38,7 @@ from wordfreq.tools.llm_validators import validate_all_translations_for_word
 from wordfreq.translation.client import LinguisticClient
 
 # Import submodules
-from wordfreq.agents.voras import batch, coverage
+from agents.voras import batch, coverage
 
 # Configure logging
 logging.basicConfig(

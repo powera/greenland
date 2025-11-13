@@ -28,8 +28,8 @@ from wordfreq.storage.models.imports import PendingImport, WordExclusion
 from wordfreq.translation.client import LinguisticClient
 
 # Import validation and staging operations
-from wordfreq.agents.dramblys.validation import is_valid_word
-from wordfreq.agents.dramblys import staging
+from agents.dramblys.validation import is_valid_word
+from agents.dramblys import staging
 
 # Configure logging
 logging.basicConfig(

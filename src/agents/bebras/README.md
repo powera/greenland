@@ -48,7 +48,7 @@ python bebras.py --check-integrity --check orphaned
 ### Python API
 
 ```python
-from wordfreq.agents.bebras import BebrasAgent
+from agents.bebras import BebrasAgent
 
 agent = BebrasAgent(model="gpt-5-mini")
 

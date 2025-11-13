@@ -75,7 +75,7 @@ def get_argument_parser():
 def main():
     """Main entry point for the voras agent."""
     # Import here to avoid circular imports
-    from wordfreq.agents.voras.agent import VorasAgent
+    from agents.voras.agent import VorasAgent
     from wordfreq.storage.models.schema import Lemma, LemmaTranslation
 
     parser = get_argument_parser()
@@ -146,9 +146,9 @@ def main():
             print(f"Batch requests queued: {results.get('batch_requests_queued', 0)}")
             print()
             print("Next steps:")
-            print(f"  1. Submit batch: python -m wordfreq.agents.voras --batch-submit")
-            print(f"  2. Check status: python -m wordfreq.agents.voras --batch-status <batch_id>")
-            print(f"  3. Retrieve results: python -m wordfreq.agents.voras --batch-retrieve <batch_id>")
+            print(f"  1. Submit batch: python -m agents.voras --batch-submit")
+            print(f"  2. Check status: python -m agents.voras --batch-status <batch_id>")
+            print(f"  3. Retrieve results: python -m agents.voras --batch-retrieve <batch_id>")
         else:
             print("REGENERATION COMPLETE")
             print("=" * 80)

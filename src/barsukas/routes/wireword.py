@@ -7,7 +7,7 @@ import os
 import tempfile
 from datetime import datetime
 
-from wordfreq.agents.ungurys import UngurysAgent, SUPPORTED_LANGUAGES
+from agents.ungurys import UngurysAgent, SUPPORTED_LANGUAGES
 from config import Config
 
 bp = Blueprint('wireword', __name__, url_prefix='/wireword')

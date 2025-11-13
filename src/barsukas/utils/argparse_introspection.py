@@ -77,7 +77,7 @@ def introspect_agent_parser(agent_module_path: str) -> Dict[str, Any]:
     Introspect an agent's argument parser.
 
     Args:
-        agent_module_path: Python module path, e.g., 'wordfreq.agents.voras.cli'
+        agent_module_path: Python module path, e.g., 'agents.voras.cli'
 
     Returns:
         Dictionary containing:
@@ -172,7 +172,7 @@ def get_agent_cli_module_path(agent_script: str) -> str:
         agent_script: Script name like 'voras.py' or 'bebras.py'
 
     Returns:
-        Module path like 'wordfreq.agents.voras.cli' or 'wordfreq.agents.bebras'
+        Module path like 'agents.voras.cli' or 'agents.bebras'
     """
     agent_name = agent_script.replace('.py', '')
 
@@ -180,6 +180,6 @@ def get_agent_cli_module_path(agent_script: str) -> str:
     multi_file_agents = ['voras', 'vilkas', 'dramblys']
 
     if agent_name in multi_file_agents:
-        return f'wordfreq.agents.{agent_name}.cli'
+        return f'agents.{agent_name}.cli'
     else:
-        return f'wordfreq.agents.{agent_name}'
+        return f'agents.{agent_name}'
