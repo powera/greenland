@@ -705,6 +705,111 @@ class WirewordExporter:
 
         return pos_mappings.get(pos_type.lower(), pos_type)
 
+    def _convert_to_legacy_grammatical_form_key(self, grammatical_form: str) -> str:
+        """
+        Convert new grammatical form key format to legacy format.
+
+        Converts from database format like "verb/lt_3s_m_pres" or "verb/fr_1s_pres"
+        to legacy wireword format like "3s-m_pres" or "1s_pres".
+
+        The key transformations:
+        - Remove "verb/{lang}_" prefix
+        - Replace underscores between person/number components with hyphens (3s_m -> 3s-m)
+
+        Args:
+            grammatical_form: Database grammatical form key (e.g., "verb/lt_3s_m_pres")
+
+        Returns:
+            Legacy format key (e.g., "3s-m_pres")
+        """
+        # If already in legacy format (no prefix), return as-is
+        if not grammatical_form.startswith('verb/'):
+            return grammatical_form
+
+        # Remove "verb/{lang}_" prefix
+        # Format: "verb/lt_1s_pres" or "verb/fr_3p_fut"
+        parts = grammatical_form.split('_', 1)  # Split on first underscore only
+        if len(parts) < 2:
+            return grammatical_form  # Return original if format unexpected
+
+        # parts[0] is "verb/lt" or "verb/fr"
+        # parts[1] is "1s_pres" or "3s_m_pres" or similar
+        key_without_prefix = parts[1]
+
+        # Now convert underscores to hyphens in person/number part
+        # e.g., "3s_m_pres" -> "3s-m_pres"
+        # The pattern is: {person}{number}_{gender}_{tense}
+        # We want hyphens between person/number/gender, but underscore before tense
+
+        # Split by underscore to find components
+        components = key_without_prefix.split('_')
+        if len(components) == 2:
+            # Simple case: "1s_pres" or "1p_past"
+            return key_without_prefix
+        elif len(components) == 3:
+            # Has gender: "3s_m_pres" -> "3s-m_pres"
+            person_num = components[0]
+            gender = components[1]
+            tense = components[2]
+            return f"{person_num}-{gender}_{tense}"
+        else:
+            # Unexpected format, return as-is
+            return key_without_prefix
+
+    def _format_verb_entry(self, entry: Dict[str, Any], is_last: bool = False) -> str:
+        """
+        Format a single verb entry with custom JSON formatting.
+
+        Creates a format where:
+        - Top-level verb fields are on separate lines with proper indentation
+        - Each grammatical form entry is condensed to a single line
+        - More vertical spacing between verb entries (like the old format)
+
+        Args:
+            entry: Verb entry dictionary
+            is_last: Whether this is the last entry in the array
+
+        Returns:
+            Formatted string for this verb entry
+        """
+        lines = []
+        lines.append('  {')
+
+        # Determine the keys order - put grammatical_forms last
+        keys_order = []
+        for key in ['guid', 'base_target', 'base_english', 'corpus', 'group', 'level', 'word_type']:
+            if key in entry:
+                keys_order.append(key)
+
+        # Add any other keys except grammatical_forms
+        for key in entry:
+            if key not in keys_order and key != 'grammatical_forms':
+                keys_order.append(key)
+
+        # Write the non-grammatical-forms fields
+        for key in keys_order:
+            value_json = json.dumps(entry[key], ensure_ascii=False)
+            lines.append(f'    "{key}": {value_json},')
+
+        # Write grammatical_forms with each form on one line
+        if 'grammatical_forms' in entry:
+            lines.append('    "grammatical_forms": {')
+
+            forms = entry['grammatical_forms']
+            form_keys = list(forms.keys())
+            for j, form_key in enumerate(form_keys):
+                form_value_json = json.dumps(forms[form_key], ensure_ascii=False, separators=(', ', ': '))
+                comma = '' if j == len(form_keys) - 1 else ','
+                lines.append(f'      "{form_key}": {form_value_json}{comma}')
+
+            lines.append('    }')
+
+        # Close the verb entry object
+        comma = '' if is_last else ','
+        lines.append(f'  }}{comma}')
+
+        return '\n'.join(lines) + '\n'
+
     def _generate_pinyin(self, chinese_text: str) -> Optional[str]:
         """
         Generate pinyin for Chinese text.
@@ -1226,7 +1331,10 @@ class WirewordExporter:
                                 if pinyin:
                                     gram_form['target_pinyin'] = pinyin
 
-                            grammatical_forms[form.grammatical_form] = gram_form
+                            # Convert grammatical form key to legacy format
+                            # e.g., "verb/lt_3s_m_pres" -> "3s-m_pres"
+                            legacy_key = self._convert_to_legacy_grammatical_form_key(form.grammatical_form)
+                            grammatical_forms[legacy_key] = gram_form
 
                 # Create WireWord object
                 wireword = {
@@ -1296,14 +1404,11 @@ class WirewordExporter:
 
                 with open(output_path, 'w', encoding='utf-8') as f:
                     if pretty_print:
-                        # Write with nice formatting, one entry per line
+                        # Write with custom formatting for verbs
+                        # Each verb entry gets more vertical space, but grammatical forms are condensed to one line each
                         f.write('[\n')
                         for i, entry in enumerate(wireword_data):
-                            line = json.dumps(entry, ensure_ascii=False, separators=(', ', ': '))
-                            if i < len(wireword_data) - 1:
-                                f.write(f'  {line},\n')
-                            else:
-                                f.write(f'  {line}\n')
+                            f.write(self._format_verb_entry(entry, is_last=(i == len(wireword_data) - 1)))
                         f.write(']\n')
                     else:
                         # Compact format
