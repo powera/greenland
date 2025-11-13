@@ -834,61 +834,66 @@ class WirewordExporter:
     def _get_english_translation_from_db(self, session, lemma_id: int, grammatical_form: str) -> Optional[str]:
         """
         Look up the English translation for a grammatical form from the database.
-        Maps French/other language grammatical forms to their Lithuanian equivalents
-        since English translations are stored with Lithuanian form labels.
+        Maps language-specific grammatical forms to their English equivalents.
 
         Args:
             session: Database session
             lemma_id: The lemma ID
-            grammatical_form: The grammatical form (e.g., "verb/fr_1p_impf")
+            grammatical_form: The grammatical form (e.g., "verb/lt_1s_pres", "verb/fr_1p_impf")
 
         Returns:
             English translation string, or None if not found
         """
-        # Map French verb forms to Lithuanian verb forms (which have English translations)
-        fr_to_lt_mapping = {
-            # Present tense
-            'verb/fr_1s_pres': 'verb/lt_1s_pres',
-            'verb/fr_2s_pres': 'verb/lt_2s_pres',
-            'verb/fr_3s_pres': 'verb/lt_3s_m_pres',  # Use masculine for he/she
-            'verb/fr_1p_pres': 'verb/lt_1p_pres',
-            'verb/fr_2p_pres': 'verb/lt_2p_pres',
-            'verb/fr_3p_pres': 'verb/lt_3p_m_pres',  # Use masculine for they
-            # Imperfect → Past tense (closest equivalent)
-            'verb/fr_1s_impf': 'verb/lt_1s_past',
-            'verb/fr_2s_impf': 'verb/lt_2s_past',
-            'verb/fr_3s_impf': 'verb/lt_3s_m_past',
-            'verb/fr_1p_impf': 'verb/lt_1p_past',
-            'verb/fr_2p_impf': 'verb/lt_2p_past',
-            'verb/fr_3p_impf': 'verb/lt_3p_m_past',
-            # Future tense
-            'verb/fr_1s_fut': 'verb/lt_1s_fut',
-            'verb/fr_2s_fut': 'verb/lt_2s_fut',
-            'verb/fr_3s_fut': 'verb/lt_3s_m_fut',
-            'verb/fr_1p_fut': 'verb/lt_1p_fut',
-            'verb/fr_2p_fut': 'verb/lt_2p_fut',
-            'verb/fr_3p_fut': 'verb/lt_3p_m_fut',
-            # Passé composé → Past tense
-            'verb/fr_1s_pc': 'verb/lt_1s_past',
-            'verb/fr_2s_pc': 'verb/lt_2s_past',
-            'verb/fr_3s_pc': 'verb/lt_3s_m_past',
-            'verb/fr_1p_pc': 'verb/lt_1p_past',
-            'verb/fr_2p_pc': 'verb/lt_2p_past',
-            'verb/fr_3p_pc': 'verb/lt_3p_m_past',
-            # Conditional and subjunctive don't have direct Lithuanian equivalents
-            # Leave those to fall through to generation
-        }
-
-        # Check if we have a mapping for this form
-        mapped_form = fr_to_lt_mapping.get(grammatical_form)
-        if not mapped_form:
+        # For Lithuanian forms, convert verb/lt_* to verb/en_*
+        # English translations are now stored with verb/en_* labels
+        if grammatical_form.startswith('verb/lt_'):
+            english_form_key = grammatical_form.replace('verb/lt_', 'verb/en_')
+        # Map French verb forms to English verb forms
+        elif grammatical_form.startswith('verb/fr_'):
+            fr_to_en_mapping = {
+                # Present tense
+                'verb/fr_1s_pres': 'verb/en_1s_pres',
+                'verb/fr_2s_pres': 'verb/en_2s_pres',
+                'verb/fr_3s_pres': 'verb/en_3s_m_pres',  # Use masculine for he/she
+                'verb/fr_1p_pres': 'verb/en_1p_pres',
+                'verb/fr_2p_pres': 'verb/en_2p_pres',
+                'verb/fr_3p_pres': 'verb/en_3p_m_pres',  # Use masculine for they
+                # Imperfect → Past tense (closest equivalent)
+                'verb/fr_1s_impf': 'verb/en_1s_past',
+                'verb/fr_2s_impf': 'verb/en_2s_past',
+                'verb/fr_3s_impf': 'verb/en_3s_m_past',
+                'verb/fr_1p_impf': 'verb/en_1p_past',
+                'verb/fr_2p_impf': 'verb/en_2p_past',
+                'verb/fr_3p_impf': 'verb/en_3p_m_past',
+                # Future tense
+                'verb/fr_1s_fut': 'verb/en_1s_fut',
+                'verb/fr_2s_fut': 'verb/en_2s_fut',
+                'verb/fr_3s_fut': 'verb/en_3s_m_fut',
+                'verb/fr_1p_fut': 'verb/en_1p_fut',
+                'verb/fr_2p_fut': 'verb/en_2p_fut',
+                'verb/fr_3p_fut': 'verb/en_3p_m_fut',
+                # Passé composé → Past tense
+                'verb/fr_1s_pc': 'verb/en_1s_past',
+                'verb/fr_2s_pc': 'verb/en_2s_past',
+                'verb/fr_3s_pc': 'verb/en_3s_m_past',
+                'verb/fr_1p_pc': 'verb/en_1p_past',
+                'verb/fr_2p_pc': 'verb/en_2p_past',
+                'verb/fr_3p_pc': 'verb/en_3p_m_past',
+                # Conditional and subjunctive don't have direct English equivalents
+                # Leave those to fall through to generation
+            }
+            english_form_key = fr_to_en_mapping.get(grammatical_form)
+            if not english_form_key:
+                return None
+        else:
+            # For other languages or unrecognized patterns, no mapping available
             return None
 
         # Look up the English derivative form with the mapped grammatical form
         english_form = session.query(DerivativeForm).filter(
             DerivativeForm.lemma_id == lemma_id,
             DerivativeForm.language_code == 'en',
-            DerivativeForm.grammatical_form == mapped_form
+            DerivativeForm.grammatical_form == english_form_key
         ).first()
 
         if english_form:
@@ -899,6 +904,7 @@ class WirewordExporter:
     def _generate_grammatical_form_label(self, grammatical_form: str, base_english: str, pos_type: str) -> str:
         """
         Generate a readable English label for a grammatical form.
+        Fallback for non-Lithuanian languages only.
 
         Args:
             grammatical_form: The grammatical form identifier (e.g., "verb/fr_1s_pres", "noun/fr_plural")
@@ -908,36 +914,12 @@ class WirewordExporter:
         Returns:
             Readable English label for the grammatical form
         """
-        # Lithuanian verb forms - proper conjugations with tense
-        lithuanian_verb_forms = {
-            # Present tense
-            'verb/lt_1s_pres': f'I {base_english}',
-            'verb/lt_2s_pres': f'you(s.) {base_english}',
-            'verb/lt_3s_m_pres': f'he {base_english}s',
-            'verb/lt_3s_f_pres': f'she {base_english}s',
-            'verb/lt_1p_pres': f'we {base_english}',
-            'verb/lt_2p_pres': f'you(pl.) {base_english}',
-            'verb/lt_3p_m_pres': f'they(m.) {base_english}',
-            'verb/lt_3p_f_pres': f'they(f.) {base_english}',
-            # Past tense - handle irregular verbs
-            'verb/lt_1s_past': f'I {base_english}' if base_english.endswith('e') else f'I {base_english}ed',
-            'verb/lt_2s_past': f'you(s.) {base_english}' if base_english.endswith('e') else f'you(s.) {base_english}ed',
-            'verb/lt_3s_m_past': f'he {base_english}' if base_english.endswith('e') else f'he {base_english}ed',
-            'verb/lt_3s_f_past': f'she {base_english}' if base_english.endswith('e') else f'she {base_english}ed',
-            'verb/lt_1p_past': f'we {base_english}' if base_english.endswith('e') else f'we {base_english}ed',
-            'verb/lt_2p_past': f'you(pl.) {base_english}' if base_english.endswith('e') else f'you(pl.) {base_english}ed',
-            'verb/lt_3p_m_past': f'they(m.) {base_english}' if base_english.endswith('e') else f'they(m.) {base_english}ed',
-            'verb/lt_3p_f_past': f'they(f.) {base_english}' if base_english.endswith('e') else f'they(f.) {base_english}ed',
-            # Future tense
-            'verb/lt_1s_fut': f'I will {base_english}',
-            'verb/lt_2s_fut': f'you(s.) will {base_english}',
-            'verb/lt_3s_m_fut': f'he will {base_english}',
-            'verb/lt_3s_f_fut': f'she will {base_english}',
-            'verb/lt_1p_fut': f'we will {base_english}',
-            'verb/lt_2p_fut': f'you(pl.) will {base_english}',
-            'verb/lt_3p_m_fut': f'they(m.) will {base_english}',
-            'verb/lt_3p_f_fut': f'they(f.) will {base_english}',
-        }
+        # Lithuanian forms should never reach here - they must be in the database
+        if grammatical_form.startswith('verb/lt_'):
+            raise ValueError(
+                f"Lithuanian verb form '{grammatical_form}' reached generation fallback. "
+                f"All Lithuanian verb conjugations must have English translations in the database."
+            )
 
         # French verb tenses
         french_verb_forms = {
@@ -1311,8 +1293,16 @@ class WirewordExporter:
                                 form.grammatical_form
                             )
 
-                            # If not found in database, generate it
+                            # If not found in database, fail hard for Lithuanian
                             if not english_label:
+                                if self.language == 'lt':
+                                    raise ValueError(
+                                        f"Missing English translation in database for Lithuanian verb form: "
+                                        f"lemma_id={lemma.id}, lemma_text='{lemma.lemma_text}', "
+                                        f"grammatical_form='{form.grammatical_form}'. "
+                                        f"All Lithuanian verb conjugations must have English translations in the database."
+                                    )
+                                # For other languages, try to generate it
                                 english_label = self._generate_grammatical_form_label(
                                     form.grammatical_form,
                                     base_english,
