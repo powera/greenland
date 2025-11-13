@@ -644,6 +644,12 @@ class TrakaidoExporter:
         exporter = WirewordExporter(self.db_path, self.debug, self.language, self.simplified_chinese)
         return exporter.export_wireword_directory(output_dir)
 
+    def export_verbs_to_wireword_format(self, output_path: str, **kwargs) -> Tuple[bool, Optional[ExportStats]]:
+        """Delegate to WirewordExporter. See export_wireword.py for details."""
+        from .export_wireword import WirewordExporter
+        exporter = WirewordExporter(self.db_path, self.debug, self.language, self.simplified_chinese)
+        return exporter.export_verbs_to_wireword_format(output_path, **kwargs)
+
     def export_all(
         self,
         json_path: str,
