@@ -6,8 +6,8 @@ import logging
 import traceback
 from typing import Dict, List, Set, Tuple, Optional
 
-import datastore.benchmarks
-import datastore.common
+import benchmarks.datastore.benchmarks
+import benchmarks.datastore.common
 from lib.benchmarks.factory import (
     get_runner, get_generator, get_all_benchmark_codes, 
     get_benchmark_metadata

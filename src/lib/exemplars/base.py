@@ -16,7 +16,7 @@ from enum import Enum
 from typing import Dict, List, Optional, Any, Union, Tuple
 
 import constants
-import datastore.common
+import benchmarks.datastore.common
 from clients import unified_client
 from clients.types import Response
 
