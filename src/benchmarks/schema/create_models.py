@@ -3,7 +3,7 @@
 
 import os
 
-import datastore.common
+import benchmarks.datastore.common
 
 def create_models():
   # create_ollama_models()

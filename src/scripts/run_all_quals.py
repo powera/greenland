@@ -5,8 +5,8 @@
 import logging
 import argparse
 from typing import List, Set, Optional
-import datastore.quals
-import datastore.common
+import benchmarks.datastore.quals
+import benchmarks.datastore.common
 import lib.run_quals
 
 # Configure logging

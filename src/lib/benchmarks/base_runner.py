@@ -3,7 +3,7 @@ import random
 import logging
 from typing import List, Dict, Tuple, Optional, Any
 
-import datastore.benchmarks
+import benchmarks.datastore.benchmarks
 import constants
 from clients import unified_client
 from clients.ollama_client import OllamaTimeoutError

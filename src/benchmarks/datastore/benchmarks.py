@@ -9,7 +9,7 @@ from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 
-from datastore.common import (
+from benchmarks.datastore.common import (
     Base, Model, create_dev_session,
     create_database_and_session, decode_json
 )

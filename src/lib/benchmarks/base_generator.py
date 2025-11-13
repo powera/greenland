@@ -10,7 +10,7 @@ import uuid
 import random
 from typing import Dict, List, Optional, Any, Union, Tuple, Set, Iterator
 
-import datastore.benchmarks
+import benchmarks.datastore.benchmarks
 import constants
 from clients import unified_client, ollama_client
 from clients.ollama_client import OllamaTimeoutError

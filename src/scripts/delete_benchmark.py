@@ -1,8 +1,8 @@
 
 
-import datastore.benchmarks
+import benchmarks.datastore.benchmarks
 from sqlalchemy import delete
-from datastore.common import create_dev_session
+from benchmarks.datastore.common import create_dev_session
 
 def delete_benchmark_completely(session, benchmark_code: str) -> bool:
     """

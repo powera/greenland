@@ -10,7 +10,7 @@ from typing import Dict, List, Optional, Any
 from sqlalchemy.orm import Session
 
 from clients import ollama_client
-import datastore.benchmarks
+import benchmarks.datastore.benchmarks
 import constants
 import lib.validation
 from lib.benchmarks.base import BenchmarkGenerator
