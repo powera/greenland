@@ -47,6 +47,7 @@ from wordfreq.storage.crud.operation_log import log_operation
 from wordfreq.storage.translation_helpers import get_translation
 from wordfreq.translation.client import LinguisticClient
 from clients.unified_client import UnifiedLLMClient
+from clients.types import Schema, SchemaProperty
 
 # Configure logging
 logging.basicConfig(
@@ -157,24 +158,41 @@ class LapeAgent:
             english_word=lemma.lemma_text,
             chinese_translation=chinese_translation,
             pos_type=lemma.pos_type,
-            definition=lemma.definition or "N/A"
+            definition=lemma.definition_text or "N/A"
+        )
+
+        # Define JSON schema for response
+        schema = Schema(
+            name="MeasureWordGeneration",
+            description="Generate Chinese measure words/classifiers for nouns",
+            properties={
+                "primary_measure_word": SchemaProperty("string", "The primary/most common measure word"),
+                "alternative_measure_words": SchemaProperty(
+                    "array",
+                    "List of alternative measure words that can also be used",
+                    items={"type": "string"}
+                ),
+                "explanation": SchemaProperty("string", "Brief explanation of why this measure word is appropriate"),
+                "confidence": SchemaProperty("number", "Confidence score 0.0-1.0", minimum=0.0, maximum=1.0)
+            }
         )
 
         # Query LLM
         try:
             client = self.get_llm_client()
-            response = client.query(
+            response = client.generate_chat(
                 prompt=prompt_text,
-                system_prompt=context,
                 model=self.model,
-                response_format="json"
+                json_schema=schema,
+                context=context
             )
 
-            # Parse response
-            if isinstance(response, str):
-                result = json.loads(response)
+            # Extract structured data
+            if response.structured_data:
+                result = response.structured_data
             else:
-                result = response
+                logger.error(f"No structured data received for '{lemma.lemma_text}'")
+                return None, None, 0.0
 
             measure_word = result.get('primary_measure_word', None)
             alternatives = result.get('alternative_measure_words', [])
