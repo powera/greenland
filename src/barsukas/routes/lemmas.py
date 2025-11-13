@@ -324,6 +324,10 @@ def view_lemma(lemma_id):
         ).count()
         needs_disambiguation_check = duplicate_count > 0
 
+    # Get grammar facts for this lemma
+    from wordfreq.storage.crud.grammar_fact import get_grammar_facts
+    grammar_facts = get_grammar_facts(g.db, lemma_id)
+
     return render_template('lemmas/view.html',
                          lemma=lemma,
                          translations=translations,
@@ -336,7 +340,8 @@ def view_lemma(lemma_id):
                          alternative_forms_by_language=alternative_forms_by_language,
                          all_synonym_languages=all_synonym_languages,
                          sentence_count=sentence_count,
-                         needs_disambiguation_check=needs_disambiguation_check)
+                         needs_disambiguation_check=needs_disambiguation_check,
+                         grammar_facts=grammar_facts)
 
 
 @bp.route('/<int:lemma_id>/edit', methods=['GET', 'POST'])
