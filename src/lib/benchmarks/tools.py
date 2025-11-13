@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 
 from sqlalchemy.exc import SQLAlchemyError
-import datastore.benchmarks
-from datastore.benchmarks import Run, RunDetail
+import benchmarks.datastore.benchmarks
+from benchmarks.datastore.benchmarks import Run, RunDetail
 
 def delete_run(run_id: int, session=None) -> tuple[bool, str]:
     """

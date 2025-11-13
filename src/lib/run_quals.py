@@ -5,7 +5,7 @@ import json
 
 from clients import unified_client
 from telemetry import LLMUsage
-import datastore.quals
+import benchmarks.datastore.quals
 import lib.advanced_queries
 from clients.ollama_client import OllamaTimeoutError
 

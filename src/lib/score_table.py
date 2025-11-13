@@ -7,8 +7,8 @@ from typing import Dict, List, Optional
 from jinja2 import Environment, FileSystemLoader
 import logging
 
-import datastore.benchmarks
-import datastore.common
+import benchmarks.datastore.benchmarks
+import benchmarks.datastore.common
 import constants
 
 @dataclass
