@@ -54,8 +54,8 @@ def get_argument_parser():
 def main():
     """Main entry point for the vilkas agent."""
     # Import here to avoid circular imports
-    from wordfreq.agents.vilkas.agent import VilkasAgent
-    from wordfreq.agents.vilkas import display
+    from agents.vilkas.agent import VilkasAgent
+    from agents.vilkas import display
 
     parser = get_argument_parser()
     args = parser.parse_args()
