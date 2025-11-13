@@ -312,20 +312,44 @@ document.addEventListener('DOMContentLoaded', function() {
 
                             {% if alternatives %}
                                 <div class="mb-3">
-                                    <strong>Alternative Forms:</strong>
-                                    <span class="text-muted small">(same word, different form)</span>
-                                    <div class="d-flex flex-wrap gap-2 mt-2">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <div>
+                                            <strong>Alternative Forms:</strong>
+                                            <span class="text-muted small">(same word, different form)</span>
+                                        </div>
+                                        <form method="post" action="{{ url_for('lemmas.delete_all_synonyms', lemma_id=lemma.id) }}"
+                                              style="display: inline;"
+                                              onsubmit="return confirm('Delete all alternative forms for {{ language_names.get(lang_code, lang_code) }}?');">
+                                            <input type="hidden" name="lang_code" value="{{ lang_code }}">
+                                            <input type="hidden" name="form_category" value="alternatives">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Remove all alternative forms">
+                                                <i class="bi bi-trash"></i> Remove All
+                                            </button>
+                                        </form>
+                                    </div>
+                                    <div class="d-flex flex-wrap gap-2">
                                         {% for alt in alternatives %}
-                                            <span class="badge bg-secondary" style="font-size: 0.9rem;"
+                                            <span class="badge bg-secondary d-flex align-items-center" style="font-size: 0.9rem;"
                                                   title="Type: {{ alt.grammatical_form.replace('_', ' ').title() }}">
-                                                {{ alt.derivative_form_text }}
-                                                {% if alt.grammatical_form == 'abbreviation' %}
-                                                    <small class="ms-1" style="opacity: 0.7;">[abbr]</small>
-                                                {% elif alt.grammatical_form == 'expanded_form' %}
-                                                    <small class="ms-1" style="opacity: 0.7;">[expanded]</small>
-                                                {% elif alt.grammatical_form == 'alternate_spelling' %}
-                                                    <small class="ms-1" style="opacity: 0.7;">[spelling]</small>
-                                                {% endif %}
+                                                <span>
+                                                    {{ alt.derivative_form_text }}
+                                                    {% if alt.grammatical_form == 'abbreviation' %}
+                                                        <small class="ms-1" style="opacity: 0.7;">[abbr]</small>
+                                                    {% elif alt.grammatical_form == 'expanded_form' %}
+                                                        <small class="ms-1" style="opacity: 0.7;">[expanded]</small>
+                                                    {% elif alt.grammatical_form == 'alternate_spelling' %}
+                                                        <small class="ms-1" style="opacity: 0.7;">[spelling]</small>
+                                                    {% endif %}
+                                                </span>
+                                                <form method="post" action="{{ url_for('lemmas.delete_synonym', lemma_id=lemma.id, form_id=alt.id) }}"
+                                                      style="display: inline; margin: 0;"
+                                                      onsubmit="return confirm('Delete &quot;{{ alt.derivative_form_text }}&quot;?');">
+                                                    <button type="submit" class="btn btn-link btn-sm text-white p-0 ms-2"
+                                                            style="font-size: 0.9rem; line-height: 1; text-decoration: none;"
+                                                            title="Remove this form">
+                                                        <i class="bi bi-x-circle"></i>
+                                                    </button>
+                                                </form>
                                             </span>
                                         {% endfor %}
                                     </div>
@@ -334,11 +358,35 @@ document.addEventListener('DOMContentLoaded', function() {
 
                             {% if synonyms %}
                                 <div class="mb-3">
-                                    <strong>Synonyms:</strong>
-                                    <span class="text-muted small">(different word, similar meaning)</span>
-                                    <div class="d-flex flex-wrap gap-2 mt-2">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <div>
+                                            <strong>Synonyms:</strong>
+                                            <span class="text-muted small">(different word, similar meaning)</span>
+                                        </div>
+                                        <form method="post" action="{{ url_for('lemmas.delete_all_synonyms', lemma_id=lemma.id) }}"
+                                              style="display: inline;"
+                                              onsubmit="return confirm('Delete all synonyms for {{ language_names.get(lang_code, lang_code) }}?');">
+                                            <input type="hidden" name="lang_code" value="{{ lang_code }}">
+                                            <input type="hidden" name="form_category" value="synonyms">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Remove all synonyms">
+                                                <i class="bi bi-trash"></i> Remove All
+                                            </button>
+                                        </form>
+                                    </div>
+                                    <div class="d-flex flex-wrap gap-2">
                                         {% for syn in synonyms %}
-                                            <span class="badge bg-primary" style="font-size: 0.9rem;">{{ syn.derivative_form_text }}</span>
+                                            <span class="badge bg-primary d-flex align-items-center" style="font-size: 0.9rem;">
+                                                <span>{{ syn.derivative_form_text }}</span>
+                                                <form method="post" action="{{ url_for('lemmas.delete_synonym', lemma_id=lemma.id, form_id=syn.id) }}"
+                                                      style="display: inline; margin: 0;"
+                                                      onsubmit="return confirm('Delete &quot;{{ syn.derivative_form_text }}&quot;?');">
+                                                    <button type="submit" class="btn btn-link btn-sm text-white p-0 ms-2"
+                                                            style="font-size: 0.9rem; line-height: 1; text-decoration: none;"
+                                                            title="Remove this synonym">
+                                                        <i class="bi bi-x-circle"></i>
+                                                    </button>
+                                                </form>
+                                            </span>
                                         {% endfor %}
                                     </div>
                                 </div>
