@@ -1,3 +1,6 @@
 [submodule "data/trakaido_wordlists"]
 	path = data/trakaido_wordlists
 	url = git@github.com:powera/trakaido-wordlists.git
+[submodule "audio"]
+	path = audio
+	url = git@github.com:powera/audiotools
