@@ -840,6 +840,114 @@ def generate_sentences(lemma_id):
     return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
 
 
+@bp.route('/generate-grammar-fact/<int:lemma_id>', methods=['POST'])
+def generate_grammar_fact(lemma_id):
+    """Generate a grammar fact for a lemma using the LAPE agent."""
+    lemma = g.db.query(Lemma).get(lemma_id)
+    if not lemma:
+        flash('Lemma not found', 'error')
+        return redirect(url_for('lemmas.list_lemmas'))
+
+    # Get parameters from form
+    fact_type = request.form.get('fact_type', 'measure_words')
+    language_code = request.form.get('language_code', 'zh')
+
+    try:
+        # Import LAPE agent
+        from wordfreq.agents.lape import LapeAgent
+
+        # Initialize agent
+        agent = LapeAgent(db_path=Config.DB_PATH, debug=Config.DEBUG)
+
+        # Validate fact type is supported
+        if fact_type not in agent.SUPPORTED_FACT_TYPES:
+            flash(f'Unsupported fact type: {fact_type}', 'error')
+            return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
+
+        fact_config = agent.SUPPORTED_FACT_TYPES[fact_type]
+
+        # Validate language
+        if language_code not in fact_config['languages']:
+            flash(f'Fact type "{fact_type}" does not support language "{language_code}"', 'error')
+            return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
+
+        # Validate POS type
+        if lemma.pos_type not in fact_config['required_pos']:
+            flash(f'This word is a {lemma.pos_type}. {fact_type} only works with: {", ".join(fact_config["required_pos"])}', 'warning')
+            return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
+
+        # Check if translation exists for this language
+        from wordfreq.storage.translation_helpers import get_translation
+        translation = get_translation(g.db, lemma, language_code)
+
+        if not translation or not translation.strip():
+            flash(f'No {language_code} translation found for this lemma. Add a translation first.', 'warning')
+            return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
+
+        # Check if fact already exists
+        from wordfreq.storage.crud.grammar_fact import get_grammar_fact_value
+        existing_fact = get_grammar_fact_value(g.db, lemma_id, language_code, fact_type)
+        if existing_fact:
+            flash(f'This lemma already has {fact_type}: {existing_fact}', 'info')
+            return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
+
+        # Generate the grammar fact
+        if fact_type == 'measure_words':
+            fact_value, notes, confidence = agent.generate_measure_words(
+                lemma, translation, g.db
+            )
+        else:
+            flash(f'Handler not yet implemented for fact type: {fact_type}', 'error')
+            return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
+
+        if fact_value and confidence >= 0.7:
+            # Save to database
+            from wordfreq.storage.crud.grammar_fact import add_grammar_fact
+            add_grammar_fact(
+                g.db,
+                lemma_id=lemma_id,
+                language_code=language_code,
+                fact_type=fact_type,
+                fact_value=fact_value,
+                notes=notes,
+                verified=False
+            )
+            g.db.commit()
+
+            # Log operation
+            from wordfreq.storage.crud.operation_log import log_operation
+            log_operation(
+                g.db,
+                operation_type='grammar_fact_generated',
+                entity_type='grammar_fact',
+                entity_id=lemma_id,
+                details={
+                    'fact_type': fact_type,
+                    'language_code': language_code,
+                    'fact_value': fact_value,
+                    'confidence': confidence,
+                    'agent': 'lape',
+                    'source': 'barsukas-web-interface'
+                }
+            )
+            g.db.commit()
+
+            flash(f'Successfully generated {fact_type}: {fact_value} (confidence: {confidence:.2f})', 'success')
+            if notes:
+                flash(f'Note: {notes}', 'info')
+        else:
+            flash(f'Could not generate {fact_type} with sufficient confidence (got {confidence:.2f}, need ≥ 0.7)', 'warning')
+
+    except Exception as e:
+        g.db.rollback()
+        flash(f'Error generating grammar fact: {str(e)}', 'error')
+        import traceback
+        if Config.DEBUG:
+            flash(f'Debug: {traceback.format_exc()}', 'error')
+
+    return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
+
+
 @bp.route('/view-sentences/<int:lemma_id>')
 def view_sentences(lemma_id):
     """View all sentences that use a specific lemma."""

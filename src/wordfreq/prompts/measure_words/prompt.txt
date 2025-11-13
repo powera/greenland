@@ -1,0 +1,18 @@
+Identify the appropriate Chinese measure word(s) (量词/classifier) for the following noun:
+
+English word: {english_word}
+Chinese translation: {chinese_translation}
+Part of speech: {pos_type}
+Definition: {definition}
+
+Provide:
+1. Primary measure word (Traditional Chinese characters)
+2. Alternative measure words (if commonly used)
+3. Brief explanation (1-2 sentences) of why this measure word is appropriate
+4. Confidence score (0.0-1.0)
+
+IMPORTANT:
+- Focus on the most common, standard measure word
+- If multiple measure words are acceptable, list them in order of frequency
+- Consider the semantic category and physical properties of the noun
+- Return Traditional Chinese characters (繁體字)
