@@ -149,6 +149,7 @@ ruby {
     /* Safari compatibility: use -webkit prefix and remove unsupported ruby-align */
     -webkit-ruby-position: before;
     ruby-position: over;
+    text-align: center;
 }
 
 rt {
@@ -162,10 +163,11 @@ rt {
     text-align: center;
 }
 
-/* Ensure proper spacing for Chinese text with pinyin */
+/* Ensure proper spacing and centering for Chinese text with pinyin */
 .chinese-with-pinyin ruby {
     display: inline-block;
-    margin-right: 0.1em;
+    margin-right: 0.65em;
+    text-align: center;
 }
 
 /* Make pinyin slightly larger in headings for better readability */
