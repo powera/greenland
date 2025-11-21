@@ -35,3 +35,6 @@ class Config:
 
     # Access control
     READONLY = False  # Can be overridden at runtime
+
+    # Audio settings
+    AUDIO_BASE_DIR = os.environ.get('BARSUKAS_AUDIO_DIR', str(BASE_DIR.parent / 'wireword-audio' / 'trakaido'))

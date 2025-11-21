@@ -1,0 +1,323 @@
+{% extends "base.html" %}
+
+{% block title %}Audio Files{% endblock %}
+
+{% block extra_head %}
+<style>
+.audio-player-inline {
+    width: 200px;
+}
+.status-badge {
+    font-size: 0.8rem;
+}
+.filter-form {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 0.5rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <h1><i class="bi bi-list-ul"></i> Audio Files</h1>
+
+    <!-- Filters -->
+    <div class="filter-form mb-4">
+        <form method="GET" action="{{ url_for('audio.list_files') }}">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-2">
+                    <label for="language" class="form-label">Language</label>
+                    <select class="form-select" id="language" name="language">
+                        <option value="">All</option>
+                        {% for lang in languages %}
+                        <option value="{{ lang }}" {% if lang == language_filter %}selected{% endif %}>{{ lang }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="voice" class="form-label">Voice</label>
+                    <select class="form-select" id="voice" name="voice">
+                        <option value="">All</option>
+                        {% for voice in voices %}
+                        <option value="{{ voice }}" {% if voice == voice_filter %}selected{% endif %}>{{ voice }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="status" class="form-label">Status</label>
+                    <select class="form-select" id="status" name="status">
+                        <option value="">All</option>
+                        {% for status in statuses %}
+                        <option value="{{ status }}" {% if status == status_filter %}selected{% endif %}>
+                            {{ status.replace('_', ' ').title() }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="search" class="form-label">Search (Text or GUID)</label>
+                    <input type="text" class="form-control" id="search" name="search" value="{{ search_query }}" placeholder="Search...">
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-search"></i> Filter
+                    </button>
+                    <a href="{{ url_for('audio.list_files') }}" class="btn btn-secondary">
+                        <i class="bi bi-x-circle"></i> Clear
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Results Summary -->
+    <div class="mb-3">
+        <p class="text-muted">
+            Showing {{ ((page - 1) * per_page) + 1 }} - {{ [page * per_page, total_count]|min }} of {{ total_count }} files
+            {% if language_filter or voice_filter or status_filter or search_query %}
+            (filtered)
+            {% endif %}
+        </p>
+    </div>
+
+    <!-- Audio Files Table -->
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>GUID</th>
+                    <th>Expected Text</th>
+                    <th>English</th>
+                    <th>Language</th>
+                    <th>Voice</th>
+                    <th>Status</th>
+                    <th>Issues</th>
+                    <th>Audio</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for file in audio_files %}
+                <tr data-review-id="{{ file.id }}">
+                    <td>
+                        {% if file.lemma_id %}
+                        <a href="{{ url_for('lemmas.view_lemma', lemma_id=file.lemma_id) }}" title="View lemma">
+                            <code>{{ file.guid }}</code>
+                        </a>
+                        {% else %}
+                        <code>{{ file.guid }}</code>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <strong>{{ file.expected_text }}</strong>
+                        {% if file.language_code == 'zh' %}
+                        <br><small class="text-muted">{{ file.expected_text|pinyin }}</small>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if file.lemma %}
+                        <small>{{ file.lemma.lemma_text }}
+                        {% if file.lemma.disambiguation %}
+                        <span class="text-muted">({{ file.lemma.disambiguation }})</span>
+                        {% endif %}
+                        </small>
+                        {% else %}
+                        <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+                    <td><span class="badge bg-secondary">{{ file.language_code }}</span></td>
+                    <td><span class="badge bg-info">{{ file.voice_name }}</span></td>
+                    <td>
+                        {% if file.status == 'pending_review' %}
+                        <span class="badge bg-warning text-dark status-badge">Pending Review</span>
+                        {% elif file.status == 'approved' %}
+                        <span class="badge bg-success status-badge">Approved</span>
+                        {% elif file.status == 'needs_replacement' %}
+                        <span class="badge bg-danger status-badge">Needs Replacement</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if file.quality_issues %}
+                            {% set issues = file.quality_issues|fromjson %}
+                            <span class="badge bg-warning text-dark">{{ issues|length }}</span>
+                        {% else %}
+                        -
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if file.lemma_id %}
+                        <a href="{{ url_for('lemmas.view_lemma', lemma_id=file.lemma_id) }}" class="badge bg-primary text-decoration-none">
+                            <i class="bi bi-link-45deg"></i> Linked
+                        </a>
+                        {% else %}
+                        <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-secondary play-audio-btn"
+                                data-audio-url="{{ url_for('audio.serve_audio_file', language=file.language_code, voice=file.voice_name, filename=file.filename) }}"
+                                title="Play audio">
+                            <i class="bi bi-play-circle"></i>
+                        </button>
+                    </td>
+                    <td>
+                        <div class="btn-group btn-group-sm" role="group">
+                            <a href="{{ url_for('audio.review_file', review_id=file.id) }}" class="btn btn-outline-primary" title="Review">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <button class="btn btn-outline-success quick-approve" data-id="{{ file.id }}" title="Quick Approve">
+                                <i class="bi bi-check"></i>
+                            </button>
+                            <button class="btn btn-outline-danger quick-reject" data-id="{{ file.id }}" title="Mark for Replacement">
+                                <i class="bi bi-x"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if total_pages > 1 %}
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            <li class="page-item {% if page == 1 %}disabled{% endif %}">
+                <a class="page-link" href="{{ url_for('audio.list_files', page=page-1, language=language_filter, voice=voice_filter, status=status_filter, search=search_query) }}">
+                    Previous
+                </a>
+            </li>
+
+            {% set start_page = [1, page - 2]|max %}
+            {% set end_page = [total_pages, page + 2]|min %}
+
+            {% if start_page > 1 %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('audio.list_files', page=1, language=language_filter, voice=voice_filter, status=status_filter, search=search_query) }}">1</a>
+            </li>
+            {% if start_page > 2 %}
+            <li class="page-item disabled"><span class="page-link">...</span></li>
+            {% endif %}
+            {% endif %}
+
+            {% for p in range(start_page, end_page + 1) %}
+            <li class="page-item {% if p == page %}active{% endif %}">
+                <a class="page-link" href="{{ url_for('audio.list_files', page=p, language=language_filter, voice=voice_filter, status=status_filter, search=search_query) }}">{{ p }}</a>
+            </li>
+            {% endfor %}
+
+            {% if end_page < total_pages %}
+            {% if end_page < total_pages - 1 %}
+            <li class="page-item disabled"><span class="page-link">...</span></li>
+            {% endif %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('audio.list_files', page=total_pages, language=language_filter, voice=voice_filter, status=status_filter, search=search_query) }}">{{ total_pages }}</a>
+            </li>
+            {% endif %}
+
+            <li class="page-item {% if page == total_pages %}disabled{% endif %}">
+                <a class="page-link" href="{{ url_for('audio.list_files', page=page+1, language=language_filter, voice=voice_filter, status=status_filter, search=search_query) }}">
+                    Next
+                </a>
+            </li>
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+
+<script>
+// Create a single shared audio player
+const audioPlayer = new Audio();
+let currentPlayButton = null;
+
+// Quick approve/reject handlers
+document.addEventListener('DOMContentLoaded', function() {
+    // Play audio button handlers
+    document.querySelectorAll('.play-audio-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const audioUrl = this.dataset.audioUrl;
+
+            // If clicking the same button, toggle play/pause
+            if (currentPlayButton === this && !audioPlayer.paused) {
+                audioPlayer.pause();
+                this.innerHTML = '<i class="bi bi-play-circle"></i>';
+                return;
+            }
+
+            // Reset previous button
+            if (currentPlayButton) {
+                currentPlayButton.innerHTML = '<i class="bi bi-play-circle"></i>';
+            }
+
+            // Play new audio
+            audioPlayer.src = audioUrl;
+            audioPlayer.play();
+            this.innerHTML = '<i class="bi bi-pause-circle"></i>';
+            currentPlayButton = this;
+        });
+    });
+
+    // Reset button when audio ends
+    audioPlayer.addEventListener('ended', function() {
+        if (currentPlayButton) {
+            currentPlayButton.innerHTML = '<i class="bi bi-play-circle"></i>';
+            currentPlayButton = null;
+        }
+    });
+
+    document.querySelectorAll('.quick-approve').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const reviewId = this.dataset.id;
+            quickUpdate(reviewId, 'approved', this);
+        });
+    });
+
+    document.querySelectorAll('.quick-reject').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const reviewId = this.dataset.id;
+            quickUpdate(reviewId, 'needs_replacement', this);
+        });
+    });
+
+    function quickUpdate(reviewId, status, button) {
+        button.disabled = true;
+        const row = document.querySelector(`tr[data-review-id="${reviewId}"]`);
+
+        fetch(`{{ url_for('audio.quick_update', review_id=0) }}`.replace('0', reviewId), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ status: status })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update status badge (6th column: GUID, Text, English, Language, Voice, Status)
+                const statusCell = row.querySelector('td:nth-child(6)');
+                if (status === 'approved') {
+                    statusCell.innerHTML = '<span class="badge bg-success status-badge">Approved</span>';
+                } else if (status === 'needs_replacement') {
+                    statusCell.innerHTML = '<span class="badge bg-danger status-badge">Needs Replacement</span>';
+                }
+                // Flash success
+                row.style.backgroundColor = '#d4edda';
+                setTimeout(() => {
+                    row.style.backgroundColor = '';
+                }, 1000);
+            } else {
+                alert('Error: ' + data.error);
+            }
+        })
+        .catch(error => {
+            alert('Error updating status: ' + error);
+        })
+        .finally(() => {
+            button.disabled = false;
+        });
+    }
+});
+</script>
+{% endblock %}

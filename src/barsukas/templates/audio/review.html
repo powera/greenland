@@ -1,0 +1,255 @@
+{% extends "base.html" %}
+
+{% block title %}Review Audio - {{ review.guid }}{% endblock %}
+
+{% block extra_head %}
+<style>
+.review-container {
+    max-width: 900px;
+    margin: 0 auto;
+}
+.expected-text-display {
+    font-size: 3rem;
+    font-weight: bold;
+    text-align: center;
+    padding: 2rem;
+    background-color: #f8f9fa;
+    border-radius: 0.5rem;
+    margin: 2rem 0;
+}
+.audio-player-large {
+    width: 100%;
+    margin: 1rem 0;
+}
+.issue-checkbox {
+    margin: 0.5rem 0;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="review-container mt-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="bi bi-music-note-beamed"></i> Review Audio</h1>
+        <a href="{{ url_for('audio.list_files') }}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Back to List
+        </a>
+    </div>
+
+    <!-- Main Display -->
+    <div class="card">
+        <div class="card-body">
+            <!-- Expected Text (Large, Prominent) -->
+            <div class="expected-text-display">
+                {{ review.expected_text }}
+            </div>
+
+            <!-- Audio Player -->
+            <div class="text-center">
+                <audio controls class="audio-player-large" autoplay>
+                    <source src="{{ url_for('audio.serve_audio_file', language=review.language_code, voice=review.voice_name, filename=review.filename) }}" type="audio/mpeg">
+                    Your browser does not support audio playback.
+                </audio>
+            </div>
+
+            <!-- Metadata -->
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <dl class="row">
+                        <dt class="col-sm-4">GUID:</dt>
+                        <dd class="col-sm-8"><code>{{ review.guid }}</code></dd>
+
+                        <dt class="col-sm-4">Language:</dt>
+                        <dd class="col-sm-8"><span class="badge bg-secondary">{{ review.language_code }}</span></dd>
+
+                        <dt class="col-sm-4">Voice:</dt>
+                        <dd class="col-sm-8"><span class="badge bg-info">{{ review.voice_name }}</span></dd>
+
+                        <dt class="col-sm-4">Filename:</dt>
+                        <dd class="col-sm-8"><small><code>{{ review.filename }}</code></small></dd>
+                    </dl>
+                </div>
+                <div class="col-md-6">
+                    <dl class="row">
+                        <dt class="col-sm-4">Current Status:</dt>
+                        <dd class="col-sm-8">
+                            {% if review.status == 'pending_review' %}
+                            <span class="badge bg-warning text-dark">Pending Review</span>
+                            {% elif review.status == 'approved' %}
+                            <span class="badge bg-success">Approved</span>
+                            {% elif review.status == 'needs_replacement' %}
+                            <span class="badge bg-danger">Needs Replacement</span>
+                            {% endif %}
+                        </dd>
+
+                        <dt class="col-sm-4">Linked Lemma:</dt>
+                        <dd class="col-sm-8">
+                            {% if lemma %}
+                            <a href="{{ url_for('lemmas.view_lemma', lemma_id=lemma.id) }}">
+                                {{ lemma.lemma_text }}
+                            </a>
+                            {% else %}
+                            <span class="text-muted">Not linked</span>
+                            {% endif %}
+                        </dd>
+
+                        <dt class="col-sm-4">MD5 Hash:</dt>
+                        <dd class="col-sm-8"><small><code>{{ review.manifest_md5[:12] }}...</code></small></dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Review Form -->
+    <div class="card mt-4">
+        <div class="card-body">
+            <h5 class="card-title">Submit Review</h5>
+            <form method="POST">
+                <!-- Status Selection -->
+                <div class="mb-3">
+                    <label class="form-label">Status <span class="text-danger">*</span></label>
+                    <div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="status" id="status_approved" value="approved" {% if review.status == 'approved' %}checked{% endif %}>
+                            <label class="form-check-label" for="status_approved">
+                                <i class="bi bi-check-circle text-success"></i> Approved (Audio is good)
+                            </label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="status" id="status_needs_replacement" value="needs_replacement" {% if review.status == 'needs_replacement' %}checked{% endif %}>
+                            <label class="form-check-label" for="status_needs_replacement">
+                                <i class="bi bi-exclamation-triangle text-danger"></i> Needs Replacement
+                            </label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="status" id="status_pending" value="pending_review" {% if review.status == 'pending_review' %}checked{% endif %}>
+                            <label class="form-check-label" for="status_pending">
+                                <i class="bi bi-clock text-warning"></i> Pending Review (Skip for now)
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quality Issues -->
+                <div class="mb-3">
+                    <label class="form-label">Quality Issues (if any)</label>
+                    <div class="row">
+                        {% set current_issues = review.quality_issues|fromjson if review.quality_issues else [] %}
+                        <div class="col-md-6">
+                            <div class="issue-checkbox">
+                                <input type="checkbox" class="form-check-input" id="issue_extra_syllable" value="extra_syllable" {% if 'extra_syllable' in current_issues %}checked{% endif %}>
+                                <label class="form-check-label" for="issue_extra_syllable">Extra syllable</label>
+                            </div>
+                            <div class="issue-checkbox">
+                                <input type="checkbox" class="form-check-input" id="issue_missing_syllable" value="missing_syllable" {% if 'missing_syllable' in current_issues %}checked{% endif %}>
+                                <label class="form-check-label" for="issue_missing_syllable">Missing syllable</label>
+                            </div>
+                            <div class="issue-checkbox">
+                                <input type="checkbox" class="form-check-input" id="issue_bd_confusion" value="bd_confusion" {% if 'bd_confusion' in current_issues %}checked{% endif %}>
+                                <label class="form-check-label" for="issue_bd_confusion">B/D confusion</label>
+                            </div>
+                            <div class="issue-checkbox">
+                                <input type="checkbox" class="form-check-input" id="issue_audible_breath" value="audible_breath" {% if 'audible_breath' in current_issues %}checked{% endif %}>
+                                <label class="form-check-label" for="issue_audible_breath">Audible breath noise</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="issue-checkbox">
+                                <input type="checkbox" class="form-check-input" id="issue_echo_effect" value="echo_effect" {% if 'echo_effect' in current_issues %}checked{% endif %}>
+                                <label class="form-check-label" for="issue_echo_effect">Echo effect</label>
+                            </div>
+                            <div class="issue-checkbox">
+                                <input type="checkbox" class="form-check-input" id="issue_volume_inconsistency" value="volume_inconsistency" {% if 'volume_inconsistency' in current_issues %}checked{% endif %}>
+                                <label class="form-check-label" for="issue_volume_inconsistency">Volume issues</label>
+                            </div>
+                            <div class="issue-checkbox">
+                                <input type="checkbox" class="form-check-input" id="issue_background_noise" value="background_noise" {% if 'background_noise' in current_issues %}checked{% endif %}>
+                                <label class="form-check-label" for="issue_background_noise">Background noise</label>
+                            </div>
+                            <div class="issue-checkbox">
+                                <input type="checkbox" class="form-check-input" id="issue_pronunciation_error" value="pronunciation_error" {% if 'pronunciation_error' in current_issues %}checked{% endif %}>
+                                <label class="form-check-label" for="issue_pronunciation_error">Pronunciation error</label>
+                            </div>
+                        </div>
+                    </div>
+                    <input type="hidden" name="quality_issues" id="quality_issues_json" value="{{ review.quality_issues or '[]' }}">
+                </div>
+
+                <!-- Notes -->
+                <div class="mb-3">
+                    <label for="notes" class="form-label">Notes (optional)</label>
+                    <textarea class="form-control" id="notes" name="notes" rows="3">{{ review.notes or '' }}</textarea>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save"></i> Save Review
+                    </button>
+                    <button type="submit" name="save_and_next" value="1" class="btn btn-success">
+                        <i class="bi bi-skip-forward"></i> Save & Next
+                    </button>
+                    <a href="{{ url_for('audio.list_files') }}" class="btn btn-secondary">
+                        <i class="bi bi-x-circle"></i> Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Collect checked issues into JSON array on form submit
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const issuesInput = document.getElementById('quality_issues_json');
+
+    form.addEventListener('submit', function(e) {
+        // Collect all checked issues
+        const issues = [];
+        document.querySelectorAll('.issue-checkbox input:checked').forEach(checkbox => {
+            issues.push(checkbox.value);
+        });
+
+        // Update hidden field
+        issuesInput.value = JSON.stringify(issues);
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // Space - play/pause audio
+        if (e.code === 'Space' && e.target.tagName !== 'TEXTAREA') {
+            e.preventDefault();
+            const audio = document.querySelector('audio');
+            if (audio.paused) {
+                audio.play();
+            } else {
+                audio.pause();
+            }
+        }
+
+        // A or Enter - Approve
+        if ((e.code === 'KeyA' || e.code === 'Enter') && e.target.tagName !== 'TEXTAREA' && !e.ctrlKey && !e.metaKey) {
+            e.preventDefault();
+            document.getElementById('status_approved').checked = true;
+            form.requestSubmit();
+        }
+
+        // R - Reject (needs replacement)
+        if (e.code === 'KeyR' && e.target.tagName !== 'TEXTAREA') {
+            e.preventDefault();
+            document.getElementById('status_needs_replacement').checked = true;
+            form.requestSubmit();
+        }
+
+        // N - Next (save and next)
+        if (e.code === 'KeyN' && e.target.tagName !== 'TEXTAREA') {
+            e.preventDefault();
+            document.querySelector('[name="save_and_next"]').click();
+        }
+    });
+});
+</script>
+{% endblock %}
