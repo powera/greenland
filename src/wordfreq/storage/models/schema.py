@@ -291,3 +291,55 @@ class WordFrequency(Base):
     # Relationships
     word_token = relationship("WordToken", back_populates="frequencies")
     corpus = relationship("Corpus", back_populates="word_frequencies")
+
+class AudioQualityReview(Base):
+    """Model for tracking audio file quality reviews.
+
+    Audio files are generated for lemmas in various languages and voices.
+    This table tracks the review status and quality issues for each audio file.
+    """
+    __tablename__ = 'audio_quality_reviews'
+    __table_args__ = (
+        UniqueConstraint('guid', 'language_code', 'voice_name', name='uq_audio_review'),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+
+    # Audio file identification
+    guid: Mapped[str] = mapped_column(String, nullable=False, index=True)  # e.g., "N01_001"
+    language_code: Mapped[str] = mapped_column(String, nullable=False, index=True)  # e.g., "zh", "ko", "fr"
+    voice_name: Mapped[str] = mapped_column(String, nullable=False, index=True)  # e.g., "ash", "alloy", "echo"
+    filename: Mapped[str] = mapped_column(String, nullable=False, index=True)  # e.g., "N01_001.mp3"
+
+    # Audio content
+    expected_text: Mapped[str] = mapped_column(String, nullable=False)  # Word/phrase that should be spoken
+    manifest_md5: Mapped[str] = mapped_column(String, nullable=False)  # MD5 hash from manifest
+
+    # Optional link to lemma (hybrid approach: try GUID match, fallback to text matching)
+    lemma_id: Mapped[Optional[int]] = mapped_column(ForeignKey("lemmas.id"), nullable=True, index=True)
+
+    # Review status
+    status: Mapped[str] = mapped_column(
+        String,
+        nullable=False,
+        default='pending_review',
+        index=True
+    )  # 'pending_review', 'approved', 'needs_replacement'
+
+    # Quality issues (JSON array of issue types)
+    # e.g., ["audible_breath", "extra_syllable", "missing_syllable", "bd_confusion", "echo_effect"]
+    quality_issues: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
+    # Free-text notes
+    notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
+    # Review metadata
+    reviewed_at: Mapped[Optional[datetime.datetime]] = mapped_column(TIMESTAMP, nullable=True)
+    reviewed_by: Mapped[Optional[str]] = mapped_column(String, nullable=True)  # Username or identifier
+
+    # Timestamps
+    added_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now())
+    updated_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+
+    # Relationships
+    lemma = relationship("Lemma")

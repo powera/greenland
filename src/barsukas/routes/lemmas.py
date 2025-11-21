@@ -329,6 +329,15 @@ def view_lemma(lemma_id):
     from wordfreq.storage.crud.grammar_fact import get_grammar_facts
     grammar_facts = get_grammar_facts(g.db, lemma_id)
 
+    # Get audio files for this lemma
+    from wordfreq.storage.models.schema import AudioQualityReview
+    audio_files = g.db.query(AudioQualityReview).filter(
+        AudioQualityReview.lemma_id == lemma_id
+    ).order_by(
+        AudioQualityReview.language_code,
+        AudioQualityReview.voice_name
+    ).all()
+
     return render_template('lemmas/view.html',
                          lemma=lemma,
                          translations=translations,
@@ -337,6 +346,7 @@ def view_lemma(lemma_id):
                          effective_levels=effective_levels,
                          difficulty_stats=difficulty_stats,
                          forms_by_language=forms_by_language,
+                         audio_files=audio_files,
                          synonyms_by_language=synonyms_by_language,
                          alternative_forms_by_language=alternative_forms_by_language,
                          all_synonym_languages=all_synonym_languages,
@@ -490,6 +500,7 @@ def _get_difficulty_stats(session, pos_type, pos_subtype):
 def delete_synonym(lemma_id, form_id):
     """Delete a single synonym or alternative form."""
     from flask import current_app
+    from wordfreq.storage.crud.grammar_fact import update_alternate_forms_facts_after_deletion
 
     if current_app.config.get('READONLY', False):
         flash('Cannot delete: running in read-only mode', 'error')
@@ -505,19 +516,29 @@ def delete_synonym(lemma_id, form_id):
         flash('Synonym or alternative form not found', 'error')
         return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
 
-    # Store form details for flash message
+    # Store form details for flash message and grammar fact update
     form_text = form.derivative_form_text
     form_type = form.grammatical_form.replace('_', ' ').title()
+    language_code = form.language_code
+    grammatical_form = form.grammatical_form
 
     # Delete the form
     if delete_derivative_form(g.db, form_id):
+        # Update grammar facts based on remaining forms
+        update_alternate_forms_facts_after_deletion(
+            session=g.db,
+            lemma_id=lemma_id,
+            language_code=language_code,
+            deleted_form_type=grammatical_form
+        )
+
         # Log the deletion
         log_translation_change(
             session=g.db,
             source=Config.OPERATION_LOG_SOURCE,
             operation_type='derivative_form_delete',
             lemma_id=lemma_id,
-            field_name=f'{form.language_code}_{form.grammatical_form}',
+            field_name=f'{language_code}_{grammatical_form}',
             old_value=form_text,
             new_value=None
         )
@@ -532,6 +553,7 @@ def delete_synonym(lemma_id, form_id):
 def delete_all_synonyms(lemma_id):
     """Delete all synonyms and/or alternative forms for a lemma."""
     from flask import current_app
+    from wordfreq.storage.crud.grammar_fact import update_alternate_forms_facts_after_deletion
 
     if current_app.config.get('READONLY', False):
         flash('Cannot delete: running in read-only mode', 'error')
@@ -569,6 +591,9 @@ def delete_all_synonyms(lemma_id):
         flash('No matching forms found to delete', 'warning')
         return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
 
+    # Collect affected languages for grammar fact updates
+    affected_languages = set(form.language_code for form in forms_to_delete)
+
     # Delete all matching forms
     deleted_count = 0
     for form in forms_to_delete:
@@ -584,6 +609,16 @@ def delete_all_synonyms(lemma_id):
                 old_value=form.derivative_form_text,
                 new_value=None
             )
+
+    # Update grammar facts for all affected languages
+    # Since we may have deleted forms of multiple types, recalculate all facts (deleted_form_type=None)
+    for language in affected_languages:
+        update_alternate_forms_facts_after_deletion(
+            session=g.db,
+            lemma_id=lemma_id,
+            language_code=language,
+            deleted_form_type=None  # Recalculate all types since bulk delete may affect multiple
+        )
 
     # Create success message
     if deleted_count > 0:

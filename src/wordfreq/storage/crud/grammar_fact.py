@@ -317,3 +317,107 @@ def get_declension_class(session, lemma_id: int, language_code: str) -> Optional
             print(f"This noun follows declension pattern {declension}")
     """
     return get_grammar_fact_value(session, lemma_id, language_code, "declension")
+
+
+def update_alternate_forms_facts_after_deletion(
+    session,
+    lemma_id: int,
+    language_code: str,
+    deleted_form_type: Optional[str] = None
+) -> Dict[str, bool]:
+    """
+    Update grammar facts for alternate forms after a derivative form is deleted.
+
+    This function recalculates the has_* grammar facts based on remaining forms.
+    If all forms of a type are removed, the grammar fact is DELETED (returns to NULL state),
+    indicating "we don't know if there are any" rather than "there are definitely none".
+
+    Three-state semantics:
+    - NULL (no grammar fact): Unknown, needs LLM check (ŠERNAS should process)
+    - "true": LLM confirmed forms exist AND they're stored in database
+    - "false": LLM confirmed NO forms exist for this word
+
+    When user deletes the last form, we return to NULL state because:
+    - Maybe the LLM was wrong and there ARE other forms
+    - Maybe the user deleted incorrect forms and we should re-check
+    - We want ŠERNAS to re-evaluate rather than assume "none exist"
+
+    Args:
+        session: Database session
+        lemma_id: ID of the lemma
+        language_code: Language code (e.g., "en", "lt", "zh")
+        deleted_form_type: Optional form type that was deleted
+                          (e.g., 'synonym', 'abbreviation', 'expanded_form', 'alternate_spelling')
+                          If None, recalculates all types
+
+    Returns:
+        Dictionary with updated fact values (True/False for each type, or omitted if deleted)
+
+    Example:
+        # After deleting a synonym
+        update_alternate_forms_facts_after_deletion(session, lemma_id=123,
+                                                    language_code="en",
+                                                    deleted_form_type="synonym")
+
+        # After bulk deletion (recalculate all)
+        update_alternate_forms_facts_after_deletion(session, lemma_id=123,
+                                                    language_code="en")
+    """
+    from wordfreq.storage.models.schema import DerivativeForm
+
+    # Map form types to grammar fact types
+    form_to_fact_map = {
+        'synonym': 'has_synonyms',
+        'abbreviation': 'has_abbreviations',
+        'expanded_form': 'has_expanded_forms',
+        'alternate_spelling': 'has_alternate_spellings',
+        'alternative_form': 'has_alternate_spellings',  # Legacy mapping
+    }
+
+    # Determine which fact types to update
+    if deleted_form_type:
+        fact_types_to_update = [form_to_fact_map.get(deleted_form_type)]
+        fact_types_to_update = [ft for ft in fact_types_to_update if ft]  # Remove None
+    else:
+        # Update all fact types
+        fact_types_to_update = list(set(form_to_fact_map.values()))
+
+    results = {}
+
+    for fact_type in fact_types_to_update:
+        # Reverse map to get form types for this fact type
+        relevant_form_types = [
+            form_type for form_type, ft in form_to_fact_map.items()
+            if ft == fact_type
+        ]
+
+        # Count remaining forms of this type
+        remaining_count = session.query(DerivativeForm).filter(
+            DerivativeForm.lemma_id == lemma_id,
+            DerivativeForm.language_code == language_code,
+            DerivativeForm.grammatical_form.in_(relevant_form_types)
+        ).count()
+
+        if remaining_count > 0:
+            # Forms still exist - update fact to "true"
+            # First delete old fact to avoid unique constraint issues
+            delete_grammar_fact(session, lemma_id, language_code, fact_type)
+            # Then add new fact
+            add_grammar_fact(
+                session, lemma_id, language_code, fact_type,
+                fact_value="true",
+                verified=True
+            )
+            results[fact_type] = True
+            logger.info(f"Updated {fact_type}=true for lemma {lemma_id} ({language_code})")
+        else:
+            # No forms remain - DELETE the grammar fact (return to NULL/unknown state)
+            deleted = delete_grammar_fact(session, lemma_id, language_code, fact_type)
+            if deleted:
+                logger.info(
+                    f"Deleted {fact_type} for lemma {lemma_id} ({language_code}) - "
+                    f"no forms remain, returning to unknown state"
+                )
+            # Don't add to results dict - absence indicates NULL state
+
+    return results

@@ -609,6 +609,108 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
 </div>
 
+<!-- Audio Files -->
+{% if audio_files %}
+<div class="row mb-4">
+    <div class="col">
+        <div class="card">
+            <div class="card-header">
+                <span><i class="bi bi-music-note-beamed"></i> Audio Files</span>
+            </div>
+            <div class="card-body">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Language</th>
+                            <th>Voice</th>
+                            <th>Expected Text</th>
+                            <th>Status</th>
+                            <th>Audio</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for audio in audio_files %}
+                        <tr>
+                            <td><span class="badge bg-secondary">{{ audio.language_code }}</span></td>
+                            <td><span class="badge bg-info">{{ audio.voice_name }}</span></td>
+                            <td>
+                                <strong>{{ audio.expected_text }}</strong>
+                                {% if audio.language_code == 'zh' %}
+                                <br><small class="text-muted">{{ audio.expected_text|pinyin }}</small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if audio.status == 'pending_review' %}
+                                <span class="badge bg-warning text-dark">Pending</span>
+                                {% elif audio.status == 'approved' %}
+                                <span class="badge bg-success">Approved</span>
+                                {% elif audio.status == 'needs_replacement' %}
+                                <span class="badge bg-danger">Needs Fix</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-secondary play-audio-btn-lemma"
+                                        data-audio-url="{{ url_for('audio.serve_audio_file', language=audio.language_code, voice=audio.voice_name, filename=audio.filename) }}"
+                                        title="Play audio">
+                                    <i class="bi bi-play-circle"></i>
+                                </button>
+                            </td>
+                            <td>
+                                <a href="{{ url_for('audio.review_file', review_id=audio.id) }}"
+                                   class="btn btn-sm btn-outline-primary"
+                                   title="Review audio">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Audio player for lemma view
+const audioPlayerLemma = new Audio();
+let currentPlayButtonLemma = null;
+
+document.querySelectorAll('.play-audio-btn-lemma').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const audioUrl = this.dataset.audioUrl;
+
+        // If clicking the same button, toggle play/pause
+        if (currentPlayButtonLemma === this && !audioPlayerLemma.paused) {
+            audioPlayerLemma.pause();
+            this.innerHTML = '<i class="bi bi-play-circle"></i>';
+            return;
+        }
+
+        // Reset previous button
+        if (currentPlayButtonLemma) {
+            currentPlayButtonLemma.innerHTML = '<i class="bi bi-play-circle"></i>';
+        }
+
+        // Play new audio
+        audioPlayerLemma.src = audioUrl;
+        audioPlayerLemma.play();
+        this.innerHTML = '<i class="bi bi-pause-circle"></i>';
+        currentPlayButtonLemma = this;
+    });
+});
+
+// Reset button when audio ends
+audioPlayerLemma.addEventListener('ended', function() {
+    if (currentPlayButtonLemma) {
+        currentPlayButtonLemma.innerHTML = '<i class="bi bi-play-circle"></i>';
+        currentPlayButtonLemma = null;
+    }
+});
+</script>
+{% endif %}
+
 <!-- Generate Grammar Fact Modal (for nouns) -->
 {% if lemma.pos_type == 'noun' %}
 <div class="modal fade" id="generateGrammarFactModal" tabindex="-1">

@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}Audio Quality Review{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1><i class="bi bi-music-note-beamed"></i> Audio Quality Review</h1>
+    <p class="text-muted">Manage and review audio file quality for multiple languages and voices</p>
+
+    <div class="row mt-4">
+        <!-- Summary Statistics -->
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Total Files</h5>
+                    <p class="display-4">{{ total_files }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-warning">
+                <div class="card-body">
+                    <h5 class="card-title">Pending Review</h5>
+                    <p class="display-4 text-warning">{{ pending_review }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-success">
+                <div class="card-body">
+                    <h5 class="card-title">Approved</h5>
+                    <p class="display-4 text-success">{{ approved }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-danger">
+                <div class="card-body">
+                    <h5 class="card-title">Needs Replacement</h5>
+                    <p class="display-4 text-danger">{{ needs_replacement }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Quick Actions</h5>
+                    <div class="d-flex gap-2">
+                        <a href="{{ url_for('audio.import_manifest') }}" class="btn btn-primary">
+                            <i class="bi bi-upload"></i> Import Manifest
+                        </a>
+                        <a href="{{ url_for('audio.list_files') }}" class="btn btn-secondary">
+                            <i class="bi bi-list-ul"></i> View All Files
+                        </a>
+                        <a href="{{ url_for('audio.list_files', status='pending_review') }}" class="btn btn-warning">
+                            <i class="bi bi-clock"></i> Pending Review ({{ pending_review }})
+                        </a>
+                        <a href="{{ url_for('audio.list_files', status='needs_replacement') }}" class="btn btn-danger">
+                            <i class="bi bi-exclamation-triangle"></i> Needs Replacement ({{ needs_replacement }})
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Language Breakdown -->
+    {% if language_counts %}
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Files by Language</h5>
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Language</th>
+                                <th class="text-end">Count</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for lang_code, count in language_counts.items() %}
+                            <tr>
+                                <td><code>{{ lang_code }}</code></td>
+                                <td class="text-end">{{ count }}</td>
+                                <td>
+                                    <a href="{{ url_for('audio.list_files', language=lang_code) }}" class="btn btn-sm btn-outline-primary">
+                                        View
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Voice Breakdown -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Files by Voice</h5>
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Voice</th>
+                                <th class="text-end">Count</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for voice, count in voice_counts.items() %}
+                            <tr>
+                                <td><code>{{ voice }}</code></td>
+                                <td class="text-end">{{ count }}</td>
+                                <td>
+                                    <a href="{{ url_for('audio.list_files', voice=voice) }}" class="btn btn-sm btn-outline-primary">
+                                        View
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}Import Audio Manifest{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1><i class="bi bi-upload"></i> Import Audio Manifest</h1>
+    <p class="text-muted">Upload a manifest JSON file and specify the audio files directory</p>
+
+    <div class="row mt-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <form method="POST" id="importForm">
+                        {% if available_manifests %}
+                        <div class="mb-3">
+                            <label for="audio_dir_select" class="form-label">Select Manifest</label>
+                            <select class="form-select" id="audio_dir_select" name="audio_dir" required>
+                                <option value="">-- Choose a manifest --</option>
+                                {% for manifest in available_manifests %}
+                                <option value="{{ manifest.path }}">{{ manifest.display }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text">
+                                Select from available <code>audio_manifest.json</code> files found in the configured directory.
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            No manifests found. Please check that <code>AUDIO_BASE_DIR</code> is configured correctly.
+                            <br><small>Current base: <code>{{ config.AUDIO_BASE_DIR or 'Not configured' }}</code></small>
+                        </div>
+                        {% endif %}
+
+                        <div class="mb-3">
+                            <label for="audio_dir_manual" class="form-label">Or enter path manually (optional)</label>
+                            <input type="text" class="form-control" id="audio_dir_manual"
+                                   placeholder="/Users/powera/repo/wireword-audio/trakaido/chinese/ash">
+                            <div class="form-text">
+                                Full path to the directory containing both the <code>audio_manifest.json</code> file and the MP3 files.
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-upload"></i> Import Manifest
+                            </button>
+                            <a href="{{ url_for('audio.index') }}" class="btn btn-secondary">
+                                <i class="bi bi-x-circle"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Instructions -->
+        <div class="col-md-4">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-info-circle"></i> Instructions</h5>
+                    <ol class="small">
+                        <li>Click "Choose File" to browse for your <code>audio_manifest.json</code> file</li>
+                        <li>Select the manifest file from the directory containing the MP3 files</li>
+                        <li>Click "Import Manifest" to import the file metadata</li>
+                    </ol>
+                    <hr>
+                    <h6>Expected Manifest Format:</h6>
+                    <pre class="small"><code>{
+  "language": "zh",
+  "voice": "ash",
+  "files": {
+    "N01_001.mp3": {
+      "md5": "abc123...",
+      "text": "你好",
+      "guid": "N01_001"
+    }
+  }
+}</code></pre>
+                    <hr>
+                    <p class="small mb-0"><strong>Note:</strong> The manifest and audio MP3 files must be in the same directory.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const selectInput = document.getElementById('audio_dir_select');
+    const manualInput = document.getElementById('audio_dir_manual');
+    const form = document.getElementById('importForm');
+
+    // If user types in manual input, clear the select
+    if (manualInput) {
+        manualInput.addEventListener('input', function() {
+            if (this.value && selectInput) {
+                selectInput.value = '';
+                selectInput.removeAttribute('required');
+            } else if (selectInput) {
+                selectInput.setAttribute('required', 'required');
+            }
+        });
+    }
+
+    // On form submit, use manual input if provided
+    form.addEventListener('submit', function(e) {
+        if (manualInput && manualInput.value) {
+            // Create a hidden input with the manual value
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = 'audio_dir';
+            hiddenInput.value = manualInput.value;
+            form.appendChild(hiddenInput);
+
+            // Disable the select so its value isn't sent
+            if (selectInput) {
+                selectInput.disabled = true;
+            }
+        }
+    });
+});
+</script>
+{% endblock %}
