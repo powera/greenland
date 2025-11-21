@@ -1,0 +1,15 @@
+Identify the grammatical gender for the following {language_name} noun:
+
+English word: {english_word}
+{language_name} translation: {target_translation}
+Part of speech: {pos_type}
+Definition: {definition}
+
+Language: {language_name} ({language_code})
+Gender system: {gender_system}
+
+Provide:
+1. Gender value: {valid_genders}
+2. Brief explanation: Only include if there's something non-obvious to note (e.g., "Despite -a ending" or "Irregular"). Otherwise leave blank.
+
+Return the grammatical gender (not biological sex) for the specific {language_name} translation provided.

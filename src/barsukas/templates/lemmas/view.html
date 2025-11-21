@@ -729,9 +729,9 @@ audioPlayerLemma.addEventListener('ended', function() {
                     <div class="mb-3">
                         <label for="fact_type" class="form-label">Fact Type</label>
                         <select class="form-select" id="fact_type" name="fact_type" required>
-                            <option value="measure_words" selected>Measure Words (Chinese classifiers)</option>
+                            <option value="measure_words">Measure Words (Chinese classifiers)</option>
+                            <option value="grammatical_gender">Grammatical Gender</option>
                             <!-- Future options:
-                            <option value="grammatical_gender">Grammatical Gender (French, Spanish, German, etc.)</option>
                             <option value="number_type">Number Type (Plurale tantum, Singulare tantum)</option>
                             <option value="declension_class">Declension Class (Lithuanian, Latin, etc.)</option>
                             -->
@@ -742,22 +742,18 @@ audioPlayerLemma.addEventListener('ended', function() {
                     </div>
                     <div class="mb-3">
                         <label for="language_code" class="form-label">Language</label>
-                        <select class="form-select" id="language_code" name="language_code" required>
-                            <option value="zh" selected>Chinese (zh)</option>
-                            <!-- Future options based on fact type:
-                            <option value="fr">French (fr)</option>
-                            <option value="es">Spanish (es)</option>
-                            <option value="de">German (de)</option>
-                            <option value="lt">Lithuanian (lt)</option>
-                            -->
+                        <select class="form-select" id="grammar_fact_language_code" name="language_code" required>
+                            <!-- Options populated by JavaScript based on fact type -->
                         </select>
                         <small class="form-text text-muted">
                             Language for the grammar fact
                         </small>
                     </div>
-                    <div class="alert alert-info">
+                    <div class="alert alert-info" id="grammar_fact_description">
                         <i class="bi bi-info-circle"></i>
-                        <strong>About Measure Words:</strong> The Lape agent uses AI to determine the appropriate Chinese classifier/measure word (量词) for this noun. The measure word is required when using numbers with nouns in Chinese.
+                        <span id="grammar_fact_description_text">
+                            Select a fact type to see description
+                        </span>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -980,4 +976,60 @@ audioPlayerLemma.addEventListener('ended', function() {
         </div>
     </div>
 </div>
+
+<script>
+// Grammar fact type configuration
+const GRAMMAR_FACT_TYPES = {
+    'measure_words': {
+        languages: ['zh'],
+        languageNames: {'zh': 'Chinese'},
+        description: 'The Lape agent uses AI to determine the appropriate Chinese classifier/measure word (量词) for this noun. The measure word is required when using numbers with nouns in Chinese.'
+    },
+    'grammatical_gender': {
+        languages: ['fr', 'lt', 'es', 'de', 'pt', 'ru', 'it'],
+        languageNames: {
+            'fr': 'French',
+            'lt': 'Lithuanian',
+            'es': 'Spanish',
+            'de': 'German',
+            'pt': 'Portuguese',
+            'ru': 'Russian',
+            'it': 'Italian'
+        },
+        description: 'The Lape agent uses AI to determine the grammatical gender (masculine, feminine, neuter) for this noun in the selected language.'
+    }
+};
+
+function updateGrammarFactLanguages() {
+    const factType = document.getElementById('fact_type').value;
+    const languageSelect = document.getElementById('grammar_fact_language_code');
+    const descriptionText = document.getElementById('grammar_fact_description_text');
+    const config = GRAMMAR_FACT_TYPES[factType];
+
+    if (!config) return;
+
+    // Clear and populate language options
+    languageSelect.innerHTML = '';
+    config.languages.forEach((langCode, index) => {
+        const option = document.createElement('option');
+        option.value = langCode;
+        option.textContent = `${config.languageNames[langCode]} (${langCode})`;
+        if (index === 0) option.selected = true;
+        languageSelect.appendChild(option);
+    });
+
+    // Update description
+    descriptionText.textContent = config.description;
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const factTypeSelect = document.getElementById('fact_type');
+    if (factTypeSelect) {
+        updateGrammarFactLanguages();
+        factTypeSelect.addEventListener('change', updateGrammarFactLanguages);
+    }
+});
+</script>
+
 {% endblock %}

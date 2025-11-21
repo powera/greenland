@@ -896,6 +896,10 @@ def generate_grammar_fact(lemma_id):
             fact_value, notes, confidence = agent.generate_measure_words(
                 lemma, translation, g.db
             )
+        elif fact_type == 'grammatical_gender':
+            fact_value, notes, confidence = agent.generate_grammatical_gender(
+                lemma, translation, language_code, g.db
+            )
         else:
             flash(f'Handler not yet implemented for fact type: {fact_type}', 'error')
             return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
