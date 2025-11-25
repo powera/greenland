@@ -9,16 +9,16 @@ from wordfreq.storage.models.operation_log import OperationLog
 from wordfreq.storage.models.schema import Lemma
 from config import Config
 
-bp = Blueprint('operation_logs', __name__, url_prefix='/logs')
+bp = Blueprint("operation_logs", __name__, url_prefix="/logs")
 
 
-@bp.route('/')
+@bp.route("/")
 def list_logs():
     """List operation logs with pagination and filtering."""
-    page = request.args.get('page', 1, type=int)
-    source_filter = request.args.get('source', '').strip()
-    operation_type_filter = request.args.get('operation_type', '').strip()
-    lemma_id_filter = request.args.get('lemma_id', '', type=str).strip()
+    page = request.args.get("page", 1, type=int)
+    source_filter = request.args.get("source", "").strip()
+    operation_type_filter = request.args.get("operation_type", "").strip()
+    lemma_id_filter = request.args.get("lemma_id", "", type=str).strip()
 
     # Build query
     query = g.db.query(OperationLog)
@@ -50,16 +50,16 @@ def list_logs():
         try:
             fact_data = json.loads(log.fact)
         except json.JSONDecodeError:
-            fact_data = {'error': 'Invalid JSON'}
+            fact_data = {"error": "Invalid JSON"}
 
         lemma = None
         if log.lemma_id:
             lemma = g.db.query(Lemma).get(log.lemma_id)
 
         enriched_logs.append({
-            'log': log,
-            'fact_data': fact_data,
-            'lemma': lemma
+            "log": log,
+            "fact_data": fact_data,
+            "lemma": lemma
         })
 
     # Get unique sources and operation types for filters
@@ -72,7 +72,7 @@ def list_logs():
     # Calculate pagination
     total_pages = (total + Config.ITEMS_PER_PAGE - 1) // Config.ITEMS_PER_PAGE
 
-    return render_template('logs/list.html',
+    return render_template("logs/list.html",
                          logs=enriched_logs,
                          page=page,
                          total_pages=total_pages,
@@ -84,25 +84,25 @@ def list_logs():
                          operation_types=operation_types)
 
 
-@bp.route('/<int:log_id>')
+@bp.route("/<int:log_id>")
 def view_log(log_id):
     """View a single operation log entry."""
     log = g.db.query(OperationLog).get(log_id)
     if not log:
         from flask import flash, redirect, url_for
-        flash('Log entry not found', 'error')
-        return redirect(url_for('operation_logs.list_logs'))
+        flash("Log entry not found", "error")
+        return redirect(url_for("operation_logs.list_logs"))
 
     try:
         fact_data = json.loads(log.fact)
     except json.JSONDecodeError:
-        fact_data = {'error': 'Invalid JSON'}
+        fact_data = {"error": "Invalid JSON"}
 
     lemma = None
     if log.lemma_id:
         lemma = g.db.query(Lemma).get(log.lemma_id)
 
-    return render_template('logs/view.html',
+    return render_template("logs/view.html",
                          log=log,
                          fact_data=fact_data,
                          lemma=lemma)

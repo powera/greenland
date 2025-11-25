@@ -30,7 +30,7 @@ from wordfreq.translation.language_forms import (
 from wordfreq.translation.constants import DEFAULT_MODEL
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 
@@ -67,7 +67,7 @@ class LinguisticClient:
             logger.warning(f"Failed to warm up model {model}: {e}")
 
     @classmethod
-    def get_instance(cls, model: str = DEFAULT_MODEL, db_path: str = None, debug: bool = False) -> 'LinguisticClient':
+    def get_instance(cls, model: str = DEFAULT_MODEL, db_path: str = None, debug: bool = False) -> "LinguisticClient":
         """
         Get a thread-local instance of the LinguisticClient.
 
@@ -81,7 +81,7 @@ class LinguisticClient:
         Returns:
             Thread-local LinguisticClient instance
         """
-        if not hasattr(cls._thread_local, 'instance'):
+        if not hasattr(cls._thread_local, "instance"):
             with cls._lock:
                 # Initialize the thread-local instance
                 cls._thread_local.instance = cls(model=model, db_path=db_path, debug=debug)
@@ -236,7 +236,7 @@ class LinguisticClient:
         self,
         word: str = None,
         lemma_id: int = None,
-        source: str = 'llm'
+        source: str = "llm"
     ) -> Tuple[Dict[str, str], bool]:
         """
         Get Lithuanian noun declensions using either LLM or Wiktionary.
@@ -249,12 +249,12 @@ class LinguisticClient:
         Returns:
             Tuple of (dictionary mapping case names to forms, success flag)
         """
-        if source == 'wiki':
+        if source == "wiki":
             if word is None:
                 raise ValueError("word parameter is required when source='wiki'")
             from wordfreq.translation.wiki import get_lithuanian_noun_forms
             return get_lithuanian_noun_forms(word)
-        elif source == 'llm':
+        elif source == "llm":
             if lemma_id is None:
                 raise ValueError("lemma_id parameter is required when source='llm'")
             return self.query_lithuanian_noun_declensions(lemma_id)
@@ -396,7 +396,7 @@ class LinguisticClient:
 
         for def_data in definitions_list:
             # If we find a matching definition, use its translation
-            if def_data.get('definition', '').lower().strip() == lemma.definition_text.lower().strip():
+            if def_data.get("definition", "").lower().strip() == lemma.definition_text.lower().strip():
                 translation = def_data.get(language_key)
                 break
 

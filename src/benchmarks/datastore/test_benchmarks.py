@@ -20,7 +20,7 @@ class TestDatastore(unittest.TestCase):
         """
         Create a temporary database for each test
         """
-        self.db_path = 'test_benchmarks.sqlite'
+        self.db_path = "test_benchmarks.sqlite"
         self.session = create_database_and_session(self.db_path)
 
     def tearDown(self):
@@ -39,12 +39,12 @@ class TestDatastore(unittest.TestCase):
         """
         success, message = insert_benchmark(
             self.session, 
-            'test_benchmark', 
-            'Test Benchmark', 
-            'A benchmark for testing purposes'
+            "test_benchmark", 
+            "Test Benchmark", 
+            "A benchmark for testing purposes"
         )
         self.assertTrue(success)
-        self.assertIn('successfully inserted', message)
+        self.assertIn("successfully inserted", message)
 
     def test_insert_benchmark_duplicate(self):
         """
@@ -53,20 +53,20 @@ class TestDatastore(unittest.TestCase):
         # First insertion should succeed
         insert_benchmark(
             self.session, 
-            'test_benchmark',
-            'Test Benchmark',
-            'Test Description'
+            "test_benchmark",
+            "Test Benchmark",
+            "Test Description"
         )
         
         # Second insertion should fail
         success, message = insert_benchmark(
             self.session, 
-            'test_benchmark', 
-            'Test Benchmark',
-            'Test Description'
+            "test_benchmark", 
+            "Test Benchmark",
+            "Test Description"
         )
         self.assertFalse(success)
-        self.assertIn('already exists', message)
+        self.assertIn("already exists", message)
 
     def test_insert_model(self):
         """
@@ -74,45 +74,45 @@ class TestDatastore(unittest.TestCase):
         """
         success, message = insert_model(
             self.session,
-            'test_model',
-            'Test Model',
-            '2024-01-01',
+            "test_model",
+            "Test Model",
+            "2024-01-01",
             100,
-            'MIT'
+            "MIT"
         )
         self.assertTrue(success)
-        self.assertIn('successfully inserted', message)
+        self.assertIn("successfully inserted", message)
 
     def test_insert_question(self):
         """
         Test inserting a question with a benchmark
         """
         # First, insert a benchmark
-        insert_benchmark(self.session, 'test_benchmark', 'Test Benchmark', 'Test Description')
+        insert_benchmark(self.session, "test_benchmark", "Test Benchmark", "Test Description")
         
         # Then insert a question
         success, message = insert_question(
             self.session,
-            'test_question_1',
-            'test_benchmark',
-            json.dumps({'difficulty': 'medium', 'category': 'math'})
+            "test_question_1",
+            "test_benchmark",
+            json.dumps({"difficulty": "medium", "category": "math"})
         )
         self.assertTrue(success)
-        self.assertIn('successfully inserted', message)
+        self.assertIn("successfully inserted", message)
 
     def test_insert_run(self):
         """
         Test inserting a run with a model and benchmark
         """
         # First, insert a model and benchmark
-        insert_model(self.session, 'test_model', 'Test Model')
-        insert_benchmark(self.session, 'test_benchmark', 'Test Benchmark', 'Test Description')
+        insert_model(self.session, "test_model", "Test Model")
+        insert_benchmark(self.session, "test_benchmark", "Test Benchmark", "Test Description")
         
         # Then insert a run
         success, run_id = insert_run(
             self.session,
-            'test_model',
-            'test_benchmark',
+            "test_model",
+            "test_benchmark",
             85  # normed_score
         )
         self.assertTrue(success)
@@ -123,13 +123,13 @@ class TestDatastore(unittest.TestCase):
         Test inserting a run with run details
         """
         # Setup: insert model, benchmark, run, and question
-        insert_model(self.session, 'test_model', 'Test Model')
-        insert_benchmark(self.session, 'test_benchmark', 'Test Benchmark', 'Test Description')
+        insert_model(self.session, "test_model", "Test Model")
+        insert_benchmark(self.session, "test_benchmark", "Test Benchmark", "Test Description")
         insert_question(
             self.session,
-            'test_question_1',
-            'test_benchmark',
-            json.dumps({'test': 'data'})
+            "test_question_1",
+            "test_benchmark",
+            json.dumps({"test": "data"})
         )
         
         run_details = [{
@@ -141,8 +141,8 @@ class TestDatastore(unittest.TestCase):
         
         success, run_id = insert_run(
             self.session,
-            'test_model',
-            'test_benchmark',
+            "test_model",
+            "test_benchmark",
             85,  # normed_score
             run_details=run_details
         )
@@ -153,14 +153,14 @@ class TestDatastore(unittest.TestCase):
         """
         Test inserting a run with a specific timestamp
         """
-        insert_model(self.session, 'test_model', 'Test Model')
-        insert_benchmark(self.session, 'test_benchmark', 'Test Benchmark', 'Test Description')
+        insert_model(self.session, "test_model", "Test Model")
+        insert_benchmark(self.session, "test_benchmark", "Test Benchmark", "Test Description")
         
         timestamp = datetime(2024, 1, 1, 12, 0, 0)
         success, run_id = insert_run(
             self.session,
-            'test_model',
-            'test_benchmark',
+            "test_model",
+            "test_benchmark",
             85,
             run_ts=timestamp
         )
@@ -172,51 +172,51 @@ class TestDatastore(unittest.TestCase):
         Test listing all models
         """
         # Insert multiple models
-        insert_model(self.session, 'model1', 'Model One')
-        insert_model(self.session, 'model2', 'Model Two')
+        insert_model(self.session, "model1", "Model One")
+        insert_model(self.session, "model2", "Model Two")
         
         models = list_all_models(self.session)
         self.assertEqual(len(models), 2)
-        self.assertTrue(any(m['codename'] == 'model1' for m in models))
-        self.assertTrue(any(m['codename'] == 'model2' for m in models))
+        self.assertTrue(any(m["codename"] == "model1" for m in models))
+        self.assertTrue(any(m["codename"] == "model2" for m in models))
 
     def test_list_all_benchmarks(self):
         """
         Test listing all benchmarks
         """
-        insert_benchmark(self.session, 'benchmark1', 'Benchmark One', 'Description 1')
-        insert_benchmark(self.session, 'benchmark2', 'Benchmark Two', 'Description 2')
+        insert_benchmark(self.session, "benchmark1", "Benchmark One", "Description 1")
+        insert_benchmark(self.session, "benchmark2", "Benchmark Two", "Description 2")
         
         benchmarks = list_all_benchmarks(self.session)
         self.assertEqual(len(benchmarks), 2)
-        self.assertTrue(any(b['codename'] == 'benchmark1' for b in benchmarks))
-        self.assertTrue(any(b['codename'] == 'benchmark2' for b in benchmarks))
+        self.assertTrue(any(b["codename"] == "benchmark1" for b in benchmarks))
+        self.assertTrue(any(b["codename"] == "benchmark2" for b in benchmarks))
 
     def test_load_all_questions_for_benchmark(self):
         """
         Test loading all questions for a specific benchmark
         """
-        insert_benchmark(self.session, 'test_benchmark', 'Test Benchmark', 'Test Description')
+        insert_benchmark(self.session, "test_benchmark", "Test Benchmark", "Test Description")
         
         # Insert multiple questions
         questions_data = [
-            ('q1', {'type': 'multiple_choice'}),
-            ('q2', {'type': 'free_response'}),
+            ("q1", {"type": "multiple_choice"}),
+            ("q2", {"type": "free_response"}),
         ]
         
         for qid, data in questions_data:
             insert_question(
                 self.session,
                 f'test_question_{qid}',
-                'test_benchmark',
+                "test_benchmark",
                 json.dumps(data)
             )
         
-        questions = load_all_questions_for_benchmark(self.session, 'test_benchmark')
+        questions = load_all_questions_for_benchmark(self.session, "test_benchmark")
         self.assertEqual(len(questions), 2)
-        self.assertTrue(any(q['question_id'] == 'test_question_q1' for q in questions))
-        self.assertTrue(any(q['question_id'] == 'test_question_q2' for q in questions))
+        self.assertTrue(any(q["question_id"] == "test_question_q1" for q in questions))
+        self.assertTrue(any(q["question_id"] == "test_question_q2" for q in questions))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

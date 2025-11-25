@@ -17,15 +17,15 @@ if GREENLAND_SRC_PATH not in sys.path:
 # Language mappings for CLI
 # Format: 'code': (field_name_or_code, display_name, use_lemma_translation_table)
 LANGUAGE_FIELDS = {
-    'lt': ('lithuanian_translation', 'Lithuanian', False),
-    'zh': ('chinese_translation', 'Chinese', False),
-    'ko': ('korean_translation', 'Korean', False),
-    'fr': ('french_translation', 'French', False),
-    'es': ('es', 'Spanish', True),
-    'de': ('de', 'German', True),
-    'pt': ('pt', 'Portuguese', True),
-    'sw': ('swahili_translation', 'Swahili', False),
-    'vi': ('vietnamese_translation', 'Vietnamese', False)
+    "lt": ("lithuanian_translation", "Lithuanian", False),
+    "zh": ("chinese_translation", "Chinese", False),
+    "ko": ("korean_translation", "Korean", False),
+    "fr": ("french_translation", "French", False),
+    "es": ("es", "Spanish", True),
+    "de": ("de", "German", True),
+    "pt": ("pt", "Portuguese", True),
+    "sw": ("swahili_translation", "Swahili", False),
+    "vi": ("vietnamese_translation", "Vietnamese", False)
 }
 
 
@@ -38,37 +38,37 @@ def get_argument_parser():
     parser = argparse.ArgumentParser(
         description="Voras - Multi-lingual Translation Validator and Populator"
     )
-    parser.add_argument('--db-path', help='Database path (uses default if not specified)')
-    parser.add_argument('--debug', action='store_true', help='Enable debug logging')
-    parser.add_argument('--output', help='Output JSON file for report')
-    parser.add_argument('--mode',
-                       choices=['check-only', 'populate-only', 'both', 'coverage', 'regenerate'],
-                       default='coverage',
-                       help='Operation mode: check-only (validate existing), populate-only (add missing), both (validate + populate), coverage (report only, default), regenerate (delete and regenerate, supports --batch)')
-    parser.add_argument('--language', '--languages',
-                       nargs='+',
+    parser.add_argument("--db-path", help="Database path (uses default if not specified)")
+    parser.add_argument("--debug", action="store_true", help="Enable debug logging")
+    parser.add_argument("--output", help="Output JSON file for report")
+    parser.add_argument("--mode",
+                       choices=["check-only", "populate-only", "both", "coverage", "regenerate"],
+                       default="coverage",
+                       help="Operation mode: check-only (validate existing), populate-only (add missing), both (validate + populate), coverage (report only, default), regenerate (delete and regenerate, supports --batch)")
+    parser.add_argument("--language", "--languages",
+                       nargs="+",
                        choices=list(LANGUAGE_FIELDS.keys()),
-                       help='Specific language(s) to process (lt, zh, ko, fr, es, de, pt, sw, vi). Can specify multiple languages separated by spaces. If not specified, processes all languages.')
-    parser.add_argument('--yes', '-y', action='store_true',
-                       help='Skip confirmation prompt before running LLM queries')
-    parser.add_argument('--model', default='gpt-5-mini',
-                       help='LLM model to use (default: gpt-5-mini)')
-    parser.add_argument('--limit', type=int,
-                       help='Maximum items to process per language')
-    parser.add_argument('--sample-rate', type=float, default=1.0,
-                       help='Fraction of items to sample for validation (0.0-1.0, default: 1.0)')
-    parser.add_argument('--confidence-threshold', type=float, default=0.7,
-                       help='Minimum confidence to flag issues (0.0-1.0, default: 0.7)')
-    parser.add_argument('--dry-run', action='store_true',
-                       help='Show what would be done without making changes')
-    parser.add_argument('--batch', action='store_true',
-                       help='Use batch mode (supported by --mode regenerate only): queue requests instead of making synchronous API calls')
-    parser.add_argument('--batch-submit', action='store_true',
-                       help='Submit all pending batch requests to OpenAI')
-    parser.add_argument('--batch-status', type=str, metavar='BATCH_ID',
-                       help='Check status of a submitted batch (requires only batch ID)')
-    parser.add_argument('--batch-retrieve', type=str, metavar='BATCH_ID',
-                       help='Retrieve and process results from a completed batch (requires only batch ID)')
+                       help="Specific language(s) to process (lt, zh, ko, fr, es, de, pt, sw, vi). Can specify multiple languages separated by spaces. If not specified, processes all languages.")
+    parser.add_argument("--yes", "-y", action="store_true",
+                       help="Skip confirmation prompt before running LLM queries")
+    parser.add_argument("--model", default="gpt-5-mini",
+                       help="LLM model to use (default: gpt-5-mini)")
+    parser.add_argument("--limit", type=int,
+                       help="Maximum items to process per language")
+    parser.add_argument("--sample-rate", type=float, default=1.0,
+                       help="Fraction of items to sample for validation (0.0-1.0, default: 1.0)")
+    parser.add_argument("--confidence-threshold", type=float, default=0.7,
+                       help="Minimum confidence to flag issues (0.0-1.0, default: 0.7)")
+    parser.add_argument("--dry-run", action="store_true",
+                       help="Show what would be done without making changes")
+    parser.add_argument("--batch", action="store_true",
+                       help="Use batch mode (supported by --mode regenerate only): queue requests instead of making synchronous API calls")
+    parser.add_argument("--batch-submit", action="store_true",
+                       help="Submit all pending batch requests to OpenAI")
+    parser.add_argument("--batch-status", type=str, metavar="BATCH_ID",
+                       help="Check status of a submitted batch (requires only batch ID)")
+    parser.add_argument("--batch-retrieve", type=str, metavar="BATCH_ID",
+                       help="Retrieve and process results from a completed batch (requires only batch ID)")
     return parser
 
 
@@ -98,7 +98,7 @@ def main():
         return
 
     # Handle regenerate mode (special case)
-    if args.mode == 'regenerate':
+    if args.mode == "regenerate":
         # Estimate LLM calls for regeneration
         if not args.yes and not args.dry_run:
             session = agent.get_session()
@@ -123,7 +123,7 @@ def main():
                     print("\nThis may incur costs and take some time to complete.")
                 response = input("Do you want to proceed? [y/N]: ").strip().lower()
 
-                if response not in ['y', 'yes']:
+                if response not in ["y", "yes"]:
                     print("Aborted.")
                     sys.exit(0)
                 print()
@@ -156,7 +156,7 @@ def main():
             print(f"Total translations added: {results['total_translations_added']}")
             print(f"Total failed: {results['total_failed']}")
             print()
-            for lang_code, lang_results in results['by_language'].items():
+            for lang_code, lang_results in results["by_language"].items():
                 print(f"{lang_results['language_name']}:")
                 print(f"  Deleted: {lang_results['deleted']}")
                 print(f"  Added: {lang_results['added']}")
@@ -165,7 +165,7 @@ def main():
         return
 
     # Handle different modes
-    if args.mode == 'coverage':
+    if args.mode == "coverage":
         # Coverage reporting mode (no LLM calls)
         agent.run_full_check(output_file=args.output)
         return
@@ -181,7 +181,7 @@ def main():
             # args.language is now a list or None
             languages_to_process = args.language if args.language else list(LANGUAGE_FIELDS.keys())
 
-            if args.mode in ['check-only', 'both']:
+            if args.mode in ["check-only", "both"]:
                 # Calculate validation calls
                 if args.language and len(args.language) == 1:
                     # Single language: still validates all languages per word, just filters which words
@@ -189,7 +189,7 @@ def main():
                     query = session.query(Lemma).filter(
                         Lemma.guid.isnot(None),
                         getattr(Lemma, field_name).isnot(None),
-                        getattr(Lemma, field_name) != ''
+                        getattr(Lemma, field_name) != ""
                     )
                     if args.limit:
                         query = query.limit(args.limit)
@@ -205,7 +205,7 @@ def main():
                         field_name, _, use_translation_table = LANGUAGE_FIELDS[lang_code]
                         field_filter = (
                             (getattr(Lemma, field_name).isnot(None)) &
-                            (getattr(Lemma, field_name) != '')
+                            (getattr(Lemma, field_name) != "")
                         )
                         if has_translation_filter is None:
                             has_translation_filter = field_filter
@@ -222,7 +222,7 @@ def main():
                     if args.sample_rate < 1.0:
                         count = int(count * args.sample_rate)
                     estimated_calls += count
-                    lang_names = ', '.join([LANGUAGE_FIELDS[lc][1] for lc in args.language])
+                    lang_names = ", ".join([LANGUAGE_FIELDS[lc][1] for lc in args.language])
                     logger.info(f"{lang_names}: {count} words to validate (all translations per word)")
                 else:
                     # All languages: one call per word with any translation
@@ -230,7 +230,7 @@ def main():
                     for lang_code, (field_name, _) in LANGUAGE_FIELDS.items():
                         field_filter = (
                             (getattr(Lemma, field_name).isnot(None)) &
-                            (getattr(Lemma, field_name) != '')
+                            (getattr(Lemma, field_name) != "")
                         )
                         if has_translation_filter is None:
                             has_translation_filter = field_filter
@@ -249,7 +249,7 @@ def main():
                     estimated_calls += count
                     logger.info(f"All languages: {count} words to validate (all translations per word)")
 
-            if args.mode in ['populate-only', 'both']:
+            if args.mode in ["populate-only", "both"]:
                 # Calculate population calls - one call per word with any missing translation
                 # Note: For LemmaTranslation-based languages, we can't easily build a SQL filter
                 # So we just query all lemmas and count missing translations in Python
@@ -318,7 +318,7 @@ def main():
         print("This may incur costs and take some time to complete.")
         response = input("Do you want to proceed? [y/N]: ").strip().lower()
 
-        if response not in ['y', 'yes']:
+        if response not in ["y", "yes"]:
             print("Aborted.")
             sys.exit(0)
 
@@ -327,7 +327,7 @@ def main():
     # Execute the requested mode
     results = {}
 
-    if args.mode == 'check-only':
+    if args.mode == "check-only":
         # Validate existing translations
         if args.language and len(args.language) == 1:
             # Single language validation
@@ -348,13 +348,13 @@ def main():
                 confidence_threshold=args.confidence_threshold
             )
             if args.language and len(args.language) > 1:
-                lang_names = ', '.join([LANGUAGE_FIELDS[lc][1] for lc in args.language])
+                lang_names = ", ".join([LANGUAGE_FIELDS[lc][1] for lc in args.language])
                 print(f"\nValidation results for {lang_names}:")
                 print(f"  Total translation issues (all languages): {results['total_issues_all_languages']}")
             else:
                 print(f"\nTotal translation issues (all languages): {results['total_issues_all_languages']}")
 
-    elif args.mode == 'populate-only':
+    elif args.mode == "populate-only":
         # Generate missing translations only
         results = agent.fix_missing_translations(
             language_code=args.language,
@@ -364,7 +364,7 @@ def main():
         print("\n" + "=" * 80)
         print("TRANSLATION POPULATION SUMMARY")
         print("=" * 80)
-        for lang_code, lang_results in results['by_language'].items():
+        for lang_code, lang_results in results["by_language"].items():
             print(f"\n{lang_results['language_name']}:")
             print(f"  Total missing: {lang_results['total_missing']}")
             print(f"  Populated: {lang_results['fixed']}")
@@ -373,7 +373,7 @@ def main():
         print(f"Total failed: {results['total_failed']}")
         print("=" * 80)
 
-    elif args.mode == 'both':
+    elif args.mode == "both":
         # First validate existing translations
         print("\n=== STEP 1: Validating Existing Translations ===\n")
         if args.language and len(args.language) == 1:
@@ -413,17 +413,17 @@ def main():
         else:
             # All languages or multiple languages validation results
             if args.language and len(args.language) > 1:
-                lang_names = ', '.join([LANGUAGE_FIELDS[lc][1] for lc in args.language])
+                lang_names = ", ".join([LANGUAGE_FIELDS[lc][1] for lc in args.language])
                 print(f"\nValidation ({lang_names}):")
             else:
                 print(f"\nValidation (all languages):")
             print(f"  Total issues: {validation_results['total_issues_all_languages']}")
 
         print(f"\nPopulation:")
-        for lang_code, lang_results in population_results['by_language'].items():
+        for lang_code, lang_results in population_results["by_language"].items():
             print(f"  {lang_results['language_name']}: {lang_results['fixed']} populated, {lang_results['failed']} failed")
         print("=" * 80)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

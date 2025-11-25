@@ -11,7 +11,7 @@ from lib.benchmarks.data_models import BenchmarkMetadata
 from lib.benchmarks.factory import runner
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 # Benchmark code
@@ -93,7 +93,7 @@ Be as precise as possible and follow standard conversion formulas."""
     def build_debug_info(self, question_data: Dict, response: Any, is_correct: bool) -> Dict:
         """Build debug information for benchmark results."""
         # Get the response value
-        if hasattr(response, 'structured_data') and response.structured_data:
+        if hasattr(response, "structured_data") and response.structured_data:
             actual_value = response.structured_data.get("value", "No value provided")
             response_text = response.response_text
         else:

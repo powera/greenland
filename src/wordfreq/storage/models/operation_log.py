@@ -15,7 +15,7 @@ class OperationLog(Base):
     The fact field contains structured JSON data about what happened.
     Entity IDs are stored for querying but without foreign keys to avoid impacting other tables.
     """
-    __tablename__ = 'operation_logs'
+    __tablename__ = "operation_logs"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     source: Mapped[str] = mapped_column(String, nullable=False, index=True)  # e.g., "gpt-5-nano", "lokys-agent", "manual-import"

@@ -14,13 +14,13 @@ COMMON_SHORT_WORDS = [
 ]
 
 COMMON_MEDIUM_WORDS = [
-    'abundance', 'appearance', 'banana', 'beautiful', 'challenge', 'computer',
-    'delicious', 'difficult', 'education', 'elephant', 'fantastic', 'freedom',
-    'garden', 'generation', 'happiness', 'important', 'internet', 'jewelry',
-    'journey', 'knowledge', 'language', 'magazine', 'mountain', 'notebook',
-    'ocean', 'operation', 'patience', 'positive', 'question', 'rainbow', 'reaction',
-    'science', 'solution', 'technology', 'telephone', 'umbrella', 'universe',
-    'victory', 'window', 'wonderful', 'yesterday', 'zealous'
+    "abundance", "appearance", "banana", "beautiful", "challenge", "computer",
+    "delicious", "difficult", "education", "elephant", "fantastic", "freedom",
+    "garden", "generation", "happiness", "important", "internet", "jewelry",
+    "journey", "knowledge", "language", "magazine", "mountain", "notebook",
+    "ocean", "operation", "patience", "positive", "question", "rainbow", "reaction",
+    "science", "solution", "technology", "telephone", "umbrella", "universe",
+    "victory", "window", "wonderful", "yesterday", "zealous"
 ]
 
 COMMON_LONG_WORDS = [

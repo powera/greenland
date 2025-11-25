@@ -17,9 +17,9 @@ from .utils.export_manager import (
 )
 
 __all__ = [
-    'TrakaidoExporter',
-    'export_trakaido_data', 
-    'write_json_file',
-    'get_english_word_from_lemma',
-    'format_subtype_display_name'
+    "TrakaidoExporter",
+    "export_trakaido_data", 
+    "write_json_file",
+    "get_english_word_from_lemma",
+    "format_subtype_display_name"
 ]

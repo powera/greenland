@@ -128,9 +128,9 @@ def display_word_data(word_data) -> None:
         for trans in translations:
             print(f"  {trans}")
 
-    if word_data.alternatives['english']:
+    if word_data.alternatives["english"]:
         print(f"English Alternatives: {', '.join(word_data.alternatives['english'])}")
-    if word_data.alternatives['lithuanian']:
+    if word_data.alternatives["lithuanian"]:
         print(f"Lithuanian Alternatives: {', '.join(word_data.alternatives['lithuanian'])}")
 
     if word_data.notes:
@@ -175,7 +175,7 @@ def display_word_list(words: List[Dict[str, Any]], title: str = "Words") -> None
         print(f"\n{title} ({len(words)} found):")
         print("-" * 80)
         for word in words:
-            status = "✓" if word.get('verified', False) else "?"
+            status = "✓" if word.get("verified", False) else "?"
             print(f"{status} {word.get('guid', ''):<10} L{word.get('level', 0):<2} "
                   f"{word.get('english', ''):<20} → {word.get('lithuanian', ''):<20} "
                   f"({word.get('subtype', '')})")
@@ -214,11 +214,11 @@ def display_export_summary(export_type: str, success: bool, stats=None, **kwargs
         
         if stats:
             print(f"   Total entries: {stats.total_entries}")
-            if hasattr(stats, 'entries_with_guids'):
+            if hasattr(stats, "entries_with_guids"):
                 print(f"   Entries with GUIDs: {stats.entries_with_guids}")
-            if hasattr(stats, 'pos_distribution'):
+            if hasattr(stats, "pos_distribution"):
                 print(f"   POS distribution: {stats.pos_distribution}")
-            if hasattr(stats, 'level_distribution'):
+            if hasattr(stats, "level_distribution"):
                 print(f"   Level distribution: {stats.level_distribution}")
         
         # Display additional information from kwargs
@@ -243,9 +243,9 @@ def display_bulk_operation_preview(items: List[Any], operation: str, details: st
     print("-" * 80)
 
     for item in items:
-        if hasattr(item, 'guid'):
+        if hasattr(item, "guid"):
             # Display lemma/word items
-            status = "✓" if getattr(item, 'verified', False) else "?"
+            status = "✓" if getattr(item, "verified", False) else "?"
             print(f"{status} {item.guid:<10} L{getattr(item, 'difficulty_level', 0):<2} "
                   f"{getattr(item, 'lemma_text', ''):<20} → {getattr(item, 'lithuanian_translation', '') or 'N/A':<20}")
         else:
@@ -290,7 +290,7 @@ def get_user_confirmation(message: str, default: bool = False) -> bool:
     if not response:
         return default
     
-    return response in ['y', 'yes', 'true', '1']
+    return response in ["y", "yes", "true", "1"]
 
 
 def display_progress(current: int, total: int, item_name: str = "") -> None:
@@ -305,7 +305,7 @@ def display_progress(current: int, total: int, item_name: str = "") -> None:
     percentage = (current / total) * 100 if total > 0 else 0
     progress_bar = "█" * int(percentage // 5) + "░" * (20 - int(percentage // 5))
     
-    print(f"\r[{current}/{total}] [{progress_bar}] {percentage:.1f}% {item_name}", end='', flush=True)
+    print(f"\r[{current}/{total}] [{progress_bar}] {percentage:.1f}% {item_name}", end="", flush=True)
     
     if current == total:
         print()  # New line when complete

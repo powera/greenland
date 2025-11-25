@@ -18,7 +18,7 @@ from wordfreq.translation.client import LinguisticClient
 import wordfreq.frequency.corpus
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 # Regular expression to detect words containing numerals
@@ -85,13 +85,13 @@ def import_frequency_data(
     
     try:
         if file_type.lower() == "json":
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
                 
                 # Handle different JSON formats
-                if isinstance(data, dict) and 'global_word_frequency' in data:
+                if isinstance(data, dict) and "global_word_frequency" in data:
                     # Known format with explicit frequency data
-                    raw_words_data = data['global_word_frequency']
+                    raw_words_data = data["global_word_frequency"]
                     # Mark that these are frequencies
                     detected_type = "frequency"
                 elif isinstance(data, dict):
@@ -109,8 +109,8 @@ def import_frequency_data(
                     return (0, 0)
         elif file_type.lower() == "subtlex":
             # Handle SUBTLEX format
-            with open(file_path, 'r', encoding='utf-8') as f:
-                reader = csv.reader(f, delimiter='\t')
+            with open(file_path, "r", encoding="utf-8") as f:
+                reader = csv.reader(f, delimiter="\t")
                 header = next(reader)
                 row_count = 0
                 for row in reader:

@@ -44,10 +44,10 @@ def log_operation(
     """
     # Determine source - if not provided, try to infer from details/fact
     if source is None:
-        if details and 'source' in details:
-            source = details['source']
-        elif fact and isinstance(fact, dict) and 'source' in fact:
-            source = fact['source']
+        if details and "source" in details:
+            source = details["source"]
+        elif fact and isinstance(fact, dict) and "source" in fact:
+            source = fact["source"]
         else:
             source = "unknown"
 
@@ -56,7 +56,7 @@ def log_operation(
 
     # Add entity type if provided
     if entity_type:
-        fact_data['entity_type'] = entity_type
+        fact_data["entity_type"] = entity_type
 
     # Add entity_id if provided and not already in lemma_id
     if entity_id and not lemma_id:

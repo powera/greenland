@@ -10,7 +10,7 @@ from wordfreq.storage.models.schema import Base
 
 class QueryLog(Base):
     """Model for tracking LLM queries for auditing and debugging."""
-    __tablename__ = 'query_logs'
+    __tablename__ = "query_logs"
     
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     word: Mapped[str] = mapped_column(String, nullable=False)

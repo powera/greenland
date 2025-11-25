@@ -15,7 +15,7 @@ import lib.score_table
 import lib.validation
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 # Constants
@@ -120,7 +120,7 @@ class BenchmarkRunner:
             
         elif answer_type == AnswerType.BOOLEAN.value:
             # For boolean answers
-            return str(actual_response).lower() in ("true", "false") and \
+            return str(actual_response).lower() in ("true", "false") and\
                    str(actual_response).lower() == str(correct_answer).lower()
                    
         elif answer_type == AnswerType.NUMERIC.value:
@@ -247,7 +247,7 @@ class BenchmarkRunner:
     def build_debug_info(self, question_data: Dict, response: Any, is_correct: bool) -> Dict:
         """Build debug information for benchmark results."""
         # Default implementation - subclasses can override
-        if hasattr(response, 'structured_data') and response.structured_data:
+        if hasattr(response, "structured_data") and response.structured_data:
             return {
                 "response": response.structured_data,
                 "expected": question_data.get("correct_answer"),

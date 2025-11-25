@@ -11,7 +11,7 @@ from lib.benchmarks.data_models import BenchmarkMetadata
 from lib.benchmarks.factory import runner
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 @runner("0032_part_of_speech")
@@ -109,7 +109,7 @@ class PartOfSpeechRunner(BenchmarkRunner):
             Dictionary containing debug information
         """
         # Extract structured response or text response
-        if hasattr(response, 'structured_data') and response.structured_data:
+        if hasattr(response, "structured_data") and response.structured_data:
             model_answer = response.structured_data
         else:
             model_answer = response.response_text

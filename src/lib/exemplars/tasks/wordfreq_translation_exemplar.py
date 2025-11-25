@@ -189,11 +189,11 @@ def run_both_exemplars(models: Optional[List[str]] = None, num_models: int = 3) 
     
     print("\n1. Testing 'vinegar':")
     print("-" * 30)
-    results['vinegar'] = run_vinegar_exemplar(models, num_models)
+    results["vinegar"] = run_vinegar_exemplar(models, num_models)
     
     print("\n2. Testing 'bicycle':")
     print("-" * 30)
-    results['bicycle'] = run_bicycle_exemplar(models, num_models)
+    results["bicycle"] = run_bicycle_exemplar(models, num_models)
     
     print("\n" + "=" * 60)
     print("All wordfreq translation exemplars completed!")

@@ -43,7 +43,7 @@ def query_pos_subtype(
     valid_subtypes = linguistic_db.get_subtype_values_for_pos(pos_type)
 
     # Check if the POS is one we have subtypes for
-    if pos_type not in ['noun', 'verb', 'adjective', 'adverb']:
+    if pos_type not in ["noun", "verb", "adjective", "adverb"]:
         logger.warning(f"No subtypes defined for part of speech: {pos_type}")
         return "other", True
 
@@ -103,9 +103,9 @@ def query_pos_subtype(
         # Validate and return response data
         if (response.structured_data and
             isinstance(response.structured_data, dict) and
-            'classification' in response.structured_data and
-            'pos_subtype' in response.structured_data['classification']):
-            return response.structured_data['classification']['pos_subtype'], True
+            "classification" in response.structured_data and
+            "pos_subtype" in response.structured_data["classification"]):
+            return response.structured_data["classification"]["pos_subtype"], True
         else:
             logger.warning(f"Invalid subtype response format for word '{word}'")
             return "other", False
@@ -177,7 +177,7 @@ def update_missing_subtypes_for_word(
 
     for definition in definitions_without_subtypes:
         # Only process nouns, verbs, adjectives, and adverbs
-        if definition.pos_type.lower() not in ['noun', 'verb', 'adjective', 'adverb']:
+        if definition.pos_type.lower() not in ["noun", "verb", "adjective", "adverb"]:
             logger.info(f"Skipping definition ID {definition.id} with POS '{definition.pos_type}'")
             continue
 
@@ -245,7 +245,7 @@ def update_subtypes_for_batch(
 
     for definition in definitions:
         # Only process nouns, verbs, adjectives, and adverbs
-        if definition.pos_type.lower() not in ['noun', 'verb', 'adjective', 'adverb']:
+        if definition.pos_type.lower() not in ["noun", "verb", "adjective", "adverb"]:
             logger.info(f"Skipping definition ID {definition.id} with POS '{definition.pos_type}'")
             continue
 

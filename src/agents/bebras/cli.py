@@ -17,7 +17,7 @@ from .translation import get_language_name, validate_language_codes
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -51,64 +51,64 @@ Examples:
     # Input options
     input_group = parser.add_mutually_exclusive_group(required=True)
     input_group.add_argument(
-        '--sentence',
-        help='Single sentence to process'
+        "--sentence",
+        help="Single sentence to process"
     )
     input_group.add_argument(
-        '--file',
-        help='File containing sentences (one per line)'
+        "--file",
+        help="File containing sentences (one per line)"
     )
 
     # Language options
     parser.add_argument(
-        '--source',
-        default='en',
-        help='Source language code (default: en)'
+        "--source",
+        default="en",
+        help="Source language code (default: en)"
     )
     parser.add_argument(
-        '--languages',
-        nargs='+',
-        default=['lt', 'zh'],
-        help='Target language codes for translations (default: lt zh)'
+        "--languages",
+        nargs="+",
+        default=["lt", "zh"],
+        help="Target language codes for translations (default: lt zh)"
     )
 
     # Processing options
     parser.add_argument(
-        '--verified',
-        action='store_true',
-        help='Mark sentences as verified'
+        "--verified",
+        action="store_true",
+        help="Mark sentences as verified"
     )
     parser.add_argument(
-        '--context',
-        help='Optional context about the sentence(s)'
+        "--context",
+        help="Optional context about the sentence(s)"
     )
     parser.add_argument(
-        '--interactive',
-        action='store_true',
-        help='Enable interactive disambiguation prompts'
+        "--interactive",
+        action="store_true",
+        help="Enable interactive disambiguation prompts"
     )
 
     # Model and database options
     parser.add_argument(
-        '--model',
-        default='gpt-5-mini',
-        help='LLM model to use (default: gpt-5-mini)'
+        "--model",
+        default="gpt-5-mini",
+        help="LLM model to use (default: gpt-5-mini)"
     )
     parser.add_argument(
-        '--db-path',
-        help='Database path (uses default if not specified)'
+        "--db-path",
+        help="Database path (uses default if not specified)"
     )
 
     # Output options
     parser.add_argument(
-        '--debug',
-        action='store_true',
-        help='Enable debug logging'
+        "--debug",
+        action="store_true",
+        help="Enable debug logging"
     )
     parser.add_argument(
-        '--json',
-        action='store_true',
-        help='Output results as JSON'
+        "--json",
+        action="store_true",
+        help="Output results as JSON"
     )
 
     return parser
@@ -140,7 +140,7 @@ def process_single_sentence(
     else:
         print_result(result)
 
-    return 0 if result.get('success') else 1
+    return 0 if result.get("success") else 1
 
 
 def process_file(
@@ -155,7 +155,7 @@ def process_file(
     logger.info(f"Processing sentences from: {file_path}")
 
     try:
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(file_path, "r", encoding="utf-8") as f:
             sentences = [line.strip() for line in f if line.strip()]
 
         if not sentences:
@@ -177,7 +177,7 @@ def process_file(
         else:
             print_batch_result(result)
 
-        return 0 if result.get('success_count', 0) > 0 else 1
+        return 0 if result.get("success_count", 0) > 0 else 1
 
     except FileNotFoundError:
         logger.error(f"File not found: {file_path}")
@@ -189,18 +189,18 @@ def process_file(
 
 def print_result(result: dict):
     """Print processing result in human-readable format."""
-    if result.get('success'):
+    if result.get("success"):
         print("\n✓ Success!")
         print(f"  Sentence ID: {result.get('sentence_id')}")
         print(f"  Text: {result.get('sentence_text')}")
         print(f"  Linked words: {result.get('linked_words', 0)}")
         print(f"  Unlinked words: {result.get('unlinked_words', 0)}")
 
-        min_level = result.get('minimum_level')
+        min_level = result.get("minimum_level")
         if min_level and min_level > 0:
             print(f"  Minimum level: {min_level}")
 
-        disambiguation = result.get('disambiguation_needed', [])
+        disambiguation = result.get("disambiguation_needed", [])
         if disambiguation:
             print(f"\n  ⚠ Disambiguation needed for {len(disambiguation)} words:")
             for word_info in disambiguation:
@@ -211,9 +211,9 @@ def print_result(result: dict):
 
 def print_batch_result(result: dict):
     """Print batch processing result in human-readable format."""
-    total = result.get('total', 0)
-    success = result.get('success_count', 0)
-    failure = result.get('failure_count', 0)
+    total = result.get("total", 0)
+    success = result.get("success_count", 0)
+    failure = result.get("failure_count", 0)
 
     print(f"\n{'='*60}")
     print(f"Batch Processing Complete")
@@ -223,11 +223,11 @@ def print_batch_result(result: dict):
     print(f"Failed: {failure}")
 
     # Show details for each sentence
-    results = result.get('results', [])
+    results = result.get("results", [])
     if results:
         print(f"\nDetails:")
         for i, res in enumerate(results, 1):
-            if res.get('success'):
+            if res.get("success"):
                 print(f"  {i}. ✓ {res.get('sentence_text', 'N/A')[:50]}...")
                 print(f"     Linked: {res.get('linked_words', 0)}, " +
                       f"Unlinked: {res.get('unlinked_words', 0)}")
@@ -290,5 +290,5 @@ def main():
         return 1
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())

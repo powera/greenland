@@ -48,7 +48,7 @@ def list_exemplars():
     print(f"{'-' * 30} {'-' * 30} {'-' * 20}")
     
     for exemplar in exemplars:
-        type_str = exemplar.type.value if hasattr(exemplar.type, 'value') else exemplar.type
+        type_str = exemplar.type.value if hasattr(exemplar.type, "value") else exemplar.type
         print(f"{exemplar.id:<30} {exemplar.name:<30} {type_str:<20}")
         
     print(f"{'=' * 80}\n")

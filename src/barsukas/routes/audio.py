@@ -18,19 +18,19 @@ from sqlalchemy.exc import IntegrityError
 
 from wordfreq.storage.models.schema import AudioQualityReview, Lemma
 
-bp = Blueprint('audio', __name__, url_prefix='/audio')
+bp = Blueprint("audio", __name__, url_prefix="/audio")
 
 # Mapping from language codes to directory names
 LANGUAGE_DIR_MAP = {
-    'zh': 'chinese',
-    'lt': 'lithuanian',
-    'ko': 'korean',
-    'fr': 'french',
-    'de': 'german',
-    'es': 'spanish',
-    'pt': 'portuguese',
-    'sw': 'swahili',
-    'vi': 'vietnamese',
+    "zh": "chinese",
+    "lt": "lithuanian",
+    "ko": "korean",
+    "fr": "french",
+    "de": "german",
+    "es": "spanish",
+    "pt": "portuguese",
+    "sw": "swahili",
+    "vi": "vietnamese",
 }
 
 
@@ -58,16 +58,16 @@ def link_audio_to_lemma(session, guid: str, expected_text: str, language_code: s
     # Fallback to text matching based on language
     # Map language codes to column names
     language_column_map = {
-        'zh': 'chinese_translation',
-        'ko': 'korean_translation',
-        'fr': 'french_translation',
-        'sw': 'swahili_translation',
-        'lt': 'lithuanian_translation',
-        'vi': 'vietnamese_translation',
+        "zh": "chinese_translation",
+        "ko": "korean_translation",
+        "fr": "french_translation",
+        "sw": "swahili_translation",
+        "lt": "lithuanian_translation",
+        "vi": "vietnamese_translation",
     }
 
     # For table-based translations (es, de, pt), query LemmaTranslation
-    if language_code in ['es', 'de', 'pt']:
+    if language_code in ["es", "de", "pt"]:
         from wordfreq.storage.models.schema import LemmaTranslation
         translation = session.query(LemmaTranslation).filter_by(
             language_code=language_code,
@@ -88,14 +88,14 @@ def link_audio_to_lemma(session, guid: str, expected_text: str, language_code: s
     return None
 
 
-@bp.route('/')
+@bp.route("/")
 def index():
     """Audio quality review dashboard."""
     # Get summary statistics
     total_files = g.db.query(AudioQualityReview).count()
-    pending_review = g.db.query(AudioQualityReview).filter_by(status='pending_review').count()
-    approved = g.db.query(AudioQualityReview).filter_by(status='approved').count()
-    needs_replacement = g.db.query(AudioQualityReview).filter_by(status='needs_replacement').count()
+    pending_review = g.db.query(AudioQualityReview).filter_by(status="pending_review").count()
+    approved = g.db.query(AudioQualityReview).filter_by(status="approved").count()
+    needs_replacement = g.db.query(AudioQualityReview).filter_by(status="needs_replacement").count()
 
     # Get counts by language
     language_counts = g.db.query(
@@ -110,7 +110,7 @@ def index():
     ).group_by(AudioQualityReview.voice_name).all()
 
     return render_template(
-        'audio/index.html',
+        "audio/index.html",
         total_files=total_files,
         pending_review=pending_review,
         approved=approved,
@@ -120,65 +120,65 @@ def index():
     )
 
 
-@bp.route('/import', methods=['GET', 'POST'])
+@bp.route("/import", methods=["GET", "POST"])
 def import_manifest():
     """Import audio manifest file."""
-    if request.method == 'GET':
+    if request.method == "GET":
         # Scan for available manifests
         available_manifests = []
-        audio_base = current_app.config.get('AUDIO_BASE_DIR')
+        audio_base = current_app.config.get("AUDIO_BASE_DIR")
 
         if audio_base and os.path.exists(audio_base):
             # Walk through the directory tree looking for audio_manifest.json files
             for root, dirs, files in os.walk(audio_base):
-                if 'audio_manifest.json' in files:
-                    manifest_path = os.path.join(root, 'audio_manifest.json')
+                if "audio_manifest.json" in files:
+                    manifest_path = os.path.join(root, "audio_manifest.json")
                     # Get relative path from base for display
                     rel_path = os.path.relpath(root, audio_base)
                     available_manifests.append({
-                        'path': root,
-                        'display': rel_path,
-                        'full_path': manifest_path
+                        "path": root,
+                        "display": rel_path,
+                        "full_path": manifest_path
                     })
 
-        return render_template('audio/import.html', available_manifests=available_manifests)
+        return render_template("audio/import.html", available_manifests=available_manifests)
 
     # Handle POST - get the audio directory path
-    audio_dir = request.form.get('audio_dir', '').strip()
+    audio_dir = request.form.get("audio_dir", "").strip()
 
     if not audio_dir:
-        flash('Audio directory path is required', 'error')
-        return redirect(url_for('audio.import_manifest'))
+        flash("Audio directory path is required", "error")
+        return redirect(url_for("audio.import_manifest"))
 
     audio_dir_path = Path(audio_dir)
 
     if not audio_dir_path.exists():
-        flash(f'Audio directory not found: {audio_dir}', 'error')
-        return redirect(url_for('audio.import_manifest'))
+        flash(f'Audio directory not found: {audio_dir}', "error")
+        return redirect(url_for("audio.import_manifest"))
 
     if not audio_dir_path.is_dir():
-        flash(f'Path is not a directory: {audio_dir}', 'error')
-        return redirect(url_for('audio.import_manifest'))
+        flash(f'Path is not a directory: {audio_dir}', "error")
+        return redirect(url_for("audio.import_manifest"))
 
     # Look for audio_manifest.json in the directory
-    manifest_file_path = audio_dir_path / 'audio_manifest.json'
+    manifest_file_path = audio_dir_path / "audio_manifest.json"
 
     if not manifest_file_path.exists():
-        flash(f'audio_manifest.json not found in directory: {audio_dir}', 'error')
-        return redirect(url_for('audio.import_manifest'))
+        flash(f'audio_manifest.json not found in directory: {audio_dir}', "error")
+        return redirect(url_for("audio.import_manifest"))
 
     try:
         # Parse manifest JSON from the directory
-        with open(manifest_file_path, 'r', encoding='utf-8') as f:
+        with open(manifest_file_path, "r", encoding="utf-8") as f:
             manifest_data = json.load(f)
 
-        language_code = manifest_data.get('language')
-        voice_name = manifest_data.get('voice')
-        files_data = manifest_data.get('files', {})
+        language_code = manifest_data.get("language")
+        voice_name = manifest_data.get("voice")
+        files_data = manifest_data.get("files", {})
 
         if not language_code or not voice_name:
-            flash('Invalid manifest format: missing language or voice', 'error')
-            return redirect(url_for('audio.import_manifest'))
+            flash("Invalid manifest format: missing language or voice", "error")
+            return redirect(url_for("audio.import_manifest"))
 
         # Audio directory is the provided directory
         audio_dir = str(audio_dir_path)
@@ -189,9 +189,9 @@ def import_manifest():
         error_count = 0
 
         for filename, file_info in files_data.items():
-            guid = file_info.get('guid')
-            text = file_info.get('text')
-            md5 = file_info.get('md5')
+            guid = file_info.get("guid")
+            text = file_info.get("text")
+            md5 = file_info.get("md5")
 
             if not all([guid, text, md5]):
                 error_count += 1
@@ -227,7 +227,7 @@ def import_manifest():
                 expected_text=text,
                 manifest_md5=md5,
                 lemma_id=lemma_id,
-                status='pending_review'
+                status="pending_review"
             )
 
             g.db.add(review)
@@ -239,29 +239,29 @@ def import_manifest():
             f'Import complete: {imported_count} files imported, '
             f'{skipped_count} skipped (already exist), '
             f'{error_count} errors',
-            'success'
+            "success"
         )
 
-        return redirect(url_for('audio.list_files'))
+        return redirect(url_for("audio.list_files"))
 
     except json.JSONDecodeError as e:
-        flash(f'Invalid JSON format: {str(e)}', 'error')
-        return redirect(url_for('audio.import_manifest'))
+        flash(f'Invalid JSON format: {str(e)}', "error")
+        return redirect(url_for("audio.import_manifest"))
     except Exception as e:
         g.db.rollback()
-        flash(f'Error importing manifest: {str(e)}', 'error')
-        return redirect(url_for('audio.import_manifest'))
+        flash(f'Error importing manifest: {str(e)}', "error")
+        return redirect(url_for("audio.import_manifest"))
 
 
-@bp.route('/list')
+@bp.route("/list")
 def list_files():
     """List audio files with filters and search."""
     # Get filter parameters
-    language_filter = request.args.get('language', '')
-    voice_filter = request.args.get('voice', '')
-    status_filter = request.args.get('status', '')
-    search_query = request.args.get('search', '').strip()
-    page = request.args.get('page', 1, type=int)
+    language_filter = request.args.get("language", "")
+    voice_filter = request.args.get("voice", "")
+    status_filter = request.args.get("status", "")
+    search_query = request.args.get("search", "").strip()
+    page = request.args.get("page", 1, type=int)
     per_page = 100
 
     # Build query with eager loading of lemma relationship
@@ -297,12 +297,12 @@ def list_files():
     voices = g.db.query(AudioQualityReview.voice_name).distinct().all()
     voices = sorted([voice[0] for voice in voices])
 
-    statuses = ['pending_review', 'approved', 'approved_with_issues', 'needs_replacement']
+    statuses = ["pending_review", "approved", "approved_with_issues", "needs_replacement"]
 
     total_pages = (total_count + per_page - 1) // per_page
 
     return render_template(
-        'audio/list.html',
+        "audio/list.html",
         audio_files=audio_files,
         languages=languages,
         voices=voices,
@@ -318,14 +318,14 @@ def list_files():
     )
 
 
-@bp.route('/files/<language>/<voice>/<filename>')
+@bp.route("/files/<language>/<voice>/<filename>")
 def serve_audio_file(language, voice, filename):
     """Serve audio file from local directory."""
     # Get audio directory from config
-    audio_base_dir = current_app.config.get('AUDIO_BASE_DIR')
+    audio_base_dir = current_app.config.get("AUDIO_BASE_DIR")
 
     if not audio_base_dir:
-        return jsonify({'error': 'Audio directory not configured'}), 500
+        return jsonify({"error": "Audio directory not configured"}), 500
 
     # Map language code to directory name (e.g., 'zh' -> 'chinese')
     language_dir = LANGUAGE_DIR_MAP.get(language, language)
@@ -334,41 +334,41 @@ def serve_audio_file(language, voice, filename):
     file_path = Path(audio_base_dir) / language_dir / voice / filename
 
     if not file_path.exists():
-        return jsonify({'error': f'Audio file not found: {file_path}'}), 404
+        return jsonify({"error": f'Audio file not found: {file_path}'}), 404
 
-    return send_file(str(file_path), mimetype='audio/mpeg')
+    return send_file(str(file_path), mimetype="audio/mpeg")
 
 
-@bp.route('/review/<int:review_id>', methods=['GET', 'POST'])
+@bp.route("/review/<int:review_id>", methods=["GET", "POST"])
 def review_file(review_id):
     """Review a single audio file."""
     review = g.db.query(AudioQualityReview).filter_by(id=review_id).first()
 
     if not review:
-        flash('Audio review not found', 'error')
-        return redirect(url_for('audio.list_files'))
+        flash("Audio review not found", "error")
+        return redirect(url_for("audio.list_files"))
 
-    if request.method == 'GET':
+    if request.method == "GET":
         # Get linked lemma info if available
         lemma = None
         if review.lemma_id:
             lemma = g.db.query(Lemma).filter_by(id=review.lemma_id).first()
 
-        return render_template('audio/review.html', review=review, lemma=lemma)
+        return render_template("audio/review.html", review=review, lemma=lemma)
 
     # Handle POST - update review
-    status = request.form.get('status')
-    issues_json = request.form.get('quality_issues', '[]')
-    notes = request.form.get('notes', '').strip()
+    status = request.form.get("status")
+    issues_json = request.form.get("quality_issues", "[]")
+    notes = request.form.get("notes", "").strip()
 
-    if status not in ['pending_review', 'approved', 'approved_with_issues', 'needs_replacement']:
-        return jsonify({'error': 'Invalid status'}), 400
+    if status not in ["pending_review", "approved", "approved_with_issues", "needs_replacement"]:
+        return jsonify({"error": "Invalid status"}), 400
 
     try:
         # Validate JSON
         issues = json.loads(issues_json)
         if not isinstance(issues, list):
-            return jsonify({'error': 'quality_issues must be an array'}), 400
+            return jsonify({"error": "quality_issues must be an array"}), 400
 
         # Update review
         review.status = status
@@ -379,62 +379,62 @@ def review_file(review_id):
 
         g.db.commit()
 
-        flash('Review updated successfully', 'success')
+        flash("Review updated successfully", "success")
 
         # Redirect to next pending file or back to list
-        if request.form.get('save_and_next'):
+        if request.form.get("save_and_next"):
             next_review = g.db.query(AudioQualityReview).filter(
                 AudioQualityReview.id > review_id,
                 AudioQualityReview.language_code == review.language_code,
                 AudioQualityReview.voice_name == review.voice_name,
-                AudioQualityReview.status == 'pending_review'
+                AudioQualityReview.status == "pending_review"
             ).order_by(AudioQualityReview.id).first()
 
             if next_review:
-                return redirect(url_for('audio.review_file', review_id=next_review.id))
+                return redirect(url_for("audio.review_file", review_id=next_review.id))
 
-        return redirect(url_for('audio.list_files'))
+        return redirect(url_for("audio.list_files"))
 
     except json.JSONDecodeError:
-        return jsonify({'error': 'Invalid JSON for quality_issues'}), 400
+        return jsonify({"error": "Invalid JSON for quality_issues"}), 400
     except Exception as e:
         g.db.rollback()
-        flash(f'Error updating review: {str(e)}', 'error')
-        return redirect(url_for('audio.review_file', review_id=review_id))
+        flash(f'Error updating review: {str(e)}', "error")
+        return redirect(url_for("audio.review_file", review_id=review_id))
 
 
-@bp.route('/update/<int:review_id>', methods=['POST'])
+@bp.route("/update/<int:review_id>", methods=["POST"])
 def quick_update(review_id):
     """Quick update for inline actions (AJAX endpoint)."""
     review = g.db.query(AudioQualityReview).filter_by(id=review_id).first()
 
     if not review:
-        return jsonify({'error': 'Review not found'}), 404
+        return jsonify({"error": "Review not found"}), 404
 
     data = request.get_json()
-    status = data.get('status')
+    status = data.get("status")
 
-    if status not in ['pending_review', 'approved', 'approved_with_issues', 'needs_replacement']:
-        return jsonify({'error': 'Invalid status'}), 400
+    if status not in ["pending_review", "approved", "approved_with_issues", "needs_replacement"]:
+        return jsonify({"error": "Invalid status"}), 400
 
     try:
         review.status = status
         review.reviewed_at = datetime.utcnow()
         g.db.commit()
 
-        return jsonify({'success': True, 'status': status})
+        return jsonify({"success": True, "status": status})
     except Exception as e:
         g.db.rollback()
-        return jsonify({'error': str(e)}), 500
+        return jsonify({"error": str(e)}), 500
 
 
-@bp.route('/rapid-review')
+@bp.route("/rapid-review")
 def rapid_review():
     """Streamlined rapid review interface with keyboard shortcuts."""
     # Get filter parameters - default to pending_review
-    language_filter = request.args.get('language', '')
-    voice_filter = request.args.get('voice', '')
-    status_filter = request.args.get('status', 'pending_review')
+    language_filter = request.args.get("language", "")
+    voice_filter = request.args.get("voice", "")
+    status_filter = request.args.get("status", "pending_review")
 
     # Build query
     query = g.db.query(AudioQualityReview)
@@ -464,10 +464,10 @@ def rapid_review():
     voices = g.db.query(AudioQualityReview.voice_name).distinct().all()
     voices = sorted([voice[0] for voice in voices])
 
-    statuses = ['pending_review', 'approved', 'approved_with_issues', 'needs_replacement']
+    statuses = ["pending_review", "approved", "approved_with_issues", "needs_replacement"]
 
     return render_template(
-        'audio/rapid_review.html',
+        "audio/rapid_review.html",
         review=current_review,
         total_count=total_count,
         languages=languages,
@@ -479,20 +479,20 @@ def rapid_review():
     )
 
 
-@bp.route('/rapid-review/submit/<int:review_id>', methods=['POST'])
+@bp.route("/rapid-review/submit/<int:review_id>", methods=["POST"])
 def rapid_review_submit(review_id):
     """Submit rapid review and get next file (AJAX endpoint)."""
     review = g.db.query(AudioQualityReview).filter_by(id=review_id).first()
 
     if not review:
-        return jsonify({'error': 'Review not found'}), 404
+        return jsonify({"error": "Review not found"}), 404
 
     data = request.get_json()
-    status = data.get('status')
-    issues = data.get('quality_issues', [])
+    status = data.get("status")
+    issues = data.get("quality_issues", [])
 
-    if status not in ['pending_review', 'approved', 'approved_with_issues', 'needs_replacement']:
-        return jsonify({'error': 'Invalid status'}), 400
+    if status not in ["pending_review", "approved", "approved_with_issues", "needs_replacement"]:
+        return jsonify({"error": "Invalid status"}), 400
 
     try:
         # Update review
@@ -502,9 +502,9 @@ def rapid_review_submit(review_id):
         g.db.commit()
 
         # Get next file based on same filters
-        language_filter = data.get('language', '')
-        voice_filter = data.get('voice', '')
-        status_filter = data.get('status_filter', 'pending_review')
+        language_filter = data.get("language", "")
+        voice_filter = data.get("voice", "")
+        status_filter = data.get("status_filter", "pending_review")
 
         # Build query for next file - use GUID ordering, not ID
         # This ensures we get the next file in GUID sequence regardless of ID gaps
@@ -525,22 +525,22 @@ def rapid_review_submit(review_id):
         if next_review:
             # Generate pinyin for Chinese text
             pinyin_text = None
-            if next_review.language_code == 'zh':
+            if next_review.language_code == "zh":
                 from barsukas.pinyin_helper import generate_pinyin
                 pinyin_text = generate_pinyin(next_review.expected_text)
 
             return jsonify({
-                'success': True,
-                'has_next': True,
-                'next_review': {
-                    'id': next_review.id,
-                    'guid': next_review.guid,
-                    'expected_text': next_review.expected_text,
-                    'language_code': next_review.language_code,
-                    'voice_name': next_review.voice_name,
-                    'filename': next_review.filename,
-                    'pinyin': pinyin_text,
-                    'audio_url': url_for('audio.serve_audio_file',
+                "success": True,
+                "has_next": True,
+                "next_review": {
+                    "id": next_review.id,
+                    "guid": next_review.guid,
+                    "expected_text": next_review.expected_text,
+                    "language_code": next_review.language_code,
+                    "voice_name": next_review.voice_name,
+                    "filename": next_review.filename,
+                    "pinyin": pinyin_text,
+                    "audio_url": url_for("audio.serve_audio_file",
                                         language=next_review.language_code,
                                         voice=next_review.voice_name,
                                         filename=next_review.filename)
@@ -548,11 +548,11 @@ def rapid_review_submit(review_id):
             })
         else:
             return jsonify({
-                'success': True,
-                'has_next': False,
-                'message': 'No more files to review'
+                "success": True,
+                "has_next": False,
+                "message": "No more files to review"
             })
 
     except Exception as e:
         g.db.rollback()
-        return jsonify({'error': str(e)}), 500
+        return jsonify({"error": str(e)}), 500

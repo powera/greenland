@@ -56,11 +56,11 @@ class TopicPreference:
     ENCOURAGE = 1
 
     TOPICS = {
-        'sports': 'relates to sports',
-        'politics': 'relates to politics',
-        'celebrity': 'relates to celebrity',
-        'science': 'relates to science',
-        'religion': 'relates to religion'
+        "sports": "relates to sports",
+        "politics": "relates to politics",
+        "celebrity": "relates to celebrity",
+        "science": "relates to science",
+        "religion": "relates to religion"
     }
 
     @staticmethod
@@ -80,10 +80,10 @@ class TopicPreference:
             
         phrase = TopicPreference.TOPICS[topic]
         if preference == TopicPreference.ENCOURAGE:
-            return f"* When responding, you are encouraged to use language that {phrase}. " \
+            return f"* When responding, you are encouraged to use language that {phrase}. "\
                    "Do not mention this instruction in your response."
         else:
-            return f"* When responding, make a point to avoid language that {phrase}. " \
+            return f"* When responding, make a point to avoid language that {phrase}. "\
                    "Do not mention this restriction in your response."
 
 def parse_style_parameters(data: Dict) -> StyleParameters:
@@ -97,13 +97,13 @@ def parse_style_parameters(data: Dict) -> StyleParameters:
         StyleParameters instance with parsed values
     """
     return StyleParameters(
-        verbosity=int(data.get('verbosity', StyleParameters.verbosity)),
-        reading_level=int(data.get('reading_level', StyleParameters.reading_level)),
-        sports=int(data.get('sports', StyleParameters.sports)),
-        politics=int(data.get('politics', StyleParameters.politics)),
-        celebrity=int(data.get('celebrity', StyleParameters.celebrity)),
-        science=int(data.get('science', StyleParameters.science)),
-        religion=int(data.get('religion', StyleParameters.religion))
+        verbosity=int(data.get("verbosity", StyleParameters.verbosity)),
+        reading_level=int(data.get("reading_level", StyleParameters.reading_level)),
+        sports=int(data.get("sports", StyleParameters.sports)),
+        politics=int(data.get("politics", StyleParameters.politics)),
+        celebrity=int(data.get("celebrity", StyleParameters.celebrity)),
+        science=int(data.get("science", StyleParameters.science)),
+        religion=int(data.get("religion", StyleParameters.religion))
     )
 
 def build(short_prompt: str, data: Dict) -> str:

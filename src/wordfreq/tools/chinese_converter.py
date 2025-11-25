@@ -34,7 +34,7 @@ def _get_t2s_converter() -> Optional[OpenCC]:
     if _traditional_to_simplified is None:
         try:
             # t2s = Traditional Chinese to Simplified Chinese
-            _traditional_to_simplified = OpenCC('t2s')
+            _traditional_to_simplified = OpenCC("t2s")
         except Exception as e:
             logger.error(f"Failed to initialize Traditional to Simplified converter: {e}")
             return None
@@ -53,7 +53,7 @@ def _get_s2t_converter() -> Optional[OpenCC]:
     if _simplified_to_traditional is None:
         try:
             # s2t = Simplified Chinese to Traditional Chinese
-            _simplified_to_traditional = OpenCC('s2t')
+            _simplified_to_traditional = OpenCC("s2t")
         except Exception as e:
             logger.error(f"Failed to initialize Simplified to Traditional converter: {e}")
             return None
@@ -122,7 +122,7 @@ def get_chinese_translation(lemma, simplified: bool = False) -> Optional[str]:
     Returns:
         Chinese translation in requested form, or None if not available
     """
-    if not hasattr(lemma, 'chinese_translation') or not lemma.chinese_translation:
+    if not hasattr(lemma, "chinese_translation") or not lemma.chinese_translation:
         return None
 
     traditional = lemma.chinese_translation

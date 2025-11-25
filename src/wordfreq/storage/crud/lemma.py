@@ -74,12 +74,12 @@ def add_lemma(
 
     # Log translation additions
     translation_map = {
-        'zh': chinese_translation,
-        'fr': french_translation,
-        'ko': korean_translation,
-        'sw': swahili_translation,
-        'lt': lithuanian_translation,
-        'vi': vietnamese_translation
+        "zh": chinese_translation,
+        "fr": french_translation,
+        "ko": korean_translation,
+        "sw": swahili_translation,
+        "lt": lithuanian_translation,
+        "vi": vietnamese_translation
     }
 
     for lang_code, translation in translation_map.items():
@@ -132,12 +132,12 @@ def update_lemma(
 
     # Map of translation parameters to language codes
     translation_updates = {
-        'zh': ('chinese_translation', chinese_translation),
-        'fr': ('french_translation', french_translation),
-        'ko': ('korean_translation', korean_translation),
-        'sw': ('swahili_translation', swahili_translation),
-        'lt': ('lithuanian_translation', lithuanian_translation),
-        'vi': ('vietnamese_translation', vietnamese_translation)
+        "zh": ("chinese_translation", chinese_translation),
+        "fr": ("french_translation", french_translation),
+        "ko": ("korean_translation", korean_translation),
+        "sw": ("swahili_translation", swahili_translation),
+        "lt": ("lithuanian_translation", lithuanian_translation),
+        "vi": ("vietnamese_translation", vietnamese_translation)
     }
 
     # Track translation changes for logging
@@ -266,13 +266,13 @@ def get_lemmas_by_subtype_and_level(session, pos_subtype: str = None, difficulty
     lang_code = None
     if lang:
         lang_map = {
-            'chinese': 'zh',
-            'lithuanian': 'lt',
-            'french': 'fr',
-            'german': 'de',
-            'korean': 'ko',
-            'vietnamese': 'vi',
-            'swahili': 'sw'
+            "chinese": "zh",
+            "lithuanian": "lt",
+            "french": "fr",
+            "german": "de",
+            "korean": "ko",
+            "vietnamese": "vi",
+            "swahili": "sw"
         }
         lang_code = lang_map.get(lang, lang)
 

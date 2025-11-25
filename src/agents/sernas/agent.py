@@ -127,14 +127,14 @@ class SernasAgent:
             if language_code:
                 lang_codes = [language_code]
             else:
-                lang_codes = ['en'] + list(get_supported_languages().keys())
+                lang_codes = ["en"] + list(get_supported_languages().keys())
 
             # Determine which form types to check
             if form_type:
                 form_types = [form_type]
             else:
                 # Check all types (including legacy 'alternative_form')
-                form_types = ['synonym', 'abbreviation', 'expanded_form', 'alternate_spelling', 'alternative_form']
+                form_types = ["synonym", "abbreviation", "expanded_form", "alternate_spelling", "alternative_form"]
 
             missing_by_language = {}
             for lang in lang_codes:
@@ -143,7 +143,7 @@ class SernasAgent:
             for lemma in lemmas:
                 for lang in lang_codes:
                     # Get the translation for this language
-                    if lang == 'en':
+                    if lang == "en":
                         translation = lemma.lemma_text
                     else:
                         translation = get_translation(session, lemma, lang)
@@ -158,24 +158,24 @@ class SernasAgent:
                     # If no facts recorded, we need to run ŠERNAS
                     if facts is None:
                         missing_by_language[lang].append({
-                            'guid': lemma.guid,
-                            'english': lemma.lemma_text,
-                            'translation': translation,
-                            'pos_type': lemma.pos_type,
-                            'pos_subtype': lemma.pos_subtype,
-                            'difficulty_level': lemma.difficulty_level
+                            "guid": lemma.guid,
+                            "english": lemma.lemma_text,
+                            "translation": translation,
+                            "pos_type": lemma.pos_type,
+                            "pos_subtype": lemma.pos_subtype,
+                            "difficulty_level": lemma.difficulty_level
                         })
                     # If form_type is specified, check if that specific fact is missing
                     elif form_type:
-                        fact_key = f"has_{form_type}s" if not form_type.endswith('s') else f"has_{form_type}"
+                        fact_key = f"has_{form_type}s" if not form_type.endswith("s") else f"has_{form_type}"
                         if fact_key not in facts:
                             missing_by_language[lang].append({
-                                'guid': lemma.guid,
-                                'english': lemma.lemma_text,
-                                'translation': translation,
-                                'pos_type': lemma.pos_type,
-                                'pos_subtype': lemma.pos_subtype,
-                                'difficulty_level': lemma.difficulty_level
+                                "guid": lemma.guid,
+                                "english": lemma.lemma_text,
+                                "translation": translation,
+                                "pos_type": lemma.pos_type,
+                                "pos_subtype": lemma.pos_subtype,
+                                "difficulty_level": lemma.difficulty_level
                             })
 
             # Calculate statistics
@@ -184,18 +184,18 @@ class SernasAgent:
             logger.info(f"Found {total_missing} lemmas missing synonyms/alternatives across all languages")
 
             return {
-                'total_missing': total_missing,
-                'missing_by_language': missing_by_language,
-                'checked_languages': lang_codes,
-                'checked_form_types': form_types
+                "total_missing": total_missing,
+                "missing_by_language": missing_by_language,
+                "checked_languages": lang_codes,
+                "checked_form_types": form_types
             }
 
         except Exception as e:
             logger.error(f"Error checking missing synonyms: {e}")
             return {
-                'error': str(e),
-                'total_missing': 0,
-                'missing_by_language': {}
+                "error": str(e),
+                "total_missing": 0,
+                "missing_by_language": {}
             }
         finally:
             session.close()
@@ -204,7 +204,7 @@ class SernasAgent:
         self,
         lemma_id: int,
         language_code: str,
-        model: str = 'gpt-5-mini',
+        model: str = "gpt-5-mini",
         dry_run: bool = False
     ) -> Dict[str, any]:
         """
@@ -224,19 +224,19 @@ class SernasAgent:
             # Get the lemma
             lemma = session.query(Lemma).get(lemma_id)
             if not lemma:
-                return {'error': f'Lemma ID {lemma_id} not found'}
+                return {"error": f'Lemma ID {lemma_id} not found'}
 
             # Get the translation for the target language
-            if language_code == 'en':
+            if language_code == "en":
                 word = lemma.lemma_text
             else:
                 word = get_translation(session, lemma, language_code)
 
             if not word or not word.strip():
                 return {
-                    'error': f'No translation found for language {language_code}',
-                    'lemma_id': lemma_id,
-                    'language_code': language_code
+                    "error": f'No translation found for language {language_code}',
+                    "lemma_id": lemma_id,
+                    "language_code": language_code
                 }
 
             logger.info(f"Generating synonyms for '{word}' ({language_code})")
@@ -254,30 +254,30 @@ class SernasAgent:
                 english_word=lemma.lemma_text
             )
 
-            if not result['success']:
+            if not result["success"]:
                 return {
-                    'error': result.get('error', 'Failed to generate synonyms'),
-                    'lemma_id': lemma_id,
-                    'language_code': language_code
+                    "error": result.get("error", "Failed to generate synonyms"),
+                    "lemma_id": lemma_id,
+                    "language_code": language_code
                 }
 
             # Extract results and filter out numerals
-            synonyms = [s for s in result.get('synonyms', []) if not self._is_numeral(s)]
-            abbreviations = [a for a in result.get('abbreviations', []) if not self._is_numeral(a)]
-            expanded_forms = [e for e in result.get('expanded_forms', []) if not self._is_numeral(e)]
-            alternate_spellings = [a for a in result.get('alternate_spellings', []) if not self._is_numeral(a)]
+            synonyms = [s for s in result.get("synonyms", []) if not self._is_numeral(s)]
+            abbreviations = [a for a in result.get("abbreviations", []) if not self._is_numeral(a)]
+            expanded_forms = [e for e in result.get("expanded_forms", []) if not self._is_numeral(e)]
+            alternate_spellings = [a for a in result.get("alternate_spellings", []) if not self._is_numeral(a)]
 
             if dry_run:
                 return {
-                    'dry_run': True,
-                    'lemma_id': lemma_id,
-                    'language_code': language_code,
-                    'word': word,
-                    'synonyms': synonyms,
-                    'abbreviations': abbreviations,
-                    'expanded_forms': expanded_forms,
-                    'alternate_spellings': alternate_spellings,
-                    'total_count': len(synonyms) + len(abbreviations) + len(expanded_forms) + len(alternate_spellings)
+                    "dry_run": True,
+                    "lemma_id": lemma_id,
+                    "language_code": language_code,
+                    "word": word,
+                    "synonyms": synonyms,
+                    "abbreviations": abbreviations,
+                    "expanded_forms": expanded_forms,
+                    "alternate_spellings": alternate_spellings,
+                    "total_count": len(synonyms) + len(abbreviations) + len(expanded_forms) + len(alternate_spellings)
                 }
 
             # Store the forms in the database
@@ -294,7 +294,7 @@ class SernasAgent:
                         lemma=lemma,
                         derivative_form_text=synonym,
                         language_code=language_code,
-                        grammatical_form='synonym',
+                        grammatical_form="synonym",
                         word_token=word_token,
                         verified=False
                     )
@@ -310,7 +310,7 @@ class SernasAgent:
                         lemma=lemma,
                         derivative_form_text=abbr,
                         language_code=language_code,
-                        grammatical_form='abbreviation',
+                        grammatical_form="abbreviation",
                         word_token=word_token,
                         verified=False
                     )
@@ -326,7 +326,7 @@ class SernasAgent:
                         lemma=lemma,
                         derivative_form_text=exp_form,
                         language_code=language_code,
-                        grammatical_form='expanded_form',
+                        grammatical_form="expanded_form",
                         word_token=word_token,
                         verified=False
                     )
@@ -342,7 +342,7 @@ class SernasAgent:
                         lemma=lemma,
                         derivative_form_text=alt_spelling,
                         language_code=language_code,
-                        grammatical_form='alternate_spelling',
+                        grammatical_form="alternate_spelling",
                         word_token=word_token,
                         verified=False
                     )
@@ -365,27 +365,27 @@ class SernasAgent:
             logger.info(f"Stored {stored_synonyms} synonyms, {stored_abbreviations} abbreviations, {stored_expanded} expanded forms, and {stored_spellings} alternate spellings")
 
             return {
-                'success': True,
-                'lemma_id': lemma_id,
-                'language_code': language_code,
-                'word': word,
-                'synonyms': synonyms,
-                'abbreviations': abbreviations,
-                'expanded_forms': expanded_forms,
-                'alternate_spellings': alternate_spellings,
-                'stored_synonyms': stored_synonyms,
-                'stored_abbreviations': stored_abbreviations,
-                'stored_expanded': stored_expanded,
-                'stored_spellings': stored_spellings
+                "success": True,
+                "lemma_id": lemma_id,
+                "language_code": language_code,
+                "word": word,
+                "synonyms": synonyms,
+                "abbreviations": abbreviations,
+                "expanded_forms": expanded_forms,
+                "alternate_spellings": alternate_spellings,
+                "stored_synonyms": stored_synonyms,
+                "stored_abbreviations": stored_abbreviations,
+                "stored_expanded": stored_expanded,
+                "stored_spellings": stored_spellings
             }
 
         except Exception as e:
             session.rollback()
             logger.error(f"Error generating synonyms for lemma {lemma_id}: {e}")
             return {
-                'error': str(e),
-                'lemma_id': lemma_id,
-                'language_code': language_code
+                "error": str(e),
+                "lemma_id": lemma_id,
+                "language_code": language_code
             }
         finally:
             session.close()
@@ -415,8 +415,8 @@ class SernasAgent:
         """
         # Get language name
         language_names = get_supported_languages()
-        if language_code == 'en':
-            language_name = 'English'
+        if language_code == "en":
+            language_name = "English"
         else:
             language_name = language_names.get(language_code, language_code)
 
@@ -454,9 +454,9 @@ class SernasAgent:
 - Consider the part of speech and usage context
 """
 
-        if language_code == 'zh':
+        if language_code == "zh":
             prompt += "\n- For Chinese, provide Traditional Chinese characters (繁體字) (e.g., 街道, 馬路 for 'street')"
-        elif language_code == 'ko':
+        elif language_code == "ko":
             prompt += "\n- For Korean, provide words in Hangul (e.g., 거리, 길 for 'street')"
 
         prompt += """
@@ -506,34 +506,34 @@ Respond ONLY with valid JSON, no other text."""
 
             if not response.structured_data:
                 return {
-                    'success': False,
-                    'error': 'Empty response from LLM'
+                    "success": False,
+                    "error": "Empty response from LLM"
                 }
 
             # Use structured data from response
             result = response.structured_data
 
             return {
-                'success': True,
-                'synonyms': result.get('synonyms', []),
-                'abbreviations': result.get('abbreviations', []),
-                'expanded_forms': result.get('expanded_forms', []),
-                'alternate_spellings': result.get('alternate_spellings', []),
-                'explanation': result.get('explanation', '')
+                "success": True,
+                "synonyms": result.get("synonyms", []),
+                "abbreviations": result.get("abbreviations", []),
+                "expanded_forms": result.get("expanded_forms", []),
+                "alternate_spellings": result.get("alternate_spellings", []),
+                "explanation": result.get("explanation", "")
             }
 
         except json.JSONDecodeError as e:
             logger.error(f"Failed to parse JSON response: {e}")
             logger.debug(f"Response was: {response}")
             return {
-                'success': False,
-                'error': f'Invalid JSON response: {e}'
+                "success": False,
+                "error": f'Invalid JSON response: {e}'
             }
         except Exception as e:
             logger.error(f"Error querying LLM: {e}")
             return {
-                'success': False,
-                'error': str(e)
+                "success": False,
+                "error": str(e)
             }
 
     def fix_missing_synonyms(
@@ -541,7 +541,7 @@ Respond ONLY with valid JSON, no other text."""
         language_code: Optional[str] = None,
         form_type: Optional[str] = None,
         limit: Optional[int] = None,
-        model: str = 'gpt-5-mini',
+        model: str = "gpt-5-mini",
         throttle: float = 1.0,
         dry_run: bool = False
     ) -> Dict[str, any]:
@@ -561,7 +561,7 @@ Respond ONLY with valid JSON, no other text."""
         """
         # Default to English if no language specified
         if not language_code:
-            language_code = 'en'
+            language_code = "en"
             logger.info("No language specified, defaulting to English")
 
         # Check what's missing
@@ -570,20 +570,20 @@ Respond ONLY with valid JSON, no other text."""
             form_type=form_type
         )
 
-        if 'error' in check_results:
+        if "error" in check_results:
             return check_results
 
-        lemmas_missing = check_results['missing_by_language'].get(language_code, [])
+        lemmas_missing = check_results["missing_by_language"].get(language_code, [])
         total_needs_fix = len(lemmas_missing)
 
         if total_needs_fix == 0:
             logger.info(f"No lemmas need synonyms/alternatives for {language_code}!")
             return {
-                'total_needing_fix': 0,
-                'processed': 0,
-                'successful': 0,
-                'failed': 0,
-                'dry_run': dry_run
+                "total_needing_fix": 0,
+                "processed": 0,
+                "successful": 0,
+                "failed": 0,
+                "dry_run": dry_run
             }
 
         logger.info(f"Found {total_needs_fix} lemmas needing synonyms/alternatives for {language_code}")
@@ -602,10 +602,10 @@ Respond ONLY with valid JSON, no other text."""
             if len(lemmas_to_process) > 10:
                 logger.info(f"  ... and {len(lemmas_to_process) - 10} more")
             return {
-                'total_needing_fix': total_needs_fix,
-                'would_process': len(lemmas_to_process),
-                'dry_run': True,
-                'sample': lemmas_to_process[:10]
+                "total_needing_fix": total_needs_fix,
+                "would_process": len(lemmas_to_process),
+                "dry_run": True,
+                "sample": lemmas_to_process[:10]
             }
 
         # Process each lemma
@@ -618,7 +618,7 @@ Respond ONLY with valid JSON, no other text."""
                 logger.info(f"\n[{i}/{len(lemmas_to_process)}] Processing: {lemma_info['english']} -> {lemma_info['translation']}")
 
                 # Get lemma object
-                lemma = session.query(Lemma).filter(Lemma.guid == lemma_info['guid']).first()
+                lemma = session.query(Lemma).filter(Lemma.guid == lemma_info["guid"]).first()
                 if not lemma:
                     logger.error(f"Could not find lemma with GUID {lemma_info['guid']}")
                     failed += 1
@@ -632,7 +632,7 @@ Respond ONLY with valid JSON, no other text."""
                     dry_run=False
                 )
 
-                if result.get('success'):
+                if result.get("success"):
                     successful += 1
                     logger.info(f"Successfully generated {result.get('stored_synonyms', 0)} synonyms and {result.get('stored_alternatives', 0)} alternatives")
                 else:
@@ -655,10 +655,10 @@ Respond ONLY with valid JSON, no other text."""
         logger.info(f"{'='*60}")
 
         return {
-            'total_needing_fix': total_needs_fix,
-            'processed': len(lemmas_to_process),
-            'successful': successful,
-            'failed': failed,
-            'dry_run': dry_run,
-            'language_code': language_code
+            "total_needing_fix": total_needs_fix,
+            "processed": len(lemmas_to_process),
+            "successful": successful,
+            "failed": failed,
+            "dry_run": dry_run,
+            "language_code": language_code
         }

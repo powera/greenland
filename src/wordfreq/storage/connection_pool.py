@@ -13,7 +13,7 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.orm import sessionmaker, Session
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 class ConnectionPool:
@@ -63,7 +63,7 @@ class ConnectionPool:
                 engine = create_engine(
                     conn_str, 
                     echo=echo,
-                    connect_args={'check_same_thread': False}
+                    connect_args={"check_same_thread": False}
                 )
                 self._engines[db_path] = engine
                 self._session_factories[db_path] = sessionmaker(bind=engine)
@@ -84,7 +84,7 @@ class ConnectionPool:
             Thread-local SQLAlchemy session
         """
         # Initialize thread_local sessions dict if it doesn't exist
-        if not hasattr(self._thread_local, 'sessions'):
+        if not hasattr(self._thread_local, "sessions"):
             self._thread_local.sessions = {}
         
         # Create a new session for this thread if it doesn't exist
@@ -101,7 +101,7 @@ class ConnectionPool:
     
     def close_thread_sessions(self):
         """Close all sessions for the current thread."""
-        if hasattr(self._thread_local, 'sessions'):
+        if hasattr(self._thread_local, "sessions"):
             for db_path, session in self._thread_local.sessions.items():
                 session.close()
                 logger.debug(f"Closed session for {db_path} in thread {threading.current_thread().name}")

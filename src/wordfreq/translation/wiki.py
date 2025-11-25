@@ -63,7 +63,7 @@ def remove_stress_marks(text: str) -> str:
     """
     # Lithuanian alphabet letters with diacritics that should be PRESERVED
     # These are precomposed characters in Unicode
-    lithuanian_letters = set('ąčėęįšūųž' + 'ĄČĖĘĮŠŪŲŽ')
+    lithuanian_letters = set("ąčėęįšūųž" + "ĄČĖĘĮŠŪŲŽ")
 
     # Stress/tone combining marks that should be REMOVED
     # U+0300: COMBINING GRAVE ACCENT (grave: ò)
@@ -75,11 +75,11 @@ def remove_stress_marks(text: str) -> str:
     # Note: U+030C (COMBINING CARON) is NOT a stress mark - it's part of č, š, ž
     # Note: U+0304 (COMBINING MACRON) is NOT a stress mark - it's part of ū
     # Note: U+0328 (COMBINING OGONEK) is NOT a stress mark - it's part of ą, ę, į, ų
-    stress_marks = {'\u0300', '\u0301', '\u0303'}  # U+0307 handled specially below
+    stress_marks = {"\u0300", "\u0301", "\u0303"}  # U+0307 handled specially below
 
     # Decompose unicode characters into base + combining marks
     # NFD = Canonical Decomposition
-    decomposed = unicodedata.normalize('NFD', text)
+    decomposed = unicodedata.normalize("NFD", text)
 
     # Build result by filtering combining marks
     result = []
@@ -88,14 +88,14 @@ def remove_stress_marks(text: str) -> str:
         char = decomposed[i]
 
         # Check if this is a base character
-        if unicodedata.category(char) != 'Mn':
+        if unicodedata.category(char) != "Mn":
             # It's a base character, check what follows
             base = char
             combining_marks = []
 
             # Collect any combining marks that follow
             j = i + 1
-            while j < len(decomposed) and unicodedata.category(decomposed[j]) == 'Mn':
+            while j < len(decomposed) and unicodedata.category(decomposed[j]) == "Mn":
                 combining_marks.append(decomposed[j])
                 j += 1
 
@@ -108,9 +108,9 @@ def remove_stress_marks(text: str) -> str:
                 if m in stress_marks:
                     # Always remove these stress marks
                     continue
-                elif m == '\u0307':
+                elif m == "\u0307":
                     # Dot above: keep only if base is 'e' or 'E'
-                    if base.lower() == 'e':
+                    if base.lower() == "e":
                         non_stress_marks.append(m)
                     # Otherwise skip (it's a stress mark)
                 else:
@@ -118,7 +118,7 @@ def remove_stress_marks(text: str) -> str:
                     non_stress_marks.append(m)
 
             # Reconstruct with only non-stress marks
-            reconstructed = unicodedata.normalize('NFC', base + ''.join(non_stress_marks))
+            reconstructed = unicodedata.normalize("NFC", base + "".join(non_stress_marks))
 
             # Add to result
             result.append(reconstructed)
@@ -127,11 +127,11 @@ def remove_stress_marks(text: str) -> str:
             i = j
         else:
             # Orphan combining mark - skip it if it's a stress mark, otherwise keep
-            if char not in stress_marks and char != '\u0307':
+            if char not in stress_marks and char != "\u0307":
                 result.append(char)
             i += 1
 
-    return ''.join(result)
+    return "".join(result)
 
 
 def clean_declension_form(text: str) -> List[str]:
@@ -144,11 +144,11 @@ def clean_declension_form(text: str) -> List[str]:
     Returns:
         List of cleaned forms (multiple if there are alternatives separated by /)
     """
-    if not text or text in ('—', '-', ''):
+    if not text or text in ("—", "-", ""):
         return []
 
     # Split by slash to handle alternative forms
-    forms = [f.strip() for f in text.split('/')]
+    forms = [f.strip() for f in text.split("/")]
 
     # Remove stress marks from each form
     cleaned_forms = [remove_stress_marks(form) for form in forms]
@@ -378,10 +378,10 @@ def extract_declension_from_html(html: str) -> Dict[str, str]:
     Returns:
         Dictionary mapping case names to forms
     """
-    soup = BeautifulSoup(html, 'html.parser')
+    soup = BeautifulSoup(html, "html.parser")
 
     # Find the declension table - it typically has class "inflection-table"
-    table = soup.find('table', class_='inflection-table')
+    table = soup.find("table", class_="inflection-table")
     if not table:
         logger.warning("No inflection table found in HTML")
         return {}
@@ -396,31 +396,31 @@ def extract_declension_from_html(html: str) -> Dict[str, str]:
     #   Row 1+: Case name, plural form (no header row, no singular column)
     # Singulare tantum (singular-only):
     #   Row 1+: Case name, singular form (no header row, no plural column)
-    rows = table.find_all('tr')
+    rows = table.find_all("tr")
 
     # Detect table structure by checking first row
     # If first row contains "singular" or "plural" in header cells, skip it
     # Otherwise, start processing from first row
     start_row = 0
     if rows:
-        first_row_cells = rows[0].find_all(['th', 'td'])
-        first_row_text = ' '.join(cell.get_text(strip=True).lower() for cell in first_row_cells)
-        if 'singular' in first_row_text or 'plural' in first_row_text:
+        first_row_cells = rows[0].find_all(["th", "td"])
+        first_row_text = " ".join(cell.get_text(strip=True).lower() for cell in first_row_cells)
+        if "singular" in first_row_text or "plural" in first_row_text:
             start_row = 1  # Skip header row
 
     # Map Lithuanian case names to our internal format
     case_name_map = {
-        'nominative': 'nominative',
-        'genitive': 'genitive',
-        'dative': 'dative',
-        'accusative': 'accusative',
-        'instrumental': 'instrumental',
-        'locative': 'locative',
-        'vocative': 'vocative',
+        "nominative": "nominative",
+        "genitive": "genitive",
+        "dative": "dative",
+        "accusative": "accusative",
+        "instrumental": "instrumental",
+        "locative": "locative",
+        "vocative": "vocative",
     }
 
     for row in rows[start_row:]:
-        cells = row.find_all(['th', 'td'])
+        cells = row.find_all(["th", "td"])
         if len(cells) < 2:
             continue
 
@@ -560,13 +560,13 @@ def test_wiktionary_fetch():
     if success:
         logger.info(f"\n✓ Successfully extracted declensions for '{test_word}':")
         logger.info(f"\nSingular forms:")
-        for case in ['nominative', 'genitive', 'dative', 'accusative', 'instrumental', 'locative', 'vocative']:
+        for case in ["nominative", "genitive", "dative", "accusative", "instrumental", "locative", "vocative"]:
             key = f"{case}_singular"
             if key in declensions:
                 logger.info(f"  {case.capitalize():15} {declensions[key]}")
 
         logger.info(f"\nPlural forms:")
-        for case in ['nominative', 'genitive', 'dative', 'accusative', 'instrumental', 'locative', 'vocative']:
+        for case in ["nominative", "genitive", "dative", "accusative", "instrumental", "locative", "vocative"]:
             key = f"{case}_plural"
             if key in declensions:
                 logger.info(f"  {case.capitalize():15} {declensions[key]}")
@@ -691,7 +691,7 @@ if __name__ == "__main__":
     # Set up logging for testing
     logging.basicConfig(
         level=logging.DEBUG,
-        format='%(asctime)s - %(levelname)s - %(message)s'
+        format="%(asctime)s - %(levelname)s - %(message)s"
     )
 
     # Run unit tests first

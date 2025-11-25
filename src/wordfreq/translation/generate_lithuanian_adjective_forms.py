@@ -24,7 +24,7 @@ import constants
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
+    format="%(asctime)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -80,9 +80,9 @@ def get_lithuanian_adjective_lemmas(db_path: str, limit: int = None) -> List[Dic
     session = get_session(db_path)
 
     query = session.query(linguistic_db.Lemma).filter(
-        linguistic_db.Lemma.pos_type == 'adjective',
+        linguistic_db.Lemma.pos_type == "adjective",
         linguistic_db.Lemma.lithuanian_translation.isnot(None),
-        linguistic_db.Lemma.lithuanian_translation != ''
+        linguistic_db.Lemma.lithuanian_translation != ""
     ).order_by(linguistic_db.Lemma.frequency_rank)
 
     if limit:
@@ -93,11 +93,11 @@ def get_lithuanian_adjective_lemmas(db_path: str, limit: int = None) -> List[Dic
     result = []
     for lemma in lemmas:
         result.append({
-            'id': lemma.id,
-            'english': lemma.lemma_text,
-            'lithuanian': lemma.lithuanian_translation,
-            'pos_subtype': lemma.pos_subtype,
-            'frequency_rank': lemma.frequency_rank
+            "id": lemma.id,
+            "english": lemma.lemma_text,
+            "lithuanian": lemma.lithuanian_translation,
+            "pos_subtype": lemma.pos_subtype,
+            "frequency_rank": lemma.frequency_rank
         })
 
     return result
@@ -131,7 +131,7 @@ def process_lemma_declensions(client: LinguisticClient, lemma_id: int, db_path: 
         # Only skip if we have at least 3 forms that are in FORM_MAPPING
         existing_forms = session.query(linguistic_db.DerivativeForm).filter(
             linguistic_db.DerivativeForm.lemma_id == lemma_id,
-            linguistic_db.DerivativeForm.language_code == 'lt'
+            linguistic_db.DerivativeForm.language_code == "lt"
         ).all()
 
         # Count how many of the existing forms are actual declension forms (in FORM_MAPPING)
@@ -170,14 +170,14 @@ def process_lemma_declensions(client: LinguisticClient, lemma_id: int, db_path: 
             is_base_form = (form_name == "nominative_singular_m")
 
             # Get or create word token for this Lithuanian form
-            word_token = linguistic_db.add_word_token(session, form_text, 'lt')
+            word_token = linguistic_db.add_word_token(session, form_text, "lt")
 
             # Create derivative form
             derivative_form = linguistic_db.DerivativeForm(
                 lemma_id=lemma_id,
                 derivative_form_text=form_text,
                 word_token_id=word_token.id,
-                language_code='lt',
+                language_code="lt",
                 grammatical_form=grammatical_form.value,
                 is_base_form=is_base_form,
                 verified=False
@@ -201,38 +201,38 @@ def main():
         description="Generate Lithuanian adjective declensions for all adjectives in the database"
     )
     parser.add_argument(
-        '--limit',
+        "--limit",
         type=int,
-        help='Limit the number of lemmas to process (for testing)'
+        help="Limit the number of lemmas to process (for testing)"
     )
     parser.add_argument(
-        '--throttle',
+        "--throttle",
         type=float,
         default=1.0,
-        help='Seconds to wait between API calls (default: 1.0)'
+        help="Seconds to wait between API calls (default: 1.0)"
     )
     parser.add_argument(
-        '--db-path',
+        "--db-path",
         type=str,
         default=constants.WORDFREQ_DB_PATH,
-        help='Path to the database'
+        help="Path to the database"
     )
     parser.add_argument(
-        '--model',
+        "--model",
         type=str,
-        default='gpt-5-mini',
-        help='LLM model to use (default: gpt-5-mini)'
+        default="gpt-5-mini",
+        help="LLM model to use (default: gpt-5-mini)"
     )
     parser.add_argument(
-        '--debug',
-        action='store_true',
-        help='Enable debug logging'
+        "--debug",
+        action="store_true",
+        help="Enable debug logging"
     )
     parser.add_argument(
-        '--yes',
-        '-y',
-        action='store_true',
-        help='Skip confirmation prompt'
+        "--yes",
+        "-y",
+        action="store_true",
+        help="Skip confirmation prompt"
     )
 
     args = parser.parse_args()
@@ -257,7 +257,7 @@ def main():
         print(f"Throttle: {args.throttle}s between calls")
         print(f"{'='*60}")
         response = input("\nContinue? [y/N]: ")
-        if response.lower() not in ['y', 'yes']:
+        if response.lower() not in ["y", "yes"]:
             print("Aborted.")
             return
 
@@ -272,7 +272,7 @@ def main():
     for i, lemma_info in enumerate(lemmas, 1):
         logger.info(f"\n[{i}/{len(lemmas)}] Processing: {lemma_info['english']} -> {lemma_info['lithuanian']}")
 
-        success = process_lemma_declensions(client, lemma_info['id'], args.db_path)
+        success = process_lemma_declensions(client, lemma_info["id"], args.db_path)
 
         if success:
             successful += 1
@@ -293,5 +293,5 @@ def main():
     logger.info(f"{'='*60}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

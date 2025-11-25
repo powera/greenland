@@ -7,4 +7,4 @@ in the database.
 
 from agents.vilkas.agent import VilkasAgent
 
-__all__ = ['VilkasAgent']
+__all__ = ["VilkasAgent"]

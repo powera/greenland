@@ -11,8 +11,8 @@ import os
 from pathlib import Path
 
 # Add the src directory to the path for imports
-GREENLAND_SRC_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..'))
-GREENLAND_REPO_ROOT = os.path.abspath(os.path.join(GREENLAND_SRC_PATH, '..'))
+GREENLAND_SRC_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.."))
+GREENLAND_REPO_ROOT = os.path.abspath(os.path.join(GREENLAND_SRC_PATH, ".."))
 sys.path.append(GREENLAND_SRC_PATH)
 
 import constants
@@ -23,7 +23,7 @@ from wordfreq.storage.database import (
 from wordfreq.storage.models.schema import DerivativeForm, Lemma
 
 # Add verbs.py directory to path
-sys.path.insert(0, os.path.join(GREENLAND_REPO_ROOT, 'data', 'trakaido_wordlists', 'lang_lt'))
+sys.path.insert(0, os.path.join(GREENLAND_REPO_ROOT, "data", "trakaido_wordlists", "lang_lt"))
 from verbs import verbs_new
 
 
@@ -59,9 +59,9 @@ FORM_MAPPING = {
 }
 
 TENSE_MAPPING = {
-    'present_tense': 'pres',
-    'past_tense': 'past',
-    'future': 'fut'
+    "present_tense": "pres",
+    "past_tense": "past",
+    "future": "fut"
 }
 
 
@@ -72,7 +72,7 @@ def main():
     session = create_database_session(constants.WORDFREQ_DB_PATH)
 
     # Get all verbs from database
-    verbs_in_db = session.query(Lemma).filter(Lemma.pos_type == 'verb').all()
+    verbs_in_db = session.query(Lemma).filter(Lemma.pos_type == "verb").all()
 
     print(f"Found {len(verbs_in_db)} verbs in database")
 
@@ -94,7 +94,7 @@ def main():
         # Check if this verb already has English conjugations
         existing_english_forms = session.query(DerivativeForm).filter(
             DerivativeForm.lemma_id == lemma.id,
-            DerivativeForm.language_code == 'en',
+            DerivativeForm.language_code == "en",
             DerivativeForm.is_base_form == False
         ).count()
 
@@ -108,7 +108,7 @@ def main():
         verb_forms_added = 0
 
         for tense_key, tense_data in verb_data.items():
-            if tense_key == 'english':
+            if tense_key == "english":
                 continue
 
             tense_suffix = TENSE_MAPPING.get(tense_key)
@@ -122,17 +122,17 @@ def main():
                 if not grammatical_form:
                     continue
 
-                english_text = person_data.get('english')
+                english_text = person_data.get("english")
                 if not english_text:
                     continue
 
                 # Create English conjugation form
-                english_token = add_word_token(session, english_text, 'en')
+                english_token = add_word_token(session, english_text, "en")
                 english_form = DerivativeForm(
                     lemma_id=lemma.id,
                     derivative_form_text=english_text,
                     word_token_id=english_token.id,
-                    language_code='en',
+                    language_code="en",
                     grammatical_form=grammatical_form,
                     is_base_form=False,
                     verified=True
@@ -158,5 +158,5 @@ def main():
     session.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

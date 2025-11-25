@@ -18,14 +18,14 @@ class Base(DeclarativeBase):
 
 class Model(Base):
     """Model definition."""
-    __tablename__ = 'model'
+    __tablename__ = "model"
     codename: Mapped[str] = mapped_column(String, primary_key=True)
     displayname: Mapped[str] = mapped_column(String, nullable=False)
     launch_date: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     filesize_mb: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     license_name: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     model_path: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-    model_type: Mapped[str] = mapped_column(String, nullable=False, default='local')
+    model_type: Mapped[str] = mapped_column(String, nullable=False, default="local")
 
     # benchmark runs and qual runs are populated in those files.
 
@@ -36,7 +36,7 @@ def create_dev_session():
     Session = sessionmaker(bind=engine)
     return Session()
 
-def create_database_and_session(db_path='benchmarks.sqlite'):
+def create_database_and_session(db_path="benchmarks.sqlite"):
     """Create a SQLite database engine and session."""
     engine = create_engine(f'sqlite:///{db_path}', echo=False)
     Base.metadata.create_all(engine)
@@ -51,7 +51,7 @@ def insert_model(
     filesize_mb: int = None,
     license_name: str = None,
     model_path: str = None,
-    model_type: str = 'local'
+    model_type: str = "local"
 ):
     """Insert a new model into the database."""
     try:
@@ -84,13 +84,13 @@ def list_all_models(session):
     models = session.query(Model).order_by(Model.displayname).all()
     return [
         {
-            'codename': model.codename,
-            'displayname': model.displayname,
-            'launch_date': model.launch_date,
-            'filesize_mb': model.filesize_mb,
-            'license_name': model.license_name,
-            'model_path': model.model_path,
-            'model_type': model.model_type
+            "codename": model.codename,
+            "displayname": model.displayname,
+            "launch_date": model.launch_date,
+            "filesize_mb": model.filesize_mb,
+            "license_name": model.license_name,
+            "model_path": model.model_path,
+            "model_type": model.model_type
         }
         for model in models
     ]
@@ -107,13 +107,13 @@ def get_model_by_codename(session, codename: str):
         return None
 
     return {
-        'codename': model.codename,
-        'displayname': model.displayname,
-        'launch_date': model.launch_date,
-        'filesize_mb': model.filesize_mb,
-        'license_name': model.license_name,
-        'model_path': model.model_path,
-        'model_type': model.model_type
+        "codename": model.codename,
+        "displayname": model.displayname,
+        "launch_date": model.launch_date,
+        "filesize_mb": model.filesize_mb,
+        "license_name": model.license_name,
+        "model_path": model.model_path,
+        "model_type": model.model_type
     }
 
 def get_default_model_codename(session):

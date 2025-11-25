@@ -12,7 +12,7 @@ from lib.benchmarks.data_models import (
 )
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 class LemmaRunner(BenchmarkRunner):
@@ -107,7 +107,7 @@ class LemmaRunner(BenchmarkRunner):
                 inflected_word = parts[1]
         
         # Format the debug info
-        if hasattr(response, 'structured_data') and response.structured_data:
+        if hasattr(response, "structured_data") and response.structured_data:
             return {
                 "inflected_word": inflected_word,
                 "model_response": response.structured_data.get("lemma", ""),

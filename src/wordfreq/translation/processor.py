@@ -17,7 +17,7 @@ from wordfreq.translation.client import LinguisticClient
 from wordfreq.storage.connection_pool import get_session, close_thread_sessions
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 # Constants

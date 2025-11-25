@@ -7,4 +7,4 @@ multi-lingual translations.
 
 from agents.voras.agent import VorasAgent
 
-__all__ = ['VorasAgent']
+__all__ = ["VorasAgent"]

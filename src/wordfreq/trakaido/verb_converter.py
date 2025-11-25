@@ -13,12 +13,12 @@ from pathlib import Path
 from typing import Dict, List, Tuple, Optional
 
 # Add the src directory to the path for imports
-GREENLAND_SRC_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
-GREENLAND_REPO_ROOT = os.path.abspath(os.path.join(GREENLAND_SRC_PATH, '..'))
+GREENLAND_SRC_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
+GREENLAND_REPO_ROOT = os.path.abspath(os.path.join(GREENLAND_SRC_PATH, ".."))
 sys.path.append(GREENLAND_SRC_PATH)
 
 # Add the data directory to the path for imports
-sys.path.append(os.path.join(GREENLAND_REPO_ROOT, 'data', 'trakaido_wordlists', 'lang_lt'))
+sys.path.append(os.path.join(GREENLAND_REPO_ROOT, "data", "trakaido_wordlists", "lang_lt"))
 
 try:
     from verbs import verbs_new
@@ -77,9 +77,9 @@ def get_level_for_group_and_tense(group_name: str, tense: str) -> Optional[int]:
     
     # Map tense to corpus type
     corpus_mapping = {
-        'present_tense': 'verbs_present',
-        'past_tense': 'verbs_past', 
-        'future': 'verbs_future'
+        "present_tense": "verbs_present",
+        "past_tense": "verbs_past", 
+        "future": "verbs_future"
     }
     
     corpus = corpus_mapping.get(tense)
@@ -88,10 +88,10 @@ def get_level_for_group_and_tense(group_name: str, tense: str) -> Optional[int]:
     
     # Search through levels to find matching group and corpus
     for level_name, level_config in levels.items():
-        level_num = int(level_name.split('_')[1])
+        level_num = int(level_name.split("_")[1])
         for config in level_config:
-            if (config.get('corpus') == corpus and 
-                config.get('group') == group_name):
+            if (config.get("corpus") == corpus and 
+                config.get("group") == group_name):
                 return level_num
     
     return None
@@ -109,9 +109,9 @@ def convert_person_format(person_key: str) -> str:
 def convert_tense_format(tense_key: str) -> str:
     """Convert tense format from verbs.py to wireword format."""
     mapping = {
-        'present_tense': 'pres',
-        'past_tense': 'past',
-        'future': 'fut'
+        "present_tense": "pres",
+        "past_tense": "past",
+        "future": "fut"
     }
     return mapping.get(tense_key, tense_key)
 
@@ -128,7 +128,7 @@ def convert_verbs_to_wireword_format() -> List[Dict]:
     sorted_verbs = sorted(verbs_new.items())
     
     for index, (verb_infinitive, verb_data) in enumerate(sorted_verbs, 1):
-        base_english = verb_data['english']
+        base_english = verb_data["english"]
         
         # Get the group for this verb
         group = VERB_GROUPS.get(verb_infinitive)
@@ -138,10 +138,10 @@ def convert_verbs_to_wireword_format() -> List[Dict]:
         
         # Determine the level for this verb based on its group
         # We'll use the present tense level as the base level for the verb
-        base_level = get_level_for_group_and_tense(group, 'present_tense')
+        base_level = get_level_for_group_and_tense(group, "present_tense")
         if base_level is None:
             # If no present tense level, try other tenses
-            for tense in ['past_tense', 'future']:
+            for tense in ["past_tense", "future"]:
                 base_level = get_level_for_group_and_tense(group, tense)
                 if base_level is not None:
                     break
@@ -154,7 +154,7 @@ def convert_verbs_to_wireword_format() -> List[Dict]:
         converted_forms = {}
         
         for tense_key, tense_data in verb_data.items():
-            if tense_key == 'english':
+            if tense_key == "english":
                 continue  # Skip the english translation field
                 
             # Get the appropriate level for this specific tense
@@ -176,8 +176,8 @@ def convert_verbs_to_wireword_format() -> List[Dict]:
                 # Add the form with level information
                 converted_forms[form_key] = {
                     "level": form_level,
-                    "target": person_data['lithuanian'],
-                    "english": person_data['english']
+                    "target": person_data["lithuanian"],
+                    "english": person_data["english"]
                 }
         
         # Generate GUID
@@ -237,7 +237,7 @@ def export_wireword_verbs(output_path: str = None) -> Tuple[bool, Dict]:
     """
     try:
         if output_path is None:
-            output_path = os.path.join(GREENLAND_REPO_ROOT, 'wireword_verbs_export.json')
+            output_path = os.path.join(GREENLAND_REPO_ROOT, "wireword_verbs_export.json")
         
         # Convert verbs
         converted_entries = convert_verbs_to_wireword_format()
@@ -246,13 +246,13 @@ def export_wireword_verbs(output_path: str = None) -> Tuple[bool, Dict]:
             return False, {"error": "No verbs were converted"}
         
         # Sort by level, then by group, then by GUID for consistent ordering
-        converted_entries.sort(key=lambda x: (x['level'], x['group'], x['guid']))
+        converted_entries.sort(key=lambda x: (x["level"], x["group"], x["guid"]))
         
         # Save to JSON file
         output_path = Path(output_path)
         output_path.parent.mkdir(parents=True, exist_ok=True)
         
-        with open(output_path, 'w', encoding='utf-8') as f:
+        with open(output_path, "w", encoding="utf-8") as f:
             json.dump(converted_entries, f, ensure_ascii=False, indent=2)
         
         # Calculate statistics
@@ -262,22 +262,22 @@ def export_wireword_verbs(output_path: str = None) -> Tuple[bool, Dict]:
         tense_form_counts = {}
         
         for entry in converted_entries:
-            level = entry['level']
+            level = entry["level"]
             level_counts[level] = level_counts.get(level, 0) + 1
             
-            group = entry['group']
+            group = entry["group"]
             group_counts[group] = group_counts.get(group, 0) + 1
             
             # Count grammatical forms
-            for form_key in entry['grammatical_forms']:
+            for form_key in entry["grammatical_forms"]:
                 total_forms += 1
-                if '_' in form_key:
-                    tense = form_key.split('_')[-1]  # Get the last part (tense)
+                if "_" in form_key:
+                    tense = form_key.split("_")[-1]  # Get the last part (tense)
                     tense_form_counts[tense] = tense_form_counts.get(tense, 0) + 1
         
         # Check for skipped verbs
         all_verbs = set(verbs_new.keys())
-        converted_verbs = {entry['base_lithuanian'] for entry in converted_entries}
+        converted_verbs = {entry["base_lithuanian"] for entry in converted_entries}
         skipped_verbs = all_verbs - converted_verbs
         
         results = {
@@ -301,8 +301,8 @@ def main():
     import argparse
     
     parser = argparse.ArgumentParser(description="Convert verbs to wireword format")
-    parser.add_argument('--output', '-o', help='Output JSON file path')
-    parser.add_argument('--verbose', '-v', action='store_true', help='Verbose output')
+    parser.add_argument("--output", "-o", help="Output JSON file path")
+    parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
     
     args = parser.parse_args()
     
@@ -322,7 +322,7 @@ def main():
             print(f"   Tense form distribution: {results['tense_form_distribution']}")
             print(f"   Group distribution: {results['group_distribution']}")
             
-            if results['skipped_verbs']:
+            if results["skipped_verbs"]:
                 print(f"   Skipped verbs ({len(results['skipped_verbs'])}): {', '.join(results['skipped_verbs'])}")
     else:
         print(f"❌ Conversion failed: {results.get('error', 'Unknown error')}")

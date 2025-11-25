@@ -54,7 +54,7 @@ class LemmaGenerator(BenchmarkGenerator):
                 self.questions_file_path
             )
             
-            with open(words_file_path, 'r') as f:
+            with open(words_file_path, "r") as f:
                 word_pairs = json.load(f)
                 
             for word_pair in word_pairs:

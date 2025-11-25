@@ -42,8 +42,8 @@ import argparse
 from typing import Dict, List, Any, Optional
 
 # Configuration - Update these paths as needed
-GREENLAND_SRC_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
-DEFAULT_JSON_PATH = os.path.join(os.path.dirname(__file__), 'nouns.json')
+GREENLAND_SRC_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
+DEFAULT_JSON_PATH = os.path.join(os.path.dirname(__file__), "nouns.json")
 
 # Add paths for imports
 sys.path.append(GREENLAND_SRC_PATH)
@@ -103,7 +103,7 @@ def clean_english_word(english_word: str) -> tuple[str, bool]:
     has_parentheses = bool(re.search(r'\s*\([^)]+\)', english_word))
 
     # Just normalize whitespace, DO NOT strip parentheticals
-    normalized = ' '.join(english_word.split())
+    normalized = " ".join(english_word.split())
 
     return normalized, has_parentheses
 
@@ -127,7 +127,7 @@ def load_trakaido_json(json_path: str) -> List[Dict[str, Any]]:
         raise FileNotFoundError(f"JSON file not found: {json_path}")
     
     try:
-        with open(json_path, 'r', encoding='utf-8') as f:
+        with open(json_path, "r", encoding="utf-8") as f:
             data = json.load(f)
     except json.JSONDecodeError as e:
         raise json.JSONDecodeError(f"Invalid JSON in {json_path}: {e}")
@@ -484,16 +484,16 @@ Examples:
     )
     
     parser.add_argument(
-        'json_path',
-        nargs='?',
+        "json_path",
+        nargs="?",
         default=DEFAULT_JSON_PATH,
         help=f'Path to JSON file containing trakaido data (default: {DEFAULT_JSON_PATH})'
     )
     
     parser.add_argument(
-        '--no-update-difficulty',
-        action='store_true',
-        help='Do not update difficulty levels on existing lemmas (default: update difficulty levels)'
+        "--no-update-difficulty",
+        action="store_true",
+        help="Do not update difficulty levels on existing lemmas (default: update difficulty levels)"
     )
     
     args = parser.parse_args()

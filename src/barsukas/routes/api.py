@@ -8,19 +8,19 @@ from sqlalchemy import or_, func
 from wordfreq.storage.models.schema import Lemma
 from config import Config
 
-bp = Blueprint('api', __name__, url_prefix='/api')
+bp = Blueprint("api", __name__, url_prefix="/api")
 
 
-@bp.route('/check_lemma_exists')
+@bp.route("/check_lemma_exists")
 def check_lemma_exists():
     """Check if a lemma exists or find similar lemmas."""
-    search = request.args.get('search', '').strip()
-    pos_type = request.args.get('pos_type', '').strip()
+    search = request.args.get("search", "").strip()
+    pos_type = request.args.get("pos_type", "").strip()
 
     if not search:
         return jsonify({
-            'exact_match': None,
-            'similar_matches': []
+            "exact_match": None,
+            "similar_matches": []
         })
 
     # Check for exact match
@@ -44,35 +44,35 @@ def check_lemma_exists():
     similar_matches = similar_query.limit(5).all()
 
     return jsonify({
-        'exact_match': {
-            'id': exact_match.id,
-            'lemma_text': exact_match.lemma_text,
-            'pos_type': exact_match.pos_type,
-            'definition_text': exact_match.definition_text
+        "exact_match": {
+            "id": exact_match.id,
+            "lemma_text": exact_match.lemma_text,
+            "pos_type": exact_match.pos_type,
+            "definition_text": exact_match.definition_text
         } if exact_match else None,
-        'similar_matches': [
+        "similar_matches": [
             {
-                'id': lemma.id,
-                'lemma_text': lemma.lemma_text,
-                'pos_type': lemma.pos_type,
-                'definition_text': lemma.definition_text
+                "id": lemma.id,
+                "lemma_text": lemma.lemma_text,
+                "pos_type": lemma.pos_type,
+                "definition_text": lemma.definition_text
             }
             for lemma in similar_matches
         ]
     })
 
 
-@bp.route('/auto_populate_lemma')
+@bp.route("/auto_populate_lemma")
 def auto_populate_lemma():
     """Auto-populate lemma fields using LLM based on word and optional translation."""
-    word = request.args.get('word', '').strip()
-    translation = request.args.get('translation', '').strip()
-    lang_code = request.args.get('lang_code', '').strip()
+    word = request.args.get("word", "").strip()
+    translation = request.args.get("translation", "").strip()
+    lang_code = request.args.get("lang_code", "").strip()
 
     if not word:
         return jsonify({
-            'success': False,
-            'error': 'Word is required'
+            "success": False,
+            "error": "Word is required"
         })
 
     try:
@@ -80,7 +80,7 @@ def auto_populate_lemma():
         from wordfreq.translation.client import LinguisticClient
 
         client = LinguisticClient(
-            model='gpt-5-mini',
+            model="gpt-5-mini",
             db_path=Config.DB_PATH,
             debug=Config.DEBUG
         )
@@ -131,24 +131,24 @@ The definition should be suitable for language learners."""
 
         response = client.client.generate_chat(
             prompt=prompt,
-            model='gpt-5-mini',
+            model="gpt-5-mini",
             json_schema=schema,
             timeout=30
         )
 
         if not response.structured_data:
             return jsonify({
-                'success': False,
-                'error': 'Failed to get structured response from LLM'
+                "success": False,
+                "error": "Failed to get structured response from LLM"
             })
 
         result = response.structured_data
 
         # Get the maximum difficulty level for this pos_subtype
         max_level = None
-        if result.get('pos_subtype'):
+        if result.get("pos_subtype"):
             max_level_query = g.db.query(func.max(Lemma.difficulty_level)).filter(
-                Lemma.pos_subtype == result['pos_subtype'],
+                Lemma.pos_subtype == result["pos_subtype"],
                 Lemma.difficulty_level.isnot(None),
                 Lemma.difficulty_level != -1  # Exclude "excluded" words
             ).scalar()
@@ -156,15 +156,15 @@ The definition should be suitable for language learners."""
                 max_level = int(max_level_query)
 
         return jsonify({
-            'success': True,
-            'definition': result.get('definition', ''),
-            'pos_type': result.get('pos_type', ''),
-            'pos_subtype': result.get('pos_subtype', ''),
-            'suggested_difficulty_level': max_level
+            "success": True,
+            "definition": result.get("definition", ""),
+            "pos_type": result.get("pos_type", ""),
+            "pos_subtype": result.get("pos_subtype", ""),
+            "suggested_difficulty_level": max_level
         })
 
     except Exception as e:
         return jsonify({
-            'success': False,
-            'error': str(e)
+            "success": False,
+            "error": str(e)
         })

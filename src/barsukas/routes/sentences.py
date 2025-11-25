@@ -9,16 +9,16 @@ from wordfreq.storage.models.schema import Sentence, SentenceTranslation, Senten
 from wordfreq.storage.translation_helpers import get_supported_languages
 from config import Config
 
-bp = Blueprint('sentences', __name__, url_prefix='/sentences')
+bp = Blueprint("sentences", __name__, url_prefix="/sentences")
 
 
-@bp.route('/')
+@bp.route("/")
 def list_sentences():
     """List all sentences with pagination and filtering."""
-    page = request.args.get('page', 1, type=int)
-    search = request.args.get('search', '').strip()
-    pattern_type = request.args.get('pattern_type', '').strip()
-    minimum_level = request.args.get('minimum_level', '', type=str).strip()
+    page = request.args.get("page", 1, type=int)
+    search = request.args.get("search", "").strip()
+    pattern_type = request.args.get("pattern_type", "").strip()
+    minimum_level = request.args.get("minimum_level", "", type=str).strip()
 
     # Build query
     query = g.db.query(Sentence)
@@ -35,7 +35,7 @@ def list_sentences():
         query = query.filter(Sentence.pattern_type == pattern_type)
 
     if minimum_level:
-        if minimum_level == 'null':
+        if minimum_level == "null":
             query = query.filter(Sentence.minimum_level.is_(None))
         else:
             query = query.filter(Sentence.minimum_level == int(minimum_level))
@@ -61,7 +61,7 @@ def list_sentences():
         # Get English translation for preview
         en_translation = g.db.query(SentenceTranslation).filter(
             SentenceTranslation.sentence_id == sentence.id,
-            SentenceTranslation.language_code == 'en'
+            SentenceTranslation.language_code == "en"
         ).first()
         if en_translation:
             sentence_previews[sentence.id] = en_translation.translation_text
@@ -70,12 +70,12 @@ def list_sentences():
             any_translation = g.db.query(SentenceTranslation).filter(
                 SentenceTranslation.sentence_id == sentence.id
             ).first()
-            sentence_previews[sentence.id] = any_translation.translation_text if any_translation else '(No translation)'
+            sentence_previews[sentence.id] = any_translation.translation_text if any_translation else "(No translation)"
 
     # Calculate pagination
     total_pages = (total + Config.ITEMS_PER_PAGE - 1) // Config.ITEMS_PER_PAGE
 
-    return render_template('sentences/list.html',
+    return render_template("sentences/list.html",
                          sentences=sentences,
                          sentence_previews=sentence_previews,
                          page=page,
@@ -87,13 +87,13 @@ def list_sentences():
                          pattern_types=pattern_types)
 
 
-@bp.route('/<int:sentence_id>')
+@bp.route("/<int:sentence_id>")
 def view_sentence(sentence_id):
     """View a single sentence with all translations."""
     sentence = g.db.query(Sentence).get(sentence_id)
     if not sentence:
-        flash('Sentence not found', 'error')
-        return redirect(url_for('sentences.list_sentences'))
+        flash("Sentence not found", "error")
+        return redirect(url_for("sentences.list_sentences"))
 
     # Get all translations
     translations_query = g.db.query(SentenceTranslation).filter(
@@ -124,44 +124,44 @@ def view_sentence(sentence_id):
             lemma = g.db.query(Lemma).get(sw.lemma_id)
 
         words_by_language[sw.language_code].append({
-            'position': sw.position,
-            'role': sw.word_role,
-            'english_text': sw.english_text,
-            'target_text': sw.target_language_text,
-            'lemma': lemma,
-            'lemma_id': sw.lemma_id
+            "position": sw.position,
+            "role": sw.word_role,
+            "english_text": sw.english_text,
+            "target_text": sw.target_language_text,
+            "lemma": lemma,
+            "lemma_id": sw.lemma_id
         })
 
-    return render_template('sentences/view.html',
+    return render_template("sentences/view.html",
                          sentence=sentence,
                          translations=translations,
                          language_names=language_names,
                          words_by_language=words_by_language)
 
 
-@bp.route('/<int:sentence_id>/update_level', methods=['POST'])
+@bp.route("/<int:sentence_id>/update_level", methods=["POST"])
 def update_level(sentence_id):
     """Update the minimum level for a sentence."""
     sentence = g.db.query(Sentence).get(sentence_id)
     if not sentence:
-        flash('Sentence not found', 'error')
-        return redirect(url_for('sentences.list_sentences'))
+        flash("Sentence not found", "error")
+        return redirect(url_for("sentences.list_sentences"))
 
-    new_level = request.form.get('minimum_level', '').strip()
+    new_level = request.form.get("minimum_level", "").strip()
 
     try:
-        if new_level == '' or new_level.lower() == 'null':
+        if new_level == "" or new_level.lower() == "null":
             sentence.minimum_level = None
-            flash(f'Sentence level cleared', 'success')
+            flash(f'Sentence level cleared', "success")
         else:
             sentence.minimum_level = int(new_level)
-            flash(f'Sentence level updated to {sentence.minimum_level}', 'success')
+            flash(f'Sentence level updated to {sentence.minimum_level}', "success")
 
         g.db.commit()
     except ValueError:
-        flash('Invalid level value. Must be a number or empty.', 'error')
+        flash("Invalid level value. Must be a number or empty.", "error")
     except Exception as e:
-        flash(f'Error updating sentence level: {e}', 'error')
+        flash(f'Error updating sentence level: {e}', "error")
         g.db.rollback()
 
-    return redirect(url_for('sentences.view_sentence', sentence_id=sentence_id))
+    return redirect(url_for("sentences.view_sentence", sentence_id=sentence_id))

@@ -10,13 +10,13 @@ from wordfreq.translation.generate_forms_base import (
 )
 
 CONFIG = FormGenerationConfig(
-    language_code='pt',
-    language_name='Portuguese',
-    pos_type='verb',
+    language_code="pt",
+    language_name="Portuguese",
+    pos_type="verb",
     form_mapping=VERB_FORM_MAPPING,
-    client_method_name='query_portuguese_verb_conjugations',
+    client_method_name="query_portuguese_verb_conjugations",
     min_forms_threshold=20,
-    base_form_identifier='1s_pres',
+    base_form_identifier="1s_pres",
     use_legacy_translation=False
 )
 
@@ -30,5 +30,5 @@ def main():
     run_form_generation(CONFIG, get_portuguese_verb_lemmas)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

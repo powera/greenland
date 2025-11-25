@@ -20,19 +20,19 @@ to provide context for what the lemma represents.
 import logging
 from wordfreq.storage.database import create_database_session, Lemma, LemmaTranslation
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 # Mapping of old column names to language codes
 # Note: chinese_translation and lithuanian_translation are kept in lemmas table for context
 TRANSLATION_COLUMNS = {
-    'french_translation': 'fr',
-    'spanish_translation': 'es',
-    'german_translation': 'de',
-    'portuguese_translation': 'pt',
-    'korean_translation': 'ko',
-    'swahili_translation': 'sw',
-    'vietnamese_translation': 'vi',
+    "french_translation": "fr",
+    "spanish_translation": "es",
+    "german_translation": "de",
+    "portuguese_translation": "pt",
+    "korean_translation": "ko",
+    "swahili_translation": "sw",
+    "vietnamese_translation": "vi",
 }
 
 def migrate_translations(session, dry_run=False):
@@ -100,8 +100,8 @@ def migrate_translations(session, dry_run=False):
         logger.info(f"Dry run complete! Would migrate {total_migrated} translations, {total_skipped} already exist")
 
     return {
-        'migrated': total_migrated,
-        'skipped': total_skipped
+        "migrated": total_migrated,
+        "skipped": total_skipped
     }
 
 def main():
@@ -109,17 +109,17 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(
-        description='Migrate lemma translations from columns to lemma_translations table'
+        description="Migrate lemma translations from columns to lemma_translations table"
     )
     parser.add_argument(
-        '--dry-run',
-        action='store_true',
-        help='Show what would be migrated without making changes'
+        "--dry-run",
+        action="store_true",
+        help="Show what would be migrated without making changes"
     )
     parser.add_argument(
-        '--verbose',
-        action='store_true',
-        help='Enable verbose debug logging'
+        "--verbose",
+        action="store_true",
+        help="Enable verbose debug logging"
     )
 
     args = parser.parse_args()
@@ -139,5 +139,5 @@ def main():
     finally:
         session.close()
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

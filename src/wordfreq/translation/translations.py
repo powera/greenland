@@ -58,7 +58,7 @@ def query_translations(
 
     # Use default languages if not specified
     if languages is None:
-        languages = ['chinese', 'korean', 'french', 'spanish', 'german', 'portuguese', 'swahili', 'vietnamese']
+        languages = ["chinese", "korean", "french", "spanish", "german", "portuguese", "swahili", "vietnamese"]
 
     # Build schema properties dynamically based on requested languages
     schema_properties = {}
@@ -68,11 +68,11 @@ def query_translations(
     for lang in languages:
         if lang in DEFAULT_TRANSLATION_LANGUAGES:
             lang_config = DEFAULT_TRANSLATION_LANGUAGES[lang]
-            schema_properties[lang_config['field']] = SchemaProperty("string", lang_config['description'])
+            schema_properties[lang_config["field"]] = SchemaProperty("string", lang_config["description"])
             # Add to languages list (e.g., "- French")
             languages_list_lines.append(f"- {lang.capitalize()}")
             # Add language instructions
-            language_instructions_lines.append(lang_config['instructions'])
+            language_instructions_lines.append(lang_config["instructions"])
         else:
             logger.warning(f"Unknown language '{lang}' requested, skipping")
 
@@ -95,15 +95,15 @@ def query_translations(
 
     # Map language code to full language name
     lang_code_to_name_map = {
-        'lt': 'Lithuanian',
-        'zh': 'Chinese',
-        'ko': 'Korean',
-        'fr': 'French',
-        'es': 'Spanish',
-        'de': 'German',
-        'pt': 'Portuguese',
-        'sw': 'Swahili',
-        'vi': 'Vietnamese'
+        "lt": "Lithuanian",
+        "zh": "Chinese",
+        "ko": "Korean",
+        "fr": "French",
+        "es": "Spanish",
+        "de": "German",
+        "pt": "Portuguese",
+        "sw": "Swahili",
+        "vi": "Vietnamese"
     }
     reference_language_name = lang_code_to_name_map.get(ref_lang_code, ref_lang_code.capitalize())
 
@@ -136,7 +136,7 @@ def query_translations(
             linguistic_db.log_query(
                 session,
                 word=english_word,
-                query_type='translation_generation',
+                query_type="translation_generation",
                 prompt=prompt,
                 response=json.dumps(response.structured_data),
                 model=model

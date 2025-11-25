@@ -13,7 +13,7 @@ import requests
 import constants
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 API_BASE = "https://api.openai.com/v1"
@@ -94,10 +94,10 @@ class OpenAIBatchClient:
         # Upload file
         url = f"{API_BASE}/files"
         files = {
-            'file': ('batch_input.jsonl', jsonl_content.encode('utf-8'), 'application/jsonl'),
+            "file": ("batch_input.jsonl", jsonl_content.encode("utf-8"), "application/jsonl"),
         }
         data = {
-            'purpose': 'batch'
+            "purpose": "batch"
         }
 
         response = requests.post(
@@ -114,7 +114,7 @@ class OpenAIBatchClient:
             raise Exception(error_msg)
 
         file_info = response.json()
-        file_id = file_info['id']
+        file_id = file_info["id"]
 
         if self.debug:
             logger.debug(f"Uploaded batch file: {file_id}")
@@ -230,7 +230,7 @@ class OpenAIBatchClient:
             raise Exception(error_msg)
 
         batches_data = response.json()
-        return batches_data.get('data', [])
+        return batches_data.get("data", [])
 
     def cancel_batch(self, batch_id: str) -> Dict[str, Any]:
         """Cancel a batch job that is in progress.
@@ -285,7 +285,7 @@ class OpenAIBatchClient:
 
         # Parse JSONL response
         results = []
-        for line in response.text.strip().split('\n'):
+        for line in response.text.strip().split("\n"):
             if line.strip():
                 results.append(json.loads(line))
 
@@ -320,7 +320,7 @@ class OpenAIBatchClient:
 
         while True:
             batch_info = self.get_batch_status(batch_id)
-            status = batch_info['status']
+            status = batch_info["status"]
 
             if status == BatchStatus.COMPLETED.value:
                 logger.info(f"Batch {batch_id} completed successfully")
@@ -335,10 +335,10 @@ class OpenAIBatchClient:
                 raise TimeoutError(f"Batch {batch_id} did not complete within {max_wait_time} seconds")
 
             # Log progress
-            counts = batch_info.get('request_counts', {})
-            total = counts.get('total', 0)
-            completed = counts.get('completed', 0)
-            failed = counts.get('failed', 0)
+            counts = batch_info.get("request_counts", {})
+            total = counts.get("total", 0)
+            completed = counts.get("completed", 0)
+            failed = counts.get("failed", 0)
             logger.info(f"Batch {batch_id} - Status: {status}, Progress: {completed}/{total} completed, {failed} failed")
 
             # Wait before next poll
@@ -370,14 +370,14 @@ class OpenAIBatchClient:
 
         # Create batch
         batch_info = self.create_batch(file_id, endpoint, metadata=metadata)
-        batch_id = batch_info['id']
+        batch_id = batch_info["id"]
         logger.info(f"Created batch: {batch_id}")
 
         # Wait for completion
         completed_batch = self.wait_for_batch_completion(batch_id, poll_interval, max_wait_time)
 
         # Download results
-        output_file_id = completed_batch['output_file_id']
+        output_file_id = completed_batch["output_file_id"]
         results = self.download_batch_results(output_file_id)
         logger.info(f"Downloaded {len(results)} results from batch {batch_id}")
 

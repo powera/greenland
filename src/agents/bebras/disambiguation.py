@@ -161,8 +161,8 @@ def disambiguate_lemma(
         )
 
         if response.structured_data:
-            candidate_num = response.structured_data.get('candidate_number', 1)
-            reasoning = response.structured_data.get('reasoning', '')
+            candidate_num = response.structured_data.get("candidate_number", 1)
+            reasoning = response.structured_data.get("reasoning", "")
 
             # Validate candidate number
             if 1 <= candidate_num <= len(candidates):
@@ -195,18 +195,18 @@ def _normalize_pos(pos: str) -> str:
 
     # Map common variations to canonical forms
     pos_map = {
-        'n': 'noun',
-        'noun': 'noun',
-        'nouns': 'noun',
-        'v': 'verb',
-        'verb': 'verb',
-        'verbs': 'verb',
-        'adj': 'adjective',
-        'adjective': 'adjective',
-        'adjectives': 'adjective',
-        'adv': 'adverb',
-        'adverb': 'adverb',
-        'adverbs': 'adverb'
+        "n": "noun",
+        "noun": "noun",
+        "nouns": "noun",
+        "v": "verb",
+        "verb": "verb",
+        "verbs": "verb",
+        "adj": "adjective",
+        "adjective": "adjective",
+        "adjectives": "adjective",
+        "adv": "adverb",
+        "adverb": "adverb",
+        "adverbs": "adverb"
     }
 
     return pos_map.get(pos_lower, pos_lower)

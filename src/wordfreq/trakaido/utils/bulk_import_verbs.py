@@ -17,8 +17,8 @@ from pathlib import Path
 from typing import Dict, List, Tuple
 
 # Add the src directory to the path for imports
-GREENLAND_SRC_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..'))
-GREENLAND_REPO_ROOT = os.path.abspath(os.path.join(GREENLAND_SRC_PATH, '..'))
+GREENLAND_SRC_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.."))
+GREENLAND_REPO_ROOT = os.path.abspath(os.path.join(GREENLAND_SRC_PATH, ".."))
 sys.path.append(GREENLAND_SRC_PATH)
 
 import constants
@@ -32,19 +32,19 @@ from wordfreq.storage.models.enums import GrammaticalForm
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
+    format="%(asctime)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
 
 # Language-specific settings
 LANGUAGE_CONFIGS = {
-    'lt': {
-        'name': 'Lithuanian',
-        'verbs_path': os.path.join(GREENLAND_REPO_ROOT, 'data', 'trakaido_wordlists', 'lang_lt'),
-        'translation_field': 'lithuanian_translation',
-        'has_conjugations': True,
-        'form_mapping': {
+    "lt": {
+        "name": "Lithuanian",
+        "verbs_path": os.path.join(GREENLAND_REPO_ROOT, "data", "trakaido_wordlists", "lang_lt"),
+        "translation_field": "lithuanian_translation",
+        "has_conjugations": True,
+        "form_mapping": {
             # Present tense
             "1s_pres": "verb/lt_1s_pres",
             "2s_pres": "verb/lt_2s_pres",
@@ -73,10 +73,10 @@ LANGUAGE_CONFIGS = {
             "3p-m_fut": "verb/lt_3p_m_fut",
             "3p-f_fut": "verb/lt_3p_f_fut",
         },
-        'tense_mapping': {
-            'present_tense': 'pres',
-            'past_tense': 'past',
-            'future': 'fut'
+        "tense_mapping": {
+            "present_tense": "pres",
+            "past_tense": "past",
+            "future": "fut"
         }
     }
 }
@@ -144,7 +144,7 @@ def load_verbs_from_file(language: str) -> Dict:
     if not config:
         raise ValueError(f"Unsupported language: {language}")
 
-    verbs_dir = config['verbs_path']
+    verbs_dir = config["verbs_path"]
     sys.path.insert(0, verbs_dir)
 
     try:
@@ -188,7 +188,7 @@ def import_verb(
     config = LANGUAGE_CONFIGS[language]
 
     # Get English translation
-    english_verb = verb_data.get('english', '')
+    english_verb = verb_data.get("english", "")
     if not english_verb:
         return False, f"No English translation for {verb_infinitive}"
 
@@ -199,7 +199,7 @@ def import_verb(
     # Check if verb already exists
     existing = session.query(Lemma).filter(
         Lemma.lemma_text.ilike(english_verb),
-        Lemma.pos_type == 'verb'
+        Lemma.pos_type == "verb"
     ).first()
 
     if existing:
@@ -222,7 +222,7 @@ def import_verb(
 
     # Generate GUID
     guid = generate_guid("V01", existing_guids)
-    existing_guids.append(int(guid.split('_')[1]))
+    existing_guids.append(int(guid.split("_")[1]))
 
     if dry_run:
         return True, f"[DRY RUN] Would import {english_verb} ({verb_infinitive}) with GUID {guid}, level {level}"
@@ -231,11 +231,11 @@ def import_verb(
     lemma = Lemma(
         lemma_text=english_verb,
         definition_text=f"{english_verb} (verb)",
-        pos_type='verb',
+        pos_type="verb",
         pos_subtype=pos_subtype,
         guid=guid,
         difficulty_level=level,
-        lithuanian_translation=verb_infinitive if language == 'lt' else None,
+        lithuanian_translation=verb_infinitive if language == "lt" else None,
         confidence=0.9,
         verified=True
     )
@@ -244,13 +244,13 @@ def import_verb(
     session.flush()  # Get the ID
 
     # Create English derivative form (infinitive)
-    english_token = add_word_token(session, english_verb, 'en')
+    english_token = add_word_token(session, english_verb, "en")
     english_form = DerivativeForm(
         lemma_id=lemma.id,
         derivative_form_text=english_verb,
         word_token_id=english_token.id,
-        language_code='en',
-        grammatical_form='infinitive',
+        language_code="en",
+        grammatical_form="infinitive",
         is_base_form=True,
         verified=True
     )
@@ -263,7 +263,7 @@ def import_verb(
         derivative_form_text=verb_infinitive,
         word_token_id=target_token.id,
         language_code=language,
-        grammatical_form='infinitive',
+        grammatical_form="infinitive",
         is_base_form=True,
         verified=True
     )
@@ -271,12 +271,12 @@ def import_verb(
 
     # Add conjugation forms if available
     forms_added = 0
-    if config['has_conjugations']:
-        form_mapping = config['form_mapping']
-        tense_mapping = config['tense_mapping']
+    if config["has_conjugations"]:
+        form_mapping = config["form_mapping"]
+        tense_mapping = config["tense_mapping"]
 
         for tense_key, tense_data in verb_data.items():
-            if tense_key == 'english':
+            if tense_key == "english":
                 continue  # Skip the english field
 
             # Map tense to suffix
@@ -294,7 +294,7 @@ def import_verb(
                     continue
 
                 # Get the conjugated form text for target language
-                target_text = person_data.get(config['name'].lower())
+                target_text = person_data.get(config["name"].lower())
                 if not target_text:
                     continue
 
@@ -313,14 +313,14 @@ def import_verb(
                 forms_added += 1
 
                 # Also store English conjugation if available
-                english_text = person_data.get('english')
+                english_text = person_data.get("english")
                 if english_text:
-                    english_token = add_word_token(session, english_text, 'en')
+                    english_token = add_word_token(session, english_text, "en")
                     english_conj_form = DerivativeForm(
                         lemma_id=lemma.id,
                         derivative_form_text=english_text,
                         word_token_id=english_token.id,
-                        language_code='en',
+                        language_code="en",
                         grammatical_form=grammatical_form,
                         is_base_form=False,
                         verified=True
@@ -334,7 +334,7 @@ def import_verb(
 
 
 def bulk_import_verbs(
-    language: str = 'lt',
+    language: str = "lt",
     limit: int = None,
     dry_run: bool = False,
     db_path: str = None
@@ -362,7 +362,7 @@ def bulk_import_verbs(
         logger.info(f"Loaded {len(verbs)} verbs from verbs.py")
     except Exception as e:
         logger.error(f"Failed to load verbs: {e}")
-        return {'success': False, 'error': str(e)}
+        return {"success": False, "error": str(e)}
 
     # Get database session
     db_path = db_path or constants.WORDFREQ_DB_PATH
@@ -376,19 +376,19 @@ def bulk_import_verbs(
     existing_numbers = []
     for guid_tuple in existing_guids:
         guid = guid_tuple[0]
-        if guid and '_' in guid:
+        if guid and "_" in guid:
             try:
-                number = int(guid.split('_')[1])
+                number = int(guid.split("_")[1])
                 existing_numbers.append(number)
             except (ValueError, IndexError):
                 continue
 
     # Import verbs
     results = {
-        'total_verbs': len(verbs),
-        'imported': [],
-        'skipped': [],
-        'failed': []
+        "total_verbs": len(verbs),
+        "imported": [],
+        "skipped": [],
+        "failed": []
     }
 
     verb_list = list(verbs.items())
@@ -407,14 +407,14 @@ def bulk_import_verbs(
             )
 
             if success:
-                results['imported'].append(verb_infinitive)
+                results["imported"].append(verb_infinitive)
                 logger.info(message)
             else:
-                results['skipped'].append(verb_infinitive)
+                results["skipped"].append(verb_infinitive)
                 logger.warning(message)
 
         except Exception as e:
-            results['failed'].append((verb_infinitive, str(e)))
+            results["failed"].append((verb_infinitive, str(e)))
             logger.error(f"Failed to import {verb_infinitive}: {e}")
             session.rollback()
 
@@ -429,12 +429,12 @@ def bulk_import_verbs(
     logger.info(f"Skipped (already exist): {len(results['skipped'])}")
     logger.info(f"Failed: {len(results['failed'])}")
 
-    if results['failed']:
+    if results["failed"]:
         logger.error("\nFailed imports:")
-        for verb, error in results['failed']:
+        for verb, error in results["failed"]:
             logger.error(f"  {verb}: {error}")
 
-    results['success'] = True
+    results["success"] = True
     return results
 
 
@@ -443,13 +443,13 @@ def main():
     parser = argparse.ArgumentParser(
         description="Bulk import verbs from verbs.py to database"
     )
-    parser.add_argument('--language', choices=['lt'], default='lt',
-                       help='Language code (default: lt)')
-    parser.add_argument('--limit', type=int,
-                       help='Limit number of verbs to import')
-    parser.add_argument('--dry-run', action='store_true',
-                       help='Show what would be imported without saving')
-    parser.add_argument('--db-path', help='Database path (uses default if not specified)')
+    parser.add_argument("--language", choices=["lt"], default="lt",
+                       help="Language code (default: lt)")
+    parser.add_argument("--limit", type=int,
+                       help="Limit number of verbs to import")
+    parser.add_argument("--dry-run", action="store_true",
+                       help="Show what would be imported without saving")
+    parser.add_argument("--db-path", help="Database path (uses default if not specified)")
 
     args = parser.parse_args()
 
@@ -460,9 +460,9 @@ def main():
         db_path=args.db_path
     )
 
-    if not results.get('success'):
+    if not results.get("success"):
         sys.exit(1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

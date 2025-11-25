@@ -22,7 +22,7 @@ import lib.score_table
 import lib.validation
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 # Default model for validation and LLM-based question generation
@@ -112,7 +112,7 @@ class BenchmarkGenerator:
         
         # Load and parse the file
         try:
-            with open(file_path, 'r') as f:
+            with open(file_path, "r") as f:
                 data = json.load(f)
             logger.debug(f"Loaded data from {file_path}")
             return data
@@ -145,7 +145,7 @@ class BenchmarkGenerator:
         
         # Load the file
         try:
-            with open(file_path, 'r') as f:
+            with open(file_path, "r") as f:
                 lines = [line.strip() for line in f if line.strip()]
             logger.debug(f"Loaded {len(lines)} lines from {file_path}")
             return lines

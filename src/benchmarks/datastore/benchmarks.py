@@ -15,12 +15,12 @@ from benchmarks.datastore.common import (
 )
 
 Model.benchmark_runs = relationship(
-    "Run", back_populates='model', lazy='noload'
+    "Run", back_populates="model", lazy="noload"
 )
 
 class Benchmark(Base):
     """Benchmark definition."""
-    __tablename__ = 'benchmark'
+    __tablename__ = "benchmark"
     codename: Mapped[str] = mapped_column(String, primary_key=True)
     displayname: Mapped[str] = mapped_column(String, nullable=False)
     description: Mapped[Optional[str]] = mapped_column(String, nullable=True)
@@ -28,52 +28,52 @@ class Benchmark(Base):
     license_name: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
     # Relationships
-    runs: Mapped[List['Run']] = relationship(back_populates='benchmark', lazy='noload')
-    questions: Mapped[List['Question']] = relationship(back_populates='benchmark')
+    runs: Mapped[List["Run"]] = relationship(back_populates="benchmark", lazy="noload")
+    questions: Mapped[List["Question"]] = relationship(back_populates="benchmark")
 
 class Question(Base):
     """Benchmark question definition."""
-    __tablename__ = 'question'
+    __tablename__ = "question"
 
     question_id: Mapped[str] = mapped_column(String, primary_key=True)
-    benchmark_name: Mapped[str] = mapped_column(String, ForeignKey('benchmark.codename'))
+    benchmark_name: Mapped[str] = mapped_column(String, ForeignKey("benchmark.codename"))
     question_info_json: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
     # Relationships
-    benchmark: Mapped['Benchmark'] = relationship(back_populates='questions')
-    run_details: Mapped[List['RunDetail']] = relationship(back_populates='question', lazy='noload')
+    benchmark: Mapped["Benchmark"] = relationship(back_populates="questions")
+    run_details: Mapped[List["RunDetail"]] = relationship(back_populates="question", lazy="noload")
 
 class Run(Base):
     """Benchmark run results."""
-    __tablename__ = 'run'
+    __tablename__ = "run"
     run_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     run_ts: Mapped[datetime.datetime] = mapped_column(
         TIMESTAMP, server_default=func.current_timestamp()
     )
-    model_name: Mapped[str] = mapped_column(String, ForeignKey('model.codename'))
+    model_name: Mapped[str] = mapped_column(String, ForeignKey("model.codename"))
 
-    benchmark_name: Mapped[str] = mapped_column(String, ForeignKey('benchmark.codename'))
+    benchmark_name: Mapped[str] = mapped_column(String, ForeignKey("benchmark.codename"))
     normed_score: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
 
     # Relationships
-    model: Mapped['Model'] = relationship(back_populates='benchmark_runs')
-    benchmark: Mapped['Benchmark'] = relationship(back_populates='runs')
-    run_details: Mapped[List['RunDetail']] = relationship(back_populates='run', lazy='noload')
+    model: Mapped["Model"] = relationship(back_populates="benchmark_runs")
+    benchmark: Mapped["Benchmark"] = relationship(back_populates="runs")
+    run_details: Mapped[List["RunDetail"]] = relationship(back_populates="run", lazy="noload")
 
 class RunDetail(Base):
     """Detailed results for a benchmark run."""
-    __tablename__ = 'run_detail'
-    run_id: Mapped[int] = mapped_column(ForeignKey('run.run_id'), primary_key=True)
+    __tablename__ = "run_detail"
+    run_id: Mapped[int] = mapped_column(ForeignKey("run.run_id"), primary_key=True)
     eval_msec: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     debug_json: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     thought_process: Mapped[Optional[str]] = mapped_column(String, nullable=True)  # Add this line
 
-    question_id: Mapped[str] = mapped_column(String, ForeignKey('question.question_id'), primary_key=True)
+    question_id: Mapped[str] = mapped_column(String, ForeignKey("question.question_id"), primary_key=True)
     score: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
 
     # Relationships
-    run: Mapped['Run'] = relationship(back_populates='run_details')
-    question: Mapped['Question'] = relationship(back_populates='run_details')
+    run: Mapped["Run"] = relationship(back_populates="run_details")
+    question: Mapped["Question"] = relationship(back_populates="run_details")
 
 def insert_benchmark(
     session,
@@ -170,11 +170,11 @@ def insert_run(
             for detail in run_details:
                 run_detail = RunDetail(
                     run_id=new_run.run_id,
-                    question_id=detail['question_id'],
-                    score=detail.get('score'),
-                    eval_msec=detail.get('eval_msec'),
-                    debug_json=detail.get('debug_json'),
-                    thought_process=detail.get('thought_process', None)
+                    question_id=detail["question_id"],
+                    score=detail.get("score"),
+                    eval_msec=detail.get("eval_msec"),
+                    debug_json=detail.get("debug_json"),
+                    thought_process=detail.get("thought_process", None)
                 )
                 session.add(run_detail)
 
@@ -197,10 +197,10 @@ def list_all_benchmarks(session) -> List[Dict]:
     benchmarks = session.query(Benchmark).order_by(Benchmark.codename).all()
     return [
         {
-            'codename': benchmark.codename,
-            'displayname': benchmark.displayname,
-            'description': benchmark.description,
-            'license_name': benchmark.license_name
+            "codename": benchmark.codename,
+            "displayname": benchmark.displayname,
+            "description": benchmark.description,
+            "license_name": benchmark.license_name
         }
         for benchmark in benchmarks
     ]
@@ -220,9 +220,9 @@ def load_all_questions_for_benchmark(session, benchmark_name: str) -> List[Dict]
     
     return [
         {
-            'question_id': question.question_id,
-            'benchmark_name': question.benchmark_name,
-            'question_info_json': question.question_info_json
+            "question_id": question.question_id,
+            "benchmark_name": question.benchmark_name,
+            "question_info_json": question.question_info_json
         } 
         for question in questions
     ]
@@ -254,19 +254,19 @@ def get_run_by_run_id(run_id: int, session=None) -> Optional[Dict]:
     )
 
     return {
-        'run_id': run.run_id,
-        'model_name': run.model_name,
-        'benchmark_name': run.benchmark_name,
-        'normed_score': run.normed_score,
-        'run_ts': run.run_ts,
-        'details': [
+        "run_id": run.run_id,
+        "model_name": run.model_name,
+        "benchmark_name": run.benchmark_name,
+        "normed_score": run.normed_score,
+        "run_ts": run.run_ts,
+        "details": [
             {
-                'question_id': detail.question_id,
-                'score': detail.score,
-                'eval_msec': detail.eval_msec,
-                'question_info_json': decode_json(question.question_info_json),
-                'debug_json': decode_json(detail.debug_json),
-                'thought_process': detail.thought_process
+                "question_id": detail.question_id,
+                "score": detail.score,
+                "eval_msec": detail.eval_msec,
+                "question_info_json": decode_json(question.question_info_json),
+                "debug_json": decode_json(detail.debug_json),
+                "thought_process": detail.thought_process
             }
             for detail, question in run_details
         ]
@@ -292,8 +292,8 @@ def get_highest_benchmark_scores(session) -> Dict:
 
     return {
         (run.benchmark_name, run.model_name): {
-            'score': run.normed_score,
-            'run_id': run.run_id
+            "score": run.normed_score,
+            "run_id": run.run_id
         }
         for run in highest_scores
     }
@@ -329,17 +329,17 @@ def get_highest_scoring_run_details(
     )
 
     return {
-        'run_id': highest_run.run_id,
-        'model_name': highest_run.model_name,
-        'benchmark_name': highest_run.benchmark_name,
-        'normed_score': highest_run.normed_score,
-        'details': [
+        "run_id": highest_run.run_id,
+        "model_name": highest_run.model_name,
+        "benchmark_name": highest_run.benchmark_name,
+        "normed_score": highest_run.normed_score,
+        "details": [
             {
-                'question_id': detail.question_id,
-                'score': detail.score,
-                'eval_msec': detail.eval_msec,
-                'question_info_json': decode_json(question.question_info_json),
-                'debug_json': decode_json(detail.debug_json)
+                "question_id": detail.question_id,
+                "score": detail.score,
+                "eval_msec": detail.eval_msec,
+                "question_info_json": decode_json(question.question_info_json),
+                "debug_json": decode_json(detail.debug_json)
             }
             for detail, question in run_details
         ]

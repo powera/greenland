@@ -14,7 +14,7 @@ from lib.benchmarks.factory import (
 )
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 
@@ -272,7 +272,7 @@ if __name__ == "__main__":
         print("Available benchmarks:")
         for benchmark in benchmarks:
             print(f"  {benchmark['code']}: {benchmark['name']}")
-            if benchmark['description']:
+            if benchmark["description"]:
                 print(f"    {benchmark['description']}")
                 
     elif args.command == "models":

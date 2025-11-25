@@ -12,7 +12,7 @@ import sys
 from pathlib import Path
 
 # Add the src directory to the path for imports
-GREENLAND_SRC_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..'))
+GREENLAND_SRC_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.."))
 sys.path.append(GREENLAND_SRC_PATH)
 
 import constants
@@ -27,144 +27,144 @@ from wordfreq.trakaido.verb_converter import export_wireword_verbs
 def create_parser():
     """Create and configure the argument parser."""
     parser = argparse.ArgumentParser(description="Trakaido Word Management Tool")
-    subparsers = parser.add_subparsers(dest='command', help='Available commands')
+    subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
     # Store subparsers for later access
     parser.subparsers_map = {}
 
     # Add word command
-    add_parser = subparsers.add_parser('add', help='Add a new word')
-    add_parser.add_argument('english_word', help='English word to add')
-    add_parser.add_argument('--lithuanian', help='Lithuanian translation to clarify meaning')
-    add_parser.add_argument('--level', type=int, help='Difficulty level (1-20)')
-    add_parser.add_argument('--auto-approve', action='store_true',
-                           help='Skip user review')
-    add_parser.add_argument('--model', default='gpt-5-mini',
-                           help='LLM model to use')
+    add_parser = subparsers.add_parser("add", help="Add a new word")
+    add_parser.add_argument("english_word", help="English word to add")
+    add_parser.add_argument("--lithuanian", help="Lithuanian translation to clarify meaning")
+    add_parser.add_argument("--level", type=int, help="Difficulty level (1-20)")
+    add_parser.add_argument("--auto-approve", action="store_true",
+                           help="Skip user review")
+    add_parser.add_argument("--model", default="gpt-5-mini",
+                           help="LLM model to use")
 
     # Set level command
-    level_parser = subparsers.add_parser('set-level', help='Set word difficulty level')
-    level_parser.add_argument('identifier', help='GUID or English word')
-    level_parser.add_argument('level', type=int, help='New difficulty level (1-20)')
-    level_parser.add_argument('--reason', help='Reason for the change')
+    level_parser = subparsers.add_parser("set-level", help="Set word difficulty level")
+    level_parser.add_argument("identifier", help="GUID or English word")
+    level_parser.add_argument("level", type=int, help="New difficulty level (1-20)")
+    level_parser.add_argument("--reason", help="Reason for the change")
 
     # Update word command
-    update_parser = subparsers.add_parser('update', help='Update entire Lemma entry using specified model')
-    update_parser.add_argument('identifier', help='GUID or English word to update')
-    update_parser.add_argument('--auto-approve', action='store_true',
-                              help='Skip user review')
-    update_parser.add_argument('--model', default='gpt-5-mini',
-                              help='LLM model to use')
+    update_parser = subparsers.add_parser("update", help="Update entire Lemma entry using specified model")
+    update_parser.add_argument("identifier", help="GUID or English word to update")
+    update_parser.add_argument("--auto-approve", action="store_true",
+                              help="Skip user review")
+    update_parser.add_argument("--model", default="gpt-5-mini",
+                              help="LLM model to use")
 
     # Move words by subtype and level command
-    move_parser = subparsers.add_parser('move-words', help='Move all words with specific level and subtype to new level')
-    move_parser.add_argument('from_level', type=int, help='Current difficulty level (1-20)')
-    move_parser.add_argument('subtype', help='POS subtype (e.g., "clothing")')
-    move_parser.add_argument('to_level', type=int, help='New difficulty level (1-20)')
-    move_parser.add_argument('--reason', help='Reason for the bulk change')
-    move_parser.add_argument('--dry-run', action='store_true', help='Show what would be changed without making changes')
+    move_parser = subparsers.add_parser("move-words", help="Move all words with specific level and subtype to new level")
+    move_parser.add_argument("from_level", type=int, help="Current difficulty level (1-20)")
+    move_parser.add_argument("subtype", help="POS subtype (e.g., \"clothing\")")
+    move_parser.add_argument("to_level", type=int, help="New difficulty level (1-20)")
+    move_parser.add_argument("--reason", help="Reason for the bulk change")
+    move_parser.add_argument("--dry-run", action="store_true", help="Show what would be changed without making changes")
 
     # List words command
-    list_parser = subparsers.add_parser('list', help='List words')
-    list_parser.add_argument('--level', type=int, help='Filter by difficulty level')
-    list_parser.add_argument('--subtype', help='Filter by POS subtype')
-    list_parser.add_argument('--limit', type=int, default=50, help='Maximum results')
+    list_parser = subparsers.add_parser("list", help="List words")
+    list_parser.add_argument("--level", type=int, help="Filter by difficulty level")
+    list_parser.add_argument("--subtype", help="Filter by POS subtype")
+    list_parser.add_argument("--limit", type=int, default=50, help="Maximum results")
 
     # List subtypes command
-    subtypes_parser = subparsers.add_parser('subtypes', help='List all subtypes with counts')
+    subtypes_parser = subparsers.add_parser("subtypes", help="List all subtypes with counts")
 
     # Generate noun forms command
-    generate_forms_parser = subparsers.add_parser('generate-noun-forms', help='Generate derivative forms for Lithuanian nouns')
-    generate_forms_parser.add_argument('--limit', type=int, default=50, help='Maximum number of nouns to process')
-    generate_forms_parser.add_argument('--level', type=int, help='Filter by specific difficulty level')
-    generate_forms_parser.add_argument('--dry-run', action='store_true', help='Show what would be generated without saving')
-    generate_forms_parser.add_argument('--force', action='store_true', help='Regenerate forms even if they already exist')
+    generate_forms_parser = subparsers.add_parser("generate-noun-forms", help="Generate derivative forms for Lithuanian nouns")
+    generate_forms_parser.add_argument("--limit", type=int, default=50, help="Maximum number of nouns to process")
+    generate_forms_parser.add_argument("--level", type=int, help="Filter by specific difficulty level")
+    generate_forms_parser.add_argument("--dry-run", action="store_true", help="Show what would be generated without saving")
+    generate_forms_parser.add_argument("--force", action="store_true", help="Regenerate forms even if they already exist")
 
     # Verb commands
-    add_verb_parser = subparsers.add_parser('add-verb', help='Add a new verb')
-    add_verb_parser.add_argument('english_verb', help='English verb to add (infinitive form)')
-    add_verb_parser.add_argument('--translation', help='Translation in target language to clarify meaning')
-    add_verb_parser.add_argument('--language', choices=['lt', 'zh', 'ko', 'fr'], default='lt',
-                                 help='Target language (default: lt)')
-    add_verb_parser.add_argument('--level', type=int, help='Difficulty level (1-20)')
-    add_verb_parser.add_argument('--auto-approve', action='store_true',
-                                 help='Skip user review')
-    add_verb_parser.add_argument('--no-forms', action='store_true',
-                                 help='Skip generating conjugation forms')
-    add_verb_parser.add_argument('--model', default='gpt-5-mini',
-                                 help='LLM model to use')
+    add_verb_parser = subparsers.add_parser("add-verb", help="Add a new verb")
+    add_verb_parser.add_argument("english_verb", help="English verb to add (infinitive form)")
+    add_verb_parser.add_argument("--translation", help="Translation in target language to clarify meaning")
+    add_verb_parser.add_argument("--language", choices=["lt", "zh", "ko", "fr"], default="lt",
+                                 help="Target language (default: lt)")
+    add_verb_parser.add_argument("--level", type=int, help="Difficulty level (1-20)")
+    add_verb_parser.add_argument("--auto-approve", action="store_true",
+                                 help="Skip user review")
+    add_verb_parser.add_argument("--no-forms", action="store_true",
+                                 help="Skip generating conjugation forms")
+    add_verb_parser.add_argument("--model", default="gpt-5-mini",
+                                 help="LLM model to use")
 
-    list_verbs_parser = subparsers.add_parser('list-verbs', help='List verbs in database')
-    list_verbs_parser.add_argument('--language', choices=['lt', 'zh', 'ko', 'fr'], default='lt',
-                                   help='Filter by language (default: lt)')
-    list_verbs_parser.add_argument('--level', type=int, help='Filter by difficulty level')
-    list_verbs_parser.add_argument('--subtype', help='Filter by verb subtype')
-    list_verbs_parser.add_argument('--limit', type=int, default=50, help='Maximum results')
+    list_verbs_parser = subparsers.add_parser("list-verbs", help="List verbs in database")
+    list_verbs_parser.add_argument("--language", choices=["lt", "zh", "ko", "fr"], default="lt",
+                                   help="Filter by language (default: lt)")
+    list_verbs_parser.add_argument("--level", type=int, help="Filter by difficulty level")
+    list_verbs_parser.add_argument("--subtype", help="Filter by verb subtype")
+    list_verbs_parser.add_argument("--limit", type=int, default=50, help="Maximum results")
 
-    import_verbs_parser = subparsers.add_parser('import-verbs', help='Bulk import verbs from verbs.py file')
-    import_verbs_parser.add_argument('--language', choices=['lt'], default='lt',
-                                     help='Language code (default: lt)')
-    import_verbs_parser.add_argument('--limit', type=int,
-                                     help='Limit number of verbs to import')
-    import_verbs_parser.add_argument('--dry-run', action='store_true',
-                                     help='Show what would be imported without saving')
+    import_verbs_parser = subparsers.add_parser("import-verbs", help="Bulk import verbs from verbs.py file")
+    import_verbs_parser.add_argument("--language", choices=["lt"], default="lt",
+                                     help="Language code (default: lt)")
+    import_verbs_parser.add_argument("--limit", type=int,
+                                     help="Limit number of verbs to import")
+    import_verbs_parser.add_argument("--dry-run", action="store_true",
+                                     help="Show what would be imported without saving")
 
     # Export commands
-    export_parser = subparsers.add_parser('export', help='Export words to files')
-    export_subparsers = export_parser.add_subparsers(dest='export_type', help='Export formats')
+    export_parser = subparsers.add_parser("export", help="Export words to files")
+    export_subparsers = export_parser.add_subparsers(dest="export_type", help="Export formats")
 
     # Store export parser for later access to show help
-    parser.subparsers_map['export'] = export_parser
+    parser.subparsers_map["export"] = export_parser
 
     # Export to JSON
-    json_parser = export_subparsers.add_parser('json', help='Export to JSON format')
-    json_parser.add_argument('--output', help='Output JSON file path')
+    json_parser = export_subparsers.add_parser("json", help="Export to JSON format")
+    json_parser.add_argument("--output", help="Output JSON file path")
 
     # Export to lang_lt
-    lang_lt_parser = export_subparsers.add_parser('lang-lt', help='Export to lang_lt directory structure')
-    lang_lt_parser.add_argument('--output-dir', help='Output directory path')
+    lang_lt_parser = export_subparsers.add_parser("lang-lt", help="Export to lang_lt directory structure")
+    lang_lt_parser.add_argument("--output-dir", help="Output directory path")
 
     # Export to text
-    text_parser = export_subparsers.add_parser('text', help='Export to simple text format for specific subtype')
-    text_parser.add_argument('subtype', help='POS subtype to export (required)')
-    text_parser.add_argument('--output', help='Output text file path')
-    text_parser.add_argument('--level', type=int, help='Filter by specific difficulty level')
-    text_parser.add_argument('--include-without-guid', action='store_true',
-                            help='Include lemmas without GUIDs')
-    text_parser.add_argument('--include-unverified', action='store_true', default=True,
-                            help='Include unverified entries (default: True)')
+    text_parser = export_subparsers.add_parser("text", help="Export to simple text format for specific subtype")
+    text_parser.add_argument("subtype", help="POS subtype to export (required)")
+    text_parser.add_argument("--output", help="Output text file path")
+    text_parser.add_argument("--level", type=int, help="Filter by specific difficulty level")
+    text_parser.add_argument("--include-without-guid", action="store_true",
+                            help="Include lemmas without GUIDs")
+    text_parser.add_argument("--include-unverified", action="store_true", default=True,
+                            help="Include unverified entries (default: True)")
 
     # Export to wireword format
-    wireword_parser = export_subparsers.add_parser('wireword', help='Export nouns/adjectives/etc to single WireWord JSON file')
-    wireword_parser.add_argument('--output', help='Output JSON file path')
-    wireword_parser.add_argument('--level', type=int, help='Filter by specific difficulty level')
-    wireword_parser.add_argument('--subtype', help='Filter by specific POS subtype')
-    wireword_parser.add_argument('--include-without-guid', action='store_true',
-                                help='Include lemmas without GUIDs')
-    wireword_parser.add_argument('--include-unverified', action='store_true', default=True,
-                                help='Include unverified entries (default: True)')
+    wireword_parser = export_subparsers.add_parser("wireword", help="Export nouns/adjectives/etc to single WireWord JSON file")
+    wireword_parser.add_argument("--output", help="Output JSON file path")
+    wireword_parser.add_argument("--level", type=int, help="Filter by specific difficulty level")
+    wireword_parser.add_argument("--subtype", help="Filter by specific POS subtype")
+    wireword_parser.add_argument("--include-without-guid", action="store_true",
+                                help="Include lemmas without GUIDs")
+    wireword_parser.add_argument("--include-unverified", action="store_true", default=True,
+                                help="Include unverified entries (default: True)")
 
     # Export wireword directory (DEPRECATED)
-    wireword_dir_parser = export_subparsers.add_parser('wireword-dir',
-                                                       help='[DEPRECATED] Export WireWord nouns/adjectives to separate files by level/subtype')
-    wireword_dir_parser.add_argument('--output-dir', help='Base output directory (will create wireword subdirectory)')
+    wireword_dir_parser = export_subparsers.add_parser("wireword-dir",
+                                                       help="[DEPRECATED] Export WireWord nouns/adjectives to separate files by level/subtype")
+    wireword_dir_parser.add_argument("--output-dir", help="Base output directory (will create wireword subdirectory)")
 
     # Export wireword verbs
-    wireword_verbs_parser = export_subparsers.add_parser('wireword-verbs', help='Export verbs from verbs.py to WireWord JSON file')
-    wireword_verbs_parser.add_argument('--output', help='Output JSON file path')
+    wireword_verbs_parser = export_subparsers.add_parser("wireword-verbs", help="Export verbs from verbs.py to WireWord JSON file")
+    wireword_verbs_parser.add_argument("--output", help="Output JSON file path")
 
     # Export all
-    all_parser = export_subparsers.add_parser('all', help='Export to all formats including wireword directory')
-    all_parser.add_argument('--json-output', help='JSON output file path')
-    all_parser.add_argument('--lang-lt-dir', help='lang_lt output directory path')
-    all_parser.add_argument('--no-wireword-dir', action='store_true', help='Skip wireword directory export')
+    all_parser = export_subparsers.add_parser("all", help="Export to all formats including wireword directory")
+    all_parser.add_argument("--json-output", help="JSON output file path")
+    all_parser.add_argument("--lang-lt-dir", help="lang_lt output directory path")
+    all_parser.add_argument("--no-wireword-dir", action="store_true", help="Skip wireword directory export")
 
     return parser
 
 
 def handle_word_commands(args, manager):
     """Handle word management commands."""
-    if args.command == 'add':
+    if args.command == "add":
         success = manager.add_word(
             english_word=args.english_word,
             lithuanian_word=args.lithuanian,
@@ -173,12 +173,12 @@ def handle_word_commands(args, manager):
         )
         return success
 
-    elif args.command == 'set-level':
+    elif args.command == "set-level":
         success = manager.set_level(args.identifier, args.level,
-                                   reason=getattr(args, 'reason', ''))
+                                   reason=getattr(args, "reason", ""))
         return success
 
-    elif args.command == 'update':
+    elif args.command == "update":
         success = manager.update_word(
             identifier=args.identifier,
             auto_approve=args.auto_approve,
@@ -186,13 +186,13 @@ def handle_word_commands(args, manager):
         )
         return success
 
-    elif args.command == 'move-words':
+    elif args.command == "move-words":
         success = manager.move_words_by_subtype_and_level(
             from_level=args.from_level,
             subtype=args.subtype,
             to_level=args.to_level,
-            reason=getattr(args, 'reason', ''),
-            dry_run=getattr(args, 'dry_run', False)
+            reason=getattr(args, "reason", ""),
+            dry_run=getattr(args, "dry_run", False)
         )
         return success
 
@@ -201,7 +201,7 @@ def handle_word_commands(args, manager):
 
 def handle_list_commands(args, manager):
     """Handle list and information commands."""
-    if args.command == 'list':
+    if args.command == "list":
         words = manager.list_words(level=args.level, subtype=args.subtype,
                                   limit=args.limit)
 
@@ -209,7 +209,7 @@ def handle_list_commands(args, manager):
             print(f"\nFound {len(words)} words:")
             print("-" * 80)
             for word in words:
-                status = "✓" if word['verified'] else "?"
+                status = "✓" if word["verified"] else "?"
                 print(f"{status} {word['guid']:<10} L{word['level']:<2} "
                       f"{word['english']:<20} → {word['lithuanian']:<20} "
                       f"({word['subtype']})")
@@ -217,7 +217,7 @@ def handle_list_commands(args, manager):
             print("No words found matching criteria.")
         return True
 
-    elif args.command == 'subtypes':
+    elif args.command == "subtypes":
         subtypes = manager.list_subtypes()
 
         if subtypes:
@@ -232,11 +232,11 @@ def handle_list_commands(args, manager):
     return False
 
 
-def handle_verb_commands(args, model='gpt-5-mini'):
+def handle_verb_commands(args, model="gpt-5-mini"):
     """Handle verb management commands."""
-    verb_manager = VerbManager(model=args.model if hasattr(args, 'model') else model, debug=False)
+    verb_manager = VerbManager(model=args.model if hasattr(args, "model") else model, debug=False)
 
-    if args.command == 'add-verb':
+    if args.command == "add-verb":
         success = verb_manager.add_verb(
             english_verb=args.english_verb,
             target_translation=args.translation,
@@ -247,7 +247,7 @@ def handle_verb_commands(args, model='gpt-5-mini'):
         )
         return success
 
-    elif args.command == 'list-verbs':
+    elif args.command == "list-verbs":
         verbs = verb_manager.list_verbs(
             language=args.language,
             level=args.level,
@@ -259,7 +259,7 @@ def handle_verb_commands(args, model='gpt-5-mini'):
             print(f"\nFound {len(verbs)} verbs:")
             print("-" * 80)
             for verb in verbs:
-                status = "✓" if verb['verified'] else "?"
+                status = "✓" if verb["verified"] else "?"
                 print(f"{status} {verb['guid']:<10} L{verb['level']:<2} "
                       f"{verb['english']:<20} → {verb['translation']:<20} "
                       f"({verb['subtype']})")
@@ -267,13 +267,13 @@ def handle_verb_commands(args, model='gpt-5-mini'):
             print("No verbs found matching criteria.")
         return True
 
-    elif args.command == 'import-verbs':
+    elif args.command == "import-verbs":
         results = bulk_import_verbs(
             language=args.language,
             limit=args.limit,
             dry_run=args.dry_run
         )
-        return results.get('success', False)
+        return results.get("success", False)
 
     return False
 
@@ -290,7 +290,7 @@ def handle_export_commands(args, manager, export_parser=None):
     # Create TrakaidoExporter instance for export operations
     exporter = TrakaidoExporter(db_path=manager.db_path, debug=manager.debug)
 
-    if args.export_type == 'json':
+    if args.export_type == "json":
         # Use default path if not provided
         output_path = args.output
         if not output_path:
@@ -309,7 +309,7 @@ def handle_export_commands(args, manager, export_parser=None):
 
         return success
 
-    elif args.export_type == 'lang-lt':
+    elif args.export_type == "lang-lt":
         # Use default directory if not provided
         output_dir = args.output_dir
         if not output_dir:
@@ -318,8 +318,8 @@ def handle_export_commands(args, manager, export_parser=None):
         success, results = exporter.export_to_lang_lt(output_dir)
 
         if success:
-            levels_generated = results.get('levels_generated', [])
-            dictionaries_generated = results.get('dictionaries_generated', [])
+            levels_generated = results.get("levels_generated", [])
+            dictionaries_generated = results.get("dictionaries_generated", [])
 
             print(f"\n✅ Export to lang_lt completed:")
             print(f"   Structure files: {len(levels_generated)} levels")
@@ -328,7 +328,7 @@ def handle_export_commands(args, manager, export_parser=None):
 
         return success
 
-    elif args.export_type == 'text':
+    elif args.export_type == "text":
         # Generate default output filename if not provided
         output_path = args.output
         if not output_path:
@@ -355,7 +355,7 @@ def handle_export_commands(args, manager, export_parser=None):
 
         return success
 
-    elif args.export_type == 'wireword':
+    elif args.export_type == "wireword":
         # Generate default output filename if not provided
         output_path = args.output
         if not output_path:
@@ -385,7 +385,7 @@ def handle_export_commands(args, manager, export_parser=None):
 
         return success
 
-    elif args.export_type == 'wireword-dir':
+    elif args.export_type == "wireword-dir":
         # Use default directory if not provided
         output_dir = args.output_dir
         if not output_dir:
@@ -403,7 +403,7 @@ def handle_export_commands(args, manager, export_parser=None):
 
         return success
 
-    elif args.export_type == 'wireword-verbs':
+    elif args.export_type == "wireword-verbs":
         # Use default output path if not provided
         output_path = args.output
         if not output_path:
@@ -424,14 +424,14 @@ def handle_export_commands(args, manager, export_parser=None):
             print(f"   Group distribution: {results['group_distribution']}")
             print(f"   Output file: {results['output_path']}")
 
-            if results['skipped_verbs']:
+            if results["skipped_verbs"]:
                 print(f"   Skipped verbs ({len(results['skipped_verbs'])}): {', '.join(results['skipped_verbs'])}")
         else:
             print(f"\n❌ WireWord verbs export failed: {results.get('error', 'Unknown error')}")
 
         return success
 
-    elif args.export_type == 'all':
+    elif args.export_type == "all":
         # Use default paths if not provided
         json_path = args.json_output
         if not json_path:
@@ -463,31 +463,31 @@ def main():
         parser.print_help()
         return
 
-    manager = WordManager(model=args.model if hasattr(args, 'model') else 'gpt-5-mini')
+    manager = WordManager(model=args.model if hasattr(args, "model") else "gpt-5-mini")
 
     success = False
 
     # Handle different command types
-    if args.command in ['add', 'set-level', 'update', 'move-words']:
+    if args.command in ["add", "set-level", "update", "move-words"]:
         success = handle_word_commands(args, manager)
 
-    elif args.command in ['list', 'subtypes']:
+    elif args.command in ["list", "subtypes"]:
         success = handle_list_commands(args, manager)
 
-    elif args.command in ['add-verb', 'list-verbs', 'import-verbs']:
-        success = handle_verb_commands(args, model=args.model if hasattr(args, 'model') else 'gpt-5-mini')
+    elif args.command in ["add-verb", "list-verbs", "import-verbs"]:
+        success = handle_verb_commands(args, model=args.model if hasattr(args, "model") else "gpt-5-mini")
 
-    elif args.command == 'generate-noun-forms':
+    elif args.command == "generate-noun-forms":
         # Function not implemented yet
         print("Error: generate-noun-forms command is not yet implemented")
         success = False
 
-    elif args.command == 'export':
-        export_parser = parser.subparsers_map.get('export')
+    elif args.command == "export":
+        export_parser = parser.subparsers_map.get("export")
         success = handle_export_commands(args, manager, export_parser)
 
     sys.exit(0 if success else 1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -24,7 +24,7 @@ import constants
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
+    format="%(asctime)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -62,9 +62,9 @@ def get_lithuanian_noun_lemmas(db_path: str, limit: int = None) -> List[Dict]:
     session = get_session(db_path)
 
     query = session.query(linguistic_db.Lemma).filter(
-        linguistic_db.Lemma.pos_type == 'noun',
+        linguistic_db.Lemma.pos_type == "noun",
         linguistic_db.Lemma.lithuanian_translation.isnot(None),
-        linguistic_db.Lemma.lithuanian_translation != ''
+        linguistic_db.Lemma.lithuanian_translation != ""
     ).order_by(linguistic_db.Lemma.frequency_rank)
 
     if limit:
@@ -75,17 +75,17 @@ def get_lithuanian_noun_lemmas(db_path: str, limit: int = None) -> List[Dict]:
     result = []
     for lemma in lemmas:
         result.append({
-            'id': lemma.id,
-            'english': lemma.lemma_text,
-            'lithuanian': lemma.lithuanian_translation,
-            'pos_subtype': lemma.pos_subtype,
-            'frequency_rank': lemma.frequency_rank
+            "id": lemma.id,
+            "english": lemma.lemma_text,
+            "lithuanian": lemma.lithuanian_translation,
+            "pos_subtype": lemma.pos_subtype,
+            "frequency_rank": lemma.frequency_rank
         })
 
     return result
 
 
-def process_lemma_declensions(client: LinguisticClient, lemma_id: int, db_path: str, source: str = 'llm') -> bool:
+def process_lemma_declensions(client: LinguisticClient, lemma_id: int, db_path: str, source: str = "llm") -> bool:
     """
     Process a single lemma to generate and store all its declensions.
 
@@ -114,7 +114,7 @@ def process_lemma_declensions(client: LinguisticClient, lemma_id: int, db_path: 
         # Only skip if we have at least 3 forms that are in FORM_MAPPING
         existing_forms = session.query(linguistic_db.DerivativeForm).filter(
             linguistic_db.DerivativeForm.lemma_id == lemma_id,
-            linguistic_db.DerivativeForm.language_code == 'lt'
+            linguistic_db.DerivativeForm.language_code == "lt"
         ).all()
 
         # Count how many of the existing forms are actual declension forms (in FORM_MAPPING)
@@ -130,23 +130,23 @@ def process_lemma_declensions(client: LinguisticClient, lemma_id: int, db_path: 
         # Query for declensions based on source
         logger.info(f"Querying declensions for lemma ID {lemma_id}: {lemma.lemma_text} -> {lemma.lithuanian_translation} (source: {source})")
 
-        number_type = 'regular'  # Default value
-        if source == 'wiki':
+        number_type = "regular"  # Default value
+        if source == "wiki":
             # Use Wiktionary-based implementation
             from wordfreq.translation.wiki import get_lithuanian_noun_forms
             forms_dict, success = get_lithuanian_noun_forms(lemma.lithuanian_translation)
             # Wiki implementation doesn't return number_type, so we'll try to detect it
             # from the forms: if all singular forms are missing/empty, it's plurale_tantum
             if success and forms_dict:
-                singular_forms = [f for f in forms_dict.keys() if f.endswith('_singular')]
-                plural_forms = [f for f in forms_dict.keys() if f.endswith('_plural')]
+                singular_forms = [f for f in forms_dict.keys() if f.endswith("_singular")]
+                plural_forms = [f for f in forms_dict.keys() if f.endswith("_plural")]
                 has_singular = any(forms_dict.get(f) for f in singular_forms)
                 has_plural = any(forms_dict.get(f) for f in plural_forms)
 
                 if has_plural and not has_singular:
-                    number_type = 'plurale_tantum'
+                    number_type = "plurale_tantum"
                 elif has_singular and not has_plural:
-                    number_type = 'singulare_tantum'
+                    number_type = "singulare_tantum"
         else:  # source == 'llm'
             # Use LLM-based implementation (existing behavior)
             forms_dict, success, number_type = client.query_lithuanian_noun_declensions(lemma_id)
@@ -171,14 +171,14 @@ def process_lemma_declensions(client: LinguisticClient, lemma_id: int, db_path: 
             is_base_form = (form_name == "nominative_singular")
 
             # Get or create word token for this Lithuanian form
-            word_token = linguistic_db.add_word_token(session, form_text, 'lt')
+            word_token = linguistic_db.add_word_token(session, form_text, "lt")
 
             # Create derivative form
             derivative_form = linguistic_db.DerivativeForm(
                 lemma_id=lemma_id,
                 derivative_form_text=form_text,
                 word_token_id=word_token.id,
-                language_code='lt',
+                language_code="lt",
                 grammatical_form=grammatical_form.value,
                 is_base_form=is_base_form,
                 verified=False
@@ -188,12 +188,12 @@ def process_lemma_declensions(client: LinguisticClient, lemma_id: int, db_path: 
             stored_forms += 1
 
         # Store grammar fact if the noun is plurale tantum or singulare tantum
-        if number_type != 'regular':
+        if number_type != "regular":
             grammar_fact = linguistic_db.add_grammar_fact(
                 session,
                 lemma_id=lemma_id,
-                language_code='lt',
-                fact_type='number_type',
+                language_code="lt",
+                fact_type="number_type",
                 fact_value=number_type,
                 notes=f"Detected during declension generation (source: {source})",
                 verified=False
@@ -218,45 +218,45 @@ def main():
         description="Generate Lithuanian noun declensions for all nouns in the database"
     )
     parser.add_argument(
-        '--limit',
+        "--limit",
         type=int,
-        help='Limit the number of lemmas to process (for testing)'
+        help="Limit the number of lemmas to process (for testing)"
     )
     parser.add_argument(
-        '--throttle',
+        "--throttle",
         type=float,
         default=1.0,
-        help='Seconds to wait between API calls (default: 1.0)'
+        help="Seconds to wait between API calls (default: 1.0)"
     )
     parser.add_argument(
-        '--db-path',
+        "--db-path",
         type=str,
         default=constants.WORDFREQ_DB_PATH,
-        help='Path to the database'
+        help="Path to the database"
     )
     parser.add_argument(
-        '--model',
+        "--model",
         type=str,
-        default='gpt-5-mini',
-        help='LLM model to use (default: gpt-5-mini)'
+        default="gpt-5-mini",
+        help="LLM model to use (default: gpt-5-mini)"
     )
     parser.add_argument(
-        '--debug',
-        action='store_true',
-        help='Enable debug logging'
+        "--debug",
+        action="store_true",
+        help="Enable debug logging"
     )
     parser.add_argument(
-        '--yes',
-        '-y',
-        action='store_true',
-        help='Skip confirmation prompt'
+        "--yes",
+        "-y",
+        action="store_true",
+        help="Skip confirmation prompt"
     )
     parser.add_argument(
-        '--source',
+        "--source",
         type=str,
-        choices=['llm', 'wiki'],
-        default='llm',
-        help='Source for noun forms: llm (default) or wiki (Wiktionary)'
+        choices=["llm", "wiki"],
+        default="llm",
+        help="Source for noun forms: llm (default) or wiki (Wiktionary)"
     )
 
     args = parser.parse_args()
@@ -278,12 +278,12 @@ def main():
         print(f"\n{'='*60}")
         print(f"Ready to run queries for {len(lemmas)} words")
         print(f"Source: {args.source}")
-        if args.source == 'llm':
+        if args.source == "llm":
             print(f"Model: {args.model}")
         print(f"Throttle: {args.throttle}s between calls")
         print(f"{'='*60}")
         response = input("\nContinue? [y/N]: ")
-        if response.lower() not in ['y', 'yes']:
+        if response.lower() not in ["y", "yes"]:
             print("Aborted.")
             return
 
@@ -298,7 +298,7 @@ def main():
     for i, lemma_info in enumerate(lemmas, 1):
         logger.info(f"\n[{i}/{len(lemmas)}] Processing: {lemma_info['english']} -> {lemma_info['lithuanian']}")
 
-        success = process_lemma_declensions(client, lemma_info['id'], args.db_path, source=args.source)
+        success = process_lemma_declensions(client, lemma_info["id"], args.db_path, source=args.source)
 
         if success:
             successful += 1
@@ -319,5 +319,5 @@ def main():
     logger.info(f"{'='*60}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -101,7 +101,7 @@ def query_pronunciation(
             linguistic_db.log_query(
                 session,
                 word=word,
-                query_type='pronunciation',
+                query_type="pronunciation",
                 prompt=prompt,
                 response=json.dumps(response.structured_data),
                 model=client.model
@@ -112,9 +112,9 @@ def query_pronunciation(
         # Validate and return response data
         if (response.structured_data and
             isinstance(response.structured_data, dict) and
-            'pronunciation' in response.structured_data and
-            isinstance(response.structured_data['pronunciation'], dict)):
-            return response.structured_data['pronunciation'], True
+            "pronunciation" in response.structured_data and
+            isinstance(response.structured_data["pronunciation"], dict)):
+            return response.structured_data["pronunciation"], True
         else:
             logger.warning(f"Invalid pronunciation response format for word '{word}'")
             return {}, False
@@ -171,8 +171,8 @@ def update_pronunciation_for_definition(
     if success:
         # Update the definition with the pronunciation information
         try:
-            ipa = pronunciation_data.get('ipa', '')
-            phonetic = pronunciation_data.get('phonetic', '')
+            ipa = pronunciation_data.get("ipa", "")
+            phonetic = pronunciation_data.get("phonetic", "")
 
             # Update the definition with the pronunciation
             linguistic_db.update_definition(

@@ -13,4 +13,4 @@ from .word_manager import WordManager
 from .export_manager import TrakaidoExporter
 from .cli import main
 
-__all__ = ['WordManager', 'TrakaidoExporter', 'main']
+__all__ = ["WordManager", "TrakaidoExporter", "main"]

@@ -290,7 +290,7 @@ def get_noun_derivative_forms(session, lemma_id: int) -> List[DerivativeForm]:
     """
     return session.query(DerivativeForm).filter(
         DerivativeForm.lemma_id == lemma_id,
-        DerivativeForm.language_code == 'lt'
+        DerivativeForm.language_code == "lt"
     ).all()
 
 
@@ -308,7 +308,7 @@ def has_specific_noun_forms(session, lemma_id: int, required_forms: List[str]) -
     """
     existing_forms = session.query(DerivativeForm.grammatical_form).filter(
         DerivativeForm.lemma_id == lemma_id,
-        DerivativeForm.language_code == 'lt',
+        DerivativeForm.language_code == "lt",
         DerivativeForm.grammatical_form.in_(required_forms)
     ).all()
 
@@ -389,10 +389,10 @@ def get_alternative_forms_for_lemma(session, lemma: Lemma, language_code: str = 
     query = session.query(DerivativeForm)\
         .filter(DerivativeForm.lemma_id == lemma.id)\
         .filter(DerivativeForm.grammatical_form.in_([
-            'abbreviation',
-            'expanded_form',
-            'alternate_spelling',
-            'alternative_form'  # Legacy value
+            "abbreviation",
+            "expanded_form",
+            "alternate_spelling",
+            "alternative_form"  # Legacy value
         ]))
 
     if language_code:
@@ -440,7 +440,7 @@ def add_complete_word_entry(
     from wordfreq.storage.crud.lemma import add_lemma
     from wordfreq.storage.crud.word_token import add_word_token
 
-    language_code = 'en'
+    language_code = "en"
 
     # Extract translations from TranslationSet if provided
     if translations is not None:

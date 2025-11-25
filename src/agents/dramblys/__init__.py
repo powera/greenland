@@ -7,4 +7,4 @@ that should be in the dictionary.
 
 from agents.dramblys.agent import DramblysAgent
 
-__all__ = ['DramblysAgent']
+__all__ = ["DramblysAgent"]

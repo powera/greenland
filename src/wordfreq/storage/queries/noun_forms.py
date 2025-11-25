@@ -33,7 +33,7 @@ def get_noun_form(session, guid: str, grammatical_form: str) -> Optional[str]:
 
     form = session.query(DerivativeForm).filter(
         DerivativeForm.lemma_id == lemma.id,
-        DerivativeForm.language_code == 'lt',
+        DerivativeForm.language_code == "lt",
         (DerivativeForm.grammatical_form == full_form_underscore) |
         (DerivativeForm.grammatical_form == full_form_slash)
     ).first()
@@ -63,15 +63,15 @@ def get_all_noun_forms(session, guid: str) -> Dict[str, str]:
     # Check both formats: "noun_lt_" and "noun/lt_"
     forms = session.query(DerivativeForm).filter(
         DerivativeForm.lemma_id == lemma.id,
-        DerivativeForm.language_code == 'lt',
-        (DerivativeForm.grammatical_form.like('noun_lt_%') |
-         DerivativeForm.grammatical_form.like('noun/lt_%'))
+        DerivativeForm.language_code == "lt",
+        (DerivativeForm.grammatical_form.like("noun_lt_%") |
+         DerivativeForm.grammatical_form.like("noun/lt_%"))
     ).all()
 
     result = {}
     for form in forms:
         # Strip the "noun_lt_" or "noun/lt_" prefix to get the short form name
-        short_name = form.grammatical_form.replace('noun_lt_', '').replace('noun/lt_', '')
+        short_name = form.grammatical_form.replace("noun_lt_", "").replace("noun/lt_", "")
         result[short_name] = form.derivative_form_text
 
     return result

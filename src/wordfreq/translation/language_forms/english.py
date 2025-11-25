@@ -62,7 +62,7 @@ def query_english_verb_conjugations(
         logger.error(f"Lemma with ID {lemma_id} not found")
         return {}, False
 
-    if lemma.pos_type.lower() != 'verb':
+    if lemma.pos_type.lower() != "verb":
         logger.error(f"Lemma ID {lemma_id} is not a verb (pos_type: {lemma.pos_type})")
         return {}, False
 
@@ -121,7 +121,7 @@ def query_english_verb_conjugations(
             linguistic_db.log_query(
                 session,
                 word=verb,
-                query_type='english_verb_conjugations',
+                query_type="english_verb_conjugations",
                 prompt=prompt,
                 response=json.dumps(response.structured_data),
                 model=client.model
@@ -132,9 +132,9 @@ def query_english_verb_conjugations(
         # Validate and return response data
         if (response.structured_data and
             isinstance(response.structured_data, dict) and
-            'forms' in response.structured_data and
-            isinstance(response.structured_data['forms'], dict)):
-            forms = response.structured_data['forms']
+            "forms" in response.structured_data and
+            isinstance(response.structured_data["forms"], dict)):
+            forms = response.structured_data["forms"]
             return forms, True
         else:
             logger.warning(f"Invalid response format for English verb '{verb}'")

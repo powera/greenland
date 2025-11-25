@@ -16,11 +16,11 @@ from lib.benchmarks.factory import benchmark, generator, register_benchmark_meta
 from benchmarks.data.wordlist_extended import TRANSLATIONS, TranslationEntry
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 # Define valid language codes
-VALID_LANGS = {'en', 'fr', 'de', 'ind', 'sw', 'ko', 'kn', 'zh'}
+VALID_LANGS = {"en", "fr", "de", "ind", "sw", "ko", "kn", "zh"}
 
 # Define benchmark metadata creator
 def get_translation_metadata(origin_lang: str, target_lang: str) -> BenchmarkMetadata:
@@ -63,7 +63,7 @@ class TranslationGenerator(BenchmarkGenerator):
         super().__init__(metadata, session)
         
         # Extract language codes from metadata code
-        parts = metadata.code.split('_')
+        parts = metadata.code.split("_")
         if len(parts) == 4:
             self.origin_lang = parts[2]
             self.target_lang = parts[3]
@@ -316,7 +316,7 @@ class LanguagePairGenerator:
 if __name__ == "__main__":
     # When run directly, generate data for all language pairs
     LanguagePairGenerator.generate_specific_pairs([
-        ('en', 'fr'), 
-        ('en', 'zh'),
-        ('sw', 'ko')
+        ("en", "fr"), 
+        ("en", "zh"),
+        ("sw", "ko")
     ])

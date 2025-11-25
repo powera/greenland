@@ -20,12 +20,12 @@ def get_lemmas_without_translation(session, language: str, limit: int = 100) -> 
     """
     language = language.lower()
     column_map = {
-        'chinese': Lemma.chinese_translation,
-        'french': Lemma.french_translation,
-        'korean': Lemma.korean_translation,
-        'swahili': Lemma.swahili_translation,
-        'lithuanian': Lemma.lithuanian_translation,
-        'vietnamese': Lemma.vietnamese_translation
+        "chinese": Lemma.chinese_translation,
+        "french": Lemma.french_translation,
+        "korean": Lemma.korean_translation,
+        "swahili": Lemma.swahili_translation,
+        "lithuanian": Lemma.lithuanian_translation,
+        "vietnamese": Lemma.vietnamese_translation
     }
 
     if language not in column_map:
@@ -60,12 +60,12 @@ def update_lemma_translation(
 
     # Map language names to field names and language codes
     language_map = {
-        'chinese': ('chinese_translation', 'zh'),
-        'french': ('french_translation', 'fr'),
-        'korean': ('korean_translation', 'ko'),
-        'swahili': ('swahili_translation', 'sw'),
-        'lithuanian': ('lithuanian_translation', 'lt'),
-        'vietnamese': ('vietnamese_translation', 'vi')
+        "chinese": ("chinese_translation", "zh"),
+        "french": ("french_translation", "fr"),
+        "korean": ("korean_translation", "ko"),
+        "swahili": ("swahili_translation", "sw"),
+        "lithuanian": ("lithuanian_translation", "lt"),
+        "vietnamese": ("vietnamese_translation", "vi")
     }
 
     if language not in language_map:
@@ -97,39 +97,39 @@ def update_lemma_translation(
 # Language-specific convenience functions
 def get_definitions_without_korean_translations(session, limit: int = 100):
     """Get lemmas that need Korean translations."""
-    return get_lemmas_without_translation(session, 'korean', limit)
+    return get_lemmas_without_translation(session, "korean", limit)
 
 
 def get_definitions_without_swahili_translations(session, limit: int = 100):
     """Get lemmas that need Swahili translations."""
-    return get_lemmas_without_translation(session, 'swahili', limit)
+    return get_lemmas_without_translation(session, "swahili", limit)
 
 
 def get_definitions_without_lithuanian_translations(session, limit: int = 100):
     """Get lemmas that need Lithuanian translations."""
-    return get_lemmas_without_translation(session, 'lithuanian', limit)
+    return get_lemmas_without_translation(session, "lithuanian", limit)
 
 
 def get_definitions_without_vietnamese_translations(session, limit: int = 100):
     """Get lemmas that need Vietnamese translations."""
-    return get_lemmas_without_translation(session, 'vietnamese', limit)
+    return get_lemmas_without_translation(session, "vietnamese", limit)
 
 
 def get_definitions_without_french_translations(session, limit: int = 100):
     """Get lemmas that need French translations."""
-    return get_lemmas_without_translation(session, 'french', limit)
+    return get_lemmas_without_translation(session, "french", limit)
 
 
 def get_definitions_without_chinese_translations(session, limit: int = 100):
     """Get lemmas that need Chinese translations."""
-    return get_lemmas_without_translation(session, 'chinese', limit)
+    return get_lemmas_without_translation(session, "chinese", limit)
 
 
 def update_chinese_translation(session, lemma_id: int, chinese_translation: str):
     """Update Chinese translation for a lemma."""
-    return update_lemma_translation(session, lemma_id, 'chinese', chinese_translation)
+    return update_lemma_translation(session, lemma_id, "chinese", chinese_translation)
 
 
 def update_korean_translation(session, lemma_id: int, korean_translation: str):
     """Update Korean translation for a lemma."""
-    return update_lemma_translation(session, lemma_id, 'korean', korean_translation)
+    return update_lemma_translation(session, lemma_id, "korean", korean_translation)

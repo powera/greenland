@@ -19,7 +19,7 @@ if GREENLAND_SRC_PATH not in sys.path:
 from agents.dramblys.agent import DramblysAgent
 from agents.dramblys.cli import main
 
-__all__ = ['DramblysAgent', 'main']
+__all__ = ["DramblysAgent", "main"]
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

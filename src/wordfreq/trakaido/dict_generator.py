@@ -22,9 +22,9 @@ import re
 from typing import Dict, List, Any, Optional
 
 # Configuration
-GREENLAND_SRC_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
-GREENLAND_REPO_ROOT = os.path.abspath(os.path.join(GREENLAND_SRC_PATH, '..'))
-DEFAULT_OUTPUT_BASE = os.path.join(GREENLAND_REPO_ROOT, 'data', 'trakaido_wordlists')
+GREENLAND_SRC_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
+GREENLAND_REPO_ROOT = os.path.abspath(os.path.join(GREENLAND_SRC_PATH, ".."))
+DEFAULT_OUTPUT_BASE = os.path.join(GREENLAND_REPO_ROOT, "data", "trakaido_wordlists")
 
 import sys
 sys.path.append(GREENLAND_SRC_PATH)
@@ -48,7 +48,7 @@ def get_english_word_for_lemma(session, lemma: Lemma) -> str:
     
     # If that somehow fails, try to get from English derivative forms that are base forms
     for form in lemma.derivative_forms:
-        if form.language_code == 'en' and form.is_base_form:
+        if form.language_code == "en" and form.is_base_form:
             return form.derivative_form_text
     
     return None # Should not happen if data is correct
@@ -61,12 +61,12 @@ def get_lithuanian_word_for_lemma(session, lemma: Lemma) -> str:
     
     # Fallback to Lithuanian base forms
     for form in lemma.derivative_forms:
-        if form.is_base_form and form.language_code == 'lt':
+        if form.is_base_form and form.language_code == "lt":
             return form.derivative_form_text
     
     # Fallback to any Lithuanian derivative form
     for form in lemma.derivative_forms:
-        if form.language_code == 'lt':
+        if form.language_code == "lt":
             return form.derivative_form_text
     
     # Final fallback (shouldn't happen if data is properly migrated)
@@ -96,22 +96,22 @@ def get_chinese_word_for_lemma(session, lemma: Lemma, simplified: bool = True) -
 
 def get_alternatives_for_lemma(session, lemma: Lemma) -> Dict[str, List[str]]:
     """Get alternative forms for a lemma, organized by language."""
-    alternatives = {'english': [], 'lithuanian': [], 'chinese': []}
+    alternatives = {"english": [], "lithuanian": [], "chinese": []}
     
     # Get alternative forms from DerivativeForm table
     # Alternative forms have grammatical_form starting with "alternative_"
     alt_forms = session.query(DerivativeForm)\
         .filter(DerivativeForm.lemma_id == lemma.id)\
-        .filter(DerivativeForm.grammatical_form.like('alternative_%'))\
+        .filter(DerivativeForm.grammatical_form.like("alternative_%"))\
         .all()
     
     for alt_form in alt_forms:
-        if alt_form.language_code == 'en' and 'english' in alternatives:
-            alternatives['english'].append(alt_form.derivative_form_text)
-        elif alt_form.language_code == 'lt' and 'lithuanian' in alternatives:
-            alternatives['lithuanian'].append(alt_form.derivative_form_text)
-        elif alt_form.language_code == 'zh' and 'chinese' in alternatives:
-            alternatives['chinese'].append(alt_form.derivative_form_text)
+        if alt_form.language_code == "en" and "english" in alternatives:
+            alternatives["english"].append(alt_form.derivative_form_text)
+        elif alt_form.language_code == "lt" and "lithuanian" in alternatives:
+            alternatives["lithuanian"].append(alt_form.derivative_form_text)
+        elif alt_form.language_code == "zh" and "chinese" in alternatives:
+            alternatives["chinese"].append(alt_form.derivative_form_text)
         # Can extend for other languages as needed
     
     return alternatives
@@ -233,7 +233,7 @@ def generate_structure_data(session, difficulty_level: int, lang: str = "lithuan
         
         if lemmas:
             # Convert subtype name to display format
-            display_subtype = subtype.replace('_', ' ').title().replace(' And ', ' + ')
+            display_subtype = subtype.replace("_", " ").title().replace(" And ", " + ")
             
             # Extract just the GUIDs for structure files, validating each one
             guid_list = []
@@ -281,7 +281,7 @@ def generate_structure_file(session, difficulty_level: int, output_dir: str, lan
     subtypes_to_import = set()
     for display_subtype, guids in level_data.items():
         # Convert display name back to subtype for import
-        subtype = display_subtype.lower().replace(' + ', '_and_').replace(' ', '_')
+        subtype = display_subtype.lower().replace(" + ", "_and_").replace(" ", "_")
         subtypes_to_import.add(subtype)
     
     # Generate imports
@@ -289,7 +289,7 @@ def generate_structure_file(session, difficulty_level: int, output_dir: str, lan
     for subtype in sorted(subtypes_to_import):
         imports.append(f"from ..dictionary.{subtype}_dictionary import *")
     
-    imports_section = '\n'.join(imports) + '\n\n' if imports else ''
+    imports_section = "\n".join(imports) + "\n\n" if imports else ""
     
     # Create header
     header = f'''"""
@@ -315,12 +315,12 @@ Format: "Category": {{
     structured_data = {}
     for display_subtype, guids in level_data.items():
         # Create pretty display name
-        pretty_name = display_subtype.replace('_', ' ').title()
-        if ' And ' in pretty_name:
-            pretty_name = pretty_name.replace(' And ', ' & ')
+        pretty_name = display_subtype.replace("_", " ").title()
+        if " And " in pretty_name:
+            pretty_name = pretty_name.replace(" And ", " & ")
         
         # Create word list using the actual GUID variable names
-        word_list = ', '.join(guids)
+        word_list = ", ".join(guids)
         
         structured_data[display_subtype] = {
             "display_name": pretty_name,
@@ -330,26 +330,26 @@ Format: "Category": {{
     # Format the structure data manually to handle the raw code
     structure_lines = []
     structure_lines.append(f"{variable_name} = {{")
-    
+
     if structured_data:
         for category, data in structured_data.items():
-            structure_lines.append(f'  {repr(category)}: {{')
-            structure_lines.append(f'    "display_name": {repr(data["display_name"])},')
-            structure_lines.append(f'    "words": {data["words"]}')
-            structure_lines.append('  },')
+            structure_lines.append(f"  {repr(category)}: {{")
+            structure_lines.append(f"    'display_name': {repr(data['display_name'])},")
+            structure_lines.append(f"    'words': {data['words']}")
+            structure_lines.append("  },")
     else:
         # Empty level - add a comment
-        structure_lines.append('  # No words available at this difficulty level')
+        structure_lines.append("  # No words available at this difficulty level")
     
-    structure_lines.append('}')
+    structure_lines.append("}")
     
-    content = header + '\n'.join(structure_lines) + '\n'
+    content = header + "\n".join(structure_lines) + "\n"
     
     # Ensure output directory exists
     os.makedirs(os.path.dirname(filepath), exist_ok=True)
     
     # Write file
-    with open(filepath, 'w', encoding='utf-8') as f:
+    with open(filepath, "w", encoding="utf-8") as f:
         f.write(content)
     
     return filepath
@@ -364,7 +364,7 @@ def generate_dictionary_file_content(session, subtype: str, lang="lithuanian") -
         return f'"""\n{subtype.replace("_", " ").title()} - Dictionary Data\n\nNo entries found for this subtype.\n"""\n'
     
     # Generate header
-    subtype_title = subtype.replace('_', ' ').title()
+    subtype_title = subtype.replace("_", " ").title()
     header = f'''"""
 {subtype_title} - Dictionary Data
 
@@ -399,18 +399,18 @@ Entry structure:
         
         # Format the entry as Python code with proper escaping
         entry_code = f"""{variable_name} = {{
-  'guid': {repr(entry_data['guid'])},
-  'english': {repr(entry_data['english'])},
+  'guid': {repr(entry_data["guid"])},
+  'english': {repr(entry_data["english"])},
   '{lang}': {repr(entry_data[lang])},
   'alternatives': {{
-    'english': {entry_data['alternatives']['english']},
-    '{lang}': {entry_data['alternatives'][lang]}
+    'english': {entry_data["alternatives"]["english"]},
+    '{lang}': {entry_data["alternatives"][lang]}
   }},
   'metadata': {{
-    'difficulty_level': {entry_data['metadata']['difficulty_level']},
-    'frequency_rank': {entry_data['metadata']['frequency_rank']},
-    'tags': {entry_data['metadata']['tags']},
-    'notes': {repr(entry_data['metadata']['notes'])}
+    'difficulty_level': {entry_data["metadata"]["difficulty_level"]},
+    'frequency_rank': {entry_data["metadata"]["frequency_rank"]},
+    'tags': {entry_data["metadata"]["tags"]},
+    'notes': {repr(entry_data["metadata"]["notes"])}
   }}
 }}"""
         entries.append(entry_code)
@@ -418,7 +418,7 @@ Entry structure:
     if skipped_count > 0:
         print(f"Skipped {skipped_count} lemmas with invalid GUIDs in subtype '{subtype}'")
     
-    return header + '\n\n'.join(entries) + '\n'
+    return header + "\n\n".join(entries) + "\n"
 
 def generate_dictionary_file(session, subtype: str, output_dir: str, lang: str = "lithuanian") -> str:
     """Generate a dictionary file for a specific subtype."""
@@ -429,7 +429,7 @@ def generate_dictionary_file(session, subtype: str, output_dir: str, lang: str =
     # Ensure output directory exists
     os.makedirs(os.path.dirname(filepath), exist_ok=True)
     
-    with open(filepath, 'w', encoding='utf-8') as f:
+    with open(filepath, "w", encoding="utf-8") as f:
         f.write(content)
     
     return filepath
@@ -491,18 +491,18 @@ def generate_all_files(session, output_dir: str, lang: str) -> List[str]:
 
 def main():
     """Main function for command-line usage."""
-    parser = argparse.ArgumentParser(description='Generate trakaido structure and dictionary files from wordfreq database')
-    parser.add_argument('--output-base', '-o', default=DEFAULT_OUTPUT_BASE, 
-                       help='Output directory for generated files')
-    parser.add_argument('--language', choices=['lithuanian', 'chinese'], default='lithuanian',
-                       help='Choose language - lithuanian or chinese')
-    parser.add_argument('--level', '-l', type=int,
-                       help='Generate structure file for specific difficulty level only')
-    parser.add_argument('--subtype', '-s', 
-                       help='Generate dictionary file for specific subtype only')
-    parser.add_argument('--type', '-t', choices=['structure', 'dictionary', 'both'], default='both',
-                       help='Type of files to generate (default: both)')
-    parser.add_argument('--db-path', help='Path to database file (optional)')
+    parser = argparse.ArgumentParser(description="Generate trakaido structure and dictionary files from wordfreq database")
+    parser.add_argument("--output-base", "-o", default=DEFAULT_OUTPUT_BASE, 
+                       help="Output directory for generated files")
+    parser.add_argument("--language", choices=["lithuanian", "chinese"], default="lithuanian",
+                       help="Choose language - lithuanian or chinese")
+    parser.add_argument("--level", "-l", type=int,
+                       help="Generate structure file for specific difficulty level only")
+    parser.add_argument("--subtype", "-s", 
+                       help="Generate dictionary file for specific subtype only")
+    parser.add_argument("--type", "-t", choices=["structure", "dictionary", "both"], default="both",
+                       help="Type of files to generate (default: both)")
+    parser.add_argument("--db-path", help="Path to database file (optional)")
     
     args = parser.parse_args()
     
@@ -519,7 +519,7 @@ def main():
         
         lang_code_map = {"lithuanian": "lang_lt", "chinese": "lang_zh"}
         output_dir = os.path.join(args.output_base, lang_code_map[args.language], "generated")
-        if args.level and args.type in ['structure', 'both']:
+        if args.level and args.type in ["structure", "both"]:
             # Generate specific level structure file
             filepath = generate_structure_file(session, args.level, output_dir, lang=args.language)
             if filepath:
@@ -528,7 +528,7 @@ def main():
             else:
                 print(f"No data found for level {args.level}")
         
-        if args.subtype and args.type in ['dictionary', 'both']:
+        if args.subtype and args.type in ["dictionary", "both"]:
             # Generate specific subtype dictionary file
             filepath = generate_dictionary_file(session, args.subtype, output_dir, lang=args.language)
             if filepath:
@@ -539,9 +539,9 @@ def main():
         
         if not args.level and not args.subtype:
             # Generate all files based on type
-            if args.type == 'structure':
+            if args.type == "structure":
                 generated_files = generate_all_structure_files(session, output_dir, lang=args.language)
-            elif args.type == 'dictionary':
+            elif args.type == "dictionary":
                 generated_files = generate_all_dictionary_files(session, output_dir, lang=args.language)
             else:  # both
                 generated_files = generate_all_files(session, output_dir, lang=args.language)

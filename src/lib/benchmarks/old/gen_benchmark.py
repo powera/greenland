@@ -50,23 +50,23 @@ Use natural language and vary the sentence structure."""
         """Generate a question with 6 simple sentences."""
         count = 6
         selected = {
-            'names': random.sample(names, count),
-            'actions': random.sample(actions, count),
-            'locations': random.sample(locations, count)
+            "names": random.sample(names, count),
+            "actions": random.sample(actions, count),
+            "locations": random.sample(locations, count)
         }
         
         sentences = [
             self.generate_sentence(n, a, l)
-            for n, a, l in zip(selected['names'], selected['actions'], selected['locations'])
+            for n, a, l in zip(selected["names"], selected["actions"], selected["locations"])
         ]
 
         return {
             "sentences": sentences,
             "correct": {
                 "sentence": sentences[-1],
-                "name": selected['names'][-1],
-                "action": selected['actions'][-1],
-                "location": selected['locations'][-1],
+                "name": selected["names"][-1],
+                "action": selected["actions"][-1],
+                "location": selected["locations"][-1],
             }
         }
 
@@ -77,9 +77,9 @@ Use natural language and vary the sentence structure."""
                 return [line.strip() for line in f]
 
         resources = {
-            'names': load_list('names.txt'),
-            'actions': load_list('actions.txt'),
-            'locations': load_list('locations.txt')
+            "names": load_list("names.txt"),
+            "actions": load_list("actions.txt"),
+            "locations": load_list("locations.txt")
         }
 
         for idx in range(25):

@@ -234,10 +234,10 @@ def bulk_add_overrides(
     for override_data in overrides:
         add_difficulty_override(
             session=session,
-            lemma_id=override_data['lemma_id'],
-            language_code=override_data['language_code'],
-            difficulty_level=override_data['difficulty_level'],
-            notes=override_data.get('notes')
+            lemma_id=override_data["lemma_id"],
+            language_code=override_data["language_code"],
+            difficulty_level=override_data["difficulty_level"],
+            notes=override_data.get("notes")
         )
         count += 1
 

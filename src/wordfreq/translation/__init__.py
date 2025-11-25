@@ -3,4 +3,4 @@
 from wordfreq.translation.client import LinguisticClient
 from wordfreq.translation.processor import WordProcessor
 
-__all__ = ['LinguisticClient', 'WordProcessor']
+__all__ = ["LinguisticClient", "WordProcessor"]

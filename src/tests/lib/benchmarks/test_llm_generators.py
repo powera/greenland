@@ -32,7 +32,7 @@ from lib.benchmarks.data_models import BenchmarkQuestion, BenchmarkMetadata
 from lib.benchmarks.factory import get_all_benchmark_codes, get_generator
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 
@@ -78,7 +78,7 @@ class LLMResponseCache:
         """Load the cache from file if it exists."""
         if os.path.exists(self.cache_file_path):
             try:
-                with open(self.cache_file_path, 'r') as f:
+                with open(self.cache_file_path, "r") as f:
                     self.cache = json.load(f)
                 logger.info(f"Loaded {len(self.cache)} cached LLM responses from {self.cache_file_path}")
             except Exception as e:
@@ -94,7 +94,7 @@ class LLMResponseCache:
             # Create directory if it doesn't exist
             os.makedirs(os.path.dirname(os.path.abspath(self.cache_file_path)), exist_ok=True)
             
-            with open(self.cache_file_path, 'w') as f:
+            with open(self.cache_file_path, "w") as f:
                 json.dump(self.cache, f, indent=2)
             logger.info(f"Saved {len(self.cache)} cached LLM responses to {self.cache_file_path}")
             logger.info(f"Cache hits: {self.hit_count}, misses: {self.miss_count}")
@@ -199,12 +199,12 @@ class GeneratorTestCase(unittest.TestCase):
             self.skipTest("No generator_class or benchmark_code specified")
 
         # Patch the insert_benchmark function to prevent database writes
-        self.insert_benchmark_patcher = patch('datastore.benchmarks.insert_benchmark')
+        self.insert_benchmark_patcher = patch("datastore.benchmarks.insert_benchmark")
         self.mock_insert_benchmark = self.insert_benchmark_patcher.start()
         self.mock_insert_benchmark.return_value = (True, "Benchmark inserted")
 
         # Patch the insert_question function to prevent database writes
-        self.insert_question_patcher = patch('datastore.benchmarks.insert_question')
+        self.insert_question_patcher = patch("datastore.benchmarks.insert_question")
         self.mock_insert_question = self.insert_question_patcher.start()
         self.mock_insert_question.return_value = (True, "Question inserted")
         
@@ -215,21 +215,21 @@ class GeneratorTestCase(unittest.TestCase):
     def _setup_llm_stubs(self):
         """Set up LLM function stubs with cached responses."""
         # Patch random.choice, random.sample, etc. to ensure deterministic behavior
-        self.random_choice_patcher = patch('random.choice')
+        self.random_choice_patcher = patch("random.choice")
         self.mock_random_choice = self.random_choice_patcher.start()
         self.mock_random_choice.side_effect = lambda seq: seq[0]  # Always choose first item
         
-        self.random_sample_patcher = patch('random.sample')
+        self.random_sample_patcher = patch("random.sample")
         self.mock_random_sample = self.random_sample_patcher.start()
         self.mock_random_sample.side_effect = lambda population, k: population[:k]  # Always take first k items
         
         # Patch unified_client.generate_chat to use cache
-        self.generate_chat_patcher = patch('lib.benchmarks.base.unified_client.generate_chat')
+        self.generate_chat_patcher = patch("lib.benchmarks.base.unified_client.generate_chat")
         self.mock_generate_chat = self.generate_chat_patcher.start()
         self.mock_generate_chat.side_effect = self._mock_generate_chat
         
         # Patch unified_client.warm_model
-        self.warm_model_patcher = patch('lib.benchmarks.base.unified_client.warm_model')
+        self.warm_model_patcher = patch("lib.benchmarks.base.unified_client.warm_model")
         self.mock_warm_model = self.warm_model_patcher.start()
         self.mock_warm_model.return_value = True
 
@@ -240,9 +240,9 @@ class GeneratorTestCase(unittest.TestCase):
         if cached:
             # Create a mock response object using the cached data
             mock_response = MagicMock()
-            mock_response.structured_data = cached.get('structured_data')
-            mock_response.response_text = cached.get('response_text')
-            mock_response.usage = cached.get('usage')
+            mock_response.structured_data = cached.get("structured_data")
+            mock_response.response_text = cached.get("response_text")
+            mock_response.usage = cached.get("usage")
             return mock_response
         else:
             # If no cached response, create a fallback response
@@ -251,7 +251,7 @@ class GeneratorTestCase(unittest.TestCase):
             
             # Different fallback responses based on schema
             if json_schema:
-                if 'antonym' in str(json_schema):
+                if "antonym" in str(json_schema):
                     mock_response.structured_data = {
                         "word": "example", 
                         "candidates": ["opposite", "similar", "unrelated", "different", "contrasting", "antonym"],
@@ -259,7 +259,7 @@ class GeneratorTestCase(unittest.TestCase):
                         "difficulty": "medium",
                         "category": "adjectives"
                     }
-                elif 'valid' in str(json_schema):
+                elif "valid" in str(json_schema):
                     mock_response.structured_data = {"valid": True, "reason": "Good question"}
                 else:
                     # Generic fallback
@@ -303,16 +303,16 @@ class GeneratorTestCase(unittest.TestCase):
         question = self.generator.generate_question()
         
         # Check that the question has all required attributes
-        self.assertTrue(hasattr(question, 'question_text'))
-        self.assertTrue(hasattr(question, 'answer_type'))
-        self.assertTrue(hasattr(question, 'correct_answer'))
+        self.assertTrue(hasattr(question, "question_text"))
+        self.assertTrue(hasattr(question, "answer_type"))
+        self.assertTrue(hasattr(question, "correct_answer"))
         
         # Check that converting to dict works
         question_dict = question.to_dict()
         self.assertIsInstance(question_dict, dict)
-        self.assertIn('question_text', question_dict)
-        self.assertIn('answer_type', question_dict)
-        self.assertIn('correct_answer', question_dict)
+        self.assertIn("question_text", question_dict)
+        self.assertIn("answer_type", question_dict)
+        self.assertIn("correct_answer", question_dict)
 
     def test_save_question(self):
         """Test that the generator can save a question."""
@@ -344,8 +344,8 @@ class GeneratorTestCase(unittest.TestCase):
         if self.record_mode:
             # Create a wrapper for the real generate_chat function
             original_generate_chat = getattr(
-                __import__('lib.benchmarks.base', fromlist=['unified_client']).unified_client, 
-                'generate_chat'
+                __import__("lib.benchmarks.base", fromlist=["unified_client"]).unified_client, 
+                "generate_chat"
             )
             
             def record_wrapper(prompt, model, **kwargs):
@@ -354,16 +354,16 @@ class GeneratorTestCase(unittest.TestCase):
                 
                 # Cache the response
                 cached_data = {
-                    'structured_data': response.structured_data,
-                    'response_text': response.response_text,
-                    'usage': response.usage.__dict__ if hasattr(response.usage, '__dict__') else response.usage
+                    "structured_data": response.structured_data,
+                    "response_text": response.response_text,
+                    "usage": response.usage.__dict__ if hasattr(response.usage, "__dict__") else response.usage
                 }
-                llm_cache.put(prompt, model, cached_data, kwargs.get('json_schema'), kwargs.get('context'))
+                llm_cache.put(prompt, model, cached_data, kwargs.get("json_schema"), kwargs.get("context"))
                 
                 return response
                 
             # Apply the wrapper for this test
-            with patch('lib.benchmarks.base.unified_client.generate_chat', side_effect=record_wrapper):
+            with patch("lib.benchmarks.base.unified_client.generate_chat", side_effect=record_wrapper):
                 result = self.generator.generate_llm_question("test prompt", schema=schema)
                 self.assertIsNotNone(result)
                 
@@ -382,7 +382,7 @@ class GeneratorTestCase(unittest.TestCase):
         
         else:
             # Without stubbing or recording, use temporary mocks
-            with patch('lib.benchmarks.base.unified_client.generate_chat') as mock_generate_chat:
+            with patch("lib.benchmarks.base.unified_client.generate_chat") as mock_generate_chat:
                 # Configure the mock
                 mock_response = MagicMock()
                 mock_response.structured_data = {"key": "value"}
@@ -405,8 +405,8 @@ class GeneratorTestCase(unittest.TestCase):
         if self.record_mode:
             # Create a wrapper for the real generate_chat function
             original_generate_chat = getattr(
-                __import__('lib.benchmarks.base', fromlist=['unified_client']).unified_client, 
-                'generate_chat'
+                __import__("lib.benchmarks.base", fromlist=["unified_client"]).unified_client, 
+                "generate_chat"
             )
             
             def record_wrapper(prompt, model, **kwargs):
@@ -415,16 +415,16 @@ class GeneratorTestCase(unittest.TestCase):
                 
                 # Cache the response
                 cached_data = {
-                    'structured_data': response.structured_data,
-                    'response_text': response.response_text,
-                    'usage': response.usage.__dict__ if hasattr(response.usage, '__dict__') else response.usage
+                    "structured_data": response.structured_data,
+                    "response_text": response.response_text,
+                    "usage": response.usage.__dict__ if hasattr(response.usage, "__dict__") else response.usage
                 }
-                llm_cache.put(prompt, model, cached_data, kwargs.get('json_schema'), kwargs.get('context'))
+                llm_cache.put(prompt, model, cached_data, kwargs.get("json_schema"), kwargs.get("context"))
                 
                 return response
                 
             # Apply the wrapper for this test
-            with patch('lib.benchmarks.base.unified_client.generate_chat', side_effect=record_wrapper):
+            with patch("lib.benchmarks.base.unified_client.generate_chat", side_effect=record_wrapper):
                 is_valid, reason = self.generator.validate_question(question)
                 self.assertIsNotNone(is_valid)
                 self.assertIsNotNone(reason)
@@ -437,7 +437,7 @@ class GeneratorTestCase(unittest.TestCase):
         
         else:
             # Without stubbing or recording, use temporary mocks
-            with patch('lib.benchmarks.base.unified_client.generate_chat') as mock_generate_chat:
+            with patch("lib.benchmarks.base.unified_client.generate_chat") as mock_generate_chat:
                 # Configure the mock
                 mock_response = MagicMock()
                 mock_response.structured_data = {"valid": True, "reason": "Good question"}
@@ -474,7 +474,7 @@ class TestAntonymGenerator(GeneratorTestCase):
         
         # Check for antonym-specific properties
         self.assertIn("antonym", question.question_text.lower())
-        self.assertTrue(hasattr(question, 'choices'))
+        self.assertTrue(hasattr(question, "choices"))
         self.assertIsInstance(question.choices, list)
 
 
@@ -508,27 +508,27 @@ def get_test_suite():
 
 def parse_args():
     """Parse command line arguments."""
-    parser = argparse.ArgumentParser(description='Run generator tests')
+    parser = argparse.ArgumentParser(description="Run generator tests")
     
     # LLM stubbing options
     cache_group = parser.add_mutually_exclusive_group()
-    cache_group.add_argument('--stub-llm', action='store_true', 
-                          help='Stub out LLM calls using cached responses')
-    cache_group.add_argument('--record', action='store_true',
-                          help='Record LLM responses to cache file for future stub runs')
+    cache_group.add_argument("--stub-llm", action="store_true", 
+                          help="Stub out LLM calls using cached responses")
+    cache_group.add_argument("--record", action="store_true",
+                          help="Record LLM responses to cache file for future stub runs")
     
     # Cache file path
-    parser.add_argument('--cache-file', default='llm_responses_cache.json',
-                      help='Path to the cache file (default: llm_responses_cache.json)')
+    parser.add_argument("--cache-file", default="llm_responses_cache.json",
+                      help="Path to the cache file (default: llm_responses_cache.json)")
     
     # Random seed
-    parser.add_argument('--seed', type=int, default=42,
-                      help='Random seed for deterministic tests (default: 42)')
+    parser.add_argument("--seed", type=int, default=42,
+                      help="Random seed for deterministic tests (default: 42)")
     
     return parser.parse_args()
 
 
-def run_tests(stub_llm=False, record_mode=False, cache_file='llm_responses_cache.json', random_seed=42):
+def run_tests(stub_llm=False, record_mode=False, cache_file="llm_responses_cache.json", random_seed=42):
     """Run all generator tests.
     
     Args:

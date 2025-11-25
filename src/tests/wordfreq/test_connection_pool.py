@@ -10,7 +10,7 @@ import sys
 from unittest.mock import patch, MagicMock
 
 # Add the src directory to the path so we can import the module
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
 from wordfreq.storage.connection_pool import ConnectionPool, get_session, close_thread_sessions
 
@@ -29,7 +29,7 @@ class TestConnectionPool(unittest.TestCase):
         ConnectionPool._initialized = False
         
         # Create a patch for the logger to avoid logging during tests
-        self.patch_logger = patch('wordfreq.connection_pool.logger')
+        self.patch_logger = patch("wordfreq.connection_pool.logger")
         self.mock_logger = self.patch_logger.start()
 
     def tearDown(self):
@@ -54,9 +54,9 @@ class TestConnectionPool(unittest.TestCase):
         
         # Verify the singleton instance is initialized
         self.assertTrue(pool1._initialized)
-        self.assertTrue(hasattr(pool1, '_engines'))
-        self.assertTrue(hasattr(pool1, '_session_factories'))
-        self.assertTrue(hasattr(pool1, '_thread_local'))
+        self.assertTrue(hasattr(pool1, "_engines"))
+        self.assertTrue(hasattr(pool1, "_session_factories"))
+        self.assertTrue(hasattr(pool1, "_thread_local"))
 
     def test_get_engine_creates_engine(self):
         """Test that get_engine creates a new engine when one doesn't exist."""
@@ -84,7 +84,7 @@ class TestConnectionPool(unittest.TestCase):
         session = pool.get_session(self.db_path)
         
         # Verify a session was created
-        self.assertTrue(hasattr(pool._thread_local, 'sessions'))
+        self.assertTrue(hasattr(pool._thread_local, "sessions"))
         self.assertIn(self.db_path, pool._thread_local.sessions)
         self.assertEqual(session, pool._thread_local.sessions[self.db_path])
         

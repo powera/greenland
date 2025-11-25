@@ -130,16 +130,16 @@ def slug_json_to_html(slug: str) -> None:
 
 def json_to_html(json_file: str, output_html: str) -> None:
     """Convert JSON results file to HTML report."""
-    with open(json_file, 'r') as f:
+    with open(json_file, "r") as f:
         data = json.load(f)
 
     # HTML template
-    html_content = '''
+    html_content = """
     <!DOCTYPE html>
-    <html lang="en">
+    <html lang=\"en\">
     <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta charset=\"UTF-8\">
+        <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
         <title>LLM Outputs</title>
         <style>
             .collapsible {
@@ -183,18 +183,18 @@ def json_to_html(json_file: str, output_html: str) -> None:
         </style>
     </head>
     <body>
-    '''
+    """
 
     # Add prompt
     html_content += f'<h2>Prompt: {data["prompt"]}</h2>\n'
 
     # Add each result in a collapsible div
-    for result in data['results']:
-        response = result.get('response', '')
+    for result in data["results"]:
+        response = result.get("response", "")
         response = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', response)
-        response = response.replace('\n', '<br>')
+        response = response.replace("\n", "<br>")
 
-        critique = result.get('critique', '')
+        critique = result.get("critique", "")
         if isinstance(critique, dict):
             critique = f'''
 <b>Was this a refusal?</b> {critique["is_refusal"]}<br />
@@ -203,10 +203,10 @@ def json_to_html(json_file: str, output_html: str) -> None:
 <b>Was there excessive repetition?</b> {critique["repetition"]}<br />
 <b>Was there excessive verbosity?</b> {critique["verbosity"]}<br />
 <b>Were there unwarranted assumptions?</b> {critique["unwarranted_assumptions"]}'''
-        critique = critique.replace('\n', '<br>')
+        critique = critique.replace("\n", "<br>")
 
         html_content += f'''
-        <button class="collapsible">Model: {result['model']} (Cost: {result['usage']['cost']:.6f}, Response Tokens: {result['usage']['tokens_out']})</button>
+        <button class="collapsible">Model: {result["model"]} (Cost: {result["usage"]["cost"]:.6f}, Response Tokens: {result["usage"]["tokens_out"]})</button>
         <div class="content">
             <div class="response-critique">
                 <div class="column response-column">
@@ -222,26 +222,26 @@ def json_to_html(json_file: str, output_html: str) -> None:
         '''
 
     # Add JavaScript
-    html_content += '''
+    html_content += """
     <script>
-        var coll = document.getElementsByClassName("collapsible");
+        var coll = document.getElementsByClassName(\"collapsible\");
         for (var i = 0; i < coll.length; i++) {
-            coll[i].addEventListener("click", function() {
-                this.classList.toggle("active");
+            coll[i].addEventListener(\"click\", function() {
+                this.classList.toggle(\"active\");
                 var content = this.nextElementSibling;
-                if (content.style.display === "block") {
-                    content.style.display = "none";
+                if (content.style.display === \"block\") {
+                    content.style.display = \"none\";
                 } else {
-                    content.style.display = "block";
+                    content.style.display = \"block\";
                 }
             });
         }
     </script>
     </body>
     </html>
-    '''
+    """
 
-    with open(output_html, 'w') as f:
+    with open(output_html, "w") as f:
         f.write(html_content)
 
 def main():

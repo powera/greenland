@@ -113,15 +113,15 @@ def query_lithuanian_noun_declensions(
     lemma = session.query(linguistic_db.Lemma).filter(linguistic_db.Lemma.id == lemma_id).first()
     if not lemma:
         logger.error(f"Lemma with ID {lemma_id} not found")
-        return {}, False, 'regular'
+        return {}, False, "regular"
 
     if not lemma.lithuanian_translation:
         logger.error(f"Lemma ID {lemma_id} has no Lithuanian translation")
-        return {}, False, 'regular'
+        return {}, False, "regular"
 
-    if lemma.pos_type.lower() != 'noun':
+    if lemma.pos_type.lower() != "noun":
         logger.error(f"Lemma ID {lemma_id} is not a noun (pos_type: {lemma.pos_type})")
-        return {}, False, 'regular'
+        return {}, False, "regular"
 
     noun = lemma.lithuanian_translation
     english_word = lemma.lemma_text
@@ -189,7 +189,7 @@ def query_lithuanian_noun_declensions(
             linguistic_db.log_query(
                 session,
                 word=noun,
-                query_type='lithuanian_noun_declensions',
+                query_type="lithuanian_noun_declensions",
                 prompt=prompt,
                 response=json.dumps(response.structured_data),
                 model=client.model
@@ -200,29 +200,29 @@ def query_lithuanian_noun_declensions(
         # Validate and return response data
         if (response.structured_data and
             isinstance(response.structured_data, dict) and
-            'forms' in response.structured_data and
-            isinstance(response.structured_data['forms'], dict)):
+            "forms" in response.structured_data and
+            isinstance(response.structured_data["forms"], dict)):
             # Filter out forms based on number_type
-            forms = response.structured_data['forms']
-            number_type = response.structured_data.get('number_type', 'regular')
+            forms = response.structured_data["forms"]
+            number_type = response.structured_data.get("number_type", "regular")
 
             # For plurale_tantum, remove all singular forms
-            if number_type == 'plurale_tantum':
-                forms = {k: v for k, v in forms.items() if not k.endswith('_singular')}
+            if number_type == "plurale_tantum":
+                forms = {k: v for k, v in forms.items() if not k.endswith("_singular")}
                 logger.info(f"Filtered singular forms for plurale_tantum noun '{noun}'")
             # For singulare_tantum, remove all plural forms
-            elif number_type == 'singulare_tantum':
-                forms = {k: v for k, v in forms.items() if not k.endswith('_plural')}
+            elif number_type == "singulare_tantum":
+                forms = {k: v for k, v in forms.items() if not k.endswith("_plural")}
                 logger.info(f"Filtered plural forms for singulare_tantum noun '{noun}'")
 
             return forms, True, number_type
         else:
             logger.warning(f"Invalid response format for Lithuanian noun '{noun}'")
-            return {}, False, 'regular'
+            return {}, False, "regular"
 
     except Exception as e:
         logger.error(f"Error querying Lithuanian declensions for '{noun}': {type(e).__name__}: {e}")
-        return {}, False, 'regular'
+        return {}, False, "regular"
 
 
 def query_lithuanian_verb_conjugations(
@@ -253,7 +253,7 @@ def query_lithuanian_verb_conjugations(
         logger.error(f"Lemma ID {lemma_id} has no Lithuanian translation")
         return {}, False
 
-    if lemma.pos_type.lower() != 'verb':
+    if lemma.pos_type.lower() != "verb":
         logger.error(f"Lemma ID {lemma_id} is not a verb (pos_type: {lemma.pos_type})")
         return {}, False
 
@@ -322,7 +322,7 @@ def query_lithuanian_verb_conjugations(
             linguistic_db.log_query(
                 session,
                 word=verb,
-                query_type='lithuanian_verb_conjugations',
+                query_type="lithuanian_verb_conjugations",
                 prompt=prompt,
                 response=json.dumps(response.structured_data),
                 model=client.model
@@ -333,9 +333,9 @@ def query_lithuanian_verb_conjugations(
         # Validate and return response data
         if (response.structured_data and
             isinstance(response.structured_data, dict) and
-            'forms' in response.structured_data and
-            isinstance(response.structured_data['forms'], dict)):
-            forms = response.structured_data['forms']
+            "forms" in response.structured_data and
+            isinstance(response.structured_data["forms"], dict)):
+            forms = response.structured_data["forms"]
             return forms, True
         else:
             logger.warning(f"Invalid response format for Lithuanian verb '{verb}'")
@@ -374,7 +374,7 @@ def query_lithuanian_adjective_declensions(
         logger.error(f"Lemma ID {lemma_id} has no Lithuanian translation")
         return {}, False
 
-    if lemma.pos_type.lower() != 'adjective':
+    if lemma.pos_type.lower() != "adjective":
         logger.error(f"Lemma ID {lemma_id} is not an adjective (pos_type: {lemma.pos_type})")
         return {}, False
 
@@ -447,7 +447,7 @@ def query_lithuanian_adjective_declensions(
             linguistic_db.log_query(
                 session,
                 word=adjective,
-                query_type='lithuanian_adjective_declensions',
+                query_type="lithuanian_adjective_declensions",
                 prompt=prompt,
                 response=json.dumps(response.structured_data),
                 model=client.model
@@ -458,9 +458,9 @@ def query_lithuanian_adjective_declensions(
         # Validate and return response data
         if (response.structured_data and
             isinstance(response.structured_data, dict) and
-            'forms' in response.structured_data and
-            isinstance(response.structured_data['forms'], dict)):
-            forms = response.structured_data['forms']
+            "forms" in response.structured_data and
+            isinstance(response.structured_data["forms"], dict)):
+            forms = response.structured_data["forms"]
             return forms, True
         else:
             logger.warning(f"Invalid response format for Lithuanian adjective '{adjective}'")

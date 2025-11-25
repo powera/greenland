@@ -17,13 +17,13 @@ VALID_POS_TYPES = {
 def get_subtype_enum(pos_type: str) -> Optional[enum.EnumMeta]:
     """Get the appropriate subtype enum class based on part of speech."""
     pos_type = pos_type.lower()
-    if pos_type == 'noun':
+    if pos_type == "noun":
         return NounSubtype
-    elif pos_type == 'verb':
+    elif pos_type == "verb":
         return VerbSubtype
-    elif pos_type == 'adjective':
+    elif pos_type == "adjective":
         return AdjectiveSubtype
-    elif pos_type == 'adverb':
+    elif pos_type == "adverb":
         return AdverbSubtype
     return None
 
@@ -52,9 +52,9 @@ def get_all_pos_subtypes() -> List[str]:
         List of all subtypes across all POS types
     """
     all_subtypes = set()
-    all_subtypes.update(get_subtype_values_for_pos('noun'))
-    all_subtypes.update(get_subtype_values_for_pos('verb'))
-    all_subtypes.update(get_subtype_values_for_pos('adjective'))
-    all_subtypes.update(get_subtype_values_for_pos('adverb'))
+    all_subtypes.update(get_subtype_values_for_pos("noun"))
+    all_subtypes.update(get_subtype_values_for_pos("verb"))
+    all_subtypes.update(get_subtype_values_for_pos("adjective"))
+    all_subtypes.update(get_subtype_values_for_pos("adverb"))
     all_subtypes.update(VALID_POS_TYPES)
     return sorted(list(all_subtypes))

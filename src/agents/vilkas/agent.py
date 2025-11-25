@@ -65,7 +65,7 @@ class VilkasAgent:
             # Find lemmas with Lithuanian translations
             lemmas_with_lt = session.query(Lemma).filter(
                 Lemma.lithuanian_translation.isnot(None),
-                Lemma.lithuanian_translation != ''
+                Lemma.lithuanian_translation != ""
             ).all()
 
             logger.info(f"Found {len(lemmas_with_lt)} lemmas with Lithuanian translations")
@@ -77,36 +77,36 @@ class VilkasAgent:
                 # Check for Lithuanian derivative forms
                 lt_forms = session.query(DerivativeForm).filter(
                     DerivativeForm.lemma_id == lemma.id,
-                    DerivativeForm.language_code == 'lt'
+                    DerivativeForm.language_code == "lt"
                 ).all()
 
                 if not lt_forms:
                     missing_forms.append({
-                        'guid': lemma.guid,
-                        'english': lemma.lemma_text,
-                        'lithuanian_translation': lemma.lithuanian_translation,
-                        'pos_type': lemma.pos_type,
-                        'pos_subtype': lemma.pos_subtype,
-                        'difficulty_level': lemma.difficulty_level
+                        "guid": lemma.guid,
+                        "english": lemma.lemma_text,
+                        "lithuanian_translation": lemma.lithuanian_translation,
+                        "pos_type": lemma.pos_type,
+                        "pos_subtype": lemma.pos_subtype,
+                        "difficulty_level": lemma.difficulty_level
                     })
 
             logger.info(f"Found {len(missing_forms)} lemmas missing Lithuanian derivative forms")
 
             return {
-                'total_with_translation': len(lemmas_with_lt),
-                'missing_forms': missing_forms,
-                'missing_count': len(missing_forms),
-                'coverage_percentage': ((len(lemmas_with_lt) - len(missing_forms)) / len(lemmas_with_lt) * 100) if lemmas_with_lt else 0
+                "total_with_translation": len(lemmas_with_lt),
+                "missing_forms": missing_forms,
+                "missing_count": len(missing_forms),
+                "coverage_percentage": ((len(lemmas_with_lt) - len(missing_forms)) / len(lemmas_with_lt) * 100) if lemmas_with_lt else 0
             }
 
         except Exception as e:
             logger.error(f"Error checking missing Lithuanian base forms: {e}")
             return {
-                'error': str(e),
-                'total_with_translation': 0,
-                'missing_forms': [],
-                'missing_count': 0,
-                'coverage_percentage': 0
+                "error": str(e),
+                "total_with_translation": 0,
+                "missing_forms": [],
+                "missing_count": 0,
+                "coverage_percentage": 0
             }
         finally:
             session.close()
@@ -127,9 +127,9 @@ class VilkasAgent:
         try:
             # Find lemmas that are nouns with Lithuanian translations
             noun_lemmas = session.query(Lemma).filter(
-                Lemma.pos_type == 'noun',
+                Lemma.pos_type == "noun",
                 Lemma.lithuanian_translation.isnot(None),
-                Lemma.lithuanian_translation != ''
+                Lemma.lithuanian_translation != ""
             ).all()
 
             logger.info(f"Found {len(noun_lemmas)} noun lemmas with Lithuanian translations")
@@ -142,50 +142,50 @@ class VilkasAgent:
                 # Count Lithuanian derivative forms for this noun
                 lt_forms = session.query(DerivativeForm).filter(
                     DerivativeForm.lemma_id == lemma.id,
-                    DerivativeForm.language_code == 'lt'
+                    DerivativeForm.language_code == "lt"
                 ).all()
 
                 # If we only have 1 form (the base form), it needs declensions
                 if len(lt_forms) <= 1:
                     needs_declensions.append({
-                        'guid': lemma.guid,
-                        'english': lemma.lemma_text,
-                        'lithuanian': lemma.lithuanian_translation,
-                        'pos_subtype': lemma.pos_subtype,
-                        'difficulty_level': lemma.difficulty_level,
-                        'current_form_count': len(lt_forms)
+                        "guid": lemma.guid,
+                        "english": lemma.lemma_text,
+                        "lithuanian": lemma.lithuanian_translation,
+                        "pos_subtype": lemma.pos_subtype,
+                        "difficulty_level": lemma.difficulty_level,
+                        "current_form_count": len(lt_forms)
                     })
                 else:
                     has_declensions.append({
-                        'guid': lemma.guid,
-                        'form_count': len(lt_forms)
+                        "guid": lemma.guid,
+                        "form_count": len(lt_forms)
                     })
 
             logger.info(f"Nouns with declensions: {len(has_declensions)}")
             logger.info(f"Nouns needing declensions: {len(needs_declensions)}")
 
             return {
-                'total_nouns': len(noun_lemmas),
-                'with_declensions': len(has_declensions),
-                'needs_declensions': len(needs_declensions),
-                'nouns_needing_declensions': needs_declensions,
-                'declension_coverage_percentage': (len(has_declensions) / len(noun_lemmas) * 100) if noun_lemmas else 0
+                "total_nouns": len(noun_lemmas),
+                "with_declensions": len(has_declensions),
+                "needs_declensions": len(needs_declensions),
+                "nouns_needing_declensions": needs_declensions,
+                "declension_coverage_percentage": (len(has_declensions) / len(noun_lemmas) * 100) if noun_lemmas else 0
             }
 
         except Exception as e:
             logger.error(f"Error checking noun declension coverage: {e}")
             return {
-                'error': str(e),
-                'total_nouns': 0,
-                'with_declensions': 0,
-                'needs_declensions': 0,
-                'nouns_needing_declensions': [],
-                'declension_coverage_percentage': 0
+                "error": str(e),
+                "total_nouns": 0,
+                "with_declensions": 0,
+                "needs_declensions": 0,
+                "nouns_needing_declensions": [],
+                "declension_coverage_percentage": 0
             }
         finally:
             session.close()
 
-    def check_verb_conjugation_coverage(self, language_code: str = 'lt') -> Dict[str, any]:
+    def check_verb_conjugation_coverage(self, language_code: str = "lt") -> Dict[str, any]:
         """
         Check for verbs that have base forms but missing conjugations.
 
@@ -195,7 +195,7 @@ class VilkasAgent:
         Returns:
             Dictionary with check results
         """
-        language_names = {'lt': 'Lithuanian', 'fr': 'French'}
+        language_names = {"lt": "Lithuanian", "fr": "French"}
         language_name = language_names.get(language_code, language_code.upper())
 
         logger.info(f"Checking {language_name} verb conjugation coverage...")
@@ -204,8 +204,8 @@ class VilkasAgent:
         try:
             # Get the appropriate translation field name
             translation_field_map = {
-                'lt': 'lithuanian_translation',
-                'fr': 'french_translation'
+                "lt": "lithuanian_translation",
+                "fr": "french_translation"
             }
             translation_field = translation_field_map.get(language_code)
 
@@ -214,9 +214,9 @@ class VilkasAgent:
 
             # Find lemmas that are verbs with translations in the target language
             verb_lemmas = session.query(Lemma).filter(
-                Lemma.pos_type == 'verb',
+                Lemma.pos_type == "verb",
                 getattr(Lemma, translation_field).isnot(None),
-                getattr(Lemma, translation_field) != ''
+                getattr(Lemma, translation_field) != ""
             ).all()
 
             logger.info(f"Found {len(verb_lemmas)} verb lemmas with {language_name} translations")
@@ -235,56 +235,56 @@ class VilkasAgent:
                 # If we only have 1 form (the infinitive), it needs conjugations
                 if len(forms) <= 1:
                     needs_conjugations.append({
-                        'guid': lemma.guid,
-                        'english': lemma.lemma_text,
-                        'translation': getattr(lemma, translation_field),
-                        'pos_subtype': lemma.pos_subtype,
-                        'difficulty_level': lemma.difficulty_level,
-                        'current_form_count': len(forms)
+                        "guid": lemma.guid,
+                        "english": lemma.lemma_text,
+                        "translation": getattr(lemma, translation_field),
+                        "pos_subtype": lemma.pos_subtype,
+                        "difficulty_level": lemma.difficulty_level,
+                        "current_form_count": len(forms)
                     })
                 else:
                     has_conjugations.append({
-                        'guid': lemma.guid,
-                        'form_count': len(forms)
+                        "guid": lemma.guid,
+                        "form_count": len(forms)
                     })
 
             logger.info(f"Verbs with conjugations: {len(has_conjugations)}")
             logger.info(f"Verbs needing conjugations: {len(needs_conjugations)}")
 
             return {
-                'language_code': language_code,
-                'language_name': language_name,
-                'total_verbs': len(verb_lemmas),
-                'with_conjugations': len(has_conjugations),
-                'needs_conjugations': len(needs_conjugations),
-                'verbs_needing_conjugations': needs_conjugations,
-                'conjugation_coverage_percentage': (len(has_conjugations) / len(verb_lemmas) * 100) if verb_lemmas else 0
+                "language_code": language_code,
+                "language_name": language_name,
+                "total_verbs": len(verb_lemmas),
+                "with_conjugations": len(has_conjugations),
+                "needs_conjugations": len(needs_conjugations),
+                "verbs_needing_conjugations": needs_conjugations,
+                "conjugation_coverage_percentage": (len(has_conjugations) / len(verb_lemmas) * 100) if verb_lemmas else 0
             }
 
         except Exception as e:
             logger.error(f"Error checking verb conjugation coverage: {e}")
             return {
-                'error': str(e),
-                'language_code': language_code,
-                'language_name': language_name,
-                'total_verbs': 0,
-                'with_conjugations': 0,
-                'needs_conjugations': 0,
-                'verbs_needing_conjugations': [],
-                'conjugation_coverage_percentage': 0
+                "error": str(e),
+                "language_code": language_code,
+                "language_name": language_name,
+                "total_verbs": 0,
+                "with_conjugations": 0,
+                "needs_conjugations": 0,
+                "verbs_needing_conjugations": [],
+                "conjugation_coverage_percentage": 0
             }
         finally:
             session.close()
 
     def fix_missing_forms(
         self,
-        language_code: str = 'lt',
+        language_code: str = "lt",
         pos_type: Optional[str] = None,
         limit: Optional[int] = None,
-        model: str = 'gpt-5-mini',
+        model: str = "gpt-5-mini",
         throttle: float = 1.0,
         dry_run: bool = False,
-        source: str = 'llm'
+        source: str = "llm"
     ) -> Dict[str, any]:
         """
         Generate and store missing word forms for a specific language.
@@ -311,27 +311,27 @@ class VilkasAgent:
         """
         # Define supported languages and their supported POS types
         SUPPORTED_LANGUAGES = {
-            'lt': ['noun', 'verb', 'adjective'],
-            'fr': ['noun', 'verb'],
-            'de': ['noun', 'verb'],
-            'es': ['noun', 'verb'],
-            'pt': ['noun', 'verb'],
-            'en': ['verb']
+            "lt": ["noun", "verb", "adjective"],
+            "fr": ["noun", "verb"],
+            "de": ["noun", "verb"],
+            "es": ["noun", "verb"],
+            "pt": ["noun", "verb"],
+            "en": ["verb"]
         }
 
         if language_code not in SUPPORTED_LANGUAGES:
             logger.error(f"Language '{language_code}' is not yet supported for form generation")
             return {
-                'error': f"Language '{language_code}' not supported",
-                'supported_languages': list(SUPPORTED_LANGUAGES.keys())
+                "error": f"Language '{language_code}' not supported",
+                "supported_languages": list(SUPPORTED_LANGUAGES.keys())
             }
 
         # Validate POS type for the language
         if pos_type and pos_type not in SUPPORTED_LANGUAGES[language_code]:
             logger.error(f"POS type '{pos_type}' is not supported for {language_code}")
             return {
-                'error': f"POS type '{pos_type}' not supported for {language_code}",
-                'supported_pos_types': SUPPORTED_LANGUAGES[language_code]
+                "error": f"POS type '{pos_type}' not supported for {language_code}",
+                "supported_pos_types": SUPPORTED_LANGUAGES[language_code]
             }
 
         # Default POS type if not specified (language-specific defaults)
@@ -345,32 +345,32 @@ class VilkasAgent:
 
         # Map to handler methods
         handlers = {
-            'lt_noun': self._fix_lithuanian_noun_declensions,
-            'lt_verb': self._fix_lithuanian_verb_conjugations,
-            'lt_adjective': self._fix_lithuanian_adjective_forms,
-            'fr_noun': self._fix_french_noun_declensions,
-            'fr_verb': self._fix_french_verb_conjugations,
-            'de_noun': self._fix_german_noun_declensions,
-            'de_verb': self._fix_german_verb_conjugations,
-            'es_noun': self._fix_spanish_noun_declensions,
-            'es_verb': self._fix_spanish_verb_conjugations,
-            'pt_noun': self._fix_portuguese_noun_declensions,
-            'pt_verb': self._fix_portuguese_verb_conjugations,
-            'en_verb': self._fix_english_verb_conjugations
+            "lt_noun": self._fix_lithuanian_noun_declensions,
+            "lt_verb": self._fix_lithuanian_verb_conjugations,
+            "lt_adjective": self._fix_lithuanian_adjective_forms,
+            "fr_noun": self._fix_french_noun_declensions,
+            "fr_verb": self._fix_french_verb_conjugations,
+            "de_noun": self._fix_german_noun_declensions,
+            "de_verb": self._fix_german_verb_conjugations,
+            "es_noun": self._fix_spanish_noun_declensions,
+            "es_verb": self._fix_spanish_verb_conjugations,
+            "pt_noun": self._fix_portuguese_noun_declensions,
+            "pt_verb": self._fix_portuguese_verb_conjugations,
+            "en_verb": self._fix_english_verb_conjugations
         }
 
         if handler_key not in handlers:
             logger.error(f"No handler found for {language_code} {pos_type}")
             return {
-                'error': f"Handler not implemented for {language_code} {pos_type}",
-                'supported_combinations': list(handlers.keys())
+                "error": f"Handler not implemented for {language_code} {pos_type}",
+                "supported_combinations": list(handlers.keys())
             }
 
         # Call the appropriate handler
         handler = handlers[handler_key]
 
         # Only Lithuanian nouns support the 'source' parameter
-        if handler_key == 'lt_noun':
+        if handler_key == "lt_noun":
             return handler(
                 limit=limit,
                 model=model,
@@ -389,10 +389,10 @@ class VilkasAgent:
     def _fix_lithuanian_noun_declensions(
         self,
         limit: Optional[int] = None,
-        model: str = 'gpt-5-mini',
+        model: str = "gpt-5-mini",
         throttle: float = 1.0,
         dry_run: bool = False,
-        source: str = 'llm'
+        source: str = "llm"
     ) -> Dict[str, any]:
         """
         Generate missing Lithuanian noun declensions.
@@ -420,20 +420,20 @@ class VilkasAgent:
         # Get noun declension coverage check results
         check_results = self.check_noun_declension_coverage()
 
-        if 'error' in check_results:
+        if "error" in check_results:
             return check_results
 
-        nouns_needing_declensions = check_results['nouns_needing_declensions']
+        nouns_needing_declensions = check_results["nouns_needing_declensions"]
         total_needs_fix = len(nouns_needing_declensions)
 
         if total_needs_fix == 0:
             logger.info("No Lithuanian nouns need declensions!")
             return {
-                'total_needing_fix': 0,
-                'processed': 0,
-                'successful': 0,
-                'failed': 0,
-                'dry_run': dry_run
+                "total_needing_fix": 0,
+                "processed": 0,
+                "successful": 0,
+                "failed": 0,
+                "dry_run": dry_run
             }
 
         logger.info(f"Found {total_needs_fix} Lithuanian nouns needing declensions")
@@ -452,10 +452,10 @@ class VilkasAgent:
             if len(nouns_to_process) > 10:
                 logger.info(f"  ... and {len(nouns_to_process) - 10} more")
             return {
-                'total_needing_fix': total_needs_fix,
-                'would_process': len(nouns_to_process),
-                'dry_run': True,
-                'sample': nouns_to_process[:10]
+                "total_needing_fix": total_needs_fix,
+                "would_process": len(nouns_to_process),
+                "dry_run": True,
+                "sample": nouns_to_process[:10]
             }
 
         # Initialize client for LLM-based generation
@@ -472,7 +472,7 @@ class VilkasAgent:
                 logger.info(f"\n[{i}/{len(nouns_to_process)}] Processing: {noun_info['english']} -> {noun_info['lithuanian']}")
 
                 # Get the full lemma object
-                lemma = session.query(Lemma).filter(Lemma.guid == noun_info['guid']).first()
+                lemma = session.query(Lemma).filter(Lemma.guid == noun_info["guid"]).first()
 
                 if not lemma:
                     logger.error(f"Could not find lemma with GUID {noun_info['guid']}")
@@ -510,17 +510,17 @@ class VilkasAgent:
         logger.info(f"{'='*60}")
 
         return {
-            'total_needing_fix': total_needs_fix,
-            'processed': len(nouns_to_process),
-            'successful': successful,
-            'failed': failed,
-            'dry_run': dry_run
+            "total_needing_fix": total_needs_fix,
+            "processed": len(nouns_to_process),
+            "successful": successful,
+            "failed": failed,
+            "dry_run": dry_run
         }
 
     def _fix_french_verb_conjugations(
         self,
         limit: Optional[int] = None,
-        model: str = 'gpt-5-mini',
+        model: str = "gpt-5-mini",
         throttle: float = 1.0,
         dry_run: bool = False
     ) -> Dict[str, any]:
@@ -547,22 +547,22 @@ class VilkasAgent:
         logger.info("Finding French verbs needing conjugations...")
 
         # Get verb conjugation coverage check results
-        check_results = self.check_verb_conjugation_coverage(language_code='fr')
+        check_results = self.check_verb_conjugation_coverage(language_code="fr")
 
-        if 'error' in check_results:
+        if "error" in check_results:
             return check_results
 
-        verbs_needing_conjugations = check_results['verbs_needing_conjugations']
+        verbs_needing_conjugations = check_results["verbs_needing_conjugations"]
         total_needs_fix = len(verbs_needing_conjugations)
 
         if total_needs_fix == 0:
             logger.info("No French verbs need conjugations!")
             return {
-                'total_needing_fix': 0,
-                'processed': 0,
-                'successful': 0,
-                'failed': 0,
-                'dry_run': dry_run
+                "total_needing_fix": 0,
+                "processed": 0,
+                "successful": 0,
+                "failed": 0,
+                "dry_run": dry_run
             }
 
         logger.info(f"Found {total_needs_fix} French verbs needing conjugations")
@@ -581,10 +581,10 @@ class VilkasAgent:
             if len(verbs_to_process) > 10:
                 logger.info(f"  ... and {len(verbs_to_process) - 10} more")
             return {
-                'total_needing_fix': total_needs_fix,
-                'would_process': len(verbs_to_process),
-                'dry_run': True,
-                'sample': verbs_to_process[:10]
+                "total_needing_fix": total_needs_fix,
+                "would_process": len(verbs_to_process),
+                "dry_run": True,
+                "sample": verbs_to_process[:10]
             }
 
         # Initialize client for LLM-based generation
@@ -601,7 +601,7 @@ class VilkasAgent:
                 logger.info(f"\n[{i}/{len(verbs_to_process)}] Processing: {verb_info['english']} -> {verb_info['translation']}")
 
                 # Get the full lemma object
-                lemma = session.query(Lemma).filter(Lemma.guid == verb_info['guid']).first()
+                lemma = session.query(Lemma).filter(Lemma.guid == verb_info["guid"]).first()
 
                 if not lemma:
                     logger.error(f"Could not find lemma with GUID {verb_info['guid']}")
@@ -638,26 +638,26 @@ class VilkasAgent:
         logger.info(f"{'='*60}")
 
         return {
-            'total_needing_fix': total_needs_fix,
-            'processed': len(verbs_to_process),
-            'successful': successful,
-            'failed': failed,
-            'dry_run': dry_run
+            "total_needing_fix": total_needs_fix,
+            "processed": len(verbs_to_process),
+            "successful": successful,
+            "failed": failed,
+            "dry_run": dry_run
         }
 
     def _fix_lithuanian_verb_conjugations(
         self,
         limit: Optional[int] = None,
-        model: str = 'gpt-5-mini',
+        model: str = "gpt-5-mini",
         throttle: float = 1.0,
         dry_run: bool = False
     ) -> Dict[str, any]:
         """Generate missing Lithuanian verb conjugations."""
         from wordfreq.translation.generate_lithuanian_verb_forms import process_lemma_conjugations
         return self._fix_generic_forms(
-            language_code='lt',
-            language_name='Lithuanian',
-            pos_type='verb',
+            language_code="lt",
+            language_name="Lithuanian",
+            pos_type="verb",
             process_func=process_lemma_conjugations,
             limit=limit,
             model=model,
@@ -668,16 +668,16 @@ class VilkasAgent:
     def _fix_lithuanian_adjective_forms(
         self,
         limit: Optional[int] = None,
-        model: str = 'gpt-5-mini',
+        model: str = "gpt-5-mini",
         throttle: float = 1.0,
         dry_run: bool = False
     ) -> Dict[str, any]:
         """Generate missing Lithuanian adjective forms."""
         from wordfreq.translation.generate_lithuanian_adjective_forms import process_lemma_forms
         return self._fix_generic_forms(
-            language_code='lt',
-            language_name='Lithuanian',
-            pos_type='adjective',
+            language_code="lt",
+            language_name="Lithuanian",
+            pos_type="adjective",
             process_func=process_lemma_forms,
             limit=limit,
             model=model,
@@ -688,16 +688,16 @@ class VilkasAgent:
     def _fix_french_noun_declensions(
         self,
         limit: Optional[int] = None,
-        model: str = 'gpt-5-mini',
+        model: str = "gpt-5-mini",
         throttle: float = 1.0,
         dry_run: bool = False
     ) -> Dict[str, any]:
         """Generate missing French noun declensions."""
         from wordfreq.translation.generate_french_noun_forms import process_lemma_forms
         return self._fix_generic_forms(
-            language_code='fr',
-            language_name='French',
-            pos_type='noun',
+            language_code="fr",
+            language_name="French",
+            pos_type="noun",
             process_func=process_lemma_forms,
             limit=limit,
             model=model,
@@ -708,16 +708,16 @@ class VilkasAgent:
     def _fix_german_noun_declensions(
         self,
         limit: Optional[int] = None,
-        model: str = 'gpt-5-mini',
+        model: str = "gpt-5-mini",
         throttle: float = 1.0,
         dry_run: bool = False
     ) -> Dict[str, any]:
         """Generate missing German noun declensions."""
         from wordfreq.translation.generate_german_noun_forms import process_lemma_forms
         return self._fix_generic_forms(
-            language_code='de',
-            language_name='German',
-            pos_type='noun',
+            language_code="de",
+            language_name="German",
+            pos_type="noun",
             process_func=process_lemma_forms,
             limit=limit,
             model=model,
@@ -728,16 +728,16 @@ class VilkasAgent:
     def _fix_german_verb_conjugations(
         self,
         limit: Optional[int] = None,
-        model: str = 'gpt-5-mini',
+        model: str = "gpt-5-mini",
         throttle: float = 1.0,
         dry_run: bool = False
     ) -> Dict[str, any]:
         """Generate missing German verb conjugations."""
         from wordfreq.translation.generate_german_verb_forms import process_lemma_conjugations
         return self._fix_generic_forms(
-            language_code='de',
-            language_name='German',
-            pos_type='verb',
+            language_code="de",
+            language_name="German",
+            pos_type="verb",
             process_func=process_lemma_conjugations,
             limit=limit,
             model=model,
@@ -748,16 +748,16 @@ class VilkasAgent:
     def _fix_spanish_noun_declensions(
         self,
         limit: Optional[int] = None,
-        model: str = 'gpt-5-mini',
+        model: str = "gpt-5-mini",
         throttle: float = 1.0,
         dry_run: bool = False
     ) -> Dict[str, any]:
         """Generate missing Spanish noun declensions."""
         from wordfreq.translation.generate_spanish_noun_forms import process_lemma_forms
         return self._fix_generic_forms(
-            language_code='es',
-            language_name='Spanish',
-            pos_type='noun',
+            language_code="es",
+            language_name="Spanish",
+            pos_type="noun",
             process_func=process_lemma_forms,
             limit=limit,
             model=model,
@@ -768,16 +768,16 @@ class VilkasAgent:
     def _fix_spanish_verb_conjugations(
         self,
         limit: Optional[int] = None,
-        model: str = 'gpt-5-mini',
+        model: str = "gpt-5-mini",
         throttle: float = 1.0,
         dry_run: bool = False
     ) -> Dict[str, any]:
         """Generate missing Spanish verb conjugations."""
         from wordfreq.translation.generate_spanish_verb_forms import process_lemma_conjugations
         return self._fix_generic_forms(
-            language_code='es',
-            language_name='Spanish',
-            pos_type='verb',
+            language_code="es",
+            language_name="Spanish",
+            pos_type="verb",
             process_func=process_lemma_conjugations,
             limit=limit,
             model=model,
@@ -788,16 +788,16 @@ class VilkasAgent:
     def _fix_portuguese_noun_declensions(
         self,
         limit: Optional[int] = None,
-        model: str = 'gpt-5-mini',
+        model: str = "gpt-5-mini",
         throttle: float = 1.0,
         dry_run: bool = False
     ) -> Dict[str, any]:
         """Generate missing Portuguese noun declensions."""
         from wordfreq.translation.generate_portuguese_noun_forms import process_lemma_forms
         return self._fix_generic_forms(
-            language_code='pt',
-            language_name='Portuguese',
-            pos_type='noun',
+            language_code="pt",
+            language_name="Portuguese",
+            pos_type="noun",
             process_func=process_lemma_forms,
             limit=limit,
             model=model,
@@ -808,16 +808,16 @@ class VilkasAgent:
     def _fix_portuguese_verb_conjugations(
         self,
         limit: Optional[int] = None,
-        model: str = 'gpt-5-mini',
+        model: str = "gpt-5-mini",
         throttle: float = 1.0,
         dry_run: bool = False
     ) -> Dict[str, any]:
         """Generate missing Portuguese verb conjugations."""
         from wordfreq.translation.generate_portuguese_verb_forms import process_lemma_conjugations
         return self._fix_generic_forms(
-            language_code='pt',
-            language_name='Portuguese',
-            pos_type='verb',
+            language_code="pt",
+            language_name="Portuguese",
+            pos_type="verb",
             process_func=process_lemma_conjugations,
             limit=limit,
             model=model,
@@ -828,16 +828,16 @@ class VilkasAgent:
     def _fix_english_verb_conjugations(
         self,
         limit: Optional[int] = None,
-        model: str = 'gpt-5-mini',
+        model: str = "gpt-5-mini",
         throttle: float = 1.0,
         dry_run: bool = False
     ) -> Dict[str, any]:
         """Generate missing English verb conjugations."""
         from wordfreq.translation.generate_english_verb_forms import process_lemma_conjugations
         return self._fix_generic_forms(
-            language_code='en',
-            language_name='English',
-            pos_type='verb',
+            language_code="en",
+            language_name="English",
+            pos_type="verb",
             process_func=process_lemma_conjugations,
             limit=limit,
             model=model,
@@ -852,7 +852,7 @@ class VilkasAgent:
         pos_type: str,
         process_func,
         limit: Optional[int] = None,
-        model: str = 'gpt-5-mini',
+        model: str = "gpt-5-mini",
         throttle: float = 1.0,
         dry_run: bool = False
     ) -> Dict[str, any]:
@@ -875,23 +875,23 @@ class VilkasAgent:
         logger.info(f"Finding {language_name} {pos_type}s needing forms...")
 
         # Get form coverage check results
-        check_results = self.check_verb_conjugation_coverage(language_code=language_code) if pos_type == 'verb' else self.check_noun_declension_coverage()
+        check_results = self.check_verb_conjugation_coverage(language_code=language_code) if pos_type == "verb" else self.check_noun_declension_coverage()
 
-        if 'error' in check_results:
+        if "error" in check_results:
             return check_results
 
-        items_key = 'verbs_needing_conjugations' if pos_type == 'verb' else 'nouns_needing_declensions'
+        items_key = "verbs_needing_conjugations" if pos_type == "verb" else "nouns_needing_declensions"
         items_needing_forms = check_results.get(items_key, [])
         total_needs_fix = len(items_needing_forms)
 
         if total_needs_fix == 0:
             logger.info(f"No {language_name} {pos_type}s need forms!")
             return {
-                'total_needing_fix': 0,
-                'processed': 0,
-                'successful': 0,
-                'failed': 0,
-                'dry_run': dry_run
+                "total_needing_fix": 0,
+                "processed": 0,
+                "successful": 0,
+                "failed": 0,
+                "dry_run": dry_run
             }
 
         logger.info(f"Found {total_needs_fix} {language_name} {pos_type}s needing forms")
@@ -910,10 +910,10 @@ class VilkasAgent:
             if len(items_to_process) > 10:
                 logger.info(f"  ... and {len(items_to_process) - 10} more")
             return {
-                'total_needing_fix': total_needs_fix,
-                'would_process': len(items_to_process),
-                'dry_run': True,
-                'sample': items_to_process[:10]
+                "total_needing_fix": total_needs_fix,
+                "would_process": len(items_to_process),
+                "dry_run": True,
+                "sample": items_to_process[:10]
             }
 
         # Initialize client
@@ -929,7 +929,7 @@ class VilkasAgent:
                 logger.info(f"\n[{i}/{len(items_to_process)}] Processing: {item_info['english']} -> {item_info.get('translation', item_info.get('lithuanian', 'N/A'))}")
 
                 # Get the full lemma object
-                lemma = session.query(Lemma).filter(Lemma.guid == item_info['guid']).first()
+                lemma = session.query(Lemma).filter(Lemma.guid == item_info["guid"]).first()
 
                 if not lemma:
                     logger.error(f"Could not find lemma with GUID {item_info['guid']}")
@@ -966,11 +966,11 @@ class VilkasAgent:
         logger.info(f"{'='*60}")
 
         return {
-            'total_needing_fix': total_needs_fix,
-            'processed': len(items_to_process),
-            'successful': successful,
-            'failed': failed,
-            'dry_run': dry_run
+            "total_needing_fix": total_needs_fix,
+            "processed": len(items_to_process),
+            "successful": successful,
+            "failed": failed,
+            "dry_run": dry_run
         }
 
     def run_full_check(self, output_file: Optional[str] = None) -> Dict[str, any]:
@@ -987,18 +987,18 @@ class VilkasAgent:
         start_time = datetime.now()
 
         results = {
-            'timestamp': start_time.isoformat(),
-            'database_path': self.db_path,
-            'checks': {
-                'missing_base_forms': self.check_missing_lithuanian_base_forms(),
-                'noun_declensions': self.check_noun_declension_coverage(),
-                'verb_conjugations': self.check_verb_conjugation_coverage()
+            "timestamp": start_time.isoformat(),
+            "database_path": self.db_path,
+            "checks": {
+                "missing_base_forms": self.check_missing_lithuanian_base_forms(),
+                "noun_declensions": self.check_noun_declension_coverage(),
+                "verb_conjugations": self.check_verb_conjugation_coverage()
             }
         }
 
         end_time = datetime.now()
         duration = (end_time - start_time).total_seconds()
-        results['duration_seconds'] = duration
+        results["duration_seconds"] = duration
 
         # Print summary
         logger.info("=" * 80)
@@ -1009,7 +1009,7 @@ class VilkasAgent:
         logger.info("")
 
         # Missing base forms
-        base_check = results['checks']['missing_base_forms']
+        base_check = results["checks"]["missing_base_forms"]
         logger.info(f"MISSING LITHUANIAN BASE FORMS:")
         logger.info(f"  Total lemmas with Lithuanian translation: {base_check['total_with_translation']}")
         logger.info(f"  Missing derivative forms: {base_check['missing_count']}")
@@ -1017,7 +1017,7 @@ class VilkasAgent:
         logger.info("")
 
         # Noun declensions
-        noun_check = results['checks']['noun_declensions']
+        noun_check = results["checks"]["noun_declensions"]
         logger.info(f"LITHUANIAN NOUN DECLENSIONS:")
         logger.info(f"  Total nouns: {noun_check['total_nouns']}")
         logger.info(f"  With declensions: {noun_check['with_declensions']}")
@@ -1026,7 +1026,7 @@ class VilkasAgent:
         logger.info("")
 
         # Verb conjugations
-        verb_check = results['checks']['verb_conjugations']
+        verb_check = results["checks"]["verb_conjugations"]
         logger.info(f"LITHUANIAN VERB CONJUGATIONS:")
         logger.info(f"  Total verbs: {verb_check['total_verbs']}")
         logger.info(f"  With conjugations: {verb_check['with_conjugations']}")
@@ -1038,7 +1038,7 @@ class VilkasAgent:
         if output_file:
             import json
             try:
-                with open(output_file, 'w', encoding='utf-8') as f:
+                with open(output_file, "w", encoding="utf-8") as f:
                     json.dump(results, f, indent=2, ensure_ascii=False)
                 logger.info(f"Report written to: {output_file}")
             except Exception as e:

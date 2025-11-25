@@ -13,9 +13,9 @@ class Base(DeclarativeBase):
 
 class WordToken(Base):
     """Model for storing word tokens - the specific letters/spelling of a word in a specific language."""
-    __tablename__ = 'word_tokens'
+    __tablename__ = "word_tokens"
     __table_args__ = (
-        UniqueConstraint('token', 'language_code', name='uq_word_token_language'),
+        UniqueConstraint("token", "language_code", name="uq_word_token_language"),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -31,7 +31,7 @@ class WordToken(Base):
 
 class Lemma(Base):
     """Model for storing lemmas - specific concepts and their base meanings."""
-    __tablename__ = 'lemmas'
+    __tablename__ = "lemmas"
     
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     lemma_text: Mapped[str] = mapped_column(String, nullable=False, index=True)
@@ -75,9 +75,9 @@ class LemmaTranslation(Base):
     This table replaces the individual language columns (french_translation, etc.)
     on the Lemma table to support scalable multi-language translations.
     """
-    __tablename__ = 'lemma_translations'
+    __tablename__ = "lemma_translations"
     __table_args__ = (
-        UniqueConstraint('lemma_id', 'language_code', name='uq_lemma_translation'),
+        UniqueConstraint("lemma_id", "language_code", name="uq_lemma_translation"),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -100,9 +100,9 @@ class LemmaDifficultyOverride(Base):
     For example, 筷子 (chopsticks) might be level 2 in Chinese but level 8 in German.
     A difficulty_level of -1 means the word should be excluded from that language's wordlist.
     """
-    __tablename__ = 'lemma_difficulty_overrides'
+    __tablename__ = "lemma_difficulty_overrides"
     __table_args__ = (
-        UniqueConstraint('lemma_id', 'language_code', name='uq_lemma_difficulty_override'),
+        UniqueConstraint("lemma_id", "language_code", name="uq_lemma_difficulty_override"),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -127,9 +127,9 @@ class DerivativeForm(Base):
     
     Note: When word_token_id is present, the language_code must match the WordToken's language_code.
     """
-    __tablename__ = 'derivative_forms'
+    __tablename__ = "derivative_forms"
     __table_args__ = (
-        UniqueConstraint('lemma_id', 'language_code', 'grammatical_form', 'derivative_form_text', name='uq_derivative_form'),
+        UniqueConstraint("lemma_id", "language_code", "grammatical_form", "derivative_form_text", name="uq_derivative_form"),
     )
     
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -169,7 +169,7 @@ class Sentence(Base):
     The actual sentence text in various languages is stored in SentenceTranslation.
     Words used in the sentence are tracked in SentenceWord for difficulty calculation.
     """
-    __tablename__ = 'sentences'
+    __tablename__ = "sentences"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
 
@@ -200,9 +200,9 @@ class SentenceTranslation(Base):
     Unlike the Lemma table which has legacy translation columns, this table stores
     ALL language versions including the original/source language.
     """
-    __tablename__ = 'sentence_translations'
+    __tablename__ = "sentence_translations"
     __table_args__ = (
-        UniqueConstraint('sentence_id', 'language_code', name='uq_sentence_translation'),
+        UniqueConstraint("sentence_id", "language_code", name="uq_sentence_translation"),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -228,9 +228,9 @@ class SentenceWord(Base):
     The lemma_id may be NULL for function words (pronouns, particles) that aren't
     tracked as separate vocabulary items.
     """
-    __tablename__ = 'sentence_words'
+    __tablename__ = "sentence_words"
     __table_args__ = (
-        UniqueConstraint('sentence_id', 'language_code', 'position', name='uq_sentence_word_lang_position'),
+        UniqueConstraint("sentence_id", "language_code", "position", name="uq_sentence_word_lang_position"),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -264,7 +264,7 @@ class SentenceWord(Base):
 
 class Corpus(Base):
     """Model for storing corpus information."""
-    __tablename__ = 'corpus'
+    __tablename__ = "corpus"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String, unique=True, nullable=False)
@@ -280,7 +280,7 @@ class Corpus(Base):
 
 class WordFrequency(Base):
     """Model for storing word frequency in different corpora - tied to WordToken."""
-    __tablename__ = 'word_frequencies'
+    __tablename__ = "word_frequencies"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     word_token_id: Mapped[int] = mapped_column(ForeignKey("word_tokens.id"), nullable=False)
@@ -298,9 +298,9 @@ class AudioQualityReview(Base):
     Audio files are generated for lemmas in various languages and voices.
     This table tracks the review status and quality issues for each audio file.
     """
-    __tablename__ = 'audio_quality_reviews'
+    __tablename__ = "audio_quality_reviews"
     __table_args__ = (
-        UniqueConstraint('guid', 'language_code', 'voice_name', name='uq_audio_review'),
+        UniqueConstraint("guid", "language_code", "voice_name", name="uq_audio_review"),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -322,7 +322,7 @@ class AudioQualityReview(Base):
     status: Mapped[str] = mapped_column(
         String,
         nullable=False,
-        default='pending_review',
+        default="pending_review",
         index=True
     )  # 'pending_review', 'approved', 'needs_replacement'
 

@@ -12,57 +12,57 @@ from sqlalchemy.sql import func
 from benchmarks.datastore.common import Base, Model, create_dev_session, decode_json
 
 Model.qual_runs = relationship(
-    "QualRun", back_populates='model', lazy='noload'
+    "QualRun", back_populates="model", lazy="noload"
 )
 
 class QualTest(Base):
     """Qualitative test definition."""
-    __tablename__ = 'qual_test'
+    __tablename__ = "qual_test"
     codename: Mapped[str] = mapped_column(String, primary_key=True)
     displayname: Mapped[str] = mapped_column(String, nullable=False)
     description: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
     # Relationships
-    runs: Mapped[List['QualRun']] = relationship(back_populates='qual_test', lazy='noload')
-    topics: Mapped[List['QualTopic']] = relationship(back_populates='qual_test')
+    runs: Mapped[List["QualRun"]] = relationship(back_populates="qual_test", lazy="noload")
+    topics: Mapped[List["QualTopic"]] = relationship(back_populates="qual_test")
 
 class QualTopic(Base):
     """Topic for qualitative testing."""
-    __tablename__ = 'qual_topic'
+    __tablename__ = "qual_topic"
 
     topic_id: Mapped[str] = mapped_column(String, primary_key=True)
-    qual_test_name: Mapped[str] = mapped_column(String, ForeignKey('qual_test.codename'))
+    qual_test_name: Mapped[str] = mapped_column(String, ForeignKey("qual_test.codename"))
     topic_text: Mapped[str] = mapped_column(String, nullable=False)
 
     # Relationships
-    qual_test: Mapped['QualTest'] = relationship(back_populates='topics')
-    run_details: Mapped[List['QualRunDetail']] = relationship(back_populates='topic', lazy='noload')
+    qual_test: Mapped["QualTest"] = relationship(back_populates="topics")
+    run_details: Mapped[List["QualRunDetail"]] = relationship(back_populates="topic", lazy="noload")
 
 class QualRun(Base):
     """Qualitative test run results."""
-    __tablename__ = 'qual_run'
+    __tablename__ = "qual_run"
     run_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     run_ts: Mapped[datetime.datetime] = mapped_column(
         TIMESTAMP, server_default=func.current_timestamp()
     )
-    model_name: Mapped[str] = mapped_column(String, ForeignKey('model.codename'))
+    model_name: Mapped[str] = mapped_column(String, ForeignKey("model.codename"))
 
-    qual_test_name: Mapped[str] = mapped_column(String, ForeignKey('qual_test.codename'))
+    qual_test_name: Mapped[str] = mapped_column(String, ForeignKey("qual_test.codename"))
     avg_score: Mapped[Optional[float]] = mapped_column(Integer, nullable=True)
 
     # Relationships
-    model: Mapped['Model'] = relationship(back_populates='qual_runs')
-    qual_test: Mapped['QualTest'] = relationship(back_populates='runs')
-    run_details: Mapped[List['QualRunDetail']] = relationship(back_populates='run', lazy='noload')
+    model: Mapped["Model"] = relationship(back_populates="qual_runs")
+    qual_test: Mapped["QualTest"] = relationship(back_populates="runs")
+    run_details: Mapped[List["QualRunDetail"]] = relationship(back_populates="run", lazy="noload")
 
 class QualRunDetail(Base):
     """Detailed results for a qualitative test run."""
-    __tablename__ = 'qual_run_detail'
-    run_id: Mapped[int] = mapped_column(ForeignKey('qual_run.run_id'), primary_key=True)
+    __tablename__ = "qual_run_detail"
+    run_id: Mapped[int] = mapped_column(ForeignKey("qual_run.run_id"), primary_key=True)
     eval_msec: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     debug_json: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
-    topic_id: Mapped[str] = mapped_column(String, ForeignKey('qual_topic.topic_id'), primary_key=True)
+    topic_id: Mapped[str] = mapped_column(String, ForeignKey("qual_topic.topic_id"), primary_key=True)
     accuracy_score: Mapped[int] = mapped_column(Integer, nullable=False)  # 0-10
     clarity_score: Mapped[int] = mapped_column(Integer, nullable=False)   # 0-10
     completeness_score: Mapped[int] = mapped_column(Integer, nullable=False)  # 0-10
@@ -70,8 +70,8 @@ class QualRunDetail(Base):
     evaluation_text: Mapped[str] = mapped_column(Text, nullable=False)
 
     # Relationships
-    run: Mapped['QualRun'] = relationship(back_populates='run_details')
-    topic: Mapped['QualTopic'] = relationship(back_populates='run_details')
+    run: Mapped["QualRun"] = relationship(back_populates="run_details")
+    topic: Mapped["QualTopic"] = relationship(back_populates="run_details")
 
 def insert_qual_test(
     session,
@@ -142,14 +142,14 @@ def insert_qual_run(
             for detail in run_details:
                 run_detail = QualRunDetail(
                     run_id=new_run.run_id,
-                    topic_id=detail['topic_id'],
-                    accuracy_score=detail['accuracy_score'],
-                    clarity_score=detail['clarity_score'],
-                    completeness_score=detail['completeness_score'],
-                    eval_msec=detail.get('eval_msec'),
-                    response_text=detail['response_text'],
-                    evaluation_text=detail['evaluation_text'],
-                    debug_json=detail.get('debug_json')
+                    topic_id=detail["topic_id"],
+                    accuracy_score=detail["accuracy_score"],
+                    clarity_score=detail["clarity_score"],
+                    completeness_score=detail["completeness_score"],
+                    eval_msec=detail.get("eval_msec"),
+                    response_text=detail["response_text"],
+                    evaluation_text=detail["evaluation_text"],
+                    debug_json=detail.get("debug_json")
                 )
                 session.add(run_detail)
 
@@ -168,9 +168,9 @@ def list_all_qual_tests(session) -> List[Dict]:
     qual_tests = session.query(QualTest).all()
     return [
         {
-            'codename': test.codename,
-            'displayname': test.displayname,
-            'description': test.description
+            "codename": test.codename,
+            "displayname": test.displayname,
+            "description": test.description
         }
         for test in qual_tests
     ]
@@ -196,8 +196,8 @@ def get_highest_qual_scores(session) -> Dict:
 
     return {
         (run.qual_test_name, run.model_name): {
-            'score': run.avg_score,
-            'run_id': run.run_id
+            "score": run.avg_score,
+            "run_id": run.run_id
         }
         for run in highest_scores
     }

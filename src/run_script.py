@@ -20,7 +20,7 @@ def run_script(script_path: str, args: list) -> None:
     # Configure logging
     logging.basicConfig(
         level=logging.INFO,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     )
     
     # Modify sys.argv to pass remaining args to script

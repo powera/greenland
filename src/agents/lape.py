@@ -52,7 +52,7 @@ from clients.types import Schema, SchemaProperty
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -62,54 +62,54 @@ class LapeAgent:
 
     # Language-specific gender systems configuration
     GENDER_SYSTEMS = {
-        'fr': {
-            'name': 'French',
-            'genders': ['masculine', 'feminine'],
-            'description': '2-way system (masculine/feminine)'
+        "fr": {
+            "name": "French",
+            "genders": ["masculine", "feminine"],
+            "description": "2-way system (masculine/feminine)"
         },
-        'lt': {
-            'name': 'Lithuanian',
-            'genders': ['masculine', 'feminine'],
-            'description': '2-way system (masculine/feminine)'
+        "lt": {
+            "name": "Lithuanian",
+            "genders": ["masculine", "feminine"],
+            "description": "2-way system (masculine/feminine)"
         },
-        'es': {
-            'name': 'Spanish',
-            'genders': ['masculine', 'feminine'],
-            'description': '2-way system (masculine/feminine)'
+        "es": {
+            "name": "Spanish",
+            "genders": ["masculine", "feminine"],
+            "description": "2-way system (masculine/feminine)"
         },
-        'de': {
-            'name': 'German',
-            'genders': ['masculine', 'feminine', 'neuter'],
-            'description': '3-way system (masculine/feminine/neuter)'
+        "de": {
+            "name": "German",
+            "genders": ["masculine", "feminine", "neuter"],
+            "description": "3-way system (masculine/feminine/neuter)"
         },
-        'pt': {
-            'name': 'Portuguese',
-            'genders': ['masculine', 'feminine'],
-            'description': '2-way system (masculine/feminine)'
+        "pt": {
+            "name": "Portuguese",
+            "genders": ["masculine", "feminine"],
+            "description": "2-way system (masculine/feminine)"
         },
-        'ru': {
-            'name': 'Russian',
-            'genders': ['masculine', 'feminine', 'neuter'],
-            'description': '3-way system (masculine/feminine/neuter)'
+        "ru": {
+            "name": "Russian",
+            "genders": ["masculine", "feminine", "neuter"],
+            "description": "3-way system (masculine/feminine/neuter)"
         },
-        'it': {
-            'name': 'Italian',
-            'genders': ['masculine', 'feminine'],
-            'description': '2-way system (masculine/feminine)'
+        "it": {
+            "name": "Italian",
+            "genders": ["masculine", "feminine"],
+            "description": "2-way system (masculine/feminine)"
         },
     }
 
     # Supported fact types and their required parameters
     SUPPORTED_FACT_TYPES = {
-        'measure_words': {
-            'languages': ['zh'],  # Chinese only for now
-            'required_pos': ['noun'],
-            'description': 'Generate Chinese measure words/classifiers for nouns'
+        "measure_words": {
+            "languages": ["zh"],  # Chinese only for now
+            "required_pos": ["noun"],
+            "description": "Generate Chinese measure words/classifiers for nouns"
         },
-        'grammatical_gender': {
-            'languages': list(GENDER_SYSTEMS.keys()),
-            'required_pos': ['noun'],
-            'description': 'Determine grammatical gender (masculine, feminine, neuter)'
+        "grammatical_gender": {
+            "languages": list(GENDER_SYSTEMS.keys()),
+            "required_pos": ["noun"],
+            "description": "Determine grammatical gender (masculine, feminine, neuter)"
         },
         # 'number_type': {
         #     'languages': ['en', 'lt', 'fr', 'es'],
@@ -179,7 +179,7 @@ class LapeAgent:
         Returns:
             Tuple of (measure_word, explanation, confidence)
         """
-        if lemma.pos_type != 'noun':
+        if lemma.pos_type != "noun":
             logger.warning(f"Lemma '{lemma.lemma_text}' is not a noun, skipping measure word generation")
             return None, None, 0.0
 
@@ -232,10 +232,10 @@ class LapeAgent:
                 logger.error(f"No structured data received for '{lemma.lemma_text}'")
                 return None, None, 0.0
 
-            measure_word = result.get('primary_measure_word', None)
-            alternatives = result.get('alternative_measure_words', [])
-            explanation = result.get('explanation', '')
-            confidence = float(result.get('confidence', 0.5))
+            measure_word = result.get("primary_measure_word", None)
+            alternatives = result.get("alternative_measure_words", [])
+            explanation = result.get("explanation", "")
+            confidence = float(result.get("confidence", 0.5))
 
             # Combine primary and alternatives
             if alternatives:
@@ -273,7 +273,7 @@ class LapeAgent:
         Returns:
             Tuple of (gender, explanation, confidence)
         """
-        if lemma.pos_type != 'noun':
+        if lemma.pos_type != "noun":
             logger.warning(f"Lemma '{lemma.lemma_text}' is not a noun, skipping gender generation")
             return None, None, 0.0
 
@@ -282,9 +282,9 @@ class LapeAgent:
             return None, None, 0.0
 
         gender_config = self.GENDER_SYSTEMS[language_code]
-        language_name = gender_config['name']
-        valid_genders = ', '.join(gender_config['genders'])
-        gender_system = gender_config['description']
+        language_name = gender_config["name"]
+        valid_genders = ", ".join(gender_config["genders"])
+        gender_system = gender_config["description"]
 
         # Load prompts
         try:
@@ -314,7 +314,7 @@ class LapeAgent:
                 "gender": SchemaProperty(
                     "string",
                     f"The grammatical gender: {valid_genders}",
-                    enum=gender_config['genders']
+                    enum=gender_config["genders"]
                 ),
                 "explanation": SchemaProperty(
                     "string",
@@ -346,9 +346,9 @@ class LapeAgent:
                 logger.error(f"No structured data received for '{lemma.lemma_text}'")
                 return None, None, 0.0
 
-            gender = result.get('gender', None)
-            explanation = result.get('explanation', '')
-            confidence = float(result.get('confidence', 0.5))
+            gender = result.get("gender", None)
+            explanation = result.get("explanation", "")
+            confidence = float(result.get("confidence", 0.5))
 
             logger.info(
                 f"Generated gender for '{lemma.lemma_text}' ({target_translation}): "
@@ -394,7 +394,7 @@ class LapeAgent:
         fact_config = self.SUPPORTED_FACT_TYPES[fact_type]
 
         # Validate language
-        if language_code not in fact_config['languages']:
+        if language_code not in fact_config["languages"]:
             raise ValueError(
                 f"Fact type '{fact_type}' does not support language '{language_code}'. "
                 f"Supported languages: {', '.join(fact_config['languages'])}"
@@ -408,7 +408,7 @@ class LapeAgent:
         try:
             # Get lemmas that need this fact
             query = session.query(Lemma).filter(
-                Lemma.pos_type.in_(fact_config['required_pos'])
+                Lemma.pos_type.in_(fact_config["required_pos"])
             ).order_by(Lemma.id)
 
             if limit:
@@ -448,11 +448,11 @@ class LapeAgent:
                 logger.info(f"Processing {processed_count}/{limit or '∞'}: {lemma.lemma_text}")
 
                 # Generate fact based on type
-                if fact_type == 'measure_words':
+                if fact_type == "measure_words":
                     fact_value, notes, confidence = self.generate_measure_words(
                         lemma, translation, session
                     )
-                elif fact_type == 'grammatical_gender':
+                elif fact_type == "grammatical_gender":
                     fact_value, notes, confidence = self.generate_grammatical_gender(
                         lemma, translation, language_code, session
                     )
@@ -479,28 +479,28 @@ class LapeAgent:
                         # Log operation
                         log_operation(
                             session,
-                            operation_type='grammar_fact_generated',
-                            entity_type='grammar_fact',
+                            operation_type="grammar_fact_generated",
+                            entity_type="grammar_fact",
                             entity_id=lemma.id,
                             details={
-                                'fact_type': fact_type,
-                                'language_code': language_code,
-                                'fact_value': fact_value,
-                                'confidence': confidence,
-                                'agent': 'lape',
-                                'model': self.model
+                                "fact_type": fact_type,
+                                "language_code": language_code,
+                                "fact_value": fact_value,
+                                "confidence": confidence,
+                                "agent": "lape",
+                                "model": self.model
                             }
                         )
                         session.commit()
 
                     success_count += 1
                     results.append({
-                        'lemma_id': lemma.id,
-                        'lemma_text': lemma.lemma_text,
-                        'translation': translation,
-                        'fact_value': fact_value,
-                        'notes': notes,
-                        'confidence': confidence
+                        "lemma_id": lemma.id,
+                        "lemma_text": lemma.lemma_text,
+                        "translation": translation,
+                        "fact_value": fact_value,
+                        "notes": notes,
+                        "confidence": confidence
                     })
                     logger.info(f"  ✓ Generated: {fact_value} (confidence: {confidence:.2f})")
                 else:
@@ -515,14 +515,14 @@ class LapeAgent:
             )
 
             return {
-                'fact_type': fact_type,
-                'language_code': language_code,
-                'processed': processed_count,
-                'success': success_count,
-                'failed': failed_count,
-                'skipped': skipped_count,
-                'results': results,
-                'dry_run': dry_run
+                "fact_type": fact_type,
+                "language_code": language_code,
+                "processed": processed_count,
+                "success": success_count,
+                "failed": failed_count,
+                "skipped": skipped_count,
+                "results": results,
+                "dry_run": dry_run
             }
 
         except Exception as e:
@@ -538,7 +538,7 @@ class LapeAgent:
 def main():
     """Command-line interface for the Lape agent."""
     parser = argparse.ArgumentParser(
-        description='Lape - Grammar Facts Generator Agent',
+        description="Lape - Grammar Facts Generator Agent",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
@@ -574,57 +574,57 @@ Future fact types (see code comments):
     )
 
     parser.add_argument(
-        '--fact-type',
+        "--fact-type",
         required=True,
         choices=LapeAgent.SUPPORTED_FACT_TYPES.keys(),
-        help='Type of grammar fact to generate'
+        help="Type of grammar fact to generate"
     )
     parser.add_argument(
-        '--language',
+        "--language",
         required=True,
-        help='Language code (e.g., zh, fr, es)'
+        help="Language code (e.g., zh, fr, es)"
     )
     parser.add_argument(
-        '--limit',
+        "--limit",
         type=int,
-        help='Maximum number of lemmas to process'
+        help="Maximum number of lemmas to process"
     )
     parser.add_argument(
-        '--skip-existing',
-        action='store_true',
+        "--skip-existing",
+        action="store_true",
         default=True,
-        help='Skip lemmas that already have this fact (default: True)'
+        help="Skip lemmas that already have this fact (default: True)"
     )
     parser.add_argument(
-        '--no-skip-existing',
-        dest='skip_existing',
-        action='store_false',
-        help='Process all lemmas, even if they have existing facts'
+        "--no-skip-existing",
+        dest="skip_existing",
+        action="store_false",
+        help="Process all lemmas, even if they have existing facts"
     )
     parser.add_argument(
-        '--min-confidence',
+        "--min-confidence",
         type=float,
         default=0.7,
-        help='Minimum confidence score to save fact (default: 0.7)'
+        help="Minimum confidence score to save fact (default: 0.7)"
     )
     parser.add_argument(
-        '--dry-run',
-        action='store_true',
-        help='Run without saving to database'
+        "--dry-run",
+        action="store_true",
+        help="Run without saving to database"
     )
     parser.add_argument(
-        '--model',
-        default='gpt-5-mini',
-        help='LLM model to use (default: gpt-5-mini)'
+        "--model",
+        default="gpt-5-mini",
+        help="LLM model to use (default: gpt-5-mini)"
     )
     parser.add_argument(
-        '--debug',
-        action='store_true',
-        help='Enable debug logging'
+        "--debug",
+        action="store_true",
+        help="Enable debug logging"
     )
     parser.add_argument(
-        '--db-path',
-        help='Database path (default: from constants)'
+        "--db-path",
+        help="Database path (default: from constants)"
     )
 
     args = parser.parse_args()
@@ -657,18 +657,18 @@ Future fact types (see code comments):
         print(f"Success: {results['success']}")
         print(f"Failed: {results['failed']}")
         print(f"Skipped: {results['skipped']}")
-        if results['dry_run']:
+        if results["dry_run"]:
             print("\n⚠️  DRY RUN - No changes saved to database")
         print("=" * 60)
 
         # Print some examples
-        if results['results']:
+        if results["results"]:
             print("\nSample results:")
-            for i, result in enumerate(results['results'][:5], 1):
+            for i, result in enumerate(results["results"][:5], 1):
                 print(f"{i}. {result['lemma_text']} ({result['translation']})")
                 print(f"   → {result['fact_value']}")
                 print(f"   Confidence: {result['confidence']:.2f}")
-                if result['notes']:
+                if result["notes"]:
                     print(f"   Notes: {result['notes']}")
 
     except Exception as e:
@@ -676,5 +676,5 @@ Future fact types (see code comments):
         sys.exit(1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

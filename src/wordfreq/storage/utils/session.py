@@ -50,7 +50,7 @@ def _add_missing_columns(engine):
             continue  # Table doesn't exist yet, create_all() will handle it
 
         # Get existing columns in the database
-        existing_columns = {col['name'] for col in inspector.get_columns(table_name)}
+        existing_columns = {col["name"] for col in inspector.get_columns(table_name)}
 
         # Get columns defined in the model
         model_columns = {col.name for col in table.columns}
@@ -72,7 +72,7 @@ def _add_missing_columns(engine):
                 default_clause = ""
 
                 if column.default is not None:
-                    if hasattr(column.default, 'arg'):
+                    if hasattr(column.default, "arg"):
                         # Scalar default value
                         if isinstance(column.default.arg, str):
                             default_clause = f" DEFAULT '{column.default.arg}'"
@@ -80,9 +80,9 @@ def _add_missing_columns(engine):
                             default_clause = f" DEFAULT {1 if column.default.arg else 0}"
                         else:
                             default_clause = f" DEFAULT {column.default.arg}"
-                    elif hasattr(column.default, 'name'):
+                    elif hasattr(column.default, "name"):
                         # Server default (like func.now())
-                        if column.default.name == 'now':
+                        if column.default.name == "now":
                             default_clause = " DEFAULT CURRENT_TIMESTAMP"
 
                 alter_sql = f"ALTER TABLE {table_name} ADD COLUMN {col_name} {col_type}{default_clause}{nullable_clause}"

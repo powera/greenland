@@ -304,5 +304,5 @@ class TestOpenAISchemaStrictMode(unittest.TestCase):
         self.assertEqual(openai_schema["type"], "object")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(verbosity=2)

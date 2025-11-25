@@ -25,7 +25,7 @@ from clients.openai_batch_client import OpenAIBatchClient, BatchStatus
 import constants
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 # Batch tracking database path
@@ -64,19 +64,19 @@ class BatchRequestMetadata:
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'BatchRequestMetadata':
+    def from_dict(cls, data: Dict[str, Any]) -> "BatchRequestMetadata":
         """Create from dictionary."""
         return cls(**{k: v for k, v in data.items() if k in cls.__annotations__})
 
 
 class BatchQueue(Base):
     """Database model for tracking batch requests."""
-    __tablename__ = 'batch_queue'
+    __tablename__ = "batch_queue"
     __table_args__ = (
-        Index('ix_batch_queue_batch_id', 'batch_id'),
-        Index('ix_batch_queue_status', 'status'),
-        Index('ix_batch_queue_custom_id', 'custom_id'),
-        Index('ix_batch_queue_agent_name', 'agent_name'),
+        Index("ix_batch_queue_batch_id", "batch_id"),
+        Index("ix_batch_queue_status", "status"),
+        Index("ix_batch_queue_custom_id", "custom_id"),
+        Index("ix_batch_queue_agent_name", "agent_name"),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -233,7 +233,7 @@ class BatchQueueManager:
         # Create batch
         endpoint = requests[0].endpoint  # All requests should have same endpoint
         batch_info = self.batch_client.create_batch(file_id, endpoint, metadata=batch_metadata)
-        batch_id = batch_info['id']
+        batch_id = batch_info["id"]
         logger.info(f"Created batch {batch_id}")
 
         # Update request records
@@ -258,7 +258,7 @@ class BatchQueueManager:
             Batch status information from OpenAI
         """
         batch_info = self.batch_client.get_batch_status(batch_id)
-        status = batch_info['status']
+        status = batch_info["status"]
 
         # Update request statuses if batch is processing or completed
         if status in [BatchStatus.IN_PROGRESS.value, BatchStatus.FINALIZING.value]:
@@ -283,13 +283,13 @@ class BatchQueueManager:
         """
         # Check batch status first
         batch_info = self.batch_client.get_batch_status(batch_id)
-        status = batch_info['status']
+        status = batch_info["status"]
 
         if status != BatchStatus.COMPLETED.value:
             raise ValueError(f"Batch {batch_id} is not completed (status: {status})")
 
         # Download results
-        output_file_id = batch_info['output_file_id']
+        output_file_id = batch_info["output_file_id"]
         results = self.batch_client.download_batch_results(output_file_id)
         logger.info(f"Downloaded {len(results)} results from batch {batch_id}")
 
@@ -298,7 +298,7 @@ class BatchQueueManager:
         processed_count = 0
 
         for result in results:
-            custom_id = result['custom_id']
+            custom_id = result["custom_id"]
 
             # Find the request record
             req = self.db.query(BatchQueue).filter_by(custom_id=custom_id).first()
@@ -307,12 +307,12 @@ class BatchQueueManager:
                 continue
 
             # Check if request succeeded or failed
-            if result.get('error'):
+            if result.get("error"):
                 req.status = BatchRequestStatus.FAILED.value
-                req.error_message = json.dumps(result['error'])
+                req.error_message = json.dumps(result["error"])
             else:
                 req.status = BatchRequestStatus.COMPLETED.value
-                req.response_body = json.dumps(result.get('response', {}))
+                req.response_body = json.dumps(result.get("response", {}))
 
             req.completed_at = completed_at
             processed_count += 1

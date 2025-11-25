@@ -15,7 +15,7 @@ from clients.types import Response
 import clients.lib
 
 # Configure logging with DEBUG level option
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 SERVER = "100.123.16.86"
@@ -77,7 +77,7 @@ class OllamaClient:
             
         for line in response.iter_lines():
             if line:
-                response_data = json.loads(line.decode('utf-8'))
+                response_data = json.loads(line.decode("utf-8"))
                     
                 if "total_duration" in response_data:
                     usage = LLMUsage.from_api_response(response_data, model=model)

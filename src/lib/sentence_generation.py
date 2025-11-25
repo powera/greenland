@@ -143,14 +143,14 @@ class SentenceGenerator:
             return None
             
         # Build context for LLM
-        subject_info = pattern['subject'].get('data', pattern['subject'])
-        verb_info = pattern['verb'].get('data', pattern['verb'])
-        object_info = pattern['object'].get('data', pattern['object'])
+        subject_info = pattern["subject"].get("data", pattern["subject"])
+        verb_info = pattern["verb"].get("data", pattern["verb"])
+        object_info = pattern["object"].get("data", pattern["object"])
         
         # Get subject, verb, object keys
-        subject_key = pattern['subject'].get('key') or pattern['subject'].get('english')
-        verb_key = pattern['verb'].get('key') or pattern['verb'].get('english')
-        object_key = pattern['object'].get('key') or pattern['object'].get('english')
+        subject_key = pattern["subject"].get("key") or pattern["subject"].get("english")
+        verb_key = pattern["verb"].get("key") or pattern["verb"].get("english")
+        object_key = pattern["object"].get("key") or pattern["object"].get("english")
         
         # Get available adjectives for context
         available_adjectives = [key for key, _ in self._get_available_adjectives()]
@@ -159,9 +159,9 @@ class SentenceGenerator:
         prompt = f"""
         Create a natural {target_language} sentence for language learning using these components:
         
-        Subject: {subject_key} (Target: {subject_info.get(target_language, 'unknown')})
-        Verb: {verb_key} in {pattern['tense']} tense
-        Object: {object_key} (Target: {object_info.get(target_language, 'unknown')})
+        Subject: {subject_key} (Target: {subject_info.get(target_language, "unknown")})
+        Verb: {verb_key} in {pattern["tense"]} tense
+        Object: {object_key} (Target: {object_info.get(target_language, "unknown")})
         
         Available adjectives to optionally include: {adj_list}
         
@@ -345,9 +345,9 @@ class SentenceGenerator:
                 return verb
             else:
                 # Third person singular
-                if verb.endswith(('s', 'sh', 'ch', 'x', 'z')):
+                if verb.endswith(("s", "sh", "ch", "x", "z")):
                     return verb + "es"
-                elif verb.endswith('y') and verb[-2] not in 'aeiou':
+                elif verb.endswith("y") and verb[-2] not in "aeiou":
                     return verb[:-1] + "ies"
                 else:
                     return verb + "s"

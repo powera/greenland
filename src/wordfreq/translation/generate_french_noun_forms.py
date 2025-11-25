@@ -10,15 +10,15 @@ from wordfreq.translation.generate_forms_base import (
 )
 
 CONFIG = FormGenerationConfig(
-    language_code='fr',
-    language_name='French',
-    pos_type='noun',
+    language_code="fr",
+    language_name="French",
+    pos_type="noun",
     form_mapping=NOUN_FORM_MAPPING,
-    client_method_name='query_french_noun_forms',
+    client_method_name="query_french_noun_forms",
     min_forms_threshold=2,
-    base_form_identifier='singular_m',
+    base_form_identifier="singular_m",
     use_legacy_translation=True,
-    translation_field_name='french_translation',
+    translation_field_name="french_translation",
     extract_gender=True
 )
 
@@ -32,5 +32,5 @@ def main():
     run_form_generation(CONFIG, get_french_noun_lemmas)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

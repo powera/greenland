@@ -92,7 +92,7 @@ class MockOllamaClient:
             "gemma2": {"explanation": explanation, "valid": False, "confidence": 40}
         }
 
-@patch('lib.validation.ollama_client', MockOllamaClient())
+@patch("lib.validation.ollama_client", MockOllamaClient())
 class TestResponseValidator(unittest.TestCase):
     def setUp(self):
         self.validator = ResponseValidator()
@@ -173,5 +173,5 @@ class TestResponseValidator(unittest.TestCase):
             self.assertGreaterEqual(validator_result["confidence"], 0)
             self.assertLessEqual(validator_result["confidence"], 100)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
