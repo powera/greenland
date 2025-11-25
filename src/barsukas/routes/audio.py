@@ -297,7 +297,7 @@ def list_files():
     voices = g.db.query(AudioQualityReview.voice_name).distinct().all()
     voices = sorted([voice[0] for voice in voices])
 
-    statuses = ['pending_review', 'approved', 'needs_replacement']
+    statuses = ['pending_review', 'approved', 'approved_with_issues', 'needs_replacement']
 
     total_pages = (total_count + per_page - 1) // per_page
 
@@ -361,7 +361,7 @@ def review_file(review_id):
     issues_json = request.form.get('quality_issues', '[]')
     notes = request.form.get('notes', '').strip()
 
-    if status not in ['pending_review', 'approved', 'needs_replacement']:
+    if status not in ['pending_review', 'approved', 'approved_with_issues', 'needs_replacement']:
         return jsonify({'error': 'Invalid status'}), 400
 
     try:
@@ -414,7 +414,7 @@ def quick_update(review_id):
     data = request.get_json()
     status = data.get('status')
 
-    if status not in ['pending_review', 'approved', 'needs_replacement']:
+    if status not in ['pending_review', 'approved', 'approved_with_issues', 'needs_replacement']:
         return jsonify({'error': 'Invalid status'}), 400
 
     try:
@@ -423,6 +423,136 @@ def quick_update(review_id):
         g.db.commit()
 
         return jsonify({'success': True, 'status': status})
+    except Exception as e:
+        g.db.rollback()
+        return jsonify({'error': str(e)}), 500
+
+
+@bp.route('/rapid-review')
+def rapid_review():
+    """Streamlined rapid review interface with keyboard shortcuts."""
+    # Get filter parameters - default to pending_review
+    language_filter = request.args.get('language', '')
+    voice_filter = request.args.get('voice', '')
+    status_filter = request.args.get('status', 'pending_review')
+
+    # Build query
+    query = g.db.query(AudioQualityReview)
+
+    if language_filter:
+        query = query.filter(AudioQualityReview.language_code == language_filter)
+
+    if voice_filter:
+        query = query.filter(AudioQualityReview.voice_name == voice_filter)
+
+    if status_filter:
+        query = query.filter(AudioQualityReview.status == status_filter)
+
+    # Order by GUID
+    query = query.order_by(AudioQualityReview.guid)
+
+    # Get total count
+    total_count = query.count()
+
+    # Get first file
+    current_review = query.first()
+
+    # Get available filter options
+    languages = g.db.query(AudioQualityReview.language_code).distinct().all()
+    languages = sorted([lang[0] for lang in languages])
+
+    voices = g.db.query(AudioQualityReview.voice_name).distinct().all()
+    voices = sorted([voice[0] for voice in voices])
+
+    statuses = ['pending_review', 'approved', 'approved_with_issues', 'needs_replacement']
+
+    return render_template(
+        'audio/rapid_review.html',
+        review=current_review,
+        total_count=total_count,
+        languages=languages,
+        voices=voices,
+        statuses=statuses,
+        language_filter=language_filter,
+        voice_filter=voice_filter,
+        status_filter=status_filter
+    )
+
+
+@bp.route('/rapid-review/submit/<int:review_id>', methods=['POST'])
+def rapid_review_submit(review_id):
+    """Submit rapid review and get next file (AJAX endpoint)."""
+    review = g.db.query(AudioQualityReview).filter_by(id=review_id).first()
+
+    if not review:
+        return jsonify({'error': 'Review not found'}), 404
+
+    data = request.get_json()
+    status = data.get('status')
+    issues = data.get('quality_issues', [])
+
+    if status not in ['pending_review', 'approved', 'approved_with_issues', 'needs_replacement']:
+        return jsonify({'error': 'Invalid status'}), 400
+
+    try:
+        # Update review
+        review.status = status
+        review.quality_issues = json.dumps(issues) if issues else None
+        review.reviewed_at = datetime.utcnow()
+        g.db.commit()
+
+        # Get next file based on same filters
+        language_filter = data.get('language', '')
+        voice_filter = data.get('voice', '')
+        status_filter = data.get('status_filter', 'pending_review')
+
+        # Build query for next file - use GUID ordering, not ID
+        # This ensures we get the next file in GUID sequence regardless of ID gaps
+        query = g.db.query(AudioQualityReview).filter(AudioQualityReview.guid > review.guid)
+
+        if language_filter:
+            query = query.filter(AudioQualityReview.language_code == language_filter)
+
+        if voice_filter:
+            query = query.filter(AudioQualityReview.voice_name == voice_filter)
+
+        if status_filter:
+            query = query.filter(AudioQualityReview.status == status_filter)
+
+        query = query.order_by(AudioQualityReview.guid)
+        next_review = query.first()
+
+        if next_review:
+            # Generate pinyin for Chinese text
+            pinyin_text = None
+            if next_review.language_code == 'zh':
+                from barsukas.pinyin_helper import generate_pinyin
+                pinyin_text = generate_pinyin(next_review.expected_text)
+
+            return jsonify({
+                'success': True,
+                'has_next': True,
+                'next_review': {
+                    'id': next_review.id,
+                    'guid': next_review.guid,
+                    'expected_text': next_review.expected_text,
+                    'language_code': next_review.language_code,
+                    'voice_name': next_review.voice_name,
+                    'filename': next_review.filename,
+                    'pinyin': pinyin_text,
+                    'audio_url': url_for('audio.serve_audio_file',
+                                        language=next_review.language_code,
+                                        voice=next_review.voice_name,
+                                        filename=next_review.filename)
+                }
+            })
+        else:
+            return jsonify({
+                'success': True,
+                'has_next': False,
+                'message': 'No more files to review'
+            })
+
     except Exception as e:
         g.db.rollback()
         return jsonify({'error': str(e)}), 500

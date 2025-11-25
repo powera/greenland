@@ -57,6 +57,10 @@ def create_app(config_class=Config):
     app.jinja_env.filters['pinyin_ruby'] = generate_pinyin_ruby_html
     app.jinja_env.filters['is_chinese'] = is_chinese
 
+    # Register JSON filter for parsing JSON strings in templates
+    import json
+    app.jinja_env.filters['fromjson'] = json.loads
+
     @app.before_request
     def before_request():
         """Set up database session for each request."""

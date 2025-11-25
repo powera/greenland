@@ -78,10 +78,24 @@
                             <span class="badge bg-warning text-dark">Pending Review</span>
                             {% elif review.status == 'approved' %}
                             <span class="badge bg-success">Approved</span>
+                            {% elif review.status == 'approved_with_issues' %}
+                            <span class="badge bg-info">Acceptable with Issues</span>
                             {% elif review.status == 'needs_replacement' %}
                             <span class="badge bg-danger">Needs Replacement</span>
                             {% endif %}
                         </dd>
+
+                        {% if review.quality_issues %}
+                        {% set existing_issues = review.quality_issues|fromjson %}
+                        {% if existing_issues|length > 0 %}
+                        <dt class="col-sm-4">Current Issues:</dt>
+                        <dd class="col-sm-8">
+                            {% for issue in existing_issues %}
+                            <span class="badge bg-warning text-dark">{{ issue|replace('_', ' ')|title }}</span>
+                            {% endfor %}
+                        </dd>
+                        {% endif %}
+                        {% endif %}
 
                         <dt class="col-sm-4">Linked Lemma:</dt>
                         <dd class="col-sm-8">
@@ -115,6 +129,12 @@
                             <input class="form-check-input" type="radio" name="status" id="status_approved" value="approved" {% if review.status == 'approved' %}checked{% endif %}>
                             <label class="form-check-label" for="status_approved">
                                 <i class="bi bi-check-circle text-success"></i> Approved (Audio is good)
+                            </label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="status" id="status_approved_with_issues" value="approved_with_issues" {% if review.status == 'approved_with_issues' %}checked{% endif %}>
+                            <label class="form-check-label" for="status_approved_with_issues">
+                                <i class="bi bi-check-circle text-info"></i> Acceptable with Issues
                             </label>
                         </div>
                         <div class="form-check form-check-inline">
