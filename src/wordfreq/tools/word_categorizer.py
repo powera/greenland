@@ -14,7 +14,7 @@ from clients.types import Schema, SchemaProperty
 from util.prompt_loader import get_context
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 @dataclass
@@ -231,7 +231,7 @@ class WordCategorizer:
             ]
         }
         
-        with open(filename, 'w', encoding='utf-8') as f:
+        with open(filename, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
         
         logger.info(f"Results saved to {filename}")

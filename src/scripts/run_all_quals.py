@@ -10,7 +10,7 @@ import benchmarks.datastore.common
 import lib.run_quals
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 def get_all_model_codenames(session) -> List[str]:

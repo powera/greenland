@@ -10,7 +10,7 @@ from lib.benchmarks.data_models import BenchmarkMetadata
 from lib.benchmarks.factory import runner
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 # Define benchmark code

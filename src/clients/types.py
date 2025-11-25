@@ -72,12 +72,12 @@ class SchemaProperty:
     maximum: Optional[float] = None
     default: Optional[Any] = None
     items: Optional[Dict[str, Any]] = None
-    properties: Optional[Dict[str, 'SchemaProperty']] = None
+    properties: Optional[Dict[str, "SchemaProperty"]] = None
     additional_properties: bool = False
     # For handling nested object schemas
-    object_schema: Optional['Schema'] = None
+    object_schema: Optional["Schema"] = None
     # For handling array of objects
-    array_items_schema: Optional['Schema'] = None
+    array_items_schema: Optional["Schema"] = None
 
 
 @dataclass

@@ -18,21 +18,21 @@ def print_fix_confirmation(lang_name, form_type, needs_fix, args):
     if args.limit:
         print(f"Limit: {args.limit}")
     print(f"Model: {args.model}")
-    if args.language == 'lt':
+    if args.language == "lt":
         print(f"Source: {args.source}")
     print(f"Throttle: {args.throttle}s between calls")
     print(f"{'='*60}")
     response = input("\nContinue? [y/N]: ")
-    return response.lower() in ['y', 'yes']
+    return response.lower() in ["y", "yes"]
 
 
 def print_fix_results(results, dry_run=False):
     """Print results of fix operation."""
-    if 'error' in results:
+    if "error" in results:
         print(f"\nError: {results['error']}")
-        if 'supported_languages' in results:
+        if "supported_languages" in results:
             print(f"Supported languages: {', '.join(results['supported_languages'])}")
-        if 'supported_pos_types' in results:
+        if "supported_pos_types" in results:
             print(f"Supported POS types: {', '.join(results['supported_pos_types'])}")
     else:
         if dry_run:
@@ -59,6 +59,6 @@ def print_noun_declensions_check(results):
 
 def print_verb_conjugations_check(results, language_code):
     """Print verb conjugations check results."""
-    lang_name = results.get('language_name', language_code.upper())
+    lang_name = results.get("language_name", language_code.upper())
     print(f"\n{lang_name} Verbs needing conjugations: {results['needs_conjugations']} out of {results['total_verbs']}")
     print(f"Coverage: {results['conjugation_coverage_percentage']:.1f}%")

@@ -16,7 +16,7 @@ from lib.benchmarks.factory import runner, get_benchmark_metadata, benchmark
 from lib.benchmarks.generators.translations_generator import VALID_LANGS, get_translation_metadata
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 @runner("0050_translation")
@@ -34,7 +34,7 @@ class TranslationRunner(BenchmarkRunner):
         super().__init__(model, metadata)
         
         # Extract language codes from metadata code
-        parts = metadata.code.split('_')
+        parts = metadata.code.split("_")
         if len(parts) == 4:
             self.origin_lang = parts[2]
             self.target_lang = parts[3]
@@ -57,7 +57,7 @@ When translating a word from {self.origin_lang.upper()} to {self.target_lang.upp
 - Do not provide explanations or alternative translations"""
     
     @staticmethod
-    def create_language_pair_runner(model: str, origin_lang: str, target_lang: str) -> 'TranslationRunner':
+    def create_language_pair_runner(model: str, origin_lang: str, target_lang: str) -> "TranslationRunner":
         """
         Create a runner for a specific language pair.
         

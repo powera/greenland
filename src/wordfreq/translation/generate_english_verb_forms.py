@@ -10,25 +10,25 @@ from wordfreq.translation.generate_forms_base import (
 )
 
 CONFIG = FormGenerationConfig(
-    language_code='en',
-    language_name='English',
-    pos_type='verb',
+    language_code="en",
+    language_name="English",
+    pos_type="verb",
     form_mapping=VERB_FORM_MAPPING,
-    client_method_name='query_english_verb_conjugations',
+    client_method_name="query_english_verb_conjugations",
     min_forms_threshold=3,
-    base_form_identifier='1s_pres',
+    base_form_identifier="1s_pres",
     use_legacy_translation=False
 )
 
 
 def get_english_verb_lemmas(db_path: str, limit: int = None):
     """Get all lemmas that are English verbs."""
-    return get_lemmas_without_translation(db_path, 'verb', limit)
+    return get_lemmas_without_translation(db_path, "verb", limit)
 
 
 def main():
     run_form_generation(CONFIG, get_english_verb_lemmas)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

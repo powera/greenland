@@ -31,14 +31,14 @@ def generate_guid(session, subtype: str) -> str:
         if guid and guid.startswith(prefix):
             try:
                 # Handle old format (A01001), dot format (A01.001), and new underscore format (A01_001)
-                if '_' in guid:
+                if "_" in guid:
                     # New format: A01_001
-                    if len(guid) >= 7 and guid[3] == '_':
+                    if len(guid) >= 7 and guid[3] == "_":
                         num = int(guid[4:])  # Extract the number part after the underscore
                         max_num = max(max_num, num)
-                elif '.' in guid:
+                elif "." in guid:
                     # Dot format: A01.001 (for backward compatibility)
-                    if len(guid) >= 7 and guid[3] == '.':
+                    if len(guid) >= 7 and guid[3] == ".":
                         num = int(guid[4:])  # Extract the number part after the period
                         max_num = max(max_num, num)
                 else:

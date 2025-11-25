@@ -44,7 +44,7 @@ from wordfreq.storage.translation_helpers import get_translation, get_all_transl
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -81,7 +81,7 @@ class ZvirblisAgent:
     def generate_sentences_for_noun(
         self,
         lemma: Lemma,
-        target_languages: List[str] = ['en', 'lt'],
+        target_languages: List[str] = ["en", "lt"],
         num_sentences: int = 3,
         difficulty_context: Optional[int] = None
     ) -> Dict[str, any]:
@@ -100,8 +100,8 @@ class ZvirblisAgent:
         if lemma.pos_type != "noun":
             logger.warning(f"Lemma {lemma.guid} is not a noun (got {lemma.pos_type})")
             return {
-                'success': False,
-                'error': f'Expected noun, got {lemma.pos_type}'
+                "success": False,
+                "error": f'Expected noun, got {lemma.pos_type}'
             }
 
         logger.info(f"Generating {num_sentences} sentences for noun: {lemma.lemma_text} (GUID: {lemma.guid})")
@@ -112,7 +112,7 @@ class ZvirblisAgent:
             # Get translations for the noun in target languages
             noun_translations = {}
             for lang_code in target_languages:
-                if lang_code == 'en':
+                if lang_code == "en":
                     # For English, use the lemma text itself
                     noun_translations[lang_code] = lemma.lemma_text
                 else:
@@ -147,28 +147,28 @@ class ZvirblisAgent:
                 generated_sentences.append(result)
 
                 # Add to previous sentences for context
-                english_text = result.get('translations', {}).get('en', '')
+                english_text = result.get("translations", {}).get("en", "")
                 if english_text:
                     previous_sentences.append(english_text)
 
             if not generated_sentences:
                 logger.error(f"LLM failed to generate any sentences for {lemma.lemma_text}")
                 return {
-                    'success': False,
-                    'error': 'LLM generation failed'
+                    "success": False,
+                    "error": "LLM generation failed"
                 }
 
             return {
-                'success': True,
-                'sentences': generated_sentences,
-                'lemma_guid': lemma.guid
+                "success": True,
+                "sentences": generated_sentences,
+                "lemma_guid": lemma.guid
             }
 
         except Exception as e:
             logger.error(f"Error generating sentences for {lemma.lemma_text}: {e}", exc_info=True)
             return {
-                'success': False,
-                'error': str(e)
+                "success": False,
+                "error": str(e)
             }
         finally:
             session.close()
@@ -318,7 +318,7 @@ Focus on variety, natural language usage, and accurate translations."""
 
         # Add per-language word lists
         for lang_code in target_languages:
-            if lang_code == 'en':
+            if lang_code == "en":
                 continue  # Skip English
             words_key = f"words_{lang_code}"
             top_level_properties[words_key] = SchemaProperty(
@@ -378,15 +378,15 @@ Focus on variety, natural language usage, and accurate translations."""
                 # Create the sentence record
                 sentence = add_sentence(
                     session=session,
-                    pattern_type=sentence_data.get('pattern'),
-                    tense=sentence_data.get('tense'),
+                    pattern_type=sentence_data.get("pattern"),
+                    tense=sentence_data.get("tense"),
                     source_filename=f"zvirblis_{source_lemma.guid}",
                     verified=False,
                     notes=f"Generated for {source_lemma.lemma_text} (GUID: {source_lemma.guid})"
                 )
 
                 # Add translations
-                translations = sentence_data.get('translations', {})
+                translations = sentence_data.get("translations", {})
                 for lang_code, text in translations.items():
                     add_sentence_translation(
                         session=session,
@@ -398,9 +398,9 @@ Focus on variety, natural language usage, and accurate translations."""
 
                 # Add word linkages for each language
                 # Get list of languages from translations
-                translations = sentence_data.get('translations', {})
+                translations = sentence_data.get("translations", {})
                 for lang_code in translations.keys():
-                    if lang_code == 'en':
+                    if lang_code == "en":
                         continue  # Skip English, we only store target language words
 
                     # Get the words list for this language
@@ -426,13 +426,13 @@ Focus on variety, natural language usage, and accurate translations."""
                             logger.error(f"Expected dict at position {position} in {words_key}, got {type(word_data)}: {word_data}")
                             continue
                         # Try to find the lemma by matching the English lemma
-                        english_lemma = word_data.get('english_lemma')
+                        english_lemma = word_data.get("english_lemma")
                         word_lemma = None
                         if english_lemma:
                             word_lemma = self._find_lemma_for_word(
                                 session,
                                 english_lemma,
-                                word_data.get('role'),
+                                word_data.get("role"),
                                 source_lemma=source_lemma
                             )
 
@@ -440,13 +440,13 @@ Focus on variety, natural language usage, and accurate translations."""
                             session=session,
                             sentence=sentence,
                             position=position,
-                            word_role=word_data.get('role', 'unknown'),
+                            word_role=word_data.get("role", "unknown"),
                             lemma=word_lemma,
-                            english_text=word_data.get('english'),
-                            target_language_text=word_data.get('lemma'),
-                            grammatical_form=word_data.get('grammatical_form'),
-                            grammatical_case=word_data.get('grammatical_case'),
-                            declined_form=word_data.get('word'),
+                            english_text=word_data.get("english"),
+                            target_language_text=word_data.get("lemma"),
+                            grammatical_form=word_data.get("grammatical_form"),
+                            grammatical_case=word_data.get("grammatical_case"),
+                            declined_form=word_data.get("word"),
                             language_code=lang_code
                         )
 
@@ -477,10 +477,10 @@ Focus on variety, natural language usage, and accurate translations."""
             session.commit()
 
         return {
-            'stored': stored_count,
-            'failed': failed_count,
-            'errors': errors,
-            'sentence_ids': sentence_ids
+            "stored": stored_count,
+            "failed": failed_count,
+            "errors": errors,
+            "sentence_ids": sentence_ids
         }
 
     def _find_lemma_for_word(
@@ -511,8 +511,8 @@ Focus on variety, natural language usage, and accurate translations."""
             # Strip disambiguation from source lemma text to compare
             source_text = source_lemma.lemma_text
             # Remove parenthetical disambiguation if present
-            if '(' in source_text:
-                source_base = source_text.split('(')[0].strip()
+            if "(" in source_text:
+                source_base = source_text.split("(")[0].strip()
             else:
                 source_base = source_text
 
@@ -523,11 +523,11 @@ Focus on variety, natural language usage, and accurate translations."""
 
         # Map roles to POS types
         role_to_pos = {
-            'subject': 'noun',
-            'object': 'noun',
-            'verb': 'verb',
-            'adjective': 'adjective',
-            'adverb': 'adverb'
+            "subject": "noun",
+            "object": "noun",
+            "verb": "verb",
+            "adjective": "adjective",
+            "adverb": "adverb"
         }
 
         pos_hint = role_to_pos.get(word_role)
@@ -564,7 +564,7 @@ Focus on variety, natural language usage, and accurate translations."""
         difficulty_level: int,
         limit: Optional[int] = None,
         sentences_per_noun: int = 3,
-        target_languages: List[str] = ['en', 'lt'],
+        target_languages: List[str] = ["en", "lt"],
         dry_run: bool = False
     ) -> Dict[str, any]:
         """
@@ -586,7 +586,7 @@ Focus on variety, natural language usage, and accurate translations."""
         try:
             # Query nouns at this difficulty level
             query = session.query(Lemma).filter(
-                Lemma.pos_type == 'noun',
+                Lemma.pos_type == "noun",
                 Lemma.difficulty_level == difficulty_level
             ).order_by(Lemma.id)
 
@@ -598,10 +598,10 @@ Focus on variety, natural language usage, and accurate translations."""
 
             if dry_run:
                 return {
-                    'nouns_found': len(nouns),
-                    'sentences_generated': 0,
-                    'sentences_stored': 0,
-                    'dry_run': True
+                    "nouns_found": len(nouns),
+                    "sentences_generated": 0,
+                    "sentences_stored": 0,
+                    "dry_run": True
                 }
 
             total_generated = 0
@@ -619,8 +619,8 @@ Focus on variety, natural language usage, and accurate translations."""
                     difficulty_context=difficulty_level
                 )
 
-                if result.get('success') and result.get('sentences'):
-                    sentences = result['sentences']
+                if result.get("success") and result.get("sentences"):
+                    sentences = result["sentences"]
                     total_generated += len(sentences)
 
                     # Store sentences
@@ -630,8 +630,8 @@ Focus on variety, natural language usage, and accurate translations."""
                         session=session
                     )
 
-                    total_stored += store_result['stored']
-                    total_failed += store_result['failed']
+                    total_stored += store_result["stored"]
+                    total_failed += store_result["failed"]
 
             logger.info(f"\n{'='*60}")
             logger.info(f"Generation complete!")
@@ -642,19 +642,19 @@ Focus on variety, natural language usage, and accurate translations."""
             logger.info(f"{'='*60}")
 
             return {
-                'nouns_found': len(nouns),
-                'sentences_generated': total_generated,
-                'sentences_stored': total_stored,
-                'sentences_failed': total_failed
+                "nouns_found": len(nouns),
+                "sentences_generated": total_generated,
+                "sentences_stored": total_stored,
+                "sentences_failed": total_failed
             }
 
         except Exception as e:
             logger.error(f"Error in generation process: {e}", exc_info=True)
             return {
-                'error': str(e),
-                'nouns_found': 0,
-                'sentences_generated': 0,
-                'sentences_stored': 0
+                "error": str(e),
+                "nouns_found": 0,
+                "sentences_generated": 0,
+                "sentences_stored": 0
             }
         finally:
             session.close()
@@ -667,48 +667,48 @@ def get_argument_parser():
     command-line arguments without executing the main function.
     """
     parser = argparse.ArgumentParser(
-        description='Generate example sentences for vocabulary words'
+        description="Generate example sentences for vocabulary words"
     )
     parser.add_argument(
-        '--guid',
-        help='Generate sentences for a specific lemma GUID'
+        "--guid",
+        help="Generate sentences for a specific lemma GUID"
     )
     parser.add_argument(
-        '--level',
+        "--level",
         type=int,
-        help='Generate sentences for all nouns at a specific difficulty level (1-20)'
+        help="Generate sentences for all nouns at a specific difficulty level (1-20)"
     )
     parser.add_argument(
-        '--limit',
+        "--limit",
         type=int,
-        help='Limit number of nouns to process'
+        help="Limit number of nouns to process"
     )
     parser.add_argument(
-        '--num-sentences',
+        "--num-sentences",
         type=int,
         default=3,
-        help='Number of sentences to generate per noun (default: 3)'
+        help="Number of sentences to generate per noun (default: 3)"
     )
     parser.add_argument(
-        '--languages',
-        nargs='+',
-        default=['en', 'lt'],
-        help='Target languages for generation (default: en lt)'
+        "--languages",
+        nargs="+",
+        default=["en", "lt"],
+        help="Target languages for generation (default: en lt)"
     )
     parser.add_argument(
-        '--model',
-        default='gpt-5-mini',
-        help='LLM model to use (default: gpt-5-mini)'
+        "--model",
+        default="gpt-5-mini",
+        help="LLM model to use (default: gpt-5-mini)"
     )
     parser.add_argument(
-        '--dry-run',
-        action='store_true',
-        help='Show what would be done without actually generating sentences'
+        "--dry-run",
+        action="store_true",
+        help="Show what would be done without actually generating sentences"
     )
     parser.add_argument(
-        '--debug',
-        action='store_true',
-        help='Enable debug logging'
+        "--debug",
+        action="store_true",
+        help="Enable debug logging"
     )
 
     return parser
@@ -740,10 +740,10 @@ def main():
                 num_sentences=args.num_sentences
             )
 
-            if result.get('success') and result.get('sentences'):
+            if result.get("success") and result.get("sentences"):
                 if not args.dry_run:
                     store_result = agent.store_sentences(
-                        sentences_data=result['sentences'],
+                        sentences_data=result["sentences"],
                         source_lemma=lemma,
                         session=session
                     )
@@ -767,7 +767,7 @@ def main():
             dry_run=args.dry_run
         )
 
-        if result.get('error'):
+        if result.get("error"):
             logger.error(f"Generation failed: {result['error']}")
             return 1
 
@@ -779,5 +779,5 @@ def main():
     return 0
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     exit(main())

@@ -22,7 +22,7 @@ class ArgumentInfo:
         self.help = action.help or ""
         self.default = action.default
         self.required = action.required
-        self.choices = getattr(action, 'choices', None)
+        self.choices = getattr(action, "choices", None)
         self.nargs = action.nargs
         self.metavar = action.metavar
         self.type_name = self._infer_type(action)
@@ -33,20 +33,20 @@ class ArgumentInfo:
     def _infer_type(self, action) -> str:
         """Infer the input type from the action."""
         if isinstance(action, argparse._StoreTrueAction):
-            return 'boolean'
+            return "boolean"
         elif isinstance(action, argparse._StoreFalseAction):
-            return 'boolean'
-        elif action.nargs in ['+', '*']:
+            return "boolean"
+        elif action.nargs in ["+", "*"]:
             # List type takes precedence over choices
-            return 'list'
+            return "list"
         elif self.choices:
-            return 'choice'
+            return "choice"
         elif action.type == int:
-            return 'integer'
+            return "integer"
         elif action.type == float:
-            return 'float'
+            return "float"
         else:
-            return 'string'
+            return "string"
 
     def _extract_mode_hint(self, help_text: str) -> Optional[str]:
         """Extract mode hints from help text like '[Fix mode]' or '[Stage mode]'."""
@@ -59,16 +59,16 @@ class ArgumentInfo:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to a dictionary for JSON serialization."""
         return {
-            'names': self.names,
-            'dest': self.dest,
-            'help': self.help,
-            'default': self.default,
-            'required': self.required,
-            'type': self.type_name,
-            'choices': self.choices,
-            'nargs': self.nargs,
-            'metavar': self.metavar,
-            'mode_hint': self.mode_hint
+            "names": self.names,
+            "dest": self.dest,
+            "help": self.help,
+            "default": self.default,
+            "required": self.required,
+            "type": self.type_name,
+            "choices": self.choices,
+            "nargs": self.nargs,
+            "metavar": self.metavar,
+            "mode_hint": self.mode_hint
         }
 
 
@@ -91,10 +91,10 @@ def introspect_agent_parser(agent_module_path: str) -> Dict[str, Any]:
         import sys
 
         # Convert module path to file path
-        module_parts = agent_module_path.split('.')
+        module_parts = agent_module_path.split(".")
         # Find the greenland/src directory
         src_path = Path(__file__).parent.parent.parent  # barsukas/utils -> barsukas -> src
-        file_path = src_path.joinpath(*module_parts).with_suffix('.py')
+        file_path = src_path.joinpath(*module_parts).with_suffix(".py")
 
         if not file_path.exists():
             raise FileNotFoundError(f"Module file not found: {file_path}")
@@ -108,7 +108,7 @@ def introspect_agent_parser(agent_module_path: str) -> Dict[str, Any]:
         spec.loader.exec_module(module)
 
         # Get the parser
-        if not hasattr(module, 'get_argument_parser'):
+        if not hasattr(module, "get_argument_parser"):
             raise AttributeError(f"Module {agent_module_path} does not have get_argument_parser()")
 
         parser = module.get_argument_parser()
@@ -119,7 +119,7 @@ def introspect_agent_parser(agent_module_path: str) -> Dict[str, Any]:
 
         for action in parser._actions:
             # Skip positional arguments and help
-            if not action.option_strings or action.dest == 'help':
+            if not action.option_strings or action.dest == "help":
                 continue
 
             arg_info = ArgumentInfo(action)
@@ -130,9 +130,9 @@ def introspect_agent_parser(agent_module_path: str) -> Dict[str, Any]:
                 modes.add(arg_info.mode_hint)
 
         return {
-            'description': parser.description,
-            'arguments': [arg.to_dict() for arg in arguments],
-            'modes': sorted(list(modes))
+            "description": parser.description,
+            "arguments": [arg.to_dict() for arg in arguments],
+            "modes": sorted(list(modes))
         }
 
     except Exception as e:
@@ -150,16 +150,16 @@ def group_arguments_by_mode(arguments: List[Dict[str, Any]]) -> Dict[str, List[D
         Dictionary mapping mode names to lists of arguments.
         Arguments with no mode hint are in the 'common' group.
     """
-    groups = {'common': []}
+    groups = {"common": []}
 
     for arg in arguments:
-        mode_hint = arg.get('mode_hint')
+        mode_hint = arg.get("mode_hint")
         if mode_hint:
             if mode_hint not in groups:
                 groups[mode_hint] = []
             groups[mode_hint].append(arg)
         else:
-            groups['common'].append(arg)
+            groups["common"].append(arg)
 
     return groups
 
@@ -174,10 +174,10 @@ def get_agent_cli_module_path(agent_script: str) -> str:
     Returns:
         Module path like 'agents.voras.cli' or 'agents.bebras'
     """
-    agent_name = agent_script.replace('.py', '')
+    agent_name = agent_script.replace(".py", "")
 
     # Check if it's a multi-file agent (has a directory)
-    multi_file_agents = ['voras', 'vilkas', 'dramblys']
+    multi_file_agents = ["voras", "vilkas", "dramblys"]
 
     if agent_name in multi_file_agents:
         return f'agents.{agent_name}.cli'

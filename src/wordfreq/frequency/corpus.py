@@ -428,7 +428,7 @@ def load_corpus(corpus_name: str) -> tuple[int, int]:
     
     # Build the full file path
     # Assume data files are in src/wordfreq/data directory
-    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
     data_dir = os.path.join(project_root, "src", "wordfreq", "data")
     full_file_path = os.path.join(data_dir, config.file_path)
     

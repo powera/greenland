@@ -76,19 +76,19 @@ def validate_lemma_form(word: str, pos_type: str, model: str = "gpt-5-mini") -> 
         else:
             logger.error(f"No structured data received for lemma validation of '{word}'")
             return {
-                'is_lemma': True,  # Assume correct if validation fails
-                'suggested_lemma': word,
-                'reason': 'Validation failed',
-                'confidence': 0.0
+                "is_lemma": True,  # Assume correct if validation fails
+                "suggested_lemma": word,
+                "reason": "Validation failed",
+                "confidence": 0.0
             }
 
     except Exception as e:
         logger.error(f"Error validating lemma form for '{word}': {e}")
         return {
-            'is_lemma': True,
-            'suggested_lemma': word,
-            'reason': f'Error: {str(e)}',
-            'confidence': 0.0
+            "is_lemma": True,
+            "suggested_lemma": word,
+            "reason": f'Error: {str(e)}',
+            "confidence": 0.0
         }
 
 
@@ -161,21 +161,21 @@ def validate_translation(
         else:
             logger.error(f"No structured data received for translation validation of '{english_word}' → '{translation}'")
             return {
-                'is_correct': True,  # Assume correct if validation fails
-                'is_lemma_form': True,
-                'suggested_translation': translation,
-                'issues': ['Validation failed'],
-                'confidence': 0.0
+                "is_correct": True,  # Assume correct if validation fails
+                "is_lemma_form": True,
+                "suggested_translation": translation,
+                "issues": ["Validation failed"],
+                "confidence": 0.0
             }
 
     except Exception as e:
         logger.error(f"Error validating translation '{english_word}' → '{translation}': {e}")
         return {
-            'is_correct': True,
-            'is_lemma_form': True,
-            'suggested_translation': translation,
-            'issues': [f'Error: {str(e)}'],
-            'confidence': 0.0
+            "is_correct": True,
+            "is_lemma_form": True,
+            "suggested_translation": translation,
+            "issues": [f'Error: {str(e)}'],
+            "confidence": 0.0
         }
 
 
@@ -254,19 +254,19 @@ def validate_definition(
         else:
             logger.error(f"No structured data received for definition validation of '{word}'")
             return {
-                'is_valid': True,  # Assume valid if validation fails
-                'issues': ['Validation failed'],
-                'suggested_definition': '',
-                'confidence': 0.0
+                "is_valid": True,  # Assume valid if validation fails
+                "issues": ["Validation failed"],
+                "suggested_definition": "",
+                "confidence": 0.0
             }
 
     except Exception as e:
         logger.error(f"Error validating definition for '{word}': {e}")
         return {
-            'is_valid': True,
-            'issues': [f'Error: {str(e)}'],
-            'suggested_definition': '',
-            'confidence': 0.0
+            "is_valid": True,
+            "issues": [f'Error: {str(e)}'],
+            "suggested_definition": "",
+            "confidence": 0.0
         }
 
 
@@ -289,16 +289,16 @@ def batch_validate_lemmas(
     issues = []
 
     for word_info in words:
-        word = word_info['word']
-        pos_type = word_info['pos_type']
+        word = word_info["word"]
+        pos_type = word_info["pos_type"]
 
         result = validate_lemma_form(word, pos_type, model)
 
-        if not result['is_lemma'] and result['confidence'] >= confidence_threshold:
+        if not result["is_lemma"] and result["confidence"] >= confidence_threshold:
             issues.append({
-                'word': word,
-                'pos_type': pos_type,
-                'validation': result
+                "word": word,
+                "pos_type": pos_type,
+                "validation": result
             })
 
     return issues
@@ -376,12 +376,12 @@ def validate_all_translations_for_word(
     ])
 
     language_names = {
-        'lt': 'Lithuanian',
-        'zh': 'Chinese',
-        'ko': 'Korean',
-        'fr': 'French',
-        'sw': 'Swahili',
-        'vi': 'Vietnamese'
+        "lt": "Lithuanian",
+        "zh": "Chinese",
+        "ko": "Korean",
+        "fr": "French",
+        "sw": "Swahili",
+        "vi": "Vietnamese"
     }
 
     language_list = ", ".join([language_names.get(lc, lc) for lc in translations.keys()])
@@ -418,22 +418,22 @@ Language guidance: Validate for {language_list}.
             results = {}
             for lang_code in translations.keys():
                 results[lang_code] = {
-                    'is_correct': response.structured_data.get(f"{lang_code}_is_correct", True),
-                    'is_lemma_form': response.structured_data.get(f"{lang_code}_is_lemma_form", True),
-                    'suggested_translation': response.structured_data.get(f"{lang_code}_suggested", ""),
-                    'issues': response.structured_data.get(f"{lang_code}_issues", []),
-                    'confidence': response.structured_data.get("confidence", 0.0)
+                    "is_correct": response.structured_data.get(f"{lang_code}_is_correct", True),
+                    "is_lemma_form": response.structured_data.get(f"{lang_code}_is_lemma_form", True),
+                    "suggested_translation": response.structured_data.get(f"{lang_code}_suggested", ""),
+                    "issues": response.structured_data.get(f"{lang_code}_issues", []),
+                    "confidence": response.structured_data.get("confidence", 0.0)
                 }
             return results
         else:
             logger.error(f"No structured data received for multi-lingual validation of '{english_word}'")
             return {
                 lang_code: {
-                    'is_correct': True,
-                    'is_lemma_form': True,
-                    'suggested_translation': "",
-                    'issues': ['Validation failed'],
-                    'confidence': 0.0
+                    "is_correct": True,
+                    "is_lemma_form": True,
+                    "suggested_translation": "",
+                    "issues": ["Validation failed"],
+                    "confidence": 0.0
                 }
                 for lang_code in translations.keys()
             }
@@ -442,11 +442,11 @@ Language guidance: Validate for {language_list}.
         logger.error(f"Error validating translations for '{english_word}': {e}")
         return {
             lang_code: {
-                'is_correct': True,
-                'is_lemma_form': True,
-                'suggested_translation': "",
-                'issues': [f'Error: {str(e)}'],
-                'confidence': 0.0
+                "is_correct": True,
+                "is_lemma_form": True,
+                "suggested_translation": "",
+                "issues": [f'Error: {str(e)}'],
+                "confidence": 0.0
             }
             for lang_code in translations.keys()
         }
@@ -473,25 +473,25 @@ def batch_validate_translations(
 
     for trans_info in translations:
         result = validate_translation(
-            trans_info['english_word'],
-            trans_info['translation'],
-            trans_info['target_language'],
-            trans_info['pos_type'],
+            trans_info["english_word"],
+            trans_info["translation"],
+            trans_info["target_language"],
+            trans_info["pos_type"],
             model
         )
 
         has_issues = (
-            (not result['is_correct'] or not result['is_lemma_form'])
-            and result['confidence'] >= confidence_threshold
+            (not result["is_correct"] or not result["is_lemma_form"])
+            and result["confidence"] >= confidence_threshold
         )
 
         if has_issues:
             issues.append({
-                'english_word': trans_info['english_word'],
-                'translation': trans_info['translation'],
-                'target_language': trans_info['target_language'],
-                'pos_type': trans_info['pos_type'],
-                'validation': result
+                "english_word": trans_info["english_word"],
+                "translation": trans_info["translation"],
+                "target_language": trans_info["target_language"],
+                "pos_type": trans_info["pos_type"],
+                "validation": result
             })
 
     return issues
@@ -622,25 +622,25 @@ If incorrect, provide the correct pronunciations. If correct, confirm them."""
         else:
             logger.error(f"No structured data received for pronunciation validation of '{word}'")
             return {
-                'needs_update': False,
-                'suggested_ipa': ipa_pronunciation or "",
-                'suggested_phonetic': phonetic_pronunciation or "",
-                'alternative_pronunciations': [],
-                'issues': ['Validation failed'],
-                'confidence': 0.0,
-                'notes': ""
+                "needs_update": False,
+                "suggested_ipa": ipa_pronunciation or "",
+                "suggested_phonetic": phonetic_pronunciation or "",
+                "alternative_pronunciations": [],
+                "issues": ["Validation failed"],
+                "confidence": 0.0,
+                "notes": ""
             }
 
     except Exception as e:
         logger.error(f"Error validating pronunciation for '{word}': {e}")
         return {
-            'needs_update': False,
-            'suggested_ipa': ipa_pronunciation or "",
-            'suggested_phonetic': phonetic_pronunciation or "",
-            'alternative_pronunciations': [],
-            'issues': [f'Error: {str(e)}'],
-            'confidence': 0.0,
-            'notes': ""
+            "needs_update": False,
+            "suggested_ipa": ipa_pronunciation or "",
+            "suggested_phonetic": phonetic_pronunciation or "",
+            "alternative_pronunciations": [],
+            "issues": [f'Error: {str(e)}'],
+            "confidence": 0.0,
+            "notes": ""
         }
 
 
@@ -683,11 +683,11 @@ def generate_pronunciation(
     )
 
     return {
-        'ipa_pronunciation': result['suggested_ipa'],
-        'phonetic_pronunciation': result['suggested_phonetic'],
-        'alternative_pronunciations': result.get('alternative_pronunciations', []),
-        'confidence': result['confidence'],
-        'notes': result['notes']
+        "ipa_pronunciation": result["suggested_ipa"],
+        "phonetic_pronunciation": result["suggested_phonetic"],
+        "alternative_pronunciations": result.get("alternative_pronunciations", []),
+        "confidence": result["confidence"],
+        "notes": result["notes"]
     }
 
 
@@ -718,8 +718,8 @@ def suggest_disambiguation(
     definitions_text = []
     for i, item in enumerate(definitions, 1):
         def_text = f"{i}. GUID: {item['guid']}\n   Definition: {item['definition']}"
-        if 'translations' in item and item['translations']:
-            trans_examples = ', '.join([f"{lang}: {trans}" for lang, trans in list(item['translations'].items())[:3]])
+        if "translations" in item and item["translations"]:
+            trans_examples = ", ".join([f"{lang}: {trans}" for lang, trans in list(item["translations"].items())[:3]])
             def_text += f"\n   Example translations: {trans_examples}"
         definitions_text.append(def_text)
 
@@ -760,9 +760,9 @@ Provide a short disambiguation term for each definition."""
         if not response.structured_data:
             logger.error("No structured data received for disambiguation suggestions")
             return {
-                'success': False,
-                'error': 'No structured data received',
-                'suggestions': {}
+                "success": False,
+                "error": "No structured data received",
+                "suggestions": {}
             }
 
         # Map results back to GUIDs
@@ -770,17 +770,17 @@ Provide a short disambiguation term for each definition."""
         for i, item in enumerate(definitions):
             key = f"disambiguation_{i+1}"
             if key in response.structured_data:
-                suggestions[item['guid']] = response.structured_data[key].strip()
+                suggestions[item["guid"]] = response.structured_data[key].strip()
 
         return {
-            'success': True,
-            'suggestions': suggestions
+            "success": True,
+            "suggestions": suggestions
         }
 
     except Exception as e:
         logger.error(f"Error getting disambiguation suggestions: {e}")
         return {
-            'success': False,
-            'error': str(e),
-            'suggestions': {}
+            "success": False,
+            "error": str(e),
+            "suggestions": {}
         }

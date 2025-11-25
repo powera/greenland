@@ -22,16 +22,16 @@ logger = logging.getLogger(__name__)
 
 # Language name mappings for prompts
 LANGUAGE_NAMES = {
-    'en': 'English',
-    'lt': 'Lithuanian',
-    'zh': 'Chinese',
-    'fr': 'French',
-    'ko': 'Korean',
-    'sw': 'Swahili',
-    'vi': 'Vietnamese',
-    'de': 'German',
-    'es': 'Spanish',
-    'ja': 'Japanese'
+    "en": "English",
+    "lt": "Lithuanian",
+    "zh": "Chinese",
+    "fr": "French",
+    "ko": "Korean",
+    "sw": "Swahili",
+    "vi": "Vietnamese",
+    "de": "German",
+    "es": "Spanish",
+    "ja": "Japanese"
 }
 
 
@@ -75,9 +75,9 @@ def ensure_translations(
     if not needed_languages:
         logger.info("All translations already exist")
         return {
-            'success': True,
-            'added': 0,
-            'skipped': len(target_languages)
+            "success": True,
+            "added": 0,
+            "skipped": len(target_languages)
         }
 
     # Generate translations via LLM
@@ -88,12 +88,12 @@ def ensure_translations(
         model=model
     )
 
-    if not translations.get('success'):
+    if not translations.get("success"):
         return translations
 
     # Add translations to database
     added_count = 0
-    for lang_code, translation_text in translations.get('translations', {}).items():
+    for lang_code, translation_text in translations.get("translations", {}).items():
         try:
             add_sentence_translation(
                 session=session,
@@ -108,9 +108,9 @@ def ensure_translations(
             logger.error(f"Failed to add {lang_code} translation: {e}")
 
     return {
-        'success': True,
-        'added': added_count,
-        'skipped': len(existing_translations)
+        "success": True,
+        "added": added_count,
+        "skipped": len(existing_translations)
     }
 
 
@@ -146,9 +146,9 @@ def translate_sentence(
     # Format the prompt with parameters
     formatted_prompt = prompt_template.format(
         source_lang_name=source_lang_name,
-        target_lang_names=', '.join(target_lang_names),
+        target_lang_names=", ".join(target_lang_names),
         source_text=source_text,
-        target_lang_codes=', '.join(target_languages)
+        target_lang_codes=", ".join(target_languages)
     )
 
     # Combine context and prompt
@@ -182,21 +182,21 @@ def translate_sentence(
             translations = response.structured_data
             logger.info(f"Generated {len(translations)} translations")
             return {
-                'success': True,
-                'translations': translations
+                "success": True,
+                "translations": translations
             }
         else:
             logger.error("No structured data received from LLM")
             return {
-                'success': False,
-                'error': 'LLM did not return structured data'
+                "success": False,
+                "error": "LLM did not return structured data"
             }
 
     except Exception as e:
         logger.error(f"Error translating sentence: {e}", exc_info=True)
         return {
-            'success': False,
-            'error': str(e)
+            "success": False,
+            "error": str(e)
         }
 
 

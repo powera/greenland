@@ -48,7 +48,7 @@ def query_french_noun_forms(client, lemma_id: int, get_session_func) -> Tuple[Di
     """Query LLM for French noun forms (2 genders × 2 numbers = 4 forms)."""
     session = get_session_func()
     lemma = session.query(linguistic_db.Lemma).filter(linguistic_db.Lemma.id == lemma_id).first()
-    if not lemma or not lemma.french_translation or lemma.pos_type.lower() != 'noun':
+    if not lemma or not lemma.french_translation or lemma.pos_type.lower() != "noun":
         logger.error(f"Invalid lemma for French noun forms: {lemma_id}")
         return {}, False
 
@@ -66,10 +66,10 @@ def query_french_noun_forms(client, lemma_id: int, get_session_func) -> Tuple[Di
             noun=noun, english_noun=english_noun, definition=definition,
             subtype_context=f" (category: {pos_subtype})" if pos_subtype else "")
         response = client.generate_chat(prompt=prompt, model=client.model, json_schema=schema, context=context)
-        linguistic_db.log_query(session, word=noun, query_type='french_noun_forms', prompt=prompt,
+        linguistic_db.log_query(session, word=noun, query_type="french_noun_forms", prompt=prompt,
                                response=json.dumps(response.structured_data), model=client.model)
-        if response.structured_data and 'forms' in response.structured_data:
-            return response.structured_data['forms'], True
+        if response.structured_data and "forms" in response.structured_data:
+            return response.structured_data["forms"], True
         return {}, False
     except Exception as e:
         logger.error(f"Error querying French noun forms for '{noun}': {e}")
@@ -80,7 +80,7 @@ def query_french_verb_conjugations(client, lemma_id: int, get_session_func) -> T
     """Query LLM for French verb conjugations (8 persons × 4 tenses = 32 forms)."""
     session = get_session_func()
     lemma = session.query(linguistic_db.Lemma).filter(linguistic_db.Lemma.id == lemma_id).first()
-    if not lemma or not lemma.french_translation or lemma.pos_type.lower() != 'verb':
+    if not lemma or not lemma.french_translation or lemma.pos_type.lower() != "verb":
         logger.error(f"Invalid lemma for French verb conjugations: {lemma_id}")
         return {}, False
 
@@ -99,10 +99,10 @@ def query_french_verb_conjugations(client, lemma_id: int, get_session_func) -> T
             verb=verb, english_verb=english_verb, definition=definition,
             subtype_context=f" (category: {pos_subtype})" if pos_subtype else "")
         response = client.generate_chat(prompt=prompt, model=client.model, json_schema=schema, context=context)
-        linguistic_db.log_query(session, word=verb, query_type='french_verb_conjugations', prompt=prompt,
+        linguistic_db.log_query(session, word=verb, query_type="french_verb_conjugations", prompt=prompt,
                                response=json.dumps(response.structured_data), model=client.model)
-        if response.structured_data and 'forms' in response.structured_data:
-            return response.structured_data['forms'], True
+        if response.structured_data and "forms" in response.structured_data:
+            return response.structured_data["forms"], True
         return {}, False
     except Exception as e:
         logger.error(f"Error querying French verb conjugations for '{verb}': {e}")

@@ -12,7 +12,7 @@ from .schema import Base
 
 class PendingImport(Base):
     """Model for storing words pending import with disambiguation context."""
-    __tablename__ = 'pending_imports'
+    __tablename__ = "pending_imports"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     english_word: Mapped[str] = mapped_column(String, nullable=False, index=True)
@@ -34,7 +34,7 @@ class PendingImport(Base):
 
 class WordExclusion(Base):
     """Model for storing words to exclude from import/processing."""
-    __tablename__ = 'word_exclusions'
+    __tablename__ = "word_exclusions"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     excluded_word: Mapped[str] = mapped_column(String, unique=True, nullable=False, index=True)

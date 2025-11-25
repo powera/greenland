@@ -10,7 +10,7 @@ import lib.advanced_queries
 from clients.ollama_client import OllamaTimeoutError
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 EVALUATOR_MODEL = "gpt-4o-mini"

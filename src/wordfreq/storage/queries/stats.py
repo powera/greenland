@@ -49,15 +49,15 @@ def list_problematic_words(session, limit: int = 10) -> List[Dict[str, Any]]:
         word_text = word_token.token
         if word_text not in word_groups:
             word_groups[word_text] = {
-                'word': word_text,
-                'rank': word_frequency.rank if word_frequency else None,
-                'definitions': []
+                "word": word_text,
+                "rank": word_frequency.rank if word_frequency else None,
+                "definitions": []
             }
 
-        word_groups[word_text]['definitions'].append({
-            'text': lemma.definition_text,
-            'pos': lemma.pos_type,
-            'verified': derivative_form.verified
+        word_groups[word_text]["definitions"].append({
+            "text": lemma.definition_text,
+            "pos": lemma.pos_type,
+            "verified": derivative_form.verified
         })
 
     return list(word_groups.values())

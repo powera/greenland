@@ -68,7 +68,7 @@ def generate_pinyin(chinese_text: str) -> Optional[str]:
     try:
         # Use Style.TONE to get pinyin with tone marks (e.g., "nǐ hǎo")
         pinyin_list = lazy_pinyin(chinese_text, style=Style.TONE)
-        return ' '.join(pinyin_list)
+        return " ".join(pinyin_list)
     except Exception as e:
         logger.warning(f"Failed to generate pinyin for '{chinese_text}': {e}")
         return None
@@ -116,7 +116,7 @@ def generate_pinyin_ruby_html(chinese_text: str) -> str:
                     # Get pinyin at word level for correct pronunciation
                     pinyin_list = lazy_pinyin(segment, style=Style.TONE)
                     if pinyin_list:
-                        pinyin = ' '.join(pinyin_list)
+                        pinyin = " ".join(pinyin_list)
                         result.append(f'<ruby>{segment}<rt>{pinyin}</rt></ruby>')
                     else:
                         result.append(segment)
@@ -138,7 +138,7 @@ def generate_pinyin_ruby_html(chinese_text: str) -> str:
                     # Non-Chinese character (punctuation, space, etc.)
                     result.append(char)
 
-        return ''.join(result)
+        return "".join(result)
     except Exception as e:
         logger.warning(f"Failed to generate ruby HTML for '{chinese_text}': {e}")
         return chinese_text

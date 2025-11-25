@@ -19,7 +19,7 @@ from wordfreq.storage.models.enums import GrammaticalForm
 from wordfreq.storage.connection_pool import get_session
 import constants
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 
@@ -67,7 +67,7 @@ def get_lemmas_with_translation(
         query = session.query(linguistic_db.Lemma).filter(
             linguistic_db.Lemma.pos_type == config.pos_type,
             translation_column.isnot(None),
-            translation_column != ''
+            translation_column != ""
         ).order_by(linguistic_db.Lemma.frequency_rank)
 
         if limit:
@@ -77,10 +77,10 @@ def get_lemmas_with_translation(
         for lemma in query.all():
             translation = getattr(lemma, config.translation_field_name)
             results.append({
-                'id': lemma.id,
-                'english': lemma.lemma_text,
+                "id": lemma.id,
+                "english": lemma.lemma_text,
                 config.language_code: translation,
-                'pos_subtype': lemma.pos_subtype
+                "pos_subtype": lemma.pos_subtype
             })
         return results
     else:
@@ -105,10 +105,10 @@ def get_lemmas_with_translation(
 
             if translation:
                 results.append({
-                    'id': lemma.id,
-                    'english': lemma.lemma_text,
+                    "id": lemma.id,
+                    "english": lemma.lemma_text,
                     config.language_code: translation.translation,
-                    'pos_subtype': lemma.pos_subtype
+                    "pos_subtype": lemma.pos_subtype
                 })
 
         return results
@@ -141,10 +141,10 @@ def get_lemmas_without_translation(
 
     return [
         {
-            'id': lemma.id,
-            'english': lemma.lemma_text,
-            'pos_subtype': lemma.pos_subtype,
-            'frequency_rank': lemma.frequency_rank
+            "id": lemma.id,
+            "english": lemma.lemma_text,
+            "pos_subtype": lemma.pos_subtype,
+            "frequency_rank": lemma.frequency_rank
         }
         for lemma in query.all()
     ]
@@ -162,23 +162,23 @@ def detect_number_type_from_forms(forms_dict: Dict[str, str], config: FormGenera
         One of: 'plurale_tantum', 'singulare_tantum', or 'regular'
     """
     # Only detect for nouns and adjectives, not verbs
-    if config.pos_type not in ['noun', 'adjective']:
-        return 'regular'
+    if config.pos_type not in ["noun", "adjective"]:
+        return "regular"
 
     # Identify which forms are singular vs plural based on form names
-    singular_forms = [name for name in forms_dict.keys() if 'singular' in name.lower()]
-    plural_forms = [name for name in forms_dict.keys() if 'plural' in name.lower()]
+    singular_forms = [name for name in forms_dict.keys() if "singular" in name.lower()]
+    plural_forms = [name for name in forms_dict.keys() if "plural" in name.lower()]
 
     # Check if we have non-empty forms
     has_singular = any(forms_dict.get(f) and forms_dict.get(f).strip() for f in singular_forms)
     has_plural = any(forms_dict.get(f) and forms_dict.get(f).strip() for f in plural_forms)
 
     if has_plural and not has_singular:
-        return 'plurale_tantum'
+        return "plurale_tantum"
     elif has_singular and not has_plural:
-        return 'singulare_tantum'
+        return "singulare_tantum"
     else:
-        return 'regular'
+        return "regular"
 
 
 def extract_gender_from_forms(forms_dict: Dict[str, str], config: FormGenerationConfig) -> Optional[str]:
@@ -196,13 +196,13 @@ def extract_gender_from_forms(forms_dict: Dict[str, str], config: FormGeneration
         One of: 'masculine', 'feminine', 'neuter', or None if cannot be determined
     """
     # Only extract for nouns and adjectives
-    if config.pos_type not in ['noun', 'adjective']:
+    if config.pos_type not in ["noun", "adjective"]:
         return None
 
     # Check for gender markers in form names
-    masculine_forms = [name for name in forms_dict.keys() if '_m' in name.lower()]
-    feminine_forms = [name for name in forms_dict.keys() if '_f' in name.lower()]
-    neuter_forms = [name for name in forms_dict.keys() if '_n' in name.lower()]
+    masculine_forms = [name for name in forms_dict.keys() if "_m" in name.lower()]
+    feminine_forms = [name for name in forms_dict.keys() if "_f" in name.lower()]
+    neuter_forms = [name for name in forms_dict.keys() if "_n" in name.lower()]
 
     # Count non-empty forms for each gender
     has_masculine = any(forms_dict.get(f) and forms_dict.get(f).strip() for f in masculine_forms)
@@ -214,11 +214,11 @@ def extract_gender_from_forms(forms_dict: Dict[str, str], config: FormGeneration
 
     if gender_count == 1:
         if has_masculine:
-            return 'masculine'
+            return "masculine"
         elif has_feminine:
-            return 'feminine'
+            return "feminine"
         elif has_neuter:
-            return 'neuter'
+            return "neuter"
 
     # If multiple genders or no gender markers, return None
     return None
@@ -312,12 +312,12 @@ def process_lemma_forms(
         # Detect number type (plurale_tantum, singulare_tantum) for nouns
         if config.detect_number_type:
             number_type = detect_number_type_from_forms(forms_dict, config)
-            if number_type != 'regular':
+            if number_type != "regular":
                 grammar_fact = linguistic_db.add_grammar_fact(
                     session,
                     lemma_id=lemma_id,
                     language_code=config.language_code,
-                    fact_type='number_type',
+                    fact_type="number_type",
                     fact_value=number_type,
                     notes=f"Detected during {config.pos_type} form generation",
                     verified=False
@@ -335,7 +335,7 @@ def process_lemma_forms(
                     session,
                     lemma_id=lemma_id,
                     language_code=config.language_code,
-                    fact_type='gender',
+                    fact_type="gender",
                     fact_value=gender,
                     notes=f"Extracted from {config.pos_type} forms",
                     verified=False
@@ -369,14 +369,14 @@ def run_form_generation(
     parser = argparse.ArgumentParser(
         description=f"Generate {config.language_name} {config.pos_type} forms"
     )
-    parser.add_argument('--limit', type=int, help='Limit number of lemmas')
-    parser.add_argument('--throttle', type=float, default=1.0,
-                       help='Seconds between calls')
-    parser.add_argument('--db-path', type=str, default=constants.WORDFREQ_DB_PATH)
-    parser.add_argument('--model', type=str, default='gpt-5-mini')
-    parser.add_argument('--debug', action='store_true')
-    parser.add_argument('--yes', '-y', action='store_true',
-                       help='Skip confirmation prompt')
+    parser.add_argument("--limit", type=int, help="Limit number of lemmas")
+    parser.add_argument("--throttle", type=float, default=1.0,
+                       help="Seconds between calls")
+    parser.add_argument("--db-path", type=str, default=constants.WORDFREQ_DB_PATH)
+    parser.add_argument("--model", type=str, default="gpt-5-mini")
+    parser.add_argument("--debug", action="store_true")
+    parser.add_argument("--yes", "-y", action="store_true",
+                       help="Skip confirmation prompt")
     args = parser.parse_args()
 
     if args.debug:
@@ -399,7 +399,7 @@ def run_form_generation(
         print(f"Model: {args.model}")
         print(f"Throttle: {args.throttle}s between calls")
         print(f"{'='*60}")
-        if input("\nContinue? [y/N]: ").lower() not in ['y', 'yes']:
+        if input("\nContinue? [y/N]: ").lower() not in ["y", "yes"]:
             print("Aborted.")
             return
 
@@ -409,15 +409,15 @@ def run_form_generation(
 
     for i, lemma_info in enumerate(lemmas, 1):
         # Format log message based on available fields
-        english = lemma_info.get('english', lemma_info.get('verb', 'unknown'))
-        translation = lemma_info.get(config.language_code, '')
+        english = lemma_info.get("english", lemma_info.get("verb", "unknown"))
+        translation = lemma_info.get(config.language_code, "")
 
         if translation:
             logger.info(f"\n[{i}/{len(lemmas)}] {english} -> {translation}")
         else:
             logger.info(f"\n[{i}/{len(lemmas)}] {english}")
 
-        if process_lemma_forms(client, lemma_info['id'], args.db_path, config):
+        if process_lemma_forms(client, lemma_info["id"], args.db_path, config):
             successful += 1
         else:
             failed += 1

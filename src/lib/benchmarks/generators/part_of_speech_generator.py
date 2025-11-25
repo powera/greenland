@@ -14,7 +14,7 @@ from lib.benchmarks.data_models import (
 from lib.benchmarks.factory import generator
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 # Supported parts of speech for the benchmark

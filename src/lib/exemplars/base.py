@@ -21,7 +21,7 @@ from clients import unified_client
 from clients.types import Response
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 class ExemplarType(str, Enum):
@@ -258,7 +258,7 @@ class ExemplarStorage:
         file_path = os.path.join(exemplar_dir, filename)
         
         # Save result as JSON
-        with open(file_path, 'w') as f:
+        with open(file_path, "w") as f:
             json.dump(result.to_dict(), f, indent=2)
             
         logger.info(f"Saved result to {file_path}")
@@ -280,7 +280,7 @@ class ExemplarStorage:
         if not os.path.exists(file_path):
             return None
             
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(file_path, "r", encoding="utf-8") as f:
             data = json.load(f)
             
         return ExemplarResult(
@@ -418,7 +418,7 @@ class ExemplarReportGenerator:
             
         # Generate simple HTML report
         report_path = os.path.join(self.output_dir, f"{exemplar_id}.html")
-        with open(report_path, 'w', encoding='utf-8') as f:
+        with open(report_path, "w", encoding="utf-8") as f:
             f.write(f"""<!DOCTYPE html>
 <html>
 <head>
@@ -433,7 +433,7 @@ class ExemplarReportGenerator:
 </head>
 <body>
     <h1>Exemplar: {exemplar.name}</h1>
-    <p>{exemplar.description or ''}</p>
+    <p>{exemplar.description or ""}</p>
     
     <div class="prompt">
         <h3>Prompt:</h3>
@@ -470,8 +470,8 @@ class ExemplarReportGenerator:
     <div class="model-response">
         <h2>Model: {model_name} ({model_size} MB)</h2>
         <div class="metadata">
-            <p>Tokens: {result.metadata.get('tokens', 'N/A')}</p>
-            <p>Time: {result.metadata.get('timing_ms', 'N/A')}ms</p>
+            <p>Tokens: {result.metadata.get("tokens", "N/A")}</p>
+            <p>Time: {result.metadata.get("timing_ms", "N/A")}ms</p>
         </div>
         <h3>Response:</h3>
         <pre>{response}</pre>
@@ -516,15 +516,15 @@ class ExemplarReportGenerator:
     <tr>
         <td>{exemplar.name}</td>
         <td>{exemplar.id}</td>
-        <td>{exemplar.type.value if hasattr(exemplar.type, 'value') else exemplar.type}</td>
-        <td>{exemplar.description or ''}</td>
+        <td>{exemplar.type.value if hasattr(exemplar.type, "value") else exemplar.type}</td>
+        <td>{exemplar.description or ""}</td>
         <td><a href="{exemplar.id}.html">View Report</a></td>
     </tr>
 """)
             
         # Write index report
         index_path = os.path.join(self.output_dir, "index.html")
-        with open(index_path, 'w') as f:
+        with open(index_path, "w") as f:
             f.write(f"""<!DOCTYPE html>
 <html>
 <head>
@@ -547,7 +547,7 @@ class ExemplarReportGenerator:
             <th>Description</th>
             <th>Report</th>
         </tr>
-        {''.join(rows)}
+        {"".join(rows)}
     </table>
 </body>
 </html>

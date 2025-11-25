@@ -21,7 +21,7 @@ if GREENLAND_SRC_PATH not in sys.path:
 from agents.vilkas.agent import VilkasAgent
 from agents.vilkas.cli import main
 
-__all__ = ['VilkasAgent', 'main']
+__all__ = ["VilkasAgent", "main"]
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -106,7 +106,7 @@ class TestSentenceGenerator(unittest.TestCase):
         
         self.assertIsNone(pattern)
     
-    @patch('lib.sentence_generation.UnifiedLLMClient')
+    @patch("lib.sentence_generation.UnifiedLLMClient")
     def test_llm_generation(self, mock_client_class):
         """Test LLM-enhanced generation."""
         # Mock LLM client

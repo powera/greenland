@@ -10,7 +10,7 @@ from clients.ollama_client import OllamaTimeoutError
 from lib.benchmarks.base import BenchmarkRunner, BenchmarkResult
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 class ParagraphAnalysisBenchmark(BenchmarkRunner):

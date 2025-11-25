@@ -237,7 +237,7 @@ class WikiLoader:
             db = sqlite3.connect(db_path)
             cur = db.cursor()
             result = cur.execute(
-                'SELECT offset, offset_readsize FROM offsets WHERE key=?', [page_name])
+                "SELECT offset, offset_readsize FROM offsets WHERE key=?", [page_name])
             row = result.fetchone()
             
             if not row:

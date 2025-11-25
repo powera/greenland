@@ -12,44 +12,44 @@ from wordfreq.storage.translation_helpers import get_all_translations, get_suppo
 from wordfreq.storage.crud.derivative_form import delete_derivative_form
 from config import Config
 
-bp = Blueprint('lemmas', __name__, url_prefix='/lemmas')
+bp = Blueprint("lemmas", __name__, url_prefix="/lemmas")
 
 
-@bp.route('/add', methods=['GET', 'POST'])
+@bp.route("/add", methods=["GET", "POST"])
 def add_lemma():
     """Add a new lemma."""
     from flask import current_app
 
-    if request.method == 'POST':
-        if current_app.config.get('READONLY', False):
-            flash('Cannot add lemma: running in read-only mode', 'error')
-            return redirect(url_for('lemmas.list_lemmas'))
+    if request.method == "POST":
+        if current_app.config.get("READONLY", False):
+            flash("Cannot add lemma: running in read-only mode", "error")
+            return redirect(url_for("lemmas.list_lemmas"))
 
         # Get form data
-        lemma_text = request.form.get('lemma_text', '').strip()
-        definition_text = request.form.get('definition_text', '').strip()
-        pos_type = request.form.get('pos_type', '').strip()
-        pos_subtype = request.form.get('pos_subtype', '').strip() or None
-        difficulty_level_str = request.form.get('difficulty_level', '').strip()
-        initial_translation_lang = request.form.get('initial_translation_lang', '').strip()
-        initial_translation_text = request.form.get('initial_translation_text', '').strip()
+        lemma_text = request.form.get("lemma_text", "").strip()
+        definition_text = request.form.get("definition_text", "").strip()
+        pos_type = request.form.get("pos_type", "").strip()
+        pos_subtype = request.form.get("pos_subtype", "").strip() or None
+        difficulty_level_str = request.form.get("difficulty_level", "").strip()
+        initial_translation_lang = request.form.get("initial_translation_lang", "").strip()
+        initial_translation_text = request.form.get("initial_translation_text", "").strip()
 
         # Validate required fields
         if not lemma_text:
-            flash('Lemma text is required', 'error')
-            return render_template('lemmas/add.html')
+            flash("Lemma text is required", "error")
+            return render_template("lemmas/add.html")
 
         if not definition_text:
-            flash('Definition is required', 'error')
-            return render_template('lemmas/add.html')
+            flash("Definition is required", "error")
+            return render_template("lemmas/add.html")
 
         if not pos_type:
-            flash('POS type is required', 'error')
-            return render_template('lemmas/add.html')
+            flash("POS type is required", "error")
+            return render_template("lemmas/add.html")
 
         if not pos_subtype:
-            flash('POS subtype is required for GUID generation', 'error')
-            return render_template('lemmas/add.html')
+            flash("POS subtype is required for GUID generation", "error")
+            return render_template("lemmas/add.html")
 
         # Check if lemma already exists
         existing = g.db.query(Lemma).filter(
@@ -58,16 +58,16 @@ def add_lemma():
         ).first()
 
         if existing:
-            flash(f'Lemma "{lemma_text}" with POS type "{pos_type}" already exists', 'error')
-            return redirect(url_for('lemmas.view_lemma', lemma_id=existing.id))
+            flash(f'Lemma "{lemma_text}" with POS type "{pos_type}" already exists', "error")
+            return redirect(url_for("lemmas.view_lemma", lemma_id=existing.id))
 
         # Generate GUID based on pos_subtype
         from wordfreq.storage.utils.guid import generate_guid
         try:
             guid = generate_guid(g.db, pos_subtype)
         except ValueError as e:
-            flash(f'Invalid POS subtype for GUID generation: {e}', 'error')
-            return render_template('lemmas/add.html')
+            flash(f'Invalid POS subtype for GUID generation: {e}', "error")
+            return render_template("lemmas/add.html")
 
         # Parse difficulty level
         difficulty_level = None
@@ -75,13 +75,13 @@ def add_lemma():
             try:
                 difficulty_level = int(difficulty_level_str)
                 # Validate difficulty level
-                if difficulty_level != Config.EXCLUDE_DIFFICULTY_LEVEL and \
+                if difficulty_level != Config.EXCLUDE_DIFFICULTY_LEVEL and\
                    (difficulty_level < Config.MIN_DIFFICULTY_LEVEL or difficulty_level > Config.MAX_DIFFICULTY_LEVEL):
-                    flash(f'Difficulty level must be -1 or between {Config.MIN_DIFFICULTY_LEVEL} and {Config.MAX_DIFFICULTY_LEVEL}', 'error')
-                    return render_template('lemmas/add.html')
+                    flash(f'Difficulty level must be -1 or between {Config.MIN_DIFFICULTY_LEVEL} and {Config.MAX_DIFFICULTY_LEVEL}', "error")
+                    return render_template("lemmas/add.html")
             except ValueError:
-                flash('Invalid difficulty level', 'error')
-                return render_template('lemmas/add.html')
+                flash("Invalid difficulty level", "error")
+                return render_template("lemmas/add.html")
 
         # Create new lemma
         new_lemma = Lemma(
@@ -102,9 +102,9 @@ def add_lemma():
         log_translation_change(
             session=g.db,
             source=Config.OPERATION_LOG_SOURCE,
-            operation_type='lemma_create',
+            operation_type="lemma_create",
             lemma_id=new_lemma.id,
-            field_name='created',
+            field_name="created",
             old_value=None,
             new_value=f'{lemma_text} ({pos_type})'
         )
@@ -118,7 +118,7 @@ def add_lemma():
                 log_translation_change(
                     session=g.db,
                     source=Config.OPERATION_LOG_SOURCE,
-                    operation_type='translation_add',
+                    operation_type="translation_add",
                     lemma_id=new_lemma.id,
                     field_name=f'{initial_translation_lang}_translation',
                     old_value=None,
@@ -126,29 +126,29 @@ def add_lemma():
                 )
             except Exception as e:
                 # Don't fail lemma creation if translation fails
-                flash(f'Warning: Failed to save translation: {str(e)}', 'warning')
+                flash(f'Warning: Failed to save translation: {str(e)}', "warning")
 
         g.db.commit()
 
         success_message = f'Created new lemma: {lemma_text}'
         if initial_translation_lang and initial_translation_text:
             success_message += f' (with {initial_translation_lang.upper()} translation)'
-        flash(success_message, 'success')
+        flash(success_message, "success")
 
-        return redirect(url_for('lemmas.view_lemma', lemma_id=new_lemma.id))
+        return redirect(url_for("lemmas.view_lemma", lemma_id=new_lemma.id))
 
-    return render_template('lemmas/add.html')
+    return render_template("lemmas/add.html")
 
 
-@bp.route('/')
+@bp.route("/")
 def list_lemmas():
     """List all lemmas with pagination and filtering."""
     from wordfreq.storage.models.schema import LemmaTranslation
 
-    page = request.args.get('page', 1, type=int)
-    search = request.args.get('search', '').strip()
-    pos_type = request.args.get('pos_type', '').strip()
-    difficulty = request.args.get('difficulty', '', type=str).strip()
+    page = request.args.get("page", 1, type=int)
+    search = request.args.get("search", "").strip()
+    pos_type = request.args.get("pos_type", "").strip()
+    difficulty = request.args.get("difficulty", "", type=str).strip()
 
     # Build query
     query = g.db.query(Lemma)
@@ -183,9 +183,9 @@ def list_lemmas():
         query = query.filter(Lemma.pos_type == pos_type)
 
     if difficulty:
-        if difficulty == '-1':
+        if difficulty == "-1":
             query = query.filter(Lemma.difficulty_level == -1)
-        elif difficulty == 'null':
+        elif difficulty == "null":
             query = query.filter(Lemma.difficulty_level.is_(None))
         else:
             query = query.filter(Lemma.difficulty_level == int(difficulty))
@@ -231,7 +231,7 @@ def list_lemmas():
     # Calculate pagination
     total_pages = (total + Config.ITEMS_PER_PAGE - 1) // Config.ITEMS_PER_PAGE
 
-    return render_template('lemmas/list.html',
+    return render_template("lemmas/list.html",
                          lemmas=lemmas,
                          page=page,
                          total_pages=total_pages,
@@ -242,15 +242,15 @@ def list_lemmas():
                          pos_types=pos_types)
 
 
-@bp.route('/<int:lemma_id>')
+@bp.route("/<int:lemma_id>")
 def view_lemma(lemma_id):
     """View a single lemma with all details."""
     from wordfreq.storage.models.schema import DerivativeForm, SentenceWord
 
     lemma = g.db.query(Lemma).get(lemma_id)
     if not lemma:
-        flash('Lemma not found', 'error')
-        return redirect(url_for('lemmas.list_lemmas'))
+        flash("Lemma not found", "error")
+        return redirect(url_for("lemmas.list_lemmas"))
 
     # Get all translations
     translations = get_all_translations(g.db, lemma)
@@ -286,8 +286,8 @@ def view_lemma(lemma_id):
 
         # Separate synonyms and alternative forms
         # Alternative forms include: abbreviation, expanded_form, alternate_spelling, and legacy 'alternative_form'
-        is_alternative = form.grammatical_form in ['abbreviation', 'expanded_form', 'alternate_spelling', 'alternative_form']
-        is_synonym = form.grammatical_form == 'synonym'
+        is_alternative = form.grammatical_form in ["abbreviation", "expanded_form", "alternate_spelling", "alternative_form"]
+        is_synonym = form.grammatical_form == "synonym"
 
         if is_synonym:
             if lang_code not in synonyms_by_language:
@@ -308,7 +308,7 @@ def view_lemma(lemma_id):
 
     # Get count of sentences using this lemma (for nouns)
     sentence_count = 0
-    if lemma.pos_type == 'noun':
+    if lemma.pos_type == "noun":
         sentence_count = g.db.query(SentenceWord).filter(
             SentenceWord.lemma_id == lemma_id
         ).count()
@@ -316,7 +316,7 @@ def view_lemma(lemma_id):
     # Check if disambiguation check button should be shown
     # Show if: (1) no parenthetical in current lemma_text AND (2) other lemmas exist with same base text
     needs_disambiguation_check = False
-    if lemma.lemma_text and '(' not in lemma.lemma_text:
+    if lemma.lemma_text and "(" not in lemma.lemma_text:
         # Quick check: are there other lemmas with this exact lemma_text?
         duplicate_count = g.db.query(Lemma).filter(
             Lemma.lemma_text == lemma.lemma_text,
@@ -338,7 +338,7 @@ def view_lemma(lemma_id):
         AudioQualityReview.voice_name
     ).all()
 
-    return render_template('lemmas/view.html',
+    return render_template("lemmas/view.html",
                          lemma=lemma,
                          translations=translations,
                          language_names=language_names,
@@ -355,101 +355,101 @@ def view_lemma(lemma_id):
                          grammar_facts=grammar_facts)
 
 
-@bp.route('/<int:lemma_id>/edit', methods=['GET', 'POST'])
+@bp.route("/<int:lemma_id>/edit", methods=["GET", "POST"])
 def edit_lemma(lemma_id):
     """Edit a lemma."""
     from flask import current_app
 
     lemma = g.db.query(Lemma).get(lemma_id)
     if not lemma:
-        flash('Lemma not found', 'error')
-        return redirect(url_for('lemmas.list_lemmas'))
+        flash("Lemma not found", "error")
+        return redirect(url_for("lemmas.list_lemmas"))
 
-    if request.method == 'POST':
-        if current_app.config.get('READONLY', False):
-            flash('Cannot update: running in read-only mode', 'error')
-            return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
+    if request.method == "POST":
+        if current_app.config.get("READONLY", False):
+            flash("Cannot update: running in read-only mode", "error")
+            return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
         # Track changes for logging
         changes = []
 
         # Update basic fields
-        new_lemma_text = request.form.get('lemma_text', '').strip()
+        new_lemma_text = request.form.get("lemma_text", "").strip()
         if new_lemma_text != lemma.lemma_text:
-            changes.append(('lemma_text', lemma.lemma_text, new_lemma_text))
+            changes.append(("lemma_text", lemma.lemma_text, new_lemma_text))
             lemma.lemma_text = new_lemma_text
 
-        new_definition = request.form.get('definition_text', '').strip()
+        new_definition = request.form.get("definition_text", "").strip()
         if new_definition != lemma.definition_text:
-            changes.append(('definition_text', lemma.definition_text, new_definition))
+            changes.append(("definition_text", lemma.definition_text, new_definition))
             lemma.definition_text = new_definition
 
-        new_pos_type = request.form.get('pos_type', '').strip()
+        new_pos_type = request.form.get("pos_type", "").strip()
         if new_pos_type != lemma.pos_type:
-            changes.append(('pos_type', lemma.pos_type, new_pos_type))
+            changes.append(("pos_type", lemma.pos_type, new_pos_type))
             lemma.pos_type = new_pos_type
 
-        new_pos_subtype = request.form.get('pos_subtype', '').strip() or None
+        new_pos_subtype = request.form.get("pos_subtype", "").strip() or None
         if new_pos_subtype != lemma.pos_subtype:
-            changes.append(('pos_subtype', lemma.pos_subtype, new_pos_subtype))
+            changes.append(("pos_subtype", lemma.pos_subtype, new_pos_subtype))
             lemma.pos_subtype = new_pos_subtype
 
-        new_guid = request.form.get('guid', '').strip() or None
+        new_guid = request.form.get("guid", "").strip() or None
         if new_guid != lemma.guid:
-            changes.append(('guid', lemma.guid, new_guid))
+            changes.append(("guid", lemma.guid, new_guid))
             lemma.guid = new_guid
 
         # Handle difficulty level
-        difficulty_str = request.form.get('difficulty_level', '').strip()
+        difficulty_str = request.form.get("difficulty_level", "").strip()
         new_difficulty = None
         if difficulty_str:
             try:
                 new_difficulty = int(difficulty_str)
                 # Validate
-                if new_difficulty != Config.EXCLUDE_DIFFICULTY_LEVEL and \
+                if new_difficulty != Config.EXCLUDE_DIFFICULTY_LEVEL and\
                    (new_difficulty < Config.MIN_DIFFICULTY_LEVEL or new_difficulty > Config.MAX_DIFFICULTY_LEVEL):
-                    flash(f'Difficulty level must be -1 or between {Config.MIN_DIFFICULTY_LEVEL} and {Config.MAX_DIFFICULTY_LEVEL}', 'error')
-                    return render_template('lemmas/edit.html', lemma=lemma)
+                    flash(f'Difficulty level must be -1 or between {Config.MIN_DIFFICULTY_LEVEL} and {Config.MAX_DIFFICULTY_LEVEL}', "error")
+                    return render_template("lemmas/edit.html", lemma=lemma)
             except ValueError:
-                flash('Invalid difficulty level', 'error')
-                return render_template('lemmas/edit.html', lemma=lemma)
+                flash("Invalid difficulty level", "error")
+                return render_template("lemmas/edit.html", lemma=lemma)
 
         if new_difficulty != lemma.difficulty_level:
-            changes.append(('difficulty_level', lemma.difficulty_level, new_difficulty))
+            changes.append(("difficulty_level", lemma.difficulty_level, new_difficulty))
             lemma.difficulty_level = new_difficulty
 
         # Handle verified checkbox
-        new_verified = request.form.get('verified') == 'on'
+        new_verified = request.form.get("verified") == "on"
         if new_verified != lemma.verified:
-            changes.append(('verified', lemma.verified, new_verified))
+            changes.append(("verified", lemma.verified, new_verified))
             lemma.verified = new_verified
 
         # Handle confidence
-        confidence_str = request.form.get('confidence', '').strip()
+        confidence_str = request.form.get("confidence", "").strip()
         if confidence_str:
             try:
                 new_confidence = float(confidence_str)
                 if new_confidence != lemma.confidence:
-                    changes.append(('confidence', lemma.confidence, new_confidence))
+                    changes.append(("confidence", lemma.confidence, new_confidence))
                     lemma.confidence = new_confidence
             except ValueError:
-                flash('Invalid confidence value', 'error')
-                return render_template('lemmas/edit.html', lemma=lemma)
+                flash("Invalid confidence value", "error")
+                return render_template("lemmas/edit.html", lemma=lemma)
 
         # Handle notes and tags
-        new_notes = request.form.get('notes', '').strip() or None
+        new_notes = request.form.get("notes", "").strip() or None
         if new_notes != lemma.notes:
-            changes.append(('notes', lemma.notes, new_notes))
+            changes.append(("notes", lemma.notes, new_notes))
             lemma.notes = new_notes
 
-        new_tags = request.form.get('tags', '').strip() or None
+        new_tags = request.form.get("tags", "").strip() or None
         if new_tags != lemma.tags:
-            changes.append(('tags', lemma.tags, new_tags))
+            changes.append(("tags", lemma.tags, new_tags))
             lemma.tags = new_tags
 
         # Handle disambiguation
-        new_disambiguation = request.form.get('disambiguation', '').strip() or None
+        new_disambiguation = request.form.get("disambiguation", "").strip() or None
         if new_disambiguation != lemma.disambiguation:
-            changes.append(('disambiguation', lemma.disambiguation, new_disambiguation))
+            changes.append(("disambiguation", lemma.disambiguation, new_disambiguation))
             lemma.disambiguation = new_disambiguation
 
         # Log all changes
@@ -457,7 +457,7 @@ def edit_lemma(lemma_id):
             log_translation_change(
                 session=g.db,
                 source=Config.OPERATION_LOG_SOURCE,
-                operation_type='lemma_update',
+                operation_type="lemma_update",
                 lemma_id=lemma.id,
                 field_name=field_name,
                 old_value=str(old_value) if old_value is not None else None,
@@ -465,13 +465,13 @@ def edit_lemma(lemma_id):
             )
 
         g.db.commit()
-        flash(f'Updated lemma: {lemma.lemma_text}', 'success')
-        return redirect(url_for('lemmas.view_lemma', lemma_id=lemma.id))
+        flash(f'Updated lemma: {lemma.lemma_text}', "success")
+        return redirect(url_for("lemmas.view_lemma", lemma_id=lemma.id))
 
     # Get difficulty level distribution for same POS type/subtype
     difficulty_stats = _get_difficulty_stats(g.db, lemma.pos_type, lemma.pos_subtype)
 
-    return render_template('lemmas/edit.html', lemma=lemma, difficulty_stats=difficulty_stats)
+    return render_template("lemmas/edit.html", lemma=lemma, difficulty_stats=difficulty_stats)
 
 
 def _get_difficulty_stats(session, pos_type, pos_subtype):
@@ -496,15 +496,15 @@ def _get_difficulty_stats(session, pos_type, pos_subtype):
     return stats
 
 
-@bp.route('/<int:lemma_id>/delete-synonym/<int:form_id>', methods=['POST'])
+@bp.route("/<int:lemma_id>/delete-synonym/<int:form_id>", methods=["POST"])
 def delete_synonym(lemma_id, form_id):
     """Delete a single synonym or alternative form."""
     from flask import current_app
     from wordfreq.storage.crud.grammar_fact import update_alternate_forms_facts_after_deletion
 
-    if current_app.config.get('READONLY', False):
-        flash('Cannot delete: running in read-only mode', 'error')
-        return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
+    if current_app.config.get("READONLY", False):
+        flash("Cannot delete: running in read-only mode", "error")
+        return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
     # Verify the form belongs to this lemma
     form = g.db.query(DerivativeForm).filter(
@@ -513,12 +513,12 @@ def delete_synonym(lemma_id, form_id):
     ).first()
 
     if not form:
-        flash('Synonym or alternative form not found', 'error')
-        return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
+        flash("Synonym or alternative form not found", "error")
+        return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
     # Store form details for flash message and grammar fact update
     form_text = form.derivative_form_text
-    form_type = form.grammatical_form.replace('_', ' ').title()
+    form_type = form.grammatical_form.replace("_", " ").title()
     language_code = form.language_code
     grammatical_form = form.grammatical_form
 
@@ -536,38 +536,38 @@ def delete_synonym(lemma_id, form_id):
         log_translation_change(
             session=g.db,
             source=Config.OPERATION_LOG_SOURCE,
-            operation_type='derivative_form_delete',
+            operation_type="derivative_form_delete",
             lemma_id=lemma_id,
             field_name=f'{language_code}_{grammatical_form}',
             old_value=form_text,
             new_value=None
         )
-        flash(f'Deleted {form_type}: "{form_text}"', 'success')
+        flash(f'Deleted {form_type}: "{form_text}"', "success")
     else:
-        flash(f'Failed to delete {form_type}: "{form_text}"', 'error')
+        flash(f'Failed to delete {form_type}: "{form_text}"', "error")
 
-    return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
+    return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
 
-@bp.route('/<int:lemma_id>/delete-all-synonyms', methods=['POST'])
+@bp.route("/<int:lemma_id>/delete-all-synonyms", methods=["POST"])
 def delete_all_synonyms(lemma_id):
     """Delete all synonyms and/or alternative forms for a lemma."""
     from flask import current_app
     from wordfreq.storage.crud.grammar_fact import update_alternate_forms_facts_after_deletion
 
-    if current_app.config.get('READONLY', False):
-        flash('Cannot delete: running in read-only mode', 'error')
-        return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
+    if current_app.config.get("READONLY", False):
+        flash("Cannot delete: running in read-only mode", "error")
+        return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
     # Get optional filters from request
-    lang_code = request.form.get('lang_code')  # Optional: filter by language
-    form_category = request.form.get('form_category')  # 'synonyms', 'alternatives', or 'all'
+    lang_code = request.form.get("lang_code")  # Optional: filter by language
+    form_category = request.form.get("form_category")  # 'synonyms', 'alternatives', or 'all'
 
     # Verify lemma exists
     lemma = g.db.query(Lemma).get(lemma_id)
     if not lemma:
-        flash('Lemma not found', 'error')
-        return redirect(url_for('lemmas.list_lemmas'))
+        flash("Lemma not found", "error")
+        return redirect(url_for("lemmas.list_lemmas"))
 
     # Build query for forms to delete
     query = g.db.query(DerivativeForm).filter(DerivativeForm.lemma_id == lemma_id)
@@ -577,19 +577,19 @@ def delete_all_synonyms(lemma_id):
         query = query.filter(DerivativeForm.language_code == lang_code)
 
     # Apply form category filter
-    if form_category == 'synonyms':
-        query = query.filter(DerivativeForm.grammatical_form == 'synonym')
-    elif form_category == 'alternatives':
+    if form_category == "synonyms":
+        query = query.filter(DerivativeForm.grammatical_form == "synonym")
+    elif form_category == "alternatives":
         query = query.filter(DerivativeForm.grammatical_form.in_([
-            'abbreviation', 'expanded_form', 'alternate_spelling', 'alternative_form'
+            "abbreviation", "expanded_form", "alternate_spelling", "alternative_form"
         ]))
     # If 'all' or not specified, delete both synonyms and alternatives
 
     forms_to_delete = query.all()
 
     if not forms_to_delete:
-        flash('No matching forms found to delete', 'warning')
-        return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
+        flash("No matching forms found to delete", "warning")
+        return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
     # Collect affected languages for grammar fact updates
     affected_languages = set(form.language_code for form in forms_to_delete)
@@ -603,7 +603,7 @@ def delete_all_synonyms(lemma_id):
             log_translation_change(
                 session=g.db,
                 source=Config.OPERATION_LOG_SOURCE,
-                operation_type='derivative_form_delete',
+                operation_type="derivative_form_delete",
                 lemma_id=lemma_id,
                 field_name=f'{form.language_code}_{form.grammatical_form}',
                 old_value=form.derivative_form_text,
@@ -627,8 +627,8 @@ def delete_all_synonyms(lemma_id):
             from wordfreq.storage.translation_helpers import get_supported_languages
             language_names = get_supported_languages()
             msg += f' for {language_names.get(lang_code, lang_code)}'
-        flash(msg, 'success')
+        flash(msg, "success")
     else:
-        flash('Failed to delete forms', 'error')
+        flash("Failed to delete forms", "error")
 
-    return redirect(url_for('lemmas.view_lemma', lemma_id=lemma_id))
+    return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))

@@ -15,7 +15,7 @@ from clients.types import Response
 import clients.lib
 
 # Configure logging with DEBUG level option
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 SERVER = "100.118.20.30"
@@ -107,13 +107,13 @@ class LMStudioClient:
             # Clean up markdown code blocks if present
             if content.startswith("```"):
                 # Remove the first line (```json)
-                content_lines = content.split('\n')
+                content_lines = content.split("\n")
                 # Remove the first and last lines if they contain backticks
                 if content_lines[0].startswith("```"):
                     content_lines = content_lines[1:]
                 if content_lines and content_lines[-1].strip() == "```":
                     content_lines = content_lines[:-1]
-                content = '\n'.join(content_lines)
+                content = "\n".join(content_lines)
             
             result = content
             

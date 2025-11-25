@@ -14,7 +14,7 @@ from lib.benchmarks.data_models import (
 from lib.benchmarks.factory import generator
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 # Benchmark code
@@ -162,14 +162,14 @@ class UnitConversionGenerator(BenchmarkGenerator):
             for item in questions_data:
                 try:
                     question = BenchmarkQuestion(
-                        question_text=item['question_text'],
-                        answer_type=AnswerType(item['answer_type']),
-                        correct_answer=item['correct_answer'],
-                        category=item.get('category'),
-                        difficulty=Difficulty(item['difficulty']) if 'difficulty' in item else None,
-                        tags=item.get('tags', []),
-                        evaluation_criteria=EvaluationCriteria(**item['evaluation_criteria']) 
-                            if 'evaluation_criteria' in item else EvaluationCriteria()
+                        question_text=item["question_text"],
+                        answer_type=AnswerType(item["answer_type"]),
+                        correct_answer=item["correct_answer"],
+                        category=item.get("category"),
+                        difficulty=Difficulty(item["difficulty"]) if "difficulty" in item else None,
+                        tags=item.get("tags", []),
+                        evaluation_criteria=EvaluationCriteria(**item["evaluation_criteria"]) 
+                            if "evaluation_criteria" in item else EvaluationCriteria()
                     )
                     yield question
                 except (KeyError, ValueError) as e:

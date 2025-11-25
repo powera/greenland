@@ -69,11 +69,11 @@ class ScoreTableGenerator:
             float: Average evaluation time in milliseconds
         """
         run_data = datastore.benchmarks.get_run_by_run_id(run_id, self.session)
-        if not run_data or not run_data['details']:
+        if not run_data or not run_data["details"]:
             return 0.0
 
-        eval_times = [detail['eval_msec'] for detail in run_data['details'] 
-                     if detail['eval_msec'] is not None]
+        eval_times = [detail["eval_msec"] for detail in run_data["details"] 
+                     if detail["eval_msec"] is not None]
         if not eval_times:
             return 0.0
 
@@ -126,14 +126,14 @@ class ScoreTableGenerator:
     def generate_dashboard(self) -> None:
         """Generate the main dashboard HTML file."""
         data = self._get_dashboard_data()
-        template = self.template_env.get_template('model_scores.html')
+        template = self.template_env.get_template("model_scores.html")
 
         # Ensure output directory exists
         os.makedirs(constants.OUTPUT_DIR, exist_ok=True)
 
         # Render and write dashboard
-        output_path = os.path.join(constants.OUTPUT_DIR, 'model_summary.html')
-        with open(output_path, 'w') as f:
+        output_path = os.path.join(constants.OUTPUT_DIR, "model_summary.html")
+        with open(output_path, "w") as f:
             f.write(template.render(data=data))
 
     def _write_run_detail(self, run_details: Dict) -> None:
@@ -146,10 +146,10 @@ class ScoreTableGenerator:
         if not run_details:
             return
 
-        template = self.template_env.get_template('run_details.html')
+        template = self.template_env.get_template("run_details.html")
 
         # Get system prompt (context) for this benchmark
-        system_prompt = self._get_context_from_benchmark(run_details['benchmark_name'])
+        system_prompt = self._get_context_from_benchmark(run_details["benchmark_name"])
 
         # Ensure output directories exist
         os.makedirs(os.path.join(constants.OUTPUT_DIR, "run_details"), exist_ok=True)
@@ -160,7 +160,7 @@ class ScoreTableGenerator:
             "run_details", 
             f"{run_details['run_id']}.html"
         )
-        with open(run_path, 'w') as f:
+        with open(run_path, "w") as f:
             f.write(template.render(run_details=run_details, system_prompt=system_prompt))
 
     def generate_run_detail_by_id(self, run_id: int) -> None:
@@ -189,7 +189,7 @@ class ScoreTableGenerator:
         key = (benchmark_name, model_name)
 
         if key in highest_scores:
-            run_id = highest_scores[key]['run_id']
+            run_id = highest_scores[key]["run_id"]
             data = datastore.benchmarks.get_run_by_run_id(run_id, self.session)
             self._write_run_detail(data)
 

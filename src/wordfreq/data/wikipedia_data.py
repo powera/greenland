@@ -62,7 +62,7 @@ def load_article_list(file_path: str) -> List[str]:
         print(f"Error: Article list file not found: {file_path}")
         return []
         
-    with open(file_path, 'r', encoding='utf-8') as f:
+    with open(file_path, "r", encoding="utf-8") as f:
         return [line.strip() for line in f if line.strip()]
 
 def clean_wiki_text(text: str) -> str:
@@ -76,30 +76,30 @@ def clean_wiki_text(text: str) -> str:
         Cleaned text
     """
     # Replace specific wiki entities
-    text = text.replace('&nbsp;', ' ')
-    text = text.replace('&lt;', '<')
-    text = text.replace('&gt;', '>')
-    text = text.replace('&amp;', '&')
-    text = text.replace('&quot;', '"')
+    text = text.replace("&nbsp;", " ")
+    text = text.replace("&lt;", "<")
+    text = text.replace("&gt;", ">")
+    text = text.replace("&amp;", "&")
+    text = text.replace("&quot;", "\"")
     
     # Apply regex patterns to remove wiki markup
     for pattern in WIKI_MARKUP_PATTERNS:
-        if '(' in pattern:  # If the pattern has a capturing group
+        if "(" in pattern:  # If the pattern has a capturing group
             text = re.sub(pattern, r'\1', text, flags=re.MULTILINE | re.DOTALL)
         else:
-            text = re.sub(pattern, ' ', text, flags=re.MULTILINE | re.DOTALL)
+            text = re.sub(pattern, " ", text, flags=re.MULTILINE | re.DOTALL)
     
     # Handle tables - this is a simple approach; tables can be complex
-    text = re.sub(r'\{\|[\s\S]*?\|\}', ' ', text)
+    text = re.sub(r'\{\|[\s\S]*?\|\}', " ", text)
     
     # Remove file/image links
-    text = re.sub(r'\[\[File:[^\]]*\]\]', ' ', text)
-    text = re.sub(r'\[\[Image:[^\]]*\]\]', ' ', text)
+    text = re.sub(r'\[\[File:[^\]]*\]\]', " ", text)
+    text = re.sub(r'\[\[Image:[^\]]*\]\]', " ", text)
     
     # Remove remaining markup and clean up spacing
-    text = re.sub(r'[=]{2,}', ' ', text)  # Remove any remaining === header marks ===
-    text = re.sub(r'\n+', ' ', text)      # Replace newlines with spaces
-    text = re.sub(r'\s+', ' ', text)      # Replace multiple spaces with single space
+    text = re.sub(r'[=]{2,}', " ", text)  # Remove any remaining === header marks ===
+    text = re.sub(r'\n+', " ", text)      # Replace newlines with spaces
+    text = re.sub(r'\s+', " ", text)      # Replace multiple spaces with single space
     
     return text.strip()
 
@@ -117,7 +117,7 @@ def tokenize_text(text: str) -> List[str]:
     text = text.lower()
     
     # Remove punctuation and replace with spaces
-    translator = str.maketrans(string.punctuation, ' ' * len(string.punctuation))
+    translator = str.maketrans(string.punctuation, " " * len(string.punctuation))
     text = text.translate(translator)
     
     # Split on whitespace
@@ -128,7 +128,7 @@ def tokenize_text(text: str) -> List[str]:
     for token in tokens:
         if token.isdigit():
             continue
-        if len(token) == 1 and token not in ['a', 'i']:
+        if len(token) == 1 and token not in ["a", "i"]:
             continue
         valid_tokens.append(token)
     
@@ -209,7 +209,7 @@ def main():
     timestamp = time.strftime("%Y%m%d_%H%M%S")
     output_file = os.path.join(OUTPUT_DIR, f"word_frequencies_{timestamp}.txt")
     
-    with open(output_file, 'w', encoding='utf-8') as f:
+    with open(output_file, "w", encoding="utf-8") as f:
         f.write("word,frequency\n")
         for word, count in total_word_counts.most_common():
             f.write(f"{word},{count}\n")
@@ -220,7 +220,7 @@ def main():
     json_output_file = os.path.join(OUTPUT_DIR, f"word_frequencies_{timestamp}.json")
     
     import json
-    with open(json_output_file, 'w', encoding='utf-8') as f:
+    with open(json_output_file, "w", encoding="utf-8") as f:
         json.dump(dict(total_word_counts.most_common()), f, ensure_ascii=False, indent=2)
     
     print(f"Word frequencies also saved as JSON to {json_output_file}")

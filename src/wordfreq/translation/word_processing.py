@@ -25,52 +25,52 @@ def determine_default_grammatical_form(word_text: str, pos_type: str, lemma_text
 
     if word_text == lemma_text:
         # Word matches lemma, likely base form
-        if pos_lower == 'verb':
+        if pos_lower == "verb":
             return GrammaticalForm.VERB_INFINITIVE.value
-        elif pos_lower == 'noun':
+        elif pos_lower == "noun":
             return GrammaticalForm.NOUN_SINGULAR.value
-        elif pos_lower == 'adjective':
+        elif pos_lower == "adjective":
             return GrammaticalForm.ADJECTIVE_POSITIVE.value
-        elif pos_lower == 'adverb':
+        elif pos_lower == "adverb":
             return GrammaticalForm.ADVERB_POSITIVE.value
-        elif pos_lower == 'preposition':
+        elif pos_lower == "preposition":
             return GrammaticalForm.PREPOSITION.value
-        elif pos_lower == 'conjunction':
+        elif pos_lower == "conjunction":
             return GrammaticalForm.CONJUNCTION.value
-        elif pos_lower == 'interjection':
+        elif pos_lower == "interjection":
             return GrammaticalForm.INTERJECTION.value
-        elif pos_lower == 'determiner':
+        elif pos_lower == "determiner":
             return GrammaticalForm.DETERMINER.value
-        elif pos_lower == 'article':
+        elif pos_lower == "article":
             return GrammaticalForm.ARTICLE.value
         else:
             return GrammaticalForm.BASE_FORM.value
 
     # Basic heuristics for English inflected forms
-    if pos_lower == 'verb':
-        if word_text.endswith('ing'):
+    if pos_lower == "verb":
+        if word_text.endswith("ing"):
             return GrammaticalForm.VERB_PRESENT_PARTICIPLE.value  # Default to participle
-        elif word_text.endswith('ed'):
+        elif word_text.endswith("ed"):
             return GrammaticalForm.VERB_PAST_TENSE.value
-        elif word_text.endswith('s'):
+        elif word_text.endswith("s"):
             return GrammaticalForm.VERB_PRESENT_TENSE.value
 
-    elif pos_lower == 'noun':
-        if word_text.endswith('s') and not lemma_text.endswith('s'):
+    elif pos_lower == "noun":
+        if word_text.endswith("s") and not lemma_text.endswith("s"):
             return GrammaticalForm.NOUN_PLURAL.value
         elif word_text.endswith("'s"):
             return GrammaticalForm.NOUN_POSSESSIVE_SINGULAR.value
 
-    elif pos_lower == 'adjective':
-        if word_text.endswith('er'):
+    elif pos_lower == "adjective":
+        if word_text.endswith("er"):
             return GrammaticalForm.ADJECTIVE_COMPARATIVE.value
-        elif word_text.endswith('est'):
+        elif word_text.endswith("est"):
             return GrammaticalForm.ADJECTIVE_SUPERLATIVE.value
 
-    elif pos_lower == 'adverb':
-        if word_text.endswith('er'):
+    elif pos_lower == "adverb":
+        if word_text.endswith("er"):
             return GrammaticalForm.ADVERB_COMPARATIVE.value
-        elif word_text.endswith('est'):
+        elif word_text.endswith("est"):
             return GrammaticalForm.ADVERB_SUPERLATIVE.value
 
     return GrammaticalForm.OTHER.value
@@ -87,15 +87,15 @@ def is_likely_base_form(word_text: str, lemma_text: str, pos_type: str) -> bool:
     # For some POS types, check specific patterns
     pos_lower = pos_type.lower()
 
-    if pos_lower == 'verb':
+    if pos_lower == "verb":
         # Base form for verbs is typically the infinitive
         return word_text == lemma_text
-    elif pos_lower == 'noun':
+    elif pos_lower == "noun":
         # Base form for nouns is typically the singular
-        return not (word_text.endswith('s') and not lemma_text.endswith('s'))
-    elif pos_lower in ['adjective', 'adverb']:
+        return not (word_text.endswith("s") and not lemma_text.endswith("s"))
+    elif pos_lower in ["adjective", "adverb"]:
         # Base form is the positive degree
-        return not (word_text.endswith('er') or word_text.endswith('est'))
+        return not (word_text.endswith("er") or word_text.endswith("est"))
 
     # For other POS types, assume base form if it matches lemma
     return word_text == lemma_text
@@ -122,7 +122,7 @@ def process_word(
     session = get_session_func()
     try:
         # Add or get word token in database (assuming English)
-        word_token = linguistic_db.add_word_token(session, word, 'en')
+        word_token = linguistic_db.add_word_token(session, word, "en")
 
         # If the word token already has derivative forms and refresh is False, return early
         if len(word_token.derivative_forms) > 0:
@@ -147,15 +147,15 @@ def process_word(
         # Process each definition/form
         for def_data in definitions_list:
             # Validate POS type
-            pos_type = def_data.get('pos', 'unknown')
-            if pos_type != 'unknown' and pos_type not in VALID_POS_TYPES:
+            pos_type = def_data.get("pos", "unknown")
+            if pos_type != "unknown" and pos_type not in VALID_POS_TYPES:
                 logger.warning(f"Invalid POS type '{pos_type}' for word '{word}', defaulting to 'unknown'")
-                pos_type = 'unknown'
+                pos_type = "unknown"
 
             # Get grammatical form, defaulting based on POS if not provided
-            grammatical_form = def_data.get('grammatical_form')
+            grammatical_form = def_data.get("grammatical_form")
             if not grammatical_form:
-                grammatical_form = determine_default_grammatical_form(word, pos_type, def_data.get('lemma', word))
+                grammatical_form = determine_default_grammatical_form(word, pos_type, def_data.get("lemma", word))
 
             # Validate grammatical form
             valid_forms = [form.value for form in GrammaticalForm]
@@ -164,34 +164,34 @@ def process_word(
                 grammatical_form = GrammaticalForm.OTHER.value
 
             # Determine if this is a base form
-            is_base_form_flag = def_data.get('is_base_form', False)
+            is_base_form_flag = def_data.get("is_base_form", False)
             if not is_base_form_flag:
-                is_base_form_flag = is_likely_base_form(word, def_data.get('lemma', word), pos_type)
+                is_base_form_flag = is_likely_base_form(word, def_data.get("lemma", word), pos_type)
 
             # Create Translation objects for each language
             chinese_trans = None
-            if def_data.get('chinese_translation'):
-                chinese_trans = Translation(text=def_data.get('chinese_translation'))
+            if def_data.get("chinese_translation"):
+                chinese_trans = Translation(text=def_data.get("chinese_translation"))
 
             korean_trans = None
-            if def_data.get('korean_translation'):
-                korean_trans = Translation(text=def_data.get('korean_translation'))
+            if def_data.get("korean_translation"):
+                korean_trans = Translation(text=def_data.get("korean_translation"))
 
             french_trans = None
-            if def_data.get('french_translation'):
-                french_trans = Translation(text=def_data.get('french_translation'))
+            if def_data.get("french_translation"):
+                french_trans = Translation(text=def_data.get("french_translation"))
 
             swahili_trans = None
-            if def_data.get('swahili_translation'):
-                swahili_trans = Translation(text=def_data.get('swahili_translation'))
+            if def_data.get("swahili_translation"):
+                swahili_trans = Translation(text=def_data.get("swahili_translation"))
 
             vietnamese_trans = None
-            if def_data.get('vietnamese_translation'):
-                vietnamese_trans = Translation(text=def_data.get('vietnamese_translation'))
+            if def_data.get("vietnamese_translation"):
+                vietnamese_trans = Translation(text=def_data.get("vietnamese_translation"))
 
             lithuanian_trans = None
-            if def_data.get('lithuanian_translation'):
-                lithuanian_trans = Translation(text=def_data.get('lithuanian_translation'))
+            if def_data.get("lithuanian_translation"):
+                lithuanian_trans = Translation(text=def_data.get("lithuanian_translation"))
 
             # Create TranslationSet with Translation objects
             translations_set = TranslationSet(
@@ -207,17 +207,17 @@ def process_word(
             derivative_form = linguistic_db.add_complete_word_entry(
                 session=session,
                 token=word,
-                lemma_text=def_data.get('lemma', word),
-                definition_text=def_data.get('definition', f"Definition for {word}"),
+                lemma_text=def_data.get("lemma", word),
+                definition_text=def_data.get("definition", f"Definition for {word}"),
                 pos_type=pos_type,
                 grammatical_form=grammatical_form,
-                pos_subtype=def_data.get('pos_subtype'),
+                pos_subtype=def_data.get("pos_subtype"),
                 is_base_form=is_base_form_flag,
-                ipa_pronunciation=def_data.get('ipa_spelling'),
-                phonetic_pronunciation=def_data.get('phonetic_spelling'),
+                ipa_pronunciation=def_data.get("ipa_spelling"),
+                phonetic_pronunciation=def_data.get("phonetic_spelling"),
                 translations=translations_set,
-                confidence=def_data.get('confidence', 0.0),
-                notes=def_data.get('notes')
+                confidence=def_data.get("confidence", 0.0),
+                notes=def_data.get("notes")
             )
 
             if not derivative_form:

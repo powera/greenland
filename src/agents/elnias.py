@@ -30,16 +30,16 @@ from wordfreq.trakaido.utils.export_manager import TrakaidoExporter
 
 # Supported languages and their codes
 SUPPORTED_LANGUAGES = {
-    'lt': 'Lithuanian',
-    'zh': 'Chinese',
-    'ko': 'Korean',
-    'fr': 'French'
+    "lt": "Lithuanian",
+    "zh": "Chinese",
+    "ko": "Korean",
+    "fr": "French"
 }
 
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -47,7 +47,7 @@ logger = logging.getLogger(__name__)
 class ElniasAgent:
     """Agent for exporting word data in minimal bootstrap format."""
 
-    def __init__(self, db_path: str = None, debug: bool = False, language: str = 'lt',
+    def __init__(self, db_path: str = None, debug: bool = False, language: str = "lt",
                  simplified_chinese: bool = True):
         """
         Initialize the Elnias agent.
@@ -63,10 +63,10 @@ class ElniasAgent:
         self.simplified_chinese = simplified_chinese
 
         # Handle language variants
-        if language == 'zh-Hant':
-            self.language = 'zh'
+        if language == "zh-Hant":
+            self.language = "zh"
             self.simplified_chinese = False
-            self.language_suffix = 'zh_Hant'
+            self.language_suffix = "zh_Hant"
         else:
             self.language = language
             self.language_suffix = language
@@ -83,11 +83,11 @@ class ElniasAgent:
             db_path=self.db_path,
             debug=debug,
             language=self.language,
-            simplified_chinese=self.simplified_chinese if self.language == 'zh' else True
+            simplified_chinese=self.simplified_chinese if self.language == "zh" else True
         )
 
         variant_info = ""
-        if self.language == 'zh':
+        if self.language == "zh":
             variant_info = f" ({'Simplified' if self.simplified_chinese else 'Traditional'})"
         logger.info(f"Initialized Elnias agent for {SUPPORTED_LANGUAGES[self.language]}{variant_info} (lang_{self.language_suffix})")
 
@@ -106,10 +106,10 @@ class ElniasAgent:
         # Build path: data/trakaido_wordlists/lang_{code}/generated/
         output_dir = os.path.join(
             project_root,
-            'data',
-            'trakaido_wordlists',
+            "data",
+            "trakaido_wordlists",
             f'lang_{self.language_suffix}',
-            'generated'
+            "generated"
         )
 
         return output_dir
@@ -122,7 +122,7 @@ class ElniasAgent:
             Path to bootstrap.json in the language's generated directory
         """
         output_dir = self.get_language_output_dir()
-        return os.path.join(output_dir, 'bootstrap.json')
+        return os.path.join(output_dir, "bootstrap.json")
 
     def export_bootstrap(
         self,
@@ -184,7 +184,7 @@ class ElniasAgent:
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
         # Write JSON file with pretty formatting
-        with open(output_path, 'w', encoding='utf-8') as f:
+        with open(output_path, "w", encoding="utf-8") as f:
             json.dump(bootstrap_data, f, ensure_ascii=False, indent=2)
 
         file_size = os.path.getsize(output_path)
@@ -192,13 +192,13 @@ class ElniasAgent:
         logger.info(f"File size: {file_size:,} bytes")
 
         return {
-            'success': True,
-            'output_path': output_path,
-            'entry_count': len(bootstrap_data),
-            'file_size': file_size,
-            'language': language_name,
-            'language_code': self.language_suffix,
-            'include_unverified': include_unverified
+            "success": True,
+            "output_path": output_path,
+            "entry_count": len(bootstrap_data),
+            "file_size": file_size,
+            "language": language_name,
+            "language_code": self.language_suffix,
+            "include_unverified": include_unverified
         }
 
     def run_export(
@@ -235,15 +235,15 @@ class ElniasAgent:
         except Exception as e:
             logger.error(f"Export failed: {str(e)}", exc_info=True)
             return {
-                'success': False,
-                'error': str(e)
+                "success": False,
+                "error": str(e)
             }
 
 
 def main():
     """Main entry point for command-line execution."""
     parser = argparse.ArgumentParser(
-        description='Elnias - Bootstrap Export Agent',
+        description="Elnias - Bootstrap Export Agent",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
@@ -271,42 +271,42 @@ Examples:
     )
 
     parser.add_argument(
-        '--db-path',
+        "--db-path",
         type=str,
-        help='Path to the database file (default: from constants.WORDFREQ_DB_PATH)'
+        help="Path to the database file (default: from constants.WORDFREQ_DB_PATH)"
     )
 
     parser.add_argument(
-        '--language',
+        "--language",
         type=str,
-        default='lt',
-        choices=['lt', 'zh', 'zh-Hant', 'ko', 'fr'],
-        help='Target language code (default: lt)'
+        default="lt",
+        choices=["lt", "zh", "zh-Hant", "ko", "fr"],
+        help="Target language code (default: lt)"
     )
 
     parser.add_argument(
-        '--output',
+        "--output",
         type=str,
-        help='Output file path (default: data/trakaido_wordlists/lang_{code}/generated/bootstrap.json)'
+        help="Output file path (default: data/trakaido_wordlists/lang_{code}/generated/bootstrap.json)"
     )
 
     parser.add_argument(
-        '--include-unverified',
-        action='store_true',
-        help='Include unverified entries in export'
+        "--include-unverified",
+        action="store_true",
+        help="Include unverified entries in export"
     )
 
     parser.add_argument(
-        '--debug',
-        action='store_true',
-        help='Enable debug logging'
+        "--debug",
+        action="store_true",
+        help="Enable debug logging"
     )
 
     args = parser.parse_args()
 
     # Handle Traditional Chinese flag
     simplified_chinese = True
-    if args.language == 'zh-Hant':
+    if args.language == "zh-Hant":
         simplified_chinese = False
 
     # Create agent
@@ -324,8 +324,8 @@ Examples:
     )
 
     # Exit with appropriate code
-    sys.exit(0 if result.get('success', False) else 1)
+    sys.exit(0 if result.get("success", False) else 1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -10,7 +10,7 @@ from clients.types import Response
 import benchmarks.datastore.common # Assuming datastore.common is available
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 # Default timeout values (in seconds)
@@ -57,15 +57,15 @@ class UnifiedLLMClient:
         # Check if this is a commercial API model first (skip database lookup)
         # These models can be routed directly based on their name
         # Exception: gpt-oss models should use database lookup
-        if model.startswith('gpt-') and not model.startswith('gpt-oss'):
+        if model.startswith("gpt-") and not model.startswith("gpt-oss"):
             client = self.openai
             client_name = "OpenAI"
             normalized_model = model
-        elif model.startswith('claude-'):
+        elif model.startswith("claude-"):
             client = self.anthropic
             client_name = "Anthropic"
             normalized_model = model
-        elif model.startswith('gemini-'):
+        elif model.startswith("gemini-"):
             client = self.gemini
             client_name = "Gemini"
             normalized_model = model
@@ -76,17 +76,17 @@ class UnifiedLLMClient:
             if not model_info:
                 raise ValueError(f"Model '{model}' not found in database")
 
-            model_path = model_info.get('model_path')
-            model_type = model_info.get('model_type')
+            model_path = model_info.get("model_path")
+            model_type = model_info.get("model_type")
 
             if not model_path or not model_type:
                 raise ValueError(f"Model '{model}' has incomplete configuration (path={model_path}, type={model_type})")
 
             # Route to appropriate client based on model type and path
-            if model_type == 'remote':
+            if model_type == "remote":
                 raise ValueError(f"Unknown remote model type for {model_path}")
             else:  # local models
-                if model_path.startswith('lmstudio/'):
+                if model_path.startswith("lmstudio/"):
                     client = self.lmstudio
                     client_name = "LMStudio"
                     normalized_model = model_path[len("lmstudio/"):]

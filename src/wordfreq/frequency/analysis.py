@@ -14,7 +14,7 @@ from wordfreq.storage.models.schema import WordToken, Corpus, WordFrequency
 import wordfreq.frequency.corpus
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 # Constants
@@ -67,9 +67,9 @@ def calculate_combined_ranks(
     for corpus in corpora:
         effective_unknown_rank = wordfreq.frequency.corpus.get_effective_unknown_rank(corpus.name, unknown_rank, session)
         corpus_info[corpus.id] = {
-            'name': corpus.name,
-            'weight': corpus.corpus_weight,
-            'unknown_rank': effective_unknown_rank
+            "name": corpus.name,
+            "weight": corpus.corpus_weight,
+            "unknown_rank": effective_unknown_rank
         }
     
     corpus_ids = list(corpus_info.keys())
@@ -104,13 +104,13 @@ def calculate_combined_ranks(
                 rank = freq_by_word_token[word_token.id][corpus_id]
                 corpus_ranks[corpus_id] = rank
             else:
-                rank = corpus_config['unknown_rank']
+                rank = corpus_config["unknown_rank"]
                 corpus_ranks[corpus_id] = rank
             
             # Only include in weighted calculation if weight > 0
-            if corpus_config['weight'] > 0:
+            if corpus_config["weight"] > 0:
                 weighted_ranks.append(rank)
-                weights.append(corpus_config['weight'])
+                weights.append(corpus_config["weight"])
             
         # Calculate combined rank using arithmetic mean of harmonic and geometric means
         if weighted_ranks and weights:
@@ -128,16 +128,16 @@ def calculate_combined_ranks(
                 
             except (ZeroDivisionError, ValueError):
                 # Fallback to maximum unknown rank if calculation fails
-                combined_rank = max(corpus_info[cid]['unknown_rank'] for cid in corpus_ids)
+                combined_rank = max(corpus_info[cid]["unknown_rank"] for cid in corpus_ids)
         else:
             # No valid ranks, use the maximum unknown rank
-            combined_rank = max(corpus_info[cid]['unknown_rank'] for cid in corpus_ids)
+            combined_rank = max(corpus_info[cid]["unknown_rank"] for cid in corpus_ids)
             
         word_data[word_token.id] = {
             "word": word_token.token,
             "ranks": corpus_ranks,
-            "harmonic_mean": harmonic_mean if 'harmonic_mean' in locals() else combined_rank,
-            "geometric_mean": geometric_mean if 'geometric_mean' in locals() else combined_rank,
+            "harmonic_mean": harmonic_mean if "harmonic_mean" in locals() else combined_rank,
+            "geometric_mean": geometric_mean if "geometric_mean" in locals() else combined_rank,
             "combined_rank_value": combined_rank,
             "is_outlier": False,
             "z_score": 0,
@@ -226,7 +226,7 @@ def export_ranked_word_list(
         word_list = word_list[:limit]
     
     # Write to file
-    with open(output_path, 'w', encoding='utf-8') as f:
+    with open(output_path, "w", encoding="utf-8") as f:
         for word_info in word_list:
             f.write(f"{word_info['word']}\n")
     
@@ -272,7 +272,7 @@ def export_frequency_data(
     
     if format.lower() == "csv":
         import csv
-        with open(output_path, 'w', newline='', encoding='utf-8') as f:
+        with open(output_path, "w", newline="", encoding="utf-8") as f:
             # Create headers
             headers = ["word", "combined_rank", "combined_rank_value", "harmonic_mean", "geometric_mean", "is_outlier", "z_score"]
             for corpus in corpora:
@@ -324,7 +324,7 @@ def export_frequency_data(
             })
         
         # Write to file
-        with open(output_path, 'w', encoding='utf-8') as f:
+        with open(output_path, "w", encoding="utf-8") as f:
             json.dump(json_data, f, indent=2)
     
     else:

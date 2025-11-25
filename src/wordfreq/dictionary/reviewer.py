@@ -11,21 +11,21 @@ import constants
 from wordfreq.storage import database as linguistic_db
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 @dataclass
 class CliColors:
     """ANSI color codes for CLI formatting."""
-    HEADER = '\033[95m'
-    BLUE = '\033[94m'
-    CYAN = '\033[96m'
-    GREEN = '\033[92m'
-    YELLOW = '\033[93m'
-    RED = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
+    HEADER = "\033[95m"
+    BLUE = "\033[94m"
+    CYAN = "\033[96m"
+    GREEN = "\033[92m"
+    YELLOW = "\033[93m"
+    RED = "\033[91m"
+    ENDC = "\033[0m"
+    BOLD = "\033[1m"
+    UNDERLINE = "\033[4m"
 
 class LinguisticReviewer:
     """Interactive tool for reviewing and updating linguistic data."""
@@ -136,13 +136,13 @@ class LinguisticReviewer:
         
         for item in words:
             # Show unverified status
-            unverified_count = sum(1 for definition in item['definitions'] if not definition.get('verified', True))
+            unverified_count = sum(1 for definition in item["definitions"] if not definition.get("verified", True))
             flag_str = f" [unverified: {unverified_count}]" if unverified_count > 0 else ""
             
             print(f"{self.c.CYAN}{item['word']}{self.c.ENDC}{flag_str} (rank: {item['rank']})")
             # Show definition summaries
-            for i, definition in enumerate(item['definitions']):
-                verified_str = f" {self.c.GREEN}[✓]{self.c.ENDC}" if definition.get('verified', False) else f" {self.c.RED}[✗]{self.c.ENDC}"
+            for i, definition in enumerate(item["definitions"]):
+                verified_str = f" {self.c.GREEN}[✓]{self.c.ENDC}" if definition.get("verified", False) else f" {self.c.RED}[✗]{self.c.ENDC}"
                 print(f"  {i+1}. {definition['pos']} - {definition['text'][:50]}...{verified_str}")
     
     def list_common_words_by_pos(self, pos_type: str, limit: int = 20) -> None:
@@ -178,9 +178,9 @@ class LinguisticReviewer:
         # Print words
         for item in words:
             # Truncate definition for display
-            definition = item['definition'][:50] + "..." if len(item['definition']) > 50 else item['definition']
-            if not item['rank']:
-                item['rank'] = "N/A"
+            definition = item["definition"][:50] + "..." if len(item["definition"]) > 50 else item["definition"]
+            if not item["rank"]:
+                item["rank"] = "N/A"
             row = (
                 f"{item['rank']:<6} "
                 f"{item['token']:<{word_width}} "
@@ -224,9 +224,9 @@ class LinguisticReviewer:
         # Print words
         for item in words:
             # Truncate definition for display
-            definition = item['definition'][:50] + "..." if len(item['definition']) > 50 else item['definition']
-            if not item['rank']:
-                item['rank'] = "N/A"
+            definition = item["definition"][:50] + "..." if len(item["definition"]) > 50 else item["definition"]
+            if not item["rank"]:
+                item["rank"] = "N/A"
             row = (
                 f"{item['rank']:<6} "
                 f"{item['token']:<{word_width}} "
@@ -332,7 +332,7 @@ class LinguisticReviewer:
                     stats = linguistic_db.get_processing_stats(self.session)
                     print(f"\n{self.c.HEADER}{self.c.BOLD}Database Statistics:{self.c.ENDC}")
                     print(f"  Total word tokens: {stats['total_word_tokens']}")
-                    percent_with_defs = stats['tokens_with_derivative_forms']/stats['total_word_tokens']*100 if stats['total_word_tokens'] > 0 else 0
+                    percent_with_defs = stats["tokens_with_derivative_forms"]/stats["total_word_tokens"]*100 if stats["total_word_tokens"] > 0 else 0
                     print(f"  Tokens with derivative forms: {stats['tokens_with_derivative_forms']} ({percent_with_defs:.1f}%)")
                     print(f"  Total lemmas: {stats['total_lemmas']}")
                     print(f"  Total derivative forms: {stats['total_derivative_forms']}")

@@ -10,13 +10,13 @@ from wordfreq.translation.generate_forms_base import (
 )
 
 CONFIG = FormGenerationConfig(
-    language_code='de',
-    language_name='German',
-    pos_type='noun',
+    language_code="de",
+    language_name="German",
+    pos_type="noun",
     form_mapping=NOUN_FORM_MAPPING,
-    client_method_name='query_german_noun_forms',
+    client_method_name="query_german_noun_forms",
     min_forms_threshold=2,
-    base_form_identifier='singular',
+    base_form_identifier="singular",
     use_legacy_translation=False
 )
 
@@ -30,5 +30,5 @@ def main():
     run_form_generation(CONFIG, get_german_noun_lemmas)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

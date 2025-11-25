@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Dict, Optional
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 import constants
@@ -57,7 +57,7 @@ def get_context(category: str, prompt_type: str, subtype: Optional[str] = None) 
 
     # Load the prompt from the file
     try:
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(file_path, "r", encoding="utf-8") as f:
             prompt_text = f.read().strip()
 
         # Cache the result
@@ -107,7 +107,7 @@ def get_prompt(category: str, prompt_type: str, subtype: Optional[str] = None) -
 
     # Load the prompt from the file
     try:
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(file_path, "r", encoding="utf-8") as f:
             prompt_text = f.read().strip()
 
         # Cache the result

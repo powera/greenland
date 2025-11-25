@@ -12,7 +12,7 @@ import os
 from typing import Any, Dict, List, Optional, Tuple
 
 # Add the src directory to the path for imports
-GREENLAND_SRC_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..'))
+GREENLAND_SRC_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.."))
 sys.path.append(GREENLAND_SRC_PATH)
 
 import constants
@@ -30,7 +30,7 @@ from .data_models import WordData, ReviewResult
 from .text_rendering import display_word_data
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 
@@ -63,15 +63,15 @@ class VerbManager:
         return create_database_session(self.db_path)
 
     def _get_verb_analysis_prompt(self, english_verb: str, target_translation: str = None,
-                                   language: str = 'lt') -> str:
+                                   language: str = "lt") -> str:
         """Get the prompt for analyzing a new verb."""
         language_names = {
-            'lt': 'Lithuanian',
-            'zh': 'Chinese',
-            'ko': 'Korean',
-            'fr': 'French'
+            "lt": "Lithuanian",
+            "zh": "Chinese",
+            "ko": "Korean",
+            "fr": "French"
         }
-        language_name = language_names.get(language, 'Lithuanian')
+        language_name = language_names.get(language, "Lithuanian")
 
         context = util.prompt_loader.get_context("wordfreq", "word_analysis")
         prompt_template = util.prompt_loader.get_prompt("wordfreq", "word_analysis")
@@ -92,7 +92,7 @@ class VerbManager:
         return f"{context}\n\n{prompt}"
 
     def _query_verb_data(self, english_verb: str, target_translation: str = None,
-                        language: str = 'lt', model_override: str = None) -> Tuple[Optional[WordData], bool]:
+                        language: str = "lt", model_override: str = None) -> Tuple[Optional[WordData], bool]:
         """
         Query LLM for comprehensive verb data.
 
@@ -106,10 +106,10 @@ class VerbManager:
             Tuple of (WordData object, success flag)
         """
         language_field_names = {
-            'lt': 'lithuanian',
-            'zh': 'chinese',
-            'ko': 'korean',
-            'fr': 'french'
+            "lt": "lithuanian",
+            "zh": "chinese",
+            "ko": "korean",
+            "fr": "french"
         }
 
         schema = Schema(
@@ -163,19 +163,19 @@ class VerbManager:
             if response.structured_data:
                 data = response.structured_data
                 return WordData(
-                    english=data.get('english', english_verb),
-                    lithuanian=data.get('lithuanian', target_translation or ''),
-                    pos_type='verb',  # Always verb
-                    pos_subtype=data.get('pos_subtype', 'action'),
-                    definition=data.get('definition', ''),
-                    confidence=data.get('confidence', 0.5),
-                    alternatives=data.get('alternatives', {'english': [], 'lithuanian': []}),
-                    notes=data.get('notes', ''),
-                    chinese_translation=data.get('chinese_translation'),
-                    korean_translation=data.get('korean_translation'),
-                    french_translation=data.get('french_translation'),
-                    swahili_translation=data.get('swahili_translation'),
-                    vietnamese_translation=data.get('vietnamese_translation')
+                    english=data.get("english", english_verb),
+                    lithuanian=data.get("lithuanian", target_translation or ""),
+                    pos_type="verb",  # Always verb
+                    pos_subtype=data.get("pos_subtype", "action"),
+                    definition=data.get("definition", ""),
+                    confidence=data.get("confidence", 0.5),
+                    alternatives=data.get("alternatives", {"english": [], "lithuanian": []}),
+                    notes=data.get("notes", ""),
+                    chinese_translation=data.get("chinese_translation"),
+                    korean_translation=data.get("korean_translation"),
+                    french_translation=data.get("french_translation"),
+                    swahili_translation=data.get("swahili_translation"),
+                    vietnamese_translation=data.get("vietnamese_translation")
                 ), True
             else:
                 logger.error(f"No structured data received for verb '{english_verb}'")
@@ -203,9 +203,9 @@ class VerbManager:
         existing_numbers = []
         for guid_tuple in existing_guids:
             guid = guid_tuple[0]
-            if guid and '_' in guid:
+            if guid and "_" in guid:
                 try:
-                    number = int(guid.split('_')[1])
+                    number = int(guid.split("_")[1])
                     existing_numbers.append(number)
                 except (ValueError, IndexError):
                     continue
@@ -236,43 +236,43 @@ class VerbManager:
                           "3. Reject\n"
                           "Enter choice (1-3): ").strip()
 
-            if choice == '1':
+            if choice == "1":
                 return ReviewResult(approved=True, modifications={}, notes="")
 
-            elif choice == '2':
+            elif choice == "2":
                 modifications = {}
 
                 # Allow modification of key fields
                 new_translation = input(f"Target translation [{data.lithuanian}]: ").strip()
                 if new_translation:
-                    modifications['lithuanian'] = new_translation
+                    modifications["lithuanian"] = new_translation
 
                 new_definition = input(f"Definition [{data.definition}]: ").strip()
                 if new_definition:
-                    modifications['definition'] = new_definition
+                    modifications["definition"] = new_definition
 
                 new_level = input("Difficulty Level (1-20, leave blank to set later): ").strip()
                 if new_level and new_level.isdigit():
                     level = int(new_level)
                     if 1 <= level <= 20:
-                        modifications['difficulty_level'] = level
+                        modifications["difficulty_level"] = level
 
                 new_subtype = input(f"Verb subtype [{data.pos_subtype}]: ").strip()
                 if new_subtype:
-                    modifications['pos_subtype'] = new_subtype
+                    modifications["pos_subtype"] = new_subtype
 
                 notes = input("Review notes: ").strip()
 
                 return ReviewResult(approved=True, modifications=modifications, notes=notes)
 
-            elif choice == '3':
+            elif choice == "3":
                 notes = input("Rejection reason: ").strip()
                 return ReviewResult(approved=False, modifications={}, notes=notes)
 
             else:
                 print("Invalid choice. Please enter 1, 2, or 3.")
 
-    def _generate_conjugation_forms(self, lemma_id: int, language: str = 'lt') -> bool:
+    def _generate_conjugation_forms(self, lemma_id: int, language: str = "lt") -> bool:
         """
         Generate conjugation forms for a verb using the LinguisticClient.
 
@@ -283,20 +283,20 @@ class VerbManager:
         Returns:
             Success flag
         """
-        if language == 'zh':
+        if language == "zh":
             # Chinese verbs don't conjugate - skip this step
             logger.info("Skipping conjugation generation for Chinese (verbs don't conjugate)")
             return True
 
-        if language == 'lt':
+        if language == "lt":
             # Use existing Lithuanian verb conjugation generator
             from wordfreq.translation.generate_lithuanian_verb_forms import process_lemma_conjugations
             return process_lemma_conjugations(self.linguistic_client, lemma_id, self.db_path)
-        elif language == 'fr':
+        elif language == "fr":
             # Use French verb conjugation generator
             from wordfreq.translation.generate_french_verb_forms import process_lemma_conjugations as process_french
             return process_french(self.linguistic_client, lemma_id, self.db_path)
-        elif language == 'ko':
+        elif language == "ko":
             # Korean verbs conjugate - would need a generator similar to Lithuanian/French
             logger.warning(f"Korean verb conjugation not yet implemented for lemma {lemma_id}")
             return True
@@ -306,7 +306,7 @@ class VerbManager:
 
     def add_verb(self, english_verb: str, target_translation: str = None,
                  difficulty_level: int = None, auto_approve: bool = False,
-                 language: str = 'lt', generate_forms: bool = True) -> bool:
+                 language: str = "lt", generate_forms: bool = True) -> bool:
         """
         Add a new verb to the trakaido system.
 
@@ -333,7 +333,7 @@ class VerbManager:
             # Check if verb already exists
             existing = session.query(Lemma).filter(
                 Lemma.lemma_text.ilike(english_verb),
-                Lemma.pos_type == 'verb'
+                Lemma.pos_type == "verb"
             ).first()
 
             if existing:
@@ -361,7 +361,7 @@ class VerbManager:
                     setattr(verb_data, key, value)
 
             # Use provided difficulty level or default to 1 if not set
-            final_difficulty_level = difficulty_level or getattr(verb_data, 'difficulty_level', None) or 1
+            final_difficulty_level = difficulty_level or getattr(verb_data, "difficulty_level", None) or 1
 
             # Generate GUID
             guid = self._generate_guid(session)
@@ -370,7 +370,7 @@ class VerbManager:
             lemma = Lemma(
                 lemma_text=verb_data.english,
                 definition_text=verb_data.definition,
-                pos_type='verb',
+                pos_type="verb",
                 pos_subtype=verb_data.pos_subtype,
                 guid=guid,
                 difficulty_level=final_difficulty_level,
@@ -389,13 +389,13 @@ class VerbManager:
             session.flush()  # Get the ID
 
             # Create English derivative form (infinitive/base form)
-            english_token = add_word_token(session, verb_data.english, 'en')
+            english_token = add_word_token(session, verb_data.english, "en")
             english_form = DerivativeForm(
                 lemma_id=lemma.id,
                 derivative_form_text=verb_data.english,
                 word_token_id=english_token.id,
-                language_code='en',
-                grammatical_form='infinitive',
+                language_code="en",
+                grammatical_form="infinitive",
                 is_base_form=True,
                 verified=not auto_approve
             )
@@ -409,28 +409,28 @@ class VerbManager:
                     derivative_form_text=verb_data.lithuanian,
                     word_token_id=target_token.id,
                     language_code=language,
-                    grammatical_form='infinitive',
+                    grammatical_form="infinitive",
                     is_base_form=True,
                     verified=not auto_approve
                 )
                 session.add(target_form)
 
             # Add alternative forms (synonyms)
-            for alt_english in verb_data.alternatives.get('english', []):
+            for alt_english in verb_data.alternatives.get("english", []):
                 if alt_english != verb_data.english:
-                    alt_token = add_word_token(session, alt_english, 'en')
+                    alt_token = add_word_token(session, alt_english, "en")
                     alt_form = DerivativeForm(
                         lemma_id=lemma.id,
                         derivative_form_text=alt_english,
                         word_token_id=alt_token.id,
-                        language_code='en',
-                        grammatical_form='synonym',
+                        language_code="en",
+                        grammatical_form="synonym",
                         is_base_form=False,
                         verified=not auto_approve
                     )
                     session.add(alt_form)
 
-            for alt_target in verb_data.alternatives.get('lithuanian', []):
+            for alt_target in verb_data.alternatives.get("lithuanian", []):
                 if alt_target != verb_data.lithuanian:
                     alt_token = add_word_token(session, alt_target, language)
                     alt_form = DerivativeForm(
@@ -438,7 +438,7 @@ class VerbManager:
                         derivative_form_text=alt_target,
                         word_token_id=alt_token.id,
                         language_code=language,
-                        grammatical_form='synonym',
+                        grammatical_form="synonym",
                         is_base_form=False,
                         verified=not auto_approve
                     )
@@ -466,7 +466,7 @@ class VerbManager:
         finally:
             session.close()
 
-    def list_verbs(self, language: str = 'lt', level: int = None, subtype: str = None,
+    def list_verbs(self, language: str = "lt", level: int = None, subtype: str = None,
                    limit: int = 50) -> List[Dict[str, Any]]:
         """
         List verbs in the database.
@@ -483,18 +483,18 @@ class VerbManager:
         session = self.get_session()
         try:
             language_field_map = {
-                'lt': 'lithuanian_translation',
-                'zh': 'chinese_translation',
-                'ko': 'korean_translation',
-                'fr': 'french_translation'
+                "lt": "lithuanian_translation",
+                "zh": "chinese_translation",
+                "ko": "korean_translation",
+                "fr": "french_translation"
             }
 
-            query = session.query(Lemma).filter(Lemma.pos_type == 'verb')
+            query = session.query(Lemma).filter(Lemma.pos_type == "verb")
 
             # Filter by language (must have translation)
             if language in language_field_map:
                 field = getattr(Lemma, language_field_map[language])
-                query = query.filter(field.isnot(None), field != '')
+                query = query.filter(field.isnot(None), field != "")
 
             if level:
                 query = query.filter(Lemma.difficulty_level == level)
@@ -508,15 +508,15 @@ class VerbManager:
 
             results = []
             for verb in verbs:
-                translation = getattr(verb, language_field_map.get(language, 'lithuanian_translation'), '')
+                translation = getattr(verb, language_field_map.get(language, "lithuanian_translation"), "")
                 results.append({
-                    'guid': verb.guid,
-                    'english': verb.lemma_text,
-                    'translation': translation,
-                    'language': language,
-                    'level': verb.difficulty_level,
-                    'subtype': verb.pos_subtype,
-                    'verified': verb.verified
+                    "guid": verb.guid,
+                    "english": verb.lemma_text,
+                    "translation": translation,
+                    "language": language,
+                    "level": verb.difficulty_level,
+                    "subtype": verb.pos_subtype,
+                    "verified": verb.verified
                 })
 
             return results

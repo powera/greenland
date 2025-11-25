@@ -21,7 +21,7 @@ if GREENLAND_SRC_PATH not in sys.path:
 from agents.sernas.agent import SernasAgent
 from agents.sernas.cli import main
 
-__all__ = ['SernasAgent', 'main']
+__all__ = ["SernasAgent", "main"]
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

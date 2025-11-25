@@ -35,7 +35,7 @@ def print_regeneration_summary(results, batch_mode=False):
         print(f"Total translations added: {results['total_translations_added']}")
         print(f"Total failed: {results['total_failed']}")
         print()
-        for lang_code, lang_results in results['by_language'].items():
+        for lang_code, lang_results in results["by_language"].items():
             print(f"{lang_results['language_name']}:")
             print(f"  Deleted: {lang_results['deleted']}")
             print(f"  Added: {lang_results['added']}")
@@ -58,7 +58,7 @@ def print_population_summary(results):
     print("\n" + "=" * 80)
     print("TRANSLATION POPULATION SUMMARY")
     print("=" * 80)
-    for lang_code, lang_results in results['by_language'].items():
+    for lang_code, lang_results in results["by_language"].items():
         print(f"\n{lang_results['language_name']}:")
         print(f"  Total missing: {lang_results['total_missing']}")
         print(f"  Populated: {lang_results['fixed']}")
@@ -83,6 +83,6 @@ def print_combined_summary(validation_results, population_results, language_code
         print(f"  Total issues: {validation_results['total_issues_all_languages']}")
 
     print(f"\nPopulation:")
-    for lang_code, lang_results in population_results['by_language'].items():
+    for lang_code, lang_results in population_results["by_language"].items():
         print(f"  {lang_results['language_name']}: {lang_results['fixed']} populated, {lang_results['failed']} failed")
     print("=" * 80)

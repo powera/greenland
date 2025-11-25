@@ -46,10 +46,10 @@ def query_spanish_noun_forms(client, lemma_id: int, get_session_func) -> Tuple[D
     # Get Spanish translation from lemma_translations table
     spanish_translation = session.query(linguistic_db.LemmaTranslation).filter(
         linguistic_db.LemmaTranslation.lemma_id == lemma_id,
-        linguistic_db.LemmaTranslation.language_code == 'es'
+        linguistic_db.LemmaTranslation.language_code == "es"
     ).first()
 
-    if not lemma or not spanish_translation or lemma.pos_type.lower() != 'noun':
+    if not lemma or not spanish_translation or lemma.pos_type.lower() != "noun":
         logger.error(f"Invalid lemma for Spanish noun forms: {lemma_id}")
         return {}, False
 
@@ -68,10 +68,10 @@ def query_spanish_noun_forms(client, lemma_id: int, get_session_func) -> Tuple[D
             noun=noun, english_noun=english_noun, definition=definition,
             subtype_context=f" (category: {pos_subtype})" if pos_subtype else "")
         response = client.generate_chat(prompt=prompt, model=client.model, json_schema=schema, context=context)
-        linguistic_db.log_query(session, word=noun, query_type='spanish_noun_forms', prompt=prompt,
+        linguistic_db.log_query(session, word=noun, query_type="spanish_noun_forms", prompt=prompt,
                                response=json.dumps(response.structured_data), model=client.model)
-        if response.structured_data and 'forms' in response.structured_data:
-            return response.structured_data['forms'], True
+        if response.structured_data and "forms" in response.structured_data:
+            return response.structured_data["forms"], True
         return {}, False
     except Exception as e:
         logger.error(f"Error querying Spanish noun forms for '{noun}': {e}")
@@ -86,10 +86,10 @@ def query_spanish_verb_conjugations(client, lemma_id: int, get_session_func) -> 
     # Get Spanish translation from lemma_translations table
     spanish_translation = session.query(linguistic_db.LemmaTranslation).filter(
         linguistic_db.LemmaTranslation.lemma_id == lemma_id,
-        linguistic_db.LemmaTranslation.language_code == 'es'
+        linguistic_db.LemmaTranslation.language_code == "es"
     ).first()
 
-    if not lemma or not spanish_translation or lemma.pos_type.lower() != 'verb':
+    if not lemma or not spanish_translation or lemma.pos_type.lower() != "verb":
         logger.error(f"Invalid lemma for Spanish verb conjugations: {lemma_id}")
         return {}, False
 
@@ -109,10 +109,10 @@ def query_spanish_verb_conjugations(client, lemma_id: int, get_session_func) -> 
             verb=verb, english_verb=english_verb, definition=definition,
             subtype_context=f" (category: {pos_subtype})" if pos_subtype else "")
         response = client.generate_chat(prompt=prompt, model=client.model, json_schema=schema, context=context)
-        linguistic_db.log_query(session, word=verb, query_type='spanish_verb_conjugations', prompt=prompt,
+        linguistic_db.log_query(session, word=verb, query_type="spanish_verb_conjugations", prompt=prompt,
                                response=json.dumps(response.structured_data), model=client.model)
-        if response.structured_data and 'forms' in response.structured_data:
-            return response.structured_data['forms'], True
+        if response.structured_data and "forms" in response.structured_data:
+            return response.structured_data["forms"], True
         return {}, False
     except Exception as e:
         logger.error(f"Error querying Spanish verb conjugations for '{verb}': {e}")

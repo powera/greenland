@@ -154,7 +154,7 @@ Provide your answer as concisely as possible.
             Dictionary with debug information
         """
         # Extract response based on format
-        if hasattr(response, 'structured_data') and response.structured_data:
+        if hasattr(response, "structured_data") and response.structured_data:
             actual_response = response.structured_data
         else:
             actual_response = response.response_text

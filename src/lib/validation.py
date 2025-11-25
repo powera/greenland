@@ -13,7 +13,7 @@ from clients import openai_client, ollama_client, unified_client
 from lib.benchmarks.data_models import BenchmarkQuestion
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 # Default model for validation and LLM-based question generation

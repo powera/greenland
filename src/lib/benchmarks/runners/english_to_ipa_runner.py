@@ -12,7 +12,7 @@ from lib.benchmarks.data_models import BenchmarkMetadata, BenchmarkResult
 from lib.benchmarks.factory import runner
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 # Define benchmark metadata
@@ -172,26 +172,26 @@ Include stress markers and all appropriate IPA symbols.
         # Compare character by character and count matches
         # Allow for slight variations in symbols, especially for similar sounds
         similar_chars = {
-            'i': set(['i', 'ɪ', 'iː']),
-            'ɪ': set(['ɪ', 'i', 'iː']),
-            'e': set(['e', 'ɛ', 'eɪ']),
-            'ɛ': set(['ɛ', 'e', 'eɪ']),
-            'æ': set(['æ', 'a', 'ɑ']),
-            'a': set(['a', 'æ', 'ɑ']),
-            'ɑ': set(['ɑ', 'a', 'æ', 'ɒ']),
-            'ɒ': set(['ɒ', 'ɑ', 'o', 'ɔ']),
-            'ɔ': set(['ɔ', 'o', 'ɒ']),
-            'o': set(['o', 'ɔ', 'ɒ', 'oʊ']),
-            'u': set(['u', 'ʊ', 'uː']),
-            'ʊ': set(['ʊ', 'u', 'uː']),
-            'ʌ': set(['ʌ', 'ə', 'ɜ']),
-            'ə': set(['ə', 'ʌ', 'ɜ', 'ɚ']),
-            'ɝ': set(['ɝ', 'ɚ', 'ɜ']),
-            'ɚ': set(['ɚ', 'ɝ', 'ə']),
-            'ɹ': set(['ɹ', 'r']),
-            'r': set(['r', 'ɹ']),
-            't': set(['t', 'ɾ']),  # Especially for American English
-            'ɾ': set(['ɾ', 't']),
+            "i": set(["i", "ɪ", "iː"]),
+            "ɪ": set(["ɪ", "i", "iː"]),
+            "e": set(["e", "ɛ", "eɪ"]),
+            "ɛ": set(["ɛ", "e", "eɪ"]),
+            "æ": set(["æ", "a", "ɑ"]),
+            "a": set(["a", "æ", "ɑ"]),
+            "ɑ": set(["ɑ", "a", "æ", "ɒ"]),
+            "ɒ": set(["ɒ", "ɑ", "o", "ɔ"]),
+            "ɔ": set(["ɔ", "o", "ɒ"]),
+            "o": set(["o", "ɔ", "ɒ", "oʊ"]),
+            "u": set(["u", "ʊ", "uː"]),
+            "ʊ": set(["ʊ", "u", "uː"]),
+            "ʌ": set(["ʌ", "ə", "ɜ"]),
+            "ə": set(["ə", "ʌ", "ɜ", "ɚ"]),
+            "ɝ": set(["ɝ", "ɚ", "ɜ"]),
+            "ɚ": set(["ɚ", "ɝ", "ə"]),
+            "ɹ": set(["ɹ", "r"]),
+            "r": set(["r", "ɹ"]),
+            "t": set(["t", "ɾ"]),  # Especially for American English
+            "ɾ": set(["ɾ", "t"]),
         }
         
         # Count match points
@@ -207,7 +207,7 @@ Include stress markers and all appropriate IPA symbols.
         for i in range(min(m, n)):
             if model_answer[i] == correct_answer[i]:
                 match_points += 1
-            elif model_answer[i] in similar_chars.get(correct_answer[i], set()) or \
+            elif model_answer[i] in similar_chars.get(correct_answer[i], set()) or\
                  correct_answer[i] in similar_chars.get(model_answer[i], set()):
                 match_points += 0.5
         
@@ -220,13 +220,13 @@ Include stress markers and all appropriate IPA symbols.
     def build_debug_info(self, question_data: Dict, response: Any, is_correct: bool) -> Dict:
         """Build debug information for benchmark results."""
         # Extract model's answer based on response type
-        if hasattr(response, 'structured_data') and isinstance(response.structured_data, dict) and 'ipa' in response.structured_data:
+        if hasattr(response, "structured_data") and isinstance(response.structured_data, dict) and "ipa" in response.structured_data:
             # Response object with structured data
             model_answer = response.structured_data["ipa"]
         elif isinstance(response, dict) and "ipa" in response:
             # Direct dictionary with ipa key
             model_answer = response["ipa"]
-        elif hasattr(response, 'response_text'):
+        elif hasattr(response, "response_text"):
             # Response object with text
             model_answer = response.response_text
         else:

@@ -27,12 +27,12 @@ def create_app(config_class=Config):
     app.config.from_object(config_class)
 
     # Set up database
-    db_path = app.config['DB_PATH']
+    db_path = app.config["DB_PATH"]
     if not Path(db_path).exists():
         print(f"Error: Database not found at {db_path}", file=sys.stderr)
         sys.exit(1)
 
-    engine = create_engine(f'sqlite:///{db_path}', echo=app.config['DEBUG'])
+    engine = create_engine(f'sqlite:///{db_path}', echo=app.config["DEBUG"])
     app.db_session_factory = scoped_session(sessionmaker(bind=engine))
 
     # Ensure all tables exist (creates missing tables and columns)
@@ -53,13 +53,13 @@ def create_app(config_class=Config):
     app.register_blueprint(audio.bp)
 
     # Register Jinja2 filters for Pinyin
-    app.jinja_env.filters['pinyin'] = generate_pinyin
-    app.jinja_env.filters['pinyin_ruby'] = generate_pinyin_ruby_html
-    app.jinja_env.filters['is_chinese'] = is_chinese
+    app.jinja_env.filters["pinyin"] = generate_pinyin
+    app.jinja_env.filters["pinyin_ruby"] = generate_pinyin_ruby_html
+    app.jinja_env.filters["is_chinese"] = is_chinese
 
     # Register JSON filter for parsing JSON strings in templates
     import json
-    app.jinja_env.filters['fromjson'] = json.loads
+    app.jinja_env.filters["fromjson"] = json.loads
 
     @app.before_request
     def before_request():
@@ -69,7 +69,7 @@ def create_app(config_class=Config):
     @app.teardown_appcontext
     def shutdown_session(exception=None):
         """Clean up database session after request."""
-        db = g.pop('db', None)
+        db = g.pop("db", None)
         if db is not None:
             if exception:
                 db.rollback()
@@ -77,7 +77,7 @@ def create_app(config_class=Config):
                 db.commit()
             db.close()
 
-    @app.route('/')
+    @app.route("/")
     def index():
         """Home page with search and quick stats."""
         from wordfreq.storage.models.schema import Lemma, Sentence
@@ -88,7 +88,7 @@ def create_app(config_class=Config):
         with_difficulty = g.db.query(Lemma).filter(Lemma.difficulty_level != None).count()
         total_sentences = g.db.query(Sentence).count()
 
-        return render_template('index.html',
+        return render_template("index.html",
                              total_lemmas=total_lemmas,
                              verified_lemmas=verified_lemmas,
                              with_difficulty=with_difficulty,
@@ -98,7 +98,7 @@ def create_app(config_class=Config):
     def utility_processor():
         """Add utility functions to Jinja templates."""
         return {
-            'config': app.config
+            "config": app.config
         }
 
     return app
@@ -106,22 +106,22 @@ def create_app(config_class=Config):
 
 def main():
     """Run the Flask development server."""
-    parser = argparse.ArgumentParser(description='Barsukas Web Interface')
-    parser.add_argument('--port', type=int, default=Config.PORT,
+    parser = argparse.ArgumentParser(description="Barsukas Web Interface")
+    parser.add_argument("--port", type=int, default=Config.PORT,
                        help=f'Port to run on (default: {Config.PORT})')
-    parser.add_argument('--debug', action='store_true',
-                       help='Enable debug mode')
-    parser.add_argument('--readonly', action='store_true',
-                       help='Run in read-only mode (no edits allowed)')
+    parser.add_argument("--debug", action="store_true",
+                       help="Enable debug mode")
+    parser.add_argument("--readonly", action="store_true",
+                       help="Run in read-only mode (no edits allowed)")
     args = parser.parse_args()
 
     app = create_app()
 
     if args.debug:
-        app.config['DEBUG'] = True
+        app.config["DEBUG"] = True
 
     if args.readonly:
-        app.config['READONLY'] = True
+        app.config["READONLY"] = True
 
     print(f"Starting Barsukas on http://{Config.HOST}:{args.port}")
     print(f"Database: {app.config['DB_PATH']}")
@@ -129,8 +129,8 @@ def main():
         print("Running in READ-ONLY mode - no edits allowed")
     print(f"Press Ctrl+C to stop")
 
-    app.run(host=Config.HOST, port=args.port, debug=app.config['DEBUG'])
+    app.run(host=Config.HOST, port=args.port, debug=app.config["DEBUG"])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

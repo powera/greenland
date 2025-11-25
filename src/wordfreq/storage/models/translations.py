@@ -24,15 +24,15 @@ class TranslationSet:
     def get_translations(self) -> dict:
         """Get a dictionary of available translations."""
         return {
-            'chinese': self.chinese,
-            'french': self.french,
-            'spanish': self.spanish,
-            'german': self.german,
-            'portuguese': self.portuguese,
-            'korean': self.korean,
-            'swahili': self.swahili,
-            'lithuanian': self.lithuanian,
-            'vietnamese': self.vietnamese
+            "chinese": self.chinese,
+            "french": self.french,
+            "spanish": self.spanish,
+            "german": self.german,
+            "portuguese": self.portuguese,
+            "korean": self.korean,
+            "swahili": self.swahili,
+            "lithuanian": self.lithuanian,
+            "vietnamese": self.vietnamese
         }
 
     def has_translation(self, lang: str) -> bool:

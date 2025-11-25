@@ -87,7 +87,7 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
 
     def do_POST(self) -> None:
         """Handle POST requests."""
-        if self.path == '/query':
+        if self.path == "/query":
             self._handle_generation_request()
         else:
             self.send_error(404, "Not Found")
@@ -95,11 +95,11 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
     def _get_normalized_path(self) -> str:
         """Get normalized file path from request path."""
         # Remove query parameters if any
-        path = self.path.split('?')[0]
+        path = self.path.split("?")[0]
         # Convert URL path to filesystem path
-        normalized_path = os.path.normpath(path.lstrip('/'))
+        normalized_path = os.path.normpath(path.lstrip("/"))
         # Ensure the path doesn't try to access parent directories
-        if normalized_path.startswith('..') or '/../' in normalized_path:
+        if normalized_path.startswith("..") or "/../" in normalized_path:
             raise ValueError("Invalid path")
         return normalized_path
 
@@ -107,7 +107,7 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
         """Serve static files."""
         normalized_path = self._get_normalized_path()
         path = os.path.join(constants.VERBALATOR_HTML_DIR, normalized_path)
-        with open(path, mode='rb') as f:
+        with open(path, mode="rb") as f:
             response = f.read()
 
         content_types = {
@@ -128,7 +128,7 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
     def _serve_favicon(self) -> None:
         """Serve favicon.ico."""
         path = os.path.join(constants.VERBALATOR_HTML_DIR, "favicon.ico")
-        with open(path, mode='rb') as f:
+        with open(path, mode="rb") as f:
             response = f.read()
         self._send_response(response, "image/x-icon")
 
@@ -148,20 +148,20 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
         """Handle text generation requests."""
         try:
             # Parse request data
-            content_length = int(self.headers['Content-Length'])
+            content_length = int(self.headers["Content-Length"])
             post_data = self.rfile.read(content_length)
-            data = json.loads(post_data.decode('utf-8'))
+            data = json.loads(post_data.decode("utf-8"))
 
             # Extract parameters
-            prompt = verbalator.prompt_builder.build(data.get('prompt'), data)
+            prompt = verbalator.prompt_builder.build(data.get("prompt"), data)
             if not prompt:
                 raise ValueError("No prompt provided")
 
             # Generate response
             response, usage = GenerationHandler.generate_text(
                 prompt=prompt,
-                entry=data.get('entry'),
-                model=data.get('model', 'phi3:3.8b')
+                entry=data.get("entry"),
+                model=data.get("model", "phi3:3.8b")
             )
 
             # Calculate reading level
@@ -201,15 +201,15 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
         """Send JSON response with CORS headers."""
         response = json.dumps(data).encode()
         self.send_response(200)
-        self.send_header('Content-type', 'application/json')
-        self.send_header('Access-Control-Allow-Origin', '*')
-        self.send_header('Content-length', len(response))
+        self.send_header("Content-type", "application/json")
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Content-length", len(response))
         self.end_headers()
         self.wfile.write(response)
 
 def run(server_class=http.server.HTTPServer, handler_class=RequestHandler) -> None:
     """Run the HTTP server."""
-    server_address = ('', PORT)
+    server_address = ("", PORT)
     httpd = server_class(server_address, handler_class)
     httpd.serve_forever()
 

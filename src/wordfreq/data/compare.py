@@ -8,9 +8,9 @@ from typing import Dict, List, Tuple, Set, Any
 
 def load_frequency_data(file_path: str) -> Dict[str, int]:
     """Load word frequency data from a JSON file."""
-    with open(file_path, 'r', encoding='utf-8') as f:
+    with open(file_path, "r", encoding="utf-8") as f:
         data = json.load(f)
-    return data['global_word_frequency']
+    return data["global_word_frequency"]
 
 def create_rank_dictionary(frequency_dict: Dict[str, int]) -> Dict[str, int]:
     """Convert frequency dictionary to rank dictionary.
@@ -74,16 +74,16 @@ def compare_multiple_ranks(rank_dicts: List[Dict[str, int]], file_names: List[st
 
 def main():
     # Set up argument parser
-    parser = argparse.ArgumentParser(description='Compare word frequency rankings across multiple files')
-    parser.add_argument('files', nargs='+', help='JSON files containing word frequency data')
-    parser.add_argument('--default-rank', type=int, default=6000, 
-                        help='Default rank for words not found in a list (default: 6000)')
-    parser.add_argument('--output', default='rank_changes.txt', 
-                        help='Output file name (default: rank_changes.txt)')
-    parser.add_argument('--top', type=int, default=50, 
-                        help='Number of top results to display (default: 50)')
-    parser.add_argument('--csv', action='store_true',
-                        help='Output results as CSV files')
+    parser = argparse.ArgumentParser(description="Compare word frequency rankings across multiple files")
+    parser.add_argument("files", nargs="+", help="JSON files containing word frequency data")
+    parser.add_argument("--default-rank", type=int, default=6000, 
+                        help="Default rank for words not found in a list (default: 6000)")
+    parser.add_argument("--output", default="rank_changes.txt", 
+                        help="Output file name (default: rank_changes.txt)")
+    parser.add_argument("--top", type=int, default=50, 
+                        help="Number of top results to display (default: 50)")
+    parser.add_argument("--csv", action="store_true",
+                        help="Output results as CSV files")
     args = parser.parse_args()
     
     if len(args.files) < 2:
@@ -166,7 +166,7 @@ def main():
         csv_headers.extend(["Harmonic_Mean", "Max_Diff"])
         
         # Write harmonic mean sorted CSV
-        with open(harmonic_csv, 'w', newline='', encoding='utf-8') as f:
+        with open(harmonic_csv, "w", newline="", encoding="utf-8") as f:
             writer = csv.writer(f)
             writer.writerow(csv_headers)
             
@@ -182,7 +182,7 @@ def main():
                 writer.writerow(row)
         
         # Write max difference sorted CSV
-        with open(diff_csv, 'w', newline='', encoding='utf-8') as f:
+        with open(diff_csv, "w", newline="", encoding="utf-8") as f:
             writer = csv.writer(f)
             writer.writerow(csv_headers)
             
@@ -202,7 +202,7 @@ def main():
         print(f"  - {diff_csv} (sorted by maximum difference)")
     else:
         # Save results to a text file
-        with open(args.output, 'w', encoding='utf-8') as f:
+        with open(args.output, "w", encoding="utf-8") as f:
             f.write("# Words Ranked by Harmonic Mean\n")
             f.write(header + "\n")
             f.write("-" * len(header) + "\n")

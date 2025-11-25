@@ -16,7 +16,7 @@ import constants
 from wordfreq.storage import database as linguistic_db
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 
@@ -85,7 +85,7 @@ def export_wordlist_to_file(
 def main():
     """Main function for command-line usage."""
     parser = argparse.ArgumentParser(
-        description='Export words from wordfreq database to a flat file in frequency order',
+        description="Export words from wordfreq database to a flat file in frequency order",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
@@ -107,33 +107,33 @@ Examples:
     )
     
     parser.add_argument(
-        '--output', '-o',
+        "--output", "-o",
         type=str,
-        help='Output file path (default: stdout)'
+        help="Output file path (default: stdout)"
     )
     
     parser.add_argument(
-        '--limit', '-l',
+        "--limit", "-l",
         type=int,
-        help='Maximum number of words to export (default: all words)'
+        help="Maximum number of words to export (default: all words)"
     )
     
     parser.add_argument(
-        '--include-rank', '-r',
-        action='store_true',
-        help='Include frequency rank as first column'
+        "--include-rank", "-r",
+        action="store_true",
+        help="Include frequency rank as first column"
     )
     
     parser.add_argument(
-        '--include-frequency', '-f',
-        action='store_true',
-        help='Include frequency value as additional column'
+        "--include-frequency", "-f",
+        action="store_true",
+        help="Include frequency value as additional column"
     )
     
     parser.add_argument(
-        '--db-path',
+        "--db-path",
         type=str,
-        help='Path to database file (optional, uses default from constants)'
+        help="Path to database file (optional, uses default from constants)"
     )
     
     args = parser.parse_args()
@@ -144,7 +144,7 @@ Examples:
     # Open output file or use stdout
     if args.output:
         try:
-            with open(args.output, 'w', encoding='utf-8') as f:
+            with open(args.output, "w", encoding="utf-8") as f:
                 count = export_wordlist_to_file(
                     f, 
                     db_path=db_path,
@@ -167,5 +167,5 @@ Examples:
         logger.info(f"Exported {count} words to stdout")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

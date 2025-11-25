@@ -35,7 +35,7 @@ from wordfreq.storage.connection_pool import get_session
 from wordfreq.storage.models.schema import WordToken, Lemma, DerivativeForm
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 
@@ -218,7 +218,7 @@ class PovasAgent:
             }
 
         # Load template
-        template = env.get_template('pos_index.html')
+        template = env.get_template("pos_index.html")
 
         # Render template
         html = template.render(
@@ -267,7 +267,7 @@ class PovasAgent:
         sorted_subtypes = sorted(subtype_stats.items(), key=lambda x: x[1]["word_count"], reverse=True)
 
         # Load template
-        template = env.get_template('pos_type.html')
+        template = env.get_template("pos_type.html")
 
         # Render template
         html = template.render(
@@ -295,7 +295,7 @@ class PovasAgent:
             words: List of words for this subtype
         """
         # Load template
-        template = env.get_template('pos_subtype.html')
+        template = env.get_template("pos_subtype.html")
 
         # Render template
         html = template.render(
@@ -411,10 +411,10 @@ def main():
     parser = argparse.ArgumentParser(
         description="Povas - HTML Generation Agent for POS Subtypes"
     )
-    parser.add_argument('--db-path', help='Database path (uses default if not specified)')
-    parser.add_argument('--debug', action='store_true', help='Enable debug logging')
-    parser.add_argument('--index-only', action='store_true',
-                        help='Generate only the index page')
+    parser.add_argument("--db-path", help="Database path (uses default if not specified)")
+    parser.add_argument("--debug", action="store_true", help="Enable debug logging")
+    parser.add_argument("--index-only", action="store_true",
+                        help="Generate only the index page")
 
     args = parser.parse_args()
 
@@ -430,5 +430,5 @@ def main():
     logger.info(f"HTML generation complete. Files written to: {agent.POS_SUBTYPE_DIR}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

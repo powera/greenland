@@ -18,7 +18,7 @@ from typing import Dict, List, Any, Optional, Tuple
 import sys
 
 # Add the src directory to the path for imports
-GREENLAND_SRC_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..'))
+GREENLAND_SRC_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.."))
 sys.path.append(GREENLAND_SRC_PATH)
 
 import constants
@@ -43,37 +43,37 @@ class TrakaidoExporter:
 
     # Language configuration mapping
     LANGUAGE_CONFIG = {
-        'lt': {
-            'name': 'Lithuanian',
-            'field': 'lithuanian_translation'
+        "lt": {
+            "name": "Lithuanian",
+            "field": "lithuanian_translation"
         },
-        'zh': {
-            'name': 'Chinese',
-            'field': 'chinese_translation'
+        "zh": {
+            "name": "Chinese",
+            "field": "chinese_translation"
         },
-        'ko': {
-            'name': 'Korean',
-            'field': 'korean_translation'
+        "ko": {
+            "name": "Korean",
+            "field": "korean_translation"
         },
-        'fr': {
-            'name': 'French',
-            'field': 'french_translation'
+        "fr": {
+            "name": "French",
+            "field": "french_translation"
         },
-        'es': {
-            'name': 'Spanish',
-            'field': 'spanish_translation'
+        "es": {
+            "name": "Spanish",
+            "field": "spanish_translation"
         },
-        'de': {
-            'name': 'German',
-            'field': 'german_translation'
+        "de": {
+            "name": "German",
+            "field": "german_translation"
         },
-        'pt': {
-            'name': 'Portuguese',
-            'field': 'portuguese_translation'
+        "pt": {
+            "name": "Portuguese",
+            "field": "portuguese_translation"
         }
     }
 
-    def __init__(self, db_path: str = None, debug: bool = False, language: str = 'lt', simplified_chinese: bool = True):
+    def __init__(self, db_path: str = None, debug: bool = False, language: str = "lt", simplified_chinese: bool = True):
         """
         Initialize the TrakaidoExporter.
 
@@ -91,8 +91,8 @@ class TrakaidoExporter:
         if language not in self.LANGUAGE_CONFIG:
             raise ValueError(f"Unsupported language: {language}. Supported: {', '.join(self.LANGUAGE_CONFIG.keys())}")
 
-        self.language_name = self.LANGUAGE_CONFIG[language]['name']
-        self.language_field = self.LANGUAGE_CONFIG[language]['field']
+        self.language_name = self.LANGUAGE_CONFIG[language]["name"]
+        self.language_field = self.LANGUAGE_CONFIG[language]["field"]
 
         if debug:
             logger.setLevel(logging.DEBUG)
@@ -158,7 +158,7 @@ class TrakaidoExporter:
 
         # Build the query
         query = session.query(Lemma)\
-            .filter(Lemma.pos_type != 'verb')  # Exclude verbs - they go in separate file
+            .filter(Lemma.pos_type != "verb")  # Exclude verbs - they go in separate file
 
         # For column-based translations, we can filter in SQL
         if not use_translation_table:
@@ -250,7 +250,7 @@ class TrakaidoExporter:
             target_translation = get_translation(session, lemma, self.language)
 
             # For Chinese, optionally convert to simplified
-            if self.language == 'zh' and self.simplified_chinese and target_translation:
+            if self.language == "zh" and self.simplified_chinese and target_translation:
                 target_translation = to_simplified(target_translation)
 
             # Create the export entry with standardized key names
@@ -297,20 +297,20 @@ class TrakaidoExporter:
             # Ensure the directory exists
             os.makedirs(os.path.dirname(output_path), exist_ok=True)
             
-            with open(output_path, 'w', encoding='utf-8') as f:
+            with open(output_path, "w", encoding="utf-8") as f:
                 if pretty_print:
                     # Write with nice formatting, one entry per line
-                    f.write('[\n')
+                    f.write("[\n")
                     for i, entry in enumerate(data):
-                        line = json.dumps(entry, ensure_ascii=False, separators=(', ', ': '))
+                        line = json.dumps(entry, ensure_ascii=False, separators=(", ", ": "))
                         if i < len(data) - 1:
                             f.write(f'  {line},\n')
                         else:
                             f.write(f'  {line}\n')
-                    f.write(']\n')
+                    f.write("]\n")
                 else:
                     # Compact format
-                    json.dump(data, f, ensure_ascii=False, separators=(',', ':'))
+                    json.dump(data, f, ensure_ascii=False, separators=(",", ":"))
             
             # Calculate statistics
             stats = create_export_stats(data)
@@ -431,16 +431,16 @@ class TrakaidoExporter:
                 # Ensure the directory exists
                 os.makedirs(os.path.dirname(output_path), exist_ok=True)
                 
-                with open(output_path, 'w', encoding='utf-8') as f:
+                with open(output_path, "w", encoding="utf-8") as f:
                     # Write as JSON array with nice formatting
-                    f.write('[\n')
+                    f.write("[\n")
                     for i, entry in enumerate(text_data):
-                        line = json.dumps(entry, ensure_ascii=False, separators=(', ', ': '))
+                        line = json.dumps(entry, ensure_ascii=False, separators=(", ", ": "))
                         if i < len(text_data) - 1:
                             f.write(f'  {line},\n')
                         else:
                             f.write(f'  {line}\n')
-                    f.write(']\n')
+                    f.write("]\n")
                 
                 # Calculate statistics from original data
                 stats = create_export_stats(export_data)
@@ -508,10 +508,10 @@ class TrakaidoExporter:
             session.close()
             
             results = {
-                'levels_generated': levels_generated,
-                'dictionaries_generated': dictionaries_generated,
-                'output_directory': output_dir,
-                'export_time': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                "levels_generated": levels_generated,
+                "dictionaries_generated": dictionaries_generated,
+                "output_directory": output_dir,
+                "export_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             }
             
             success = len(levels_generated) > 0 or len(dictionaries_generated) > 0
@@ -528,7 +528,7 @@ class TrakaidoExporter:
             
         except Exception as e:
             logger.error(f"Error exporting to lang_lt: {e}")
-            return False, {'error': str(e)}
+            return False, {"error": str(e)}
 
     def export_all_text_files(self, lang_lt_dir: str) -> Tuple[bool, Dict[str, Any]]:
         """
@@ -549,12 +549,12 @@ class TrakaidoExporter:
 
             subtypes_query = session.query(
                 Lemma.pos_subtype,
-                func.count(Lemma.id).label('count')
+                func.count(Lemma.id).label("count")
             ).filter(
                 Lemma.pos_subtype.isnot(None),
-                Lemma.pos_subtype != '',
+                Lemma.pos_subtype != "",
                 Lemma.lithuanian_translation.isnot(None),
-                Lemma.lithuanian_translation != ''
+                Lemma.lithuanian_translation != ""
             ).group_by(
                 Lemma.pos_subtype
             ).order_by(
@@ -565,19 +565,19 @@ class TrakaidoExporter:
 
             if not subtypes_data:
                 logger.warning("No subtypes found for text export")
-                return False, {'subtypes_exported': [], 'files_created': []}
+                return False, {"subtypes_exported": [], "files_created": []}
 
             logger.info(f"Found {len(subtypes_data)} subtypes to export")
 
             # Create the simple directory
-            simple_dir = os.path.join(lang_lt_dir, 'simple')
+            simple_dir = os.path.join(lang_lt_dir, "simple")
             os.makedirs(simple_dir, exist_ok=True)
 
             results = {
-                'subtypes_exported': [],
-                'files_created': [],
-                'failed_exports': [],
-                'total_entries': 0
+                "subtypes_exported": [],
+                "files_created": [],
+                "failed_exports": [],
+                "total_entries": 0
             }
 
             # Export each subtype
@@ -597,22 +597,22 @@ class TrakaidoExporter:
                 )
 
                 if success and stats:
-                    results['subtypes_exported'].append({
-                        'subtype': subtype,
-                        'count': stats.total_entries,
-                        'entries_with_guids': stats.entries_with_guids,
-                        'filename': filename
+                    results["subtypes_exported"].append({
+                        "subtype": subtype,
+                        "count": stats.total_entries,
+                        "entries_with_guids": stats.entries_with_guids,
+                        "filename": filename
                     })
-                    results['files_created'].append(output_path)
-                    results['total_entries'] += stats.total_entries
+                    results["files_created"].append(output_path)
+                    results["total_entries"] += stats.total_entries
                     logger.info(f"✅ Exported {stats.total_entries} entries for '{subtype}' to {filename}")
                 else:
-                    results['failed_exports'].append(subtype)
+                    results["failed_exports"].append(subtype)
                     logger.error(f"❌ Failed to export subtype '{subtype}'")
 
             # Summary
-            successful_count = len(results['subtypes_exported'])
-            failed_count = len(results['failed_exports'])
+            successful_count = len(results["subtypes_exported"])
+            failed_count = len(results["failed_exports"])
 
             if successful_count > 0:
                 logger.info(f"✅ Text export completed: {successful_count} subtypes exported, {results['total_entries']} total entries")
@@ -628,7 +628,7 @@ class TrakaidoExporter:
 
         except Exception as e:
             logger.error(f"Error during text export: {e}")
-            return False, {'error': str(e), 'subtypes_exported': [], 'files_created': []}
+            return False, {"error": str(e), "subtypes_exported": [], "files_created": []}
         finally:
             session.close()
 
@@ -690,35 +690,35 @@ class TrakaidoExporter:
             wireword_dir_success, wireword_dir_results = self.export_wireword_directory(lang_lt_dir)
         
         results = {
-            'json_export': {
-                'success': json_success,
-                'stats': json_stats,
-                'path': json_path
+            "json_export": {
+                "success": json_success,
+                "stats": json_stats,
+                "path": json_path
             },
-            'lang_lt_export': {
-                'success': lang_lt_success,
-                'results': lang_lt_results,
-                'directory': lang_lt_dir
+            "lang_lt_export": {
+                "success": lang_lt_success,
+                "results": lang_lt_results,
+                "directory": lang_lt_dir
             },
-            'text_export': {
-                'success': text_success,
-                'results': text_results,
-                'directory': f"{lang_lt_dir}/simple"
+            "text_export": {
+                "success": text_success,
+                "results": text_results,
+                "directory": f"{lang_lt_dir}/simple"
             },
-            'wireword_directory_export': {
-                'success': wireword_dir_success,
-                'results': wireword_dir_results,
-                'directory': f"{lang_lt_dir}/wireword"
+            "wireword_directory_export": {
+                "success": wireword_dir_success,
+                "results": wireword_dir_results,
+                "directory": f"{lang_lt_dir}/wireword"
             },
-            'overall_success': json_success and lang_lt_success and text_success and wireword_success and wireword_dir_success,
-            'export_time': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            "overall_success": json_success and lang_lt_success and text_success and wireword_success and wireword_dir_success,
+            "export_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         }
         
         if wireword_path:
-            results['wireword_export'] = {
-                'success': wireword_success,
-                'stats': wireword_stats,
-                'path': wireword_path
+            results["wireword_export"] = {
+                "success": wireword_success,
+                "stats": wireword_stats,
+                "path": wireword_path
             }
         
         # Update success tracking
@@ -764,7 +764,7 @@ class TrakaidoExporter:
             else:
                 logger.warning(f"⚠️  {', '.join(successful_exports)} export(s) succeeded, but {', '.join(failed_exports)} export(s) failed")
         
-        return results['overall_success'], results
+        return results["overall_success"], results
 
 def export_trakaido_data(
     session, 

@@ -34,7 +34,7 @@ from agents.dramblys import staging
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -87,7 +87,7 @@ class DramblysAgent:
 
             # Also get all English derivative forms
             english_forms = session.query(DerivativeForm).filter(
-                DerivativeForm.language_code == 'en'
+                DerivativeForm.language_code == "en"
             ).all()
             for form in english_forms:
                 existing_lemmas.add(form.derivative_form_text.lower())
@@ -95,7 +95,7 @@ class DramblysAgent:
             # Get excluded words (words we've decided not to import)
             excluded_words = set()
             exclusions = session.query(WordExclusion).filter(
-                WordExclusion.language_code == 'en'
+                WordExclusion.language_code == "en"
             ).all()
             for exclusion in exclusions:
                 excluded_words.add(exclusion.excluded_word.lower())
@@ -105,7 +105,7 @@ class DramblysAgent:
 
             # Get high-frequency words from word_tokens
             high_freq_tokens = session.query(WordToken).filter(
-                WordToken.language_code == 'en',
+                WordToken.language_code == "en",
                 WordToken.frequency_rank.isnot(None),
                 WordToken.frequency_rank >= min_rank
             ).order_by(WordToken.frequency_rank).limit(top_n).all()
@@ -142,33 +142,33 @@ class DramblysAgent:
                     ).first()
                     if corpus:
                         corpus_info.append({
-                            'corpus': corpus.name,
-                            'rank': freq.rank,
-                            'frequency': freq.frequency
+                            "corpus": corpus.name,
+                            "rank": freq.rank,
+                            "frequency": freq.frequency
                         })
 
                 missing_words.append({
-                    'word': word,
-                    'overall_rank': token.frequency_rank,
-                    'corpus_frequencies': corpus_info
+                    "word": word,
+                    "overall_rank": token.frequency_rank,
+                    "corpus_frequencies": corpus_info
                 })
 
             logger.info(f"Found {len(missing_words)} high-frequency missing words")
 
             return {
-                'total_checked': len(high_freq_tokens),
-                'missing_count': len(missing_words),
-                'missing_words': missing_words,
-                'existing_word_count': len(existing_lemmas)
+                "total_checked": len(high_freq_tokens),
+                "missing_count": len(missing_words),
+                "missing_words": missing_words,
+                "existing_word_count": len(existing_lemmas)
             }
 
         except Exception as e:
             logger.error(f"Error checking high-frequency missing words: {e}")
             return {
-                'error': str(e),
-                'total_checked': 0,
-                'missing_count': 0,
-                'missing_words': []
+                "error": str(e),
+                "total_checked": 0,
+                "missing_count": 0,
+                "missing_words": []
             }
         finally:
             session.close()
@@ -186,7 +186,7 @@ class DramblysAgent:
         try:
             # Get all English derivative forms
             derivative_forms = session.query(DerivativeForm).filter(
-                DerivativeForm.language_code == 'en'
+                DerivativeForm.language_code == "en"
             ).all()
 
             logger.info(f"Found {len(derivative_forms)} English derivative forms")
@@ -202,27 +202,27 @@ class DramblysAgent:
             for form in derivative_forms:
                 if form.lemma_id not in existing_lemma_ids:
                     orphaned_forms.append({
-                        'derivative_form_id': form.id,
-                        'word': form.derivative_form_text,
-                        'grammatical_form': form.grammatical_form,
-                        'lemma_id': form.lemma_id
+                        "derivative_form_id": form.id,
+                        "word": form.derivative_form_text,
+                        "grammatical_form": form.grammatical_form,
+                        "lemma_id": form.lemma_id
                     })
 
             logger.info(f"Found {len(orphaned_forms)} orphaned derivative forms")
 
             return {
-                'total_forms_checked': len(derivative_forms),
-                'orphaned_count': len(orphaned_forms),
-                'orphaned_forms': orphaned_forms
+                "total_forms_checked": len(derivative_forms),
+                "orphaned_count": len(orphaned_forms),
+                "orphaned_forms": orphaned_forms
             }
 
         except Exception as e:
             logger.error(f"Error checking orphaned derivative forms: {e}")
             return {
-                'error': str(e),
-                'total_forms_checked': 0,
-                'orphaned_count': 0,
-                'orphaned_forms': []
+                "error": str(e),
+                "total_forms_checked": 0,
+                "orphaned_count": 0,
+                "orphaned_forms": []
             }
         finally:
             session.close()
@@ -247,10 +247,10 @@ class DramblysAgent:
             subtype_counts = session.query(
                 Lemma.pos_type,
                 Lemma.pos_subtype,
-                func.count(Lemma.id).label('count')
+                func.count(Lemma.id).label("count")
             ).filter(
                 Lemma.pos_subtype.isnot(None),
-                Lemma.pos_subtype != ''
+                Lemma.pos_subtype != ""
             ).group_by(
                 Lemma.pos_type,
                 Lemma.pos_subtype
@@ -264,9 +264,9 @@ class DramblysAgent:
 
             for pos_type, pos_subtype, count in subtype_counts:
                 entry = {
-                    'pos_type': pos_type,
-                    'pos_subtype': pos_subtype,
-                    'count': count
+                    "pos_type": pos_type,
+                    "pos_subtype": pos_subtype,
+                    "count": count
                 }
 
                 if count >= min_expected:
@@ -275,29 +275,29 @@ class DramblysAgent:
                     under_covered.append(entry)
 
             # Sort under-covered by count (ascending)
-            under_covered.sort(key=lambda x: x['count'])
+            under_covered.sort(key=lambda x: x["count"])
 
             logger.info(f"Well-covered subtypes: {len(well_covered)}")
             logger.info(f"Under-covered subtypes: {len(under_covered)}")
 
             return {
-                'total_subtypes': len(subtype_counts),
-                'well_covered_count': len(well_covered),
-                'under_covered_count': len(under_covered),
-                'well_covered': well_covered,
-                'under_covered': under_covered,
-                'min_expected_threshold': min_expected
+                "total_subtypes": len(subtype_counts),
+                "well_covered_count": len(well_covered),
+                "under_covered_count": len(under_covered),
+                "well_covered": well_covered,
+                "under_covered": under_covered,
+                "min_expected_threshold": min_expected
             }
 
         except Exception as e:
             logger.error(f"Error checking subtype coverage: {e}")
             return {
-                'error': str(e),
-                'total_subtypes': 0,
-                'well_covered_count': 0,
-                'under_covered_count': 0,
-                'well_covered': [],
-                'under_covered': []
+                "error": str(e),
+                "total_subtypes": 0,
+                "well_covered_count": 0,
+                "under_covered_count": 0,
+                "well_covered": [],
+                "under_covered": []
             }
         finally:
             session.close()
@@ -307,7 +307,7 @@ class DramblysAgent:
         pos_type: str,
         pos_subtype: str,
         top_n: int = 250,
-        model: str = 'gpt-5-mini'
+        model: str = "gpt-5-mini"
     ) -> Dict[str, any]:
         """
         Use LLM to identify which high-frequency words have meanings in a specific POS subtype.
@@ -327,7 +327,7 @@ class DramblysAgent:
         try:
             # Get all high-frequency tokens (we'll filter to top N after removing stopwords/existing)
             all_tokens = session.query(WordToken).filter(
-                WordToken.language_code == 'en',
+                WordToken.language_code == "en",
                 WordToken.frequency_rank.isnot(None)
             ).order_by(WordToken.frequency_rank).all()
 
@@ -380,7 +380,7 @@ class DramblysAgent:
             prompt = f"""Review this list of high-frequency English words and identify which ones have at least one meaning that fits the category: {pos_type} / {pos_subtype}.
 
 Word list:
-{', '.join(word_list[:100])}
+{", ".join(word_list[:100])}
 
 For each word that has a meaning in this category, provide:
 1. The word
@@ -396,35 +396,35 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
                 json_schema=schema
             )
 
-            if response.structured_data and 'matches' in response.structured_data:
-                matches = response.structured_data['matches']
+            if response.structured_data and "matches" in response.structured_data:
+                matches = response.structured_data["matches"]
                 logger.info(f"Found {len(matches)} words with {pos_type}/{pos_subtype} meanings")
 
                 return {
-                    'pos_type': pos_type,
-                    'pos_subtype': pos_subtype,
-                    'total_words_reviewed': len(word_list),
-                    'matches_found': len(matches),
-                    'matches': matches
+                    "pos_type": pos_type,
+                    "pos_subtype": pos_subtype,
+                    "total_words_reviewed": len(word_list),
+                    "matches_found": len(matches),
+                    "matches": matches
                 }
             else:
                 logger.error("Invalid response from LLM")
                 return {
-                    'error': 'Invalid LLM response',
-                    'pos_type': pos_type,
-                    'pos_subtype': pos_subtype,
-                    'matches_found': 0,
-                    'matches': []
+                    "error": "Invalid LLM response",
+                    "pos_type": pos_type,
+                    "pos_subtype": pos_subtype,
+                    "matches_found": 0,
+                    "matches": []
                 }
 
         except Exception as e:
             logger.error(f"Error finding words for subtype: {e}")
             return {
-                'error': str(e),
-                'pos_type': pos_type,
-                'pos_subtype': pos_subtype,
-                'matches_found': 0,
-                'matches': []
+                "error": str(e),
+                "pos_type": pos_type,
+                "pos_subtype": pos_subtype,
+                "matches_found": 0,
+                "matches": []
             }
         finally:
             session.close()
@@ -434,11 +434,11 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
         pos_type: str,
         pos_subtype: str,
         top_n: int = 250,
-        model: str = 'gpt-5-mini',
+        model: str = "gpt-5-mini",
         throttle: float = 1.0,
         dry_run: bool = False,
         stage_only: bool = False,
-        target_language: str = 'lt'
+        target_language: str = "lt"
     ) -> Dict[str, any]:
         """
         Find and add words for a specific POS subtype.
@@ -461,10 +461,10 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
         # Find matching words
         find_results = self.find_words_for_subtype(pos_type, pos_subtype, top_n, model)
 
-        if 'error' in find_results:
+        if "error" in find_results:
             return find_results
 
-        matches = find_results['matches']
+        matches = find_results["matches"]
 
         if dry_run:
             logger.info(f"DRY RUN: Would {'stage' if stage_only else 'add'} {len(matches)} words:")
@@ -473,12 +473,12 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
             if len(matches) > 20:
                 logger.info(f"  ... and {len(matches) - 20} more")
             return {
-                'pos_type': pos_type,
-                'pos_subtype': pos_subtype,
-                'would_add': len(matches),
-                'dry_run': True,
-                'stage_only': stage_only,
-                'sample': matches[:20]
+                "pos_type": pos_type,
+                "pos_subtype": pos_subtype,
+                "would_add": len(matches),
+                "dry_run": True,
+                "stage_only": stage_only,
+                "sample": matches[:20]
             }
 
         # Process each matched word
@@ -491,15 +491,15 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
         staged = 0
 
         for i, match in enumerate(matches, 1):
-            word = match['word']
-            target_definition = match['definition']
+            word = match["word"]
+            target_definition = match["definition"]
 
             logger.info(f"[{i}/{len(matches)}] {'Staging' if stage_only else 'Processing'} '{word}' for {pos_type}/{pos_subtype}")
 
             # Check if this word already has this specific meaning
             word_token = session.query(WordToken).filter(
                 WordToken.token == word,
-                WordToken.language_code == 'en'
+                WordToken.language_code == "en"
             ).first()
 
             if word_token:
@@ -534,11 +534,11 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
                 # Get translation from LinguisticClient
                 try:
                     word_data = client.get_word_definitions(word)
-                    translation = ''
-                    if word_data and 'definitions' in word_data:
-                        for defn in word_data['definitions']:
-                            if defn.get('pos_type') == pos_type and defn.get('pos_subtype') == pos_subtype:
-                                translation = defn.get('translations', {}).get(target_language, '')
+                    translation = ""
+                    if word_data and "definitions" in word_data:
+                        for defn in word_data["definitions"]:
+                            if defn.get("pos_type") == pos_type and defn.get("pos_subtype") == pos_subtype:
+                                translation = defn.get("translations", {}).get(target_language, "")
                                 break
 
                     if not translation:
@@ -589,19 +589,19 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
         logger.info(f"  Skipped (already exist): {skipped}")
 
         result = {
-            'pos_type': pos_type,
-            'pos_subtype': pos_subtype,
-            'matches_found': len(matches),
-            'failed': failed,
-            'skipped': skipped,
-            'dry_run': dry_run,
-            'stage_only': stage_only
+            "pos_type": pos_type,
+            "pos_subtype": pos_subtype,
+            "matches_found": len(matches),
+            "failed": failed,
+            "skipped": skipped,
+            "dry_run": dry_run,
+            "stage_only": stage_only
         }
 
         if stage_only:
-            result['staged'] = staged
+            result["staged"] = staged
         else:
-            result['successful'] = successful
+            result["successful"] = successful
 
         return result
 
@@ -621,7 +621,7 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
             # Get counts by difficulty level
             level_counts = session.query(
                 Lemma.difficulty_level,
-                func.count(Lemma.id).label('count')
+                func.count(Lemma.id).label("count")
             ).filter(
                 Lemma.difficulty_level.isnot(None),
                 Lemma.guid.isnot(None)  # Only count trakaido words
@@ -649,9 +649,9 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
                     gaps.append(level)
                 elif avg_per_level > 0 and count < avg_per_level * 0.5:
                     imbalanced.append({
-                        'level': level,
-                        'count': count,
-                        'expected_avg': avg_per_level
+                        "level": level,
+                        "count": count,
+                        "expected_avg": avg_per_level
                     })
 
             logger.info(f"Total trakaido words: {total_words}")
@@ -659,21 +659,21 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
             logger.info(f"Imbalanced levels: {len(imbalanced)}")
 
             return {
-                'total_words': total_words,
-                'distribution': distribution,
-                'average_per_level': avg_per_level,
-                'gaps': gaps,
-                'imbalanced': imbalanced
+                "total_words": total_words,
+                "distribution": distribution,
+                "average_per_level": avg_per_level,
+                "gaps": gaps,
+                "imbalanced": imbalanced
             }
 
         except Exception as e:
             logger.error(f"Error checking difficulty level distribution: {e}")
             return {
-                'error': str(e),
-                'total_words': 0,
-                'distribution': {},
-                'gaps': [],
-                'imbalanced': []
+                "error": str(e),
+                "total_words": 0,
+                "distribution": {},
+                "gaps": [],
+                "imbalanced": []
             }
         finally:
             session.close()
@@ -682,10 +682,10 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
         self,
         top_n: int = 5000,
         limit: Optional[int] = None,
-        model: str = 'gpt-5-mini',
+        model: str = "gpt-5-mini",
         throttle: float = 1.0,
         dry_run: bool = False,
-        target_language: str = 'lt'
+        target_language: str = "lt"
     ) -> Dict[str, any]:
         """
         Stage high-frequency missing words to the pending_imports table.
@@ -706,10 +706,10 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
         # Get missing words check results
         check_results = self.check_high_frequency_missing_words(top_n=top_n)
 
-        if 'error' in check_results:
+        if "error" in check_results:
             return check_results
 
-        missing_words = check_results['missing_words']
+        missing_words = check_results["missing_words"]
         session = self.get_session()
 
         try:
@@ -731,7 +731,7 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
         self,
         top_n: int = 5000,
         limit: Optional[int] = None,
-        model: str = 'gpt-5-mini',
+        model: str = "gpt-5-mini",
         throttle: float = 1.0,
         dry_run: bool = False
     ) -> Dict[str, any]:
@@ -753,20 +753,20 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
         # Get missing words check results
         check_results = self.check_high_frequency_missing_words(top_n=top_n)
 
-        if 'error' in check_results:
+        if "error" in check_results:
             return check_results
 
-        missing_words = check_results['missing_words']
+        missing_words = check_results["missing_words"]
         total_missing = len(missing_words)
 
         if total_missing == 0:
             logger.info("No high-frequency missing words found!")
             return {
-                'total_missing': 0,
-                'processed': 0,
-                'successful': 0,
-                'failed': 0,
-                'dry_run': dry_run
+                "total_missing": 0,
+                "processed": 0,
+                "successful": 0,
+                "failed": 0,
+                "dry_run": dry_run
             }
 
         logger.info(f"Found {total_missing} high-frequency missing words")
@@ -781,15 +781,15 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
         if dry_run:
             logger.info(f"DRY RUN: Would process {len(words_to_process)} words:")
             for word_info in words_to_process[:20]:
-                corpus_str = ", ".join([f"{c['corpus']}:{c['rank']}" for c in word_info['corpus_frequencies'][:2]])
+                corpus_str = ", ".join([f"{c['corpus']}:{c['rank']}" for c in word_info["corpus_frequencies"][:2]])
                 logger.info(f"  - '{word_info['word']}' (overall rank: {word_info['overall_rank']}, {corpus_str})")
             if len(words_to_process) > 20:
                 logger.info(f"  ... and {len(words_to_process) - 20} more")
             return {
-                'total_missing': total_missing,
-                'would_process': len(words_to_process),
-                'dry_run': True,
-                'sample': words_to_process[:20]
+                "total_missing": total_missing,
+                "would_process": len(words_to_process),
+                "dry_run": True,
+                "sample": words_to_process[:20]
             }
 
         # Initialize client for LLM-based processing
@@ -800,7 +800,7 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
         failed = 0
 
         for i, word_info in enumerate(words_to_process, 1):
-            word = word_info['word']
+            word = word_info["word"]
             logger.info(f"\n[{i}/{len(words_to_process)}] Processing: '{word}' (rank: {word_info['overall_rank']})")
 
             success = client.process_word(word, refresh=False)
@@ -825,11 +825,11 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
         logger.info(f"{'='*60}")
 
         return {
-            'total_missing': total_missing,
-            'processed': len(words_to_process),
-            'successful': successful,
-            'failed': failed,
-            'dry_run': dry_run
+            "total_missing": total_missing,
+            "processed": len(words_to_process),
+            "successful": successful,
+            "failed": failed,
+            "dry_run": dry_run
         }
 
     def list_pending_imports(
@@ -848,7 +848,7 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
     def approve_pending_import(
         self,
         pending_import_id: int,
-        model: str = 'gpt-5-mini'
+        model: str = "gpt-5-mini"
     ) -> Dict[str, any]:
         """Delegate to staging module."""
         session = self.get_session()
@@ -862,7 +862,7 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
     def reject_pending_import(
         self,
         pending_import_id: int,
-        reason: str = 'manual_rejection',
+        reason: str = "manual_rejection",
         add_to_exclusions: bool = True
     ) -> Dict[str, any]:
         """Delegate to staging module."""
@@ -895,23 +895,23 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
         start_time = datetime.now()
 
         results = {
-            'timestamp': start_time.isoformat(),
-            'database_path': self.db_path,
-            'checks': {
-                'high_frequency_missing': self.check_high_frequency_missing_words(
+            "timestamp": start_time.isoformat(),
+            "database_path": self.db_path,
+            "checks": {
+                "high_frequency_missing": self.check_high_frequency_missing_words(
                     top_n=top_n_frequency
                 ),
-                'orphaned_forms': self.check_orphaned_derivative_forms(),
-                'subtype_coverage': self.check_subtype_coverage(
+                "orphaned_forms": self.check_orphaned_derivative_forms(),
+                "subtype_coverage": self.check_subtype_coverage(
                     min_expected=min_subtype_count
                 ),
-                'difficulty_distribution': self.check_difficulty_level_distribution()
+                "difficulty_distribution": self.check_difficulty_level_distribution()
             }
         }
 
         end_time = datetime.now()
         duration = (end_time - start_time).total_seconds()
-        results['duration_seconds'] = duration
+        results["duration_seconds"] = duration
 
         # Print summary
         self._print_summary(results, start_time, duration)
@@ -920,7 +920,7 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
         if output_file:
             import json
             try:
-                with open(output_file, 'w', encoding='utf-8') as f:
+                with open(output_file, "w", encoding="utf-8") as f:
                     json.dump(results, f, indent=2, ensure_ascii=False)
                 logger.info(f"Report written to: {output_file}")
             except Exception as e:
@@ -936,12 +936,12 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
         print(f"  Missing words found: {freq_check['missing_count']}")
         print(f"  Existing words in database: {freq_check.get('existing_word_count', 'N/A')}")
 
-        if freq_check['missing_count'] > 0:
+        if freq_check["missing_count"] > 0:
             print(f"\n  Top {min(max_words, freq_check['missing_count'])} missing by rank:")
-            for i, word_info in enumerate(freq_check['missing_words'][:max_words], 1):
+            for i, word_info in enumerate(freq_check["missing_words"][:max_words], 1):
                 corpus_str = ", ".join([
                     f"{c['corpus']}:{c['rank']}"
-                    for c in word_info.get('corpus_frequencies', [])[:2]
+                    for c in word_info.get("corpus_frequencies", [])[:2]
                 ])
                 print(f"    {i}. '{word_info['word']}' (rank: {word_info['overall_rank']}) [{corpus_str}]")
         print(f"{'='*80}\n")
@@ -956,51 +956,51 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
         logger.info("")
 
         # High-frequency missing words
-        if 'high_frequency_missing' in results['checks']:
-            freq_check = results['checks']['high_frequency_missing']
+        if "high_frequency_missing" in results["checks"]:
+            freq_check = results["checks"]["high_frequency_missing"]
             logger.info(f"HIGH-FREQUENCY MISSING WORDS:")
             logger.info(f"  Frequency tokens checked: {freq_check['total_checked']}")
             logger.info(f"  Missing words found: {freq_check['missing_count']}")
             logger.info(f"  Existing words in database: {freq_check.get('existing_word_count', 'N/A')}")
-            if freq_check['missing_count'] > 0:
+            if freq_check["missing_count"] > 0:
                 logger.info(f"  Top 10 missing by rank:")
-                for i, word_info in enumerate(freq_check['missing_words'][:10], 1):
+                for i, word_info in enumerate(freq_check["missing_words"][:10], 1):
                     logger.info(f"    {i}. '{word_info['word']}' (rank: {word_info['overall_rank']})")
             logger.info("")
 
         # Orphaned forms
-        if 'orphaned_forms' in results['checks']:
-            orphan_check = results['checks']['orphaned_forms']
+        if "orphaned_forms" in results["checks"]:
+            orphan_check = results["checks"]["orphaned_forms"]
             logger.info(f"ORPHANED DERIVATIVE FORMS:")
             logger.info(f"  Total forms checked: {orphan_check['total_forms_checked']}")
             logger.info(f"  Orphaned forms: {orphan_check['orphaned_count']}")
             logger.info("")
 
         # Subtype coverage
-        if 'subtype_coverage' in results['checks']:
-            subtype_check = results['checks']['subtype_coverage']
+        if "subtype_coverage" in results["checks"]:
+            subtype_check = results["checks"]["subtype_coverage"]
             logger.info(f"POS SUBTYPE COVERAGE:")
             logger.info(f"  Total subtypes: {subtype_check['total_subtypes']}")
             logger.info(f"  Well-covered: {subtype_check['well_covered_count']}")
             logger.info(f"  Under-covered: {subtype_check['under_covered_count']}")
-            if subtype_check['under_covered_count'] > 0:
+            if subtype_check["under_covered_count"] > 0:
                 logger.info(f"  Most under-covered subtypes:")
-                for i, subtype in enumerate(subtype_check['under_covered'][:5], 1):
+                for i, subtype in enumerate(subtype_check["under_covered"][:5], 1):
                     logger.info(f"    {i}. {subtype['pos_subtype']} ({subtype['pos_type']}): {subtype['count']} words")
             logger.info("")
 
         # Difficulty distribution
-        if 'difficulty_distribution' in results['checks']:
-            dist_check = results['checks']['difficulty_distribution']
+        if "difficulty_distribution" in results["checks"]:
+            dist_check = results["checks"]["difficulty_distribution"]
             logger.info(f"DIFFICULTY LEVEL DISTRIBUTION:")
             logger.info(f"  Total trakaido words: {dist_check['total_words']}")
             logger.info(f"  Average per level: {dist_check['average_per_level']:.1f}")
             logger.info(f"  Empty levels: {len(dist_check['gaps'])}")
-            if dist_check['gaps']:
+            if dist_check["gaps"]:
                 logger.info(f"    Levels: {dist_check['gaps']}")
             logger.info(f"  Imbalanced levels: {len(dist_check['imbalanced'])}")
-            if dist_check['imbalanced']:
-                for level_info in dist_check['imbalanced'][:5]:
+            if dist_check["imbalanced"]:
+                for level_info in dist_check["imbalanced"][:5]:
                     logger.info(f"    Level {level_info['level']}: {level_info['count']} words (expected ~{level_info['expected_avg']:.0f})")
 
         logger.info("=" * 80)

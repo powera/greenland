@@ -96,7 +96,7 @@ def query_definitions(
             linguistic_db.log_query(
                 session,
                 word=word,
-                query_type='definitions',
+                query_type="definitions",
                 prompt=prompt,
                 response=json.dumps(response.structured_data),
                 model=client.model
@@ -107,9 +107,9 @@ def query_definitions(
         # Validate and return response data
         if (response.structured_data and
             isinstance(response.structured_data, dict) and
-            'definitions' in response.structured_data and
-            isinstance(response.structured_data['definitions'], list)):
-            return response.structured_data['definitions'], True
+            "definitions" in response.structured_data and
+            isinstance(response.structured_data["definitions"], list)):
+            return response.structured_data["definitions"], True
         else:
             logger.warning(f"Invalid response format for word '{word}'")
             return [], False

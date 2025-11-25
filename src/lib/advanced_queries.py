@@ -11,7 +11,7 @@ from clients import unified_client
 from telemetry import LLMUsage
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 DEFAULT_MODEL = "gemma2:9b"

@@ -223,7 +223,7 @@ def run_sentence_generation_demo(models: Optional[List[str]] = None) -> Dict[str
                 print(f"  Components: {test_case['subject']} + {test_case['verb']} + {test_case['object']} ({test_case['tense']})")
                 print(f"  English: {llm_result['english']}")
                 print(f"  Lithuanian: {llm_result['target_sentence']}")
-                if llm_result.get('adjective_used'):
+                if llm_result.get("adjective_used"):
                     print(f"  Adjective added: {llm_result['adjective_used']}")
                 print()
             else:

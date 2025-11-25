@@ -239,10 +239,10 @@ def get_alternate_forms_facts(session, lemma_id: int, language_code: str) -> Opt
         GrammarFact.lemma_id == lemma_id,
         GrammarFact.language_code == language_code,
         GrammarFact.fact_type.in_([
-            'has_synonyms',
-            'has_abbreviations',
-            'has_expanded_forms',
-            'has_alternate_spellings'
+            "has_synonyms",
+            "has_abbreviations",
+            "has_expanded_forms",
+            "has_alternate_spellings"
         ])
     ).first()
 
@@ -250,7 +250,7 @@ def get_alternate_forms_facts(session, lemma_id: int, language_code: str) -> Opt
         return None
 
     results = {}
-    for fact_type in ['has_synonyms', 'has_abbreviations', 'has_expanded_forms', 'has_alternate_spellings']:
+    for fact_type in ["has_synonyms", "has_abbreviations", "has_expanded_forms", "has_alternate_spellings"]:
         value = get_grammar_fact_value(session, lemma_id, language_code, fact_type)
         results[fact_type] = (value == "true")
 
@@ -367,11 +367,11 @@ def update_alternate_forms_facts_after_deletion(
 
     # Map form types to grammar fact types
     form_to_fact_map = {
-        'synonym': 'has_synonyms',
-        'abbreviation': 'has_abbreviations',
-        'expanded_form': 'has_expanded_forms',
-        'alternate_spelling': 'has_alternate_spellings',
-        'alternative_form': 'has_alternate_spellings',  # Legacy mapping
+        "synonym": "has_synonyms",
+        "abbreviation": "has_abbreviations",
+        "expanded_form": "has_expanded_forms",
+        "alternate_spelling": "has_alternate_spellings",
+        "alternative_form": "has_alternate_spellings",  # Legacy mapping
     }
 
     # Determine which fact types to update

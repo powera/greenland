@@ -29,11 +29,11 @@ class TestBenchmarkGenerators(unittest.TestCase):
         self.mock_session = MagicMock()
         
         # Create a patch for the database insert_benchmark function
-        self.patch_insert_benchmark = patch('datastore.benchmarks.insert_benchmark', return_value=(True, "Success"))
+        self.patch_insert_benchmark = patch("datastore.benchmarks.insert_benchmark", return_value=(True, "Success"))
         self.mock_insert_benchmark = self.patch_insert_benchmark.start()
         
         # Create a patch for the unified_client to ensure no LLM calls
-        self.patch_unified_client = patch('clients.unified_client.generate_chat')
+        self.patch_unified_client = patch("clients.unified_client.generate_chat")
         self.mock_unified_client = self.patch_unified_client.start()
         self.mock_unified_client.side_effect = self.unified_client_error
         
@@ -60,21 +60,21 @@ class TestBenchmarkGenerators(unittest.TestCase):
     def create_test_file(self, filename, content):
         """Helper to create a test file in the temporary directory."""
         path = os.path.join(self.temp_dir.name, filename)
-        with open(path, 'w') as f:
-            if filename.endswith('.json'):
+        with open(path, "w") as f:
+            if filename.endswith(".json"):
                 json.dump(content, f)
             else:
-                f.write('\n'.join(content))
+                f.write("\n".join(content))
         return path
     
-    @patch('os.path.join')
-    @patch('builtins.open')
+    @patch("os.path.join")
+    @patch("builtins.open")
     def test_base_generator_load_files(self, mock_open, mock_path_join):
         """Test the file loading methods in BenchmarkGenerator."""
         # Setup mocks for load_json_file
         mock_path_join.return_value = "/mock/path/file.json"
         mock_file = MagicMock()
-        mock_file.__enter__.return_value.read.return_value = '{"key": "value"}'
+        mock_file.__enter__.return_value.read.return_value = "{\"key\": \"value\"}"
         mock_open.return_value = mock_file
         
         # Create a basic generator
@@ -96,7 +96,7 @@ class TestBenchmarkGenerators(unittest.TestCase):
         self.assertEqual(result, ["line1", "line2", "line3"])
         mock_open.assert_called_once()
     
-    @patch('os.listdir')
+    @patch("os.listdir")
     def test_spell_check_generator_from_file(self, mock_listdir):
         """Test SpellCheckGenerator's from_file generation."""
         # Create test data
@@ -114,7 +114,7 @@ class TestBenchmarkGenerators(unittest.TestCase):
         # Create patched generator with mocked file loading
         metadata = BenchmarkMetadata(code="0015_spell_check", name="Spell Check", description="Test")
         
-        with patch.object(SpellCheckGenerator, 'load_json_file', return_value=spell_check_data):
+        with patch.object(SpellCheckGenerator, "load_json_file", return_value=spell_check_data):
             generator = SpellCheckGenerator(metadata, self.mock_session)
             generator.word_files = ["attention"]
             
@@ -149,8 +149,8 @@ class TestBenchmarkGenerators(unittest.TestCase):
         # Ensure no LLM calls
         self.mock_unified_client.assert_not_called()
     
-    @patch('builtins.open')
-    @patch('os.path.join')
+    @patch("builtins.open")
+    @patch("os.path.join")
     def test_definitions_generator_with_wordlist(self, mock_path_join, mock_open):
         """Test DefinitionsGenerator with a mock wordlist."""
         # Setup mock for wordlist
@@ -163,7 +163,7 @@ class TestBenchmarkGenerators(unittest.TestCase):
         metadata = BenchmarkMetadata(code="0020_definitions", name="Definitions", description="Test")
         
         # Create generator with mock load_text_file method
-        with patch.object(DefinitionsGenerator, 'load_text_file', return_value=["apple", "banana", "cherry"]):
+        with patch.object(DefinitionsGenerator, "load_text_file", return_value=["apple", "banana", "cherry"]):
             generator = DefinitionsGenerator(metadata, self.mock_session)
             
             # Check that _load_word_list returns expected words
@@ -215,7 +215,7 @@ class TestBenchmarkGenerators(unittest.TestCase):
     def test_save_question(self):
         """Test the save_question method."""
         # Create a mock for insert_question
-        with patch('datastore.benchmarks.insert_question', return_value=(True, "Success")) as mock_insert_question:
+        with patch("datastore.benchmarks.insert_question", return_value=(True, "Success")) as mock_insert_question:
             # Create a basic generator
             generator = BenchmarkGenerator(self.test_metadata, self.mock_session)
             

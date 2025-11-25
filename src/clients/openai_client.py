@@ -16,7 +16,7 @@ from clients.types import Response
 import clients.lib
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 # Model identifiers
@@ -119,12 +119,12 @@ class OpenAIClient:
         
         # Determine which token limit parameter to use based on model
         # Newer reasoning models (o1, gpt-5, o3) require max_output_tokens
-        reasoning_models = ['o1-', 'gpt-5-', 'o3-']
+        reasoning_models = ["o1-", "gpt-5-", "o3-"]
         uses_output_tokens = any(model.startswith(prefix) for prefix in reasoning_models)
         
         # gpt-5 models don't support custom temperature (only default value of 1)
-        is_gpt5_model = model.startswith('gpt-5-')
-        is_gpt5_nano_or_mini = model.startswith('gpt-5-nano') or model.startswith('gpt-5-mini')
+        is_gpt5_model = model.startswith("gpt-5-")
+        is_gpt5_nano_or_mini = model.startswith("gpt-5-nano") or model.startswith("gpt-5-mini")
         
         token_limit = 512 if brief else 4096
         kwargs = {

@@ -8,7 +8,7 @@ from typing import Dict, Any, Optional
 from enum import Enum, auto
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 class ModelTier(Enum):
@@ -146,26 +146,26 @@ class LLMUsage:
     metadata: Dict[str, Any] = field(default_factory=dict)
 
     @classmethod
-    def from_api_response(cls, response_data: Dict[str, Any], model: str = None, **kwargs) -> 'LLMUsage':
+    def from_api_response(cls, response_data: Dict[str, Any], model: str = None, **kwargs) -> "LLMUsage":
         """Create LLMUsage from API response data.
         
         Supports OpenAI, Anthropic, and Ollama response formats.
         Additional kwargs are stored in metadata dict.
         """
         # Extract required fields with reasonable fallbacks
-        tokens_in = response_data.get('prompt_tokens', 
-                                    response_data.get('prompt_eval_count', 0))
-        tokens_out = response_data.get('completion_tokens',
-                                     response_data.get('eval_count', 0))
+        tokens_in = response_data.get("prompt_tokens", 
+                                    response_data.get("prompt_eval_count", 0))
+        tokens_out = response_data.get("completion_tokens",
+                                     response_data.get("eval_count", 0))
         
         # Convert duration from API format (if present)
-        duration = response_data.get('total_duration', 0)
+        duration = response_data.get("total_duration", 0)
         # TODO: fix hackiness
         if duration > 1000000:  # Ollama returns nanoseconds
             duration = duration / 1_000_000  # Convert to milliseconds
             
         # Calculate cost if not provided
-        cost = response_data.get('cost', CostConfig.estimate_cost(
+        cost = response_data.get("cost", CostConfig.estimate_cost(
             tokens_in=tokens_in,
             tokens_out=tokens_out,
             compute_ms=duration,
@@ -177,8 +177,8 @@ class LLMUsage:
         
         # Add any extra fields from response_data
         for key, value in response_data.items():
-            if key not in ['prompt_tokens', 'completion_tokens', 'total_duration',
-                          'prompt_eval_count', 'eval_count', 'cost']:
+            if key not in ["prompt_tokens", "completion_tokens", "total_duration",
+                          "prompt_eval_count", "eval_count", "cost"]:
                 metadata[key] = value
                 logger.debug(f"Storing extra API response field in metadata: {key}")
                 
@@ -195,7 +195,7 @@ class LLMUsage:
             metadata=metadata
         )
 
-    def combine(self, other: 'LLMUsage') -> 'LLMUsage':
+    def combine(self, other: "LLMUsage") -> "LLMUsage":
         """Combine usage metrics from multiple operations."""
         combined_metadata = self.metadata.copy()
         combined_metadata.update(other.metadata)

@@ -92,22 +92,22 @@ class BebrasAgent:
                 result = response.structured_data
                 logger.info(f"Extracted {len(result.get('words', []))} words from sentence")
                 return {
-                    'success': True,
-                    'sentence_text': sentence_text,
-                    'analysis': result
+                    "success": True,
+                    "sentence_text": sentence_text,
+                    "analysis": result
                 }
             else:
                 logger.error("No structured data received from LLM")
                 return {
-                    'success': False,
-                    'error': 'LLM did not return structured data'
+                    "success": False,
+                    "error": "LLM did not return structured data"
                 }
 
         except Exception as e:
             logger.error(f"Error analyzing sentence: {e}", exc_info=True)
             return {
-                'success': False,
-                'error': str(e)
+                "success": False,
+                "error": str(e)
             }
 
     def _build_analysis_prompt(
@@ -188,7 +188,7 @@ class BebrasAgent:
 
     def link_sentence_to_words(
         self,
-        sentence: 'Sentence',
+        sentence: "Sentence",
         analysis: Dict,
         source_language: str = "en",
         target_languages: Optional[List[str]] = None,
@@ -215,15 +215,15 @@ class BebrasAgent:
         try:
             from .disambiguation import find_best_lemma_match
 
-            words = analysis.get('words', [])
+            words = analysis.get("words", [])
             linked_count = 0
             unlinked_count = 0
             disambiguation_needed = []
 
             for position, word_data in enumerate(words):
-                lemma_text = word_data.get('lemma')
-                pos = word_data.get('pos')
-                disambiguation_hint = word_data.get('disambiguation', '')
+                lemma_text = word_data.get("lemma")
+                pos = word_data.get("pos")
+                disambiguation_hint = word_data.get("disambiguation", "")
 
                 # Try to find matching lemma
                 lemma = find_best_lemma_match(
@@ -240,9 +240,9 @@ class BebrasAgent:
                     unlinked_count += 1
                     logger.warning(f"No lemma found for '{lemma_text}' (POS: {pos})")
                     disambiguation_needed.append({
-                        'word': lemma_text,
-                        'pos': pos,
-                        'hint': disambiguation_hint
+                        "word": lemma_text,
+                        "pos": pos,
+                        "hint": disambiguation_hint
                     })
 
                 # Create SentenceWord record
@@ -250,29 +250,29 @@ class BebrasAgent:
                     session=session,
                     sentence=sentence,
                     position=position,
-                    word_role=word_data.get('role', 'unknown'),
+                    word_role=word_data.get("role", "unknown"),
                     lemma=lemma,
                     english_text=lemma_text,
                     target_language_text=lemma_text,  # Will be updated with translations
-                    grammatical_form=word_data.get('grammatical_form'),
+                    grammatical_form=word_data.get("grammatical_form"),
                     language_code=source_language
                 )
 
             session.commit()
 
             return {
-                'success': True,
-                'linked_count': linked_count,
-                'unlinked_count': unlinked_count,
-                'disambiguation_needed': disambiguation_needed
+                "success": True,
+                "linked_count": linked_count,
+                "unlinked_count": unlinked_count,
+                "disambiguation_needed": disambiguation_needed
             }
 
         except Exception as e:
             logger.error(f"Error linking sentence to words: {e}", exc_info=True)
             session.rollback()
             return {
-                'success': False,
-                'error': str(e)
+                "success": False,
+                "error": str(e)
             }
         finally:
             if close_session:
@@ -308,18 +308,18 @@ class BebrasAgent:
             context=context
         )
 
-        if not analysis_result.get('success'):
+        if not analysis_result.get("success"):
             return analysis_result
 
-        analysis = analysis_result['analysis']
+        analysis = analysis_result["analysis"]
 
         # Step 2: Create sentence record
         session = self.get_session()
         try:
             sentence = add_sentence(
                 session=session,
-                pattern_type=analysis.get('pattern'),
-                tense=analysis.get('tense'),
+                pattern_type=analysis.get("pattern"),
+                tense=analysis.get("tense"),
                 source_filename="bebras_import",
                 verified=verified,
                 notes=context
@@ -363,21 +363,21 @@ class BebrasAgent:
             session.commit()
 
             return {
-                'success': True,
-                'sentence_id': sentence.id,
-                'sentence_text': sentence_text,
-                'linked_words': link_result.get('linked_count', 0),
-                'unlinked_words': link_result.get('unlinked_count', 0),
-                'disambiguation_needed': link_result.get('disambiguation_needed', []),
-                'minimum_level': sentence.minimum_level
+                "success": True,
+                "sentence_id": sentence.id,
+                "sentence_text": sentence_text,
+                "linked_words": link_result.get("linked_count", 0),
+                "unlinked_words": link_result.get("unlinked_count", 0),
+                "disambiguation_needed": link_result.get("disambiguation_needed", []),
+                "minimum_level": sentence.minimum_level
             }
 
         except Exception as e:
             logger.error(f"Error processing sentence: {e}", exc_info=True)
             session.rollback()
             return {
-                'success': False,
-                'error': str(e)
+                "success": False,
+                "error": str(e)
             }
         finally:
             session.close()
@@ -419,7 +419,7 @@ class BebrasAgent:
 
             results.append(result)
 
-            if result.get('success'):
+            if result.get("success"):
                 success_count += 1
             else:
                 failure_count += 1
@@ -427,8 +427,8 @@ class BebrasAgent:
         logger.info(f"Batch complete: {success_count} succeeded, {failure_count} failed")
 
         return {
-            'total': len(sentences),
-            'success_count': success_count,
-            'failure_count': failure_count,
-            'results': results
+            "total": len(sentences),
+            "success_count": success_count,
+            "failure_count": failure_count,
+            "results": results
         }

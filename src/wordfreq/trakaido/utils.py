@@ -19,8 +19,8 @@ from wordfreq.trakaido.utils.word_manager import WordManager
 from wordfreq.trakaido.utils.export_manager import TrakaidoExporter
 from wordfreq.trakaido.utils.cli import main
 
-__all__ = ['WordManager', 'TrakaidoExporter', 'main']
+__all__ = ["WordManager", "TrakaidoExporter", "main"]
 
 # Provide a command-line entry point
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

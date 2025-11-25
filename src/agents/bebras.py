@@ -44,7 +44,7 @@ from agents.bebras.integrity import (
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -57,7 +57,7 @@ def get_argument_parser():
     command-line arguments without executing the main function.
     """
     # Check if we're running in integrity check mode
-    if '--check-integrity' in sys.argv:
+    if "--check-integrity" in sys.argv:
         return get_integrity_parser()
     else:
         return get_sentence_parser()
@@ -66,14 +66,14 @@ def get_argument_parser():
 def main():
     """Main entry point for Bebras."""
     # Check if we're running in integrity check mode
-    if '--check-integrity' in sys.argv:
+    if "--check-integrity" in sys.argv:
         # Remove the flag and delegate to integrity checker
-        sys.argv.remove('--check-integrity')
+        sys.argv.remove("--check-integrity")
         return integrity_main()
     else:
         # Run the sentence-word link functionality
         return sentence_main()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())

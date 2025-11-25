@@ -11,7 +11,7 @@ from lib.benchmarks.data_models import BenchmarkMetadata
 from lib.benchmarks.factory import runner
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 @runner("0051_pinyin_letters")
@@ -121,10 +121,10 @@ class PinyinLetterCountRunner(BenchmarkRunner):
         model_count = None
         if isinstance(response, dict) and "letter_count" in response:
             model_count = response["letter_count"]
-        elif hasattr(response, 'structured_data') and response.structured_data:
+        elif hasattr(response, "structured_data") and response.structured_data:
             model_count = response.structured_data.get("letter_count", "Unknown")
         else:
-            model_count = response.response_text if hasattr(response, 'response_text') else str(response)
+            model_count = response.response_text if hasattr(response, "response_text") else str(response)
         
         # Build debug info
         return {

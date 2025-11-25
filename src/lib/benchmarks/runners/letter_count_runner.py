@@ -10,7 +10,7 @@ from lib.benchmarks.base import BenchmarkRunner
 from lib.benchmarks.factory import runner
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 @runner("0012_letter_count")
@@ -81,7 +81,7 @@ Provide your answer as a single integer in the specified JSON format."""
     def build_debug_info(self, question_data: Dict, response: Any, is_correct: bool) -> Dict:
         """Build debug information for benchmark results."""
         # Create debug info with the question text for better context
-        if hasattr(response, 'structured_data') and response.structured_data:
+        if hasattr(response, "structured_data") and response.structured_data:
             return {
                 "prompt": question_data.get("question_text", ""),
                 "response": response.structured_data,

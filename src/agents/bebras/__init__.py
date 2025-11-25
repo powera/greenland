@@ -14,8 +14,8 @@ from .disambiguation import disambiguate_lemma, find_best_lemma_match
 from .translation import ensure_translations
 
 __all__ = [
-    'BebrasAgent',
-    'disambiguate_lemma',
-    'find_best_lemma_match',
-    'ensure_translations'
+    "BebrasAgent",
+    "disambiguate_lemma",
+    "find_best_lemma_match",
+    "ensure_translations"
 ]

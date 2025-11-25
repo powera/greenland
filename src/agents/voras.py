@@ -19,7 +19,7 @@ if GREENLAND_SRC_PATH not in sys.path:
 from agents.voras.agent import VorasAgent
 from agents.voras.cli import main
 
-__all__ = ['VorasAgent', 'main']
+__all__ = ["VorasAgent", "main"]
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

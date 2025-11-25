@@ -110,7 +110,7 @@ def view_language_overrides(session, language_code: str, limit: int = 50):
         if lemma:
             status = "EXCLUDED" if override.difficulty_level == -1 else str(override.difficulty_level)
             word_text = lemma.lemma_text[:24] if len(lemma.lemma_text) <= 24 else lemma.lemma_text[:21] + "..."
-            notes_text = (override.notes or '')[:29] if override.notes else ''
+            notes_text = (override.notes or "")[:29] if override.notes else ""
             print(f"   {lemma.guid:<15} {word_text:<25} {lemma.difficulty_level or 'N/A':<8} {status:<10} {notes_text:<30}")
 
 
@@ -145,14 +145,14 @@ def bulk_import_csv(session, csv_path: str):
     import_count = 0
     error_count = 0
 
-    with open(csv_path, 'r', encoding='utf-8') as f:
+    with open(csv_path, "r", encoding="utf-8") as f:
         reader = csv.DictReader(f)
 
         for row in reader:
-            guid = row.get('guid', '').strip()
-            language_code = row.get('language_code', '').strip()
-            difficulty_level_str = row.get('difficulty_level', '').strip()
-            notes = row.get('notes', '').strip() or None
+            guid = row.get("guid", "").strip()
+            language_code = row.get("language_code", "").strip()
+            difficulty_level_str = row.get("difficulty_level", "").strip()
+            notes = row.get("notes", "").strip() or None
 
             if not guid or not language_code or not difficulty_level_str:
                 print(f"⚠️  Skipping row with missing data: {row}")
@@ -200,9 +200,9 @@ def export_to_csv(session, language_code: Optional[str], output_path: str):
     else:
         overrides = session.query(LemmaDifficultyOverride).all()
 
-    with open(output_path, 'w', encoding='utf-8', newline='') as f:
+    with open(output_path, "w", encoding="utf-8", newline="") as f:
         writer = csv.writer(f)
-        writer.writerow(['guid', 'word', 'language_code', 'default_level', 'override_level', 'notes'])
+        writer.writerow(["guid", "word", "language_code", "default_level", "override_level", "notes"])
 
         for override in overrides:
             lemma = session.query(Lemma).filter(Lemma.id == override.lemma_id).first()
@@ -211,9 +211,9 @@ def export_to_csv(session, language_code: Optional[str], output_path: str):
                     lemma.guid,
                     lemma.lemma_text,
                     override.language_code,
-                    lemma.difficulty_level or '',
+                    lemma.difficulty_level or "",
                     override.difficulty_level,
-                    override.notes or ''
+                    override.notes or ""
                 ])
 
     print(f"✅ Exported {len(overrides)} overrides to {output_path}")
@@ -221,7 +221,7 @@ def export_to_csv(session, language_code: Optional[str], output_path: str):
 
 def main():
     parser = argparse.ArgumentParser(
-        description='Manage per-language difficulty level overrides',
+        description="Manage per-language difficulty level overrides",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
@@ -245,39 +245,39 @@ Examples:
         """
     )
 
-    parser.add_argument('--db-path', help='Database path (uses default if not specified)')
+    parser.add_argument("--db-path", help="Database path (uses default if not specified)")
 
-    subparsers = parser.add_subparsers(dest='command', help='Command to execute')
+    subparsers = parser.add_subparsers(dest="command", help="Command to execute")
 
     # Set command
-    set_parser = subparsers.add_parser('set', help='Set a difficulty override')
-    set_parser.add_argument('guid', help='Lemma GUID')
-    set_parser.add_argument('language', help='Language code (e.g., zh, fr, de)')
-    set_parser.add_argument('level', type=int, help='Difficulty level (1-20) or -1 to exclude')
-    set_parser.add_argument('--notes', help='Notes explaining the override')
+    set_parser = subparsers.add_parser("set", help="Set a difficulty override")
+    set_parser.add_argument("guid", help="Lemma GUID")
+    set_parser.add_argument("language", help="Language code (e.g., zh, fr, de)")
+    set_parser.add_argument("level", type=int, help="Difficulty level (1-20) or -1 to exclude")
+    set_parser.add_argument("--notes", help="Notes explaining the override")
 
     # View command
-    view_parser = subparsers.add_parser('view', help='View overrides for a specific lemma')
-    view_parser.add_argument('guid', help='Lemma GUID')
+    view_parser = subparsers.add_parser("view", help="View overrides for a specific lemma")
+    view_parser.add_argument("guid", help="Lemma GUID")
 
     # List command
-    list_parser = subparsers.add_parser('list', help='List all overrides for a language')
-    list_parser.add_argument('language', help='Language code')
-    list_parser.add_argument('--limit', type=int, default=50, help='Limit results (default: 50)')
+    list_parser = subparsers.add_parser("list", help="List all overrides for a language")
+    list_parser.add_argument("language", help="Language code")
+    list_parser.add_argument("--limit", type=int, default=50, help="Limit results (default: 50)")
 
     # Remove command
-    remove_parser = subparsers.add_parser('remove', help='Remove a difficulty override')
-    remove_parser.add_argument('guid', help='Lemma GUID')
-    remove_parser.add_argument('language', help='Language code')
+    remove_parser = subparsers.add_parser("remove", help="Remove a difficulty override")
+    remove_parser.add_argument("guid", help="Lemma GUID")
+    remove_parser.add_argument("language", help="Language code")
 
     # Import command
-    import_parser = subparsers.add_parser('import', help='Bulk import from CSV')
-    import_parser.add_argument('csv_file', help='Path to CSV file')
+    import_parser = subparsers.add_parser("import", help="Bulk import from CSV")
+    import_parser.add_argument("csv_file", help="Path to CSV file")
 
     # Export command
-    export_parser = subparsers.add_parser('export', help='Export overrides to CSV')
-    export_parser.add_argument('--language', help='Language code (exports all if not specified)')
-    export_parser.add_argument('--output', required=True, help='Output CSV file path')
+    export_parser = subparsers.add_parser("export", help="Export overrides to CSV")
+    export_parser.add_argument("--language", help="Language code (exports all if not specified)")
+    export_parser.add_argument("--output", required=True, help="Output CSV file path")
 
     args = parser.parse_args()
 
@@ -294,17 +294,17 @@ Examples:
         return
 
     try:
-        if args.command == 'set':
+        if args.command == "set":
             set_override(session, args.guid, args.language, args.level, args.notes)
-        elif args.command == 'view':
+        elif args.command == "view":
             view_override(session, args.guid)
-        elif args.command == 'list':
+        elif args.command == "list":
             view_language_overrides(session, args.language, args.limit)
-        elif args.command == 'remove':
+        elif args.command == "remove":
             remove_override(session, args.guid, args.language)
-        elif args.command == 'import':
+        elif args.command == "import":
             bulk_import_csv(session, args.csv_file)
-        elif args.command == 'export':
+        elif args.command == "export":
             export_to_csv(session, args.language, args.output)
     except Exception as e:
         print(f"❌ Error: {e}")
@@ -314,5 +314,5 @@ Examples:
         session.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
