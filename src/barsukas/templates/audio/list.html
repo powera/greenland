@@ -60,11 +60,22 @@
                         {% endfor %}
                     </select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
+                    <label for="issue" class="form-label">Issue Type</label>
+                    <select class="form-select" id="issue" name="issue">
+                        <option value="">All</option>
+                        {% for issue in issue_types %}
+                        <option value="{{ issue }}" {% if issue == issue_filter %}selected{% endif %}>
+                            {{ issue.replace('_', ' ').title() }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
                     <label for="search" class="form-label">Search (Text or GUID)</label>
                     <input type="text" class="form-control" id="search" name="search" value="{{ search_query }}" placeholder="Search...">
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <button type="submit" class="btn btn-primary">
                         <i class="bi bi-search"></i> Filter
                     </button>
@@ -80,7 +91,7 @@
     <div class="mb-3">
         <p class="text-muted">
             Showing {{ ((page - 1) * per_page) + 1 }} - {{ [page * per_page, total_count]|min }} of {{ total_count }} files
-            {% if language_filter or voice_filter or status_filter or search_query %}
+            {% if language_filter or voice_filter or status_filter or issue_filter or search_query %}
             (filtered)
             {% endif %}
         </p>
@@ -200,7 +211,7 @@
     <nav aria-label="Page navigation">
         <ul class="pagination justify-content-center">
             <li class="page-item {% if page == 1 %}disabled{% endif %}">
-                <a class="page-link" href="{{ url_for('audio.list_files', page=page-1, language=language_filter, voice=voice_filter, status=status_filter, search=search_query) }}">
+                <a class="page-link" href="{{ url_for('audio.list_files', page=page-1, language=language_filter, voice=voice_filter, status=status_filter, issue=issue_filter, search=search_query) }}">
                     Previous
                 </a>
             </li>
@@ -210,7 +221,7 @@
 
             {% if start_page > 1 %}
             <li class="page-item">
-                <a class="page-link" href="{{ url_for('audio.list_files', page=1, language=language_filter, voice=voice_filter, status=status_filter, search=search_query) }}">1</a>
+                <a class="page-link" href="{{ url_for('audio.list_files', page=1, language=language_filter, voice=voice_filter, status=status_filter, issue=issue_filter, search=search_query) }}">1</a>
             </li>
             {% if start_page > 2 %}
             <li class="page-item disabled"><span class="page-link">...</span></li>
@@ -219,7 +230,7 @@
 
             {% for p in range(start_page, end_page + 1) %}
             <li class="page-item {% if p == page %}active{% endif %}">
-                <a class="page-link" href="{{ url_for('audio.list_files', page=p, language=language_filter, voice=voice_filter, status=status_filter, search=search_query) }}">{{ p }}</a>
+                <a class="page-link" href="{{ url_for('audio.list_files', page=p, language=language_filter, voice=voice_filter, status=status_filter, issue=issue_filter, search=search_query) }}">{{ p }}</a>
             </li>
             {% endfor %}
 
@@ -228,12 +239,12 @@
             <li class="page-item disabled"><span class="page-link">...</span></li>
             {% endif %}
             <li class="page-item">
-                <a class="page-link" href="{{ url_for('audio.list_files', page=total_pages, language=language_filter, voice=voice_filter, status=status_filter, search=search_query) }}">{{ total_pages }}</a>
+                <a class="page-link" href="{{ url_for('audio.list_files', page=total_pages, language=language_filter, voice=voice_filter, status=status_filter, issue=issue_filter, search=search_query) }}">{{ total_pages }}</a>
             </li>
             {% endif %}
 
             <li class="page-item {% if page == total_pages %}disabled{% endif %}">
-                <a class="page-link" href="{{ url_for('audio.list_files', page=page+1, language=language_filter, voice=voice_filter, status=status_filter, search=search_query) }}">
+                <a class="page-link" href="{{ url_for('audio.list_files', page=page+1, language=language_filter, voice=voice_filter, status=status_filter, issue=issue_filter, search=search_query) }}">
                     Next
                 </a>
             </li>

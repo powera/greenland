@@ -336,6 +336,7 @@ def list_files():
     language_filter = request.args.get("language", "")
     voice_filter = request.args.get("voice", "")
     status_filter = request.args.get("status", "")
+    issue_filter = request.args.get("issue", "")
     search_query = request.args.get("search", "").strip()
     page = request.args.get("page", 1, type=int)
     per_page = 100
@@ -352,6 +353,10 @@ def list_files():
 
     if status_filter:
         query = query.filter(AudioQualityReview.status == status_filter)
+
+    if issue_filter:
+        # Filter by quality_issues JSON array containing the specified issue
+        query = query.filter(AudioQualityReview.quality_issues.like(f'%"{issue_filter}"%'))
 
     if search_query:
         query = query.filter(
@@ -375,6 +380,23 @@ def list_files():
 
     statuses = ["pending_review", "approved", "approved_with_issues", "needs_replacement"]
 
+    # Define available issue types
+    issue_types = [
+        "audible_breath",
+        "missing_syllable",
+        "extra_syllable",
+        "audible_echo",
+        "volume_inconsistency",
+        "background_noise",
+        "pronunciation_error",
+        "phoneme_confusion",
+        "wrong_word",
+        "unnatural_prosody",
+        "clipping_distortion",
+        "speed_issues",
+        "translation_mismatch"
+    ]
+
     total_pages = (total_count + per_page - 1) // per_page
 
     return render_template(
@@ -383,9 +405,11 @@ def list_files():
         languages=languages,
         voices=voices,
         statuses=statuses,
+        issue_types=issue_types,
         language_filter=language_filter,
         voice_filter=voice_filter,
         status_filter=status_filter,
+        issue_filter=issue_filter,
         search_query=search_query,
         page=page,
         per_page=per_page,
