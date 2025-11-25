@@ -221,6 +221,21 @@
         </div>
         {% endif %}
 
+        <!-- Translation Mismatch Warning (hidden initially, shown by JS if needed) -->
+        <div id="translation-warning" class="alert alert-warning text-center" style="display: none; margin: 1rem auto; max-width: 800px;">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <strong>Translation Mismatch!</strong>
+            <div style="margin-top: 0.5rem;">
+                <span style="font-size: 0.9rem;">
+                    Audio text: <code id="warning-audio-text"></code><br>
+                    Current translation: <code id="warning-current-text"></code>
+                </span>
+            </div>
+            <div style="margin-top: 0.5rem; font-size: 0.85rem; color: #856404;">
+                This audio file may be for an outdated translation. Consider marking as "Bad Translation".
+            </div>
+        </div>
+
         <!-- Audio Player -->
         <div class="text-center">
             <audio controls class="audio-player-large" id="audio-player" autoplay>
@@ -245,33 +260,43 @@
         <div class="collapse" id="issue-tags-container">
             <div class="issue-tags">
                 <div class="issue-tag" data-issue="audible_breath">
+                    <span class="keyboard-key" style="margin-right: 0.3rem;">1</span>
                     <i class="bi bi-wind"></i> Audible Breath
                 </div>
                 <div class="issue-tag" data-issue="missing_syllable">
+                    <span class="keyboard-key" style="margin-right: 0.3rem;">2</span>
                     <i class="bi bi-dash-circle"></i> Missing Syllable
                 </div>
                 <div class="issue-tag" data-issue="extra_syllable">
+                    <span class="keyboard-key" style="margin-right: 0.3rem;">3</span>
                     <i class="bi bi-plus-circle"></i> Extra Syllable
                 </div>
                 <div class="issue-tag" data-issue="audible_echo">
+                    <span class="keyboard-key" style="margin-right: 0.3rem;">4</span>
                     <i class="bi bi-soundwave"></i> Audible Echo
                 </div>
                 <div class="issue-tag" data-issue="volume_inconsistency">
+                    <span class="keyboard-key" style="margin-right: 0.3rem;">5</span>
                     <i class="bi bi-volume-up"></i> Volume Issues
                 </div>
                 <div class="issue-tag" data-issue="background_noise">
+                    <span class="keyboard-key" style="margin-right: 0.3rem;">6</span>
                     <i class="bi bi-noise"></i> Background Noise
                 </div>
                 <div class="issue-tag" data-issue="pronunciation_error">
+                    <span class="keyboard-key" style="margin-right: 0.3rem;">7</span>
                     <i class="bi bi-exclamation-triangle"></i> Pronunciation Error
                 </div>
                 <div class="issue-tag" data-issue="phoneme_confusion">
+                    <span class="keyboard-key" style="margin-right: 0.3rem;">8</span>
                     <i class="bi bi-alphabet"></i> Phoneme Confusion
                 </div>
                 <div class="issue-tag" data-issue="wrong_word">
+                    <span class="keyboard-key" style="margin-right: 0.3rem;">9</span>
                     <i class="bi bi-question-circle"></i> Wrong Word
                 </div>
                 <div class="issue-tag" data-issue="unnatural_prosody">
+                    <span class="keyboard-key" style="margin-right: 0.3rem;">0</span>
                     <i class="bi bi-graph-down"></i> Unnatural Prosody
                 </div>
                 <div class="issue-tag" data-issue="clipping_distortion">
@@ -288,7 +313,7 @@
             <button class="action-btn btn-approve" id="btn-approve">
                 <i class="bi bi-check-circle"></i><br>
                 OK<br>
-                <small>(Enter)</small>
+                <small>(G)</small>
             </button>
             <button class="action-btn btn-acceptable" id="btn-acceptable">
                 <i class="bi bi-dash-circle"></i><br>
@@ -299,6 +324,20 @@
                 <i class="bi bi-x-circle"></i><br>
                 Problem<br>
                 <small>(R)</small>
+            </button>
+        </div>
+
+        <!-- Skip and Mark Translation Bad Buttons -->
+        <div class="action-buttons" style="margin-top: 1rem;">
+            <button class="action-btn" id="btn-skip" style="background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%); color: white; max-width: 200px;">
+                <i class="bi bi-skip-forward"></i><br>
+                Skip<br>
+                <small>(S)</small>
+            </button>
+            <button class="action-btn" id="btn-bad-translation" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white; max-width: 200px;">
+                <i class="bi bi-translate"></i><br>
+                Bad Translation<br>
+                <small>(T)</small>
             </button>
         </div>
 
@@ -313,15 +352,19 @@
         <!-- Keyboard Hints -->
         <div class="keyboard-hints">
             <strong>Keyboard Shortcuts:</strong>
-            <span class="keyboard-key">Enter</span> = OK
+            <span class="keyboard-key">G</span> = OK (Good)
             &nbsp;|&nbsp;
             <span class="keyboard-key">A</span> = Acceptable
             &nbsp;|&nbsp;
             <span class="keyboard-key">R</span> = Problem
             &nbsp;|&nbsp;
-            <span class="keyboard-key">Space</span> = Replay Audio
+            <span class="keyboard-key">S</span> = Skip
             &nbsp;|&nbsp;
-            <span class="keyboard-key">1-9</span> = Toggle Issue Tags
+            <span class="keyboard-key">T</span> = Bad Translation
+            &nbsp;|&nbsp;
+            <span class="keyboard-key">P</span> = Replay Audio
+            &nbsp;|&nbsp;
+            <span class="keyboard-key">1-9,0</span> = Toggle Issue Tags
             &nbsp;|&nbsp;
             <span class="keyboard-key">U</span> or <span class="keyboard-key">Backspace</span> = Undo
         </div>
@@ -411,18 +454,20 @@ document.addEventListener('DOMContentLoaded', function() {
         performUndo();
     });
 
+    // Skip button
+    document.getElementById('btn-skip')?.addEventListener('click', function() {
+        skipToNext();
+    });
+
+    // Bad translation button
+    document.getElementById('btn-bad-translation')?.addEventListener('click', function() {
+        markBadTranslation();
+    });
+
     // Keyboard shortcuts
     document.addEventListener('keydown', function(e) {
-        // Space - replay audio
-        if (e.code === 'Space' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'SELECT') {
-            e.preventDefault();
-            const audio = document.getElementById('audio-player');
-            audio.currentTime = 0;
-            audio.play();
-        }
-
-        // Enter - Approve (OK)
-        if (e.code === 'Enter' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'SELECT') {
+        // G - Approve (Good/OK)
+        if (e.code === 'KeyG' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'SELECT') {
             e.preventDefault();
             submitReview('approved');
         }
@@ -437,6 +482,28 @@ document.addEventListener('DOMContentLoaded', function() {
         if (e.code === 'KeyR' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'SELECT') {
             e.preventDefault();
             submitReview('needs_replacement');
+        }
+
+        // S - Skip to next without marking
+        if (e.code === 'KeyS' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'SELECT') {
+            e.preventDefault();
+            skipToNext();
+        }
+
+        // T - Mark translation as bad
+        if (e.code === 'KeyT' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'SELECT') {
+            e.preventDefault();
+            markBadTranslation();
+        }
+
+        // P - Replay audio
+        if (e.code === 'KeyP' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'SELECT') {
+            e.preventDefault();
+            const audio = document.getElementById('audio-player');
+            if (audio) {
+                audio.currentTime = 0;
+                audio.play();
+            }
         }
 
         // U or Backspace - Undo
@@ -532,6 +599,20 @@ function loadNextReview(review) {
     const pinyinDisplay = document.getElementById('pinyin-display');
     if (pinyinDisplay && review.pinyin) {
         pinyinDisplay.textContent = review.pinyin;
+    }
+
+    // Check for translation mismatch and display warning
+    const warningDiv = document.getElementById('translation-warning');
+    if (warningDiv) {
+        if (review.validation && review.validation.mismatch) {
+            const audioTextEl = document.getElementById('warning-audio-text');
+            const currentTextEl = document.getElementById('warning-current-text');
+            if (audioTextEl) audioTextEl.textContent = review.expected_text;
+            if (currentTextEl) currentTextEl.textContent = review.validation.current_translation;
+            warningDiv.style.display = 'block';
+        } else {
+            warningDiv.style.display = 'none';
+        }
     }
 
     // Update audio
@@ -648,6 +729,76 @@ function loadPreviousReview(review) {
     // Show review area if it was hidden
     document.getElementById('review-area').style.display = 'block';
     document.getElementById('completion-area').style.display = 'none';
+}
+
+function skipToNext() {
+    if (!currentReviewId) return;
+
+    // Just fetch the next review without changing the status of the current one
+    fetch(`/audio/rapid-review/skip/${currentReviewId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            language: languageFilter,
+            voice: voiceFilter,
+            status_filter: statusFilter
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            if (data.has_next) {
+                loadNextReview(data.next_review);
+            } else {
+                showCompletion();
+            }
+        } else {
+            alert('Error: ' + data.error);
+        }
+    })
+    .catch(error => {
+        alert('Error skipping to next: ' + error);
+    });
+}
+
+function markBadTranslation() {
+    if (!currentReviewId) return;
+
+    // Mark the translation as needing attention (we'll use a specific issue tag)
+    // and mark the status as needs_replacement
+    const badTranslationIssues = ['translation_mismatch'];
+
+    fetch(`/audio/rapid-review/bad-translation/${currentReviewId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            language: languageFilter,
+            voice: voiceFilter,
+            status_filter: statusFilter
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            reviewedCount++;
+            updateProgress();
+
+            if (data.has_next) {
+                loadNextReview(data.next_review);
+            } else {
+                showCompletion();
+            }
+        } else {
+            alert('Error: ' + data.error);
+        }
+    })
+    .catch(error => {
+        alert('Error marking bad translation: ' + error);
+    });
 }
 </script>
 {% endblock %}
