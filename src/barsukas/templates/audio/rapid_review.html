@@ -1,0 +1,653 @@
+{% extends "base.html" %}
+
+{% block title %}Rapid Audio Review{% endblock %}
+
+{% block extra_head %}
+<style>
+.rapid-review-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.expected-text-display {
+    font-size: 4rem;
+    font-weight: bold;
+    text-align: center;
+    padding: 3rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 1rem;
+    margin: 2rem 0;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.action-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin: 2rem 0;
+}
+
+.action-btn {
+    flex: 1;
+    max-width: 200px;
+    padding: 2rem 1rem;
+    font-size: 1.5rem;
+    font-weight: bold;
+    border-radius: 0.5rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+
+.action-btn:active {
+    transform: translateY(0);
+}
+
+.btn-approve {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    color: white;
+}
+
+.btn-acceptable {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+}
+
+.btn-reject {
+    background: linear-gradient(135deg, #ee0979 0%, #ff6a00 100%);
+    color: white;
+}
+
+.issue-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+    margin: 1rem 0;
+}
+
+.issue-tag {
+    padding: 0.5rem 1rem;
+    border-radius: 2rem;
+    border: 2px solid #ddd;
+    background-color: white;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+}
+
+.issue-tag:hover {
+    border-color: #667eea;
+    background-color: #f0f4ff;
+}
+
+.issue-tag.selected {
+    background-color: #667eea;
+    color: white;
+    border-color: #667eea;
+}
+
+.progress-bar-container {
+    background-color: #e0e0e0;
+    height: 8px;
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 1rem 0;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    transition: width 0.3s ease;
+}
+
+.metadata-row {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin: 1rem 0;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.keyboard-hints {
+    text-align: center;
+    margin: 2rem 0;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-radius: 0.5rem;
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.keyboard-key {
+    display: inline-block;
+    padding: 0.2rem 0.5rem;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 0.25rem;
+    font-family: monospace;
+    font-weight: bold;
+    margin: 0 0.2rem;
+}
+
+.completion-message {
+    text-align: center;
+    padding: 3rem;
+    font-size: 1.5rem;
+    color: #666;
+}
+
+.audio-player-large {
+    width: 100%;
+    max-width: 600px;
+    margin: 1rem auto;
+    display: block;
+}
+
+.filter-bar {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.filter-bar select {
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    border: 2px solid #ddd;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="rapid-review-container">
+    <!-- Header with Progress -->
+    <div class="text-center mb-4">
+        <h1><i class="bi bi-lightning-charge"></i> Rapid Audio Review</h1>
+        <p class="text-muted">
+            <span id="progress-text">Review {{ total_count }} files</span>
+        </p>
+        <div class="progress-bar-container">
+            <div class="progress-bar-fill" id="progress-bar" style="width: 0%"></div>
+        </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+        <select id="language-filter" class="form-select" style="width: auto;">
+            <option value="">All Languages</option>
+            {% for lang in languages %}
+            <option value="{{ lang }}" {% if lang == language_filter %}selected{% endif %}>{{ lang }}</option>
+            {% endfor %}
+        </select>
+        <select id="voice-filter" class="form-select" style="width: auto;">
+            <option value="">All Voices</option>
+            {% for voice in voices %}
+            <option value="{{ voice }}" {% if voice == voice_filter %}selected{% endif %}>{{ voice }}</option>
+            {% endfor %}
+        </select>
+        <select id="status-filter" class="form-select" style="width: auto;">
+            {% for status in statuses %}
+            <option value="{{ status }}" {% if status == status_filter %}selected{% endif %}>
+                {{ status.replace('_', ' ').title() }}
+            </option>
+            {% endfor %}
+        </select>
+        <button id="apply-filters" class="btn btn-primary">
+            <i class="bi bi-funnel"></i> Apply
+        </button>
+    </div>
+
+    {% if review %}
+    <!-- Main Review Area -->
+    <div id="review-area">
+        <!-- Expected Text -->
+        <div class="expected-text-display" id="expected-text">
+            {{ review.expected_text }}
+        </div>
+        {% if review.language_code == 'zh' %}
+        <div class="text-center text-muted" style="font-size: 1.2rem; margin-top: -1rem; margin-bottom: 1rem;">
+            <span id="pinyin-display">{{ review.expected_text|pinyin }}</span>
+        </div>
+        {% endif %}
+
+        <!-- Audio Player -->
+        <div class="text-center">
+            <audio controls class="audio-player-large" id="audio-player" autoplay>
+                <source id="audio-source" src="{{ url_for('audio.serve_audio_file', language=review.language_code, voice=review.voice_name, filename=review.filename) }}" type="audio/mpeg">
+                Your browser does not support audio playback.
+            </audio>
+        </div>
+
+        <!-- Metadata -->
+        <div class="metadata-row">
+            <span><strong>GUID:</strong> <code id="guid">{{ review.guid }}</code></span>
+            <span><strong>Language:</strong> <span class="badge bg-secondary" id="language">{{ review.language_code }}</span></span>
+            <span><strong>Voice:</strong> <span class="badge bg-info" id="voice">{{ review.voice_name }}</span></span>
+        </div>
+
+        <!-- Issue Tags (collapsible) -->
+        <div class="text-center mb-2">
+            <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#issue-tags-container">
+                <i class="bi bi-tags"></i> Tag Issues (optional)
+            </button>
+        </div>
+        <div class="collapse" id="issue-tags-container">
+            <div class="issue-tags">
+                <div class="issue-tag" data-issue="audible_breath">
+                    <i class="bi bi-wind"></i> Audible Breath
+                </div>
+                <div class="issue-tag" data-issue="missing_syllable">
+                    <i class="bi bi-dash-circle"></i> Missing Syllable
+                </div>
+                <div class="issue-tag" data-issue="extra_syllable">
+                    <i class="bi bi-plus-circle"></i> Extra Syllable
+                </div>
+                <div class="issue-tag" data-issue="audible_echo">
+                    <i class="bi bi-soundwave"></i> Audible Echo
+                </div>
+                <div class="issue-tag" data-issue="volume_inconsistency">
+                    <i class="bi bi-volume-up"></i> Volume Issues
+                </div>
+                <div class="issue-tag" data-issue="background_noise">
+                    <i class="bi bi-noise"></i> Background Noise
+                </div>
+                <div class="issue-tag" data-issue="pronunciation_error">
+                    <i class="bi bi-exclamation-triangle"></i> Pronunciation Error
+                </div>
+                <div class="issue-tag" data-issue="phoneme_confusion">
+                    <i class="bi bi-alphabet"></i> Phoneme Confusion
+                </div>
+                <div class="issue-tag" data-issue="wrong_word">
+                    <i class="bi bi-question-circle"></i> Wrong Word
+                </div>
+                <div class="issue-tag" data-issue="unnatural_prosody">
+                    <i class="bi bi-graph-down"></i> Unnatural Prosody
+                </div>
+                <div class="issue-tag" data-issue="clipping_distortion">
+                    <i class="bi bi-exclamation-diamond"></i> Clipping/Distortion
+                </div>
+                <div class="issue-tag" data-issue="speed_issues">
+                    <i class="bi bi-speedometer"></i> Speed Issues
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <button class="action-btn btn-approve" id="btn-approve">
+                <i class="bi bi-check-circle"></i><br>
+                OK<br>
+                <small>(Enter)</small>
+            </button>
+            <button class="action-btn btn-acceptable" id="btn-acceptable">
+                <i class="bi bi-dash-circle"></i><br>
+                Acceptable<br>
+                <small>(A)</small>
+            </button>
+            <button class="action-btn btn-reject" id="btn-reject">
+                <i class="bi bi-x-circle"></i><br>
+                Problem<br>
+                <small>(R)</small>
+            </button>
+        </div>
+
+        <!-- Undo Button -->
+        <div class="text-center mt-3">
+            <button class="btn btn-warning" id="btn-undo" disabled>
+                <i class="bi bi-arrow-counterclockwise"></i> Undo Last Review
+                <span class="badge bg-light text-dark" id="undo-count">0</span>
+            </button>
+        </div>
+
+        <!-- Keyboard Hints -->
+        <div class="keyboard-hints">
+            <strong>Keyboard Shortcuts:</strong>
+            <span class="keyboard-key">Enter</span> = OK
+            &nbsp;|&nbsp;
+            <span class="keyboard-key">A</span> = Acceptable
+            &nbsp;|&nbsp;
+            <span class="keyboard-key">R</span> = Problem
+            &nbsp;|&nbsp;
+            <span class="keyboard-key">Space</span> = Replay Audio
+            &nbsp;|&nbsp;
+            <span class="keyboard-key">1-9</span> = Toggle Issue Tags
+            &nbsp;|&nbsp;
+            <span class="keyboard-key">U</span> or <span class="keyboard-key">Backspace</span> = Undo
+        </div>
+    </div>
+
+    <!-- Completion Message (hidden initially) -->
+    <div id="completion-area" style="display: none;">
+        <div class="completion-message">
+            <i class="bi bi-check-circle-fill text-success" style="font-size: 4rem;"></i>
+            <h2>Review Complete!</h2>
+            <p>All files have been reviewed.</p>
+            <a href="{{ url_for('audio.list_files') }}" class="btn btn-primary">
+                <i class="bi bi-arrow-left"></i> Back to List
+            </a>
+        </div>
+    </div>
+
+    {% else %}
+    <div class="completion-message">
+        <i class="bi bi-inbox" style="font-size: 4rem; color: #ccc;"></i>
+        <h2>No Files to Review</h2>
+        <p>There are no files matching your filters.</p>
+        <a href="{{ url_for('audio.list_files') }}" class="btn btn-primary">
+            <i class="bi bi-arrow-left"></i> Back to List
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+let currentReviewId = {{ review.id if review else 'null' }};
+let reviewedCount = 0;
+let totalCount = {{ total_count }};
+let selectedIssues = [];
+const languageFilter = '{{ language_filter }}';
+const voiceFilter = '{{ voice_filter }}';
+const statusFilter = '{{ status_filter }}';
+
+// Undo stack - stores last 5 reviews
+const MAX_UNDO_STACK = 5;
+let undoStack = [];
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Issue tag selection
+    document.querySelectorAll('.issue-tag').forEach((tag, index) => {
+        tag.addEventListener('click', function() {
+            this.classList.toggle('selected');
+            const issue = this.dataset.issue;
+            if (selectedIssues.includes(issue)) {
+                selectedIssues = selectedIssues.filter(i => i !== issue);
+            } else {
+                selectedIssues.push(issue);
+            }
+        });
+
+        // Number key shortcuts (1-9, 0 for 10th)
+        document.addEventListener('keydown', function(e) {
+            const key = parseInt(e.key);
+            const tags = document.querySelectorAll('.issue-tag');
+            if (key >= 1 && key <= 9) {
+                e.preventDefault();
+                tags[key - 1]?.click();
+            } else if (e.key === '0') {
+                e.preventDefault();
+                tags[9]?.click();
+            }
+        });
+    });
+
+    // Approve button
+    document.getElementById('btn-approve')?.addEventListener('click', function() {
+        submitReview('approved');
+    });
+
+    // Acceptable button
+    document.getElementById('btn-acceptable')?.addEventListener('click', function() {
+        submitReview('approved_with_issues');
+    });
+
+    // Reject button
+    document.getElementById('btn-reject')?.addEventListener('click', function() {
+        submitReview('needs_replacement');
+    });
+
+    // Undo button
+    document.getElementById('btn-undo')?.addEventListener('click', function() {
+        performUndo();
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // Space - replay audio
+        if (e.code === 'Space' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'SELECT') {
+            e.preventDefault();
+            const audio = document.getElementById('audio-player');
+            audio.currentTime = 0;
+            audio.play();
+        }
+
+        // Enter - Approve (OK)
+        if (e.code === 'Enter' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'SELECT') {
+            e.preventDefault();
+            submitReview('approved');
+        }
+
+        // A - Acceptable with issues
+        if (e.code === 'KeyA' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'SELECT') {
+            e.preventDefault();
+            submitReview('approved_with_issues');
+        }
+
+        // R - Reject (Problem)
+        if (e.code === 'KeyR' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'SELECT') {
+            e.preventDefault();
+            submitReview('needs_replacement');
+        }
+
+        // U or Backspace - Undo
+        if ((e.code === 'KeyU' || e.code === 'Backspace') && e.target.tagName !== 'INPUT' && e.target.tagName !== 'SELECT' && e.target.tagName !== 'TEXTAREA') {
+            e.preventDefault();
+            performUndo();
+        }
+    });
+
+    // Filter application
+    document.getElementById('apply-filters')?.addEventListener('click', function() {
+        const language = document.getElementById('language-filter').value;
+        const voice = document.getElementById('voice-filter').value;
+        const status = document.getElementById('status-filter').value;
+
+        const params = new URLSearchParams();
+        if (language) params.set('language', language);
+        if (voice) params.set('voice', voice);
+        if (status) params.set('status', status);
+
+        window.location.href = '{{ url_for("audio.rapid_review") }}?' + params.toString();
+    });
+});
+
+function submitReview(status) {
+    if (!currentReviewId) return;
+
+    // Save current state to undo stack before submitting
+    const currentState = {
+        id: currentReviewId,
+        guid: document.getElementById('guid').textContent,
+        expected_text: document.getElementById('expected-text').textContent,
+        language_code: document.getElementById('language').textContent,
+        voice_name: document.getElementById('voice').textContent,
+        pinyin: document.getElementById('pinyin-display')?.textContent || null,
+        audio_url: document.getElementById('audio-source').src,
+        previous_status: 'pending_review', // Assume it was pending before
+        new_status: status,
+        issues: [...selectedIssues]
+    };
+
+    fetch(`/audio/rapid-review/submit/${currentReviewId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            status: status,
+            quality_issues: selectedIssues,
+            language: languageFilter,
+            voice: voiceFilter,
+            status_filter: statusFilter
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Add to undo stack
+            undoStack.push(currentState);
+            if (undoStack.length > MAX_UNDO_STACK) {
+                undoStack.shift(); // Remove oldest entry
+            }
+            updateUndoButton();
+
+            reviewedCount++;
+            updateProgress();
+
+            if (data.has_next) {
+                loadNextReview(data.next_review);
+            } else {
+                showCompletion();
+            }
+        } else {
+            alert('Error: ' + data.error);
+        }
+    })
+    .catch(error => {
+        alert('Error submitting review: ' + error);
+    });
+}
+
+function loadNextReview(review) {
+    currentReviewId = review.id;
+    selectedIssues = [];
+
+    // Update UI
+    document.getElementById('expected-text').textContent = review.expected_text;
+    document.getElementById('guid').textContent = review.guid;
+    document.getElementById('language').textContent = review.language_code;
+    document.getElementById('voice').textContent = review.voice_name;
+
+    // Update pinyin if present (for Chinese)
+    const pinyinDisplay = document.getElementById('pinyin-display');
+    if (pinyinDisplay && review.pinyin) {
+        pinyinDisplay.textContent = review.pinyin;
+    }
+
+    // Update audio
+    const audioPlayer = document.getElementById('audio-player');
+    const audioSource = document.getElementById('audio-source');
+    audioSource.src = review.audio_url;
+    audioPlayer.load();
+    audioPlayer.play();
+
+    // Clear selected issue tags
+    document.querySelectorAll('.issue-tag').forEach(tag => {
+        tag.classList.remove('selected');
+    });
+}
+
+function updateProgress() {
+    const percentage = (reviewedCount / totalCount) * 100;
+    document.getElementById('progress-bar').style.width = percentage + '%';
+    document.getElementById('progress-text').textContent =
+        `Reviewed ${reviewedCount} of ${totalCount} files`;
+}
+
+function showCompletion() {
+    document.getElementById('review-area').style.display = 'none';
+    document.getElementById('completion-area').style.display = 'block';
+}
+
+function updateUndoButton() {
+    const undoButton = document.getElementById('btn-undo');
+    const undoCount = document.getElementById('undo-count');
+
+    if (undoStack.length > 0) {
+        undoButton.disabled = false;
+        undoCount.textContent = undoStack.length;
+    } else {
+        undoButton.disabled = true;
+        undoCount.textContent = '0';
+    }
+}
+
+function performUndo() {
+    if (undoStack.length === 0) return;
+
+    // Pop the last review from the stack
+    const lastReview = undoStack.pop();
+    updateUndoButton();
+
+    // Revert the status change
+    fetch(`/audio/rapid-review/submit/${lastReview.id}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            status: lastReview.previous_status,
+            quality_issues: [],
+            language: languageFilter,
+            voice: voiceFilter,
+            status_filter: statusFilter
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Load the previous review back into the UI
+            loadPreviousReview(lastReview);
+
+            // Decrement reviewed count
+            reviewedCount--;
+            updateProgress();
+        } else {
+            alert('Error undoing review: ' + data.error);
+            // Put it back on the stack if it failed
+            undoStack.push(lastReview);
+            updateUndoButton();
+        }
+    })
+    .catch(error => {
+        alert('Error undoing review: ' + error);
+        // Put it back on the stack if it failed
+        undoStack.push(lastReview);
+        updateUndoButton();
+    });
+}
+
+function loadPreviousReview(review) {
+    currentReviewId = review.id;
+    selectedIssues = [];
+
+    // Update UI
+    document.getElementById('expected-text').textContent = review.expected_text;
+    document.getElementById('guid').textContent = review.guid;
+    document.getElementById('language').textContent = review.language_code;
+    document.getElementById('voice').textContent = review.voice_name;
+
+    // Update pinyin if present
+    const pinyinDisplay = document.getElementById('pinyin-display');
+    if (pinyinDisplay && review.pinyin) {
+        pinyinDisplay.textContent = review.pinyin;
+    }
+
+    // Update audio
+    const audioPlayer = document.getElementById('audio-player');
+    const audioSource = document.getElementById('audio-source');
+    audioSource.src = review.audio_url;
+    audioPlayer.load();
+    audioPlayer.play();
+
+    // Clear selected issue tags
+    document.querySelectorAll('.issue-tag').forEach(tag => {
+        tag.classList.remove('selected');
+    });
+
+    // Show review area if it was hidden
+    document.getElementById('review-area').style.display = 'block';
+    document.getElementById('completion-area').style.display = 'none';
+}
+</script>
+{% endblock %}

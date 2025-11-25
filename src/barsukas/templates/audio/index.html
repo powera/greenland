@@ -49,9 +49,12 @@
             <div class="card">
                 <div class="card-body">
                     <h5 class="card-title">Quick Actions</h5>
-                    <div class="d-flex gap-2">
+                    <div class="d-flex gap-2 flex-wrap">
                         <a href="{{ url_for('audio.import_manifest') }}" class="btn btn-primary">
                             <i class="bi bi-upload"></i> Import Manifest
+                        </a>
+                        <a href="{{ url_for('audio.rapid_review', status='pending_review') }}" class="btn btn-success">
+                            <i class="bi bi-lightning-charge"></i> Rapid Review Mode
                         </a>
                         <a href="{{ url_for('audio.list_files') }}" class="btn btn-secondary">
                             <i class="bi bi-list-ul"></i> View All Files

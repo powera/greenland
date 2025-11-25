@@ -20,7 +20,12 @@
 
 {% block content %}
 <div class="container-fluid mt-4">
-    <h1><i class="bi bi-list-ul"></i> Audio Files</h1>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1><i class="bi bi-list-ul"></i> Audio Files</h1>
+        <a href="{{ url_for('audio.rapid_review', status='pending_review') }}" class="btn btn-success">
+            <i class="bi bi-lightning-charge"></i> Rapid Review Mode
+        </a>
+    </div>
 
     <!-- Filters -->
     <div class="filter-form mb-4">
@@ -133,6 +138,8 @@
                         <span class="badge bg-warning text-dark status-badge">Pending Review</span>
                         {% elif file.status == 'approved' %}
                         <span class="badge bg-success status-badge">Approved</span>
+                        {% elif file.status == 'approved_with_issues' %}
+                        <span class="badge bg-info status-badge">Acceptable</span>
                         {% elif file.status == 'needs_replacement' %}
                         <span class="badge bg-danger status-badge">Needs Replacement</span>
                         {% endif %}
@@ -140,7 +147,15 @@
                     <td>
                         {% if file.quality_issues %}
                             {% set issues = file.quality_issues|fromjson %}
-                            <span class="badge bg-warning text-dark">{{ issues|length }}</span>
+                            {% if issues|length > 0 %}
+                            <span class="badge bg-warning text-dark"
+                                  title="{{ issues|join(', ')|replace('_', ' ')|title }}"
+                                  style="cursor: help;">
+                                {{ issues|length }}
+                            </span>
+                            {% else %}
+                            -
+                            {% endif %}
                         {% else %}
                         -
                         {% endif %}

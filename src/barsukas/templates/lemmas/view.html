@@ -625,6 +625,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             <th>Voice</th>
                             <th>Expected Text</th>
                             <th>Status</th>
+                            <th>Issues</th>
                             <th>Audio</th>
                             <th>Actions</th>
                         </tr>
@@ -645,8 +646,24 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <span class="badge bg-warning text-dark">Pending</span>
                                 {% elif audio.status == 'approved' %}
                                 <span class="badge bg-success">Approved</span>
+                                {% elif audio.status == 'approved_with_issues' %}
+                                <span class="badge bg-info">Acceptable</span>
                                 {% elif audio.status == 'needs_replacement' %}
                                 <span class="badge bg-danger">Needs Fix</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if audio.quality_issues %}
+                                    {% set issues = audio.quality_issues|fromjson %}
+                                    {% if issues|length > 0 %}
+                                        <span class="badge bg-warning text-dark" title="{{ issues|join(', ')|replace('_', ' ') }}">
+                                            {{ issues|length }}
+                                        </span>
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                {% else %}
+                                    -
                                 {% endif %}
                             </td>
                             <td>
