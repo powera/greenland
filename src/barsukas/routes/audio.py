@@ -88,6 +88,82 @@ def link_audio_to_lemma(session, guid: str, expected_text: str, language_code: s
     return None
 
 
+def validate_audio_translation(session, guid: str, expected_text: str, language_code: str) -> dict:
+    """
+    Validate that audio file's expected text matches the current translation in the database.
+
+    Args:
+        session: Database session
+        guid: GUID like "N01_001"
+        expected_text: Text from audio file manifest
+        language_code: Language code (zh, ko, fr, etc.)
+
+    Returns:
+        Dict with validation results: {
+            "valid": bool,
+            "current_translation": str or None,
+            "mismatch": bool,
+            "lemma_found": bool
+        }
+    """
+    # Map language codes to column names
+    language_column_map = {
+        "zh": "chinese_translation",
+        "ko": "korean_translation",
+        "fr": "french_translation",
+        "sw": "swahili_translation",
+        "lt": "lithuanian_translation",
+        "vi": "vietnamese_translation",
+    }
+
+    # Try to find lemma by GUID
+    lemma = session.query(Lemma).filter_by(guid=guid).first()
+
+    if not lemma:
+        return {
+            "valid": False,
+            "current_translation": None,
+            "mismatch": False,
+            "lemma_found": False
+        }
+
+    # Get current translation from database
+    current_translation = None
+
+    # For table-based translations (es, de, pt)
+    if language_code in ["es", "de", "pt"]:
+        from wordfreq.storage.models.schema import LemmaTranslation
+        translation = session.query(LemmaTranslation).filter_by(
+            lemma_id=lemma.id,
+            language_code=language_code
+        ).first()
+        if translation:
+            current_translation = translation.translation
+
+    # For column-based translations
+    elif language_code in language_column_map:
+        column_name = language_column_map[language_code]
+        current_translation = getattr(lemma, column_name, None)
+
+    # Check if they match
+    if current_translation is None:
+        return {
+            "valid": False,
+            "current_translation": None,
+            "mismatch": False,
+            "lemma_found": True
+        }
+
+    mismatch = current_translation != expected_text
+
+    return {
+        "valid": not mismatch,
+        "current_translation": current_translation,
+        "mismatch": mismatch,
+        "lemma_found": True
+    }
+
+
 @bp.route("/")
 def index():
     """Audio quality review dashboard."""
@@ -529,6 +605,14 @@ def rapid_review_submit(review_id):
                 from barsukas.pinyin_helper import generate_pinyin
                 pinyin_text = generate_pinyin(next_review.expected_text)
 
+            # Validate audio file against current translation
+            validation = validate_audio_translation(
+                g.db,
+                next_review.guid,
+                next_review.expected_text,
+                next_review.language_code
+            )
+
             return jsonify({
                 "success": True,
                 "has_next": True,
@@ -543,7 +627,164 @@ def rapid_review_submit(review_id):
                     "audio_url": url_for("audio.serve_audio_file",
                                         language=next_review.language_code,
                                         voice=next_review.voice_name,
-                                        filename=next_review.filename)
+                                        filename=next_review.filename),
+                    "validation": validation
+                }
+            })
+        else:
+            return jsonify({
+                "success": True,
+                "has_next": False,
+                "message": "No more files to review"
+            })
+
+    except Exception as e:
+        g.db.rollback()
+        return jsonify({"error": str(e)}), 500
+
+
+@bp.route("/rapid-review/skip/<int:review_id>", methods=["POST"])
+def rapid_review_skip(review_id):
+    """Skip current review and get next file without changing status (AJAX endpoint)."""
+    review = g.db.query(AudioQualityReview).filter_by(id=review_id).first()
+
+    if not review:
+        return jsonify({"error": "Review not found"}), 404
+
+    try:
+        # Don't change the review status, just get the next file
+        data = request.get_json()
+        language_filter = data.get("language", "")
+        voice_filter = data.get("voice", "")
+        status_filter = data.get("status_filter", "pending_review")
+
+        # Build query for next file - use GUID ordering
+        query = g.db.query(AudioQualityReview).filter(AudioQualityReview.guid > review.guid)
+
+        if language_filter:
+            query = query.filter(AudioQualityReview.language_code == language_filter)
+
+        if voice_filter:
+            query = query.filter(AudioQualityReview.voice_name == voice_filter)
+
+        if status_filter:
+            query = query.filter(AudioQualityReview.status == status_filter)
+
+        query = query.order_by(AudioQualityReview.guid)
+        next_review = query.first()
+
+        if next_review:
+            # Generate pinyin for Chinese text
+            pinyin_text = None
+            if next_review.language_code == "zh":
+                from barsukas.pinyin_helper import generate_pinyin
+                pinyin_text = generate_pinyin(next_review.expected_text)
+
+            # Validate audio file against current translation
+            validation = validate_audio_translation(
+                g.db,
+                next_review.guid,
+                next_review.expected_text,
+                next_review.language_code
+            )
+
+            return jsonify({
+                "success": True,
+                "has_next": True,
+                "next_review": {
+                    "id": next_review.id,
+                    "guid": next_review.guid,
+                    "expected_text": next_review.expected_text,
+                    "language_code": next_review.language_code,
+                    "voice_name": next_review.voice_name,
+                    "filename": next_review.filename,
+                    "pinyin": pinyin_text,
+                    "audio_url": url_for("audio.serve_audio_file",
+                                        language=next_review.language_code,
+                                        voice=next_review.voice_name,
+                                        filename=next_review.filename),
+                    "validation": validation
+                }
+            })
+        else:
+            return jsonify({
+                "success": True,
+                "has_next": False,
+                "message": "No more files to review"
+            })
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@bp.route("/rapid-review/bad-translation/<int:review_id>", methods=["POST"])
+def rapid_review_bad_translation(review_id):
+    """Mark translation as bad and get next file (AJAX endpoint)."""
+    review = g.db.query(AudioQualityReview).filter_by(id=review_id).first()
+
+    if not review:
+        return jsonify({"error": "Review not found"}), 404
+
+    try:
+        # Mark as needs_replacement with translation_mismatch issue
+        review.status = "needs_replacement"
+        review.quality_issues = json.dumps(["translation_mismatch"])
+        review.notes = "Translation marked as incorrect during rapid review"
+        review.reviewed_at = datetime.utcnow()
+        g.db.commit()
+
+        # Get next file based on same filters
+        data = request.get_json()
+        language_filter = data.get("language", "")
+        voice_filter = data.get("voice", "")
+        status_filter = data.get("status_filter", "pending_review")
+
+        # Build query for next file - use GUID ordering
+        query = g.db.query(AudioQualityReview).filter(AudioQualityReview.guid > review.guid)
+
+        if language_filter:
+            query = query.filter(AudioQualityReview.language_code == language_filter)
+
+        if voice_filter:
+            query = query.filter(AudioQualityReview.voice_name == voice_filter)
+
+        if status_filter:
+            query = query.filter(AudioQualityReview.status == status_filter)
+
+        query = query.order_by(AudioQualityReview.guid)
+        next_review = query.first()
+
+        if next_review:
+            # Generate pinyin for Chinese text
+            pinyin_text = None
+            if next_review.language_code == "zh":
+                from barsukas.pinyin_helper import generate_pinyin
+                pinyin_text = generate_pinyin(next_review.expected_text)
+
+            # Validate audio file against current translation
+            validation = validate_audio_translation(
+                g.db,
+                next_review.guid,
+                next_review.expected_text,
+                next_review.language_code
+            )
+
+            return jsonify({
+                "success": True,
+                "has_next": True,
+                "next_review": {
+                    "id": next_review.id,
+                    "guid": next_review.guid,
+                    "expected_text": next_review.expected_text,
+                    "language_code": next_review.language_code,
+                    "voice_name": next_review.voice_name,
+                    "filename": next_review.filename,
+                    "pinyin": pinyin_text,
+                    "audio_url": url_for("audio.serve_audio_file",
+                                        language=next_review.language_code,
+                                        voice=next_review.voice_name,
+                                        filename=next_review.filename),
+                    "validation": validation
                 }
             })
         else:
