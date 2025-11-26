@@ -297,19 +297,21 @@ class AudioQualityReview(Base):
 
     Audio files are generated for lemmas in various languages and voices.
     This table tracks the review status and quality issues for each audio file.
+    Supports both base forms and derivative forms (conjugations, declensions).
     """
     __tablename__ = "audio_quality_reviews"
     __table_args__ = (
-        UniqueConstraint("guid", "language_code", "voice_name", name="uq_audio_review"),
+        UniqueConstraint("guid", "language_code", "voice_name", "grammatical_form", name="uq_audio_review"),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
 
     # Audio file identification
-    guid: Mapped[str] = mapped_column(String, nullable=False, index=True)  # e.g., "N01_001"
+    guid: Mapped[str] = mapped_column(String, nullable=False, index=True)  # e.g., "N01_001" or "gyventi"
     language_code: Mapped[str] = mapped_column(String, nullable=False, index=True)  # e.g., "zh", "ko", "fr"
     voice_name: Mapped[str] = mapped_column(String, nullable=False, index=True)  # e.g., "ash", "alloy", "echo"
-    filename: Mapped[str] = mapped_column(String, nullable=False, index=True)  # e.g., "N01_001.mp3"
+    grammatical_form: Mapped[Optional[str]] = mapped_column(String, nullable=True, index=True)  # e.g., "1s_pres", null for base forms
+    filename: Mapped[str] = mapped_column(String, nullable=False, index=True)  # e.g., "N01_001.mp3" or "aš_gyvenu.mp3"
 
     # Audio content
     expected_text: Mapped[str] = mapped_column(String, nullable=False)  # Word/phrase that should be spoken

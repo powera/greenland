@@ -12,9 +12,10 @@ from pathlib import Path
 from datetime import datetime
 from typing import Optional
 
-from flask import Blueprint, render_template, request, jsonify, g, flash, redirect, url_for, send_file, current_app
+from flask import Blueprint, render_template, request, jsonify, g, flash, redirect, url_for, send_file, current_app, Response
 from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
+import io
 
 from wordfreq.storage.models.schema import AudioQualityReview, Lemma
 
@@ -260,14 +261,16 @@ def import_manifest():
         audio_dir = str(audio_dir_path)
 
         # Import files
-        imported_count = 0
-        skipped_count = 0
+        new_count = 0
+        updated_count = 0
+        unchanged_count = 0
         error_count = 0
 
         for filename, file_info in files_data.items():
             guid = file_info.get("guid")
             text = file_info.get("text")
             md5 = file_info.get("md5")
+            grammatical_form = file_info.get("grammatical_form")  # None for base forms
 
             if not all([guid, text, md5]):
                 error_count += 1
@@ -277,18 +280,19 @@ def import_manifest():
             existing = g.db.query(AudioQualityReview).filter_by(
                 guid=guid,
                 language_code=language_code,
-                voice_name=voice_name
+                voice_name=voice_name,
+                grammatical_form=grammatical_form
             ).first()
 
             if existing:
-                # Update MD5 if changed
+                # Update if MD5 changed
                 if existing.manifest_md5 != md5:
                     existing.manifest_md5 = md5
                     existing.expected_text = text
                     existing.filename = filename
-                    imported_count += 1
+                    updated_count += 1
                 else:
-                    skipped_count += 1
+                    unchanged_count += 1
                 continue
 
             # Try to link to lemma
@@ -299,6 +303,7 @@ def import_manifest():
                 guid=guid,
                 language_code=language_code,
                 voice_name=voice_name,
+                grammatical_form=grammatical_form,
                 filename=filename,
                 expected_text=text,
                 manifest_md5=md5,
@@ -307,14 +312,13 @@ def import_manifest():
             )
 
             g.db.add(review)
-            imported_count += 1
+            new_count += 1
 
         g.db.commit()
 
         flash(
-            f'Import complete: {imported_count} files imported, '
-            f'{skipped_count} skipped (already exist), '
-            f'{error_count} errors',
+            f'Import complete: {new_count} new, {updated_count} updated, '
+            f'{unchanged_count} unchanged, {error_count} errors',
             "success"
         )
 
@@ -415,6 +419,89 @@ def list_files():
         per_page=per_page,
         total_count=total_count,
         total_pages=total_pages
+    )
+
+
+@bp.route("/download-filelist")
+def download_filelist():
+    """Download a text file containing paths to audio files matching current filters."""
+    # Get filter parameters
+    language_filter = request.args.get("language", "")
+    voice_filter = request.args.get("voice", "")
+    status_filter = request.args.get("status", "")
+    issue_filter = request.args.get("issue", "")
+    search_query = request.args.get("search", "").strip()
+
+    # Build query
+    query = g.db.query(AudioQualityReview)
+
+    if language_filter:
+        query = query.filter(AudioQualityReview.language_code == language_filter)
+
+    if voice_filter:
+        query = query.filter(AudioQualityReview.voice_name == voice_filter)
+
+    if status_filter:
+        query = query.filter(AudioQualityReview.status == status_filter)
+
+    if issue_filter:
+        # Filter by quality_issues JSON array containing the specified issue
+        query = query.filter(AudioQualityReview.quality_issues.like(f'%"{issue_filter}"%'))
+
+    if search_query:
+        query = query.filter(
+            (AudioQualityReview.expected_text.like(f'%{search_query}%')) |
+            (AudioQualityReview.guid.like(f'%{search_query}%'))
+        )
+
+    # Order by GUID
+    query = query.order_by(AudioQualityReview.guid)
+
+    # Get all matching files
+    audio_files = query.all()
+
+    # Get audio directory from config
+    audio_base_dir = current_app.config.get("AUDIO_BASE_DIR")
+
+    if not audio_base_dir:
+        flash("Audio directory not configured", "error")
+        return redirect(url_for("audio.list_files"))
+
+    # Generate file list
+    file_lines = []
+    for file in audio_files:
+        # Map language code to directory name (e.g., 'zh' -> 'chinese')
+        language_dir = LANGUAGE_DIR_MAP.get(file.language_code, file.language_code)
+
+        # Build file path
+        file_path = Path(audio_base_dir) / language_dir / file.voice_name / file.filename
+
+        # Add to list
+        file_lines.append(str(file_path))
+
+    # Create in-memory text file
+    output = io.StringIO()
+    output.write("\n".join(file_lines))
+    output.seek(0)
+
+    # Generate filename based on filters
+    filename_parts = ["audio_files"]
+    if language_filter:
+        filename_parts.append(f"lang_{language_filter}")
+    if voice_filter:
+        filename_parts.append(f"voice_{voice_filter}")
+    if status_filter:
+        filename_parts.append(f"status_{status_filter}")
+    if issue_filter:
+        filename_parts.append(f"issue_{issue_filter}")
+
+    filename = "_".join(filename_parts) + ".txt"
+
+    # Return as downloadable file
+    return Response(
+        output.getvalue(),
+        mimetype="text/plain",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
     )
 
 
@@ -532,12 +619,25 @@ def quick_update(review_id):
 def rapid_review():
     """Streamlined rapid review interface with keyboard shortcuts."""
     # Get filter parameters - default to pending_review
+    # Language is REQUIRED - redirect to list if not provided
     language_filter = request.args.get("language", "")
+    if not language_filter:
+        flash("Please select a language to begin rapid review", "warning")
+        return redirect(url_for("audio.list_files"))
+
     voice_filter = request.args.get("voice", "")
     status_filter = request.args.get("status", "pending_review")
+    subtype_filter = request.args.get("subtype", "")
+    level_filter = request.args.get("level", "")
 
-    # Build query
-    query = g.db.query(AudioQualityReview)
+    # Build query - join with Lemma if we need subtype or level filtering
+    from sqlalchemy.orm import joinedload
+    if subtype_filter or level_filter:
+        query = g.db.query(AudioQualityReview).join(
+            Lemma, AudioQualityReview.lemma_id == Lemma.id
+        ).options(joinedload(AudioQualityReview.lemma))
+    else:
+        query = g.db.query(AudioQualityReview)
 
     if language_filter:
         query = query.filter(AudioQualityReview.language_code == language_filter)
@@ -548,8 +648,18 @@ def rapid_review():
     if status_filter:
         query = query.filter(AudioQualityReview.status == status_filter)
 
-    # Order by GUID
-    query = query.order_by(AudioQualityReview.guid)
+    if subtype_filter:
+        query = query.filter(Lemma.pos_subtype == subtype_filter)
+
+    if level_filter:
+        try:
+            level_int = int(level_filter)
+            query = query.filter(Lemma.difficulty_level == level_int)
+        except ValueError:
+            pass  # Ignore invalid level values
+
+    # Order by GUID, then voice_name to ensure we go through all voices for each word
+    query = query.order_by(AudioQualityReview.guid, AudioQualityReview.voice_name)
 
     # Get total count
     total_count = query.count()
@@ -566,6 +676,18 @@ def rapid_review():
 
     statuses = ["pending_review", "approved", "approved_with_issues", "needs_replacement"]
 
+    # Get available subtypes from lemmas that have audio
+    subtypes = g.db.query(Lemma.pos_subtype).join(
+        AudioQualityReview, AudioQualityReview.lemma_id == Lemma.id
+    ).filter(Lemma.pos_subtype.isnot(None)).distinct().all()
+    subtypes = sorted([st[0] for st in subtypes if st[0]])
+
+    # Get available levels from lemmas that have audio
+    levels = g.db.query(Lemma.difficulty_level).join(
+        AudioQualityReview, AudioQualityReview.lemma_id == Lemma.id
+    ).filter(Lemma.difficulty_level.isnot(None)).distinct().all()
+    levels = sorted([lvl[0] for lvl in levels if lvl[0] is not None])
+
     return render_template(
         "audio/rapid_review.html",
         review=current_review,
@@ -573,9 +695,13 @@ def rapid_review():
         languages=languages,
         voices=voices,
         statuses=statuses,
+        subtypes=subtypes,
+        levels=levels,
         language_filter=language_filter,
         voice_filter=voice_filter,
-        status_filter=status_filter
+        status_filter=status_filter,
+        subtype_filter=subtype_filter,
+        level_filter=level_filter
     )
 
 
@@ -605,10 +731,31 @@ def rapid_review_submit(review_id):
         language_filter = data.get("language", "")
         voice_filter = data.get("voice", "")
         status_filter = data.get("status_filter", "pending_review")
+        subtype_filter = data.get("subtype", "")
+        level_filter = data.get("level", "")
 
-        # Build query for next file - use GUID ordering, not ID
-        # This ensures we get the next file in GUID sequence regardless of ID gaps
-        query = g.db.query(AudioQualityReview).filter(AudioQualityReview.guid > review.guid)
+        # Build query for next file - order by (GUID, voice_name) to cycle through all voices
+        # Use compound comparison: (guid, voice_name) > (current_guid, current_voice_name)
+        from sqlalchemy.orm import joinedload
+        from sqlalchemy import or_, and_
+
+        if subtype_filter or level_filter:
+            query = g.db.query(AudioQualityReview).join(
+                Lemma, AudioQualityReview.lemma_id == Lemma.id
+            ).options(joinedload(AudioQualityReview.lemma))
+        else:
+            query = g.db.query(AudioQualityReview)
+
+        # Compound comparison to get next in (guid, voice_name) order
+        query = query.filter(
+            or_(
+                AudioQualityReview.guid > review.guid,
+                and_(
+                    AudioQualityReview.guid == review.guid,
+                    AudioQualityReview.voice_name > review.voice_name
+                )
+            )
+        )
 
         if language_filter:
             query = query.filter(AudioQualityReview.language_code == language_filter)
@@ -619,7 +766,17 @@ def rapid_review_submit(review_id):
         if status_filter:
             query = query.filter(AudioQualityReview.status == status_filter)
 
-        query = query.order_by(AudioQualityReview.guid)
+        if subtype_filter:
+            query = query.filter(Lemma.pos_subtype == subtype_filter)
+
+        if level_filter:
+            try:
+                level_int = int(level_filter)
+                query = query.filter(Lemma.difficulty_level == level_int)
+            except ValueError:
+                pass  # Ignore invalid level values
+
+        query = query.order_by(AudioQualityReview.guid, AudioQualityReview.voice_name)
         next_review = query.first()
 
         if next_review:
@@ -681,9 +838,31 @@ def rapid_review_skip(review_id):
         language_filter = data.get("language", "")
         voice_filter = data.get("voice", "")
         status_filter = data.get("status_filter", "pending_review")
+        subtype_filter = data.get("subtype", "")
+        level_filter = data.get("level", "")
 
-        # Build query for next file - use GUID ordering
-        query = g.db.query(AudioQualityReview).filter(AudioQualityReview.guid > review.guid)
+        # Build query for next file - order by (GUID, voice_name) to cycle through all voices
+        # Use compound comparison: (guid, voice_name) > (current_guid, current_voice_name)
+        from sqlalchemy.orm import joinedload
+        from sqlalchemy import or_, and_
+
+        if subtype_filter or level_filter:
+            query = g.db.query(AudioQualityReview).join(
+                Lemma, AudioQualityReview.lemma_id == Lemma.id
+            ).options(joinedload(AudioQualityReview.lemma))
+        else:
+            query = g.db.query(AudioQualityReview)
+
+        # Compound comparison to get next in (guid, voice_name) order
+        query = query.filter(
+            or_(
+                AudioQualityReview.guid > review.guid,
+                and_(
+                    AudioQualityReview.guid == review.guid,
+                    AudioQualityReview.voice_name > review.voice_name
+                )
+            )
+        )
 
         if language_filter:
             query = query.filter(AudioQualityReview.language_code == language_filter)
@@ -694,7 +873,17 @@ def rapid_review_skip(review_id):
         if status_filter:
             query = query.filter(AudioQualityReview.status == status_filter)
 
-        query = query.order_by(AudioQualityReview.guid)
+        if subtype_filter:
+            query = query.filter(Lemma.pos_subtype == subtype_filter)
+
+        if level_filter:
+            try:
+                level_int = int(level_filter)
+                query = query.filter(Lemma.difficulty_level == level_int)
+            except ValueError:
+                pass  # Ignore invalid level values
+
+        query = query.order_by(AudioQualityReview.guid, AudioQualityReview.voice_name)
         next_review = query.first()
 
         if next_review:
@@ -762,9 +951,31 @@ def rapid_review_bad_translation(review_id):
         language_filter = data.get("language", "")
         voice_filter = data.get("voice", "")
         status_filter = data.get("status_filter", "pending_review")
+        subtype_filter = data.get("subtype", "")
+        level_filter = data.get("level", "")
 
-        # Build query for next file - use GUID ordering
-        query = g.db.query(AudioQualityReview).filter(AudioQualityReview.guid > review.guid)
+        # Build query for next file - order by (GUID, voice_name) to cycle through all voices
+        # Use compound comparison: (guid, voice_name) > (current_guid, current_voice_name)
+        from sqlalchemy.orm import joinedload
+        from sqlalchemy import or_, and_
+
+        if subtype_filter or level_filter:
+            query = g.db.query(AudioQualityReview).join(
+                Lemma, AudioQualityReview.lemma_id == Lemma.id
+            ).options(joinedload(AudioQualityReview.lemma))
+        else:
+            query = g.db.query(AudioQualityReview)
+
+        # Compound comparison to get next in (guid, voice_name) order
+        query = query.filter(
+            or_(
+                AudioQualityReview.guid > review.guid,
+                and_(
+                    AudioQualityReview.guid == review.guid,
+                    AudioQualityReview.voice_name > review.voice_name
+                )
+            )
+        )
 
         if language_filter:
             query = query.filter(AudioQualityReview.language_code == language_filter)
@@ -775,7 +986,17 @@ def rapid_review_bad_translation(review_id):
         if status_filter:
             query = query.filter(AudioQualityReview.status == status_filter)
 
-        query = query.order_by(AudioQualityReview.guid)
+        if subtype_filter:
+            query = query.filter(Lemma.pos_subtype == subtype_filter)
+
+        if level_filter:
+            try:
+                level_int = int(level_filter)
+                query = query.filter(Lemma.difficulty_level == level_int)
+            except ValueError:
+                pass  # Ignore invalid level values
+
+        query = query.order_by(AudioQualityReview.guid, AudioQualityReview.voice_name)
         next_review = query.first()
 
         if next_review:
