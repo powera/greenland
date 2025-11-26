@@ -326,6 +326,9 @@ def import_manifest():
                     existing.manifest_md5 = md5
                     existing.expected_text = text
                     existing.filename = filename
+                    # Update S3 URL if MD5 changed
+                    s3_cdn_base = current_app.config.get("S3_CDN_BASE_URL")
+                    existing.s3_url = f"{s3_cdn_base}/{language_code}/{voice_name}/{md5}.mp3" if s3_cdn_base else None
                     updated_count += 1
                 else:
                     unchanged_count += 1
@@ -333,6 +336,10 @@ def import_manifest():
 
             # Try to link to lemma
             lemma_id = link_audio_to_lemma(g.db, guid, text, language_code)
+
+            # Calculate S3 URL from MD5 hash
+            s3_cdn_base = current_app.config.get("S3_CDN_BASE_URL")
+            s3_url = f"{s3_cdn_base}/{language_code}/{voice_name}/{md5}.mp3" if s3_cdn_base else None
 
             # Create new review record
             review = AudioQualityReview(
@@ -343,6 +350,7 @@ def import_manifest():
                 filename=filename,
                 expected_text=text,
                 manifest_md5=md5,
+                s3_url=s3_url,
                 lemma_id=lemma_id,
                 status="pending_review"
             )
@@ -543,12 +551,29 @@ def download_filelist():
 
 @bp.route("/files/<language>/<voice>/<filename>")
 def serve_audio_file(language, voice, filename):
-    """Serve audio file from local directory."""
-    # Get audio directory from config
+    """
+    Serve audio file - redirects to S3 CDN if available, otherwise serves from local directory.
+
+    This route is called from the UI. It looks up the audio record by filename and redirects
+    to the S3 URL if available. This allows for a seamless transition from local to S3 storage.
+    """
+    # Try to find the audio record by filename to get S3 URL
+    from sqlalchemy.orm import joinedload
+    review = g.db.query(AudioQualityReview).filter_by(
+        language_code=language,
+        voice_name=voice,
+        filename=filename
+    ).first()
+
+    # If we have an S3 URL, redirect to CDN
+    if review and review.s3_url:
+        return redirect(review.s3_url)
+
+    # Fallback to local file serving
     audio_base_dir = current_app.config.get("AUDIO_BASE_DIR")
 
     if not audio_base_dir:
-        return jsonify({"error": "Audio directory not configured"}), 500
+        return jsonify({"error": "Audio directory not configured and no S3 URL available"}), 500
 
     # Map language code to directory name (e.g., 'zh' -> 'chinese')
     language_dir = LANGUAGE_DIR_MAP.get(language, language)
@@ -557,7 +582,7 @@ def serve_audio_file(language, voice, filename):
     file_path = Path(audio_base_dir) / language_dir / voice / filename
 
     if not file_path.exists():
-        return jsonify({"error": f'Audio file not found: {file_path}'}), 404
+        return jsonify({"error": f'Audio file not found locally and no S3 URL available'}), 404
 
     return send_file(str(file_path), mimetype="audio/mpeg")
 
