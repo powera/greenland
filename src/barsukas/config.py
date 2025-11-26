@@ -38,3 +38,7 @@ class Config:
 
     # Audio settings
     AUDIO_BASE_DIR = os.environ.get("BARSUKAS_AUDIO_DIR", str(BASE_DIR.parent / "wireword-audio" / "trakaido"))
+
+    # S3/CDN settings for audio
+    S3_CDN_BASE_URL = os.environ.get("S3_CDN_BASE_URL", "https://trakaido-audio.sfo3.cdn.digitaloceanspaces.com")
+    S3_BUCKET_NAME = os.environ.get("S3_BUCKET_NAME", "trakaido-audio")

@@ -316,6 +316,7 @@ class AudioQualityReview(Base):
     # Audio content
     expected_text: Mapped[str] = mapped_column(String, nullable=False)  # Word/phrase that should be spoken
     manifest_md5: Mapped[str] = mapped_column(String, nullable=False)  # MD5 hash from manifest
+    s3_url: Mapped[Optional[str]] = mapped_column(String, nullable=True)  # CDN URL for S3-hosted audio
 
     # Optional link to lemma (hybrid approach: try GUID match, fallback to text matching)
     lemma_id: Mapped[Optional[int]] = mapped_column(ForeignKey("lemmas.id"), nullable=True, index=True)
