@@ -184,8 +184,8 @@
 
     <!-- Filter Bar -->
     <div class="filter-bar">
-        <select id="language-filter" class="form-select" style="width: auto;">
-            <option value="">All Languages</option>
+        <select id="language-filter" class="form-select" style="width: auto;" required>
+            <option value="">Select Language...</option>
             {% for lang in languages %}
             <option value="{{ lang }}" {% if lang == language_filter %}selected{% endif %}>{{ lang }}</option>
             {% endfor %}
@@ -201,6 +201,18 @@
             <option value="{{ status }}" {% if status == status_filter %}selected{% endif %}>
                 {{ status.replace('_', ' ').title() }}
             </option>
+            {% endfor %}
+        </select>
+        <select id="subtype-filter" class="form-select" style="width: auto;">
+            <option value="">All Subtypes</option>
+            {% for subtype in subtypes %}
+            <option value="{{ subtype }}" {% if subtype == subtype_filter %}selected{% endif %}>{{ subtype }}</option>
+            {% endfor %}
+        </select>
+        <select id="level-filter" class="form-select" style="width: auto;">
+            <option value="">All Levels</option>
+            {% for level in levels %}
+            <option value="{{ level }}" {% if level|string == level_filter %}selected{% endif %}>Level {{ level }}</option>
             {% endfor %}
         </select>
         <button id="apply-filters" class="btn btn-primary">
@@ -402,6 +414,8 @@ let selectedIssues = [];
 const languageFilter = '{{ language_filter }}';
 const voiceFilter = '{{ voice_filter }}';
 const statusFilter = '{{ status_filter }}';
+const subtypeFilter = '{{ subtype_filter }}';
+const levelFilter = '{{ level_filter }}';
 
 // Undo stack - stores last 5 reviews
 const MAX_UNDO_STACK = 5;
@@ -419,19 +433,24 @@ document.addEventListener('DOMContentLoaded', function() {
                 selectedIssues.push(issue);
             }
         });
+    });
 
-        // Number key shortcuts (1-9, 0 for 10th)
-        document.addEventListener('keydown', function(e) {
-            const key = parseInt(e.key);
-            const tags = document.querySelectorAll('.issue-tag');
-            if (key >= 1 && key <= 9) {
-                e.preventDefault();
-                tags[key - 1]?.click();
-            } else if (e.key === '0') {
-                e.preventDefault();
-                tags[9]?.click();
-            }
-        });
+    // Number key shortcuts (1-9, 0 for 10th) - outside the forEach loop
+    document.addEventListener('keydown', function(e) {
+        // Only handle number keys if not in an input or select element
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') {
+            return;
+        }
+
+        const key = parseInt(e.key);
+        const tags = document.querySelectorAll('.issue-tag');
+        if (key >= 1 && key <= 9) {
+            e.preventDefault();
+            tags[key - 1]?.click();
+        } else if (e.key === '0') {
+            e.preventDefault();
+            tags[9]?.click();
+        }
     });
 
     // Approve button
@@ -516,13 +535,24 @@ document.addEventListener('DOMContentLoaded', function() {
     // Filter application
     document.getElementById('apply-filters')?.addEventListener('click', function() {
         const language = document.getElementById('language-filter').value;
+
+        // Language is required
+        if (!language) {
+            alert('Please select a language to begin rapid review');
+            return;
+        }
+
         const voice = document.getElementById('voice-filter').value;
         const status = document.getElementById('status-filter').value;
+        const subtype = document.getElementById('subtype-filter').value;
+        const level = document.getElementById('level-filter').value;
 
         const params = new URLSearchParams();
-        if (language) params.set('language', language);
+        params.set('language', language);  // Language is always set
         if (voice) params.set('voice', voice);
         if (status) params.set('status', status);
+        if (subtype) params.set('subtype', subtype);
+        if (level) params.set('level', level);
 
         window.location.href = '{{ url_for("audio.rapid_review") }}?' + params.toString();
     });
@@ -555,7 +585,9 @@ function submitReview(status) {
             quality_issues: selectedIssues,
             language: languageFilter,
             voice: voiceFilter,
-            status_filter: statusFilter
+            status_filter: statusFilter,
+            subtype: subtypeFilter,
+            level: levelFilter
         })
     })
     .then(response => response.json())
@@ -671,7 +703,9 @@ function performUndo() {
             quality_issues: [],
             language: languageFilter,
             voice: voiceFilter,
-            status_filter: statusFilter
+            status_filter: statusFilter,
+            subtype: subtypeFilter,
+            level: levelFilter
         })
     })
     .then(response => response.json())
@@ -743,7 +777,9 @@ function skipToNext() {
         body: JSON.stringify({
             language: languageFilter,
             voice: voiceFilter,
-            status_filter: statusFilter
+            status_filter: statusFilter,
+            subtype: subtypeFilter,
+            level: levelFilter
         })
     })
     .then(response => response.json())
@@ -778,7 +814,9 @@ function markBadTranslation() {
         body: JSON.stringify({
             language: languageFilter,
             voice: voiceFilter,
-            status_filter: statusFilter
+            status_filter: statusFilter,
+            subtype: subtypeFilter,
+            level: levelFilter
         })
     })
     .then(response => response.json())

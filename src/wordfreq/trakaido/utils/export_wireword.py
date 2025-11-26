@@ -21,7 +21,7 @@ if GREENLAND_SRC_PATH not in sys.path:
 
 import constants
 from wordfreq.storage.database import create_database_session
-from wordfreq.storage.models.schema import WordToken, Lemma, DerivativeForm
+from wordfreq.storage.models.schema import WordToken, Lemma, DerivativeForm, AudioQualityReview
 from wordfreq.storage.models.grammar_fact import GrammarFact
 from wordfreq.storage.translation_helpers import get_translation, LANGUAGE_FIELDS
 from wordfreq.tools.chinese_converter import to_simplified
@@ -316,6 +316,54 @@ class WirewordExporter:
         except Exception as e:
             logger.warning(f"Failed to generate pinyin for '{chinese_text}': {e}")
             return None
+
+    def _get_audio_hashes(
+        self,
+        session,
+        guid: str,
+        language: str,
+        grammatical_form: Optional[str] = None
+    ) -> Optional[Dict[str, str]]:
+        """
+        Get MD5 hashes for all available audio voices for a given word.
+
+        Args:
+            session: Database session
+            guid: Lemma GUID (e.g., "N01_001") or word text (e.g., "gyventi")
+            language: Language code (e.g., "zh")
+            grammatical_form: Optional grammatical form (e.g., "1s_pres"), None for base form
+
+        Returns:
+            Dict mapping voice names to MD5 hashes, e.g.:
+            {"ash": "ab4d3513...", "alloy": "cd567890..."}
+            Returns None if no audio available.
+        """
+        # Query all audio records for this word and form
+        query = session.query(AudioQualityReview).filter_by(
+            guid=guid,
+            language_code=language
+        )
+
+        # Filter by grammatical form (None matches NULL in database)
+        if grammatical_form is None:
+            query = query.filter(AudioQualityReview.grammatical_form.is_(None))
+        else:
+            query = query.filter_by(grammatical_form=grammatical_form)
+
+        audio_records = query.all()
+
+        if not audio_records:
+            return None
+
+        # Build dict of voice -> MD5 hash
+        audio_hashes = {}
+        for audio in audio_records:
+            # Only include approved or pending audio (not rejected/needs_replacement)
+            if audio.status in ('approved', 'pending_review', 'approved_with_issues'):
+                audio_hashes[audio.voice_name] = audio.manifest_md5
+
+        return audio_hashes if audio_hashes else None
+
     def export_to_wireword_format(
         self,
         output_path: str,
@@ -429,6 +477,17 @@ class WirewordExporter:
                                 pinyin = self._generate_pinyin(form.derivative_form_text)
                                 if pinyin:
                                     gram_form["target_pinyin"] = pinyin
+
+                            # Add audio MD5 hashes for this grammatical form
+                            form_audio = self._get_audio_hashes(
+                                session,
+                                entry["GUID"],
+                                self.language,
+                                grammatical_form=form.grammatical_form
+                            )
+                            if form_audio:
+                                gram_form["audio"] = form_audio
+
                             grammatical_forms[form.grammatical_form] = gram_form
                         elif form.grammatical_form in ["singular_accusative", "plural_accusative"]:
                             # Skip derivative forms for Lithuanian nouns (they're handled by special cases like "where is X")
@@ -447,6 +506,17 @@ class WirewordExporter:
                                 pinyin = self._generate_pinyin(form.derivative_form_text)
                                 if pinyin:
                                     gram_form["target_pinyin"] = pinyin
+
+                            # Add audio MD5 hashes for this grammatical form
+                            form_audio = self._get_audio_hashes(
+                                session,
+                                entry["GUID"],
+                                self.language,
+                                grammatical_form=form.grammatical_form
+                            )
+                            if form_audio:
+                                gram_form["audio"] = form_audio
+
                             grammatical_forms[form.grammatical_form] = gram_form
                         else:
                             # Skip derivative forms for Lithuanian nouns (they're handled by special cases like "where is X")
@@ -482,6 +552,17 @@ class WirewordExporter:
                                     pinyin = self._generate_pinyin(form.derivative_form_text)
                                     if pinyin:
                                         gram_form["target_pinyin"] = pinyin
+
+                                # Add audio MD5 hashes for this grammatical form
+                                form_audio = self._get_audio_hashes(
+                                    session,
+                                    entry["GUID"],
+                                    self.language,
+                                    grammatical_form=form.grammatical_form
+                                )
+                                if form_audio:
+                                    gram_form["audio"] = form_audio
+
                                 grammatical_forms[form.grammatical_form] = gram_form
 
                 # Generate derivative noun phrases (e.g., "where is X") for appropriate nouns
@@ -508,9 +589,11 @@ class WirewordExporter:
                     "word_type": self._normalize_pos_type(entry["pos_type"])
                 }
 
-                # Add filename field for Chinese to use GUID in URL instead of Chinese characters
-                if self.language == "zh" and entry["GUID"]:
-                    wireword["filename"] = entry["GUID"]
+                # Add audio MD5 hashes for all available voices
+                if entry["GUID"]:
+                    audio_hashes = self._get_audio_hashes(session, entry["GUID"], self.language)
+                    if audio_hashes:
+                        wireword["audio"] = audio_hashes
 
                 # Add pinyin for Chinese language exports
                 if self.language == "zh" and entry["target_language"]:
@@ -1324,6 +1407,17 @@ class WirewordExporter:
                             # Convert grammatical form key to legacy format
                             # e.g., "verb/lt_3s_m_pres" -> "3s-m_pres"
                             legacy_key = self._convert_to_legacy_grammatical_form_key(form.grammatical_form)
+
+                            # Add audio MD5 hashes for this grammatical form
+                            form_audio = self._get_audio_hashes(
+                                session,
+                                lemma.guid,
+                                self.language,
+                                grammatical_form=form.grammatical_form
+                            )
+                            if form_audio:
+                                gram_form["audio"] = form_audio
+
                             grammatical_forms[legacy_key] = gram_form
 
                 # Create WireWord object
@@ -1337,9 +1431,11 @@ class WirewordExporter:
                     "word_type": "verb"
                 }
 
-                # Add filename field for Chinese to use GUID in URL instead of Chinese characters
-                if self.language == "zh" and lemma.guid:
-                    wireword["filename"] = lemma.guid
+                # Add audio MD5 hashes for all available voices
+                if lemma.guid:
+                    audio_hashes = self._get_audio_hashes(session, lemma.guid, self.language)
+                    if audio_hashes:
+                        wireword["audio"] = audio_hashes
 
                 # Add pinyin for Chinese language exports
                 if self.language == "zh" and base_target:
