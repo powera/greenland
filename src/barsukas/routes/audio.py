@@ -17,7 +17,7 @@ from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 import io
 
-from wordfreq.storage.models.schema import AudioQualityReview, Lemma
+from wordfreq.storage.models.schema import AudioQualityReview, Lemma, LemmaDifficultyOverride
 
 bp = Blueprint("audio", __name__, url_prefix="/audio")
 
@@ -33,6 +33,42 @@ LANGUAGE_DIR_MAP = {
     "sw": "swahili",
     "vi": "vietnamese",
 }
+
+
+def apply_effective_difficulty_filter(query, language_code: str, difficulty_level: int):
+    """
+    Apply difficulty level filter considering language-specific overrides.
+
+    This uses a SQL COALESCE to prefer override difficulty over base difficulty.
+    The query must already have Lemma joined.
+
+    Args:
+        query: SQLAlchemy query with Lemma joined
+        language_code: Language code (e.g., "lt", "zh")
+        difficulty_level: Target difficulty level
+
+    Returns:
+        Modified query with difficulty filter applied
+    """
+    from sqlalchemy import case
+
+    # Left join with difficulty overrides for the specific language
+    query = query.outerjoin(
+        LemmaDifficultyOverride,
+        (LemmaDifficultyOverride.lemma_id == Lemma.id) &
+        (LemmaDifficultyOverride.language_code == language_code)
+    )
+
+    # Use COALESCE to prefer override difficulty, fall back to base difficulty
+    # Filter by the effective difficulty level
+    effective_difficulty = case(
+        (LemmaDifficultyOverride.difficulty_level.isnot(None), LemmaDifficultyOverride.difficulty_level),
+        else_=Lemma.difficulty_level
+    )
+
+    query = query.filter(effective_difficulty == difficulty_level)
+
+    return query
 
 
 def link_audio_to_lemma(session, guid: str, expected_text: str, language_code: str) -> Optional[int]:
@@ -654,7 +690,8 @@ def rapid_review():
     if level_filter:
         try:
             level_int = int(level_filter)
-            query = query.filter(Lemma.difficulty_level == level_int)
+            # Apply effective difficulty filter considering language overrides
+            query = apply_effective_difficulty_filter(query, language_filter, level_int)
         except ValueError:
             pass  # Ignore invalid level values
 
@@ -772,7 +809,8 @@ def rapid_review_submit(review_id):
         if level_filter:
             try:
                 level_int = int(level_filter)
-                query = query.filter(Lemma.difficulty_level == level_int)
+                # Apply effective difficulty filter considering language overrides
+                query = apply_effective_difficulty_filter(query, language_filter, level_int)
             except ValueError:
                 pass  # Ignore invalid level values
 
@@ -879,7 +917,8 @@ def rapid_review_skip(review_id):
         if level_filter:
             try:
                 level_int = int(level_filter)
-                query = query.filter(Lemma.difficulty_level == level_int)
+                # Apply effective difficulty filter considering language overrides
+                query = apply_effective_difficulty_filter(query, language_filter, level_int)
             except ValueError:
                 pass  # Ignore invalid level values
 
@@ -992,7 +1031,8 @@ def rapid_review_bad_translation(review_id):
         if level_filter:
             try:
                 level_int = int(level_filter)
-                query = query.filter(Lemma.difficulty_level == level_int)
+                # Apply effective difficulty filter considering language overrides
+                query = apply_effective_difficulty_filter(query, language_filter, level_int)
             except ValueError:
                 pass  # Ignore invalid level values
 
