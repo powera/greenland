@@ -788,12 +788,12 @@ class WirewordExporter:
 
         return pos_mappings.get(pos_type.lower(), pos_type)
 
-    def _convert_to_legacy_grammatical_form_key(self, grammatical_form: str) -> str:
+    def _convert_to_wireword_grammatical_form_key(self, grammatical_form: str) -> str:
         """
-        Convert new grammatical form key format to legacy format.
+        Convert database grammatical form key format to WireWord format.
 
         Converts from database format like "verb/lt_3s_m_pres" or "verb/fr_1s_pres"
-        to legacy wireword format like "3s-m_pres" or "1s_pres".
+        to WireWord format like "3s-m_pres" or "1s_pres".
 
         The key transformations:
         - Remove "verb/{lang}_" prefix
@@ -803,9 +803,9 @@ class WirewordExporter:
             grammatical_form: Database grammatical form key (e.g., "verb/lt_3s_m_pres")
 
         Returns:
-            Legacy format key (e.g., "3s-m_pres")
+            WireWord format key (e.g., "3s-m_pres")
         """
-        # If already in legacy format (no prefix), return as-is
+        # If already in WireWord format (no prefix), return as-is
         if not grammatical_form.startswith("verb/"):
             return grammatical_form
 
@@ -1404,21 +1404,22 @@ class WirewordExporter:
                                 if pinyin:
                                     gram_form["target_pinyin"] = pinyin
 
-                            # Convert grammatical form key to legacy format
+                            # Convert grammatical form key to WireWord format
                             # e.g., "verb/lt_3s_m_pres" -> "3s-m_pres"
-                            legacy_key = self._convert_to_legacy_grammatical_form_key(form.grammatical_form)
+                            wireword_key = self._convert_to_wireword_grammatical_form_key(form.grammatical_form)
 
                             # Add audio MD5 hashes for this grammatical form
+                            # Use wireword_key since audio_quality_reviews stores forms in WireWord format
                             form_audio = self._get_audio_hashes(
                                 session,
                                 lemma.guid,
                                 self.language,
-                                grammatical_form=form.grammatical_form
+                                grammatical_form=wireword_key
                             )
                             if form_audio:
                                 gram_form["audio"] = form_audio
 
-                            grammatical_forms[legacy_key] = gram_form
+                            grammatical_forms[wireword_key] = gram_form
 
                 # Create WireWord object
                 wireword = {
