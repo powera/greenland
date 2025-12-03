@@ -260,7 +260,7 @@
         <div class="metadata-row">
             <span><strong>GUID:</strong> <code id="guid">{{ review.guid }}</code></span>
             <span><strong>Language:</strong> <span class="badge bg-secondary" id="language">{{ review.language_code }}</span></span>
-            <span><strong>Voice:</strong> <span class="badge bg-info" id="voice">{{ review.voice_name }}</span></span>
+            <span><strong>Voice:</strong> <span class="badge bg-info" id="voice">{{ review.display_voice }}</span></span>
         </div>
 
         <!-- Issue Tags (collapsible) -->
@@ -625,7 +625,7 @@ function loadNextReview(review) {
     document.getElementById('expected-text').textContent = review.expected_text;
     document.getElementById('guid').textContent = review.guid;
     document.getElementById('language').textContent = review.language_code;
-    document.getElementById('voice').textContent = review.voice_name;
+    document.getElementById('voice').textContent = review.display_voice;
 
     // Update pinyin if present (for Chinese)
     const pinyinDisplay = document.getElementById('pinyin-display');
@@ -740,7 +740,7 @@ function loadPreviousReview(review) {
     document.getElementById('expected-text').textContent = review.expected_text;
     document.getElementById('guid').textContent = review.guid;
     document.getElementById('language').textContent = review.language_code;
-    document.getElementById('voice').textContent = review.voice_name;
+    document.getElementById('voice').textContent = review.display_voice;
 
     // Update pinyin if present
     const pinyinDisplay = document.getElementById('pinyin-display');

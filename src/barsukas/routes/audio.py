@@ -216,11 +216,11 @@ def index():
         func.count(AudioQualityReview.id)
     ).group_by(AudioQualityReview.language_code).all()
 
-    # Get counts by voice
+    # Get counts by voice (grouped by language/voice combination)
     voice_counts = g.db.query(
-        AudioQualityReview.voice_name,
+        AudioQualityReview.display_voice,
         func.count(AudioQualityReview.id)
-    ).group_by(AudioQualityReview.voice_name).all()
+    ).group_by(AudioQualityReview.language_code, AudioQualityReview.voice_name).all()
 
     return render_template(
         "audio/index.html",
@@ -397,7 +397,12 @@ def list_files():
         query = query.filter(AudioQualityReview.language_code == language_filter)
 
     if voice_filter:
-        query = query.filter(AudioQualityReview.voice_name == voice_filter)
+        # Check if voice_filter contains '/' (language/voice format)
+        if '/' in voice_filter:
+            query = query.filter(AudioQualityReview.display_voice == voice_filter)
+        else:
+            # Legacy support: filter by voice_name only
+            query = query.filter(AudioQualityReview.voice_name == voice_filter)
 
     if status_filter:
         query = query.filter(AudioQualityReview.status == status_filter)
@@ -423,8 +428,8 @@ def list_files():
     languages = g.db.query(AudioQualityReview.language_code).distinct().all()
     languages = sorted([lang[0] for lang in languages])
 
-    voices = g.db.query(AudioQualityReview.voice_name).distinct().all()
-    voices = sorted([voice[0] for voice in voices])
+    voices = g.db.query(AudioQualityReview.display_voice).distinct().order_by(AudioQualityReview.display_voice).all()
+    voices = [voice[0] for voice in voices]
 
     statuses = ["pending_review", "approved", "approved_with_issues", "needs_replacement"]
 
@@ -483,7 +488,12 @@ def download_filelist():
         query = query.filter(AudioQualityReview.language_code == language_filter)
 
     if voice_filter:
-        query = query.filter(AudioQualityReview.voice_name == voice_filter)
+        # Check if voice_filter contains '/' (language/voice format)
+        if '/' in voice_filter:
+            query = query.filter(AudioQualityReview.display_voice == voice_filter)
+        else:
+            # Legacy support: filter by voice_name only
+            query = query.filter(AudioQualityReview.voice_name == voice_filter)
 
     if status_filter:
         query = query.filter(AudioQualityReview.status == status_filter)
@@ -704,7 +714,12 @@ def rapid_review():
         query = query.filter(AudioQualityReview.language_code == language_filter)
 
     if voice_filter:
-        query = query.filter(AudioQualityReview.voice_name == voice_filter)
+        # Check if voice_filter contains '/' (language/voice format)
+        if '/' in voice_filter:
+            query = query.filter(AudioQualityReview.display_voice == voice_filter)
+        else:
+            # Legacy support: filter by voice_name only
+            query = query.filter(AudioQualityReview.voice_name == voice_filter)
 
     if status_filter:
         query = query.filter(AudioQualityReview.status == status_filter)
@@ -733,8 +748,8 @@ def rapid_review():
     languages = g.db.query(AudioQualityReview.language_code).distinct().all()
     languages = sorted([lang[0] for lang in languages])
 
-    voices = g.db.query(AudioQualityReview.voice_name).distinct().all()
-    voices = sorted([voice[0] for voice in voices])
+    voices = g.db.query(AudioQualityReview.display_voice).distinct().order_by(AudioQualityReview.display_voice).all()
+    voices = [voice[0] for voice in voices]
 
     statuses = ["pending_review", "approved", "approved_with_issues", "needs_replacement"]
 
@@ -866,6 +881,7 @@ def rapid_review_submit(review_id):
                     "expected_text": next_review.expected_text,
                     "language_code": next_review.language_code,
                     "voice_name": next_review.voice_name,
+                    "display_voice": next_review.display_voice,
                     "filename": next_review.filename,
                     "pinyin": pinyin_text,
                     "audio_url": url_for("audio.serve_audio_file",
@@ -974,6 +990,7 @@ def rapid_review_skip(review_id):
                     "expected_text": next_review.expected_text,
                     "language_code": next_review.language_code,
                     "voice_name": next_review.voice_name,
+                    "display_voice": next_review.display_voice,
                     "filename": next_review.filename,
                     "pinyin": pinyin_text,
                     "audio_url": url_for("audio.serve_audio_file",
@@ -1088,6 +1105,7 @@ def rapid_review_bad_translation(review_id):
                     "expected_text": next_review.expected_text,
                     "language_code": next_review.language_code,
                     "voice_name": next_review.voice_name,
+                    "display_voice": next_review.display_voice,
                     "filename": next_review.filename,
                     "pinyin": pinyin_text,
                     "audio_url": url_for("audio.serve_audio_file",

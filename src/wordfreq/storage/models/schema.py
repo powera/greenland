@@ -4,7 +4,8 @@
 
 import datetime
 from typing import Optional, List
-from sqlalchemy import String, Integer, Text, Float, ForeignKey, TIMESTAMP, Boolean, func, UniqueConstraint, CheckConstraint
+from sqlalchemy import String, Integer, Text, Float, ForeignKey, TIMESTAMP, Boolean, func, UniqueConstraint, CheckConstraint, literal_column
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 class Base(DeclarativeBase):
@@ -346,3 +347,13 @@ class AudioQualityReview(Base):
 
     # Relationships
     lemma = relationship("Lemma")
+
+    @hybrid_property
+    def display_voice(self):
+        """Display voice as 'language/voice' format for UX."""
+        return f"{self.language_code}/{self.voice_name}"
+
+    @display_voice.expression
+    def display_voice(cls):
+        """SQL expression for display_voice."""
+        return cls.language_code + literal_column("'/'") + cls.voice_name
