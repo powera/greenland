@@ -202,9 +202,9 @@ def get_pos_and_subtype_for_category(display_category_name: str) -> tuple[str, O
         # Body and health
         "Body Parts": ("noun", "body_part"),
         # People and relationships
-        "Occupations": ("noun", "human"),
-        "Family & Relationships": ("noun", "human"),
-        "People & Relationships": ("noun", "human"),
+        "Occupations": ("noun", "occupation"),
+        "Family & Relationships": ("noun", "family_relation"),
+        "People & Relationships": ("noun", "human"),  # Generic category
         "Nationalities": ("noun", "nationality"),
         # Places and geography
         "Countries": ("noun", "place_name"),

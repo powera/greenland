@@ -4,6 +4,8 @@
 SUBTYPE_GUID_PREFIXES = {
     # Noun subtypes (N01-N99)
     "human": "N01",
+    "family_relation": "N35",
+    "occupation": "N36",
     "animal": "N02",
     "body_part": "N03",
     "disease_condition": "N04",
