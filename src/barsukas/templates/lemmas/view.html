@@ -634,7 +634,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         {% for audio in audio_files %}
                         <tr>
                             <td><span class="badge bg-secondary">{{ audio.language_code }}</span></td>
-                            <td><span class="badge bg-info">{{ audio.voice_name }}</span></td>
+                            <td><span class="badge bg-info">{{ audio.display_voice }}</span></td>
                             <td>
                                 <strong>{{ audio.expected_text }}</strong>
                                 {% if audio.language_code == 'zh' %}

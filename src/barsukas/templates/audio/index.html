@@ -118,12 +118,12 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for voice, count in voice_counts.items() %}
+                            {% for display_voice, count in voice_counts.items() %}
                             <tr>
-                                <td><code>{{ voice }}</code></td>
+                                <td><code>{{ display_voice }}</code></td>
                                 <td class="text-end">{{ count }}</td>
                                 <td>
-                                    <a href="{{ url_for('audio.list_files', voice=voice) }}" class="btn btn-sm btn-outline-primary">
+                                    <a href="{{ url_for('audio.list_files', voice=display_voice) }}" class="btn btn-sm btn-outline-primary">
                                         View
                                     </a>
                                 </td>
