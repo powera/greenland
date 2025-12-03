@@ -8,6 +8,9 @@ SRC_DIR = os.path.dirname(os.path.abspath(__file__))
 # Get the project root (top-level directory)
 PROJECT_ROOT = os.path.dirname(SRC_DIR)
 
+# Agents directory
+AGENTS_DIR = os.path.join(SRC_DIR, "agents")
+
 # Define common paths relative to project root
 BENCHMARK_DATA_DIR = os.path.join(SRC_DIR, "benchmarks")  # TODO: split/move?
 SCHEMA_DIR = os.path.join(SRC_DIR, "benchmarks", "schema")

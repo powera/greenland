@@ -111,6 +111,7 @@ class TrakaidoExporter:
         limit: Optional[int] = None,
         include_without_guid: bool = False,
         include_unverified: bool = True,
+        exclude_verbs: bool = True,
     ) -> List[Dict[str, Any]]:
         """
         Query trakaido data from the database with flexible filtering.
@@ -126,6 +127,7 @@ class TrakaidoExporter:
             limit: Limit number of results (optional)
             include_without_guid: Include lemmas without GUIDs (default: False)
             include_unverified: Include unverified entries (default: True)
+            exclude_verbs: Exclude verbs from results (default: True, for backward compatibility)
 
         Returns:
             List of dictionaries with trakaido data
@@ -140,9 +142,11 @@ class TrakaidoExporter:
         _, _, use_translation_table = LANGUAGE_FIELDS[self.language]
 
         # Build the query
-        query = session.query(Lemma).filter(
-            Lemma.pos_type != "verb"
-        )  # Exclude verbs - they go in separate file
+        query = session.query(Lemma)
+
+        # Optionally exclude verbs (default behavior for backward compatibility)
+        if exclude_verbs:
+            query = query.filter(Lemma.pos_type != "verb")
 
         # For column-based translations, we can filter in SQL
         if not use_translation_table:

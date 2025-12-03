@@ -8,6 +8,7 @@ import os
 import re
 from pathlib import Path
 from config import Config
+import constants
 
 bp = Blueprint("exports", __name__, url_prefix="/exports")
 
@@ -31,8 +32,7 @@ def povas_generate():
     dry_run = request.form.get("dry_run") == "true"
 
     # Build command
-    agents_dir = Path(Config.DB_PATH).parent.parent / "agents"
-    script_path = agents_dir / "povas.py"
+    script_path = Path(constants.AGENTS_DIR) / "povas.py"
 
     if not script_path.exists():
         return jsonify({"success": False, "error": f"Script not found: {script_path}"}), 404
@@ -91,8 +91,7 @@ def elnias_generate():
     include_unverified = request.form.get("include_unverified") == "true"
 
     # Build command
-    agents_dir = Path(Config.DB_PATH).parent.parent / "agents"
-    script_path = agents_dir / "elnias.py"
+    script_path = Path(constants.AGENTS_DIR) / "elnias.py"
 
     if not script_path.exists():
         return jsonify({"success": False, "error": f"Script not found: {script_path}"}), 404
@@ -160,7 +159,7 @@ def elnias_download():
         return redirect(url_for("exports.elnias_form"))
 
     # Security: Ensure the file path is within the project directory
-    project_root = Path(Config.DB_PATH).parent.parent
+    project_root = Path(constants.PROJECT_ROOT)
     abs_file_path = Path(file_path).resolve()
 
     try:

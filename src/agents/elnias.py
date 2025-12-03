@@ -151,12 +151,13 @@ class ElniasAgent:
         logger.info(f"Language: {SUPPORTED_LANGUAGES[self.language]}")
         logger.info(f"Include unverified: {include_unverified}")
 
-        # Query all non-verb words with translations
-        # Note: verbs are excluded because of wild differences in conjugation between languages
+        # Query all words with translations (including verbs)
+        # Note: Bootstrap format only includes base forms, so verb conjugation complexity doesn't apply
         export_data = self.exporter.query_trakaido_data(
             session=self.exporter.get_session(),
             include_without_guid=False,  # Only include words with GUIDs for bootstrap
             include_unverified=include_unverified,
+            exclude_verbs=False,  # Include verbs in bootstrap export
         )
 
         logger.info(f"Found {len(export_data)} entries for export")
