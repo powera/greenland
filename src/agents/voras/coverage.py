@@ -16,11 +16,7 @@ if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
 from wordfreq.storage.models.schema import Lemma
-from wordfreq.storage.translation_helpers import (
-    LANGUAGE_FIELDS,
-    get_translation,
-    get_language_name
-)
+from wordfreq.storage.translation_helpers import LANGUAGE_FIELDS, get_translation, get_language_name
 
 logger = logging.getLogger(__name__)
 
@@ -39,9 +35,7 @@ def check_overall_coverage(session) -> Dict[str, any]:
 
     try:
         # Get all lemmas with GUIDs (curated words)
-        all_lemmas = session.query(Lemma).filter(
-            Lemma.guid.isnot(None)
-        ).all()
+        all_lemmas = session.query(Lemma).filter(Lemma.guid.isnot(None)).all()
 
         total_lemmas = len(all_lemmas)
         logger.info(f"Found {total_lemmas} curated lemmas")
@@ -58,13 +52,15 @@ def check_overall_coverage(session) -> Dict[str, any]:
                 if translation and translation.strip():
                     with_translation += 1
                 else:
-                    without_translation.append({
-                        "guid": lemma.guid,
-                        "lemma_text": lemma.lemma_text,
-                        "pos_type": lemma.pos_type,
-                        "pos_subtype": lemma.pos_subtype,
-                        "difficulty_level": lemma.difficulty_level
-                    })
+                    without_translation.append(
+                        {
+                            "guid": lemma.guid,
+                            "lemma_text": lemma.lemma_text,
+                            "pos_type": lemma.pos_type,
+                            "pos_subtype": lemma.pos_subtype,
+                            "difficulty_level": lemma.difficulty_level,
+                        }
+                    )
 
             coverage_percentage = (with_translation / total_lemmas * 100) if total_lemmas else 0
 
@@ -74,10 +70,12 @@ def check_overall_coverage(session) -> Dict[str, any]:
                 "with_translation": with_translation,
                 "without_translation": len(without_translation),
                 "coverage_percentage": coverage_percentage,
-                "missing_translations": without_translation
+                "missing_translations": without_translation,
             }
 
-            logger.info(f"{language_name}: {with_translation}/{total_lemmas} ({coverage_percentage:.1f}%)")
+            logger.info(
+                f"{language_name}: {with_translation}/{total_lemmas} ({coverage_percentage:.1f}%)"
+            )
 
         # Find lemmas with complete translation coverage (all languages)
         fully_translated = []
@@ -99,21 +97,25 @@ def check_overall_coverage(session) -> Dict[str, any]:
             if translation_count == len(LANGUAGE_FIELDS):
                 fully_translated.append(lemma.guid)
             elif translation_count == 0:
-                not_translated.append({
-                    "guid": lemma.guid,
-                    "lemma_text": lemma.lemma_text,
-                    "pos_type": lemma.pos_type,
-                    "difficulty_level": lemma.difficulty_level
-                })
+                not_translated.append(
+                    {
+                        "guid": lemma.guid,
+                        "lemma_text": lemma.lemma_text,
+                        "pos_type": lemma.pos_type,
+                        "difficulty_level": lemma.difficulty_level,
+                    }
+                )
             else:
-                partially_translated.append({
-                    "guid": lemma.guid,
-                    "lemma_text": lemma.lemma_text,
-                    "pos_type": lemma.pos_type,
-                    "difficulty_level": lemma.difficulty_level,
-                    "translation_count": translation_count,
-                    "missing_languages": missing_languages
-                })
+                partially_translated.append(
+                    {
+                        "guid": lemma.guid,
+                        "lemma_text": lemma.lemma_text,
+                        "pos_type": lemma.pos_type,
+                        "difficulty_level": lemma.difficulty_level,
+                        "translation_count": translation_count,
+                        "missing_languages": missing_languages,
+                    }
+                )
 
         return {
             "total_lemmas": total_lemmas,
@@ -123,7 +125,7 @@ def check_overall_coverage(session) -> Dict[str, any]:
             "not_translated_count": len(not_translated),
             "fully_translated_guids": fully_translated,
             "partially_translated": partially_translated,
-            "not_translated": not_translated
+            "not_translated": not_translated,
         }
 
     except Exception as e:
@@ -134,7 +136,7 @@ def check_overall_coverage(session) -> Dict[str, any]:
             "language_coverage": {},
             "fully_translated_count": 0,
             "partially_translated_count": 0,
-            "not_translated_count": 0
+            "not_translated_count": 0,
         }
 
 
@@ -157,9 +159,7 @@ def check_language_coverage(session, language_code: str) -> Dict[str, any]:
 
     try:
         # Get all lemmas with GUIDs
-        all_lemmas = session.query(Lemma).filter(
-            Lemma.guid.isnot(None)
-        ).all()
+        all_lemmas = session.query(Lemma).filter(Lemma.guid.isnot(None)).all()
 
         total_lemmas = len(all_lemmas)
 
@@ -180,12 +180,14 @@ def check_language_coverage(session, language_code: str) -> Dict[str, any]:
             if translation and translation.strip():
                 coverage_by_pos[pos_type]["with_translation"] += 1
             else:
-                missing_by_pos[pos_type].append({
-                    "guid": lemma.guid,
-                    "lemma_text": lemma.lemma_text,
-                    "pos_subtype": lemma.pos_subtype,
-                    "difficulty_level": lemma.difficulty_level
-                })
+                missing_by_pos[pos_type].append(
+                    {
+                        "guid": lemma.guid,
+                        "lemma_text": lemma.lemma_text,
+                        "pos_subtype": lemma.pos_subtype,
+                        "difficulty_level": lemma.difficulty_level,
+                    }
+                )
 
         # Calculate percentages
         pos_statistics = {}
@@ -196,11 +198,13 @@ def check_language_coverage(session, language_code: str) -> Dict[str, any]:
                 "with_translation": stats["with_translation"],
                 "without_translation": stats["total"] - stats["with_translation"],
                 "coverage_percentage": percentage,
-                "missing": missing_by_pos[pos_type]
+                "missing": missing_by_pos[pos_type],
             }
 
         # Overall stats
-        total_with_translation = sum(stats["with_translation"] for stats in coverage_by_pos.values())
+        total_with_translation = sum(
+            stats["with_translation"] for stats in coverage_by_pos.values()
+        )
         overall_percentage = (total_with_translation / total_lemmas * 100) if total_lemmas else 0
 
         return {
@@ -210,7 +214,7 @@ def check_language_coverage(session, language_code: str) -> Dict[str, any]:
             "with_translation": total_with_translation,
             "without_translation": total_lemmas - total_with_translation,
             "coverage_percentage": overall_percentage,
-            "coverage_by_pos": pos_statistics
+            "coverage_by_pos": pos_statistics,
         }
 
     except Exception as e:
@@ -223,7 +227,7 @@ def check_language_coverage(session, language_code: str) -> Dict[str, any]:
             "with_translation": 0,
             "without_translation": 0,
             "coverage_percentage": 0,
-            "coverage_by_pos": {}
+            "coverage_by_pos": {},
         }
 
 
@@ -241,10 +245,11 @@ def check_difficulty_level_coverage(session) -> Dict[str, any]:
 
     try:
         # Get all lemmas with GUIDs and difficulty levels
-        all_lemmas = session.query(Lemma).filter(
-            Lemma.guid.isnot(None),
-            Lemma.difficulty_level.isnot(None)
-        ).all()
+        all_lemmas = (
+            session.query(Lemma)
+            .filter(Lemma.guid.isnot(None), Lemma.difficulty_level.isnot(None))
+            .all()
+        )
 
         logger.info(f"Found {len(all_lemmas)} lemmas with difficulty levels")
 
@@ -257,7 +262,7 @@ def check_difficulty_level_coverage(session) -> Dict[str, any]:
             if level not in coverage_by_level:
                 coverage_by_level[level] = {
                     "total": 0,
-                    "language_coverage": {lang: 0 for lang in LANGUAGE_FIELDS.keys()}
+                    "language_coverage": {lang: 0 for lang in LANGUAGE_FIELDS.keys()},
                 }
 
             coverage_by_level[level]["total"] += 1
@@ -280,21 +285,14 @@ def check_difficulty_level_coverage(session) -> Dict[str, any]:
             level_statistics[level] = {
                 "total_lemmas": total,
                 "language_coverage": stats["language_coverage"],
-                "language_percentages": language_percentages
+                "language_percentages": language_percentages,
             }
 
-        return {
-            "total_levels": len(coverage_by_level),
-            "coverage_by_level": level_statistics
-        }
+        return {"total_levels": len(coverage_by_level), "coverage_by_level": level_statistics}
 
     except Exception as e:
         logger.error(f"Error checking difficulty level coverage: {e}")
-        return {
-            "error": str(e),
-            "total_levels": 0,
-            "coverage_by_level": {}
-        }
+        return {"error": str(e), "total_levels": 0, "coverage_by_level": {}}
 
 
 def print_summary(results: Dict, start_time: datetime, duration: float):
@@ -311,15 +309,23 @@ def print_summary(results: Dict, start_time: datetime, duration: float):
         overall = results["checks"]["overall_coverage"]
         logger.info(f"OVERALL COVERAGE:")
         logger.info(f"  Total curated lemmas: {overall['total_lemmas']}")
-        logger.info(f"  Fully translated (all languages): {overall['fully_translated_count']} ({overall['fully_translated_count']/overall['total_lemmas']*100 if overall['total_lemmas'] else 0:.1f}%)")
-        logger.info(f"  Partially translated: {overall['partially_translated_count']} ({overall['partially_translated_count']/overall['total_lemmas']*100 if overall['total_lemmas'] else 0:.1f}%)")
-        logger.info(f"  Not translated: {overall['not_translated_count']} ({overall['not_translated_count']/overall['total_lemmas']*100 if overall['total_lemmas'] else 0:.1f}%)")
+        logger.info(
+            f"  Fully translated (all languages): {overall['fully_translated_count']} ({overall['fully_translated_count']/overall['total_lemmas']*100 if overall['total_lemmas'] else 0:.1f}%)"
+        )
+        logger.info(
+            f"  Partially translated: {overall['partially_translated_count']} ({overall['partially_translated_count']/overall['total_lemmas']*100 if overall['total_lemmas'] else 0:.1f}%)"
+        )
+        logger.info(
+            f"  Not translated: {overall['not_translated_count']} ({overall['not_translated_count']/overall['total_lemmas']*100 if overall['total_lemmas'] else 0:.1f}%)"
+        )
         logger.info("")
 
         logger.info(f"COVERAGE BY LANGUAGE:")
         for lang_code, lang_data in overall["language_coverage"].items():
             logger.info(f"  {lang_data['language_name']} ({lang_code}):")
-            logger.info(f"    Translated: {lang_data['with_translation']}/{lang_data['total_lemmas']} ({lang_data['coverage_percentage']:.1f}%)")
+            logger.info(
+                f"    Translated: {lang_data['with_translation']}/{lang_data['total_lemmas']} ({lang_data['coverage_percentage']:.1f}%)"
+            )
             logger.info(f"    Missing: {lang_data['without_translation']}")
         logger.info("")
 

@@ -4,18 +4,20 @@
 
 import enum
 
+
 class NounSubtype(enum.Enum):
     """Subtypes for nouns."""
+
     # People and Living Things
     HUMAN = "human"
     ANIMAL = "animal"
     BODY_PART = "body_part"
     DISEASE_CONDITION = "disease_condition"
     PLANT = "plant"
-    
+
     # Food and Consumables
     FOOD_DRINK = "food_drink"
-    
+
     # Physical Objects and Structures
     BUILDING_STRUCTURE = "building_structure"
     SMALL_MOVABLE_OBJECT = "small_movable_object"
@@ -24,12 +26,12 @@ class NounSubtype(enum.Enum):
     NATURAL_FEATURE = "natural_feature"
     TOOL_MACHINE = "tool_machine"
     PATH_INFRASTRUCTURE = "path_infrastructure"
-    
+
     # Materials and Substances
     MATERIAL_SUBSTANCE = "material_substance"
     CHEMICAL_COMPOUND = "chemical_compound"
     MEDICATION_REMEDY = "medication_remedy"
-    
+
     # Abstract Concepts and Ideas
     CONCEPT_IDEA = "concept_idea"
     SYMBOLIC_ELEMENT = "symbolic_element"
@@ -38,33 +40,35 @@ class NounSubtype(enum.Enum):
     KNOWLEDGE_DOMAIN = "knowledge_domain"
     QUANTITATIVE_CONCEPT = "quantitative_concept"
     EMOTION_FEELING = "emotion_feeling"
-    
+
     # Processes and Time
     PROCESS_EVENT = "process_event"
     TIME_PERIOD = "time_period"
-    
+
     # Groups and Collections
     GROUP_PEOPLE = "group_people"
     GROUP_ANIMAL = "animal_grouping_term"
     COLLECTION_THINGS = "collection_things"
-    
+
     # Named Entities
     PERSONAL_NAME = "personal_name"
     PLACE_NAME = "place_name"
     ORGANIZATION_NAME = "organization_name"
-    
+
     # Temporal Names
     TEMPORAL_NAME = "temporal_name"  # Days of week, months, etc.
-    
+
     # Nationality and Measurement
     NATIONALITY = "nationality"
     UNIT_OF_MEASUREMENT = "unit_of_measurement"
-    
+
     # Other
     OTHER = "other"
 
+
 class VerbSubtype(enum.Enum):
     """Subtypes for verbs."""
+
     PHYSICAL_ACTION = "physical_action"
     CREATION_ACTION = "creation_action"
     DESTRUCTION_ACTION = "destruction_action"
@@ -80,8 +84,10 @@ class VerbSubtype(enum.Enum):
     MANNER_MOVEMENT = "manner_movement"
     OTHER = "other"
 
+
 class AdjectiveSubtype(enum.Enum):
     """Subtypes for adjectives."""
+
     SIZE = "size"
     COLOR = "color"
     SHAPE = "shape"
@@ -99,8 +105,10 @@ class AdjectiveSubtype(enum.Enum):
     SEQUENCE = "sequence"
     OTHER = "other"
 
+
 class AdverbSubtype(enum.Enum):
     """Subtypes for adverbs."""
+
     STYLE = "style"
     ATTITUDE = "attitude"
     SPECIFIC_TIME = "specific_time"
@@ -116,8 +124,10 @@ class AdverbSubtype(enum.Enum):
     INDEFINITE_FREQUENCY = "indefinite_frequency"
     OTHER = "other"
 
+
 class GrammaticalForm(enum.Enum):
     """Grammatical forms for derivative forms with part-of-speech prefixes."""
+
     # Verb forms - generic/language-neutral
     VERB_INFINITIVE = "verb/infinitive"
     VERB_PAST_PARTICIPLE = "verb/past_participle"
@@ -183,7 +193,7 @@ class GrammaticalForm(enum.Enum):
     VERB_LT_2P_FUT = "verb/lt_2p_fut"
     VERB_LT_3P_M_FUT = "verb/lt_3p-m_fut"
     VERB_LT_3P_F_FUT = "verb/lt_3p-f_fut"
-    
+
     # Noun forms (English)
     NOUN_SINGULAR = "noun/singular"
     NOUN_PLURAL = "noun/plural"
@@ -206,7 +216,7 @@ class GrammaticalForm(enum.Enum):
     NOUN_LT_INSTRUMENTAL_PLURAL = "noun/lt_instrumental_plural"
     NOUN_LT_LOCATIVE_PLURAL = "noun/lt_locative_plural"
     NOUN_LT_VOCATIVE_PLURAL = "noun/lt_vocative_plural"
-    
+
     # Adjective forms (English)
     ADJECTIVE_POSITIVE = "adjective/positive"
     ADJECTIVE_COMPARATIVE = "adjective/comparative"
@@ -427,20 +437,20 @@ class GrammaticalForm(enum.Enum):
     ADVERB_POSITIVE = "adverb/positive"
     ADVERB_COMPARATIVE = "adverb/comparative"
     ADVERB_SUPERLATIVE = "adverb/superlative"
-    
+
     # Pronoun forms
     PRONOUN_SUBJECTIVE = "pronoun/subjective"
     PRONOUN_OBJECTIVE = "pronoun/objective"
     PRONOUN_POSSESSIVE = "pronoun/possessive"
     PRONOUN_REFLEXIVE = "pronoun/reflexive"
-    
+
     # Other parts of speech (typically invariant)
     PREPOSITION = "preposition/base"
     CONJUNCTION = "conjunction/base"
     INTERJECTION = "interjection/base"
     DETERMINER = "determiner/base"
     ARTICLE = "article/base"
-    
+
     # Generic forms
     BASE_FORM = "base_form"
     OTHER = "other"

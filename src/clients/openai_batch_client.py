@@ -19,8 +19,10 @@ logger = logging.getLogger(__name__)
 API_BASE = "https://api.openai.com/v1"
 DEFAULT_TIMEOUT = 50
 
+
 class BatchStatus(Enum):
     """Status of a batch job."""
+
     VALIDATING = "validating"
     FAILED = "failed"
     IN_PROGRESS = "in_progress"
@@ -49,7 +51,7 @@ class OpenAIBatchClient:
         self.api_key = self._load_key()
         self.headers = {
             "Authorization": f"Bearer {self.api_key}",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
         }
 
     def _load_key(self) -> str:
@@ -96,16 +98,14 @@ class OpenAIBatchClient:
         files = {
             "file": ("batch_input.jsonl", jsonl_content.encode("utf-8"), "application/jsonl"),
         }
-        data = {
-            "purpose": "batch"
-        }
+        data = {"purpose": "batch"}
 
         response = requests.post(
             url,
             headers={"Authorization": f"Bearer {self.api_key}"},
             files=files,
             data=data,
-            timeout=self.timeout
+            timeout=self.timeout,
         )
 
         if response.status_code != 200:
@@ -127,7 +127,7 @@ class OpenAIBatchClient:
         input_file_id: str,
         endpoint: str = "/v1/responses",
         completion_window: str = "24h",
-        metadata: Optional[Dict[str, str]] = None
+        metadata: Optional[Dict[str, str]] = None,
     ) -> Dict[str, Any]:
         """Create a batch job.
 
@@ -145,7 +145,7 @@ class OpenAIBatchClient:
         payload = {
             "input_file_id": input_file_id,
             "endpoint": endpoint,
-            "completion_window": completion_window
+            "completion_window": completion_window,
         }
 
         if metadata:
@@ -155,12 +155,7 @@ class OpenAIBatchClient:
             logger.debug(f"Creating batch with input file: {input_file_id}")
             logger.debug(f"Payload: {json.dumps(payload, indent=2)}")
 
-        response = requests.post(
-            url,
-            headers=self.headers,
-            json=payload,
-            timeout=self.timeout
-        )
+        response = requests.post(url, headers=self.headers, json=payload, timeout=self.timeout)
 
         if response.status_code != 200:
             error_msg = f"Error creating batch {response.status_code}: {response.text}"
@@ -186,11 +181,7 @@ class OpenAIBatchClient:
         """
         url = f"{API_BASE}/batches/{batch_id}"
 
-        response = requests.get(
-            url,
-            headers=self.headers,
-            timeout=self.timeout
-        )
+        response = requests.get(url, headers=self.headers, timeout=self.timeout)
 
         if response.status_code != 200:
             error_msg = f"Error getting batch status {response.status_code}: {response.text}"
@@ -217,12 +208,7 @@ class OpenAIBatchClient:
         url = f"{API_BASE}/batches"
         params = {"limit": limit}
 
-        response = requests.get(
-            url,
-            headers=self.headers,
-            params=params,
-            timeout=self.timeout
-        )
+        response = requests.get(url, headers=self.headers, params=params, timeout=self.timeout)
 
         if response.status_code != 200:
             error_msg = f"Error listing batches {response.status_code}: {response.text}"
@@ -243,11 +229,7 @@ class OpenAIBatchClient:
         """
         url = f"{API_BASE}/batches/{batch_id}/cancel"
 
-        response = requests.post(
-            url,
-            headers=self.headers,
-            timeout=self.timeout
-        )
+        response = requests.post(url, headers=self.headers, timeout=self.timeout)
 
         if response.status_code != 200:
             error_msg = f"Error cancelling batch {response.status_code}: {response.text}"
@@ -272,11 +254,7 @@ class OpenAIBatchClient:
         """
         url = f"{API_BASE}/files/{output_file_id}/content"
 
-        response = requests.get(
-            url,
-            headers=self.headers,
-            timeout=self.timeout
-        )
+        response = requests.get(url, headers=self.headers, timeout=self.timeout)
 
         if response.status_code != 200:
             error_msg = f"Error downloading results {response.status_code}: {response.text}"
@@ -297,10 +275,7 @@ class OpenAIBatchClient:
         return results
 
     def wait_for_batch_completion(
-        self,
-        batch_id: str,
-        poll_interval: int = 60,
-        max_wait_time: Optional[int] = None
+        self, batch_id: str, poll_interval: int = 60, max_wait_time: Optional[int] = None
     ) -> Dict[str, Any]:
         """Wait for a batch to complete by polling its status.
 
@@ -325,21 +300,29 @@ class OpenAIBatchClient:
             if status == BatchStatus.COMPLETED.value:
                 logger.info(f"Batch {batch_id} completed successfully")
                 return batch_info
-            elif status in [BatchStatus.FAILED.value, BatchStatus.EXPIRED.value, BatchStatus.CANCELLED.value]:
+            elif status in [
+                BatchStatus.FAILED.value,
+                BatchStatus.EXPIRED.value,
+                BatchStatus.CANCELLED.value,
+            ]:
                 error_msg = f"Batch {batch_id} ended with status: {status}"
                 logger.error(error_msg)
                 raise Exception(error_msg)
 
             # Check timeout
             if max_wait_time and (time.time() - start_time) > max_wait_time:
-                raise TimeoutError(f"Batch {batch_id} did not complete within {max_wait_time} seconds")
+                raise TimeoutError(
+                    f"Batch {batch_id} did not complete within {max_wait_time} seconds"
+                )
 
             # Log progress
             counts = batch_info.get("request_counts", {})
             total = counts.get("total", 0)
             completed = counts.get("completed", 0)
             failed = counts.get("failed", 0)
-            logger.info(f"Batch {batch_id} - Status: {status}, Progress: {completed}/{total} completed, {failed} failed")
+            logger.info(
+                f"Batch {batch_id} - Status: {status}, Progress: {completed}/{total} completed, {failed} failed"
+            )
 
             # Wait before next poll
             time.sleep(poll_interval)
@@ -350,7 +333,7 @@ class OpenAIBatchClient:
         endpoint: str = "/v1/responses",
         metadata: Optional[Dict[str, str]] = None,
         poll_interval: int = 60,
-        max_wait_time: Optional[int] = None
+        max_wait_time: Optional[int] = None,
     ) -> List[Dict[str, Any]]:
         """Convenience method to submit a batch and wait for results.
 
@@ -387,38 +370,46 @@ class OpenAIBatchClient:
 # Create default client instance
 client = OpenAIBatchClient(debug=False)
 
+
 # Expose key functions at module level
 def upload_batch_file(requests_data: List[Dict[str, Any]]) -> str:
     """Upload a batch input file to OpenAI."""
     return client.upload_batch_file(requests_data)
 
+
 def create_batch(
     input_file_id: str,
     endpoint: str = "/v1/responses",
     completion_window: str = "24h",
-    metadata: Optional[Dict[str, str]] = None
+    metadata: Optional[Dict[str, str]] = None,
 ) -> Dict[str, Any]:
     """Create a batch job."""
     return client.create_batch(input_file_id, endpoint, completion_window, metadata)
+
 
 def get_batch_status(batch_id: str) -> Dict[str, Any]:
     """Get the current status of a batch job."""
     return client.get_batch_status(batch_id)
 
+
 def list_batches(limit: int = 20) -> List[Dict[str, Any]]:
     """List recent batch jobs."""
     return client.list_batches(limit)
 
+
 def download_batch_results(output_file_id: str) -> List[Dict[str, Any]]:
     """Download and parse batch results."""
     return client.download_batch_results(output_file_id)
+
 
 def submit_batch_and_wait(
     requests_data: List[Dict[str, Any]],
     endpoint: str = "/v1/responses",
     metadata: Optional[Dict[str, str]] = None,
     poll_interval: int = 60,
-    max_wait_time: Optional[int] = None
+    max_wait_time: Optional[int] = None,
 ) -> List[Dict[str, Any]]:
     """Submit a batch and wait for results."""
-    return client.submit_batch_and_wait(requests_data, endpoint, metadata, poll_interval, max_wait_time)
+    return client.submit_batch_and_wait(
+        requests_data, endpoint, metadata, poll_interval, max_wait_time
+    )

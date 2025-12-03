@@ -32,7 +32,7 @@ from wordfreq.storage.translation_helpers import (
     LANGUAGE_FIELDS,
     get_translation as get_translation_helper,
     set_translation as set_translation_helper,
-    get_language_name
+    get_language_name,
 )
 from wordfreq.tools.llm_validators import validate_all_translations_for_word
 from wordfreq.translation.client import LinguisticClient
@@ -42,8 +42,7 @@ from agents.voras import batch, coverage
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -77,9 +76,7 @@ class VorasAgent:
         """Get or create linguistic client for LLM queries."""
         if self.linguistic_client is None:
             self.linguistic_client = LinguisticClient(
-                model=self.model,
-                db_path=self.db_path,
-                debug=self.debug
+                model=self.model, db_path=self.db_path, debug=self.debug
             )
         return self.linguistic_client
 
@@ -99,7 +96,9 @@ class VorasAgent:
         Includes operation logging for audit trail.
         """
         # Use helper function which returns (old_translation, new_translation)
-        old_translation, new_translation = set_translation_helper(session, lemma, lang_code, translation)
+        old_translation, new_translation = set_translation_helper(
+            session, lemma, lang_code, translation
+        )
 
         # Log the translation change
         log_translation_change(
@@ -109,7 +108,7 @@ class VorasAgent:
             lemma_id=lemma.id,
             language_code=lang_code,
             old_translation=old_translation,
-            new_translation=new_translation
+            new_translation=new_translation,
         )
 
     def validate_translations(
@@ -117,7 +116,7 @@ class VorasAgent:
         language_code: str,
         limit: Optional[int] = None,
         sample_rate: float = 1.0,
-        confidence_threshold: float = 0.7
+        confidence_threshold: float = 0.7,
     ) -> Dict[str, any]:
         """
         Validate translations for a specific language using efficient single-call-per-word approach.
@@ -135,16 +134,22 @@ class VorasAgent:
             raise ValueError(f"Unsupported language code: {language_code}")
 
         field_name, language_name = LANGUAGE_FIELDS[language_code]
-        logger.info(f"Validating {language_name} translations (efficient mode: 1 LLM call per word)...")
+        logger.info(
+            f"Validating {language_name} translations (efficient mode: 1 LLM call per word)..."
+        )
 
         session = self.get_session()
         try:
             # Get lemmas with this language translation
-            query = session.query(Lemma).filter(
-                Lemma.guid.isnot(None),
-                getattr(Lemma, field_name).isnot(None),
-                getattr(Lemma, field_name) != ""
-            ).order_by(Lemma.id)
+            query = (
+                session.query(Lemma)
+                .filter(
+                    Lemma.guid.isnot(None),
+                    getattr(Lemma, field_name).isnot(None),
+                    getattr(Lemma, field_name) != "",
+                )
+                .order_by(Lemma.id)
+            )
 
             if limit:
                 query = query.limit(limit)
@@ -177,14 +182,13 @@ class VorasAgent:
                 if not translations:
                     continue
 
-                logger.debug(f"Validating word '{lemma.lemma_text}' (GUID: {lemma.guid}), checking {language_name}: '{translations.get(language_code, 'N/A')}'")
+                logger.debug(
+                    f"Validating word '{lemma.lemma_text}' (GUID: {lemma.guid}), checking {language_name}: '{translations.get(language_code, 'N/A')}'"
+                )
 
                 # Validate all translations in one call
                 validation_results = validate_all_translations_for_word(
-                    lemma.lemma_text,
-                    translations,
-                    lemma.pos_type,
-                    self.model
+                    lemma.lemma_text, translations, lemma.pos_type, self.model
                 )
 
                 # Only process results for the requested language
@@ -192,28 +196,31 @@ class VorasAgent:
                     lang_validation = validation_results[language_code]
 
                     has_issues = (
-                        (not lang_validation["is_correct"] or not lang_validation["is_lemma_form"])
-                        and lang_validation["confidence"] >= confidence_threshold
-                    )
+                        not lang_validation["is_correct"] or not lang_validation["is_lemma_form"]
+                    ) and lang_validation["confidence"] >= confidence_threshold
 
                     if has_issues:
-                        issues_found.append({
-                            "guid": lemma.guid,
-                            "english": lemma.lemma_text,
-                            "current_translation": translations[language_code],
-                            "suggested_translation": lang_validation["suggested_translation"],
-                            "pos_type": lemma.pos_type,
-                            "is_correct": lang_validation["is_correct"],
-                            "is_lemma_form": lang_validation["is_lemma_form"],
-                            "issues": lang_validation["issues"],
-                            "confidence": lang_validation["confidence"]
-                        })
+                        issues_found.append(
+                            {
+                                "guid": lemma.guid,
+                                "english": lemma.lemma_text,
+                                "current_translation": translations[language_code],
+                                "suggested_translation": lang_validation["suggested_translation"],
+                                "pos_type": lemma.pos_type,
+                                "is_correct": lang_validation["is_correct"],
+                                "is_lemma_form": lang_validation["is_lemma_form"],
+                                "issues": lang_validation["issues"],
+                                "confidence": lang_validation["confidence"],
+                            }
+                        )
                         logger.warning(
                             f"Translation issue ({lemma.guid}): '{lemma.lemma_text}' → '{translations[language_code]}' "
                             f"(suggested: '{lang_validation['suggested_translation']}', confidence: {lang_validation['confidence']:.2f})"
                         )
 
-            logger.info(f"Found {len(issues_found)} {language_name} translations with potential issues")
+            logger.info(
+                f"Found {len(issues_found)} {language_name} translations with potential issues"
+            )
 
             return {
                 "language_code": language_code,
@@ -222,7 +229,7 @@ class VorasAgent:
                 "issues_found": len(issues_found),
                 "issue_rate": (len(issues_found) / checked_count * 100) if checked_count else 0,
                 "issues": issues_found,
-                "confidence_threshold": confidence_threshold
+                "confidence_threshold": confidence_threshold,
             }
 
         except Exception as e:
@@ -234,7 +241,7 @@ class VorasAgent:
                 "total_checked": 0,
                 "issues_found": 0,
                 "issue_rate": 0,
-                "issues": []
+                "issues": [],
             }
         finally:
             session.close()
@@ -243,7 +250,7 @@ class VorasAgent:
         self,
         limit: Optional[int] = None,
         sample_rate: float = 1.0,
-        confidence_threshold: float = 0.7
+        confidence_threshold: float = 0.7,
     ) -> Dict[str, any]:
         """
         Validate all multi-lingual translations using efficient single-call-per-word approach.
@@ -256,14 +263,14 @@ class VorasAgent:
         Returns:
             Dictionary with results for all languages
         """
-        logger.info("Validating all multi-lingual translations (efficient mode: 1 LLM call per word)...")
+        logger.info(
+            "Validating all multi-lingual translations (efficient mode: 1 LLM call per word)..."
+        )
 
         session = self.get_session()
         try:
             # Get all lemmas with GUIDs
-            query = session.query(Lemma).filter(
-                Lemma.guid.isnot(None)
-            ).order_by(Lemma.id)
+            query = session.query(Lemma).filter(Lemma.guid.isnot(None)).order_by(Lemma.id)
 
             if limit:
                 query = query.limit(limit * 2)  # Get extra to account for filtering
@@ -300,7 +307,7 @@ class VorasAgent:
                     "issues_found": 0,
                     "issue_rate": 0.0,
                     "issues": [],
-                    "confidence_threshold": confidence_threshold
+                    "confidence_threshold": confidence_threshold,
                 }
                 for lang_code in LANGUAGE_FIELDS.keys()
             }
@@ -322,14 +329,13 @@ class VorasAgent:
                 if not translations:
                     continue
 
-                logger.debug(f"Validating word '{lemma.lemma_text}' (GUID: {lemma.guid}) with {len(translations)} translations")
+                logger.debug(
+                    f"Validating word '{lemma.lemma_text}' (GUID: {lemma.guid}) with {len(translations)} translations"
+                )
 
                 # Validate all translations in one call
                 validation_results = validate_all_translations_for_word(
-                    lemma.lemma_text,
-                    translations,
-                    lemma.pos_type,
-                    self.model
+                    lemma.lemma_text, translations, lemma.pos_type, self.model
                 )
 
                 # Process results for each language
@@ -338,23 +344,24 @@ class VorasAgent:
                     lang_result["total_checked"] += 1
 
                     has_issues = (
-                        (not lang_validation["is_correct"] or not lang_validation["is_lemma_form"])
-                        and lang_validation["confidence"] >= confidence_threshold
-                    )
+                        not lang_validation["is_correct"] or not lang_validation["is_lemma_form"]
+                    ) and lang_validation["confidence"] >= confidence_threshold
 
                     if has_issues:
                         lang_result["issues_found"] += 1
-                        lang_result["issues"].append({
-                            "guid": lemma.guid,
-                            "english": lemma.lemma_text,
-                            "current_translation": translations[lang_code],
-                            "suggested_translation": lang_validation["suggested_translation"],
-                            "pos_type": lemma.pos_type,
-                            "is_correct": lang_validation["is_correct"],
-                            "is_lemma_form": lang_validation["is_lemma_form"],
-                            "issues": lang_validation["issues"],
-                            "confidence": lang_validation["confidence"]
-                        })
+                        lang_result["issues"].append(
+                            {
+                                "guid": lemma.guid,
+                                "english": lemma.lemma_text,
+                                "current_translation": translations[lang_code],
+                                "suggested_translation": lang_validation["suggested_translation"],
+                                "pos_type": lemma.pos_type,
+                                "is_correct": lang_validation["is_correct"],
+                                "is_lemma_form": lang_validation["is_lemma_form"],
+                                "issues": lang_validation["issues"],
+                                "confidence": lang_validation["confidence"],
+                            }
+                        )
 
             # Calculate issue rates
             total_issues = 0
@@ -370,26 +377,16 @@ class VorasAgent:
                     f"({lang_result['issue_rate']:.1f}%)"
                 )
 
-            return {
-                "by_language": results_by_language,
-                "total_issues_all_languages": total_issues
-            }
+            return {"by_language": results_by_language, "total_issues_all_languages": total_issues}
 
         except Exception as e:
             logger.error(f"Error validating all translations: {e}")
-            return {
-                "error": str(e),
-                "by_language": {},
-                "total_issues_all_languages": 0
-            }
+            return {"error": str(e), "by_language": {}, "total_issues_all_languages": 0}
         finally:
             session.close()
 
     def regenerate_all_translations(
-        self,
-        limit: Optional[int] = None,
-        dry_run: bool = False,
-        batch_mode: bool = False
+        self, limit: Optional[int] = None, dry_run: bool = False, batch_mode: bool = False
     ) -> Dict[str, any]:
         """
         Delete all non-Lithuanian translations and regenerate them fresh.
@@ -425,17 +422,15 @@ class VorasAgent:
                     "language_name": get_language_name(lang_code),
                     "deleted": 0,
                     "added": 0,
-                    "failed": 0
+                    "failed": 0,
                 }
                 for lang_code in languages_to_regenerate
-            }
+            },
         }
 
         try:
             # Get all lemmas with GUIDs (curated words)
-            query = session.query(Lemma).filter(
-                Lemma.guid.isnot(None)
-            ).order_by(Lemma.id)
+            query = session.query(Lemma).filter(Lemma.guid.isnot(None)).order_by(Lemma.id)
 
             if limit:
                 query = query.limit(limit)
@@ -475,7 +470,9 @@ class VorasAgent:
                         for lang_code in languages_to_regenerate:
                             results["by_language"][lang_code]["added"] += 1
                             results["total_translations_added"] += 1
-                        logger.info(f"[DRY RUN] Would generate all translations for '{lemma.lemma_text}'")
+                        logger.info(
+                            f"[DRY RUN] Would generate all translations for '{lemma.lemma_text}'"
+                        )
                         continue
 
                     if batch_mode:
@@ -483,7 +480,9 @@ class VorasAgent:
                         # For brevity, just increment counter
                         results["batch_requests_queued"] += 1
                         if i % 100 == 0:
-                            logger.info(f"Queued {results['batch_requests_queued']} batch requests...")
+                            logger.info(
+                                f"Queued {results['batch_requests_queued']} batch requests..."
+                            )
                     else:
                         # Synchronous mode: use query_translations method - ONE CALL
                         # Use Lithuanian as reference translation
@@ -492,7 +491,7 @@ class VorasAgent:
                             reference_translation=("lt", lemma.lithuanian_translation or ""),
                             definition=lemma.definition_text,
                             pos_type=lemma.pos_type,
-                            pos_subtype=lemma.pos_subtype
+                            pos_subtype=lemma.pos_subtype,
                         )
 
                         if not success or not translations:
@@ -508,7 +507,7 @@ class VorasAgent:
                             "ko": "korean_translation",
                             "fr": "french_translation",
                             "sw": "swahili_translation",
-                            "vi": "vietnamese_translation"
+                            "vi": "vietnamese_translation",
                         }
 
                         # Add all non-Lithuanian translations
@@ -525,13 +524,17 @@ class VorasAgent:
                                 results["total_translations_added"] += 1
                                 added_this_word += 1
                             else:
-                                logger.warning(f"  LLM returned empty {language_name} translation for '{lemma.lemma_text}'")
+                                logger.warning(
+                                    f"  LLM returned empty {language_name} translation for '{lemma.lemma_text}'"
+                                )
                                 results["by_language"][lang_code]["failed"] += 1
                                 results["total_failed"] += 1
 
                         # Commit all updates for this word at once
                         session.commit()
-                        logger.info(f"Added {added_this_word}/{len(languages_to_regenerate)} translations for '{lemma.lemma_text}' (GUID: {lemma.guid})")
+                        logger.info(
+                            f"Added {added_this_word}/{len(languages_to_regenerate)} translations for '{lemma.lemma_text}' (GUID: {lemma.guid})"
+                        )
 
                 except Exception as e:
                     logger.error(f"Error processing '{lemma.lemma_text}': {e}")
@@ -549,7 +552,7 @@ class VorasAgent:
         self,
         language_code: Optional[str | List[str]] = None,
         limit: Optional[int] = None,
-        dry_run: bool = False
+        dry_run: bool = False,
     ) -> Dict[str, any]:
         """
         Generate missing translations using LLM and update the database.
@@ -585,19 +588,17 @@ class VorasAgent:
                     "language_name": get_language_name(lang_code),
                     "total_missing": 0,
                     "fixed": 0,
-                    "failed": 0
+                    "failed": 0,
                 }
                 for lang_code in languages_to_fix
-            }
+            },
         }
 
         try:
             # Build query to find words missing ANY of the target translations
             # For simplicity, we'll get all lemmas and check missing translations using helper method
             # This is less efficient but handles both storage types uniformly
-            query = session.query(Lemma).filter(
-                Lemma.guid.isnot(None)
-            ).order_by(Lemma.id)
+            query = session.query(Lemma).filter(Lemma.guid.isnot(None)).order_by(Lemma.id)
 
             if limit:
                 query = query.limit(limit)
@@ -642,12 +643,16 @@ class VorasAgent:
                 if not missing_languages:
                     continue
 
-                logger.debug(f"Processing word '{lemma.lemma_text}' (GUID: {lemma.guid}), missing {len(missing_languages)} translations")
+                logger.debug(
+                    f"Processing word '{lemma.lemma_text}' (GUID: {lemma.guid}), missing {len(missing_languages)} translations"
+                )
 
                 try:
                     if dry_run:
                         for lang_code, language_name in missing_languages:
-                            logger.info(f"[DRY RUN] Would generate {language_name} translation for '{lemma.lemma_text}'")
+                            logger.info(
+                                f"[DRY RUN] Would generate {language_name} translation for '{lemma.lemma_text}'"
+                            )
                             results["by_language"][lang_code]["fixed"] += 1
                             results["total_fixed"] += 1
                         continue
@@ -666,7 +671,9 @@ class VorasAgent:
                                 break
 
                     if not reference_translation:
-                        logger.warning(f"No reference translation available for '{lemma.lemma_text}', skipping")
+                        logger.warning(
+                            f"No reference translation available for '{lemma.lemma_text}', skipping"
+                        )
                         for lang_code, _ in missing_languages:
                             results["by_language"][lang_code]["failed"] += 1
                             results["total_failed"] += 1
@@ -683,7 +690,7 @@ class VorasAgent:
                         "pt": "portuguese",
                         "sw": "swahili",
                         "vi": "vietnamese",
-                        "lt": "lithuanian"
+                        "lt": "lithuanian",
                     }
                     missing_lang_names = [
                         lang_code_to_name[lang_code]
@@ -698,7 +705,7 @@ class VorasAgent:
                         definition=lemma.definition_text,
                         pos_type=lemma.pos_type,
                         pos_subtype=lemma.pos_subtype,
-                        languages=missing_lang_names
+                        languages=missing_lang_names,
                     )
 
                     if not success or not translations:
@@ -718,7 +725,7 @@ class VorasAgent:
                         "pt": "portuguese_translation",
                         "sw": "swahili_translation",
                         "vi": "vietnamese_translation",
-                        "lt": "lithuanian_translation"
+                        "lt": "lithuanian_translation",
                     }
 
                     for lang_code, language_name in missing_languages:
@@ -732,14 +739,25 @@ class VorasAgent:
                             results["by_language"][lang_code]["fixed"] += 1
                             results["total_fixed"] += 1
                         else:
-                            logger.warning(f"  LLM returned empty {language_name} translation for '{lemma.lemma_text}'")
+                            logger.warning(
+                                f"  LLM returned empty {language_name} translation for '{lemma.lemma_text}'"
+                            )
                             results["by_language"][lang_code]["failed"] += 1
                             results["total_failed"] += 1
 
                     # Commit all updates for this word at once
                     session.commit()
-                    added_count = len([lc for lc, _ in missing_languages if lc != "lt" and translations.get(translation_field_map.get(lc), "").strip()])
-                    logger.info(f"Added {added_count} translations for '{lemma.lemma_text}' (GUID: {lemma.guid})")
+                    added_count = len(
+                        [
+                            lc
+                            for lc, _ in missing_languages
+                            if lc != "lt"
+                            and translations.get(translation_field_map.get(lc), "").strip()
+                        ]
+                    )
+                    logger.info(
+                        f"Added {added_count} translations for '{lemma.lemma_text}' (GUID: {lemma.guid})"
+                    )
 
                 except Exception as e:
                     logger.error(f"Error processing '{lemma.lemma_text}': {e}")
@@ -814,8 +832,8 @@ class VorasAgent:
             "database_path": self.db_path,
             "checks": {
                 "overall_coverage": self.check_overall_coverage(),
-                "difficulty_level_coverage": self.check_difficulty_level_coverage()
-            }
+                "difficulty_level_coverage": self.check_difficulty_level_coverage(),
+            },
         }
 
         end_time = datetime.now()

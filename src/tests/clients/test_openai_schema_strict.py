@@ -46,12 +46,12 @@ class TestOpenAISchemaStrictMode(unittest.TestCase):
             self.assertIn(
                 "additionalProperties",
                 schema_dict,
-                f"At {path}: object type must have 'additionalProperties'"
+                f"At {path}: object type must have 'additionalProperties'",
             )
             self.assertEqual(
                 schema_dict["additionalProperties"],
                 False,
-                f"At {path}: additionalProperties must be false"
+                f"At {path}: additionalProperties must be false",
             )
 
             # Rule 2: If has properties, must have required array
@@ -59,14 +59,12 @@ class TestOpenAISchemaStrictMode(unittest.TestCase):
                 self.assertIn(
                     "required",
                     schema_dict,
-                    f"At {path}: object with properties must have 'required' array"
+                    f"At {path}: object with properties must have 'required' array",
                 )
 
                 # Rule 3: Required must be a list
                 self.assertIsInstance(
-                    schema_dict["required"],
-                    list,
-                    f"At {path}: 'required' must be a list"
+                    schema_dict["required"], list, f"At {path}: 'required' must be a list"
                 )
 
                 # Rule 4: Required must contain exactly all property keys
@@ -78,27 +76,26 @@ class TestOpenAISchemaStrictMode(unittest.TestCase):
                     required_keys,
                     f"At {path}: 'required' must contain exactly all property keys. "
                     f"Properties: {prop_keys}, Required: {required_keys}. "
-                    f"Missing: {prop_keys - required_keys}, Extra: {required_keys - prop_keys}"
+                    f"Missing: {prop_keys - required_keys}, Extra: {required_keys - prop_keys}",
                 )
 
                 # Recurse into properties
                 for prop_name, prop_value in schema_dict["properties"].items():
-                    self.validate_openai_strict_schema(
-                        prop_value,
-                        f"{path}.properties.{prop_name}"
-                    )
+                    self.validate_openai_strict_schema(prop_value, f"{path}.properties.{prop_name}")
 
         elif schema_type == "array":
             # Recurse into items
             if "items" in schema_dict:
-                self.validate_openai_strict_schema(
-                    schema_dict["items"],
-                    f"{path}.items"
-                )
+                self.validate_openai_strict_schema(schema_dict["items"], f"{path}.items")
 
         # Recurse into any other nested structures
         for key, value in schema_dict.items():
-            if isinstance(value, dict) and key not in ["additionalProperties", "required", "properties", "items"]:
+            if isinstance(value, dict) and key not in [
+                "additionalProperties",
+                "required",
+                "properties",
+                "items",
+            ]:
                 self.validate_openai_strict_schema(value, f"{path}.{key}")
 
     def test_simple_schema(self):
@@ -108,8 +105,8 @@ class TestOpenAISchemaStrictMode(unittest.TestCase):
             description="A simple schema",
             properties={
                 "name": SchemaProperty("string", "User name"),
-                "age": SchemaProperty("integer", "User age")
-            }
+                "age": SchemaProperty("integer", "User age"),
+            },
         )
 
         openai_schema = to_openai_schema(schema)
@@ -134,10 +131,10 @@ class TestOpenAISchemaStrictMode(unittest.TestCase):
                     "User address",
                     properties={
                         "street": SchemaProperty("string", "Street"),
-                        "city": SchemaProperty("string", "City")
-                    }
-                )
-            }
+                        "city": SchemaProperty("string", "City"),
+                    },
+                ),
+            },
         )
 
         openai_schema = to_openai_schema(schema)
@@ -148,13 +145,7 @@ class TestOpenAISchemaStrictMode(unittest.TestCase):
         schema = Schema(
             name="TagList",
             description="List of tags",
-            properties={
-                "tags": SchemaProperty(
-                    "array",
-                    "Tag list",
-                    items={"type": "string"}
-                )
-            }
+            properties={"tags": SchemaProperty("array", "Tag list", items={"type": "string"})},
         )
 
         openai_schema = to_openai_schema(schema)
@@ -173,11 +164,11 @@ class TestOpenAISchemaStrictMode(unittest.TestCase):
                         "type": "object",
                         "properties": {
                             "name": {"type": "string", "description": "Name"},
-                            "email": {"type": "string", "description": "Email"}
-                        }
-                    }
+                            "email": {"type": "string", "description": "Email"},
+                        },
+                    },
                 )
-            }
+            },
         )
 
         openai_schema = to_openai_schema(schema)
@@ -195,14 +186,11 @@ class TestOpenAISchemaStrictMode(unittest.TestCase):
                     items={
                         "type": "object",
                         "properties": {
-                            "text": {
-                                "type": "string",
-                                "description": "Sentence text"
-                            },
+                            "text": {"type": "string", "description": "Sentence text"},
                             "translations": {
                                 "type": "object",
                                 "description": "Translations",
-                                "additionalProperties": {"type": "string"}
+                                "additionalProperties": {"type": "string"},
                             },
                             "words": {
                                 "type": "array",
@@ -212,14 +200,14 @@ class TestOpenAISchemaStrictMode(unittest.TestCase):
                                     "properties": {
                                         "lemma": {"type": "string", "description": "Base form"},
                                         "role": {"type": "string", "description": "Role"},
-                                        "form": {"type": "string", "description": "Actual form"}
-                                    }
-                                }
-                            }
-                        }
-                    }
+                                        "form": {"type": "string", "description": "Actual form"},
+                                    },
+                                },
+                            },
+                        },
+                    },
                 )
-            }
+            },
         )
 
         openai_schema = to_openai_schema(schema)
@@ -240,15 +228,15 @@ class TestOpenAISchemaStrictMode(unittest.TestCase):
                             "translations": {
                                 "type": "object",
                                 "description": "Sentence in each language (keys are language codes)",
-                                "additionalProperties": {"type": "string"}
+                                "additionalProperties": {"type": "string"},
                             },
                             "pattern": {
                                 "type": "string",
-                                "description": "Sentence pattern type (SVO, SVAO, etc.)"
+                                "description": "Sentence pattern type (SVO, SVAO, etc.)",
                             },
                             "tense": {
                                 "type": "string",
-                                "description": "Verb tense (present, past, future)"
+                                "description": "Verb tense (present, past, future)",
                             },
                             "words_used": {
                                 "type": "array",
@@ -256,21 +244,39 @@ class TestOpenAISchemaStrictMode(unittest.TestCase):
                                 "items": {
                                     "type": "object",
                                     "properties": {
-                                        "lemma": {"type": "string", "description": "Base form of the word in target language"},
-                                        "role": {"type": "string", "description": "Role in sentence (subject, verb, object, etc.)"},
-                                        "language_code": {"type": "string", "description": "Target language code (e.g., 'lt', 'zh')"},
-                                        "grammatical_form": {"type": "string", "description": "Form used (e.g., '3s_present', 'past_participle')"},
-                                        "grammatical_case": {"type": "string", "description": "Case if applicable (nominative, accusative, etc.)"},
-                                        "declined_form": {"type": "string", "description": "Actual form used in sentence"}
+                                        "lemma": {
+                                            "type": "string",
+                                            "description": "Base form of the word in target language",
+                                        },
+                                        "role": {
+                                            "type": "string",
+                                            "description": "Role in sentence (subject, verb, object, etc.)",
+                                        },
+                                        "language_code": {
+                                            "type": "string",
+                                            "description": "Target language code (e.g., 'lt', 'zh')",
+                                        },
+                                        "grammatical_form": {
+                                            "type": "string",
+                                            "description": "Form used (e.g., '3s_present', 'past_participle')",
+                                        },
+                                        "grammatical_case": {
+                                            "type": "string",
+                                            "description": "Case if applicable (nominative, accusative, etc.)",
+                                        },
+                                        "declined_form": {
+                                            "type": "string",
+                                            "description": "Actual form used in sentence",
+                                        },
                                     },
-                                    "required": ["lemma", "role"]
-                                }
-                            }
+                                    "required": ["lemma", "role"],
+                                },
+                            },
                         },
-                        "required": ["translations", "pattern", "words_used"]
-                    }
+                        "required": ["translations", "pattern", "words_used"],
+                    },
                 )
-            }
+            },
         )
 
         openai_schema = to_openai_schema(schema)
@@ -289,11 +295,9 @@ class TestOpenAISchemaStrictMode(unittest.TestCase):
             description="Translation map",
             properties={
                 "translations": SchemaProperty(
-                    "object",
-                    "Language code to translation mapping",
-                    items={"type": "string"}
+                    "object", "Language code to translation mapping", items={"type": "string"}
                 )
-            }
+            },
         )
 
         openai_schema = to_openai_schema(schema)

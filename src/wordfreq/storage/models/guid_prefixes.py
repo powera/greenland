@@ -38,7 +38,6 @@ SUBTYPE_GUID_PREFIXES = {
     "nationality": "N33",
     "unit_of_measurement": "N34",
     "noun_other": "N99",
-
     # Verb subtypes (V01-V99)
     "physical_action": "V01",
     "creation_action": "V02",
@@ -54,7 +53,6 @@ SUBTYPE_GUID_PREFIXES = {
     "directional_movement": "V12",
     "manner_movement": "V13",
     "verb_other": "V99",
-
     # Adjective subtypes (A01-A99)
     "size": "A01",
     "color": "A02",
@@ -72,7 +70,6 @@ SUBTYPE_GUID_PREFIXES = {
     "frequency": "A14",
     "sequence": "A15",
     "adjective_other": "A99",
-
     # Adverb subtypes (D01-D99)
     "style": "D01",
     "attitude": "D02",
@@ -88,22 +85,16 @@ SUBTYPE_GUID_PREFIXES = {
     "definite_frequency": "D12",
     "indefinite_frequency": "D13",
     "adverb_other": "D99",
-
     # Conjunction subtypes (C01-C99)
     "conjunction_other": "C99",
-
     # Pronoun subtypes (P01-P99)
     "pronoun_other": "P99",
-
     # Preposition subtypes (R01-R99)
     "preposition_other": "R99",
-
     # Interjection subtypes (I01-I99)
     "interjection_other": "I99",
-
     # Determiner subtypes (T01-T99)
     "determiner_other": "T99",
-
     # Article subtypes (L01-L99)
-    "article_other": "L99"
+    "article_other": "L99",
 }

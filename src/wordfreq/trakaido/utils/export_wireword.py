@@ -29,6 +29,7 @@ from wordfreq.tools.chinese_converter import to_simplified
 # Import pypinyin for Chinese pinyin generation
 try:
     from pypinyin import lazy_pinyin, Style
+
     PYPINYIN_AVAILABLE = True
 except ImportError:
     PYPINYIN_AVAILABLE = False
@@ -43,7 +44,13 @@ logger = logging.getLogger(__name__)
 class WirewordExporter:
     """Exporter for WireWord API format."""
 
-    def __init__(self, db_path: str = None, debug: bool = False, language: str = "lt", simplified_chinese: bool = True):
+    def __init__(
+        self,
+        db_path: str = None,
+        debug: bool = False,
+        language: str = "lt",
+        simplified_chinese: bool = True,
+    ):
         """
         Initialize the WirewordExporter.
 
@@ -59,10 +66,13 @@ class WirewordExporter:
         self.simplified_chinese = simplified_chinese
 
         if language not in LANGUAGE_FIELDS:
-            raise ValueError(f"Unsupported language: {language}. Supported: {', '.join(LANGUAGE_FIELDS.keys())}")
+            raise ValueError(
+                f"Unsupported language: {language}. Supported: {', '.join(LANGUAGE_FIELDS.keys())}"
+            )
 
         # Get language name from translation_helpers
         from wordfreq.storage.translation_helpers import get_language_name
+
         self.language_name = get_language_name(language)
 
         if debug:
@@ -85,7 +95,6 @@ class WirewordExporter:
         """
         return lemma.lemma_text
 
-
     def query_trakaido_data_for_wireword(
         self,
         session,
@@ -94,7 +103,7 @@ class WirewordExporter:
         pos_subtype: Optional[str] = None,
         limit: Optional[int] = None,
         include_without_guid: bool = False,
-        include_unverified: bool = True
+        include_unverified: bool = True,
     ) -> List[Dict[str, Any]]:
         """
         Query trakaido data from the database with flexible filtering.
@@ -112,8 +121,9 @@ class WirewordExporter:
         logger.info(f"Querying database for trakaido data (language: {self.language_name})...")
 
         # Build the query without language filtering (we'll filter in Python)
-        query = session.query(Lemma)\
-            .filter(Lemma.pos_type != "verb")  # Exclude verbs - they go in separate file
+        query = session.query(Lemma).filter(
+            Lemma.pos_type != "verb"
+        )  # Exclude verbs - they go in separate file
 
         # Apply filters
         if not include_without_guid:
@@ -127,31 +137,30 @@ class WirewordExporter:
             # Left join with overrides to get language-specific levels
             query = query.outerjoin(
                 LemmaDifficultyOverride,
-                (LemmaDifficultyOverride.lemma_id == Lemma.id) &
-                (LemmaDifficultyOverride.language_code == self.language)
+                (LemmaDifficultyOverride.lemma_id == Lemma.id)
+                & (LemmaDifficultyOverride.language_code == self.language),
             )
             # Use override if exists, otherwise use default
             effective_level = func.coalesce(
-                LemmaDifficultyOverride.difficulty_level,
-                Lemma.difficulty_level
+                LemmaDifficultyOverride.difficulty_level, Lemma.difficulty_level
             )
             query = query.filter(effective_level == difficulty_level)
-        
+
         if pos_type:
             query = query.filter(Lemma.pos_type == pos_type)
-        
+
         if pos_subtype:
             query = query.filter(Lemma.pos_subtype == pos_subtype)
-        
+
         # Order by GUID
         query = query.order_by(Lemma.guid.asc().nullslast())
-        
+
         if limit:
             # Get extra since we'll filter by translation availability
             query = query.limit(limit * 2)
-        
+
         all_lemmas = query.all()
-        
+
         # Filter by translation availability using translation_helpers
         lemmas = []
         for lemma in all_lemmas:
@@ -160,9 +169,9 @@ class WirewordExporter:
                 lemmas.append(lemma)
                 if limit and len(lemmas) >= limit:
                     break
-        
+
         logger.info(f"Found {len(lemmas)} lemmas with {self.language_name} translations")
-        
+
         # Build export data
         export_data = []
         for lemma in lemmas:
@@ -191,19 +200,21 @@ class WirewordExporter:
                 "subtype": lemma.pos_subtype or "general",
                 "trakaido_level": effective_level,
                 "verified": lemma.verified,
-                "confidence": lemma.confidence
+                "confidence": lemma.confidence,
             }
             export_data.append(entry)
-        
+
         return export_data
 
-    def _calculate_corpus_assignments(self, export_data: List[Dict[str, Any]]) -> Dict[Tuple[int, str], str]:
+    def _calculate_corpus_assignments(
+        self, export_data: List[Dict[str, Any]]
+    ) -> Dict[Tuple[int, str], str]:
         """
         Calculate corpus assignments based on levels and group overflow logic.
-        
+
         Args:
             export_data: List of export entries
-            
+
         Returns:
             Dictionary mapping (level, subtype) tuples to corpus names
         """
@@ -212,24 +223,24 @@ class WirewordExporter:
         for entry in export_data:
             level = entry["trakaido_level"]
             subtype = entry["subtype"]
-            
+
             if level not in groups_by_level:
                 groups_by_level[level] = set()
             groups_by_level[level].add(subtype)
-        
+
         # Track which groups have been assigned to which WORDS level
         group_assignments = {}  # group_name -> WORDS level
         corpus_assignments = {}  # (level, subtype) -> corpus name
-        
+
         # Define the level ranges for each WORDS corpus
         words_ranges = {
-            "WORDS1": range(1, 4),   # Levels 1-3
-            "WORDS2": range(4, 7),   # Levels 4-6
+            "WORDS1": range(1, 4),  # Levels 1-3
+            "WORDS2": range(4, 7),  # Levels 4-6
             "WORDS3": range(7, 11),  # Levels 7-10
-            "WORDS4": range(11, 15), # Levels 11-14
-            "WORDS5": range(15, 21)  # Levels 15-20 (overflow)
+            "WORDS4": range(11, 15),  # Levels 11-14
+            "WORDS5": range(15, 21),  # Levels 15-20 (overflow)
         }
-        
+
         # Process each level in order
         for level in sorted(groups_by_level.keys()):
             # Determine base WORDS level for this difficulty level
@@ -238,13 +249,13 @@ class WirewordExporter:
                 if level in level_range:
                     base_words_level = words_name
                     break
-            
+
             if base_words_level is None:
                 # Level is outside normal ranges, assign to Trakaido
                 for subtype in groups_by_level[level]:
                     corpus_assignments[(level, subtype)] = "Trakaido"
                 continue
-            
+
             # Process each subtype in this level
             for subtype in groups_by_level[level]:
                 if subtype in group_assignments:
@@ -252,25 +263,31 @@ class WirewordExporter:
                     current_words_level = group_assignments[subtype]
                     words_levels = list(words_ranges.keys())
                     current_index = words_levels.index(current_words_level)
-                    
+
                     if current_index + 1 < len(words_levels):
                         # Assign to next WORDS level
                         next_words_level = words_levels[current_index + 1]
                         group_assignments[subtype] = next_words_level
                         corpus_assignments[(level, subtype)] = next_words_level
-                        logger.debug(f"Group '{subtype}' at level {level} kicked from {current_words_level} to {next_words_level}")
+                        logger.debug(
+                            f"Group '{subtype}' at level {level} kicked from {current_words_level} to {next_words_level}"
+                        )
                     else:
                         # No more WORDS levels available, assign to Trakaido
                         corpus_assignments[(level, subtype)] = "Trakaido"
-                        logger.debug(f"Group '{subtype}' at level {level} assigned to Trakaido (overflow)")
+                        logger.debug(
+                            f"Group '{subtype}' at level {level} assigned to Trakaido (overflow)"
+                        )
                 else:
                     # First time seeing this group, assign to base WORDS level
                     group_assignments[subtype] = base_words_level
                     corpus_assignments[(level, subtype)] = base_words_level
-                    logger.debug(f"Group '{subtype}' at level {level} assigned to {base_words_level}")
-        
+                    logger.debug(
+                        f"Group '{subtype}' at level {level} assigned to {base_words_level}"
+                    )
+
         return corpus_assignments
-    
+
     def _normalize_pos_type(self, pos_type: str) -> str:
         """
         Normalize POS type to match WireWord PartOfSpeech enum.
@@ -291,7 +308,7 @@ class WirewordExporter:
             "conjunction": "conjunction",
             "interjection": "interjection",
             "numeral": "numeral",
-            "particle": "particle"
+            "particle": "particle",
         }
 
         return pos_mappings.get(pos_type.lower(), pos_type)
@@ -318,11 +335,7 @@ class WirewordExporter:
             return None
 
     def _get_audio_hashes(
-        self,
-        session,
-        guid: str,
-        language: str,
-        grammatical_form: Optional[str] = None
+        self, session, guid: str, language: str, grammatical_form: Optional[str] = None
     ) -> Optional[Dict[str, str]]:
         """
         Get MD5 hashes for all available audio voices for a given word.
@@ -339,10 +352,7 @@ class WirewordExporter:
             Returns None if no audio available.
         """
         # Query all audio records for this word and form
-        query = session.query(AudioQualityReview).filter_by(
-            guid=guid,
-            language_code=language
-        )
+        query = session.query(AudioQualityReview).filter_by(guid=guid, language_code=language)
 
         # Filter by grammatical form (None matches NULL in database)
         if grammatical_form is None:
@@ -359,7 +369,7 @@ class WirewordExporter:
         audio_hashes = {}
         for audio in audio_records:
             # Only include approved or pending audio (not rejected/needs_replacement)
-            if audio.status in ('approved', 'pending_review', 'approved_with_issues'):
+            if audio.status in ("approved", "pending_review", "approved_with_issues"):
                 audio_hashes[audio.voice_name] = audio.manifest_md5
 
         return audio_hashes if audio_hashes else None
@@ -373,11 +383,11 @@ class WirewordExporter:
         limit: Optional[int] = None,
         include_without_guid: bool = False,
         include_unverified: bool = True,
-        pretty_print: bool = True
+        pretty_print: bool = True,
     ) -> Tuple[bool, Optional[ExportStats]]:
         """
         Export trakaido data to new WireWord API format.
-        
+
         Args:
             output_path: Path to write the JSON file
             difficulty_level: Filter by specific difficulty level (optional)
@@ -387,7 +397,7 @@ class WirewordExporter:
             include_without_guid: Include lemmas without GUIDs (default: False)
             include_unverified: Include unverified entries (default: True)
             pretty_print: Whether to format JSON with indentation (default: True)
-            
+
         Returns:
             Tuple of (success flag, export statistics)
         """
@@ -401,16 +411,16 @@ class WirewordExporter:
                 pos_subtype=pos_subtype,
                 limit=limit,
                 include_without_guid=include_without_guid,
-                include_unverified=include_unverified
+                include_unverified=include_unverified,
             )
-            
+
             if not export_data:
                 logger.warning("No data found matching the specified criteria")
                 return False, None
-            
+
             # Calculate corpus assignments based on levels and groups
             corpus_assignments = self._calculate_corpus_assignments(export_data)
-            
+
             # Transform to WireWord format
             wireword_data = []
             for entry in export_data:
@@ -418,11 +428,11 @@ class WirewordExporter:
                 lemma = session.query(Lemma).filter(Lemma.guid == entry["GUID"]).first()
                 if not lemma:
                     continue
-                
-                derivative_forms = session.query(DerivativeForm).filter(
-                    DerivativeForm.lemma_id == lemma.id
-                ).all()
-                
+
+                derivative_forms = (
+                    session.query(DerivativeForm).filter(DerivativeForm.lemma_id == lemma.id).all()
+                )
+
                 # Build alternatives, synonyms, and grammatical forms
                 english_alternatives = []
                 target_alternatives = []
@@ -439,7 +449,12 @@ class WirewordExporter:
 
                     # Determine if this form is an alternative form or synonym
                     # Alternative forms include: abbreviation, expanded_form, alternate_spelling, and legacy 'alternative_form'
-                    is_alternative = form.grammatical_form in ["abbreviation", "expanded_form", "alternate_spelling", "alternative_form"]
+                    is_alternative = form.grammatical_form in [
+                        "abbreviation",
+                        "expanded_form",
+                        "alternate_spelling",
+                        "alternative_form",
+                    ]
                     is_synonym = form.grammatical_form == "synonym"
 
                     # Handle different types of derivative forms
@@ -470,7 +485,7 @@ class WirewordExporter:
                             gram_form = {
                                 "level": form_level,
                                 "target": form.derivative_form_text,
-                                "english": f"{entry['english']} (plural)"  # Simple plural English form
+                                "english": f"{entry['english']} (plural)",  # Simple plural English form
                             }
                             # Add pinyin for Chinese grammatical forms
                             if self.language == "zh":
@@ -483,7 +498,7 @@ class WirewordExporter:
                                 session,
                                 entry["GUID"],
                                 self.language,
-                                grammatical_form=form.grammatical_form
+                                grammatical_form=form.grammatical_form,
                             )
                             if form_audio:
                                 gram_form["audio"] = form_audio
@@ -495,11 +510,15 @@ class WirewordExporter:
                                 continue
                             # Add accusative forms with appropriate level (minimum level 9)
                             form_level = max(entry["trakaido_level"], 9)
-                            english_suffix = " (accusative singular)" if form.grammatical_form == "singular_accusative" else " (accusative plural)"
+                            english_suffix = (
+                                " (accusative singular)"
+                                if form.grammatical_form == "singular_accusative"
+                                else " (accusative plural)"
+                            )
                             gram_form = {
                                 "level": form_level,
                                 "target": form.derivative_form_text,
-                                "english": f"{entry['english']}{english_suffix}"
+                                "english": f"{entry['english']}{english_suffix}",
                             }
                             # Add pinyin for Chinese grammatical forms
                             if self.language == "zh":
@@ -512,7 +531,7 @@ class WirewordExporter:
                                 session,
                                 entry["GUID"],
                                 self.language,
-                                grammatical_form=form.grammatical_form
+                                grammatical_form=form.grammatical_form,
                             )
                             if form_audio:
                                 gram_form["audio"] = form_audio
@@ -529,23 +548,19 @@ class WirewordExporter:
 
                                 # Try to look up English translation from database first
                                 english_label = self._get_english_translation_from_db(
-                                    session,
-                                    lemma.id,
-                                    form.grammatical_form
+                                    session, lemma.id, form.grammatical_form
                                 )
 
                                 # If not found in database, generate it
                                 if not english_label:
                                     english_label = self._generate_grammatical_form_label(
-                                        form.grammatical_form,
-                                        entry["english"],
-                                        lemma.pos_type
+                                        form.grammatical_form, entry["english"], lemma.pos_type
                                     )
 
                                 gram_form = {
                                     "level": form_level,
                                     "target": form.derivative_form_text,
-                                    "english": english_label
+                                    "english": english_label,
                                 }
                                 # Add pinyin for Chinese grammatical forms
                                 if self.language == "zh":
@@ -558,7 +573,7 @@ class WirewordExporter:
                                     session,
                                     entry["GUID"],
                                     self.language,
-                                    grammatical_form=form.grammatical_form
+                                    grammatical_form=form.grammatical_form,
                                 )
                                 if form_audio:
                                     gram_form["audio"] = form_audio
@@ -567,10 +582,7 @@ class WirewordExporter:
 
                 # Generate derivative noun phrases (e.g., "where is X") for appropriate nouns
                 derivative_phrases = self._generate_derivative_noun_phrases(
-                    lemma,
-                    entry["english"],
-                    entry["target_language"],
-                    entry["trakaido_level"]
+                    lemma, entry["english"], entry["target_language"], entry["trakaido_level"]
                 )
                 grammatical_forms.update(derivative_phrases)
 
@@ -586,7 +598,7 @@ class WirewordExporter:
                     "corpus": assigned_corpus,
                     "group": format_subtype_display_name(entry["subtype"]),
                     "level": entry["trakaido_level"],
-                    "word_type": self._normalize_pos_type(entry["pos_type"])
+                    "word_type": self._normalize_pos_type(entry["pos_type"]),
                 }
 
                 # Add audio MD5 hashes for all available voices
@@ -616,16 +628,19 @@ class WirewordExporter:
                     # Add pinyin for Chinese synonyms
                     if self.language == "zh" and target_synonyms_pinyin:
                         wireword["target_synonyms_pinyin"] = target_synonyms_pinyin
-                
+
                 # Add grammatical forms (for both verbs and nouns with declensions)
                 if grammatical_forms:
                     wireword["grammatical_forms"] = grammatical_forms
 
                 # Add grammar facts (gender, declension, etc.) as metadata
-                grammar_facts = session.query(GrammarFact).filter(
-                    GrammarFact.lemma_id == lemma.id,
-                    GrammarFact.language_code == self.language
-                ).all()
+                grammar_facts = (
+                    session.query(GrammarFact)
+                    .filter(
+                        GrammarFact.lemma_id == lemma.id, GrammarFact.language_code == self.language
+                    )
+                    .all()
+                )
 
                 if grammar_facts:
                     grammar_metadata = {}
@@ -638,13 +653,13 @@ class WirewordExporter:
                     wireword["frequency_rank"] = lemma.frequency_rank
                 if lemma.notes:
                     wireword["notes"] = lemma.notes
-                
+
                 # Add tags based on subtype and level
                 tags = [entry["subtype"], f"level_{entry['trakaido_level']}"]
                 if lemma.verified:
                     tags.append("verified")
                 wireword["tags"] = tags
-                
+
                 wireword_data.append(wireword)
 
             # Calculate stats from the original export_data (before transformation)
@@ -662,9 +677,9 @@ class WirewordExporter:
                         for i, entry in enumerate(wireword_data):
                             line = json.dumps(entry, ensure_ascii=False, separators=(", ", ": "))
                             if i < len(wireword_data) - 1:
-                                f.write(f'  {line},\n')
+                                f.write(f"  {line},\n")
                             else:
-                                f.write(f'  {line}\n')
+                                f.write(f"  {line}\n")
                         f.write("]\n")
                     else:
                         # Compact format
@@ -682,20 +697,22 @@ class WirewordExporter:
             logger.info(f"✅ Successfully exported {len(wireword_data)} words in WireWord format")
 
             return True, stats
-            
+
         except Exception as e:
             logger.error(f"Export to WireWord format failed: {e}")
             return False, None
         finally:
             session.close()
 
-    def _calculate_corpus_assignments(self, export_data: List[Dict[str, Any]]) -> Dict[Tuple[int, str], str]:
+    def _calculate_corpus_assignments(
+        self, export_data: List[Dict[str, Any]]
+    ) -> Dict[Tuple[int, str], str]:
         """
         Calculate corpus assignments based on levels and group overflow logic.
-        
+
         Args:
             export_data: List of export entries
-            
+
         Returns:
             Dictionary mapping (level, subtype) tuples to corpus names
         """
@@ -704,24 +721,24 @@ class WirewordExporter:
         for entry in export_data:
             level = entry["trakaido_level"]
             subtype = entry["subtype"]
-            
+
             if level not in groups_by_level:
                 groups_by_level[level] = set()
             groups_by_level[level].add(subtype)
-        
+
         # Track which groups have been assigned to which WORDS level
         group_assignments = {}  # group_name -> WORDS level
         corpus_assignments = {}  # (level, subtype) -> corpus name
-        
+
         # Define the level ranges for each WORDS corpus
         words_ranges = {
-            "WORDS1": range(1, 4),   # Levels 1-3
-            "WORDS2": range(4, 7),   # Levels 4-6
+            "WORDS1": range(1, 4),  # Levels 1-3
+            "WORDS2": range(4, 7),  # Levels 4-6
             "WORDS3": range(7, 11),  # Levels 7-10
-            "WORDS4": range(11, 15), # Levels 11-14
-            "WORDS5": range(15, 21)  # Levels 15-20 (overflow)
+            "WORDS4": range(11, 15),  # Levels 11-14
+            "WORDS5": range(15, 21),  # Levels 15-20 (overflow)
         }
-        
+
         # Process each level in order
         for level in sorted(groups_by_level.keys()):
             # Determine base WORDS level for this difficulty level
@@ -730,13 +747,13 @@ class WirewordExporter:
                 if level in level_range:
                     base_words_level = words_name
                     break
-            
+
             if base_words_level is None:
                 # Level is outside normal ranges, assign to Trakaido
                 for subtype in groups_by_level[level]:
                     corpus_assignments[(level, subtype)] = "Trakaido"
                 continue
-            
+
             # Process each subtype in this level
             for subtype in groups_by_level[level]:
                 if subtype in group_assignments:
@@ -744,25 +761,31 @@ class WirewordExporter:
                     current_words_level = group_assignments[subtype]
                     words_levels = list(words_ranges.keys())
                     current_index = words_levels.index(current_words_level)
-                    
+
                     if current_index + 1 < len(words_levels):
                         # Assign to next WORDS level
                         next_words_level = words_levels[current_index + 1]
                         group_assignments[subtype] = next_words_level
                         corpus_assignments[(level, subtype)] = next_words_level
-                        logger.debug(f"Group '{subtype}' at level {level} kicked from {current_words_level} to {next_words_level}")
+                        logger.debug(
+                            f"Group '{subtype}' at level {level} kicked from {current_words_level} to {next_words_level}"
+                        )
                     else:
                         # No more WORDS levels available, assign to Trakaido
                         corpus_assignments[(level, subtype)] = "Trakaido"
-                        logger.debug(f"Group '{subtype}' at level {level} assigned to Trakaido (overflow)")
+                        logger.debug(
+                            f"Group '{subtype}' at level {level} assigned to Trakaido (overflow)"
+                        )
                 else:
                     # First time seeing this group, assign to base WORDS level
                     group_assignments[subtype] = base_words_level
                     corpus_assignments[(level, subtype)] = base_words_level
-                    logger.debug(f"Group '{subtype}' at level {level} assigned to {base_words_level}")
-        
+                    logger.debug(
+                        f"Group '{subtype}' at level {level} assigned to {base_words_level}"
+                    )
+
         return corpus_assignments
-    
+
     def _normalize_pos_type(self, pos_type: str) -> str:
         """
         Normalize POS type to match WireWord PartOfSpeech enum.
@@ -783,7 +806,7 @@ class WirewordExporter:
             "conjunction": "conjunction",
             "interjection": "interjection",
             "numeral": "numeral",
-            "particle": "particle"
+            "particle": "particle",
         }
 
         return pos_mappings.get(pos_type.lower(), pos_type)
@@ -876,12 +899,14 @@ class WirewordExporter:
 
         # Write grammatical_forms with each form on one line
         if "grammatical_forms" in entry:
-            lines.append("    \"grammatical_forms\": {")
+            lines.append('    "grammatical_forms": {')
 
             forms = entry["grammatical_forms"]
             form_keys = list(forms.keys())
             for j, form_key in enumerate(form_keys):
-                form_value_json = json.dumps(forms[form_key], ensure_ascii=False, separators=(", ", ": "))
+                form_value_json = json.dumps(
+                    forms[form_key], ensure_ascii=False, separators=(", ", ": ")
+                )
                 comma = "" if j == len(form_keys) - 1 else ","
                 lines.append(f'      "{form_key}": {form_value_json}{comma}')
 
@@ -889,7 +914,7 @@ class WirewordExporter:
 
         # Close the verb entry object
         comma = "" if is_last else ","
-        lines.append(f'  }}{comma}')
+        lines.append(f"  }}{comma}")
 
         return "\n".join(lines) + "\n"
 
@@ -914,7 +939,9 @@ class WirewordExporter:
             logger.warning(f"Failed to generate pinyin for '{chinese_text}': {e}")
             return None
 
-    def _get_english_translation_from_db(self, session, lemma_id: int, grammatical_form: str) -> Optional[str]:
+    def _get_english_translation_from_db(
+        self, session, lemma_id: int, grammatical_form: str
+    ) -> Optional[str]:
         """
         Look up the English translation for a grammatical form from the database.
         Maps language-specific grammatical forms to their English equivalents.
@@ -973,18 +1000,24 @@ class WirewordExporter:
             return None
 
         # Look up the English derivative form with the mapped grammatical form
-        english_form = session.query(DerivativeForm).filter(
-            DerivativeForm.lemma_id == lemma_id,
-            DerivativeForm.language_code == "en",
-            DerivativeForm.grammatical_form == english_form_key
-        ).first()
+        english_form = (
+            session.query(DerivativeForm)
+            .filter(
+                DerivativeForm.lemma_id == lemma_id,
+                DerivativeForm.language_code == "en",
+                DerivativeForm.grammatical_form == english_form_key,
+            )
+            .first()
+        )
 
         if english_form:
             return english_form.derivative_form_text
 
         return None
 
-    def _generate_grammatical_form_label(self, grammatical_form: str, base_english: str, pos_type: str) -> str:
+    def _generate_grammatical_form_label(
+        self, grammatical_form: str, base_english: str, pos_type: str
+    ) -> str:
         """
         Generate a readable English label for a grammatical form.
         Fallback for non-Lithuanian languages only.
@@ -1006,59 +1039,59 @@ class WirewordExporter:
 
         # French verb tenses
         french_verb_forms = {
-            "verb/fr_1s_pres": f'{base_english} (I, present)',
-            "verb/fr_2s_pres": f'{base_english} (you, present)',
-            "verb/fr_3s_pres": f'{base_english} (he/she, present)',
-            "verb/fr_1p_pres": f'{base_english} (we, present)',
-            "verb/fr_2p_pres": f'{base_english} (you all, present)',
-            "verb/fr_3p_pres": f'{base_english} (they, present)',
-            "verb/fr_1s_impf": f'{base_english} (I, imperfect)',
-            "verb/fr_2s_impf": f'{base_english} (you, imperfect)',
-            "verb/fr_3s_impf": f'{base_english} (he/she, imperfect)',
-            "verb/fr_1p_impf": f'{base_english} (we, imperfect)',
-            "verb/fr_2p_impf": f'{base_english} (you all, imperfect)',
-            "verb/fr_3p_impf": f'{base_english} (they, imperfect)',
-            "verb/fr_1s_fut": f'{base_english} (I, future)',
-            "verb/fr_2s_fut": f'{base_english} (you, future)',
-            "verb/fr_3s_fut": f'{base_english} (he/she, future)',
-            "verb/fr_1p_fut": f'{base_english} (we, future)',
-            "verb/fr_2p_fut": f'{base_english} (you all, future)',
-            "verb/fr_3p_fut": f'{base_english} (they, future)',
-            "verb/fr_1s_cond": f'{base_english} (I, conditional)',
-            "verb/fr_2s_cond": f'{base_english} (you, conditional)',
-            "verb/fr_3s_cond": f'{base_english} (he/she, conditional)',
-            "verb/fr_1p_cond": f'{base_english} (we, conditional)',
-            "verb/fr_2p_cond": f'{base_english} (you all, conditional)',
-            "verb/fr_3p_cond": f'{base_english} (they, conditional)',
-            "verb/fr_1s_subj": f'{base_english} (I, subjunctive)',
-            "verb/fr_2s_subj": f'{base_english} (you, subjunctive)',
-            "verb/fr_3s_subj": f'{base_english} (he/she, subjunctive)',
-            "verb/fr_1p_subj": f'{base_english} (we, subjunctive)',
-            "verb/fr_2p_subj": f'{base_english} (you all, subjunctive)',
-            "verb/fr_3p_subj": f'{base_english} (they, subjunctive)',
-            "verb/fr_1s_pc": f'{base_english} (I, perfect)',
-            "verb/fr_2s_pc": f'{base_english} (you, perfect)',
-            "verb/fr_3s_pc": f'{base_english} (he/she, perfect)',
-            "verb/fr_1p_pc": f'{base_english} (we, perfect)',
-            "verb/fr_2p_pc": f'{base_english} (you all, perfect)',
-            "verb/fr_3p_pc": f'{base_english} (they, perfect)',
-            "verb/fr_inf": f'{base_english} (infinitive)',
-            "verb/fr_pres_part": f'{base_english} (present participle)',
-            "verb/fr_past_part": f'{base_english} (past participle)',
+            "verb/fr_1s_pres": f"{base_english} (I, present)",
+            "verb/fr_2s_pres": f"{base_english} (you, present)",
+            "verb/fr_3s_pres": f"{base_english} (he/she, present)",
+            "verb/fr_1p_pres": f"{base_english} (we, present)",
+            "verb/fr_2p_pres": f"{base_english} (you all, present)",
+            "verb/fr_3p_pres": f"{base_english} (they, present)",
+            "verb/fr_1s_impf": f"{base_english} (I, imperfect)",
+            "verb/fr_2s_impf": f"{base_english} (you, imperfect)",
+            "verb/fr_3s_impf": f"{base_english} (he/she, imperfect)",
+            "verb/fr_1p_impf": f"{base_english} (we, imperfect)",
+            "verb/fr_2p_impf": f"{base_english} (you all, imperfect)",
+            "verb/fr_3p_impf": f"{base_english} (they, imperfect)",
+            "verb/fr_1s_fut": f"{base_english} (I, future)",
+            "verb/fr_2s_fut": f"{base_english} (you, future)",
+            "verb/fr_3s_fut": f"{base_english} (he/she, future)",
+            "verb/fr_1p_fut": f"{base_english} (we, future)",
+            "verb/fr_2p_fut": f"{base_english} (you all, future)",
+            "verb/fr_3p_fut": f"{base_english} (they, future)",
+            "verb/fr_1s_cond": f"{base_english} (I, conditional)",
+            "verb/fr_2s_cond": f"{base_english} (you, conditional)",
+            "verb/fr_3s_cond": f"{base_english} (he/she, conditional)",
+            "verb/fr_1p_cond": f"{base_english} (we, conditional)",
+            "verb/fr_2p_cond": f"{base_english} (you all, conditional)",
+            "verb/fr_3p_cond": f"{base_english} (they, conditional)",
+            "verb/fr_1s_subj": f"{base_english} (I, subjunctive)",
+            "verb/fr_2s_subj": f"{base_english} (you, subjunctive)",
+            "verb/fr_3s_subj": f"{base_english} (he/she, subjunctive)",
+            "verb/fr_1p_subj": f"{base_english} (we, subjunctive)",
+            "verb/fr_2p_subj": f"{base_english} (you all, subjunctive)",
+            "verb/fr_3p_subj": f"{base_english} (they, subjunctive)",
+            "verb/fr_1s_pc": f"{base_english} (I, perfect)",
+            "verb/fr_2s_pc": f"{base_english} (you, perfect)",
+            "verb/fr_3s_pc": f"{base_english} (he/she, perfect)",
+            "verb/fr_1p_pc": f"{base_english} (we, perfect)",
+            "verb/fr_2p_pc": f"{base_english} (you all, perfect)",
+            "verb/fr_3p_pc": f"{base_english} (they, perfect)",
+            "verb/fr_inf": f"{base_english} (infinitive)",
+            "verb/fr_pres_part": f"{base_english} (present participle)",
+            "verb/fr_past_part": f"{base_english} (past participle)",
         }
 
         # French noun forms (with gender from grammar_facts)
         french_noun_forms = {
-            "noun/fr_singular": f'{base_english} (singular)',
-            "noun/fr_plural": f'{base_english} (plural)',
+            "noun/fr_singular": f"{base_english} (singular)",
+            "noun/fr_plural": f"{base_english} (plural)",
         }
 
         # French adjective forms (with gender)
         french_adj_forms = {
-            "adjective/fr_singular_m": f'{base_english} (masculine singular)',
-            "adjective/fr_plural_m": f'{base_english} (masculine plural)',
-            "adjective/fr_singular_f": f'{base_english} (feminine singular)',
-            "adjective/fr_plural_f": f'{base_english} (feminine plural)',
+            "adjective/fr_singular_m": f"{base_english} (masculine singular)",
+            "adjective/fr_plural_m": f"{base_english} (masculine plural)",
+            "adjective/fr_singular_f": f"{base_english} (feminine singular)",
+            "adjective/fr_plural_f": f"{base_english} (feminine plural)",
         }
 
         # Check for exact matches
@@ -1073,9 +1106,11 @@ class WirewordExporter:
 
         # Generic fallback: convert underscores to spaces and add base word
         readable_form = grammatical_form.replace("_", " ").replace("/", " ")
-        return f'{base_english} ({readable_form})'
+        return f"{base_english} ({readable_form})"
 
-    def _generate_derivative_noun_phrases(self, lemma: Lemma, base_english: str, base_target: str, entry_level: int) -> Dict[str, Dict[str, any]]:
+    def _generate_derivative_noun_phrases(
+        self, lemma: Lemma, base_english: str, base_target: str, entry_level: int
+    ) -> Dict[str, Dict[str, any]]:
         """
         Generate derivative noun phrases like "where is X" and "this is my X" for nouns.
         These are constructed phrases, not stored in the database.
@@ -1102,8 +1137,8 @@ class WirewordExporter:
         if self.language == "lt":
             where_is_subtypes = {
                 "building_structure",  # where is the bank, hospital, school
-                "location",            # where is the park, city
-                "place_name"          # where is Paris, etc.
+                "location",  # where is the park, city
+                "place_name",  # where is Paris, etc.
             }
 
             if lemma.pos_subtype in where_is_subtypes:
@@ -1111,7 +1146,7 @@ class WirewordExporter:
                 derivative_phrases["where_is"] = {
                     "level": where_is_level,
                     "target": f"Kur yra {base_target}?",
-                    "english": f"Where is the {base_english}?"
+                    "english": f"Where is the {base_english}?",
                 }
 
         # Generate "this is my X" phrase for possessable items
@@ -1121,9 +1156,9 @@ class WirewordExporter:
         # "These are my pants" vs "This is my shirt"
         if False:  # Temporarily disabled
             this_is_my_subtypes = {
-                "clothing_accessory",     # this is my shirt, hat
-                "small_movable_object",   # this is my book, phone
-                "body_part"              # this is my hand, foot
+                "clothing_accessory",  # this is my shirt, hat
+                "small_movable_object",  # this is my book, phone
+                "body_part",  # this is my hand, foot
             }
 
             if lemma.pos_subtype in this_is_my_subtypes:
@@ -1131,7 +1166,7 @@ class WirewordExporter:
                 derivative_phrases["this_is_my"] = {
                     "level": this_is_my_level,
                     "lithuanian": f"Tai mano {base_lithuanian}",
-                    "english": f"This is my {base_english}"
+                    "english": f"This is my {base_english}",
                 }
 
         return derivative_phrases
@@ -1151,11 +1186,7 @@ class WirewordExporter:
         wireword_dir = os.path.join(output_dir, "wireword")
         os.makedirs(wireword_dir, exist_ok=True)
 
-        results = {
-            "files_created": [],
-            "levels_exported": set(),
-            "subtypes_exported": set()
-        }
+        results = {"files_created": [], "levels_exported": set(), "subtypes_exported": set()}
 
         # Export verbs to wireword_verbs.json
         verbs_path = os.path.join(wireword_dir, "wireword_verbs.json")
@@ -1164,7 +1195,7 @@ class WirewordExporter:
             output_path=verbs_path,
             include_without_guid=False,
             include_unverified=True,
-            pretty_print=True
+            pretty_print=True,
         )
 
         if verbs_success:
@@ -1184,7 +1215,7 @@ class WirewordExporter:
             output_path=nouns_path,
             include_without_guid=False,
             include_unverified=True,
-            pretty_print=True
+            pretty_print=True,
         )
 
         if nouns_success:
@@ -1203,7 +1234,9 @@ class WirewordExporter:
         results["levels_exported"] = sorted(list(results["levels_exported"]))
         results["subtypes_exported"] = sorted(list(results["subtypes_exported"]))
 
-        logger.info(f"✅ WireWord directory export completed: {len(results['files_created'])} files created")
+        logger.info(
+            f"✅ WireWord directory export completed: {len(results['files_created'])} files created"
+        )
         return True, results
 
     def export_verbs_to_wireword_format(
@@ -1214,7 +1247,7 @@ class WirewordExporter:
         limit: Optional[int] = None,
         include_without_guid: bool = False,
         include_unverified: bool = True,
-        pretty_print: bool = True
+        pretty_print: bool = True,
     ) -> Tuple[bool, Optional[ExportStats]]:
         """
         Export verbs from database to WireWord API format.
@@ -1243,8 +1276,7 @@ class WirewordExporter:
             # TODO: Add proper join for LemmaTranslation table or filter in Python
 
             # Build the query for verbs
-            query = session.query(Lemma)\
-                .filter(Lemma.pos_type == "verb")
+            query = session.query(Lemma).filter(Lemma.pos_type == "verb")
 
             # Apply filters
             if not include_without_guid:
@@ -1258,16 +1290,17 @@ class WirewordExporter:
                 # Left join with overrides to get language-specific levels
                 query = query.outerjoin(
                     LemmaDifficultyOverride,
-                    (LemmaDifficultyOverride.lemma_id == Lemma.id) &
-                    (LemmaDifficultyOverride.language_code == self.language)
+                    (LemmaDifficultyOverride.lemma_id == Lemma.id)
+                    & (LemmaDifficultyOverride.language_code == self.language),
                 )
                 # Use override if exists, otherwise use default
                 effective_level = func.coalesce(
-                    LemmaDifficultyOverride.difficulty_level,
-                    Lemma.difficulty_level
+                    LemmaDifficultyOverride.difficulty_level, Lemma.difficulty_level
                 )
                 query = query.filter(effective_level == difficulty_level)
-                logger.info(f"Filtering by effective difficulty level: {difficulty_level} for language: {self.language}")
+                logger.info(
+                    f"Filtering by effective difficulty level: {difficulty_level} for language: {self.language}"
+                )
 
             if pos_subtype:
                 query = query.filter(Lemma.pos_subtype == pos_subtype)
@@ -1291,7 +1324,9 @@ class WirewordExporter:
             wireword_data = []
             for lemma in lemmas:
                 # Get effective difficulty level for this language
-                effective_lemma_level = get_effective_difficulty_level(session, lemma, self.language)
+                effective_lemma_level = get_effective_difficulty_level(
+                    session, lemma, self.language
+                )
                 if effective_lemma_level is None:
                     effective_lemma_level = 1  # Default to level 1 if not set
 
@@ -1300,9 +1335,9 @@ class WirewordExporter:
                     continue
 
                 # Get all derivative forms for this verb
-                derivative_forms = session.query(DerivativeForm).filter(
-                    DerivativeForm.lemma_id == lemma.id
-                ).all()
+                derivative_forms = (
+                    session.query(DerivativeForm).filter(DerivativeForm.lemma_id == lemma.id).all()
+                )
 
                 # Get base English and target language forms
                 base_english = self.get_english_word_from_lemma(session, lemma)
@@ -1371,9 +1406,7 @@ class WirewordExporter:
 
                             # Try to look up English translation from database first
                             english_label = self._get_english_translation_from_db(
-                                session,
-                                lemma.id,
-                                form.grammatical_form
+                                session, lemma.id, form.grammatical_form
                             )
 
                             # If not found in database, fail hard for Lithuanian
@@ -1387,15 +1420,13 @@ class WirewordExporter:
                                     )
                                 # For other languages, try to generate it
                                 english_label = self._generate_grammatical_form_label(
-                                    form.grammatical_form,
-                                    base_english,
-                                    "verb"
+                                    form.grammatical_form, base_english, "verb"
                                 )
 
                             gram_form = {
                                 "level": form_level,
                                 "target": form.derivative_form_text,
-                                "english": english_label
+                                "english": english_label,
                             }
 
                             # Add pinyin for Chinese grammatical forms
@@ -1406,15 +1437,14 @@ class WirewordExporter:
 
                             # Convert grammatical form key to WireWord format
                             # e.g., "verb/lt_3s_m_pres" -> "3s-m_pres"
-                            wireword_key = self._convert_to_wireword_grammatical_form_key(form.grammatical_form)
+                            wireword_key = self._convert_to_wireword_grammatical_form_key(
+                                form.grammatical_form
+                            )
 
                             # Add audio MD5 hashes for this grammatical form
                             # Use wireword_key since audio_quality_reviews stores forms in WireWord format
                             form_audio = self._get_audio_hashes(
-                                session,
-                                lemma.guid,
-                                self.language,
-                                grammatical_form=wireword_key
+                                session, lemma.guid, self.language, grammatical_form=wireword_key
                             )
                             if form_audio:
                                 gram_form["audio"] = form_audio
@@ -1429,7 +1459,7 @@ class WirewordExporter:
                     "corpus": "VERBS",
                     "group": format_subtype_display_name(lemma.pos_subtype or "action"),
                     "level": effective_lemma_level,
-                    "word_type": "verb"
+                    "word_type": "verb",
                 }
 
                 # Add audio MD5 hashes for all available voices
@@ -1481,7 +1511,7 @@ class WirewordExporter:
                 total_entries=len(wireword_data),
                 entries_with_guids=sum(1 for w in wireword_data if w.get("guid")),
                 pos_distribution={"verb": len(wireword_data)},
-                level_distribution=level_dist
+                level_distribution=level_dist,
             )
 
             # Write to JSON file
@@ -1495,13 +1525,19 @@ class WirewordExporter:
                         # Each verb entry gets more vertical space, but grammatical forms are condensed to one line each
                         f.write("[\n")
                         for i, entry in enumerate(wireword_data):
-                            f.write(self._format_verb_entry(entry, is_last=(i == len(wireword_data) - 1)))
+                            f.write(
+                                self._format_verb_entry(
+                                    entry, is_last=(i == len(wireword_data) - 1)
+                                )
+                            )
                         f.write("]\n")
                     else:
                         # Compact format
                         json.dump(wireword_data, f, ensure_ascii=False, separators=(",", ":"))
 
-                logger.info(f"✅ Successfully wrote {len(wireword_data)} verb entries to {output_path}")
+                logger.info(
+                    f"✅ Successfully wrote {len(wireword_data)} verb entries to {output_path}"
+                )
                 logger.info(f"Entries with GUIDs: {stats.entries_with_guids}/{stats.total_entries}")
 
             except Exception as e:

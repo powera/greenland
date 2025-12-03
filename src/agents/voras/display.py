@@ -50,7 +50,9 @@ def print_validation_summary(results, language_code=None):
         print(f"  Issues found: {results['issues_found']} out of {results['total_checked']}")
         print(f"  Issue rate: {results['issue_rate']:.1f}%")
     else:
-        print(f"\nTotal translation issues (all languages): {results['total_issues_all_languages']}")
+        print(
+            f"\nTotal translation issues (all languages): {results['total_issues_all_languages']}"
+        )
 
 
 def print_population_summary(results):
@@ -76,7 +78,9 @@ def print_combined_summary(validation_results, population_results, language_code
 
     if language_code:
         print(f"\nValidation ({validation_results['language_name']}):")
-        print(f"  Issues found: {validation_results['issues_found']} out of {validation_results['total_checked']}")
+        print(
+            f"  Issues found: {validation_results['issues_found']} out of {validation_results['total_checked']}"
+        )
         print(f"  Issue rate: {validation_results['issue_rate']:.1f}%")
     else:
         print(f"\nValidation (all languages):")
@@ -84,5 +88,7 @@ def print_combined_summary(validation_results, population_results, language_code
 
     print(f"\nPopulation:")
     for lang_code, lang_results in population_results["by_language"].items():
-        print(f"  {lang_results['language_name']}: {lang_results['fixed']} populated, {lang_results['failed']} failed")
+        print(
+            f"  {lang_results['language_name']}: {lang_results['fixed']} populated, {lang_results['failed']} failed"
+        )
     print("=" * 80)

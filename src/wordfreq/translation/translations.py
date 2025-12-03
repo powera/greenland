@@ -23,7 +23,7 @@ def query_translations(
     get_session_func,
     pos_subtype: Optional[str] = None,
     languages: Optional[List[str]] = None,
-    model: str = None
+    model: str = None,
 ) -> Tuple[Dict[str, str], bool]:
     """
     Query LLM to generate translations for a word with known English, reference translation, and definition.
@@ -58,7 +58,16 @@ def query_translations(
 
     # Use default languages if not specified
     if languages is None:
-        languages = ["chinese", "korean", "french", "spanish", "german", "portuguese", "swahili", "vietnamese"]
+        languages = [
+            "chinese",
+            "korean",
+            "french",
+            "spanish",
+            "german",
+            "portuguese",
+            "swahili",
+            "vietnamese",
+        ]
 
     # Build schema properties dynamically based on requested languages
     schema_properties = {}
@@ -68,7 +77,9 @@ def query_translations(
     for lang in languages:
         if lang in DEFAULT_TRANSLATION_LANGUAGES:
             lang_config = DEFAULT_TRANSLATION_LANGUAGES[lang]
-            schema_properties[lang_config["field"]] = SchemaProperty("string", lang_config["description"])
+            schema_properties[lang_config["field"]] = SchemaProperty(
+                "string", lang_config["description"]
+            )
             # Add to languages list (e.g., "- French")
             languages_list_lines.append(f"- {lang.capitalize()}")
             # Add language instructions
@@ -83,7 +94,7 @@ def query_translations(
     schema = Schema(
         name="Translations",
         description="Translations for a word to multiple languages",
-        properties=schema_properties
+        properties=schema_properties,
     )
 
     context_template = util.prompt_loader.get_context("wordfreq", "translation_generation")
@@ -103,14 +114,12 @@ def query_translations(
         "de": "German",
         "pt": "Portuguese",
         "sw": "Swahili",
-        "vi": "Vietnamese"
+        "vi": "Vietnamese",
     }
     reference_language_name = lang_code_to_name_map.get(ref_lang_code, ref_lang_code.capitalize())
 
     # Format context with language instructions
-    context = context_template.format(
-        language_instructions=language_instructions
-    )
+    context = context_template.format(language_instructions=language_instructions)
 
     prompt = prompt_template.format(
         english_word=english_word,
@@ -119,15 +128,12 @@ def query_translations(
         definition=definition,
         pos_type=pos_type,
         subtype_info=subtype_info,
-        languages_list=languages_list
+        languages_list=languages_list,
     )
 
     try:
         response = client.generate_chat(
-            prompt=prompt,
-            model=model,
-            json_schema=schema,
-            context=context
+            prompt=prompt, model=model, json_schema=schema, context=context
         )
 
         # Log successful query
@@ -139,7 +145,7 @@ def query_translations(
                 query_type="translation_generation",
                 prompt=prompt,
                 response=json.dumps(response.structured_data),
-                model=model
+                model=model,
             )
         except Exception as log_err:
             logger.error(f"Failed to log successful query: {log_err}")

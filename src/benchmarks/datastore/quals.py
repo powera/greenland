@@ -11,12 +11,12 @@ from sqlalchemy.sql import func
 
 from benchmarks.datastore.common import Base, Model, create_dev_session, decode_json
 
-Model.qual_runs = relationship(
-    "QualRun", back_populates="model", lazy="noload"
-)
+Model.qual_runs = relationship("QualRun", back_populates="model", lazy="noload")
+
 
 class QualTest(Base):
     """Qualitative test definition."""
+
     __tablename__ = "qual_test"
     codename: Mapped[str] = mapped_column(String, primary_key=True)
     displayname: Mapped[str] = mapped_column(String, nullable=False)
@@ -26,8 +26,10 @@ class QualTest(Base):
     runs: Mapped[List["QualRun"]] = relationship(back_populates="qual_test", lazy="noload")
     topics: Mapped[List["QualTopic"]] = relationship(back_populates="qual_test")
 
+
 class QualTopic(Base):
     """Topic for qualitative testing."""
+
     __tablename__ = "qual_topic"
 
     topic_id: Mapped[str] = mapped_column(String, primary_key=True)
@@ -38,8 +40,10 @@ class QualTopic(Base):
     qual_test: Mapped["QualTest"] = relationship(back_populates="topics")
     run_details: Mapped[List["QualRunDetail"]] = relationship(back_populates="topic", lazy="noload")
 
+
 class QualRun(Base):
     """Qualitative test run results."""
+
     __tablename__ = "qual_run"
     run_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     run_ts: Mapped[datetime.datetime] = mapped_column(
@@ -55,16 +59,20 @@ class QualRun(Base):
     qual_test: Mapped["QualTest"] = relationship(back_populates="runs")
     run_details: Mapped[List["QualRunDetail"]] = relationship(back_populates="run", lazy="noload")
 
+
 class QualRunDetail(Base):
     """Detailed results for a qualitative test run."""
+
     __tablename__ = "qual_run_detail"
     run_id: Mapped[int] = mapped_column(ForeignKey("qual_run.run_id"), primary_key=True)
     eval_msec: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     debug_json: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
-    topic_id: Mapped[str] = mapped_column(String, ForeignKey("qual_topic.topic_id"), primary_key=True)
+    topic_id: Mapped[str] = mapped_column(
+        String, ForeignKey("qual_topic.topic_id"), primary_key=True
+    )
     accuracy_score: Mapped[int] = mapped_column(Integer, nullable=False)  # 0-10
-    clarity_score: Mapped[int] = mapped_column(Integer, nullable=False)   # 0-10
+    clarity_score: Mapped[int] = mapped_column(Integer, nullable=False)  # 0-10
     completeness_score: Mapped[int] = mapped_column(Integer, nullable=False)  # 0-10
     response_text: Mapped[str] = mapped_column(Text, nullable=False)
     evaluation_text: Mapped[str] = mapped_column(Text, nullable=False)
@@ -73,18 +81,14 @@ class QualRunDetail(Base):
     run: Mapped["QualRun"] = relationship(back_populates="run_details")
     topic: Mapped["QualTopic"] = relationship(back_populates="run_details")
 
+
 def insert_qual_test(
-    session,
-    codename: str,
-    displayname: str,
-    description: str = None
+    session, codename: str, displayname: str, description: str = None
 ) -> tuple[bool, str]:
     """Insert a new qualification test into the database."""
     try:
         new_qual_test = QualTest(
-            codename=codename,
-            displayname=displayname,
-            description=description
+            codename=codename, displayname=displayname, description=description
         )
         session.add(new_qual_test)
         session.commit()
@@ -97,18 +101,14 @@ def insert_qual_test(
         session.rollback()
         return False, f"Error inserting qualification test: {str(e)}"
 
+
 def insert_qual_topic(
-    session,
-    topic_id: str,
-    qual_test_name: str,
-    topic_text: str
+    session, topic_id: str, qual_test_name: str, topic_text: str
 ) -> tuple[bool, str]:
     """Insert a new qualification test topic into the database."""
     try:
         new_topic = QualTopic(
-            topic_id=topic_id,
-            qual_test_name=qual_test_name,
-            topic_text=topic_text
+            topic_id=topic_id, qual_test_name=qual_test_name, topic_text=topic_text
         )
         session.add(new_topic)
         session.commit()
@@ -121,20 +121,13 @@ def insert_qual_topic(
         session.rollback()
         return False, f"Error inserting topic: {str(e)}"
 
+
 def insert_qual_run(
-    session,
-    model_name: str,
-    qual_test_name: str,
-    avg_score: float,
-    run_details: List[Dict]
+    session, model_name: str, qual_test_name: str, avg_score: float, run_details: List[Dict]
 ) -> tuple[bool, Any]:
     """Insert a new qualification test run into the database."""
     try:
-        new_run = QualRun(
-            model_name=model_name,
-            qual_test_name=qual_test_name,
-            avg_score=avg_score
-        )
+        new_run = QualRun(model_name=model_name, qual_test_name=qual_test_name, avg_score=avg_score)
         session.add(new_run)
         session.flush()
 
@@ -149,7 +142,7 @@ def insert_qual_run(
                     eval_msec=detail.get("eval_msec"),
                     response_text=detail["response_text"],
                     evaluation_text=detail["evaluation_text"],
-                    debug_json=detail.get("debug_json")
+                    debug_json=detail.get("debug_json"),
                 )
                 session.add(run_detail)
 
@@ -163,6 +156,7 @@ def insert_qual_run(
         session.rollback()
         return False, f"Error inserting run: {str(e)}"
 
+
 def list_all_qual_tests(session) -> List[Dict]:
     """List all qualification tests in the database."""
     qual_tests = session.query(QualTest).all()
@@ -170,7 +164,7 @@ def list_all_qual_tests(session) -> List[Dict]:
         {
             "codename": test.codename,
             "displayname": test.displayname,
-            "description": test.description
+            "description": test.description,
         }
         for test in qual_tests
     ]
@@ -183,21 +177,13 @@ def get_highest_qual_scores(session) -> Dict:
     :return: Dict with (qual_test, model) tuple as key and dict containing score and run_id as value
     """
     highest_scores = (
-        session.query(
-            QualRun.qual_test_name,
-            QualRun.model_name,
-            QualRun.avg_score,
-            QualRun.run_id
-        )
+        session.query(QualRun.qual_test_name, QualRun.model_name, QualRun.avg_score, QualRun.run_id)
         .order_by(QualRun.avg_score)
         .distinct(QualRun.qual_test_name, QualRun.model_name)
         .all()
     )
 
     return {
-        (run.qual_test_name, run.model_name): {
-            "score": run.avg_score,
-            "run_id": run.run_id
-        }
+        (run.qual_test_name, run.model_name): {"score": run.avg_score, "run_id": run.run_id}
         for run in highest_scores
     }

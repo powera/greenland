@@ -14,19 +14,20 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_MODEL = "gemma2:9b"
 
+
 def check_message_safety(message: str, model: str = DEFAULT_MODEL) -> Tuple[Dict, LLMUsage]:
     """Check message for various types of unsafe or forbidden content.
-    
+
     Args:
         message: The message to analyze
         model: Model to use for analysis
-        
+
     Returns:
         Tuple containing (analysis_results, usage_metrics)
         analysis_results contains detection results for each category
     """
     _validate_input(message)
-    
+
     context = """You are a content safety analyzer. Evaluate the message for these categories:
 1. Obscene language: Profanity, explicit sexual content, or extreme vulgarity
 2. Personal information: Credit card numbers, passwords, private contact details
@@ -50,37 +51,32 @@ Respond with clear true/false values and specific concerns found."""
                 "type": "array",
                 "items": {
                     "type": "object",
-                    "properties": {
-                        "category": {"type": "string"},
-                        "concern": {"type": "string"}
-                    },
-                    "required": ["category", "concern"]
-                }
-            }
+                    "properties": {"category": {"type": "string"}, "concern": {"type": "string"}},
+                    "required": ["category", "concern"],
+                },
+            },
         },
         "required": [
             "has_obscenity",
-            "has_personal_info", 
+            "has_personal_info",
             "has_prompt_manipulation",
             "has_threats",
             "has_dangerous_content",
             "has_malicious_code",
-            "detected_issues"
-        ]
+            "detected_issues",
+        ],
     }
 
     prompt = f"""Analyze this message for safety concerns:
 
 {message}"""
-    
+
     _, response, usage = unified_client.generate_chat(
-        prompt=prompt,
-        model=model,
-        json_schema=schema,
-        context=context
+        prompt=prompt, model=model, json_schema=schema, context=context
     )
-    
+
     return response, usage
+
 
 def _validate_input(text: str, min_length: int = 1) -> None:
     """Validate input text meets minimum requirements."""

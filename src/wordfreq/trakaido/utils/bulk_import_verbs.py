@@ -30,10 +30,7 @@ from wordfreq.storage.models.schema import DerivativeForm, Lemma
 from wordfreq.storage.models.enums import GrammaticalForm
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 
@@ -73,11 +70,7 @@ LANGUAGE_CONFIGS = {
             "3p-m_fut": "verb/lt_3p_m_fut",
             "3p-f_fut": "verb/lt_3p_f_fut",
         },
-        "tense_mapping": {
-            "present_tense": "pres",
-            "past_tense": "past",
-            "future": "fut"
-        }
+        "tense_mapping": {"present_tense": "pres", "past_tense": "past", "future": "fut"},
     }
 }
 
@@ -91,14 +84,12 @@ VERB_GROUPS = {
     "gerti": "Basic Needs & Daily Life",
     "miegoti": "Basic Needs & Daily Life",
     "žaisti": "Basic Needs & Daily Life",
-
     # Learning & Knowledge
     "mokytis": "Learning & Knowledge",
     "mokyti": "Learning & Knowledge",
     "skaityti": "Learning & Knowledge",
     "rašyti": "Learning & Knowledge",
     "žinoti": "Learning & Knowledge",
-
     # Actions & Transactions
     "būti": "Actions & Transactions",
     "turėti": "Actions & Transactions",
@@ -106,17 +97,14 @@ VERB_GROUPS = {
     "pirkti": "Actions & Transactions",
     "duoti": "Actions & Transactions",
     "imti": "Actions & Transactions",
-
     # Mental & Emotional
     "mėgti": "Mental & Emotional",
     "norėti": "Mental & Emotional",
     "galėti": "Mental & Emotional",
     "kalbėti": "Mental & Emotional",
-
     # Sensory Perception
     "klausyti": "Sensory Perception",
     "matyti": "Sensory Perception",
-
     # Movement & Travel
     "eiti": "Movement & Travel",
     "važiuoti": "Movement & Travel",
@@ -149,6 +137,7 @@ def load_verbs_from_file(language: str) -> Dict:
 
     try:
         from verbs import verbs_new
+
         return verbs_new
     except ImportError as e:
         logger.error(f"Could not import verbs.py from {verbs_dir}: {e}")
@@ -169,7 +158,7 @@ def import_verb(
     language: str,
     session,
     existing_guids: List[int],
-    dry_run: bool = False
+    dry_run: bool = False,
 ) -> Tuple[bool, str]:
     """
     Import a single verb into the database.
@@ -197,10 +186,11 @@ def import_verb(
         english_verb = english_verb[3:]
 
     # Check if verb already exists
-    existing = session.query(Lemma).filter(
-        Lemma.lemma_text.ilike(english_verb),
-        Lemma.pos_type == "verb"
-    ).first()
+    existing = (
+        session.query(Lemma)
+        .filter(Lemma.lemma_text.ilike(english_verb), Lemma.pos_type == "verb")
+        .first()
+    )
 
     if existing:
         return False, f"Verb '{english_verb}' already exists with GUID {existing.guid}"
@@ -225,7 +215,10 @@ def import_verb(
     existing_guids.append(int(guid.split("_")[1]))
 
     if dry_run:
-        return True, f"[DRY RUN] Would import {english_verb} ({verb_infinitive}) with GUID {guid}, level {level}"
+        return (
+            True,
+            f"[DRY RUN] Would import {english_verb} ({verb_infinitive}) with GUID {guid}, level {level}",
+        )
 
     # Create lemma
     lemma = Lemma(
@@ -237,7 +230,7 @@ def import_verb(
         difficulty_level=level,
         lithuanian_translation=verb_infinitive if language == "lt" else None,
         confidence=0.9,
-        verified=True
+        verified=True,
     )
 
     session.add(lemma)
@@ -252,7 +245,7 @@ def import_verb(
         language_code="en",
         grammatical_form="infinitive",
         is_base_form=True,
-        verified=True
+        verified=True,
     )
     session.add(english_form)
 
@@ -265,7 +258,7 @@ def import_verb(
         language_code=language,
         grammatical_form="infinitive",
         is_base_form=True,
-        verified=True
+        verified=True,
     )
     session.add(target_form)
 
@@ -307,7 +300,7 @@ def import_verb(
                     language_code=language,
                     grammatical_form=grammatical_form,
                     is_base_form=False,
-                    verified=True
+                    verified=True,
                 )
                 session.add(conj_form)
                 forms_added += 1
@@ -323,21 +316,21 @@ def import_verb(
                         language_code="en",
                         grammatical_form=grammatical_form,
                         is_base_form=False,
-                        verified=True
+                        verified=True,
                     )
                     session.add(english_conj_form)
                     forms_added += 1
 
     session.commit()
 
-    return True, f"✅ Imported {english_verb} ({verb_infinitive}) with GUID {guid}, {forms_added} conjugation forms"
+    return (
+        True,
+        f"✅ Imported {english_verb} ({verb_infinitive}) with GUID {guid}, {forms_added} conjugation forms",
+    )
 
 
 def bulk_import_verbs(
-    language: str = "lt",
-    limit: int = None,
-    dry_run: bool = False,
-    db_path: str = None
+    language: str = "lt", limit: int = None, dry_run: bool = False, db_path: str = None
 ) -> Dict:
     """
     Bulk import verbs from verbs.py to database.
@@ -352,7 +345,9 @@ def bulk_import_verbs(
         Dictionary with import results
     """
     if language not in LANGUAGE_CONFIGS:
-        raise ValueError(f"Unsupported language: {language}. Supported: {', '.join(LANGUAGE_CONFIGS.keys())}")
+        raise ValueError(
+            f"Unsupported language: {language}. Supported: {', '.join(LANGUAGE_CONFIGS.keys())}"
+        )
 
     logger.info(f"Starting bulk verb import for {LANGUAGE_CONFIGS[language]['name']}...")
 
@@ -369,9 +364,7 @@ def bulk_import_verbs(
     session = create_database_session(db_path)
 
     # Get existing GUIDs
-    existing_guids = session.query(Lemma.guid).filter(
-        Lemma.guid.like("V01_%")
-    ).all()
+    existing_guids = session.query(Lemma.guid).filter(Lemma.guid.like("V01_%")).all()
 
     existing_numbers = []
     for guid_tuple in existing_guids:
@@ -384,12 +377,7 @@ def bulk_import_verbs(
                 continue
 
     # Import verbs
-    results = {
-        "total_verbs": len(verbs),
-        "imported": [],
-        "skipped": [],
-        "failed": []
-    }
+    results = {"total_verbs": len(verbs), "imported": [], "skipped": [], "failed": []}
 
     verb_list = list(verbs.items())
     if limit:
@@ -398,12 +386,7 @@ def bulk_import_verbs(
     for verb_infinitive, verb_data in verb_list:
         try:
             success, message = import_verb(
-                verb_infinitive,
-                verb_data,
-                language,
-                session,
-                existing_numbers,
-                dry_run
+                verb_infinitive, verb_data, language, session, existing_numbers, dry_run
             )
 
             if success:
@@ -440,24 +423,20 @@ def bulk_import_verbs(
 
 def main():
     """Main entry point for CLI."""
-    parser = argparse.ArgumentParser(
-        description="Bulk import verbs from verbs.py to database"
+    parser = argparse.ArgumentParser(description="Bulk import verbs from verbs.py to database")
+    parser.add_argument(
+        "--language", choices=["lt"], default="lt", help="Language code (default: lt)"
     )
-    parser.add_argument("--language", choices=["lt"], default="lt",
-                       help="Language code (default: lt)")
-    parser.add_argument("--limit", type=int,
-                       help="Limit number of verbs to import")
-    parser.add_argument("--dry-run", action="store_true",
-                       help="Show what would be imported without saving")
+    parser.add_argument("--limit", type=int, help="Limit number of verbs to import")
+    parser.add_argument(
+        "--dry-run", action="store_true", help="Show what would be imported without saving"
+    )
     parser.add_argument("--db-path", help="Database path (uses default if not specified)")
 
     args = parser.parse_args()
 
     results = bulk_import_verbs(
-        language=args.language,
-        limit=args.limit,
-        dry_run=args.dry_run,
-        db_path=args.db_path
+        language=args.language, limit=args.limit, dry_run=args.dry_run, db_path=args.db_path
     )
 
     if not results.get("success"):

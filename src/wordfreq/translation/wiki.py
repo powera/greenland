@@ -21,9 +21,7 @@ WIKTIONARY_API_URL = "https://en.wiktionary.org/w/api.php"
 
 # User-Agent header required by Wikimedia APIs
 # See: https://meta.wikimedia.org/wiki/User-Agent_policy
-HEADERS = {
-    "User-Agent": "LithuanianDeclensionBot/1.0 (Educational/Research; Python requests)"
-}
+HEADERS = {"User-Agent": "LithuanianDeclensionBot/1.0 (Educational/Research; Python requests)"}
 
 # Case names mapping from Wiktionary templates to our internal format
 CASE_MAPPING = {
@@ -215,7 +213,7 @@ def extract_lithuanian_section(wikitext: str) -> Optional[str]:
     """
     # Find the start of the Lithuanian section (with optional spaces around heading)
     # Pattern: ==<spaces>Lithuanian<spaces>==
-    lt_heading_match = re.search(r'==\s*Lithuanian\s*==', wikitext)
+    lt_heading_match = re.search(r"==\s*Lithuanian\s*==", wikitext)
     if not lt_heading_match:
         logger.warning("No Lithuanian section found in wikitext")
         return None
@@ -224,8 +222,8 @@ def extract_lithuanian_section(wikitext: str) -> Optional[str]:
 
     # Find the next language section (next level-2 heading)
     # Look for pattern like \n==<spaces>AnyText<spaces>==
-    rest = wikitext[lt_heading_match.end():]
-    next_section_match = re.search(r'\n==\s*[A-Z][a-zA-Z\s]+\s*==', rest)
+    rest = wikitext[lt_heading_match.end() :]
+    next_section_match = re.search(r"\n==\s*[A-Z][a-zA-Z\s]+\s*==", rest)
 
     if next_section_match:
         end = lt_heading_match.end() + next_section_match.start()
@@ -256,9 +254,9 @@ def extract_declension_template(lithuanian_section: str) -> Optional[str]:
     # Match any template starting with lt-noun or lt-decl or lt-ndecl
     # The pattern matches {{lt-noun followed by any characters until }}
     patterns = [
-        r'\{\{lt-noun-[^}]*\}\}',  # Matches all lt-noun-* variants
-        r'\{\{lt-decl-noun[^}]*\}\}',  # Generic declension template
-        r'\{\{lt-ndecl[^}]*\}\}',  # Alternative template name
+        r"\{\{lt-noun-[^}]*\}\}",  # Matches all lt-noun-* variants
+        r"\{\{lt-decl-noun[^}]*\}\}",  # Generic declension template
+        r"\{\{lt-ndecl[^}]*\}\}",  # Alternative template name
     ]
 
     for pattern in patterns:
@@ -560,13 +558,29 @@ def test_wiktionary_fetch():
     if success:
         logger.info(f"\n✓ Successfully extracted declensions for '{test_word}':")
         logger.info(f"\nSingular forms:")
-        for case in ["nominative", "genitive", "dative", "accusative", "instrumental", "locative", "vocative"]:
+        for case in [
+            "nominative",
+            "genitive",
+            "dative",
+            "accusative",
+            "instrumental",
+            "locative",
+            "vocative",
+        ]:
             key = f"{case}_singular"
             if key in declensions:
                 logger.info(f"  {case.capitalize():15} {declensions[key]}")
 
         logger.info(f"\nPlural forms:")
-        for case in ["nominative", "genitive", "dative", "accusative", "instrumental", "locative", "vocative"]:
+        for case in [
+            "nominative",
+            "genitive",
+            "dative",
+            "accusative",
+            "instrumental",
+            "locative",
+            "vocative",
+        ]:
             key = f"{case}_plural"
             if key in declensions:
                 logger.info(f"  {case.capitalize():15} {declensions[key]}")
@@ -584,7 +598,6 @@ def test_stress_mark_removal():
         ("šuõ", "šuo", "Remove tilde stress mark from o"),
         ("šuñs", "šuns", "Remove acute stress mark from u"),
         ("šùnį", "šunį", "Remove grave stress mark from u"),
-
         # Preserve Lithuanian letters WITHOUT stress marks
         ("svogūnas", "svogūnas", "Preserve ū (distinct Lithuanian letter)"),
         ("ąčiū", "ąčiū", "Preserve ą and ū (Lithuanian letters)"),
@@ -597,7 +610,6 @@ def test_stress_mark_removal():
         ("ž", "ž", "Preserve ž (Lithuanian letter)"),
         ("č", "č", "Preserve č (Lithuanian letter)"),
         ("ą", "ą", "Preserve ą (Lithuanian letter)"),
-
         # CRITICAL: Stress marks ON TOP OF Lithuanian letters
         # These should remove the stress but keep the Lithuanian letter
         ("ų̃", "ų", "Remove tilde from ų (Lithuanian letter with stress)"),
@@ -607,15 +619,14 @@ def test_stress_mark_removal():
         ("ą̃", "ą", "Remove tilde from ą (Lithuanian letter with stress)"),
         ("ę́", "ę", "Remove acute from ę (Lithuanian letter with stress)"),
         ("š́", "š", "Remove acute from š (Lithuanian letter with stress)"),
-
         # Complex words with multiple types
         ("šuniù/šunimì", "šuniu/šunimi", "Remove stress marks from alternatives"),
         ("ženklų̃", "ženklų", "Remove tilde from ų in real word (keeps ų)"),
     ]
 
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("Testing stress mark removal")
-    print("="*60)
+    print("=" * 60)
 
     all_passed = True
     for input_text, expected, description in test_cases:
@@ -660,9 +671,9 @@ def test_clean_declension_form():
         ("", [], "Empty string"),
     ]
 
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("Testing clean_declension_form()")
-    print("="*60)
+    print("=" * 60)
 
     all_passed = True
     for input_text, expected, description in test_cases:
@@ -689,21 +700,18 @@ def test_clean_declension_form():
 
 if __name__ == "__main__":
     # Set up logging for testing
-    logging.basicConfig(
-        level=logging.DEBUG,
-        format="%(asctime)s - %(levelname)s - %(message)s"
-    )
+    logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s")
 
     # Run unit tests first
     stress_tests_passed = test_stress_mark_removal()
     clean_tests_passed = test_clean_declension_form()
 
     if stress_tests_passed and clean_tests_passed:
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("All unit tests passed! Now testing live Wiktionary fetch...")
-        print("="*60 + "\n")
+        print("=" * 60 + "\n")
         test_wiktionary_fetch()
     else:
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("Unit tests failed! Skipping live Wiktionary test.")
-        print("="*60)
+        print("=" * 60)

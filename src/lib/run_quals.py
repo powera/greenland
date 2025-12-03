@@ -16,12 +16,14 @@ logger = logging.getLogger(__name__)
 EVALUATOR_MODEL = "gpt-4o-mini"
 TARGET_LENGTH = 500  # Standard length for all responses
 
+
 @dataclass
 class QualResult:
     """Stores results and metadata for a qualification test run."""
+
     topic_id: str
     accuracy_score: int  # 0-10
-    clarity_score: int   # 0-10
+    clarity_score: int  # 0-10
     completeness_score: int  # 0-10
     avg_score: int
     eval_msec: int
@@ -29,9 +31,10 @@ class QualResult:
     evaluation_text: str
     debug_json: Optional[str] = None
 
+
 class QualTestRunner:
     """Base class for running qualification tests."""
-    
+
     def __init__(self, model: str, session=None):
         """Initialize qualification test runner with model name."""
         self.model = model
@@ -41,7 +44,7 @@ class QualTestRunner:
         self.session = session
         self.test_name = None  # Must be set by subclass
         self.response_type = None  # Must be set by subclass
-        
+
     def calculate_timeout(self, length: int = TARGET_LENGTH) -> int:
         """Calculate timeout based on response length."""
         return 20 + (length // 5)
@@ -57,23 +60,20 @@ class QualTestRunner:
             eval_msec=0,
             response_text="",
             evaluation_text="Evaluation failed: Request timeout",
-            debug_json=json.dumps({"error": "Request timeout", "details": str(error)})
+            debug_json=json.dumps({"error": "Request timeout", "details": str(error)}),
         )
-        
+
     def evaluate_response(
-        self,
-        topic: str,
-        response: str,
-        criteria: Dict[str, str]
+        self, topic: str, response: str, criteria: Dict[str, str]
     ) -> Tuple[Dict[str, int], str, LLMUsage]:
         """
         Evaluate a response using the evaluator model.
-        
+
         Args:
             topic: The topic that was queried
             response: The response to evaluate
             criteria: Dictionary of criteria and their descriptions
-            
+
         Returns:
             Tuple of (scores_dict, evaluation_text, usage_metrics)
         """
@@ -92,7 +92,7 @@ Score each criterion from 0-10 (10 being best) and provide a brief explanation."
                 "clarity_score": {"type": "integer", "minimum": 0, "maximum": 10},
                 "completeness_score": {"type": "integer", "minimum": 0, "maximum": 10},
             },
-            "required": ["explanation", "accuracy_score", "clarity_score", "completeness_score"]
+            "required": ["explanation", "accuracy_score", "clarity_score", "completeness_score"],
         }
 
         prompt = f"""Evaluate this response:
@@ -100,50 +100,44 @@ Score each criterion from 0-10 (10 being best) and provide a brief explanation."
 {response}"""
 
         _, evaluation, usage = unified_client.generate_chat(
-            prompt=prompt,
-            model=self.evaluator_model,
-            json_schema=schema,
-            context=context
+            prompt=prompt, model=self.evaluator_model, json_schema=schema, context=context
         )
-        
+
         scores = {
             "accuracy": evaluation["accuracy_score"],
             "clarity": evaluation["clarity_score"],
-            "completeness": evaluation["completeness_score"]
+            "completeness": evaluation["completeness_score"],
         }
-        
+
         return scores, evaluation["explanation"], usage
 
     def run(self, save_to_db: bool = False) -> List[QualResult]:
         """Execute the qualification tests."""
         if not self.topics or not self.criteria or not self.test_name or not self.response_type:
-            raise ValueError("Topics, criteria, test_name, and response_type must be defined in subclass")
-            
+            raise ValueError(
+                "Topics, criteria, test_name, and response_type must be defined in subclass"
+            )
+
         results = []
         total_score = 0
         timeout = self.calculate_timeout(TARGET_LENGTH)
-        
+
         for topic in self.topics:
             try:
                 # Generate response using advanced_queries.generate_response
                 response, gen_usage = lib.advanced_queries.generate_response(
-                    topic,
-                    TARGET_LENGTH,
-                    self.response_type,
-                    self.model
+                    topic, TARGET_LENGTH, self.response_type, self.model
                 )
-                
+
                 # Evaluate the response
                 scores, evaluation, eval_usage = self.evaluate_response(
-                    topic,
-                    response,
-                    self.criteria
+                    topic, response, self.criteria
                 )
-                
+
                 # Calculate average score
                 avg_score = sum(scores.values()) // len(scores)
                 total_score += avg_score
-                
+
                 # Create result object
                 result = QualResult(
                     topic_id=topic,
@@ -154,38 +148,37 @@ Score each criterion from 0-10 (10 being best) and provide a brief explanation."
                     eval_msec=int(gen_usage.total_msec + eval_usage.total_msec),
                     response_text=response,
                     evaluation_text=evaluation,
-                    debug_json=json.dumps({
-                        "generation_usage": gen_usage.to_dict(),
-                        "evaluation_usage": eval_usage.to_dict()
-                    })
+                    debug_json=json.dumps(
+                        {
+                            "generation_usage": gen_usage.to_dict(),
+                            "evaluation_usage": eval_usage.to_dict(),
+                        }
+                    ),
                 )
             except OllamaTimeoutError as e:
                 result = self.handle_timeout(topic, e)
-                
+
             results.append(result)
-            
+
         # Save results to database if requested
         if save_to_db and self.session:
             # Scale total score to 100-point scale
             # Each topic has 3 criteria scored 0-10, max 30 points per topic
             max_possible = len(self.topics) * 30
             overall_score = (total_score * 100) // max_possible
-            
+
             success, run_id = datastore.quals.insert_qual_run(
-                self.session,
-                self.model,
-                self.test_name,
-                overall_score,
-                [vars(r) for r in results]
+                self.session, self.model, self.test_name, overall_score, [vars(r) for r in results]
             )
             if not success:
                 logger.error(f"Failed to save results to database: {run_id}")
-            
+
         return results
+
 
 class HistoricalAnalysisQual(QualTestRunner):
     """Qualification tests for historical analysis responses."""
-    
+
     def __init__(self, model: str, session=None):
         super().__init__(model, session)
         self.test_name = "historical_analysis"
@@ -193,17 +186,18 @@ class HistoricalAnalysisQual(QualTestRunner):
         self.topics = [
             "The causes and effects of the Industrial Revolution",
             "The impact of the printing press on medieval Europe",
-            "The role of trade routes in ancient civilizations"
+            "The role of trade routes in ancient civilizations",
         ]
         self.criteria = {
             "accuracy": "Factual correctness and proper chronology",
             "clarity": "Clear organization and logical flow of ideas",
-            "completeness": "Coverage of major events and their significance"
+            "completeness": "Coverage of major events and their significance",
         }
+
 
 class ScientificExplanationQual(QualTestRunner):
     """Qualification tests for scientific explanation responses."""
-    
+
     def __init__(self, model: str, session=None):
         super().__init__(model, session)
         self.test_name = "scientific_explanation"
@@ -211,17 +205,18 @@ class ScientificExplanationQual(QualTestRunner):
         self.topics = [
             "The process of photosynthesis in plants",
             "How black holes form and evolve",
-            "The mechanics of plate tectonics"
+            "The mechanics of plate tectonics",
         ]
         self.criteria = {
             "accuracy": "Scientific accuracy and use of current understanding",
             "clarity": "Clear explanation of complex concepts",
-            "completeness": "Coverage of key principles and mechanisms"
+            "completeness": "Coverage of key principles and mechanisms",
         }
+
 
 class TechnicalAnalysisQual(QualTestRunner):
     """Qualification tests for technical analysis responses."""
-    
+
     def __init__(self, model: str, session=None):
         super().__init__(model, session)
         self.test_name = "technical_analysis"
@@ -229,17 +224,18 @@ class TechnicalAnalysisQual(QualTestRunner):
         self.topics = [
             "How public key encryption works",
             "The architecture of modern CPUs",
-            "The principles of machine learning algorithms"
+            "The principles of machine learning algorithms",
         ]
         self.criteria = {
             "accuracy": "Technical accuracy and proper terminology",
             "clarity": "Clear explanation of complex technical concepts",
-            "completeness": "Coverage of key components and processes"
+            "completeness": "Coverage of key components and processes",
         }
+
 
 class BiographicalAnalysisQual(QualTestRunner):
     """Qualification tests for biographical analysis responses."""
-    
+
     def __init__(self, model: str, session=None):
         super().__init__(model, session)
         self.test_name = "biographical_analysis"
@@ -247,17 +243,18 @@ class BiographicalAnalysisQual(QualTestRunner):
         self.topics = [
             "The life and achievements of Marie Curie",
             "Albert Einstein's contributions to physics",
-            "Ada Lovelace's role in early computing"
+            "Ada Lovelace's role in early computing",
         ]
         self.criteria = {
             "accuracy": "Biographical accuracy and proper timeline",
             "clarity": "Clear presentation of life events and achievements",
-            "completeness": "Coverage of key life events and contributions"
+            "completeness": "Coverage of key life events and contributions",
         }
+
 
 class LiteraryAnalysisQual(QualTestRunner):
     """Qualification tests for literary analysis responses."""
-    
+
     def __init__(self, model: str, session=None):
         super().__init__(model, session)
         self.test_name = "literary_analysis"
@@ -265,17 +262,18 @@ class LiteraryAnalysisQual(QualTestRunner):
         self.topics = [
             "The plot and themes of 1984 by George Orwell",
             "The narrative structure of One Hundred Years of Solitude",
-            "Character development in Pride and Prejudice"
+            "Character development in Pride and Prejudice",
         ]
         self.criteria = {
             "accuracy": "Accuracy of plot details and literary elements",
             "clarity": "Clear presentation of narrative elements",
-            "completeness": "Coverage of key plot points and themes"
+            "completeness": "Coverage of key plot points and themes",
         }
+
 
 class CulturalAnalysisQual(QualTestRunner):
     """Qualification tests for cultural analysis responses."""
-    
+
     def __init__(self, model: str, session=None):
         super().__init__(model, session)
         self.test_name = "cultural_analysis"
@@ -283,17 +281,18 @@ class CulturalAnalysisQual(QualTestRunner):
         self.topics = [
             "The influence of jazz on American culture",
             "The role of tea ceremonies in Japanese society",
-            "The impact of Renaissance art on European culture"
+            "The impact of Renaissance art on European culture",
         ]
         self.criteria = {
             "accuracy": "Cultural accuracy and proper context",
             "clarity": "Clear explanation of cultural significance",
-            "completeness": "Coverage of key cultural elements and impact"
+            "completeness": "Coverage of key cultural elements and impact",
         }
+
 
 class AnalyticalResponseQual(QualTestRunner):
     """Qualification tests for analytical responses."""
-    
+
     def __init__(self, model: str, session=None):
         super().__init__(model, session)
         self.test_name = "analytical_response"
@@ -301,13 +300,14 @@ class AnalyticalResponseQual(QualTestRunner):
         self.topics = [
             "The economic impact of automation on employment",
             "The effects of social media on political discourse",
-            "The relationship between climate change and biodiversity"
+            "The relationship between climate change and biodiversity",
         ]
         self.criteria = {
             "accuracy": "Analytical accuracy and evidence-based reasoning",
             "clarity": "Clear presentation of analysis and arguments",
-            "completeness": "Coverage of key factors and implications"
+            "completeness": "Coverage of key factors and implications",
         }
+
 
 # Map of qualification test types to their runner classes
 QUAL_TEST_CLASSES = {
@@ -317,28 +317,31 @@ QUAL_TEST_CLASSES = {
     "biographical": BiographicalAnalysisQual,
     "literary": LiteraryAnalysisQual,
     "cultural": CulturalAnalysisQual,
-    "analytical": AnalyticalResponseQual
+    "analytical": AnalyticalResponseQual,
 }
 
-def run_qual_test(test_type: str, model: str, save_to_db: bool = False, session=None) -> List[QualResult]:
+
+def run_qual_test(
+    test_type: str, model: str, save_to_db: bool = False, session=None
+) -> List[QualResult]:
     """
     Run a specific qualification test against a model.
-    
+
     Args:
         test_type: Type of qualification test to run
         model: Model to test
         save_to_db: Whether to save results to database
         session: Optional database session (required if save_to_db is True)
-        
+
     Returns:
         List of QualResults for each topic
     """
     test_class = QUAL_TEST_CLASSES.get(test_type)
     if not test_class:
         raise ValueError(f"Unknown qualification test type: {test_type}")
-        
+
     if save_to_db and not session:
         session = datastore.quals.create_dev_session()
-        
+
     test = test_class(model, session)
     return test.run(save_to_db)

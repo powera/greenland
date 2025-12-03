@@ -1,8 +1,7 @@
-
-
 import benchmarks.datastore.benchmarks
 from sqlalchemy import delete
 from benchmarks.datastore.common import create_dev_session
+
 
 def delete_benchmark_completely(session, benchmark_code: str) -> bool:
     """
@@ -17,12 +16,14 @@ def delete_benchmark_completely(session, benchmark_code: str) -> bool:
     """
 
     if not session:
-      session = create_dev_session()
+        session = create_dev_session()
     try:
         # 1. Find all run IDs associated with this benchmark
-        run_ids_query = session.query(datastore.benchmarks.Run.run_id).filter(
-            datastore.benchmarks.Run.benchmark_name == benchmark_code
-        ).all()
+        run_ids_query = (
+            session.query(datastore.benchmarks.Run.run_id)
+            .filter(datastore.benchmarks.Run.benchmark_name == benchmark_code)
+            .all()
+        )
         run_ids = [row[0] for row in run_ids_query]
 
         # 2. Delete run details for these runs
@@ -52,7 +53,9 @@ def delete_benchmark_completely(session, benchmark_code: str) -> bool:
 
         # Commit all changes
         session.commit()
-        print(f"Successfully deleted benchmark {benchmark_code}, its questions, and {len(run_ids)} associated runs")
+        print(
+            f"Successfully deleted benchmark {benchmark_code}, its questions, and {len(run_ids)} associated runs"
+        )
 
         return True
 
@@ -60,6 +63,7 @@ def delete_benchmark_completely(session, benchmark_code: str) -> bool:
         session.rollback()
         print(f"Error deleting benchmark {benchmark_code}: {str(e)}")
         return False
+
 
 # Usage example:
 # delete_benchmark_completely(session, "0050_translation_es_sw")

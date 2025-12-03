@@ -7,7 +7,17 @@ such as gender, declension class, and number restrictions (plurale tantum, etc.)
 
 import datetime
 from typing import Optional
-from sqlalchemy import String, Integer, Text, Boolean, ForeignKey, TIMESTAMP, UniqueConstraint, Index, func
+from sqlalchemy import (
+    String,
+    Integer,
+    Text,
+    Boolean,
+    ForeignKey,
+    TIMESTAMP,
+    UniqueConstraint,
+    Index,
+    func,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .schema import Base
@@ -28,6 +38,7 @@ class GrammarFact(Base):
     Design principle: Only store POSITIVE assertions. Absence of a fact means
     normal/default behavior for that language.
     """
+
     __tablename__ = "grammar_facts"
     __table_args__ = (
         # One fact of each type per lemma+language combination
@@ -39,7 +50,9 @@ class GrammarFact(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
 
     # Links to the lemma this fact describes
-    lemma_id: Mapped[int] = mapped_column(Integer, ForeignKey("lemmas.id", ondelete="CASCADE"), nullable=False, index=True)
+    lemma_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("lemmas.id", ondelete="CASCADE"), nullable=False, index=True
+    )
 
     # Language code (ISO 639-1): "en", "lt", "fr", etc.
     # Same lemma can have different grammatical properties in different languages

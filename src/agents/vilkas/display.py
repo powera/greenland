@@ -36,7 +36,9 @@ def print_fix_results(results, dry_run=False):
             print(f"Supported POS types: {', '.join(results['supported_pos_types'])}")
     else:
         if dry_run:
-            print(f"\nDRY RUN: Would process {results['would_process']} items out of {results['total_needing_fix']} total")
+            print(
+                f"\nDRY RUN: Would process {results['would_process']} items out of {results['total_needing_fix']} total"
+            )
         else:
             print(f"\nFix complete:")
             print(f"  Total needing fix: {results['total_needing_fix']}")
@@ -47,18 +49,24 @@ def print_fix_results(results, dry_run=False):
 
 def print_base_forms_check(results):
     """Print base forms check results."""
-    print(f"\nMissing base forms: {results['missing_count']} out of {results['total_with_translation']}")
+    print(
+        f"\nMissing base forms: {results['missing_count']} out of {results['total_with_translation']}"
+    )
     print(f"Coverage: {results['coverage_percentage']:.1f}%")
 
 
 def print_noun_declensions_check(results):
     """Print noun declensions check results."""
-    print(f"\nNouns needing declensions: {results['needs_declensions']} out of {results['total_nouns']}")
+    print(
+        f"\nNouns needing declensions: {results['needs_declensions']} out of {results['total_nouns']}"
+    )
     print(f"Coverage: {results['declension_coverage_percentage']:.1f}%")
 
 
 def print_verb_conjugations_check(results, language_code):
     """Print verb conjugations check results."""
     lang_name = results.get("language_name", language_code.upper())
-    print(f"\n{lang_name} Verbs needing conjugations: {results['needs_conjugations']} out of {results['total_verbs']}")
+    print(
+        f"\n{lang_name} Verbs needing conjugations: {results['needs_conjugations']} out of {results['total_verbs']}"
+    )
     print(f"Coverage: {results['conjugation_coverage_percentage']:.1f}%")

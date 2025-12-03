@@ -34,11 +34,13 @@ BATCH_DB_PATH = os.path.join(constants.SRC_DIR, "clients", "data", "batch_tracki
 
 class Base(DeclarativeBase):
     """Base class for batch tracking database models."""
+
     pass
 
 
 class BatchRequestStatus(Enum):
     """Status of individual requests within a batch."""
+
     PENDING = "pending"  # Request created, not yet submitted
     QUEUED = "queued"  # Request added to a batch file
     SUBMITTED = "submitted"  # Batch has been submitted to OpenAI
@@ -51,6 +53,7 @@ class BatchRequestStatus(Enum):
 @dataclass
 class BatchRequestMetadata:
     """Metadata for a batch request."""
+
     custom_id: str
     agent_name: str  # e.g., "voras", "lokys"
     operation_type: str  # e.g., "validate_translation", "validate_lemma"
@@ -71,6 +74,7 @@ class BatchRequestMetadata:
 
 class BatchQueue(Base):
     """Database model for tracking batch requests."""
+
     __tablename__ = "batch_queue"
     __table_args__ = (
         Index("ix_batch_queue_batch_id", "batch_id"),
@@ -83,30 +87,52 @@ class BatchQueue(Base):
 
     # Request identification
     custom_id: Mapped[str] = mapped_column(String, nullable=False, unique=True, index=True)
-    batch_id: Mapped[Optional[str]] = mapped_column(String, nullable=True, index=True)  # OpenAI batch ID
-    batch_file_id: Mapped[Optional[str]] = mapped_column(String, nullable=True)  # OpenAI file ID for input
+    batch_id: Mapped[Optional[str]] = mapped_column(
+        String, nullable=True, index=True
+    )  # OpenAI batch ID
+    batch_file_id: Mapped[Optional[str]] = mapped_column(
+        String, nullable=True
+    )  # OpenAI file ID for input
 
     # Request content
-    request_body: Mapped[str] = mapped_column(Text, nullable=False)  # JSON string of the request body
+    request_body: Mapped[str] = mapped_column(
+        Text, nullable=False
+    )  # JSON string of the request body
     endpoint: Mapped[str] = mapped_column(String, nullable=False, default="/v1/responses")
 
     # Status tracking
-    status: Mapped[str] = mapped_column(String, nullable=False, default=BatchRequestStatus.PENDING.value, index=True)
+    status: Mapped[str] = mapped_column(
+        String, nullable=False, default=BatchRequestStatus.PENDING.value, index=True
+    )
 
     # Response data
-    response_body: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # JSON string of the response
+    response_body: Mapped[Optional[str]] = mapped_column(
+        Text, nullable=True
+    )  # JSON string of the response
     error_message: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     # Metadata for organization and querying
-    agent_name: Mapped[str] = mapped_column(String, nullable=False, index=True)  # e.g., "voras", "lokys"
-    operation_type: Mapped[str] = mapped_column(String, nullable=False)  # e.g., "validate_translation"
-    entity_id: Mapped[Optional[int]] = mapped_column(Integer, nullable=True, index=True)  # Reference to lemma, word_token, etc.
-    entity_type: Mapped[Optional[str]] = mapped_column(String, nullable=True)  # "lemma", "word_token", etc.
+    agent_name: Mapped[str] = mapped_column(
+        String, nullable=False, index=True
+    )  # e.g., "voras", "lokys"
+    operation_type: Mapped[str] = mapped_column(
+        String, nullable=False
+    )  # e.g., "validate_translation"
+    entity_id: Mapped[Optional[int]] = mapped_column(
+        Integer, nullable=True, index=True
+    )  # Reference to lemma, word_token, etc.
+    entity_type: Mapped[Optional[str]] = mapped_column(
+        String, nullable=True
+    )  # "lemma", "word_token", etc.
     language_code: Mapped[Optional[str]] = mapped_column(String, nullable=True, index=True)
-    additional_metadata: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # Additional JSON metadata
+    additional_metadata: Mapped[Optional[str]] = mapped_column(
+        Text, nullable=True
+    )  # Additional JSON metadata
 
     # Timestamps
-    created_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now(), index=True)
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP, server_default=func.now(), index=True
+    )
     submitted_at: Mapped[Optional[datetime.datetime]] = mapped_column(TIMESTAMP, nullable=True)
     completed_at: Mapped[Optional[datetime.datetime]] = mapped_column(TIMESTAMP, nullable=True)
 
@@ -114,7 +140,12 @@ class BatchQueue(Base):
 class BatchQueueManager:
     """Manager for batch request queue and lifecycle."""
 
-    def __init__(self, db_session: Session, batch_client: Optional[OpenAIBatchClient] = None, debug: bool = False):
+    def __init__(
+        self,
+        db_session: Session,
+        batch_client: Optional[OpenAIBatchClient] = None,
+        debug: bool = False,
+    ):
         """Initialize batch queue manager.
 
         Args:
@@ -133,7 +164,7 @@ class BatchQueueManager:
         custom_id: str,
         request_body: Dict[str, Any],
         metadata: BatchRequestMetadata,
-        endpoint: str = "/v1/responses"
+        endpoint: str = "/v1/responses",
     ) -> BatchQueue:
         """Add a request to the batch queue.
 
@@ -161,14 +192,16 @@ class BatchQueueManager:
             entity_id=metadata.entity_id,
             entity_type=metadata.entity_type,
             language_code=metadata.language_code,
-            additional_metadata=json.dumps(metadata.to_dict())
+            additional_metadata=json.dumps(metadata.to_dict()),
         )
 
         self.db.add(record)
         self.db.commit()
 
         if self.debug:
-            logger.debug(f"Queued request {custom_id} for {metadata.agent_name}/{metadata.operation_type}")
+            logger.debug(
+                f"Queued request {custom_id} for {metadata.agent_name}/{metadata.operation_type}"
+            )
 
         return record
 
@@ -176,7 +209,7 @@ class BatchQueueManager:
         self,
         agent_name: Optional[str] = None,
         operation_type: Optional[str] = None,
-        limit: Optional[int] = None
+        limit: Optional[int] = None,
     ) -> List[BatchQueue]:
         """Get pending requests from the queue.
 
@@ -200,9 +233,7 @@ class BatchQueueManager:
         return query.all()
 
     def submit_batch(
-        self,
-        requests: List[BatchQueue],
-        batch_metadata: Optional[Dict[str, str]] = None
+        self, requests: List[BatchQueue], batch_metadata: Optional[Dict[str, str]] = None
     ) -> Tuple[str, str]:
         """Submit a batch of queued requests to OpenAI.
 
@@ -219,12 +250,14 @@ class BatchQueueManager:
         # Format requests for batch API
         batch_requests = []
         for req in requests:
-            batch_requests.append({
-                "custom_id": req.custom_id,
-                "method": "POST",
-                "url": req.endpoint,
-                "body": json.loads(req.request_body)
-            })
+            batch_requests.append(
+                {
+                    "custom_id": req.custom_id,
+                    "method": "POST",
+                    "url": req.endpoint,
+                    "body": json.loads(req.request_body),
+                }
+            )
 
         # Upload batch file
         file_id = self.batch_client.upload_batch_file(batch_requests)
@@ -263,11 +296,8 @@ class BatchQueueManager:
         # Update request statuses if batch is processing or completed
         if status in [BatchStatus.IN_PROGRESS.value, BatchStatus.FINALIZING.value]:
             self.db.query(BatchQueue).filter_by(
-                batch_id=batch_id,
-                status=BatchRequestStatus.SUBMITTED.value
-            ).update({
-                "status": BatchRequestStatus.PROCESSING.value
-            })
+                batch_id=batch_id, status=BatchRequestStatus.SUBMITTED.value
+            ).update({"status": BatchRequestStatus.PROCESSING.value})
             self.db.commit()
 
         return batch_info
@@ -327,7 +357,7 @@ class BatchQueueManager:
         agent_name: Optional[str] = None,
         operation_type: Optional[str] = None,
         batch_id: Optional[str] = None,
-        limit: Optional[int] = None
+        limit: Optional[int] = None,
     ) -> List[BatchQueue]:
         """Get completed requests with results.
 
@@ -354,9 +384,7 @@ class BatchQueueManager:
         return query.order_by(BatchQueue.completed_at.desc()).all()
 
     def get_failed_requests(
-        self,
-        agent_name: Optional[str] = None,
-        batch_id: Optional[str] = None
+        self, agent_name: Optional[str] = None, batch_id: Optional[str] = None
     ) -> List[BatchQueue]:
         """Get failed requests.
 
@@ -389,9 +417,9 @@ class BatchQueueManager:
         batch_info = self.batch_client.cancel_batch(batch_id)
 
         # Update request records
-        self.db.query(BatchQueue).filter_by(batch_id=batch_id).update({
-            "status": BatchRequestStatus.CANCELLED.value
-        })
+        self.db.query(BatchQueue).filter_by(batch_id=batch_id).update(
+            {"status": BatchRequestStatus.CANCELLED.value}
+        )
         self.db.commit()
 
         logger.info(f"Cancelled batch {batch_id}")
@@ -417,8 +445,12 @@ class BatchQueueManager:
             "batch_id": batch_id,
             "total_requests": len(requests),
             "status_counts": status_counts,
-            "first_submitted": min((r.submitted_at for r in requests if r.submitted_at), default=None),
-            "last_completed": max((r.completed_at for r in requests if r.completed_at), default=None)
+            "first_submitted": min(
+                (r.submitted_at for r in requests if r.submitted_at), default=None
+            ),
+            "last_completed": max(
+                (r.completed_at for r in requests if r.completed_at), default=None
+            ),
         }
 
     def list_active_batches(self) -> List[str]:
@@ -427,15 +459,14 @@ class BatchQueueManager:
         Returns:
             List of batch IDs that are submitted or processing
         """
-        active_statuses = [
-            BatchRequestStatus.SUBMITTED.value,
-            BatchRequestStatus.PROCESSING.value
-        ]
+        active_statuses = [BatchRequestStatus.SUBMITTED.value, BatchRequestStatus.PROCESSING.value]
 
-        result = self.db.query(BatchQueue.batch_id).filter(
-            BatchQueue.batch_id.isnot(None),
-            BatchQueue.status.in_(active_statuses)
-        ).distinct().all()
+        result = (
+            self.db.query(BatchQueue.batch_id)
+            .filter(BatchQueue.batch_id.isnot(None), BatchQueue.status.in_(active_statuses))
+            .distinct()
+            .all()
+        )
 
         return [batch_id for (batch_id,) in result]
 
@@ -453,7 +484,7 @@ def create_batch_database_session(db_path: str = BATCH_DB_PATH) -> Session:
     os.makedirs(os.path.dirname(db_path), exist_ok=True)
 
     # Create engine and tables
-    engine = create_engine(f'sqlite:///{db_path}')
+    engine = create_engine(f"sqlite:///{db_path}")
     Base.metadata.create_all(engine)
 
     # Create session
@@ -461,7 +492,9 @@ def create_batch_database_session(db_path: str = BATCH_DB_PATH) -> Session:
     return Session()
 
 
-def get_batch_manager(db_session: Optional[Session] = None, debug: bool = False) -> BatchQueueManager:
+def get_batch_manager(
+    db_session: Optional[Session] = None, debug: bool = False
+) -> BatchQueueManager:
     """Get a BatchQueueManager instance.
 
     Args:

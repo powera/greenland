@@ -35,7 +35,7 @@ def povas_generate():
     script_path = agents_dir / "povas.py"
 
     if not script_path.exists():
-        return jsonify({"success": False, "error": f'Script not found: {script_path}'}), 404
+        return jsonify({"success": False, "error": f"Script not found: {script_path}"}), 404
 
     # Build arguments
     args = ["python3", str(script_path)]
@@ -51,36 +51,31 @@ def povas_generate():
 
     try:
         # Execute
-        process = subprocess.Popen(
-            args,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True
-        )
+        process = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
         stdout, stderr = process.communicate(timeout=300)  # 5 min timeout
 
         success = process.returncode == 0
 
-        return jsonify({
-            "success": success,
-            "stdout": stdout,
-            "stderr": stderr,
-            "returncode": process.returncode
-        })
+        return jsonify(
+            {
+                "success": success,
+                "stdout": stdout,
+                "stderr": stderr,
+                "returncode": process.returncode,
+            }
+        )
 
     except subprocess.TimeoutExpired:
         process.kill()
-        return jsonify({
-            "success": False,
-            "error": "Generation timed out (5 minutes)",
-            "timeout": True
-        }), 408
+        return (
+            jsonify(
+                {"success": False, "error": "Generation timed out (5 minutes)", "timeout": True}
+            ),
+            408,
+        )
     except Exception as e:
-        return jsonify({
-            "success": False,
-            "error": str(e)
-        }), 500
+        return jsonify({"success": False, "error": str(e)}), 500
 
 
 @bp.route("/elnias")
@@ -100,7 +95,7 @@ def elnias_generate():
     script_path = agents_dir / "elnias.py"
 
     if not script_path.exists():
-        return jsonify({"success": False, "error": f'Script not found: {script_path}'}), 404
+        return jsonify({"success": False, "error": f"Script not found: {script_path}"}), 404
 
     # Build arguments
     args = ["python3", str(script_path)]
@@ -117,12 +112,7 @@ def elnias_generate():
 
     try:
         # Execute
-        process = subprocess.Popen(
-            args,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True
-        )
+        process = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
         stdout, stderr = process.communicate(timeout=300)  # 5 min timeout
 
@@ -132,7 +122,7 @@ def elnias_generate():
         output_path = None
         if success and stdout:
             # Look for "Successfully wrote X entries to /path/to/file" in stdout
-            match = re.search(r'Successfully wrote \d+ entries to (.+)', stdout)
+            match = re.search(r"Successfully wrote \d+ entries to (.+)", stdout)
             if match:
                 output_path = match.group(1).strip()
 
@@ -140,7 +130,7 @@ def elnias_generate():
             "success": success,
             "stdout": stdout,
             "stderr": stderr,
-            "returncode": process.returncode
+            "returncode": process.returncode,
         }
 
         if output_path:
@@ -150,16 +140,14 @@ def elnias_generate():
 
     except subprocess.TimeoutExpired:
         process.kill()
-        return jsonify({
-            "success": False,
-            "error": "Generation timed out (5 minutes)",
-            "timeout": True
-        }), 408
+        return (
+            jsonify(
+                {"success": False, "error": "Generation timed out (5 minutes)", "timeout": True}
+            ),
+            408,
+        )
     except Exception as e:
-        return jsonify({
-            "success": False,
-            "error": str(e)
-        }), 500
+        return jsonify({"success": False, "error": str(e)}), 500
 
 
 @bp.route("/elnias/download")
@@ -190,5 +178,5 @@ def elnias_download():
         abs_file_path,
         as_attachment=True,
         download_name=abs_file_path.name,
-        mimetype="application/json"
+        mimetype="application/json",
     )

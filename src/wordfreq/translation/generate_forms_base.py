@@ -35,15 +35,15 @@ class FormGenerationConfig:
     min_forms_threshold: int  # Minimum number of forms to consider complete
     base_form_identifier: str  # Form name that should be marked as base form
     use_legacy_translation: bool = False  # Use old schema (e.g., french_translation column)
-    translation_field_name: Optional[str] = None  # Field name for legacy translation (e.g., 'french_translation')
+    translation_field_name: Optional[str] = (
+        None  # Field name for legacy translation (e.g., 'french_translation')
+    )
     detect_number_type: bool = True  # Detect plurale_tantum/singulare_tantum for nouns
     extract_gender: bool = False  # Extract grammatical gender from forms (for gendered languages)
 
 
 def get_lemmas_with_translation(
-    db_path: str,
-    config: FormGenerationConfig,
-    limit: Optional[int] = None
+    db_path: str, config: FormGenerationConfig, limit: Optional[int] = None
 ) -> List[Dict]:
     """
     Get lemmas with translations for a specific language and POS type.
@@ -64,11 +64,15 @@ def get_lemmas_with_translation(
     if config.use_legacy_translation:
         # Old schema: direct translation column on Lemma table
         translation_column = getattr(linguistic_db.Lemma, config.translation_field_name)
-        query = session.query(linguistic_db.Lemma).filter(
-            linguistic_db.Lemma.pos_type == config.pos_type,
-            translation_column.isnot(None),
-            translation_column != ""
-        ).order_by(linguistic_db.Lemma.frequency_rank)
+        query = (
+            session.query(linguistic_db.Lemma)
+            .filter(
+                linguistic_db.Lemma.pos_type == config.pos_type,
+                translation_column.isnot(None),
+                translation_column != "",
+            )
+            .order_by(linguistic_db.Lemma.frequency_rank)
+        )
 
         if limit:
             query = query.limit(limit)
@@ -76,48 +80,57 @@ def get_lemmas_with_translation(
         results = []
         for lemma in query.all():
             translation = getattr(lemma, config.translation_field_name)
-            results.append({
-                "id": lemma.id,
-                "english": lemma.lemma_text,
-                config.language_code: translation,
-                "pos_subtype": lemma.pos_subtype
-            })
+            results.append(
+                {
+                    "id": lemma.id,
+                    "english": lemma.lemma_text,
+                    config.language_code: translation,
+                    "pos_subtype": lemma.pos_subtype,
+                }
+            )
         return results
     else:
         # New schema: LemmaTranslation table
-        query = session.query(linguistic_db.Lemma).join(
-            linguistic_db.LemmaTranslation,
-            (linguistic_db.Lemma.id == linguistic_db.LemmaTranslation.lemma_id) &
-            (linguistic_db.LemmaTranslation.language_code == config.language_code)
-        ).filter(
-            linguistic_db.Lemma.pos_type == config.pos_type
-        ).order_by(linguistic_db.Lemma.frequency_rank)
+        query = (
+            session.query(linguistic_db.Lemma)
+            .join(
+                linguistic_db.LemmaTranslation,
+                (linguistic_db.Lemma.id == linguistic_db.LemmaTranslation.lemma_id)
+                & (linguistic_db.LemmaTranslation.language_code == config.language_code),
+            )
+            .filter(linguistic_db.Lemma.pos_type == config.pos_type)
+            .order_by(linguistic_db.Lemma.frequency_rank)
+        )
 
         if limit:
             query = query.limit(limit)
 
         results = []
         for lemma in query.all():
-            translation = session.query(linguistic_db.LemmaTranslation).filter(
-                linguistic_db.LemmaTranslation.lemma_id == lemma.id,
-                linguistic_db.LemmaTranslation.language_code == config.language_code
-            ).first()
+            translation = (
+                session.query(linguistic_db.LemmaTranslation)
+                .filter(
+                    linguistic_db.LemmaTranslation.lemma_id == lemma.id,
+                    linguistic_db.LemmaTranslation.language_code == config.language_code,
+                )
+                .first()
+            )
 
             if translation:
-                results.append({
-                    "id": lemma.id,
-                    "english": lemma.lemma_text,
-                    config.language_code: translation.translation,
-                    "pos_subtype": lemma.pos_subtype
-                })
+                results.append(
+                    {
+                        "id": lemma.id,
+                        "english": lemma.lemma_text,
+                        config.language_code: translation.translation,
+                        "pos_subtype": lemma.pos_subtype,
+                    }
+                )
 
         return results
 
 
 def get_lemmas_without_translation(
-    db_path: str,
-    pos_type: str,
-    limit: Optional[int] = None
+    db_path: str, pos_type: str, limit: Optional[int] = None
 ) -> List[Dict]:
     """
     Get lemmas without requiring translations (e.g., for English forms).
@@ -132,9 +145,11 @@ def get_lemmas_without_translation(
     """
     session = get_session(db_path)
 
-    query = session.query(linguistic_db.Lemma).filter(
-        linguistic_db.Lemma.pos_type == pos_type
-    ).order_by(linguistic_db.Lemma.frequency_rank)
+    query = (
+        session.query(linguistic_db.Lemma)
+        .filter(linguistic_db.Lemma.pos_type == pos_type)
+        .order_by(linguistic_db.Lemma.frequency_rank)
+    )
 
     if limit:
         query = query.limit(limit)
@@ -144,7 +159,7 @@ def get_lemmas_without_translation(
             "id": lemma.id,
             "english": lemma.lemma_text,
             "pos_subtype": lemma.pos_subtype,
-            "frequency_rank": lemma.frequency_rank
+            "frequency_rank": lemma.frequency_rank,
         }
         for lemma in query.all()
     ]
@@ -181,7 +196,9 @@ def detect_number_type_from_forms(forms_dict: Dict[str, str], config: FormGenera
         return "regular"
 
 
-def extract_gender_from_forms(forms_dict: Dict[str, str], config: FormGenerationConfig) -> Optional[str]:
+def extract_gender_from_forms(
+    forms_dict: Dict[str, str], config: FormGenerationConfig
+) -> Optional[str]:
     """
     Extract grammatical gender from form names.
 
@@ -225,10 +242,7 @@ def extract_gender_from_forms(forms_dict: Dict[str, str], config: FormGeneration
 
 
 def process_lemma_forms(
-    client: LinguisticClient,
-    lemma_id: int,
-    db_path: str,
-    config: FormGenerationConfig
+    client: LinguisticClient, lemma_id: int, db_path: str, config: FormGenerationConfig
 ) -> bool:
     """
     Process and store forms for a single lemma.
@@ -245,23 +259,28 @@ def process_lemma_forms(
     session = get_session(db_path)
 
     try:
-        lemma = session.query(linguistic_db.Lemma).filter(
-            linguistic_db.Lemma.id == lemma_id
-        ).first()
+        lemma = (
+            session.query(linguistic_db.Lemma).filter(linguistic_db.Lemma.id == lemma_id).first()
+        )
 
         if not lemma:
             logger.error(f"Lemma ID {lemma_id} not found")
             return False
 
         # Check if forms already exist
-        existing_forms = session.query(linguistic_db.DerivativeForm).filter(
-            linguistic_db.DerivativeForm.lemma_id == lemma_id,
-            linguistic_db.DerivativeForm.language_code == config.language_code
-        ).all()
+        existing_forms = (
+            session.query(linguistic_db.DerivativeForm)
+            .filter(
+                linguistic_db.DerivativeForm.lemma_id == lemma_id,
+                linguistic_db.DerivativeForm.language_code == config.language_code,
+            )
+            .all()
+        )
 
         # Count existing forms that match our form mapping
         existing_count = sum(
-            1 for f in existing_forms
+            1
+            for f in existing_forms
             if f.grammatical_form in [g.value for g in config.form_mapping.values()]
         )
 
@@ -292,20 +311,20 @@ def process_lemma_forms(
                 continue
 
             # Get or create word token
-            word_token = linguistic_db.add_word_token(
-                session, form_text, config.language_code
-            )
+            word_token = linguistic_db.add_word_token(session, form_text, config.language_code)
 
             # Create derivative form
-            session.add(linguistic_db.DerivativeForm(
-                lemma_id=lemma_id,
-                derivative_form_text=form_text,
-                word_token_id=word_token.id,
-                language_code=config.language_code,
-                grammatical_form=config.form_mapping[form_name].value,
-                is_base_form=(form_name == config.base_form_identifier),
-                verified=False
-            ))
+            session.add(
+                linguistic_db.DerivativeForm(
+                    lemma_id=lemma_id,
+                    derivative_form_text=form_text,
+                    word_token_id=word_token.id,
+                    language_code=config.language_code,
+                    grammatical_form=config.form_mapping[form_name].value,
+                    is_base_form=(form_name == config.base_form_identifier),
+                    verified=False,
+                )
+            )
             stored += 1
 
         # Detect and store grammatical properties
@@ -320,12 +339,16 @@ def process_lemma_forms(
                     fact_type="number_type",
                     fact_value=number_type,
                     notes=f"Detected during {config.pos_type} form generation",
-                    verified=False
+                    verified=False,
                 )
                 if grammar_fact:
-                    logger.info(f"Added grammar_fact for lemma ID {lemma_id}: number_type={number_type}")
+                    logger.info(
+                        f"Added grammar_fact for lemma ID {lemma_id}: number_type={number_type}"
+                    )
                 else:
-                    logger.debug(f"Grammar fact for number_type={number_type} already exists for lemma ID {lemma_id}")
+                    logger.debug(
+                        f"Grammar fact for number_type={number_type} already exists for lemma ID {lemma_id}"
+                    )
 
         # Extract and store grammatical gender for gendered languages
         if config.extract_gender:
@@ -338,12 +361,14 @@ def process_lemma_forms(
                     fact_type="gender",
                     fact_value=gender,
                     notes=f"Extracted from {config.pos_type} forms",
-                    verified=False
+                    verified=False,
                 )
                 if grammar_fact:
                     logger.info(f"Added grammar_fact for lemma ID {lemma_id}: gender={gender}")
                 else:
-                    logger.debug(f"Grammar fact for gender={gender} already exists for lemma ID {lemma_id}")
+                    logger.debug(
+                        f"Grammar fact for gender={gender} already exists for lemma ID {lemma_id}"
+                    )
 
         session.commit()
         logger.info(f"Added {stored} forms for lemma ID {lemma_id}")
@@ -355,10 +380,7 @@ def process_lemma_forms(
         return False
 
 
-def run_form_generation(
-    config: FormGenerationConfig,
-    get_lemmas_func: Callable
-):
+def run_form_generation(config: FormGenerationConfig, get_lemmas_func: Callable):
     """
     Main entry point for form generation scripts.
 
@@ -370,13 +392,11 @@ def run_form_generation(
         description=f"Generate {config.language_name} {config.pos_type} forms"
     )
     parser.add_argument("--limit", type=int, help="Limit number of lemmas")
-    parser.add_argument("--throttle", type=float, default=1.0,
-                       help="Seconds between calls")
+    parser.add_argument("--throttle", type=float, default=1.0, help="Seconds between calls")
     parser.add_argument("--db-path", type=str, default=constants.WORDFREQ_DB_PATH)
     parser.add_argument("--model", type=str, default="gpt-5-mini")
     parser.add_argument("--debug", action="store_true")
-    parser.add_argument("--yes", "-y", action="store_true",
-                       help="Skip confirmation prompt")
+    parser.add_argument("--yes", "-y", action="store_true", help="Skip confirmation prompt")
     args = parser.parse_args()
 
     if args.debug:

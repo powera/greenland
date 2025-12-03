@@ -24,13 +24,15 @@ from wordfreq.storage.translation_helpers import (
     LANGUAGE_FIELDS,
     get_translation,
     set_translation,
-    get_language_name
+    get_language_name,
 )
 
 logger = logging.getLogger(__name__)
 
 
-def submit_batch(debug: bool = False, agent_name: str = "voras", metadata: Optional[Dict[str, str]] = None) -> Dict[str, str]:
+def submit_batch(
+    debug: bool = False, agent_name: str = "voras", metadata: Optional[Dict[str, str]] = None
+) -> Dict[str, str]:
     """Submit all pending batch requests to OpenAI.
 
     Args:
@@ -62,11 +64,7 @@ def submit_batch(debug: bool = False, agent_name: str = "voras", metadata: Optio
     logger.info(f"\nTo check status: use --batch-status {batch_id}")
     logger.info(f"To retrieve results: use --batch-retrieve {batch_id}")
 
-    return {
-        "batch_id": batch_id,
-        "file_id": file_id,
-        "count": len(pending)
-    }
+    return {"batch_id": batch_id, "file_id": file_id, "count": len(pending)}
 
 
 def check_batch_status(batch_id: str, debug: bool = False) -> Dict[str, Any]:
@@ -113,18 +111,10 @@ def retrieve_batch_results(batch_id: str, session, debug: bool = False) -> Dict[
     logger.info(f"Retrieved {result_count} results from batch {batch_id}")
 
     # Get completed requests
-    completed = batch_manager.get_completed_requests(
-        agent_name="voras",
-        batch_id=batch_id
-    )
+    completed = batch_manager.get_completed_requests(agent_name="voras", batch_id=batch_id)
 
     # Process each result and update the linguistics database
-    results = {
-        "total_processed": 0,
-        "total_updated": 0,
-        "total_failed": 0,
-        "by_language": {}
-    }
+    results = {"total_processed": 0, "total_updated": 0, "total_failed": 0, "by_language": {}}
 
     # Initialize language tracking
     languages_to_update = [lc for lc in LANGUAGE_FIELDS.keys() if lc != "lt"]
@@ -132,7 +122,7 @@ def retrieve_batch_results(batch_id: str, session, debug: bool = False) -> Dict[
         results["by_language"][lang_code] = {
             "language_name": get_language_name(lang_code),
             "updated": 0,
-            "failed": 0
+            "failed": 0,
         }
 
     translation_field_map = {
@@ -140,7 +130,7 @@ def retrieve_batch_results(batch_id: str, session, debug: bool = False) -> Dict[
         "ko": "korean_translation",
         "fr": "french_translation",
         "sw": "swahili_translation",
-        "vi": "vietnamese_translation"
+        "vi": "vietnamese_translation",
     }
 
     for req in completed:
@@ -185,7 +175,9 @@ def retrieve_batch_results(batch_id: str, session, debug: bool = False) -> Dict[
 
                 if translation:
                     # Use helper function which returns (old_translation, new_translation)
-                    old_translation, new_translation = set_translation(session, lemma, lang_code, translation)
+                    old_translation, new_translation = set_translation(
+                        session, lemma, lang_code, translation
+                    )
 
                     # Log the change
                     log_translation_change(
@@ -195,7 +187,7 @@ def retrieve_batch_results(batch_id: str, session, debug: bool = False) -> Dict[
                         lemma_id=lemma.id,
                         language_code=lang_code,
                         old_translation=old_translation,
-                        new_translation=new_translation
+                        new_translation=new_translation,
                     )
 
                     results["by_language"][lang_code]["updated"] += 1
@@ -206,7 +198,9 @@ def retrieve_batch_results(batch_id: str, session, debug: bool = False) -> Dict[
             if updated_count > 0:
                 session.commit()
                 results["total_updated"] += 1
-                logger.info(f"Updated {updated_count} translations for '{lemma.lemma_text}' (ID: {lemma_id})")
+                logger.info(
+                    f"Updated {updated_count} translations for '{lemma.lemma_text}' (ID: {lemma_id})"
+                )
 
         except Exception as e:
             logger.error(f"Error processing result for {req.custom_id}: {e}")

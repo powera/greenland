@@ -35,6 +35,7 @@ TRANSLATION_COLUMNS = {
     "vietnamese_translation": "vi",
 }
 
+
 def migrate_translations(session, dry_run=False):
     """
     Migrate translations from individual columns to lemma_translations table.
@@ -59,10 +60,14 @@ def migrate_translations(session, dry_run=False):
 
             if translation_value:
                 # Check if this translation already exists in the new table
-                existing = session.query(LemmaTranslation).filter(
-                    LemmaTranslation.lemma_id == lemma.id,
-                    LemmaTranslation.language_code == language_code
-                ).first()
+                existing = (
+                    session.query(LemmaTranslation)
+                    .filter(
+                        LemmaTranslation.lemma_id == lemma.id,
+                        LemmaTranslation.language_code == language_code,
+                    )
+                    .first()
+                )
 
                 if existing:
                     if existing.translation != translation_value:
@@ -84,7 +89,7 @@ def migrate_translations(session, dry_run=False):
                             lemma_id=lemma.id,
                             language_code=language_code,
                             translation=translation_value,
-                            verified=False
+                            verified=False,
                         )
                         session.add(new_translation)
                         logger.debug(
@@ -95,14 +100,16 @@ def migrate_translations(session, dry_run=False):
 
     if not dry_run:
         session.commit()
-        logger.info(f"Migration complete! Migrated {total_migrated} translations, skipped {total_skipped} existing")
+        logger.info(
+            f"Migration complete! Migrated {total_migrated} translations, skipped {total_skipped} existing"
+        )
     else:
-        logger.info(f"Dry run complete! Would migrate {total_migrated} translations, {total_skipped} already exist")
+        logger.info(
+            f"Dry run complete! Would migrate {total_migrated} translations, {total_skipped} already exist"
+        )
 
-    return {
-        "migrated": total_migrated,
-        "skipped": total_skipped
-    }
+    return {"migrated": total_migrated, "skipped": total_skipped}
+
 
 def main():
     """Main entry point for migration script."""
@@ -112,15 +119,9 @@ def main():
         description="Migrate lemma translations from columns to lemma_translations table"
     )
     parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="Show what would be migrated without making changes"
+        "--dry-run", action="store_true", help="Show what would be migrated without making changes"
     )
-    parser.add_argument(
-        "--verbose",
-        action="store_true",
-        help="Enable verbose debug logging"
-    )
+    parser.add_argument("--verbose", action="store_true", help="Enable verbose debug logging")
 
     args = parser.parse_args()
 
@@ -138,6 +139,7 @@ def main():
         raise
     finally:
         session.close()
+
 
 if __name__ == "__main__":
     main()

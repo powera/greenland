@@ -12,7 +12,7 @@ def add_sentence_translation(
     sentence: Sentence,
     language_code: str,
     translation_text: str,
-    verified: bool = False
+    verified: bool = False,
 ) -> SentenceTranslation:
     """Add a translation to a sentence.
 
@@ -33,7 +33,7 @@ def add_sentence_translation(
         sentence_id=sentence.id,
         language_code=language_code,
         translation_text=translation_text,
-        verified=verified
+        verified=verified,
     )
     session.add(translation)
     session.flush()
@@ -41,9 +41,7 @@ def add_sentence_translation(
 
 
 def get_sentence_translation(
-    session: Session,
-    sentence_id: int,
-    language_code: str
+    session: Session, sentence_id: int, language_code: str
 ) -> Optional[SentenceTranslation]:
     """Get a specific translation for a sentence.
 
@@ -55,17 +53,21 @@ def get_sentence_translation(
     Returns:
         SentenceTranslation object or None if not found
     """
-    return session.query(SentenceTranslation).filter(
-        SentenceTranslation.sentence_id == sentence_id,
-        SentenceTranslation.language_code == language_code
-    ).first()
+    return (
+        session.query(SentenceTranslation)
+        .filter(
+            SentenceTranslation.sentence_id == sentence_id,
+            SentenceTranslation.language_code == language_code,
+        )
+        .first()
+    )
 
 
 def update_sentence_translation(
     session: Session,
     translation: SentenceTranslation,
     translation_text: Optional[str] = None,
-    verified: Optional[bool] = None
+    verified: Optional[bool] = None,
 ) -> SentenceTranslation:
     """Update a sentence translation.
 
@@ -86,10 +88,7 @@ def update_sentence_translation(
     return translation
 
 
-def delete_sentence_translation(
-    session: Session,
-    translation: SentenceTranslation
-) -> None:
+def delete_sentence_translation(session: Session, translation: SentenceTranslation) -> None:
     """Delete a sentence translation.
 
     Args:
@@ -104,7 +103,7 @@ def get_or_create_sentence_translation(
     sentence: Sentence,
     language_code: str,
     translation_text: str,
-    verified: bool = False
+    verified: bool = False,
 ) -> tuple[SentenceTranslation, bool]:
     """Get an existing translation or create a new one.
 

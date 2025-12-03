@@ -31,12 +31,16 @@ def get_noun_form(session, guid: str, grammatical_form: str) -> Optional[str]:
     full_form_underscore = f"noun_lt_{grammatical_form}"
     full_form_slash = f"noun/lt_{grammatical_form}"
 
-    form = session.query(DerivativeForm).filter(
-        DerivativeForm.lemma_id == lemma.id,
-        DerivativeForm.language_code == "lt",
-        (DerivativeForm.grammatical_form == full_form_underscore) |
-        (DerivativeForm.grammatical_form == full_form_slash)
-    ).first()
+    form = (
+        session.query(DerivativeForm)
+        .filter(
+            DerivativeForm.lemma_id == lemma.id,
+            DerivativeForm.language_code == "lt",
+            (DerivativeForm.grammatical_form == full_form_underscore)
+            | (DerivativeForm.grammatical_form == full_form_slash),
+        )
+        .first()
+    )
 
     if not form:
         logger.warning(f"No {grammatical_form} form found for {lemma.lemma_text} (GUID: {guid})")
@@ -61,12 +65,18 @@ def get_all_noun_forms(session, guid: str) -> Dict[str, str]:
         return {}
 
     # Check both formats: "noun_lt_" and "noun/lt_"
-    forms = session.query(DerivativeForm).filter(
-        DerivativeForm.lemma_id == lemma.id,
-        DerivativeForm.language_code == "lt",
-        (DerivativeForm.grammatical_form.like("noun_lt_%") |
-         DerivativeForm.grammatical_form.like("noun/lt_%"))
-    ).all()
+    forms = (
+        session.query(DerivativeForm)
+        .filter(
+            DerivativeForm.lemma_id == lemma.id,
+            DerivativeForm.language_code == "lt",
+            (
+                DerivativeForm.grammatical_form.like("noun_lt_%")
+                | DerivativeForm.grammatical_form.like("noun/lt_%")
+            ),
+        )
+        .all()
+    )
 
     result = {}
     for form in forms:
@@ -97,7 +107,7 @@ def check_noun_forms_coverage(session, guid: str) -> Dict[str, Any]:
             "lithuanian": None,
             "forms_count": 0,
             "missing_forms": [],
-            "is_plurale_tantum": False
+            "is_plurale_tantum": False,
         }
 
     all_forms = get_all_noun_forms(session, guid)
@@ -110,15 +120,30 @@ def check_noun_forms_coverage(session, guid: str) -> Dict[str, Any]:
 
     if is_plurale_tantum:
         expected_forms = [
-            "nominative_plural", "genitive_plural", "dative_plural",
-            "accusative_plural", "instrumental_plural", "locative_plural", "vocative_plural"
+            "nominative_plural",
+            "genitive_plural",
+            "dative_plural",
+            "accusative_plural",
+            "instrumental_plural",
+            "locative_plural",
+            "vocative_plural",
         ]
     else:
         expected_forms = [
-            "nominative_singular", "genitive_singular", "dative_singular",
-            "accusative_singular", "instrumental_singular", "locative_singular", "vocative_singular",
-            "nominative_plural", "genitive_plural", "dative_plural",
-            "accusative_plural", "instrumental_plural", "locative_plural", "vocative_plural"
+            "nominative_singular",
+            "genitive_singular",
+            "dative_singular",
+            "accusative_singular",
+            "instrumental_singular",
+            "locative_singular",
+            "vocative_singular",
+            "nominative_plural",
+            "genitive_plural",
+            "dative_plural",
+            "accusative_plural",
+            "instrumental_plural",
+            "locative_plural",
+            "vocative_plural",
         ]
 
     missing = [f for f in expected_forms if f not in all_forms]
@@ -132,5 +157,5 @@ def check_noun_forms_coverage(session, guid: str) -> Dict[str, Any]:
         "expected_count": len(expected_forms),
         "missing_forms": missing,
         "has_all_forms": len(missing) == 0,
-        "is_plurale_tantum": is_plurale_tantum
+        "is_plurale_tantum": is_plurale_tantum,
     }

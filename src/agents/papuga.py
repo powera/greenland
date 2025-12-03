@@ -25,16 +25,18 @@ if GREENLAND_SRC_PATH not in sys.path:
 
 import constants
 from wordfreq.storage.database import create_database_session
-from wordfreq.storage.models.schema import DerivativeForm, Lemma, Sentence, SentenceTranslation, SentenceWord
-from wordfreq.tools.llm_validators import (
-    validate_pronunciation,
-    generate_pronunciation
+from wordfreq.storage.models.schema import (
+    DerivativeForm,
+    Lemma,
+    Sentence,
+    SentenceTranslation,
+    SentenceWord,
 )
+from wordfreq.tools.llm_validators import validate_pronunciation, generate_pronunciation
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -77,18 +79,22 @@ class PapugaAgent:
             return None
 
         # Query for sentences that use this lemma
-        sentence_word = session.query(SentenceWord).filter(
-            SentenceWord.lemma_id == lemma.id
-        ).first()
+        sentence_word = (
+            session.query(SentenceWord).filter(SentenceWord.lemma_id == lemma.id).first()
+        )
 
         if not sentence_word:
             return None
 
         # Get the English translation of this sentence
-        sentence_translation = session.query(SentenceTranslation).filter(
-            SentenceTranslation.sentence_id == sentence_word.sentence_id,
-            SentenceTranslation.language_code == "en"
-        ).first()
+        sentence_translation = (
+            session.query(SentenceTranslation)
+            .filter(
+                SentenceTranslation.sentence_id == sentence_word.sentence_id,
+                SentenceTranslation.language_code == "en",
+            )
+            .first()
+        )
 
         if sentence_translation:
             return sentence_translation.translation_text
@@ -101,7 +107,7 @@ class PapugaAgent:
         sample_rate: float = 1.0,
         confidence_threshold: float = 0.7,
         only_english: bool = True,
-        dry_run: bool = False
+        dry_run: bool = False,
     ) -> Dict[str, any]:
         """
         Check existing pronunciations for correctness.
@@ -122,8 +128,8 @@ class PapugaAgent:
         try:
             # Get derivative forms with pronunciations
             query = session.query(DerivativeForm).filter(
-                (DerivativeForm.ipa_pronunciation.isnot(None)) |
-                (DerivativeForm.phonetic_pronunciation.isnot(None))
+                (DerivativeForm.ipa_pronunciation.isnot(None))
+                | (DerivativeForm.phonetic_pronunciation.isnot(None))
             )
 
             if only_english:
@@ -140,6 +146,7 @@ class PapugaAgent:
             # Sample if needed
             if sample_rate < 1.0:
                 import random
+
                 sample_size = int(len(forms) * sample_rate)
                 forms = random.sample(forms, sample_size)
                 logger.info(f"Sampling {len(forms)} forms ({sample_rate*100:.0f}%)")
@@ -173,22 +180,24 @@ class PapugaAgent:
                         pos_type=lemma.pos_type,
                         example_sentence=example_text,
                         definition=lemma.definition_text,
-                        model=self.model
+                        model=self.model,
                     )
 
                     if result["needs_update"] and result["confidence"] >= confidence_threshold:
-                        issues_found.append({
-                            "form_id": form.id,
-                            "word": form.derivative_form_text,
-                            "lemma_guid": lemma.guid,
-                            "current_ipa": form.ipa_pronunciation,
-                            "current_phonetic": form.phonetic_pronunciation,
-                            "suggested_ipa": result["suggested_ipa"],
-                            "suggested_phonetic": result["suggested_phonetic"],
-                            "issues": result["issues"],
-                            "confidence": result["confidence"],
-                            "notes": result["notes"]
-                        })
+                        issues_found.append(
+                            {
+                                "form_id": form.id,
+                                "word": form.derivative_form_text,
+                                "lemma_guid": lemma.guid,
+                                "current_ipa": form.ipa_pronunciation,
+                                "current_phonetic": form.phonetic_pronunciation,
+                                "suggested_ipa": result["suggested_ipa"],
+                                "suggested_phonetic": result["suggested_phonetic"],
+                                "issues": result["issues"],
+                                "confidence": result["confidence"],
+                                "notes": result["notes"],
+                            }
+                        )
                         logger.warning(
                             f"Pronunciation issue: '{form.derivative_form_text}' (form_id: {form.id}) - "
                             f"{', '.join(result['issues'])} (confidence: {result['confidence']:.2f})"
@@ -201,7 +210,7 @@ class PapugaAgent:
                 "issues_found": len(issues_found),
                 "issue_rate": (len(issues_found) / checked_count * 100) if checked_count else 0,
                 "issues": issues_found,
-                "confidence_threshold": confidence_threshold
+                "confidence_threshold": confidence_threshold,
             }
 
         except Exception as e:
@@ -211,16 +220,13 @@ class PapugaAgent:
                 "total_checked": 0,
                 "issues_found": 0,
                 "issue_rate": 0,
-                "issues": []
+                "issues": [],
             }
         finally:
             session.close()
 
     def check_missing_pronunciations(
-        self,
-        limit: Optional[int] = None,
-        only_english: bool = True,
-        only_base_forms: bool = False
+        self, limit: Optional[int] = None, only_english: bool = True, only_base_forms: bool = False
     ) -> Dict[str, any]:
         """
         Find derivative forms that are missing pronunciations.
@@ -240,7 +246,7 @@ class PapugaAgent:
             # Get derivative forms without pronunciations
             query = session.query(DerivativeForm).filter(
                 DerivativeForm.ipa_pronunciation.is_(None),
-                DerivativeForm.phonetic_pronunciation.is_(None)
+                DerivativeForm.phonetic_pronunciation.is_(None),
             )
 
             if only_english:
@@ -260,14 +266,16 @@ class PapugaAgent:
             missing_list = []
             for form in missing_forms[:100]:  # Limit detail list to 100
                 lemma = session.query(Lemma).filter(Lemma.id == form.lemma_id).first()
-                missing_list.append({
-                    "form_id": form.id,
-                    "word": form.derivative_form_text,
-                    "lemma_guid": lemma.guid if lemma else None,
-                    "pos_type": lemma.pos_type if lemma else None,
-                    "grammatical_form": form.grammatical_form,
-                    "is_base_form": form.is_base_form
-                })
+                missing_list.append(
+                    {
+                        "form_id": form.id,
+                        "word": form.derivative_form_text,
+                        "lemma_guid": lemma.guid if lemma else None,
+                        "pos_type": lemma.pos_type if lemma else None,
+                        "grammatical_form": form.grammatical_form,
+                        "is_base_form": form.is_base_form,
+                    }
+                )
 
             logger.info(f"Found {len(missing_forms)} forms missing pronunciations")
 
@@ -275,16 +283,12 @@ class PapugaAgent:
                 "total_missing": len(missing_forms),
                 "missing_forms": missing_list,
                 "only_english": only_english,
-                "only_base_forms": only_base_forms
+                "only_base_forms": only_base_forms,
             }
 
         except Exception as e:
             logger.error(f"Error checking missing pronunciations: {e}")
-            return {
-                "error": str(e),
-                "total_missing": 0,
-                "missing_forms": []
-            }
+            return {"error": str(e), "total_missing": 0, "missing_forms": []}
         finally:
             session.close()
 
@@ -293,7 +297,7 @@ class PapugaAgent:
         limit: Optional[int] = None,
         only_english: bool = True,
         only_base_forms: bool = False,
-        dry_run: bool = False
+        dry_run: bool = False,
     ) -> Dict[str, any]:
         """
         Generate pronunciations for forms that are missing them.
@@ -314,7 +318,7 @@ class PapugaAgent:
             # Get derivative forms without pronunciations
             query = session.query(DerivativeForm).filter(
                 DerivativeForm.ipa_pronunciation.is_(None),
-                DerivativeForm.phonetic_pronunciation.is_(None)
+                DerivativeForm.phonetic_pronunciation.is_(None),
             )
 
             if only_english:
@@ -336,11 +340,15 @@ class PapugaAgent:
 
             if dry_run:
                 # In dry run, just count what would be processed
-                logger.info(f"Would process {len(forms)} forms to generate pronunciations (dry run)")
+                logger.info(
+                    f"Would process {len(forms)} forms to generate pronunciations (dry run)"
+                )
                 # Show a few examples
                 for idx, form in enumerate(forms[:5], 1):
                     lemma = session.query(Lemma).filter(Lemma.id == form.lemma_id).first()
-                    logger.info(f"  {idx}. '{form.derivative_form_text}' ({lemma.pos_type if lemma else 'unknown'})")
+                    logger.info(
+                        f"  {idx}. '{form.derivative_form_text}' ({lemma.pos_type if lemma else 'unknown'})"
+                    )
                 if len(forms) > 5:
                     logger.info(f"  ... and {len(forms) - 5} more")
             else:
@@ -363,7 +371,7 @@ class PapugaAgent:
                             pos_type=lemma.pos_type,
                             example_sentence=example_text,
                             definition=lemma.definition_text,
-                            model=self.model
+                            model=self.model,
                         )
 
                         if result["confidence"] >= 0.5:  # Minimum confidence threshold
@@ -378,7 +386,9 @@ class PapugaAgent:
                             )
                             populated_count += 1
                         else:
-                            logger.warning(f"  Low confidence ({result['confidence']:.2f}), skipping")
+                            logger.warning(
+                                f"  Low confidence ({result['confidence']:.2f}), skipping"
+                            )
                             failed_count += 1
 
                     except Exception as e:
@@ -389,7 +399,7 @@ class PapugaAgent:
                 "total_processed": len(forms),
                 "populated": populated_count,
                 "failed": failed_count,
-                "dry_run": dry_run
+                "dry_run": dry_run,
             }
 
         except Exception as e:
@@ -401,7 +411,7 @@ class PapugaAgent:
                 "total_processed": 0,
                 "populated": 0,
                 "failed": 0,
-                "dry_run": dry_run
+                "dry_run": dry_run,
             }
         finally:
             session.close()
@@ -413,7 +423,7 @@ class PapugaAgent:
         sample_rate: float = 1.0,
         confidence_threshold: float = 0.7,
         only_english: bool = True,
-        dry_run: bool = False
+        dry_run: bool = False,
     ) -> Dict[str, any]:
         """
         Run full pronunciation validation and generate a comprehensive report.
@@ -440,7 +450,7 @@ class PapugaAgent:
             "confidence_threshold": confidence_threshold,
             "only_english": only_english,
             "dry_run": dry_run,
-            "checks": {}
+            "checks": {},
         }
 
         # Check existing pronunciations
@@ -449,14 +459,12 @@ class PapugaAgent:
             sample_rate=sample_rate,
             confidence_threshold=confidence_threshold,
             only_english=only_english,
-            dry_run=dry_run
+            dry_run=dry_run,
         )
 
         # Check for missing pronunciations
         results["checks"]["missing_pronunciations"] = self.check_missing_pronunciations(
-            limit=limit,
-            only_english=only_english,
-            only_base_forms=False
+            limit=limit, only_english=only_english, only_base_forms=False
         )
 
         end_time = datetime.now()
@@ -469,6 +477,7 @@ class PapugaAgent:
         # Write to output file if requested
         if output_file:
             import json
+
             try:
                 with open(output_file, "w", encoding="utf-8") as f:
                     json.dump(results, f, indent=2, ensure_ascii=False)
@@ -522,30 +531,54 @@ def get_argument_parser():
     parser.add_argument("--db-path", help="Database path (uses default if not specified)")
     parser.add_argument("--debug", action="store_true", help="Enable debug logging")
     parser.add_argument("--output", help="Output JSON file for report")
-    parser.add_argument("--model", default="gpt-5-mini", help="LLM model to use (default: gpt-5-mini)")
+    parser.add_argument(
+        "--model", default="gpt-5-mini", help="LLM model to use (default: gpt-5-mini)"
+    )
     parser.add_argument("--limit", type=int, help="Maximum items to check/process")
-    parser.add_argument("--sample-rate", type=float, default=1.0,
-                       help="Fraction of items to sample for validation (0.0-1.0, default: 1.0)")
-    parser.add_argument("--confidence-threshold", type=float, default=0.7,
-                       help="Minimum confidence to flag issues (0.0-1.0, default: 0.7)")
-    parser.add_argument("--all-languages", action="store_true",
-                       help="Check all languages (default: English only)")
-    parser.add_argument("--yes", "-y", action="store_true",
-                       help="Skip confirmation prompt before running LLM queries")
+    parser.add_argument(
+        "--sample-rate",
+        type=float,
+        default=1.0,
+        help="Fraction of items to sample for validation (0.0-1.0, default: 1.0)",
+    )
+    parser.add_argument(
+        "--confidence-threshold",
+        type=float,
+        default=0.7,
+        help="Minimum confidence to flag issues (0.0-1.0, default: 0.7)",
+    )
+    parser.add_argument(
+        "--all-languages", action="store_true", help="Check all languages (default: English only)"
+    )
+    parser.add_argument(
+        "--yes",
+        "-y",
+        action="store_true",
+        help="Skip confirmation prompt before running LLM queries",
+    )
 
     # Mode selection
     mode_group = parser.add_mutually_exclusive_group()
-    mode_group.add_argument("--check", action="store_true",
-                           help="Check existing pronunciations only (default)")
-    mode_group.add_argument("--populate", action="store_true",
-                           help="Generate missing pronunciations")
-    mode_group.add_argument("--both", action="store_true",
-                           help="Check existing AND populate missing")
+    mode_group.add_argument(
+        "--check", action="store_true", help="Check existing pronunciations only (default)"
+    )
+    mode_group.add_argument(
+        "--populate", action="store_true", help="Generate missing pronunciations"
+    )
+    mode_group.add_argument(
+        "--both", action="store_true", help="Check existing AND populate missing"
+    )
 
-    parser.add_argument("--dry-run", action="store_true",
-                       help="Show what would be done without making LLM API calls or database changes")
-    parser.add_argument("--base-forms-only", action="store_true",
-                       help="Only process base forms (populate mode only)")
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show what would be done without making LLM API calls or database changes",
+    )
+    parser.add_argument(
+        "--base-forms-only",
+        action="store_true",
+        help="Only process base forms (populate mode only)",
+    )
 
     return parser
 
@@ -575,8 +608,8 @@ def main():
             if mode in ["check", "both"]:
                 # Count forms with pronunciations
                 query = session.query(DerivativeForm).filter(
-                    (DerivativeForm.ipa_pronunciation.isnot(None)) |
-                    (DerivativeForm.phonetic_pronunciation.isnot(None))
+                    (DerivativeForm.ipa_pronunciation.isnot(None))
+                    | (DerivativeForm.phonetic_pronunciation.isnot(None))
                 )
                 if only_english:
                     query = query.filter(DerivativeForm.language_code == "en")
@@ -592,7 +625,7 @@ def main():
                 # Count forms without pronunciations
                 query = session.query(DerivativeForm).filter(
                     DerivativeForm.ipa_pronunciation.is_(None),
-                    DerivativeForm.phonetic_pronunciation.is_(None)
+                    DerivativeForm.phonetic_pronunciation.is_(None),
                 )
                 if only_english:
                     query = query.filter(DerivativeForm.language_code == "en")
@@ -608,7 +641,9 @@ def main():
         finally:
             session.close()
 
-        print(f"\nThis will make approximately {estimated_calls} LLM API calls using model '{args.model}'.")
+        print(
+            f"\nThis will make approximately {estimated_calls} LLM API calls using model '{args.model}'."
+        )
         print("This may incur costs and take some time to complete.")
         response = input("Do you want to proceed? [y/N]: ").strip().lower()
 
@@ -627,16 +662,18 @@ def main():
             sample_rate=args.sample_rate,
             confidence_threshold=args.confidence_threshold,
             only_english=only_english,
-            dry_run=args.dry_run
+            dry_run=args.dry_run,
         )
     elif mode == "populate":
         result = agent.populate_missing_pronunciations(
             limit=args.limit,
             only_english=only_english,
             only_base_forms=args.base_forms_only,
-            dry_run=args.dry_run
+            dry_run=args.dry_run,
         )
-        logger.info(f"\nPopulation complete: {result['populated']} populated, {result['failed']} failed")
+        logger.info(
+            f"\nPopulation complete: {result['populated']} populated, {result['failed']} failed"
+        )
     elif mode == "both":
         # First check
         agent.run_full_check(
@@ -645,16 +682,18 @@ def main():
             sample_rate=args.sample_rate,
             confidence_threshold=args.confidence_threshold,
             only_english=only_english,
-            dry_run=args.dry_run
+            dry_run=args.dry_run,
         )
         # Then populate
         result = agent.populate_missing_pronunciations(
             limit=args.limit,
             only_english=only_english,
             only_base_forms=args.base_forms_only,
-            dry_run=args.dry_run
+            dry_run=args.dry_run,
         )
-        logger.info(f"\nPopulation complete: {result['populated']} populated, {result['failed']} failed")
+        logger.info(
+            f"\nPopulation complete: {result['populated']} populated, {result['failed']} failed"
+        )
 
 
 if __name__ == "__main__":

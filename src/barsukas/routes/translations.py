@@ -5,7 +5,11 @@
 from flask import Blueprint, request, redirect, url_for, flash, g, jsonify
 
 from wordfreq.storage.models.schema import Lemma
-from wordfreq.storage.translation_helpers import set_translation, get_translation, get_supported_languages
+from wordfreq.storage.translation_helpers import (
+    set_translation,
+    get_translation,
+    get_supported_languages,
+)
 from wordfreq.storage.crud.operation_log import log_translation_change
 from config import Config
 
@@ -16,6 +20,7 @@ bp = Blueprint("translations", __name__, url_prefix="/translations")
 def update_translation(lemma_id, lang_code):
     """Update a translation for a lemma."""
     from flask import current_app
+
     if current_app.config.get("READONLY", False):
         flash("Cannot update: running in read-only mode", "error")
         return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
@@ -53,15 +58,15 @@ def update_translation(lemma_id, lang_code):
             lemma_id=lemma.id,
             language_code=lang_code,
             old_translation=old_translation,
-            new_translation=new_translation
+            new_translation=new_translation,
         )
 
         g.db.commit()
 
         # Flash message with warning if needed
-        message = f'Updated {get_supported_languages()[lang_code]} translation'
+        message = f"Updated {get_supported_languages()[lang_code]} translation"
         if has_slash:
-            message += " (note: contains \"/\")"
+            message += ' (note: contains "/")'
             flash(message, "warning")
         else:
             flash(message, "success")

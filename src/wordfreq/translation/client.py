@@ -17,7 +17,7 @@ from wordfreq.translation import (
     translations,
     pronunciation,
     pos_subtype,
-    word_processing
+    word_processing,
 )
 from wordfreq.translation.language_forms import (
     english,
@@ -25,7 +25,7 @@ from wordfreq.translation.language_forms import (
     french,
     spanish,
     german,
-    portuguese
+    portuguese,
 )
 from wordfreq.translation.constants import DEFAULT_MODEL
 
@@ -67,7 +67,9 @@ class LinguisticClient:
             logger.warning(f"Failed to warm up model {model}: {e}")
 
     @classmethod
-    def get_instance(cls, model: str = DEFAULT_MODEL, db_path: str = None, debug: bool = False) -> "LinguisticClient":
+    def get_instance(
+        cls, model: str = DEFAULT_MODEL, db_path: str = None, debug: bool = False
+    ) -> "LinguisticClient":
         """
         Get a thread-local instance of the LinguisticClient.
 
@@ -85,7 +87,9 @@ class LinguisticClient:
             with cls._lock:
                 # Initialize the thread-local instance
                 cls._thread_local.instance = cls(model=model, db_path=db_path, debug=debug)
-                logger.debug(f"Created new LinguisticClient for thread {threading.current_thread().name}")
+                logger.debug(
+                    f"Created new LinguisticClient for thread {threading.current_thread().name}"
+                )
         return cls._thread_local.instance
 
     def get_session(self):
@@ -110,7 +114,7 @@ class LinguisticClient:
         definition: str,
         pos_type: str,
         pos_subtype: Optional[str] = None,
-        languages: Optional[List[str]] = None
+        languages: Optional[List[str]] = None,
     ) -> Tuple[Dict[str, str], bool]:
         """
         Query LLM to generate translations for a word.
@@ -127,8 +131,15 @@ class LinguisticClient:
             Tuple of (translations dict, success flag)
         """
         return translations.query_translations(
-            self.client, english_word, reference_translation, definition, pos_type,
-            self.get_session, pos_subtype, languages, self.model
+            self.client,
+            english_word,
+            reference_translation,
+            definition,
+            pos_type,
+            self.get_session,
+            pos_subtype,
+            languages,
+            self.model,
         )
 
     # Word processing
@@ -137,10 +148,7 @@ class LinguisticClient:
         return word_processing.process_word(self.client, word, self.get_session, refresh)
 
     def process_words_batch(
-        self,
-        word_list: List[str],
-        refresh: bool = False,
-        throttle: float = 1.0
+        self, word_list: List[str], refresh: bool = False, throttle: float = 1.0
     ) -> Dict[str, Any]:
         """Process a batch of words."""
         return word_processing.process_words_batch(
@@ -153,9 +161,7 @@ class LinguisticClient:
         return pronunciation.query_pronunciation(self.client, word, sentence, self.get_session)
 
     def update_pronunciation_for_definition(
-        self,
-        definition_id: int,
-        sentence: Optional[str] = None
+        self, definition_id: int, sentence: Optional[str] = None
     ) -> bool:
         """Update the pronunciation information for a specific definition."""
         return pronunciation.update_pronunciation_for_definition(
@@ -163,9 +169,7 @@ class LinguisticClient:
         )
 
     def update_missing_pronunciations_for_word(
-        self,
-        word_text: str,
-        throttle: float = 1.0
+        self, word_text: str, throttle: float = 1.0
     ) -> Dict[str, Any]:
         """Add missing pronunciations for all definitions of a word."""
         return pronunciation.update_missing_pronunciations_for_word(
@@ -173,9 +177,7 @@ class LinguisticClient:
         )
 
     def update_pronunciations_for_batch(
-        self,
-        limit: int = 100,
-        throttle: float = 1.0
+        self, limit: int = 100, throttle: float = 1.0
     ) -> Dict[str, Any]:
         """Add missing pronunciations for a batch of definitions."""
         return pronunciation.update_pronunciations_for_batch(
@@ -183,36 +185,23 @@ class LinguisticClient:
         )
 
     # POS subtype queries
-    def query_pos_subtype(
-        self,
-        word: str,
-        definition_text: str,
-        pos_type: str
-    ) -> Tuple[str, bool]:
+    def query_pos_subtype(self, word: str, definition_text: str, pos_type: str) -> Tuple[str, bool]:
         """Query LLM for POS subtype for a definition."""
         return pos_subtype.query_pos_subtype(
             self.client, word, definition_text, pos_type, self.get_session
         )
 
     def update_missing_subtypes_for_word(
-        self,
-        word_text: str,
-        throttle: float = 1.0
+        self, word_text: str, throttle: float = 1.0
     ) -> Dict[str, Any]:
         """Add missing POS subtypes for all definitions of a word."""
         return pos_subtype.update_missing_subtypes_for_word(
             self.client, word_text, self.get_session, throttle
         )
 
-    def update_subtypes_for_batch(
-        self,
-        limit: int = 100,
-        throttle: float = 1.0
-    ) -> Dict[str, Any]:
+    def update_subtypes_for_batch(self, limit: int = 100, throttle: float = 1.0) -> Dict[str, Any]:
         """Add missing POS subtypes for a batch of definitions."""
-        return pos_subtype.update_subtypes_for_batch(
-            self.client, self.get_session, limit, throttle
-        )
+        return pos_subtype.update_subtypes_for_batch(self.client, self.get_session, limit, throttle)
 
     # English forms
     def query_english_verb_conjugations(self, lemma_id: int) -> Tuple[Dict[str, str], bool]:
@@ -226,17 +215,18 @@ class LinguisticClient:
 
     def query_lithuanian_verb_conjugations(self, lemma_id: int) -> Tuple[Dict[str, str], bool]:
         """Query LLM for Lithuanian verb conjugations."""
-        return lithuanian.query_lithuanian_verb_conjugations(self.client, lemma_id, self.get_session)
+        return lithuanian.query_lithuanian_verb_conjugations(
+            self.client, lemma_id, self.get_session
+        )
 
     def query_lithuanian_adjective_declensions(self, lemma_id: int) -> Tuple[Dict[str, str], bool]:
         """Query LLM for Lithuanian adjective declensions."""
-        return lithuanian.query_lithuanian_adjective_declensions(self.client, lemma_id, self.get_session)
+        return lithuanian.query_lithuanian_adjective_declensions(
+            self.client, lemma_id, self.get_session
+        )
 
     def get_lithuanian_noun_forms(
-        self,
-        word: str = None,
-        lemma_id: int = None,
-        source: str = "llm"
+        self, word: str = None, lemma_id: int = None, source: str = "llm"
     ) -> Tuple[Dict[str, str], bool]:
         """
         Get Lithuanian noun declensions using either LLM or Wiktionary.
@@ -253,6 +243,7 @@ class LinguisticClient:
             if word is None:
                 raise ValueError("word parameter is required when source='wiki'")
             from wordfreq.translation.wiki import get_lithuanian_noun_forms
+
             return get_lithuanian_noun_forms(word)
         elif source == "llm":
             if lemma_id is None:
@@ -295,7 +286,9 @@ class LinguisticClient:
 
     def query_portuguese_verb_conjugations(self, lemma_id: int) -> Tuple[Dict[str, str], bool]:
         """Query LLM for Portuguese verb conjugations."""
-        return portuguese.query_portuguese_verb_conjugations(self.client, lemma_id, self.get_session)
+        return portuguese.query_portuguese_verb_conjugations(
+            self.client, lemma_id, self.get_session
+        )
 
     # Legacy methods for compatibility
     def get_word_token_info(self, token_text: str) -> Dict[str, Any]:
@@ -304,11 +297,7 @@ class LinguisticClient:
         word_token = linguistic_db.get_word_token_by_text(session, token_text)
 
         if not word_token:
-            return {
-                "token": token_text,
-                "exists": False,
-                "derivative_forms": []
-            }
+            return {"token": token_text, "exists": False, "derivative_forms": []}
 
         forms_info = []
         for derivative_form in word_token.derivative_forms:
@@ -332,21 +321,21 @@ class LinguisticClient:
                     "french": derivative_form.french_translation,
                     "swahili": derivative_form.swahili_translation,
                     "vietnamese": derivative_form.vietnamese_translation,
-                    "lithuanian": derivative_form.lithuanian_translation
-                }
+                    "lithuanian": derivative_form.lithuanian_translation,
+                },
             }
             forms_info.append(form_info)
 
-        return {
-            "token": token_text,
-            "exists": True,
-            "derivative_forms": forms_info
-        }
+        return {"token": token_text, "exists": True, "derivative_forms": forms_info}
 
-    def get_lemma_forms(self, lemma_text: str, pos_type: Optional[str] = None) -> List[Dict[str, Any]]:
+    def get_lemma_forms(
+        self, lemma_text: str, pos_type: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
         """Get all word tokens that represent forms of a specific lemma."""
         session = self.get_session()
-        derivative_forms = linguistic_db.get_all_derivative_forms_for_lemma(session, lemma_text, pos_type)
+        derivative_forms = linguistic_db.get_all_derivative_forms_for_lemma(
+            session, lemma_text, pos_type
+        )
 
         forms_info = []
         for derivative_form in derivative_forms:
@@ -360,7 +349,7 @@ class LinguisticClient:
                 "phonetic_pronunciation": derivative_form.phonetic_pronunciation,
                 "confidence": derivative_form.confidence,
                 "verified": derivative_form.verified,
-                "examples": examples
+                "examples": examples,
             }
             forms_info.append(form_info)
 
@@ -371,9 +360,11 @@ class LinguisticClient:
         session = self.get_session()
 
         # Get the derivative form
-        derivative_form = session.query(linguistic_db.DerivativeForm).filter(
-            linguistic_db.DerivativeForm.id == derivative_form_id
-        ).first()
+        derivative_form = (
+            session.query(linguistic_db.DerivativeForm)
+            .filter(linguistic_db.DerivativeForm.id == derivative_form_id)
+            .first()
+        )
 
         if not derivative_form:
             logger.warning(f"Derivative form with ID {derivative_form_id} not found")
@@ -387,16 +378,21 @@ class LinguisticClient:
         definitions_list, success = self.query_definitions(word_token.token)
 
         if not success or not definitions_list:
-            logger.warning(f"Failed to get definitions and translations for '{word_token.token}' (derivative form ID: {derivative_form.id})")
+            logger.warning(
+                f"Failed to get definitions and translations for '{word_token.token}' (derivative form ID: {derivative_form.id})"
+            )
             return False
 
         # Find the matching definition and extract the requested translation
         translation = None
-        language_key = f'{language.lower()}_translation'
+        language_key = f"{language.lower()}_translation"
 
         for def_data in definitions_list:
             # If we find a matching definition, use its translation
-            if def_data.get("definition", "").lower().strip() == lemma.definition_text.lower().strip():
+            if (
+                def_data.get("definition", "").lower().strip()
+                == lemma.definition_text.lower().strip()
+            ):
                 translation = def_data.get(language_key)
                 break
 
@@ -406,11 +402,17 @@ class LinguisticClient:
 
         if translation:
             # Update the derivative form with the translation
-            linguistic_db.update_translation(session, derivative_form.id, language.lower(), translation)
-            logger.info(f"Added {language} translation '{translation}' for '{word_token.token}' (derivative form ID: {derivative_form.id})")
+            linguistic_db.update_translation(
+                session, derivative_form.id, language.lower(), translation
+            )
+            logger.info(
+                f"Added {language} translation '{translation}' for '{word_token.token}' (derivative form ID: {derivative_form.id})"
+            )
             return True
         else:
-            logger.warning(f"No {language} translation found for '{word_token.token}' (derivative form ID: {derivative_form.id})")
+            logger.warning(
+                f"No {language} translation found for '{word_token.token}' (derivative form ID: {derivative_form.id})"
+            )
             return False
 
     # Deprecated methods - retained for backwards compatibility

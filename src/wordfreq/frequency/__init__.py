@@ -4,7 +4,7 @@ from wordfreq.frequency.analysis import (
     calculate_combined_ranks,
     export_ranked_word_list,
     export_frequency_data,
-    analyze_corpus_correlations
+    analyze_corpus_correlations,
 )
 from wordfreq.frequency.corpus import (
     CorpusConfig,
@@ -12,7 +12,7 @@ from wordfreq.frequency.corpus import (
     get_enabled_corpus_configs,
     get_all_corpus_configs,
     load_corpus,
-    load_all_corpora
+    load_all_corpora,
 )
 from wordfreq.frequency.importer import import_frequency_data, process_stopwords
 

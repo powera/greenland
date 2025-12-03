@@ -22,10 +22,7 @@ from wordfreq.storage.connection_pool import get_session
 import constants
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 
@@ -74,11 +71,15 @@ def get_lithuanian_verb_lemmas(db_path: str, limit: int = None) -> List[Dict]:
     """
     session = get_session(db_path)
 
-    query = session.query(linguistic_db.Lemma).filter(
-        linguistic_db.Lemma.pos_type == "verb",
-        linguistic_db.Lemma.lithuanian_translation.isnot(None),
-        linguistic_db.Lemma.lithuanian_translation != ""
-    ).order_by(linguistic_db.Lemma.frequency_rank)
+    query = (
+        session.query(linguistic_db.Lemma)
+        .filter(
+            linguistic_db.Lemma.pos_type == "verb",
+            linguistic_db.Lemma.lithuanian_translation.isnot(None),
+            linguistic_db.Lemma.lithuanian_translation != "",
+        )
+        .order_by(linguistic_db.Lemma.frequency_rank)
+    )
 
     if limit:
         query = query.limit(limit)
@@ -87,13 +88,15 @@ def get_lithuanian_verb_lemmas(db_path: str, limit: int = None) -> List[Dict]:
 
     result = []
     for lemma in lemmas:
-        result.append({
-            "id": lemma.id,
-            "english": lemma.lemma_text,
-            "lithuanian": lemma.lithuanian_translation,
-            "pos_subtype": lemma.pos_subtype,
-            "frequency_rank": lemma.frequency_rank
-        })
+        result.append(
+            {
+                "id": lemma.id,
+                "english": lemma.lemma_text,
+                "lithuanian": lemma.lithuanian_translation,
+                "pos_subtype": lemma.pos_subtype,
+                "frequency_rank": lemma.frequency_rank,
+            }
+        )
 
     return result
 
@@ -114,9 +117,9 @@ def process_lemma_conjugations(client: LinguisticClient, lemma_id: int, db_path:
 
     try:
         # Get the lemma
-        lemma = session.query(linguistic_db.Lemma).filter(
-            linguistic_db.Lemma.id == lemma_id
-        ).first()
+        lemma = (
+            session.query(linguistic_db.Lemma).filter(linguistic_db.Lemma.id == lemma_id).first()
+        )
 
         if not lemma:
             logger.error(f"Lemma ID {lemma_id} not found")
@@ -124,23 +127,32 @@ def process_lemma_conjugations(client: LinguisticClient, lemma_id: int, db_path:
 
         # Check if we already have Lithuanian derivative forms for this lemma
         # Only skip if we have at least 3 forms that are in FORM_MAPPING
-        existing_forms = session.query(linguistic_db.DerivativeForm).filter(
-            linguistic_db.DerivativeForm.lemma_id == lemma_id,
-            linguistic_db.DerivativeForm.language_code == "lt"
-        ).all()
+        existing_forms = (
+            session.query(linguistic_db.DerivativeForm)
+            .filter(
+                linguistic_db.DerivativeForm.lemma_id == lemma_id,
+                linguistic_db.DerivativeForm.language_code == "lt",
+            )
+            .all()
+        )
 
         # Count how many of the existing forms are actual conjugation forms (in FORM_MAPPING)
         conjugation_forms_count = sum(
-            1 for form in existing_forms
+            1
+            for form in existing_forms
             if form.grammatical_form in [gf.value for gf in FORM_MAPPING.values()]
         )
 
         if conjugation_forms_count >= 3:
-            logger.info(f"Lemma ID {lemma_id} ({lemma.lemma_text}) already has {conjugation_forms_count} Lithuanian conjugation forms, skipping")
+            logger.info(
+                f"Lemma ID {lemma_id} ({lemma.lemma_text}) already has {conjugation_forms_count} Lithuanian conjugation forms, skipping"
+            )
             return True
 
         # Query for conjugations
-        logger.info(f"Querying conjugations for lemma ID {lemma_id}: {lemma.lemma_text} -> {lemma.lithuanian_translation}")
+        logger.info(
+            f"Querying conjugations for lemma ID {lemma_id}: {lemma.lemma_text} -> {lemma.lithuanian_translation}"
+        )
 
         forms_dict, success = client.query_lithuanian_verb_conjugations(lemma_id)
 
@@ -163,7 +175,7 @@ def process_lemma_conjugations(client: LinguisticClient, lemma_id: int, db_path:
             grammatical_form = FORM_MAPPING[form_name]
             # The infinitive is the base form for verbs, but we don't have it in these conjugations
             # So we'll mark the 1st person singular present as base form as a convention
-            is_base_form = (form_name == "1s_pres")
+            is_base_form = form_name == "1s_pres"
 
             # Get or create word token for this Lithuanian form
             word_token = linguistic_db.add_word_token(session, form_text, "lt")
@@ -176,7 +188,7 @@ def process_lemma_conjugations(client: LinguisticClient, lemma_id: int, db_path:
                 language_code="lt",
                 grammatical_form=grammatical_form.value,
                 is_base_form=is_base_form,
-                verified=False
+                verified=False,
             )
 
             session.add(derivative_form)
@@ -197,39 +209,22 @@ def main():
         description="Generate Lithuanian verb conjugations for all verbs in the database"
     )
     parser.add_argument(
-        "--limit",
-        type=int,
-        help="Limit the number of lemmas to process (for testing)"
+        "--limit", type=int, help="Limit the number of lemmas to process (for testing)"
     )
     parser.add_argument(
         "--throttle",
         type=float,
         default=1.0,
-        help="Seconds to wait between API calls (default: 1.0)"
+        help="Seconds to wait between API calls (default: 1.0)",
     )
     parser.add_argument(
-        "--db-path",
-        type=str,
-        default=constants.WORDFREQ_DB_PATH,
-        help="Path to the database"
+        "--db-path", type=str, default=constants.WORDFREQ_DB_PATH, help="Path to the database"
     )
     parser.add_argument(
-        "--model",
-        type=str,
-        default="gpt-5-mini",
-        help="LLM model to use (default: gpt-5-mini)"
+        "--model", type=str, default="gpt-5-mini", help="LLM model to use (default: gpt-5-mini)"
     )
-    parser.add_argument(
-        "--debug",
-        action="store_true",
-        help="Enable debug logging"
-    )
-    parser.add_argument(
-        "--yes",
-        "-y",
-        action="store_true",
-        help="Skip confirmation prompt"
-    )
+    parser.add_argument("--debug", action="store_true", help="Enable debug logging")
+    parser.add_argument("--yes", "-y", action="store_true", help="Skip confirmation prompt")
 
     args = parser.parse_args()
 
@@ -266,7 +261,9 @@ def main():
     skipped = 0
 
     for i, lemma_info in enumerate(lemmas, 1):
-        logger.info(f"\n[{i}/{len(lemmas)}] Processing: {lemma_info['english']} -> {lemma_info['lithuanian']}")
+        logger.info(
+            f"\n[{i}/{len(lemmas)}] Processing: {lemma_info['english']} -> {lemma_info['lithuanian']}"
+        )
 
         success = process_lemma_conjugations(client, lemma_info["id"], args.db_path)
 

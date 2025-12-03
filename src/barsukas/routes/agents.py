@@ -32,6 +32,7 @@ def check_translations(lemma_id):
 
         # Gather translations for this word
         from wordfreq.storage.translation_helpers import LANGUAGE_FIELDS
+
         translations = {}
         for lc in LANGUAGE_FIELDS.keys():
             translation = agent.get_translation(g.db, lemma, lc)
@@ -44,11 +45,9 @@ def check_translations(lemma_id):
 
         # Use the LLM validator to check all translations at once
         from wordfreq.tools.llm_validators import validate_all_translations_for_word
+
         validation_results = validate_all_translations_for_word(
-            lemma.lemma_text,
-            translations,
-            lemma.pos_type,
-            agent.model
+            lemma.lemma_text, translations, lemma.pos_type, agent.model
         )
 
         # Format results for display
@@ -58,31 +57,35 @@ def check_translations(lemma_id):
             has_issues = not result["is_correct"] or not result["is_lemma_form"]
             if has_issues and result["confidence"] >= 0.7:
                 all_good = False
-                issues.append({
-                    "language_code": lc,
-                    "language_name": get_supported_languages()[lc],
-                    "current": translations[lc],
-                    "suggested": result["suggested_translation"],
-                    "is_correct": result["is_correct"],
-                    "is_lemma_form": result["is_lemma_form"],
-                    "issues": result["issues"],
-                    "confidence": result["confidence"]
-                })
+                issues.append(
+                    {
+                        "language_code": lc,
+                        "language_name": get_supported_languages()[lc],
+                        "current": translations[lc],
+                        "suggested": result["suggested_translation"],
+                        "is_correct": result["is_correct"],
+                        "is_lemma_form": result["is_lemma_form"],
+                        "issues": result["issues"],
+                        "confidence": result["confidence"],
+                    }
+                )
 
         if all_good:
             flash("All translations look good!", "success")
         else:
             # Store issues in session or pass as query param
             # For now, we'll flash a summary
-            flash(f'Found {len(issues)} translation issues. Check the results below.', "warning")
+            flash(f"Found {len(issues)} translation issues. Check the results below.", "warning")
             # Redirect to a results page or back to lemma view with issues
-            return render_template("agents/translation_check_results.html",
-                                 lemma=lemma,
-                                 issues=issues,
-                                 all_good=all_good)
+            return render_template(
+                "agents/translation_check_results.html",
+                lemma=lemma,
+                issues=issues,
+                all_good=all_good,
+            )
 
     except Exception as e:
-        flash(f'Error checking translations: {str(e)}', "error")
+        flash(f"Error checking translations: {str(e)}", "error")
 
     return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
@@ -101,6 +104,7 @@ def add_missing_translations(lemma_id):
 
         # Find missing translations
         from wordfreq.storage.translation_helpers import LANGUAGE_FIELDS
+
         missing_languages = []
         for lc in LANGUAGE_FIELDS.keys():
             translation = agent.get_translation(g.db, lemma, lc)
@@ -108,7 +112,10 @@ def add_missing_translations(lemma_id):
                 missing_languages.append(lc)
 
         if not missing_languages:
-            flash("No missing translations found - all languages already have translations!", "success")
+            flash(
+                "No missing translations found - all languages already have translations!",
+                "success",
+            )
             return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
         # Use voras agent to fix missing translations for this single lemma
@@ -127,15 +134,15 @@ def add_missing_translations(lemma_id):
                     break
 
         if not reference_translation:
-            flash("Cannot generate translations: at least one existing translation is required for context", "warning")
+            flash(
+                "Cannot generate translations: at least one existing translation is required for context",
+                "warning",
+            )
             return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
         from wordfreq.translation.client import LinguisticClient
-        client = LinguisticClient(
-            model=agent.model,
-            db_path=Config.DB_PATH,
-            debug=Config.DEBUG
-        )
+
+        client = LinguisticClient(model=agent.model, db_path=Config.DB_PATH, debug=Config.DEBUG)
 
         # Map language codes to language names for query_translations
         lang_code_to_name = {
@@ -147,7 +154,7 @@ def add_missing_translations(lemma_id):
             "pt": "portuguese",
             "sw": "swahili",
             "vi": "vietnamese",
-            "lt": "lithuanian"
+            "lt": "lithuanian",
         }
         missing_lang_names = [
             lang_code_to_name[lang_code]
@@ -168,7 +175,7 @@ def add_missing_translations(lemma_id):
             definition=lemma.definition_text,
             pos_type=lemma.pos_type,
             pos_subtype=lemma.pos_subtype,
-            languages=missing_lang_names
+            languages=missing_lang_names,
         )
 
         if not success or not translations:
@@ -185,7 +192,7 @@ def add_missing_translations(lemma_id):
             "pt": "portuguese_translation",
             "sw": "swahili_translation",
             "vi": "vietnamese_translation",
-            "lt": "lithuanian_translation"
+            "lt": "lithuanian_translation",
         }
 
         added_count = 0
@@ -199,12 +206,12 @@ def add_missing_translations(lemma_id):
                 added_count += 1
 
         if added_count > 0:
-            flash(f'Successfully added {added_count} missing translation(s)!', "success")
+            flash(f"Successfully added {added_count} missing translation(s)!", "success")
         else:
             flash("Could not generate any missing translations", "warning")
 
     except Exception as e:
-        flash(f'Error adding missing translations: {str(e)}', "error")
+        flash(f"Error adding missing translations: {str(e)}", "error")
 
     return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
@@ -219,11 +226,17 @@ def check_pronunciations(lemma_id):
 
     try:
         # Get all derivative forms for this lemma that have pronunciations
-        forms_with_pronunciations = g.db.query(DerivativeForm).filter(
-            DerivativeForm.lemma_id == lemma_id,
-            ((DerivativeForm.ipa_pronunciation.isnot(None)) |
-             (DerivativeForm.phonetic_pronunciation.isnot(None)))
-        ).all()
+        forms_with_pronunciations = (
+            g.db.query(DerivativeForm)
+            .filter(
+                DerivativeForm.lemma_id == lemma_id,
+                (
+                    (DerivativeForm.ipa_pronunciation.isnot(None))
+                    | (DerivativeForm.phonetic_pronunciation.isnot(None))
+                ),
+            )
+            .all()
+        )
 
         if not forms_with_pronunciations:
             flash("No pronunciations found to check", "warning")
@@ -239,10 +252,16 @@ def check_pronunciations(lemma_id):
         issues = []
         for form in forms_with_pronunciations:
             # Get example sentence for context - find sentences that use the lemma
-            example_translation = g.db.query(SentenceTranslation).join(Sentence).join(SentenceWord).filter(
-                SentenceWord.lemma_id == lemma_id,
-                SentenceTranslation.language_code == "en"  # Get English version for context
-            ).first()
+            example_translation = (
+                g.db.query(SentenceTranslation)
+                .join(Sentence)
+                .join(SentenceWord)
+                .filter(
+                    SentenceWord.lemma_id == lemma_id,
+                    SentenceTranslation.language_code == "en",  # Get English version for context
+                )
+                .first()
+            )
             example_text = example_translation.translation_text if example_translation else None
 
             result = validate_pronunciation(
@@ -252,32 +271,34 @@ def check_pronunciations(lemma_id):
                 pos_type=lemma.pos_type,
                 example_sentence=example_text,
                 definition=lemma.definition_text,
-                model="gpt-5-mini"
+                model="gpt-5-mini",
             )
 
             if result["needs_update"] and result["confidence"] >= 0.7:
-                issues.append({
-                    "form_id": form.id,
-                    "form_text": form.derivative_form_text,
-                    "grammatical_form": form.grammatical_form,
-                    "current_ipa": form.ipa_pronunciation,
-                    "current_phonetic": form.phonetic_pronunciation,
-                    "suggested_ipa": result["suggested_ipa"],
-                    "suggested_phonetic": result["suggested_phonetic"],
-                    "issues": result["issues"],
-                    "confidence": result["confidence"]
-                })
+                issues.append(
+                    {
+                        "form_id": form.id,
+                        "form_text": form.derivative_form_text,
+                        "grammatical_form": form.grammatical_form,
+                        "current_ipa": form.ipa_pronunciation,
+                        "current_phonetic": form.phonetic_pronunciation,
+                        "suggested_ipa": result["suggested_ipa"],
+                        "suggested_phonetic": result["suggested_phonetic"],
+                        "issues": result["issues"],
+                        "confidence": result["confidence"],
+                    }
+                )
 
         if not issues:
             flash("All pronunciations look good!", "success")
         else:
-            flash(f'Found {len(issues)} pronunciation issues', "warning")
-            return render_template("agents/pronunciation_check_results.html",
-                                 lemma=lemma,
-                                 issues=issues)
+            flash(f"Found {len(issues)} pronunciation issues", "warning")
+            return render_template(
+                "agents/pronunciation_check_results.html", lemma=lemma, issues=issues
+            )
 
     except Exception as e:
-        flash(f'Error checking pronunciations: {str(e)}', "error")
+        flash(f"Error checking pronunciations: {str(e)}", "error")
 
     return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
@@ -295,15 +316,19 @@ def generate_pronunciations(lemma_id):
 
     try:
         # Get derivative forms without pronunciations for this lemma
-        forms_missing_pronunciations = g.db.query(DerivativeForm).filter(
-            DerivativeForm.lemma_id == lemma_id,
-            DerivativeForm.language_code == lang_code,
-            DerivativeForm.ipa_pronunciation.is_(None),
-            DerivativeForm.phonetic_pronunciation.is_(None)
-        ).all()
+        forms_missing_pronunciations = (
+            g.db.query(DerivativeForm)
+            .filter(
+                DerivativeForm.lemma_id == lemma_id,
+                DerivativeForm.language_code == lang_code,
+                DerivativeForm.ipa_pronunciation.is_(None),
+                DerivativeForm.phonetic_pronunciation.is_(None),
+            )
+            .all()
+        )
 
         if not forms_missing_pronunciations:
-            flash(f'No missing pronunciations for {lang_code} forms', "success")
+            flash(f"No missing pronunciations for {lang_code} forms", "success")
             return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
         # Initialize PAPUGA agent
@@ -316,10 +341,16 @@ def generate_pronunciations(lemma_id):
         generated_count = 0
         for form in forms_missing_pronunciations:
             # Get example sentence for context - find sentences that use the lemma
-            example_translation = g.db.query(SentenceTranslation).join(Sentence).join(SentenceWord).filter(
-                SentenceWord.lemma_id == lemma_id,
-                SentenceTranslation.language_code == "en"  # Get English version for context
-            ).first()
+            example_translation = (
+                g.db.query(SentenceTranslation)
+                .join(Sentence)
+                .join(SentenceWord)
+                .filter(
+                    SentenceWord.lemma_id == lemma_id,
+                    SentenceTranslation.language_code == "en",  # Get English version for context
+                )
+                .first()
+            )
             example_text = example_translation.translation_text if example_translation else None
 
             result = generate_pronunciation(
@@ -327,7 +358,7 @@ def generate_pronunciations(lemma_id):
                 pos_type=lemma.pos_type,
                 definition=lemma.definition_text,
                 example_sentence=example_text,
-                model="gpt-5-mini"
+                model="gpt-5-mini",
             )
 
             # Update the form with generated pronunciations
@@ -342,13 +373,15 @@ def generate_pronunciations(lemma_id):
 
         if generated_count > 0:
             g.db.commit()
-            flash(f'Successfully generated pronunciations for {generated_count} form(s)!', "success")
+            flash(
+                f"Successfully generated pronunciations for {generated_count} form(s)!", "success"
+            )
         else:
             flash("Could not generate any pronunciations", "warning")
 
     except Exception as e:
         g.db.rollback()
-        flash(f'Error generating pronunciations: {str(e)}', "error")
+        flash(f"Error generating pronunciations: {str(e)}", "error")
 
     return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
@@ -379,34 +412,43 @@ def generate_forms(lemma_id):
             "de": ["verb"],
             "es": ["verb"],
             "pt": ["verb"],
-            "en": ["verb"]
+            "en": ["verb"],
         }
 
         if lang_code not in SUPPORTED_LANGUAGES:
-            flash(f'Language {lang_code} is not yet supported for form generation', "error")
+            flash(f"Language {lang_code} is not yet supported for form generation", "error")
             return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
         if pos_type not in SUPPORTED_LANGUAGES[lang_code]:
-            flash(f'POS type {pos_type} is not supported for {lang_code}', "error")
+            flash(f"POS type {pos_type} is not supported for {lang_code}", "error")
             return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
         # Check if translation exists for this language
         from wordfreq.storage.translation_helpers import LANGUAGE_FIELDS
+
         translation = None
         if lang_code in LANGUAGE_FIELDS:
             field_name, _, uses_table = LANGUAGE_FIELDS[lang_code]
             if uses_table:
                 from wordfreq.storage.models.schema import LemmaTranslation
-                trans_obj = g.db.query(LemmaTranslation).filter(
-                    LemmaTranslation.lemma_id == lemma_id,
-                    LemmaTranslation.language_code == lang_code
-                ).first()
+
+                trans_obj = (
+                    g.db.query(LemmaTranslation)
+                    .filter(
+                        LemmaTranslation.lemma_id == lemma_id,
+                        LemmaTranslation.language_code == lang_code,
+                    )
+                    .first()
+                )
                 translation = trans_obj.translation if trans_obj else None
             else:
                 translation = getattr(lemma, field_name, None)
 
         if not translation or not translation.strip():
-            flash(f'No {lang_code} translation found for this lemma. Add a translation first.', "warning")
+            flash(
+                f"No {lang_code} translation found for this lemma. Add a translation first.",
+                "warning",
+            )
             return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
         # For now, we'll use the language-specific generators directly
@@ -414,51 +456,63 @@ def generate_forms(lemma_id):
         # the agent's fix_missing_forms for individual lemmas
         from wordfreq.translation.client import LinguisticClient
 
-        client = LinguisticClient(
-            model="gpt-5-mini",
-            db_path=Config.DB_PATH,
-            debug=Config.DEBUG
-        )
+        client = LinguisticClient(model="gpt-5-mini", db_path=Config.DB_PATH, debug=Config.DEBUG)
 
         # Route to appropriate generator based on language and POS type
         handler_key = f"{lang_code}_{pos_type}"
 
         # Import the appropriate generator
         if handler_key == "lt_noun":
-            from wordfreq.translation.generate_lithuanian_noun_forms import process_lemma_declensions
+            from wordfreq.translation.generate_lithuanian_noun_forms import (
+                process_lemma_declensions,
+            )
+
             success = process_lemma_declensions(g.db, lemma, client, source="llm")
         elif handler_key == "lt_verb":
-            from wordfreq.translation.generate_lithuanian_verb_forms import process_lemma_conjugations
+            from wordfreq.translation.generate_lithuanian_verb_forms import (
+                process_lemma_conjugations,
+            )
+
             success = process_lemma_conjugations(g.db, lemma, client)
         elif handler_key == "lt_adjective":
-            from wordfreq.translation.generate_lithuanian_adjective_forms import process_lemma_adjective_forms
+            from wordfreq.translation.generate_lithuanian_adjective_forms import (
+                process_lemma_adjective_forms,
+            )
+
             success = process_lemma_adjective_forms(g.db, lemma, client)
         elif handler_key == "fr_verb":
             from wordfreq.translation.generate_french_verb_forms import process_lemma_conjugations
+
             success = process_lemma_conjugations(g.db, lemma, client)
         elif handler_key == "de_verb":
             from wordfreq.translation.generate_german_verb_forms import process_lemma_conjugations
+
             success = process_lemma_conjugations(g.db, lemma, client)
         elif handler_key == "es_verb":
             from wordfreq.translation.generate_spanish_verb_forms import process_lemma_conjugations
+
             success = process_lemma_conjugations(g.db, lemma, client)
         elif handler_key == "pt_verb":
-            from wordfreq.translation.generate_portuguese_verb_forms import process_lemma_conjugations
+            from wordfreq.translation.generate_portuguese_verb_forms import (
+                process_lemma_conjugations,
+            )
+
             success = process_lemma_conjugations(g.db, lemma, client)
         elif handler_key == "en_verb":
             from wordfreq.translation.generate_english_verb_forms import process_lemma_conjugations
+
             success = process_lemma_conjugations(g.db, lemma, client)
         else:
-            flash(f'Handler not implemented for {lang_code} {pos_type}', "error")
+            flash(f"Handler not implemented for {lang_code} {pos_type}", "error")
             return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
         if success:
-            flash(f'Successfully generated {lang_code} {pos_type} forms!', "success")
+            flash(f"Successfully generated {lang_code} {pos_type} forms!", "success")
         else:
-            flash(f'Could not generate {lang_code} {pos_type} forms', "warning")
+            flash(f"Could not generate {lang_code} {pos_type} forms", "warning")
 
     except Exception as e:
-        flash(f'Error generating forms: {str(e)}', "error")
+        flash(f"Error generating forms: {str(e)}", "error")
 
     return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
@@ -477,23 +531,25 @@ def generate_synonyms(lemma_id):
     try:
         # Initialize ŠERNAS agent
         from agents.sernas.agent import SernasAgent
+
         agent = SernasAgent(db_path=Config.DB_PATH, debug=Config.DEBUG)
 
         # Check if translation exists for this language (skip for English since that's the lemma itself)
         if lang_code != "en":
             from wordfreq.storage.translation_helpers import get_translation
+
             translation = get_translation(g.db, lemma, lang_code)
 
             if not translation or not translation.strip():
-                flash(f'No {lang_code} translation found for this lemma. Add a translation first.', "warning")
+                flash(
+                    f"No {lang_code} translation found for this lemma. Add a translation first.",
+                    "warning",
+                )
                 return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
         # Generate synonyms for this lemma and language
         result = agent.generate_synonyms_for_lemma(
-            lemma_id=lemma_id,
-            language_code=lang_code,
-            model="gpt-5-mini",
-            dry_run=False
+            lemma_id=lemma_id, language_code=lang_code, model="gpt-5-mini", dry_run=False
         )
 
         if "error" in result:
@@ -504,23 +560,30 @@ def generate_synonyms(lemma_id):
         synonyms_count = result.get("stored_synonyms", 0)
         # Sum all alternative form types (new specific types + legacy)
         alternatives_count = (
-            result.get("stored_abbreviations", 0) +
-            result.get("stored_expanded", 0) +
-            result.get("stored_spellings", 0) +
-            result.get("stored_alternatives", 0)  # Legacy field for backward compatibility
+            result.get("stored_abbreviations", 0)
+            + result.get("stored_expanded", 0)
+            + result.get("stored_spellings", 0)
+            + result.get("stored_alternatives", 0)  # Legacy field for backward compatibility
         )
         total_count = synonyms_count + alternatives_count
 
         if total_count > 0:
-            flash(f'Successfully generated {synonyms_count} synonym(s) and {alternatives_count} alternative form(s)!', "success")
+            flash(
+                f"Successfully generated {synonyms_count} synonym(s) and {alternatives_count} alternative form(s)!",
+                "success",
+            )
         else:
-            flash("No synonyms or alternative forms were generated. This word may not have common synonyms.", "info")
+            flash(
+                "No synonyms or alternative forms were generated. This word may not have common synonyms.",
+                "info",
+            )
 
     except Exception as e:
-        flash(f'Error generating synonyms: {str(e)}', "error")
+        flash(f"Error generating synonyms: {str(e)}", "error")
         import traceback
+
         if Config.DEBUG:
-            flash(f'Debug: {traceback.format_exc()}', "error")
+            flash(f"Debug: {traceback.format_exc()}", "error")
 
     return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
@@ -544,19 +607,19 @@ def check_definition(lemma_id):
             word=lemma.lemma_text,
             definition=lemma.definition_text,
             pos_type=lemma.pos_type,
-            model="gpt-5-mini"
+            model="gpt-5-mini",
         )
 
         if result["is_valid"] and result["confidence"] >= 0.7:
             flash("Definition looks good!", "success")
         else:
             # Show issues and suggested improvement
-            return render_template("agents/definition_check_results.html",
-                                 lemma=lemma,
-                                 result=result)
+            return render_template(
+                "agents/definition_check_results.html", lemma=lemma, result=result
+            )
 
     except Exception as e:
-        flash(f'Error checking definition: {str(e)}', "error")
+        flash(f"Error checking definition: {str(e)}", "error")
 
     return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
@@ -581,6 +644,7 @@ def apply_definition(lemma_id):
 
         # Log the change
         from wordfreq.storage.crud.operation_log import log_operation
+
         log_operation(
             g.db,
             source="barsukas-web-interface",
@@ -589,15 +653,15 @@ def apply_definition(lemma_id):
                 "lemma_id": lemma_id,
                 "lemma_text": lemma.lemma_text,
                 "old_definition": old_definition,
-                "new_definition": new_definition
+                "new_definition": new_definition,
             },
-            lemma_id=lemma_id
+            lemma_id=lemma_id,
         )
 
         flash("Definition updated successfully!", "success")
     except Exception as e:
         g.db.rollback()
-        flash(f'Error updating definition: {str(e)}', "error")
+        flash(f"Error updating definition: {str(e)}", "error")
 
     return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
@@ -615,13 +679,17 @@ def check_disambiguation(lemma_id):
         agent = LokysAgent(db_path=Config.DB_PATH, debug=Config.DEBUG)
 
         # Check for lemmas with the same lemma_text
-        duplicates = g.db.query(Lemma).filter(
-            Lemma.lemma_text == lemma.lemma_text,
-            Lemma.guid.isnot(None)
-        ).all()
+        duplicates = (
+            g.db.query(Lemma)
+            .filter(Lemma.lemma_text == lemma.lemma_text, Lemma.guid.isnot(None))
+            .all()
+        )
 
         if len(duplicates) <= 1:
-            flash(f'No other lemmas found with lemma_text "{lemma.lemma_text}" - disambiguation not needed', "info")
+            flash(
+                f'No other lemmas found with lemma_text "{lemma.lemma_text}" - disambiguation not needed',
+                "info",
+            )
             return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
         # Check if translations differ
@@ -659,7 +727,10 @@ def check_disambiguation(lemma_id):
                         break
 
         if not translations_differ:
-            flash(f'Found {len(duplicates)} lemmas with "{lemma.lemma_text}", but translations are the same - may be duplicates', "warning")
+            flash(
+                f'Found {len(duplicates)} lemmas with "{lemma.lemma_text}", but translations are the same - may be duplicates',
+                "warning",
+            )
             return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
         # Check if this lemma has parentheticals
@@ -677,7 +748,7 @@ def check_disambiguation(lemma_id):
             item = {
                 "guid": dup.guid,
                 "definition": dup.definition_text or "No definition",
-                "translations": {}
+                "translations": {},
             }
             for lang_code in supported_languages.keys():
                 try:
@@ -689,24 +760,30 @@ def check_disambiguation(lemma_id):
             definitions_data.append(item)
 
         llm_result = suggest_disambiguation(
-            word=lemma.lemma_text,
-            definitions=definitions_data,
-            model="gpt-5-mini"
+            word=lemma.lemma_text, definitions=definitions_data, model="gpt-5-mini"
         )
 
         if llm_result["success"] and llm_result["suggestions"]:
             # Render a results page with suggestions
-            return render_template("agents/disambiguation_suggestions.html",
-                                 lemma=lemma,
-                                 duplicates=duplicates,
-                                 suggestions=llm_result["suggestions"],
-                                 lemma_text=lemma.lemma_text)
+            return render_template(
+                "agents/disambiguation_suggestions.html",
+                lemma=lemma,
+                duplicates=duplicates,
+                suggestions=llm_result["suggestions"],
+                lemma_text=lemma.lemma_text,
+            )
         else:
-            flash(f'⚠️ This lemma needs disambiguation! Found {len(duplicates)} different meanings for "{lemma.lemma_text}" with different translations', "warning")
-            flash(f'Consider adding parentheticals like: "{lemma.lemma_text} (animal)", "{lemma.lemma_text} (computer)", etc.', "info")
+            flash(
+                f'⚠️ This lemma needs disambiguation! Found {len(duplicates)} different meanings for "{lemma.lemma_text}" with different translations',
+                "warning",
+            )
+            flash(
+                f'Consider adding parentheticals like: "{lemma.lemma_text} (animal)", "{lemma.lemma_text} (computer)", etc.',
+                "info",
+            )
 
     except Exception as e:
-        flash(f'Error checking disambiguation: {str(e)}', "error")
+        flash(f"Error checking disambiguation: {str(e)}", "error")
 
     return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
@@ -734,6 +811,7 @@ def apply_disambiguation(lemma_id):
 
         # Log the change
         from wordfreq.storage.crud.operation_log import log_translation_change
+
         log_translation_change(
             g.db,
             source="barsukas-web-interface",
@@ -742,13 +820,13 @@ def apply_disambiguation(lemma_id):
             old_lemma_text=old_lemma_text,
             new_lemma_text=new_lemma_text,
             guid=lemma.guid,
-            change_source="ai_disambiguation_suggestion"
+            change_source="ai_disambiguation_suggestion",
         )
 
         flash(f'✓ Updated GUID {lemma.guid}: "{old_lemma_text}" → "{new_lemma_text}"', "success")
     except Exception as e:
         g.db.rollback()
-        flash(f'Error applying disambiguation: {str(e)}', "error")
+        flash(f"Error applying disambiguation: {str(e)}", "error")
 
     # Stay on suggestions page if requested, otherwise go to the updated lemma
     if return_to_suggestions and original_lemma_id:
@@ -789,7 +867,7 @@ def generate_sentences(lemma_id):
             lemma=lemma,
             target_languages=languages,
             num_sentences=num_sentences,
-            difficulty_context=lemma.difficulty_level
+            difficulty_context=lemma.difficulty_level,
         )
 
         if not result.get("success"):
@@ -803,39 +881,41 @@ def generate_sentences(lemma_id):
             return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
         store_result = agent.store_sentences(
-            sentences_data=sentences_data,
-            source_lemma=lemma,
-            session=g.db
+            sentences_data=sentences_data, source_lemma=lemma, session=g.db
         )
 
         if store_result["stored"] > 0:
-            flash(f'Successfully generated and stored {store_result["stored"]} sentence(s)!', "success")
+            flash(
+                f'Successfully generated and stored {store_result["stored"]} sentence(s)!',
+                "success",
+            )
 
             # Get the newly created sentences using the IDs returned from store_sentences
             sentence_ids = store_result.get("sentence_ids", [])
             if sentence_ids:
-                sentences = g.db.query(Sentence).filter(
-                    Sentence.id.in_(sentence_ids)
-                ).all()
+                sentences = g.db.query(Sentence).filter(Sentence.id.in_(sentence_ids)).all()
             else:
                 sentences = []
 
             # Show the results
-            return render_template("agents/sentence_generation_results.html",
-                                 lemma=lemma,
-                                 sentences=sentences,
-                                 generated_count=store_result["stored"])
+            return render_template(
+                "agents/sentence_generation_results.html",
+                lemma=lemma,
+                sentences=sentences,
+                generated_count=store_result["stored"],
+            )
         else:
             flash("Failed to store generated sentences", "error")
             if store_result.get("errors"):
                 for error in store_result["errors"][:3]:  # Show first 3 errors
-                    flash(f'Error: {error}', "error")
+                    flash(f"Error: {error}", "error")
 
     except Exception as e:
-        flash(f'Error generating sentences: {str(e)}', "error")
+        flash(f"Error generating sentences: {str(e)}", "error")
         import traceback
+
         if Config.DEBUG:
-            flash(f'Debug: {traceback.format_exc()}', "error")
+            flash(f"Debug: {traceback.format_exc()}", "error")
 
     return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
@@ -861,7 +941,7 @@ def generate_grammar_fact(lemma_id):
 
         # Validate fact type is supported
         if fact_type not in agent.SUPPORTED_FACT_TYPES:
-            flash(f'Unsupported fact type: {fact_type}', "error")
+            flash(f"Unsupported fact type: {fact_type}", "error")
             return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
         fact_config = agent.SUPPORTED_FACT_TYPES[fact_type]
@@ -873,40 +953,47 @@ def generate_grammar_fact(lemma_id):
 
         # Validate POS type
         if lemma.pos_type not in fact_config["required_pos"]:
-            flash(f'This word is a {lemma.pos_type}. {fact_type} only works with: {", ".join(fact_config["required_pos"])}', "warning")
+            flash(
+                f'This word is a {lemma.pos_type}. {fact_type} only works with: {", ".join(fact_config["required_pos"])}',
+                "warning",
+            )
             return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
         # Check if translation exists for this language
         from wordfreq.storage.translation_helpers import get_translation
+
         translation = get_translation(g.db, lemma, language_code)
 
         if not translation or not translation.strip():
-            flash(f'No {language_code} translation found for this lemma. Add a translation first.', "warning")
+            flash(
+                f"No {language_code} translation found for this lemma. Add a translation first.",
+                "warning",
+            )
             return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
         # Check if fact already exists
         from wordfreq.storage.crud.grammar_fact import get_grammar_fact_value
+
         existing_fact = get_grammar_fact_value(g.db, lemma_id, language_code, fact_type)
         if existing_fact:
-            flash(f'This lemma already has {fact_type}: {existing_fact}', "info")
+            flash(f"This lemma already has {fact_type}: {existing_fact}", "info")
             return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
         # Generate the grammar fact
         if fact_type == "measure_words":
-            fact_value, notes, confidence = agent.generate_measure_words(
-                lemma, translation, g.db
-            )
+            fact_value, notes, confidence = agent.generate_measure_words(lemma, translation, g.db)
         elif fact_type == "grammatical_gender":
             fact_value, notes, confidence = agent.generate_grammatical_gender(
                 lemma, translation, language_code, g.db
             )
         else:
-            flash(f'Handler not yet implemented for fact type: {fact_type}', "error")
+            flash(f"Handler not yet implemented for fact type: {fact_type}", "error")
             return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
         if fact_value and confidence >= 0.7:
             # Save to database
             from wordfreq.storage.crud.grammar_fact import add_grammar_fact
+
             add_grammar_fact(
                 g.db,
                 lemma_id=lemma_id,
@@ -914,12 +1001,13 @@ def generate_grammar_fact(lemma_id):
                 fact_type=fact_type,
                 fact_value=fact_value,
                 notes=notes,
-                verified=False
+                verified=False,
             )
             g.db.commit()
 
             # Log operation
             from wordfreq.storage.crud.operation_log import log_operation
+
             log_operation(
                 g.db,
                 operation_type="grammar_fact_generated",
@@ -931,23 +1019,30 @@ def generate_grammar_fact(lemma_id):
                     "fact_value": fact_value,
                     "confidence": confidence,
                     "agent": "lape",
-                    "source": "barsukas-web-interface"
-                }
+                    "source": "barsukas-web-interface",
+                },
             )
             g.db.commit()
 
-            flash(f'Successfully generated {fact_type}: {fact_value} (confidence: {confidence:.2f})', "success")
+            flash(
+                f"Successfully generated {fact_type}: {fact_value} (confidence: {confidence:.2f})",
+                "success",
+            )
             if notes:
-                flash(f'Note: {notes}', "info")
+                flash(f"Note: {notes}", "info")
         else:
-            flash(f'Could not generate {fact_type} with sufficient confidence (got {confidence:.2f}, need ≥ 0.7)', "warning")
+            flash(
+                f"Could not generate {fact_type} with sufficient confidence (got {confidence:.2f}, need ≥ 0.7)",
+                "warning",
+            )
 
     except Exception as e:
         g.db.rollback()
-        flash(f'Error generating grammar fact: {str(e)}', "error")
+        flash(f"Error generating grammar fact: {str(e)}", "error")
         import traceback
+
         if Config.DEBUG:
-            flash(f'Debug: {traceback.format_exc()}', "error")
+            flash(f"Debug: {traceback.format_exc()}", "error")
 
     return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
@@ -965,17 +1060,17 @@ def view_sentences(lemma_id):
         from wordfreq.storage.models.schema import Sentence, SentenceWord
         from sqlalchemy.orm import joinedload
 
-        sentences = g.db.query(Sentence).join(SentenceWord).filter(
-            SentenceWord.lemma_id == lemma_id
-        ).options(
-            joinedload(Sentence.translations),
-            joinedload(Sentence.words)
-        ).order_by(Sentence.id.desc()).all()
+        sentences = (
+            g.db.query(Sentence)
+            .join(SentenceWord)
+            .filter(SentenceWord.lemma_id == lemma_id)
+            .options(joinedload(Sentence.translations), joinedload(Sentence.words))
+            .order_by(Sentence.id.desc())
+            .all()
+        )
 
-        return render_template("agents/view_sentences.html",
-                             lemma=lemma,
-                             sentences=sentences)
+        return render_template("agents/view_sentences.html", lemma=lemma, sentences=sentences)
 
     except Exception as e:
-        flash(f'Error viewing sentences: {str(e)}', "error")
+        flash(f"Error viewing sentences: {str(e)}", "error")
         return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))

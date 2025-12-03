@@ -46,29 +46,29 @@ def validate_lemma_form(word: str, pos_type: str, model: str = "gpt-5-mini") -> 
         description="Validation of whether a word is in its lemma (dictionary) form",
         properties={
             "is_lemma": SchemaProperty("boolean", "True if the word is already in lemma form"),
-            "suggested_lemma": SchemaProperty("string", "The correct lemma form if different from input"),
-            "reason": SchemaProperty("string", "Explanation of why it's not a lemma or confirmation it is"),
-            "confidence": SchemaProperty("number", "Confidence score 0.0-1.0", minimum=0.0, maximum=1.0)
-        }
+            "suggested_lemma": SchemaProperty(
+                "string", "The correct lemma form if different from input"
+            ),
+            "reason": SchemaProperty(
+                "string", "Explanation of why it's not a lemma or confirmation it is"
+            ),
+            "confidence": SchemaProperty(
+                "number", "Confidence score 0.0-1.0", minimum=0.0, maximum=1.0
+            ),
+        },
     )
 
     # Load prompt from files
     context = util.prompt_loader.get_context("wordfreq", "lemma_validation")
     prompt_template = util.prompt_loader.get_prompt("wordfreq", "lemma_validation")
 
-    prompt = prompt_template.format(
-        word=word,
-        pos_type=pos_type
-    )
+    prompt = prompt_template.format(word=word, pos_type=pos_type)
 
     logger.debug(f"Validating lemma form for word: '{word}' (POS: {pos_type})")
 
     try:
         response = client.generate_chat(
-            prompt=prompt,
-            model=model,
-            json_schema=schema,
-            context=context
+            prompt=prompt, model=model, json_schema=schema, context=context
         )
 
         if response.structured_data:
@@ -79,7 +79,7 @@ def validate_lemma_form(word: str, pos_type: str, model: str = "gpt-5-mini") -> 
                 "is_lemma": True,  # Assume correct if validation fails
                 "suggested_lemma": word,
                 "reason": "Validation failed",
-                "confidence": 0.0
+                "confidence": 0.0,
             }
 
     except Exception as e:
@@ -87,8 +87,8 @@ def validate_lemma_form(word: str, pos_type: str, model: str = "gpt-5-mini") -> 
         return {
             "is_lemma": True,
             "suggested_lemma": word,
-            "reason": f'Error: {str(e)}',
-            "confidence": 0.0
+            "reason": f"Error: {str(e)}",
+            "confidence": 0.0,
         }
 
 
@@ -97,7 +97,7 @@ def validate_translation(
     translation: str,
     target_language: str,
     pos_type: str,
-    model: str = "gpt-5-mini"
+    model: str = "gpt-5-mini",
 ) -> Dict[str, any]:
     """
     Validate that a translation is correct and in lemma form.
@@ -123,16 +123,22 @@ def validate_translation(
         name="TranslationValidation",
         description="Validation of translation accuracy and lemma form",
         properties={
-            "is_correct": SchemaProperty("boolean", "True if the translation is semantically correct"),
-            "is_lemma_form": SchemaProperty("boolean", "True if the translation is in lemma/dictionary form"),
-            "suggested_translation": SchemaProperty("string", "Better translation if current one has issues"),
-            "issues": SchemaProperty(
-                type="array",
-                description="List of issues found",
-                items={"type": "string"}
+            "is_correct": SchemaProperty(
+                "boolean", "True if the translation is semantically correct"
             ),
-            "confidence": SchemaProperty("number", "Confidence score 0.0-1.0", minimum=0.0, maximum=1.0)
-        }
+            "is_lemma_form": SchemaProperty(
+                "boolean", "True if the translation is in lemma/dictionary form"
+            ),
+            "suggested_translation": SchemaProperty(
+                "string", "Better translation if current one has issues"
+            ),
+            "issues": SchemaProperty(
+                type="array", description="List of issues found", items={"type": "string"}
+            ),
+            "confidence": SchemaProperty(
+                "number", "Confidence score 0.0-1.0", minimum=0.0, maximum=1.0
+            ),
+        },
     )
 
     # Load prompt from files
@@ -143,29 +149,30 @@ def validate_translation(
         english_word=english_word,
         target_language=target_language,
         translation=translation,
-        pos_type=pos_type
+        pos_type=pos_type,
     )
 
-    logger.debug(f"Validating translation: '{english_word}' → '{translation}' ({target_language}, POS: {pos_type})")
+    logger.debug(
+        f"Validating translation: '{english_word}' → '{translation}' ({target_language}, POS: {pos_type})"
+    )
 
     try:
         response = client.generate_chat(
-            prompt=prompt,
-            model=model,
-            json_schema=schema,
-            context=context
+            prompt=prompt, model=model, json_schema=schema, context=context
         )
 
         if response.structured_data:
             return response.structured_data
         else:
-            logger.error(f"No structured data received for translation validation of '{english_word}' → '{translation}'")
+            logger.error(
+                f"No structured data received for translation validation of '{english_word}' → '{translation}'"
+            )
             return {
                 "is_correct": True,  # Assume correct if validation fails
                 "is_lemma_form": True,
                 "suggested_translation": translation,
                 "issues": ["Validation failed"],
-                "confidence": 0.0
+                "confidence": 0.0,
             }
 
     except Exception as e:
@@ -174,8 +181,8 @@ def validate_translation(
             "is_correct": True,
             "is_lemma_form": True,
             "suggested_translation": translation,
-            "issues": [f'Error: {str(e)}'],
-            "confidence": 0.0
+            "issues": [f"Error: {str(e)}"],
+            "confidence": 0.0,
         }
 
 
@@ -185,7 +192,7 @@ def validate_definition(
     pos_type: str,
     model: str = "gpt-5-mini",
     translation_language: Optional[str] = None,
-    translation_text: Optional[str] = None
+    translation_text: Optional[str] = None,
 ) -> Dict[str, any]:
     """
     Validate that a definition is well-formed and appropriate.
@@ -211,15 +218,22 @@ def validate_definition(
         name="DefinitionValidation",
         description="Validation of definition text quality",
         properties={
-            "is_valid": SchemaProperty("boolean", "True if the definition is well-formed and appropriate"),
+            "is_valid": SchemaProperty(
+                "boolean", "True if the definition is well-formed and appropriate"
+            ),
             "issues": SchemaProperty(
                 type="array",
                 description="List of issues found (e.g., 'Contains translation only', 'Too vague', 'Empty', 'Circular definition')",
-                items={"type": "string"}
+                items={"type": "string"},
             ),
-            "suggested_definition": SchemaProperty("string", "A better definition if the current one has issues, otherwise empty string"),
-            "confidence": SchemaProperty("number", "Confidence score 0.0-1.0", minimum=0.0, maximum=1.0)
-        }
+            "suggested_definition": SchemaProperty(
+                "string",
+                "A better definition if the current one has issues, otherwise empty string",
+            ),
+            "confidence": SchemaProperty(
+                "number", "Confidence score 0.0-1.0", minimum=0.0, maximum=1.0
+            ),
+        },
     )
 
     # Load prompt from files
@@ -233,20 +247,14 @@ def validate_definition(
         translation_info = "No translation available"
 
     prompt = prompt_template.format(
-        word=word,
-        pos_type=pos_type,
-        definition=definition,
-        translation_info=translation_info
+        word=word, pos_type=pos_type, definition=definition, translation_info=translation_info
     )
 
     logger.debug(f"Validating definition for word: '{word}' (POS: {pos_type})")
 
     try:
         response = client.generate_chat(
-            prompt=prompt,
-            model=model,
-            json_schema=schema,
-            context=context
+            prompt=prompt, model=model, json_schema=schema, context=context
         )
 
         if response.structured_data:
@@ -257,23 +265,21 @@ def validate_definition(
                 "is_valid": True,  # Assume valid if validation fails
                 "issues": ["Validation failed"],
                 "suggested_definition": "",
-                "confidence": 0.0
+                "confidence": 0.0,
             }
 
     except Exception as e:
         logger.error(f"Error validating definition for '{word}': {e}")
         return {
             "is_valid": True,
-            "issues": [f'Error: {str(e)}'],
+            "issues": [f"Error: {str(e)}"],
             "suggested_definition": "",
-            "confidence": 0.0
+            "confidence": 0.0,
         }
 
 
 def batch_validate_lemmas(
-    words: List[Dict[str, str]],
-    model: str = "gpt-5-mini",
-    confidence_threshold: float = 0.7
+    words: List[Dict[str, str]], model: str = "gpt-5-mini", confidence_threshold: float = 0.7
 ) -> List[Dict[str, any]]:
     """
     Validate multiple words for lemma form.
@@ -295,20 +301,13 @@ def batch_validate_lemmas(
         result = validate_lemma_form(word, pos_type, model)
 
         if not result["is_lemma"] and result["confidence"] >= confidence_threshold:
-            issues.append({
-                "word": word,
-                "pos_type": pos_type,
-                "validation": result
-            })
+            issues.append({"word": word, "pos_type": pos_type, "validation": result})
 
     return issues
 
 
 def validate_all_translations_for_word(
-    english_word: str,
-    translations: Dict[str, str],
-    pos_type: str,
-    model: str = "gpt-5-mini"
+    english_word: str, translations: Dict[str, str], pos_type: str, model: str = "gpt-5-mini"
 ) -> Dict[str, any]:
     """
     Validate all translations for a single word in one LLM call.
@@ -339,41 +338,35 @@ def validate_all_translations_for_word(
     language_properties = {}
     for lang_code in translations.keys():
         language_properties[f"{lang_code}_is_correct"] = SchemaProperty(
-            "boolean",
-            f"True if the {lang_code} translation is semantically correct"
+            "boolean", f"True if the {lang_code} translation is semantically correct"
         )
         language_properties[f"{lang_code}_is_lemma_form"] = SchemaProperty(
-            "boolean",
-            f"True if the {lang_code} translation is in lemma/dictionary form"
+            "boolean", f"True if the {lang_code} translation is in lemma/dictionary form"
         )
         language_properties[f"{lang_code}_suggested"] = SchemaProperty(
             "string",
-            f"ONLY the corrected {lang_code} translation word/phrase (no explanations or alternatives). Empty string if current translation is correct."
+            f"ONLY the corrected {lang_code} translation word/phrase (no explanations or alternatives). Empty string if current translation is correct.",
         )
         language_properties[f"{lang_code}_issues"] = SchemaProperty(
             type="array",
             description=f"List of issues found for {lang_code} translation",
-            items={"type": "string"}
+            items={"type": "string"},
         )
 
     language_properties["confidence"] = SchemaProperty(
-        "number",
-        "Overall confidence score 0.0-1.0",
-        minimum=0.0,
-        maximum=1.0
+        "number", "Overall confidence score 0.0-1.0", minimum=0.0, maximum=1.0
     )
 
     schema = Schema(
         name="MultilingualTranslationValidation",
         description="Validation of multiple translations for one word",
-        properties=language_properties
+        properties=language_properties,
     )
 
     # Build prompt with all translations
-    translations_text = "\n".join([
-        f"- {lang_code}: {trans}"
-        for lang_code, trans in translations.items()
-    ])
+    translations_text = "\n".join(
+        [f"- {lang_code}: {trans}" for lang_code, trans in translations.items()]
+    )
 
     language_names = {
         "lt": "Lithuanian",
@@ -381,7 +374,7 @@ def validate_all_translations_for_word(
         "ko": "Korean",
         "fr": "French",
         "sw": "Swahili",
-        "vi": "Vietnamese"
+        "vi": "Vietnamese",
     }
 
     language_list = ", ".join([language_names.get(lc, lc) for lc in translations.keys()])
@@ -404,14 +397,12 @@ IMPORTANT FORMATTING RULES:
 Language guidance: Validate for {language_list}.
 """
 
-    logger.debug(f"Validating all translations for word: '{english_word}' ({len(translations)} languages)")
+    logger.debug(
+        f"Validating all translations for word: '{english_word}' ({len(translations)} languages)"
+    )
 
     try:
-        response = client.generate_chat(
-            prompt=prompt,
-            model=model,
-            json_schema=schema
-        )
+        response = client.generate_chat(prompt=prompt, model=model, json_schema=schema)
 
         if response.structured_data:
             # Parse the flat structure into per-language results
@@ -419,21 +410,27 @@ Language guidance: Validate for {language_list}.
             for lang_code in translations.keys():
                 results[lang_code] = {
                     "is_correct": response.structured_data.get(f"{lang_code}_is_correct", True),
-                    "is_lemma_form": response.structured_data.get(f"{lang_code}_is_lemma_form", True),
-                    "suggested_translation": response.structured_data.get(f"{lang_code}_suggested", ""),
+                    "is_lemma_form": response.structured_data.get(
+                        f"{lang_code}_is_lemma_form", True
+                    ),
+                    "suggested_translation": response.structured_data.get(
+                        f"{lang_code}_suggested", ""
+                    ),
                     "issues": response.structured_data.get(f"{lang_code}_issues", []),
-                    "confidence": response.structured_data.get("confidence", 0.0)
+                    "confidence": response.structured_data.get("confidence", 0.0),
                 }
             return results
         else:
-            logger.error(f"No structured data received for multi-lingual validation of '{english_word}'")
+            logger.error(
+                f"No structured data received for multi-lingual validation of '{english_word}'"
+            )
             return {
                 lang_code: {
                     "is_correct": True,
                     "is_lemma_form": True,
                     "suggested_translation": "",
                     "issues": ["Validation failed"],
-                    "confidence": 0.0
+                    "confidence": 0.0,
                 }
                 for lang_code in translations.keys()
             }
@@ -445,17 +442,15 @@ Language guidance: Validate for {language_list}.
                 "is_correct": True,
                 "is_lemma_form": True,
                 "suggested_translation": "",
-                "issues": [f'Error: {str(e)}'],
-                "confidence": 0.0
+                "issues": [f"Error: {str(e)}"],
+                "confidence": 0.0,
             }
             for lang_code in translations.keys()
         }
 
 
 def batch_validate_translations(
-    translations: List[Dict[str, str]],
-    model: str = "gpt-5-mini",
-    confidence_threshold: float = 0.7
+    translations: List[Dict[str, str]], model: str = "gpt-5-mini", confidence_threshold: float = 0.7
 ) -> List[Dict[str, any]]:
     """
     Validate multiple translations.
@@ -477,22 +472,23 @@ def batch_validate_translations(
             trans_info["translation"],
             trans_info["target_language"],
             trans_info["pos_type"],
-            model
+            model,
         )
 
-        has_issues = (
-            (not result["is_correct"] or not result["is_lemma_form"])
-            and result["confidence"] >= confidence_threshold
-        )
+        has_issues = (not result["is_correct"] or not result["is_lemma_form"]) and result[
+            "confidence"
+        ] >= confidence_threshold
 
         if has_issues:
-            issues.append({
-                "english_word": trans_info["english_word"],
-                "translation": trans_info["translation"],
-                "target_language": trans_info["target_language"],
-                "pos_type": trans_info["pos_type"],
-                "validation": result
-            })
+            issues.append(
+                {
+                    "english_word": trans_info["english_word"],
+                    "translation": trans_info["translation"],
+                    "target_language": trans_info["target_language"],
+                    "pos_type": trans_info["pos_type"],
+                    "validation": result,
+                }
+            )
 
     return issues
 
@@ -504,7 +500,7 @@ def validate_pronunciation(
     pos_type: str,
     example_sentence: Optional[str] = None,
     definition: Optional[str] = None,
-    model: str = "gpt-5-mini"
+    model: str = "gpt-5-mini",
 ) -> Dict[str, any]:
     """
     Validate or generate pronunciations (both IPA and simplified phonetic).
@@ -537,30 +533,45 @@ def validate_pronunciation(
         name="PronunciationValidation",
         description="Validation or generation of word pronunciations",
         properties={
-            "needs_update": SchemaProperty("boolean", "True if the current pronunciation is incorrect or missing"),
+            "needs_update": SchemaProperty(
+                "boolean", "True if the current pronunciation is incorrect or missing"
+            ),
             "suggested_ipa": SchemaProperty("string", "Correct IPA pronunciation (e.g., /ˈwɜːrd/)"),
-            "suggested_phonetic": SchemaProperty("string", "Simplified phonetic pronunciation (e.g., WURD)"),
+            "suggested_phonetic": SchemaProperty(
+                "string", "Simplified phonetic pronunciation (e.g., WURD)"
+            ),
             "alternative_pronunciations": SchemaProperty(
                 type="array",
                 description="List of alternative pronunciations (British English, regional variations, etc.)",
                 items={
                     "type": "object",
                     "properties": {
-                        "dialect": {"type": "string", "description": "The dialect or variant (e.g., 'British', 'Australian', 'Southern US')"},
-                        "ipa": {"type": "string", "description": "IPA pronunciation for this dialect"},
-                        "phonetic": {"type": "string", "description": "Simplified phonetic pronunciation for this dialect"}
+                        "dialect": {
+                            "type": "string",
+                            "description": "The dialect or variant (e.g., 'British', 'Australian', 'Southern US')",
+                        },
+                        "ipa": {
+                            "type": "string",
+                            "description": "IPA pronunciation for this dialect",
+                        },
+                        "phonetic": {
+                            "type": "string",
+                            "description": "Simplified phonetic pronunciation for this dialect",
+                        },
                     },
-                    "required": ["dialect", "ipa", "phonetic"]
-                }
+                    "required": ["dialect", "ipa", "phonetic"],
+                },
             ),
             "issues": SchemaProperty(
                 type="array",
                 description="List of issues found with current pronunciation (if any)",
-                items={"type": "string"}
+                items={"type": "string"},
             ),
-            "confidence": SchemaProperty("number", "Confidence score 0.0-1.0", minimum=0.0, maximum=1.0),
-            "notes": SchemaProperty("string", "Additional notes about pronunciation")
-        }
+            "confidence": SchemaProperty(
+                "number", "Confidence score 0.0-1.0", minimum=0.0, maximum=1.0
+            ),
+            "notes": SchemaProperty("string", "Additional notes about pronunciation"),
+        },
     )
 
     # Load prompt from files
@@ -602,19 +613,13 @@ Check if the pronunciation is accurate and follows proper conventions:
 If incorrect, provide the correct pronunciations. If correct, confirm them."""
     else:
         # Generation mode
-        prompt = prompt_template.format(
-            word=word,
-            sentence=sentence
-        )
+        prompt = prompt_template.format(word=word, sentence=sentence)
 
     logger.debug(f"Validating/generating pronunciation for word: '{word}' (POS: {pos_type})")
 
     try:
         response = client.generate_chat(
-            prompt=prompt,
-            model=model,
-            json_schema=schema,
-            context=context
+            prompt=prompt, model=model, json_schema=schema, context=context
         )
 
         if response.structured_data:
@@ -628,7 +633,7 @@ If incorrect, provide the correct pronunciations. If correct, confirm them."""
                 "alternative_pronunciations": [],
                 "issues": ["Validation failed"],
                 "confidence": 0.0,
-                "notes": ""
+                "notes": "",
             }
 
     except Exception as e:
@@ -638,9 +643,9 @@ If incorrect, provide the correct pronunciations. If correct, confirm them."""
             "suggested_ipa": ipa_pronunciation or "",
             "suggested_phonetic": phonetic_pronunciation or "",
             "alternative_pronunciations": [],
-            "issues": [f'Error: {str(e)}'],
+            "issues": [f"Error: {str(e)}"],
             "confidence": 0.0,
-            "notes": ""
+            "notes": "",
         }
 
 
@@ -649,7 +654,7 @@ def generate_pronunciation(
     pos_type: str,
     example_sentence: Optional[str] = None,
     definition: Optional[str] = None,
-    model: str = "gpt-5-mini"
+    model: str = "gpt-5-mini",
 ) -> Dict[str, any]:
     """
     Generate both IPA and simplified phonetic pronunciations for a word.
@@ -679,7 +684,7 @@ def generate_pronunciation(
         pos_type=pos_type,
         example_sentence=example_sentence,
         definition=definition,
-        model=model
+        model=model,
     )
 
     return {
@@ -687,14 +692,12 @@ def generate_pronunciation(
         "phonetic_pronunciation": result["suggested_phonetic"],
         "alternative_pronunciations": result.get("alternative_pronunciations", []),
         "confidence": result["confidence"],
-        "notes": result["notes"]
+        "notes": result["notes"],
     }
 
 
 def suggest_disambiguation(
-    word: str,
-    definitions: List[Dict[str, str]],
-    model: str = "gpt-5-mini"
+    word: str, definitions: List[Dict[str, str]], model: str = "gpt-5-mini"
 ) -> Dict[str, any]:
     """
     Suggest short disambiguation terms for multiple meanings of the same word.
@@ -719,7 +722,9 @@ def suggest_disambiguation(
     for i, item in enumerate(definitions, 1):
         def_text = f"{i}. GUID: {item['guid']}\n   Definition: {item['definition']}"
         if "translations" in item and item["translations"]:
-            trans_examples = ", ".join([f"{lang}: {trans}" for lang, trans in list(item["translations"].items())[:3]])
+            trans_examples = ", ".join(
+                [f"{lang}: {trans}" for lang, trans in list(item["translations"].items())[:3]]
+            )
             def_text += f"\n   Example translations: {trans_examples}"
         definitions_text.append(def_text)
 
@@ -743,27 +748,18 @@ Provide a short disambiguation term for each definition."""
         description="Suggested disambiguation terms for each meaning",
         properties={
             f"disambiguation_{i+1}": SchemaProperty(
-                "string",
-                f"Short disambiguation term for definition {i+1} (GUID: {item['guid']})"
+                "string", f"Short disambiguation term for definition {i+1} (GUID: {item['guid']})"
             )
             for i, item in enumerate(definitions)
-        }
+        },
     )
 
     try:
-        response = client.generate_chat(
-            prompt=prompt,
-            model=model,
-            json_schema=schema
-        )
+        response = client.generate_chat(prompt=prompt, model=model, json_schema=schema)
 
         if not response.structured_data:
             logger.error("No structured data received for disambiguation suggestions")
-            return {
-                "success": False,
-                "error": "No structured data received",
-                "suggestions": {}
-            }
+            return {"success": False, "error": "No structured data received", "suggestions": {}}
 
         # Map results back to GUIDs
         suggestions = {}
@@ -772,15 +768,8 @@ Provide a short disambiguation term for each definition."""
             if key in response.structured_data:
                 suggestions[item["guid"]] = response.structured_data[key].strip()
 
-        return {
-            "success": True,
-            "suggestions": suggestions
-        }
+        return {"success": True, "suggestions": suggestions}
 
     except Exception as e:
         logger.error(f"Error getting disambiguation suggestions: {e}")
-        return {
-            "success": False,
-            "error": str(e),
-            "suggestions": {}
-        }
+        return {"success": False, "error": str(e), "suggestions": {}}

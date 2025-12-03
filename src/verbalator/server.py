@@ -22,23 +22,22 @@ import verbalator.samples
 
 PORT = 9871
 
+
 class GenerationHandler:
     """Handles text generation requests using different LLM clients."""
-    
+
     @staticmethod
     def generate_text(
-        prompt: str,
-        entry: Optional[str],
-        model: str = "phi3:3.8b"
+        prompt: str, entry: Optional[str], model: str = "phi3:3.8b"
     ) -> Tuple[str, Dict[str, Any]]:
         """
         Generate text using specified model and track usage.
-        
+
         Args:
             prompt: The generation prompt
             entry: Optional additional context
             model: Model identifier to use
-            
+
         Returns:
             Tuple of (generated_text, usage_info)
         """
@@ -52,20 +51,20 @@ class GenerationHandler:
             response, usage = ollama_client.generate_text(full_prompt, model)
             return response, asdict(usage)
 
+
 class RequestHandler(http.server.BaseHTTPRequestHandler):
     """HTTP request handler for the server."""
-    
+
     def __init__(self, *args, **kwargs):
         self.jinja_env = None
         super().__init__(*args, **kwargs)
-        
+
     @property
     def template_env(self) -> Environment:
         """Lazy loading of Jinja environment."""
         if not self.jinja_env:
             self.jinja_env = Environment(
-                loader=PackageLoader("verbalator"),
-                autoescape=select_autoescape()
+                loader=PackageLoader("verbalator"), autoescape=select_autoescape()
             )
         return self.jinja_env
 
@@ -75,13 +74,13 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
             "/favicon.ico": self._serve_favicon,
             "/images/": self._serve_static,
             "/css/": self._serve_static,
-            "/js/": self._serve_static
+            "/js/": self._serve_static,
         }
-        
+
         # Find matching handler based on path prefix
         handler = next(
             (handlers[prefix] for prefix in handlers if self.path.startswith(prefix)),
-            self._serve_template
+            self._serve_template,
         )
         handler()
 
@@ -114,13 +113,13 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
             "/images/": ("image/png", {"Cache-control": "public, max-age=3600"}),
             "/css/": ("text/css", {}),
             "/js/": ("text/javascript", {}),
-            "default": ("text/html; charset=utf-8", {})
+            "default": ("text/html; charset=utf-8", {}),
         }
-        
+
         # Get content type and extra headers based on path prefix
         content_type, extra_headers = next(
             (content_types[prefix] for prefix in content_types if self.path.startswith(prefix)),
-            content_types["default"]
+            content_types["default"],
         )
 
         self._send_response(response, content_type, extra_headers)
@@ -136,13 +135,9 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
         """Serve template-rendered pages."""
         template = self.template_env.get_template("index.html")
         html = template.render(
-            prompts=verbalator.common.PROMPTS,
-            samples=verbalator.samples.ALL_SAMPLES
+            prompts=verbalator.common.PROMPTS, samples=verbalator.samples.ALL_SAMPLES
         )
-        self._send_response(
-            bytes(html, "utf-8"),
-            "text/html; charset=utf-8"
-        )
+        self._send_response(bytes(html, "utf-8"), "text/html; charset=utf-8")
 
     def _handle_generation_request(self) -> None:
         """Handle text generation requests."""
@@ -159,20 +154,16 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
 
             # Generate response
             response, usage = GenerationHandler.generate_text(
-                prompt=prompt,
-                entry=data.get("entry"),
-                model=data.get("model", "phi3:3.8b")
+                prompt=prompt, entry=data.get("entry"), model=data.get("model", "phi3:3.8b")
             )
 
             # Calculate reading level
             reading_level = fk.flesch_kincaid_grade(response)
 
             # Send response
-            self._send_json_response({
-                "response": response,
-                "usage": usage,
-                "reading_level": reading_level
-            })
+            self._send_json_response(
+                {"response": response, "usage": usage, "reading_level": reading_level}
+            )
 
         except (ValueError, KeyError) as e:
             self.send_error(400, str(e))
@@ -180,20 +171,17 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
             self.send_error(500, str(e))
 
     def _send_response(
-        self,
-        content: bytes,
-        content_type: str,
-        extra_headers: Dict[str, str] = None
+        self, content: bytes, content_type: str, extra_headers: Dict[str, str] = None
     ) -> None:
         """Send HTTP response with headers."""
         self.send_response(200)
         self.send_header("Content-type", content_type)
         self.send_header("Content-length", len(content))
-        
+
         if extra_headers:
             for key, value in extra_headers.items():
                 self.send_header(key, value)
-                
+
         self.end_headers()
         self.wfile.write(content)
 
@@ -207,11 +195,13 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(response)
 
+
 def run(server_class=http.server.HTTPServer, handler_class=RequestHandler) -> None:
     """Run the HTTP server."""
     server_address = ("", PORT)
     httpd = server_class(server_address, handler_class)
     httpd.serve_forever()
+
 
 if __name__ == "__main__":
     run()

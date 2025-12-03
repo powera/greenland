@@ -12,7 +12,19 @@ from pathlib import Path
 from datetime import datetime
 from typing import Optional
 
-from flask import Blueprint, render_template, request, jsonify, g, flash, redirect, url_for, send_file, current_app, Response
+from flask import (
+    Blueprint,
+    render_template,
+    request,
+    jsonify,
+    g,
+    flash,
+    redirect,
+    url_for,
+    send_file,
+    current_app,
+    Response,
+)
 from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 import io
@@ -55,15 +67,18 @@ def apply_effective_difficulty_filter(query, language_code: str, difficulty_leve
     # Left join with difficulty overrides for the specific language
     query = query.outerjoin(
         LemmaDifficultyOverride,
-        (LemmaDifficultyOverride.lemma_id == Lemma.id) &
-        (LemmaDifficultyOverride.language_code == language_code)
+        (LemmaDifficultyOverride.lemma_id == Lemma.id)
+        & (LemmaDifficultyOverride.language_code == language_code),
     )
 
     # Use COALESCE to prefer override difficulty, fall back to base difficulty
     # Filter by the effective difficulty level
     effective_difficulty = case(
-        (LemmaDifficultyOverride.difficulty_level.isnot(None), LemmaDifficultyOverride.difficulty_level),
-        else_=Lemma.difficulty_level
+        (
+            LemmaDifficultyOverride.difficulty_level.isnot(None),
+            LemmaDifficultyOverride.difficulty_level,
+        ),
+        else_=Lemma.difficulty_level,
     )
 
     query = query.filter(effective_difficulty == difficulty_level)
@@ -71,7 +86,9 @@ def apply_effective_difficulty_filter(query, language_code: str, difficulty_leve
     return query
 
 
-def link_audio_to_lemma(session, guid: str, expected_text: str, language_code: str) -> Optional[int]:
+def link_audio_to_lemma(
+    session, guid: str, expected_text: str, language_code: str
+) -> Optional[int]:
     """
     Hybrid approach to link audio file to lemma.
 
@@ -106,19 +123,19 @@ def link_audio_to_lemma(session, guid: str, expected_text: str, language_code: s
     # For table-based translations (es, de, pt), query LemmaTranslation
     if language_code in ["es", "de", "pt"]:
         from wordfreq.storage.models.schema import LemmaTranslation
-        translation = session.query(LemmaTranslation).filter_by(
-            language_code=language_code,
-            translation=expected_text
-        ).first()
+
+        translation = (
+            session.query(LemmaTranslation)
+            .filter_by(language_code=language_code, translation=expected_text)
+            .first()
+        )
         if translation:
             return translation.lemma_id
 
     # For column-based translations
     elif language_code in language_column_map:
         column_name = language_column_map[language_code]
-        lemma = session.query(Lemma).filter(
-            getattr(Lemma, column_name) == expected_text
-        ).first()
+        lemma = session.query(Lemma).filter(getattr(Lemma, column_name) == expected_text).first()
         if lemma:
             return lemma.id
 
@@ -161,7 +178,7 @@ def validate_audio_translation(session, guid: str, expected_text: str, language_
             "valid": False,
             "current_translation": None,
             "mismatch": False,
-            "lemma_found": False
+            "lemma_found": False,
         }
 
     # Get current translation from database
@@ -170,10 +187,12 @@ def validate_audio_translation(session, guid: str, expected_text: str, language_
     # For table-based translations (es, de, pt)
     if language_code in ["es", "de", "pt"]:
         from wordfreq.storage.models.schema import LemmaTranslation
-        translation = session.query(LemmaTranslation).filter_by(
-            lemma_id=lemma.id,
-            language_code=language_code
-        ).first()
+
+        translation = (
+            session.query(LemmaTranslation)
+            .filter_by(lemma_id=lemma.id, language_code=language_code)
+            .first()
+        )
         if translation:
             current_translation = translation.translation
 
@@ -184,12 +203,7 @@ def validate_audio_translation(session, guid: str, expected_text: str, language_
 
     # Check if they match
     if current_translation is None:
-        return {
-            "valid": False,
-            "current_translation": None,
-            "mismatch": False,
-            "lemma_found": True
-        }
+        return {"valid": False, "current_translation": None, "mismatch": False, "lemma_found": True}
 
     mismatch = current_translation != expected_text
 
@@ -197,7 +211,7 @@ def validate_audio_translation(session, guid: str, expected_text: str, language_
         "valid": not mismatch,
         "current_translation": current_translation,
         "mismatch": mismatch,
-        "lemma_found": True
+        "lemma_found": True,
     }
 
 
@@ -211,16 +225,18 @@ def index():
     needs_replacement = g.db.query(AudioQualityReview).filter_by(status="needs_replacement").count()
 
     # Get counts by language
-    language_counts = g.db.query(
-        AudioQualityReview.language_code,
-        func.count(AudioQualityReview.id)
-    ).group_by(AudioQualityReview.language_code).all()
+    language_counts = (
+        g.db.query(AudioQualityReview.language_code, func.count(AudioQualityReview.id))
+        .group_by(AudioQualityReview.language_code)
+        .all()
+    )
 
     # Get counts by voice (grouped by language/voice combination)
-    voice_counts = g.db.query(
-        AudioQualityReview.display_voice,
-        func.count(AudioQualityReview.id)
-    ).group_by(AudioQualityReview.language_code, AudioQualityReview.voice_name).all()
+    voice_counts = (
+        g.db.query(AudioQualityReview.display_voice, func.count(AudioQualityReview.id))
+        .group_by(AudioQualityReview.language_code, AudioQualityReview.voice_name)
+        .all()
+    )
 
     return render_template(
         "audio/index.html",
@@ -229,7 +245,7 @@ def index():
         approved=approved,
         needs_replacement=needs_replacement,
         language_counts=dict(language_counts),
-        voice_counts=dict(voice_counts)
+        voice_counts=dict(voice_counts),
     )
 
 
@@ -248,11 +264,9 @@ def import_manifest():
                     manifest_path = os.path.join(root, "audio_manifest.json")
                     # Get relative path from base for display
                     rel_path = os.path.relpath(root, audio_base)
-                    available_manifests.append({
-                        "path": root,
-                        "display": rel_path,
-                        "full_path": manifest_path
-                    })
+                    available_manifests.append(
+                        {"path": root, "display": rel_path, "full_path": manifest_path}
+                    )
 
         return render_template("audio/import.html", available_manifests=available_manifests)
 
@@ -266,18 +280,18 @@ def import_manifest():
     audio_dir_path = Path(audio_dir)
 
     if not audio_dir_path.exists():
-        flash(f'Audio directory not found: {audio_dir}', "error")
+        flash(f"Audio directory not found: {audio_dir}", "error")
         return redirect(url_for("audio.import_manifest"))
 
     if not audio_dir_path.is_dir():
-        flash(f'Path is not a directory: {audio_dir}', "error")
+        flash(f"Path is not a directory: {audio_dir}", "error")
         return redirect(url_for("audio.import_manifest"))
 
     # Look for audio_manifest.json in the directory
     manifest_file_path = audio_dir_path / "audio_manifest.json"
 
     if not manifest_file_path.exists():
-        flash(f'audio_manifest.json not found in directory: {audio_dir}', "error")
+        flash(f"audio_manifest.json not found in directory: {audio_dir}", "error")
         return redirect(url_for("audio.import_manifest"))
 
     try:
@@ -313,12 +327,16 @@ def import_manifest():
                 continue
 
             # Check if already exists
-            existing = g.db.query(AudioQualityReview).filter_by(
-                guid=guid,
-                language_code=language_code,
-                voice_name=voice_name,
-                grammatical_form=grammatical_form
-            ).first()
+            existing = (
+                g.db.query(AudioQualityReview)
+                .filter_by(
+                    guid=guid,
+                    language_code=language_code,
+                    voice_name=voice_name,
+                    grammatical_form=grammatical_form,
+                )
+                .first()
+            )
 
             if existing:
                 # Update if MD5 changed
@@ -328,7 +346,11 @@ def import_manifest():
                     existing.filename = filename
                     # Update S3 URL if MD5 changed
                     s3_cdn_base = current_app.config.get("S3_CDN_BASE_URL")
-                    existing.s3_url = f"{s3_cdn_base}/{language_code}/{voice_name}/{md5}.mp3" if s3_cdn_base else None
+                    existing.s3_url = (
+                        f"{s3_cdn_base}/{language_code}/{voice_name}/{md5}.mp3"
+                        if s3_cdn_base
+                        else None
+                    )
                     updated_count += 1
                 else:
                     unchanged_count += 1
@@ -339,7 +361,9 @@ def import_manifest():
 
             # Calculate S3 URL from MD5 hash
             s3_cdn_base = current_app.config.get("S3_CDN_BASE_URL")
-            s3_url = f"{s3_cdn_base}/{language_code}/{voice_name}/{md5}.mp3" if s3_cdn_base else None
+            s3_url = (
+                f"{s3_cdn_base}/{language_code}/{voice_name}/{md5}.mp3" if s3_cdn_base else None
+            )
 
             # Create new review record
             review = AudioQualityReview(
@@ -352,7 +376,7 @@ def import_manifest():
                 manifest_md5=md5,
                 s3_url=s3_url,
                 lemma_id=lemma_id,
-                status="pending_review"
+                status="pending_review",
             )
 
             g.db.add(review)
@@ -361,19 +385,19 @@ def import_manifest():
         g.db.commit()
 
         flash(
-            f'Import complete: {new_count} new, {updated_count} updated, '
-            f'{unchanged_count} unchanged, {error_count} errors',
-            "success"
+            f"Import complete: {new_count} new, {updated_count} updated, "
+            f"{unchanged_count} unchanged, {error_count} errors",
+            "success",
         )
 
         return redirect(url_for("audio.list_files"))
 
     except json.JSONDecodeError as e:
-        flash(f'Invalid JSON format: {str(e)}', "error")
+        flash(f"Invalid JSON format: {str(e)}", "error")
         return redirect(url_for("audio.import_manifest"))
     except Exception as e:
         g.db.rollback()
-        flash(f'Error importing manifest: {str(e)}', "error")
+        flash(f"Error importing manifest: {str(e)}", "error")
         return redirect(url_for("audio.import_manifest"))
 
 
@@ -391,6 +415,7 @@ def list_files():
 
     # Build query with eager loading of lemma relationship
     from sqlalchemy.orm import joinedload
+
     query = g.db.query(AudioQualityReview).options(joinedload(AudioQualityReview.lemma))
 
     if language_filter:
@@ -398,7 +423,7 @@ def list_files():
 
     if voice_filter:
         # Check if voice_filter contains '/' (language/voice format)
-        if '/' in voice_filter:
+        if "/" in voice_filter:
             query = query.filter(AudioQualityReview.display_voice == voice_filter)
         else:
             # Legacy support: filter by voice_name only
@@ -413,8 +438,8 @@ def list_files():
 
     if search_query:
         query = query.filter(
-            (AudioQualityReview.expected_text.like(f'%{search_query}%')) |
-            (AudioQualityReview.guid.like(f'%{search_query}%'))
+            (AudioQualityReview.expected_text.like(f"%{search_query}%"))
+            | (AudioQualityReview.guid.like(f"%{search_query}%"))
         )
 
     # Order by GUID
@@ -428,7 +453,12 @@ def list_files():
     languages = g.db.query(AudioQualityReview.language_code).distinct().all()
     languages = sorted([lang[0] for lang in languages])
 
-    voices = g.db.query(AudioQualityReview.display_voice).distinct().order_by(AudioQualityReview.display_voice).all()
+    voices = (
+        g.db.query(AudioQualityReview.display_voice)
+        .distinct()
+        .order_by(AudioQualityReview.display_voice)
+        .all()
+    )
     voices = [voice[0] for voice in voices]
 
     statuses = ["pending_review", "approved", "approved_with_issues", "needs_replacement"]
@@ -447,7 +477,7 @@ def list_files():
         "unnatural_prosody",
         "clipping_distortion",
         "speed_issues",
-        "translation_mismatch"
+        "translation_mismatch",
     ]
 
     total_pages = (total_count + per_page - 1) // per_page
@@ -467,7 +497,7 @@ def list_files():
         page=page,
         per_page=per_page,
         total_count=total_count,
-        total_pages=total_pages
+        total_pages=total_pages,
     )
 
 
@@ -489,7 +519,7 @@ def download_filelist():
 
     if voice_filter:
         # Check if voice_filter contains '/' (language/voice format)
-        if '/' in voice_filter:
+        if "/" in voice_filter:
             query = query.filter(AudioQualityReview.display_voice == voice_filter)
         else:
             # Legacy support: filter by voice_name only
@@ -504,8 +534,8 @@ def download_filelist():
 
     if search_query:
         query = query.filter(
-            (AudioQualityReview.expected_text.like(f'%{search_query}%')) |
-            (AudioQualityReview.guid.like(f'%{search_query}%'))
+            (AudioQualityReview.expected_text.like(f"%{search_query}%"))
+            | (AudioQualityReview.guid.like(f"%{search_query}%"))
         )
 
     # Order by GUID
@@ -555,7 +585,7 @@ def download_filelist():
     return Response(
         output.getvalue(),
         mimetype="text/plain",
-        headers={"Content-Disposition": f"attachment; filename={filename}"}
+        headers={"Content-Disposition": f"attachment; filename={filename}"},
     )
 
 
@@ -569,11 +599,12 @@ def serve_audio_file(language, voice, filename):
     """
     # Try to find the audio record by filename to get S3 URL
     from sqlalchemy.orm import joinedload
-    review = g.db.query(AudioQualityReview).filter_by(
-        language_code=language,
-        voice_name=voice,
-        filename=filename
-    ).first()
+
+    review = (
+        g.db.query(AudioQualityReview)
+        .filter_by(language_code=language, voice_name=voice, filename=filename)
+        .first()
+    )
 
     # If we have an S3 URL, redirect to CDN
     if review and review.s3_url:
@@ -592,7 +623,7 @@ def serve_audio_file(language, voice, filename):
     file_path = Path(audio_base_dir) / language_dir / voice / filename
 
     if not file_path.exists():
-        return jsonify({"error": f'Audio file not found locally and no S3 URL available'}), 404
+        return jsonify({"error": f"Audio file not found locally and no S3 URL available"}), 404
 
     return send_file(str(file_path), mimetype="audio/mpeg")
 
@@ -641,12 +672,17 @@ def review_file(review_id):
 
         # Redirect to next pending file or back to list
         if request.form.get("save_and_next"):
-            next_review = g.db.query(AudioQualityReview).filter(
-                AudioQualityReview.id > review_id,
-                AudioQualityReview.language_code == review.language_code,
-                AudioQualityReview.voice_name == review.voice_name,
-                AudioQualityReview.status == "pending_review"
-            ).order_by(AudioQualityReview.id).first()
+            next_review = (
+                g.db.query(AudioQualityReview)
+                .filter(
+                    AudioQualityReview.id > review_id,
+                    AudioQualityReview.language_code == review.language_code,
+                    AudioQualityReview.voice_name == review.voice_name,
+                    AudioQualityReview.status == "pending_review",
+                )
+                .order_by(AudioQualityReview.id)
+                .first()
+            )
 
             if next_review:
                 return redirect(url_for("audio.review_file", review_id=next_review.id))
@@ -657,7 +693,7 @@ def review_file(review_id):
         return jsonify({"error": "Invalid JSON for quality_issues"}), 400
     except Exception as e:
         g.db.rollback()
-        flash(f'Error updating review: {str(e)}', "error")
+        flash(f"Error updating review: {str(e)}", "error")
         return redirect(url_for("audio.review_file", review_id=review_id))
 
 
@@ -703,10 +739,13 @@ def rapid_review():
 
     # Build query - join with Lemma if we need subtype or level filtering
     from sqlalchemy.orm import joinedload
+
     if subtype_filter or level_filter:
-        query = g.db.query(AudioQualityReview).join(
-            Lemma, AudioQualityReview.lemma_id == Lemma.id
-        ).options(joinedload(AudioQualityReview.lemma))
+        query = (
+            g.db.query(AudioQualityReview)
+            .join(Lemma, AudioQualityReview.lemma_id == Lemma.id)
+            .options(joinedload(AudioQualityReview.lemma))
+        )
     else:
         query = g.db.query(AudioQualityReview)
 
@@ -715,7 +754,7 @@ def rapid_review():
 
     if voice_filter:
         # Check if voice_filter contains '/' (language/voice format)
-        if '/' in voice_filter:
+        if "/" in voice_filter:
             query = query.filter(AudioQualityReview.display_voice == voice_filter)
         else:
             # Legacy support: filter by voice_name only
@@ -748,21 +787,34 @@ def rapid_review():
     languages = g.db.query(AudioQualityReview.language_code).distinct().all()
     languages = sorted([lang[0] for lang in languages])
 
-    voices = g.db.query(AudioQualityReview.display_voice).distinct().order_by(AudioQualityReview.display_voice).all()
+    voices = (
+        g.db.query(AudioQualityReview.display_voice)
+        .distinct()
+        .order_by(AudioQualityReview.display_voice)
+        .all()
+    )
     voices = [voice[0] for voice in voices]
 
     statuses = ["pending_review", "approved", "approved_with_issues", "needs_replacement"]
 
     # Get available subtypes from lemmas that have audio
-    subtypes = g.db.query(Lemma.pos_subtype).join(
-        AudioQualityReview, AudioQualityReview.lemma_id == Lemma.id
-    ).filter(Lemma.pos_subtype.isnot(None)).distinct().all()
+    subtypes = (
+        g.db.query(Lemma.pos_subtype)
+        .join(AudioQualityReview, AudioQualityReview.lemma_id == Lemma.id)
+        .filter(Lemma.pos_subtype.isnot(None))
+        .distinct()
+        .all()
+    )
     subtypes = sorted([st[0] for st in subtypes if st[0]])
 
     # Get available levels from lemmas that have audio
-    levels = g.db.query(Lemma.difficulty_level).join(
-        AudioQualityReview, AudioQualityReview.lemma_id == Lemma.id
-    ).filter(Lemma.difficulty_level.isnot(None)).distinct().all()
+    levels = (
+        g.db.query(Lemma.difficulty_level)
+        .join(AudioQualityReview, AudioQualityReview.lemma_id == Lemma.id)
+        .filter(Lemma.difficulty_level.isnot(None))
+        .distinct()
+        .all()
+    )
     levels = sorted([lvl[0] for lvl in levels if lvl[0] is not None])
 
     return render_template(
@@ -778,7 +830,7 @@ def rapid_review():
         voice_filter=voice_filter,
         status_filter=status_filter,
         subtype_filter=subtype_filter,
-        level_filter=level_filter
+        level_filter=level_filter,
     )
 
 
@@ -817,9 +869,11 @@ def rapid_review_submit(review_id):
         from sqlalchemy import or_, and_
 
         if subtype_filter or level_filter:
-            query = g.db.query(AudioQualityReview).join(
-                Lemma, AudioQualityReview.lemma_id == Lemma.id
-            ).options(joinedload(AudioQualityReview.lemma))
+            query = (
+                g.db.query(AudioQualityReview)
+                .join(Lemma, AudioQualityReview.lemma_id == Lemma.id)
+                .options(joinedload(AudioQualityReview.lemma))
+            )
         else:
             query = g.db.query(AudioQualityReview)
 
@@ -829,8 +883,8 @@ def rapid_review_submit(review_id):
                 AudioQualityReview.guid > review.guid,
                 and_(
                     AudioQualityReview.guid == review.guid,
-                    AudioQualityReview.voice_name > review.voice_name
-                )
+                    AudioQualityReview.voice_name > review.voice_name,
+                ),
             )
         )
 
@@ -862,41 +916,41 @@ def rapid_review_submit(review_id):
             pinyin_text = None
             if next_review.language_code == "zh":
                 from barsukas.pinyin_helper import generate_pinyin
+
                 pinyin_text = generate_pinyin(next_review.expected_text)
 
             # Validate audio file against current translation
             validation = validate_audio_translation(
-                g.db,
-                next_review.guid,
-                next_review.expected_text,
-                next_review.language_code
+                g.db, next_review.guid, next_review.expected_text, next_review.language_code
             )
 
-            return jsonify({
-                "success": True,
-                "has_next": True,
-                "next_review": {
-                    "id": next_review.id,
-                    "guid": next_review.guid,
-                    "expected_text": next_review.expected_text,
-                    "language_code": next_review.language_code,
-                    "voice_name": next_review.voice_name,
-                    "display_voice": next_review.display_voice,
-                    "filename": next_review.filename,
-                    "pinyin": pinyin_text,
-                    "audio_url": url_for("audio.serve_audio_file",
-                                        language=next_review.language_code,
-                                        voice=next_review.voice_name,
-                                        filename=next_review.filename),
-                    "validation": validation
+            return jsonify(
+                {
+                    "success": True,
+                    "has_next": True,
+                    "next_review": {
+                        "id": next_review.id,
+                        "guid": next_review.guid,
+                        "expected_text": next_review.expected_text,
+                        "language_code": next_review.language_code,
+                        "voice_name": next_review.voice_name,
+                        "display_voice": next_review.display_voice,
+                        "filename": next_review.filename,
+                        "pinyin": pinyin_text,
+                        "audio_url": url_for(
+                            "audio.serve_audio_file",
+                            language=next_review.language_code,
+                            voice=next_review.voice_name,
+                            filename=next_review.filename,
+                        ),
+                        "validation": validation,
+                    },
                 }
-            })
+            )
         else:
-            return jsonify({
-                "success": True,
-                "has_next": False,
-                "message": "No more files to review"
-            })
+            return jsonify(
+                {"success": True, "has_next": False, "message": "No more files to review"}
+            )
 
     except Exception as e:
         g.db.rollback()
@@ -926,9 +980,11 @@ def rapid_review_skip(review_id):
         from sqlalchemy import or_, and_
 
         if subtype_filter or level_filter:
-            query = g.db.query(AudioQualityReview).join(
-                Lemma, AudioQualityReview.lemma_id == Lemma.id
-            ).options(joinedload(AudioQualityReview.lemma))
+            query = (
+                g.db.query(AudioQualityReview)
+                .join(Lemma, AudioQualityReview.lemma_id == Lemma.id)
+                .options(joinedload(AudioQualityReview.lemma))
+            )
         else:
             query = g.db.query(AudioQualityReview)
 
@@ -938,8 +994,8 @@ def rapid_review_skip(review_id):
                 AudioQualityReview.guid > review.guid,
                 and_(
                     AudioQualityReview.guid == review.guid,
-                    AudioQualityReview.voice_name > review.voice_name
-                )
+                    AudioQualityReview.voice_name > review.voice_name,
+                ),
             )
         )
 
@@ -971,41 +1027,41 @@ def rapid_review_skip(review_id):
             pinyin_text = None
             if next_review.language_code == "zh":
                 from barsukas.pinyin_helper import generate_pinyin
+
                 pinyin_text = generate_pinyin(next_review.expected_text)
 
             # Validate audio file against current translation
             validation = validate_audio_translation(
-                g.db,
-                next_review.guid,
-                next_review.expected_text,
-                next_review.language_code
+                g.db, next_review.guid, next_review.expected_text, next_review.language_code
             )
 
-            return jsonify({
-                "success": True,
-                "has_next": True,
-                "next_review": {
-                    "id": next_review.id,
-                    "guid": next_review.guid,
-                    "expected_text": next_review.expected_text,
-                    "language_code": next_review.language_code,
-                    "voice_name": next_review.voice_name,
-                    "display_voice": next_review.display_voice,
-                    "filename": next_review.filename,
-                    "pinyin": pinyin_text,
-                    "audio_url": url_for("audio.serve_audio_file",
-                                        language=next_review.language_code,
-                                        voice=next_review.voice_name,
-                                        filename=next_review.filename),
-                    "validation": validation
+            return jsonify(
+                {
+                    "success": True,
+                    "has_next": True,
+                    "next_review": {
+                        "id": next_review.id,
+                        "guid": next_review.guid,
+                        "expected_text": next_review.expected_text,
+                        "language_code": next_review.language_code,
+                        "voice_name": next_review.voice_name,
+                        "display_voice": next_review.display_voice,
+                        "filename": next_review.filename,
+                        "pinyin": pinyin_text,
+                        "audio_url": url_for(
+                            "audio.serve_audio_file",
+                            language=next_review.language_code,
+                            voice=next_review.voice_name,
+                            filename=next_review.filename,
+                        ),
+                        "validation": validation,
+                    },
                 }
-            })
+            )
         else:
-            return jsonify({
-                "success": True,
-                "has_next": False,
-                "message": "No more files to review"
-            })
+            return jsonify(
+                {"success": True, "has_next": False, "message": "No more files to review"}
+            )
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -1041,9 +1097,11 @@ def rapid_review_bad_translation(review_id):
         from sqlalchemy import or_, and_
 
         if subtype_filter or level_filter:
-            query = g.db.query(AudioQualityReview).join(
-                Lemma, AudioQualityReview.lemma_id == Lemma.id
-            ).options(joinedload(AudioQualityReview.lemma))
+            query = (
+                g.db.query(AudioQualityReview)
+                .join(Lemma, AudioQualityReview.lemma_id == Lemma.id)
+                .options(joinedload(AudioQualityReview.lemma))
+            )
         else:
             query = g.db.query(AudioQualityReview)
 
@@ -1053,8 +1111,8 @@ def rapid_review_bad_translation(review_id):
                 AudioQualityReview.guid > review.guid,
                 and_(
                     AudioQualityReview.guid == review.guid,
-                    AudioQualityReview.voice_name > review.voice_name
-                )
+                    AudioQualityReview.voice_name > review.voice_name,
+                ),
             )
         )
 
@@ -1086,41 +1144,41 @@ def rapid_review_bad_translation(review_id):
             pinyin_text = None
             if next_review.language_code == "zh":
                 from barsukas.pinyin_helper import generate_pinyin
+
                 pinyin_text = generate_pinyin(next_review.expected_text)
 
             # Validate audio file against current translation
             validation = validate_audio_translation(
-                g.db,
-                next_review.guid,
-                next_review.expected_text,
-                next_review.language_code
+                g.db, next_review.guid, next_review.expected_text, next_review.language_code
             )
 
-            return jsonify({
-                "success": True,
-                "has_next": True,
-                "next_review": {
-                    "id": next_review.id,
-                    "guid": next_review.guid,
-                    "expected_text": next_review.expected_text,
-                    "language_code": next_review.language_code,
-                    "voice_name": next_review.voice_name,
-                    "display_voice": next_review.display_voice,
-                    "filename": next_review.filename,
-                    "pinyin": pinyin_text,
-                    "audio_url": url_for("audio.serve_audio_file",
-                                        language=next_review.language_code,
-                                        voice=next_review.voice_name,
-                                        filename=next_review.filename),
-                    "validation": validation
+            return jsonify(
+                {
+                    "success": True,
+                    "has_next": True,
+                    "next_review": {
+                        "id": next_review.id,
+                        "guid": next_review.guid,
+                        "expected_text": next_review.expected_text,
+                        "language_code": next_review.language_code,
+                        "voice_name": next_review.voice_name,
+                        "display_voice": next_review.display_voice,
+                        "filename": next_review.filename,
+                        "pinyin": pinyin_text,
+                        "audio_url": url_for(
+                            "audio.serve_audio_file",
+                            language=next_review.language_code,
+                            voice=next_review.voice_name,
+                            filename=next_review.filename,
+                        ),
+                        "validation": validation,
+                    },
                 }
-            })
+            )
         else:
-            return jsonify({
-                "success": True,
-                "has_next": False,
-                "message": "No more files to review"
-            })
+            return jsonify(
+                {"success": True, "has_next": False, "message": "No more files to review"}
+            )
 
     except Exception as e:
         g.db.rollback()

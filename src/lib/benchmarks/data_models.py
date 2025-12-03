@@ -10,6 +10,7 @@ from typing import Dict, List, Optional, Any, Union, Set
 
 class AnswerType(str, Enum):
     """Enumeration of supported answer types."""
+
     FREE_TEXT = "free_text"
     MULTIPLE_CHOICE = "multiple_choice"
     JSON = "json"
@@ -19,6 +20,7 @@ class AnswerType(str, Enum):
 
 class Difficulty(str, Enum):
     """Enumeration of difficulty levels."""
+
     EASY = "easy"
     MEDIUM = "medium"
     HARD = "hard"
@@ -27,41 +29,43 @@ class Difficulty(str, Enum):
 @dataclass
 class EvaluationCriteria:
     """Defines how to evaluate responses."""
-    exact_match: bool = True         # Whether to require exact string match
-    case_sensitive: bool = False     # Whether to consider letter case
-    contains: bool = False           # Whether answer just needs to contain correct text
+
+    exact_match: bool = True  # Whether to require exact string match
+    case_sensitive: bool = False  # Whether to consider letter case
+    contains: bool = False  # Whether answer just needs to contain correct text
     required_fields: List[str] = field(default_factory=list)  # Required fields for JSON
-    tolerance: float = 0.0           # Tolerance for numeric answers
-    
+    tolerance: float = 0.0  # Tolerance for numeric answers
+
     def to_dict(self) -> Dict:
         """Convert to dictionary, removing default values."""
         result = {}
         defaults = EvaluationCriteria()
-        
+
         for k, v in asdict(self).items():
             default_value = getattr(defaults, k)
             if v != default_value:
                 result[k] = v
-                
+
         return result
 
 
 @dataclass
 class BenchmarkQuestion:
     """Standardized benchmark question format."""
+
     # Core fields (required)
-    question_text: str                      # The actual question text presented to the model
-    answer_type: AnswerType                 # Format of expected answer
-    correct_answer: Any                     # The expected correct answer
-    
+    question_text: str  # The actual question text presented to the model
+    answer_type: AnswerType  # Format of expected answer
+    correct_answer: Any  # The expected correct answer
+
     # Optional metadata fields
-    category: Optional[str] = None          # Question category or topic
-    difficulty: Optional[Difficulty] = None # Difficulty level
+    category: Optional[str] = None  # Question category or topic
+    difficulty: Optional[Difficulty] = None  # Difficulty level
     tags: List[str] = field(default_factory=list)  # List of tags for filtering/grouping
-    
+
     # Optional fields for specific answer types
     choices: List[str] = field(default_factory=list)  # For multiple_choice questions
-    schema: Optional[Dict] = None           # For JSON answer type
+    schema: Optional[Dict] = None  # For JSON answer type
     evaluation_criteria: EvaluationCriteria = field(default_factory=EvaluationCriteria)
 
     def to_dict(self) -> Dict:
@@ -87,9 +91,10 @@ class BenchmarkQuestion:
 @dataclass
 class BenchmarkResult:
     """Stores results and metadata for a benchmark run."""
+
     question_id: str
-    score: int                    # 100 for correct, 0 for incorrect, or partial score
-    eval_msec: int                # Evaluation time in milliseconds
+    score: int  # 100 for correct, 0 for incorrect, or partial score
+    eval_msec: int  # Evaluation time in milliseconds
     debug_json: Optional[str] = None  # Debug information (model response, etc.)
     thought_process: Optional[str] = None  # Add this line to store model's reasoning
 
@@ -97,9 +102,10 @@ class BenchmarkResult:
 @dataclass
 class BenchmarkMetadata:
     """Metadata about a benchmark."""
-    code: str                    # Identifier code (e.g., "0015_spell_check")
-    name: str                    # Display name
+
+    code: str  # Identifier code (e.g., "0015_spell_check")
+    name: str  # Display name
     description: Optional[str] = None  # Description
-    version: str = "1.0"         # Version of the benchmark
+    version: str = "1.0"  # Version of the benchmark
     tags: List[str] = field(default_factory=list)  # Tags for categorization
-    max_score: int = 100         # Maximum possible score
+    max_score: int = 100  # Maximum possible score

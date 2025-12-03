@@ -30,21 +30,17 @@ if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
 # Import sentence-word link functionality
-from agents.bebras.cli import (
-    get_argument_parser as get_sentence_parser,
-    main as sentence_main
-)
+from agents.bebras.cli import get_argument_parser as get_sentence_parser, main as sentence_main
 
 # Import integrity checker functionality
 from agents.bebras.integrity import (
     get_argument_parser as get_integrity_parser,
-    main as integrity_main
+    main as integrity_main,
 )
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 

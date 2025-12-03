@@ -25,14 +25,18 @@ DEFAULT_MODEL = TEST_MODEL
 DEFAULT_TIMEOUT = 50
 API_BASE = "https://api.anthropic.com/v1"
 
+
 def measure_completion(func):
     """Decorator to measure completion API call duration."""
+
     def wrapper(*args, **kwargs):
         start_time = time.time()
         result = func(*args, **kwargs)
         duration_ms = (time.time() - start_time) * 1000
         return result, duration_ms
+
     return wrapper
+
 
 class AnthropicClient:
     """Client for making direct HTTP requests to Anthropic API."""
@@ -40,7 +44,7 @@ class AnthropicClient:
     def __init__(self, timeout: int = DEFAULT_TIMEOUT, cache: bool = True, debug: bool = False):
         """
         Initialize Anthropic client with API key.
-        
+
         Args:
             timeout: Request timeout in seconds
             debug: Whether to enable debug logging
@@ -53,13 +57,13 @@ class AnthropicClient:
         if debug:
             logger.setLevel(logging.DEBUG)
             logger.debug("Initialized AnthropicClient in debug mode")
-            
+
         self.api_key = self._load_key()
         self.headers = {
             "x-api-key": self.api_key,
             "anthropic-version": "2023-06-01",
             "content-type": "application/json",
-            "anthropic-beta": "prompt-caching-2024-07-31"
+            "anthropic-beta": "prompt-caching-2024-07-31",
         }
 
     def _load_key(self) -> str:
@@ -82,13 +86,8 @@ class AnthropicClient:
         if self.debug:
             logger.debug("Making request to %s", url)
             logger.debug("Request data: %s", json.dumps(kwargs, indent=2))
-            
-        response = requests.post(
-            url,
-            headers=self.headers,
-            json=kwargs,
-            timeout=self.timeout
-        )
+
+        response = requests.post(url, headers=self.headers, json=kwargs, timeout=self.timeout)
 
         if response.status_code != 200:
             error_msg = f"Error {response.status_code}: {response.text}"
@@ -109,7 +108,7 @@ class AnthropicClient:
         model: str = DEFAULT_MODEL,
         brief: bool = False,
         json_schema: Optional[Any] = None,
-        context: Optional[str] = None
+        context: Optional[str] = None,
     ) -> Response:
         """
         Generate chat completion using Anthropic API.
@@ -131,7 +130,7 @@ class AnthropicClient:
             logger.debug("Model: %s", model)
             logger.debug("Brief mode: %s", brief)
             logger.debug("JSON schema: %s", json_schema)
-            
+
             if context:
                 logger.debug("Using provided context: %s", context)
 
@@ -155,19 +154,31 @@ class AnthropicClient:
                 anthropic_schema = clients.lib.to_anthropic_schema(schema_obj)
             else:
                 raise ValueError(f"Unexpected json_schema type: {type(json_schema)}")
-            
+
             # Set up tools parameter for structured output
-            kwargs["tools"] = [{
-                "type": "custom",
-                "name": json_schema.name if isinstance(json_schema, Schema) else "structured_response",
-                "description": json_schema.description if isinstance(json_schema, Schema) else "Structured response schema",
-                "input_schema": anthropic_schema
-            }]
-            
+            kwargs["tools"] = [
+                {
+                    "type": "custom",
+                    "name": (
+                        json_schema.name
+                        if isinstance(json_schema, Schema)
+                        else "structured_response"
+                    ),
+                    "description": (
+                        json_schema.description
+                        if isinstance(json_schema, Schema)
+                        else "Structured response schema"
+                    ),
+                    "input_schema": anthropic_schema,
+                }
+            ]
+
             # Force the model to use the tool
             kwargs["tool_choice"] = {
                 "type": "tool",
-                "name": json_schema.name if isinstance(json_schema, Schema) else "structured_response"
+                "name": (
+                    json_schema.name if isinstance(json_schema, Schema) else "structured_response"
+                ),
             }
 
             # Add schema explanation to system prompt for better results
@@ -175,27 +186,27 @@ class AnthropicClient:
             display_schema = {
                 "type": "object",
                 "properties": anthropic_schema.get("properties", {}),
-                "required": anthropic_schema.get("required", [])
+                "required": anthropic_schema.get("required", []),
             }
-            
+
             schema_prefix = f"""Please provide a response that matches exactly this schema:
 {json.dumps(display_schema, indent=2)}
 
 Your response must be valid JSON that follows the above schema."""
 
-            if self.cache and context and len(context) > 512:  # Only cache if also a (long) system prompt
+            if (
+                self.cache and context and len(context) > 512
+            ):  # Only cache if also a (long) system prompt
                 system_content.append(
                     {"type": "text", "text": schema_prefix, "cache_control": {"type": "ephemeral"}}
                 )
             else:
-                system_content.append(
-                    {"type": "text", "text": schema_prefix}
-                )
-        
+                system_content.append({"type": "text", "text": schema_prefix})
+
         # Add system content if we have any
         if system_content:
             kwargs["system"] = system_content
-        
+
         # Add the user message
         kwargs["messages"] = [{"role": "user", "content": prompt}]
 
@@ -204,7 +215,7 @@ Your response must be valid JSON that follows the above schema."""
         # Extract text or tool output from response
         structured_data = {}
         response_text = ""
-        
+
         if "content" in completion_data and completion_data["content"]:
             # Check if there's tool use in the response
             tool_use = None
@@ -213,7 +224,7 @@ Your response must be valid JSON that follows the above schema."""
                     tool_use = content_item
                 elif content_item.get("type") == "text":
                     response_text = content_item.get("text", "")
-            
+
             # If we got structured data via tool use
             if tool_use and "input" in tool_use:
                 structured_data = tool_use["input"]
@@ -222,7 +233,8 @@ Your response must be valid JSON that follows the above schema."""
                 try:
                     # Try to extract JSON from the response text
                     import re
-                    json_pattern = r'```json\s*([\s\S]*?)\s*```|^\s*({[\s\S]*})\s*$'
+
+                    json_pattern = r"```json\s*([\s\S]*?)\s*```|^\s*({[\s\S]*})\s*$"
                     json_match = re.search(json_pattern, response_text)
 
                     if json_match:
@@ -251,9 +263,9 @@ Your response must be valid JSON that follows the above schema."""
             {
                 "prompt_tokens": completion_data["usage"]["input_tokens"],
                 "completion_tokens": completion_data["usage"]["output_tokens"],
-                "total_duration": duration_ms
+                "total_duration": duration_ms,
             },
-            model=model
+            model=model,
         )
 
         if self.debug:
@@ -264,30 +276,29 @@ Your response must be valid JSON that follows the above schema."""
             else:
                 logger.debug("No response text or structured data")
             logger.debug("Usage metrics: %s", usage.to_dict())
-        
-        return Response(
-            response_text=response_text,
-            structured_data=structured_data,
-            usage=usage
-        )
+
+        return Response(response_text=response_text, structured_data=structured_data, usage=usage)
+
 
 # Create default client instance
 client = AnthropicClient(debug=False)  # Set to True to enable debug logging
 
+
 # Expose key functions at module level for API compatibility
 def warm_model(model: str) -> bool:
     return client.warm_model(model)
+
 
 def generate_chat(
     prompt: str,
     model: str = DEFAULT_MODEL,
     brief: bool = False,
     json_schema: Optional[Any] = None,
-    context: Optional[str] = None
+    context: Optional[str] = None,
 ) -> Response:
     """
     Generate a chat response using Anthropic API.
-    
+
     Args:
         prompt: The main prompt/question
         model: Model to use for generation
@@ -302,10 +313,11 @@ def generate_chat(
     """
     return client.generate_chat(prompt, model, brief, json_schema, context)
 
+
 def set_system_prompt(system_prompt: str) -> None:
     """
     Set a new default system prompt for the default client.
-    
+
     Args:
         system_prompt: New default system prompt to use
     """

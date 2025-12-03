@@ -17,7 +17,7 @@ def add_sentence_word(
     target_language_text: Optional[str] = None,
     grammatical_form: Optional[str] = None,
     grammatical_case: Optional[str] = None,
-    declined_form: Optional[str] = None
+    declined_form: Optional[str] = None,
 ) -> SentenceWord:
     """Add a word usage record to a sentence.
 
@@ -47,7 +47,7 @@ def add_sentence_word(
         target_language_text=target_language_text,
         grammatical_form=grammatical_form,
         grammatical_case=grammatical_case,
-        declined_form=declined_form
+        declined_form=declined_form,
     )
     session.add(sentence_word)
     session.flush()
@@ -55,9 +55,7 @@ def add_sentence_word(
 
 
 def get_sentence_words(
-    session: Session,
-    sentence_id: int,
-    include_lemmas: bool = True
+    session: Session, sentence_id: int, include_lemmas: bool = True
 ) -> List[SentenceWord]:
     """Get all words for a sentence, ordered by position.
 
@@ -69,9 +67,7 @@ def get_sentence_words(
     Returns:
         List of SentenceWord objects ordered by position
     """
-    query = session.query(SentenceWord).filter(
-        SentenceWord.sentence_id == sentence_id
-    )
+    query = session.query(SentenceWord).filter(SentenceWord.sentence_id == sentence_id)
 
     if include_lemmas:
         query = query.options(joinedload(SentenceWord.lemma))
@@ -79,10 +75,7 @@ def get_sentence_words(
     return query.order_by(SentenceWord.position).all()
 
 
-def get_lemmas_for_sentence(
-    session: Session,
-    sentence_id: int
-) -> List[Lemma]:
+def get_lemmas_for_sentence(session: Session, sentence_id: int) -> List[Lemma]:
     """Get all lemmas (vocabulary words) used in a sentence.
 
     Args:
@@ -92,10 +85,12 @@ def get_lemmas_for_sentence(
     Returns:
         List of Lemma objects (excludes words without lemma_id)
     """
-    sentence_words = session.query(SentenceWord).filter(
-        SentenceWord.sentence_id == sentence_id,
-        SentenceWord.lemma_id.isnot(None)
-    ).options(joinedload(SentenceWord.lemma)).all()
+    sentence_words = (
+        session.query(SentenceWord)
+        .filter(SentenceWord.sentence_id == sentence_id, SentenceWord.lemma_id.isnot(None))
+        .options(joinedload(SentenceWord.lemma))
+        .all()
+    )
 
     return [sw.lemma for sw in sentence_words if sw.lemma]
 
@@ -109,7 +104,7 @@ def update_sentence_word(
     target_language_text: Optional[str] = None,
     grammatical_form: Optional[str] = None,
     grammatical_case: Optional[str] = None,
-    declined_form: Optional[str] = None
+    declined_form: Optional[str] = None,
 ) -> SentenceWord:
     """Update a sentence word record.
 
@@ -145,10 +140,7 @@ def update_sentence_word(
     return sentence_word
 
 
-def delete_sentence_word(
-    session: Session,
-    sentence_word: SentenceWord
-) -> None:
+def delete_sentence_word(session: Session, sentence_word: SentenceWord) -> None:
     """Delete a sentence word record.
 
     Args:
@@ -158,10 +150,7 @@ def delete_sentence_word(
     session.delete(sentence_word)
 
 
-def find_lemma_by_guid(
-    session: Session,
-    guid: str
-) -> Optional[Lemma]:
+def find_lemma_by_guid(session: Session, guid: str) -> Optional[Lemma]:
     """Find a lemma by its GUID.
 
     Helper function for linking sentence words to lemmas during import.

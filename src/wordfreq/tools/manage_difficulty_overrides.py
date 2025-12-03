@@ -31,11 +31,13 @@ from wordfreq.storage.crud.difficulty_override import (
     get_all_overrides_for_lemma,
     get_all_overrides_for_language,
     delete_difficulty_override,
-    get_effective_difficulty_level
+    get_effective_difficulty_level,
 )
 
 
-def set_override(session, guid: str, language_code: str, difficulty_level: int, notes: Optional[str] = None):
+def set_override(
+    session, guid: str, language_code: str, difficulty_level: int, notes: Optional[str] = None
+):
     """Set a difficulty override for a lemma by GUID."""
     # Find lemma by GUID
     lemma = session.query(Lemma).filter(Lemma.guid == guid).first()
@@ -49,7 +51,7 @@ def set_override(session, guid: str, language_code: str, difficulty_level: int, 
         lemma_id=lemma.id,
         language_code=language_code,
         difficulty_level=difficulty_level,
-        notes=notes
+        notes=notes,
     )
 
     session.commit()
@@ -84,7 +86,9 @@ def view_override(session, guid: str):
 
     print("   Language-specific overrides:")
     for override in overrides:
-        status = "EXCLUDED" if override.difficulty_level == -1 else f"Level {override.difficulty_level}"
+        status = (
+            "EXCLUDED" if override.difficulty_level == -1 else f"Level {override.difficulty_level}"
+        )
         print(f"   - {override.language_code}: {status}")
         if override.notes:
             print(f"     Notes: {override.notes}")
@@ -108,10 +112,18 @@ def view_language_overrides(session, language_code: str, limit: int = 50):
     for i, override in enumerate(overrides[:limit]):
         lemma = session.query(Lemma).filter(Lemma.id == override.lemma_id).first()
         if lemma:
-            status = "EXCLUDED" if override.difficulty_level == -1 else str(override.difficulty_level)
-            word_text = lemma.lemma_text[:24] if len(lemma.lemma_text) <= 24 else lemma.lemma_text[:21] + "..."
+            status = (
+                "EXCLUDED" if override.difficulty_level == -1 else str(override.difficulty_level)
+            )
+            word_text = (
+                lemma.lemma_text[:24]
+                if len(lemma.lemma_text) <= 24
+                else lemma.lemma_text[:21] + "..."
+            )
             notes_text = (override.notes or "")[:29] if override.notes else ""
-            print(f"   {lemma.guid:<15} {word_text:<25} {lemma.difficulty_level or 'N/A':<8} {status:<10} {notes_text:<30}")
+            print(
+                f"   {lemma.guid:<15} {word_text:<25} {lemma.difficulty_level or 'N/A':<8} {status:<10} {notes_text:<30}"
+            )
 
 
 def remove_override(session, guid: str, language_code: str):
@@ -180,7 +192,7 @@ def bulk_import_csv(session, csv_path: str):
                     lemma_id=lemma.id,
                     language_code=language_code,
                     difficulty_level=difficulty_level,
-                    notes=notes
+                    notes=notes,
                 )
                 import_count += 1
             except Exception as e:
@@ -202,19 +214,23 @@ def export_to_csv(session, language_code: Optional[str], output_path: str):
 
     with open(output_path, "w", encoding="utf-8", newline="") as f:
         writer = csv.writer(f)
-        writer.writerow(["guid", "word", "language_code", "default_level", "override_level", "notes"])
+        writer.writerow(
+            ["guid", "word", "language_code", "default_level", "override_level", "notes"]
+        )
 
         for override in overrides:
             lemma = session.query(Lemma).filter(Lemma.id == override.lemma_id).first()
             if lemma:
-                writer.writerow([
-                    lemma.guid,
-                    lemma.lemma_text,
-                    override.language_code,
-                    lemma.difficulty_level or "",
-                    override.difficulty_level,
-                    override.notes or ""
-                ])
+                writer.writerow(
+                    [
+                        lemma.guid,
+                        lemma.lemma_text,
+                        override.language_code,
+                        lemma.difficulty_level or "",
+                        override.difficulty_level,
+                        override.notes or "",
+                    ]
+                )
 
     print(f"✅ Exported {len(overrides)} overrides to {output_path}")
 
@@ -242,7 +258,7 @@ Examples:
 
   # Export overrides to CSV
   %(prog)s export --language zh --output zh_overrides.csv
-        """
+        """,
     )
 
     parser.add_argument("--db-path", help="Database path (uses default if not specified)")
@@ -287,7 +303,9 @@ Examples:
 
     # Create database session
     try:
-        session = create_database_session(args.db_path) if args.db_path else create_database_session()
+        session = (
+            create_database_session(args.db_path) if args.db_path else create_database_session()
+        )
         print("✅ Connected to wordfreq database")
     except Exception as e:
         print(f"❌ Failed to connect to database: {e}")
@@ -309,6 +327,7 @@ Examples:
     except Exception as e:
         print(f"❌ Error: {e}")
         import traceback
+
         traceback.print_exc()
     finally:
         session.close()

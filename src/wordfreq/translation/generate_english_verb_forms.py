@@ -6,7 +6,7 @@ from wordfreq.translation.language_forms.english import VERB_FORM_MAPPING
 from wordfreq.translation.generate_forms_base import (
     FormGenerationConfig,
     get_lemmas_without_translation,
-    run_form_generation
+    run_form_generation,
 )
 
 CONFIG = FormGenerationConfig(
@@ -17,7 +17,7 @@ CONFIG = FormGenerationConfig(
     client_method_name="query_english_verb_conjugations",
     min_forms_threshold=3,
     base_form_identifier="1s_pres",
-    use_legacy_translation=False
+    use_legacy_translation=False,
 )
 
 

@@ -5,7 +5,13 @@ from typing import Optional
 from wordfreq.storage.models.schema import WordToken, WordFrequency, Corpus
 
 
-def add_word_frequency(session, word_token: WordToken, corpus_name: str, rank: Optional[int] = None, frequency: Optional[float] = None) -> WordFrequency:
+def add_word_frequency(
+    session,
+    word_token: WordToken,
+    corpus_name: str,
+    rank: Optional[int] = None,
+    frequency: Optional[float] = None,
+) -> WordFrequency:
     """Add word frequency data for a word token in a specific corpus."""
     # Get or create corpus
     corpus = session.query(Corpus).filter(Corpus.name == corpus_name).first()
@@ -15,10 +21,11 @@ def add_word_frequency(session, word_token: WordToken, corpus_name: str, rank: O
         session.flush()
 
     # Check if frequency already exists
-    existing = session.query(WordFrequency).filter(
-        WordFrequency.word_token_id == word_token.id,
-        WordFrequency.corpus_id == corpus.id
-    ).first()
+    existing = (
+        session.query(WordFrequency)
+        .filter(WordFrequency.word_token_id == word_token.id, WordFrequency.corpus_id == corpus.id)
+        .first()
+    )
 
     if existing:
         # Update existing frequency
@@ -31,10 +38,7 @@ def add_word_frequency(session, word_token: WordToken, corpus_name: str, rank: O
 
     # Create new frequency record
     word_freq = WordFrequency(
-        word_token_id=word_token.id,
-        corpus_id=corpus.id,
-        rank=rank,
-        frequency=frequency
+        word_token_id=word_token.id, corpus_id=corpus.id, rank=rank, frequency=frequency
     )
     session.add(word_freq)
     session.commit()

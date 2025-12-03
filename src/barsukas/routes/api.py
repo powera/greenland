@@ -18,24 +18,17 @@ def check_lemma_exists():
     pos_type = request.args.get("pos_type", "").strip()
 
     if not search:
-        return jsonify({
-            "exact_match": None,
-            "similar_matches": []
-        })
+        return jsonify({"exact_match": None, "similar_matches": []})
 
     # Check for exact match
-    exact_query = g.db.query(Lemma).filter(
-        func.lower(Lemma.lemma_text) == search.lower()
-    )
+    exact_query = g.db.query(Lemma).filter(func.lower(Lemma.lemma_text) == search.lower())
     if pos_type:
         exact_query = exact_query.filter(Lemma.pos_type == pos_type)
 
     exact_match = exact_query.first()
 
     # Find similar matches (case-insensitive LIKE search)
-    similar_query = g.db.query(Lemma).filter(
-        Lemma.lemma_text.ilike(f'%{search}%')
-    )
+    similar_query = g.db.query(Lemma).filter(Lemma.lemma_text.ilike(f"%{search}%"))
 
     # If exact match found, exclude it from similar matches
     if exact_match:
@@ -43,23 +36,29 @@ def check_lemma_exists():
 
     similar_matches = similar_query.limit(5).all()
 
-    return jsonify({
-        "exact_match": {
-            "id": exact_match.id,
-            "lemma_text": exact_match.lemma_text,
-            "pos_type": exact_match.pos_type,
-            "definition_text": exact_match.definition_text
-        } if exact_match else None,
-        "similar_matches": [
-            {
-                "id": lemma.id,
-                "lemma_text": lemma.lemma_text,
-                "pos_type": lemma.pos_type,
-                "definition_text": lemma.definition_text
-            }
-            for lemma in similar_matches
-        ]
-    })
+    return jsonify(
+        {
+            "exact_match": (
+                {
+                    "id": exact_match.id,
+                    "lemma_text": exact_match.lemma_text,
+                    "pos_type": exact_match.pos_type,
+                    "definition_text": exact_match.definition_text,
+                }
+                if exact_match
+                else None
+            ),
+            "similar_matches": [
+                {
+                    "id": lemma.id,
+                    "lemma_text": lemma.lemma_text,
+                    "pos_type": lemma.pos_type,
+                    "definition_text": lemma.definition_text,
+                }
+                for lemma in similar_matches
+            ],
+        }
+    )
 
 
 @bp.route("/auto_populate_lemma")
@@ -70,20 +69,13 @@ def auto_populate_lemma():
     lang_code = request.args.get("lang_code", "").strip()
 
     if not word:
-        return jsonify({
-            "success": False,
-            "error": "Word is required"
-        })
+        return jsonify({"success": False, "error": "Word is required"})
 
     try:
         # Use LLM to generate definition, POS type, and POS subtype
         from wordfreq.translation.client import LinguisticClient
 
-        client = LinguisticClient(
-            model="gpt-5-mini",
-            db_path=Config.DB_PATH,
-            debug=Config.DEBUG
-        )
+        client = LinguisticClient(model="gpt-5-mini", db_path=Config.DB_PATH, debug=Config.DEBUG)
 
         # Build prompt for LLM
         if translation and lang_code:
@@ -116,55 +108,48 @@ The definition should be suitable for language learners."""
             properties={
                 "definition": SchemaProperty(
                     type="string",
-                    description="Clear, concise definition of the word (1-2 sentences)"
+                    description="Clear, concise definition of the word (1-2 sentences)",
                 ),
-                "pos_type": SchemaProperty(
-                    type="string",
-                    description="Part of speech type"
-                ),
-                "pos_subtype": SchemaProperty(
-                    type="string",
-                    description="Part of speech subtype"
-                )
-            }
+                "pos_type": SchemaProperty(type="string", description="Part of speech type"),
+                "pos_subtype": SchemaProperty(type="string", description="Part of speech subtype"),
+            },
         )
 
         response = client.client.generate_chat(
-            prompt=prompt,
-            model="gpt-5-mini",
-            json_schema=schema,
-            timeout=30
+            prompt=prompt, model="gpt-5-mini", json_schema=schema, timeout=30
         )
 
         if not response.structured_data:
-            return jsonify({
-                "success": False,
-                "error": "Failed to get structured response from LLM"
-            })
+            return jsonify(
+                {"success": False, "error": "Failed to get structured response from LLM"}
+            )
 
         result = response.structured_data
 
         # Get the maximum difficulty level for this pos_subtype
         max_level = None
         if result.get("pos_subtype"):
-            max_level_query = g.db.query(func.max(Lemma.difficulty_level)).filter(
-                Lemma.pos_subtype == result["pos_subtype"],
-                Lemma.difficulty_level.isnot(None),
-                Lemma.difficulty_level != -1  # Exclude "excluded" words
-            ).scalar()
+            max_level_query = (
+                g.db.query(func.max(Lemma.difficulty_level))
+                .filter(
+                    Lemma.pos_subtype == result["pos_subtype"],
+                    Lemma.difficulty_level.isnot(None),
+                    Lemma.difficulty_level != -1,  # Exclude "excluded" words
+                )
+                .scalar()
+            )
             if max_level_query:
                 max_level = int(max_level_query)
 
-        return jsonify({
-            "success": True,
-            "definition": result.get("definition", ""),
-            "pos_type": result.get("pos_type", ""),
-            "pos_subtype": result.get("pos_subtype", ""),
-            "suggested_difficulty_level": max_level
-        })
+        return jsonify(
+            {
+                "success": True,
+                "definition": result.get("definition", ""),
+                "pos_type": result.get("pos_type", ""),
+                "pos_subtype": result.get("pos_subtype", ""),
+                "suggested_difficulty_level": max_level,
+            }
+        )
 
     except Exception as e:
-        return jsonify({
-            "success": False,
-            "error": str(e)
-        })
+        return jsonify({"success": False, "error": str(e)})

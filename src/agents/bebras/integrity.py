@@ -13,9 +13,7 @@ from typing import Dict, List, Optional
 
 import constants
 from wordfreq.storage.database import create_database_session
-from wordfreq.storage.models.schema import (
-    Lemma, WordToken, DerivativeForm, Corpus, WordFrequency
-)
+from wordfreq.storage.models.schema import Lemma, WordToken, DerivativeForm, Corpus, WordFrequency
 
 logger = logging.getLogger(__name__)
 
@@ -56,7 +54,7 @@ class IntegrityChecker:
                     "id": form.id,
                     "derivative_form_text": form.derivative_form_text,
                     "language_code": form.language_code,
-                    "invalid_lemma_id": form.lemma_id
+                    "invalid_lemma_id": form.lemma_id,
                 }
                 for form in derivative_forms
                 if form.lemma_id not in valid_lemma_ids
@@ -67,17 +65,12 @@ class IntegrityChecker:
             return {
                 "total_checked": len(derivative_forms),
                 "orphaned_count": len(orphaned),
-                "orphaned_forms": orphaned
+                "orphaned_forms": orphaned,
             }
 
         except Exception as e:
             logger.error(f"Error checking orphaned derivative forms: {e}")
-            return {
-                "error": str(e),
-                "total_checked": 0,
-                "orphaned_count": 0,
-                "orphaned_forms": []
-            }
+            return {"error": str(e), "total_checked": 0, "orphaned_count": 0, "orphaned_forms": []}
         finally:
             session.close()
 
@@ -87,12 +80,15 @@ class IntegrityChecker:
 
         session = self.get_session()
         try:
-            word_tokens_dict = {token_id: token_text for token_id, token_text in session.query(WordToken.id, WordToken.token).all()}
+            word_tokens_dict = {
+                token_id: token_text
+                for token_id, token_text in session.query(WordToken.id, WordToken.token).all()
+            }
             logger.info(f"Found {len(word_tokens_dict)} valid word tokens")
 
-            derivative_forms = session.query(DerivativeForm).filter(
-                DerivativeForm.word_token_id.isnot(None)
-            ).all()
+            derivative_forms = (
+                session.query(DerivativeForm).filter(DerivativeForm.word_token_id.isnot(None)).all()
+            )
 
             issues = []
             for form in derivative_forms:
@@ -107,31 +103,28 @@ class IntegrityChecker:
                     )
 
                 if form_issues:
-                    issues.append({
-                        "id": form.id,
-                        "derivative_form_text": form.derivative_form_text,
-                        "word_token_id": form.word_token_id,
-                        "lemma_id": form.lemma_id,
-                        "language_code": form.language_code,
-                        "issues": form_issues
-                    })
+                    issues.append(
+                        {
+                            "id": form.id,
+                            "derivative_form_text": form.derivative_form_text,
+                            "word_token_id": form.word_token_id,
+                            "lemma_id": form.lemma_id,
+                            "language_code": form.language_code,
+                            "issues": form_issues,
+                        }
+                    )
 
             logger.info(f"Found {len(issues)} derivative forms with word token issues")
 
             return {
                 "total_checked": len(derivative_forms),
                 "issue_count": len(issues),
-                "issues": issues
+                "issues": issues,
             }
 
         except Exception as e:
             logger.error(f"Error checking derivative form word tokens: {e}")
-            return {
-                "error": str(e),
-                "total_checked": 0,
-                "issue_count": 0,
-                "issues": []
-            }
+            return {"error": str(e), "total_checked": 0, "issue_count": 0, "issues": []}
         finally:
             session.close()
 
@@ -144,7 +137,9 @@ class IntegrityChecker:
             valid_token_ids = set(token_id for token_id, in session.query(WordToken.id).all())
             valid_corpus_ids = set(corpus_id for corpus_id, in session.query(Corpus.id).all())
 
-            logger.info(f"Found {len(valid_token_ids)} valid token IDs and {len(valid_corpus_ids)} valid corpus IDs")
+            logger.info(
+                f"Found {len(valid_token_ids)} valid token IDs and {len(valid_corpus_ids)} valid corpus IDs"
+            )
 
             frequencies = session.query(WordFrequency).all()
             orphaned = []
@@ -157,19 +152,21 @@ class IntegrityChecker:
                     issues.append(f"invalid_corpus_id: {freq.corpus_id}")
 
                 if issues:
-                    orphaned.append({
-                        "id": freq.id,
-                        "word_token_id": freq.word_token_id,
-                        "corpus_id": freq.corpus_id,
-                        "issues": issues
-                    })
+                    orphaned.append(
+                        {
+                            "id": freq.id,
+                            "word_token_id": freq.word_token_id,
+                            "corpus_id": freq.corpus_id,
+                            "issues": issues,
+                        }
+                    )
 
             logger.info(f"Found {len(orphaned)} orphaned word frequencies")
 
             return {
                 "total_checked": len(frequencies),
                 "orphaned_count": len(orphaned),
-                "orphaned_frequencies": orphaned
+                "orphaned_frequencies": orphaned,
             }
 
         except Exception as e:
@@ -178,7 +175,7 @@ class IntegrityChecker:
                 "error": str(e),
                 "total_checked": 0,
                 "orphaned_count": 0,
-                "orphaned_frequencies": []
+                "orphaned_frequencies": [],
             }
         finally:
             session.close()
@@ -192,42 +189,53 @@ class IntegrityChecker:
             issues = []
 
             # Check Lemmas for missing fields
-            for lemma in session.query(Lemma).filter(
-                (Lemma.definition_text.is_(None)) | (Lemma.definition_text == "")
-            ).all():
-                issues.append({
-                    "table": "lemmas",
-                    "id": lemma.id,
-                    "guid": lemma.guid,
-                    "lemma_text": lemma.lemma_text,
-                    "missing_field": "definition_text",
-                    "severity": "high"
-                })
+            for lemma in (
+                session.query(Lemma)
+                .filter((Lemma.definition_text.is_(None)) | (Lemma.definition_text == ""))
+                .all()
+            ):
+                issues.append(
+                    {
+                        "table": "lemmas",
+                        "id": lemma.id,
+                        "guid": lemma.guid,
+                        "lemma_text": lemma.lemma_text,
+                        "missing_field": "definition_text",
+                        "severity": "high",
+                    }
+                )
 
-            for lemma in session.query(Lemma).filter(
-                (Lemma.pos_type.is_(None)) | (Lemma.pos_type == "")
-            ).all():
-                issues.append({
-                    "table": "lemmas",
-                    "id": lemma.id,
-                    "guid": lemma.guid,
-                    "lemma_text": lemma.lemma_text,
-                    "missing_field": "pos_type",
-                    "severity": "high"
-                })
+            for lemma in (
+                session.query(Lemma)
+                .filter((Lemma.pos_type.is_(None)) | (Lemma.pos_type == ""))
+                .all()
+            ):
+                issues.append(
+                    {
+                        "table": "lemmas",
+                        "id": lemma.id,
+                        "guid": lemma.guid,
+                        "lemma_text": lemma.lemma_text,
+                        "missing_field": "pos_type",
+                        "severity": "high",
+                    }
+                )
 
-            for lemma in session.query(Lemma).filter(
-                Lemma.guid.isnot(None),
-                Lemma.difficulty_level.is_(None)
-            ).all():
-                issues.append({
-                    "table": "lemmas",
-                    "id": lemma.id,
-                    "guid": lemma.guid,
-                    "lemma_text": lemma.lemma_text,
-                    "missing_field": "difficulty_level",
-                    "severity": "medium"
-                })
+            for lemma in (
+                session.query(Lemma)
+                .filter(Lemma.guid.isnot(None), Lemma.difficulty_level.is_(None))
+                .all()
+            ):
+                issues.append(
+                    {
+                        "table": "lemmas",
+                        "id": lemma.id,
+                        "guid": lemma.guid,
+                        "lemma_text": lemma.lemma_text,
+                        "missing_field": "difficulty_level",
+                        "severity": "medium",
+                    }
+                )
 
             logger.info(f"Found {len(issues)} records with missing required fields")
 
@@ -239,7 +247,7 @@ class IntegrityChecker:
                 "high_severity_count": len(high_severity),
                 "medium_severity_count": len(medium_severity),
                 "high_severity_issues": high_severity,
-                "medium_severity_issues": medium_severity
+                "medium_severity_issues": medium_severity,
             }
 
         except Exception as e:
@@ -250,7 +258,7 @@ class IntegrityChecker:
                 "high_severity_count": 0,
                 "medium_severity_count": 0,
                 "high_severity_issues": [],
-                "medium_severity_issues": []
+                "medium_severity_issues": [],
             }
         finally:
             session.close()
@@ -262,7 +270,9 @@ class IntegrityChecker:
         session = self.get_session()
         try:
             all_lemma_ids = set(lemma.id for lemma in session.query(Lemma).all())
-            lemmas_with_forms = set(lemma_id for lemma_id, in session.query(DerivativeForm.lemma_id).distinct().all())
+            lemmas_with_forms = set(
+                lemma_id for lemma_id, in session.query(DerivativeForm.lemma_id).distinct().all()
+            )
             lemmas_without_forms_ids = all_lemma_ids - lemmas_with_forms
 
             lemmas_without_forms = [
@@ -271,7 +281,7 @@ class IntegrityChecker:
                     "guid": lemma.guid,
                     "lemma_text": lemma.lemma_text,
                     "pos_type": lemma.pos_type,
-                    "difficulty_level": lemma.difficulty_level
+                    "difficulty_level": lemma.difficulty_level,
                 }
                 for lemma_id in lemmas_without_forms_ids
                 if (lemma := session.query(Lemma).filter(Lemma.id == lemma_id).first())
@@ -282,7 +292,7 @@ class IntegrityChecker:
             return {
                 "total_lemmas": len(all_lemma_ids),
                 "without_forms_count": len(lemmas_without_forms),
-                "lemmas_without_forms": lemmas_without_forms
+                "lemmas_without_forms": lemmas_without_forms,
             }
 
         except Exception as e:
@@ -291,7 +301,7 @@ class IntegrityChecker:
                 "error": str(e),
                 "total_lemmas": 0,
                 "without_forms_count": 0,
-                "lemmas_without_forms": []
+                "lemmas_without_forms": [],
             }
         finally:
             session.close()
@@ -304,16 +314,13 @@ class IntegrityChecker:
         try:
             from sqlalchemy import func
 
-            guid_counts = session.query(
-                Lemma.guid,
-                func.count(Lemma.id).label("count")
-            ).filter(
-                Lemma.guid.isnot(None)
-            ).group_by(
-                Lemma.guid
-            ).having(
-                func.count(Lemma.id) > 1
-            ).all()
+            guid_counts = (
+                session.query(Lemma.guid, func.count(Lemma.id).label("count"))
+                .filter(Lemma.guid.isnot(None))
+                .group_by(Lemma.guid)
+                .having(func.count(Lemma.id) > 1)
+                .all()
+            )
 
             duplicates = []
             for guid, count in guid_counts:
@@ -326,27 +333,20 @@ class IntegrityChecker:
                             "id": lemma.id,
                             "lemma_text": lemma.lemma_text,
                             "pos_type": lemma.pos_type,
-                            "difficulty_level": lemma.difficulty_level
+                            "difficulty_level": lemma.difficulty_level,
                         }
                         for lemma in lemmas
-                    ]
+                    ],
                 }
                 duplicates.append(duplicate_entry)
 
             logger.info(f"Found {len(duplicates)} duplicate GUIDs")
 
-            return {
-                "duplicate_count": len(duplicates),
-                "duplicates": duplicates
-            }
+            return {"duplicate_count": len(duplicates), "duplicates": duplicates}
 
         except Exception as e:
             logger.error(f"Error checking duplicate GUIDs: {e}")
-            return {
-                "error": str(e),
-                "duplicate_count": 0,
-                "duplicates": []
-            }
+            return {"error": str(e), "duplicate_count": 0, "duplicates": []}
         finally:
             session.close()
 
@@ -356,35 +356,32 @@ class IntegrityChecker:
 
         session = self.get_session()
         try:
-            invalid_lemmas = session.query(Lemma).filter(
-                Lemma.difficulty_level.isnot(None),
-                ((Lemma.difficulty_level < 1) | (Lemma.difficulty_level > 20))
-            ).all()
+            invalid_lemmas = (
+                session.query(Lemma)
+                .filter(
+                    Lemma.difficulty_level.isnot(None),
+                    ((Lemma.difficulty_level < 1) | (Lemma.difficulty_level > 20)),
+                )
+                .all()
+            )
 
             invalid_entries = [
                 {
                     "id": lemma.id,
                     "guid": lemma.guid,
                     "lemma_text": lemma.lemma_text,
-                    "invalid_level": lemma.difficulty_level
+                    "invalid_level": lemma.difficulty_level,
                 }
                 for lemma in invalid_lemmas
             ]
 
             logger.info(f"Found {len(invalid_entries)} lemmas with invalid difficulty levels")
 
-            return {
-                "invalid_count": len(invalid_entries),
-                "invalid_entries": invalid_entries
-            }
+            return {"invalid_count": len(invalid_entries), "invalid_entries": invalid_entries}
 
         except Exception as e:
             logger.error(f"Error checking invalid difficulty levels: {e}")
-            return {
-                "error": str(e),
-                "invalid_count": 0,
-                "invalid_entries": []
-            }
+            return {"error": str(e), "invalid_count": 0, "invalid_entries": []}
         finally:
             session.close()
 
@@ -403,8 +400,8 @@ class IntegrityChecker:
                 "missing_required_fields": self.check_missing_required_fields(),
                 "lemmas_without_derivatives": self.check_lemmas_without_derivatives(),
                 "duplicate_guids": self.check_duplicate_guids(),
-                "invalid_difficulty_levels": self.check_invalid_difficulty_levels()
-            }
+                "invalid_difficulty_levels": self.check_invalid_difficulty_levels(),
+            },
         }
 
         end_time = datetime.now()
@@ -415,6 +412,7 @@ class IntegrityChecker:
 
         if output_file:
             import json
+
             try:
                 with open(output_file, "w", encoding="utf-8") as f:
                     json.dump(results, f, indent=2, ensure_ascii=False)
@@ -436,8 +434,12 @@ class IntegrityChecker:
         checks = results["checks"]
 
         logger.info("ORPHANED RECORDS:")
-        logger.info(f"  Derivative forms (invalid lemma_id): {checks['orphaned_derivative_forms']['orphaned_count']}")
-        logger.info(f"  Derivative forms (invalid/mismatched word_token): {checks['derivative_form_word_tokens']['issue_count']}")
+        logger.info(
+            f"  Derivative forms (invalid lemma_id): {checks['orphaned_derivative_forms']['orphaned_count']}"
+        )
+        logger.info(
+            f"  Derivative forms (invalid/mismatched word_token): {checks['derivative_form_word_tokens']['issue_count']}"
+        )
         logger.info(f"  Word frequencies: {checks['orphaned_word_frequencies']['orphaned_count']}")
         logger.info("")
 
@@ -459,13 +461,13 @@ class IntegrityChecker:
         logger.info(f"  Count: {checks['invalid_difficulty_levels']['invalid_count']}")
 
         total_issues = (
-            checks["orphaned_derivative_forms"]["orphaned_count"] +
-            checks["derivative_form_word_tokens"]["issue_count"] +
-            checks["orphaned_word_frequencies"]["orphaned_count"] +
-            missing_fields["total_issues"] +
-            checks["lemmas_without_derivatives"]["without_forms_count"] +
-            checks["duplicate_guids"]["duplicate_count"] +
-            checks["invalid_difficulty_levels"]["invalid_count"]
+            checks["orphaned_derivative_forms"]["orphaned_count"]
+            + checks["derivative_form_word_tokens"]["issue_count"]
+            + checks["orphaned_word_frequencies"]["orphaned_count"]
+            + missing_fields["total_issues"]
+            + checks["lemmas_without_derivatives"]["without_forms_count"]
+            + checks["duplicate_guids"]["duplicate_count"]
+            + checks["invalid_difficulty_levels"]["invalid_count"]
         )
 
         logger.info("")
@@ -475,17 +477,23 @@ class IntegrityChecker:
 
 def get_argument_parser():
     """Return the argument parser for introspection."""
-    parser = argparse.ArgumentParser(
-        description="Bebras Database Integrity Checker"
-    )
+    parser = argparse.ArgumentParser(description="Bebras Database Integrity Checker")
     parser.add_argument("--db-path", help="Database path (uses default if not specified)")
     parser.add_argument("--debug", action="store_true", help="Enable debug logging")
     parser.add_argument("--output", help="Output JSON file for report")
-    parser.add_argument("--check",
-                       choices=["orphaned", "missing-fields", "no-derivatives",
-                               "duplicates", "invalid-levels", "all"],
-                       default="all",
-                       help="Which check to run (default: all)")
+    parser.add_argument(
+        "--check",
+        choices=[
+            "orphaned",
+            "missing-fields",
+            "no-derivatives",
+            "duplicates",
+            "invalid-levels",
+            "all",
+        ],
+        default="all",
+        help="Which check to run (default: all)",
+    )
 
     return parser
 
@@ -501,21 +509,27 @@ def main():
         results = {
             "derivative_forms": checker.check_orphaned_derivative_forms(),
             "derivative_form_word_tokens": checker.check_derivative_form_word_tokens(),
-            "word_frequencies": checker.check_orphaned_word_frequencies()
+            "word_frequencies": checker.check_orphaned_word_frequencies(),
         }
-        total = (results["derivative_forms"]["orphaned_count"] +
-                results["derivative_form_word_tokens"]["issue_count"] +
-                results["word_frequencies"]["orphaned_count"])
+        total = (
+            results["derivative_forms"]["orphaned_count"]
+            + results["derivative_form_word_tokens"]["issue_count"]
+            + results["word_frequencies"]["orphaned_count"]
+        )
         print(f"\nTotal orphaned records: {total}")
 
     elif args.check == "missing-fields":
         results = checker.check_missing_required_fields()
-        print(f"\nMissing required fields: {results['total_issues']} " +
-              f"(High: {results['high_severity_count']}, Medium: {results['medium_severity_count']})")
+        print(
+            f"\nMissing required fields: {results['total_issues']} "
+            + f"(High: {results['high_severity_count']}, Medium: {results['medium_severity_count']})"
+        )
 
     elif args.check == "no-derivatives":
         results = checker.check_lemmas_without_derivatives()
-        print(f"\nLemmas without derivative forms: {results['without_forms_count']} out of {results['total_lemmas']}")
+        print(
+            f"\nLemmas without derivative forms: {results['without_forms_count']} out of {results['total_lemmas']}"
+        )
 
     elif args.check == "duplicates":
         results = checker.check_duplicate_guids()

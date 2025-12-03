@@ -10,16 +10,19 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 
 from benchmarks.datastore.common import (
-    Base, Model, create_dev_session,
-    create_database_and_session, decode_json
+    Base,
+    Model,
+    create_dev_session,
+    create_database_and_session,
+    decode_json,
 )
 
-Model.benchmark_runs = relationship(
-    "Run", back_populates="model", lazy="noload"
-)
+Model.benchmark_runs = relationship("Run", back_populates="model", lazy="noload")
+
 
 class Benchmark(Base):
     """Benchmark definition."""
+
     __tablename__ = "benchmark"
     codename: Mapped[str] = mapped_column(String, primary_key=True)
     displayname: Mapped[str] = mapped_column(String, nullable=False)
@@ -31,8 +34,10 @@ class Benchmark(Base):
     runs: Mapped[List["Run"]] = relationship(back_populates="benchmark", lazy="noload")
     questions: Mapped[List["Question"]] = relationship(back_populates="benchmark")
 
+
 class Question(Base):
     """Benchmark question definition."""
+
     __tablename__ = "question"
 
     question_id: Mapped[str] = mapped_column(String, primary_key=True)
@@ -43,8 +48,10 @@ class Question(Base):
     benchmark: Mapped["Benchmark"] = relationship(back_populates="questions")
     run_details: Mapped[List["RunDetail"]] = relationship(back_populates="question", lazy="noload")
 
+
 class Run(Base):
     """Benchmark run results."""
+
     __tablename__ = "run"
     run_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     run_ts: Mapped[datetime.datetime] = mapped_column(
@@ -60,27 +67,28 @@ class Run(Base):
     benchmark: Mapped["Benchmark"] = relationship(back_populates="runs")
     run_details: Mapped[List["RunDetail"]] = relationship(back_populates="run", lazy="noload")
 
+
 class RunDetail(Base):
     """Detailed results for a benchmark run."""
+
     __tablename__ = "run_detail"
     run_id: Mapped[int] = mapped_column(ForeignKey("run.run_id"), primary_key=True)
     eval_msec: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     debug_json: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     thought_process: Mapped[Optional[str]] = mapped_column(String, nullable=True)  # Add this line
 
-    question_id: Mapped[str] = mapped_column(String, ForeignKey("question.question_id"), primary_key=True)
+    question_id: Mapped[str] = mapped_column(
+        String, ForeignKey("question.question_id"), primary_key=True
+    )
     score: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
 
     # Relationships
     run: Mapped["Run"] = relationship(back_populates="run_details")
     question: Mapped["Question"] = relationship(back_populates="run_details")
 
+
 def insert_benchmark(
-    session,
-    codename: str,
-    displayname: str,
-    description: str = None,
-    license_name: str = None
+    session, codename: str, displayname: str, description: str = None, license_name: str = None
 ) -> tuple[bool, str]:
     """Insert a new benchmark into the database.
 
@@ -96,7 +104,7 @@ def insert_benchmark(
             codename=codename,
             displayname=displayname,
             description=description,
-            license_name=license_name
+            license_name=license_name,
         )
         session.add(new_benchmark)
         session.commit()
@@ -109,11 +117,9 @@ def insert_benchmark(
         session.rollback()
         return False, f"Error inserting benchmark: {str(e)}"
 
+
 def insert_question(
-    session,
-    question_id: str,
-    benchmark_name: str,
-    question_info_json: str = None
+    session, question_id: str, benchmark_name: str, question_info_json: str = None
 ) -> tuple[bool, str]:
     """Insert a new question into the database.
 
@@ -127,7 +133,7 @@ def insert_question(
         new_question = Question(
             question_id=question_id,
             benchmark_name=benchmark_name,
-            question_info_json=question_info_json
+            question_info_json=question_info_json,
         )
         session.add(new_question)
         session.commit()
@@ -140,12 +146,13 @@ def insert_question(
         session.rollback()
         return False, f"Error inserting question: {str(e)}"
 
+
 def insert_run(
     session,
     model_name: str,
     benchmark_name: str,
     normed_score: int,
-    run_details: Optional[List[Dict]] = None
+    run_details: Optional[List[Dict]] = None,
 ) -> tuple[bool, Any]:
     """Insert a new run into the database.
 
@@ -161,7 +168,7 @@ def insert_run(
             model_name=model_name,
             benchmark_name=benchmark_name,
             normed_score=normed_score,
-            run_ts=func.current_timestamp()
+            run_ts=func.current_timestamp(),
         )
         session.add(new_run)
         session.flush()
@@ -174,7 +181,7 @@ def insert_run(
                     score=detail.get("score"),
                     eval_msec=detail.get("eval_msec"),
                     debug_json=detail.get("debug_json"),
-                    thought_process=detail.get("thought_process", None)
+                    thought_process=detail.get("thought_process", None),
                 )
                 session.add(run_detail)
 
@@ -188,9 +195,10 @@ def insert_run(
         session.rollback()
         return False, f"Error inserting run: {str(e)}"
 
+
 def list_all_benchmarks(session) -> List[Dict]:
     """List all benchmarks in the database.
-    
+
     :param session: SQLAlchemy session
     :return: List of benchmark details
     """
@@ -200,10 +208,11 @@ def list_all_benchmarks(session) -> List[Dict]:
             "codename": benchmark.codename,
             "displayname": benchmark.displayname,
             "description": benchmark.description,
-            "license_name": benchmark.license_name
+            "license_name": benchmark.license_name,
         }
         for benchmark in benchmarks
     ]
+
 
 def load_all_questions_for_benchmark(session, benchmark_name: str) -> List[Dict]:
     """Load all questions associated with a specific benchmark.
@@ -212,20 +221,17 @@ def load_all_questions_for_benchmark(session, benchmark_name: str) -> List[Dict]
     :param benchmark_name: Codename of the benchmark
     :return: List of questions with their details
     """
-    questions = (
-        session.query(Question)
-        .filter(Question.benchmark_name == benchmark_name)
-        .all()
-    )
-    
+    questions = session.query(Question).filter(Question.benchmark_name == benchmark_name).all()
+
     return [
         {
             "question_id": question.question_id,
             "benchmark_name": question.benchmark_name,
-            "question_info_json": question.question_info_json
-        } 
+            "question_info_json": question.question_info_json,
+        }
         for question in questions
     ]
+
 
 def get_run_by_run_id(run_id: int, session=None) -> Optional[Dict]:
     """Retrieve run details for a specific run ID.
@@ -237,11 +243,7 @@ def get_run_by_run_id(run_id: int, session=None) -> Optional[Dict]:
     if session is None:
         session = create_dev_session()
 
-    run = (
-        session.query(Run)
-        .filter(Run.run_id == run_id)
-        .first()
-    )
+    run = session.query(Run).filter(Run.run_id == run_id).first()
 
     if not run:
         return None
@@ -266,11 +268,12 @@ def get_run_by_run_id(run_id: int, session=None) -> Optional[Dict]:
                 "eval_msec": detail.eval_msec,
                 "question_info_json": decode_json(question.question_info_json),
                 "debug_json": decode_json(detail.debug_json),
-                "thought_process": detail.thought_process
+                "thought_process": detail.thought_process,
             }
             for detail, question in run_details
-        ]
+        ],
     }
+
 
 def get_highest_benchmark_scores(session) -> Dict:
     """Get the highest benchmark scores for each (benchmark, model) combination with run IDs.
@@ -279,29 +282,20 @@ def get_highest_benchmark_scores(session) -> Dict:
     :return: Dict with (benchmark, model) tuple as key and dict containing score and run_id as value
     """
     highest_scores = (
-        session.query(
-            Run.benchmark_name,
-            Run.model_name,
-            Run.normed_score,
-            Run.run_id
-        )
+        session.query(Run.benchmark_name, Run.model_name, Run.normed_score, Run.run_id)
         .order_by(Run.normed_score)
         .distinct(Run.benchmark_name, Run.model_name)
         .all()
     )
 
     return {
-        (run.benchmark_name, run.model_name): {
-            "score": run.normed_score,
-            "run_id": run.run_id
-        }
+        (run.benchmark_name, run.model_name): {"score": run.normed_score, "run_id": run.run_id}
         for run in highest_scores
     }
 
+
 def get_highest_scoring_run_details(
-    session,
-    model_name: str,
-    benchmark_name: str
+    session, model_name: str, benchmark_name: str
 ) -> Optional[Dict]:
     """Retrieve run details for the highest-scoring run for a specific (model, benchmark) pair.
 
@@ -339,8 +333,8 @@ def get_highest_scoring_run_details(
                 "score": detail.score,
                 "eval_msec": detail.eval_msec,
                 "question_info_json": decode_json(question.question_info_json),
-                "debug_json": decode_json(detail.debug_json)
+                "debug_json": decode_json(detail.debug_json),
             }
             for detail, question in run_details
-        ]
+        ],
     }
