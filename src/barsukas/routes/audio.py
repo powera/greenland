@@ -729,6 +729,26 @@ def quick_update(review_id):
         return jsonify({"error": str(e)}), 500
 
 
+@bp.route("/remove/<int:review_id>", methods=["POST"])
+def remove_file(review_id):
+    """Remove an audio file review record."""
+    review = g.db.query(AudioQualityReview).filter_by(id=review_id).first()
+
+    if not review:
+        flash("Audio review not found", "error")
+        return redirect(url_for("audio.list_files"))
+
+    try:
+        g.db.delete(review)
+        g.db.commit()
+        flash("Audio file record removed successfully", "success")
+        return redirect(url_for("audio.list_files"))
+    except Exception as e:
+        g.db.rollback()
+        flash(f"Error removing audio file: {str(e)}", "error")
+        return redirect(url_for("audio.review_file", review_id=review_id))
+
+
 @bp.route("/rapid-review")
 def rapid_review():
     """Streamlined rapid review interface with keyboard shortcuts."""

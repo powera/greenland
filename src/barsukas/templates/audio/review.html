@@ -214,7 +214,13 @@
                     <a href="{{ url_for('audio.list_files') }}" class="btn btn-secondary">
                         <i class="bi bi-x-circle"></i> Cancel
                     </a>
+                    <button type="button" class="btn btn-danger ms-auto" onclick="confirmRemove()">
+                        <i class="bi bi-trash"></i> Remove
+                    </button>
                 </div>
+            </form>
+            
+            <form id="remove-form" action="{{ url_for('audio.remove_file', review_id=review.id) }}" method="POST" style="display: none;">
             </form>
         </div>
     </div>
@@ -264,12 +270,24 @@ document.addEventListener('DOMContentLoaded', function() {
             form.requestSubmit();
         }
 
-        // N - Next (save and next)
         if (e.code === 'KeyN' && e.target.tagName !== 'TEXTAREA') {
             e.preventDefault();
             document.querySelector('[name="save_and_next"]').click();
         }
     });
+
+    window.confirmRemove = function() {
+        const currentStatus = "{{ review.status }}";
+        let message = "Are you sure you want to remove this file from the database?";
+        
+        if (currentStatus !== 'needs_replacement') {
+            message = "WARNING: This file is currently marked as '" + currentStatus + "' (not 'needs_replacement').\n\n" + message;
+        }
+        
+        if (confirm(message)) {
+            document.getElementById('remove-form').submit();
+        }
+    };
 });
 </script>
 {% endblock %}
