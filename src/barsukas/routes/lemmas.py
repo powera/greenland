@@ -23,6 +23,8 @@ bp = Blueprint("lemmas", __name__, url_prefix="/lemmas")
 def add_lemma():
     """Add a new lemma."""
     from flask import current_app
+    from wordfreq.storage.utils.enums import VALID_POS_TYPES, get_subtype_values_for_pos
+    import json
 
     if request.method == "POST":
         if current_app.config.get("READONLY", False):
@@ -149,7 +151,21 @@ def add_lemma():
 
         return redirect(url_for("lemmas.view_lemma", lemma_id=new_lemma.id))
 
-    return render_template("lemmas/add.html")
+    # For GET request, provide POS types and subtypes
+    pos_types = sorted(list(VALID_POS_TYPES))
+
+    # Build a mapping of POS type to subtypes for JavaScript
+    pos_subtypes_map = {}
+    for pos_type in pos_types:
+        subtypes = get_subtype_values_for_pos(pos_type)
+        if subtypes:
+            pos_subtypes_map[pos_type] = subtypes
+
+    return render_template(
+        "lemmas/add.html",
+        pos_types=pos_types,
+        pos_subtypes_map=json.dumps(pos_subtypes_map),
+    )
 
 
 @bp.route("/")
@@ -549,7 +565,26 @@ def edit_lemma(lemma_id):
     # Get difficulty level distribution for same POS type/subtype
     difficulty_stats = _get_difficulty_stats(g.db, lemma.pos_type, lemma.pos_subtype)
 
-    return render_template("lemmas/edit.html", lemma=lemma, difficulty_stats=difficulty_stats)
+    # Get POS types and subtypes for dropdowns
+    from wordfreq.storage.utils.enums import VALID_POS_TYPES, get_subtype_values_for_pos
+    import json
+
+    pos_types = sorted(list(VALID_POS_TYPES))
+
+    # Build a mapping of POS type to subtypes for JavaScript
+    pos_subtypes_map = {}
+    for pos_type in pos_types:
+        subtypes = get_subtype_values_for_pos(pos_type)
+        if subtypes:
+            pos_subtypes_map[pos_type] = subtypes
+
+    return render_template(
+        "lemmas/edit.html",
+        lemma=lemma,
+        difficulty_stats=difficulty_stats,
+        pos_types=pos_types,
+        pos_subtypes_map=json.dumps(pos_subtypes_map),
+    )
 
 
 def _get_difficulty_stats(session, pos_type, pos_subtype):
