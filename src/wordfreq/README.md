@@ -144,10 +144,6 @@ All LLM queries go through `clients.unified_client.UnifiedLLMClient` and use pro
   - Usage: `python json_to_database.py [path/to/nouns.json] [--no-update-difficulty]`
   - Migrates English/Lithuanian word pairs with GUIDs and difficulty levels
 
-- **`trakaido/verb_converter.py`** - Convert verbs to wireword export format
-  - Usage: `python verb_converter.py [--output path.json] [--verbose]`
-  - Generates JSON with Lithuanian verb conjugations organized by level
-
 ### Translation
 - **`translation/generate_lithuanian_noun_forms.py`** - Generate Lithuanian noun declensions
   - Batch generation of all 14 declension forms (7 cases × 2 numbers) for Lithuanian nouns

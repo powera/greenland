@@ -18,10 +18,8 @@ import constants
 from .word_manager import WordManager
 from .verb_manager import VerbManager
 from .export_manager import TrakaidoExporter
-from .bulk_import_verbs import bulk_import_verbs
 
 # from .noun_forms import generate_noun_forms_for_lemmas  # Function not implemented
-from wordfreq.trakaido.verb_converter import export_wireword_verbs
 
 
 def create_parser():
@@ -122,17 +120,6 @@ def create_parser():
     list_verbs_parser.add_argument("--subtype", help="Filter by verb subtype")
     list_verbs_parser.add_argument("--limit", type=int, default=50, help="Maximum results")
 
-    import_verbs_parser = subparsers.add_parser(
-        "import-verbs", help="Bulk import verbs from verbs.py file"
-    )
-    import_verbs_parser.add_argument(
-        "--language", choices=["lt"], default="lt", help="Language code (default: lt)"
-    )
-    import_verbs_parser.add_argument("--limit", type=int, help="Limit number of verbs to import")
-    import_verbs_parser.add_argument(
-        "--dry-run", action="store_true", help="Show what would be imported without saving"
-    )
-
     # Export commands
     export_parser = subparsers.add_parser("export", help="Export words to files")
     export_subparsers = export_parser.add_subparsers(dest="export_type", help="Export formats")
@@ -192,12 +179,6 @@ def create_parser():
     wireword_dir_parser.add_argument(
         "--output-dir", help="Base output directory (will create wireword subdirectory)"
     )
-
-    # Export wireword verbs
-    wireword_verbs_parser = export_subparsers.add_parser(
-        "wireword-verbs", help="Export verbs from verbs.py to WireWord JSON file"
-    )
-    wireword_verbs_parser.add_argument("--output", help="Output JSON file path")
 
     # Export all
     all_parser = export_subparsers.add_parser(
@@ -315,10 +296,6 @@ def handle_verb_commands(args, model="gpt-5-mini"):
         else:
             print("No verbs found matching criteria.")
         return True
-
-    elif args.command == "import-verbs":
-        results = bulk_import_verbs(language=args.language, limit=args.limit, dry_run=args.dry_run)
-        return results.get("success", False)
 
     return False
 
@@ -450,36 +427,6 @@ def handle_export_commands(args, manager, export_parser=None):
 
         return success
 
-    elif args.export_type == "wireword-verbs":
-        # Use default output path if not provided
-        output_path = args.output
-        if not output_path:
-            output_path = f"{GREENLAND_SRC_PATH}/../data/trakaido_wordlists/lang_lt/generated/wireword/wireword_verbs.json"
-
-        # Ensure directory exists
-        output_path = str(Path(output_path).resolve())
-        os.makedirs(os.path.dirname(output_path), exist_ok=True)
-
-        success, results = export_wireword_verbs(output_path)
-
-        if success:
-            print(f"\n✅ WireWord verbs export completed:")
-            print(f"   Total verbs: {results['total_verbs']}")
-            print(f"   Total grammatical forms: {results['total_forms']}")
-            print(f"   Levels: {results['levels']}")
-            print(f"   Level distribution: {results['level_distribution']}")
-            print(f"   Group distribution: {results['group_distribution']}")
-            print(f"   Output file: {results['output_path']}")
-
-            if results["skipped_verbs"]:
-                print(
-                    f"   Skipped verbs ({len(results['skipped_verbs'])}): {', '.join(results['skipped_verbs'])}"
-                )
-        else:
-            print(f"\n❌ WireWord verbs export failed: {results.get('error', 'Unknown error')}")
-
-        return success
-
     elif args.export_type == "all":
         # Use default paths if not provided
         json_path = args.json_output
@@ -523,7 +470,7 @@ def main():
     elif args.command in ["list", "subtypes"]:
         success = handle_list_commands(args, manager)
 
-    elif args.command in ["add-verb", "list-verbs", "import-verbs"]:
+    elif args.command in ["add-verb", "list-verbs"]:
         success = handle_verb_commands(
             args, model=args.model if hasattr(args, "model") else "gpt-5-mini"
         )
