@@ -1,0 +1,108 @@
+<!-- Lemma Details -->
+<div class="row mb-4">
+    <div class="col">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-book"></i> Lemma Details</span>
+                <a href="{{ url_for('lemmas.edit_lemma', lemma_id=lemma.id) }}" class="btn btn-sm btn-light">
+                    <i class="bi bi-pencil"></i> Edit
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <h3>
+                            {{ lemma.lemma_text }}
+                            {% if lemma.verified %}
+                                <i class="bi bi-check-circle-fill text-success" title="Verified"></i>
+                            {% endif %}
+                            {% if lemma.disambiguation %}
+                                <small class="text-muted">({{ lemma.disambiguation }})</small>
+                            {% endif %}
+                            {% if needs_disambiguation_check %}
+                            <form method="post" action="{{ url_for('agents.check_disambiguation', lemma_id=lemma.id) }}" style="display: inline;">
+                                <button type="submit" class="btn btn-sm btn-outline-warning" title="Other lemmas exist with this word - check if disambiguation is needed">
+                                    <i class="bi bi-exclamation-triangle"></i> Check Disambiguation
+                                </button>
+                            </form>
+                            {% endif %}
+                        </h3>
+                        <p class="lead lemma-definition">
+                            {{ lemma.definition_text }}
+                            <form method="post" action="{{ url_for('agents.check_definition', lemma_id=lemma.id) }}" style="display: inline;">
+                                <button type="submit" class="btn btn-sm btn-outline-primary" title="Check/improve definition using AI">
+                                    <i class="bi bi-robot"></i> Validate Definition
+                                </button>
+                            </form>
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <dl class="row">
+                            <dt class="col-sm-5">POS Type:</dt>
+                            <dd class="col-sm-7"><span class="badge bg-secondary">{{ lemma.pos_type }}</span></dd>
+
+                            {% if lemma.pos_subtype %}
+                                <dt class="col-sm-5">POS Subtype:</dt>
+                                <dd class="col-sm-7"><span class="badge bg-light text-dark">{{ lemma.pos_subtype }}</span></dd>
+                            {% endif %}
+
+                            <dt class="col-sm-5">GUID:</dt>
+                            <dd class="col-sm-7">
+                                {% if lemma.guid %}
+                                    <code>{{ lemma.guid }}</code>
+                                {% else %}
+                                    <span class="text-warning"><i class="bi bi-exclamation-triangle"></i> Not set</span>
+                                {% endif %}
+                            </dd>
+
+                            <dt class="col-sm-5">Base Difficulty:</dt>
+                            <dd class="col-sm-7">
+                                {% if lemma.difficulty_level is not none %}
+                                    {% if lemma.difficulty_level == -1 %}
+                                        <span class="badge bg-warning difficulty-badge">Excluded</span>
+                                    {% else %}
+                                        <span class="badge bg-info difficulty-badge">Level {{ lemma.difficulty_level }}</span>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="text-muted">Not set</span>
+                                {% endif %}
+                                {% if difficulty_stats %}
+                                    <br><small class="text-muted">
+                                        Levels for {{ lemma.pos_type }}{% if lemma.pos_subtype %} ({{ lemma.pos_subtype }}){% endif %}:
+                                        {% for level in range(-1, 21) %}
+                                            {% if level in difficulty_stats %}
+                                                {% if level == -1 %}
+                                                    <span class="badge bg-warning text-dark" title="{{ difficulty_stats[level] }} words" style="font-size: 0.7rem;">-1: {{ difficulty_stats[level] }}</span>
+                                                {% else %}
+                                                    <span class="badge bg-secondary" title="{{ difficulty_stats[level] }} words" style="font-size: 0.7rem;">{{ level }}: {{ difficulty_stats[level] }}</span>
+                                                {% endif %}
+                                            {% endif %}
+                                        {% endfor %}
+                                    </small>
+                                {% endif %}
+                            </dd>
+
+                            <dt class="col-sm-5">Confidence:</dt>
+                            <dd class="col-sm-7">{{ "%.2f"|format(lemma.confidence) }}</dd>
+
+                            {% if lemma.tags %}
+                                <dt class="col-sm-5">Tags:</dt>
+                                <dd class="col-sm-7"><code>{{ lemma.tags }}</code></dd>
+                            {% endif %}
+
+                            {% if lemma.notes %}
+                                <dt class="col-sm-5">Notes:</dt>
+                                <dd class="col-sm-7">{{ lemma.notes }}</dd>
+                            {% endif %}
+
+                            {% if lemma.disambiguation %}
+                                <dt class="col-sm-5">Disambiguation:</dt>
+                                <dd class="col-sm-7"><span class="badge bg-info">{{ lemma.disambiguation }}</span></dd>
+                            {% endif %}
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,104 @@
+<!-- Difficulty Overrides -->
+<div class="row mb-4">
+    <div class="col">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-bar-chart"></i> Per-Language Difficulty Overrides
+            </div>
+            <div class="card-body">
+                {% if overrides %}
+                    <table class="table table-hover override-table mb-3">
+                        <thead>
+                            <tr>
+                                <th>Language</th>
+                                <th>Override Level</th>
+                                <th>Effective Level</th>
+                                <th>Notes</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for override in overrides %}
+                                <tr>
+                                    <td><strong>{{ language_names[override.language_code] }}</strong></td>
+                                    <td>
+                                        {% if override.difficulty_level == -1 %}
+                                            <span class="badge bg-warning">Excluded</span>
+                                        {% else %}
+                                            <span class="badge bg-primary">Level {{ override.difficulty_level }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="effective-level">
+                                            {% if effective_levels[override.language_code] == -1 %}
+                                                Excluded
+                                            {% else %}
+                                                Level {{ effective_levels[override.language_code] }}
+                                            {% endif %}
+                                        </span>
+                                    </td>
+                                    <td>{{ override.notes or '-' }}</td>
+                                    <td>
+                                        <form method="post" action="{{ url_for('overrides.delete_override', lemma_id=lemma.id, lang_code=override.language_code) }}"
+                                              style="display: inline;"
+                                              onsubmit="return confirmDelete('Delete difficulty override for {{ language_names[override.language_code] }}?');">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                <i class="bi bi-trash"></i> Delete
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p class="text-muted">No difficulty overrides set. The base difficulty level will be used for all languages.</p>
+                {% endif %}
+
+                <!-- Add Override Form -->
+                <button type="button" class="btn btn-primary" data-bs-toggle="collapse" data-bs-target="#addOverrideForm">
+                    <i class="bi bi-plus-circle"></i> Add Difficulty Override
+                </button>
+
+                <div class="collapse mt-3" id="addOverrideForm">
+                    <div class="override-form">
+                        <h5>Add Difficulty Override</h5>
+                        <form method="post" action="{{ url_for('overrides.add_override', lemma_id=lemma.id) }}">
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label for="language_code" class="form-label">Language</label>
+                                    <select class="form-select" id="language_code" name="language_code" required>
+                                        <option value="">Select language...</option>
+                                        {% for lang_code, lang_name in language_names.items() %}
+                                            <option value="{{ lang_code }}">{{ lang_name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="difficulty_level" class="form-label">Difficulty Level</label>
+                                    <input type="number" class="form-control" id="difficulty_level" name="difficulty_level"
+                                           min="-1" max="20" required
+                                           placeholder="-1 or 1-20">
+                                    <small class="form-text text-muted">-1 to exclude, 1-20 for level</small>
+                                </div>
+                                <div class="col-md-5">
+                                    <label for="notes" class="form-label">Notes (optional)</label>
+                                    <input type="text" class="form-control" id="notes" name="notes"
+                                           placeholder="Reason for override...">
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-save"></i> Save Override
+                                </button>
+                                <button type="button" class="btn btn-secondary" data-bs-toggle="collapse" data-bs-target="#addOverrideForm">
+                                    Cancel
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

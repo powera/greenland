@@ -1,0 +1,103 @@
+<!-- Example Sentences (for nouns only) -->
+{% if lemma.pos_type == 'noun' %}
+<div class="row mb-4">
+    <div class="col">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-chat-left-quote"></i> Example Sentences</span>
+                <div>
+                    <a href="{{ url_for('agents.view_sentences', lemma_id=lemma.id) }}" class="btn btn-sm btn-light" title="View all sentences">
+                        <i class="bi bi-list"></i> View All
+                    </a>
+                    <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#generateSentencesModal">
+                        <i class="bi bi-plus-circle"></i> Generate Sentences
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">
+                    <i class="bi bi-info-circle"></i> Use the <strong>Žvirblis agent</strong> to generate example sentences featuring this noun.
+                    Sentences are automatically linked to vocabulary words and assigned difficulty levels.
+                </p>
+                {% if sentence_count is defined and sentence_count > 0 %}
+                    <div class="alert alert-info">
+                        <i class="bi bi-check-circle"></i> This word is used in <strong>{{ sentence_count }}</strong> sentence{{ 's' if sentence_count != 1 else '' }}.
+                        <a href="{{ url_for('agents.view_sentences', lemma_id=lemma.id) }}" class="alert-link">View all sentences</a>.
+                    </div>
+                {% else %}
+                    <div class="alert alert-secondary">
+                        <i class="bi bi-info-circle"></i> No sentences have been generated for this word yet.
+                        Click "Generate Sentences" to create some!
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Generate Sentences Modal -->
+<div class="modal fade" id="generateSentencesModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">Generate Example Sentences</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="{{ url_for('agents.generate_sentences', lemma_id=lemma.id) }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Word</label>
+                        <p class="form-control-plaintext"><strong>{{ lemma.lemma_text }}</strong> {% if lemma.guid %}<code>{{ lemma.guid }}</code>{% endif %}</p>
+                        <small class="text-muted">{{ lemma.definition_text }}</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="num_sentences" class="form-label">Number of Sentences</label>
+                        <input type="number" class="form-control" id="num_sentences" name="num_sentences"
+                               value="3" min="1" max="10" required>
+                        <small class="text-muted">Generate between 1-10 example sentences</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Target Languages</label>
+                        <div class="row">
+                            {% set target_languages = [
+                                ('lt', 'Lithuanian'),
+                                ('zh', 'Chinese'),
+                                ('ko', 'Korean'),
+                                ('fr', 'French'),
+                                ('es', 'Spanish'),
+                                ('de', 'German'),
+                                ('pt', 'Portuguese'),
+                                ('sw', 'Swahili'),
+                                ('vi', 'Vietnamese')
+                            ] %}
+                            {% for lang_code, lang_name in target_languages %}
+                            <div class="col-md-6 col-lg-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="languages"
+                                           value="{{ lang_code }}" id="lang_{{ lang_code }}"
+                                           {% if lang_code in ['lt', 'zh', 'ko', 'fr'] %}checked{% endif %}>
+                                    <label class="form-check-label" for="lang_{{ lang_code }}">
+                                        {{ lang_name }}
+                                    </label>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <small class="text-muted">Select languages for sentence translations (English is always included)</small>
+                    </div>
+                    <div class="alert alert-info">
+                        <i class="bi bi-robot"></i> The Žvirblis agent will use AI to generate natural, contextual sentences
+                        featuring this noun in different roles and patterns.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-stars"></i> Generate
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}

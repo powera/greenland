@@ -1,0 +1,155 @@
+<!-- Grammatical Forms and Pronunciations -->
+{% if forms_by_language %}
+<div class="row mb-4">
+    <div class="col">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-file-text"></i> Grammatical Forms & Pronunciations</span>
+                <div>
+                    <button type="button" class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#generateFormsModal">
+                        <i class="bi bi-plus-circle"></i> Generate Forms
+                    </button>
+                    {% if forms_by_language.get('en') %}
+                        <form method="post" action="{{ url_for('agents.check_pronunciations', lemma_id=lemma.id) }}" style="display: inline;">
+                            <button type="submit" class="btn btn-sm btn-light" title="Check pronunciations using AI">
+                                <i class="bi bi-robot"></i> Check Pronunciations
+                            </button>
+                        </form>
+                        <form method="post" action="{{ url_for('agents.generate_pronunciations', lemma_id=lemma.id) }}" style="display: inline;">
+                            <input type="hidden" name="lang_code" value="en">
+                            <button type="submit" class="btn btn-sm btn-success" title="Generate missing pronunciations using AI">
+                                <i class="bi bi-volume-up"></i> Generate Pronunciations
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-body">
+                {% for lang_code, forms in forms_by_language.items() %}
+                    <h5 class="mt-3">
+                        {{ language_names.get(lang_code, lang_code) }}
+                        <span class="badge bg-secondary">{{ forms|length }} form(s)</span>
+                    </h5>
+                    <table class="table table-sm table-hover">
+                        <thead>
+                            <tr>
+                                <th>Form</th>
+                                <th>Grammatical Form</th>
+                                <th>IPA</th>
+                                <th>Phonetic</th>
+                                <th>Base</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for form in forms %}
+                                <tr>
+                                    <td><strong>{{ form.derivative_form_text }}</strong></td>
+                                    <td><code>{{ form.grammatical_form }}</code></td>
+                                    <td>{{ form.ipa_pronunciation or '-' }}</td>
+                                    <td>{{ form.phonetic_pronunciation or '-' }}</td>
+                                    <td>
+                                        {% if form.is_base_form %}
+                                            <i class="bi bi-check-circle-fill text-success" title="Base form"></i>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Generate Forms Modal -->
+<div class="modal fade" id="generateFormsModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Generate Grammatical Forms</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="{{ url_for('agents.generate_forms', lemma_id=lemma.id) }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="pos_type" class="form-label">POS Type</label>
+                        <select class="form-select" id="pos_type" name="pos_type" required>
+                            <option value="noun" {% if lemma.pos_type == 'noun' %}selected{% endif %}>Noun</option>
+                            <option value="verb" {% if lemma.pos_type == 'verb' %}selected{% endif %}>Verb</option>
+                            <option value="adjective" {% if lemma.pos_type == 'adjective' %}selected{% endif %}>Adjective</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="lang_code" class="form-label">Language</label>
+                        <select class="form-select" id="lang_code" name="lang_code" required>
+                            <!-- Options will be populated by JavaScript based on POS type -->
+                        </select>
+                    </div>
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i>
+                        <strong>Note:</strong> This will use AI to generate grammatical forms based on the translation in the selected language. Make sure a translation exists first.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-robot"></i> Generate Forms
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Supported language/POS combinations for form generation
+const SUPPORTED_FORM_GENERATION = {
+    'noun': ['lt'],
+    'verb': ['lt', 'fr', 'de', 'es', 'pt', 'en'],
+    'adjective': ['lt']
+};
+
+const LANGUAGE_NAMES = {
+    'lt': 'Lithuanian',
+    'fr': 'French',
+    'de': 'German',
+    'es': 'Spanish',
+    'pt': 'Portuguese',
+    'en': 'English'
+};
+
+function updateLanguageOptions() {
+    const posType = document.getElementById('pos_type').value;
+    const langSelect = document.getElementById('lang_code');
+    const supportedLangs = SUPPORTED_FORM_GENERATION[posType] || [];
+
+    // Clear existing options
+    langSelect.innerHTML = '';
+
+    if (supportedLangs.length === 0) {
+        langSelect.innerHTML = '<option value="">No languages available for this POS type</option>';
+        langSelect.disabled = true;
+        return;
+    }
+
+    langSelect.disabled = false;
+
+    // Add supported language options
+    supportedLangs.forEach(langCode => {
+        const option = document.createElement('option');
+        option.value = langCode;
+        option.textContent = LANGUAGE_NAMES[langCode];
+        langSelect.appendChild(option);
+    });
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    updateLanguageOptions();
+
+    // Update when POS type changes
+    document.getElementById('pos_type').addEventListener('change', updateLanguageOptions);
+});
+</script>
+{% endif %}

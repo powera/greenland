@@ -1,0 +1,291 @@
+<!-- Audio Files -->
+<div class="row mb-4">
+    <div class="col">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-music-note-beamed"></i> Audio Files</span>
+                <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#generateAudioModal">
+                    <i class="bi bi-mic-fill"></i> Generate Audio
+                </button>
+            </div>
+            <div class="card-body">
+                {% if audio_files %}
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Language</th>
+                            <th>Voice</th>
+                            <th>Expected Text</th>
+                            <th>Status</th>
+                            <th>Issues</th>
+                            <th>Audio</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for audio in audio_files %}
+                        <tr>
+                            <td><span class="badge bg-secondary">{{ audio.language_code }}</span></td>
+                            <td><span class="badge bg-info">{{ audio.display_voice }}</span></td>
+                            <td>
+                                <strong>{{ audio.expected_text }}</strong>
+                                {% if audio.language_code == 'zh' %}
+                                <br><small class="text-muted">{{ audio.expected_text|pinyin }}</small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if audio.status == 'pending_review' %}
+                                <span class="badge bg-warning text-dark">Pending</span>
+                                {% elif audio.status == 'approved' %}
+                                <span class="badge bg-success">Approved</span>
+                                {% elif audio.status == 'approved_with_issues' %}
+                                <span class="badge bg-info">Acceptable</span>
+                                {% elif audio.status == 'needs_replacement' %}
+                                <span class="badge bg-danger">Needs Fix</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if audio.quality_issues %}
+                                    {% set issues = audio.quality_issues|fromjson %}
+                                    {% if issues|length > 0 %}
+                                        <span class="badge bg-warning text-dark" title="{{ issues|join(', ')|replace('_', ' ') }}">
+                                            {{ issues|length }}
+                                        </span>
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-secondary play-audio-btn-lemma"
+                                        data-audio-url="{{ url_for('audio.serve_audio_file', language=audio.language_code, voice=audio.voice_name, filename=audio.filename) }}"
+                                        title="Play audio">
+                                    <i class="bi bi-play-circle"></i>
+                                </button>
+                            </td>
+                            <td>
+                                <a href="{{ url_for('audio.review_file', review_id=audio.id) }}"
+                                   class="btn btn-sm btn-outline-primary"
+                                   title="Review audio">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p class="text-muted">
+                    <i class="bi bi-info-circle"></i> No audio files have been generated for this lemma yet.
+                    Click "Generate Audio" to create audio files using OpenAI TTS.
+                </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Generate Audio Modal -->
+<div class="modal fade" id="generateAudioModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Generate Audio for Lemma</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Lemma</label>
+                    <p class="form-control-plaintext">
+                        <strong>{{ lemma.lemma_text }}</strong>
+                        {% if lemma.guid %}<code>{{ lemma.guid }}</code>{% endif %}
+                    </p>
+                </div>
+                <div class="mb-3">
+                    <label for="audio_language" class="form-label">Language <span class="text-danger">*</span></label>
+                    <select class="form-select" id="audio_language" required>
+                        <option value="">Select a language...</option>
+                        {% for lang_code, lang_name in language_names.items() %}
+                            {% if translations[lang_code] %}
+                            <option value="{{ lang_code }}">{{ lang_name }} ({{ translations[lang_code] }})</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                    <div class="form-text">Only languages with translations are shown</div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Voices <span class="text-danger">*</span></label>
+                    <div class="form-text mb-2">Select voices to generate (default: ash, alloy, nova)</div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                <input class="form-check-input audio-voice-checkbox" type="checkbox" value="ash" id="audio-voice-ash" checked>
+                                <label class="form-check-label" for="audio-voice-ash">ash</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input audio-voice-checkbox" type="checkbox" value="alloy" id="audio-voice-alloy" checked>
+                                <label class="form-check-label" for="audio-voice-alloy">alloy</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input audio-voice-checkbox" type="checkbox" value="nova" id="audio-voice-nova" checked>
+                                <label class="form-check-label" for="audio-voice-nova">nova</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input audio-voice-checkbox" type="checkbox" value="ballad" id="audio-voice-ballad">
+                                <label class="form-check-label" for="audio-voice-ballad">ballad</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input audio-voice-checkbox" type="checkbox" value="coral" id="audio-voice-coral">
+                                <label class="form-check-label" for="audio-voice-coral">coral</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                <input class="form-check-input audio-voice-checkbox" type="checkbox" value="echo" id="audio-voice-echo">
+                                <label class="form-check-label" for="audio-voice-echo">echo</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input audio-voice-checkbox" type="checkbox" value="fable" id="audio-voice-fable">
+                                <label class="form-check-label" for="audio-voice-fable">fable</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input audio-voice-checkbox" type="checkbox" value="onyx" id="audio-voice-onyx">
+                                <label class="form-check-label" for="audio-voice-onyx">onyx</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input audio-voice-checkbox" type="checkbox" value="sage" id="audio-voice-sage">
+                                <label class="form-check-label" for="audio-voice-sage">sage</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input audio-voice-checkbox" type="checkbox" value="shimmer" id="audio-voice-shimmer">
+                                <label class="form-check-label" for="audio-voice-shimmer">shimmer</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i>
+                    <strong>Note:</strong> Audio will be generated using OpenAI TTS API and saved to a temporary directory.
+                    Review records will be created with status "pending_review".
+                </div>
+                <div id="audio-generation-progress" style="display: none;">
+                    <div class="spinner-border spinner-border-sm" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <span class="ms-2">Generating audio...</span>
+                </div>
+                <div id="audio-generation-error" class="alert alert-danger" style="display: none;"></div>
+                <div id="audio-generation-success" class="alert alert-success" style="display: none;"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" id="generate-audio-btn">
+                    <i class="bi bi-mic-fill"></i> Generate Audio
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Generate audio for this lemma
+document.getElementById('generate-audio-btn').addEventListener('click', function() {
+    const language = document.getElementById('audio_language').value;
+    const voices = Array.from(document.querySelectorAll('.audio-voice-checkbox:checked')).map(cb => cb.value);
+
+    if (!language) {
+        alert('Please select a language');
+        return;
+    }
+
+    if (voices.length === 0) {
+        alert('Please select at least one voice');
+        return;
+    }
+
+    // Show progress, hide previous messages
+    document.getElementById('audio-generation-progress').style.display = 'block';
+    document.getElementById('audio-generation-error').style.display = 'none';
+    document.getElementById('audio-generation-success').style.display = 'none';
+    this.disabled = true;
+
+    // Make AJAX request
+    fetch('{{ url_for("audio.generate_single", guid=lemma.guid) }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            language: language,
+            voices: voices
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('audio-generation-progress').style.display = 'none';
+        this.disabled = false;
+
+        if (data.success) {
+            const successDiv = document.getElementById('audio-generation-success');
+            successDiv.innerHTML = '<i class="bi bi-check-circle"></i> Successfully generated audio for ' + data.voices.length + ' voice(s). Reload the page to see the results.';
+            successDiv.style.display = 'block';
+
+            // Reload page after 2 seconds
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+        } else {
+            const errorDiv = document.getElementById('audio-generation-error');
+            errorDiv.innerHTML = '<i class="bi bi-exclamation-triangle"></i> Error: ' + (data.error || 'Unknown error');
+            errorDiv.style.display = 'block';
+        }
+    })
+    .catch(error => {
+        document.getElementById('audio-generation-progress').style.display = 'none';
+        this.disabled = false;
+        const errorDiv = document.getElementById('audio-generation-error');
+        errorDiv.innerHTML = '<i class="bi bi-exclamation-triangle"></i> Error: ' + error.message;
+        errorDiv.style.display = 'block';
+    });
+});
+</script>
+
+<script>
+// Audio player for lemma view
+const audioPlayerLemma = new Audio();
+let currentPlayButtonLemma = null;
+
+document.querySelectorAll('.play-audio-btn-lemma').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const audioUrl = this.dataset.audioUrl;
+
+        // If clicking the same button, toggle play/pause
+        if (currentPlayButtonLemma === this && !audioPlayerLemma.paused) {
+            audioPlayerLemma.pause();
+            this.innerHTML = '<i class="bi bi-play-circle"></i>';
+            return;
+        }
+
+        // Reset previous button
+        if (currentPlayButtonLemma) {
+            currentPlayButtonLemma.innerHTML = '<i class="bi bi-play-circle"></i>';
+        }
+
+        // Play new audio
+        audioPlayerLemma.src = audioUrl;
+        audioPlayerLemma.play();
+        this.innerHTML = '<i class="bi bi-pause-circle"></i>';
+        currentPlayButtonLemma = this;
+    });
+});
+
+// Reset button when audio ends
+audioPlayerLemma.addEventListener('ended', function() {
+    if (currentPlayButtonLemma) {
+        currentPlayButtonLemma.innerHTML = '<i class="bi bi-play-circle"></i>';
+        currentPlayButtonLemma = null;
+    }
+});
+</script>
