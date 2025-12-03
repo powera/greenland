@@ -30,6 +30,7 @@ from sqlalchemy.exc import IntegrityError
 import io
 
 from wordfreq.storage.models.schema import AudioQualityReview, Lemma, LemmaDifficultyOverride
+from clients.audio import Voice
 
 bp = Blueprint("audio", __name__, url_prefix="/audio")
 
@@ -1182,4 +1183,121 @@ def rapid_review_bad_translation(review_id):
 
     except Exception as e:
         g.db.rollback()
+        return jsonify({"error": str(e)}), 500
+
+
+# ============================================================================
+# Audio Generation Routes
+# ============================================================================
+
+@bp.route("/generate", methods=["GET", "POST"])
+def generate():
+    """Audio generation interface."""
+    if request.method == "GET":
+        # Show generation form
+        supported_languages = ["lt", "zh", "ko", "fr", "de", "es", "pt", "sw", "vi"]
+        available_voices = ["ash", "alloy", "nova", "ballad", "coral", "echo", "fable", "onyx", "sage", "shimmer"]
+
+        return render_template(
+            "audio/generate.html",
+            supported_languages=supported_languages,
+            available_voices=available_voices,
+        )
+
+    # Handle POST - trigger generation
+    language_code = request.form.get("language")
+    limit = request.form.get("limit", type=int)
+    difficulty_level = request.form.get("difficulty_level", type=int)
+    voices = request.form.getlist("voices")
+
+    if not language_code:
+        flash("Language is required", "error")
+        return redirect(url_for("audio.generate"))
+
+    if not voices:
+        flash("At least one voice must be selected", "error")
+        return redirect(url_for("audio.generate"))
+
+    # Convert voice names to Voice enums
+    try:
+        voice_enums = [Voice(v) for v in voices]
+    except ValueError as e:
+        flash(f"Invalid voice: {e}", "error")
+        return redirect(url_for("audio.generate"))
+
+    # Import and run the agent
+    try:
+        from agents.vieversys import VieversysAgent
+        import tempfile
+
+        # Create temporary output directory
+        output_dir = Path(tempfile.mkdtemp(prefix="audio_gen_"))
+
+        agent = VieversysAgent(output_dir=str(output_dir))
+        results = agent.generate_batch(
+            language_code=language_code,
+            limit=limit,
+            difficulty_level=difficulty_level,
+            voices=voice_enums,
+        )
+
+        flash(
+            f"Generated audio for {results['success_count']} lemmas "
+            f"({results['error_count']} errors). "
+            f"Files saved to {output_dir}",
+            "success" if results['error_count'] == 0 else "warning"
+        )
+
+        return redirect(url_for("audio.list_files", language=language_code, status="pending_review"))
+
+    except Exception as e:
+        flash(f"Error generating audio: {str(e)}", "error")
+        return redirect(url_for("audio.generate"))
+
+
+@bp.route("/generate-single/<guid>", methods=["POST"])
+def generate_single(guid):
+    """Generate audio for a single lemma (AJAX endpoint)."""
+    data = request.get_json()
+    language_code = data.get("language")
+    voices = data.get("voices", ["ash", "alloy", "nova"])
+
+    if not language_code:
+        return jsonify({"error": "Language code required"}), 400
+
+    # Find lemma
+    lemma = g.db.query(Lemma).filter_by(guid=guid).first()
+    if not lemma:
+        return jsonify({"error": f"Lemma not found: {guid}"}), 404
+
+    try:
+        # Convert voice names to Voice enums
+        voice_enums = [Voice(v) for v in voices]
+
+        # Import and run the agent
+        from agents.vieversys import VieversysAgent
+        import tempfile
+
+        output_dir = Path(tempfile.mkdtemp(prefix="audio_gen_single_"))
+        agent = VieversysAgent(output_dir=str(output_dir))
+
+        result = agent.generate_audio_for_lemma(
+            g.db, lemma, language_code, voice_enums, create_review_record=True
+        )
+
+        if result["success"]:
+            return jsonify({
+                "success": True,
+                "guid": guid,
+                "language": language_code,
+                "voices": result["voices"],
+                "output_dir": str(output_dir),
+            })
+        else:
+            return jsonify({
+                "success": False,
+                "error": result.get("error", "Unknown error"),
+            }), 500
+
+    except Exception as e:
         return jsonify({"error": str(e)}), 500

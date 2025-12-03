@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}Generate Audio{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1><i class="bi bi-mic-fill"></i> Generate Audio</h1>
+    <p class="text-muted">Generate audio files for lemmas using OpenAI TTS</p>
+
+    <div class="row mt-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Batch Audio Generation</h5>
+
+                    <form method="POST" action="{{ url_for('audio.generate') }}">
+                        <!-- Language Selection -->
+                        <div class="mb-3">
+                            <label for="language" class="form-label">Language <span class="text-danger">*</span></label>
+                            <select class="form-select" id="language" name="language" required>
+                                <option value="">Select a language...</option>
+                                {% for lang in supported_languages %}
+                                <option value="{{ lang }}">{{ lang }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text">Language to generate audio for</div>
+                        </div>
+
+                        <!-- Voice Selection -->
+                        <div class="mb-3">
+                            <label class="form-label">Voices <span class="text-danger">*</span></label>
+                            <div class="form-text mb-2">Select voices to use (default: ash, alloy, nova)</div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="voices" value="ash" id="voice-ash" checked>
+                                        <label class="form-check-label" for="voice-ash">ash</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="voices" value="alloy" id="voice-alloy" checked>
+                                        <label class="form-check-label" for="voice-alloy">alloy</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="voices" value="nova" id="voice-nova" checked>
+                                        <label class="form-check-label" for="voice-nova">nova</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="voices" value="ballad" id="voice-ballad">
+                                        <label class="form-check-label" for="voice-ballad">ballad</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="voices" value="coral" id="voice-coral">
+                                        <label class="form-check-label" for="voice-coral">coral</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="voices" value="echo" id="voice-echo">
+                                        <label class="form-check-label" for="voice-echo">echo</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="voices" value="fable" id="voice-fable">
+                                        <label class="form-check-label" for="voice-fable">fable</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="voices" value="onyx" id="voice-onyx">
+                                        <label class="form-check-label" for="voice-onyx">onyx</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="voices" value="sage" id="voice-sage">
+                                        <label class="form-check-label" for="voice-sage">sage</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="voices" value="shimmer" id="voice-shimmer">
+                                        <label class="form-check-label" for="voice-shimmer">shimmer</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Filters -->
+                        <div class="mb-3">
+                            <label for="difficulty_level" class="form-label">Difficulty Level (optional)</label>
+                            <input type="number" class="form-control" id="difficulty_level" name="difficulty_level" min="1" max="20" placeholder="All levels">
+                            <div class="form-text">Filter by Trakaido difficulty level (1-20). Leave empty for all levels.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="limit" class="form-label">Limit (optional)</label>
+                            <input type="number" class="form-control" id="limit" name="limit" min="1" placeholder="All lemmas">
+                            <div class="form-text">Maximum number of lemmas to process. Leave empty for all.</div>
+                        </div>
+
+                        <!-- Warning -->
+                        <div class="alert alert-warning" role="alert">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            <strong>Note:</strong> Audio generation uses the OpenAI TTS API and will incur costs.
+                            Each lemma will generate audio for all selected voices.
+                        </div>
+
+                        <!-- Submit -->
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-play-fill"></i> Generate Audio
+                            </button>
+                            <a href="{{ url_for('audio.index') }}" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Back
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Panel -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-info-circle"></i> How It Works</h5>
+                    <ol class="small">
+                        <li>Select a language to generate audio for</li>
+                        <li>Choose which voices to use (default: ash, alloy, nova)</li>
+                        <li>Optionally filter by difficulty level or set a limit</li>
+                        <li>Click "Generate Audio" to start</li>
+                        <li>Audio files will be generated to a temporary directory</li>
+                        <li>Review records will be created with status "pending_review"</li>
+                        <li>Review the audio in the quality review interface</li>
+                        <li>After review, use the upload script to upload to S3</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-terminal"></i> Command Line</h5>
+                    <p class="small">You can also generate audio using the vieversys agent:</p>
+                    <pre class="bg-light p-2 small"><code>python -m agents.vieversys \
+  --language lt \
+  --limit 10 \
+  --difficulty-level 1 \
+  --generate-manifests</code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
