@@ -22,7 +22,7 @@ class SchemaProperty:
                 "postal_code": SchemaProperty("string", "Postal code")
             }
         )
-        
+
         user_schema = Schema(
             "User",
             "A user profile",
@@ -49,7 +49,7 @@ class SchemaProperty:
                 "number": SchemaProperty("string", "Phone number")
             }
         )
-        
+
         user_schema = Schema(
             "User",
             "A user profile",
@@ -64,6 +64,7 @@ class SchemaProperty:
         )
         ```
     """
+
     type: str
     description: Optional[str] = None
     required: bool = True
@@ -84,7 +85,7 @@ class SchemaProperty:
 class Schema:
     """
     A unified schema definition that can be converted to different LLM client formats.
-    
+
     Usage:
     schema = Schema(
         "UserProfile",
@@ -97,13 +98,15 @@ class Schema:
         }
     )
     """
+
     name: str
     description: str
     properties: Dict[str, SchemaProperty]
-    
+
     def required_properties(self) -> List[str]:
         """Get list of required property names."""
         return [name for name, prop in self.properties.items() if prop.required]
+
     def all_properties(self) -> List[str]:
         """Get list of all property names."""
         return list(self.properties.keys())
@@ -112,6 +115,7 @@ class Schema:
 @dataclass
 class Response:
     """Container for response data."""
+
     response_text: str
     structured_data: Dict[str, Any]
     usage: LLMUsage

@@ -19,7 +19,7 @@ def log_operation(
     lemma_id: Optional[int] = None,
     word_token_id: Optional[int] = None,
     derivative_form_id: Optional[int] = None,
-    **extra_data
+    **extra_data,
 ) -> OperationLog:
     """
     Log a general operation to the operation log.
@@ -75,7 +75,7 @@ def log_operation(
         fact=json.dumps(fact_data),
         lemma_id=lemma_id,
         word_token_id=word_token_id,
-        derivative_form_id=derivative_form_id
+        derivative_form_id=derivative_form_id,
     )
 
     session.add(log_entry)
@@ -93,7 +93,7 @@ def log_translation_change(
     new_translation: Optional[str] = None,
     word_token_id: Optional[int] = None,
     derivative_form_id: Optional[int] = None,
-    **extra_data
+    **extra_data,
 ) -> OperationLog:
     """
     Log a translation change operation.
@@ -133,7 +133,7 @@ def log_translation_change(
         fact=json.dumps(fact_data),
         lemma_id=lemma_id,
         word_token_id=word_token_id,
-        derivative_form_id=derivative_form_id
+        derivative_form_id=derivative_form_id,
     )
 
     session.add(log_entry)

@@ -1,16 +1,20 @@
 from dataclasses import dataclass
 from typing import Optional
 
+
 @dataclass
 class Translation:
     """Represents a translation in a specific language."""
+
     text: str
     pronunciation: Optional[str] = None
     notes: Optional[str] = None
 
+
 @dataclass
 class TranslationSet:
     """Represents translations across multiple languages."""
+
     chinese: Optional[Translation] = None
     french: Optional[Translation] = None
     spanish: Optional[Translation] = None
@@ -32,7 +36,7 @@ class TranslationSet:
             "korean": self.korean,
             "swahili": self.swahili,
             "lithuanian": self.lithuanian,
-            "vietnamese": self.vietnamese
+            "vietnamese": self.vietnamese,
         }
 
     def has_translation(self, lang: str) -> bool:

@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python3
 """
 Legacy wrapper for trakaido export utilities.
@@ -13,13 +12,13 @@ from .utils.export_manager import (
     export_trakaido_data,
     write_json_file,
     get_english_word_from_lemma,
-    format_subtype_display_name
+    format_subtype_display_name,
 )
 
 __all__ = [
     "TrakaidoExporter",
-    "export_trakaido_data", 
+    "export_trakaido_data",
     "write_json_file",
     "get_english_word_from_lemma",
-    "format_subtype_display_name"
+    "format_subtype_display_name",
 ]

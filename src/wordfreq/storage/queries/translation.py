@@ -25,23 +25,19 @@ def get_lemmas_without_translation(session, language: str, limit: int = 100) -> 
         "korean": Lemma.korean_translation,
         "swahili": Lemma.swahili_translation,
         "lithuanian": Lemma.lithuanian_translation,
-        "vietnamese": Lemma.vietnamese_translation
+        "vietnamese": Lemma.vietnamese_translation,
     }
 
     if language not in column_map:
-        raise ValueError(f"Unsupported language: {language}. Supported languages: {', '.join(column_map.keys())}")
+        raise ValueError(
+            f"Unsupported language: {language}. Supported languages: {', '.join(column_map.keys())}"
+        )
 
-    return session.query(Lemma).filter(
-        column_map[language].is_(None)
-    ).limit(limit).all()
+    return session.query(Lemma).filter(column_map[language].is_(None)).limit(limit).all()
 
 
 def update_lemma_translation(
-    session,
-    lemma_id: int,
-    language: str,
-    translation_text: str,
-    source: str = None
+    session, lemma_id: int, language: str, translation_text: str, source: str = None
 ) -> bool:
     """Update translation for a specific language in a lemma.
 
@@ -65,7 +61,7 @@ def update_lemma_translation(
         "korean": ("korean_translation", "ko"),
         "swahili": ("swahili_translation", "sw"),
         "lithuanian": ("lithuanian_translation", "lt"),
-        "vietnamese": ("vietnamese_translation", "vi")
+        "vietnamese": ("vietnamese_translation", "vi"),
     }
 
     if language not in language_map:
@@ -87,7 +83,7 @@ def update_lemma_translation(
         lemma_id=lemma.id,
         language_code=lang_code,
         old_translation=old_translation,
-        new_translation=translation_text
+        new_translation=translation_text,
     )
 
     session.commit()

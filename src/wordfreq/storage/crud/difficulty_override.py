@@ -7,11 +7,7 @@ from wordfreq.storage.models.schema import LemmaDifficultyOverride, Lemma
 
 
 def add_difficulty_override(
-    session,
-    lemma_id: int,
-    language_code: str,
-    difficulty_level: int,
-    notes: Optional[str] = None
+    session, lemma_id: int, language_code: str, difficulty_level: int, notes: Optional[str] = None
 ) -> LemmaDifficultyOverride:
     """
     Add or update a difficulty level override for a lemma in a specific language.
@@ -27,12 +23,16 @@ def add_difficulty_override(
         The created or updated LemmaDifficultyOverride
     """
     # Check if override already exists
-    existing = session.query(LemmaDifficultyOverride).filter(
-        and_(
-            LemmaDifficultyOverride.lemma_id == lemma_id,
-            LemmaDifficultyOverride.language_code == language_code
+    existing = (
+        session.query(LemmaDifficultyOverride)
+        .filter(
+            and_(
+                LemmaDifficultyOverride.lemma_id == lemma_id,
+                LemmaDifficultyOverride.language_code == language_code,
+            )
         )
-    ).first()
+        .first()
+    )
 
     if existing:
         # Update existing override
@@ -47,7 +47,7 @@ def add_difficulty_override(
         lemma_id=lemma_id,
         language_code=language_code,
         difficulty_level=difficulty_level,
-        notes=notes
+        notes=notes,
     )
     session.add(override)
     session.flush()
@@ -55,9 +55,7 @@ def add_difficulty_override(
 
 
 def get_difficulty_override(
-    session,
-    lemma_id: int,
-    language_code: str
+    session, lemma_id: int, language_code: str
 ) -> Optional[LemmaDifficultyOverride]:
     """
     Get a difficulty override for a specific lemma and language.
@@ -70,18 +68,19 @@ def get_difficulty_override(
     Returns:
         LemmaDifficultyOverride if found, None otherwise
     """
-    return session.query(LemmaDifficultyOverride).filter(
-        and_(
-            LemmaDifficultyOverride.lemma_id == lemma_id,
-            LemmaDifficultyOverride.language_code == language_code
+    return (
+        session.query(LemmaDifficultyOverride)
+        .filter(
+            and_(
+                LemmaDifficultyOverride.lemma_id == lemma_id,
+                LemmaDifficultyOverride.language_code == language_code,
+            )
         )
-    ).first()
+        .first()
+    )
 
 
-def get_all_overrides_for_lemma(
-    session,
-    lemma_id: int
-) -> List[LemmaDifficultyOverride]:
+def get_all_overrides_for_lemma(session, lemma_id: int) -> List[LemmaDifficultyOverride]:
     """
     Get all difficulty overrides for a specific lemma across all languages.
 
@@ -92,15 +91,14 @@ def get_all_overrides_for_lemma(
     Returns:
         List of LemmaDifficultyOverride objects
     """
-    return session.query(LemmaDifficultyOverride).filter(
-        LemmaDifficultyOverride.lemma_id == lemma_id
-    ).all()
+    return (
+        session.query(LemmaDifficultyOverride)
+        .filter(LemmaDifficultyOverride.lemma_id == lemma_id)
+        .all()
+    )
 
 
-def get_all_overrides_for_language(
-    session,
-    language_code: str
-) -> List[LemmaDifficultyOverride]:
+def get_all_overrides_for_language(session, language_code: str) -> List[LemmaDifficultyOverride]:
     """
     Get all difficulty overrides for a specific language.
 
@@ -111,16 +109,14 @@ def get_all_overrides_for_language(
     Returns:
         List of LemmaDifficultyOverride objects
     """
-    return session.query(LemmaDifficultyOverride).filter(
-        LemmaDifficultyOverride.language_code == language_code
-    ).all()
+    return (
+        session.query(LemmaDifficultyOverride)
+        .filter(LemmaDifficultyOverride.language_code == language_code)
+        .all()
+    )
 
 
-def delete_difficulty_override(
-    session,
-    lemma_id: int,
-    language_code: str
-) -> bool:
+def delete_difficulty_override(session, lemma_id: int, language_code: str) -> bool:
     """
     Delete a difficulty override.
 
@@ -140,11 +136,7 @@ def delete_difficulty_override(
     return False
 
 
-def get_effective_difficulty_level(
-    session,
-    lemma: Lemma,
-    language_code: str
-) -> Optional[int]:
+def get_effective_difficulty_level(session, lemma: Lemma, language_code: str) -> Optional[int]:
     """
     Get the effective difficulty level for a lemma in a specific language.
 
@@ -176,7 +168,7 @@ def get_lemmas_by_effective_level(
     language_code: str,
     difficulty_level: int,
     pos_type: Optional[str] = None,
-    pos_subtype: Optional[str] = None
+    pos_subtype: Optional[str] = None,
 ) -> List[Lemma]:
     """
     Get all lemmas that have a specific effective difficulty level in a language.
@@ -216,10 +208,7 @@ def get_lemmas_by_effective_level(
     return result
 
 
-def bulk_add_overrides(
-    session,
-    overrides: List[Dict[str, any]]
-) -> int:
+def bulk_add_overrides(session, overrides: List[Dict[str, any]]) -> int:
     """
     Bulk add or update difficulty overrides.
 
@@ -237,7 +226,7 @@ def bulk_add_overrides(
             lemma_id=override_data["lemma_id"],
             language_code=override_data["language_code"],
             difficulty_level=override_data["difficulty_level"],
-            notes=override_data.get("notes")
+            notes=override_data.get("notes"),
         )
         count += 1
 

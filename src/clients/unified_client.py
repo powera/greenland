@@ -7,7 +7,7 @@ from typing import Dict, Optional, Tuple, Any
 from clients import ollama_client, openai_client, anthropic_client, lmstudio_client, gemini_client
 from telemetry import LLMUsage
 from clients.types import Response
-import benchmarks.datastore.common # Assuming datastore.common is available
+import benchmarks.datastore.common  # Assuming datastore.common is available
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 # Default timeout values (in seconds)
 DEFAULT_TIMEOUT = 150
+
 
 class UnifiedLLMClient:
     """Client for routing requests to appropriate LLM backend based on model name."""
@@ -80,7 +81,9 @@ class UnifiedLLMClient:
             model_type = model_info.get("model_type")
 
             if not model_path or not model_type:
-                raise ValueError(f"Model '{model}' has incomplete configuration (path={model_path}, type={model_type})")
+                raise ValueError(
+                    f"Model '{model}' has incomplete configuration (path={model_path}, type={model_type})"
+                )
 
             # Route to appropriate client based on model type and path
             if model_type == "remote":
@@ -89,7 +92,7 @@ class UnifiedLLMClient:
                 if model_path.startswith("lmstudio/"):
                     client = self.lmstudio
                     client_name = "LMStudio"
-                    normalized_model = model_path[len("lmstudio/"):]
+                    normalized_model = model_path[len("lmstudio/") :]
                 else:
                     # Default to Ollama for local models
                     client = self.ollama
@@ -101,11 +104,14 @@ class UnifiedLLMClient:
                     if len(parts) > 1:  # Has quantization suffix or other params
                         normalized_model = ":".join(parts[:-1])
 
-
         if self.debug:
             if normalized_model != model:
-                logger.debug("Using %s client for model: %s (normalized from %s)",
-                           client_name, normalized_model, model)
+                logger.debug(
+                    "Using %s client for model: %s (normalized from %s)",
+                    client_name,
+                    normalized_model,
+                    model,
+                )
             else:
                 logger.debug("Using %s client for model: %s", client_name, model)
             client.debug = True
@@ -126,7 +132,7 @@ class UnifiedLLMClient:
         brief: bool = False,
         json_schema: Optional[Any] = None,
         context: Optional[str] = None,
-        timeout: Optional[float] = None
+        timeout: Optional[float] = None,
     ) -> Response:
         """
         Generate chat completion using appropriate backend.
@@ -145,16 +151,17 @@ class UnifiedLLMClient:
             For JSON responses, response_text will be empty string
 
         Raises:
-            TimeoutError: If request exceeds configured timeout  
+            TimeoutError: If request exceeds configured timeout
             ConnectionError: If connection to backend fails
             RuntimeError: For other request failures
         """
         if self.debug:
-            logger.debug("Chat request: model=%s, brief=%s, schema=%s",
-                        model, brief, bool(json_schema))
+            logger.debug(
+                "Chat request: model=%s, brief=%s, schema=%s", model, brief, bool(json_schema)
+            )
 
         # Get the appropriate client for this model
-        client, normalized_model = self._get_client(model) 
+        client, normalized_model = self._get_client(model)
 
         try:
             result = client.generate_chat(
@@ -162,13 +169,16 @@ class UnifiedLLMClient:
                 model=normalized_model,
                 brief=brief,
                 json_schema=json_schema,
-                context=context
+                context=context,
             )
 
             if self.debug:
                 response_type = "JSON" if json_schema else "text"
-                logger.debug("Chat complete: %s response, %d tokens", 
-                            response_type, result.usage.total_tokens)
+                logger.debug(
+                    "Chat complete: %s response, %d tokens",
+                    response_type,
+                    result.usage.total_tokens,
+                )
 
             return result
 
@@ -176,8 +186,10 @@ class UnifiedLLMClient:
             logger.error("Chat generation failed: %s", str(e))
             raise
 
+
 # Create default client instance
 client = UnifiedLLMClient()  # Use defaults for timeout and debug
+
 
 # Expose key functions at module level for API compatibility
 def warm_model(model: str, timeout: Optional[float] = None) -> bool:
@@ -191,7 +203,7 @@ def generate_chat(
     brief: bool = False,
     json_schema: Optional[Dict] = None,
     context: Optional[str] = None,
-    timeout: Optional[float] = None
+    timeout: Optional[float] = None,
 ) -> Response:
     """
     Generate a chat response using appropriate backend based on model name.

@@ -22,29 +22,61 @@ def get_argument_parser():
     parser.add_argument("--debug", action="store_true", help="Enable debug logging")
 
     # Check mode options (reporting only, no changes)
-    parser.add_argument("--check",
-                       choices=["all", "by-language"],
-                       default="all",
-                       help="Check which lemmas are missing synonyms/alternatives (default: all)")
+    parser.add_argument(
+        "--check",
+        choices=["all", "by-language"],
+        default="all",
+        help="Check which lemmas are missing synonyms/alternatives (default: all)",
+    )
 
     # Fix mode options (generate missing synonyms)
-    parser.add_argument("--fix", action="store_true",
-                       help="Fix mode: Generate missing synonyms and alternative forms")
-    parser.add_argument("--language", default="en",
-                       help="Language code for operations (en=English, lt=Lithuanian, etc., default: en)")
-    parser.add_argument("--type",
-                       choices=["synonym", "abbreviation", "expanded_form", "alternate_spelling", "alternative_form", "all"],
-                       help="[Check/Fix mode] Type to check/generate. Options: synonym, abbreviation, expanded_form, alternate_spelling, alternative_form (legacy), or all. Default: all")
-    parser.add_argument("--limit", type=int, default=10,
-                       help="[Fix mode] Maximum number of lemmas to process (default: 10)")
-    parser.add_argument("--model", default="gpt-5-mini",
-                       help="[Fix mode] LLM model to use for generation (default: gpt-5-mini)")
-    parser.add_argument("--throttle", type=float, default=1.0,
-                       help="[Fix mode] Seconds to wait between API calls (default: 1.0)")
-    parser.add_argument("--dry-run", action="store_true",
-                       help="[Fix mode] Show what would be generated WITHOUT making any LLM calls or database changes")
-    parser.add_argument("--yes", "-y", action="store_true",
-                       help="[Fix mode] Skip confirmation prompt when fixing")
+    parser.add_argument(
+        "--fix",
+        action="store_true",
+        help="Fix mode: Generate missing synonyms and alternative forms",
+    )
+    parser.add_argument(
+        "--language",
+        default="en",
+        help="Language code for operations (en=English, lt=Lithuanian, etc., default: en)",
+    )
+    parser.add_argument(
+        "--type",
+        choices=[
+            "synonym",
+            "abbreviation",
+            "expanded_form",
+            "alternate_spelling",
+            "alternative_form",
+            "all",
+        ],
+        help="[Check/Fix mode] Type to check/generate. Options: synonym, abbreviation, expanded_form, alternate_spelling, alternative_form (legacy), or all. Default: all",
+    )
+    parser.add_argument(
+        "--limit",
+        type=int,
+        default=10,
+        help="[Fix mode] Maximum number of lemmas to process (default: 10)",
+    )
+    parser.add_argument(
+        "--model",
+        default="gpt-5-mini",
+        help="[Fix mode] LLM model to use for generation (default: gpt-5-mini)",
+    )
+    parser.add_argument(
+        "--throttle",
+        type=float,
+        default=1.0,
+        help="[Fix mode] Seconds to wait between API calls (default: 1.0)",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="[Fix mode] Show what would be generated WITHOUT making any LLM calls or database changes",
+    )
+    parser.add_argument(
+        "--yes", "-y", action="store_true", help="[Fix mode] Skip confirmation prompt when fixing"
+    )
 
     return parser
 
@@ -70,8 +102,7 @@ def main():
         if not args.yes and not args.dry_run:
             # Get check results to show how many need fixing
             check_results = agent.check_missing_synonyms(
-                language_code=args.language,
-                form_type=form_type
+                language_code=args.language, form_type=form_type
             )
 
             if "error" in check_results:
@@ -83,7 +114,9 @@ def main():
             print(f"\n{'='*60}")
             print(f"Ready to generate synonyms/alternatives for {args.language}")
             print(f"Lemmas needing forms: {missing_count}")
-            print(f"Will process: {min(args.limit, missing_count) if args.limit else missing_count}")
+            print(
+                f"Will process: {min(args.limit, missing_count) if args.limit else missing_count}"
+            )
             print(f"Model: {args.model}")
             print(f"Throttle: {args.throttle}s between calls")
             print(f"{'='*60}")
@@ -99,7 +132,7 @@ def main():
             limit=args.limit,
             model=args.model,
             throttle=args.throttle,
-            dry_run=args.dry_run
+            dry_run=args.dry_run,
         )
 
         # Print results
@@ -138,10 +171,7 @@ def main():
         print(f"{'='*60}")
 
     elif args.check == "by-language":
-        results = agent.check_missing_synonyms(
-            language_code=args.language,
-            form_type=form_type
-        )
+        results = agent.check_missing_synonyms(language_code=args.language, form_type=form_type)
 
         if "error" in results:
             print(f"Error: {results['error']}")

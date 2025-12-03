@@ -11,13 +11,16 @@ import benchmarks.datastore.benchmarks
 import benchmarks.datastore.common
 import constants
 
+
 @dataclass
 class ScoreData:
     """Represents score data for a benchmark run."""
+
     value: int
     color: str
     run_id: int
     avg_eval_time: float  # Average evaluation time in milliseconds
+
 
 class ScoreTableGenerator:
     """Generates HTML reports for benchmark scores and run details."""
@@ -44,7 +47,7 @@ class ScoreTableGenerator:
         normalized = score / 100.0
 
         # Base colors for interpolation
-        if (score > 70):
+        if score > 70:
             low_r, low_g, low_b = 530, 400, -70  # not reached
             high_r, high_g, high_b = 30, 100, 230
         else:  # score <= 70
@@ -72,8 +75,9 @@ class ScoreTableGenerator:
         if not run_data or not run_data["details"]:
             return 0.0
 
-        eval_times = [detail["eval_msec"] for detail in run_data["details"] 
-                     if detail["eval_msec"] is not None]
+        eval_times = [
+            detail["eval_msec"] for detail in run_data["details"] if detail["eval_msec"] is not None
+        ]
         if not eval_times:
             return 0.0
 
@@ -108,7 +112,7 @@ class ScoreTableGenerator:
                 value=score_data["score"],
                 color=self._get_color(score_data["score"]),
                 run_id=score_data["run_id"],
-                avg_eval_time=avg_time
+                avg_eval_time=avg_time,
             ).__dict__
 
         # Filter the models list to only include those with benchmark results
@@ -117,11 +121,7 @@ class ScoreTableGenerator:
         # Model type is now stored in the database
         # No need to infer from codename anymore
 
-        return {
-            "llms": llms,
-            "benchmarks": benchmarks_list,
-            "scores": scores
-        }
+        return {"llms": llms, "benchmarks": benchmarks_list, "scores": scores}
 
     def generate_dashboard(self) -> None:
         """Generate the main dashboard HTML file."""
@@ -156,9 +156,7 @@ class ScoreTableGenerator:
 
         # Write run details to file
         run_path = os.path.join(
-            constants.OUTPUT_DIR, 
-            "run_details", 
-            f"{run_details['run_id']}.html"
+            constants.OUTPUT_DIR, "run_details", f"{run_details['run_id']}.html"
         )
         with open(run_path, "w") as f:
             f.write(template.render(run_details=run_details, system_prompt=system_prompt))
@@ -212,7 +210,7 @@ class ScoreTableGenerator:
             dummy_question = {
                 "question_text": "Sample question",
                 "answer_type": "free_text",
-                "correct_answer": "Sample answer"
+                "correct_answer": "Sample answer",
             }
 
             # Get a runner instance for this benchmark (with a dummy model name)
@@ -226,8 +224,10 @@ class ScoreTableGenerator:
 
         return None
 
+
 # Create default generator instance
 generator = ScoreTableGenerator()
+
 
 def generate_dashboard(session: Optional[object] = None) -> None:
     """Generate the main dashboard HTML file using default generator."""
@@ -235,6 +235,7 @@ def generate_dashboard(session: Optional[object] = None) -> None:
         ScoreTableGenerator(session).generate_dashboard()
     else:
         generator.generate_dashboard()
+
 
 def generate_run_detail_by_id(run_id: int, session: Optional[object] = None) -> None:
     """

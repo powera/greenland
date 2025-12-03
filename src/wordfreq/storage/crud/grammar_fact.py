@@ -18,7 +18,7 @@ def add_grammar_fact(
     fact_type: str,
     fact_value: Optional[str] = None,
     notes: Optional[str] = None,
-    verified: bool = False
+    verified: bool = False,
 ) -> Optional[GrammarFact]:
     """
     Add a grammar fact to a lemma.
@@ -55,11 +55,13 @@ def add_grammar_fact(
             fact_type=fact_type,
             fact_value=fact_value,
             notes=notes,
-            verified=verified
+            verified=verified,
         )
         session.add(grammar_fact)
         session.commit()
-        logger.info(f"Added grammar fact: lemma_id={lemma_id}, {fact_type}={fact_value} ({language_code})")
+        logger.info(
+            f"Added grammar fact: lemma_id={lemma_id}, {fact_type}={fact_value} ({language_code})"
+        )
         return grammar_fact
     except IntegrityError as e:
         session.rollback()
@@ -72,10 +74,7 @@ def add_grammar_fact(
 
 
 def get_grammar_facts(
-    session,
-    lemma_id: int,
-    language_code: Optional[str] = None,
-    fact_type: Optional[str] = None
+    session, lemma_id: int, language_code: Optional[str] = None, fact_type: Optional[str] = None
 ) -> List[GrammarFact]:
     """
     Get grammar facts for a lemma.
@@ -111,10 +110,7 @@ def get_grammar_facts(
 
 
 def get_grammar_fact_value(
-    session,
-    lemma_id: int,
-    language_code: str,
-    fact_type: str
+    session, lemma_id: int, language_code: str, fact_type: str
 ) -> Optional[str]:
     """
     Get a specific grammar fact value for a lemma.
@@ -140,11 +136,15 @@ def get_grammar_fact_value(
                                        language_code="fr",
                                        fact_type="gender")
     """
-    fact = session.query(GrammarFact).filter(
-        GrammarFact.lemma_id == lemma_id,
-        GrammarFact.language_code == language_code,
-        GrammarFact.fact_type == fact_type
-    ).first()
+    fact = (
+        session.query(GrammarFact)
+        .filter(
+            GrammarFact.lemma_id == lemma_id,
+            GrammarFact.language_code == language_code,
+            GrammarFact.fact_type == fact_type,
+        )
+        .first()
+    )
 
     return fact.fact_value if fact else None
 
@@ -169,12 +169,7 @@ def is_plurale_tantum(session, lemma_id: int, language_code: str) -> bool:
     return number_type == "plurale_tantum"
 
 
-def delete_grammar_fact(
-    session,
-    lemma_id: int,
-    language_code: str,
-    fact_type: str
-) -> bool:
+def delete_grammar_fact(session, lemma_id: int, language_code: str, fact_type: str) -> bool:
     """
     Delete a specific grammar fact.
 
@@ -187,11 +182,15 @@ def delete_grammar_fact(
     Returns:
         True if a fact was deleted, False if not found
     """
-    fact = session.query(GrammarFact).filter(
-        GrammarFact.lemma_id == lemma_id,
-        GrammarFact.language_code == language_code,
-        GrammarFact.fact_type == fact_type
-    ).first()
+    fact = (
+        session.query(GrammarFact)
+        .filter(
+            GrammarFact.lemma_id == lemma_id,
+            GrammarFact.language_code == language_code,
+            GrammarFact.fact_type == fact_type,
+        )
+        .first()
+    )
 
     if fact:
         session.delete(fact)
@@ -202,7 +201,9 @@ def delete_grammar_fact(
     return False
 
 
-def get_alternate_forms_facts(session, lemma_id: int, language_code: str) -> Optional[Dict[str, bool]]:
+def get_alternate_forms_facts(
+    session, lemma_id: int, language_code: str
+) -> Optional[Dict[str, bool]]:
     """
     Get the alternate forms grammar facts for a lemma in a specific language.
 
@@ -235,24 +236,35 @@ def get_alternate_forms_facts(session, lemma_id: int, language_code: str) -> Opt
             print(f"Has: {', '.join(k for k, v in facts.items() if v)}")
     """
     # Check if any alternate forms facts exist
-    fact = session.query(GrammarFact).filter(
-        GrammarFact.lemma_id == lemma_id,
-        GrammarFact.language_code == language_code,
-        GrammarFact.fact_type.in_([
-            "has_synonyms",
-            "has_abbreviations",
-            "has_expanded_forms",
-            "has_alternate_spellings"
-        ])
-    ).first()
+    fact = (
+        session.query(GrammarFact)
+        .filter(
+            GrammarFact.lemma_id == lemma_id,
+            GrammarFact.language_code == language_code,
+            GrammarFact.fact_type.in_(
+                [
+                    "has_synonyms",
+                    "has_abbreviations",
+                    "has_expanded_forms",
+                    "has_alternate_spellings",
+                ]
+            ),
+        )
+        .first()
+    )
 
     if not fact:
         return None
 
     results = {}
-    for fact_type in ["has_synonyms", "has_abbreviations", "has_expanded_forms", "has_alternate_spellings"]:
+    for fact_type in [
+        "has_synonyms",
+        "has_abbreviations",
+        "has_expanded_forms",
+        "has_alternate_spellings",
+    ]:
         value = get_grammar_fact_value(session, lemma_id, language_code, fact_type)
-        results[fact_type] = (value == "true")
+        results[fact_type] = value == "true"
 
     return results
 
@@ -320,10 +332,7 @@ def get_declension_class(session, lemma_id: int, language_code: str) -> Optional
 
 
 def update_alternate_forms_facts_after_deletion(
-    session,
-    lemma_id: int,
-    language_code: str,
-    deleted_form_type: Optional[str] = None
+    session, lemma_id: int, language_code: str, deleted_form_type: Optional[str] = None
 ) -> Dict[str, bool]:
     """
     Update grammar facts for alternate forms after a derivative form is deleted.
@@ -387,16 +396,19 @@ def update_alternate_forms_facts_after_deletion(
     for fact_type in fact_types_to_update:
         # Reverse map to get form types for this fact type
         relevant_form_types = [
-            form_type for form_type, ft in form_to_fact_map.items()
-            if ft == fact_type
+            form_type for form_type, ft in form_to_fact_map.items() if ft == fact_type
         ]
 
         # Count remaining forms of this type
-        remaining_count = session.query(DerivativeForm).filter(
-            DerivativeForm.lemma_id == lemma_id,
-            DerivativeForm.language_code == language_code,
-            DerivativeForm.grammatical_form.in_(relevant_form_types)
-        ).count()
+        remaining_count = (
+            session.query(DerivativeForm)
+            .filter(
+                DerivativeForm.lemma_id == lemma_id,
+                DerivativeForm.language_code == language_code,
+                DerivativeForm.grammatical_form.in_(relevant_form_types),
+            )
+            .count()
+        )
 
         if remaining_count > 0:
             # Forms still exist - update fact to "true"
@@ -404,9 +416,7 @@ def update_alternate_forms_facts_after_deletion(
             delete_grammar_fact(session, lemma_id, language_code, fact_type)
             # Then add new fact
             add_grammar_fact(
-                session, lemma_id, language_code, fact_type,
-                fact_value="true",
-                verified=True
+                session, lemma_id, language_code, fact_type, fact_value="true", verified=True
             )
             results[fact_type] = True
             logger.info(f"Updated {fact_type}=true for lemma {lemma_id} ({language_code})")

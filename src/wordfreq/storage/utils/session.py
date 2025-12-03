@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 def create_database_session(db_path: str = constants.WORDFREQ_DB_PATH):
     """Create a new database session."""
-    engine = create_engine(f'sqlite:///{db_path}')
+    engine = create_engine(f"sqlite:///{db_path}")
     Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
     return Session()

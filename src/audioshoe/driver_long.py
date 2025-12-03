@@ -20,16 +20,13 @@ stride_len_samples = stride_length * sr
 results = []
 
 for i in range(0, len(audio), stride_len_samples):
-    chunk = audio[i:i+chunk_len_samples]
+    chunk = audio[i : i + chunk_len_samples]
     input_features = processor(chunk, sampling_rate=sr, return_tensors="pt").input_features
 
     # Generate with detailed output
     with torch.no_grad():
         outputs = model.generate(
-            input_features,
-            return_dict_in_generate=True,
-            output_scores=True,
-            max_length=448
+            input_features, return_dict_in_generate=True, output_scores=True, max_length=448
         )
 
     # Decode the output
@@ -48,16 +45,18 @@ for i in range(0, len(audio), stride_len_samples):
     for j, token in enumerate(tokens):
         if token in processor.tokenizer.all_special_ids:
             continue
-        
+
         word = processor.tokenizer.decode([token])
         prob = logprobs[0][j][token].item()
-        
+
         if word.startswith(" ") and current_word:
-            words.append({
-                "word": current_word.strip(),
-                "logprob": current_logprob,
-                "start_time": current_start_time
-            })
+            words.append(
+                {
+                    "word": current_word.strip(),
+                    "logprob": current_logprob,
+                    "start_time": current_start_time,
+                }
+            )
             current_word = word
             current_logprob = prob
             current_start_time = i / sr + (j / len(tokens)) * chunk_length
@@ -66,14 +65,18 @@ for i in range(0, len(audio), stride_len_samples):
             current_logprob += prob
 
     if current_word:
-        words.append({
-            "word": current_word.strip(),
-            "logprob": current_logprob,
-            "start_time": current_start_time
-        })
+        words.append(
+            {
+                "word": current_word.strip(),
+                "logprob": current_logprob,
+                "start_time": current_start_time,
+            }
+        )
 
     results.extend(words)
 
 # Print results
 for word_info in results:
-    print(f"Word: {word_info['word']}, LogProb: {word_info['logprob']:.4f}, Start Time: {word_info['start_time']:.2f}s")
+    print(
+        f"Word: {word_info['word']}, LogProb: {word_info['logprob']:.4f}, Start Time: {word_info['start_time']:.2f}s"
+    )

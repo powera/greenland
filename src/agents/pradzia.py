@@ -21,14 +21,17 @@ if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
 import constants
-from wordfreq.storage.database import create_database_session, ensure_tables_exist, initialize_corpora
+from wordfreq.storage.database import (
+    create_database_session,
+    ensure_tables_exist,
+    initialize_corpora,
+)
 from wordfreq.frequency import corpus, analysis
 from wordfreq.trakaido import json_to_database
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -72,6 +75,7 @@ class PradziaAgent:
 
         # Check which data files exist
         import os
+
         project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
         data_dir = os.path.join(project_root, "src", "wordfreq", "data")
 
@@ -79,18 +83,21 @@ class PradziaAgent:
         for config in all_configs:
             full_path = os.path.join(data_dir, config.file_path)
             exists = os.path.exists(full_path)
-            file_status.append({
-                "corpus_name": config.name,
-                "file_path": config.file_path,
-                "full_path": full_path,
-                "exists": exists,
-                "enabled": config.enabled
-            })
+            file_status.append(
+                {
+                    "corpus_name": config.name,
+                    "file_path": config.file_path,
+                    "full_path": full_path,
+                    "exists": exists,
+                    "enabled": config.enabled,
+                }
+            )
 
         # Check database state
         session = self.get_session()
         try:
             from wordfreq.storage.models.schema import Corpus
+
             db_corpora = session.query(Corpus).all()
             db_corpus_info = [
                 {
@@ -98,7 +105,7 @@ class PradziaAgent:
                     "description": c.description,
                     "enabled": c.enabled,
                     "corpus_weight": c.corpus_weight,
-                    "max_unknown_rank": c.max_unknown_rank
+                    "max_unknown_rank": c.max_unknown_rank,
                 }
                 for c in db_corpora
             ]
@@ -120,12 +127,12 @@ class PradziaAgent:
                     "enabled": c.enabled,
                     "corpus_weight": c.corpus_weight,
                     "max_words": c.max_words,
-                    "file_path": c.file_path
+                    "file_path": c.file_path,
                 }
                 for c in all_configs
             ],
             "file_status": file_status,
-            "database_corpora": db_corpus_info
+            "database_corpora": db_corpus_info,
         }
 
         logger.info(f"Configuration check complete: {len(validation_errors)} errors found")
@@ -164,33 +171,37 @@ class PradziaAgent:
                         changes = []
 
                         if db_corpus.description != config.description:
-                            changes.append(f"description: '{db_corpus.description}' -> '{config.description}'")
+                            changes.append(
+                                f"description: '{db_corpus.description}' -> '{config.description}'"
+                            )
                         if db_corpus.corpus_weight != config.corpus_weight:
-                            changes.append(f"corpus_weight: {db_corpus.corpus_weight} -> {config.corpus_weight}")
+                            changes.append(
+                                f"corpus_weight: {db_corpus.corpus_weight} -> {config.corpus_weight}"
+                            )
                         if db_corpus.max_unknown_rank != config.max_unknown_rank:
-                            changes.append(f"max_unknown_rank: {db_corpus.max_unknown_rank} -> {config.max_unknown_rank}")
+                            changes.append(
+                                f"max_unknown_rank: {db_corpus.max_unknown_rank} -> {config.max_unknown_rank}"
+                            )
                         if db_corpus.enabled != config.enabled:
                             changes.append(f"enabled: {db_corpus.enabled} -> {config.enabled}")
 
                         if changes:
-                            would_update.append({
-                                "name": config.name,
-                                "changes": changes
-                            })
+                            would_update.append({"name": config.name, "changes": changes})
                     else:
-                        would_add.append({
-                            "name": config.name,
-                            "description": config.description,
-                            "enabled": config.enabled
-                        })
+                        would_add.append(
+                            {
+                                "name": config.name,
+                                "description": config.description,
+                                "enabled": config.enabled,
+                            }
+                        )
 
                 # Check what would be disabled
                 for corpus_name, db_corpus in existing_corpora.items():
                     if corpus_name not in config_names and db_corpus.enabled:
-                        would_disable.append({
-                            "name": corpus_name,
-                            "description": db_corpus.description
-                        })
+                        would_disable.append(
+                            {"name": corpus_name, "description": db_corpus.description}
+                        )
 
                 result = {
                     "dry_run": True,
@@ -199,7 +210,7 @@ class PradziaAgent:
                     "would_disable": would_disable,
                     "added_count": len(would_add),
                     "updated_count": len(would_update),
-                    "disabled_count": len(would_disable)
+                    "disabled_count": len(would_disable),
                 }
 
             finally:
@@ -213,12 +224,16 @@ class PradziaAgent:
             finally:
                 session.close()
 
-        logger.info(f"Sync complete: {result.get('added_count', 0)} added, "
-                   f"{result.get('updated_count', 0)} updated, "
-                   f"{result.get('disabled_count', 0)} disabled")
+        logger.info(
+            f"Sync complete: {result.get('added_count', 0)} added, "
+            f"{result.get('updated_count', 0)} updated, "
+            f"{result.get('disabled_count', 0)} disabled"
+        )
         return result
 
-    def load_corpora(self, corpus_names: Optional[List[str]] = None, dry_run: bool = False) -> Dict[str, Any]:
+    def load_corpora(
+        self, corpus_names: Optional[List[str]] = None, dry_run: bool = False
+    ) -> Dict[str, Any]:
         """
         Load corpus data into the database.
 
@@ -243,7 +258,10 @@ class PradziaAgent:
 
         if dry_run:
             import os
-            project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+
+            project_root = os.path.abspath(
+                os.path.join(os.path.dirname(__file__), "..", "..", "..")
+            )
             data_dir = os.path.join(project_root, "src", "wordfreq", "data")
 
             plan = []
@@ -251,20 +269,22 @@ class PradziaAgent:
                 full_path = os.path.join(data_dir, config.file_path)
                 exists = os.path.exists(full_path)
 
-                plan.append({
-                    "corpus_name": config.name,
-                    "file_path": full_path,
-                    "file_exists": exists,
-                    "max_words": config.max_words,
-                    "enabled": config.enabled,
-                    "ready": exists and config.enabled
-                })
+                plan.append(
+                    {
+                        "corpus_name": config.name,
+                        "file_path": full_path,
+                        "file_exists": exists,
+                        "max_words": config.max_words,
+                        "enabled": config.enabled,
+                        "ready": exists and config.enabled,
+                    }
+                )
 
             result = {
                 "dry_run": True,
                 "corpora_to_load": plan,
                 "total_count": len(plan),
-                "ready_count": sum(1 for p in plan if p["ready"])
+                "ready_count": sum(1 for p in plan if p["ready"]),
             }
         else:
             # Actually load the corpora
@@ -275,11 +295,7 @@ class PradziaAgent:
                 try:
                     logger.info(f"Loading corpus: {config.name}")
                     imported, total = corpus.load_corpus(config.name)
-                    results[config.name] = {
-                        "imported": imported,
-                        "total": total,
-                        "success": True
-                    }
+                    results[config.name] = {"imported": imported, "total": total, "success": True}
                     logger.info(f"Successfully loaded {config.name}: {imported}/{total} words")
                 except Exception as e:
                     error_msg = f"Failed to load corpus {config.name}: {e}"
@@ -289,7 +305,7 @@ class PradziaAgent:
                         "imported": 0,
                         "total": 0,
                         "success": False,
-                        "error": str(e)
+                        "error": str(e),
                     }
 
             result = {
@@ -297,7 +313,7 @@ class PradziaAgent:
                 "results": results,
                 "errors": errors,
                 "total_corpora": len(configs_to_load),
-                "successful_corpora": sum(1 for r in results.values() if r["success"])
+                "successful_corpora": sum(1 for r in results.values() if r["success"]),
             }
 
         logger.info(f"Corpus loading complete")
@@ -330,7 +346,7 @@ class PradziaAgent:
                     "word_tokens": word_count,
                     "frequency_records": freq_count,
                     "enabled_corpora": corpus_count,
-                    "would_calculate": True
+                    "would_calculate": True,
                 }
             finally:
                 session.close()
@@ -343,21 +359,19 @@ class PradziaAgent:
                 result = {
                     "dry_run": False,
                     "success": True,
-                    "message": "Combined ranks calculated successfully"
+                    "message": "Combined ranks calculated successfully",
                 }
                 logger.info("Combined ranks calculation completed!")
             except Exception as e:
                 error_msg = f"Failed to calculate combined ranks: {e}"
                 logger.error(error_msg)
-                result = {
-                    "dry_run": False,
-                    "success": False,
-                    "error": str(e)
-                }
+                result = {"dry_run": False, "success": False, "error": str(e)}
 
         return result
 
-    def bootstrap_from_json(self, json_path: str, update_difficulty: bool = True, dry_run: bool = False) -> Dict[str, Any]:
+    def bootstrap_from_json(
+        self, json_path: str, update_difficulty: bool = True, dry_run: bool = False
+    ) -> Dict[str, Any]:
         """
         Bootstrap the database with trakaido data from JSON export.
 
@@ -382,20 +396,25 @@ class PradziaAgent:
             from wordfreq.storage.models.schema import Lemma
 
             # Count lemmas with Lithuanian translations
-            existing_lithuanian_count = session.query(Lemma).filter(
-                Lemma.lithuanian_translation != None,
-                Lemma.lithuanian_translation != ""
-            ).count()
+            existing_lithuanian_count = (
+                session.query(Lemma)
+                .filter(Lemma.lithuanian_translation != None, Lemma.lithuanian_translation != "")
+                .count()
+            )
 
             if existing_lithuanian_count > 0:
-                logger.warning(f"Database already contains {existing_lithuanian_count} lemmas with Lithuanian translations")
-                logger.warning("Bootstrap operation aborted to prevent accidental data modification")
+                logger.warning(
+                    f"Database already contains {existing_lithuanian_count} lemmas with Lithuanian translations"
+                )
+                logger.warning(
+                    "Bootstrap operation aborted to prevent accidental data modification"
+                )
                 return {
                     "success": False,
                     "aborted": True,
                     "reason": "database_already_populated",
                     "existing_lithuanian_count": existing_lithuanian_count,
-                    "message": f'Database already contains {existing_lithuanian_count} lemmas with Lithuanian translations. Bootstrap is only for initial setup.'
+                    "message": f"Database already contains {existing_lithuanian_count} lemmas with Lithuanian translations. Bootstrap is only for initial setup.",
                 }
 
             logger.info("No existing Lithuanian translations found - proceeding with bootstrap")
@@ -412,21 +431,21 @@ class PradziaAgent:
                 "dry_run": dry_run,
                 "json_path": json_path,
                 "json_entries_loaded": len(trakaido_data),
-                "timestamp": start_time.isoformat()
+                "timestamp": start_time.isoformat(),
             }
         except Exception as e:
             logger.error(f"Failed to load JSON data: {e}")
             return {
                 "success": False,
                 "error": str(e),
-                "message": f'Failed to load JSON data from {json_path}'
+                "message": f"Failed to load JSON data from {json_path}",
             }
 
         if dry_run:
             # For dry run, just report what would happen
             result["would_migrate"] = len(trakaido_data)
             result["update_difficulty"] = update_difficulty
-            result["message"] = f'Would migrate {len(trakaido_data)} entries from JSON'
+            result["message"] = f"Would migrate {len(trakaido_data)} entries from JSON"
         else:
             # Actually perform the migration
             session = self.get_session()
@@ -436,7 +455,7 @@ class PradziaAgent:
                     session=session,
                     trakaido_data=trakaido_data,
                     update_difficulty=update_difficulty,
-                    verbose=False  # Use logging instead of print statements
+                    verbose=False,  # Use logging instead of print statements
                 )
 
                 # Commit the changes
@@ -485,7 +504,7 @@ class PradziaAgent:
         results = {
             "timestamp": start_time.isoformat(),
             "database_path": self.db_path,
-            "dry_run": dry_run
+            "dry_run": dry_run,
         }
 
         # Step 1: Ensure tables exist (only if not dry run)
@@ -541,7 +560,7 @@ class PradziaAgent:
         results = {
             "timestamp": start_time.isoformat(),
             "database_path": self.db_path,
-            "check": self.check_configuration()
+            "check": self.check_configuration(),
         }
 
         end_time = datetime.now()
@@ -554,6 +573,7 @@ class PradziaAgent:
         # Write to output file if requested
         if output_file:
             import json
+
             try:
                 with open(output_file, "w", encoding="utf-8") as f:
                     json.dump(results, f, indent=2, ensure_ascii=False)
@@ -584,7 +604,9 @@ class PradziaAgent:
         logger.info("")
 
         # Corpus summary
-        logger.info(f"CONFIGURED CORPORA: {check['total_configs']} total, {check['enabled_configs']} enabled")
+        logger.info(
+            f"CONFIGURED CORPORA: {check['total_configs']} total, {check['enabled_configs']} enabled"
+        )
         logger.info("")
 
         # File status
@@ -592,7 +614,9 @@ class PradziaAgent:
         for file_info in check["file_status"]:
             status = "EXISTS" if file_info["exists"] else "MISSING"
             enabled = "enabled" if file_info["enabled"] else "disabled"
-            logger.info(f"  [{status}] {file_info['corpus_name']} ({enabled}): {file_info['file_path']}")
+            logger.info(
+                f"  [{status}] {file_info['corpus_name']} ({enabled}): {file_info['file_path']}"
+            )
         logger.info("")
 
         # Database status
@@ -610,33 +634,44 @@ def get_argument_parser():
     This function allows external tools to introspect the available
     command-line arguments without executing the main function.
     """
-    parser = argparse.ArgumentParser(
-        description="Pradzia - Database Initialization Agent"
-    )
+    parser = argparse.ArgumentParser(description="Pradzia - Database Initialization Agent")
     parser.add_argument("--db-path", help="Database path (uses default if not specified)")
     parser.add_argument("--debug", action="store_true", help="Enable debug logging")
     parser.add_argument("--output", help="Output JSON file for report")
-    parser.add_argument("--dry-run", action="store_true",
-                       help="Report what would be done without making changes")
+    parser.add_argument(
+        "--dry-run", action="store_true", help="Report what would be done without making changes"
+    )
 
     # Mode selection
     mode_group = parser.add_mutually_exclusive_group()
-    mode_group.add_argument("--check", action="store_true",
-                           help="Check configuration and database state (no changes)")
-    mode_group.add_argument("--sync-config", action="store_true",
-                           help="Sync corpus configurations to database")
-    mode_group.add_argument("--load", nargs="*", metavar="CORPUS",
-                           help="Load specified corpora (or all enabled if none specified)")
-    mode_group.add_argument("--calc-ranks", action="store_true",
-                           help="Calculate combined ranks")
-    mode_group.add_argument("--init-full", action="store_true",
-                           help="Full initialization (sync + load + calc ranks)")
-    mode_group.add_argument("--bootstrap", metavar="JSON_PATH",
-                           help="Bootstrap database from trakaido JSON export (initial setup only)")
+    mode_group.add_argument(
+        "--check", action="store_true", help="Check configuration and database state (no changes)"
+    )
+    mode_group.add_argument(
+        "--sync-config", action="store_true", help="Sync corpus configurations to database"
+    )
+    mode_group.add_argument(
+        "--load",
+        nargs="*",
+        metavar="CORPUS",
+        help="Load specified corpora (or all enabled if none specified)",
+    )
+    mode_group.add_argument("--calc-ranks", action="store_true", help="Calculate combined ranks")
+    mode_group.add_argument(
+        "--init-full", action="store_true", help="Full initialization (sync + load + calc ranks)"
+    )
+    mode_group.add_argument(
+        "--bootstrap",
+        metavar="JSON_PATH",
+        help="Bootstrap database from trakaido JSON export (initial setup only)",
+    )
 
     # Bootstrap-specific options
-    parser.add_argument("--no-update-difficulty", action="store_true",
-                       help="Do not update difficulty levels on existing lemmas (only with --bootstrap)")
+    parser.add_argument(
+        "--no-update-difficulty",
+        action="store_true",
+        help="Do not update difficulty levels on existing lemmas (only with --bootstrap)",
+    )
 
     return parser
 
@@ -655,13 +690,16 @@ def main():
         result = agent.sync_configurations(dry_run=args.dry_run)
         if args.output:
             import json
+
             with open(args.output, "w", encoding="utf-8") as f:
                 json.dump(result, f, indent=2, ensure_ascii=False)
 
         if not args.dry_run:
-            print(f"\nSynced: {result['added_count']} added, "
-                  f"{result['updated_count']} updated, "
-                  f"{result['disabled_count']} disabled")
+            print(
+                f"\nSynced: {result['added_count']} added, "
+                f"{result['updated_count']} updated, "
+                f"{result['disabled_count']} disabled"
+            )
 
     elif args.load is not None:
         corpus_names = args.load if args.load else None
@@ -669,6 +707,7 @@ def main():
 
         if args.output:
             import json
+
             with open(args.output, "w", encoding="utf-8") as f:
                 json.dump(result, f, indent=2, ensure_ascii=False)
 
@@ -680,6 +719,7 @@ def main():
 
         if args.output:
             import json
+
             with open(args.output, "w", encoding="utf-8") as f:
                 json.dump(result, f, indent=2, ensure_ascii=False)
 
@@ -691,6 +731,7 @@ def main():
 
         if args.output:
             import json
+
             with open(args.output, "w", encoding="utf-8") as f:
                 json.dump(result, f, indent=2, ensure_ascii=False)
 
@@ -699,13 +740,12 @@ def main():
     elif args.bootstrap:
         update_difficulty = not args.no_update_difficulty
         result = agent.bootstrap_from_json(
-            json_path=args.bootstrap,
-            update_difficulty=update_difficulty,
-            dry_run=args.dry_run
+            json_path=args.bootstrap, update_difficulty=update_difficulty, dry_run=args.dry_run
         )
 
         if args.output:
             import json
+
             with open(args.output, "w", encoding="utf-8") as f:
                 json.dump(result, f, indent=2, ensure_ascii=False)
 
@@ -713,7 +753,9 @@ def main():
             print(f"\n⚠️  Bootstrap aborted: {result['message']}")
         elif result.get("success"):
             if not args.dry_run:
-                print(f"\n✅ Bootstrap complete: {result['successful_migrations']}/{result['total_entries']} entries migrated")
+                print(
+                    f"\n✅ Bootstrap complete: {result['successful_migrations']}/{result['total_entries']} entries migrated"
+                )
                 print(f"   Duration: {result['duration_seconds']:.2f} seconds")
             else:
                 print(f"\n✅ Dry run: Would migrate {result['would_migrate']} entries")

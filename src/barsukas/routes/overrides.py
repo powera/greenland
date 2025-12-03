@@ -8,7 +8,7 @@ from wordfreq.storage.models.schema import Lemma
 from wordfreq.storage.crud.difficulty_override import (
     add_difficulty_override,
     delete_difficulty_override,
-    get_difficulty_override
+    get_difficulty_override,
 )
 from wordfreq.storage.crud.operation_log import log_translation_change
 from wordfreq.storage.translation_helpers import get_supported_languages
@@ -21,6 +21,7 @@ bp = Blueprint("overrides", __name__, url_prefix="/overrides")
 def add_override(lemma_id):
     """Add or update a difficulty override."""
     from flask import current_app
+
     if current_app.config.get("READONLY", False):
         flash("Cannot add override: running in read-only mode", "error")
         return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
@@ -43,9 +44,14 @@ def add_override(lemma_id):
     # Validate difficulty level
     try:
         difficulty_level = int(difficulty_str)
-        if difficulty_level != Config.EXCLUDE_DIFFICULTY_LEVEL and\
-           (difficulty_level < Config.MIN_DIFFICULTY_LEVEL or difficulty_level > Config.MAX_DIFFICULTY_LEVEL):
-            flash(f'Difficulty level must be -1 or between {Config.MIN_DIFFICULTY_LEVEL} and {Config.MAX_DIFFICULTY_LEVEL}', "error")
+        if difficulty_level != Config.EXCLUDE_DIFFICULTY_LEVEL and (
+            difficulty_level < Config.MIN_DIFFICULTY_LEVEL
+            or difficulty_level > Config.MAX_DIFFICULTY_LEVEL
+        ):
+            flash(
+                f"Difficulty level must be -1 or between {Config.MIN_DIFFICULTY_LEVEL} and {Config.MAX_DIFFICULTY_LEVEL}",
+                "error",
+            )
             return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
     except ValueError:
         flash("Invalid difficulty level", "error")
@@ -61,7 +67,7 @@ def add_override(lemma_id):
         lemma_id=lemma_id,
         language_code=lang_code,
         difficulty_level=difficulty_level,
-        notes=notes
+        notes=notes,
     )
 
     # Log the change
@@ -73,14 +79,14 @@ def add_override(lemma_id):
         language_code=lang_code,
         old_translation=str(old_level) if old_level is not None else None,
         new_translation=str(difficulty_level),
-        notes=notes
+        notes=notes,
     )
 
     g.db.commit()
 
     action = "Updated" if old_override else "Added"
     lang_name = get_supported_languages()[lang_code]
-    flash(f'{action} difficulty override for {lang_name}: Level {difficulty_level}', "success")
+    flash(f"{action} difficulty override for {lang_name}: Level {difficulty_level}", "success")
 
     return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
@@ -89,6 +95,7 @@ def add_override(lemma_id):
 def delete_override(lemma_id, lang_code):
     """Delete a difficulty override."""
     from flask import current_app
+
     if current_app.config.get("READONLY", False):
         flash("Cannot delete override: running in read-only mode", "error")
         return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
@@ -118,13 +125,13 @@ def delete_override(lemma_id, lang_code):
             lemma_id=lemma_id,
             language_code=lang_code,
             old_translation=str(old_level),
-            new_translation=None
+            new_translation=None,
         )
 
         g.db.commit()
 
         lang_name = get_supported_languages()[lang_code]
-        flash(f'Deleted difficulty override for {lang_name}', "success")
+        flash(f"Deleted difficulty override for {lang_name}", "success")
     else:
         flash("Failed to delete override", "error")
 

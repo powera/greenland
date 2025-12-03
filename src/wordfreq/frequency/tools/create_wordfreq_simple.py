@@ -49,6 +49,7 @@ for corpus_name, (imported, total) in results.items():
 
 # Import constants and calculate harmonic mean ranks (from notebook cells)
 import constants
+
 print("Calculating harmonic mean ranks...")
 wordfreq.frequency.analysis.calculate_combined_ranks(db_path=constants.WORDFREQ_DB_PATH)
 

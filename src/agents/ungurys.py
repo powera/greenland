@@ -25,17 +25,11 @@ import constants
 from wordfreq.trakaido.utils.export_manager import TrakaidoExporter
 
 # Supported languages and their codes
-SUPPORTED_LANGUAGES = {
-    "lt": "Lithuanian",
-    "zh": "Chinese",
-    "ko": "Korean",
-    "fr": "French"
-}
+SUPPORTED_LANGUAGES = {"lt": "Lithuanian", "zh": "Chinese", "ko": "Korean", "fr": "French"}
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -43,8 +37,13 @@ logger = logging.getLogger(__name__)
 class UngurysAgent:
     """Agent for exporting word data to WireWord format."""
 
-    def __init__(self, db_path: str = None, debug: bool = False, language: str = "lt",
-                 simplified_chinese: bool = True):
+    def __init__(
+        self,
+        db_path: str = None,
+        debug: bool = False,
+        language: str = "lt",
+        simplified_chinese: bool = True,
+    ):
         """
         Initialize the Ungurys agent.
 
@@ -72,20 +71,24 @@ class UngurysAgent:
 
         # Validate language
         if self.language not in SUPPORTED_LANGUAGES:
-            raise ValueError(f"Unsupported language: {self.language}. Supported: {', '.join(SUPPORTED_LANGUAGES.keys())}")
+            raise ValueError(
+                f"Unsupported language: {self.language}. Supported: {', '.join(SUPPORTED_LANGUAGES.keys())}"
+            )
 
         # Initialize exporter with language parameter and Chinese variant
         self.exporter = TrakaidoExporter(
             db_path=self.db_path,
             debug=debug,
             language=self.language,
-            simplified_chinese=self.simplified_chinese if self.language == "zh" else True
+            simplified_chinese=self.simplified_chinese if self.language == "zh" else True,
         )
 
         variant_info = ""
         if self.language == "zh":
             variant_info = f" ({'Simplified' if self.simplified_chinese else 'Traditional'})"
-        logger.info(f"Initialized Ungurys agent for {SUPPORTED_LANGUAGES[self.language]}{variant_info} (lang_{self.language_suffix})")
+        logger.info(
+            f"Initialized Ungurys agent for {SUPPORTED_LANGUAGES[self.language]}{variant_info} (lang_{self.language_suffix})"
+        )
 
     def get_language_output_dir(self) -> str:
         """
@@ -100,7 +103,9 @@ class UngurysAgent:
         project_root = constants.PROJECT_ROOT
 
         # Build path to data/trakaido_wordlists/lang_{suffix}/generated/
-        lang_dir = os.path.join(project_root, "data", "trakaido_wordlists", f"lang_{self.language_suffix}", "generated")
+        lang_dir = os.path.join(
+            project_root, "data", "trakaido_wordlists", f"lang_{self.language_suffix}", "generated"
+        )
 
         return lang_dir
 
@@ -122,7 +127,7 @@ class UngurysAgent:
         pos_subtype: Optional[str] = None,
         limit: Optional[int] = None,
         include_without_guid: bool = False,
-        include_unverified: bool = True
+        include_unverified: bool = True,
     ) -> Tuple[bool, Optional[Any]]:
         """
         Export to a single WireWord format JSON file.
@@ -149,7 +154,7 @@ class UngurysAgent:
             limit=limit,
             include_without_guid=include_without_guid,
             include_unverified=include_unverified,
-            pretty_print=True
+            pretty_print=True,
         )
 
         if success:
@@ -160,8 +165,7 @@ class UngurysAgent:
         return success, stats
 
     def export_wireword_directory(
-        self,
-        output_dir: Optional[str] = None
+        self, output_dir: Optional[str] = None
     ) -> Tuple[bool, Dict[str, Any]]:
         """
         Export WireWord format files to directory structure.
@@ -178,7 +182,9 @@ class UngurysAgent:
         if output_dir is None:
             output_dir = self.get_language_output_dir()
 
-        logger.info(f"Starting WireWord directory export for {SUPPORTED_LANGUAGES[self.language]}...")
+        logger.info(
+            f"Starting WireWord directory export for {SUPPORTED_LANGUAGES[self.language]}..."
+        )
         logger.info(f"Output directory: {output_dir}/wireword/")
 
         success, results = self.exporter.export_wireword_directory(output_dir)
@@ -200,7 +206,7 @@ class UngurysAgent:
         pos_subtype: Optional[str] = None,
         limit: Optional[int] = None,
         include_without_guid: bool = False,
-        include_unverified: bool = True
+        include_unverified: bool = True,
     ) -> Tuple[bool, Optional[Any]]:
         """
         Export verbs to a single WireWord format JSON file.
@@ -230,7 +236,7 @@ class UngurysAgent:
             limit=limit,
             include_without_guid=include_without_guid,
             include_unverified=include_unverified,
-            pretty_print=True
+            pretty_print=True,
         )
 
         if success:
@@ -250,7 +256,7 @@ class UngurysAgent:
         limit: Optional[int] = None,
         include_without_guid: bool = False,
         include_unverified: bool = True,
-        export_mode: str = "directory"
+        export_mode: str = "directory",
     ) -> Dict[str, Any]:
         """
         Run the WireWord export with specified parameters.
@@ -274,14 +280,17 @@ class UngurysAgent:
             "timestamp": start_time.isoformat(),
             "database_path": self.db_path,
             "export_mode": export_mode,
-            "exports": {}
+            "exports": {},
         }
 
         # Single-file export
         if export_mode in ["single", "both"]:
             if not output_path:
                 logger.error("output_path is required for single-file export")
-                results["exports"]["single"] = {"success": False, "error": "No output_path specified"}
+                results["exports"]["single"] = {
+                    "success": False,
+                    "error": "No output_path specified",
+                }
             else:
                 success, stats = self.export_wireword_single(
                     output_path=output_path,
@@ -290,12 +299,12 @@ class UngurysAgent:
                     pos_subtype=pos_subtype,
                     limit=limit,
                     include_without_guid=include_without_guid,
-                    include_unverified=include_unverified
+                    include_unverified=include_unverified,
                 )
                 results["exports"]["single"] = {
                     "success": success,
                     "stats": stats,
-                    "path": output_path
+                    "path": output_path,
                 }
 
         # Directory export
@@ -306,7 +315,7 @@ class UngurysAgent:
             results["exports"]["directory"] = {
                 "success": success,
                 "results": export_results,
-                "directory": actual_dir
+                "directory": actual_dir,
             }
 
         # Always export verbs to separate file (regardless of export mode)
@@ -314,12 +323,12 @@ class UngurysAgent:
         verb_success, verb_stats = self.export_wireword_verbs(
             output_path=None,  # Use default path
             include_without_guid=include_without_guid,
-            include_unverified=include_unverified
+            include_unverified=include_unverified,
         )
         results["exports"]["verbs"] = {
             "success": verb_success,
             "stats": verb_stats,
-            "note": "Verbs are always exported to separate wireword_verbs.json file"
+            "note": "Verbs are always exported to separate wireword_verbs.json file",
         }
 
         end_time = datetime.now()
@@ -339,7 +348,9 @@ class UngurysAgent:
         variant_info = ""
         if self.language == "zh":
             variant_info = f" ({'Simplified' if self.simplified_chinese else 'Traditional'})"
-        logger.info(f"Language: {SUPPORTED_LANGUAGES[self.language]}{variant_info} (lang_{self.language_suffix})")
+        logger.info(
+            f"Language: {SUPPORTED_LANGUAGES[self.language]}{variant_info} (lang_{self.language_suffix})"
+        )
         logger.info(f"Timestamp: {start_time.strftime('%Y-%m-%d %H:%M:%S')}")
         logger.info(f"Export Mode: {results['export_mode']}")
         logger.info(f"Duration: {duration:.2f} seconds")
@@ -401,26 +412,38 @@ class UngurysAgent:
 
 def main():
     """Main entry point for the ungurys agent."""
-    parser = argparse.ArgumentParser(
-        description="Ungurys - WireWord Export Agent"
-    )
+    parser = argparse.ArgumentParser(description="Ungurys - WireWord Export Agent")
     parser.add_argument("--db-path", help="Database path (uses default if not specified)")
     parser.add_argument("--debug", action="store_true", help="Enable debug logging")
 
     # Language options
     language_help = f'Language code (default: lt). Supported: {", ".join(f"{k}={v}" for k, v in SUPPORTED_LANGUAGES.items())}, zh-Hant=Chinese (Traditional)'
-    parser.add_argument("--language", choices=["lt", "zh", "zh-Hant", "ko", "fr"], default="lt",
-                       help=language_help)
-    parser.add_argument("--traditional", action="store_true",
-                       help="For Chinese (zh): export Traditional characters instead of Simplified (exports to lang_zh_Hant/)")
+    parser.add_argument(
+        "--language", choices=["lt", "zh", "zh-Hant", "ko", "fr"], default="lt", help=language_help
+    )
+    parser.add_argument(
+        "--traditional",
+        action="store_true",
+        help="For Chinese (zh): export Traditional characters instead of Simplified (exports to lang_zh_Hant/)",
+    )
 
     # Export mode
-    parser.add_argument("--mode", choices=["single", "directory", "both"], default="single",
-                       help="Export mode: single file, directory structure, or both (default: single)")
+    parser.add_argument(
+        "--mode",
+        choices=["single", "directory", "both"],
+        default="single",
+        help="Export mode: single file, directory structure, or both (default: single)",
+    )
 
     # Output paths
-    parser.add_argument("--output", help="Output path for single-file export (default: data/trakaido_wordlists/lang_{language}/generated/wireword/wireword_nouns.json)")
-    parser.add_argument("--output-dir", help="Output directory for directory export (default: data/trakaido_wordlists/lang_{language}/generated/)")
+    parser.add_argument(
+        "--output",
+        help="Output path for single-file export (default: data/trakaido_wordlists/lang_{language}/generated/wireword/wireword_nouns.json)",
+    )
+    parser.add_argument(
+        "--output-dir",
+        help="Output directory for directory export (default: data/trakaido_wordlists/lang_{language}/generated/)",
+    )
 
     # Filtering options
     parser.add_argument("--level", type=int, help="Filter by specific difficulty level")
@@ -429,10 +452,17 @@ def main():
     parser.add_argument("--limit", type=int, help="Limit number of results")
 
     # Include options
-    parser.add_argument("--include-without-guid", action="store_true",
-                       help="Include lemmas without GUIDs (default: False)")
-    parser.add_argument("--include-unverified", action="store_true", default=True,
-                       help="Include unverified entries (default: True)")
+    parser.add_argument(
+        "--include-without-guid",
+        action="store_true",
+        help="Include lemmas without GUIDs (default: False)",
+    )
+    parser.add_argument(
+        "--include-unverified",
+        action="store_true",
+        default=True,
+        help="Include unverified entries (default: True)",
+    )
 
     args = parser.parse_args()
 
@@ -451,7 +481,9 @@ def main():
 
     # If output_dir not specified for directory mode, it will use language-specific default
     if args.mode in ["directory", "both"] and not args.output_dir:
-        args.output_dir = None  # Will trigger use of get_language_output_dir() in export_wireword_directory
+        args.output_dir = (
+            None  # Will trigger use of get_language_output_dir() in export_wireword_directory
+        )
 
     # Run export
     agent.run_export(
@@ -463,7 +495,7 @@ def main():
         limit=args.limit,
         include_without_guid=args.include_without_guid,
         include_unverified=args.include_unverified,
-        export_mode=args.mode
+        export_mode=args.mode,
     )
 
 

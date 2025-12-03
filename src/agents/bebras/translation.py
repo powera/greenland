@@ -12,10 +12,7 @@ from typing import List, Dict, Optional
 import util.prompt_loader
 from clients.unified_client import UnifiedLLMClient
 from clients.types import Schema, SchemaProperty
-from wordfreq.storage.database import (
-    Sentence,
-    add_sentence_translation
-)
+from wordfreq.storage.database import Sentence, add_sentence_translation
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +28,7 @@ LANGUAGE_NAMES = {
     "vi": "Vietnamese",
     "de": "German",
     "es": "Spanish",
-    "ja": "Japanese"
+    "ja": "Japanese",
 }
 
 
@@ -42,7 +39,7 @@ def ensure_translations(
     source_language: str,
     target_languages: List[str],
     model: str = "gpt-5-mini",
-    verified: bool = False
+    verified: bool = False,
 ) -> Dict[str, any]:
     """
     Ensure translations exist for a sentence in all target languages.
@@ -62,30 +59,25 @@ def ensure_translations(
     logger.info(f"Ensuring translations for sentence {sentence.id} in: {target_languages}")
 
     # Check which translations already exist
-    existing_translations = {
-        t.language_code for t in sentence.translations
-    }
+    existing_translations = {t.language_code for t in sentence.translations}
 
     # Determine which translations need to be added
     needed_languages = [
-        lang for lang in target_languages
+        lang
+        for lang in target_languages
         if lang not in existing_translations and lang != source_language
     ]
 
     if not needed_languages:
         logger.info("All translations already exist")
-        return {
-            "success": True,
-            "added": 0,
-            "skipped": len(target_languages)
-        }
+        return {"success": True, "added": 0, "skipped": len(target_languages)}
 
     # Generate translations via LLM
     translations = translate_sentence(
         source_text=source_text,
         source_language=source_language,
         target_languages=needed_languages,
-        model=model
+        model=model,
     )
 
     if not translations.get("success"):
@@ -100,25 +92,18 @@ def ensure_translations(
                 sentence=sentence,
                 language_code=lang_code,
                 translation_text=translation_text,
-                verified=verified
+                verified=verified,
             )
             added_count += 1
             logger.info(f"Added {lang_code} translation: {translation_text}")
         except Exception as e:
             logger.error(f"Failed to add {lang_code} translation: {e}")
 
-    return {
-        "success": True,
-        "added": added_count,
-        "skipped": len(existing_translations)
-    }
+    return {"success": True, "added": added_count, "skipped": len(existing_translations)}
 
 
 def translate_sentence(
-    source_text: str,
-    source_language: str,
-    target_languages: List[str],
-    model: str = "gpt-5-mini"
+    source_text: str, source_language: str, target_languages: List[str], model: str = "gpt-5-mini"
 ) -> Dict[str, any]:
     """
     Translate a sentence to multiple target languages using LLM.
@@ -135,9 +120,7 @@ def translate_sentence(
     logger.info(f"Translating '{source_text}' to {target_languages}")
 
     source_lang_name = LANGUAGE_NAMES.get(source_language, source_language)
-    target_lang_names = [
-        LANGUAGE_NAMES.get(lang, lang) for lang in target_languages
-    ]
+    target_lang_names = [LANGUAGE_NAMES.get(lang, lang) for lang in target_languages]
 
     # Load prompt templates
     prompt_context = util.prompt_loader.get_context("wordfreq", "sentence_translation")
@@ -148,7 +131,7 @@ def translate_sentence(
         source_lang_name=source_lang_name,
         target_lang_names=", ".join(target_lang_names),
         source_text=source_text,
-        target_lang_codes=", ".join(target_languages)
+        target_lang_codes=", ".join(target_languages),
     )
 
     # Combine context and prompt
@@ -159,45 +142,32 @@ def translate_sentence(
     for lang_code in target_languages:
         lang_name = LANGUAGE_NAMES.get(lang_code, lang_code)
         properties[lang_code] = SchemaProperty(
-            type="string",
-            description=f"Translation in {lang_name}"
+            type="string", description=f"Translation in {lang_name}"
         )
 
     schema = Schema(
         name="Translations",
         description="Sentence translations in multiple languages",
-        properties=properties
+        properties=properties,
     )
 
     try:
         llm_client = UnifiedLLMClient()
         response = llm_client.generate_chat(
-            prompt=prompt,
-            model=model,
-            json_schema=schema,
-            timeout=60
+            prompt=prompt, model=model, json_schema=schema, timeout=60
         )
 
         if response.structured_data:
             translations = response.structured_data
             logger.info(f"Generated {len(translations)} translations")
-            return {
-                "success": True,
-                "translations": translations
-            }
+            return {"success": True, "translations": translations}
         else:
             logger.error("No structured data received from LLM")
-            return {
-                "success": False,
-                "error": "LLM did not return structured data"
-            }
+            return {"success": False, "error": "LLM did not return structured data"}
 
     except Exception as e:
         logger.error(f"Error translating sentence: {e}", exc_info=True)
-        return {
-            "success": False,
-            "error": str(e)
-        }
+        return {"success": False, "error": str(e)}
 
 
 def get_language_name(language_code: str) -> str:

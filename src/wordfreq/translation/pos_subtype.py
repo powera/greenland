@@ -15,11 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 def query_pos_subtype(
-    client,
-    word: str,
-    definition_text: str,
-    pos_type: str,
-    get_session_func
+    client, word: str, definition_text: str, pos_type: str, get_session_func
 ) -> Tuple[str, bool]:
     """
     Query LLM for POS subtype for a definition.
@@ -58,19 +54,17 @@ def query_pos_subtype(
                     "pos_subtype": SchemaProperty(
                         type="string",
                         description="The specific subtype within the part of speech category",
-                        enum=valid_subtypes
+                        enum=valid_subtypes,
                     ),
                     "confidence": SchemaProperty(
-                        type="number",
-                        description="Confidence score from 0-1"
+                        type="number", description="Confidence score from 0-1"
                     ),
                     "reasoning": SchemaProperty(
-                        type="string",
-                        description="Explanation for the classification"
-                    )
-                }
+                        type="string", description="Explanation for the classification"
+                    ),
+                },
             )
-        }
+        },
     )
 
     # Select the appropriate context based on the part of speech
@@ -80,10 +74,7 @@ def query_pos_subtype(
 
     try:
         response = client.generate_chat(
-            prompt=prompt,
-            model=client.model,
-            json_schema=schema,
-            context=context
+            prompt=prompt, model=client.model, json_schema=schema, context=context
         )
 
         # Log successful query
@@ -92,19 +83,21 @@ def query_pos_subtype(
             linguistic_db.log_query(
                 session,
                 word=word,
-                query_type=f'pos_subtype_{pos_type}',
+                query_type=f"pos_subtype_{pos_type}",
                 prompt=prompt,
                 response=json.dumps(response.structured_data),
-                model=client.model
+                model=client.model,
             )
         except Exception as log_err:
             logger.error(f"Failed to log successful subtype query: {log_err}")
 
         # Validate and return response data
-        if (response.structured_data and
-            isinstance(response.structured_data, dict) and
-            "classification" in response.structured_data and
-            "pos_subtype" in response.structured_data["classification"]):
+        if (
+            response.structured_data
+            and isinstance(response.structured_data, dict)
+            and "classification" in response.structured_data
+            and "pos_subtype" in response.structured_data["classification"]
+        ):
             return response.structured_data["classification"]["pos_subtype"], True
         else:
             logger.warning(f"Invalid subtype response format for word '{word}'")
@@ -117,10 +110,7 @@ def query_pos_subtype(
 
 
 def update_missing_subtypes_for_word(
-    client,
-    word_text: str,
-    get_session_func,
-    throttle: float = 1.0
+    client, word_text: str, get_session_func, throttle: float = 1.0
 ) -> Dict[str, Any]:
     """
     Add missing POS subtypes for all definitions of a word.
@@ -146,7 +136,7 @@ def update_missing_subtypes_for_word(
             "total_definitions": 0,
             "missing_subtypes": 0,
             "processed": 0,
-            "successful": 0
+            "successful": 0,
         }
 
     # Get all definitions for the word
@@ -160,17 +150,18 @@ def update_missing_subtypes_for_word(
             "total_definitions": 0,
             "missing_subtypes": 0,
             "processed": 0,
-            "successful": 0
+            "successful": 0,
         }
 
     # Filter for definitions without subtypes
     definitions_without_subtypes = [
-        d for d in definitions
-        if not d.pos_subtype or d.pos_subtype.strip() == ""
+        d for d in definitions if not d.pos_subtype or d.pos_subtype.strip() == ""
     ]
 
     missing_subtypes = len(definitions_without_subtypes)
-    logger.info(f"Found {missing_subtypes} definitions without subtypes (out of {total_definitions} total)")
+    logger.info(
+        f"Found {missing_subtypes} definitions without subtypes (out of {total_definitions} total)"
+    )
 
     successful = 0
     processed = 0
@@ -182,11 +173,7 @@ def update_missing_subtypes_for_word(
             continue
 
         subtype, success = query_pos_subtype(
-            client,
-            word.word,
-            definition.definition_text,
-            definition.pos_type,
-            get_session_func
+            client, word.word, definition.definition_text, definition.pos_type, get_session_func
         )
 
         if success and subtype:
@@ -202,23 +189,22 @@ def update_missing_subtypes_for_word(
         # Throttle to avoid overloading the API
         time.sleep(throttle)
 
-    logger.info(f"Processing complete for '{word_text}': {successful}/{processed} successful "
-                f"({missing_subtypes} missing, {total_definitions} total)")
+    logger.info(
+        f"Processing complete for '{word_text}': {successful}/{processed} successful "
+        f"({missing_subtypes} missing, {total_definitions} total)"
+    )
 
     return {
         "word": word_text,
         "total_definitions": total_definitions,
         "missing_subtypes": missing_subtypes,
         "processed": processed,
-        "successful": successful
+        "successful": successful,
     }
 
 
 def update_subtypes_for_batch(
-    client,
-    get_session_func,
-    limit: int = 100,
-    throttle: float = 1.0
+    client, get_session_func, limit: int = 100, throttle: float = 1.0
 ) -> Dict[str, Any]:
     """
     Add missing POS subtypes for a batch of definitions.
@@ -252,18 +238,16 @@ def update_subtypes_for_batch(
         word = definition.word
 
         subtype, success = query_pos_subtype(
-            client,
-            word.word,
-            definition.definition_text,
-            definition.pos_type,
-            get_session_func
+            client, word.word, definition.definition_text, definition.pos_type, get_session_func
         )
 
         if success and subtype:
             # Update the definition with the subtype
             linguistic_db.update_definition(session, definition.id, pos_subtype=subtype)
             successful += 1
-            logger.info(f"Added subtype '{subtype}' for '{word.word}' definition ID {definition.id}")
+            logger.info(
+                f"Added subtype '{subtype}' for '{word.word}' definition ID {definition.id}"
+            )
         else:
             logger.warning(f"Failed to get subtype for '{word.word}' definition ID {definition.id}")
 
@@ -272,10 +256,8 @@ def update_subtypes_for_batch(
         # Throttle to avoid overloading the API
         time.sleep(throttle)
 
-    logger.info(f"Batch processing complete: {successful}/{processed} successful (out of {total} total)")
+    logger.info(
+        f"Batch processing complete: {successful}/{processed} successful (out of {total} total)"
+    )
 
-    return {
-        "total": total,
-        "processed": processed,
-        "successful": successful
-    }
+    return {"total": total, "processed": processed, "successful": successful}

@@ -62,15 +62,11 @@ class VerbManager:
         """Get database session."""
         return create_database_session(self.db_path)
 
-    def _get_verb_analysis_prompt(self, english_verb: str, target_translation: str = None,
-                                   language: str = "lt") -> str:
+    def _get_verb_analysis_prompt(
+        self, english_verb: str, target_translation: str = None, language: str = "lt"
+    ) -> str:
         """Get the prompt for analyzing a new verb."""
-        language_names = {
-            "lt": "Lithuanian",
-            "zh": "Chinese",
-            "ko": "Korean",
-            "fr": "French"
-        }
+        language_names = {"lt": "Lithuanian", "zh": "Chinese", "ko": "Korean", "fr": "French"}
         language_name = language_names.get(language, "Lithuanian")
 
         context = util.prompt_loader.get_context("wordfreq", "word_analysis")
@@ -86,13 +82,18 @@ class VerbManager:
         prompt = prompt_template.format(
             word_specification=word_specification,
             meaning_clarification=meaning_clarification,
-            english_word=english_verb
+            english_word=english_verb,
         )
 
         return f"{context}\n\n{prompt}"
 
-    def _query_verb_data(self, english_verb: str, target_translation: str = None,
-                        language: str = "lt", model_override: str = None) -> Tuple[Optional[WordData], bool]:
+    def _query_verb_data(
+        self,
+        english_verb: str,
+        target_translation: str = None,
+        language: str = "lt",
+        model_override: str = None,
+    ) -> Tuple[Optional[WordData], bool]:
         """
         Query LLM for comprehensive verb data.
 
@@ -105,31 +106,54 @@ class VerbManager:
         Returns:
             Tuple of (WordData object, success flag)
         """
-        language_field_names = {
-            "lt": "lithuanian",
-            "zh": "chinese",
-            "ko": "korean",
-            "fr": "french"
-        }
+        language_field_names = {"lt": "lithuanian", "zh": "chinese", "ko": "korean", "fr": "french"}
 
         schema = Schema(
             name="VerbAnalysis",
             description="Comprehensive analysis of a verb for language learning",
             properties={
-                "english": SchemaProperty("string", "The English verb being analyzed (infinitive form)"),
-                "lithuanian": SchemaProperty("string", "Lithuanian translation of the verb (infinitive form)"),
-                "pos_type": SchemaProperty("string", "Part of speech (should be 'verb')",
-                    enum=["verb"]),
-                "pos_subtype": SchemaProperty("string", "Verb subtype classification",
-                    enum=["action", "state", "motion", "communication", "mental", "modal", "auxiliary", "other"]),
+                "english": SchemaProperty(
+                    "string", "The English verb being analyzed (infinitive form)"
+                ),
+                "lithuanian": SchemaProperty(
+                    "string", "Lithuanian translation of the verb (infinitive form)"
+                ),
+                "pos_type": SchemaProperty(
+                    "string", "Part of speech (should be 'verb')", enum=["verb"]
+                ),
+                "pos_subtype": SchemaProperty(
+                    "string",
+                    "Verb subtype classification",
+                    enum=[
+                        "action",
+                        "state",
+                        "motion",
+                        "communication",
+                        "mental",
+                        "modal",
+                        "auxiliary",
+                        "other",
+                    ],
+                ),
                 "definition": SchemaProperty("string", "Clear definition for language learners"),
-                "confidence": SchemaProperty("number", "Confidence score from 0.0-1.0",
-                    minimum=0.0, maximum=1.0),
-                "chinese_translation": SchemaProperty("string", "Chinese translation (infinitive/base form)"),
-                "korean_translation": SchemaProperty("string", "Korean translation (infinitive/base form)"),
-                "french_translation": SchemaProperty("string", "French translation (infinitive form)"),
-                "swahili_translation": SchemaProperty("string", "Swahili translation (infinitive/base form)"),
-                "vietnamese_translation": SchemaProperty("string", "Vietnamese translation (infinitive/base form)"),
+                "confidence": SchemaProperty(
+                    "number", "Confidence score from 0.0-1.0", minimum=0.0, maximum=1.0
+                ),
+                "chinese_translation": SchemaProperty(
+                    "string", "Chinese translation (infinitive/base form)"
+                ),
+                "korean_translation": SchemaProperty(
+                    "string", "Korean translation (infinitive/base form)"
+                ),
+                "french_translation": SchemaProperty(
+                    "string", "French translation (infinitive form)"
+                ),
+                "swahili_translation": SchemaProperty(
+                    "string", "Swahili translation (infinitive/base form)"
+                ),
+                "vietnamese_translation": SchemaProperty(
+                    "string", "Vietnamese translation (infinitive/base form)"
+                ),
                 "alternatives": SchemaProperty(
                     type="object",
                     description="Alternative forms in different languages",
@@ -137,17 +161,20 @@ class VerbManager:
                         "english": SchemaProperty(
                             type="array",
                             description="Alternative English forms (synonyms)",
-                            items={"type": "string"}
+                            items={"type": "string"},
                         ),
                         "lithuanian": SchemaProperty(
                             type="array",
                             description="Alternative Lithuanian forms (synonyms)",
-                            items={"type": "string"}
-                        )
-                    }
+                            items={"type": "string"},
+                        ),
+                    },
                 ),
-                "notes": SchemaProperty("string", "Additional notes about the verb (e.g., transitivity, irregular conjugations)")
-            }
+                "notes": SchemaProperty(
+                    "string",
+                    "Additional notes about the verb (e.g., transitivity, irregular conjugations)",
+                ),
+            },
         )
 
         prompt = self._get_verb_analysis_prompt(english_verb, target_translation, language)
@@ -155,28 +182,29 @@ class VerbManager:
         try:
             model_to_use = model_override or self.model
             response = self.client.generate_chat(
-                prompt=prompt,
-                model=model_to_use,
-                json_schema=schema
+                prompt=prompt, model=model_to_use, json_schema=schema
             )
 
             if response.structured_data:
                 data = response.structured_data
-                return WordData(
-                    english=data.get("english", english_verb),
-                    lithuanian=data.get("lithuanian", target_translation or ""),
-                    pos_type="verb",  # Always verb
-                    pos_subtype=data.get("pos_subtype", "action"),
-                    definition=data.get("definition", ""),
-                    confidence=data.get("confidence", 0.5),
-                    alternatives=data.get("alternatives", {"english": [], "lithuanian": []}),
-                    notes=data.get("notes", ""),
-                    chinese_translation=data.get("chinese_translation"),
-                    korean_translation=data.get("korean_translation"),
-                    french_translation=data.get("french_translation"),
-                    swahili_translation=data.get("swahili_translation"),
-                    vietnamese_translation=data.get("vietnamese_translation")
-                ), True
+                return (
+                    WordData(
+                        english=data.get("english", english_verb),
+                        lithuanian=data.get("lithuanian", target_translation or ""),
+                        pos_type="verb",  # Always verb
+                        pos_subtype=data.get("pos_subtype", "action"),
+                        definition=data.get("definition", ""),
+                        confidence=data.get("confidence", 0.5),
+                        alternatives=data.get("alternatives", {"english": [], "lithuanian": []}),
+                        notes=data.get("notes", ""),
+                        chinese_translation=data.get("chinese_translation"),
+                        korean_translation=data.get("korean_translation"),
+                        french_translation=data.get("french_translation"),
+                        swahili_translation=data.get("swahili_translation"),
+                        vietnamese_translation=data.get("vietnamese_translation"),
+                    ),
+                    True,
+                )
             else:
                 logger.error(f"No structured data received for verb '{english_verb}'")
                 return None, False
@@ -196,9 +224,9 @@ class VerbManager:
             Unique GUID string in format V01_###
         """
         # Find the next available number for verb prefix
-        existing_guids = session.query(Lemma.guid).filter(
-            Lemma.guid.like(f"{self.VERB_GUID_PREFIX}_%")
-        ).all()
+        existing_guids = (
+            session.query(Lemma.guid).filter(Lemma.guid.like(f"{self.VERB_GUID_PREFIX}_%")).all()
+        )
 
         existing_numbers = []
         for guid_tuple in existing_guids:
@@ -230,11 +258,13 @@ class VerbManager:
         display_word_data(data)
 
         while True:
-            choice = input("\nOptions:\n"
-                          "1. Approve as-is\n"
-                          "2. Modify before approval\n"
-                          "3. Reject\n"
-                          "Enter choice (1-3): ").strip()
+            choice = input(
+                "\nOptions:\n"
+                "1. Approve as-is\n"
+                "2. Modify before approval\n"
+                "3. Reject\n"
+                "Enter choice (1-3): "
+            ).strip()
 
             if choice == "1":
                 return ReviewResult(approved=True, modifications={}, notes="")
@@ -290,11 +320,17 @@ class VerbManager:
 
         if language == "lt":
             # Use existing Lithuanian verb conjugation generator
-            from wordfreq.translation.generate_lithuanian_verb_forms import process_lemma_conjugations
+            from wordfreq.translation.generate_lithuanian_verb_forms import (
+                process_lemma_conjugations,
+            )
+
             return process_lemma_conjugations(self.linguistic_client, lemma_id, self.db_path)
         elif language == "fr":
             # Use French verb conjugation generator
-            from wordfreq.translation.generate_french_verb_forms import process_lemma_conjugations as process_french
+            from wordfreq.translation.generate_french_verb_forms import (
+                process_lemma_conjugations as process_french,
+            )
+
             return process_french(self.linguistic_client, lemma_id, self.db_path)
         elif language == "ko":
             # Korean verbs conjugate - would need a generator similar to Lithuanian/French
@@ -304,9 +340,15 @@ class VerbManager:
             logger.warning(f"Unknown language '{language}' for conjugation generation")
             return True
 
-    def add_verb(self, english_verb: str, target_translation: str = None,
-                 difficulty_level: int = None, auto_approve: bool = False,
-                 language: str = "lt", generate_forms: bool = True) -> bool:
+    def add_verb(
+        self,
+        english_verb: str,
+        target_translation: str = None,
+        difficulty_level: int = None,
+        auto_approve: bool = False,
+        language: str = "lt",
+        generate_forms: bool = True,
+    ) -> bool:
         """
         Add a new verb to the trakaido system.
 
@@ -325,19 +367,24 @@ class VerbManager:
         if english_verb.startswith("to "):
             english_verb = english_verb[3:]
 
-        logger.info(f"Adding verb: {english_verb}" +
-                   (f" → {target_translation}" if target_translation else ""))
+        logger.info(
+            f"Adding verb: {english_verb}"
+            + (f" → {target_translation}" if target_translation else "")
+        )
 
         session = self.get_session()
         try:
             # Check if verb already exists
-            existing = session.query(Lemma).filter(
-                Lemma.lemma_text.ilike(english_verb),
-                Lemma.pos_type == "verb"
-            ).first()
+            existing = (
+                session.query(Lemma)
+                .filter(Lemma.lemma_text.ilike(english_verb), Lemma.pos_type == "verb")
+                .first()
+            )
 
             if existing:
-                print(f"Verb '{english_verb}' already exists in database with GUID: {existing.guid}")
+                print(
+                    f"Verb '{english_verb}' already exists in database with GUID: {existing.guid}"
+                )
                 return False
 
             # Query LLM for verb data
@@ -361,7 +408,9 @@ class VerbManager:
                     setattr(verb_data, key, value)
 
             # Use provided difficulty level or default to 1 if not set
-            final_difficulty_level = difficulty_level or getattr(verb_data, "difficulty_level", None) or 1
+            final_difficulty_level = (
+                difficulty_level or getattr(verb_data, "difficulty_level", None) or 1
+            )
 
             # Generate GUID
             guid = self._generate_guid(session)
@@ -382,7 +431,7 @@ class VerbManager:
                 vietnamese_translation=verb_data.vietnamese_translation,
                 confidence=verb_data.confidence,
                 notes=verb_data.notes,
-                verified=not auto_approve  # Mark as verified if user reviewed
+                verified=not auto_approve,  # Mark as verified if user reviewed
             )
 
             session.add(lemma)
@@ -397,7 +446,7 @@ class VerbManager:
                 language_code="en",
                 grammatical_form="infinitive",
                 is_base_form=True,
-                verified=not auto_approve
+                verified=not auto_approve,
             )
             session.add(english_form)
 
@@ -411,7 +460,7 @@ class VerbManager:
                     language_code=language,
                     grammatical_form="infinitive",
                     is_base_form=True,
-                    verified=not auto_approve
+                    verified=not auto_approve,
                 )
                 session.add(target_form)
 
@@ -426,7 +475,7 @@ class VerbManager:
                         language_code="en",
                         grammatical_form="synonym",
                         is_base_form=False,
-                        verified=not auto_approve
+                        verified=not auto_approve,
                     )
                     session.add(alt_form)
 
@@ -440,7 +489,7 @@ class VerbManager:
                         language_code=language,
                         grammatical_form="synonym",
                         is_base_form=False,
-                        verified=not auto_approve
+                        verified=not auto_approve,
                     )
                     session.add(alt_form)
 
@@ -455,7 +504,9 @@ class VerbManager:
                 if forms_success:
                     logger.info(f"✅ Successfully generated conjugation forms")
                 else:
-                    logger.warning(f"⚠️  Failed to generate conjugation forms (verb added but forms missing)")
+                    logger.warning(
+                        f"⚠️  Failed to generate conjugation forms (verb added but forms missing)"
+                    )
 
             return True
 
@@ -466,8 +517,9 @@ class VerbManager:
         finally:
             session.close()
 
-    def list_verbs(self, language: str = "lt", level: int = None, subtype: str = None,
-                   limit: int = 50) -> List[Dict[str, Any]]:
+    def list_verbs(
+        self, language: str = "lt", level: int = None, subtype: str = None, limit: int = 50
+    ) -> List[Dict[str, Any]]:
         """
         List verbs in the database.
 
@@ -486,7 +538,7 @@ class VerbManager:
                 "lt": "lithuanian_translation",
                 "zh": "chinese_translation",
                 "ko": "korean_translation",
-                "fr": "french_translation"
+                "fr": "french_translation",
             }
 
             query = session.query(Lemma).filter(Lemma.pos_type == "verb")
@@ -508,16 +560,20 @@ class VerbManager:
 
             results = []
             for verb in verbs:
-                translation = getattr(verb, language_field_map.get(language, "lithuanian_translation"), "")
-                results.append({
-                    "guid": verb.guid,
-                    "english": verb.lemma_text,
-                    "translation": translation,
-                    "language": language,
-                    "level": verb.difficulty_level,
-                    "subtype": verb.pos_subtype,
-                    "verified": verb.verified
-                })
+                translation = getattr(
+                    verb, language_field_map.get(language, "lithuanian_translation"), ""
+                )
+                results.append(
+                    {
+                        "guid": verb.guid,
+                        "english": verb.lemma_text,
+                        "translation": translation,
+                        "language": language,
+                        "level": verb.difficulty_level,
+                        "subtype": verb.pos_subtype,
+                        "verified": verb.verified,
+                    }
+                )
 
             return results
 

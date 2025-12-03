@@ -12,7 +12,7 @@ def add_sentence(
     tense: Optional[str] = None,
     source_filename: Optional[str] = None,
     verified: bool = False,
-    notes: Optional[str] = None
+    notes: Optional[str] = None,
 ) -> Sentence:
     """Create a new sentence.
 
@@ -33,7 +33,7 @@ def add_sentence(
         source_filename=source_filename,
         verified=verified,
         notes=notes,
-        minimum_level=None  # Will be calculated later
+        minimum_level=None,  # Will be calculated later
     )
     session.add(sentence)
     session.flush()
@@ -44,7 +44,7 @@ def get_sentence_by_id(
     session: Session,
     sentence_id: int,
     include_translations: bool = True,
-    include_words: bool = True
+    include_words: bool = True,
 ) -> Optional[Sentence]:
     """Retrieve a sentence by ID with optional eager loading.
 
@@ -68,9 +68,7 @@ def get_sentence_by_id(
 
 
 def get_sentences_by_level(
-    session: Session,
-    max_level: int,
-    language_code: Optional[str] = None
+    session: Session, max_level: int, language_code: Optional[str] = None
 ) -> List[Sentence]:
     """Retrieve sentences up to a certain difficulty level.
 
@@ -82,12 +80,10 @@ def get_sentences_by_level(
     Returns:
         List of Sentence objects
     """
-    query = session.query(Sentence).filter(
-        Sentence.minimum_level.isnot(None),
-        Sentence.minimum_level <= max_level
-    ).options(
-        joinedload(Sentence.translations),
-        joinedload(Sentence.words)
+    query = (
+        session.query(Sentence)
+        .filter(Sentence.minimum_level.isnot(None), Sentence.minimum_level <= max_level)
+        .options(joinedload(Sentence.translations), joinedload(Sentence.words))
     )
 
     sentences = query.all()
@@ -95,17 +91,13 @@ def get_sentences_by_level(
     # Filter by language if specified
     if language_code:
         sentences = [
-            s for s in sentences
-            if any(t.language_code == language_code for t in s.translations)
+            s for s in sentences if any(t.language_code == language_code for t in s.translations)
         ]
 
     return sentences
 
 
-def calculate_minimum_level(
-    session: Session,
-    sentence: Sentence
-) -> Optional[int]:
+def calculate_minimum_level(session: Session, sentence: Sentence) -> Optional[int]:
     """Calculate and update the minimum difficulty level for a sentence.
 
     The minimum level is the maximum difficulty of all words (lemmas) used
@@ -119,10 +111,12 @@ def calculate_minimum_level(
         Calculated minimum level, or None if no words have levels
     """
     # Get all words for this sentence that have associated lemmas
-    words_with_lemmas = session.query(SentenceWord).filter(
-        SentenceWord.sentence_id == sentence.id,
-        SentenceWord.lemma_id.isnot(None)
-    ).options(joinedload(SentenceWord.lemma)).all()
+    words_with_lemmas = (
+        session.query(SentenceWord)
+        .filter(SentenceWord.sentence_id == sentence.id, SentenceWord.lemma_id.isnot(None))
+        .options(joinedload(SentenceWord.lemma))
+        .all()
+    )
 
     if not words_with_lemmas:
         sentence.minimum_level = None
@@ -145,7 +139,7 @@ def update_sentence(
     pattern_type: Optional[str] = None,
     tense: Optional[str] = None,
     verified: Optional[bool] = None,
-    notes: Optional[str] = None
+    notes: Optional[str] = None,
 ) -> Sentence:
     """Update a sentence's metadata.
 
@@ -172,10 +166,7 @@ def update_sentence(
     return sentence
 
 
-def delete_sentence(
-    session: Session,
-    sentence: Sentence
-) -> None:
+def delete_sentence(session: Session, sentence: Sentence) -> None:
     """Delete a sentence and all its associated data.
 
     This will cascade delete all translations and word associations.

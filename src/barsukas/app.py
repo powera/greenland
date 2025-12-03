@@ -16,7 +16,19 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 
 from config import Config
-from routes import lemmas, translations, overrides, agents, operation_logs, wireword, api, agents_launcher, exports, sentences, audio
+from routes import (
+    lemmas,
+    translations,
+    overrides,
+    agents,
+    operation_logs,
+    wireword,
+    api,
+    agents_launcher,
+    exports,
+    sentences,
+    audio,
+)
 from wordfreq.storage.utils.session import ensure_tables_exist
 from pinyin_helper import generate_pinyin, generate_pinyin_ruby_html, is_chinese
 
@@ -32,7 +44,7 @@ def create_app(config_class=Config):
         print(f"Error: Database not found at {db_path}", file=sys.stderr)
         sys.exit(1)
 
-    engine = create_engine(f'sqlite:///{db_path}', echo=app.config["DEBUG"])
+    engine = create_engine(f"sqlite:///{db_path}", echo=app.config["DEBUG"])
     app.db_session_factory = scoped_session(sessionmaker(bind=engine))
 
     # Ensure all tables exist (creates missing tables and columns)
@@ -59,6 +71,7 @@ def create_app(config_class=Config):
 
     # Register JSON filter for parsing JSON strings in templates
     import json
+
     app.jinja_env.filters["fromjson"] = json.loads
 
     @app.before_request
@@ -88,18 +101,18 @@ def create_app(config_class=Config):
         with_difficulty = g.db.query(Lemma).filter(Lemma.difficulty_level != None).count()
         total_sentences = g.db.query(Sentence).count()
 
-        return render_template("index.html",
-                             total_lemmas=total_lemmas,
-                             verified_lemmas=verified_lemmas,
-                             with_difficulty=with_difficulty,
-                             total_sentences=total_sentences)
+        return render_template(
+            "index.html",
+            total_lemmas=total_lemmas,
+            verified_lemmas=verified_lemmas,
+            with_difficulty=with_difficulty,
+            total_sentences=total_sentences,
+        )
 
     @app.context_processor
     def utility_processor():
         """Add utility functions to Jinja templates."""
-        return {
-            "config": app.config
-        }
+        return {"config": app.config}
 
     return app
 
@@ -107,12 +120,13 @@ def create_app(config_class=Config):
 def main():
     """Run the Flask development server."""
     parser = argparse.ArgumentParser(description="Barsukas Web Interface")
-    parser.add_argument("--port", type=int, default=Config.PORT,
-                       help=f'Port to run on (default: {Config.PORT})')
-    parser.add_argument("--debug", action="store_true",
-                       help="Enable debug mode")
-    parser.add_argument("--readonly", action="store_true",
-                       help="Run in read-only mode (no edits allowed)")
+    parser.add_argument(
+        "--port", type=int, default=Config.PORT, help=f"Port to run on (default: {Config.PORT})"
+    )
+    parser.add_argument("--debug", action="store_true", help="Enable debug mode")
+    parser.add_argument(
+        "--readonly", action="store_true", help="Run in read-only mode (no edits allowed)"
+    )
     args = parser.parse_args()
 
     app = create_app()

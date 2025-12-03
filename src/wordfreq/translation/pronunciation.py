@@ -15,10 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 def query_pronunciation(
-    client,
-    word: str,
-    sentence: str,
-    get_session_func
+    client, word: str, sentence: str, get_session_func
 ) -> Tuple[Dict[str, Any], bool]:
     """
     Query LLM for IPA and phonetic pronunciation of a word.
@@ -46,11 +43,11 @@ def query_pronunciation(
                 properties={
                     "ipa": SchemaProperty(
                         type="string",
-                        description="IPA pronunciation for the word in American English"
+                        description="IPA pronunciation for the word in American English",
                     ),
                     "phonetic": SchemaProperty(
                         type="string",
-                        description="Simple phonetic pronunciation (e.g. 'SOO-duh-nim' for 'pseudonym')"
+                        description="Simple phonetic pronunciation (e.g. 'SOO-duh-nim' for 'pseudonym')",
                     ),
                     "alternatives": SchemaProperty(
                         type="array",
@@ -61,26 +58,23 @@ def query_pronunciation(
                             properties={
                                 "variant": SchemaProperty(
                                     type="string",
-                                    description="Variant name (e.g. 'British', 'Australian', 'Alternative')"
+                                    description="Variant name (e.g. 'British', 'Australian', 'Alternative')",
                                 ),
                                 "ipa": SchemaProperty(
-                                    type="string",
-                                    description="IPA pronunciation for this variant"
-                                )
-                            }
-                        )
+                                    type="string", description="IPA pronunciation for this variant"
+                                ),
+                            },
+                        ),
                     ),
                     "confidence": SchemaProperty(
-                        type="number",
-                        description="Confidence score from 0-1"
+                        type="number", description="Confidence score from 0-1"
                     ),
                     "notes": SchemaProperty(
-                        type="string",
-                        description="Additional notes about the pronunciation"
-                    )
-                }
+                        type="string", description="Additional notes about the pronunciation"
+                    ),
+                },
             )
-        }
+        },
     )
 
     context = util.prompt_loader.get_context("wordfreq", "pronunciation")
@@ -89,10 +83,7 @@ def query_pronunciation(
 
     try:
         response = client.generate_chat(
-            prompt=prompt,
-            model=client.model,
-            json_schema=schema,
-            context=context
+            prompt=prompt, model=client.model, json_schema=schema, context=context
         )
 
         # Log successful query
@@ -104,16 +95,18 @@ def query_pronunciation(
                 query_type="pronunciation",
                 prompt=prompt,
                 response=json.dumps(response.structured_data),
-                model=client.model
+                model=client.model,
             )
         except Exception as log_err:
             logger.error(f"Failed to log successful pronunciation query: {log_err}")
 
         # Validate and return response data
-        if (response.structured_data and
-            isinstance(response.structured_data, dict) and
-            "pronunciation" in response.structured_data and
-            isinstance(response.structured_data["pronunciation"], dict)):
+        if (
+            response.structured_data
+            and isinstance(response.structured_data, dict)
+            and "pronunciation" in response.structured_data
+            and isinstance(response.structured_data["pronunciation"], dict)
+        ):
             return response.structured_data["pronunciation"], True
         else:
             logger.warning(f"Invalid pronunciation response format for word '{word}'")
@@ -126,10 +119,7 @@ def query_pronunciation(
 
 
 def update_pronunciation_for_definition(
-    client,
-    definition_id: int,
-    get_session_func,
-    sentence: Optional[str] = None
+    client, definition_id: int, get_session_func, sentence: Optional[str] = None
 ) -> bool:
     """
     Update the pronunciation information for a specific definition.
@@ -146,7 +136,11 @@ def update_pronunciation_for_definition(
     session = get_session_func()
 
     # Get the definition
-    definition = session.query(linguistic_db.Definition).filter(linguistic_db.Definition.id == definition_id).first()
+    definition = (
+        session.query(linguistic_db.Definition)
+        .filter(linguistic_db.Definition.id == definition_id)
+        .first()
+    )
     if not definition:
         logger.warning(f"Definition with ID {definition_id} not found")
         return False
@@ -176,10 +170,7 @@ def update_pronunciation_for_definition(
 
             # Update the definition with the pronunciation
             linguistic_db.update_definition(
-                session,
-                definition.id,
-                ipa_pronunciation=ipa,
-                phonetic_pronunciation=phonetic
+                session, definition.id, ipa_pronunciation=ipa, phonetic_pronunciation=phonetic
             )
 
             logger.info(f"Added pronunciations for '{word.word}' (definition ID: {definition.id})")
@@ -189,15 +180,14 @@ def update_pronunciation_for_definition(
             logger.error(f"Error updating pronunciation for definition {definition_id}: {e}")
             return False
     else:
-        logger.warning(f"Failed to get pronunciation for '{word.word}' (definition ID: {definition.id})")
+        logger.warning(
+            f"Failed to get pronunciation for '{word.word}' (definition ID: {definition.id})"
+        )
         return False
 
 
 def update_missing_pronunciations_for_word(
-    client,
-    word_text: str,
-    get_session_func,
-    throttle: float = 1.0
+    client, word_text: str, get_session_func, throttle: float = 1.0
 ) -> Dict[str, Any]:
     """
     Add missing pronunciations for all definitions of a word.
@@ -223,7 +213,7 @@ def update_missing_pronunciations_for_word(
             "total_definitions": 0,
             "missing_pronunciations": 0,
             "processed": 0,
-            "successful": 0
+            "successful": 0,
         }
 
     # Get all definitions for the word
@@ -237,17 +227,18 @@ def update_missing_pronunciations_for_word(
             "total_definitions": 0,
             "missing_pronunciations": 0,
             "processed": 0,
-            "successful": 0
+            "successful": 0,
         }
 
     # Filter for definitions without pronunciations
     definitions_without_pronunciations = [
-        d for d in definitions
-        if not d.ipa_pronunciation or not d.phonetic_pronunciation
+        d for d in definitions if not d.ipa_pronunciation or not d.phonetic_pronunciation
     ]
 
     missing_pronunciations = len(definitions_without_pronunciations)
-    logger.info(f"Found {missing_pronunciations} definitions without pronunciations (out of {total_definitions} total)")
+    logger.info(
+        f"Found {missing_pronunciations} definitions without pronunciations (out of {total_definitions} total)"
+    )
 
     successful = 0
     processed = 0
@@ -265,23 +256,22 @@ def update_missing_pronunciations_for_word(
         # Throttle to avoid overloading the API
         time.sleep(throttle)
 
-    logger.info(f"Processing complete for '{word_text}': {successful}/{processed} successful "
-                f"({missing_pronunciations} missing, {total_definitions} total)")
+    logger.info(
+        f"Processing complete for '{word_text}': {successful}/{processed} successful "
+        f"({missing_pronunciations} missing, {total_definitions} total)"
+    )
 
     return {
         "word": word_text,
         "total_definitions": total_definitions,
         "missing_pronunciations": missing_pronunciations,
         "processed": processed,
-        "successful": successful
+        "successful": successful,
     }
 
 
 def update_pronunciations_for_batch(
-    client,
-    get_session_func,
-    limit: int = 100,
-    throttle: float = 1.0
+    client, get_session_func, limit: int = 100, throttle: float = 1.0
 ) -> Dict[str, Any]:
     """
     Add missing pronunciations for a batch of definitions.
@@ -317,15 +307,15 @@ def update_pronunciations_for_batch(
             successful += 1
             logger.info(f"Added pronunciation for '{word.word}' definition ID {definition.id}")
         else:
-            logger.warning(f"Failed to add pronunciation for '{word.word}' definition ID {definition.id}")
+            logger.warning(
+                f"Failed to add pronunciation for '{word.word}' definition ID {definition.id}"
+            )
 
         # Throttle to avoid overloading the API
         time.sleep(throttle)
 
-    logger.info(f"Batch processing complete: {successful}/{processed} successful (out of {total} total)")
+    logger.info(
+        f"Batch processing complete: {successful}/{processed} successful (out of {total} total)"
+    )
 
-    return {
-        "total": total,
-        "processed": processed,
-        "successful": successful
-    }
+    return {"total": total, "processed": processed, "successful": successful}

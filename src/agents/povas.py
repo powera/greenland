@@ -91,19 +91,13 @@ class PovasAgent:
         subtypes = linguistic_db.get_subtype_values_for_pos(pos_type)
 
         # Query lemmas and their derivative forms, joining to word tokens
-        query = session.query(
-                Lemma,
-                DerivativeForm,
-                WordToken
-            ).join(
-                DerivativeForm, Lemma.id == DerivativeForm.lemma_id
-            ).outerjoin(
-                WordToken, DerivativeForm.word_token_id == WordToken.id
-            ).filter(
-                Lemma.pos_type == pos_type
-            ).order_by(
-                Lemma.lemma_text
-            )
+        query = (
+            session.query(Lemma, DerivativeForm, WordToken)
+            .join(DerivativeForm, Lemma.id == DerivativeForm.lemma_id)
+            .outerjoin(WordToken, DerivativeForm.word_token_id == WordToken.id)
+            .filter(Lemma.pos_type == pos_type)
+            .order_by(Lemma.lemma_text)
+        )
 
         # Organize by subtype, grouping all derivative forms under each lemma
         words_by_subtype = defaultdict(list)
@@ -137,22 +131,47 @@ class PovasAgent:
                     "swahili": lemma.swahili_translation or "",
                     "lithuanian": lemma.lithuanian_translation or "",
                     "vietnamese": lemma.vietnamese_translation or "",
-                    "derivative_forms": [derivative_form.derivative_form_text] if derivative_form.derivative_form_text else [],
-                    "grammatical_forms": [derivative_form.grammatical_form] if derivative_form.grammatical_form else [],
+                    "derivative_forms": (
+                        [derivative_form.derivative_form_text]
+                        if derivative_form.derivative_form_text
+                        else []
+                    ),
+                    "grammatical_forms": (
+                        [derivative_form.grammatical_form]
+                        if derivative_form.grammatical_form
+                        else []
+                    ),
                     "subtype": subtype,
-                    "min_rank": word_token.frequency_rank if word_token else None  # Track minimum rank for sorting
+                    "min_rank": (
+                        word_token.frequency_rank if word_token else None
+                    ),  # Track minimum rank for sorting
                 }
             else:
                 # Add this derivative form to the existing entry
-                if derivative_form.derivative_form_text and derivative_form.derivative_form_text not in lemma_data[lemma_key]["derivative_forms"]:
-                    lemma_data[lemma_key]["derivative_forms"].append(derivative_form.derivative_form_text)
+                if (
+                    derivative_form.derivative_form_text
+                    and derivative_form.derivative_form_text
+                    not in lemma_data[lemma_key]["derivative_forms"]
+                ):
+                    lemma_data[lemma_key]["derivative_forms"].append(
+                        derivative_form.derivative_form_text
+                    )
 
-                if derivative_form.grammatical_form and derivative_form.grammatical_form not in lemma_data[lemma_key]["grammatical_forms"]:
-                    lemma_data[lemma_key]["grammatical_forms"].append(derivative_form.grammatical_form)
+                if (
+                    derivative_form.grammatical_form
+                    and derivative_form.grammatical_form
+                    not in lemma_data[lemma_key]["grammatical_forms"]
+                ):
+                    lemma_data[lemma_key]["grammatical_forms"].append(
+                        derivative_form.grammatical_form
+                    )
 
                 # Update rank if this word token has a better (lower) rank
                 if word_token and word_token.frequency_rank:
-                    if lemma_data[lemma_key]["min_rank"] is None or word_token.frequency_rank < lemma_data[lemma_key]["min_rank"]:
+                    if (
+                        lemma_data[lemma_key]["min_rank"] is None
+                        or word_token.frequency_rank < lemma_data[lemma_key]["min_rank"]
+                    ):
                         lemma_data[lemma_key]["min_rank"] = word_token.frequency_rank
                         lemma_data[lemma_key]["rank"] = word_token.frequency_rank
 
@@ -183,29 +202,38 @@ class PovasAgent:
 
         for pos_type in pos_types:
             # Count unique lemmas for this POS (this matches the condensed view)
-            lemma_count = session.query(func.count(Lemma.id.distinct()))\
-                .filter(Lemma.pos_type == pos_type)\
-                .scalar() or 0
+            lemma_count = (
+                session.query(func.count(Lemma.id.distinct()))
+                .filter(Lemma.pos_type == pos_type)
+                .scalar()
+                or 0
+            )
 
             # Count derivative forms for this POS
-            derivative_form_count = session.query(func.count(DerivativeForm.id))\
-                .join(Lemma)\
-                .filter(Lemma.pos_type == pos_type)\
-                .scalar() or 0
+            derivative_form_count = (
+                session.query(func.count(DerivativeForm.id))
+                .join(Lemma)
+                .filter(Lemma.pos_type == pos_type)
+                .scalar()
+                or 0
+            )
 
             # Count subtypes used
-            subtype_count = session.query(func.count(Lemma.pos_subtype.distinct()))\
-                .filter(
-                    Lemma.pos_type == pos_type,
-                    Lemma.pos_subtype != None
-                ).scalar() or 0
+            subtype_count = (
+                session.query(func.count(Lemma.pos_subtype.distinct()))
+                .filter(Lemma.pos_type == pos_type, Lemma.pos_subtype != None)
+                .scalar()
+                or 0
+            )
 
             # Get top 5 most common lemmas for this POS
             top_words = []
-            query = session.query(Lemma.lemma_text)\
-                .filter(Lemma.pos_type == pos_type)\
-                .order_by(Lemma.lemma_text)\
+            query = (
+                session.query(Lemma.lemma_text)
+                .filter(Lemma.pos_type == pos_type)
+                .order_by(Lemma.lemma_text)
                 .limit(5)
+            )
 
             for row in query:
                 top_words.append(row[0])
@@ -214,17 +242,14 @@ class PovasAgent:
                 "word_count": lemma_count,
                 "definition_count": derivative_form_count,
                 "subtype_count": subtype_count,
-                "top_words": top_words
+                "top_words": top_words,
             }
 
         # Load template
         template = env.get_template("pos_index.html")
 
         # Render template
-        html = template.render(
-            pos_stats=pos_stats,
-            css_file=self.CSS_FILENAME
-        )
+        html = template.render(pos_stats=pos_stats, css_file=self.CSS_FILENAME)
 
         # Write to file
         with open(os.path.join(self.POS_SUBTYPE_DIR, "index.html"), "w", encoding="utf-8") as f:
@@ -232,7 +257,9 @@ class PovasAgent:
 
         logger.info("Generated index page")
 
-    def generate_pos_type_page(self, env, pos_type: str, words_by_subtype: Dict[str, List[Dict[str, Any]]]) -> None:
+    def generate_pos_type_page(
+        self, env, pos_type: str, words_by_subtype: Dict[str, List[Dict[str, Any]]]
+    ) -> None:
         """
         Generate a page for a specific part of speech with links to subtypes.
 
@@ -250,21 +277,27 @@ class PovasAgent:
             total_words += word_count
 
             # Get top 5 words by frequency rank
-            top_words = sorted(words, key=lambda w: float("inf") if w.get("rank") is None else w.get("rank"))[:5]
+            top_words = sorted(
+                words, key=lambda w: float("inf") if w.get("rank") is None else w.get("rank")
+            )[:5]
             top_words = [word["word"] for word in top_words]
 
             subtype_stats[subtype] = {
                 "word_count": word_count,
                 "percentage": 0,  # Will calculate after loop
-                "top_words": top_words
+                "top_words": top_words,
             }
 
         # Calculate percentages
         for subtype in subtype_stats:
-            subtype_stats[subtype]["percentage"] = round(subtype_stats[subtype]["word_count"] / total_words * 100, 1)
+            subtype_stats[subtype]["percentage"] = round(
+                subtype_stats[subtype]["word_count"] / total_words * 100, 1
+            )
 
         # Sort subtypes by word count
-        sorted_subtypes = sorted(subtype_stats.items(), key=lambda x: x[1]["word_count"], reverse=True)
+        sorted_subtypes = sorted(
+            subtype_stats.items(), key=lambda x: x[1]["word_count"], reverse=True
+        )
 
         # Load template
         template = env.get_template("pos_type.html")
@@ -275,16 +308,20 @@ class PovasAgent:
             total_words=total_words,
             subtypes=subtype_stats,
             sorted_subtypes=sorted_subtypes,
-            css_file=self.CSS_FILENAME
+            css_file=self.CSS_FILENAME,
         )
 
         # Write to file
-        with open(os.path.join(self.POS_SUBTYPE_DIR, f"{pos_type}.html"), "w", encoding="utf-8") as f:
+        with open(
+            os.path.join(self.POS_SUBTYPE_DIR, f"{pos_type}.html"), "w", encoding="utf-8"
+        ) as f:
             f.write(html)
 
         logger.info(f"Generated page for {pos_type}")
 
-    def generate_subtype_page(self, env, pos_type: str, subtype: str, words: List[Dict[str, Any]]) -> None:
+    def generate_subtype_page(
+        self, env, pos_type: str, subtype: str, words: List[Dict[str, Any]]
+    ) -> None:
         """
         Generate a page for a specific POS subtype.
 
@@ -303,7 +340,7 @@ class PovasAgent:
             subtype=subtype,
             words=words,
             css_file=self.CSS_FILENAME,
-            js_file=self.JS_FILENAME
+            js_file=self.JS_FILENAME,
         )
 
         # Write to file
@@ -408,13 +445,10 @@ class PovasAgent:
 
 def main():
     """Main entry point for the povas agent."""
-    parser = argparse.ArgumentParser(
-        description="Povas - HTML Generation Agent for POS Subtypes"
-    )
+    parser = argparse.ArgumentParser(description="Povas - HTML Generation Agent for POS Subtypes")
     parser.add_argument("--db-path", help="Database path (uses default if not specified)")
     parser.add_argument("--debug", action="store_true", help="Enable debug logging")
-    parser.add_argument("--index-only", action="store_true",
-                        help="Generate only the index page")
+    parser.add_argument("--index-only", action="store_true", help="Generate only the index page")
 
     args = parser.parse_args()
 

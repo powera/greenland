@@ -20,7 +20,7 @@ from wordfreq.storage.database import (
     add_sentence,
     add_sentence_translation,
     add_sentence_word,
-    calculate_minimum_level
+    calculate_minimum_level,
 )
 
 logger = logging.getLogger(__name__)
@@ -29,12 +29,7 @@ logger = logging.getLogger(__name__)
 class BebrasAgent:
     """Agent for managing sentence-word links."""
 
-    def __init__(
-        self,
-        db_path: str = None,
-        debug: bool = False,
-        model: str = "gpt-5-mini"
-    ):
+    def __init__(self, db_path: str = None, debug: bool = False, model: str = "gpt-5-mini"):
         """
         Initialize the Bebras agent.
 
@@ -56,10 +51,7 @@ class BebrasAgent:
         return create_database_session(self.db_path)
 
     def analyze_sentence(
-        self,
-        sentence_text: str,
-        source_language: str = "en",
-        context: Optional[str] = None
+        self, sentence_text: str, source_language: str = "en", context: Optional[str] = None
     ) -> Dict[str, any]:
         """
         Analyze a sentence to extract vocabulary words and their metadata.
@@ -82,39 +74,23 @@ class BebrasAgent:
 
         try:
             response = self.llm_client.generate_chat(
-                prompt=prompt,
-                model=self.model,
-                json_schema=schema,
-                timeout=60
+                prompt=prompt, model=self.model, json_schema=schema, timeout=60
             )
 
             if response.structured_data:
                 result = response.structured_data
                 logger.info(f"Extracted {len(result.get('words', []))} words from sentence")
-                return {
-                    "success": True,
-                    "sentence_text": sentence_text,
-                    "analysis": result
-                }
+                return {"success": True, "sentence_text": sentence_text, "analysis": result}
             else:
                 logger.error("No structured data received from LLM")
-                return {
-                    "success": False,
-                    "error": "LLM did not return structured data"
-                }
+                return {"success": False, "error": "LLM did not return structured data"}
 
         except Exception as e:
             logger.error(f"Error analyzing sentence: {e}", exc_info=True)
-            return {
-                "success": False,
-                "error": str(e)
-            }
+            return {"success": False, "error": str(e)}
 
     def _build_analysis_prompt(
-        self,
-        sentence_text: str,
-        source_language: str,
-        context: Optional[str]
+        self, sentence_text: str, source_language: str, context: Optional[str]
     ) -> str:
         """Build the LLM prompt for sentence analysis."""
         # Load prompt templates
@@ -124,9 +100,7 @@ class BebrasAgent:
         # Format the prompt with parameters
         context_info = f"\n\nContext: {context}" if context else ""
         formatted_prompt = prompt_template.format(
-            sentence_text=sentence_text,
-            source_language=source_language,
-            context_info=context_info
+            sentence_text=sentence_text, source_language=source_language, context_info=context_info
         )
 
         # Combine context (system instructions) and user prompt
@@ -137,12 +111,10 @@ class BebrasAgent:
         """Build the response schema for sentence analysis."""
         properties = {
             "pattern": SchemaProperty(
-                type="string",
-                description="Sentence pattern (e.g., SVO, SVAO)"
+                type="string", description="Sentence pattern (e.g., SVO, SVAO)"
             ),
             "tense": SchemaProperty(
-                type="string",
-                description="Main verb tense (present, past, future)"
+                type="string", description="Main verb tense (present, past, future)"
             ),
             "words": SchemaProperty(
                 type="array",
@@ -150,40 +122,34 @@ class BebrasAgent:
                 items={
                     "type": "object",
                     "properties": {
-                        "word": {
-                            "type": "string",
-                            "description": "Word as it appears in sentence"
-                        },
-                        "lemma": {
-                            "type": "string",
-                            "description": "Base form/lemma of the word"
-                        },
+                        "word": {"type": "string", "description": "Word as it appears in sentence"},
+                        "lemma": {"type": "string", "description": "Base form/lemma of the word"},
                         "pos": {
                             "type": "string",
-                            "description": "Part of speech (noun, verb, adjective, adverb)"
+                            "description": "Part of speech (noun, verb, adjective, adverb)",
                         },
                         "role": {
                             "type": "string",
-                            "description": "Role in sentence (subject, verb, object, etc.)"
+                            "description": "Role in sentence (subject, verb, object, etc.)",
                         },
                         "disambiguation": {
                             "type": "string",
-                            "description": "Context or disambiguation hint"
+                            "description": "Context or disambiguation hint",
                         },
                         "grammatical_form": {
                             "type": "string",
-                            "description": "Grammatical form (e.g., plural, past_tense)"
-                        }
+                            "description": "Grammatical form (e.g., plural, past_tense)",
+                        },
                     },
-                    "required": ["word", "lemma", "pos", "role"]
-                }
-            )
+                    "required": ["word", "lemma", "pos", "role"],
+                },
+            ),
         }
 
         return Schema(
             name="SentenceAnalysis",
             description="Analysis of sentence with extracted vocabulary words",
-            properties=properties
+            properties=properties,
         )
 
     def link_sentence_to_words(
@@ -192,7 +158,7 @@ class BebrasAgent:
         analysis: Dict,
         source_language: str = "en",
         target_languages: Optional[List[str]] = None,
-        session=None
+        session=None,
     ) -> Dict[str, any]:
         """
         Link a sentence to its vocabulary words in the database.
@@ -230,7 +196,7 @@ class BebrasAgent:
                     session=session,
                     lemma_text=lemma_text,
                     pos=pos,
-                    disambiguation_hint=disambiguation_hint
+                    disambiguation_hint=disambiguation_hint,
                 )
 
                 if lemma:
@@ -239,11 +205,9 @@ class BebrasAgent:
                 else:
                     unlinked_count += 1
                     logger.warning(f"No lemma found for '{lemma_text}' (POS: {pos})")
-                    disambiguation_needed.append({
-                        "word": lemma_text,
-                        "pos": pos,
-                        "hint": disambiguation_hint
-                    })
+                    disambiguation_needed.append(
+                        {"word": lemma_text, "pos": pos, "hint": disambiguation_hint}
+                    )
 
                 # Create SentenceWord record
                 add_sentence_word(
@@ -255,7 +219,7 @@ class BebrasAgent:
                     english_text=lemma_text,
                     target_language_text=lemma_text,  # Will be updated with translations
                     grammatical_form=word_data.get("grammatical_form"),
-                    language_code=source_language
+                    language_code=source_language,
                 )
 
             session.commit()
@@ -264,16 +228,13 @@ class BebrasAgent:
                 "success": True,
                 "linked_count": linked_count,
                 "unlinked_count": unlinked_count,
-                "disambiguation_needed": disambiguation_needed
+                "disambiguation_needed": disambiguation_needed,
             }
 
         except Exception as e:
             logger.error(f"Error linking sentence to words: {e}", exc_info=True)
             session.rollback()
-            return {
-                "success": False,
-                "error": str(e)
-            }
+            return {"success": False, "error": str(e)}
         finally:
             if close_session:
                 session.close()
@@ -284,7 +245,7 @@ class BebrasAgent:
         source_language: str = "en",
         target_languages: Optional[List[str]] = None,
         context: Optional[str] = None,
-        verified: bool = False
+        verified: bool = False,
     ) -> Dict[str, any]:
         """
         Complete pipeline: analyze sentence, create database records, and link words.
@@ -303,9 +264,7 @@ class BebrasAgent:
 
         # Step 1: Analyze the sentence
         analysis_result = self.analyze_sentence(
-            sentence_text=sentence_text,
-            source_language=source_language,
-            context=context
+            sentence_text=sentence_text, source_language=source_language, context=context
         )
 
         if not analysis_result.get("success"):
@@ -322,7 +281,7 @@ class BebrasAgent:
                 tense=analysis.get("tense"),
                 source_filename="bebras_import",
                 verified=verified,
-                notes=context
+                notes=context,
             )
 
             # Step 3: Add source language translation
@@ -331,19 +290,20 @@ class BebrasAgent:
                 sentence=sentence,
                 language_code=source_language,
                 translation_text=sentence_text,
-                verified=verified
+                verified=verified,
             )
 
             # Step 4: Add target language translations if requested
             if target_languages:
                 from .translation import ensure_translations
+
                 ensure_translations(
                     session=session,
                     sentence=sentence,
                     source_text=sentence_text,
                     source_language=source_language,
                     target_languages=target_languages,
-                    model=self.model
+                    model=self.model,
                 )
 
             session.flush()
@@ -354,7 +314,7 @@ class BebrasAgent:
                 analysis=analysis,
                 source_language=source_language,
                 target_languages=target_languages,
-                session=session
+                session=session,
             )
 
             # Step 6: Calculate minimum difficulty level
@@ -369,16 +329,13 @@ class BebrasAgent:
                 "linked_words": link_result.get("linked_count", 0),
                 "unlinked_words": link_result.get("unlinked_count", 0),
                 "disambiguation_needed": link_result.get("disambiguation_needed", []),
-                "minimum_level": sentence.minimum_level
+                "minimum_level": sentence.minimum_level,
             }
 
         except Exception as e:
             logger.error(f"Error processing sentence: {e}", exc_info=True)
             session.rollback()
-            return {
-                "success": False,
-                "error": str(e)
-            }
+            return {"success": False, "error": str(e)}
         finally:
             session.close()
 
@@ -387,7 +344,7 @@ class BebrasAgent:
         sentences: List[str],
         source_language: str = "en",
         target_languages: Optional[List[str]] = None,
-        verified: bool = False
+        verified: bool = False,
     ) -> Dict[str, any]:
         """
         Process multiple sentences in batch.
@@ -414,7 +371,7 @@ class BebrasAgent:
                 sentence_text=sentence_text,
                 source_language=source_language,
                 target_languages=target_languages,
-                verified=verified
+                verified=verified,
             )
 
             results.append(result)
@@ -430,5 +387,5 @@ class BebrasAgent:
             "total": len(sentences),
             "success_count": success_count,
             "failure_count": failure_count,
-            "results": results
+            "results": results,
         }

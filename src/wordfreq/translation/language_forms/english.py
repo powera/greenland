@@ -39,9 +39,7 @@ VERB_FORM_MAPPING = {
 
 
 def query_english_verb_conjugations(
-    client,
-    lemma_id: int,
-    get_session_func
+    client, lemma_id: int, get_session_func
 ) -> Tuple[Dict[str, str], bool]:
     """
     Query LLM for all English verb conjugations (3 tenses × 6 persons + 2 imperatives).
@@ -80,8 +78,7 @@ def query_english_verb_conjugations(
     form_properties = {}
     for form in present_fields + past_fields + future_fields + imperative_fields:
         form_properties[form] = SchemaProperty(
-            "string",
-            f"English {form.replace('_', ' ')} form (use empty string if not applicable)"
+            "string", f"English {form.replace('_', ' ')} form (use empty string if not applicable)"
         )
 
     schema = Schema(
@@ -91,11 +88,13 @@ def query_english_verb_conjugations(
             "forms": SchemaProperty(
                 type="object",
                 description="Dictionary of all verb conjugation forms",
-                properties=form_properties
+                properties=form_properties,
             ),
             "confidence": SchemaProperty("number", "Confidence score from 0-1"),
-            "notes": SchemaProperty("string", "Notes about the conjugation pattern (e.g., irregular forms)")
-        }
+            "notes": SchemaProperty(
+                "string", "Notes about the conjugation pattern (e.g., irregular forms)"
+            ),
+        },
     )
 
     subtype_context = f" (category: {pos_subtype})" if pos_subtype else ""
@@ -104,16 +103,11 @@ def query_english_verb_conjugations(
         context = util.prompt_loader.get_context("wordfreq", "english_verb_conjugations")
         prompt_template = util.prompt_loader.get_prompt("wordfreq", "english_verb_conjugations")
         prompt = prompt_template.format(
-            verb=verb,
-            definition=definition,
-            subtype_context=subtype_context
+            verb=verb, definition=definition, subtype_context=subtype_context
         )
 
         response = client.generate_chat(
-            prompt=prompt,
-            model=client.model,
-            json_schema=schema,
-            context=context
+            prompt=prompt, model=client.model, json_schema=schema, context=context
         )
 
         # Log successful query
@@ -124,16 +118,18 @@ def query_english_verb_conjugations(
                 query_type="english_verb_conjugations",
                 prompt=prompt,
                 response=json.dumps(response.structured_data),
-                model=client.model
+                model=client.model,
             )
         except Exception as log_err:
             logger.error(f"Failed to log English conjugation query: {log_err}")
 
         # Validate and return response data
-        if (response.structured_data and
-            isinstance(response.structured_data, dict) and
-            "forms" in response.structured_data and
-            isinstance(response.structured_data["forms"], dict)):
+        if (
+            response.structured_data
+            and isinstance(response.structured_data, dict)
+            and "forms" in response.structured_data
+            and isinstance(response.structured_data["forms"], dict)
+        ):
             forms = response.structured_data["forms"]
             return forms, True
         else:

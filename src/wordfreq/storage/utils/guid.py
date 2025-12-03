@@ -21,10 +21,12 @@ def generate_guid(session, subtype: str) -> str:
     prefix = SUBTYPE_GUID_PREFIXES[subtype]
 
     # Find the highest existing GUID number for this subtype
-    existing_guids = session.query(Lemma.guid)\
-        .filter(Lemma.guid.like(f"{prefix}%"))\
-        .filter(Lemma.guid != None)\
+    existing_guids = (
+        session.query(Lemma.guid)
+        .filter(Lemma.guid.like(f"{prefix}%"))
+        .filter(Lemma.guid != None)
         .all()
+    )
 
     max_num = 0
     for (guid,) in existing_guids:

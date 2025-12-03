@@ -7,7 +7,11 @@ import subprocess
 import os
 from pathlib import Path
 from config import Config
-from barsukas.utils.argparse_introspection import introspect_agent_parser, get_agent_cli_module_path, group_arguments_by_mode
+from barsukas.utils.argparse_introspection import (
+    introspect_agent_parser,
+    get_agent_cli_module_path,
+    group_arguments_by_mode,
+)
 
 bp = Blueprint("agents_launcher", __name__, url_prefix="/agents-launcher")
 
@@ -21,7 +25,7 @@ AGENTS = [
         "script": "pradzia.py",
         "icon": "bi-play-circle",
         "use_dynamic_form": True,
-        "show_if_empty": True  # Only show if database is empty
+        "show_if_empty": True,  # Only show if database is empty
     },
     {
         "name": "LOKYS",
@@ -131,9 +135,7 @@ def list_agents():
             if not db_empty:
                 visible_agents.append(agent)
 
-    return render_template("agents_launcher/list.html",
-                         agents=visible_agents,
-                         db_empty=db_empty)
+    return render_template("agents_launcher/list.html", agents=visible_agents, db_empty=db_empty)
 
 
 @bp.route("/launch/<agent_name>", methods=["GET"])
@@ -142,7 +144,7 @@ def launch_form(agent_name):
     # Find the agent
     agent = next((a for a in AGENTS if a["name"] == agent_name), None)
     if not agent:
-        flash(f'Agent {agent_name} not found', "error")
+        flash(f"Agent {agent_name} not found", "error")
         return redirect(url_for("agents_launcher.list_agents"))
 
     # If agent has redirect_to, redirect there
@@ -158,15 +160,17 @@ def launch_form(agent_name):
             parser_info = introspect_agent_parser(module_path)
             argument_groups = group_arguments_by_mode(parser_info["arguments"])
         except Exception as e:
-            flash(f'Error introspecting agent arguments: {str(e)}', "error")
+            flash(f"Error introspecting agent arguments: {str(e)}", "error")
             # Fall back to basic form
             parser_info = None
             argument_groups = None
 
-    return render_template("agents_launcher/launch.html",
-                         agent=agent,
-                         parser_info=parser_info,
-                         argument_groups=argument_groups)
+    return render_template(
+        "agents_launcher/launch.html",
+        agent=agent,
+        parser_info=parser_info,
+        argument_groups=argument_groups,
+    )
 
 
 @bp.route("/execute/<agent_name>", methods=["POST"])
@@ -175,14 +179,14 @@ def execute_agent(agent_name):
     # Find the agent
     agent = next((a for a in AGENTS if a["name"] == agent_name), None)
     if not agent:
-        return jsonify({"success": False, "error": f'Agent {agent_name} not found'}), 404
+        return jsonify({"success": False, "error": f"Agent {agent_name} not found"}), 404
 
     # Build command
     agents_dir = Path(Config.DB_PATH).parent.parent / "agents"
     script_path = agents_dir / agent["script"]
 
     if not script_path.exists():
-        return jsonify({"success": False, "error": f'Script not found: {script_path}'}), 404
+        return jsonify({"success": False, "error": f"Script not found: {script_path}"}), 404
 
     # Build arguments
     args = ["python3", str(script_path)]
@@ -202,14 +206,14 @@ def execute_agent(agent_name):
                 # Add the argument
                 if value == "true":
                     # Boolean flag
-                    args.append(f'--{arg_name}')
+                    args.append(f"--{arg_name}")
                 elif "," in value:
                     # List argument (comma-separated)
-                    args.append(f'--{arg_name}')
+                    args.append(f"--{arg_name}")
                     args.extend(value.split(","))
                 else:
                     # Regular argument
-                    args.append(f'--{arg_name}')
+                    args.append(f"--{arg_name}")
                     args.append(value)
 
     else:
@@ -240,34 +244,33 @@ def execute_agent(agent_name):
         # Execute asynchronously (non-blocking)
         # Note: In production, you'd want to use Celery or similar
         # For now, we'll run in background and return immediately
-        process = subprocess.Popen(
-            args,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True
-        )
+        process = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
         # For now, wait for completion (in production, make this truly async)
         stdout, stderr = process.communicate(timeout=300)  # 5 min timeout
 
         success = process.returncode == 0
 
-        return jsonify({
-            "success": success,
-            "stdout": stdout,
-            "stderr": stderr,
-            "returncode": process.returncode
-        })
+        return jsonify(
+            {
+                "success": success,
+                "stdout": stdout,
+                "stderr": stderr,
+                "returncode": process.returncode,
+            }
+        )
 
     except subprocess.TimeoutExpired:
         process.kill()
-        return jsonify({
-            "success": False,
-            "error": "Agent execution timed out (5 minutes)",
-            "timeout": True
-        }), 408
+        return (
+            jsonify(
+                {
+                    "success": False,
+                    "error": "Agent execution timed out (5 minutes)",
+                    "timeout": True,
+                }
+            ),
+            408,
+        )
     except Exception as e:
-        return jsonify({
-            "success": False,
-            "error": str(e)
-        }), 500
+        return jsonify({"success": False, "error": str(e)}), 500

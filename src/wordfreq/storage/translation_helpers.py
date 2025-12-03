@@ -29,7 +29,7 @@ LANGUAGE_FIELDS = {
     "de": ("de", "German", True),
     "pt": ("pt", "Portuguese", True),
     "sw": ("swahili_translation", "Swahili", False),
-    "vi": ("vietnamese_translation", "Vietnamese", False)
+    "vi": ("vietnamese_translation", "Vietnamese", False),
 }
 
 
@@ -55,10 +55,13 @@ def get_translation(session: Session, lemma: Lemma, lang_code: str) -> Optional[
 
     if use_translation_table:
         # Query LemmaTranslation table
-        translation_obj = session.query(LemmaTranslation).filter(
-            LemmaTranslation.lemma_id == lemma.id,
-            LemmaTranslation.language_code == field_name
-        ).first()
+        translation_obj = (
+            session.query(LemmaTranslation)
+            .filter(
+                LemmaTranslation.lemma_id == lemma.id, LemmaTranslation.language_code == field_name
+            )
+            .first()
+        )
         return translation_obj.translation if translation_obj else None
     else:
         # Get from Lemma table column
@@ -83,7 +86,9 @@ def get_all_translations(session: Session, lemma: Lemma) -> Dict[str, Optional[s
     return translations
 
 
-def set_translation(session: Session, lemma: Lemma, lang_code: str, translation: str) -> Tuple[Optional[str], str]:
+def set_translation(
+    session: Session, lemma: Lemma, lang_code: str, translation: str
+) -> Tuple[Optional[str], str]:
     """
     Set translation for a lemma in the specified language.
 
@@ -109,19 +114,19 @@ def set_translation(session: Session, lemma: Lemma, lang_code: str, translation:
 
     if use_translation_table:
         # Insert or update in LemmaTranslation table
-        translation_obj = session.query(LemmaTranslation).filter(
-            LemmaTranslation.lemma_id == lemma.id,
-            LemmaTranslation.language_code == field_name
-        ).first()
+        translation_obj = (
+            session.query(LemmaTranslation)
+            .filter(
+                LemmaTranslation.lemma_id == lemma.id, LemmaTranslation.language_code == field_name
+            )
+            .first()
+        )
 
         if translation_obj:
             translation_obj.translation = translation
         else:
             translation_obj = LemmaTranslation(
-                lemma_id=lemma.id,
-                language_code=field_name,
-                translation=translation,
-                verified=False
+                lemma_id=lemma.id, language_code=field_name, translation=translation, verified=False
             )
             session.add(translation_obj)
     else:

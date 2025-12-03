@@ -148,10 +148,10 @@ Alexander's Ragtime Band!
 
 
 ALL_SAMPLES = {
-  "twocities": TWOCITIES,
-  "pooh": POOH,
-  "gibbon": GIBBON,
-  "leegin": LEEGIN,
-  "python": PYTHON,
-  "ragtime": RAGTIME,
+    "twocities": TWOCITIES,
+    "pooh": POOH,
+    "gibbon": GIBBON,
+    "leegin": LEEGIN,
+    "python": PYTHON,
+    "ragtime": RAGTIME,
 }

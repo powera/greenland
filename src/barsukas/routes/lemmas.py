@@ -7,7 +7,10 @@ from sqlalchemy import or_, func, case
 
 from wordfreq.storage.models.schema import Lemma, DerivativeForm
 from wordfreq.storage.crud.operation_log import log_translation_change
-from wordfreq.storage.crud.difficulty_override import get_all_overrides_for_lemma, get_effective_difficulty_level
+from wordfreq.storage.crud.difficulty_override import (
+    get_all_overrides_for_lemma,
+    get_effective_difficulty_level,
+)
 from wordfreq.storage.translation_helpers import get_all_translations, get_supported_languages
 from wordfreq.storage.crud.derivative_form import delete_derivative_form
 from config import Config
@@ -52,10 +55,11 @@ def add_lemma():
             return render_template("lemmas/add.html")
 
         # Check if lemma already exists
-        existing = g.db.query(Lemma).filter(
-            Lemma.lemma_text == lemma_text,
-            Lemma.pos_type == pos_type
-        ).first()
+        existing = (
+            g.db.query(Lemma)
+            .filter(Lemma.lemma_text == lemma_text, Lemma.pos_type == pos_type)
+            .first()
+        )
 
         if existing:
             flash(f'Lemma "{lemma_text}" with POS type "{pos_type}" already exists', "error")
@@ -63,10 +67,11 @@ def add_lemma():
 
         # Generate GUID based on pos_subtype
         from wordfreq.storage.utils.guid import generate_guid
+
         try:
             guid = generate_guid(g.db, pos_subtype)
         except ValueError as e:
-            flash(f'Invalid POS subtype for GUID generation: {e}', "error")
+            flash(f"Invalid POS subtype for GUID generation: {e}", "error")
             return render_template("lemmas/add.html")
 
         # Parse difficulty level
@@ -75,9 +80,14 @@ def add_lemma():
             try:
                 difficulty_level = int(difficulty_level_str)
                 # Validate difficulty level
-                if difficulty_level != Config.EXCLUDE_DIFFICULTY_LEVEL and\
-                   (difficulty_level < Config.MIN_DIFFICULTY_LEVEL or difficulty_level > Config.MAX_DIFFICULTY_LEVEL):
-                    flash(f'Difficulty level must be -1 or between {Config.MIN_DIFFICULTY_LEVEL} and {Config.MAX_DIFFICULTY_LEVEL}', "error")
+                if difficulty_level != Config.EXCLUDE_DIFFICULTY_LEVEL and (
+                    difficulty_level < Config.MIN_DIFFICULTY_LEVEL
+                    or difficulty_level > Config.MAX_DIFFICULTY_LEVEL
+                ):
+                    flash(
+                        f"Difficulty level must be -1 or between {Config.MIN_DIFFICULTY_LEVEL} and {Config.MAX_DIFFICULTY_LEVEL}",
+                        "error",
+                    )
                     return render_template("lemmas/add.html")
             except ValueError:
                 flash("Invalid difficulty level", "error")
@@ -92,7 +102,7 @@ def add_lemma():
             guid=guid,
             difficulty_level=difficulty_level,
             confidence=0.0,
-            verified=False
+            verified=False,
         )
 
         g.db.add(new_lemma)
@@ -106,12 +116,13 @@ def add_lemma():
             lemma_id=new_lemma.id,
             field_name="created",
             old_value=None,
-            new_value=f'{lemma_text} ({pos_type})'
+            new_value=f"{lemma_text} ({pos_type})",
         )
 
         # Save initial translation if provided
         if initial_translation_lang and initial_translation_text:
             from wordfreq.storage.translation_helpers import set_translation
+
             try:
                 set_translation(g.db, new_lemma, initial_translation_lang, initial_translation_text)
                 # Log the translation
@@ -120,19 +131,19 @@ def add_lemma():
                     source=Config.OPERATION_LOG_SOURCE,
                     operation_type="translation_add",
                     lemma_id=new_lemma.id,
-                    field_name=f'{initial_translation_lang}_translation',
+                    field_name=f"{initial_translation_lang}_translation",
                     old_value=None,
-                    new_value=initial_translation_text
+                    new_value=initial_translation_text,
                 )
             except Exception as e:
                 # Don't fail lemma creation if translation fails
-                flash(f'Warning: Failed to save translation: {str(e)}', "warning")
+                flash(f"Warning: Failed to save translation: {str(e)}", "warning")
 
         g.db.commit()
 
-        success_message = f'Created new lemma: {lemma_text}'
+        success_message = f"Created new lemma: {lemma_text}"
         if initial_translation_lang and initial_translation_text:
-            success_message += f' (with {initial_translation_lang.upper()} translation)'
+            success_message += f" (with {initial_translation_lang.upper()} translation)"
         flash(success_message, "success")
 
         return redirect(url_for("lemmas.view_lemma", lemma_id=new_lemma.id))
@@ -157,22 +168,22 @@ def list_lemmas():
     if search:
         # Search in lemma text, definition, disambiguation, and ALL translations
         search_conditions = [
-            Lemma.lemma_text.ilike(f'%{search}%'),
-            Lemma.definition_text.ilike(f'%{search}%'),
-            Lemma.disambiguation.ilike(f'%{search}%'),
+            Lemma.lemma_text.ilike(f"%{search}%"),
+            Lemma.definition_text.ilike(f"%{search}%"),
+            Lemma.disambiguation.ilike(f"%{search}%"),
             # Search in legacy translation columns
-            Lemma.chinese_translation.ilike(f'%{search}%'),
-            Lemma.french_translation.ilike(f'%{search}%'),
-            Lemma.korean_translation.ilike(f'%{search}%'),
-            Lemma.swahili_translation.ilike(f'%{search}%'),
-            Lemma.lithuanian_translation.ilike(f'%{search}%'),
-            Lemma.vietnamese_translation.ilike(f'%{search}%'),
+            Lemma.chinese_translation.ilike(f"%{search}%"),
+            Lemma.french_translation.ilike(f"%{search}%"),
+            Lemma.korean_translation.ilike(f"%{search}%"),
+            Lemma.swahili_translation.ilike(f"%{search}%"),
+            Lemma.lithuanian_translation.ilike(f"%{search}%"),
+            Lemma.vietnamese_translation.ilike(f"%{search}%"),
         ]
 
         # Also search in LemmaTranslation table
         # Join with LemmaTranslation and search those translations too
         translation_subquery = g.db.query(LemmaTranslation.lemma_id).filter(
-            LemmaTranslation.translation.ilike(f'%{search}%')
+            LemmaTranslation.translation.ilike(f"%{search}%")
         )
 
         search_conditions.append(Lemma.id.in_(translation_subquery))
@@ -199,7 +210,10 @@ def list_lemmas():
             (func.lower(Lemma.lemma_text).startswith(search_lower), 2),  # Starts with in lemma
             (func.lower(Lemma.lemma_text).contains(search_lower), 3),  # Contains in lemma
             (func.lower(Lemma.definition_text).contains(search_lower), 4),  # Contains in definition
-            (func.lower(Lemma.disambiguation).contains(search_lower), 5),  # Contains in disambiguation
+            (
+                func.lower(Lemma.disambiguation).contains(search_lower),
+                5,
+            ),  # Contains in disambiguation
             # Translation matches
             (func.lower(Lemma.lithuanian_translation).contains(search_lower), 6),
             (func.lower(Lemma.chinese_translation).contains(search_lower), 6),
@@ -207,7 +221,7 @@ def list_lemmas():
             (func.lower(Lemma.korean_translation).contains(search_lower), 6),
             (func.lower(Lemma.swahili_translation).contains(search_lower), 6),
             (func.lower(Lemma.vietnamese_translation).contains(search_lower), 6),
-            else_=7
+            else_=7,
         )
         query = query.order_by(relevance, func.lower(Lemma.lemma_text))
     else:
@@ -216,7 +230,7 @@ def list_lemmas():
         level_order = case(
             (Lemma.difficulty_level.is_(None), 99),  # NULL levels last
             (Lemma.difficulty_level == -1, 98),  # -1 (not applicable) second to last
-            else_=Lemma.difficulty_level
+            else_=Lemma.difficulty_level,
         )
         query = query.order_by(level_order, func.lower(Lemma.lemma_text))
 
@@ -231,15 +245,17 @@ def list_lemmas():
     # Calculate pagination
     total_pages = (total + Config.ITEMS_PER_PAGE - 1) // Config.ITEMS_PER_PAGE
 
-    return render_template("lemmas/list.html",
-                         lemmas=lemmas,
-                         page=page,
-                         total_pages=total_pages,
-                         total=total,
-                         search=search,
-                         pos_type=pos_type,
-                         difficulty=difficulty,
-                         pos_types=pos_types)
+    return render_template(
+        "lemmas/list.html",
+        lemmas=lemmas,
+        page=page,
+        total_pages=total_pages,
+        total=total,
+        search=search,
+        pos_type=pos_type,
+        difficulty=difficulty,
+        pos_types=pos_types,
+    )
 
 
 @bp.route("/<int:lemma_id>")
@@ -268,13 +284,16 @@ def view_lemma(lemma_id):
     difficulty_stats = _get_difficulty_stats(g.db, lemma.pos_type, lemma.pos_subtype)
 
     # Get derivative forms grouped by language
-    derivative_forms = g.db.query(DerivativeForm).filter(
-        DerivativeForm.lemma_id == lemma_id
-    ).order_by(
-        DerivativeForm.language_code,
-        DerivativeForm.is_base_form.desc(),
-        DerivativeForm.grammatical_form
-    ).all()
+    derivative_forms = (
+        g.db.query(DerivativeForm)
+        .filter(DerivativeForm.lemma_id == lemma_id)
+        .order_by(
+            DerivativeForm.language_code,
+            DerivativeForm.is_base_form.desc(),
+            DerivativeForm.grammatical_form,
+        )
+        .all()
+    )
 
     # Group forms by language and type
     forms_by_language = {}
@@ -286,7 +305,12 @@ def view_lemma(lemma_id):
 
         # Separate synonyms and alternative forms
         # Alternative forms include: abbreviation, expanded_form, alternate_spelling, and legacy 'alternative_form'
-        is_alternative = form.grammatical_form in ["abbreviation", "expanded_form", "alternate_spelling", "alternative_form"]
+        is_alternative = form.grammatical_form in [
+            "abbreviation",
+            "expanded_form",
+            "alternate_spelling",
+            "alternative_form",
+        ]
         is_synonym = form.grammatical_form == "synonym"
 
         if is_synonym:
@@ -304,55 +328,61 @@ def view_lemma(lemma_id):
             forms_by_language[lang_code].append(form)
 
     # Get all languages that have synonyms or alternatives
-    all_synonym_languages = sorted(set(list(synonyms_by_language.keys()) + list(alternative_forms_by_language.keys())))
+    all_synonym_languages = sorted(
+        set(list(synonyms_by_language.keys()) + list(alternative_forms_by_language.keys()))
+    )
 
     # Get count of sentences using this lemma (for nouns)
     sentence_count = 0
     if lemma.pos_type == "noun":
-        sentence_count = g.db.query(SentenceWord).filter(
-            SentenceWord.lemma_id == lemma_id
-        ).count()
+        sentence_count = g.db.query(SentenceWord).filter(SentenceWord.lemma_id == lemma_id).count()
 
     # Check if disambiguation check button should be shown
     # Show if: (1) no parenthetical in current lemma_text AND (2) other lemmas exist with same base text
     needs_disambiguation_check = False
     if lemma.lemma_text and "(" not in lemma.lemma_text:
         # Quick check: are there other lemmas with this exact lemma_text?
-        duplicate_count = g.db.query(Lemma).filter(
-            Lemma.lemma_text == lemma.lemma_text,
-            Lemma.guid.isnot(None),
-            Lemma.id != lemma_id
-        ).count()
+        duplicate_count = (
+            g.db.query(Lemma)
+            .filter(
+                Lemma.lemma_text == lemma.lemma_text, Lemma.guid.isnot(None), Lemma.id != lemma_id
+            )
+            .count()
+        )
         needs_disambiguation_check = duplicate_count > 0
 
     # Get grammar facts for this lemma
     from wordfreq.storage.crud.grammar_fact import get_grammar_facts
+
     grammar_facts = get_grammar_facts(g.db, lemma_id)
 
     # Get audio files for this lemma
     from wordfreq.storage.models.schema import AudioQualityReview
-    audio_files = g.db.query(AudioQualityReview).filter(
-        AudioQualityReview.lemma_id == lemma_id
-    ).order_by(
-        AudioQualityReview.language_code,
-        AudioQualityReview.voice_name
-    ).all()
 
-    return render_template("lemmas/view.html",
-                         lemma=lemma,
-                         translations=translations,
-                         language_names=language_names,
-                         overrides=overrides,
-                         effective_levels=effective_levels,
-                         difficulty_stats=difficulty_stats,
-                         forms_by_language=forms_by_language,
-                         audio_files=audio_files,
-                         synonyms_by_language=synonyms_by_language,
-                         alternative_forms_by_language=alternative_forms_by_language,
-                         all_synonym_languages=all_synonym_languages,
-                         sentence_count=sentence_count,
-                         needs_disambiguation_check=needs_disambiguation_check,
-                         grammar_facts=grammar_facts)
+    audio_files = (
+        g.db.query(AudioQualityReview)
+        .filter(AudioQualityReview.lemma_id == lemma_id)
+        .order_by(AudioQualityReview.language_code, AudioQualityReview.voice_name)
+        .all()
+    )
+
+    return render_template(
+        "lemmas/view.html",
+        lemma=lemma,
+        translations=translations,
+        language_names=language_names,
+        overrides=overrides,
+        effective_levels=effective_levels,
+        difficulty_stats=difficulty_stats,
+        forms_by_language=forms_by_language,
+        audio_files=audio_files,
+        synonyms_by_language=synonyms_by_language,
+        alternative_forms_by_language=alternative_forms_by_language,
+        all_synonym_languages=all_synonym_languages,
+        sentence_count=sentence_count,
+        needs_disambiguation_check=needs_disambiguation_check,
+        grammar_facts=grammar_facts,
+    )
 
 
 @bp.route("/<int:lemma_id>/edit", methods=["GET", "POST"])
@@ -405,9 +435,14 @@ def edit_lemma(lemma_id):
             try:
                 new_difficulty = int(difficulty_str)
                 # Validate
-                if new_difficulty != Config.EXCLUDE_DIFFICULTY_LEVEL and\
-                   (new_difficulty < Config.MIN_DIFFICULTY_LEVEL or new_difficulty > Config.MAX_DIFFICULTY_LEVEL):
-                    flash(f'Difficulty level must be -1 or between {Config.MIN_DIFFICULTY_LEVEL} and {Config.MAX_DIFFICULTY_LEVEL}', "error")
+                if new_difficulty != Config.EXCLUDE_DIFFICULTY_LEVEL and (
+                    new_difficulty < Config.MIN_DIFFICULTY_LEVEL
+                    or new_difficulty > Config.MAX_DIFFICULTY_LEVEL
+                ):
+                    flash(
+                        f"Difficulty level must be -1 or between {Config.MIN_DIFFICULTY_LEVEL} and {Config.MAX_DIFFICULTY_LEVEL}",
+                        "error",
+                    )
                     return render_template("lemmas/edit.html", lemma=lemma)
             except ValueError:
                 flash("Invalid difficulty level", "error")
@@ -461,11 +496,11 @@ def edit_lemma(lemma_id):
                 lemma_id=lemma.id,
                 field_name=field_name,
                 old_value=str(old_value) if old_value is not None else None,
-                new_value=str(new_value) if new_value is not None else None
+                new_value=str(new_value) if new_value is not None else None,
             )
 
         g.db.commit()
-        flash(f'Updated lemma: {lemma.lemma_text}', "success")
+        flash(f"Updated lemma: {lemma.lemma_text}", "success")
         return redirect(url_for("lemmas.view_lemma", lemma_id=lemma.id))
 
     # Get difficulty level distribution for same POS type/subtype
@@ -477,8 +512,7 @@ def edit_lemma(lemma_id):
 def _get_difficulty_stats(session, pos_type, pos_subtype):
     """Get difficulty level distribution for a given POS type/subtype."""
     query = session.query(Lemma.difficulty_level, func.count(Lemma.id)).filter(
-        Lemma.pos_type == pos_type,
-        Lemma.difficulty_level.isnot(None)
+        Lemma.pos_type == pos_type, Lemma.difficulty_level.isnot(None)
     )
 
     if pos_subtype:
@@ -507,10 +541,11 @@ def delete_synonym(lemma_id, form_id):
         return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
     # Verify the form belongs to this lemma
-    form = g.db.query(DerivativeForm).filter(
-        DerivativeForm.id == form_id,
-        DerivativeForm.lemma_id == lemma_id
-    ).first()
+    form = (
+        g.db.query(DerivativeForm)
+        .filter(DerivativeForm.id == form_id, DerivativeForm.lemma_id == lemma_id)
+        .first()
+    )
 
     if not form:
         flash("Synonym or alternative form not found", "error")
@@ -529,7 +564,7 @@ def delete_synonym(lemma_id, form_id):
             session=g.db,
             lemma_id=lemma_id,
             language_code=language_code,
-            deleted_form_type=grammatical_form
+            deleted_form_type=grammatical_form,
         )
 
         # Log the deletion
@@ -538,9 +573,9 @@ def delete_synonym(lemma_id, form_id):
             source=Config.OPERATION_LOG_SOURCE,
             operation_type="derivative_form_delete",
             lemma_id=lemma_id,
-            field_name=f'{language_code}_{grammatical_form}',
+            field_name=f"{language_code}_{grammatical_form}",
             old_value=form_text,
-            new_value=None
+            new_value=None,
         )
         flash(f'Deleted {form_type}: "{form_text}"', "success")
     else:
@@ -580,9 +615,11 @@ def delete_all_synonyms(lemma_id):
     if form_category == "synonyms":
         query = query.filter(DerivativeForm.grammatical_form == "synonym")
     elif form_category == "alternatives":
-        query = query.filter(DerivativeForm.grammatical_form.in_([
-            "abbreviation", "expanded_form", "alternate_spelling", "alternative_form"
-        ]))
+        query = query.filter(
+            DerivativeForm.grammatical_form.in_(
+                ["abbreviation", "expanded_form", "alternate_spelling", "alternative_form"]
+            )
+        )
     # If 'all' or not specified, delete both synonyms and alternatives
 
     forms_to_delete = query.all()
@@ -605,9 +642,9 @@ def delete_all_synonyms(lemma_id):
                 source=Config.OPERATION_LOG_SOURCE,
                 operation_type="derivative_form_delete",
                 lemma_id=lemma_id,
-                field_name=f'{form.language_code}_{form.grammatical_form}',
+                field_name=f"{form.language_code}_{form.grammatical_form}",
                 old_value=form.derivative_form_text,
-                new_value=None
+                new_value=None,
             )
 
     # Update grammar facts for all affected languages
@@ -617,16 +654,17 @@ def delete_all_synonyms(lemma_id):
             session=g.db,
             lemma_id=lemma_id,
             language_code=language,
-            deleted_form_type=None  # Recalculate all types since bulk delete may affect multiple
+            deleted_form_type=None,  # Recalculate all types since bulk delete may affect multiple
         )
 
     # Create success message
     if deleted_count > 0:
-        msg = f'Deleted {deleted_count} form(s)'
+        msg = f"Deleted {deleted_count} form(s)"
         if lang_code:
             from wordfreq.storage.translation_helpers import get_supported_languages
+
             language_names = get_supported_languages()
-            msg += f' for {language_names.get(lang_code, lang_code)}'
+            msg += f" for {language_names.get(lang_code, lang_code)}"
         flash(msg, "success")
     else:
         flash("Failed to delete forms", "error")

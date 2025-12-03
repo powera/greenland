@@ -4,9 +4,7 @@
 Exemplar task for solving a logical reasoning puzzle involving multiple interconnected statements.
 """
 
-from lib.exemplars.base import (
-    register_exemplar, ExemplarType, compare_models, generate_report
-)
+from lib.exemplars.base import register_exemplar, ExemplarType, compare_models, generate_report
 
 # The solution (for reference)
 SOLUTION = """
@@ -48,33 +46,35 @@ Please show your reasoning step by step, and present your final answer in a clea
     type=ExemplarType.REASONING,
     tags=["logic puzzle", "deduction", "constraint satisfaction"],
     context="You are a logical reasoning assistant tasked with solving complex puzzles by tracking constraints and making valid inferences.",
-    temperature=0.2  # Lower temperature for more logical responses
+    temperature=0.2,  # Lower temperature for more logical responses
 )
+
 
 # Function to run this exemplar with multiple models
 def run_neighborhood_puzzle_exemplar(models=None, num_models=3):
     """
     Run the neighborhood puzzle exemplar with specified models.
-    
+
     Args:
         models: List of model names to use (if None, uses top models from database)
         num_models: Number of models to use if models parameter is None
     """
     from lib.exemplars import runner
-    
+
     if models is None:
         # Get models from database
         all_models = runner.get_model_names()
         # Use the first num_models models, or all if fewer available
-        models = all_models[:min(num_models, len(all_models))]
+        models = all_models[: min(num_models, len(all_models))]
         if not models:
             print("No models available in database. Using default models.")
             models = ["gpt-4o-mini-2024-07-18", "gemma2:9b"]
-        
+
     compare_models("neighborhood_puzzle", models)
     report_path = generate_report("neighborhood_puzzle")
     print(f"Report generated at: {report_path}")
     return report_path
+
 
 if __name__ == "__main__":
     run_neighborhood_puzzle_exemplar()

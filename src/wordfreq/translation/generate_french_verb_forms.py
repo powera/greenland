@@ -6,7 +6,7 @@ from wordfreq.translation.language_forms.french import VERB_FORM_MAPPING
 from wordfreq.translation.generate_forms_base import (
     FormGenerationConfig,
     get_lemmas_with_translation,
-    run_form_generation
+    run_form_generation,
 )
 
 CONFIG = FormGenerationConfig(
@@ -18,7 +18,7 @@ CONFIG = FormGenerationConfig(
     min_forms_threshold=25,
     base_form_identifier="1s_pres",
     use_legacy_translation=True,
-    translation_field_name="french_translation"
+    translation_field_name="french_translation",
 )
 
 

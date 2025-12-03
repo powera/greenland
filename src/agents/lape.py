@@ -41,7 +41,7 @@ from wordfreq.storage.models.schema import Lemma
 from wordfreq.storage.crud.grammar_fact import (
     add_grammar_fact,
     get_grammar_fact_value,
-    get_grammar_facts
+    get_grammar_facts,
 )
 from wordfreq.storage.crud.operation_log import log_operation
 from wordfreq.storage.translation_helpers import get_translation
@@ -51,8 +51,7 @@ from clients.types import Schema, SchemaProperty
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -65,37 +64,37 @@ class LapeAgent:
         "fr": {
             "name": "French",
             "genders": ["masculine", "feminine"],
-            "description": "2-way system (masculine/feminine)"
+            "description": "2-way system (masculine/feminine)",
         },
         "lt": {
             "name": "Lithuanian",
             "genders": ["masculine", "feminine"],
-            "description": "2-way system (masculine/feminine)"
+            "description": "2-way system (masculine/feminine)",
         },
         "es": {
             "name": "Spanish",
             "genders": ["masculine", "feminine"],
-            "description": "2-way system (masculine/feminine)"
+            "description": "2-way system (masculine/feminine)",
         },
         "de": {
             "name": "German",
             "genders": ["masculine", "feminine", "neuter"],
-            "description": "3-way system (masculine/feminine/neuter)"
+            "description": "3-way system (masculine/feminine/neuter)",
         },
         "pt": {
             "name": "Portuguese",
             "genders": ["masculine", "feminine"],
-            "description": "2-way system (masculine/feminine)"
+            "description": "2-way system (masculine/feminine)",
         },
         "ru": {
             "name": "Russian",
             "genders": ["masculine", "feminine", "neuter"],
-            "description": "3-way system (masculine/feminine/neuter)"
+            "description": "3-way system (masculine/feminine/neuter)",
         },
         "it": {
             "name": "Italian",
             "genders": ["masculine", "feminine"],
-            "description": "2-way system (masculine/feminine)"
+            "description": "2-way system (masculine/feminine)",
         },
     }
 
@@ -104,12 +103,12 @@ class LapeAgent:
         "measure_words": {
             "languages": ["zh"],  # Chinese only for now
             "required_pos": ["noun"],
-            "description": "Generate Chinese measure words/classifiers for nouns"
+            "description": "Generate Chinese measure words/classifiers for nouns",
         },
         "grammatical_gender": {
             "languages": list(GENDER_SYSTEMS.keys()),
             "required_pos": ["noun"],
-            "description": "Determine grammatical gender (masculine, feminine, neuter)"
+            "description": "Determine grammatical gender (masculine, feminine, neuter)",
         },
         # 'number_type': {
         #     'languages': ['en', 'lt', 'fr', 'es'],
@@ -149,9 +148,7 @@ class LapeAgent:
         """Get or create linguistic client for LLM queries."""
         if self.linguistic_client is None:
             self.linguistic_client = LinguisticClient(
-                model=self.model,
-                db_path=self.db_path,
-                debug=self.debug
+                model=self.model, db_path=self.db_path, debug=self.debug
             )
         return self.linguistic_client
 
@@ -163,10 +160,7 @@ class LapeAgent:
         return self.llm_client
 
     def generate_measure_words(
-        self,
-        lemma: Lemma,
-        chinese_translation: str,
-        session=None
+        self, lemma: Lemma, chinese_translation: str, session=None
     ) -> Tuple[Optional[str], Optional[str], float]:
         """
         Generate Chinese measure word(s) for a noun using LLM.
@@ -180,7 +174,9 @@ class LapeAgent:
             Tuple of (measure_word, explanation, confidence)
         """
         if lemma.pos_type != "noun":
-            logger.warning(f"Lemma '{lemma.lemma_text}' is not a noun, skipping measure word generation")
+            logger.warning(
+                f"Lemma '{lemma.lemma_text}' is not a noun, skipping measure word generation"
+            )
             return None, None, 0.0
 
         # Load prompts
@@ -196,7 +192,7 @@ class LapeAgent:
             english_word=lemma.lemma_text,
             chinese_translation=chinese_translation,
             pos_type=lemma.pos_type,
-            definition=lemma.definition_text or "N/A"
+            definition=lemma.definition_text or "N/A",
         )
 
         # Define JSON schema for response
@@ -204,25 +200,28 @@ class LapeAgent:
             name="MeasureWordGeneration",
             description="Generate Chinese measure words/classifiers for nouns",
             properties={
-                "primary_measure_word": SchemaProperty("string", "The primary/most common measure word"),
+                "primary_measure_word": SchemaProperty(
+                    "string", "The primary/most common measure word"
+                ),
                 "alternative_measure_words": SchemaProperty(
                     "array",
                     "List of alternative measure words that can also be used",
-                    items={"type": "string"}
+                    items={"type": "string"},
                 ),
-                "explanation": SchemaProperty("string", "Brief explanation of why this measure word is appropriate"),
-                "confidence": SchemaProperty("number", "Confidence score 0.0-1.0", minimum=0.0, maximum=1.0)
-            }
+                "explanation": SchemaProperty(
+                    "string", "Brief explanation of why this measure word is appropriate"
+                ),
+                "confidence": SchemaProperty(
+                    "number", "Confidence score 0.0-1.0", minimum=0.0, maximum=1.0
+                ),
+            },
         )
 
         # Query LLM
         try:
             client = self.get_llm_client()
             response = client.generate_chat(
-                prompt=prompt_text,
-                model=self.model,
-                json_schema=schema,
-                context=context
+                prompt=prompt_text, model=self.model, json_schema=schema, context=context
             )
 
             # Extract structured data
@@ -255,11 +254,7 @@ class LapeAgent:
             return None, None, 0.0
 
     def generate_grammatical_gender(
-        self,
-        lemma: Lemma,
-        target_translation: str,
-        language_code: str,
-        session=None
+        self, lemma: Lemma, target_translation: str, language_code: str, session=None
     ) -> Tuple[Optional[str], Optional[str], float]:
         """
         Generate grammatical gender for a noun using LLM.
@@ -303,7 +298,7 @@ class LapeAgent:
             language_name=language_name,
             language_code=language_code,
             gender_system=gender_system,
-            valid_genders=valid_genders
+            valid_genders=valid_genders,
         )
 
         # Define JSON schema for response
@@ -314,29 +309,22 @@ class LapeAgent:
                 "gender": SchemaProperty(
                     "string",
                     f"The grammatical gender: {valid_genders}",
-                    enum=gender_config["genders"]
+                    enum=gender_config["genders"],
                 ),
                 "explanation": SchemaProperty(
-                    "string",
-                    "Brief explanation of why this gender is correct"
+                    "string", "Brief explanation of why this gender is correct"
                 ),
                 "confidence": SchemaProperty(
-                    "number",
-                    "Confidence score 0.0-1.0",
-                    minimum=0.0,
-                    maximum=1.0
-                )
-            }
+                    "number", "Confidence score 0.0-1.0", minimum=0.0, maximum=1.0
+                ),
+            },
         )
 
         # Query LLM
         try:
             client = self.get_llm_client()
             response = client.generate_chat(
-                prompt=prompt_text,
-                model=self.model,
-                json_schema=schema,
-                context=context
+                prompt=prompt_text, model=self.model, json_schema=schema, context=context
             )
 
             # Extract structured data
@@ -368,7 +356,7 @@ class LapeAgent:
         limit: Optional[int] = None,
         skip_existing: bool = True,
         min_confidence: float = 0.7,
-        dry_run: bool = False
+        dry_run: bool = False,
     ) -> Dict[str, any]:
         """
         Generate grammar facts for lemmas.
@@ -407,9 +395,11 @@ class LapeAgent:
         session = self.get_session()
         try:
             # Get lemmas that need this fact
-            query = session.query(Lemma).filter(
-                Lemma.pos_type.in_(fact_config["required_pos"])
-            ).order_by(Lemma.id)
+            query = (
+                session.query(Lemma)
+                .filter(Lemma.pos_type.in_(fact_config["required_pos"]))
+                .order_by(Lemma.id)
+            )
 
             if limit:
                 query = query.limit(limit * 2)  # Get extra in case we skip some
@@ -440,7 +430,9 @@ class LapeAgent:
                 # Get translation for target language
                 translation = get_translation(session, lemma, language_code)
                 if not translation:
-                    logger.debug(f"No {language_code} translation for '{lemma.lemma_text}', skipping")
+                    logger.debug(
+                        f"No {language_code} translation for '{lemma.lemma_text}', skipping"
+                    )
                     skipped_count += 1
                     continue
 
@@ -472,7 +464,7 @@ class LapeAgent:
                             fact_type=fact_type,
                             fact_value=fact_value,
                             notes=notes,
-                            verified=False
+                            verified=False,
                         )
                         session.commit()
 
@@ -488,20 +480,22 @@ class LapeAgent:
                                 "fact_value": fact_value,
                                 "confidence": confidence,
                                 "agent": "lape",
-                                "model": self.model
-                            }
+                                "model": self.model,
+                            },
                         )
                         session.commit()
 
                     success_count += 1
-                    results.append({
-                        "lemma_id": lemma.id,
-                        "lemma_text": lemma.lemma_text,
-                        "translation": translation,
-                        "fact_value": fact_value,
-                        "notes": notes,
-                        "confidence": confidence
-                    })
+                    results.append(
+                        {
+                            "lemma_id": lemma.id,
+                            "lemma_text": lemma.lemma_text,
+                            "translation": translation,
+                            "fact_value": fact_value,
+                            "notes": notes,
+                            "confidence": confidence,
+                        }
+                    )
                     logger.info(f"  ✓ Generated: {fact_value} (confidence: {confidence:.2f})")
                 else:
                     failed_count += 1
@@ -522,7 +516,7 @@ class LapeAgent:
                 "failed": failed_count,
                 "skipped": skipped_count,
                 "results": results,
-                "dry_run": dry_run
+                "dry_run": dry_run,
             }
 
         except Exception as e:
@@ -570,71 +564,46 @@ Future fact types (see code comments):
   - verb_aspect: Perfective vs imperfective verbs
   - honorific_level: Politeness/honorific level
   - And more...
-        """
+        """,
     )
 
     parser.add_argument(
         "--fact-type",
         required=True,
         choices=LapeAgent.SUPPORTED_FACT_TYPES.keys(),
-        help="Type of grammar fact to generate"
+        help="Type of grammar fact to generate",
     )
-    parser.add_argument(
-        "--language",
-        required=True,
-        help="Language code (e.g., zh, fr, es)"
-    )
-    parser.add_argument(
-        "--limit",
-        type=int,
-        help="Maximum number of lemmas to process"
-    )
+    parser.add_argument("--language", required=True, help="Language code (e.g., zh, fr, es)")
+    parser.add_argument("--limit", type=int, help="Maximum number of lemmas to process")
     parser.add_argument(
         "--skip-existing",
         action="store_true",
         default=True,
-        help="Skip lemmas that already have this fact (default: True)"
+        help="Skip lemmas that already have this fact (default: True)",
     )
     parser.add_argument(
         "--no-skip-existing",
         dest="skip_existing",
         action="store_false",
-        help="Process all lemmas, even if they have existing facts"
+        help="Process all lemmas, even if they have existing facts",
     )
     parser.add_argument(
         "--min-confidence",
         type=float,
         default=0.7,
-        help="Minimum confidence score to save fact (default: 0.7)"
+        help="Minimum confidence score to save fact (default: 0.7)",
     )
+    parser.add_argument("--dry-run", action="store_true", help="Run without saving to database")
     parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="Run without saving to database"
+        "--model", default="gpt-5-mini", help="LLM model to use (default: gpt-5-mini)"
     )
-    parser.add_argument(
-        "--model",
-        default="gpt-5-mini",
-        help="LLM model to use (default: gpt-5-mini)"
-    )
-    parser.add_argument(
-        "--debug",
-        action="store_true",
-        help="Enable debug logging"
-    )
-    parser.add_argument(
-        "--db-path",
-        help="Database path (default: from constants)"
-    )
+    parser.add_argument("--debug", action="store_true", help="Enable debug logging")
+    parser.add_argument("--db-path", help="Database path (default: from constants)")
 
     args = parser.parse_args()
 
     # Create agent
-    agent = LapeAgent(
-        db_path=args.db_path,
-        debug=args.debug,
-        model=args.model
-    )
+    agent = LapeAgent(db_path=args.db_path, debug=args.debug, model=args.model)
 
     # Generate facts
     try:
@@ -644,7 +613,7 @@ Future fact types (see code comments):
             limit=args.limit,
             skip_existing=args.skip_existing,
             min_confidence=args.min_confidence,
-            dry_run=args.dry_run
+            dry_run=args.dry_run,
         )
 
         # Print summary

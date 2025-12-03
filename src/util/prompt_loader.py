@@ -12,11 +12,13 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 import constants
+
 # Prompts are now stored within the wordfreq module
 PROMPTS_DIR = Path(constants.SRC_DIR) / "wordfreq" / "prompts"
 
 # Cache for loaded prompts to avoid redundant file reads
 _prompt_cache: Dict[str, str] = {}
+
 
 def get_context(category: str, prompt_type: str, subtype: Optional[str] = None) -> str:
     """
@@ -67,6 +69,7 @@ def get_context(category: str, prompt_type: str, subtype: Optional[str] = None) 
     except Exception as e:
         logger.error(f"Error loading prompt from {file_path}: {e}")
         raise
+
 
 def get_prompt(category: str, prompt_type: str, subtype: Optional[str] = None) -> str:
     """

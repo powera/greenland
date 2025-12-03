@@ -12,6 +12,7 @@ from typing import Optional
 
 try:
     from opencc import OpenCC
+
     OPENCC_AVAILABLE = True
 except ImportError:
     OPENCC_AVAILABLE = False
@@ -28,7 +29,9 @@ def _get_t2s_converter() -> Optional[OpenCC]:
     global _traditional_to_simplified
 
     if not OPENCC_AVAILABLE:
-        logger.warning("opencc-python-reimplemented not installed. Cannot convert Chinese characters.")
+        logger.warning(
+            "opencc-python-reimplemented not installed. Cannot convert Chinese characters."
+        )
         return None
 
     if _traditional_to_simplified is None:
@@ -47,7 +50,9 @@ def _get_s2t_converter() -> Optional[OpenCC]:
     global _simplified_to_traditional
 
     if not OPENCC_AVAILABLE:
-        logger.warning("opencc-python-reimplemented not installed. Cannot convert Chinese characters.")
+        logger.warning(
+            "opencc-python-reimplemented not installed. Cannot convert Chinese characters."
+        )
         return None
 
     if _simplified_to_traditional is None:

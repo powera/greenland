@@ -56,32 +56,35 @@ def list_logs():
         if log.lemma_id:
             lemma = g.db.query(Lemma).get(log.lemma_id)
 
-        enriched_logs.append({
-            "log": log,
-            "fact_data": fact_data,
-            "lemma": lemma
-        })
+        enriched_logs.append({"log": log, "fact_data": fact_data, "lemma": lemma})
 
     # Get unique sources and operation types for filters
     sources = g.db.query(OperationLog.source).distinct().order_by(OperationLog.source).all()
     sources = [s[0] for s in sources if s[0]]
 
-    operation_types = g.db.query(OperationLog.operation_type).distinct().order_by(OperationLog.operation_type).all()
+    operation_types = (
+        g.db.query(OperationLog.operation_type)
+        .distinct()
+        .order_by(OperationLog.operation_type)
+        .all()
+    )
     operation_types = [o[0] for o in operation_types if o[0]]
 
     # Calculate pagination
     total_pages = (total + Config.ITEMS_PER_PAGE - 1) // Config.ITEMS_PER_PAGE
 
-    return render_template("logs/list.html",
-                         logs=enriched_logs,
-                         page=page,
-                         total_pages=total_pages,
-                         total=total,
-                         source_filter=source_filter,
-                         operation_type_filter=operation_type_filter,
-                         lemma_id_filter=lemma_id_filter,
-                         sources=sources,
-                         operation_types=operation_types)
+    return render_template(
+        "logs/list.html",
+        logs=enriched_logs,
+        page=page,
+        total_pages=total_pages,
+        total=total,
+        source_filter=source_filter,
+        operation_type_filter=operation_type_filter,
+        lemma_id_filter=lemma_id_filter,
+        sources=sources,
+        operation_types=operation_types,
+    )
 
 
 @bp.route("/<int:log_id>")
@@ -90,6 +93,7 @@ def view_log(log_id):
     log = g.db.query(OperationLog).get(log_id)
     if not log:
         from flask import flash, redirect, url_for
+
         flash("Log entry not found", "error")
         return redirect(url_for("operation_logs.list_logs"))
 
@@ -102,7 +106,4 @@ def view_log(log_id):
     if log.lemma_id:
         lemma = g.db.query(Lemma).get(log.lemma_id)
 
-    return render_template("logs/view.html",
-                         log=log,
-                         fact_data=fact_data,
-                         lemma=lemma)
+    return render_template("logs/view.html", log=log, fact_data=fact_data, lemma=lemma)

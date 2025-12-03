@@ -5,6 +5,7 @@ import numpy as np
 from pydub import AudioSegment
 from pydub.silence import split_on_silence
 
+
 def segment_audio(file_path, min_silence_len=500, silence_thresh=-40, keep_silence=100):
     """
     Segment an audio file into phrases based on silence.
@@ -23,10 +24,11 @@ def segment_audio(file_path, min_silence_len=500, silence_thresh=-40, keep_silen
         audio,
         min_silence_len=min_silence_len,
         silence_thresh=silence_thresh,
-        keep_silence=keep_silence
+        keep_silence=keep_silence,
     )
 
     return chunks
+
 
 def transcribe_chunks(chunks, processor, model):
     """
@@ -58,6 +60,7 @@ def transcribe_chunks(chunks, processor, model):
         transcriptions.append(transcription)
 
     return transcriptions
+
 
 # Usage example:
 file_path = "path/to/your/audio/file.wav"

@@ -16,8 +16,7 @@ from .translation import get_language_name, validate_language_codes
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -45,71 +44,39 @@ Examples:
 
   # Interactive mode (prompts for disambiguation)
   %(prog)s --sentence "The mouse is on the table" --interactive
-        """
+        """,
     )
 
     # Input options
     input_group = parser.add_mutually_exclusive_group(required=True)
-    input_group.add_argument(
-        "--sentence",
-        help="Single sentence to process"
-    )
-    input_group.add_argument(
-        "--file",
-        help="File containing sentences (one per line)"
-    )
+    input_group.add_argument("--sentence", help="Single sentence to process")
+    input_group.add_argument("--file", help="File containing sentences (one per line)")
 
     # Language options
-    parser.add_argument(
-        "--source",
-        default="en",
-        help="Source language code (default: en)"
-    )
+    parser.add_argument("--source", default="en", help="Source language code (default: en)")
     parser.add_argument(
         "--languages",
         nargs="+",
         default=["lt", "zh"],
-        help="Target language codes for translations (default: lt zh)"
+        help="Target language codes for translations (default: lt zh)",
     )
 
     # Processing options
+    parser.add_argument("--verified", action="store_true", help="Mark sentences as verified")
+    parser.add_argument("--context", help="Optional context about the sentence(s)")
     parser.add_argument(
-        "--verified",
-        action="store_true",
-        help="Mark sentences as verified"
-    )
-    parser.add_argument(
-        "--context",
-        help="Optional context about the sentence(s)"
-    )
-    parser.add_argument(
-        "--interactive",
-        action="store_true",
-        help="Enable interactive disambiguation prompts"
+        "--interactive", action="store_true", help="Enable interactive disambiguation prompts"
     )
 
     # Model and database options
     parser.add_argument(
-        "--model",
-        default="gpt-5-mini",
-        help="LLM model to use (default: gpt-5-mini)"
+        "--model", default="gpt-5-mini", help="LLM model to use (default: gpt-5-mini)"
     )
-    parser.add_argument(
-        "--db-path",
-        help="Database path (uses default if not specified)"
-    )
+    parser.add_argument("--db-path", help="Database path (uses default if not specified)")
 
     # Output options
-    parser.add_argument(
-        "--debug",
-        action="store_true",
-        help="Enable debug logging"
-    )
-    parser.add_argument(
-        "--json",
-        action="store_true",
-        help="Output results as JSON"
-    )
+    parser.add_argument("--debug", action="store_true", help="Enable debug logging")
+    parser.add_argument("--json", action="store_true", help="Output results as JSON")
 
     return parser
 
@@ -121,7 +88,7 @@ def process_single_sentence(
     target_languages: List[str],
     verified: bool,
     context: Optional[str],
-    output_json: bool
+    output_json: bool,
 ) -> int:
     """Process a single sentence."""
     logger.info(f"Processing sentence: {sentence}")
@@ -131,11 +98,12 @@ def process_single_sentence(
         source_language=source_language,
         target_languages=target_languages,
         context=context,
-        verified=verified
+        verified=verified,
     )
 
     if output_json:
         import json
+
         print(json.dumps(result, indent=2))
     else:
         print_result(result)
@@ -149,7 +117,7 @@ def process_file(
     source_language: str,
     target_languages: List[str],
     verified: bool,
-    output_json: bool
+    output_json: bool,
 ) -> int:
     """Process sentences from a file."""
     logger.info(f"Processing sentences from: {file_path}")
@@ -168,11 +136,12 @@ def process_file(
             sentences=sentences,
             source_language=source_language,
             target_languages=target_languages,
-            verified=verified
+            verified=verified,
         )
 
         if output_json:
             import json
+
             print(json.dumps(result, indent=2))
         else:
             print_batch_result(result)
@@ -229,8 +198,10 @@ def print_batch_result(result: dict):
         for i, res in enumerate(results, 1):
             if res.get("success"):
                 print(f"  {i}. ✓ {res.get('sentence_text', 'N/A')[:50]}...")
-                print(f"     Linked: {res.get('linked_words', 0)}, " +
-                      f"Unlinked: {res.get('unlinked_words', 0)}")
+                print(
+                    f"     Linked: {res.get('linked_words', 0)}, "
+                    + f"Unlinked: {res.get('unlinked_words', 0)}"
+                )
             else:
                 print(f"  {i}. ✗ Error: {res.get('error', 'Unknown')}")
 
@@ -259,11 +230,7 @@ def main():
     logger.info(f"Target languages: {', '.join(target_names)}")
 
     # Initialize agent
-    agent = BebrasAgent(
-        db_path=args.db_path,
-        debug=args.debug,
-        model=args.model
-    )
+    agent = BebrasAgent(db_path=args.db_path, debug=args.debug, model=args.model)
 
     # Process based on input mode
     if args.sentence:
@@ -274,7 +241,7 @@ def main():
             target_languages=target_languages,
             verified=args.verified,
             context=args.context,
-            output_json=args.json
+            output_json=args.json,
         )
     elif args.file:
         return process_file(
@@ -283,7 +250,7 @@ def main():
             source_language=args.source,
             target_languages=target_languages,
             verified=args.verified,
-            output_json=args.json
+            output_json=args.json,
         )
     else:
         parser.print_help()

@@ -6,7 +6,7 @@ from wordfreq.translation.language_forms.german import NOUN_FORM_MAPPING
 from wordfreq.translation.generate_forms_base import (
     FormGenerationConfig,
     get_lemmas_with_translation,
-    run_form_generation
+    run_form_generation,
 )
 
 CONFIG = FormGenerationConfig(
@@ -17,7 +17,7 @@ CONFIG = FormGenerationConfig(
     client_method_name="query_german_noun_forms",
     min_forms_threshold=2,
     base_form_identifier="singular",
-    use_legacy_translation=False
+    use_legacy_translation=False,
 )
 
 

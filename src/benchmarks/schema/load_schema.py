@@ -6,6 +6,7 @@ import sqlite3
 
 import constants
 
+
 def create_tables():
     # Define the database file
     db_file = os.path.join(constants.SCHEMA_DIR, "benchmarks.db")
@@ -22,5 +23,6 @@ def create_tables():
         conn.executescript(schema)
         print("Database and schema created successfully.")
 
+
 if __name__ == "__main__":
-  create_tables()
+    create_tables()

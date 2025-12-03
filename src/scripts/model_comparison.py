@@ -19,24 +19,19 @@ OUTPUT_DIR = constants.OUTPUT_DIR
 
 # Model groups
 OLLAMA_MODELS = [
-    "smollm2:360m",   # 725MB,
-    "qwen2.5:1.5b",   # 986MB,
-    "gemma2:2b",      # 1.6G,
-    "llama3.2:3b",     # 2.0G
-    "qwen2.5:7b",      # 4.7G
-    "gemma2:9b",       # 5.4G
+    "smollm2:360m",  # 725MB,
+    "qwen2.5:1.5b",  # 986MB,
+    "gemma2:2b",  # 1.6G,
+    "llama3.2:3b",  # 2.0G
+    "qwen2.5:7b",  # 4.7G
+    "gemma2:9b",  # 5.4G
 ]
+
 
 def multi_cross_run_to_json(slug_dict: Dict[str, str]) -> Dict:
     """Run multiple prompts across all models, saving results by slug."""
     # Initialize results structure
-    result = {
-        slug: {
-            "prompt": prompt,
-            "results": []
-        }
-        for slug, prompt in slug_dict.items()
-    }
+    result = {slug: {"prompt": prompt, "results": []} for slug, prompt in slug_dict.items()}
 
     # Run each model against all prompts before moving to next model
     for model in OLLAMA_MODELS:
@@ -44,38 +39,37 @@ def multi_cross_run_to_json(slug_dict: Dict[str, str]) -> Dict:
             try:
                 # Use new ollama_client interface
                 response, _, usage = ollama_client.generate_chat(prompt, model)
-                result[slug]["results"].append({
-                    "model": model,
-                    "response": response,
-                    "usage": usage
-                })
+                result[slug]["results"].append(
+                    {"model": model, "response": response, "usage": usage}
+                )
             except Exception as e:
                 print(f"Error with model {model} on {slug}: {e}")
 
     # Save results and generate HTML
     os.makedirs(CACHE_DIR, exist_ok=True)
     os.makedirs(OUTPUT_DIR, exist_ok=True)
-    
+
     for slug in slug_dict:
         cache_file = os.path.join(CACHE_DIR, f"{slug}.json")
         output_file = os.path.join(OUTPUT_DIR, f"{slug}.html")
-        
+
         with open(cache_file, "w") as f:
             json.dump(result[slug], f, indent=2, sort_keys=True)
         json_to_html(cache_file, output_file)
-        
+
     return result
+
 
 def add_model_for_slug(slug: str, model: str = "gpt-4o-mini", persona: str = "") -> Dict:
     """Add results for a new model to existing results for a slug."""
     cache_file = os.path.join(CACHE_DIR, f"{slug}.json")
-    
+
     with open(cache_file, "r") as f:
         result = json.load(f)
-        
+
     prompt = result["prompt"]
     existing_models = [x["model"] for x in result["results"]]
-    
+
     if model == "gpt-4o-mini":
         if persona:
             response, usage = openai_client.answer_question(prompt, persona=persona)
@@ -92,41 +86,40 @@ def add_model_for_slug(slug: str, model: str = "gpt-4o-mini", persona: str = "")
     else:
         raise ValueError(f"Unknown model: {model}")
 
-    result["results"].append({
-        "model": model_name,
-        "response": response,
-        "usage": usage
-    })
+    result["results"].append({"model": model_name, "response": response, "usage": usage})
 
     with open(cache_file, "w") as f:
         json.dump(result, f, indent=2, sort_keys=True)
 
     return add_critique(slug)
 
+
 def add_critique(slug: str) -> Dict:
     """Add critique information to results for a slug."""
     cache_file = os.path.join(CACHE_DIR, f"{slug}.json")
-    
+
     with open(cache_file, "r") as f:
         doc = json.load(f)
-        
+
     for result in doc["results"]:
         if "critique" not in result:
             evaluation, _ = lib.validation.evaluate_response(doc["prompt"], result["response"])
             result["critique"] = evaluation.dict()
             result["critique"]["overall_quality"] = str(result["critique"]["overall_quality"])
-            
+
     with open(cache_file, "w") as f:
         json.dump(doc, f, indent=2, sort_keys=True)
-        
+
     slug_json_to_html(slug)
     return doc
+
 
 def slug_json_to_html(slug: str) -> None:
     """Convert JSON results for a slug to HTML."""
     cache_file = os.path.join(CACHE_DIR, f"{slug}.json")
     output_file = os.path.join(OUTPUT_DIR, f"{slug}.html")
     json_to_html(cache_file, output_file)
+
 
 def json_to_html(json_file: str, output_html: str) -> None:
     """Convert JSON results file to HTML report."""
@@ -191,21 +184,21 @@ def json_to_html(json_file: str, output_html: str) -> None:
     # Add each result in a collapsible div
     for result in data["results"]:
         response = result.get("response", "")
-        response = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', response)
+        response = re.sub(r"\*\*(.*?)\*\*", r"<b>\1</b>", response)
         response = response.replace("\n", "<br>")
 
         critique = result.get("critique", "")
         if isinstance(critique, dict):
-            critique = f'''
+            critique = f"""
 <b>Was this a refusal?</b> {critique["is_refusal"]}<br />
 <b>What was the overall quality?</b> {critique["overall_quality"]}<br />
 <b>Were there factual errors?</b> {critique["factual_errors"]}<br />
 <b>Was there excessive repetition?</b> {critique["repetition"]}<br />
 <b>Was there excessive verbosity?</b> {critique["verbosity"]}<br />
-<b>Were there unwarranted assumptions?</b> {critique["unwarranted_assumptions"]}'''
+<b>Were there unwarranted assumptions?</b> {critique["unwarranted_assumptions"]}"""
         critique = critique.replace("\n", "<br>")
 
-        html_content += f'''
+        html_content += f"""
         <button class="collapsible">Model: {result["model"]} (Cost: {result["usage"]["cost"]:.6f}, Response Tokens: {result["usage"]["tokens_out"]})</button>
         <div class="content">
             <div class="response-critique">
@@ -219,7 +212,7 @@ def json_to_html(json_file: str, output_html: str) -> None:
                 </div>
             </div>
         </div>
-        '''
+        """
 
     # Add JavaScript
     html_content += """
@@ -244,16 +237,19 @@ def json_to_html(json_file: str, output_html: str) -> None:
     with open(output_html, "w") as f:
         f.write(html_content)
 
+
 def main():
     """Main entry point."""
     parser = argparse.ArgumentParser(description="Run model comparisons")
     parser.add_argument("--slug", help="Slug to process")
-    parser.add_argument("--model", help="Model to add (defaults to gpt-4o-mini)", default="gpt-4o-mini")
+    parser.add_argument(
+        "--model", help="Model to add (defaults to gpt-4o-mini)", default="gpt-4o-mini"
+    )
     parser.add_argument("--persona", help="Optional persona for GPT-4 Mini model")
     parser.add_argument("--prompts", type=json.loads, help="JSON dict of slug:prompt pairs to run")
-    
+
     args = parser.parse_args()
-    
+
     if args.slug:
         # Add model for specific slug
         add_model_for_slug(args.slug, args.model, args.persona)
@@ -262,6 +258,7 @@ def main():
         multi_cross_run_to_json(args.prompts)
     else:
         parser.error("Either --slug or --prompts is required")
+
 
 if __name__ == "__main__":
     main()

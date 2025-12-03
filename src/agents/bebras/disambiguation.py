@@ -18,10 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 def find_best_lemma_match(
-    session,
-    lemma_text: str,
-    pos: str,
-    disambiguation_hint: Optional[str] = None
+    session, lemma_text: str, pos: str, disambiguation_hint: Optional[str] = None
 ) -> Optional[Lemma]:
     """
     Find the best matching lemma for a word.
@@ -40,8 +37,7 @@ def find_best_lemma_match(
 
     # Query for exact matches
     query = session.query(Lemma).filter(
-        Lemma.lemma_text.ilike(f"%{lemma_text}%"),
-        Lemma.pos_type == pos_normalized
+        Lemma.lemma_text.ilike(f"%{lemma_text}%"), Lemma.pos_type == pos_normalized
     )
 
     candidates = query.all()
@@ -59,10 +55,7 @@ def find_best_lemma_match(
     logger.info(f"Multiple candidates for '{lemma_text}' (POS: {pos}): {len(candidates)}")
 
     # Filter by exact match first
-    exact_matches = [
-        c for c in candidates
-        if c.lemma_text.lower() == lemma_text.lower()
-    ]
+    exact_matches = [c for c in candidates if c.lemma_text.lower() == lemma_text.lower()]
 
     if exact_matches:
         candidates = exact_matches
@@ -73,9 +66,7 @@ def find_best_lemma_match(
     # Use disambiguation hint if available
     if disambiguation_hint:
         best_match = disambiguate_lemma(
-            candidates=candidates,
-            lemma_text=lemma_text,
-            disambiguation_hint=disambiguation_hint
+            candidates=candidates, lemma_text=lemma_text, disambiguation_hint=disambiguation_hint
         )
         if best_match:
             return best_match
@@ -92,10 +83,7 @@ def find_best_lemma_match(
 
 
 def disambiguate_lemma(
-    candidates: List[Lemma],
-    lemma_text: str,
-    disambiguation_hint: str,
-    model: str = "gpt-5-mini"
+    candidates: List[Lemma], lemma_text: str, disambiguation_hint: str, model: str = "gpt-5-mini"
 ) -> Optional[Lemma]:
     """
     Use LLM to disambiguate between multiple lemma candidates.
@@ -129,7 +117,7 @@ def disambiguate_lemma(
         lemma_text=lemma_text,
         disambiguation_hint=disambiguation_hint,
         candidate_descriptions="\n".join(candidate_descriptions),
-        num_candidates=len(candidates)
+        num_candidates=len(candidates),
     )
 
     # Combine context and prompt
@@ -142,22 +130,18 @@ def disambiguate_lemma(
         properties={
             "candidate_number": SchemaProperty(
                 type="integer",
-                description=f"The number (1-{len(candidates)}) of the best matching candidate"
+                description=f"The number (1-{len(candidates)}) of the best matching candidate",
             ),
             "reasoning": SchemaProperty(
-                type="string",
-                description="Brief explanation of why this candidate was chosen"
-            )
-        }
+                type="string", description="Brief explanation of why this candidate was chosen"
+            ),
+        },
     )
 
     try:
         llm_client = UnifiedLLMClient()
         response = llm_client.generate_chat(
-            prompt=prompt,
-            model=model,
-            json_schema=schema,
-            timeout=30
+            prompt=prompt, model=model, json_schema=schema, timeout=30
         )
 
         if response.structured_data:
@@ -167,7 +151,9 @@ def disambiguate_lemma(
             # Validate candidate number
             if 1 <= candidate_num <= len(candidates):
                 selected = candidates[candidate_num - 1]
-                logger.info(f"LLM selected candidate {candidate_num}: {selected.guid} - {reasoning}")
+                logger.info(
+                    f"LLM selected candidate {candidate_num}: {selected.guid} - {reasoning}"
+                )
                 return selected
             else:
                 logger.error(f"Invalid candidate number from LLM: {candidate_num}")
@@ -206,16 +192,14 @@ def _normalize_pos(pos: str) -> str:
         "adjectives": "adjective",
         "adv": "adverb",
         "adverb": "adverb",
-        "adverbs": "adverb"
+        "adverbs": "adverb",
     }
 
     return pos_map.get(pos_lower, pos_lower)
 
 
 def interactive_disambiguation(
-    candidates: List[Lemma],
-    lemma_text: str,
-    context: str
+    candidates: List[Lemma], lemma_text: str, context: str
 ) -> Optional[Lemma]:
     """
     Interactively ask the user to disambiguate between candidates.

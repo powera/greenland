@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python3
 """
 Core word management functionality for trakaido system.
@@ -68,7 +67,9 @@ class WordManager:
         prompt_template = util.prompt_loader.get_prompt("wordfreq", "word_analysis")
 
         if lithuanian_word:
-            word_specification = f"English word '{english_word}' with Lithuanian translation '{lithuanian_word}'"
+            word_specification = (
+                f"English word '{english_word}' with Lithuanian translation '{lithuanian_word}'"
+            )
             meaning_clarification = f"Focus on the specific meaning where '{english_word}' translates to '{lithuanian_word}' in Lithuanian."
         else:
             word_specification = f"English word '{english_word}'"
@@ -77,12 +78,14 @@ class WordManager:
         prompt = prompt_template.format(
             word_specification=word_specification,
             meaning_clarification=meaning_clarification,
-            english_word=english_word
+            english_word=english_word,
         )
 
         return f"{context}\n\n{prompt}"
 
-    def _query_word_data(self, english_word: str, lithuanian_word: str = None, model_override: str = None) -> Tuple[Optional[WordData], bool]:
+    def _query_word_data(
+        self, english_word: str, lithuanian_word: str = None, model_override: str = None
+    ) -> Tuple[Optional[WordData], bool]:
         """
         Query LLM for comprehensive word data.
 
@@ -105,19 +108,37 @@ class WordManager:
             properties={
                 "english": SchemaProperty("string", "The English word being analyzed"),
                 "lithuanian": SchemaProperty("string", "Lithuanian translation of the word"),
-                "pos_type": SchemaProperty("string", "Part of speech",
-                    enum=["noun", "verb", "adjective", "adverb", "pronoun", "preposition",
-                          "conjunction", "interjection", "determiner", "article", "numeral"]),
-                "pos_subtype": SchemaProperty("string", "Specific subtype classification",
-                    enum=all_subtypes),
+                "pos_type": SchemaProperty(
+                    "string",
+                    "Part of speech",
+                    enum=[
+                        "noun",
+                        "verb",
+                        "adjective",
+                        "adverb",
+                        "pronoun",
+                        "preposition",
+                        "conjunction",
+                        "interjection",
+                        "determiner",
+                        "article",
+                        "numeral",
+                    ],
+                ),
+                "pos_subtype": SchemaProperty(
+                    "string", "Specific subtype classification", enum=all_subtypes
+                ),
                 "definition": SchemaProperty("string", "Clear definition for language learners"),
-                "confidence": SchemaProperty("number", "Confidence score from 0.0-1.0",
-                    minimum=0.0, maximum=1.0),
+                "confidence": SchemaProperty(
+                    "number", "Confidence score from 0.0-1.0", minimum=0.0, maximum=1.0
+                ),
                 "chinese_translation": SchemaProperty("string", "Chinese translation (base form)"),
                 "korean_translation": SchemaProperty("string", "Korean translation (base form)"),
                 "french_translation": SchemaProperty("string", "French translation (base form)"),
                 "swahili_translation": SchemaProperty("string", "Swahili translation (base form)"),
-                "vietnamese_translation": SchemaProperty("string", "Vietnamese translation (base form)"),
+                "vietnamese_translation": SchemaProperty(
+                    "string", "Vietnamese translation (base form)"
+                ),
                 "alternatives": SchemaProperty(
                     type="object",
                     description="Alternative forms in different languages",
@@ -125,17 +146,17 @@ class WordManager:
                         "english": SchemaProperty(
                             type="array",
                             description="Alternative English forms",
-                            items={"type": "string"}
+                            items={"type": "string"},
                         ),
                         "lithuanian": SchemaProperty(
                             type="array",
                             description="Alternative Lithuanian forms",
-                            items={"type": "string"}
-                        )
-                    }
+                            items={"type": "string"},
+                        ),
+                    },
                 ),
-                "notes": SchemaProperty("string", "Additional notes about the word")
-            }
+                "notes": SchemaProperty("string", "Additional notes about the word"),
+            },
         )
 
         prompt = self._get_word_analysis_prompt(english_word, lithuanian_word)
@@ -143,28 +164,29 @@ class WordManager:
         try:
             model_to_use = model_override or self.model
             response = self.client.generate_chat(
-                prompt=prompt,
-                model=model_to_use,
-                json_schema=schema
+                prompt=prompt, model=model_to_use, json_schema=schema
             )
 
             if response.structured_data:
                 data = response.structured_data
-                return WordData(
-                    english=data.get("english", english_word),
-                    lithuanian=data.get("lithuanian", lithuanian_word or ""),
-                    pos_type=data.get("pos_type", "noun"),
-                    pos_subtype=data.get("pos_subtype", ""),
-                    definition=data.get("definition", ""),
-                    confidence=data.get("confidence", 0.5),
-                    alternatives=data.get("alternatives", {"english": [], "lithuanian": []}),
-                    notes=data.get("notes", ""),
-                    chinese_translation=data.get("chinese_translation"),
-                    korean_translation=data.get("korean_translation"),
-                    french_translation=data.get("french_translation"),
-                    swahili_translation=data.get("swahili_translation"),
-                    vietnamese_translation=data.get("vietnamese_translation")
-                ), True
+                return (
+                    WordData(
+                        english=data.get("english", english_word),
+                        lithuanian=data.get("lithuanian", lithuanian_word or ""),
+                        pos_type=data.get("pos_type", "noun"),
+                        pos_subtype=data.get("pos_subtype", ""),
+                        definition=data.get("definition", ""),
+                        confidence=data.get("confidence", 0.5),
+                        alternatives=data.get("alternatives", {"english": [], "lithuanian": []}),
+                        notes=data.get("notes", ""),
+                        chinese_translation=data.get("chinese_translation"),
+                        korean_translation=data.get("korean_translation"),
+                        french_translation=data.get("french_translation"),
+                        swahili_translation=data.get("swahili_translation"),
+                        vietnamese_translation=data.get("vietnamese_translation"),
+                    ),
+                    True,
+                )
             else:
                 logger.error(f"No structured data received for word '{english_word}'")
                 return None, False
@@ -188,9 +210,7 @@ class WordManager:
         prefix = SUBTYPE_GUID_PREFIXES.get(pos_subtype, "N99")  # Default to N99 for unknown
 
         # Find the next available number for this prefix
-        existing_guids = session.query(Lemma.guid).filter(
-            Lemma.guid.like(f"{prefix}_%")
-        ).all()
+        existing_guids = session.query(Lemma.guid).filter(Lemma.guid.like(f"{prefix}_%")).all()
 
         existing_numbers = []
         for guid_tuple in existing_guids:
@@ -222,11 +242,13 @@ class WordManager:
         display_word_data(data)
 
         while True:
-            choice = input("\nOptions:\n"
-                          "1. Approve as-is\n"
-                          "2. Modify before approval\n"
-                          "3. Reject\n"
-                          "Enter choice (1-3): ").strip()
+            choice = input(
+                "\nOptions:\n"
+                "1. Approve as-is\n"
+                "2. Modify before approval\n"
+                "3. Reject\n"
+                "Enter choice (1-3): "
+            ).strip()
 
             if choice == "1":
                 return ReviewResult(approved=True, modifications={}, notes="")
@@ -271,12 +293,17 @@ class WordManager:
             "noun": "singular",
             "verb": "infinitive",
             "adjective": "positive",
-            "adverb": "base_form"
+            "adverb": "base_form",
         }
         return defaults.get(pos_type, "base_form")
 
-    def add_word(self, english_word: str, lithuanian_word: str = None,
-                 difficulty_level: int = None, auto_approve: bool = False) -> bool:
+    def add_word(
+        self,
+        english_word: str,
+        lithuanian_word: str = None,
+        difficulty_level: int = None,
+        auto_approve: bool = False,
+    ) -> bool:
         """
         Add a new word to the trakaido system.
 
@@ -289,18 +316,19 @@ class WordManager:
         Returns:
             Success flag
         """
-        logger.info(f"Adding word: {english_word}" +
-                   (f" → {lithuanian_word}" if lithuanian_word else ""))
+        logger.info(
+            f"Adding word: {english_word}" + (f" → {lithuanian_word}" if lithuanian_word else "")
+        )
 
         session = self.get_session()
         try:
             # Check if word already exists
-            existing = session.query(Lemma).filter(
-                Lemma.lemma_text.ilike(english_word)
-            ).first()
+            existing = session.query(Lemma).filter(Lemma.lemma_text.ilike(english_word)).first()
 
             if existing:
-                print(f"Word '{english_word}' already exists in database with GUID: {existing.guid}")
+                print(
+                    f"Word '{english_word}' already exists in database with GUID: {existing.guid}"
+                )
                 return False
 
             # Query LLM for word data
@@ -324,7 +352,9 @@ class WordManager:
                     setattr(word_data, key, value)
 
             # Use provided difficulty level or default to 1 if not set
-            final_difficulty_level = difficulty_level or getattr(word_data, "difficulty_level", None) or 1
+            final_difficulty_level = (
+                difficulty_level or getattr(word_data, "difficulty_level", None) or 1
+            )
 
             # Generate GUID
             guid = self._generate_guid(word_data.pos_subtype, session)
@@ -345,7 +375,7 @@ class WordManager:
                 vietnamese_translation=word_data.vietnamese_translation,
                 confidence=word_data.confidence,
                 notes=word_data.notes,
-                verified=not auto_approve  # Mark as verified if user reviewed
+                verified=not auto_approve,  # Mark as verified if user reviewed
             )
 
             session.add(lemma)
@@ -360,7 +390,7 @@ class WordManager:
                 language_code="en",
                 grammatical_form=self._get_default_grammatical_form(word_data.pos_type),
                 is_base_form=True,
-                verified=not auto_approve
+                verified=not auto_approve,
             )
             session.add(english_form)
 
@@ -374,7 +404,7 @@ class WordManager:
                     language_code="lt",
                     grammatical_form=self._get_default_grammatical_form(word_data.pos_type),
                     is_base_form=True,
-                    verified=not auto_approve
+                    verified=not auto_approve,
                 )
                 session.add(lithuanian_form)
 
@@ -389,7 +419,7 @@ class WordManager:
                         language_code="en",
                         grammatical_form="alternative_form",
                         is_base_form=False,
-                        verified=not auto_approve
+                        verified=not auto_approve,
                     )
                     session.add(alt_form)
 
@@ -403,7 +433,7 @@ class WordManager:
                         language_code="lt",
                         grammatical_form="alternative_form",
                         is_base_form=False,
-                        verified=not auto_approve
+                        verified=not auto_approve,
                     )
                     session.add(alt_form)
 
@@ -445,9 +475,7 @@ class WordManager:
             if identifier.startswith(("N", "V", "A")):  # Looks like a GUID
                 lemma = session.query(Lemma).filter(Lemma.guid == identifier).first()
             else:
-                lemma = session.query(Lemma).filter(
-                    Lemma.lemma_text.ilike(identifier)
-                ).first()
+                lemma = session.query(Lemma).filter(Lemma.lemma_text.ilike(identifier)).first()
 
             if not lemma:
                 logger.error(f"Word not found: {identifier}")
@@ -460,7 +488,9 @@ class WordManager:
             if reason:
                 current_notes = lemma.notes or ""
                 timestamp = datetime.now().strftime("%Y-%m-%d")
-                level_note = f"[{timestamp}] Level changed from {old_level} to {new_level}: {reason}"
+                level_note = (
+                    f"[{timestamp}] Level changed from {old_level} to {new_level}: {reason}"
+                )
                 lemma.notes = f"{current_notes}\n{level_note}".strip()
 
             session.commit()
@@ -479,8 +509,9 @@ class WordManager:
         finally:
             session.close()
 
-    def list_words(self, level: Optional[int] = None, subtype: Optional[str] = None,
-                   limit: int = 50) -> List[Dict[str, Any]]:
+    def list_words(
+        self, level: Optional[int] = None, subtype: Optional[str] = None, limit: int = 50
+    ) -> List[Dict[str, Any]]:
         """
         List words with optional filtering.
 
@@ -506,14 +537,16 @@ class WordManager:
 
             results = []
             for lemma in lemmas:
-                results.append({
-                    "guid": lemma.guid,
-                    "english": lemma.lemma_text,
-                    "lithuanian": lemma.lithuanian_translation,
-                    "level": lemma.difficulty_level,
-                    "subtype": lemma.pos_subtype,
-                    "verified": lemma.verified
-                })
+                results.append(
+                    {
+                        "guid": lemma.guid,
+                        "english": lemma.lemma_text,
+                        "lithuanian": lemma.lithuanian_translation,
+                        "level": lemma.difficulty_level,
+                        "subtype": lemma.pos_subtype,
+                        "verified": lemma.verified,
+                    }
+                )
 
             return results
 
@@ -535,28 +568,18 @@ class WordManager:
             # Query to get counts by pos_type and pos_subtype
             from sqlalchemy import func
 
-            query = session.query(
-                Lemma.pos_type,
-                Lemma.pos_subtype,
-                func.count(Lemma.id).label("count")
-            ).filter(
-                Lemma.pos_subtype.isnot(None),
-                Lemma.pos_subtype != ""
-            ).group_by(
-                Lemma.pos_type,
-                Lemma.pos_subtype
-            ).order_by(
-                Lemma.pos_type,
-                Lemma.pos_subtype
+            query = (
+                session.query(
+                    Lemma.pos_type, Lemma.pos_subtype, func.count(Lemma.id).label("count")
+                )
+                .filter(Lemma.pos_subtype.isnot(None), Lemma.pos_subtype != "")
+                .group_by(Lemma.pos_type, Lemma.pos_subtype)
+                .order_by(Lemma.pos_type, Lemma.pos_subtype)
             )
 
             results = []
             for pos_type, pos_subtype, count in query.all():
-                results.append({
-                    "pos_type": pos_type,
-                    "pos_subtype": pos_subtype,
-                    "count": count
-                })
+                results.append({"pos_type": pos_type, "pos_subtype": pos_subtype, "count": count})
 
             return results
 
@@ -566,8 +589,9 @@ class WordManager:
         finally:
             session.close()
 
-    def move_words_by_subtype_and_level(self, from_level: int, subtype: str, to_level: int,
-                                       reason: str = "", dry_run: bool = False) -> bool:
+    def move_words_by_subtype_and_level(
+        self, from_level: int, subtype: str, to_level: int, reason: str = "", dry_run: bool = False
+    ) -> bool:
         """
         Move all words matching a specific level and subtype to a new level.
 
@@ -595,7 +619,7 @@ class WordManager:
             query = session.query(Lemma).filter(
                 Lemma.difficulty_level == from_level,
                 Lemma.pos_subtype == subtype,
-                Lemma.guid.isnot(None)
+                Lemma.guid.isnot(None),
             )
 
             matching_words = query.all()
@@ -604,21 +628,29 @@ class WordManager:
                 print(f"No words found with level {from_level} and subtype '{subtype}'")
                 return True
 
-            print(f"Found {len(matching_words)} words with level {from_level} and subtype '{subtype}':")
+            print(
+                f"Found {len(matching_words)} words with level {from_level} and subtype '{subtype}':"
+            )
             print("-" * 80)
 
             # Display the words that will be affected
             for word in matching_words:
                 status = "✓" if word.verified else "?"
-                print(f"{status} {word.guid:<10} L{word.difficulty_level:<2} "
-                      f"{word.lemma_text:<20} → {word.lithuanian_translation or 'N/A':<20}")
+                print(
+                    f"{status} {word.guid:<10} L{word.difficulty_level:<2} "
+                    f"{word.lemma_text:<20} → {word.lithuanian_translation or 'N/A':<20}"
+                )
 
             if dry_run:
-                print(f"\n[DRY RUN] Would move {len(matching_words)} words from level {from_level} to level {to_level}")
+                print(
+                    f"\n[DRY RUN] Would move {len(matching_words)} words from level {from_level} to level {to_level}"
+                )
                 return True
 
             # Confirm the operation
-            print(f"\nThis will move {len(matching_words)} words from level {from_level} to level {to_level}")
+            print(
+                f"\nThis will move {len(matching_words)} words from level {from_level} to level {to_level}"
+            )
             if reason:
                 print(f"Reason: {reason}")
 
@@ -650,7 +682,9 @@ class WordManager:
             # Commit all changes
             session.commit()
 
-            print(f"\n✅ Successfully moved {updated_count} words from level {from_level} to level {to_level}")
+            print(
+                f"\n✅ Successfully moved {updated_count} words from level {from_level} to level {to_level}"
+            )
             if reason:
                 print(f"   Reason: {reason}")
 
@@ -663,7 +697,9 @@ class WordManager:
         finally:
             session.close()
 
-    def update_word(self, identifier: str, auto_approve: bool = False, model: str = "gpt-5-mini") -> bool:
+    def update_word(
+        self, identifier: str, auto_approve: bool = False, model: str = "gpt-5-mini"
+    ) -> bool:
         """
         Update an entire Lemma entry using specified model.
 
@@ -681,9 +717,7 @@ class WordManager:
             if identifier.startswith(("N", "V", "A")):  # Looks like a GUID
                 lemma = session.query(Lemma).filter(Lemma.guid == identifier).first()
             else:
-                lemma = session.query(Lemma).filter(
-                    Lemma.lemma_text.ilike(identifier)
-                ).first()
+                lemma = session.query(Lemma).filter(Lemma.lemma_text.ilike(identifier)).first()
 
             if not lemma:
                 logger.error(f"Word not found: {identifier}")
@@ -695,9 +729,7 @@ class WordManager:
             # Query LLM for updated word data using specified model
             print(f"Analyzing word '{lemma.lemma_text}' with {model}...")
             word_data, success = self._query_word_data(
-                lemma.lemma_text,
-                lemma.lithuanian_translation,
-                model_override=model
+                lemma.lemma_text, lemma.lithuanian_translation, model_override=model
             )
 
             if not success or not word_data:
@@ -710,7 +742,9 @@ class WordManager:
                 review = self._get_user_review(word_data)
 
                 if not review.approved:
-                    logger.info(f"Word update for '{lemma.lemma_text}' rejected by user: {review.notes}")
+                    logger.info(
+                        f"Word update for '{lemma.lemma_text}' rejected by user: {review.notes}"
+                    )
                     return False
 
                 # Apply modifications
@@ -729,7 +763,7 @@ class WordManager:
                 "swahili_translation": lemma.swahili_translation,
                 "vietnamese_translation": lemma.vietnamese_translation,
                 "confidence": lemma.confidence,
-                "notes": lemma.notes
+                "notes": lemma.notes,
             }
 
             # Update all fields
@@ -758,24 +792,34 @@ class WordManager:
 
             # Update derivative forms if needed
             # Find existing English and Lithuanian base forms
-            english_form = session.query(DerivativeForm).filter(
-                DerivativeForm.lemma_id == lemma.id,
-                DerivativeForm.language_code == "en",
-                DerivativeForm.is_base_form == True
-            ).first()
+            english_form = (
+                session.query(DerivativeForm)
+                .filter(
+                    DerivativeForm.lemma_id == lemma.id,
+                    DerivativeForm.language_code == "en",
+                    DerivativeForm.is_base_form == True,
+                )
+                .first()
+            )
 
-            lithuanian_form = session.query(DerivativeForm).filter(
-                DerivativeForm.lemma_id == lemma.id,
-                DerivativeForm.language_code == "lt",
-                DerivativeForm.is_base_form == True
-            ).first()
+            lithuanian_form = (
+                session.query(DerivativeForm)
+                .filter(
+                    DerivativeForm.lemma_id == lemma.id,
+                    DerivativeForm.language_code == "lt",
+                    DerivativeForm.is_base_form == True,
+                )
+                .first()
+            )
 
             # Update English form if it exists and changed
             if english_form and english_form.derivative_form_text != word_data.english:
                 english_token = add_word_token(session, word_data.english, "en")
                 english_form.derivative_form_text = word_data.english
                 english_form.word_token_id = english_token.id
-                english_form.grammatical_form = self._get_default_grammatical_form(word_data.pos_type)
+                english_form.grammatical_form = self._get_default_grammatical_form(
+                    word_data.pos_type
+                )
                 english_form.verified = not auto_approve
 
             # Update Lithuanian form if it exists and changed
@@ -783,7 +827,9 @@ class WordManager:
                 lithuanian_token = add_word_token(session, word_data.lithuanian, "lt")
                 lithuanian_form.derivative_form_text = word_data.lithuanian
                 lithuanian_form.word_token_id = lithuanian_token.id
-                lithuanian_form.grammatical_form = self._get_default_grammatical_form(word_data.pos_type)
+                lithuanian_form.grammatical_form = self._get_default_grammatical_form(
+                    word_data.pos_type
+                )
                 lithuanian_form.verified = not auto_approve
 
             # Create Lithuanian form if it doesn't exist but we have translation
@@ -796,7 +842,7 @@ class WordManager:
                     language_code="lt",
                     grammatical_form=self._get_default_grammatical_form(word_data.pos_type),
                     is_base_form=True,
-                    verified=not auto_approve
+                    verified=not auto_approve,
                 )
                 session.add(lithuanian_form)
 
@@ -813,11 +859,15 @@ class WordManager:
                             continue
 
                         # Check if this alternative form already exists
-                        existing_alt = session.query(DerivativeForm).filter(
-                            DerivativeForm.lemma_id == lemma.id,
-                            DerivativeForm.language_code == "en",
-                            DerivativeForm.derivative_form_text == alt_form
-                        ).first()
+                        existing_alt = (
+                            session.query(DerivativeForm)
+                            .filter(
+                                DerivativeForm.lemma_id == lemma.id,
+                                DerivativeForm.language_code == "en",
+                                DerivativeForm.derivative_form_text == alt_form,
+                            )
+                            .first()
+                        )
 
                         if not existing_alt:
                             # Add the alternative form
@@ -827,9 +877,11 @@ class WordManager:
                                 derivative_form_text=alt_form,
                                 word_token_id=alt_token.id,
                                 language_code="en",
-                                grammatical_form=self._get_default_grammatical_form(word_data.pos_type),
+                                grammatical_form=self._get_default_grammatical_form(
+                                    word_data.pos_type
+                                ),
                                 is_base_form=False,  # Alternative forms are not base forms
-                                verified=not auto_approve
+                                verified=not auto_approve,
                             )
                             session.add(alt_derivative)
                             added_alternatives["english"].append(alt_form)
@@ -842,11 +894,15 @@ class WordManager:
                             continue
 
                         # Check if this alternative form already exists
-                        existing_alt = session.query(DerivativeForm).filter(
-                            DerivativeForm.lemma_id == lemma.id,
-                            DerivativeForm.language_code == "lt",
-                            DerivativeForm.derivative_form_text == alt_form
-                        ).first()
+                        existing_alt = (
+                            session.query(DerivativeForm)
+                            .filter(
+                                DerivativeForm.lemma_id == lemma.id,
+                                DerivativeForm.language_code == "lt",
+                                DerivativeForm.derivative_form_text == alt_form,
+                            )
+                            .first()
+                        )
 
                         if not existing_alt:
                             # Add the alternative form
@@ -856,9 +912,11 @@ class WordManager:
                                 derivative_form_text=alt_form,
                                 word_token_id=alt_token.id,
                                 language_code="lt",
-                                grammatical_form=self._get_default_grammatical_form(word_data.pos_type),
+                                grammatical_form=self._get_default_grammatical_form(
+                                    word_data.pos_type
+                                ),
                                 is_base_form=False,  # Alternative forms are not base forms
-                                verified=not auto_approve
+                                verified=not auto_approve,
                             )
                             session.add(alt_derivative)
                             added_alternatives["lithuanian"].append(alt_form)
@@ -876,9 +934,13 @@ class WordManager:
 
             # Add information about added alternate forms
             if added_alternatives["english"]:
-                changes.append(f"   Added English alternatives: {', '.join(added_alternatives['english'])}")
+                changes.append(
+                    f"   Added English alternatives: {', '.join(added_alternatives['english'])}"
+                )
             if added_alternatives["lithuanian"]:
-                changes.append(f"   Added Lithuanian alternatives: {', '.join(added_alternatives['lithuanian'])}")
+                changes.append(
+                    f"   Added Lithuanian alternatives: {', '.join(added_alternatives['lithuanian'])}"
+                )
 
             if changes:
                 print("Changes made:")

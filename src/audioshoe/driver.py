@@ -7,8 +7,8 @@ from datasets import load_dataset
 
 model_id = "openai/whisper-large-v3"
 
-#device = "cuda:0" if torch.cuda.is_available() else "cpu"
-#torch_dtype = torch.float16 if torch.cuda.is_available() else torch.float32
+# device = "cuda:0" if torch.cuda.is_available() else "cpu"
+# torch_dtype = torch.float16 if torch.cuda.is_available() else torch.float32
 
 # Always use MacBook M3 settings
 device = torch.device("mps")

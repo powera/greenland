@@ -29,7 +29,7 @@ def list_pending_imports(
     session,
     pos_type: Optional[str] = None,
     pos_subtype: Optional[str] = None,
-    limit: Optional[int] = None
+    limit: Optional[int] = None,
 ) -> Dict[str, any]:
     """
     List words in the pending_imports staging table.
@@ -62,42 +62,33 @@ def list_pending_imports(
 
         results = []
         for pending in pending_imports:
-            results.append({
-                "id": pending.id,
-                "english_word": pending.english_word,
-                "definition": pending.definition,
-                "translation": pending.disambiguation_translation,
-                "language": pending.disambiguation_language,
-                "pos_type": pending.pos_type,
-                "pos_subtype": pending.pos_subtype,
-                "source": pending.source,
-                "frequency_rank": pending.frequency_rank,
-                "notes": pending.notes,
-                "added_at": pending.added_at.isoformat() if pending.added_at else None
-            })
+            results.append(
+                {
+                    "id": pending.id,
+                    "english_word": pending.english_word,
+                    "definition": pending.definition,
+                    "translation": pending.disambiguation_translation,
+                    "language": pending.disambiguation_language,
+                    "pos_type": pending.pos_type,
+                    "pos_subtype": pending.pos_subtype,
+                    "source": pending.source,
+                    "frequency_rank": pending.frequency_rank,
+                    "notes": pending.notes,
+                    "added_at": pending.added_at.isoformat() if pending.added_at else None,
+                }
+            )
 
         logger.info(f"Found {len(results)} pending imports")
 
-        return {
-            "count": len(results),
-            "pending_imports": results
-        }
+        return {"count": len(results), "pending_imports": results}
 
     except Exception as e:
         logger.error(f"Error listing pending imports: {e}")
-        return {
-            "error": str(e),
-            "count": 0,
-            "pending_imports": []
-        }
+        return {"error": str(e), "count": 0, "pending_imports": []}
 
 
 def approve_pending_import(
-    session,
-    pending_import_id: int,
-    db_path: str,
-    model: str = "gpt-5-mini",
-    debug: bool = False
+    session, pending_import_id: int, db_path: str, model: str = "gpt-5-mini", debug: bool = False
 ) -> Dict[str, any]:
     """
     Approve a pending import and convert it to a full Lemma/DerivativeForm entry.
@@ -118,16 +109,11 @@ def approve_pending_import(
 
     try:
         # Get the pending import
-        pending = session.query(PendingImport).filter(
-            PendingImport.id == pending_import_id
-        ).first()
+        pending = session.query(PendingImport).filter(PendingImport.id == pending_import_id).first()
 
         if not pending:
             logger.error(f"Pending import ID {pending_import_id} not found")
-            return {
-                "error": f'Pending import ID {pending_import_id} not found',
-                "success": False
-            }
+            return {"error": f"Pending import ID {pending_import_id} not found", "success": False}
 
         word = pending.english_word
         logger.info(f"Approving word '{word}'")
@@ -142,33 +128,22 @@ def approve_pending_import(
             session.commit()
 
             logger.info(f"Successfully approved and imported '{word}'")
-            return {
-                "success": True,
-                "word": word,
-                "message": f"Successfully imported '{word}'"
-            }
+            return {"success": True, "word": word, "message": f"Successfully imported '{word}'"}
         else:
             logger.error(f"Failed to import '{word}'")
-            return {
-                "success": False,
-                "word": word,
-                "error": f"Failed to import '{word}'"
-            }
+            return {"success": False, "word": word, "error": f"Failed to import '{word}'"}
 
     except Exception as e:
         logger.error(f"Error approving pending import: {e}")
         session.rollback()
-        return {
-            "error": str(e),
-            "success": False
-        }
+        return {"error": str(e), "success": False}
 
 
 def reject_pending_import(
     session,
     pending_import_id: int,
     reason: str = "manual_rejection",
-    add_to_exclusions: bool = True
+    add_to_exclusions: bool = True,
 ) -> Dict[str, any]:
     """
     Reject a pending import and optionally add to exclusions list.
@@ -186,33 +161,29 @@ def reject_pending_import(
 
     try:
         # Get the pending import
-        pending = session.query(PendingImport).filter(
-            PendingImport.id == pending_import_id
-        ).first()
+        pending = session.query(PendingImport).filter(PendingImport.id == pending_import_id).first()
 
         if not pending:
             logger.error(f"Pending import ID {pending_import_id} not found")
-            return {
-                "error": f'Pending import ID {pending_import_id} not found',
-                "success": False
-            }
+            return {"error": f"Pending import ID {pending_import_id} not found", "success": False}
 
         word = pending.english_word
 
         # Add to exclusions if requested
         if add_to_exclusions:
             # Check if already excluded
-            existing_exclusion = session.query(WordExclusion).filter(
-                WordExclusion.excluded_word == word,
-                WordExclusion.language_code == "en"
-            ).first()
+            existing_exclusion = (
+                session.query(WordExclusion)
+                .filter(WordExclusion.excluded_word == word, WordExclusion.language_code == "en")
+                .first()
+            )
 
             if not existing_exclusion:
                 exclusion = WordExclusion(
                     excluded_word=word,
                     language_code="en",
                     exclusion_reason=reason,
-                    notes=f"Rejected from pending import. Original definition: {pending.definition[:100]}"
+                    notes=f"Rejected from pending import. Original definition: {pending.definition[:100]}",
                 )
                 session.add(exclusion)
                 logger.info(f"Added '{word}' to exclusions")
@@ -226,16 +197,13 @@ def reject_pending_import(
             "success": True,
             "word": word,
             "added_to_exclusions": add_to_exclusions,
-            "message": f"Rejected '{word}'"
+            "message": f"Rejected '{word}'",
         }
 
     except Exception as e:
         logger.error(f"Error rejecting pending import: {e}")
         session.rollback()
-        return {
-            "error": str(e),
-            "success": False
-        }
+        return {"error": str(e), "success": False}
 
 
 def stage_missing_words_for_import(
@@ -247,7 +215,7 @@ def stage_missing_words_for_import(
     throttle: float = 1.0,
     dry_run: bool = False,
     target_language: str = "lt",
-    debug: bool = False
+    debug: bool = False,
 ) -> Dict[str, any]:
     """
     Stage high-frequency missing words to the pending_imports table.
@@ -281,7 +249,7 @@ def stage_missing_words_for_import(
             "staged": 0,
             "skipped_already_pending": 0,
             "failed": 0,
-            "dry_run": dry_run
+            "dry_run": dry_run,
         }
 
     logger.info(f"Found {total_missing} high-frequency missing words")
@@ -296,15 +264,19 @@ def stage_missing_words_for_import(
     if dry_run:
         logger.info(f"DRY RUN: Would stage {len(words_to_stage)} words:")
         for word_info in words_to_stage[:20]:
-            corpus_str = ", ".join([f"{c['corpus']}:{c['rank']}" for c in word_info["corpus_frequencies"][:2]])
-            logger.info(f"  - '{word_info['word']}' (overall rank: {word_info['overall_rank']}, {corpus_str})")
+            corpus_str = ", ".join(
+                [f"{c['corpus']}:{c['rank']}" for c in word_info["corpus_frequencies"][:2]]
+            )
+            logger.info(
+                f"  - '{word_info['word']}' (overall rank: {word_info['overall_rank']}, {corpus_str})"
+            )
         if len(words_to_stage) > 20:
             logger.info(f"  ... and {len(words_to_stage) - 20} more")
         return {
             "total_missing": total_missing,
             "would_stage": len(words_to_stage),
             "dry_run": True,
-            "sample": words_to_stage[:20]
+            "sample": words_to_stage[:20],
         }
 
     # Initialize client for LLM-based definitions
@@ -321,9 +293,9 @@ def stage_missing_words_for_import(
             logger.info(f"\n[{i}/{len(words_to_stage)}] Staging: '{word}' (rank: {rank})")
 
             # Check if already in pending_imports
-            existing_pending = session.query(PendingImport).filter(
-                PendingImport.english_word == word
-            ).first()
+            existing_pending = (
+                session.query(PendingImport).filter(PendingImport.english_word == word).first()
+            )
 
             if existing_pending:
                 logger.info(f"Word '{word}' already in pending imports, skipping")
@@ -352,7 +324,9 @@ def stage_missing_words_for_import(
                 translation = definition_data.get("translations", {}).get(target_language, "")
 
                 if not translation or not definition_text:
-                    logger.warning(f"Missing translation or definition for '{word}', skipping this sense")
+                    logger.warning(
+                        f"Missing translation or definition for '{word}', skipping this sense"
+                    )
                     continue
 
                 # Create pending import entry
@@ -365,12 +339,14 @@ def stage_missing_words_for_import(
                     pos_subtype=pos_subtype,
                     source="dramblys_frequency_check",
                     frequency_rank=rank,
-                    notes=f"Found in top frequency words"
+                    notes=f"Found in top frequency words",
                 )
 
                 session.add(pending)
                 staged += 1
-                logger.info(f"Staged '{word}' ({pos_type}/{pos_subtype}): {definition_text[:60]}...")
+                logger.info(
+                    f"Staged '{word}' ({pos_type}/{pos_subtype}): {definition_text[:60]}..."
+                )
 
             session.commit()
 
@@ -387,7 +363,7 @@ def stage_missing_words_for_import(
             "staged": staged,
             "skipped_already_pending": skipped_already_pending,
             "failed": failed,
-            "dry_run": dry_run
+            "dry_run": dry_run,
         }
 
     logger.info(f"\n{'='*60}")
@@ -405,5 +381,5 @@ def stage_missing_words_for_import(
         "staged": staged,
         "skipped_already_pending": skipped_already_pending,
         "failed": failed,
-        "dry_run": dry_run
+        "dry_run": dry_run,
     }

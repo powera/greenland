@@ -12,12 +12,16 @@ from sqlalchemy.sql import func
 
 import constants
 
+
 class Base(DeclarativeBase):
     """Base class for all SQLAlchemy models."""
+
     pass
+
 
 class Model(Base):
     """Model definition."""
+
     __tablename__ = "model"
     codename: Mapped[str] = mapped_column(String, primary_key=True)
     displayname: Mapped[str] = mapped_column(String, nullable=False)
@@ -29,19 +33,22 @@ class Model(Base):
 
     # benchmark runs and qual runs are populated in those files.
 
+
 def create_dev_session():
     """Create a database session for development."""
     db_path = constants.SQLITE_DB_PATH
-    engine = create_engine(f'sqlite:///{db_path}', echo=False)
+    engine = create_engine(f"sqlite:///{db_path}", echo=False)
     Session = sessionmaker(bind=engine)
     return Session()
 
+
 def create_database_and_session(db_path="benchmarks.sqlite"):
     """Create a SQLite database engine and session."""
-    engine = create_engine(f'sqlite:///{db_path}', echo=False)
+    engine = create_engine(f"sqlite:///{db_path}", echo=False)
     Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
     return Session()
+
 
 def insert_model(
     session,
@@ -51,7 +58,7 @@ def insert_model(
     filesize_mb: int = None,
     license_name: str = None,
     model_path: str = None,
-    model_type: str = "local"
+    model_type: str = "local",
 ):
     """Insert a new model into the database."""
     try:
@@ -62,7 +69,7 @@ def insert_model(
             filesize_mb=filesize_mb,
             license_name=license_name,
             model_path=model_path,
-            model_type=model_type
+            model_type=model_type,
         )
         session.add(new_model)
         session.commit()
@@ -74,6 +81,7 @@ def insert_model(
     except SQLAlchemyError as e:
         session.rollback()
         return False, f"Error inserting model: {str(e)}"
+
 
 def list_all_models(session):
     """List all models in the database.
@@ -90,10 +98,11 @@ def list_all_models(session):
             "filesize_mb": model.filesize_mb,
             "license_name": model.license_name,
             "model_path": model.model_path,
-            "model_type": model.model_type
+            "model_type": model.model_type,
         }
         for model in models
     ]
+
 
 def get_model_by_codename(session, codename: str):
     """Get model details by codename.
@@ -113,8 +122,9 @@ def get_model_by_codename(session, codename: str):
         "filesize_mb": model.filesize_mb,
         "license_name": model.license_name,
         "model_path": model.model_path,
-        "model_type": model.model_type
+        "model_type": model.model_type,
     }
+
 
 def get_default_model_codename(session):
     """Get the default model codename from the database.
@@ -125,6 +135,7 @@ def get_default_model_codename(session):
     # Get the first model from the database as the default
     model = session.query(Model).first()
     return model.codename if model else None
+
 
 def decode_json(text: Optional[str]) -> Dict:
     """Safely decode JSON text with proper Unicode handling."""

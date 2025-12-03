@@ -15,4 +15,6 @@ def initialize_corpora(session):
         logger.error(f"Failed to initialize corpora: {result['errors']}")
         raise RuntimeError(f"Corpus initialization failed: {result['errors']}")
 
-    logger.info(f"Corpus initialization completed: {result['added']} added, {result['updated']} updated")
+    logger.info(
+        f"Corpus initialization completed: {result['added']} added, {result['updated']} updated"
+    )

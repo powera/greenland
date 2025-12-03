@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Dict, List, Optional
 
+
 @dataclass
 class TranslationEntry:
     en: str
@@ -20,6 +21,7 @@ class TranslationEntry:
     kn_details: Optional[str] = None
     zh_details: Optional[str] = None
 
+
 TRANSLATIONS: List[TranslationEntry] = [
     TranslationEntry(
         en="flower",
@@ -30,7 +32,7 @@ TRANSLATIONS: List[TranslationEntry] = [
         ko="꽃",
         kn="ಹೂವು",
         zh="花",
-        zh_details="Can also mean 'to spend (money)' in different context"
+        zh_details="Can also mean 'to spend (money)' in different context",
     ),
     TranslationEntry(
         en="to drive",
@@ -41,7 +43,7 @@ TRANSLATIONS: List[TranslationEntry] = [
         ko="운전하다",
         kn="ಚಾಲಿಸು",
         zh="开车",
-        en_details="Specifically refers to operating a vehicle"
+        en_details="Specifically refers to operating a vehicle",
     ),
     TranslationEntry(
         en="strongest",
@@ -62,7 +64,7 @@ TRANSLATIONS: List[TranslationEntry] = [
         ko="책",
         kn="ಪುಸ್ತಕ",
         zh="书",
-        fr_details="'livre' can also mean 'pound' (weight/currency)"
+        fr_details="'livre' can also mean 'pound' (weight/currency)",
     ),
     TranslationEntry(
         en="to eat",
@@ -114,7 +116,7 @@ TRANSLATIONS: List[TranslationEntry] = [
         kn="ಚಂದ್ರ",
         zh="月亮",
         ind_details="Can also mean 'month'",
-        zh_details="月 alone can mean 'month'"
+        zh_details="月 alone can mean 'month'",
     ),
     TranslationEntry(
         en="to laugh",
@@ -156,7 +158,7 @@ TRANSLATIONS: List[TranslationEntry] = [
         kn="ಹೃದಯ",
         zh="心",
         ind_details="Can also mean 'liver' or 'feelings'",
-        zh_details="Also used in many compounds for emotional/mental states"
+        zh_details="Also used in many compounds for emotional/mental states",
     ),
     TranslationEntry(
         en="bright",
@@ -168,7 +170,7 @@ TRANSLATIONS: List[TranslationEntry] = [
         kn="ಪ್ರಕಾಶಮಾನವಾದ",
         zh="明亮",
         en_details="Can refer to intelligence or light",
-        zh_details="Can refer to intelligence or light"
+        zh_details="Can refer to intelligence or light",
     ),
     TranslationEntry(
         en="to dance",
@@ -189,7 +191,7 @@ TRANSLATIONS: List[TranslationEntry] = [
         ko="조용한",
         kn="ಮೌನವಾದ",
         zh="安静",
-        en_details="Can refer to sound level or personality trait"
+        en_details="Can refer to sound level or personality trait",
     ),
     TranslationEntry(
         en="tree",
@@ -221,7 +223,7 @@ TRANSLATIONS: List[TranslationEntry] = [
         kn="ಆಕಾಶ",
         zh="天空",
         fr_details="Can also mean 'heaven'",
-        de_details="Can also mean 'heaven'"
+        de_details="Can also mean 'heaven'",
     ),
     TranslationEntry(
         en="fresh",
@@ -252,7 +254,7 @@ TRANSLATIONS: List[TranslationEntry] = [
         ko="달리다",
         kn="ಓಡು",
         zh="跑",
-        de_details="Can also mean 'to walk' in some regions"
+        de_details="Can also mean 'to walk' in some regions",
     ),
     TranslationEntry(
         en="round",
@@ -273,7 +275,7 @@ TRANSLATIONS: List[TranslationEntry] = [
         ko="바람",
         kn="ಗಾಳಿ",
         zh="风",
-        en_details="Can be noun (moving air) or verb (to twist)"
+        en_details="Can be noun (moving air) or verb (to twist)",
     ),
     TranslationEntry(
         en="warm",
@@ -305,7 +307,7 @@ TRANSLATIONS: List[TranslationEntry] = [
         kn="ಆಳವಾದ",
         zh="深",
         en_details="Can refer to physical depth or emotional/intellectual depth",
-        zh_details="Can refer to physical depth or emotional/intellectual depth"
+        zh_details="Can refer to physical depth or emotional/intellectual depth",
     ),
     TranslationEntry(
         en="to swim",
@@ -326,7 +328,7 @@ TRANSLATIONS: List[TranslationEntry] = [
         ko="새",
         kn="ಪಕ್ಷಿ",
         zh="鸟",
-        sw_details="Can also mean 'airplane'"
+        sw_details="Can also mean 'airplane'",
     ),
     TranslationEntry(
         en="sweet",
@@ -338,7 +340,7 @@ TRANSLATIONS: List[TranslationEntry] = [
         kn="ಸಿಹಿಯಾದ",
         zh="甜",
         en_details="Can refer to taste or personality",
-        ind_details="Can refer to taste or personality"
+        ind_details="Can refer to taste or personality",
     ),
     TranslationEntry(
         en="cloud",
@@ -430,7 +432,7 @@ TRANSLATIONS: List[TranslationEntry] = [
         kn="ಭಾರವಾದ",
         zh="重",
         de_details="Can also mean 'difficult'",
-        zh_details="Can also mean 'important'"
+        zh_details="Can also mean 'important'",
     ),
     TranslationEntry(
         en="fire",
@@ -462,7 +464,7 @@ TRANSLATIONS: List[TranslationEntry] = [
         kn="ಹರಿತವಾದ",
         zh="锋利",
         en_details="Can refer to physical edge or intelligence",
-        zh_details="Can refer to physical edge or intelligence"
+        zh_details="Can refer to physical edge or intelligence",
     ),
     TranslationEntry(
         en="salt",
@@ -555,6 +557,6 @@ TRANSLATIONS: List[TranslationEntry] = [
         kn="ಹಗುರವಾದ",
         zh="轻",
         en_details="Using meaning 'not heavy' (vs. illumination)",
-        zh_details="Can also mean 'trivial' or 'casual'"
+        zh_details="Can also mean 'trivial' or 'casual'",
     ),
 ]

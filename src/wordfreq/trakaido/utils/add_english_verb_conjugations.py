@@ -58,11 +58,7 @@ FORM_MAPPING = {
     "3p-f_fut": "verb/lt_3p_f_fut",
 }
 
-TENSE_MAPPING = {
-    "present_tense": "pres",
-    "past_tense": "past",
-    "future": "fut"
-}
+TENSE_MAPPING = {"present_tense": "pres", "past_tense": "past", "future": "fut"}
 
 
 def main():
@@ -92,14 +88,20 @@ def main():
         verb_data = verbs_new[lithuanian_infinitive]
 
         # Check if this verb already has English conjugations
-        existing_english_forms = session.query(DerivativeForm).filter(
-            DerivativeForm.lemma_id == lemma.id,
-            DerivativeForm.language_code == "en",
-            DerivativeForm.is_base_form == False
-        ).count()
+        existing_english_forms = (
+            session.query(DerivativeForm)
+            .filter(
+                DerivativeForm.lemma_id == lemma.id,
+                DerivativeForm.language_code == "en",
+                DerivativeForm.is_base_form == False,
+            )
+            .count()
+        )
 
         if existing_english_forms > 0:
-            print(f"✓ Skipping {lemma.lemma_text} - already has {existing_english_forms} English conjugations")
+            print(
+                f"✓ Skipping {lemma.lemma_text} - already has {existing_english_forms} English conjugations"
+            )
             skipped_count += 1
             continue
 
@@ -135,7 +137,7 @@ def main():
                     language_code="en",
                     grammatical_form=grammatical_form,
                     is_base_form=False,
-                    verified=True
+                    verified=True,
                 )
                 session.add(english_form)
                 verb_forms_added += 1

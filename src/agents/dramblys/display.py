@@ -44,7 +44,9 @@ def print_staging_summary(results, dry_run=False):
         return
 
     if dry_run:
-        print(f"\nDRY RUN: Would stage {results['would_stage']} words out of {results['total_missing']} total")
+        print(
+            f"\nDRY RUN: Would stage {results['would_stage']} words out of {results['total_missing']} total"
+        )
     else:
         print(f"\nStaging complete:")
         print(f"  Total missing: {results['total_missing']}")
@@ -99,7 +101,9 @@ def print_fix_missing_summary(results, dry_run=False):
         return
 
     if dry_run:
-        print(f"\nDRY RUN: Would process {results['would_process']} words out of {results['total_missing']} total")
+        print(
+            f"\nDRY RUN: Would process {results['would_process']} words out of {results['total_missing']} total"
+        )
     else:
         print(f"\nFix complete:")
         print(f"  Total missing: {results['total_missing']}")
@@ -111,9 +115,13 @@ def print_fix_missing_summary(results, dry_run=False):
 def print_check_summary(check_type, results):
     """Print summary of check operations."""
     if check_type == "orphaned":
-        print(f"\nOrphaned derivative forms: {results['orphaned_count']} out of {results['total_forms_checked']}")
+        print(
+            f"\nOrphaned derivative forms: {results['orphaned_count']} out of {results['total_forms_checked']}"
+        )
     elif check_type == "subtypes":
-        print(f"\nUnder-covered subtypes: {results['under_covered_count']} out of {results['total_subtypes']}")
+        print(
+            f"\nUnder-covered subtypes: {results['under_covered_count']} out of {results['total_subtypes']}"
+        )
     elif check_type == "levels":
         print(f"\nEmpty difficulty levels: {len(results['gaps'])}")
         print(f"Imbalanced levels: {len(results['imbalanced'])}")
@@ -139,7 +147,9 @@ def print_confirmation_prompt(prompt_type, **kwargs):
 
     elif prompt_type == "add_subtype":
         print(f"\n{'='*60}")
-        print(f"Found {kwargs.get('matches_found', 0)} {kwargs.get('pos_type')} words for subtype '{kwargs.get('pos_subtype')}'")
+        print(
+            f"Found {kwargs.get('matches_found', 0)} {kwargs.get('pos_type')} words for subtype '{kwargs.get('pos_subtype')}'"
+        )
         print(f"Model: {kwargs.get('model', 'N/A')}")
         print(f"Throttle: {kwargs.get('throttle', 1.0)}s between calls")
         print(f"\nSample words:")

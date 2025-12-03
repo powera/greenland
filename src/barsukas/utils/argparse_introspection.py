@@ -51,7 +51,8 @@ class ArgumentInfo:
     def _extract_mode_hint(self, help_text: str) -> Optional[str]:
         """Extract mode hints from help text like '[Fix mode]' or '[Stage mode]'."""
         import re
-        match = re.search(r'\[([^\]]+)\s+mode\]', help_text, re.IGNORECASE)
+
+        match = re.search(r"\[([^\]]+)\s+mode\]", help_text, re.IGNORECASE)
         if match:
             return match.group(1).lower()
         return None
@@ -68,7 +69,7 @@ class ArgumentInfo:
             "choices": self.choices,
             "nargs": self.nargs,
             "metavar": self.metavar,
-            "mode_hint": self.mode_hint
+            "mode_hint": self.mode_hint,
         }
 
 
@@ -132,7 +133,7 @@ def introspect_agent_parser(agent_module_path: str) -> Dict[str, Any]:
         return {
             "description": parser.description,
             "arguments": [arg.to_dict() for arg in arguments],
-            "modes": sorted(list(modes))
+            "modes": sorted(list(modes)),
         }
 
     except Exception as e:
@@ -180,6 +181,6 @@ def get_agent_cli_module_path(agent_script: str) -> str:
     multi_file_agents = ["voras", "vilkas", "dramblys"]
 
     if agent_name in multi_file_agents:
-        return f'agents.{agent_name}.cli'
+        return f"agents.{agent_name}.cli"
     else:
-        return f'agents.{agent_name}'
+        return f"agents.{agent_name}"

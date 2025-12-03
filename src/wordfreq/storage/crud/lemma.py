@@ -27,15 +27,19 @@ def add_lemma(
     verified: bool = False,
     notes: Optional[str] = None,
     auto_generate_guid: bool = True,
-    source: Optional[str] = None
+    source: Optional[str] = None,
 ) -> Lemma:
     """Add or get a lemma (concept/meaning)."""
     # Check if lemma already exists with same text, definition, and POS
-    existing = session.query(Lemma).filter(
-        Lemma.lemma_text == lemma_text,
-        Lemma.definition_text == definition_text,
-        Lemma.pos_type == pos_type
-    ).first()
+    existing = (
+        session.query(Lemma)
+        .filter(
+            Lemma.lemma_text == lemma_text,
+            Lemma.definition_text == definition_text,
+            Lemma.pos_type == pos_type,
+        )
+        .first()
+    )
 
     if existing:
         return existing
@@ -67,7 +71,7 @@ def add_lemma(
         vietnamese_translation=vietnamese_translation,
         confidence=confidence,
         verified=verified,
-        notes=notes
+        notes=notes,
     )
     session.add(lemma)
     session.flush()
@@ -79,7 +83,7 @@ def add_lemma(
         "ko": korean_translation,
         "sw": swahili_translation,
         "lt": lithuanian_translation,
-        "vi": vietnamese_translation
+        "vi": vietnamese_translation,
     }
 
     for lang_code, translation in translation_map.items():
@@ -91,7 +95,7 @@ def add_lemma(
                 lemma_id=lemma.id,
                 language_code=lang_code,
                 old_translation=None,
-                new_translation=translation
+                new_translation=translation,
             )
 
     return lemma
@@ -116,7 +120,7 @@ def update_lemma(
     confidence: Optional[float] = None,
     verified: Optional[bool] = None,
     notes: Optional[str] = None,
-    source: Optional[str] = None
+    source: Optional[str] = None,
 ) -> bool:
     """Update lemma information.
 
@@ -137,7 +141,7 @@ def update_lemma(
         "ko": ("korean_translation", korean_translation),
         "sw": ("swahili_translation", swahili_translation),
         "lt": ("lithuanian_translation", lithuanian_translation),
-        "vi": ("vietnamese_translation", vietnamese_translation)
+        "vi": ("vietnamese_translation", vietnamese_translation),
     }
 
     # Track translation changes for logging
@@ -153,7 +157,7 @@ def update_lemma(
                     lemma_id=lemma.id,
                     language_code=lang_code,
                     old_translation=old_value,
-                    new_translation=new_value
+                    new_translation=new_value,
                 )
 
     if lemma_text is not None:
@@ -209,18 +213,22 @@ def get_lemma_by_guid(session, guid: str) -> Optional[Lemma]:
 
 def get_lemmas_without_subtypes(session, limit: int = 100) -> List[Lemma]:
     """Get lemmas that need POS subtypes."""
-    return session.query(Lemma)\
-        .filter(Lemma.pos_subtype == None)\
-        .order_by(Lemma.id.desc())\
-        .limit(limit)\
+    return (
+        session.query(Lemma)
+        .filter(Lemma.pos_subtype == None)
+        .order_by(Lemma.id.desc())
+        .limit(limit)
         .all()
+    )
 
 
 def get_all_subtypes(session, lang=None) -> List[str]:
     """Get all pos_subtypes that have lemmas with GUIDs."""
-    query = session.query(Lemma.pos_subtype)\
-        .filter(Lemma.pos_subtype != None)\
+    query = (
+        session.query(Lemma.pos_subtype)
+        .filter(Lemma.pos_subtype != None)
         .filter(Lemma.guid != None)
+    )
 
     if lang == "chinese":
         query = query.filter(Lemma.chinese_translation != None)
@@ -231,17 +239,20 @@ def get_all_subtypes(session, lang=None) -> List[str]:
 
 def get_lemmas_by_subtype(session, pos_subtype: str, lang=None) -> List[Lemma]:
     """Get all lemmas for a specific subtype, ordered by GUID."""
-    query = session.query(Lemma)\
-        .filter(Lemma.pos_subtype == pos_subtype)\
-        .filter(Lemma.guid != None)
+    query = session.query(Lemma).filter(Lemma.pos_subtype == pos_subtype).filter(Lemma.guid != None)
     if lang == "chinese":
         query = query.filter(Lemma.chinese_translation != None)
 
-    return query.order_by(Lemma.guid)\
-        .all()
+    return query.order_by(Lemma.guid).all()
 
 
-def get_lemmas_by_subtype_and_level(session, pos_subtype: str = None, difficulty_level: int = None, limit: int = None, lang: str = None) -> List[Lemma]:
+def get_lemmas_by_subtype_and_level(
+    session,
+    pos_subtype: str = None,
+    difficulty_level: int = None,
+    limit: int = None,
+    lang: str = None,
+) -> List[Lemma]:
     """
     Get lemmas filtered by POS subtype and/or difficulty level.
 
@@ -272,7 +283,7 @@ def get_lemmas_by_subtype_and_level(session, pos_subtype: str = None, difficulty
             "german": "de",
             "korean": "ko",
             "vietnamese": "vi",
-            "swahili": "sw"
+            "swahili": "sw",
         }
         lang_code = lang_map.get(lang, lang)
 
@@ -286,14 +297,13 @@ def get_lemmas_by_subtype_and_level(session, pos_subtype: str = None, difficulty
         # Left join with overrides to get language-specific levels
         query = query.outerjoin(
             LemmaDifficultyOverride,
-            (LemmaDifficultyOverride.lemma_id == Lemma.id) &
-            (LemmaDifficultyOverride.language_code == lang_code)
+            (LemmaDifficultyOverride.lemma_id == Lemma.id)
+            & (LemmaDifficultyOverride.language_code == lang_code),
         )
         # Use override if exists, otherwise use default
         # COALESCE returns first non-null value
         effective_level = func.coalesce(
-            LemmaDifficultyOverride.difficulty_level,
-            Lemma.difficulty_level
+            LemmaDifficultyOverride.difficulty_level, Lemma.difficulty_level
         )
         query = query.filter(effective_level == difficulty_level)
     elif difficulty_level is not None:
@@ -319,6 +329,7 @@ def get_lemmas_by_subtype_and_level(session, pos_subtype: str = None, difficulty
     # (only when lang is specified but difficulty_level is not, or when we want to be safe)
     if lang_code and difficulty_level != -1:
         from wordfreq.storage.crud.difficulty_override import get_effective_difficulty_level
+
         filtered_results = []
         for lemma in results:
             effective = get_effective_difficulty_level(session, lemma, lang_code)

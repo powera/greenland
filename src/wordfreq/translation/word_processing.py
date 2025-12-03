@@ -101,12 +101,7 @@ def is_likely_base_form(word_text: str, lemma_text: str, pos_type: str) -> bool:
     return word_text == lemma_text
 
 
-def process_word(
-    client,
-    word: str,
-    get_session_func,
-    refresh: bool = False
-) -> bool:
+def process_word(client, word: str, get_session_func, refresh: bool = False) -> bool:
     """
     Process a word to get linguistic information and store in database using new schema.
 
@@ -127,12 +122,16 @@ def process_word(
         # If the word token already has derivative forms and refresh is False, return early
         if len(word_token.derivative_forms) > 0:
             if not refresh:
-                logger.info(f"Word token '{word}' already exists in the database with {len(word_token.derivative_forms)} derivative forms")
+                logger.info(
+                    f"Word token '{word}' already exists in the database with {len(word_token.derivative_forms)} derivative forms"
+                )
                 return True
             else:  # len(word_token.derivative_forms) > 0 and refresh
                 logger.info(f"Refreshing derivative forms for word token '{word}'")
                 if not linguistic_db.delete_derivative_forms_for_token(session, word_token.id):
-                    logger.error(f"Failed to delete existing derivative forms for word token '{word}'")
+                    logger.error(
+                        f"Failed to delete existing derivative forms for word token '{word}'"
+                    )
                     return False
                 # Refresh the word token object after deleting derivative forms
                 session.refresh(word_token)
@@ -149,18 +148,24 @@ def process_word(
             # Validate POS type
             pos_type = def_data.get("pos", "unknown")
             if pos_type != "unknown" and pos_type not in VALID_POS_TYPES:
-                logger.warning(f"Invalid POS type '{pos_type}' for word '{word}', defaulting to 'unknown'")
+                logger.warning(
+                    f"Invalid POS type '{pos_type}' for word '{word}', defaulting to 'unknown'"
+                )
                 pos_type = "unknown"
 
             # Get grammatical form, defaulting based on POS if not provided
             grammatical_form = def_data.get("grammatical_form")
             if not grammatical_form:
-                grammatical_form = determine_default_grammatical_form(word, pos_type, def_data.get("lemma", word))
+                grammatical_form = determine_default_grammatical_form(
+                    word, pos_type, def_data.get("lemma", word)
+                )
 
             # Validate grammatical form
             valid_forms = [form.value for form in GrammaticalForm]
             if grammatical_form not in valid_forms:
-                logger.warning(f"Invalid grammatical form '{grammatical_form}' for word '{word}', defaulting to 'other'")
+                logger.warning(
+                    f"Invalid grammatical form '{grammatical_form}' for word '{word}', defaulting to 'other'"
+                )
                 grammatical_form = GrammaticalForm.OTHER.value
 
             # Determine if this is a base form
@@ -200,7 +205,7 @@ def process_word(
                 french=french_trans,
                 swahili=swahili_trans,
                 vietnamese=vietnamese_trans,
-                lithuanian=lithuanian_trans
+                lithuanian=lithuanian_trans,
             )
 
             # Create complete word entry (WordToken + Lemma + DerivativeForm)
@@ -217,7 +222,7 @@ def process_word(
                 phonetic_pronunciation=def_data.get("phonetic_spelling"),
                 translations=translations_set,
                 confidence=def_data.get("confidence", 0.0),
-                notes=def_data.get("notes")
+                notes=def_data.get("notes"),
             )
 
             if not derivative_form:
@@ -226,7 +231,9 @@ def process_word(
 
         # Commit the transaction
         session.commit()
-        logger.info(f"Successfully processed word token '{word}' with {len(word_token.derivative_forms)} derivative forms.")
+        logger.info(
+            f"Successfully processed word token '{word}' with {len(word_token.derivative_forms)} derivative forms."
+        )
         return True
 
     except Exception as e:
@@ -236,11 +243,7 @@ def process_word(
 
 
 def process_words_batch(
-    client,
-    word_list: List[str],
-    get_session_func,
-    refresh: bool = False,
-    throttle: float = 1.0
+    client, word_list: List[str], get_session_func, refresh: bool = False, throttle: float = 1.0
 ) -> Dict[str, Any]:
     """
     Process a batch of words using the new schema.
@@ -278,11 +281,8 @@ def process_words_batch(
             failed += 1
             logger.error(f"Error processing '{word}': {e}")
 
-    logger.info(f"Batch processing complete: {successful} successful, {failed} failed, {skipped} skipped")
+    logger.info(
+        f"Batch processing complete: {successful} successful, {failed} failed, {skipped} skipped"
+    )
 
-    return {
-        "total": len(word_list),
-        "successful": successful,
-        "failed": failed,
-        "skipped": skipped
-    }
+    return {"total": len(word_list), "successful": successful, "failed": failed, "skipped": skipped}

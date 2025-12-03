@@ -28,13 +28,12 @@ from wordfreq.storage.models.schema import Lemma
 from wordfreq.tools.llm_validators import (
     validate_lemma_form,
     validate_definition,
-    batch_validate_lemmas
+    batch_validate_lemmas,
 )
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -66,7 +65,7 @@ class LokysAgent:
         self,
         limit: Optional[int] = None,
         sample_rate: float = 1.0,
-        confidence_threshold: float = 0.7
+        confidence_threshold: float = 0.7,
     ) -> Dict[str, any]:
         """
         Check that English lemma_text values are in proper lemma form.
@@ -84,9 +83,7 @@ class LokysAgent:
         session = self.get_session()
         try:
             # Get lemmas with GUIDs (these are the curated ones)
-            query = session.query(Lemma).filter(
-                Lemma.guid.isnot(None)
-            ).order_by(Lemma.id)
+            query = session.query(Lemma).filter(Lemma.guid.isnot(None)).order_by(Lemma.id)
 
             if limit:
                 query = query.limit(limit)
@@ -97,6 +94,7 @@ class LokysAgent:
             # Sample if needed
             if sample_rate < 1.0:
                 import random
+
                 sample_size = int(len(lemmas) * sample_rate)
                 lemmas = random.sample(lemmas, sample_size)
                 logger.info(f"Sampling {len(lemmas)} lemmas ({sample_rate*100:.0f}%)")
@@ -110,21 +108,19 @@ class LokysAgent:
                 if checked_count % 10 == 0:
                     logger.info(f"Checked {checked_count}/{len(lemmas)} lemmas...")
 
-                result = validate_lemma_form(
-                    lemma.lemma_text,
-                    lemma.pos_type,
-                    self.model
-                )
+                result = validate_lemma_form(lemma.lemma_text, lemma.pos_type, self.model)
 
                 if not result["is_lemma"] and result["confidence"] >= confidence_threshold:
-                    issues_found.append({
-                        "guid": lemma.guid,
-                        "current_lemma": lemma.lemma_text,
-                        "suggested_lemma": result["suggested_lemma"],
-                        "pos_type": lemma.pos_type,
-                        "reason": result["reason"],
-                        "confidence": result["confidence"]
-                    })
+                    issues_found.append(
+                        {
+                            "guid": lemma.guid,
+                            "current_lemma": lemma.lemma_text,
+                            "suggested_lemma": result["suggested_lemma"],
+                            "pos_type": lemma.pos_type,
+                            "reason": result["reason"],
+                            "confidence": result["confidence"],
+                        }
+                    )
                     logger.warning(
                         f"Lemma issue: '{lemma.lemma_text}' → '{result['suggested_lemma']}' "
                         f"({lemma.guid}, confidence: {result['confidence']:.2f})"
@@ -137,7 +133,7 @@ class LokysAgent:
                 "issues_found": len(issues_found),
                 "issue_rate": (len(issues_found) / checked_count * 100) if checked_count else 0,
                 "issues": issues_found,
-                "confidence_threshold": confidence_threshold
+                "confidence_threshold": confidence_threshold,
             }
 
         except Exception as e:
@@ -147,7 +143,7 @@ class LokysAgent:
                 "total_checked": 0,
                 "issues_found": 0,
                 "issue_rate": 0,
-                "issues": []
+                "issues": [],
             }
         finally:
             session.close()
@@ -156,7 +152,7 @@ class LokysAgent:
         self,
         limit: Optional[int] = None,
         sample_rate: float = 1.0,
-        confidence_threshold: float = 0.7
+        confidence_threshold: float = 0.7,
     ) -> Dict[str, any]:
         """
         Check that definition_text values are well-formed and appropriate.
@@ -174,9 +170,7 @@ class LokysAgent:
         session = self.get_session()
         try:
             # Get lemmas with GUIDs (these are the curated ones)
-            query = session.query(Lemma).filter(
-                Lemma.guid.isnot(None)
-            ).order_by(Lemma.id)
+            query = session.query(Lemma).filter(Lemma.guid.isnot(None)).order_by(Lemma.id)
 
             if limit:
                 query = query.limit(limit)
@@ -187,6 +181,7 @@ class LokysAgent:
             # Sample if needed
             if sample_rate < 1.0:
                 import random
+
                 sample_size = int(len(lemmas) * sample_rate)
                 lemmas = random.sample(lemmas, sample_size)
                 logger.info(f"Sampling {len(lemmas)} lemmas ({sample_rate*100:.0f}%)")
@@ -206,19 +201,21 @@ class LokysAgent:
                     lemma.pos_type,
                     self.model,
                     translation_language="Lithuanian",
-                    translation_text=lemma.lithuanian_translation
+                    translation_text=lemma.lithuanian_translation,
                 )
 
                 if not result["is_valid"] and result["confidence"] >= confidence_threshold:
-                    issues_found.append({
-                        "guid": lemma.guid,
-                        "lemma": lemma.lemma_text,
-                        "current_definition": lemma.definition_text,
-                        "suggested_definition": result["suggested_definition"],
-                        "pos_type": lemma.pos_type,
-                        "issues": result["issues"],
-                        "confidence": result["confidence"]
-                    })
+                    issues_found.append(
+                        {
+                            "guid": lemma.guid,
+                            "lemma": lemma.lemma_text,
+                            "current_definition": lemma.definition_text,
+                            "suggested_definition": result["suggested_definition"],
+                            "pos_type": lemma.pos_type,
+                            "issues": result["issues"],
+                            "confidence": result["confidence"],
+                        }
+                    )
 
                     # Update the database with the suggested definition
                     if result["suggested_definition"]:
@@ -242,7 +239,7 @@ class LokysAgent:
                 "issues_found": len(issues_found),
                 "issue_rate": (len(issues_found) / checked_count * 100) if checked_count else 0,
                 "issues": issues_found,
-                "confidence_threshold": confidence_threshold
+                "confidence_threshold": confidence_threshold,
             }
 
         except Exception as e:
@@ -252,15 +249,12 @@ class LokysAgent:
                 "total_checked": 0,
                 "issues_found": 0,
                 "issue_rate": 0,
-                "issues": []
+                "issues": [],
             }
         finally:
             session.close()
 
-    def check_disambiguation(
-        self,
-        limit: Optional[int] = None
-    ) -> Dict[str, any]:
+    def check_disambiguation(self, limit: Optional[int] = None) -> Dict[str, any]:
         """
         Check for lemmas that need disambiguation (parentheticals).
 
@@ -279,20 +273,18 @@ class LokysAgent:
         session = self.get_session()
         try:
             from sqlalchemy import func
-            from wordfreq.storage.translation_helpers import get_supported_languages, get_translation
+            from wordfreq.storage.translation_helpers import (
+                get_supported_languages,
+                get_translation,
+            )
 
             # Find lemma_text values that appear multiple times
-            duplicates_query = session.query(
-                Lemma.lemma_text,
-                func.count(Lemma.id).label("count")
-            ).filter(
-                Lemma.guid.isnot(None)  # Only curated lemmas
-            ).group_by(
-                Lemma.lemma_text
-            ).having(
-                func.count(Lemma.id) > 1
-            ).order_by(
-                func.count(Lemma.id).desc()
+            duplicates_query = (
+                session.query(Lemma.lemma_text, func.count(Lemma.id).label("count"))
+                .filter(Lemma.guid.isnot(None))  # Only curated lemmas
+                .group_by(Lemma.lemma_text)
+                .having(func.count(Lemma.id) > 1)
+                .order_by(func.count(Lemma.id).desc())
             )
 
             if limit:
@@ -310,10 +302,11 @@ class LokysAgent:
 
             for lemma_text, count in duplicate_groups:
                 # Get all lemmas with this lemma_text
-                lemmas = session.query(Lemma).filter(
-                    Lemma.lemma_text == lemma_text,
-                    Lemma.guid.isnot(None)
-                ).all()
+                lemmas = (
+                    session.query(Lemma)
+                    .filter(Lemma.lemma_text == lemma_text, Lemma.guid.isnot(None))
+                    .all()
+                )
 
                 total_checked += len(lemmas)
 
@@ -357,22 +350,30 @@ class LokysAgent:
                     for lemma in lemmas:
                         has_parenthetical = "(" in lemma.lemma_text and ")" in lemma.lemma_text
                         if not has_parenthetical:
-                            missing_parentheticals.append({
-                                "guid": lemma.guid,
-                                "lemma_text": lemma.lemma_text,
-                                "definition": lemma.definition_text[:100] if lemma.definition_text else None,
-                                "pos_type": lemma.pos_type,
-                                "disambiguation": lemma.disambiguation
-                            })
+                            missing_parentheticals.append(
+                                {
+                                    "guid": lemma.guid,
+                                    "lemma_text": lemma.lemma_text,
+                                    "definition": (
+                                        lemma.definition_text[:100]
+                                        if lemma.definition_text
+                                        else None
+                                    ),
+                                    "pos_type": lemma.pos_type,
+                                    "disambiguation": lemma.disambiguation,
+                                }
+                            )
 
                     if missing_parentheticals:
                         needs_disambiguation += len(missing_parentheticals)
-                        issues.append({
-                            "lemma_text": lemma_text,
-                            "total_count": count,
-                            "missing_disambiguation": missing_parentheticals,
-                            "all_guids": [l.guid for l in lemmas]
-                        })
+                        issues.append(
+                            {
+                                "lemma_text": lemma_text,
+                                "total_count": count,
+                                "missing_disambiguation": missing_parentheticals,
+                                "all_guids": [l.guid for l in lemmas],
+                            }
+                        )
 
             logger.info(f"Checked {total_checked} lemmas in {len(duplicate_groups)} groups")
             logger.info(f"Found {needs_disambiguation} lemmas needing disambiguation")
@@ -381,17 +382,12 @@ class LokysAgent:
                 "total_checked": total_checked,
                 "duplicate_groups": len(duplicate_groups),
                 "needs_disambiguation": needs_disambiguation,
-                "issues": issues
+                "issues": issues,
             }
 
         except Exception as e:
             logger.error(f"Error checking disambiguation: {e}", exc_info=True)
-            return {
-                "error": str(e),
-                "total_checked": 0,
-                "needs_disambiguation": 0,
-                "issues": []
-            }
+            return {"error": str(e), "total_checked": 0, "needs_disambiguation": 0, "issues": []}
         finally:
             session.close()
 
@@ -401,7 +397,7 @@ class LokysAgent:
         limit: Optional[int] = None,
         sample_rate: float = 1.0,
         confidence_threshold: float = 0.7,
-        check_type: str = "both"
+        check_type: str = "both",
     ) -> Dict[str, any]:
         """
         Run English lemma validation and generate a comprehensive report.
@@ -426,23 +422,19 @@ class LokysAgent:
             "sample_rate": sample_rate,
             "confidence_threshold": confidence_threshold,
             "check_type": check_type,
-            "checks": {}
+            "checks": {},
         }
 
         # Check English lemma forms
         if check_type in ["lemma", "both"]:
             results["checks"]["lemma_forms"] = self.check_lemma_forms(
-                limit=limit,
-                sample_rate=sample_rate,
-                confidence_threshold=confidence_threshold
+                limit=limit, sample_rate=sample_rate, confidence_threshold=confidence_threshold
             )
 
         # Check English definitions
         if check_type in ["definitions", "both"]:
             results["checks"]["definitions"] = self.check_definitions(
-                limit=limit,
-                sample_rate=sample_rate,
-                confidence_threshold=confidence_threshold
+                limit=limit, sample_rate=sample_rate, confidence_threshold=confidence_threshold
             )
 
         end_time = datetime.now()
@@ -455,6 +447,7 @@ class LokysAgent:
         # Write to output file if requested
         if output_file:
             import json
+
             try:
                 with open(output_file, "w", encoding="utf-8") as f:
                     json.dump(results, f, indent=2, ensure_ascii=False)
@@ -503,22 +496,38 @@ def get_argument_parser():
     This function allows external tools to introspect the available
     command-line arguments without executing the main function.
     """
-    parser = argparse.ArgumentParser(
-        description="Lokys - English Lemma Validation Agent"
-    )
+    parser = argparse.ArgumentParser(description="Lokys - English Lemma Validation Agent")
     parser.add_argument("--db-path", help="Database path (uses default if not specified)")
     parser.add_argument("--debug", action="store_true", help="Enable debug logging")
     parser.add_argument("--output", help="Output JSON file for report")
-    parser.add_argument("--model", default="gpt-5-mini", help="LLM model to use (default: gpt-5-mini)")
+    parser.add_argument(
+        "--model", default="gpt-5-mini", help="LLM model to use (default: gpt-5-mini)"
+    )
     parser.add_argument("--limit", type=int, help="Maximum items to check")
-    parser.add_argument("--sample-rate", type=float, default=1.0,
-                       help="Fraction of items to sample (0.0-1.0, default: 1.0)")
-    parser.add_argument("--confidence-threshold", type=float, default=0.7,
-                       help="Minimum confidence to flag issues (0.0-1.0, default: 0.7)")
-    parser.add_argument("--check-type", choices=["lemma", "definitions", "both"], default="both",
-                       help="Type of checks to run: \"lemma\" (lemma form validation), \"definitions\" (definition validation), or \"both\" (default: both)")
-    parser.add_argument("--yes", "-y", action="store_true",
-                       help="Skip confirmation prompt before running LLM queries")
+    parser.add_argument(
+        "--sample-rate",
+        type=float,
+        default=1.0,
+        help="Fraction of items to sample (0.0-1.0, default: 1.0)",
+    )
+    parser.add_argument(
+        "--confidence-threshold",
+        type=float,
+        default=0.7,
+        help="Minimum confidence to flag issues (0.0-1.0, default: 0.7)",
+    )
+    parser.add_argument(
+        "--check-type",
+        choices=["lemma", "definitions", "both"],
+        default="both",
+        help='Type of checks to run: "lemma" (lemma form validation), "definitions" (definition validation), or "both" (default: both)',
+    )
+    parser.add_argument(
+        "--yes",
+        "-y",
+        action="store_true",
+        help="Skip confirmation prompt before running LLM queries",
+    )
 
     return parser
 
@@ -548,7 +557,9 @@ def main():
         finally:
             session.close()
 
-        print(f"\nThis will make approximately {estimated_calls} LLM API calls using model '{args.model}'.")
+        print(
+            f"\nThis will make approximately {estimated_calls} LLM API calls using model '{args.model}'."
+        )
         print(f"Check type: {args.check_type}")
         print("This may incur costs and take some time to complete.")
         response = input("Do you want to proceed? [y/N]: ").strip().lower()
@@ -566,7 +577,7 @@ def main():
         limit=args.limit,
         sample_rate=args.sample_rate,
         confidence_threshold=args.confidence_threshold,
-        check_type=args.check_type
+        check_type=args.check_type,
     )
 
 

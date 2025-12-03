@@ -8,9 +8,19 @@ from wordfreq.storage.models.enums import NounSubtype, VerbSubtype, AdjectiveSub
 
 # TODO: de-dupe
 VALID_POS_TYPES = {
-    "noun", "verb", "adjective", "adverb", "pronoun",
-    "preposition", "conjunction", "interjection", "determiner",
-    "article", "numeral", "auxiliary", "modal"
+    "noun",
+    "verb",
+    "adjective",
+    "adverb",
+    "pronoun",
+    "preposition",
+    "conjunction",
+    "interjection",
+    "determiner",
+    "article",
+    "numeral",
+    "auxiliary",
+    "modal",
 }
 
 

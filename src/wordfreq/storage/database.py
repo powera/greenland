@@ -10,17 +10,39 @@ It now serves as a backward-compatible convenience import module.
 import logging
 
 # Import models from the models package
-from wordfreq.storage.models.schema import Base, WordToken, Lemma, LemmaTranslation, DerivativeForm, Sentence, SentenceTranslation, SentenceWord, Corpus, WordFrequency
+from wordfreq.storage.models.schema import (
+    Base,
+    WordToken,
+    Lemma,
+    LemmaTranslation,
+    DerivativeForm,
+    Sentence,
+    SentenceTranslation,
+    SentenceWord,
+    Corpus,
+    WordFrequency,
+)
 from wordfreq.storage.models.query_log import QueryLog
 from wordfreq.storage.models.grammar_fact import GrammarFact
-from wordfreq.storage.models.enums import NounSubtype, VerbSubtype, AdjectiveSubtype, AdverbSubtype, GrammaticalForm
+from wordfreq.storage.models.enums import (
+    NounSubtype,
+    VerbSubtype,
+    AdjectiveSubtype,
+    AdverbSubtype,
+    GrammaticalForm,
+)
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 # Import utilities
-from wordfreq.storage.utils.enums import VALID_POS_TYPES, get_subtype_enum, get_subtype_values_for_pos, get_all_pos_subtypes
+from wordfreq.storage.utils.enums import (
+    VALID_POS_TYPES,
+    get_subtype_enum,
+    get_subtype_values_for_pos,
+    get_all_pos_subtypes,
+)
 from wordfreq.storage.utils.guid import generate_guid
 from wordfreq.storage.utils.session import create_database_session, ensure_tables_exist
 from wordfreq.storage.utils.initialization import initialize_corpora
@@ -32,7 +54,7 @@ from wordfreq.storage.crud.word_token import (
     get_word_token_by_text,
     get_word_tokens_needing_analysis,
     get_word_tokens_by_frequency_rank,
-    get_word_tokens_by_combined_frequency_rank
+    get_word_tokens_by_combined_frequency_rank,
 )
 
 from wordfreq.storage.crud.lemma import (
@@ -42,7 +64,7 @@ from wordfreq.storage.crud.lemma import (
     get_lemmas_without_subtypes,
     get_all_subtypes,
     get_lemmas_by_subtype,
-    get_lemmas_by_subtype_and_level
+    get_lemmas_by_subtype_and_level,
 )
 
 from wordfreq.storage.crud.derivative_form import (
@@ -62,7 +84,7 @@ from wordfreq.storage.crud.derivative_form import (
     get_grammatical_forms_for_token,
     add_alternative_form,
     get_alternative_forms_for_lemma,
-    add_complete_word_entry
+    add_complete_word_entry,
 )
 
 from wordfreq.storage.crud.word_frequency import add_word_frequency
@@ -73,7 +95,7 @@ from wordfreq.storage.crud.sentence import (
     get_sentences_by_level,
     calculate_minimum_level,
     update_sentence,
-    delete_sentence
+    delete_sentence,
 )
 
 from wordfreq.storage.crud.sentence_translation import (
@@ -81,7 +103,7 @@ from wordfreq.storage.crud.sentence_translation import (
     get_sentence_translation,
     update_sentence_translation,
     delete_sentence_translation,
-    get_or_create_sentence_translation
+    get_or_create_sentence_translation,
 )
 
 from wordfreq.storage.crud.sentence_word import (
@@ -90,7 +112,7 @@ from wordfreq.storage.crud.sentence_word import (
     get_lemmas_for_sentence,
     update_sentence_word,
     delete_sentence_word,
-    find_lemma_by_guid
+    find_lemma_by_guid,
 )
 
 from wordfreq.storage.crud.grammar_fact import (
@@ -98,14 +120,11 @@ from wordfreq.storage.crud.grammar_fact import (
     get_grammar_facts,
     get_grammar_fact_value,
     is_plurale_tantum,
-    delete_grammar_fact
+    delete_grammar_fact,
 )
 
 # Import query functions
-from wordfreq.storage.queries.pos import (
-    get_common_words_by_pos,
-    get_common_base_forms_by_pos
-)
+from wordfreq.storage.queries.pos import get_common_words_by_pos, get_common_base_forms_by_pos
 
 from wordfreq.storage.queries.translation import (
     get_lemmas_without_translation,
@@ -117,22 +136,20 @@ from wordfreq.storage.queries.translation import (
     get_definitions_without_french_translations,
     get_definitions_without_chinese_translations,
     update_chinese_translation,
-    update_korean_translation
+    update_korean_translation,
 )
 
-from wordfreq.storage.queries.stats import (
-    get_processing_stats,
-    list_problematic_words
-)
+from wordfreq.storage.queries.stats import get_processing_stats, list_problematic_words
 
 from wordfreq.storage.queries.noun_forms import (
     get_noun_form,
     get_all_noun_forms,
-    check_noun_forms_coverage
+    check_noun_forms_coverage,
 )
 
 # Import legacy functions
 from wordfreq.storage.legacy import get_word_by_text
+
 
 # Query logging function
 def log_query(
@@ -143,7 +160,7 @@ def log_query(
     response: str,
     model: str,
     success: bool = True,
-    error: str = None
+    error: str = None,
 ) -> QueryLog:
     """Log a query to the database."""
     log = QueryLog(
@@ -153,7 +170,7 @@ def log_query(
         response=response,
         model=model,
         success=success,
-        error=error
+        error=error,
     )
     session.add(log)
     session.commit()
@@ -175,18 +192,15 @@ __all__ = [
     "WordFrequency",
     "QueryLog",
     "GrammarFact",
-
     # Enums
     "NounSubtype",
     "VerbSubtype",
     "AdjectiveSubtype",
     "AdverbSubtype",
     "GrammaticalForm",
-
     # Constants
     "VALID_POS_TYPES",
     "SUBTYPE_GUID_PREFIXES",
-
     # Utilities
     "get_subtype_enum",
     "get_subtype_values_for_pos",
@@ -195,14 +209,12 @@ __all__ = [
     "create_database_session",
     "ensure_tables_exist",
     "initialize_corpora",
-
     # Word Token CRUD
     "add_word_token",
     "get_word_token_by_text",
     "get_word_tokens_needing_analysis",
     "get_word_tokens_by_frequency_rank",
     "get_word_tokens_by_combined_frequency_rank",
-
     # Lemma CRUD
     "add_lemma",
     "update_lemma",
@@ -211,7 +223,6 @@ __all__ = [
     "get_all_subtypes",
     "get_lemmas_by_subtype",
     "get_lemmas_by_subtype_and_level",
-
     # Derivative Form CRUD
     "add_derivative_form",
     "update_derivative_form",
@@ -230,10 +241,8 @@ __all__ = [
     "add_alternative_form",
     "get_alternative_forms_for_lemma",
     "add_complete_word_entry",
-
     # Word Frequency CRUD
     "add_word_frequency",
-
     # Sentence CRUD
     "add_sentence",
     "get_sentence_by_id",
@@ -241,14 +250,12 @@ __all__ = [
     "calculate_minimum_level",
     "update_sentence",
     "delete_sentence",
-
     # Sentence Translation CRUD
     "add_sentence_translation",
     "get_sentence_translation",
     "update_sentence_translation",
     "delete_sentence_translation",
     "get_or_create_sentence_translation",
-
     # Sentence Word CRUD
     "add_sentence_word",
     "get_sentence_words",
@@ -256,18 +263,15 @@ __all__ = [
     "update_sentence_word",
     "delete_sentence_word",
     "find_lemma_by_guid",
-
     # Grammar Fact CRUD
     "add_grammar_fact",
     "get_grammar_facts",
     "get_grammar_fact_value",
     "is_plurale_tantum",
     "delete_grammar_fact",
-
     # POS Queries
     "get_common_words_by_pos",
     "get_common_base_forms_by_pos",
-
     # Translation Queries
     "get_lemmas_without_translation",
     "update_lemma_translation",
@@ -279,19 +283,15 @@ __all__ = [
     "get_definitions_without_chinese_translations",
     "update_chinese_translation",
     "update_korean_translation",
-
     # Stats Queries
     "get_processing_stats",
     "list_problematic_words",
-
     # Noun Form Queries
     "get_noun_form",
     "get_all_noun_forms",
     "check_noun_forms_coverage",
-
     # Legacy Functions
     "get_word_by_text",
-
     # Logging
     "log_query",
 ]

@@ -1,4 +1,3 @@
-
 """
 Trakaido utilities package for word management and export functionality.
 

@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python3
 """
 Text rendering and formatting utilities for trakaido tools.
@@ -14,17 +13,17 @@ from dataclasses import dataclass
 def format_subtype_display_name(subtype: str) -> str:
     """
     Convert database subtype values to display-friendly names.
-    
+
     Args:
         subtype: Raw subtype value from database
-        
+
     Returns:
         Display-friendly subtype name
     """
     # Handle None or empty values
     if not subtype:
         return "Other"
-    
+
     # Special cases that need custom formatting
     special_cases = {
         # Noun subtypes
@@ -57,11 +56,10 @@ def format_subtype_display_name(subtype: str) -> str:
         "temporal_name": "Temporal Name",
         "unit_of_measurement": "Unit of Measurement",
         "body_part": "Body Part",
-        "natural_feature": "Natural Feature", 
+        "natural_feature": "Natural Feature",
         "disease_condition": "Disease/Condition",
         "human": "Humans",
         "plant": "Plants",
-        
         # Verb subtypes
         "physical_action": "Physical Action",
         "creation_action": "Creation Action",
@@ -70,25 +68,23 @@ def format_subtype_display_name(subtype: str) -> str:
         "emotional_state": "Emotional State",
         "directional_movement": "Directional Movement",
         "manner_movement": "Manner Movement",
-        
         # Adjective subtypes
         "definite_quantity": "Definite Quantity",
         "indefinite_quantity": "Indefinite Quantity",
-        
         # Adverb subtypes
         "specific_time": "Specific Time",
         "relative_time": "Relative Time",
         "definite_frequency": "Definite Frequency",
         "indefinite_frequency": "Indefinite Frequency",
     }
-    
+
     # Check for special cases first
     if subtype in special_cases:
         return special_cases[subtype]
-    
+
     # For regular cases, convert underscores to spaces and title case
     formatted = subtype.replace("_", " ")
-    
+
     # Default: title case each word
     return formatted.title()
 
@@ -96,13 +92,13 @@ def format_subtype_display_name(subtype: str) -> str:
 def display_word_data(word_data) -> None:
     """
     Display word data in a formatted table for user review.
-    
+
     Args:
         word_data: WordData object with word information
     """
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("WORD ANALYSIS RESULTS")
-    print("="*60)
+    print("=" * 60)
     print(f"English: {word_data.english}")
     print(f"Lithuanian: {word_data.lithuanian}")
     print(f"Part of Speech: {word_data.pos_type}")
@@ -135,19 +131,19 @@ def display_word_data(word_data) -> None:
 
     if word_data.notes:
         print(f"Notes: {word_data.notes}")
-    print("="*60)
+    print("=" * 60)
 
 
 def display_current_lemma_entry(lemma) -> None:
     """
     Display current lemma entry information in a formatted table.
-    
+
     Args:
         lemma: Lemma object from database
     """
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("CURRENT ENTRY:")
-    print("="*60)
+    print("=" * 60)
     print(f"English: {lemma.lemma_text}")
     print(f"Lithuanian: {lemma.lithuanian_translation}")
     print(f"Part of Speech: {lemma.pos_type}")
@@ -160,13 +156,13 @@ def display_current_lemma_entry(lemma) -> None:
     print(f"Swahili: {lemma.swahili_translation or 'N/A'}")
     print(f"Vietnamese: {lemma.vietnamese_translation or 'N/A'}")
     print(f"Notes: {lemma.notes or 'N/A'}")
-    print("="*60)
+    print("=" * 60)
 
 
 def display_word_list(words: List[Dict[str, Any]], title: str = "Words") -> None:
     """
     Display a list of words in a formatted table.
-    
+
     Args:
         words: List of word dictionaries
         title: Title for the word list
@@ -176,9 +172,11 @@ def display_word_list(words: List[Dict[str, Any]], title: str = "Words") -> None
         print("-" * 80)
         for word in words:
             status = "✓" if word.get("verified", False) else "?"
-            print(f"{status} {word.get('guid', ''):<10} L{word.get('level', 0):<2} "
-                  f"{word.get('english', ''):<20} → {word.get('lithuanian', ''):<20} "
-                  f"({word.get('subtype', '')})")
+            print(
+                f"{status} {word.get('guid', ''):<10} L{word.get('level', 0):<2} "
+                f"{word.get('english', ''):<20} → {word.get('lithuanian', ''):<20} "
+                f"({word.get('subtype', '')})"
+            )
     else:
         print(f"No {title.lower()} found matching criteria.")
 
@@ -186,7 +184,7 @@ def display_word_list(words: List[Dict[str, Any]], title: str = "Words") -> None
 def display_subtype_list(subtypes: List[Dict[str, Any]]) -> None:
     """
     Display a list of subtypes with counts in a formatted table.
-    
+
     Args:
         subtypes: List of subtype dictionaries with count information
     """
@@ -194,7 +192,9 @@ def display_subtype_list(subtypes: List[Dict[str, Any]]) -> None:
         print(f"\nFound {len(subtypes)} subtypes:")
         print("-" * 60)
         for subtype_info in subtypes:
-            print(f"{subtype_info['pos_subtype']:<25} ({subtype_info['pos_type']:<10}) {subtype_info['count']:>6} words")
+            print(
+                f"{subtype_info['pos_subtype']:<25} ({subtype_info['pos_type']:<10}) {subtype_info['count']:>6} words"
+            )
     else:
         print("No subtypes found.")
 
@@ -202,7 +202,7 @@ def display_subtype_list(subtypes: List[Dict[str, Any]]) -> None:
 def display_export_summary(export_type: str, success: bool, stats=None, **kwargs) -> None:
     """
     Display a summary of export operation results.
-    
+
     Args:
         export_type: Type of export performed
         success: Whether export was successful
@@ -211,7 +211,7 @@ def display_export_summary(export_type: str, success: bool, stats=None, **kwargs
     """
     if success:
         print(f"\n✅ {export_type} export completed successfully!")
-        
+
         if stats:
             print(f"   Total entries: {stats.total_entries}")
             if hasattr(stats, "entries_with_guids"):
@@ -220,7 +220,7 @@ def display_export_summary(export_type: str, success: bool, stats=None, **kwargs
                 print(f"   POS distribution: {stats.pos_distribution}")
             if hasattr(stats, "level_distribution"):
                 print(f"   Level distribution: {stats.level_distribution}")
-        
+
         # Display additional information from kwargs
         for key, value in kwargs.items():
             print(f"   {key.replace('_', ' ').title()}: {value}")
@@ -231,7 +231,7 @@ def display_export_summary(export_type: str, success: bool, stats=None, **kwargs
 def display_bulk_operation_preview(items: List[Any], operation: str, details: str = "") -> None:
     """
     Display a preview of items that will be affected by a bulk operation.
-    
+
     Args:
         items: List of items to display
         operation: Description of the operation
@@ -246,8 +246,10 @@ def display_bulk_operation_preview(items: List[Any], operation: str, details: st
         if hasattr(item, "guid"):
             # Display lemma/word items
             status = "✓" if getattr(item, "verified", False) else "?"
-            print(f"{status} {item.guid:<10} L{getattr(item, 'difficulty_level', 0):<2} "
-                  f"{getattr(item, 'lemma_text', ''):<20} → {getattr(item, 'lithuanian_translation', '') or 'N/A':<20}")
+            print(
+                f"{status} {item.guid:<10} L{getattr(item, 'difficulty_level', 0):<2} "
+                f"{getattr(item, 'lemma_text', ''):<20} → {getattr(item, 'lithuanian_translation', '') or 'N/A':<20}"
+            )
         else:
             # Display generic items
             print(f"   {item}")
@@ -256,47 +258,47 @@ def display_bulk_operation_preview(items: List[Any], operation: str, details: st
 def format_change_summary(changes: List[str]) -> str:
     """
     Format a list of changes into a readable summary.
-    
+
     Args:
         changes: List of change descriptions
-        
+
     Returns:
         Formatted change summary string
     """
     if not changes:
         return "No changes detected"
-    
+
     summary = "Changes made:\n"
     for change in changes:
         summary += f"   {change}\n"
-    
+
     return summary.strip()
 
 
 def get_user_confirmation(message: str, default: bool = False) -> bool:
     """
     Get user confirmation for an operation.
-    
+
     Args:
         message: Message to display to user
         default: Default value if user just presses enter
-        
+
     Returns:
         True if user confirms, False otherwise
     """
     default_suffix = " (Y/n)" if default else " (y/N)"
     response = input(f"{message}{default_suffix}: ").strip().lower()
-    
+
     if not response:
         return default
-    
+
     return response in ["y", "yes", "true", "1"]
 
 
 def display_progress(current: int, total: int, item_name: str = "") -> None:
     """
     Display progress for long-running operations.
-    
+
     Args:
         current: Current item number
         total: Total number of items
@@ -304,8 +306,10 @@ def display_progress(current: int, total: int, item_name: str = "") -> None:
     """
     percentage = (current / total) * 100 if total > 0 else 0
     progress_bar = "█" * int(percentage // 5) + "░" * (20 - int(percentage // 5))
-    
-    print(f"\r[{current}/{total}] [{progress_bar}] {percentage:.1f}% {item_name}", end="", flush=True)
-    
+
+    print(
+        f"\r[{current}/{total}] [{progress_bar}] {percentage:.1f}% {item_name}", end="", flush=True
+    )
+
     if current == total:
         print()  # New line when complete

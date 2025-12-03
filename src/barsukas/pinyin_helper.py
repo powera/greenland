@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 # Try to import pypinyin, gracefully handle if not available
 try:
     from pypinyin import lazy_pinyin, Style
+
     PYPINYIN_AVAILABLE = True
 except ImportError:
     PYPINYIN_AVAILABLE = False
@@ -23,10 +24,13 @@ except ImportError:
 # Try to import jieba for word segmentation, gracefully handle if not available
 try:
     import jieba
+
     JIEBA_AVAILABLE = True
 except ImportError:
     JIEBA_AVAILABLE = False
-    logger.warning("jieba not available - Chinese word segmentation will fall back to character-by-character")
+    logger.warning(
+        "jieba not available - Chinese word segmentation will fall back to character-by-character"
+    )
 
 
 def is_chinese(text: str) -> bool:
@@ -42,7 +46,7 @@ def is_chinese(text: str) -> bool:
     if not text:
         return False
     # Check for CJK Unified Ideographs range
-    return bool(re.search(r'[\u4e00-\u9fff]', text))
+    return bool(re.search(r"[\u4e00-\u9fff]", text))
 
 
 def generate_pinyin(chinese_text: str) -> Optional[str]:
@@ -117,7 +121,7 @@ def generate_pinyin_ruby_html(chinese_text: str) -> str:
                     pinyin_list = lazy_pinyin(segment, style=Style.TONE)
                     if pinyin_list:
                         pinyin = " ".join(pinyin_list)
-                        result.append(f'<ruby>{segment}<rt>{pinyin}</rt></ruby>')
+                        result.append(f"<ruby>{segment}<rt>{pinyin}</rt></ruby>")
                     else:
                         result.append(segment)
                 else:
@@ -131,7 +135,7 @@ def generate_pinyin_ruby_html(chinese_text: str) -> str:
                     pinyin_list = lazy_pinyin(char, style=Style.TONE)
                     if pinyin_list:
                         pinyin = pinyin_list[0]
-                        result.append(f'<ruby>{char}<rt>{pinyin}</rt></ruby>')
+                        result.append(f"<ruby>{char}<rt>{pinyin}</rt></ruby>")
                     else:
                         result.append(char)
                 else:
