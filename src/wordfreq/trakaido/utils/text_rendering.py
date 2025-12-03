@@ -58,6 +58,8 @@ def format_subtype_display_name(subtype: str) -> str:
         "body_part": "Body Part",
         "natural_feature": "Natural Feature",
         "disease_condition": "Disease/Condition",
+        "occupation": "Occupation",
+        "family_relation": "Family Relation",
         "human": "Humans",
         "plant": "Plants",
         # Verb subtypes
