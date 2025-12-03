@@ -7,6 +7,7 @@ import subprocess
 import os
 from pathlib import Path
 from config import Config
+import constants
 from barsukas.utils.argparse_introspection import (
     introspect_agent_parser,
     get_agent_cli_module_path,
@@ -182,8 +183,7 @@ def execute_agent(agent_name):
         return jsonify({"success": False, "error": f"Agent {agent_name} not found"}), 404
 
     # Build command
-    agents_dir = Path(Config.DB_PATH).parent.parent / "agents"
-    script_path = agents_dir / agent["script"]
+    script_path = Path(constants.AGENTS_DIR) / agent["script"]
 
     if not script_path.exists():
         return jsonify({"success": False, "error": f"Script not found: {script_path}"}), 404

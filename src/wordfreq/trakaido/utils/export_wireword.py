@@ -121,9 +121,8 @@ class WirewordExporter:
         logger.info(f"Querying database for trakaido data (language: {self.language_name})...")
 
         # Build the query without language filtering (we'll filter in Python)
-        query = session.query(Lemma).filter(
-            Lemma.pos_type != "verb"
-        )  # Exclude verbs - they go in separate file
+        # Exclude verbs explicitly - they go in separate file (wireword_verbs.json)
+        query = session.query(Lemma).filter(Lemma.pos_type != "verb")
 
         # Apply filters
         if not include_without_guid:
