@@ -551,5 +551,16 @@ def handle_lemma_type_subtype_change(
     # Mark as unverified since this is a significant change
     lemma.verified = False
 
+    # Log a high-level operation for the type/subtype change
+    log_translation_change(
+        session=session,
+        source=source,
+        operation_type="type_subtype_change",
+        lemma_id=lemma.id,
+        field_name="type_subtype_change",
+        old_value=f"{old_pos_type}/{old_pos_subtype}",
+        new_value=f"{new_pos_type}/{new_pos_subtype}",
+    )
+
     session.flush()
     return result
