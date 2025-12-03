@@ -95,6 +95,7 @@
                 <h5 class="modal-title">Generate Audio for Lemma</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
+            <form method="post" action="{{ url_for('audio.generate_single', guid=lemma.guid) }}">
             <div class="modal-body">
                 <div class="mb-3">
                     <label class="form-label">Lemma</label>
@@ -105,7 +106,7 @@
                 </div>
                 <div class="mb-3">
                     <label for="audio_language" class="form-label">Language <span class="text-danger">*</span></label>
-                    <select class="form-select" id="audio_language" required>
+                    <select class="form-select" id="audio_language" name="language" required>
                         <option value="">Select a language...</option>
                         {% for lang_code, lang_name in language_names.items() %}
                             {% if translations[lang_code] %}
@@ -121,45 +122,45 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-check">
-                                <input class="form-check-input audio-voice-checkbox" type="checkbox" value="ash" id="audio-voice-ash" checked>
+                                <input class="form-check-input" type="checkbox" name="voices" value="ash" id="audio-voice-ash" checked>
                                 <label class="form-check-label" for="audio-voice-ash">ash</label>
                             </div>
                             <div class="form-check">
-                                <input class="form-check-input audio-voice-checkbox" type="checkbox" value="alloy" id="audio-voice-alloy" checked>
+                                <input class="form-check-input" type="checkbox" name="voices" value="alloy" id="audio-voice-alloy" checked>
                                 <label class="form-check-label" for="audio-voice-alloy">alloy</label>
                             </div>
                             <div class="form-check">
-                                <input class="form-check-input audio-voice-checkbox" type="checkbox" value="nova" id="audio-voice-nova" checked>
+                                <input class="form-check-input" type="checkbox" name="voices" value="nova" id="audio-voice-nova" checked>
                                 <label class="form-check-label" for="audio-voice-nova">nova</label>
                             </div>
                             <div class="form-check">
-                                <input class="form-check-input audio-voice-checkbox" type="checkbox" value="ballad" id="audio-voice-ballad">
+                                <input class="form-check-input" type="checkbox" name="voices" value="ballad" id="audio-voice-ballad">
                                 <label class="form-check-label" for="audio-voice-ballad">ballad</label>
                             </div>
                             <div class="form-check">
-                                <input class="form-check-input audio-voice-checkbox" type="checkbox" value="coral" id="audio-voice-coral">
+                                <input class="form-check-input" type="checkbox" name="voices" value="coral" id="audio-voice-coral">
                                 <label class="form-check-label" for="audio-voice-coral">coral</label>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-check">
-                                <input class="form-check-input audio-voice-checkbox" type="checkbox" value="echo" id="audio-voice-echo">
+                                <input class="form-check-input" type="checkbox" name="voices" value="echo" id="audio-voice-echo">
                                 <label class="form-check-label" for="audio-voice-echo">echo</label>
                             </div>
                             <div class="form-check">
-                                <input class="form-check-input audio-voice-checkbox" type="checkbox" value="fable" id="audio-voice-fable">
+                                <input class="form-check-input" type="checkbox" name="voices" value="fable" id="audio-voice-fable">
                                 <label class="form-check-label" for="audio-voice-fable">fable</label>
                             </div>
                             <div class="form-check">
-                                <input class="form-check-input audio-voice-checkbox" type="checkbox" value="onyx" id="audio-voice-onyx">
+                                <input class="form-check-input" type="checkbox" name="voices" value="onyx" id="audio-voice-onyx">
                                 <label class="form-check-label" for="audio-voice-onyx">onyx</label>
                             </div>
                             <div class="form-check">
-                                <input class="form-check-input audio-voice-checkbox" type="checkbox" value="sage" id="audio-voice-sage">
+                                <input class="form-check-input" type="checkbox" name="voices" value="sage" id="audio-voice-sage">
                                 <label class="form-check-label" for="audio-voice-sage">sage</label>
                             </div>
                             <div class="form-check">
-                                <input class="form-check-input audio-voice-checkbox" type="checkbox" value="shimmer" id="audio-voice-shimmer">
+                                <input class="form-check-input" type="checkbox" name="voices" value="shimmer" id="audio-voice-shimmer">
                                 <label class="form-check-label" for="audio-voice-shimmer">shimmer</label>
                             </div>
                         </div>
@@ -170,87 +171,18 @@
                     <strong>Note:</strong> Audio will be generated using OpenAI TTS API and saved to a temporary directory.
                     Review records will be created with status "pending_review".
                 </div>
-                <div id="audio-generation-progress" style="display: none;">
-                    <div class="spinner-border spinner-border-sm" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                    <span class="ms-2">Generating audio...</span>
-                </div>
-                <div id="audio-generation-error" class="alert alert-danger" style="display: none;"></div>
-                <div id="audio-generation-success" class="alert alert-success" style="display: none;"></div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-success" id="generate-audio-btn">
+                <button type="submit" class="btn btn-success">
                     <i class="bi bi-mic-fill"></i> Generate Audio
                 </button>
             </div>
+            </form>
         </div>
     </div>
 </div>
 
-<script>
-// Generate audio for this lemma
-document.getElementById('generate-audio-btn').addEventListener('click', function() {
-    const language = document.getElementById('audio_language').value;
-    const voices = Array.from(document.querySelectorAll('.audio-voice-checkbox:checked')).map(cb => cb.value);
-
-    if (!language) {
-        alert('Please select a language');
-        return;
-    }
-
-    if (voices.length === 0) {
-        alert('Please select at least one voice');
-        return;
-    }
-
-    // Show progress, hide previous messages
-    document.getElementById('audio-generation-progress').style.display = 'block';
-    document.getElementById('audio-generation-error').style.display = 'none';
-    document.getElementById('audio-generation-success').style.display = 'none';
-    this.disabled = true;
-
-    // Make AJAX request
-    fetch('{{ url_for("audio.generate_single", guid=lemma.guid) }}', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            language: language,
-            voices: voices
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        document.getElementById('audio-generation-progress').style.display = 'none';
-        this.disabled = false;
-
-        if (data.success) {
-            const successDiv = document.getElementById('audio-generation-success');
-            successDiv.innerHTML = '<i class="bi bi-check-circle"></i> Successfully generated audio for ' + data.voices.length + ' voice(s). Reload the page to see the results.';
-            successDiv.style.display = 'block';
-
-            // Reload page after 2 seconds
-            setTimeout(() => {
-                window.location.reload();
-            }, 2000);
-        } else {
-            const errorDiv = document.getElementById('audio-generation-error');
-            errorDiv.innerHTML = '<i class="bi bi-exclamation-triangle"></i> Error: ' + (data.error || 'Unknown error');
-            errorDiv.style.display = 'block';
-        }
-    })
-    .catch(error => {
-        document.getElementById('audio-generation-progress').style.display = 'none';
-        this.disabled = false;
-        const errorDiv = document.getElementById('audio-generation-error');
-        errorDiv.innerHTML = '<i class="bi bi-exclamation-triangle"></i> Error: ' + error.message;
-        errorDiv.style.display = 'block';
-    });
-});
-</script>
 
 <script>
 // Audio player for lemma view

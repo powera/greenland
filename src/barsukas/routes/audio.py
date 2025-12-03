@@ -8,6 +8,7 @@ Provides routes for managing and reviewing audio file quality.
 
 import json
 import os
+import logging
 from pathlib import Path
 from datetime import datetime
 from typing import Optional
@@ -33,6 +34,7 @@ from wordfreq.storage.models.schema import AudioQualityReview, Lemma, LemmaDiffi
 from clients.audio import Voice
 
 bp = Blueprint("audio", __name__, url_prefix="/audio")
+logger = logging.getLogger(__name__)
 
 # Mapping from language codes to directory names
 LANGUAGE_DIR_MAP = {
@@ -617,14 +619,18 @@ def serve_audio_file(language, voice, filename):
     if not audio_base_dir:
         return jsonify({"error": "Audio directory not configured and no S3 URL available"}), 500
 
-    # Map language code to directory name (e.g., 'zh' -> 'chinese')
-    language_dir = LANGUAGE_DIR_MAP.get(language, language)
+    # Try direct language code path first (new format)
+    file_path = Path(audio_base_dir) / language / voice / filename
 
-    # Build file path
-    file_path = Path(audio_base_dir) / language_dir / voice / filename
+    # If not found, try mapped language directory name (legacy format)
+    if not file_path.exists():
+        language_dir = LANGUAGE_DIR_MAP.get(language, language)
+        file_path = Path(audio_base_dir) / language_dir / voice / filename
+
+    logger.info(f"Serving audio file: {file_path} (exists: {file_path.exists()})")
 
     if not file_path.exists():
-        return jsonify({"error": f"Audio file not found locally and no S3 URL available"}), 404
+        return jsonify({"error": f"Audio file not found locally: {file_path}"}), 404
 
     return send_file(str(file_path), mimetype="audio/mpeg")
 
@@ -1257,18 +1263,33 @@ def generate():
 
 @bp.route("/generate-single/<guid>", methods=["POST"])
 def generate_single(guid):
-    """Generate audio for a single lemma (AJAX endpoint)."""
-    data = request.get_json()
-    language_code = data.get("language")
-    voices = data.get("voices", ["ash", "alloy", "nova"])
+    """Generate audio for a single lemma."""
+    # Support both JSON and form data
+    if request.is_json:
+        data = request.get_json()
+        language_code = data.get("language")
+        voices = data.get("voices", ["ash", "alloy", "nova"])
+    else:
+        language_code = request.form.get("language")
+        voices = request.form.getlist("voices")
+        if not voices:
+            voices = ["ash", "alloy", "nova"]
 
-    if not language_code:
-        return jsonify({"error": "Language code required"}), 400
-
-    # Find lemma
+    # Find lemma first so we have the lemma_id for redirects
     lemma = g.db.query(Lemma).filter_by(guid=guid).first()
     if not lemma:
-        return jsonify({"error": f"Lemma not found: {guid}"}), 404
+        if request.is_json:
+            return jsonify({"error": f"Lemma not found: {guid}"}), 404
+        else:
+            flash(f"Lemma not found: {guid}", "error")
+            return redirect(url_for("lemmas.index"))
+
+    if not language_code:
+        if request.is_json:
+            return jsonify({"error": "Language code required"}), 400
+        else:
+            flash("Language code required", "error")
+            return redirect(url_for("lemmas.view_lemma", lemma_id=lemma.id))
 
     try:
         # Convert voice names to Voice enums
@@ -1276,28 +1297,56 @@ def generate_single(guid):
 
         # Import and run the agent
         from agents.vieversys import VieversysAgent
-        import tempfile
 
-        output_dir = Path(tempfile.mkdtemp(prefix="audio_gen_single_"))
-        agent = VieversysAgent(output_dir=str(output_dir))
+        # Use AUDIO_BASE_DIR for persistent storage
+        audio_base_dir = current_app.config.get("AUDIO_BASE_DIR")
+        if not audio_base_dir:
+            raise ValueError("AUDIO_BASE_DIR not configured")
+
+        agent = VieversysAgent(output_dir=audio_base_dir)
 
         result = agent.generate_audio_for_lemma(
             g.db, lemma, language_code, voice_enums, create_review_record=True
         )
 
-        if result["success"]:
-            return jsonify({
-                "success": True,
-                "guid": guid,
-                "language": language_code,
-                "voices": result["voices"],
-                "output_dir": str(output_dir),
-            })
+        if request.is_json:
+            if result["success"]:
+                return jsonify({
+                    "success": True,
+                    "guid": guid,
+                    "language": language_code,
+                    "voices": result["voices"],
+                    "output_dir": audio_base_dir,
+                })
+            else:
+                return jsonify({
+                    "success": False,
+                    "error": result.get("error", "Unknown error"),
+                }), 500
         else:
-            return jsonify({
-                "success": False,
-                "error": result.get("error", "Unknown error"),
-            }), 500
+            if result["success"]:
+                voice_count = len(result['voices'])
+                flash(f"Successfully generated audio for {voice_count} voice(s).", "success")
+
+                # Find the first review record we just created to redirect to it
+                first_review = (
+                    g.db.query(AudioQualityReview)
+                    .filter_by(guid=guid, language_code=language_code, status="pending_review")
+                    .order_by(AudioQualityReview.id.desc())
+                    .first()
+                )
+
+                if first_review:
+                    return redirect(url_for("audio.review_file", review_id=first_review.id))
+                else:
+                    return redirect(url_for("lemmas.view_lemma", lemma_id=lemma.id))
+            else:
+                flash(f"Error generating audio: {result.get('error', 'Unknown error')}", "error")
+                return redirect(url_for("lemmas.view_lemma", lemma_id=lemma.id))
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        if request.is_json:
+            return jsonify({"error": str(e)}), 500
+        else:
+            flash(f"Error generating audio: {str(e)}", "error")
+            return redirect(url_for("lemmas.view_lemma", lemma_id=lemma.id))

@@ -135,12 +135,21 @@ class OpenAITTSClient:
         try:
             # Make API request
             url = f"{API_BASE}/audio/speech"
+
+            # Log API call details
+            logger.info(f"Making OpenAI TTS API call:")
+            logger.info(f"  URL: {url}")
+            logger.info(f"  Payload: {payload}")
+            logger.info(f"  Timeout: {self.timeout}s")
+
             response = requests.post(
                 url,
                 headers=self.headers,
                 json=payload,
                 timeout=self.timeout
             )
+
+            logger.info(f"API response status: {response.status_code}")
 
             if response.status_code != 200:
                 error_msg = f"OpenAI TTS API error {response.status_code}: {response.text}"
