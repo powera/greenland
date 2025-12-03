@@ -4,21 +4,25 @@ from wordfreq.storage.models.guid_prefixes import SUBTYPE_GUID_PREFIXES
 from wordfreq.storage.models.schema import Lemma
 
 
-def generate_guid(session, subtype: str) -> str:
+def generate_guid(session, pos_type: str, subtype: str) -> str:
     """
-    Generate a unique GUID for a lemma in a specific subtype.
+    Generate a unique GUID for a lemma in a specific POS type and subtype.
 
     Args:
         session: Database session
+        pos_type: POS type (e.g., 'noun', 'verb', 'adjective')
         subtype: POS subtype name (e.g., 'body_part', 'color')
 
     Returns:
         Unique GUID string (e.g., 'N14_001')
     """
-    if subtype not in SUBTYPE_GUID_PREFIXES:
-        raise ValueError(f"Unknown subtype: {subtype}")
+    if pos_type not in SUBTYPE_GUID_PREFIXES:
+        raise ValueError(f"Unknown pos_type: {pos_type}")
 
-    prefix = SUBTYPE_GUID_PREFIXES[subtype]
+    if subtype not in SUBTYPE_GUID_PREFIXES[pos_type]:
+        raise ValueError(f"Unknown subtype '{subtype}' for pos_type '{pos_type}'")
+
+    prefix = SUBTYPE_GUID_PREFIXES[pos_type][subtype]
 
     # Find the highest existing GUID number for this subtype
     existing_guids = (

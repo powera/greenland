@@ -21,11 +21,11 @@ import util.prompt_loader
 from clients.types import Schema, SchemaProperty
 from clients.unified_client import UnifiedLLMClient
 from wordfreq.storage.database import (
-    SUBTYPE_GUID_PREFIXES,
     add_word_token,
     create_database_session,
     get_subtype_values_for_pos,
 )
+from wordfreq.storage.utils.guid import generate_guid
 from wordfreq.storage.models.enums import GrammaticalForm
 from wordfreq.storage.models.schema import DerivativeForm, Lemma, WordToken
 
@@ -195,39 +195,20 @@ class WordManager:
             logger.error(f"Error querying word data for '{english_word}': {e}")
             return None, False
 
-    def _generate_guid(self, pos_subtype: str, session) -> str:
+    def _generate_guid(self, pos_type: str, pos_subtype: str, session) -> str:
         """
         Generate a unique GUID for a word.
 
         Args:
+            pos_type: The POS type (e.g., 'noun', 'verb')
             pos_subtype: The POS subtype for GUID prefix
             session: Database session
 
         Returns:
             Unique GUID string
         """
-        # Get prefix from subtype
-        prefix = SUBTYPE_GUID_PREFIXES.get(pos_subtype, "N99")  # Default to N99 for unknown
-
-        # Find the next available number for this prefix
-        existing_guids = session.query(Lemma.guid).filter(Lemma.guid.like(f"{prefix}_%")).all()
-
-        existing_numbers = []
-        for guid_tuple in existing_guids:
-            guid = guid_tuple[0]
-            if guid and "_" in guid:
-                try:
-                    number = int(guid.split("_")[1])
-                    existing_numbers.append(number)
-                except (ValueError, IndexError):
-                    continue
-
-        # Find next available number
-        next_number = 1
-        while next_number in existing_numbers:
-            next_number += 1
-
-        return f"{prefix}_{next_number:03d}"
+        # Use the centralized GUID generation function
+        return generate_guid(session, pos_type, pos_subtype)
 
     def _get_user_review(self, data: WordData) -> ReviewResult:
         """
@@ -357,7 +338,7 @@ class WordManager:
             )
 
             # Generate GUID
-            guid = self._generate_guid(word_data.pos_subtype, session)
+            guid = self._generate_guid(word_data.pos_type, word_data.pos_subtype, session)
 
             # Create lemma with all translation fields
             lemma = Lemma(

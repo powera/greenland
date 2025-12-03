@@ -72,7 +72,7 @@ def add_lemma():
         from wordfreq.storage.utils.guid import generate_guid
 
         try:
-            guid = generate_guid(g.db, pos_subtype)
+            guid = generate_guid(g.db, pos_type, pos_subtype)
         except ValueError as e:
             flash(f"Invalid POS subtype for GUID generation: {e}", "error")
             return render_template("lemmas/add.html")

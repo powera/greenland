@@ -24,6 +24,7 @@ from wordfreq.storage.database import (
     create_database_session,
 )
 from wordfreq.storage.models.schema import DerivativeForm, Lemma
+from wordfreq.storage.utils.guid import generate_guid
 from wordfreq.translation.client import LinguisticClient
 
 from .data_models import WordData, ReviewResult
@@ -213,37 +214,19 @@ class VerbManager:
             logger.error(f"Error querying verb data for '{english_verb}': {e}")
             return None, False
 
-    def _generate_guid(self, session) -> str:
+    def _generate_guid(self, pos_subtype: str, session) -> str:
         """
         Generate a unique GUID for a verb.
 
         Args:
+            pos_subtype: The verb subtype (e.g., 'physical_action')
             session: Database session
 
         Returns:
-            Unique GUID string in format V01_###
+            Unique GUID string
         """
-        # Find the next available number for verb prefix
-        existing_guids = (
-            session.query(Lemma.guid).filter(Lemma.guid.like(f"{self.VERB_GUID_PREFIX}_%")).all()
-        )
-
-        existing_numbers = []
-        for guid_tuple in existing_guids:
-            guid = guid_tuple[0]
-            if guid and "_" in guid:
-                try:
-                    number = int(guid.split("_")[1])
-                    existing_numbers.append(number)
-                except (ValueError, IndexError):
-                    continue
-
-        # Find next available number
-        next_number = 1
-        while next_number in existing_numbers:
-            next_number += 1
-
-        return f"{self.VERB_GUID_PREFIX}_{next_number:03d}"
+        # Use the centralized GUID generation function
+        return generate_guid(session, "verb", pos_subtype)
 
     def _get_user_review(self, data: WordData) -> ReviewResult:
         """
@@ -413,7 +396,7 @@ class VerbManager:
             )
 
             # Generate GUID
-            guid = self._generate_guid(session)
+            guid = self._generate_guid(verb_data.pos_subtype, session)
 
             # Create lemma with all translation fields
             lemma = Lemma(
