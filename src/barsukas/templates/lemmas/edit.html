@@ -53,16 +53,34 @@
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label for="pos_type" class="form-label">POS Type <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="pos_type" name="pos_type"
-                                   value="{{ lemma.pos_type }}" required
-                                   placeholder="e.g., verb, noun, adjective">
+                            <select class="form-select" id="pos_type" name="pos_type" required>
+                                <option value="">-- Select POS Type --</option>
+                                {% for pos_type_option in pos_types %}
+                                <option value="{{ pos_type_option }}" {% if pos_type_option == lemma.pos_type %}selected{% endif %}>
+                                    {{ pos_type_option }}
+                                </option>
+                                {% endfor %}
+                            </select>
                         </div>
                         <div class="col-md-6">
                             <label for="pos_subtype" class="form-label">POS Subtype</label>
-                            <input type="text" class="form-control" id="pos_subtype" name="pos_subtype"
-                                   value="{{ lemma.pos_subtype or '' }}"
-                                   placeholder="e.g., transitive, intransitive">
+                            <select class="form-select" id="pos_subtype" name="pos_subtype">
+                                <option value="">-- Select Subtype (optional) --</option>
+                                <!-- Options will be populated by JavaScript -->
+                            </select>
                         </div>
+                    </div>
+
+                    <!-- Warning for type/subtype changes -->
+                    <div class="alert alert-warning d-none" id="type_change_warning" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill"></i> <strong>Warning:</strong>
+                        Changing the POS type or subtype will:
+                        <ul class="mb-0 mt-2">
+                            <li>Generate a new GUID and tombstone the old one</li>
+                            <li>Clear all translations</li>
+                            <li>Delete all derivative forms (conjugations, declensions)</li>
+                            <li>Mark the lemma as unverified</li>
+                        </ul>
                     </div>
 
                     <!-- GUID -->
@@ -70,9 +88,9 @@
                         <label for="guid" class="form-label">GUID</label>
                         <input type="text" class="form-control" id="guid" name="guid"
                                value="{{ lemma.guid or '' }}"
-                               placeholder="e.g., 550e8400-e29b-41d4-a716-446655440000">
+                               placeholder="e.g., N01_001">
                         <small class="form-text text-muted">
-                            Unique identifier for this word. Leave empty for new words, or set manually if needed.
+                            Auto-generated when type/subtype changes. Can be manually overridden if needed.
                         </small>
                     </div>
 
@@ -158,9 +176,76 @@
                     <li>Difficulty level: Use -1 to exclude, 1-20 for levels, or leave empty</li>
                     <li>Per-language difficulty overrides can be set on the view page</li>
                     <li>Translations can be edited from the view page</li>
+                    <li><strong>Changing POS type/subtype will clear translations and derivative forms</strong></li>
                 </ul>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+// POS subtypes mapping from server
+const posSubtypesMap = {{ pos_subtypes_map|safe }};
+
+// Original values to detect changes
+const originalPosType = {{ lemma.pos_type|tojson }};
+const originalPosSubtype = {{ lemma.pos_subtype|tojson }};
+
+// Function to update subtype dropdown based on selected POS type
+function updateSubtypeDropdown() {
+    const posTypeSelect = document.getElementById('pos_type');
+    const posSubtypeSelect = document.getElementById('pos_subtype');
+    const selectedPosType = posTypeSelect.value;
+
+    // Clear current options except the first placeholder
+    posSubtypeSelect.innerHTML = '<option value="">-- Select Subtype (optional) --</option>';
+
+    // Add subtypes for selected POS type
+    if (selectedPosType && posSubtypesMap[selectedPosType]) {
+        posSubtypesMap[selectedPosType].forEach(subtype => {
+            const option = document.createElement('option');
+            option.value = subtype;
+            option.textContent = subtype.replace(/_/g, ' ');
+
+            // Select the current subtype if it matches
+            if (subtype === originalPosSubtype && selectedPosType === originalPosType) {
+                option.selected = true;
+            }
+
+            posSubtypeSelect.appendChild(option);
+        });
+    }
+
+    // Check if values changed
+    checkForTypeChanges();
+}
+
+// Function to show/hide warning when type or subtype changes
+function checkForTypeChanges() {
+    const posTypeSelect = document.getElementById('pos_type');
+    const posSubtypeSelect = document.getElementById('pos_subtype');
+    const warningDiv = document.getElementById('type_change_warning');
+
+    const currentPosType = posTypeSelect.value;
+    const currentPosSubtype = posSubtypeSelect.value;
+
+    const typeChanged = currentPosType !== originalPosType;
+    const subtypeChanged = currentPosSubtype !== originalPosSubtype;
+
+    if (typeChanged || subtypeChanged) {
+        warningDiv.classList.remove('d-none');
+    } else {
+        warningDiv.classList.add('d-none');
+    }
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    updateSubtypeDropdown();
+
+    // Add event listeners
+    document.getElementById('pos_type').addEventListener('change', updateSubtypeDropdown);
+    document.getElementById('pos_subtype').addEventListener('change', checkForTypeChanges);
+});
+</script>
 {% endblock %}

@@ -1,9 +1,9 @@
 """CRUD operations for Lemma model."""
 
 import json
-from typing import List, Optional
+from typing import List, Optional, Dict
 
-from wordfreq.storage.models.schema import Lemma
+from wordfreq.storage.models.schema import Lemma, LemmaTranslation, DerivativeForm
 from wordfreq.storage.utils.guid import generate_guid
 from wordfreq.storage.crud.operation_log import log_translation_change
 
@@ -339,3 +339,228 @@ def get_lemmas_by_subtype_and_level(
         return filtered_results
 
     return results
+
+
+def handle_lemma_type_subtype_change(
+    session,
+    lemma: Lemma,
+    new_pos_type: str,
+    new_pos_subtype: Optional[str],
+    source: str = "barsukas",
+    notes: Optional[str] = None,
+) -> Dict[str, any]:
+    """
+    Handle type/subtype changes for a lemma.
+
+    When a lemma's type or subtype changes:
+    1. Create a tombstone entry for the old GUID
+    2. Generate a new GUID based on the new subtype
+    3. Clear/invalidate translations
+    4. Delete derivative forms (they're tied to the specific POS)
+
+    Args:
+        session: Database session
+        lemma: The lemma being changed
+        new_pos_type: The new POS type
+        new_pos_subtype: The new POS subtype
+        source: Source of the change (for logging)
+        notes: Optional notes about why the change was made
+
+    Returns:
+        Dictionary with details about what was changed:
+        {
+            'old_guid': str,
+            'new_guid': str,
+            'tombstone_created': bool,
+            'translations_cleared': int,
+            'derivative_forms_deleted': int,
+        }
+    """
+    from wordfreq.storage.crud.guid_tombstone import create_tombstone
+
+    result = {
+        "old_guid": lemma.guid,
+        "new_guid": None,
+        "tombstone_created": False,
+        "translations_cleared": 0,
+        "derivative_forms_deleted": 0,
+    }
+
+    # Store old values
+    old_pos_type = lemma.pos_type
+    old_pos_subtype = lemma.pos_subtype
+    old_guid = lemma.guid
+
+    # Check if type or subtype actually changed
+    type_changed = old_pos_type != new_pos_type
+    subtype_changed = old_pos_subtype != new_pos_subtype
+
+    if not (type_changed or subtype_changed):
+        # No change needed
+        return result
+
+    # Step 1: Create tombstone for old GUID if it exists
+    if old_guid:
+        # Generate new GUID first so we can record the replacement
+        new_guid = None
+        if new_pos_subtype:
+            try:
+                new_guid = generate_guid(session, new_pos_subtype)
+                result["new_guid"] = new_guid
+            except ValueError as e:
+                # Invalid subtype, but still create tombstone
+                pass
+
+        # Determine the reason
+        if type_changed and subtype_changed:
+            reason = "type_and_subtype_change"
+        elif type_changed:
+            reason = "type_change"
+        else:
+            reason = "subtype_change"
+
+        # Create tombstone
+        create_tombstone(
+            session=session,
+            guid=old_guid,
+            original_lemma_text=lemma.lemma_text,
+            original_pos_type=old_pos_type,
+            original_pos_subtype=old_pos_subtype,
+            replacement_guid=new_guid,
+            lemma_id=lemma.id,
+            reason=reason,
+            notes=notes,
+            changed_by=source,
+        )
+        result["tombstone_created"] = True
+
+        # Log the GUID change
+        log_translation_change(
+            session=session,
+            source=source,
+            operation_type="guid_change",
+            lemma_id=lemma.id,
+            field_name="guid",
+            old_value=old_guid,
+            new_value=new_guid,
+        )
+
+        # Update the lemma's GUID
+        lemma.guid = new_guid
+    else:
+        # No old GUID, just generate new one if needed
+        if new_pos_subtype:
+            try:
+                new_guid = generate_guid(session, new_pos_subtype)
+                lemma.guid = new_guid
+                result["new_guid"] = new_guid
+            except ValueError:
+                pass
+
+    # Step 2: Update pos_type and pos_subtype
+    lemma.pos_type = new_pos_type
+    lemma.pos_subtype = new_pos_subtype
+
+    # Log the type/subtype changes
+    if type_changed:
+        log_translation_change(
+            session=session,
+            source=source,
+            operation_type="lemma_update",
+            lemma_id=lemma.id,
+            field_name="pos_type",
+            old_value=old_pos_type,
+            new_value=new_pos_type,
+        )
+
+    if subtype_changed:
+        log_translation_change(
+            session=session,
+            source=source,
+            operation_type="lemma_update",
+            lemma_id=lemma.id,
+            field_name="pos_subtype",
+            old_value=old_pos_subtype,
+            new_value=new_pos_subtype,
+        )
+
+    # Step 3: Clear translations (legacy columns)
+    legacy_translation_fields = [
+        "chinese_translation",
+        "french_translation",
+        "korean_translation",
+        "swahili_translation",
+        "lithuanian_translation",
+        "vietnamese_translation",
+    ]
+
+    for field_name in legacy_translation_fields:
+        old_value = getattr(lemma, field_name)
+        if old_value:
+            setattr(lemma, field_name, None)
+            result["translations_cleared"] += 1
+
+            # Log the translation removal
+            lang_code = field_name.replace("_translation", "")[:2]
+            log_translation_change(
+                session=session,
+                source=source,
+                operation_type="translation_invalidated",
+                lemma_id=lemma.id,
+                field_name=field_name,
+                old_value=old_value,
+                new_value=None,
+            )
+
+    # Also clear translations in LemmaTranslation table
+    translations = (
+        session.query(LemmaTranslation).filter(LemmaTranslation.lemma_id == lemma.id).all()
+    )
+
+    for translation in translations:
+        result["translations_cleared"] += 1
+        log_translation_change(
+            session=session,
+            source=source,
+            operation_type="translation_invalidated",
+            lemma_id=lemma.id,
+            field_name=f"{translation.language_code}_translation",
+            old_value=translation.translation,
+            new_value=None,
+        )
+        session.delete(translation)
+
+    # Step 4: Delete derivative forms
+    derivative_forms = (
+        session.query(DerivativeForm).filter(DerivativeForm.lemma_id == lemma.id).all()
+    )
+
+    for form in derivative_forms:
+        result["derivative_forms_deleted"] += 1
+        log_translation_change(
+            session=session,
+            source=source,
+            operation_type="derivative_form_deleted",
+            lemma_id=lemma.id,
+            field_name=f"{form.language_code}_{form.grammatical_form}",
+            old_value=form.derivative_form_text,
+            new_value=None,
+        )
+        session.delete(form)
+
+    # Mark as unverified since this is a significant change
+    lemma.verified = False
+
+    # Log a high-level operation for the type/subtype change
+    log_translation_change(
+        session=session,
+        source=source,
+        operation_type="type_subtype_change",
+        lemma_id=lemma.id,
+        field_name="type_subtype_change",
+        old_value=f"{old_pos_type}/{old_pos_subtype}",
+        new_value=f"{new_pos_type}/{new_pos_subtype}",
+    )
+
+    session.flush()
+    return result

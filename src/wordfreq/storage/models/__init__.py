@@ -17,6 +17,7 @@ from wordfreq.storage.models.query_log import QueryLog
 from wordfreq.storage.models.operation_log import OperationLog
 from wordfreq.storage.models.translations import Translation, TranslationSet
 from wordfreq.storage.models.grammar_fact import GrammarFact
+from wordfreq.storage.models.guid_tombstone import GuidTombstone
 from wordfreq.storage.models.enums import (
     NounSubtype,
     VerbSubtype,
@@ -39,6 +40,7 @@ __all__ = [
     "WordFrequency",
     "QueryLog",
     "OperationLog",
+    "GuidTombstone",
     "Translation",
     "TranslationSet",
     "GrammarFact",

@@ -89,16 +89,9 @@
                             <label for="pos_type" class="form-label">POS Type <span class="text-danger">*</span></label>
                             <select class="form-select" id="pos_type" name="pos_type" required onchange="updateSubtypeOptions()">
                                 <option value="">Select POS type...</option>
-                                <option value="noun">noun</option>
-                                <option value="verb">verb</option>
-                                <option value="adjective">adjective</option>
-                                <option value="adverb">adverb</option>
-                                <option value="pronoun">pronoun</option>
-                                <option value="preposition">preposition</option>
-                                <option value="conjunction">conjunction</option>
-                                <option value="interjection">interjection</option>
-                                <option value="determiner">determiner</option>
-                                <option value="numeral">numeral</option>
+                                {% for pos_type_option in pos_types %}
+                                <option value="{{ pos_type_option }}">{{ pos_type_option }}</option>
+                                {% endfor %}
                             </select>
                             <small class="form-text text-muted">Part of speech</small>
                         </div>
@@ -142,44 +135,8 @@
 </div>
 
 <script>
-// POS subtype mapping
-const posSubtypes = {
-    'noun': [
-        'animal', 'body_part', 'building_structure', 'clothing_accessory',
-        'concept_idea', 'emotion_feeling', 'food_drink', 'human',
-        'material_substance', 'nationality', 'natural_feature', 'personal_name',
-        'place_name', 'plant', 'small_movable_object', 'temporal_name',
-        'time_period', 'tool_machine', 'unit_of_measurement'
-    ],
-    'verb': [
-        'directional_movement', 'emotional_state', 'mental_state',
-        'physical_action', 'possession'
-    ],
-    'adjective': [
-        'color', 'definite_quantity', 'quality', 'sequence', 'shape'
-    ],
-    'adverb': [
-        'location', 'other', 'style'
-    ],
-    'pronoun': [
-        'pronoun_other'
-    ],
-    'conjunction': [
-        'conjunction_other'
-    ],
-    'interjection': [
-        'other'
-    ],
-    'numeral': [
-        'definite_quantity'
-    ],
-    'preposition': [
-        'preposition_other'
-    ],
-    'determiner': [
-        'determiner_other'
-    ]
-};
+// POS subtype mapping from server
+const posSubtypes = {{ pos_subtypes_map|safe }};
 
 // Format subtype for display (convert underscores to spaces, capitalize)
 function formatSubtype(subtype) {

@@ -24,6 +24,7 @@ from wordfreq.storage.models.schema import (
 )
 from wordfreq.storage.models.query_log import QueryLog
 from wordfreq.storage.models.grammar_fact import GrammarFact
+from wordfreq.storage.models.guid_tombstone import GuidTombstone
 from wordfreq.storage.models.enums import (
     NounSubtype,
     VerbSubtype,
@@ -65,6 +66,7 @@ from wordfreq.storage.crud.lemma import (
     get_all_subtypes,
     get_lemmas_by_subtype,
     get_lemmas_by_subtype_and_level,
+    handle_lemma_type_subtype_change,
 )
 
 from wordfreq.storage.crud.derivative_form import (
@@ -121,6 +123,14 @@ from wordfreq.storage.crud.grammar_fact import (
     get_grammar_fact_value,
     is_plurale_tantum,
     delete_grammar_fact,
+)
+
+from wordfreq.storage.crud.guid_tombstone import (
+    create_tombstone,
+    get_tombstone_by_guid,
+    get_tombstones_by_lemma_id,
+    is_guid_tombstoned,
+    get_replacement_chain,
 )
 
 # Import query functions
@@ -192,6 +202,7 @@ __all__ = [
     "WordFrequency",
     "QueryLog",
     "GrammarFact",
+    "GuidTombstone",
     # Enums
     "NounSubtype",
     "VerbSubtype",
@@ -223,6 +234,7 @@ __all__ = [
     "get_all_subtypes",
     "get_lemmas_by_subtype",
     "get_lemmas_by_subtype_and_level",
+    "handle_lemma_type_subtype_change",
     # Derivative Form CRUD
     "add_derivative_form",
     "update_derivative_form",
@@ -269,6 +281,12 @@ __all__ = [
     "get_grammar_fact_value",
     "is_plurale_tantum",
     "delete_grammar_fact",
+    # GUID Tombstone CRUD
+    "create_tombstone",
+    "get_tombstone_by_guid",
+    "get_tombstones_by_lemma_id",
+    "is_guid_tombstoned",
+    "get_replacement_chain",
     # POS Queries
     "get_common_words_by_pos",
     "get_common_base_forms_by_pos",

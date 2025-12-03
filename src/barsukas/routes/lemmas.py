@@ -13,6 +13,7 @@ from wordfreq.storage.crud.difficulty_override import (
 )
 from wordfreq.storage.translation_helpers import get_all_translations, get_supported_languages
 from wordfreq.storage.crud.derivative_form import delete_derivative_form
+from wordfreq.storage.crud.lemma import handle_lemma_type_subtype_change
 from config import Config
 
 bp = Blueprint("lemmas", __name__, url_prefix="/lemmas")
@@ -22,6 +23,8 @@ bp = Blueprint("lemmas", __name__, url_prefix="/lemmas")
 def add_lemma():
     """Add a new lemma."""
     from flask import current_app
+    from wordfreq.storage.utils.enums import VALID_POS_TYPES, get_subtype_values_for_pos
+    import json
 
     if request.method == "POST":
         if current_app.config.get("READONLY", False):
@@ -148,7 +151,21 @@ def add_lemma():
 
         return redirect(url_for("lemmas.view_lemma", lemma_id=new_lemma.id))
 
-    return render_template("lemmas/add.html")
+    # For GET request, provide POS types and subtypes
+    pos_types = sorted(list(VALID_POS_TYPES))
+
+    # Build a mapping of POS type to subtypes for JavaScript
+    pos_subtypes_map = {}
+    for pos_type in pos_types:
+        subtypes = get_subtype_values_for_pos(pos_type)
+        if subtypes:
+            pos_subtypes_map[pos_type] = subtypes
+
+    return render_template(
+        "lemmas/add.html",
+        pos_types=pos_types,
+        pos_subtypes_map=json.dumps(pos_subtypes_map),
+    )
 
 
 @bp.route("/")
@@ -366,6 +383,11 @@ def view_lemma(lemma_id):
         .all()
     )
 
+    # Get tombstone entries for this lemma
+    from wordfreq.storage.crud.guid_tombstone import get_tombstones_by_lemma_id
+
+    tombstones = get_tombstones_by_lemma_id(g.db, lemma_id)
+
     return render_template(
         "lemmas/view.html",
         lemma=lemma,
@@ -382,6 +404,7 @@ def view_lemma(lemma_id):
         sentence_count=sentence_count,
         needs_disambiguation_check=needs_disambiguation_check,
         grammar_facts=grammar_facts,
+        tombstones=tombstones,
     )
 
 
@@ -413,18 +436,54 @@ def edit_lemma(lemma_id):
             changes.append(("definition_text", lemma.definition_text, new_definition))
             lemma.definition_text = new_definition
 
+        # Handle type/subtype changes specially
         new_pos_type = request.form.get("pos_type", "").strip()
-        if new_pos_type != lemma.pos_type:
-            changes.append(("pos_type", lemma.pos_type, new_pos_type))
-            lemma.pos_type = new_pos_type
-
         new_pos_subtype = request.form.get("pos_subtype", "").strip() or None
-        if new_pos_subtype != lemma.pos_subtype:
-            changes.append(("pos_subtype", lemma.pos_subtype, new_pos_subtype))
-            lemma.pos_subtype = new_pos_subtype
 
+        type_changed = new_pos_type != lemma.pos_type
+        subtype_changed = new_pos_subtype != lemma.pos_subtype
+
+        if type_changed or subtype_changed:
+            # Use the special handler for type/subtype changes
+            # This will create tombstone, regenerate GUID, and invalidate translations/forms
+            result = handle_lemma_type_subtype_change(
+                session=g.db,
+                lemma=lemma,
+                new_pos_type=new_pos_type,
+                new_pos_subtype=new_pos_subtype,
+                source=Config.OPERATION_LOG_SOURCE,
+                notes=f"Type/subtype changed via BARSUKAS edit form",
+            )
+
+            # Add changes to track for user feedback
+            if type_changed:
+                changes.append(("pos_type", result.get("old_guid", lemma.pos_type), new_pos_type))
+            if subtype_changed:
+                changes.append(
+                    ("pos_subtype", lemma.pos_subtype if not subtype_changed else None, new_pos_subtype)
+                )
+
+            # Flash informative message about the type/subtype change
+            if result["tombstone_created"]:
+                flash(
+                    f"Type/subtype changed. Old GUID {result['old_guid']} tombstoned, "
+                    f"new GUID: {result['new_guid']}",
+                    "warning",
+                )
+            if result["translations_cleared"] > 0:
+                flash(
+                    f"Cleared {result['translations_cleared']} translation(s) due to type/subtype change",
+                    "warning",
+                )
+            if result["derivative_forms_deleted"] > 0:
+                flash(
+                    f"Deleted {result['derivative_forms_deleted']} derivative form(s) due to type/subtype change",
+                    "warning",
+                )
+
+        # Allow manual GUID override (but only if type/subtype didn't change)
         new_guid = request.form.get("guid", "").strip() or None
-        if new_guid != lemma.guid:
+        if new_guid != lemma.guid and not (type_changed or subtype_changed):
             changes.append(("guid", lemma.guid, new_guid))
             lemma.guid = new_guid
 
@@ -506,7 +565,26 @@ def edit_lemma(lemma_id):
     # Get difficulty level distribution for same POS type/subtype
     difficulty_stats = _get_difficulty_stats(g.db, lemma.pos_type, lemma.pos_subtype)
 
-    return render_template("lemmas/edit.html", lemma=lemma, difficulty_stats=difficulty_stats)
+    # Get POS types and subtypes for dropdowns
+    from wordfreq.storage.utils.enums import VALID_POS_TYPES, get_subtype_values_for_pos
+    import json
+
+    pos_types = sorted(list(VALID_POS_TYPES))
+
+    # Build a mapping of POS type to subtypes for JavaScript
+    pos_subtypes_map = {}
+    for pos_type in pos_types:
+        subtypes = get_subtype_values_for_pos(pos_type)
+        if subtypes:
+            pos_subtypes_map[pos_type] = subtypes
+
+    return render_template(
+        "lemmas/edit.html",
+        lemma=lemma,
+        difficulty_stats=difficulty_stats,
+        pos_types=pos_types,
+        pos_subtypes_map=json.dumps(pos_subtypes_map),
+    )
 
 
 def _get_difficulty_stats(session, pos_type, pos_subtype):
