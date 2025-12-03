@@ -8,7 +8,9 @@ NOUN SUBTYPES:
 - place_name: Place names (London, Amazon, Zimbabwe)
 - organization_name: Organization names (Microsoft, United Nations, UNESCO)
 - demonym: Nouns relating to place names (English, Texan, Muscovite)
-- human: People or roles (teacher, doctor, child)
+- occupation: Professions and roles (teacher, doctor, accountant, lawyer, engineer, chef)
+- family_relation: Family members and kinship terms (brother, sister, uncle, aunt, cousin, parent, child in familial context)
+- human: General human-related nouns not in above categories (person, baby, man, woman, adult)
 - group_people: Groups of people (team, family, crowd)
 - animal: All animals (dog, tiger, fish)
 - group_animal: Groups of animals (flock, herd, swarm)
@@ -30,5 +32,17 @@ NOUN SUBTYPES:
 - nominalized_words: non-gerund forms of verbs, adjectives which are nouns (discovery, investigation, development)
 - abbreviation: An abbreviation or uncommon acronym (BC, d, frac, eg)
 - other: Any noun that doesn't fit the above categories
+
+SPECIAL NOTE ON FAMILY RELATIONS:
+Family relation terms vary significantly across languages. Some languages distinguish:
+- Older vs. younger siblings (e.g., Korean: 형 hyeong/오빠 oppa for older brother)
+- Male vs. female cousins
+- Paternal vs. maternal relatives (e.g., uncle from father's side vs. mother's side)
+- Age-relative terms (e.g., Chinese: 哥哥 gēge older brother vs. 弟弟 dìdi younger brother)
+
+When encountering family relation terms, always classify them as "family_relation" regardless of these
+language-specific distinctions. The database supports creating multiple overlapping lemmas for the same
+English concept (e.g., separate lemmas for "older brother" and "younger brother") that can be enabled
+for specific target languages where such distinctions are important.
 
 Respond only with a structured JSON object following the schema provided.
