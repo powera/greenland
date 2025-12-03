@@ -3,9 +3,9 @@
 # Subtype mapping for GUID generation based on POS subtypes from enums
 SUBTYPE_GUID_PREFIXES = {
     # Noun subtypes (N01-N99)
-    "occupation": "N01",
-    "family_relation": "N35",  # New subtype for family relations
-    "human": "N36",  # Deprecated, moved to preserve backward compatibility
+    "human": "N01",
+    "family_relation": "N35",
+    "occupation": "N36",
     "animal": "N02",
     "body_part": "N03",
     "disease_condition": "N04",

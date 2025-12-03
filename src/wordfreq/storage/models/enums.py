@@ -11,7 +11,8 @@ class NounSubtype(enum.Enum):
     # People and Living Things
     OCCUPATION = "occupation"  # Professions and roles (teacher, doctor, accountant)
     FAMILY_RELATION = "family_relation"  # Family members (brother, uncle, cousin, parent)
-    HUMAN = "human"  # Deprecated: use OCCUPATION or FAMILY_RELATION instead
+    HUMAN = "human"
+
     ANIMAL = "animal"
     BODY_PART = "body_part"
     DISEASE_CONDITION = "disease_condition"
