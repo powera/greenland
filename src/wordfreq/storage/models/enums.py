@@ -43,6 +43,7 @@ class NounSubtype(enum.Enum):
     KNOWLEDGE_DOMAIN = "knowledge_domain"
     QUANTITATIVE_CONCEPT = "quantitative_concept"
     EMOTION_FEELING = "emotion_feeling"
+    SHAPE = "shape"  # Geometric shapes (circle, triangle, square, rectangle, etc.)
 
     # Processes and Time
     PROCESS_EVENT = "process_event"

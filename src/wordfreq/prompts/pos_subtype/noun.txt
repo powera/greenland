@@ -23,6 +23,7 @@ NOUN SUBTYPES:
 - material_substance: Materials and substances (water, metal, cloth)
 - abstract_concept: Abstract concepts, methods, etc. (tradition, justice, democracy)
 - emotion_thought: Emotions, feelings, thoughts (happiness, anger, love, decision)
+- shape: Geometric shapes (circle, triangle, square, rectangle, oval, sphere)
 - event: Events (meeting, gala, war)
 - numbers_ordinals: Number words (three, fifth, many)
 - time_period: Time-related words (month, century, Wednesday)

@@ -28,6 +28,7 @@ SUBTYPE_GUID_PREFIXES = {
     "knowledge_domain": "N21",
     "quantitative_concept": "N22",
     "emotion_feeling": "N23",
+    "shape": "N37",
     "process_event": "N24",
     "time_period": "N25",
     "group_people": "N26",
