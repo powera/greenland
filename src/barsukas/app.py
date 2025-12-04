@@ -9,11 +9,14 @@ and difficulty levels in the linguistics database.
 
 import sys
 import argparse
+import logging
 from pathlib import Path
 
 from flask import Flask, render_template, g
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
+
+logger = logging.getLogger(__name__)
 
 from config import Config
 from routes import (
@@ -30,6 +33,7 @@ from routes import (
     audio,
 )
 from wordfreq.storage.utils.session import ensure_tables_exist
+from wordfreq.storage.utils.database_url import get_database_url, get_engine_options, is_sqlite
 from pinyin_helper import generate_pinyin, generate_pinyin_ruby_html, is_chinese
 
 
@@ -38,13 +42,25 @@ def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
 
-    # Set up database
-    db_path = app.config["DB_PATH"]
-    if not Path(db_path).exists():
-        print(f"Error: Database not found at {db_path}", file=sys.stderr)
-        sys.exit(1)
+    # Set up database - support both DATABASE_URL and DB_PATH
+    # DATABASE_URL takes precedence for cloud databases
+    if app.config.get("DATABASE_URL"):
+        db_url = app.config["DATABASE_URL"]
+        logger.info(f"Using DATABASE_URL for cloud database connection")
+    else:
+        # Fall back to SQLite file path
+        db_path = app.config["DB_PATH"]
+        if not Path(db_path).exists():
+            print(f"Error: Database not found at {db_path}", file=sys.stderr)
+            sys.exit(1)
+        db_url = get_database_url(db_path)
+        logger.info(f"Using SQLite database at {db_path}")
 
-    engine = create_engine(f"sqlite:///{db_path}", echo=app.config["DEBUG"])
+    # Get database-specific engine options
+    url, connect_args = get_engine_options(db_url, echo=app.config["DEBUG"])
+
+    # Create engine and session factory
+    engine = create_engine(url, echo=app.config["DEBUG"], connect_args=connect_args)
     app.db_session_factory = scoped_session(sessionmaker(bind=engine))
 
     # Ensure all tables exist (creates missing tables and columns)

@@ -1,19 +1,45 @@
 """Database session management utilities."""
 
 import logging
+from typing import Optional
 from sqlalchemy import create_engine, inspect, text
 from sqlalchemy.orm import sessionmaker
 
 import constants
 from wordfreq.storage.models.schema import Base
+from wordfreq.storage.utils.database_url import get_database_url, get_engine_options
 
 
 logger = logging.getLogger(__name__)
 
 
-def create_database_session(db_path: str = constants.WORDFREQ_DB_PATH):
-    """Create a new database session."""
-    engine = create_engine(f"sqlite:///{db_path}")
+def create_database_session(db_path: Optional[str] = None):
+    """
+    Create a new database session.
+
+    Supports both SQLite file paths and cloud database URLs.
+    If DATABASE_URL environment variable is set, it takes precedence.
+
+    Args:
+        db_path: Optional path to SQLite database or database URL.
+                If None, uses DATABASE_URL env var or default from constants.
+
+    Returns:
+        SQLAlchemy session
+
+    Examples:
+        >>> create_database_session()  # Uses DATABASE_URL or default
+        >>> create_database_session('/path/to/db.sqlite')  # SQLite
+        >>> create_database_session('postgresql://user:pass@host/db')  # PostgreSQL
+    """
+    # Get the database URL (handles env vars and defaults)
+    db_url = get_database_url(db_path)
+
+    # Get database-specific engine options
+    url, connect_args = get_engine_options(db_url)
+
+    # Create engine and session
+    engine = create_engine(url, connect_args=connect_args)
     Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
     return Session()

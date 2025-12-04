@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 
 """
-Connection pool for SQLite connections to ensure thread safety.
-This module provides a thread-safe connection pool for SQLite databases.
+Connection pool for database connections to ensure thread safety.
+This module provides a thread-safe connection pool for SQLite and cloud databases.
 """
 
 import threading
@@ -11,6 +11,7 @@ from typing import Dict, Optional
 from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import sessionmaker, Session
+from wordfreq.storage.utils.database_url import get_database_url, get_engine_options
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -18,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 class ConnectionPool:
-    """Thread-safe connection pool for SQLite databases."""
+    """Thread-safe connection pool for SQLite and cloud databases."""
 
     _instance = None
     _lock = threading.Lock()
@@ -45,60 +46,87 @@ class ConnectionPool:
                 self._initialized = True
                 logger.debug("Connection pool initialized")
 
-    def get_engine(self, db_path: str, echo: bool = False) -> Engine:
+    def get_engine(self, db_path: Optional[str] = None, echo: bool = False) -> Engine:
         """
-        Get or create a SQLAlchemy engine for the given database path.
+        Get or create a SQLAlchemy engine for the given database path or URL.
+
+        This method supports both SQLite file paths and cloud database URLs.
+        If DATABASE_URL environment variable is set, it takes precedence.
 
         Args:
-            db_path: Path to the SQLite database
+            db_path: Optional path to SQLite database or database URL.
+                    If None, uses DATABASE_URL env var or default from constants.
             echo: Whether to enable SQLAlchemy echo mode
 
         Returns:
             SQLAlchemy engine
+
+        Examples:
+            >>> pool.get_engine()  # Uses DATABASE_URL or default
+            >>> pool.get_engine('/path/to/db.sqlite')  # SQLite
+            >>> pool.get_engine('postgresql://user:pass@host/db')  # PostgreSQL
         """
         with self._lock:
-            if db_path not in self._engines:
-                # Create a new engine with the 'check_same_thread' flag set to False
-                # which is required for SQLite to work in a multi-threaded environment
-                conn_str = f"sqlite:///{db_path}"
-                engine = create_engine(
-                    conn_str, echo=echo, connect_args={"check_same_thread": False}
-                )
-                self._engines[db_path] = engine
-                self._session_factories[db_path] = sessionmaker(bind=engine)
-                logger.debug(f"Created new engine for {db_path}")
-            return self._engines[db_path]
+            # Get the database URL (handles env vars and defaults)
+            db_url = get_database_url(db_path)
 
-    def get_session(self, db_path: str, echo: bool = False) -> Session:
+            # Use the URL as the cache key
+            cache_key = db_url
+
+            if cache_key not in self._engines:
+                # Get database-specific engine options
+                url, connect_args = get_engine_options(db_url, echo)
+
+                # Create the engine with appropriate options
+                engine = create_engine(url, echo=echo, connect_args=connect_args)
+
+                self._engines[cache_key] = engine
+                self._session_factories[cache_key] = sessionmaker(bind=engine)
+                logger.debug(f"Created new engine for {cache_key}")
+
+            return self._engines[cache_key]
+
+    def get_session(self, db_path: Optional[str] = None, echo: bool = False) -> Session:
         """
-        Get a thread-local session for the given database path.
+        Get a thread-local session for the given database path or URL.
 
         This method ensures that each thread gets its own session object.
+        Supports both SQLite file paths and cloud database URLs.
 
         Args:
-            db_path: Path to the SQLite database
+            db_path: Optional path to SQLite database or database URL.
+                    If None, uses DATABASE_URL env var or default from constants.
             echo: Whether to enable SQLAlchemy echo mode
 
         Returns:
             Thread-local SQLAlchemy session
+
+        Examples:
+            >>> pool.get_session()  # Uses DATABASE_URL or default
+            >>> pool.get_session('/path/to/db.sqlite')  # SQLite
+            >>> pool.get_session('postgresql://user:pass@host/db')  # PostgreSQL
         """
         # Initialize thread_local sessions dict if it doesn't exist
         if not hasattr(self._thread_local, "sessions"):
             self._thread_local.sessions = {}
 
+        # Get the database URL (handles env vars and defaults)
+        db_url = get_database_url(db_path)
+        cache_key = db_url
+
         # Create a new session for this thread if it doesn't exist
-        if db_path not in self._thread_local.sessions:
+        if cache_key not in self._thread_local.sessions:
             # Get or create the session factory
             self.get_engine(db_path, echo)
 
             # Create a new session for this thread
-            session = self._session_factories[db_path]()
-            self._thread_local.sessions[db_path] = session
+            session = self._session_factories[cache_key]()
+            self._thread_local.sessions[cache_key] = session
             logger.debug(
-                f"Created new session for {db_path} in thread {threading.current_thread().name}"
+                f"Created new session for {cache_key} in thread {threading.current_thread().name}"
             )
 
-        return self._thread_local.sessions[db_path]
+        return self._thread_local.sessions[cache_key]
 
     def close_thread_sessions(self):
         """Close all sessions for the current thread."""
@@ -115,18 +143,25 @@ class ConnectionPool:
 pool = ConnectionPool()
 
 
-def get_session(db_path: str, echo: bool = False) -> Session:
+def get_session(db_path: Optional[str] = None, echo: bool = False) -> Session:
     """
-    Get a thread-local session for the given database path.
+    Get a thread-local session for the given database path or URL.
 
     This is a convenience function that forwards to the singleton pool.
+    Supports both SQLite file paths and cloud database URLs.
 
     Args:
-        db_path: Path to the SQLite database
+        db_path: Optional path to SQLite database or database URL.
+                If None, uses DATABASE_URL env var or default from constants.
         echo: Whether to enable SQLAlchemy echo mode
 
     Returns:
         Thread-local SQLAlchemy session
+
+    Examples:
+        >>> get_session()  # Uses DATABASE_URL or default
+        >>> get_session('/path/to/db.sqlite')  # SQLite
+        >>> get_session('postgresql://user:pass@host/db')  # PostgreSQL
     """
     return pool.get_session(db_path, echo)
 

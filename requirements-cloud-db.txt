@@ -1,0 +1,25 @@
+# Optional database drivers for cloud database support
+# Install these based on your cloud database choice
+
+# PostgreSQL (recommended for cloud deployments)
+# Use psycopg2-binary for easy installation, or psycopg2 for production
+psycopg2-binary>=2.9.0
+
+# Alternatively, for production use:
+# psycopg2>=2.9.0
+
+# MySQL / MariaDB
+pymysql>=1.0.0
+
+# Installation instructions:
+#
+# For PostgreSQL:
+#   pip install -r requirements-cloud-db.txt
+#   OR
+#   pip install psycopg2-binary
+#
+# For MySQL:
+#   pip install pymysql
+#
+# For all cloud databases:
+#   pip install psycopg2-binary pymysql

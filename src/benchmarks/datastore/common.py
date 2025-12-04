@@ -4,6 +4,7 @@
 
 import datetime
 import json
+import os
 from typing import Dict, List, Optional, Any, Tuple
 from sqlalchemy import String, Integer, Text, ForeignKey, TIMESTAMP, create_engine, func
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
@@ -35,16 +36,67 @@ class Model(Base):
 
 
 def create_dev_session():
-    """Create a database session for development."""
-    db_path = constants.SQLITE_DB_PATH
-    engine = create_engine(f"sqlite:///{db_path}", echo=False)
+    """
+    Create a database session for development.
+
+    Supports both DATABASE_URL environment variable (for cloud databases)
+    and SQLite file path from constants.
+    """
+    # Check for DATABASE_URL environment variable first
+    db_url = os.environ.get("BENCHMARKS_DATABASE_URL")
+    if not db_url:
+        # Fall back to SQLite file path
+        db_path = constants.SQLITE_DB_PATH
+        db_url = f"sqlite:///{db_path}"
+
+    # SQLite-specific connection args
+    connect_args = {}
+    if db_url.startswith("sqlite"):
+        connect_args["check_same_thread"] = False
+
+    engine = create_engine(db_url, echo=False, connect_args=connect_args)
     Session = sessionmaker(bind=engine)
     return Session()
 
 
-def create_database_and_session(db_path="benchmarks.sqlite"):
-    """Create a SQLite database engine and session."""
-    engine = create_engine(f"sqlite:///{db_path}", echo=False)
+def create_database_and_session(db_path: Optional[str] = None):
+    """
+    Create a database engine and session.
+
+    Supports both database URLs (for cloud databases) and SQLite file paths.
+
+    Args:
+        db_path: Optional path to SQLite database or database URL.
+                If None, uses BENCHMARKS_DATABASE_URL env var or default "benchmarks.sqlite"
+
+    Returns:
+        SQLAlchemy session
+
+    Examples:
+        >>> create_database_and_session()  # Uses env var or default
+        >>> create_database_and_session('benchmarks.sqlite')  # SQLite file
+        >>> create_database_and_session('postgresql://user:pass@host/db')  # PostgreSQL
+    """
+    # Check if db_path is a URL or file path
+    if db_path and (db_path.startswith("postgresql://") or
+                    db_path.startswith("mysql://") or
+                    db_path.startswith("sqlite://")):
+        db_url = db_path
+    else:
+        # Check for environment variable
+        db_url = os.environ.get("BENCHMARKS_DATABASE_URL")
+        if not db_url:
+            # Fall back to SQLite file path
+            if not db_path:
+                db_path = "benchmarks.sqlite"
+            db_url = f"sqlite:///{db_path}"
+
+    # SQLite-specific connection args
+    connect_args = {}
+    if db_url.startswith("sqlite"):
+        connect_args["check_same_thread"] = False
+
+    engine = create_engine(db_url, echo=False, connect_args=connect_args)
     Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
     return Session()

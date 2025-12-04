@@ -20,6 +20,10 @@ class Config:
     # Database settings
     BASE_DIR = Path(__file__).parent.parent.parent  # repo root
     DEFAULT_DB_PATH = BASE_DIR / "src" / "wordfreq" / "data" / "linguistics.sqlite"
+
+    # Support both DATABASE_URL (for cloud databases) and DB_PATH (for SQLite file path)
+    # DATABASE_URL takes precedence over DB_PATH
+    DATABASE_URL = os.environ.get("DATABASE_URL")
     DB_PATH = os.environ.get("BARSUKAS_DB_PATH", str(DEFAULT_DB_PATH))
 
     # Pagination
