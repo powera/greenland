@@ -17,6 +17,7 @@ digraph barsukas_agents {
   ungurys [label="Ungurys\n(WireWord Export)", shape=box, style="rounded,filled", fillcolor=lightcoral];
   elnias [label="Elnias\n(Bootstrap Export)", shape=box, style="rounded,filled", fillcolor=lightcoral];
   povas [label="Povas\n(HTML Export)", shape=box, style="rounded,filled", fillcolor=lightcoral];
+  kiskis [label="Kiškis\n(Sentence Export)", shape=box, style="rounded,filled", fillcolor=lightcoral];
 
   // Logical dependencies (workflow order)
 
@@ -38,19 +39,27 @@ digraph barsukas_agents {
   // Phase 4: Sentence generation pipeline
   zvirblis -> bebras [label="4. sentences need linking"];
 
-  // Phase 5: Export pipeline (all exports depend on complete data)
-  voras -> ungurys [label="5. translations ready"];
-  voras -> elnias [label="5. translations ready"];
-  voras -> povas [label="5. translations ready"];
+  // Phase 5: Audio generation for base lemmas and grammatical forms
+  vilkas -> vieversys [label="5. forms need audio"];
 
-  vilkas -> ungurys [label="5. forms ready"];
-  vilkas -> povas [label="5. forms ready"];
+  // Phase 6: Export pipeline (all exports depend on complete data)
+  voras -> ungurys [label="6. translations ready"];
+  voras -> elnias [label="6. translations ready"];
+  voras -> povas [label="6. translations ready"];
 
-  lape -> ungurys [label="5. grammar ready"];
+  vilkas -> ungurys [label="6. forms ready"];
+  vilkas -> povas [label="6. forms ready"];
 
-  papuga -> povas [label="5. pronunciations ready"];
+  lape -> ungurys [label="6. grammar ready"];
 
-  vieversys -> ungurys [label="5. audio ready"];
+  sernas -> ungurys [label="6. synonyms ready"];
+
+  papuga -> povas [label="6. pronunciations ready"];
+
+  vieversys -> ungurys [label="6. audio ready"];
+
+  bebras -> kiskis [label="6. sentences linked"];
+  zvirblis -> kiskis [label="6. sentences ready"];
 
   // Subgraph for clarity
   subgraph cluster_legend {

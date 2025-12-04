@@ -140,11 +140,12 @@ All agents are Lithuanian animal names and live in `src/agents/`.
 #### Vieversys (Lark)
 - **Animal**: Lark
 - **Purpose**: Audio generation - "bird known for its beautiful song"
-- **Dependencies**: Voras (needs translations to generate audio)
-- **Outputs**: Audio files (MP3) for vocabulary words
+- **Dependencies**: Voras (needs translations), Vilkas (needs grammatical forms for audio)
+- **Outputs**: Audio files (MP3) for vocabulary words and their grammatical forms
 - **Key Functions**:
   - Generate audio using OpenAI TTS API
   - Support multiple voices per language
+  - Generate audio for base lemmas AND grammatical forms (conjugations, declensions, etc.)
   - Create audio quality review records
   - Generate manifests for S3 upload
 
@@ -155,13 +156,14 @@ All agents are Lithuanian animal names and live in `src/agents/`.
 #### Ungurys (Eel)
 - **Animal**: Eel
 - **Purpose**: WireWord export - "swimming data downstream to external systems"
-- **Dependencies**: Voras, Vilkas, Lape, Vieversys (needs complete enriched data)
+- **Dependencies**: Voras, Vilkas, Lape, Šernas, Vieversys (needs complete enriched data)
 - **Outputs**: JSON files in WireWord API format
 - **Key Functions**:
   - Export vocabulary data for Trakaido app
   - Support multiple languages
   - Create directory structures by difficulty level
   - Separate exports for verbs vs. other POS
+  - Include synonyms and alternative forms
 
 #### Elnias (Deer)
 - **Animal**: Deer
@@ -182,6 +184,17 @@ All agents are Lithuanian animal names and live in `src/agents/`.
   - Generate HTML pages organized by POS subtypes
   - Create index and navigation pages
   - Display comprehensive linguistic information
+
+#### Kiškis (Rabbit)
+- **Animal**: Rabbit
+- **Purpose**: Sentence export - "quick to deliver sentences everywhere"
+- **Dependencies**: Žvirblis, Bebras (needs generated and linked sentences)
+- **Outputs**: JSON files containing example sentences with translations
+- **Key Functions**:
+  - Export sentence data for language learning applications
+  - Include sentence translations in multiple languages
+  - Link sentences to vocabulary via GUIDs
+  - Support filtering by difficulty level
 
 ---
 
@@ -215,16 +228,18 @@ Pradzia → Lokys (Lemma Validation)
 Žvirblis → Bebras (Link Sentences to Vocabulary)
 ```
 
-### Phase 5: Media Generation
+### Phase 5: Audio Generation
 ```
-Voras → Vieversys (Audio Generation)
+Voras → Vieversys (Audio - Base Lemmas)
+Vilkas → Vieversys (Audio - Grammatical Forms)
 ```
 
 ### Phase 6: Export (all parallel, require complete data)
 ```
-Complete Data → Ungurys (WireWord Export)
-              → Elnias (Bootstrap Export)
-              → Povas (HTML Export)
+Complete Data → Ungurys (WireWord Export - needs Voras, Vilkas, Lape, Šernas, Vieversys)
+              → Elnias (Bootstrap Export - needs Voras)
+              → Povas (HTML Export - needs Voras, Vilkas, Papuga)
+              → Kiškis (Sentence Export - needs Žvirblis, Bebras)
 ```
 
 ## Critical Dependencies
@@ -241,8 +256,8 @@ Complete Data → Ungurys (WireWord Export)
 5. `papuga` - Generate pronunciations (after Lokys)
 6. `žvirblis` - Generate sentences (after Voras)
 7. `bebras` - Link sentences to vocabulary (after Žvirblis)
-8. `vieversys` - Generate audio files (after Voras)
-9. `ungurys`, `elnias`, `povas` - Export data (after all enrichment complete)
+8. `vieversys` - Generate audio files for base lemmas (after Voras) AND grammatical forms (after Vilkas)
+9. `ungurys`, `elnias`, `povas`, `kiškis` - Export data (after all enrichment complete)
 
 ### Optional/Maintenance Agents
 - **Dramblys** - Run periodically to find missing vocabulary
