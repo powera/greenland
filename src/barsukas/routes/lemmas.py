@@ -3,7 +3,6 @@
 """Routes for lemma management."""
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash, g
-from sqlalchemy import or_, func, case
 
 from wordfreq.storage.models.schema import Lemma, DerivativeForm
 from wordfreq.storage.crud.operation_log import log_translation_change
@@ -14,6 +13,8 @@ from wordfreq.storage.crud.difficulty_override import (
 from wordfreq.storage.translation_helpers import get_all_translations, get_supported_languages
 from wordfreq.storage.crud.derivative_form import delete_derivative_form
 from wordfreq.storage.crud.lemma import handle_lemma_type_subtype_change
+from wordfreq.storage.queries.lemma import build_lemma_search_query
+from barsukas.helpers.lemma_display import get_difficulty_stats, group_derivative_forms
 from config import Config
 
 bp = Blueprint("lemmas", __name__, url_prefix="/lemmas")
@@ -171,85 +172,18 @@ def add_lemma():
 @bp.route("/")
 def list_lemmas():
     """List all lemmas with pagination and filtering."""
-    from wordfreq.storage.models.schema import LemmaTranslation
-
     page = request.args.get("page", 1, type=int)
     search = request.args.get("search", "").strip()
     pos_type = request.args.get("pos_type", "").strip()
     difficulty = request.args.get("difficulty", "", type=str).strip()
 
-    # Build query
-    query = g.db.query(Lemma)
-
-    # Apply filters
-    if search:
-        # Search in lemma text, definition, disambiguation, and ALL translations
-        search_conditions = [
-            Lemma.lemma_text.ilike(f"%{search}%"),
-            Lemma.definition_text.ilike(f"%{search}%"),
-            Lemma.disambiguation.ilike(f"%{search}%"),
-            # Search in legacy translation columns
-            Lemma.chinese_translation.ilike(f"%{search}%"),
-            Lemma.french_translation.ilike(f"%{search}%"),
-            Lemma.korean_translation.ilike(f"%{search}%"),
-            Lemma.swahili_translation.ilike(f"%{search}%"),
-            Lemma.lithuanian_translation.ilike(f"%{search}%"),
-            Lemma.vietnamese_translation.ilike(f"%{search}%"),
-        ]
-
-        # Also search in LemmaTranslation table
-        # Join with LemmaTranslation and search those translations too
-        translation_subquery = g.db.query(LemmaTranslation.lemma_id).filter(
-            LemmaTranslation.translation.ilike(f"%{search}%")
-        )
-
-        search_conditions.append(Lemma.id.in_(translation_subquery))
-
-        query = query.filter(or_(*search_conditions))
-
-    if pos_type:
-        query = query.filter(Lemma.pos_type == pos_type)
-
-    if difficulty:
-        if difficulty == "-1":
-            query = query.filter(Lemma.difficulty_level == -1)
-        elif difficulty == "null":
-            query = query.filter(Lemma.difficulty_level.is_(None))
-        else:
-            query = query.filter(Lemma.difficulty_level == int(difficulty))
-
-    # Order by relevance: exact matches first, then starts-with, then contains
-    # Use CASE expressions to create a relevance score
-    if search:
-        search_lower = search.lower()
-        relevance = case(
-            (func.lower(Lemma.lemma_text) == search_lower, 1),  # Exact match in lemma
-            (func.lower(Lemma.lemma_text).startswith(search_lower), 2),  # Starts with in lemma
-            (func.lower(Lemma.lemma_text).contains(search_lower), 3),  # Contains in lemma
-            (func.lower(Lemma.definition_text).contains(search_lower), 4),  # Contains in definition
-            (
-                func.lower(Lemma.disambiguation).contains(search_lower),
-                5,
-            ),  # Contains in disambiguation
-            # Translation matches
-            (func.lower(Lemma.lithuanian_translation).contains(search_lower), 6),
-            (func.lower(Lemma.chinese_translation).contains(search_lower), 6),
-            (func.lower(Lemma.french_translation).contains(search_lower), 6),
-            (func.lower(Lemma.korean_translation).contains(search_lower), 6),
-            (func.lower(Lemma.swahili_translation).contains(search_lower), 6),
-            (func.lower(Lemma.vietnamese_translation).contains(search_lower), 6),
-            else_=7,
-        )
-        query = query.order_by(relevance, func.lower(Lemma.lemma_text))
-    else:
-        # No search: order by difficulty level first, then case-insensitive alphabetically
-        # Put NULL levels at the end, then -1 (not applicable), then levels 1-9
-        level_order = case(
-            (Lemma.difficulty_level.is_(None), 99),  # NULL levels last
-            (Lemma.difficulty_level == -1, 98),  # -1 (not applicable) second to last
-            else_=Lemma.difficulty_level,
-        )
-        query = query.order_by(level_order, func.lower(Lemma.lemma_text))
+    # Build filtered and ordered query
+    query = build_lemma_search_query(
+        session=g.db,
+        search=search or None,
+        pos_type=pos_type or None,
+        difficulty=difficulty or None,
+    )
 
     # Paginate
     total = query.count()
@@ -298,7 +232,7 @@ def view_lemma(lemma_id):
         effective_levels[lang_code] = get_effective_difficulty_level(g.db, lemma, lang_code)
 
     # Get difficulty level distribution for same POS type/subtype
-    difficulty_stats = _get_difficulty_stats(g.db, lemma.pos_type, lemma.pos_subtype)
+    difficulty_stats = get_difficulty_stats(g.db, lemma.pos_type, lemma.pos_subtype)
 
     # Get derivative forms grouped by language
     derivative_forms = (
@@ -313,41 +247,12 @@ def view_lemma(lemma_id):
     )
 
     # Group forms by language and type
-    forms_by_language = {}
-    synonyms_by_language = {}
-    alternative_forms_by_language = {}
-
-    for form in derivative_forms:
-        lang_code = form.language_code
-
-        # Separate synonyms and alternative forms
-        # Alternative forms include: abbreviation, expanded_form, alternate_spelling, and legacy 'alternative_form'
-        is_alternative = form.grammatical_form in [
-            "abbreviation",
-            "expanded_form",
-            "alternate_spelling",
-            "alternative_form",
-        ]
-        is_synonym = form.grammatical_form == "synonym"
-
-        if is_synonym:
-            if lang_code not in synonyms_by_language:
-                synonyms_by_language[lang_code] = []
-            synonyms_by_language[lang_code].append(form)
-        elif is_alternative:
-            if lang_code not in alternative_forms_by_language:
-                alternative_forms_by_language[lang_code] = []
-            alternative_forms_by_language[lang_code].append(form)
-        else:
-            # Regular grammatical forms (conjugations, declensions, etc.)
-            if lang_code not in forms_by_language:
-                forms_by_language[lang_code] = []
-            forms_by_language[lang_code].append(form)
-
-    # Get all languages that have synonyms or alternatives
-    all_synonym_languages = sorted(
-        set(list(synonyms_by_language.keys()) + list(alternative_forms_by_language.keys()))
-    )
+    (
+        forms_by_language,
+        synonyms_by_language,
+        alternative_forms_by_language,
+        all_synonym_languages,
+    ) = group_derivative_forms(derivative_forms)
 
     # Get count of sentences using this lemma (for nouns)
     sentence_count = 0
@@ -563,7 +468,7 @@ def edit_lemma(lemma_id):
         return redirect(url_for("lemmas.view_lemma", lemma_id=lemma.id))
 
     # Get difficulty level distribution for same POS type/subtype
-    difficulty_stats = _get_difficulty_stats(g.db, lemma.pos_type, lemma.pos_subtype)
+    difficulty_stats = get_difficulty_stats(g.db, lemma.pos_type, lemma.pos_subtype)
 
     # Get POS types and subtypes for dropdowns
     from wordfreq.storage.utils.enums import VALID_POS_TYPES, get_subtype_values_for_pos
@@ -585,27 +490,6 @@ def edit_lemma(lemma_id):
         pos_types=pos_types,
         pos_subtypes_map=json.dumps(pos_subtypes_map),
     )
-
-
-def _get_difficulty_stats(session, pos_type, pos_subtype):
-    """Get difficulty level distribution for a given POS type/subtype."""
-    query = session.query(Lemma.difficulty_level, func.count(Lemma.id)).filter(
-        Lemma.pos_type == pos_type, Lemma.difficulty_level.isnot(None)
-    )
-
-    if pos_subtype:
-        query = query.filter(Lemma.pos_subtype == pos_subtype)
-
-    query = query.group_by(Lemma.difficulty_level).order_by(Lemma.difficulty_level)
-
-    results = query.all()
-
-    # Format as a dictionary
-    stats = {}
-    for level, count in results:
-        stats[level] = count
-
-    return stats
 
 
 @bp.route("/<int:lemma_id>/delete-synonym/<int:form_id>", methods=["POST"])
