@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}Settings - Backend Configuration{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Settings</h1>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2>Storage Backend Configuration</h2>
+        </div>
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-3">
+                    <strong>Current Backend:</strong>
+                </div>
+                <div class="col-md-9">
+                    <span class="badge bg-primary">{{ current_backend.upper() }}</span>
+                </div>
+            </div>
+
+            {% if current_backend == 'sqlite' %}
+            <div class="row mb-3">
+                <div class="col-md-3">
+                    <strong>SQLite Database:</strong>
+                </div>
+                <div class="col-md-9">
+                    <code>{{ backend_config.sqlite_path }}</code>
+                </div>
+            </div>
+            {% else %}
+            <div class="row mb-3">
+                <div class="col-md-3">
+                    <strong>JSONL Directory:</strong>
+                </div>
+                <div class="col-md-9">
+                    <code>{{ backend_config.jsonl_data_dir }}</code>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="alert alert-info mt-3">
+                <strong>Note:</strong> Switching backends requires restarting Barsukas with a different
+                <code>STORAGE_BACKEND</code> environment variable.
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2>Migrate Data Between Backends</h2>
+        </div>
+        <div class="card-body">
+            <p>Export your current SQLite database to JSONL format for Git-based storage.</p>
+
+            <form method="POST" action="{{ url_for('settings.migrate_form') }}">
+                <div class="mb-3">
+                    <label for="sqlite-path" class="form-label">SQLite Database Path</label>
+                    <input type="text" class="form-control" name="sqlite_path"
+                           value="{{ backend_config.sqlite_path or '' }}" required>
+                    <small class="form-text text-muted">Path to the SQLite database file</small>
+                </div>
+
+                <div class="mb-3">
+                    <label for="jsonl-dir" class="form-label">JSONL Output Directory</label>
+                    <input type="text" class="form-control" name="jsonl_dir"
+                           value="data/working" required>
+                    <small class="form-text text-muted">Directory where JSONL files will be written</small>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    Export SQLite to JSONL
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2>Switch Backend</h2>
+        </div>
+        <div class="card-body">
+            <p>To switch backends, restart Barsukas with one of these commands:</p>
+
+            <div class="mb-3">
+                <h5>Use SQLite Backend:</h5>
+                <div class="input-group">
+                    <input type="text" class="form-control" readonly
+                           value="STORAGE_BACKEND=sqlite python src/barsukas/app.py" id="sqlite-cmd">
+                    <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard('sqlite-cmd')">
+                        <i class="bi bi-clipboard"></i> Copy
+                    </button>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <h5>Use JSONL Backend:</h5>
+                <div class="input-group">
+                    <input type="text" class="form-control" readonly
+                           value="STORAGE_BACKEND=jsonl python src/barsukas/app.py" id="jsonl-cmd">
+                    <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard('jsonl-cmd')">
+                        <i class="bi bi-clipboard"></i> Copy
+                    </button>
+                </div>
+                <small class="form-text text-muted">
+                    Optional: Set <code>JSONL_DATA_DIR=path/to/data</code> to customize the data directory
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function copyToClipboard(elementId) {
+    const element = document.getElementById(elementId);
+    element.select();
+    document.execCommand('copy');
+
+    // Show feedback
+    const button = event.target.closest('button');
+    const originalHtml = button.innerHTML;
+    button.innerHTML = 'Copied!';
+    setTimeout(() => {
+        button.innerHTML = originalHtml;
+    }, 2000);
+}
+</script>
+{% endblock %}

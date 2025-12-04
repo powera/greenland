@@ -12,8 +12,6 @@ import argparse
 from pathlib import Path
 
 from flask import Flask, render_template, g
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, scoped_session
 
 from config import Config
 from routes import (
@@ -29,8 +27,10 @@ from routes import (
     sentences,
     audio,
     rapid_review,
+    settings,
 )
-from wordfreq.storage.utils.session import ensure_tables_exist
+from wordfreq.storage.backend import create_session, get_backend_type
+from wordfreq.storage.backend.config import BackendConfig, BackendType
 from pinyin_helper import generate_pinyin, generate_pinyin_ruby_html, is_chinese
 
 
@@ -39,18 +39,28 @@ def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
 
-    # Set up database
-    db_path = app.config["DB_PATH"]
-    if not Path(db_path).exists():
-        print(f"Error: Database not found at {db_path}", file=sys.stderr)
-        sys.exit(1)
+    # Set up storage backend
+    backend_type = get_backend_type()
+    print(f"Using storage backend: {backend_type.value}")
 
-    engine = create_engine(f"sqlite:///{db_path}", echo=app.config["DEBUG"])
-    app.db_session_factory = scoped_session(sessionmaker(bind=engine))
+    if backend_type == BackendType.SQLITE:
+        db_path = app.config["DB_PATH"]
+        if not Path(db_path).exists():
+            print(f"Error: Database not found at {db_path}", file=sys.stderr)
+            sys.exit(1)
+        backend_config = BackendConfig(backend_type=BackendType.SQLITE, sqlite_path=db_path)
+    else:
+        # JSONL backend
+        backend_config = BackendConfig.from_env()
 
-    # Ensure all tables exist (creates missing tables and columns)
-    with app.db_session_factory() as session:
-        ensure_tables_exist(session)
+    # Store backend config in app
+    app.backend_config = backend_config
+
+    # Create a session factory function that returns new sessions
+    def session_factory():
+        return create_session(backend_config)
+
+    app.db_session_factory = session_factory
 
     # Register blueprints
     app.register_blueprint(lemmas.bp)
@@ -65,6 +75,7 @@ def create_app(config_class=Config):
     app.register_blueprint(api.bp)
     app.register_blueprint(audio.bp)
     app.register_blueprint(rapid_review.bp)
+    app.register_blueprint(settings.bp)
 
     # Register Jinja2 filters for Pinyin
     app.jinja_env.filters["pinyin"] = generate_pinyin
@@ -95,12 +106,23 @@ def create_app(config_class=Config):
     @app.route("/")
     def index():
         """Home page with search and quick stats."""
-        from wordfreq.storage.models.schema import Lemma, Sentence
+        from wordfreq.storage.backend.models import get_lemma_model, get_sentence_model
+
+        Lemma = get_lemma_model()
+        Sentence = get_sentence_model()
 
         # Get some basic stats
         total_lemmas = g.db.query(Lemma).count()
-        verified_lemmas = g.db.query(Lemma).filter(Lemma.verified == True).count()
-        with_difficulty = g.db.query(Lemma).filter(Lemma.difficulty_level != None).count()
+        verified_lemmas = g.db.query(Lemma).filter_by(verified=True).count()
+
+        # For JSONL backend, filter needs to be a lambda; for SQLite, it's an expression
+        if backend_type == BackendType.JSONL:
+            with_difficulty = g.db.query(Lemma).filter(
+                lambda x: x.difficulty_level is not None
+            ).count()
+        else:
+            with_difficulty = g.db.query(Lemma).filter(Lemma.difficulty_level != None).count()
+
         total_sentences = g.db.query(Sentence).count()
 
         return render_template(

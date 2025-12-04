@@ -31,3 +31,6 @@ claude/staging
 # wordfreq local data / tmp
 src/wordfreq/data_old/
 src/wordfreq/output/
+
+# gitstore local
+data/working
