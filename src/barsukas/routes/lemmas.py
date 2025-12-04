@@ -14,7 +14,7 @@ from wordfreq.storage.crud.difficulty_override import (
 from wordfreq.storage.translation_helpers import get_all_translations, get_supported_languages
 from wordfreq.storage.crud.derivative_form import delete_derivative_form
 from wordfreq.storage.crud.lemma import handle_lemma_type_subtype_change
-from barsukas.helpers.lemma_display import get_difficulty_stats
+from barsukas.helpers.lemma_display import get_difficulty_stats, group_derivative_forms
 from config import Config
 
 bp = Blueprint("lemmas", __name__, url_prefix="/lemmas")
@@ -314,41 +314,12 @@ def view_lemma(lemma_id):
     )
 
     # Group forms by language and type
-    forms_by_language = {}
-    synonyms_by_language = {}
-    alternative_forms_by_language = {}
-
-    for form in derivative_forms:
-        lang_code = form.language_code
-
-        # Separate synonyms and alternative forms
-        # Alternative forms include: abbreviation, expanded_form, alternate_spelling, and legacy 'alternative_form'
-        is_alternative = form.grammatical_form in [
-            "abbreviation",
-            "expanded_form",
-            "alternate_spelling",
-            "alternative_form",
-        ]
-        is_synonym = form.grammatical_form == "synonym"
-
-        if is_synonym:
-            if lang_code not in synonyms_by_language:
-                synonyms_by_language[lang_code] = []
-            synonyms_by_language[lang_code].append(form)
-        elif is_alternative:
-            if lang_code not in alternative_forms_by_language:
-                alternative_forms_by_language[lang_code] = []
-            alternative_forms_by_language[lang_code].append(form)
-        else:
-            # Regular grammatical forms (conjugations, declensions, etc.)
-            if lang_code not in forms_by_language:
-                forms_by_language[lang_code] = []
-            forms_by_language[lang_code].append(form)
-
-    # Get all languages that have synonyms or alternatives
-    all_synonym_languages = sorted(
-        set(list(synonyms_by_language.keys()) + list(alternative_forms_by_language.keys()))
-    )
+    (
+        forms_by_language,
+        synonyms_by_language,
+        alternative_forms_by_language,
+        all_synonym_languages,
+    ) = group_derivative_forms(derivative_forms)
 
     # Get count of sentences using this lemma (for nouns)
     sentence_count = 0
