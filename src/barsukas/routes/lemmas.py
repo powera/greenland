@@ -14,6 +14,7 @@ from wordfreq.storage.crud.difficulty_override import (
 from wordfreq.storage.translation_helpers import get_all_translations, get_supported_languages
 from wordfreq.storage.crud.derivative_form import delete_derivative_form
 from wordfreq.storage.crud.lemma import handle_lemma_type_subtype_change
+from barsukas.helpers.lemma_display import get_difficulty_stats
 from config import Config
 
 bp = Blueprint("lemmas", __name__, url_prefix="/lemmas")
@@ -298,7 +299,7 @@ def view_lemma(lemma_id):
         effective_levels[lang_code] = get_effective_difficulty_level(g.db, lemma, lang_code)
 
     # Get difficulty level distribution for same POS type/subtype
-    difficulty_stats = _get_difficulty_stats(g.db, lemma.pos_type, lemma.pos_subtype)
+    difficulty_stats = get_difficulty_stats(g.db, lemma.pos_type, lemma.pos_subtype)
 
     # Get derivative forms grouped by language
     derivative_forms = (
@@ -563,7 +564,7 @@ def edit_lemma(lemma_id):
         return redirect(url_for("lemmas.view_lemma", lemma_id=lemma.id))
 
     # Get difficulty level distribution for same POS type/subtype
-    difficulty_stats = _get_difficulty_stats(g.db, lemma.pos_type, lemma.pos_subtype)
+    difficulty_stats = get_difficulty_stats(g.db, lemma.pos_type, lemma.pos_subtype)
 
     # Get POS types and subtypes for dropdowns
     from wordfreq.storage.utils.enums import VALID_POS_TYPES, get_subtype_values_for_pos
@@ -585,27 +586,6 @@ def edit_lemma(lemma_id):
         pos_types=pos_types,
         pos_subtypes_map=json.dumps(pos_subtypes_map),
     )
-
-
-def _get_difficulty_stats(session, pos_type, pos_subtype):
-    """Get difficulty level distribution for a given POS type/subtype."""
-    query = session.query(Lemma.difficulty_level, func.count(Lemma.id)).filter(
-        Lemma.pos_type == pos_type, Lemma.difficulty_level.isnot(None)
-    )
-
-    if pos_subtype:
-        query = query.filter(Lemma.pos_subtype == pos_subtype)
-
-    query = query.group_by(Lemma.difficulty_level).order_by(Lemma.difficulty_level)
-
-    results = query.all()
-
-    # Format as a dictionary
-    stats = {}
-    for level, count in results:
-        stats[level] = count
-
-    return stats
 
 
 @bp.route("/<int:lemma_id>/delete-synonym/<int:form_id>", methods=["POST"])
