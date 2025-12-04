@@ -22,3 +22,6 @@ Tests are in src/tests ; any changes to src/clients require tests.  Changes to
 barsukas generally do not require tests.  Do not run any tests other than a
 pycompile to check for code mistakes; ask the developer to test the change in
 their local browser.
+
+When writing HTML files, always use ordinary form submits for POST data - do
+not do an AJAX-based submission.  Avoid using disappearing UX elements.
