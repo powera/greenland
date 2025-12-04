@@ -1,0 +1,67 @@
+digraph barsukas_agents {
+  rankdir=TB;
+  node [shape=box, style=rounded];
+
+  // Node definitions with descriptions
+  pradzia [label="Pradzia\n(Database Init)", shape=box, style="rounded,filled", fillcolor=lightblue];
+  voras [label="Voras\n(Translations)", shape=box, style="rounded,filled", fillcolor=lightgreen];
+  vilkas [label="Vilkas\n(Word Forms)", shape=box, style="rounded,filled", fillcolor=lightgreen];
+  lape [label="Lape\n(Grammar Facts)", shape=box, style="rounded,filled", fillcolor=lightgreen];
+  sernas [label="Šernas\n(Synonyms)", shape=box, style="rounded,filled", fillcolor=lightgreen];
+  lokys [label="Lokys\n(Lemma Validation)", shape=box, style="rounded,filled", fillcolor=yellow];
+  papuga [label="Papuga\n(Pronunciations)", shape=box, style="rounded,filled", fillcolor=yellow];
+  zvirblis [label="Žvirblis\n(Sentences)", shape=box, style="rounded,filled", fillcolor=lightyellow];
+  bebras [label="Bebras\n(Sentence Links)", shape=box, style="rounded,filled", fillcolor=lightyellow];
+  dramblys [label="Dramblys\n(Missing Words)", shape=box, style="rounded,filled", fillcolor=yellow];
+  vieversys [label="Vieversys\n(Audio)", shape=box, style="rounded,filled", fillcolor=pink];
+  ungurys [label="Ungurys\n(WireWord Export)", shape=box, style="rounded,filled", fillcolor=lightcoral];
+  elnias [label="Elnias\n(Bootstrap Export)", shape=box, style="rounded,filled", fillcolor=lightcoral];
+  povas [label="Povas\n(HTML Export)", shape=box, style="rounded,filled", fillcolor=lightcoral];
+
+  // Logical dependencies (workflow order)
+
+  // Phase 1: Database initialization
+  pradzia -> voras [label="1. provides base lemmas"];
+  pradzia -> lokys [label="1. provides base lemmas"];
+
+  // Phase 2: Core linguistic data generation
+  voras -> vilkas [label="2. translations needed for forms"];
+  voras -> lape [label="2. translations needed for grammar"];
+  voras -> sernas [label="2. translations needed for synonyms"];
+  voras -> zvirblis [label="2. translations needed for sentences"];
+  voras -> vieversys [label="2. translations needed for audio"];
+
+  // Phase 3: Quality validation (parallel with enrichment)
+  lokys -> papuga [label="3. validated lemmas"];
+  lokys -> dramblys [label="3. identifies issues"];
+
+  // Phase 4: Sentence generation pipeline
+  zvirblis -> bebras [label="4. sentences need linking"];
+
+  // Phase 5: Export pipeline (all exports depend on complete data)
+  voras -> ungurys [label="5. translations ready"];
+  voras -> elnias [label="5. translations ready"];
+  voras -> povas [label="5. translations ready"];
+
+  vilkas -> ungurys [label="5. forms ready"];
+  vilkas -> povas [label="5. forms ready"];
+
+  lape -> ungurys [label="5. grammar ready"];
+
+  papuga -> povas [label="5. pronunciations ready"];
+
+  vieversys -> ungurys [label="5. audio ready"];
+
+  // Subgraph for clarity
+  subgraph cluster_legend {
+    label = "Agent Types";
+    style=dashed;
+
+    init [label="Initialization", shape=box, style="rounded,filled", fillcolor=lightblue];
+    enrich [label="Enrichment", shape=box, style="rounded,filled", fillcolor=lightgreen];
+    validate [label="Validation", shape=box, style="rounded,filled", fillcolor=yellow];
+    sentence [label="Sentences", shape=box, style="rounded,filled", fillcolor=lightyellow];
+    media [label="Media Generation", shape=box, style="rounded,filled", fillcolor=pink];
+    export [label="Export", shape=box, style="rounded,filled", fillcolor=lightcoral];
+  }
+}
