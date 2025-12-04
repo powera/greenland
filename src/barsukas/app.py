@@ -28,6 +28,7 @@ from routes import (
     exports,
     sentences,
     audio,
+    rapid_review,
 )
 from wordfreq.storage.utils.session import ensure_tables_exist
 from pinyin_helper import generate_pinyin, generate_pinyin_ruby_html, is_chinese
@@ -63,6 +64,7 @@ def create_app(config_class=Config):
     app.register_blueprint(exports.bp)
     app.register_blueprint(api.bp)
     app.register_blueprint(audio.bp)
+    app.register_blueprint(rapid_review.bp)
 
     # Register Jinja2 filters for Pinyin
     app.jinja_env.filters["pinyin"] = generate_pinyin
