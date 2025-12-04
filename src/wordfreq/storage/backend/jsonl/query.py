@@ -197,6 +197,19 @@ class JSONLQuery(BaseQuery[T]):
         """
         return self.first() is not None
 
+    def get(self, id: Any) -> Optional[T]:
+        """Get a single instance by primary key.
+
+        This is a convenience method equivalent to session.get(model_class, id).
+
+        Args:
+            id: The primary key value
+
+        Returns:
+            The instance or None if not found
+        """
+        return self._session.get(self._model_class, id)
+
     def delete(self, synchronize_session: Union[str, bool] = "auto") -> int:
         """Delete all matching records.
 
