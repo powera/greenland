@@ -594,11 +594,13 @@ def generate():
         # Show generation form
         supported_languages = ["lt", "zh", "ko", "fr", "de", "es", "pt", "sw", "vi"]
         available_voices = ["ash", "alloy", "nova", "ballad", "coral", "echo", "fable", "onyx", "sage", "shimmer"]
+        tts_engines = ["openai", "espeak-ng"]
 
         return render_template(
             "audio/generate.html",
             supported_languages=supported_languages,
             available_voices=available_voices,
+            tts_engines=tts_engines,
         )
 
     # Handle POST - trigger generation
@@ -606,6 +608,8 @@ def generate():
     limit = request.form.get("limit", type=int)
     difficulty_level = request.form.get("difficulty_level", type=int)
     voices = request.form.getlist("voices")
+    tts_engine = request.form.get("tts_engine", "openai")
+    use_ipa = request.form.get("use_ipa") == "on"
 
     if not language_code:
         flash("Language is required", "error")
@@ -622,26 +626,43 @@ def generate():
         flash(f"Invalid voice: {e}", "error")
         return redirect(url_for("audio.generate"))
 
-    # Import and run the agent
+    # Import and run the appropriate agent based on TTS engine
     try:
-        from agents.vieversys import VieversysAgent
-        import tempfile
+        # Use AUDIO_BASE_DIR for persistent storage
+        audio_base_dir = current_app.config.get("AUDIO_BASE_DIR")
+        if not audio_base_dir:
+            audio_base_dir = Path(tempfile.mkdtemp(prefix="audio_gen_"))
+        else:
+            audio_base_dir = Path(audio_base_dir)
 
-        # Create temporary output directory
-        output_dir = Path(tempfile.mkdtemp(prefix="audio_gen_"))
+        if tts_engine == "espeak-ng":
+            from agents.strazdas import StrazdasAgent
 
-        agent = VieversysAgent(output_dir=str(output_dir))
-        results = agent.generate_batch(
-            language_code=language_code,
-            limit=limit,
-            difficulty_level=difficulty_level,
-            voices=voice_enums,
-        )
+            agent = StrazdasAgent(output_dir=str(audio_base_dir))
+            results = agent.generate_batch(
+                language_code=language_code,
+                limit=limit,
+                difficulty_level=difficulty_level,
+                voices=voice_enums,
+                use_ipa=use_ipa,
+            )
+            engine_name = "eSpeak-NG"
+        else:
+            from agents.vieversys import VieversysAgent
+
+            agent = VieversysAgent(output_dir=str(audio_base_dir))
+            results = agent.generate_batch(
+                language_code=language_code,
+                limit=limit,
+                difficulty_level=difficulty_level,
+                voices=voice_enums,
+            )
+            engine_name = "OpenAI"
 
         flash(
-            f"Generated audio for {results['success_count']} lemmas "
+            f"Generated audio using {engine_name} for {results['success_count']} lemmas "
             f"({results['error_count']} errors). "
-            f"Files saved to {output_dir}",
+            f"Files saved to {audio_base_dir}",
             "success" if results['error_count'] == 0 else "warning"
         )
 
@@ -660,11 +681,15 @@ def generate_single(guid):
         data = request.get_json()
         language_code = data.get("language")
         voices = data.get("voices", ["ash", "alloy", "nova"])
+        tts_engine = data.get("tts_engine", "openai")
+        use_ipa = data.get("use_ipa", False)
     else:
         language_code = request.form.get("language")
         voices = request.form.getlist("voices")
         if not voices:
             voices = ["ash", "alloy", "nova"]
+        tts_engine = request.form.get("tts_engine", "openai")
+        use_ipa = request.form.get("use_ipa") == "on"
 
     # Find lemma first so we have the lemma_id for redirects
     lemma = g.db.query(Lemma).filter_by(guid=guid).first()
@@ -686,19 +711,26 @@ def generate_single(guid):
         # Convert voice names to Voice enums
         voice_enums = [Voice(v) for v in voices]
 
-        # Import and run the agent
-        from agents.vieversys import VieversysAgent
-
         # Use AUDIO_BASE_DIR for persistent storage
         audio_base_dir = current_app.config.get("AUDIO_BASE_DIR")
         if not audio_base_dir:
             raise ValueError("AUDIO_BASE_DIR not configured")
 
-        agent = VieversysAgent(output_dir=audio_base_dir)
+        # Import and run the appropriate agent based on TTS engine
+        if tts_engine == "espeak-ng":
+            from agents.strazdas import StrazdasAgent
 
-        result = agent.generate_audio_for_lemma(
-            g.db, lemma, language_code, voice_enums, create_review_record=True
-        )
+            agent = StrazdasAgent(output_dir=audio_base_dir)
+            result = agent.generate_audio_for_lemma(
+                g.db, lemma, language_code, voice_enums, create_review_record=True, use_ipa=use_ipa
+            )
+        else:
+            from agents.vieversys import VieversysAgent
+
+            agent = VieversysAgent(output_dir=audio_base_dir)
+            result = agent.generate_audio_for_lemma(
+                g.db, lemma, language_code, voice_enums, create_review_record=True
+            )
 
         if request.is_json:
             if result["success"]:
