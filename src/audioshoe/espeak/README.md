@@ -2,6 +2,8 @@
 
 This module provides text-to-speech audio generation using eSpeak-NG, an open-source speech synthesizer.
 
+**Language documentation:** https://github.com/espeak-ng/espeak-ng/blob/master/docs/languages.md
+
 ## Overview
 
 The eSpeak-NG integration allows generating audio files for lemmas without requiring API calls to external services like OpenAI. This is useful for:
@@ -19,21 +21,18 @@ Main TTS client that interfaces with the eSpeak-NG command-line tool.
 
 **Key Features:**
 - Supports all languages in the project: Lithuanian, Chinese, Korean, French, German, Spanish, Portuguese, Swahili, Vietnamese
-- Voice variant mapping (maps OpenAI Voice enum to eSpeak variants)
+- Culturally appropriate voice names with gender variants
 - IPA phonetic input support
 - Automatic WAV to MP3 conversion (requires ffmpeg)
 - Configurable speech speed and pitch
 
 **Usage:**
 ```python
-from audioshoe.espeak import generate_audio
-from clients.audio import Voice, AudioFormat
+from audioshoe.espeak import generate_audio, EspeakVoice
 
 result = generate_audio(
     text="labas",
-    voice=Voice.ASH,
-    language_code="lt",
-    audio_format=AudioFormat.MP3,
+    voice=EspeakVoice.ONA,  # Lithuanian female voice
     speed=150,  # words per minute
     pitch=50,   # 0-99
 )
@@ -52,18 +51,95 @@ Batch audio generation agent for processing multiple lemmas using eSpeak-NG.
 
 **Usage:**
 ```bash
-# Generate audio for Lithuanian lemmas
-python -m agents.strazdas --language lt --limit 10
+# List available voices
+python -m agents.strazdas --list-voices
+
+# Generate audio for Lithuanian lemmas with specific voices
+python -m agents.strazdas --language lt --voices Ona Jonas Ruta --limit 10
 
 # Use IPA phonetic notation (when available)
 python -m agents.strazdas --language lt --use-ipa
 
-# Specify voices
-python -m agents.strazdas --language fr --voices ash alloy nova
+# Generate with default voices for French
+python -m agents.strazdas --language fr --limit 20
 
 # Filter by difficulty level
 python -m agents.strazdas --language zh --difficulty-level 5
 ```
+
+## Available Voices
+
+Each language has three culturally appropriate voice names with gender variants:
+
+### Lithuanian (lt)
+- **Ona** - Female, variant 1
+- **Jonas** - Male, variant 1
+- **Ruta** - Female, variant 2
+
+### Chinese / Mandarin (zh)
+- **Mei** - Female, variant 1
+- **Wei** - Male, variant 1
+- **Ling** - Female, variant 2
+
+### Korean (ko)
+- **Minji** - Female, variant 1
+- **Joon** - Male, variant 1
+- **Sora** - Female, variant 2
+
+### French (fr)
+- **Claire** - Female, variant 1
+- **Pierre** - Male, variant 1
+- **Marie** - Female, variant 2
+
+### German (de)
+- **Anna** - Female, variant 1
+- **Hans** - Male, variant 1
+- **Greta** - Female, variant 2
+
+### Spanish (es)
+- **Sofia** - Female, variant 1
+- **Carlos** - Male, variant 1
+- **Isabel** - Female, variant 2
+
+### Portuguese (pt)
+- **Ana** - Female, variant 1
+- **João** - Male, variant 1
+- **Maria** - Female, variant 2
+
+### Swahili (sw)
+- **Amani** - Female, variant 1
+- **Jabari** - Male, variant 1
+- **Zara** - Female, variant 2
+
+### Vietnamese (vi)
+- **Linh** - Female, variant 1
+- **Minh** - Male, variant 1
+- **Hoa** - Female, variant 2
+
+## Technical Details
+
+### Voice Identifiers
+
+Internally, eSpeak-NG uses voice identifiers in the format `{language}+{gender}{variant}`. For example:
+- **Ona** (Lithuanian female, variant 1) → `lt+f1`
+- **Pierre** (French male, variant 1) → `fr+m1`
+- **Mei** (Chinese female, variant 1) → `zh+f1`
+
+The `EspeakVoice` enum handles this mapping automatically.
+
+### Language Codes
+
+| Language   | Code | eSpeak Voice Base |
+|------------|------|-------------------|
+| Lithuanian | lt   | lt                |
+| Chinese    | zh   | zh (Mandarin)     |
+| Korean     | ko   | ko                |
+| French     | fr   | fr                |
+| German     | de   | de                |
+| Spanish    | es   | es                |
+| Portuguese | pt   | pt                |
+| Swahili    | sw   | sw                |
+| Vietnamese | vi   | vi                |
 
 ## Prerequisites
 
@@ -101,49 +177,18 @@ brew install ffmpeg
 
 If ffmpeg is not available, the module will return WAV format even when MP3 is requested.
 
-## Language Voice Codes
-
-The following language codes are supported:
-
-| Language   | Code | eSpeak Voice |
-|------------|------|--------------|
-| Lithuanian | lt   | lt           |
-| Chinese    | zh   | zh (Mandarin)|
-| Korean     | ko   | ko           |
-| French     | fr   | fr           |
-| German     | de   | de           |
-| Spanish    | es   | es           |
-| Portuguese | pt   | pt           |
-| Swahili    | sw   | sw           |
-| Vietnamese | vi   | vi           |
-
-## Voice Variants
-
-eSpeak-NG supports voice variants which provide different pitch/tone characteristics. The OpenAI Voice enum is mapped to numeric variants (1-7):
-
-| OpenAI Voice | eSpeak Variant |
-|--------------|----------------|
-| ALLOY        | 1              |
-| ASH          | 2              |
-| BALLAD       | 3              |
-| CORAL        | 4              |
-| ECHO         | 5              |
-| FABLE        | 6              |
-| NOVA         | 7              |
-
-The actual voice used is specified as `{language}+{variant}`, e.g., `lt+2` for Lithuanian with variant 2.
-
 ## Barsukas Integration
 
 The eSpeak-NG engine is integrated into the Barsukas web interface:
 
 1. Navigate to `/audio/generate`
 2. Select "espeak-ng" as the TTS engine
-3. Choose language, voices, and other parameters
-4. Optionally enable "Use IPA" for phonetic generation
-5. Submit to generate audio files
+3. Choose language - voices will update based on selected language
+4. Select voices by name (e.g., Ona, Pierre, Mei)
+5. Optionally enable "Use IPA" for phonetic generation
+6. Submit to generate audio files
 
-Generated files are stored in `AUDIO_BASE_DIR` with the voice name prefixed by "espeak-" (e.g., `espeak-ash`, `espeak-alloy`) to distinguish them from OpenAI-generated files.
+Generated files are stored in `AUDIO_BASE_DIR` with voice directories named after the voice (e.g., `lt/Ona/`, `fr/Pierre/`) to distinguish them from OpenAI-generated files.
 
 ## IPA Support
 
@@ -157,6 +202,11 @@ result = agent.generate_audio_for_lemma(
 )
 ```
 
+Or from command line:
+```bash
+python -m agents.strazdas --language lt --use-ipa
+```
+
 This allows for more precise phonetic control over the generated audio.
 
 ## Performance Considerations
@@ -165,6 +215,56 @@ This allows for more precise phonetic control over the generated audio.
 - No API rate limits or costs
 - Can process thousands of lemmas quickly
 - Quality is lower than commercial TTS but acceptable for many use cases
+- Useful for rapid prototyping and testing before investing in commercial TTS
+
+## Code Examples
+
+### Programmatic Usage
+
+```python
+from audioshoe.espeak import EspeakVoice, DEFAULT_ESPEAK_VOICES, generate_audio
+from clients.audio import AudioFormat
+
+# Generate with specific voice
+result = generate_audio(
+    text="bonjour",
+    voice=EspeakVoice.PIERRE,
+    speed=175,
+    pitch=55,
+)
+
+# Get default voices for a language
+lt_voices = DEFAULT_ESPEAK_VOICES["lt"]  # [Ona, Jonas, Ruta]
+
+# Get all voices for a language
+all_lt_voices = EspeakVoice.get_voices_for_language("lt")
+
+# Check voice properties
+print(EspeakVoice.PIERRE.language_code)  # 'fr'
+print(EspeakVoice.PIERRE.gender)  # 'm'
+print(EspeakVoice.PIERRE.variant)  # 1
+print(EspeakVoice.PIERRE.espeak_identifier)  # 'fr+m1'
+```
+
+### Agent Usage
+
+```python
+from agents.strazdas import StrazdasAgent
+from audioshoe.espeak import EspeakVoice
+
+agent = StrazdasAgent(output_dir="/path/to/output")
+
+# Generate with specific voices
+voices = [EspeakVoice.ONA, EspeakVoice.JONAS]
+results = agent.generate_batch(
+    language_code="lt",
+    limit=100,
+    voices=voices,
+    use_ipa=True,
+)
+
+print(f"Generated {results['success_count']} files")
+```
 
 ## Troubleshooting
 
@@ -182,10 +282,17 @@ This allows for more precise phonetic control over the generated audio.
 **Audio quality issues:**
 - Adjust speed: `speed=175` (default), range 80-450
 - Adjust pitch: `pitch=50` (default), range 0-99
-- Try different voice variants
+- Try different voice variants (1, 2, or 3)
+- Consider using IPA input for better pronunciation
+
+**KeyError when specifying voice:**
+- Voice names are case-insensitive in CLI but case-sensitive in Python
+- Use `EspeakVoice.ONA` (not `EspeakVoice.ona`)
+- Or use `EspeakVoice['ONA']` for string lookups
 
 ## References
 
-- [eSpeak-NG GitHub](https://github.com/espeak-ng/espeak-ng)
-- [eSpeak-NG Documentation](https://github.com/espeak-ng/espeak-ng/blob/master/docs/guide.md)
+- [eSpeak-NG GitHub Repository](https://github.com/espeak-ng/espeak-ng)
+- [eSpeak-NG Languages Documentation](https://github.com/espeak-ng/espeak-ng/blob/master/docs/languages.md)
 - [eSpeak-NG Voices Documentation](https://github.com/espeak-ng/espeak-ng/blob/master/docs/voices.md)
+- [eSpeak-NG Guide](https://github.com/espeak-ng/espeak-ng/blob/master/docs/guide.md)

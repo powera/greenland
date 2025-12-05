@@ -8,11 +8,12 @@ AudioQualityReview table with 'pending_review' status, and can later be
 uploaded to S3 after review.
 
 "Strazdas" means "thrush" in Lithuanian - a songbird known for its melodious voice.
+
+Language documentation: https://github.com/espeak-ng/espeak-ng/blob/master/docs/languages.md
 """
 
 import argparse
 import hashlib
-import json
 import logging
 import sys
 import tempfile
@@ -27,28 +28,15 @@ if GREENLAND_SRC_PATH not in sys.path:
 
 import constants
 from wordfreq.storage.database import create_database_session
-from wordfreq.storage.models.schema import Lemma, AudioQualityReview
-from clients.audio import Voice, AudioFormat
-from audioshoe.espeak import generate_audio
+from wordfreq.storage.models.schema import Lemma, AudioQualityReview, LemmaTranslation
+from clients.audio import AudioFormat
+from audioshoe.espeak import generate_audio, EspeakVoice, DEFAULT_ESPEAK_VOICES
 
 # Configure logging
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
-
-# Default voices for each language
-DEFAULT_VOICES = {
-    "lt": [Voice.ASH, Voice.ALLOY, Voice.NOVA],
-    "zh": [Voice.ASH, Voice.ALLOY, Voice.NOVA],
-    "ko": [Voice.ASH, Voice.ALLOY, Voice.NOVA],
-    "fr": [Voice.ASH, Voice.ALLOY, Voice.NOVA],
-    "de": [Voice.ASH, Voice.ALLOY, Voice.NOVA],
-    "es": [Voice.ASH, Voice.ALLOY, Voice.NOVA],
-    "pt": [Voice.ASH, Voice.ALLOY, Voice.NOVA],
-    "sw": [Voice.ASH, Voice.ALLOY, Voice.NOVA],
-    "vi": [Voice.ASH, Voice.ALLOY, Voice.NOVA],
-}
 
 # Language column mapping for direct translation columns
 LANGUAGE_COLUMN_MAP = {
@@ -111,8 +99,6 @@ class StrazdasAgent:
             return getattr(lemma, column_name, None)
 
         # Otherwise, check table-based translations (es, de, pt)
-        from wordfreq.storage.models.schema import LemmaTranslation
-
         translation = (
             session.query(LemmaTranslation)
             .filter_by(lemma_id=lemma.id, language_code=language_code)
@@ -125,7 +111,7 @@ class StrazdasAgent:
         session,
         lemma: Lemma,
         language_code: str,
-        voices: List[Voice],
+        voices: List[EspeakVoice],
         create_review_record: bool = True,
         use_ipa: bool = False,
     ) -> Dict:
@@ -136,7 +122,7 @@ class StrazdasAgent:
             session: Database session
             lemma: Lemma to generate audio for
             language_code: Target language code
-            voices: List of voices to use
+            voices: List of EspeakVoice to use
             create_review_record: Whether to create AudioQualityReview records
             use_ipa: If True and lemma has IPA, use IPA for generation
 
@@ -170,7 +156,7 @@ class StrazdasAgent:
         }
 
         for voice in voices:
-            logger.info(f"Generating audio: {text} ({language_code}/{voice.value})")
+            logger.info(f"Generating audio: {text} ({language_code}/{voice.name})")
 
             # Use IPA if available, otherwise use regular text
             input_text = ipa_text if ipa_text else text
@@ -179,7 +165,6 @@ class StrazdasAgent:
             result = generate_audio(
                 text=input_text,
                 voice=voice,
-                language_code=language_code,
                 ipa_input=bool(ipa_text),
             )
 
@@ -187,7 +172,7 @@ class StrazdasAgent:
                 logger.error(f"Failed to generate audio: {result.error}")
                 results["voices"].append(
                     {
-                        "voice": voice.value,
+                        "voice": voice.name,
                         "success": False,
                         "error": result.error,
                     }
@@ -199,8 +184,8 @@ class StrazdasAgent:
             filename = f"{lemma.guid}_{safe_text}.mp3"
 
             # Create language/voice subdirectories
-            # Use "espeak" as the voice directory to distinguish from OpenAI voices
-            voice_name = f"espeak-{voice.value}"
+            # Use the voice name directly (e.g., "Ona", "Pierre")
+            voice_name = voice.name
             voice_dir = self.output_dir / language_code / voice_name
             voice_dir.mkdir(parents=True, exist_ok=True)
 
@@ -288,7 +273,7 @@ class StrazdasAgent:
         language_code: str,
         limit: Optional[int] = None,
         difficulty_level: Optional[int] = None,
-        voices: Optional[List[Voice]] = None,
+        voices: Optional[List[EspeakVoice]] = None,
         use_ipa: bool = False,
     ) -> Dict:
         """
@@ -305,7 +290,7 @@ class StrazdasAgent:
             Dict with batch generation results
         """
         session = self.get_session()
-        voices = voices or DEFAULT_VOICES.get(language_code, [Voice.ASH, Voice.ALLOY, Voice.NOVA])
+        voices = voices or DEFAULT_ESPEAK_VOICES.get(language_code, [])
 
         try:
             # Build query
@@ -321,8 +306,6 @@ class StrazdasAgent:
                 query = query.filter(getattr(Lemma, column_name).isnot(None))
             else:
                 # For table-based translations
-                from wordfreq.storage.models.schema import LemmaTranslation
-
                 query = query.join(LemmaTranslation).filter(
                     LemmaTranslation.language_code == language_code
                 )
@@ -337,7 +320,7 @@ class StrazdasAgent:
             results = {
                 "language_code": language_code,
                 "total_lemmas": len(lemmas),
-                "voices": [v.value for v in voices],
+                "voices": [v.name for v in voices],
                 "output_dir": str(self.output_dir),
                 "lemmas": [],
                 "success_count": 0,
@@ -382,8 +365,12 @@ def get_argument_parser():
     parser.add_argument(
         "--voices",
         nargs="+",
-        choices=["ash", "alloy", "nova", "ballad", "coral", "echo", "fable", "onyx", "sage", "shimmer"],
-        help="Voices to use (defaults to ash, alloy, nova)",
+        help="Voice names to use (e.g., Ona Jonas Ruta for Lithuanian). Use --list-voices to see available voices.",
+    )
+    parser.add_argument(
+        "--list-voices",
+        action="store_true",
+        help="List available voices for each language and exit",
     )
     parser.add_argument(
         "--use-ipa",
@@ -405,10 +392,28 @@ def main():
     parser = get_argument_parser()
     args = parser.parse_args()
 
-    # Convert voice names to Voice enums
+    # Handle --list-voices
+    if args.list_voices:
+        print("\nAvailable eSpeak-NG Voices by Language:")
+        print("=" * 60)
+        for lang_code in ["lt", "zh", "ko", "fr", "de", "es", "pt", "sw", "vi"]:
+            voices = EspeakVoice.get_voices_for_language(lang_code)
+            print(f"\n{lang_code.upper()}:")
+            for voice in voices:
+                gender_str = "Female" if voice.gender == "f" else "Male"
+                print(f"  {voice.name:12} - {gender_str:6} (variant {voice.variant})")
+        print("\n" + "=" * 60)
+        sys.exit(0)
+
+    # Convert voice names to EspeakVoice enums
     voices = None
     if args.voices:
-        voices = [Voice(v) for v in args.voices]
+        try:
+            voices = [EspeakVoice[v.upper()] for v in args.voices]
+        except KeyError as e:
+            print(f"Error: Unknown voice name: {e}")
+            print(f"Use --list-voices to see available voices for {args.language}")
+            sys.exit(1)
 
     # Confirm before running (unless --yes was provided)
     if not args.yes:
@@ -429,13 +434,16 @@ def main():
                 query = query.limit(args.limit)
 
             lemma_count = query.count()
-            voice_count = len(voices) if voices else 3
+            voice_list = voices or DEFAULT_ESPEAK_VOICES.get(args.language, [])
+            voice_count = len(voice_list)
             estimated_files = lemma_count * voice_count
         finally:
             session.close()
 
         print(f"\nThis will generate audio for {lemma_count} lemmas with {voice_count} voices each.")
         print(f"Total files: {estimated_files}")
+        if voices:
+            print(f"Voices: {', '.join(v.name for v in voices)}")
         print(f"This will use eSpeak-NG TTS (free, local generation).")
         response = input("Do you want to proceed? [y/N]: ").strip().lower()
 

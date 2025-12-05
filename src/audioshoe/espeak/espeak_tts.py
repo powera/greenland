@@ -1,56 +1,29 @@
 #!/usr/bin/python3
-"""eSpeak-NG TTS client for audio generation."""
+"""
+eSpeak-NG TTS client for audio generation.
+
+Language documentation: https://github.com/espeak-ng/espeak-ng/blob/master/docs/languages.md
+"""
 
 import logging
 import subprocess
+import sys
 import tempfile
 import time
 from pathlib import Path
 from typing import Optional
-
-import sys
-from pathlib import Path
 
 # Add src directory to path for imports
 GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent)
 if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
-from clients.audio.types import Voice, AudioFormat, AudioGenerationResult
+from clients.audio.types import AudioFormat, AudioGenerationResult
+from audioshoe.espeak.types import EspeakVoice
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
-
-# Language code mapping to eSpeak-NG voice identifiers
-# Based on eSpeak-NG documentation and BCP 47 language tags
-ESPEAK_LANGUAGE_MAP = {
-    "lt": "lt",  # Lithuanian
-    "zh": "zh",  # Chinese (Mandarin)
-    "ko": "ko",  # Korean
-    "fr": "fr",  # French
-    "de": "de",  # German
-    "es": "es",  # Spanish
-    "pt": "pt",  # Portuguese (Brazilian)
-    "sw": "sw",  # Swahili
-    "vi": "vi",  # Vietnamese
-}
-
-# Voice variant mapping - eSpeak-NG has different voice variants
-# For now, we'll use numeric variants (1-7) which provide different pitch/tone characteristics
-# The Voice enum from OpenAI doesn't directly map to eSpeak variants, so we map to numbers
-VOICE_VARIANT_MAP = {
-    Voice.ALLOY: "1",
-    Voice.ASH: "2",
-    Voice.BALLAD: "3",
-    Voice.CORAL: "4",
-    Voice.ECHO: "5",
-    Voice.FABLE: "6",
-    Voice.NOVA: "7",
-    Voice.ONYX: "1",  # Reuse variants since eSpeak has limited options
-    Voice.SAGE: "2",
-    Voice.SHIMMER: "3",
-}
 
 
 class EspeakNGClient:
@@ -93,8 +66,7 @@ class EspeakNGClient:
     def generate_audio(
         self,
         text: str,
-        voice: Voice = Voice.ALLOY,
-        language_code: str = "lt",
+        voice: EspeakVoice,
         audio_format: AudioFormat = AudioFormat.MP3,
         speed: int = 150,  # eSpeak uses words per minute (default: 175, range: 80-450)
         pitch: int = 50,  # Pitch adjustment (default: 50, range: 0-99)
@@ -105,8 +77,7 @@ class EspeakNGClient:
 
         Args:
             text: Text to convert to speech (or IPA if ipa_input=True)
-            voice: Voice variant to use (mapped to eSpeak variants)
-            language_code: Language code for voice selection
+            voice: EspeakVoice to use for generation
             audio_format: Output audio format (only MP3 and WAV are supported)
             speed: Speech speed in words per minute (80-450, default: 150)
             pitch: Pitch adjustment (0-99, default: 50)
@@ -119,27 +90,7 @@ class EspeakNGClient:
 
         if self.debug:
             logger.debug(f"Generating audio for text: {text}")
-            logger.debug(f"Voice: {voice.value}, Language: {language_code}")
-
-        # Get eSpeak language identifier
-        espeak_lang = ESPEAK_LANGUAGE_MAP.get(language_code)
-        if not espeak_lang:
-            error_msg = f"Unsupported language code: {language_code}"
-            logger.error(error_msg)
-            return AudioGenerationResult(
-                audio_data=b"",
-                text=text,
-                voice=voice,
-                language_code=language_code,
-                model="espeak-ng",
-                duration_ms=0,
-                success=False,
-                error=error_msg,
-            )
-
-        # Get voice variant
-        voice_variant = VOICE_VARIANT_MAP.get(voice, "1")
-        espeak_voice = f"{espeak_lang}+{voice_variant}"
+            logger.debug(f"Voice: {voice.name}, Language: {voice.language_code}")
 
         # Validate audio format (eSpeak-NG directly supports WAV)
         # For MP3, we'll generate WAV first then convert
@@ -149,8 +100,8 @@ class EspeakNGClient:
             return AudioGenerationResult(
                 audio_data=b"",
                 text=text,
-                voice=voice,
-                language_code=language_code,
+                voice=None,  # No OpenAI voice equivalent
+                language_code=voice.language_code,
                 model="espeak-ng",
                 duration_ms=0,
                 success=False,
@@ -163,9 +114,10 @@ class EspeakNGClient:
                 wav_path = Path(tmp_wav.name)
 
             # Build eSpeak-NG command
+            # Use the voice's espeak_identifier (e.g., "lt+f1" for Lithuanian female variant 1)
             cmd = [
                 self.espeak_command,
-                "-v", espeak_voice,
+                "-v", voice.espeak_identifier,
                 "-s", str(speed),
                 "-p", str(pitch),
                 "-w", str(wav_path),
@@ -196,8 +148,8 @@ class EspeakNGClient:
                 return AudioGenerationResult(
                     audio_data=b"",
                     text=text,
-                    voice=voice,
-                    language_code=language_code,
+                    voice=None,
+                    language_code=voice.language_code,
                     model="espeak-ng",
                     duration_ms=0,
                     success=False,
@@ -211,8 +163,8 @@ class EspeakNGClient:
                 return AudioGenerationResult(
                     audio_data=b"",
                     text=text,
-                    voice=voice,
-                    language_code=language_code,
+                    voice=None,
+                    language_code=voice.language_code,
                     model="espeak-ng",
                     duration_ms=0,
                     success=False,
@@ -273,8 +225,8 @@ class EspeakNGClient:
             return AudioGenerationResult(
                 audio_data=final_audio_data,
                 text=text,
-                voice=voice,
-                language_code=language_code,
+                voice=None,  # No OpenAI voice equivalent
+                language_code=voice.language_code,
                 model="espeak-ng",
                 duration_ms=duration_ms,
                 success=True,
@@ -287,8 +239,8 @@ class EspeakNGClient:
             return AudioGenerationResult(
                 audio_data=b"",
                 text=text,
-                voice=voice,
-                language_code=language_code,
+                voice=None,
+                language_code=voice.language_code,
                 model="espeak-ng",
                 duration_ms=0,
                 success=False,
@@ -300,8 +252,8 @@ class EspeakNGClient:
             return AudioGenerationResult(
                 audio_data=b"",
                 text=text,
-                voice=voice,
-                language_code=language_code,
+                voice=None,
+                language_code=voice.language_code,
                 model="espeak-ng",
                 duration_ms=0,
                 success=False,
@@ -323,8 +275,7 @@ def get_client() -> EspeakNGClient:
 
 def generate_audio(
     text: str,
-    voice: Voice = Voice.ALLOY,
-    language_code: str = "lt",
+    voice: EspeakVoice,
     audio_format: AudioFormat = AudioFormat.MP3,
     speed: int = 150,
     pitch: int = 50,
@@ -337,8 +288,7 @@ def generate_audio(
 
     Args:
         text: Text to convert to speech (or IPA if ipa_input=True)
-        voice: Voice variant to use
-        language_code: Language code for voice selection
+        voice: EspeakVoice to use for generation
         audio_format: Output audio format (MP3 or WAV)
         speed: Speech speed in words per minute (80-450, default: 150)
         pitch: Pitch adjustment (0-99, default: 50)
@@ -348,5 +298,5 @@ def generate_audio(
         AudioGenerationResult with audio data and metadata
     """
     return get_client().generate_audio(
-        text, voice, language_code, audio_format, speed, pitch, ipa_input
+        text, voice, audio_format, speed, pitch, ipa_input
     )
