@@ -105,6 +105,14 @@
                     </p>
                 </div>
                 <div class="mb-3">
+                    <label for="audio_tts_engine" class="form-label">TTS Engine <span class="text-danger">*</span></label>
+                    <select class="form-select" id="audio_tts_engine" name="tts_engine" required>
+                        <option value="openai">OpenAI (paid, high quality)</option>
+                        <option value="espeak-ng">eSpeak-NG (free, synthetic)</option>
+                    </select>
+                    <div class="form-text">Choose between paid OpenAI voices or free eSpeak voices</div>
+                </div>
+                <div class="mb-3">
                     <label for="audio_language" class="form-label">Language <span class="text-danger">*</span></label>
                     <select class="form-select" id="audio_language" name="language" required>
                         <option value="">Select a language...</option>
@@ -118,57 +126,14 @@
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Voices <span class="text-danger">*</span></label>
-                    <div class="form-text mb-2">Select voices to generate (default: ash, alloy, nova)</div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="voices" value="ash" id="audio-voice-ash" checked>
-                                <label class="form-check-label" for="audio-voice-ash">ash</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="voices" value="alloy" id="audio-voice-alloy" checked>
-                                <label class="form-check-label" for="audio-voice-alloy">alloy</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="voices" value="nova" id="audio-voice-nova" checked>
-                                <label class="form-check-label" for="audio-voice-nova">nova</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="voices" value="ballad" id="audio-voice-ballad">
-                                <label class="form-check-label" for="audio-voice-ballad">ballad</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="voices" value="coral" id="audio-voice-coral">
-                                <label class="form-check-label" for="audio-voice-coral">coral</label>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="voices" value="echo" id="audio-voice-echo">
-                                <label class="form-check-label" for="audio-voice-echo">echo</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="voices" value="fable" id="audio-voice-fable">
-                                <label class="form-check-label" for="audio-voice-fable">fable</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="voices" value="onyx" id="audio-voice-onyx">
-                                <label class="form-check-label" for="audio-voice-onyx">onyx</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="voices" value="sage" id="audio-voice-sage">
-                                <label class="form-check-label" for="audio-voice-sage">sage</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="voices" value="shimmer" id="audio-voice-shimmer">
-                                <label class="form-check-label" for="audio-voice-shimmer">shimmer</label>
-                            </div>
-                        </div>
+                    <div class="form-text mb-2" id="audio-voice-help">Select voices to generate</div>
+                    <div id="audio-voices-container">
+                        <div class="text-muted">Please select a language and TTS engine</div>
                     </div>
                 </div>
-                <div class="alert alert-info">
+                <div class="alert alert-info" id="audio-engine-info">
                     <i class="bi bi-info-circle"></i>
-                    <strong>Note:</strong> Audio will be generated using OpenAI TTS API and saved to a temporary directory.
+                    <strong>Note:</strong> Audio will be generated and saved to a temporary directory.
                     Review records will be created with status "pending_review".
                 </div>
             </div>
@@ -220,4 +185,142 @@ audioPlayerLemma.addEventListener('ended', function() {
         currentPlayButtonLemma = null;
     }
 });
+
+// Audio generation modal - dynamic voice options
+(function() {
+    const openaiVoices = {{ openai_voices|tojson }};
+    const espeakVoices = {{ espeak_voices|tojson }};
+
+    const ttsEngineSelect = document.getElementById('audio_tts_engine');
+    const languageSelect = document.getElementById('audio_language');
+    const voicesContainer = document.getElementById('audio-voices-container');
+    const voiceHelp = document.getElementById('audio-voice-help');
+    const engineInfo = document.getElementById('audio-engine-info');
+
+    function updateVoiceOptions() {
+        const engine = ttsEngineSelect.value;
+        const language = languageSelect.value;
+
+        // Clear previous voices
+        voicesContainer.innerHTML = '';
+
+        if (engine === 'openai') {
+            // Show OpenAI voices (not language-specific)
+            voiceHelp.textContent = 'Select OpenAI voices to generate (default: ash, alloy, nova)';
+            engineInfo.innerHTML = '<i class="bi bi-info-circle"></i> <strong>Note:</strong> Audio will be generated using OpenAI TTS API (paid). Review records will be created with status "pending_review".';
+
+            const row = document.createElement('div');
+            row.className = 'row';
+
+            // Split voices into two columns
+            const col1 = document.createElement('div');
+            col1.className = 'col-md-6';
+            const col2 = document.createElement('div');
+            col2.className = 'col-md-6';
+
+            openaiVoices.forEach((voice, idx) => {
+                const formCheck = document.createElement('div');
+                formCheck.className = 'form-check';
+
+                const checkbox = document.createElement('input');
+                checkbox.className = 'form-check-input';
+                checkbox.type = 'checkbox';
+                checkbox.name = 'voices';
+                checkbox.value = voice;
+                checkbox.id = `audio-voice-${voice}`;
+
+                // Check default voices
+                if (['ash', 'alloy', 'nova'].includes(voice)) {
+                    checkbox.checked = true;
+                }
+
+                const label = document.createElement('label');
+                label.className = 'form-check-label';
+                label.htmlFor = `audio-voice-${voice}`;
+                label.textContent = voice;
+
+                formCheck.appendChild(checkbox);
+                formCheck.appendChild(label);
+
+                // Add to appropriate column
+                if (idx < 5) {
+                    col1.appendChild(formCheck);
+                } else {
+                    col2.appendChild(formCheck);
+                }
+            });
+
+            row.appendChild(col1);
+            row.appendChild(col2);
+            voicesContainer.appendChild(row);
+
+        } else if (engine === 'espeak-ng') {
+            if (!language) {
+                voicesContainer.innerHTML = '<div class="text-muted">Please select a language first</div>';
+                return;
+            }
+
+            // Show eSpeak voices for selected language
+            const voices = espeakVoices[language];
+            if (!voices || voices.length === 0) {
+                voicesContainer.innerHTML = '<div class="text-warning">No eSpeak voices available for this language</div>';
+                return;
+            }
+
+            voiceHelp.textContent = 'Select eSpeak-NG voices to generate (culturally appropriate names)';
+            engineInfo.innerHTML = '<i class="bi bi-info-circle"></i> <strong>Note:</strong> Audio will be generated using eSpeak-NG (free, synthetic). Review records will be created with status "pending_review".';
+
+            const row = document.createElement('div');
+            row.className = 'row';
+
+            // Split voices into two columns
+            const col1 = document.createElement('div');
+            col1.className = 'col-md-6';
+            const col2 = document.createElement('div');
+            col2.className = 'col-md-6';
+
+            voices.forEach((voice, idx) => {
+                const formCheck = document.createElement('div');
+                formCheck.className = 'form-check';
+
+                const checkbox = document.createElement('input');
+                checkbox.className = 'form-check-input';
+                checkbox.type = 'checkbox';
+                checkbox.name = 'voices';
+                checkbox.value = voice.name;
+                checkbox.id = `audio-voice-${voice.name}`;
+                checkbox.checked = true; // Check all by default
+
+                const label = document.createElement('label');
+                label.className = 'form-check-label';
+                label.htmlFor = `audio-voice-${voice.name}`;
+
+                // Add gender badge
+                const genderBadge = voice.gender === 'f' ? '♀' : '♂';
+                label.innerHTML = `${voice.name} <span class="badge bg-secondary">${genderBadge}</span>`;
+
+                formCheck.appendChild(checkbox);
+                formCheck.appendChild(label);
+
+                // Add to appropriate column
+                if (idx < 2) {
+                    col1.appendChild(formCheck);
+                } else {
+                    col2.appendChild(formCheck);
+                }
+            });
+
+            row.appendChild(col1);
+            row.appendChild(col2);
+            voicesContainer.appendChild(row);
+        }
+    }
+
+    // Update voices when engine or language changes
+    ttsEngineSelect.addEventListener('change', updateVoiceOptions);
+    languageSelect.addEventListener('change', updateVoiceOptions);
+
+    // Initialize on modal open
+    document.getElementById('generateAudioModal').addEventListener('shown.bs.modal', updateVoiceOptions);
+})();
 </script>

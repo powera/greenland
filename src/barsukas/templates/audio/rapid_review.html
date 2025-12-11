@@ -554,7 +554,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (subtype) params.set('subtype', subtype);
         if (level) params.set('level', level);
 
-        window.location.href = '{{ url_for("audio.rapid_review") }}?' + params.toString();
+        window.location.href = '{{ url_for("rapid_review.index") }}?' + params.toString();
     });
 });
 

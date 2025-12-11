@@ -15,6 +15,7 @@ from wordfreq.storage.crud.derivative_form import delete_derivative_form
 from wordfreq.storage.crud.lemma import handle_lemma_type_subtype_change
 from wordfreq.storage.queries.lemma import build_lemma_search_query
 from barsukas.helpers.lemma_display import get_difficulty_stats, group_derivative_forms
+from audioshoe.espeak.types import EspeakVoice
 from config import Config
 
 bp = Blueprint("lemmas", __name__, url_prefix="/lemmas")
@@ -293,6 +294,15 @@ def view_lemma(lemma_id):
 
     tombstones = get_tombstones_by_lemma_id(g.db, lemma_id)
 
+    # Prepare voice options for audio generation
+    openai_voices = ["ash", "alloy", "nova", "ballad", "coral", "echo", "fable", "onyx", "sage", "shimmer"]
+
+    # eSpeak-NG voices by language
+    espeak_voices = {}
+    for lang_code in language_names.keys():
+        voices = EspeakVoice.get_voices_for_language(lang_code)
+        espeak_voices[lang_code] = [{"name": v.name, "gender": v.gender} for v in voices]
+
     return render_template(
         "lemmas/view.html",
         lemma=lemma,
@@ -310,6 +320,8 @@ def view_lemma(lemma_id):
         needs_disambiguation_check=needs_disambiguation_check,
         grammar_facts=grammar_facts,
         tombstones=tombstones,
+        openai_voices=openai_voices,
+        espeak_voices=espeak_voices,
     )
 
 

@@ -56,7 +56,7 @@
                         <a href="{{ url_for('audio.import_manifest') }}" class="btn btn-primary">
                             <i class="bi bi-upload"></i> Import Manifest
                         </a>
-                        <a href="{{ url_for('audio.rapid_review', status='pending_review', language='lt') }}" class="btn btn-success">
+                        <a href="{{ url_for('rapid_review.index', status='pending_review', language='lt') }}" class="btn btn-success">
                             <i class="bi bi-lightning-charge"></i> Rapid Review Mode (Lithuanian)
                         </a>
                         <a href="{{ url_for('audio.list_files') }}" class="btn btn-secondary">
