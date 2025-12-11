@@ -55,7 +55,7 @@ Batch audio generation agent for processing multiple lemmas using eSpeak-NG.
 python -m agents.strazdas --list-voices
 
 # Generate audio for Lithuanian lemmas with specific voices
-python -m agents.strazdas --language lt --voices Ona Jonas Ruta --limit 10
+python -m agents.strazdas --language lt --voices Ona Jonas Ruta Tomas --limit 10
 
 # Use IPA phonetic notation (when available)
 python -m agents.strazdas --language lt --use-ipa
@@ -69,52 +69,61 @@ python -m agents.strazdas --language zh --difficulty-level 5
 
 ## Available Voices
 
-Each language has three culturally appropriate voice names with gender variants:
+Each language has **four** culturally appropriate voice names with balanced gender representation (2 female, 2 male):
 
 ### Lithuanian (lt)
 - **Ona** - Female, variant 1
 - **Jonas** - Male, variant 1
 - **Ruta** - Female, variant 2
+- **Tomas** - Male, variant 2
 
 ### Chinese / Mandarin (zh)
 - **Mei** - Female, variant 1
 - **Wei** - Male, variant 1
 - **Ling** - Female, variant 2
+- **Jun** - Male, variant 2
 
 ### Korean (ko)
 - **Minji** - Female, variant 1
 - **Joon** - Male, variant 1
 - **Sora** - Female, variant 2
+- **Minsu** - Male, variant 2
 
 ### French (fr)
 - **Claire** - Female, variant 1
 - **Pierre** - Male, variant 1
 - **Marie** - Female, variant 2
+- **Luc** - Male, variant 2
 
 ### German (de)
 - **Anna** - Female, variant 1
 - **Hans** - Male, variant 1
 - **Greta** - Female, variant 2
+- **Karl** - Male, variant 2
 
 ### Spanish (es)
 - **Sofia** - Female, variant 1
 - **Carlos** - Male, variant 1
 - **Isabel** - Female, variant 2
+- **Diego** - Male, variant 2
 
 ### Portuguese (pt)
 - **Ana** - Female, variant 1
 - **João** - Male, variant 1
 - **Maria** - Female, variant 2
+- **Pedro** - Male, variant 2
 
 ### Swahili (sw)
 - **Amani** - Female, variant 1
 - **Jabari** - Male, variant 1
 - **Zara** - Female, variant 2
+- **Kiano** - Male, variant 2
 
 ### Vietnamese (vi)
 - **Linh** - Female, variant 1
 - **Minh** - Male, variant 1
 - **Hoa** - Female, variant 2
+- **Tuan** - Male, variant 2
 
 ## Technical Details
 
@@ -234,7 +243,7 @@ result = generate_audio(
 )
 
 # Get default voices for a language
-lt_voices = DEFAULT_ESPEAK_VOICES["lt"]  # [Ona, Jonas, Ruta]
+lt_voices = DEFAULT_ESPEAK_VOICES["lt"]  # [Ona, Jonas, Ruta, Tomas]
 
 # Get all voices for a language
 all_lt_voices = EspeakVoice.get_voices_for_language("lt")

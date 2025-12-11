@@ -15,50 +15,59 @@ class EspeakVoice(Enum):
     Variant: 1-4 for different voice characteristics
     """
 
-    # Lithuanian voices
+    # Lithuanian voices (2F/2M)
     ONA = ("lt", "f", 1)        # Female, variant 1
     JONAS = ("lt", "m", 1)      # Male, variant 1
     RUTA = ("lt", "f", 2)       # Female, variant 2
+    TOMAS = ("lt", "m", 2)      # Male, variant 2
 
-    # Chinese (Mandarin) voices
+    # Chinese (Mandarin) voices (2F/2M)
     MEI = ("zh", "f", 1)        # Female, variant 1
     WEI = ("zh", "m", 1)        # Male, variant 1
     LING = ("zh", "f", 2)       # Female, variant 2
+    JUN = ("zh", "m", 2)        # Male, variant 2
 
-    # Korean voices
+    # Korean voices (2F/2M)
     MINJI = ("ko", "f", 1)      # Female, variant 1
     JOON = ("ko", "m", 1)       # Male, variant 1
     SORA = ("ko", "f", 2)       # Female, variant 2
+    MINSU = ("ko", "m", 2)      # Male, variant 2
 
-    # French voices
+    # French voices (2F/2M)
     CLAIRE = ("fr", "f", 1)     # Female, variant 1
     PIERRE = ("fr", "m", 1)     # Male, variant 1
     MARIE = ("fr", "f", 2)      # Female, variant 2
+    LUC = ("fr", "m", 2)        # Male, variant 2
 
-    # German voices
+    # German voices (2F/2M)
     ANNA = ("de", "f", 1)       # Female, variant 1
     HANS = ("de", "m", 1)       # Male, variant 1
     GRETA = ("de", "f", 2)      # Female, variant 2
+    KARL = ("de", "m", 2)       # Male, variant 2
 
-    # Spanish voices
+    # Spanish voices (2F/2M)
     SOFIA = ("es", "f", 1)      # Female, variant 1
     CARLOS = ("es", "m", 1)     # Male, variant 1
     ISABEL = ("es", "f", 2)     # Female, variant 2
+    DIEGO = ("es", "m", 2)      # Male, variant 2
 
-    # Portuguese voices
+    # Portuguese voices (2F/2M)
     ANA = ("pt", "f", 1)        # Female, variant 1
     JOAO = ("pt", "m", 1)       # Male, variant 1
     MARIA = ("pt", "f", 2)      # Female, variant 2
+    PEDRO = ("pt", "m", 2)      # Male, variant 2
 
-    # Swahili voices
+    # Swahili voices (2F/2M)
     AMANI = ("sw", "f", 1)      # Female, variant 1
     JABARI = ("sw", "m", 1)     # Male, variant 1
     ZARA = ("sw", "f", 2)       # Female, variant 2
+    KIANO = ("sw", "m", 2)      # Male, variant 2
 
-    # Vietnamese voices
+    # Vietnamese voices (2F/2M)
     LINH = ("vi", "f", 1)       # Female, variant 1
     MINH = ("vi", "m", 1)       # Male, variant 1
     HOA = ("vi", "f", 2)        # Female, variant 2
+    TUAN = ("vi", "m", 2)       # Male, variant 2
 
     @property
     def language_code(self) -> str:
@@ -92,20 +101,19 @@ class EspeakVoice(Enum):
 
     @classmethod
     def get_default_voices_for_language(cls, language_code: str):
-        """Get default voices for a language (typically first 3 voices)."""
-        voices = cls.get_voices_for_language(language_code)
-        return voices[:3] if len(voices) >= 3 else voices
+        """Get default voices for a language (all 4 voices: 2F/2M)."""
+        return cls.get_voices_for_language(language_code)
 
 
-# Default voices for each language (3 per language)
+# Default voices for each language (4 per language: 2 female, 2 male)
 DEFAULT_ESPEAK_VOICES = {
-    "lt": [EspeakVoice.ONA, EspeakVoice.JONAS, EspeakVoice.RUTA],
-    "zh": [EspeakVoice.MEI, EspeakVoice.WEI, EspeakVoice.LING],
-    "ko": [EspeakVoice.MINJI, EspeakVoice.JOON, EspeakVoice.SORA],
-    "fr": [EspeakVoice.CLAIRE, EspeakVoice.PIERRE, EspeakVoice.MARIE],
-    "de": [EspeakVoice.ANNA, EspeakVoice.HANS, EspeakVoice.GRETA],
-    "es": [EspeakVoice.SOFIA, EspeakVoice.CARLOS, EspeakVoice.ISABEL],
-    "pt": [EspeakVoice.ANA, EspeakVoice.JOAO, EspeakVoice.MARIA],
-    "sw": [EspeakVoice.AMANI, EspeakVoice.JABARI, EspeakVoice.ZARA],
-    "vi": [EspeakVoice.LINH, EspeakVoice.MINH, EspeakVoice.HOA],
+    "lt": [EspeakVoice.ONA, EspeakVoice.JONAS, EspeakVoice.RUTA, EspeakVoice.TOMAS],
+    "zh": [EspeakVoice.MEI, EspeakVoice.WEI, EspeakVoice.LING, EspeakVoice.JUN],
+    "ko": [EspeakVoice.MINJI, EspeakVoice.JOON, EspeakVoice.SORA, EspeakVoice.MINSU],
+    "fr": [EspeakVoice.CLAIRE, EspeakVoice.PIERRE, EspeakVoice.MARIE, EspeakVoice.LUC],
+    "de": [EspeakVoice.ANNA, EspeakVoice.HANS, EspeakVoice.GRETA, EspeakVoice.KARL],
+    "es": [EspeakVoice.SOFIA, EspeakVoice.CARLOS, EspeakVoice.ISABEL, EspeakVoice.DIEGO],
+    "pt": [EspeakVoice.ANA, EspeakVoice.JOAO, EspeakVoice.MARIA, EspeakVoice.PEDRO],
+    "sw": [EspeakVoice.AMANI, EspeakVoice.JABARI, EspeakVoice.ZARA, EspeakVoice.KIANO],
+    "vi": [EspeakVoice.LINH, EspeakVoice.MINH, EspeakVoice.HOA, EspeakVoice.TUAN],
 }
