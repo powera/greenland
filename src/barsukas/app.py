@@ -114,15 +114,7 @@ def create_app(config_class=Config):
         # Get some basic stats
         total_lemmas = g.db.query(Lemma).count()
         verified_lemmas = g.db.query(Lemma).filter_by(verified=True).count()
-
-        # For JSONL backend, filter needs to be a lambda; for SQLite, it's an expression
-        if backend_type == BackendType.JSONL:
-            with_difficulty = g.db.query(Lemma).filter(
-                lambda x: x.difficulty_level is not None
-            ).count()
-        else:
-            with_difficulty = g.db.query(Lemma).filter(Lemma.difficulty_level != None).count()
-
+        with_difficulty = g.db.query(Lemma).filter(Lemma.difficulty_level != None).count()
         total_sentences = g.db.query(Sentence).count()
 
         return render_template(

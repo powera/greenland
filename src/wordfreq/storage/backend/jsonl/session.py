@@ -54,6 +54,34 @@ class JSONLSession(BaseSession):
 
         return self._sqlite_session
 
+    def _get_model_map(self):
+        """Get mapping from JSONL model classes to SQLAlchemy model classes.
+
+        Returns:
+            Dictionary mapping JSONL models to SQLAlchemy models
+        """
+        from wordfreq.storage.models.schema import (
+            Lemma as SQLLemma,
+            LemmaTranslation as SQLLemmaTranslation,
+            LemmaDifficultyOverride as SQLLemmaDifficultyOverride,
+            DerivativeForm as SQLDerivativeForm,
+            Sentence as SQLSentence,
+            SentenceTranslation as SQLSentenceTranslation,
+            SentenceWord as SQLSentenceWord,
+        )
+        from wordfreq.storage.models.grammar_fact import GrammarFact as SQLGrammarFact
+
+        return {
+            models.Lemma: SQLLemma,
+            models.LemmaTranslation: SQLLemmaTranslation,
+            models.LemmaDifficultyOverride: SQLLemmaDifficultyOverride,
+            models.DerivativeForm: SQLDerivativeForm,
+            models.GrammarFact: SQLGrammarFact,
+            models.Sentence: SQLSentence,
+            models.SentenceTranslation: SQLSentenceTranslation,
+            models.SentenceWord: SQLSentenceWord,
+        }
+
     def _populate_sqlite(self):
         """Populate the temporary SQLite database with data from JSONL storage."""
         from wordfreq.storage.models.schema import (
@@ -63,10 +91,12 @@ class JSONLSession(BaseSession):
             SentenceTranslation,
             SentenceWord,
         )
+        from wordfreq.storage.models.grammar_fact import GrammarFact as SQLGrammarFact
 
         # Use bulk operations for better performance
         lemmas = []
         translations = []
+        grammar_facts = []
         sentences = []
         sentence_translations = []
         sentence_words = []
@@ -95,6 +125,17 @@ class JSONLSession(BaseSession):
                     'lemma_id': jsonl_lemma.id,
                     'language_code': lang_code,
                     'translation': translation,
+                })
+
+            # Add grammar facts
+            for fact_data in jsonl_lemma.grammar_facts:
+                grammar_facts.append({
+                    'lemma_id': jsonl_lemma.id,
+                    'language_code': fact_data.get('language_code', ''),
+                    'fact_type': fact_data.get('fact_type', ''),
+                    'fact_value': fact_data.get('fact_value'),
+                    'notes': fact_data.get('notes'),
+                    'verified': fact_data.get('verified', False),
                 })
 
         # Prepare sentences and their translations/words
@@ -136,6 +177,8 @@ class JSONLSession(BaseSession):
             self._sqlite_session.bulk_insert_mappings(SQLLemma, lemmas)
         if translations:
             self._sqlite_session.bulk_insert_mappings(LemmaTranslation, translations)
+        if grammar_facts:
+            self._sqlite_session.bulk_insert_mappings(SQLGrammarFact, grammar_facts)
         if sentences:
             self._sqlite_session.bulk_insert_mappings(SQLSentence, sentences)
         if sentence_translations:
@@ -159,9 +202,21 @@ class JSONLSession(BaseSession):
         if len(entities) == 0:
             raise ValueError("query() requires at least one argument")
 
+        # Map JSONL model classes to SQLAlchemy model classes
+        model_map = self._get_model_map()
+
+        # Convert entities to SQLAlchemy model classes
+        mapped_entities = []
+        for entity in entities:
+            if entity in model_map:
+                mapped_entities.append(model_map[entity])
+            else:
+                # For column attributes or already-mapped entities, pass through
+                mapped_entities.append(entity)
+
         # Delegate all queries to SQLite
         sqlite_session = self._get_sqlite_session()
-        return sqlite_session.query(*entities)
+        return sqlite_session.query(*mapped_entities)
 
     def _extract_lemma_translations(self):
         """Extract LemmaTranslation objects from nested Lemma data."""
@@ -271,9 +326,13 @@ class JSONLSession(BaseSession):
         """
         self._check_not_closed()
 
+        # Map JSONL model class to SQLAlchemy model class
+        model_map = self._get_model_map()
+        mapped_model_class = model_map.get(model_class, model_class)
+
         # Use SQLite for consistent querying
         sqlite_session = self._get_sqlite_session()
-        return sqlite_session.get(model_class, id)
+        return sqlite_session.get(mapped_model_class, id)
 
     def add(self, instance: Any) -> None:
         """Add an instance to the session (mark for saving).
