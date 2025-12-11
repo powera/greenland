@@ -38,9 +38,13 @@ class JSONLSession(BaseSession):
             A SQLAlchemy session connected to a temporary SQLite database
         """
         if self._sqlite_session is None:
+            import logging
             from sqlalchemy import create_engine
             from sqlalchemy.orm import sessionmaker
             from wordfreq.storage.models.schema import Base
+
+            logger = logging.getLogger(__name__)
+            logger.info("Creating temporary in-memory SQLite database for JSONL backend queries")
 
             # Create in-memory SQLite database
             engine = create_engine('sqlite:///:memory:', echo=False)
@@ -51,6 +55,33 @@ class JSONLSession(BaseSession):
 
             # Populate with data from JSONL storage
             self._populate_sqlite()
+
+            # Log statistics about what was loaded
+            from wordfreq.storage.models.schema import (
+                Lemma as SQLLemma,
+                LemmaTranslation,
+                Sentence as SQLSentence,
+                SentenceTranslation,
+                SentenceWord,
+            )
+            from wordfreq.storage.models.grammar_fact import GrammarFact as SQLGrammarFact
+
+            lemma_count = self._sqlite_session.query(SQLLemma).count()
+            translation_count = self._sqlite_session.query(LemmaTranslation).count()
+            grammar_fact_count = self._sqlite_session.query(SQLGrammarFact).count()
+            sentence_count = self._sqlite_session.query(SQLSentence).count()
+            sentence_translation_count = self._sqlite_session.query(SentenceTranslation).count()
+            sentence_word_count = self._sqlite_session.query(SentenceWord).count()
+
+            logger.info(
+                f"Populated temp SQLite DB: "
+                f"{lemma_count} lemmas, "
+                f"{translation_count} translations, "
+                f"{grammar_fact_count} grammar_facts, "
+                f"{sentence_count} sentences, "
+                f"{sentence_translation_count} sentence_translations, "
+                f"{sentence_word_count} sentence_words"
+            )
 
         return self._sqlite_session
 

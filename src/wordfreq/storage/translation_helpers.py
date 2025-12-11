@@ -18,18 +18,18 @@ from wordfreq.storage.models.schema import Lemma, LemmaTranslation
 # Language mappings
 # Format: 'code': (field_name_or_code, display_name, use_lemma_translation_table)
 # If use_lemma_translation_table is True, field_name_or_code is the language_code for LemmaTranslation table
-# If False, field_name_or_code is the column name in Lemma table
+# If False, field_name_or_code is the column name in Lemma table (only used for English)
 LANGUAGE_FIELDS = {
     "en": ("lemma_text", "English", False),  # English uses lemma_text field
-    "lt": ("lithuanian_translation", "Lithuanian", False),
-    "zh": ("chinese_translation", "Chinese", False),
-    "ko": ("korean_translation", "Korean", False),
-    "fr": ("french_translation", "French", False),
+    "lt": ("lt", "Lithuanian", True),
+    "zh": ("zh", "Chinese", True),
+    "ko": ("ko", "Korean", True),
+    "fr": ("fr", "French", True),
     "es": ("es", "Spanish", True),
     "de": ("de", "German", True),
     "pt": ("pt", "Portuguese", True),
-    "sw": ("swahili_translation", "Swahili", False),
-    "vi": ("vietnamese_translation", "Vietnamese", False),
+    "sw": ("sw", "Swahili", True),
+    "vi": ("vi", "Vietnamese", True),
 }
 
 
