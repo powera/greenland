@@ -124,9 +124,16 @@ def set_translation(
 
         if translation_obj:
             translation_obj.translation = translation
+            # For JSONL backend: ensure lemma reference is set for nested update
+            if not hasattr(translation_obj, 'lemma') or translation_obj.lemma is None:
+                translation_obj.lemma = lemma
         else:
             translation_obj = LemmaTranslation(
-                lemma_id=lemma.id, language_code=field_name, translation=translation, verified=False
+                lemma_id=lemma.id,
+                language_code=field_name,
+                translation=translation,
+                verified=False,
+                lemma=lemma  # CRITICAL: Set lemma reference for JSONL backend
             )
             session.add(translation_obj)
     else:

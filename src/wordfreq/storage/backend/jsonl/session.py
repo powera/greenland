@@ -60,6 +60,8 @@ class JSONLSession(BaseSession):
             from wordfreq.storage.models.schema import (
                 Lemma as SQLLemma,
                 LemmaTranslation,
+                LemmaDifficultyOverride,
+                DerivativeForm as SQLDerivativeForm,
                 Sentence as SQLSentence,
                 SentenceTranslation,
                 SentenceWord,
@@ -68,6 +70,8 @@ class JSONLSession(BaseSession):
 
             lemma_count = self._sqlite_session.query(SQLLemma).count()
             translation_count = self._sqlite_session.query(LemmaTranslation).count()
+            difficulty_override_count = self._sqlite_session.query(LemmaDifficultyOverride).count()
+            derivative_form_count = self._sqlite_session.query(SQLDerivativeForm).count()
             grammar_fact_count = self._sqlite_session.query(SQLGrammarFact).count()
             sentence_count = self._sqlite_session.query(SQLSentence).count()
             sentence_translation_count = self._sqlite_session.query(SentenceTranslation).count()
@@ -77,6 +81,8 @@ class JSONLSession(BaseSession):
                 f"Populated temp SQLite DB: "
                 f"{lemma_count} lemmas, "
                 f"{translation_count} translations, "
+                f"{difficulty_override_count} difficulty_overrides, "
+                f"{derivative_form_count} derivative_forms, "
                 f"{grammar_fact_count} grammar_facts, "
                 f"{sentence_count} sentences, "
                 f"{sentence_translation_count} sentence_translations, "
@@ -118,6 +124,8 @@ class JSONLSession(BaseSession):
         from wordfreq.storage.models.schema import (
             Lemma as SQLLemma,
             LemmaTranslation,
+            LemmaDifficultyOverride,
+            DerivativeForm as SQLDerivativeForm,
             Sentence as SQLSentence,
             SentenceTranslation,
             SentenceWord,
@@ -127,6 +135,8 @@ class JSONLSession(BaseSession):
         # Use bulk operations for better performance
         lemmas = []
         translations = []
+        difficulty_overrides = []
+        derivative_forms = []
         grammar_facts = []
         sentences = []
         sentence_translations = []
@@ -158,6 +168,27 @@ class JSONLSession(BaseSession):
                     'translation': translation,
                 })
 
+            # Add difficulty overrides
+            for lang_code, level in jsonl_lemma.difficulty_overrides.items():
+                difficulty_overrides.append({
+                    'lemma_id': jsonl_lemma.id,
+                    'language_code': lang_code,
+                    'difficulty_level': level,
+                })
+
+            # Add derivative forms
+            for lang_code, lang_forms in jsonl_lemma.derivative_forms.items():
+                for form_name, form_data in lang_forms.items():
+                    derivative_forms.append({
+                        'lemma_id': jsonl_lemma.id,
+                        'language_code': lang_code,
+                        'grammatical_form': form_name,
+                        'derivative_form_text': form_data.get('form', ''),
+                        'is_base_form': form_data.get('is_base_form', False),
+                        'ipa_pronunciation': form_data.get('ipa'),
+                        'phonetic_pronunciation': form_data.get('phonetic'),
+                    })
+
             # Add grammar facts
             for fact_data in jsonl_lemma.grammar_facts:
                 grammar_facts.append({
@@ -171,17 +202,27 @@ class JSONLSession(BaseSession):
 
         # Prepare sentences and their translations/words
         for jsonl_sentence in self._storage.sentences.values():
+            # Map to SQLite Sentence schema (which doesn't have sentence_text/language_code directly)
             sentence_dict = {
                 'id': jsonl_sentence.id,
-                'guid': jsonl_sentence.guid,
-                'sentence_text': jsonl_sentence.sentence_text,
-                'language_code': jsonl_sentence.language_code,
-                'difficulty_level': jsonl_sentence.difficulty_level,
-                'audio_url': jsonl_sentence.audio_url,
+                'pattern_type': jsonl_sentence.pattern_type,
+                'tense': jsonl_sentence.tense,
+                'minimum_level': jsonl_sentence.minimum_level or jsonl_sentence.difficulty_level,
+                'source_filename': jsonl_sentence.source_filename,
+                'verified': jsonl_sentence.verified,
+                'notes': jsonl_sentence.notes,
                 'added_at': jsonl_sentence.added_at,
                 'updated_at': jsonl_sentence.updated_at,
             }
             sentences.append(sentence_dict)
+
+            # Add primary sentence text as a translation (JSONL stores it directly)
+            if jsonl_sentence.sentence_text and jsonl_sentence.language_code:
+                sentence_translations.append({
+                    'sentence_id': jsonl_sentence.id,
+                    'language_code': jsonl_sentence.language_code,
+                    'translation_text': jsonl_sentence.sentence_text,
+                })
 
             # Add translations
             for lang_code, translation_text in jsonl_sentence.translations.items():
@@ -199,7 +240,11 @@ class JSONLSession(BaseSession):
                     'language_code': word_data.get("language_code", ""),
                     'position': word_data.get("position", 0),
                     'word_role': word_data.get("word_role"),
+                    'english_text': word_data.get("english_text"),
+                    'target_language_text': word_data.get("target_language_text"),
                     'grammatical_form': word_data.get("grammatical_form"),
+                    'grammatical_case': word_data.get("grammatical_case"),
+                    'declined_form': word_data.get("declined_form"),
                     'is_required_vocab': word_data.get("is_required_vocab", True),
                 })
 
@@ -208,6 +253,10 @@ class JSONLSession(BaseSession):
             self._sqlite_session.bulk_insert_mappings(SQLLemma, lemmas)
         if translations:
             self._sqlite_session.bulk_insert_mappings(LemmaTranslation, translations)
+        if difficulty_overrides:
+            self._sqlite_session.bulk_insert_mappings(LemmaDifficultyOverride, difficulty_overrides)
+        if derivative_forms:
+            self._sqlite_session.bulk_insert_mappings(SQLDerivativeForm, derivative_forms)
         if grammar_facts:
             self._sqlite_session.bulk_insert_mappings(SQLGrammarFact, grammar_facts)
         if sentences:
@@ -387,13 +436,31 @@ class JSONLSession(BaseSession):
         """Commit all pending changes to storage."""
         self._check_not_closed()
 
+        # Import SQLAlchemy models for type checking
+        from wordfreq.storage.models.schema import (
+            Lemma as SQLLemma,
+            LemmaTranslation as SQLLemmaTranslation,
+            LemmaDifficultyOverride as SQLLemmaDifficultyOverride,
+            DerivativeForm as SQLDerivativeForm,
+            Sentence as SQLSentence,
+            SentenceTranslation as SQLSentenceTranslation,
+            SentenceWord as SQLSentenceWord,
+        )
+        from wordfreq.storage.models.grammar_fact import GrammarFact as SQLGrammarFact
+
         # Process deletes first
         for instance in self._pending_deletes:
-            if isinstance(instance, models.Lemma):
-                self._storage.delete_lemma(instance)
-            elif isinstance(instance, models.Sentence):
-                self._storage.delete_sentence(instance)
-            # Other types can be removed from lists
+            if isinstance(instance, (models.Lemma, SQLLemma)):
+                # Convert SQLAlchemy to JSONL if needed
+                if isinstance(instance, SQLLemma):
+                    instance = self._storage.lemmas.get(instance.guid)
+                if instance:
+                    self._storage.delete_lemma(instance)
+            elif isinstance(instance, (models.Sentence, SQLSentence)):
+                if isinstance(instance, SQLSentence):
+                    instance = self._storage.sentences.get(instance.guid)
+                if instance:
+                    self._storage.delete_sentence(instance)
 
         # Process adds
         for instance in self._pending_adds:
@@ -402,6 +469,54 @@ class JSONLSession(BaseSession):
                 instance.added_at = datetime.datetime.now()
             if hasattr(instance, "updated_at"):
                 instance.updated_at = datetime.datetime.now()
+
+            # Handle SQLAlchemy models from temp database queries
+            # For nested models (translations, etc.), we need to update the parent JSONL model
+            if isinstance(instance, (SQLLemmaTranslation, SQLLemmaDifficultyOverride, SQLDerivativeForm, SQLGrammarFact)):
+                # Find the parent JSONL lemma
+                jsonl_lemma = self._storage.lemmas_by_id.get(instance.lemma_id)
+                if jsonl_lemma:
+                    if isinstance(instance, SQLLemmaTranslation):
+                        # Update translation in JSONL lemma
+                        jsonl_lemma.translations[instance.language_code] = instance.translation
+                        self._storage.save_lemma(jsonl_lemma)
+                    elif isinstance(instance, SQLLemmaDifficultyOverride):
+                        # Update difficulty override in JSONL lemma
+                        jsonl_lemma.difficulty_overrides[instance.language_code] = instance.difficulty_level
+                        self._storage.save_lemma(jsonl_lemma)
+                    elif isinstance(instance, SQLDerivativeForm):
+                        # Update derivative form in JSONL lemma
+                        if instance.language_code not in jsonl_lemma.derivative_forms:
+                            jsonl_lemma.derivative_forms[instance.language_code] = {}
+                        jsonl_lemma.derivative_forms[instance.language_code][instance.grammatical_form] = {
+                            "form": instance.derivative_form_text,
+                            "is_base_form": instance.is_base_form,
+                            "ipa": instance.ipa_pronunciation,
+                            "phonetic": instance.phonetic_pronunciation,
+                        }
+                        self._storage.save_lemma(jsonl_lemma)
+                    elif isinstance(instance, SQLGrammarFact):
+                        # Update grammar fact in JSONL lemma
+                        fact_data = {
+                            "language_code": instance.language_code,
+                            "fact_type": instance.fact_type,
+                            "fact_value": instance.fact_value,
+                            "notes": instance.notes,
+                            "verified": instance.verified,
+                        }
+                        # Check if fact already exists
+                        existing = None
+                        for i, fact in enumerate(jsonl_lemma.grammar_facts):
+                            if (fact.get("language_code") == instance.language_code
+                                and fact.get("fact_type") == instance.fact_type):
+                                existing = i
+                                break
+                        if existing is not None:
+                            jsonl_lemma.grammar_facts[existing] = fact_data
+                        else:
+                            jsonl_lemma.grammar_facts.append(fact_data)
+                        self._storage.save_lemma(jsonl_lemma)
+                continue
 
             # Save to storage
             if isinstance(instance, models.Lemma):

@@ -197,15 +197,26 @@ class GrammarFact:
 
 @dataclass
 class Sentence:
-    """JSONL model for sentences."""
+    """JSONL model for sentences.
+
+    Note: Unlike the SQLite Sentence model which stores sentence_text in SentenceTranslation,
+    the JSONL model stores it directly for convenience. The primary sentence text and language
+    are stored in the main fields, with translations stored in the translations dict.
+    """
 
     id: Optional[int] = None
     guid: Optional[str] = None  # Used as primary identifier in JSONL
 
+    # Primary sentence data (stored directly in JSONL, unlike SQLite)
+    sentence_text: str = ""  # The sentence text in its primary language
+    language_code: str = ""  # The primary language of this sentence (e.g., 'lt', 'fr')
+
     # Metadata
     pattern_type: Optional[str] = None
     tense: Optional[str] = None
-    minimum_level: Optional[int] = None
+    difficulty_level: Optional[int] = None  # Alias for minimum_level
+    minimum_level: Optional[int] = None  # For compatibility with SQLite schema
+    audio_url: Optional[str] = None
     source_filename: Optional[str] = None
     verified: bool = False
     notes: Optional[str] = None
@@ -219,6 +230,8 @@ class Sentence:
     def to_dict(self) -> dict:
         """Convert to dictionary for JSONL serialization."""
         data = asdict(self)
+        # Remove id field - GUID is the primary key in JSONL
+        data.pop("id", None)
         if self.added_at:
             data["added_at"] = self.added_at.isoformat()
         if self.updated_at:
@@ -233,8 +246,17 @@ class Sentence:
         if "updated_at" in data and data["updated_at"]:
             data["updated_at"] = datetime.datetime.fromisoformat(data["updated_at"])
 
+        # Ensure default values
         data.setdefault("translations", {})
         data.setdefault("words", [])
+        data.setdefault("sentence_text", "")
+        data.setdefault("language_code", "")
+
+        # Handle both difficulty_level and minimum_level (for compatibility)
+        if "difficulty_level" in data and "minimum_level" not in data:
+            data["minimum_level"] = data["difficulty_level"]
+        elif "minimum_level" in data and "difficulty_level" not in data:
+            data["difficulty_level"] = data["minimum_level"]
 
         return cls(**data)
 
@@ -276,6 +298,7 @@ class SentenceWord:
     grammatical_form: Optional[str] = None
     grammatical_case: Optional[str] = None
     declined_form: Optional[str] = None
+    is_required_vocab: bool = True  # Whether this word is required vocabulary (default: True)
     notes: Optional[str] = None
     added_at: Optional[datetime.datetime] = None
 
