@@ -21,16 +21,19 @@ class SQLiteSession(BaseSession):
         """
         self._sqlalchemy_session = sqlalchemy_session
 
-    def query(self, model_class: Type[T]) -> BaseQuery[T]:
-        """Create a query for the given model class.
+    def query(self, *entities, **kwargs) -> BaseQuery[T]:
+        """Create a query for the given model class or column expressions.
 
         Args:
-            model_class: The model class to query
+            *entities: Model class(es) or column expression(s) to query
+            **kwargs: Additional keyword arguments for the query
 
         Returns:
             A SQLiteQuery instance
         """
-        sqlalchemy_query = self._sqlalchemy_session.query(model_class)
+        sqlalchemy_query = self._sqlalchemy_session.query(*entities, **kwargs)
+        # Use the first entity as the model class if it's a type, otherwise None
+        model_class = entities[0] if entities and isinstance(entities[0], type) else None
         return SQLiteQuery(sqlalchemy_query, model_class)
 
     def get(self, model_class: Type[T], id: Any) -> Optional[T]:

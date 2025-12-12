@@ -204,3 +204,26 @@ class SQLiteQuery(BaseQuery[T]):
         else:
             new_query = self._sqlalchemy_query.distinct()
         return SQLiteQuery(new_query, self._model_class)
+
+    def get(self, ident: Any) -> Optional[T]:
+        """Get a record by primary key.
+
+        Args:
+            ident: The primary key value
+
+        Returns:
+            The model instance or None if not found
+        """
+        return self._sqlalchemy_query.get(ident)
+
+    def group_by(self, *criterion: Any) -> "SQLiteQuery[T]":
+        """Group query results by one or more columns.
+
+        Args:
+            *criterion: Group by expressions
+
+        Returns:
+            A new SQLiteQuery with the grouping applied
+        """
+        new_query = self._sqlalchemy_query.group_by(*criterion)
+        return SQLiteQuery(new_query, self._model_class)

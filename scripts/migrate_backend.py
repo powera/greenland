@@ -113,11 +113,9 @@ def convert_sqlalchemy_lemma_to_jsonl(lemma, session):
     from wordfreq.storage import translation_helpers
 
     # Get translations from the new translation table
-    translations = {}
-    for lang_code in ["lt", "zh", "ko", "fr", "sw", "vi"]:
-        trans_text = translation_helpers.get_translation(session, lemma, lang_code)
-        if trans_text:
-            translations[lang_code] = trans_text
+    translations = translation_helpers.get_all_translations(session, lemma)
+    # Remove None values and English (English is handled separately)
+    translations = {k: v for k, v in translations.items() if v is not None and k != "en"}
 
     # Get difficulty overrides
     difficulty_overrides = {}
