@@ -14,6 +14,7 @@ import constants
 from telemetry import LLMUsage
 from clients.types import Response
 import clients.lib
+from clients.keys import load_key
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -47,19 +48,10 @@ class GeminiClient:
         if debug:
             logger.setLevel(logging.DEBUG)
             logger.debug("Initialized GeminiClient in debug mode")
-        self.api_key = self._load_key()
+        self.api_key = load_key("google", required=False)
         self.headers = {"Content-Type": "application/json"}
         # Use the same tokenizer as OpenAI for token counting consistency
         self.encoder = tiktoken.get_encoding("cl100k_base")
-
-    def _load_key(self) -> str:
-        """Load Google API key from file."""
-        try:
-            key_path = os.path.join(constants.KEY_DIR, "google.key")
-            with open(key_path) as f:
-                return f.read().strip()
-        except:
-            return ""  # Return empty string if key file not found
 
     @measure_completion
     def _create_completion(self, model: str, **kwargs) -> Dict:
@@ -107,7 +99,14 @@ class GeminiClient:
             Response containing response_text, structured_data, and usage
             For text responses, structured_data will be empty dict
             For JSON responses, response_text will be empty string
+
+        Raises:
+            RuntimeError: If API key is not available
         """
+        # Check if API key is available
+        if not self.api_key:
+            raise RuntimeError("Google API key not available. Please ensure the key file exists.")
+
         if self.debug:
             logger.debug("Generating chat response")
             logger.debug("Model: %s", model)

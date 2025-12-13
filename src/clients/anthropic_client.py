@@ -13,6 +13,7 @@ import constants
 from telemetry import LLMUsage
 from clients.types import Response, Schema
 import clients.lib
+from clients.keys import load_key
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -58,25 +59,16 @@ class AnthropicClient:
             logger.setLevel(logging.DEBUG)
             logger.debug("Initialized AnthropicClient in debug mode")
 
-        self.api_key = self._load_key()
-        self.headers = {
-            "x-api-key": self.api_key,
-            "anthropic-version": "2023-06-01",
-            "content-type": "application/json",
-            "anthropic-beta": "prompt-caching-2024-07-31",
-        }
-
-    def _load_key(self) -> str:
-        """Load Anthropic API key from file."""
-        key_path = os.path.join(constants.KEY_DIR, "anthropic.key")
-        try:
-            with open(key_path) as f:
-                return f.read().strip()
-        except FileNotFoundError:
-            raise FileNotFoundError(
-                f"Anthropic API key not found at {key_path}. "
-                "Please create this file with your API key."
-            )
+        self.api_key = load_key("anthropic", required=False)
+        if self.api_key:
+            self.headers = {
+                "x-api-key": self.api_key,
+                "anthropic-version": "2023-06-01",
+                "content-type": "application/json",
+                "anthropic-beta": "prompt-caching-2024-07-31",
+            }
+        else:
+            self.headers = {}
 
     @measure_completion
     def _create_message(self, **kwargs) -> Dict:
@@ -124,7 +116,14 @@ class AnthropicClient:
             Response containing response_text, structured_data, and usage
             For text responses, structured_data will be empty dict
             For JSON responses, response_text will be empty string
+
+        Raises:
+            RuntimeError: If API key is not available
         """
+        # Check if API key is available
+        if not self.api_key:
+            raise RuntimeError("Anthropic API key not available. Please ensure the key file exists.")
+
         if self.debug:
             logger.debug("Generating chat response")
             logger.debug("Model: %s", model)

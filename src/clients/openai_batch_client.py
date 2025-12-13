@@ -11,6 +11,7 @@ from enum import Enum
 import requests
 
 import constants
+from clients.keys import load_key
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -48,17 +49,15 @@ class OpenAIBatchClient:
         if debug:
             logger.setLevel(logging.DEBUG)
             logger.debug("Initialized OpenAIBatchClient in debug mode")
-        self.api_key = self._load_key()
-        self.headers = {
-            "Authorization": f"Bearer {self.api_key}",
-            "Content-Type": "application/json",
-        }
 
-    def _load_key(self) -> str:
-        """Load OpenAI API key from file."""
-        key_path = os.path.join(constants.KEY_DIR, "openai.key")
-        with open(key_path) as f:
-            return f.read().strip()
+        self.api_key = load_key("openai", required=False)
+        if self.api_key:
+            self.headers = {
+                "Authorization": f"Bearer {self.api_key}",
+                "Content-Type": "application/json",
+            }
+        else:
+            self.headers = {}
 
     def upload_batch_file(self, requests_data: List[Dict[str, Any]]) -> str:
         """Upload a batch input file to OpenAI.
@@ -74,6 +73,9 @@ class OpenAIBatchClient:
         Returns:
             File ID of the uploaded batch file
 
+        Raises:
+            RuntimeError: If API key is not available
+
         Example request format:
             {
                 "custom_id": "request-1",
@@ -86,6 +88,10 @@ class OpenAIBatchClient:
                 }
             }
         """
+        # Check if API key is available
+        if not self.api_key:
+            raise RuntimeError("OpenAI API key not available. Please ensure the key file exists.")
+
         # Convert list of dicts to JSONL format
         jsonl_content = "\n".join(json.dumps(req) for req in requests_data)
 

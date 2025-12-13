@@ -10,6 +10,7 @@ from typing import Optional
 import requests
 
 import constants
+from clients.keys import load_key
 from .types import Voice, AudioFormat, AudioGenerationResult
 
 # Configure logging
@@ -75,7 +76,7 @@ class OpenAITTSClient:
             logger.setLevel(logging.DEBUG)
             logger.debug("Initialized OpenAITTSClient in debug mode")
 
-        self.api_key = self._load_key()
+        self.api_key = load_key("openai", required=False)
         if self.api_key:
             self.headers = {
                 "Authorization": f"Bearer {self.api_key}",
@@ -83,16 +84,6 @@ class OpenAITTSClient:
             }
         else:
             self.headers = {}
-
-    def _load_key(self) -> Optional[str]:
-        """Load OpenAI API key from file. Returns None if key file doesn't exist."""
-        key_path = os.path.join(constants.KEY_DIR, "openai.key")
-        try:
-            with open(key_path) as f:
-                return f.read().strip()
-        except FileNotFoundError:
-            logger.warning(f"OpenAI API key file not found at {key_path}")
-            return None
 
     def generate_audio(
         self,

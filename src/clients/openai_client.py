@@ -14,6 +14,7 @@ import constants
 from telemetry import LLMUsage
 from clients.types import Response
 import clients.lib
+from clients.keys import load_key
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -49,18 +50,16 @@ class OpenAIClient:
         if debug:
             logger.setLevel(logging.DEBUG)
             logger.debug("Initialized OpenAIClient in debug mode")
-        self.api_key = self._load_key()
-        self.headers = {
-            "Authorization": f"Bearer {self.api_key}",
-            "Content-Type": "application/json",
-        }
-        self.encoder = tiktoken.get_encoding("cl100k_base")
 
-    def _load_key(self) -> str:
-        """Load OpenAI API key from file."""
-        key_path = os.path.join(constants.KEY_DIR, "openai.key")
-        with open(key_path) as f:
-            return f.read().strip()
+        self.api_key = load_key("openai", required=False)
+        if self.api_key:
+            self.headers = {
+                "Authorization": f"Bearer {self.api_key}",
+                "Content-Type": "application/json",
+            }
+        else:
+            self.headers = {}
+        self.encoder = tiktoken.get_encoding("cl100k_base")
 
     @measure_completion
     def _create_response(self, **kwargs) -> Dict:
@@ -108,7 +107,14 @@ class OpenAIClient:
             Response containing response_text, structured_data, and usage
             For text responses, structured_data will be empty dict
             For JSON responses, response_text will be empty string
+
+        Raises:
+            RuntimeError: If API key is not available
         """
+        # Check if API key is available
+        if not self.api_key:
+            raise RuntimeError("OpenAI API key not available. Please ensure the key file exists.")
+
         if self.debug:
             logger.debug("Generating chat response")
             logger.debug("Model: %s", model)
