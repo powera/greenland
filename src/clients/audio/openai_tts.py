@@ -76,16 +76,23 @@ class OpenAITTSClient:
             logger.debug("Initialized OpenAITTSClient in debug mode")
 
         self.api_key = self._load_key()
-        self.headers = {
-            "Authorization": f"Bearer {self.api_key}",
-            "Content-Type": "application/json",
-        }
+        if self.api_key:
+            self.headers = {
+                "Authorization": f"Bearer {self.api_key}",
+                "Content-Type": "application/json",
+            }
+        else:
+            self.headers = {}
 
-    def _load_key(self) -> str:
-        """Load OpenAI API key from file."""
+    def _load_key(self) -> Optional[str]:
+        """Load OpenAI API key from file. Returns None if key file doesn't exist."""
         key_path = os.path.join(constants.KEY_DIR, "openai.key")
-        with open(key_path) as f:
-            return f.read().strip()
+        try:
+            with open(key_path) as f:
+                return f.read().strip()
+        except FileNotFoundError:
+            logger.warning(f"OpenAI API key file not found at {key_path}")
+            return None
 
     def generate_audio(
         self,
@@ -109,7 +116,14 @@ class OpenAITTSClient:
 
         Returns:
             AudioGenerationResult with audio data and metadata
+
+        Raises:
+            RuntimeError: If API key is not available
         """
+        # Check if API key is available
+        if not self.api_key:
+            raise RuntimeError("OpenAI API key not available. Please ensure the key file exists.")
+
         start_time = time.time()
 
         if self.debug:
