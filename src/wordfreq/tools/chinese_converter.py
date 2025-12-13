@@ -24,7 +24,7 @@ _traditional_to_simplified = None
 _simplified_to_traditional = None
 
 
-def _get_t2s_converter() -> Optional[OpenCC]:
+def _get_t2s_converter() -> Optional["OpenCC"]:
     """Get or create Traditional to Simplified converter."""
     global _traditional_to_simplified
 
@@ -45,7 +45,7 @@ def _get_t2s_converter() -> Optional[OpenCC]:
     return _traditional_to_simplified
 
 
-def _get_s2t_converter() -> Optional[OpenCC]:
+def _get_s2t_converter() -> Optional["OpenCC"]:
     """Get or create Simplified to Traditional converter."""
     global _simplified_to_traditional
 
