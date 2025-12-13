@@ -5,6 +5,8 @@
 
 # Default storage format
 STORAGE_FORMAT="sqlite"
+# Default to localhost only for security
+HOST_ARGS=""
 
 # Parse command-line arguments
 while [[ $# -gt 0 ]]; do
@@ -12,6 +14,10 @@ while [[ $# -gt 0 ]]; do
         -f|--format)
             STORAGE_FORMAT="$2"
             shift 2
+            ;;
+        -a|--all-interfaces)
+            HOST_ARGS="--host 0.0.0.0"
+            shift
             ;;
         *)
             # Pass through any other arguments to the Flask app
@@ -23,7 +29,7 @@ done
 # Validate storage format
 if [[ "$STORAGE_FORMAT" != "jsonl" && "$STORAGE_FORMAT" != "sqlite" ]]; then
     echo "Error: Invalid storage format '$STORAGE_FORMAT'"
-    echo "Usage: $0 [-f|--format jsonl|sqlite]"
+    echo "Usage: $0 [-f|--format jsonl|sqlite] [-a|--all-interfaces]"
     exit 1
 fi
 
@@ -57,4 +63,4 @@ fi
 echo ""
 
 # Run the Flask app with remaining arguments
-python app.py "$@"
+python app.py $HOST_ARGS "$@"

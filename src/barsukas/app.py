@@ -137,6 +137,9 @@ def main():
     """Run the Flask development server."""
     parser = argparse.ArgumentParser(description="Barsukas Web Interface")
     parser.add_argument(
+        "--host", type=str, default=Config.HOST, help=f"Host to bind to (default: {Config.HOST})"
+    )
+    parser.add_argument(
         "--port", type=int, default=Config.PORT, help=f"Port to run on (default: {Config.PORT})"
     )
     parser.add_argument("--debug", action="store_true", help="Enable debug mode")
@@ -153,13 +156,13 @@ def main():
     if args.readonly:
         app.config["READONLY"] = True
 
-    print(f"Starting Barsukas on http://{Config.HOST}:{args.port}")
+    print(f"Starting Barsukas on http://{args.host}:{args.port}")
     print(f"Database: {app.config['DB_PATH']}")
     if args.readonly:
         print("Running in READ-ONLY mode - no edits allowed")
     print(f"Press Ctrl+C to stop")
 
-    app.run(host=Config.HOST, port=args.port, debug=app.config["DEBUG"])
+    app.run(host=args.host, port=args.port, debug=app.config["DEBUG"])
 
 
 if __name__ == "__main__":
