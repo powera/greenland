@@ -16,6 +16,8 @@ from wordfreq.storage.crud.lemma import handle_lemma_type_subtype_change
 from wordfreq.storage.queries.lemma import build_lemma_search_query
 from barsukas.helpers.lemma_display import get_difficulty_stats, group_derivative_forms
 from audioshoe.espeak.types import EspeakVoice
+from audioshoe.piper.types import PiperVoice
+from audioshoe.coqui.types import CoquiVoice
 from config import Config
 
 bp = Blueprint("lemmas", __name__, url_prefix="/lemmas")
@@ -303,6 +305,18 @@ def view_lemma(lemma_id):
         voices = EspeakVoice.get_voices_for_language(lang_code)
         espeak_voices[lang_code] = [{"name": v.name, "gender": v.gender} for v in voices]
 
+    # Piper voices by language
+    piper_voices = {}
+    for lang_code in language_names.keys():
+        voices = PiperVoice.get_voices_for_language(lang_code)
+        piper_voices[lang_code] = [{"name": v.name, "ui_name": v.ui_name, "gender": v.gender} for v in voices]
+
+    # Coqui voices by language
+    coqui_voices = {}
+    for lang_code in language_names.keys():
+        voices = CoquiVoice.get_voices_for_language(lang_code)
+        coqui_voices[lang_code] = [{"name": v.name, "ui_name": v.ui_name, "gender": v.gender} for v in voices]
+
     return render_template(
         "lemmas/view.html",
         lemma=lemma,
@@ -322,6 +336,8 @@ def view_lemma(lemma_id):
         tombstones=tombstones,
         openai_voices=openai_voices,
         espeak_voices=espeak_voices,
+        piper_voices=piper_voices,
+        coqui_voices=coqui_voices,
     )
 
 

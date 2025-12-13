@@ -38,6 +38,8 @@ from barsukas.helpers.audio_helpers import link_audio_to_lemma, validate_audio_t
 from agents.vieversys import VieversysAgent
 from agents.strazdas import StrazdasAgent
 from audioshoe.espeak import EspeakVoice
+from audioshoe.piper import PiperVoice, PiperClient
+from audioshoe.coqui import CoquiVoice, CoquiClient
 
 bp = Blueprint("audio", __name__, url_prefix="/audio")
 logger = logging.getLogger(__name__)
@@ -688,6 +690,168 @@ def generate():
         return redirect(url_for("audio.generate"))
 
 
+def _generate_audio_piper(session, lemma, language_code, voices, output_dir):
+    """
+    Generate audio for a lemma using Piper TTS.
+
+    Args:
+        session: Database session
+        lemma: Lemma object
+        language_code: Language code (e.g., "lt", "zh")
+        voices: List of PiperVoice enums
+        output_dir: Base output directory
+
+    Returns:
+        dict with success, voices, and error information
+    """
+    from wordfreq.storage.translation_helpers import get_translation
+    from clients.audio.types import AudioFormat
+    import hashlib
+
+    try:
+        # Get translation for the language
+        translation = get_translation(session, lemma, language_code)
+        if not translation:
+            return {"success": False, "error": f"No translation found for language: {language_code}"}
+
+        # Create Piper client
+        client = PiperClient()
+
+        # Generate audio for each voice
+        generated_voices = []
+        for voice in voices:
+            # Generate audio
+            result = client.generate_audio(
+                text=translation,
+                voice=voice,
+                audio_format=AudioFormat.MP3,
+                speed=1.0,
+            )
+
+            if not result.success:
+                logger.error(f"Failed to generate audio for {voice.ui_name}: {result.error}")
+                continue
+
+            # Save audio file
+            voice_dir = Path(output_dir) / language_code / voice.ui_name
+            voice_dir.mkdir(parents=True, exist_ok=True)
+
+            # Calculate MD5 hash
+            md5_hash = hashlib.md5(result.audio_data).hexdigest()
+            filename = f"{md5_hash}.mp3"
+            file_path = voice_dir / filename
+
+            with open(file_path, "wb") as f:
+                f.write(result.audio_data)
+
+            # Create review record
+            review = AudioQualityReview(
+                guid=lemma.guid,
+                lemma_id=lemma.id,
+                language_code=language_code,
+                voice_name=voice.ui_name,
+                filename=filename,
+                expected_text=translation,
+                manifest_md5=md5_hash,
+                status="pending_review",
+                quality_issues=json.dumps([]),
+            )
+            session.add(review)
+            generated_voices.append(voice.ui_name)
+
+        session.commit()
+
+        return {
+            "success": True,
+            "voices": generated_voices,
+        }
+
+    except Exception as e:
+        logger.error(f"Error generating Piper audio: {e}")
+        return {"success": False, "error": str(e)}
+
+
+def _generate_audio_coqui(session, lemma, language_code, voices, output_dir):
+    """
+    Generate audio for a lemma using Coqui TTS.
+
+    Args:
+        session: Database session
+        lemma: Lemma object
+        language_code: Language code (e.g., "lt", "zh")
+        voices: List of CoquiVoice enums
+        output_dir: Base output directory
+
+    Returns:
+        dict with success, voices, and error information
+    """
+    from wordfreq.storage.translation_helpers import get_translation
+    from clients.audio.types import AudioFormat
+    import hashlib
+
+    try:
+        # Get translation for the language
+        translation = get_translation(session, lemma, language_code)
+        if not translation:
+            return {"success": False, "error": f"No translation found for language: {language_code}"}
+
+        # Create Coqui client
+        client = CoquiClient()
+
+        # Generate audio for each voice
+        generated_voices = []
+        for voice in voices:
+            # Generate audio
+            result = client.generate_audio(
+                text=translation,
+                voice=voice,
+                audio_format=AudioFormat.MP3,
+                speed=1.0,
+            )
+
+            if not result.success:
+                logger.error(f"Failed to generate audio for {voice.ui_name}: {result.error}")
+                continue
+
+            # Save audio file
+            voice_dir = Path(output_dir) / language_code / voice.ui_name
+            voice_dir.mkdir(parents=True, exist_ok=True)
+
+            # Calculate MD5 hash
+            md5_hash = hashlib.md5(result.audio_data).hexdigest()
+            filename = f"{md5_hash}.mp3"
+            file_path = voice_dir / filename
+
+            with open(file_path, "wb") as f:
+                f.write(result.audio_data)
+
+            # Create review record
+            review = AudioQualityReview(
+                guid=lemma.guid,
+                lemma_id=lemma.id,
+                language_code=language_code,
+                voice_name=voice.ui_name,
+                filename=filename,
+                expected_text=translation,
+                manifest_md5=md5_hash,
+                status="pending_review",
+                quality_issues=json.dumps([]),
+            )
+            session.add(review)
+            generated_voices.append(voice.ui_name)
+
+        session.commit()
+
+        return {
+            "success": True,
+            "voices": generated_voices,
+        }
+
+    except Exception as e:
+        logger.error(f"Error generating Coqui audio: {e}")
+        return {"success": False, "error": str(e)}
+
+
 @bp.route("/generate-single/<guid>", methods=["POST"])
 def generate_single(guid):
     """Generate audio for a single lemma."""
@@ -727,6 +891,12 @@ def generate_single(guid):
         if tts_engine == "espeak-ng":
             # Convert to EspeakVoice enums
             voice_enums = [EspeakVoice[v.upper()] for v in voices]
+        elif tts_engine == "piper":
+            # Convert to PiperVoice enums
+            voice_enums = [PiperVoice[v.upper()] for v in voices]
+        elif tts_engine == "coqui":
+            # Convert to CoquiVoice enums
+            voice_enums = [CoquiVoice[v.upper()] for v in voices]
         else:
             # Convert to OpenAI Voice enums
             voice_enums = [Voice(v) for v in voices]
@@ -741,6 +911,16 @@ def generate_single(guid):
             agent = StrazdasAgent(output_dir=audio_base_dir)
             result = agent.generate_audio_for_lemma(
                 g.db, lemma, language_code, voice_enums, create_review_record=True, use_ipa=use_ipa
+            )
+        elif tts_engine == "piper":
+            # Generate audio directly using Piper (no agent yet)
+            result = _generate_audio_piper(
+                g.db, lemma, language_code, voice_enums, audio_base_dir
+            )
+        elif tts_engine == "coqui":
+            # Generate audio directly using Coqui (no agent yet)
+            result = _generate_audio_coqui(
+                g.db, lemma, language_code, voice_enums, audio_base_dir
             )
         else:
             agent = VieversysAgent(output_dir=audio_base_dir)
