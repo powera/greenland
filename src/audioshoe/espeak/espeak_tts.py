@@ -144,6 +144,8 @@ class EspeakNGClient:
             if result.returncode != 0:
                 error_msg = f"eSpeak-NG failed with code {result.returncode}: {result.stderr}"
                 logger.error(error_msg)
+                logger.error(f"Voice identifier used: '{voice.espeak_identifier}' (name: {voice.name}, language: {voice.language_code})")
+                logger.error(f"Command attempted: {' '.join(cmd)}")
                 wav_path.unlink(missing_ok=True)
                 return AudioGenerationResult(
                     audio_data=b"",

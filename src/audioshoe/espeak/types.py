@@ -3,6 +3,21 @@
 
 from enum import Enum
 
+# Mapping of our language codes to eSpeak-NG primary language codes
+# Some languages need the primary code (not alias) for variant notation to work
+# Based on: espeak-ng --voices output
+ESPEAK_LANGUAGE_CODES = {
+    "zh": "cmn",      # Chinese (Mandarin) - primary code is 'cmn', 'zh' is alias
+    "ko": "ko",       # Korean
+    "lt": "lt",       # Lithuanian
+    "vi": "vi",       # Vietnamese (Northern)
+    "sw": "sw",       # Swahili
+    "fr": "fr-fr",    # French (France)
+    "de": "de",       # German
+    "es": "es",       # Spanish (Spain)
+    "pt": "pt",       # Portuguese (Portugal)
+}
+
 
 class EspeakVoice(Enum):
     """
@@ -90,9 +105,14 @@ class EspeakVoice(Enum):
         Get the eSpeak-NG voice identifier.
 
         Format: {language}+{gender}{variant}
-        Example: lt+f1 (Lithuanian, female, variant 1)
+        Example: cmn+f1 (Chinese Mandarin, female, variant 1)
+                 lt+f1 (Lithuanian, female, variant 1)
+
+        Note: Uses primary eSpeak language codes (e.g., 'cmn' not 'zh')
+        because variants only work with primary codes, not aliases.
         """
-        return f"{self.language_code}+{self.gender}{self.variant}"
+        espeak_lang = ESPEAK_LANGUAGE_CODES.get(self.language_code, self.language_code)
+        return f"{espeak_lang}+{self.gender}{self.variant}"
 
     @classmethod
     def get_voices_for_language(cls, language_code: str):
