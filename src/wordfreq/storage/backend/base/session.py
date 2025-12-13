@@ -1,7 +1,10 @@
 """Base session interface for storage backends."""
 
 from abc import ABC, abstractmethod
-from typing import Any, Optional, Type, TypeVar
+from typing import Any, Optional, Type, TypeVar, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from sqlalchemy.orm import Query as SQLAlchemyQuery
 
 T = TypeVar("T")
 
@@ -11,17 +14,21 @@ class BaseSession(ABC):
 
     This interface provides a SQLAlchemy-compatible API that can be
     implemented by different storage backends (SQLite, JSONL, etc.).
+
+    All backends return raw SQLAlchemy Query objects for querying.
+    The difference between backends is in persistence (commit/rollback).
     """
 
     @abstractmethod
-    def query(self, model_class: Type[T]) -> "BaseQuery[T]":
-        """Create a query for the given model class.
+    def query(self, *entities, **kwargs) -> "SQLAlchemyQuery":
+        """Create a query for the given model class or entities.
 
         Args:
-            model_class: The model class to query
+            *entities: Model class(es) or column expression(s) to query
+            **kwargs: Additional keyword arguments for the query
 
         Returns:
-            A query object that can be further filtered
+            A raw SQLAlchemy Query object (no wrapper)
         """
         pass
 

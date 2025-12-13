@@ -2,16 +2,18 @@
 
 from typing import Any, Optional, Type, TypeVar
 
-from sqlalchemy.orm import Session as SQLAlchemySession
+from sqlalchemy.orm import Session as SQLAlchemySession, Query as SQLAlchemyQuery
 
-from wordfreq.storage.backend.base import BaseSession, BaseQuery
-from wordfreq.storage.backend.sqlite.query import SQLiteQuery
+from wordfreq.storage.backend.base import BaseSession
 
 T = TypeVar("T")
 
 
 class SQLiteSession(BaseSession):
-    """SQLite session implementation that wraps SQLAlchemy Session."""
+    """SQLite session implementation that wraps SQLAlchemy Session.
+
+    Returns raw SQLAlchemy Query objects - no custom wrapper needed.
+    """
 
     def __init__(self, sqlalchemy_session: SQLAlchemySession):
         """Initialize SQLite session.
@@ -21,7 +23,7 @@ class SQLiteSession(BaseSession):
         """
         self._sqlalchemy_session = sqlalchemy_session
 
-    def query(self, *entities, **kwargs) -> BaseQuery[T]:
+    def query(self, *entities, **kwargs) -> SQLAlchemyQuery:
         """Create a query for the given model class or column expressions.
 
         Args:
@@ -29,12 +31,9 @@ class SQLiteSession(BaseSession):
             **kwargs: Additional keyword arguments for the query
 
         Returns:
-            A SQLiteQuery instance
+            A raw SQLAlchemy Query object
         """
-        sqlalchemy_query = self._sqlalchemy_session.query(*entities, **kwargs)
-        # Use the first entity as the model class if it's a type, otherwise None
-        model_class = entities[0] if entities and isinstance(entities[0], type) else None
-        return SQLiteQuery(sqlalchemy_query, model_class)
+        return self._sqlalchemy_session.query(*entities, **kwargs)
 
     def get(self, model_class: Type[T], id: Any) -> Optional[T]:
         """Get a single instance by primary key.

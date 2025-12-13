@@ -3,8 +3,9 @@
 import datetime
 from typing import Any, Optional, Type, TypeVar, Dict, List
 
-from wordfreq.storage.backend.base import BaseSession, BaseQuery
-from wordfreq.storage.backend.jsonl.query import JSONLQuery
+from sqlalchemy.orm import Query as SQLAlchemyQuery
+
+from wordfreq.storage.backend.base import BaseSession
 from wordfreq.storage.backend.jsonl import models
 
 T = TypeVar("T")
@@ -219,14 +220,17 @@ class JSONLSession(BaseSession):
 
         self._sqlite_session.commit()
 
-    def query(self, *entities: Type[T]) -> BaseQuery[T]:
+    def query(self, *entities, **kwargs) -> SQLAlchemyQuery:
         """Create a query for the given model class or columns.
+
+        Loads JSONL data into ephemeral SQLite and returns a raw SQLAlchemy query.
 
         Args:
             *entities: The model class(es) to query, or column attributes
+            **kwargs: Additional keyword arguments for the query
 
         Returns:
-            A SQLAlchemy query object
+            A raw SQLAlchemy Query object (querying ephemeral SQLite)
         """
         self._check_not_closed()
 
@@ -247,7 +251,7 @@ class JSONLSession(BaseSession):
 
         # Delegate all queries to SQLite
         sqlite_session = self._get_sqlite_session()
-        return sqlite_session.query(*mapped_entities)
+        return sqlite_session.query(*mapped_entities, **kwargs)
 
     def _extract_lemma_translations(self):
         """Extract LemmaTranslation objects from nested Lemma data."""
