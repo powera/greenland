@@ -292,9 +292,7 @@ Keep the translations simple and natural for language learners. Use the provided
             schema = Schema(
                 name="Translations",
                 description="Sentence translations in multiple languages",
-                strict=True,
                 properties=properties,
-                required=list(properties.keys()),
             )
 
             # Call LLM
