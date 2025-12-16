@@ -100,6 +100,16 @@ AGENTS = [
         "icon": "bi-chat-quote",
         "use_dynamic_form": True,
     },
+    {
+        "name": "BUIVOLAS",
+        "display_name": "Buivolas",
+        "subtitle": "Pattern Sentence Generator",
+        "description": "Generates simple pattern-based sentences for language learning across multiple languages.",
+        "script": "buivolas.py",
+        "icon": "bi-grid-3x3",
+        "use_dynamic_form": True,
+        "redirect_to": "pattern_sentences.index",
+    },
 ]
 
 

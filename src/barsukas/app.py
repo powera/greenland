@@ -28,6 +28,7 @@ from routes import (
     audio,
     rapid_review,
     settings,
+    pattern_sentences,
 )
 from wordfreq.storage.backend import create_session, get_backend_type
 from wordfreq.storage.backend.config import BackendConfig, BackendType
@@ -76,6 +77,7 @@ def create_app(config_class=Config):
     app.register_blueprint(audio.bp)
     app.register_blueprint(rapid_review.bp)
     app.register_blueprint(settings.bp)
+    app.register_blueprint(pattern_sentences.bp)
 
     # Register Jinja2 filters for Pinyin
     app.jinja_env.filters["pinyin"] = generate_pinyin

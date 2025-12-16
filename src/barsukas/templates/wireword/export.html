@@ -91,6 +91,18 @@
                         </div>
                     </div>
 
+                    <div class="mb-4" id="sentence_options">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="include_sentences" name="include_sentences">
+                            <label class="form-check-label" for="include_sentences">
+                                <strong>Include Pattern Sentences</strong>
+                            </label>
+                        </div>
+                        <small class="form-text text-muted">
+                            Export pattern-based simple sentences to wireword_sentences.json (only for directory exports)
+                        </small>
+                    </div>
+
                     <hr>
 
                     <div class="d-flex justify-content-between">
@@ -148,6 +160,10 @@ function toggleFilterOptions() {
     const exportType = document.getElementById('export_type').value;
     const filterOptions = document.getElementById('filter_options');
     filterOptions.style.display = (exportType === 'single' || exportType === 'verbs') ? 'block' : 'none';
+
+    // Only show sentence option for directory exports
+    const sentenceOptions = document.getElementById('sentence_options');
+    sentenceOptions.style.display = (exportType === 'directory') ? 'block' : 'none';
 }
 
 // Initialize on page load

@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block title %}View Pattern Sentences{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>
+        <i class="bi bi-eye"></i> Pattern Sentences
+    </h1>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <a href="{{ url_for('pattern_sentences.index') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Generator
+            </a>
+        </div>
+        <div>
+            <span class="badge bg-primary">{{ total }} total sentences</span>
+        </div>
+    </div>
+
+    <!-- Filter by Pattern -->
+    <div class="card mb-3">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-auto">
+                    <label for="pattern_id" class="col-form-label">Filter by Pattern:</label>
+                </div>
+                <div class="col-auto">
+                    <select class="form-select" id="pattern_id" name="pattern_id" onchange="this.form.submit()">
+                        <option value="">All Patterns</option>
+                        {% for pattern in patterns %}
+                        <option value="{{ pattern.pattern_id }}"
+                                {% if pattern_id == pattern.pattern_id %}selected{% endif %}>
+                            {{ pattern.pattern_id }} - {{ pattern.en_template }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Sentences List -->
+    {% if sentences %}
+    <div class="list-group">
+        {% for sentence in sentences %}
+        <div class="list-group-item">
+            <div class="d-flex w-100 justify-content-between align-items-start">
+                <div class="flex-grow-1">
+                    <h6 class="mb-2">
+                        <span class="badge bg-secondary">{{ sentence.source_filename }}</span>
+                        <span class="badge bg-info text-dark">ID: {{ sentence.id }}</span>
+                    </h6>
+
+                    <!-- Translations -->
+                    <div class="translations">
+                        {% for translation in sentence.translations %}
+                        <div class="mb-1">
+                            <span class="badge bg-light text-dark">{{ translation.language_code }}</span>
+                            <strong>{{ translation.translation_text }}</strong>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Linked Words -->
+                    {% if sentence.words %}
+                    <div class="mt-2">
+                        <small class="text-muted">Linked words:</small>
+                        {% for word in sentence.words %}
+                        {% if word.lemma %}
+                        <a href="{{ url_for('lemmas.view_lemma', lemma_id=word.lemma.id) }}"
+                           class="badge bg-success text-decoration-none"
+                           title="{{ word.word_role }}">
+                            {{ word.lemma.guid or word.english_text }}
+                        </a>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="ms-3">
+                    <a href="{{ url_for('sentences.view_sentence', sentence_id=sentence.id) }}"
+                       class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-eye"></i> Details
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if total_pages > 1 %}
+    <nav aria-label="Sentence pagination" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page > 1 %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('pattern_sentences.view', page=page-1, pattern_id=pattern_id) }}">
+                    Previous
+                </a>
+            </li>
+            {% endif %}
+
+            {% for p in range(1, total_pages + 1) %}
+            {% if p == page %}
+            <li class="page-item active">
+                <span class="page-link">{{ p }}</span>
+            </li>
+            {% elif p == 1 or p == total_pages or (p >= page - 2 and p <= page + 2) %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('pattern_sentences.view', page=p, pattern_id=pattern_id) }}">
+                    {{ p }}
+                </a>
+            </li>
+            {% elif p == page - 3 or p == page + 3 %}
+            <li class="page-item disabled">
+                <span class="page-link">...</span>
+            </li>
+            {% endif %}
+            {% endfor %}
+
+            {% if page < total_pages %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('pattern_sentences.view', page=page+1, pattern_id=pattern_id) }}">
+                    Next
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
+    {% else %}
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i> No pattern sentences found.
+        {% if pattern_id %}
+        Try <a href="{{ url_for('pattern_sentences.view') }}">viewing all patterns</a>.
+        {% else %}
+        <a href="{{ url_for('pattern_sentences.index') }}">Generate some sentences</a> to get started.
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

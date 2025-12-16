@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+
+{% block title %}Pattern Sentence Generator{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>
+        <i class="bi bi-grid-3x3"></i> Pattern Sentence Generator
+    </h1>
+    <p class="lead">
+        Generate simple pattern-based sentences for language learning across multiple languages.
+    </p>
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-bar-chart"></i> Statistics
+                    </h5>
+                    <p class="mb-1"><strong>Total Pattern Sentences:</strong> {{ total_sentences }}</p>
+                    <p class="mb-1"><strong>Patterns Defined:</strong> {{ patterns|length }}</p>
+                    <a href="{{ url_for('pattern_sentences.view') }}" class="btn btn-sm btn-outline-primary mt-2">
+                        <i class="bi bi-eye"></i> View All Sentences
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h5><i class="bi bi-play-circle"></i> Generate Sentences</h5>
+        </div>
+        <div class="card-body">
+            <form id="generateForm">
+                <!-- Pattern Selection -->
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Select Patterns</label>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="all" id="pattern_all" checked>
+                        <label class="form-check-label" for="pattern_all">
+                            <strong>All Patterns</strong>
+                        </label>
+                    </div>
+                    <hr class="my-2">
+                    {% for pattern in patterns %}
+                    <div class="form-check">
+                        <input class="form-check-input pattern-checkbox" type="checkbox"
+                               name="patterns" value="{{ pattern.pattern_id }}"
+                               id="pattern_{{ pattern.pattern_id }}" disabled>
+                        <label class="form-check-label" for="pattern_{{ pattern.pattern_id }}">
+                            <strong>{{ pattern.pattern_id }}</strong>: {{ pattern.en_template }}
+                            {% if stats[pattern.pattern_id] > 0 %}
+                            <span class="badge bg-success">{{ stats[pattern.pattern_id] }} sentences</span>
+                            {% endif %}
+                        </label>
+                        <small class="text-muted d-block ms-4">{{ pattern.notes }}</small>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Language Selection -->
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Target Languages <span class="text-muted">(English always included)</span></label>
+                    {% for lang in languages %}
+                    {% if lang.code != 'en' %}
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox"
+                               name="languages" value="{{ lang.code }}"
+                               id="lang_{{ lang.code }}"
+                               {% if lang.code == 'lt' %}checked{% endif %}>
+                        <label class="form-check-label" for="lang_{{ lang.code }}">
+                            {{ lang.name }}
+                        </label>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+
+                <!-- Limit -->
+                <div class="mb-3">
+                    <label for="limit" class="form-label fw-bold">Sentences per Pattern</label>
+                    <input type="number" class="form-control" id="limit" name="limit"
+                           value="10" min="1" max="100" style="width: 150px;">
+                    <small class="form-text text-muted">Maximum number of sentence variations to generate for each pattern</small>
+                </div>
+
+                <!-- Dry Run -->
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="dry_run" name="dry_run">
+                    <label class="form-check-label" for="dry_run">
+                        Dry run (preview without saving to database)
+                    </label>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn btn-primary" id="submitBtn">
+                    <i class="bi bi-play-fill"></i> Generate Sentences
+                </button>
+                <button type="button" class="btn btn-secondary" id="cancelBtn" style="display:none;">
+                    Cancel
+                </button>
+            </form>
+
+            <!-- Progress/Output Display -->
+            <div id="outputSection" class="mt-4" style="display:none;">
+                <h6>Output:</h6>
+                <div id="progressSpinner" class="text-center my-3">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Generating...</span>
+                    </div>
+                    <p class="mt-2">Generating sentences... This may take several minutes.</p>
+                </div>
+                <pre id="output" class="bg-light p-3 border rounded" style="max-height: 400px; overflow-y: auto;"></pre>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5><i class="bi bi-info-circle"></i> About Pattern Sentences</h5>
+        </div>
+        <div class="card-body">
+            <p>
+                Pattern sentences are simple, templated sentences designed for language learning.
+                Each pattern has fixed structure with slots that are filled with vocabulary words
+                from the database.
+            </p>
+            <p>
+                The system automatically:
+            </p>
+            <ul>
+                <li>Selects appropriate vocabulary words based on difficulty level and part of speech</li>
+                <li>Uses LLM to generate grammatically correct translations in all target languages</li>
+                <li>Links sentences to their constituent words via GUIDs for difficulty tracking</li>
+                <li>Stores translations in the database for wireword export</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+// Handle "All Patterns" checkbox
+document.getElementById('pattern_all').addEventListener('change', function(e) {
+    const checkboxes = document.querySelectorAll('.pattern-checkbox');
+    checkboxes.forEach(cb => {
+        cb.disabled = e.target.checked;
+        if (e.target.checked) {
+            cb.checked = false;
+        }
+    });
+});
+
+// Uncheck "All Patterns" when individual pattern is selected
+document.querySelectorAll('.pattern-checkbox').forEach(cb => {
+    cb.addEventListener('change', function() {
+        if (this.checked) {
+            document.getElementById('pattern_all').checked = false;
+        }
+    });
+});
+
+// Handle form submission
+document.getElementById('generateForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const submitBtn = document.getElementById('submitBtn');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const outputSection = document.getElementById('outputSection');
+    const progressSpinner = document.getElementById('progressSpinner');
+    const output = document.getElementById('output');
+
+    // Show output section
+    outputSection.style.display = 'block';
+    progressSpinner.style.display = 'block';
+    output.textContent = '';
+    output.style.display = 'none';
+
+    // Disable submit, enable cancel
+    submitBtn.disabled = true;
+    cancelBtn.style.display = 'inline-block';
+
+    // Build form data
+    const formData = new FormData(this);
+
+    try {
+        const response = await fetch('{{ url_for("pattern_sentences.generate") }}', {
+            method: 'POST',
+            body: formData
+        });
+
+        const result = await response.json();
+
+        // Hide spinner, show output
+        progressSpinner.style.display = 'none';
+        output.style.display = 'block';
+
+        if (result.success) {
+            output.textContent = result.stdout;
+            if (result.stderr) {
+                output.textContent += '\n\nSTDERR:\n' + result.stderr;
+            }
+        } else {
+            output.textContent = 'ERROR: ' + (result.error || 'Generation failed');
+            if (result.stdout) output.textContent += '\n\nSTDOUT:\n' + result.stdout;
+            if (result.stderr) output.textContent += '\n\nSTDERR:\n' + result.stderr;
+        }
+    } catch (error) {
+        progressSpinner.style.display = 'none';
+        output.style.display = 'block';
+        output.textContent = 'ERROR: ' + error.message;
+    } finally {
+        // Re-enable submit, hide cancel
+        submitBtn.disabled = false;
+        cancelBtn.style.display = 'none';
+    }
+});
+</script>
+{% endblock %}

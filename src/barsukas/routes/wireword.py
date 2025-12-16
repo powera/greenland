@@ -8,6 +8,7 @@ import tempfile
 from datetime import datetime
 
 from agents.ungurys import UngurysAgent, SUPPORTED_LANGUAGES
+from wordfreq.trakaido.utils.export_wireword_sentences import WirewordSentenceExporter
 from config import Config
 
 bp = Blueprint("wireword", __name__, url_prefix="/wireword")
@@ -26,6 +27,7 @@ def export_wireword():
     export_type = request.form.get("export_type", "directory")
     difficulty_level = request.form.get("difficulty_level", "").strip()
     pos_type = request.form.get("pos_type", "").strip()
+    include_sentences = request.form.get("include_sentences") == "on"
 
     # Validate language
     if language not in SUPPORTED_LANGUAGES:
@@ -58,6 +60,23 @@ def export_wireword():
         if export_type == "directory":
             # Export to directory structure
             success, results = agent.export_wireword_directory()
+
+            # Also export sentences if requested
+            sentences_exported = 0
+            if success and include_sentences:
+                try:
+                    sentence_exporter = WirewordSentenceExporter(
+                        db_path=Config.DB_PATH,
+                        language=language if language != "zh-Hant" else "zh",
+                    )
+                    output_dir = agent.get_language_output_dir()
+                    output_file = os.path.join(output_dir, "wireword_sentences.json")
+                    sentences_exported = sentence_exporter.export_to_file(
+                        output_path=output_file, include_all_languages=True
+                    )
+                    flash(f"Exported {sentences_exported} pattern sentences", "info")
+                except Exception as e:
+                    flash(f"Warning: Sentence export failed: {str(e)}", "warning")
 
             if success:
                 files_created = results.get("files_created", [])
