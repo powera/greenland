@@ -8,7 +8,7 @@ from pathlib import Path
 from config import Config
 import constants
 from wordfreq.patterns.simple_patterns import SIMPLE_PATTERNS
-from wordfreq.storage.models.schema import Sentence, SentenceTranslation
+from wordfreq.storage.models.schema import Sentence, SentenceTranslation, SentenceWord, Lemma
 
 bp = Blueprint("pattern_sentences", __name__, url_prefix="/pattern-sentences")
 
@@ -313,6 +313,8 @@ def view():
     """View generated pattern sentences with pagination."""
     page = request.args.get("page", 1, type=int)
     pattern_id = request.args.get("pattern_id", None)
+    language_code = request.args.get("language_code", None)
+    lemma_guid = request.args.get("lemma_guid", "").strip() or None
     per_page = 20
 
     # Build query
@@ -321,6 +323,27 @@ def view():
     # Filter by pattern if specified
     if pattern_id:
         query = query.filter(Sentence.source_filename == f"pattern:{pattern_id}")
+
+    # Filter by language if specified (only show sentences with translation in that language)
+    if language_code:
+        translation_subquery = g.db.query(SentenceTranslation.sentence_id).filter(
+            SentenceTranslation.language_code == language_code
+        )
+        query = query.filter(Sentence.id.in_(translation_subquery))
+
+    # Filter by lemma GUID if specified (only show sentences containing that lemma)
+    if lemma_guid:
+        # First find the lemma by GUID
+        lemma = g.db.query(Lemma).filter(Lemma.guid == lemma_guid).first()
+        if lemma:
+            # Find sentences that use this lemma
+            sentence_word_subquery = g.db.query(SentenceWord.sentence_id).filter(
+                SentenceWord.lemma_id == lemma.id
+            )
+            query = query.filter(Sentence.id.in_(sentence_word_subquery))
+        else:
+            # If lemma GUID not found, return no results
+            query = query.filter(Sentence.id == -1)
 
     # Get total count
     total = query.count()
@@ -338,5 +361,8 @@ def view():
         total_pages=total_pages,
         total=total,
         pattern_id=pattern_id,
+        language_code=language_code,
+        lemma_guid=lemma_guid,
         patterns=SIMPLE_PATTERNS,
+        languages=LANGUAGES,
     )

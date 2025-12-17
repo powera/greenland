@@ -19,10 +19,10 @@
         </div>
     </div>
 
-    <!-- Filter by Pattern -->
+    <!-- Filters -->
     <div class="card mb-3">
         <div class="card-body">
-            <form method="get" class="row g-3">
+            <form method="get" class="row g-3 align-items-end">
                 <div class="col-auto">
                     <label for="pattern_id" class="col-form-label">Filter by Pattern:</label>
                 </div>
@@ -36,6 +36,31 @@
                         </option>
                         {% endfor %}
                     </select>
+                </div>
+                <div class="col-auto">
+                    <label for="language_code" class="col-form-label">Has Translation In:</label>
+                </div>
+                <div class="col-auto">
+                    <select class="form-select" id="language_code" name="language_code" onchange="this.form.submit()">
+                        <option value="">All Languages</option>
+                        {% for language in languages %}
+                        <option value="{{ language.code }}"
+                                {% if language_code == language.code %}selected{% endif %}>
+                            {{ language.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-auto">
+                    <label for="lemma_guid" class="col-form-label">Lemma GUID:</label>
+                </div>
+                <div class="col-auto">
+                    <input type="text" class="form-control" id="lemma_guid" name="lemma_guid"
+                           value="{{ lemma_guid or '' }}" placeholder="e.g. N08_001"
+                           style="width: 150px;">
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-primary">Apply</button>
                 </div>
             </form>
         </div>
@@ -97,7 +122,7 @@
         <ul class="pagination justify-content-center">
             {% if page > 1 %}
             <li class="page-item">
-                <a class="page-link" href="{{ url_for('pattern_sentences.view', page=page-1, pattern_id=pattern_id) }}">
+                <a class="page-link" href="{{ url_for('pattern_sentences.view', page=page-1, pattern_id=pattern_id, language_code=language_code, lemma_guid=lemma_guid) }}">
                     Previous
                 </a>
             </li>
@@ -110,7 +135,7 @@
             </li>
             {% elif p == 1 or p == total_pages or (p >= page - 2 and p <= page + 2) %}
             <li class="page-item">
-                <a class="page-link" href="{{ url_for('pattern_sentences.view', page=p, pattern_id=pattern_id) }}">
+                <a class="page-link" href="{{ url_for('pattern_sentences.view', page=p, pattern_id=pattern_id, language_code=language_code, lemma_guid=lemma_guid) }}">
                     {{ p }}
                 </a>
             </li>
@@ -123,7 +148,7 @@
 
             {% if page < total_pages %}
             <li class="page-item">
-                <a class="page-link" href="{{ url_for('pattern_sentences.view', page=page+1, pattern_id=pattern_id) }}">
+                <a class="page-link" href="{{ url_for('pattern_sentences.view', page=page+1, pattern_id=pattern_id, language_code=language_code, lemma_guid=lemma_guid) }}">
                     Next
                 </a>
             </li>

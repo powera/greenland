@@ -591,7 +591,9 @@ class BuivolasAgent:
                 for word in words:
                     lemma = session.query(Lemma).filter_by(id=word.lemma_id).first()
                     if lemma:
-                        word_translations[word.word_role] = {}
+                        word_translations[word.word_role] = {
+                            "guid": lemma.guid if lemma.guid else ""
+                        }
                         for lang in target_languages:
                             trans = self.get_translation(session, lemma, lang)
                             if trans:
@@ -609,8 +611,13 @@ class BuivolasAgent:
                 ]
 
                 for word_role, translations in word_translations.items():
-                    trans_str = ", ".join([f"{lang}={trans}" for lang, trans in translations.items()])
-                    prompt_lines.append(f"  {word_role}: {trans_str}")
+                    guid = translations.get("guid", "")
+                    trans_items = [(lang, trans) for lang, trans in translations.items() if lang != "guid"]
+                    trans_str = ", ".join([f"{lang}={trans}" for lang, trans in trans_items])
+                    if guid:
+                        prompt_lines.append(f"  {word_role} (GUID: {guid}): {trans_str}")
+                    else:
+                        prompt_lines.append(f"  {word_role}: {trans_str}")
 
                 prompt_lines.extend([
                     "",
@@ -622,7 +629,7 @@ class BuivolasAgent:
                     "For each target language, provide detailed word-by-word breakdown including:",
                     "- word: the actual inflected form as it appears in the sentence",
                     "- english: English translation of this specific word/phrase",
-                    "- lemma: base/dictionary form in the target language",
+                    "- guid: the GUID for this word if provided above (e.g., 'N08_001'), or empty string if not provided",
                     "- role: grammatical role (subject, verb, object, adjective, adverb, article, preposition, determiner, etc.)",
                     "- grammatical_form: grammatical details (e.g., '3s_present', '1p_past', 'accusative_plural', 'infinitive')",
                     "- grammatical_case: case if applicable (nominative, accusative, genitive, dative, etc.) or null",
@@ -645,9 +652,9 @@ class BuivolasAgent:
                             "type": "string",
                             "description": "English translation of this word/phrase"
                         },
-                        "lemma": {
+                        "guid": {
                             "type": "string",
-                            "description": "Base/dictionary form in the target language"
+                            "description": "GUID for this word (e.g., 'N08_001'), or empty string if not applicable"
                         },
                         "role": {
                             "type": "string",
@@ -662,7 +669,7 @@ class BuivolasAgent:
                             "description": "Case if applicable: nominative, accusative, genitive, dative, etc."
                         }
                     },
-                    "required": ["word", "english", "lemma", "role", "grammatical_form", "grammatical_case"],
+                    "required": ["word", "english", "guid", "role", "grammatical_form", "grammatical_case"],
                     "additionalProperties": False
                 }
 
@@ -826,31 +833,25 @@ class BuivolasAgent:
 
                             # Add detailed word records
                             for position, word_data in enumerate(words_data):
-                                # Try to find matching lemma by English translation
-                                lemma = None
-                                english_lemma_text = word_data.get("english", "").lower().strip()
+                                # Find matching lemma by GUID if provided
+                                lemma_id = None
+                                guid = word_data.get("guid", "").strip()
 
-                                # Try to match against existing lemmas in sentence
-                                en_words = (
-                                    session.query(SentenceWord)
-                                    .filter_by(sentence_id=sentence_id, language_code="en")
-                                    .all()
-                                )
-
-                                for en_word in en_words:
-                                    if en_word.english_text and en_word.english_text.lower().strip() == english_lemma_text:
-                                        lemma = session.query(Lemma).filter_by(id=en_word.lemma_id).first()
-                                        break
+                                if guid:
+                                    # Look up lemma by GUID
+                                    lemma = session.query(Lemma).filter_by(guid=guid).first()
+                                    if lemma:
+                                        lemma_id = lemma.id
 
                                 # Create SentenceWord with detailed grammatical info
                                 new_word = SentenceWord(
                                     sentence_id=sentence_id,
-                                    lemma_id=lemma.id if lemma else None,
+                                    lemma_id=lemma_id,
                                     language_code=lang_code,
                                     position=position,
                                     word_role=word_data.get("role"),
                                     english_text=word_data.get("english"),
-                                    target_language_text=word_data.get("lemma"),
+                                    target_language_text=word_data.get("word"),
                                     grammatical_form=word_data.get("grammatical_form"),
                                     grammatical_case=word_data.get("grammatical_case"),
                                     declined_form=word_data.get("word")
@@ -898,7 +899,7 @@ Examples:
     # Global options
     parser.add_argument("--db-path", help="Database path (uses default if not specified)")
     parser.add_argument(
-        "--model", default="gpt-4o-mini", help="LLM model to use (default: gpt-4o-mini)"
+        "--model", default="gpt-5-mini", help="LLM model to use (default: gpt-5-mini)"
     )
     parser.add_argument("--debug", action="store_true", help="Enable debug logging")
     parser.add_argument(
