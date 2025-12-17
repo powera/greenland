@@ -7,80 +7,265 @@ from the database to generate simple practice sentences.
 
 SIMPLE_PATTERNS = [
     {
-        "pattern_id": "where_is_noun",
-        "en_template": "Where is the [noun]?",
+        "pattern_id": "where_is_object",
+        "en_template": "Where is the [small object]?",
         "slots": [
-            {"name": "noun", "pos_type": "noun", "min_level": 1, "max_level": 10}
+            {"name": "small object", "pos_type": "noun", "pos_subtype": "small_movable_object", "min_level": 1, "max_level": 10}
         ],
         "pattern_type": "question",
         "notes": "Basic question about location of an object"
     },
     {
-        "pattern_id": "my_noun_is_color",
-        "en_template": "My [noun] is [color].",
+        "pattern_id": "my_object_is_color",
+        "en_template": "My [small object] is [color].",
         "slots": [
-            {"name": "noun", "pos_type": "noun", "min_level": 1, "max_level": 10},
+            {"name": "small object", "pos_type": "noun", "pos_subtype": "small_movable_object", "min_level": 1, "max_level": 10},
             {"name": "color", "pos_type": "adjective", "pos_subtype": "color", "min_level": 1, "max_level": 10}
         ],
         "pattern_type": "SVO",
         "notes": "Describing color of a possessed object"
     },
     {
-        "pattern_id": "pronoun_is_occupation",
-        "en_template": "[Pronoun] is a [occupation].",
+        "pattern_id": "i_eat_food",
+        "en_template": "I eat [food].",
         "slots": [
-            {"name": "pronoun", "pos_type": "pronoun", "min_level": 1, "max_level": 5},
-            {"name": "occupation", "pos_type": "noun", "pos_subtype": "occupation", "min_level": 1, "max_level": 15}
+            {"name": "food", "pos_type": "noun", "pos_subtype": "food_drink", "min_level": 1, "max_level": 10}
         ],
         "pattern_type": "SVO",
-        "notes": "Identifying someone's profession"
+        "notes": "Eating specific food"
     },
     {
-        "pattern_id": "the_noun_is_adjective",
-        "en_template": "The [noun] is [adjective].",
+        "pattern_id": "the_animal_is_quality",
+        "en_template": "The [animal] is [quality].",
         "slots": [
-            {"name": "noun", "pos_type": "noun", "min_level": 1, "max_level": 10},
-            {"name": "adjective", "pos_type": "adjective", "min_level": 1, "max_level": 10}
+            {"name": "animal", "pos_type": "noun", "pos_subtype": "animal", "min_level": 1, "max_level": 10},
+            {"name": "quality", "pos_type": "adjective", "pos_subtype": "quality", "min_level": 1, "max_level": 10}
         ],
         "pattern_type": "SVO",
-        "notes": "Basic description of an object"
+        "notes": "Describing quality/characteristic of an animal"
     },
     {
-        "pattern_id": "i_have_number_noun",
-        "en_template": "I have [number] [noun].",
+        "pattern_id": "i_have_number_objects",
+        "en_template": "I have [number] [small object].",
         "slots": [
-            {"name": "number", "pos_type": "numeral", "min_level": 1, "max_level": 5},
-            {"name": "noun", "pos_type": "noun", "min_level": 1, "max_level": 10}
+            {"name": "number", "pos_type": "numeral", "pos_subtype": None, "min_level": 1, "max_level": 5},
+            {"name": "small object", "pos_type": "noun", "pos_subtype": "small_movable_object", "min_level": 1, "max_level": 10}
         ],
         "pattern_type": "SVO",
         "notes": "Expressing quantity of possessed items"
     },
     {
-        "pattern_id": "what_is_this",
-        "en_template": "What is this [noun]?",
+        "pattern_id": "what_is_this_object",
+        "en_template": "What is this [small object]?",
         "slots": [
-            {"name": "noun", "pos_type": "noun", "min_level": 1, "max_level": 10}
+            {"name": "small object", "pos_type": "noun", "pos_subtype": "small_movable_object", "min_level": 1, "max_level": 10}
         ],
         "pattern_type": "question",
         "notes": "Asking to identify an object"
     },
     {
-        "pattern_id": "noun_is_in_place",
-        "en_template": "The [noun] is in the [place].",
+        "pattern_id": "object_is_in_place",
+        "en_template": "The [small object] is in the [place].",
         "slots": [
-            {"name": "noun", "pos_type": "noun", "min_level": 1, "max_level": 10},
-            {"name": "place", "pos_type": "noun", "pos_subtype": "place", "min_level": 1, "max_level": 10}
+            {"name": "small object", "pos_type": "noun", "pos_subtype": "small_movable_object", "min_level": 1, "max_level": 10},
+            {"name": "place", "pos_type": "noun", "pos_subtype": "building_structure", "min_level": 1, "max_level": 10}
         ],
         "pattern_type": "SVO",
-        "notes": "Expressing location of an object"
+        "notes": "Expressing location of an object in a building"
     },
     {
         "pattern_id": "i_want_to_verb",
         "en_template": "I want to [verb].",
         "slots": [
-            {"name": "verb", "pos_type": "verb", "min_level": 1, "max_level": 10}
+            {"name": "verb", "pos_type": "verb", "pos_subtype": None, "min_level": 1, "max_level": 10}
         ],
         "pattern_type": "SVO",
         "notes": "Expressing desire to perform an action"
+    },
+    # New patterns with 1 or 2 variables (9-20)
+    {
+        "pattern_id": "this_is_object",
+        "en_template": "This is a [small object].",
+        "slots": [
+            {"name": "small object", "pos_type": "noun", "pos_subtype": "small_movable_object", "min_level": 1, "max_level": 10}
+        ],
+        "pattern_type": "SVO",
+        "notes": "Identifying a small object"
+    },
+    {
+        "pattern_id": "i_like_food",
+        "en_template": "I like [food].",
+        "slots": [
+            {"name": "food", "pos_type": "noun", "pos_subtype": "food_drink", "min_level": 1, "max_level": 10}
+        ],
+        "pattern_type": "SVO",
+        "notes": "Expressing preference for food"
+    },
+    {
+        "pattern_id": "i_verb",
+        "en_template": "I [verb].",
+        "slots": [
+            {"name": "verb", "pos_type": "verb", "pos_subtype": None, "min_level": 1, "max_level": 10}
+        ],
+        "pattern_type": "SVO",
+        "notes": "Simple statement of action"
+    },
+    {
+        "pattern_id": "do_you_verb",
+        "en_template": "Do you [verb]?",
+        "slots": [
+            {"name": "verb", "pos_type": "verb", "pos_subtype": None, "min_level": 1, "max_level": 10}
+        ],
+        "pattern_type": "question",
+        "notes": "Yes/no question about an action"
+    },
+    {
+        "pattern_id": "i_need_tool",
+        "en_template": "I need a [tool].",
+        "slots": [
+            {"name": "tool", "pos_type": "noun", "pos_subtype": "tool_machine", "min_level": 1, "max_level": 10}
+        ],
+        "pattern_type": "SVO",
+        "notes": "Expressing necessity for a tool"
+    },
+    {
+        "pattern_id": "object_is_color",
+        "en_template": "The [small object] is [color].",
+        "slots": [
+            {"name": "small object", "pos_type": "noun", "pos_subtype": "small_movable_object", "min_level": 1, "max_level": 10},
+            {"name": "color", "pos_type": "adjective", "pos_subtype": "color", "min_level": 1, "max_level": 10}
+        ],
+        "pattern_type": "SVO",
+        "notes": "Describing the color of an object"
+    },
+    {
+        "pattern_id": "i_see_animal",
+        "en_template": "I see a [animal].",
+        "slots": [
+            {"name": "animal", "pos_type": "noun", "pos_subtype": "animal", "min_level": 1, "max_level": 10}
+        ],
+        "pattern_type": "SVO",
+        "notes": "Observing an animal"
+    },
+    {
+        "pattern_id": "i_am_quality",
+        "en_template": "I am [quality].",
+        "slots": [
+            {"name": "quality", "pos_type": "adjective", "pos_subtype": "quality", "min_level": 1, "max_level": 10}
+        ],
+        "pattern_type": "SVO",
+        "notes": "Describing one's quality or state"
+    },
+    {
+        "pattern_id": "how_many_objects",
+        "en_template": "How many [small object]?",
+        "slots": [
+            {"name": "small object", "pos_type": "noun", "pos_subtype": "small_movable_object", "min_level": 1, "max_level": 10}
+        ],
+        "pattern_type": "question",
+        "notes": "Asking about quantity of objects"
+    },
+    {
+        "pattern_id": "i_want_clothing",
+        "en_template": "I want a [clothing].",
+        "slots": [
+            {"name": "clothing", "pos_type": "noun", "pos_subtype": "clothing_accessory", "min_level": 1, "max_level": 10}
+        ],
+        "pattern_type": "SVO",
+        "notes": "Expressing desire for clothing"
+    },
+    {
+        "pattern_id": "person_verb",
+        "en_template": "The [person] [verb].",
+        "slots": [
+            {"name": "person", "pos_type": "noun", "pos_subtype": "occupation", "min_level": 1, "max_level": 10},
+            {"name": "verb", "pos_type": "verb", "pos_subtype": None, "min_level": 1, "max_level": 10}
+        ],
+        "pattern_type": "SVO",
+        "notes": "Person performing an action"
+    },
+    {
+        "pattern_id": "where_is_building",
+        "en_template": "Where is the [building]?",
+        "slots": [
+            {"name": "building", "pos_type": "noun", "pos_subtype": "building_structure", "min_level": 1, "max_level": 10}
+        ],
+        "pattern_type": "question",
+        "notes": "Asking about location of a building"
+    },
+    # Additional patterns (21-28)
+    {
+        "pattern_id": "i_feel_emotion",
+        "en_template": "I feel [emotion].",
+        "slots": [
+            {"name": "emotion", "pos_type": "noun", "pos_subtype": "emotion_feeling", "min_level": 1, "max_level": 10}
+        ],
+        "pattern_type": "SVO",
+        "notes": "Expressing an emotional state"
+    },
+    {
+        "pattern_id": "my_body_part_hurts",
+        "en_template": "My [body part] hurts.",
+        "slots": [
+            {"name": "body part", "pos_type": "noun", "pos_subtype": "body_part", "min_level": 1, "max_level": 10}
+        ],
+        "pattern_type": "SVO",
+        "notes": "Expressing physical pain in a body part"
+    },
+    {
+        "pattern_id": "i_drink_food",
+        "en_template": "I drink [food].",
+        "slots": [
+            {"name": "food", "pos_type": "noun", "pos_subtype": "food_drink", "min_level": 1, "max_level": 10}
+        ],
+        "pattern_type": "SVO",
+        "notes": "Drinking beverages"
+    },
+    {
+        "pattern_id": "the_object_is_size",
+        "en_template": "The [small object] is [size].",
+        "slots": [
+            {"name": "small object", "pos_type": "noun", "pos_subtype": "small_movable_object", "min_level": 1, "max_level": 10},
+            {"name": "size", "pos_type": "adjective", "pos_subtype": "size", "min_level": 1, "max_level": 10}
+        ],
+        "pattern_type": "SVO",
+        "notes": "Describing size of an object"
+    },
+    {
+        "pattern_id": "i_go_to_place",
+        "en_template": "I go to the [place].",
+        "slots": [
+            {"name": "place", "pos_type": "noun", "pos_subtype": "building_structure", "min_level": 1, "max_level": 10}
+        ],
+        "pattern_type": "SVO",
+        "notes": "Going to a specific place"
+    },
+    {
+        "pattern_id": "the_animal_eats_food",
+        "en_template": "The [animal] eats [food].",
+        "slots": [
+            {"name": "animal", "pos_type": "noun", "pos_subtype": "animal", "min_level": 1, "max_level": 10},
+            {"name": "food", "pos_type": "noun", "pos_subtype": "food_drink", "min_level": 1, "max_level": 10}
+        ],
+        "pattern_type": "SVO",
+        "notes": "Animal eating specific food"
+    },
+    {
+        "pattern_id": "i_wear_clothing",
+        "en_template": "I wear [clothing].",
+        "slots": [
+            {"name": "clothing", "pos_type": "noun", "pos_subtype": "clothing_accessory", "min_level": 1, "max_level": 10}
+        ],
+        "pattern_type": "SVO",
+        "notes": "Wearing specific clothing"
+    },
+    {
+        "pattern_id": "i_use_tool",
+        "en_template": "I use a [tool].",
+        "slots": [
+            {"name": "tool", "pos_type": "noun", "pos_subtype": "tool_machine", "min_level": 1, "max_level": 10}
+        ],
+        "pattern_type": "SVO",
+        "notes": "Using a specific tool"
     },
 ]

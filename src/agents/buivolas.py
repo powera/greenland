@@ -3,26 +3,37 @@
 Buivolas - Simple Pattern Sentence Generation Agent
 
 This agent generates simple pattern-based sentences for language learning,
-translating them into multiple languages and storing them in the database
-with proper word linkages.
+creating candidate sentences and translating them into multiple languages
+using batch processing.
 
 "Buivolas" means "water buffalo" in Lithuanian - muscular and traveling in herds,
 like the large batches of sentences this agent generates!
 
+Workflow:
+  1. Generate candidate sentences (all combinations) without translations
+  2. Batch translate candidates into target languages
+
 Usage:
-  # Generate sentences for specific patterns
-  python buivolas.py --patterns where_is_noun my_noun_is_color --languages lt zh --limit 5
+  # Generate candidate sentences for specific patterns
+  python buivolas.py generate-candidates --patterns where_is_noun my_noun_is_color --limit 100
 
-  # Generate sentences for all patterns
-  python buivolas.py --all-patterns --languages lt zh fr --limit 10
+  # Generate candidates for all patterns
+  python buivolas.py generate-candidates --all-patterns --limit 1000
 
-  # Dry run (don't save to database)
-  python buivolas.py --patterns where_is_noun --languages lt --limit 3 --dry-run
+  # Submit batch translation job for untranslated sentences
+  python buivolas.py submit-batch --languages lt zh fr --limit 500
+
+  # Check status of batch jobs
+  python buivolas.py check-batch --batch-id batch_xxx
+
+  # Retrieve and apply batch translation results
+  python buivolas.py retrieve-batch --batch-id batch_xxx
 """
 
 import argparse
+import itertools
+import json
 import logging
-import random
 import sys
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
@@ -33,9 +44,12 @@ if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
 import constants
-import util.prompt_loader
-from clients.unified_client import UnifiedLLMClient
-from clients.types import Schema, SchemaProperty
+from clients.batch_queue import (
+    BatchQueueManager,
+    BatchRequestMetadata,
+    create_batch_database_session,
+)
+from clients.openai_batch_client import OpenAIBatchClient
 from wordfreq.patterns.simple_patterns import SIMPLE_PATTERNS
 from wordfreq.storage.database import create_database_session
 from wordfreq.storage.models.schema import (
@@ -100,23 +114,24 @@ class BuivolasAgent:
         if debug:
             logger.setLevel(logging.DEBUG)
 
-        # Initialize LLM client
-        self.llm = UnifiedLLMClient(debug=debug)
+        # Initialize batch client and queue manager
+        self.batch_client = OpenAIBatchClient(debug=debug)
+        self.batch_session = create_batch_database_session()
+        self.batch_manager = BatchQueueManager(self.batch_session, self.batch_client, debug=debug)
 
     def get_session(self):
         """Get database session."""
         return create_database_session(self.db_path)
 
     def get_lemmas_for_slot(
-        self, session, slot: Dict, limit: int = None
+        self, session, slot: Dict
     ) -> List[Tuple[Lemma, str]]:
         """
-        Get lemmas matching a slot specification.
+        Get all lemmas matching a slot specification.
 
         Args:
             session: Database session
             slot: Slot specification dict
-            limit: Max number to return
 
         Returns:
             List of (lemma, guid) tuples
@@ -126,9 +141,14 @@ class BuivolasAgent:
             Lemma.pos_type == slot["pos_type"],
         )
 
-        # Filter by subtype if specified
-        if slot.get("pos_subtype"):
+        # Filter by subtype - if specified, only match that subtype
+        # If None, match lemmas with no subtype
+        if slot.get("pos_subtype") is not None:
             query = query.filter(Lemma.pos_subtype == slot["pos_subtype"])
+        else:
+            # For None subtype, allow either NULL or any subtype (to maximize combinations)
+            # Actually, let's be strict: None means no subtype
+            query = query.filter(Lemma.pos_subtype.is_(None))
 
         # Filter by difficulty range
         if slot.get("min_level"):
@@ -137,11 +157,6 @@ class BuivolasAgent:
             query = query.filter(Lemma.difficulty_level <= slot["max_level"])
 
         lemmas = query.all()
-
-        # Return limited random sample
-        if limit and len(lemmas) > limit:
-            lemmas = random.sample(lemmas, limit)
-
         return [(lemma, lemma.guid) for lemma in lemmas]
 
     def get_translation(self, session, lemma: Lemma, language_code: str) -> Optional[str]:
@@ -173,236 +188,199 @@ class BuivolasAgent:
         )
         return translation.translation if translation else None
 
-    def fill_pattern_slots(
-        self, session, pattern: Dict, limit_per_slot: int = 10
+    def generate_all_combinations(
+        self, session, pattern: Dict, max_combinations: int = None
     ) -> List[Dict]:
         """
-        Generate multiple combinations by filling pattern slots with lemmas.
+        Generate all possible combinations for a pattern (cartesian product).
 
         Args:
             session: Database session
             pattern: Pattern definition
-            limit_per_slot: Max lemmas to get per slot
+            max_combinations: Maximum combinations to generate (None = unlimited)
 
         Returns:
             List of filled pattern dictionaries
         """
         # Get lemmas for each slot
         slot_lemmas = {}
+        slot_names = []
+
         for slot in pattern["slots"]:
-            lemmas = self.get_lemmas_for_slot(session, slot, limit=limit_per_slot)
+            lemmas = self.get_lemmas_for_slot(session, slot)
             if not lemmas:
                 logger.warning(
-                    f"No lemmas found for slot {slot['name']} (pos_type={slot['pos_type']})"
+                    f"No lemmas found for slot {slot['name']} "
+                    f"(pos_type={slot['pos_type']}, pos_subtype={slot.get('pos_subtype')})"
                 )
                 return []
             slot_lemmas[slot["name"]] = lemmas
+            slot_names.append(slot["name"])
+            logger.info(f"Slot {slot['name']}: {len(lemmas)} lemmas")
 
-        # Generate combinations
-        # For now, just create one sentence per unique lemma in the first slot
-        # This avoids combinatorial explosion
+        # Generate cartesian product of all slot combinations
+        slot_lists = [slot_lemmas[name] for name in slot_names]
+        total_combinations = 1
+        for lst in slot_lists:
+            total_combinations *= len(lst)
+
+        logger.info(
+            f"Pattern {pattern['pattern_id']}: {total_combinations} total combinations possible"
+        )
+
+        if max_combinations and total_combinations > max_combinations:
+            logger.warning(
+                f"Limiting to {max_combinations} combinations (from {total_combinations})"
+            )
+
         combinations = []
-        primary_slot = pattern["slots"][0]["name"]
+        for i, combo_tuple in enumerate(itertools.product(*slot_lists)):
+            if max_combinations and i >= max_combinations:
+                break
 
-        for lemma, guid in slot_lemmas[primary_slot]:
-            combination = {"pattern_id": pattern["pattern_id"], "lemmas": {}}
+            combination = {
+                "pattern_id": pattern["pattern_id"],
+                "lemmas": {}
+            }
 
-            # Add the primary slot lemma
-            combination["lemmas"][primary_slot] = (lemma, guid)
-
-            # For other slots, pick random lemmas
-            for slot in pattern["slots"][1:]:
-                slot_name = slot["name"]
-                if slot_lemmas[slot_name]:
-                    combination["lemmas"][slot_name] = random.choice(slot_lemmas[slot_name])
+            for slot_name, (lemma, guid) in zip(slot_names, combo_tuple):
+                combination["lemmas"][slot_name] = (lemma, guid)
 
             combinations.append(combination)
 
+        logger.info(f"Generated {len(combinations)} combinations for pattern {pattern['pattern_id']}")
         return combinations
 
-    def translate_pattern_sentence(
-        self,
-        pattern: Dict,
-        filled_slots: Dict[str, Tuple[Lemma, str]],
-        target_languages: List[str],
-    ) -> Dict:
+    def build_template_text(self, pattern: Dict, filled_slots: Dict[str, Tuple[Lemma, str]]) -> str:
         """
-        Translate a pattern-filled sentence to multiple languages using LLM.
+        Build the mechanical English template text from a pattern and filled slots.
 
         Args:
             pattern: Pattern definition
             filled_slots: Dict mapping slot names to (Lemma, guid) tuples
-            target_languages: List of language codes to translate to
 
         Returns:
-            Dictionary with translations and metadata
+            Template text with placeholders filled in
         """
-        # Build English template with actual words
-        session = self.get_session()
-        try:
-            en_words = {}
-            for slot_name, (lemma, guid) in filled_slots.items():
-                en_words[slot_name] = lemma.lemma_text
+        en_sentence = pattern["en_template"]
+        for slot_name, (lemma, guid) in filled_slots.items():
+            en_sentence = en_sentence.replace(f"[{slot_name}]", lemma.lemma_text)
+        return en_sentence
 
-            # Replace placeholders in template
-            en_sentence = pattern["en_template"]
-            for slot_name, word in en_words.items():
-                en_sentence = en_sentence.replace(f"[{slot_name}]", word)
-
-            logger.info(f"Translating: {en_sentence}")
-
-            # Build word context for LLM (helps with accuracy)
-            word_translations = {}
-            for slot_name, (lemma, guid) in filled_slots.items():
-                word_translations[slot_name] = {}
-                for lang in target_languages:
-                    if lang != "en":
-                        trans = self.get_translation(session, lemma, lang)
-                        if trans:
-                            word_translations[slot_name][lang] = trans
-
-            # Format prompt
-            prompt = f"""You are translating a simple language learning sentence into multiple languages.
-
-English sentence: {en_sentence}
-
-Word translations for reference:
-"""
-            for slot_name, translations in word_translations.items():
-                prompt += f"\n{en_words[slot_name]}:"
-                for lang, trans in translations.items():
-                    prompt += f" {LANGUAGE_NAMES[lang]}={trans},"
-
-            prompt += f"""
-
-Please translate this sentence naturally into the following languages: {", ".join([LANGUAGE_NAMES[lang] for lang in target_languages if lang != "en"])}.
-
-Keep the translations simple and natural for language learners. Use the provided word translations where appropriate, but adjust grammar (cases, verb forms, articles, etc.) as needed for natural, grammatically correct sentences.
-"""
-
-            # Build response schema
-            properties = {}
-            for lang_code in target_languages:
-                if lang_code != "en":
-                    properties[lang_code] = SchemaProperty(
-                        type="string",
-                        description=f"Natural translation in {LANGUAGE_NAMES[lang_code]}",
-                    )
-
-            schema = Schema(
-                name="Translations",
-                description="Sentence translations in multiple languages",
-                properties=properties,
-            )
-
-            # Call LLM
-            response = self.llm.generate(
-                prompt=prompt, model=self.model, response_schema=schema
-            )
-
-            if not response.success:
-                logger.error(f"Translation failed: {response.error}")
-                return {"success": False, "error": response.error}
-
-            # Parse translations
-            translations = {"en": en_sentence}
-            if response.structured_output:
-                translations.update(response.structured_output)
-
-            return {
-                "success": True,
-                "translations": translations,
-                "lemmas": filled_slots,
-                "pattern_id": pattern["pattern_id"],
-            }
-
-        finally:
-            session.close()
-
-    def save_sentence(self, session, result: Dict) -> Optional[Sentence]:
+    def save_candidate_sentence(
+        self, session, pattern: Dict, combination: Dict, template_text: str
+    ):
         """
-        Save a generated sentence to the database.
+        Save a candidate sentence to the database without translations.
 
         Args:
             session: Database session
-            result: Translation result dictionary
+            pattern: Pattern definition
+            combination: Filled combination dict
+            template_text: The mechanical English template text
 
         Returns:
-            Sentence object or None if save failed
+            Sentence object if saved successfully,
+            "duplicate" string if duplicate found,
+            None if save failed
         """
         if self.dry_run:
-            logger.info("[DRY RUN] Would save sentence:")
-            for lang, text in result["translations"].items():
-                logger.info(f"  {lang}: {text}")
+            logger.debug(f"[DRY RUN] Would save candidate: {template_text}")
             return None
 
         try:
-            # Create Sentence record
+            # Check for duplicate based on pattern and lemmas used
+            # Find sentences with same pattern
+            pattern_source = f"pattern:{pattern['pattern_id']}"
+            existing_sentences = (
+                session.query(Sentence)
+                .filter_by(source_filename=pattern_source)
+                .all()
+            )
+
+            # Build set of lemma IDs for this combination
+            combination_lemma_ids = set(lemma.id for lemma, guid in combination["lemmas"].values())
+
+            # Check each existing sentence to see if it uses the same lemmas
+            for existing_sentence in existing_sentences:
+                # Get lemma IDs used in this sentence
+                existing_lemma_ids = set(
+                    sw.lemma_id
+                    for sw in session.query(SentenceWord)
+                    .filter_by(sentence_id=existing_sentence.id, language_code="en")
+                    .all()
+                    if sw.lemma_id is not None
+                )
+
+                # If same lemmas are used, this is a duplicate
+                if combination_lemma_ids == existing_lemma_ids:
+                    logger.debug(
+                        f"Skipping duplicate sentence for pattern {pattern['pattern_id']}: "
+                        f"{template_text} (already exists as sentence {existing_sentence.id})"
+                    )
+                    return "duplicate"
+
+            # No duplicate found, create new sentence
             sentence = Sentence(
-                pattern_type=result.get("pattern_type"),
-                source_filename=f"pattern:{result['pattern_id']}",
+                pattern_type=pattern.get("pattern_type"),
+                source_filename=pattern_source,
                 verified=False,
             )
             session.add(sentence)
             session.flush()  # Get sentence ID
 
-            # Add translations
-            for lang_code, translation_text in result["translations"].items():
-                translation = SentenceTranslation(
-                    sentence_id=sentence.id,
-                    language_code=lang_code,
-                    translation_text=translation_text,
-                    verified=False,
-                )
-                session.add(translation)
+            # Add only the mechanical English "translation" (template)
+            # This will be replaced with proper English when batch translation runs
+            translation = SentenceTranslation(
+                sentence_id=sentence.id,
+                language_code="en",
+                translation_text=template_text,
+                verified=False,
+            )
+            session.add(translation)
 
-            # Add word links
+            # Add word links (for English only, for now)
             position = 0
-            for slot_name, (lemma, guid) in result["lemmas"].items():
-                for lang_code in result["translations"].keys():
-                    word_text = self.get_translation(session, lemma, lang_code)
-                    if word_text:
-                        sentence_word = SentenceWord(
-                            sentence_id=sentence.id,
-                            lemma_id=lemma.id,
-                            language_code=lang_code,
-                            position=position,
-                            word_role=slot_name,
-                            english_text=lemma.lemma_text,
-                            target_language_text=word_text,
-                        )
-                        session.add(sentence_word)
+            for slot_name, (lemma, guid) in combination["lemmas"].items():
+                sentence_word = SentenceWord(
+                    sentence_id=sentence.id,
+                    lemma_id=lemma.id,
+                    language_code="en",
+                    position=position,
+                    word_role=slot_name,
+                    english_text=lemma.lemma_text,
+                    target_language_text=lemma.lemma_text,
+                )
+                session.add(sentence_word)
                 position += 1
 
             session.commit()
-            logger.info(f"Saved sentence {sentence.id}: {result['translations']['en']}")
             return sentence
 
         except Exception as e:
-            logger.error(f"Failed to save sentence: {e}")
+            logger.error(f"Failed to save candidate sentence: {e}")
             session.rollback()
             return None
 
-    def generate_for_pattern(
-        self, pattern: Dict, languages: List[str], limit: int = 10
+    def generate_candidates_for_pattern(
+        self, pattern: Dict, max_combinations: int = None
     ) -> Dict:
         """
-        Generate sentences for a specific pattern.
+        Generate candidate sentences for a specific pattern (without translations).
 
         Args:
             pattern: Pattern definition
-            languages: Target languages
-            limit: Maximum number of sentences to generate
+            max_combinations: Maximum combinations to generate
 
         Returns:
             Dictionary with generation results
         """
-        logger.info(f"Generating sentences for pattern: {pattern['pattern_id']}")
+        logger.info(f"Generating candidates for pattern: {pattern['pattern_id']}")
 
         session = self.get_session()
         try:
-            # Fill pattern slots with lemmas
-            combinations = self.fill_pattern_slots(session, pattern, limit_per_slot=limit)
+            # Generate all combinations
+            combinations = self.generate_all_combinations(session, pattern, max_combinations)
 
             if not combinations:
                 return {
@@ -411,84 +389,513 @@ Keep the translations simple and natural for language learners. Use the provided
                     "error": "No valid lemma combinations found",
                 }
 
-            logger.info(f"Generated {len(combinations)} combinations")
-
-            # Translate each combination
+            # Save candidates to database
             results = {
                 "pattern_id": pattern["pattern_id"],
                 "total": len(combinations),
                 "success_count": 0,
+                "duplicate_count": 0,
                 "error_count": 0,
-                "sentences": [],
             }
 
-            for i, combo in enumerate(combinations[:limit], 1):
-                logger.info(
-                    f"[{i}/{min(len(combinations), limit)}] Translating combination..."
-                )
+            for i, combo in enumerate(combinations, 1):
+                if i % 100 == 0:
+                    logger.info(f"Processed {i}/{len(combinations)} candidates...")
 
-                translation_result = self.translate_pattern_sentence(
-                    pattern, combo["lemmas"], languages
-                )
+                template_text = self.build_template_text(pattern, combo["lemmas"])
+                result = self.save_candidate_sentence(session, pattern, combo, template_text)
 
-                if translation_result["success"]:
-                    # Add pattern type to result
-                    translation_result["pattern_type"] = pattern.get("pattern_type")
-
-                    # Save to database
-                    sentence = self.save_sentence(session, translation_result)
-
-                    if sentence or self.dry_run:
-                        results["success_count"] += 1
-                        results["sentences"].append(translation_result)
-                    else:
-                        results["error_count"] += 1
+                if result == "duplicate":
+                    results["duplicate_count"] += 1
+                elif result or self.dry_run:
+                    results["success_count"] += 1
                 else:
                     results["error_count"] += 1
-                    logger.error(f"Translation failed: {translation_result.get('error')}")
 
+            logger.info(
+                f"Pattern {pattern['pattern_id']}: "
+                f"saved {results['success_count']}/{results['total']} candidates, "
+                f"{results['duplicate_count']} duplicates skipped"
+            )
             return results
 
         finally:
             session.close()
 
-    def generate_all_patterns(self, languages: List[str], limit_per_pattern: int = 10) -> Dict:
+    def generate_candidates_all_patterns(self, max_per_pattern: int = None) -> Dict:
         """
-        Generate sentences for all defined patterns.
+        Generate candidate sentences for all defined patterns.
 
         Args:
-            languages: Target languages
-            limit_per_pattern: Max sentences per pattern
+            max_per_pattern: Max combinations per pattern
 
         Returns:
             Dictionary with overall results
         """
-        logger.info(f"Generating sentences for {len(SIMPLE_PATTERNS)} patterns")
+        logger.info(f"Generating candidates for {len(SIMPLE_PATTERNS)} patterns")
 
         overall_results = {
             "patterns_processed": 0,
-            "total_sentences": 0,
+            "total_candidates": 0,
             "total_success": 0,
+            "total_duplicates": 0,
             "total_errors": 0,
             "pattern_results": [],
         }
 
         for pattern in SIMPLE_PATTERNS:
-            result = self.generate_for_pattern(pattern, languages, limit=limit_per_pattern)
+            result = self.generate_candidates_for_pattern(pattern, max_combinations=max_per_pattern)
             overall_results["patterns_processed"] += 1
-            overall_results["total_sentences"] += result.get("total", 0)
+            overall_results["total_candidates"] += result.get("total", 0)
             overall_results["total_success"] += result.get("success_count", 0)
+            overall_results["total_duplicates"] += result.get("duplicate_count", 0)
             overall_results["total_errors"] += result.get("error_count", 0)
             overall_results["pattern_results"].append(result)
 
         return overall_results
 
+    def submit_batch_translation(
+        self, target_languages: List[str], limit: int = None, pattern_id: str = None
+    ) -> Tuple[str, int]:
+        """
+        Submit a batch translation job for untranslated sentences.
+
+        Args:
+            target_languages: List of language codes to translate to (e.g., ['lt', 'zh'])
+            limit: Maximum number of sentences to translate (distributed across patterns)
+            pattern_id: Optional pattern_id filter
+
+        Returns:
+            Tuple of (batch_id, number of requests queued)
+        """
+        session = self.get_session()
+        try:
+            # Find sentences that only have English translation
+            from sqlalchemy import func as sql_func
+
+            # If a specific pattern is requested, just query that pattern
+            if pattern_id:
+                query = (
+                    session.query(Sentence)
+                    .join(SentenceTranslation)
+                    .filter(SentenceTranslation.language_code == "en")
+                    .filter(Sentence.source_filename == f"pattern:{pattern_id}")
+                )
+
+                # Group by sentence and filter for those with only one translation
+                sentences_with_only_en = (
+                    session.query(Sentence.id, sql_func.count(SentenceTranslation.id))
+                    .join(SentenceTranslation)
+                    .filter(Sentence.source_filename == f"pattern:{pattern_id}")
+                    .group_by(Sentence.id)
+                    .having(sql_func.count(SentenceTranslation.id) == 1)
+                    .subquery()
+                )
+
+                query = query.filter(Sentence.id.in_(
+                    session.query(sentences_with_only_en.c.id)
+                ))
+
+                if limit:
+                    query = query.limit(limit)
+
+                sentences = query.all()
+                logger.info(f"Found {len(sentences)} untranslated sentences for pattern {pattern_id}")
+
+            else:
+                # No specific pattern - distribute limit across all patterns
+                # First, get all pattern IDs with untranslated sentences
+                pattern_source_query = (
+                    session.query(Sentence.source_filename)
+                    .join(SentenceTranslation)
+                    .filter(SentenceTranslation.language_code == "en")
+                    .filter(Sentence.source_filename.like("pattern:%"))
+                    .distinct()
+                )
+
+                # Find sentences with only English translation
+                sentences_with_only_en = (
+                    session.query(Sentence.id, sql_func.count(SentenceTranslation.id))
+                    .join(SentenceTranslation)
+                    .group_by(Sentence.id)
+                    .having(sql_func.count(SentenceTranslation.id) == 1)
+                    .subquery()
+                )
+
+                pattern_source_query = pattern_source_query.filter(
+                    Sentence.id.in_(session.query(sentences_with_only_en.c.id))
+                )
+
+                pattern_sources = [row[0] for row in pattern_source_query.all()]
+
+                if not pattern_sources:
+                    logger.warning("No untranslated sentences found")
+                    return None, 0
+
+                logger.info(f"Found {len(pattern_sources)} patterns with untranslated sentences")
+
+                # Distribute limit across patterns
+                sentences = []
+                if limit:
+                    per_pattern_limit = max(1, limit // len(pattern_sources))
+                    logger.info(f"Distributing limit of {limit} across {len(pattern_sources)} patterns ({per_pattern_limit} per pattern)")
+                else:
+                    per_pattern_limit = None
+
+                for pattern_source in pattern_sources:
+                    pattern_query = (
+                        session.query(Sentence)
+                        .filter(Sentence.source_filename == pattern_source)
+                        .filter(Sentence.id.in_(session.query(sentences_with_only_en.c.id)))
+                    )
+
+                    if per_pattern_limit:
+                        pattern_query = pattern_query.limit(per_pattern_limit)
+
+                    pattern_sentences = pattern_query.all()
+                    sentences.extend(pattern_sentences)
+
+                    if limit and len(sentences) >= limit:
+                        sentences = sentences[:limit]
+                        break
+
+                logger.info(f"Selected {len(sentences)} untranslated sentences across patterns")
+
+            if not sentences:
+                logger.warning("No untranslated sentences found")
+                return None, 0
+
+            # Queue batch requests
+            requests_queued = 0
+            for sentence in sentences:
+                # Get English text and word links
+                en_translation = (
+                    session.query(SentenceTranslation)
+                    .filter_by(sentence_id=sentence.id, language_code="en")
+                    .first()
+                )
+
+                if not en_translation:
+                    continue
+
+                template_text = en_translation.translation_text
+
+                # Get word translations for context
+                words = (
+                    session.query(SentenceWord)
+                    .filter_by(sentence_id=sentence.id, language_code="en")
+                    .all()
+                )
+
+                word_translations = {}
+                for word in words:
+                    lemma = session.query(Lemma).filter_by(id=word.lemma_id).first()
+                    if lemma:
+                        word_translations[word.word_role] = {}
+                        for lang in target_languages:
+                            trans = self.get_translation(session, lemma, lang)
+                            if trans:
+                                word_translations[word.word_role][lang] = trans
+
+                # Build batch request
+                custom_id = f"sentence_{sentence.id}"
+
+                # Build prompt for translation
+                prompt_lines = [
+                    "You are translating a simple language learning sentence.",
+                    f"Template sentence: {template_text}",
+                    "",
+                    "Word translations for reference:"
+                ]
+
+                for word_role, translations in word_translations.items():
+                    trans_str = ", ".join([f"{lang}={trans}" for lang, trans in translations.items()])
+                    prompt_lines.append(f"  {word_role}: {trans_str}")
+
+                prompt_lines.extend([
+                    "",
+                    f"Translate this sentence naturally into: {', '.join([LANGUAGE_NAMES[lang] for lang in target_languages if lang in LANGUAGE_NAMES])}.",
+                    "",
+                    "IMPORTANT: Also provide a grammatically correct English version (fixing issues like singular/plural, articles, etc.).",
+                    "Use the provided word translations where appropriate, but adjust grammar as needed for natural sentences.",
+                    "",
+                    "For each target language, provide detailed word-by-word breakdown including:",
+                    "- word: the actual inflected form as it appears in the sentence",
+                    "- english: English translation of this specific word/phrase",
+                    "- lemma: base/dictionary form in the target language",
+                    "- role: grammatical role (subject, verb, object, adjective, adverb, article, preposition, determiner, etc.)",
+                    "- grammatical_form: grammatical details (e.g., '3s_present', '1p_past', 'accusative_plural', 'infinitive')",
+                    "- grammatical_case: case if applicable (nominative, accusative, genitive, dative, etc.) or null",
+                    "",
+                    "Provide words in the order they appear in the translated sentence."
+                ])
+
+                prompt = "\n".join(prompt_lines)
+
+                # Build JSON response schema for batch API
+                # Schema for individual word details
+                word_schema = {
+                    "type": "object",
+                    "properties": {
+                        "word": {
+                            "type": "string",
+                            "description": "The actual inflected form as it appears in the sentence"
+                        },
+                        "english": {
+                            "type": "string",
+                            "description": "English translation of this word/phrase"
+                        },
+                        "lemma": {
+                            "type": "string",
+                            "description": "Base/dictionary form in the target language"
+                        },
+                        "role": {
+                            "type": "string",
+                            "description": "Grammatical role: subject, verb, object, adjective, adverb, article, preposition, determiner, etc."
+                        },
+                        "grammatical_form": {
+                            "type": ["string", "null"],
+                            "description": "Grammatical details like '3s_present', '1p_past', 'accusative_plural', 'infinitive'"
+                        },
+                        "grammatical_case": {
+                            "type": ["string", "null"],
+                            "description": "Case if applicable: nominative, accusative, genitive, dative, etc."
+                        }
+                    },
+                    "required": ["word", "english", "lemma", "role", "grammatical_form", "grammatical_case"],
+                    "additionalProperties": False
+                }
+
+                # Build properties for sentences and word arrays
+                schema_properties = {
+                    "en": {
+                        "type": "string",
+                        "description": "Corrected grammatically correct English translation"
+                    }
+                }
+
+                required_fields = ["en"]
+
+                # Add sentence and words array for each target language
+                for lang in target_languages:
+                    lang_name = LANGUAGE_NAMES.get(lang, lang)
+                    schema_properties[lang] = {
+                        "type": "string",
+                        "description": f"Natural translation in {lang_name}"
+                    }
+                    schema_properties[f"words_{lang}"] = {
+                        "type": "array",
+                        "description": f"Word-by-word breakdown for {lang_name}",
+                        "items": word_schema
+                    }
+                    required_fields.extend([lang, f"words_{lang}"])
+
+                response_format = {
+                    "type": "json_schema",
+                    "json_schema": {
+                        "name": "SentenceTranslations",
+                        "strict": True,
+                        "schema": {
+                            "type": "object",
+                            "properties": schema_properties,
+                            "required": required_fields,
+                            "additionalProperties": False
+                        }
+                    }
+                }
+
+                request_body = {
+                    "model": self.model,
+                    "messages": [{"role": "user", "content": prompt}],
+                    "response_format": response_format
+                }
+
+                metadata = BatchRequestMetadata(
+                    custom_id=custom_id,
+                    agent_name="buivolas",
+                    operation_type="translate_sentence",
+                    entity_id=sentence.id,
+                    entity_type="sentence"
+                )
+
+                try:
+                    self.batch_manager.queue_request(
+                        custom_id=custom_id,
+                        request_body=request_body,
+                        metadata=metadata,
+                        endpoint="/v1/chat/completions"
+                    )
+                    requests_queued += 1
+                except ValueError as e:
+                    # Request already exists
+                    logger.debug(f"Skipping sentence {sentence.id}: {e}")
+
+            logger.info(f"Queued {requests_queued} translation requests")
+
+            # Submit batch
+            if requests_queued > 0:
+                pending_requests = self.batch_manager.get_pending_requests(
+                    agent_name="buivolas",
+                    operation_type="translate_sentence"
+                )
+                batch_id, file_id = self.batch_manager.submit_batch(
+                    pending_requests,
+                    batch_metadata={"agent": "buivolas", "operation": "translate_sentences"}
+                )
+                logger.info(f"Submitted batch {batch_id} with {len(pending_requests)} requests")
+                return batch_id, len(pending_requests)
+
+            return None, 0
+
+        finally:
+            session.close()
+
+    def check_batch_status(self, batch_id: str) -> Dict:
+        """Check status of a batch translation job."""
+        return self.batch_manager.check_batch_status(batch_id)
+
+    def retrieve_batch_results(self, batch_id: str) -> int:
+        """
+        Retrieve and apply batch translation results.
+
+        Args:
+            batch_id: Batch ID to retrieve
+
+        Returns:
+            Number of sentences updated
+        """
+        # Retrieve results from batch API
+        count = self.batch_manager.retrieve_batch_results(batch_id)
+        logger.info(f"Retrieved {count} results from batch {batch_id}")
+
+        # Apply results to sentences
+        session = self.get_session()
+        try:
+            completed_requests = self.batch_manager.get_completed_requests(batch_id=batch_id)
+            sentences_updated = 0
+
+            for req in completed_requests:
+                sentence_id = req.entity_id
+                if not sentence_id:
+                    continue
+
+                # Parse response
+                try:
+                    response = json.loads(req.response_body)
+                    # Extract content from ChatCompletion response
+                    content = response["body"]["choices"][0]["message"]["content"]
+                    translations = json.loads(content)
+
+                    # Update sentence with translations
+                    # First, handle just the sentence text fields (en, lt, zh, etc.)
+                    for key, value in translations.items():
+                        if not key.startswith("words_"):
+                            lang_code = key
+                            translation_text = value
+
+                            # Check if translation already exists
+                            existing = (
+                                session.query(SentenceTranslation)
+                                .filter_by(sentence_id=sentence_id, language_code=lang_code)
+                                .first()
+                            )
+
+                            if existing:
+                                # Update with new translation
+                                existing.translation_text = translation_text
+                            else:
+                                # Add new translation
+                                new_trans = SentenceTranslation(
+                                    sentence_id=sentence_id,
+                                    language_code=lang_code,
+                                    translation_text=translation_text,
+                                    verified=False
+                                )
+                                session.add(new_trans)
+
+                    # Now handle word-by-word data
+                    for key, words_data in translations.items():
+                        if key.startswith("words_"):
+                            lang_code = key.replace("words_", "")
+
+                            # Delete existing word links for this language (we'll replace them)
+                            session.query(SentenceWord).filter_by(
+                                sentence_id=sentence_id,
+                                language_code=lang_code
+                            ).delete()
+
+                            # Add detailed word records
+                            for position, word_data in enumerate(words_data):
+                                # Try to find matching lemma by English translation
+                                lemma = None
+                                english_lemma_text = word_data.get("english", "").lower().strip()
+
+                                # Try to match against existing lemmas in sentence
+                                en_words = (
+                                    session.query(SentenceWord)
+                                    .filter_by(sentence_id=sentence_id, language_code="en")
+                                    .all()
+                                )
+
+                                for en_word in en_words:
+                                    if en_word.english_text and en_word.english_text.lower().strip() == english_lemma_text:
+                                        lemma = session.query(Lemma).filter_by(id=en_word.lemma_id).first()
+                                        break
+
+                                # Create SentenceWord with detailed grammatical info
+                                new_word = SentenceWord(
+                                    sentence_id=sentence_id,
+                                    lemma_id=lemma.id if lemma else None,
+                                    language_code=lang_code,
+                                    position=position,
+                                    word_role=word_data.get("role"),
+                                    english_text=word_data.get("english"),
+                                    target_language_text=word_data.get("lemma"),
+                                    grammatical_form=word_data.get("grammatical_form"),
+                                    grammatical_case=word_data.get("grammatical_case"),
+                                    declined_form=word_data.get("word")
+                                )
+                                session.add(new_word)
+
+                    session.commit()
+                    sentences_updated += 1
+
+                except Exception as e:
+                    logger.error(f"Failed to apply results for sentence {sentence_id}: {e}")
+                    session.rollback()
+
+            logger.info(f"Updated {sentences_updated} sentences with translations")
+            return sentences_updated
+
+        finally:
+            session.close()
+
 
 def get_argument_parser():
     """Return the argument parser for introspection."""
     parser = argparse.ArgumentParser(
-        description="Buivolas - Simple Pattern Sentence Generation Agent"
+        description="Buivolas - Simple Pattern Sentence Generation Agent",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  # Generate candidates for all patterns (limited to 1000 per pattern)
+  python buivolas.py generate-candidates --all-patterns --limit 1000
+
+  # Generate candidates for specific patterns
+  python buivolas.py generate-candidates --patterns where_is_noun my_noun_is_color
+
+  # Submit batch translation for untranslated sentences
+  python buivolas.py submit-batch --languages lt zh fr --limit 500
+
+  # Check batch status
+  python buivolas.py check-batch --batch-id batch_abc123
+
+  # Retrieve and apply batch results
+  python buivolas.py retrieve-batch --batch-id batch_abc123
+        """
     )
+
+    # Global options
     parser.add_argument("--db-path", help="Database path (uses default if not specified)")
     parser.add_argument(
         "--model", default="gpt-4o-mini", help="LLM model to use (default: gpt-4o-mini)"
@@ -498,25 +905,66 @@ def get_argument_parser():
         "--dry-run", action="store_true", help="Don't save to database (for testing)"
     )
 
-    # Pattern selection
-    pattern_group = parser.add_mutually_exclusive_group(required=True)
-    pattern_group.add_argument(
+    # Subcommands
+    subparsers = parser.add_subparsers(dest="command", help="Command to execute", required=True)
+
+    # generate-candidates command
+    gen_parser = subparsers.add_parser(
+        "generate-candidates",
+        help="Generate candidate sentences without translations"
+    )
+    gen_group = gen_parser.add_mutually_exclusive_group(required=True)
+    gen_group.add_argument(
         "--patterns", nargs="+", help="Specific pattern IDs to generate"
     )
-    pattern_group.add_argument(
+    gen_group.add_argument(
         "--all-patterns", action="store_true", help="Generate for all patterns"
     )
+    gen_parser.add_argument(
+        "--limit", type=int, help="Max combinations per pattern (default: unlimited)"
+    )
 
-    # Language and limits
-    parser.add_argument(
+    # submit-batch command
+    submit_parser = subparsers.add_parser(
+        "submit-batch",
+        help="Submit batch translation job for untranslated sentences"
+    )
+    submit_parser.add_argument(
         "--languages",
         nargs="+",
         required=True,
-        choices=["en", "lt", "zh", "ko", "fr", "de", "es", "pt"],
-        help="Target languages (en is always included)",
+        choices=["lt", "zh", "ko", "fr", "de", "es", "pt"],
+        help="Target languages to translate to"
     )
-    parser.add_argument(
-        "--limit", type=int, default=10, help="Max sentences per pattern (default: 10)"
+    submit_parser.add_argument(
+        "--limit", type=int, help="Max sentences to translate"
+    )
+    submit_parser.add_argument(
+        "--pattern-id", help="Only translate sentences from this pattern"
+    )
+
+    # check-batch command
+    check_parser = subparsers.add_parser(
+        "check-batch",
+        help="Check status of a batch translation job"
+    )
+    check_parser.add_argument(
+        "--batch-id", required=True, help="Batch ID to check"
+    )
+
+    # retrieve-batch command
+    retrieve_parser = subparsers.add_parser(
+        "retrieve-batch",
+        help="Retrieve and apply batch translation results"
+    )
+    retrieve_parser.add_argument(
+        "--batch-id", required=True, help="Batch ID to retrieve"
+    )
+
+    # list-batches command
+    list_parser = subparsers.add_parser(
+        "list-batches",
+        help="List active batch translation jobs"
     )
 
     return parser
@@ -527,68 +975,153 @@ def main():
     parser = get_argument_parser()
     args = parser.parse_args()
 
-    # Ensure 'en' is in languages
-    if "en" not in args.languages:
-        args.languages.insert(0, "en")
-
     # Create agent
     agent = BuivolasAgent(
         db_path=args.db_path, model=args.model, debug=args.debug, dry_run=args.dry_run
     )
 
-    # Generate sentences
-    if args.all_patterns:
-        results = agent.generate_all_patterns(
-            languages=args.languages, limit_per_pattern=args.limit
+    # Handle commands
+    if args.command == "generate-candidates":
+        pattern_dict = {p["pattern_id"]: p for p in SIMPLE_PATTERNS}
+
+        if args.all_patterns:
+            results = agent.generate_candidates_all_patterns(max_per_pattern=args.limit)
+
+            # Print summary
+            logger.info("=" * 80)
+            logger.info("BUIVOLAS - CANDIDATE GENERATION REPORT")
+            logger.info("=" * 80)
+            logger.info(f"Patterns processed: {results['patterns_processed']}")
+            logger.info(f"Total candidates: {results['total_candidates']}")
+            logger.info(f"Successful: {results['total_success']}")
+            logger.info(f"Duplicates: {results['total_duplicates']}")
+            logger.info(f"Errors: {results['total_errors']}")
+            if args.dry_run:
+                logger.info("DRY RUN - No database changes made")
+            logger.info("=" * 80)
+
+        else:
+            patterns_to_generate = []
+            for pattern_id in args.patterns:
+                if pattern_id in pattern_dict:
+                    patterns_to_generate.append(pattern_dict[pattern_id])
+                else:
+                    logger.error(f"Unknown pattern: {pattern_id}")
+                    available = ", ".join(pattern_dict.keys())
+                    logger.error(f"Available patterns: {available}")
+                    return 1
+
+            # Generate for each pattern
+            total_success = 0
+            total_duplicates = 0
+            total_errors = 0
+            total_candidates = 0
+
+            for pattern in patterns_to_generate:
+                result = agent.generate_candidates_for_pattern(pattern, max_combinations=args.limit)
+                total_candidates += result.get("total", 0)
+                total_success += result.get("success_count", 0)
+                total_duplicates += result.get("duplicate_count", 0)
+                total_errors += result.get("error_count", 0)
+
+            # Print summary
+            logger.info("=" * 80)
+            logger.info("BUIVOLAS - CANDIDATE GENERATION REPORT")
+            logger.info("=" * 80)
+            logger.info(f"Patterns: {', '.join(args.patterns)}")
+            logger.info(f"Total candidates: {total_candidates}")
+            logger.info(f"Successful: {total_success}")
+            logger.info(f"Duplicates: {total_duplicates}")
+            logger.info(f"Errors: {total_errors}")
+            if args.dry_run:
+                logger.info("DRY RUN - No database changes made")
+            logger.info("=" * 80)
+
+    elif args.command == "submit-batch":
+        batch_id, count = agent.submit_batch_translation(
+            target_languages=args.languages,
+            limit=args.limit,
+            pattern_id=args.pattern_id
         )
 
-        # Print summary
+        if batch_id:
+            logger.info("=" * 80)
+            logger.info("BUIVOLAS - BATCH SUBMISSION REPORT")
+            logger.info("=" * 80)
+            logger.info(f"Batch ID: {batch_id}")
+            logger.info(f"Requests submitted: {count}")
+            logger.info(f"Target languages: {', '.join(args.languages)}")
+            logger.info("=" * 80)
+            logger.info(f"Check status with: python buivolas.py check-batch --batch-id {batch_id}")
+        else:
+            logger.warning("No batch submitted (no untranslated sentences found)")
+
+    elif args.command == "check-batch":
+        batch_info = agent.check_batch_status(args.batch_id)
+
         logger.info("=" * 80)
-        logger.info("BUIVOLAS AGENT REPORT - Pattern Sentence Generation")
+        logger.info("BUIVOLAS - BATCH STATUS")
         logger.info("=" * 80)
-        logger.info(f"Patterns processed: {results['patterns_processed']}")
-        logger.info(f"Total sentences: {results['total_sentences']}")
-        logger.info(f"Successful: {results['total_success']}")
-        logger.info(f"Errors: {results['total_errors']}")
-        logger.info(f"Languages: {', '.join(args.languages)}")
-        if args.dry_run:
-            logger.info("DRY RUN - No database changes made")
+        logger.info(f"Batch ID: {batch_info['id']}")
+        logger.info(f"Status: {batch_info['status']}")
+        logger.info(f"Created at: {batch_info.get('created_at')}")
+
+        counts = batch_info.get("request_counts", {})
+        logger.info(f"Total requests: {counts.get('total', 0)}")
+        logger.info(f"Completed: {counts.get('completed', 0)}")
+        logger.info(f"Failed: {counts.get('failed', 0)}")
         logger.info("=" * 80)
 
-    else:
-        # Get pattern definitions
-        pattern_dict = {p["pattern_id"]: p for p in SIMPLE_PATTERNS}
-        patterns_to_generate = []
+        if batch_info['status'] == 'completed':
+            logger.info(f"Retrieve results with: python buivolas.py retrieve-batch --batch-id {args.batch_id}")
 
-        for pattern_id in args.patterns:
-            if pattern_id in pattern_dict:
-                patterns_to_generate.append(pattern_dict[pattern_id])
-            else:
-                logger.error(f"Unknown pattern: {pattern_id}")
-                available = ", ".join(pattern_dict.keys())
-                logger.error(f"Available patterns: {available}")
-                sys.exit(1)
+    elif args.command == "retrieve-batch":
+        count = agent.retrieve_batch_results(args.batch_id)
 
-        # Generate for each pattern
-        total_success = 0
-        total_errors = 0
-
-        for pattern in patterns_to_generate:
-            result = agent.generate_for_pattern(pattern, args.languages, limit=args.limit)
-            total_success += result.get("success_count", 0)
-            total_errors += result.get("error_count", 0)
-
-        # Print summary
         logger.info("=" * 80)
-        logger.info("BUIVOLAS AGENT REPORT - Pattern Sentence Generation")
+        logger.info("BUIVOLAS - BATCH RESULTS APPLIED")
         logger.info("=" * 80)
-        logger.info(f"Patterns: {', '.join(args.patterns)}")
-        logger.info(f"Successful: {total_success}")
-        logger.info(f"Errors: {total_errors}")
-        logger.info(f"Languages: {', '.join(args.languages)}")
-        if args.dry_run:
-            logger.info("DRY RUN - No database changes made")
+        logger.info(f"Batch ID: {args.batch_id}")
+        logger.info(f"Sentences updated: {count}")
         logger.info("=" * 80)
+
+    elif args.command == "list-batches":
+        active_batches = agent.batch_manager.list_active_batches()
+
+        logger.info("=" * 80)
+        logger.info("BUIVOLAS - ACTIVE BATCHES")
+        logger.info("=" * 80)
+
+        if active_batches:
+            for batch_id in active_batches:
+                # Check status with OpenAI to sync local database
+                try:
+                    batch_info = agent.batch_manager.check_batch_status(batch_id)
+                    openai_status = batch_info.get('status', 'unknown')
+                    logger.info(f"\nBatch: {batch_id}")
+                    logger.info(f"  OpenAI Status: {openai_status}")
+
+                    # Show request counts from OpenAI if available
+                    if 'request_counts' in batch_info:
+                        counts = batch_info['request_counts']
+                        logger.info(f"  Total: {counts.get('total', 0)}, Completed: {counts.get('completed', 0)}, Failed: {counts.get('failed', 0)}")
+
+                    # Also show local database summary
+                    summary = agent.batch_manager.get_batch_summary(batch_id)
+                    logger.info(f"  Local DB status counts: {summary['status_counts']}")
+                except Exception as e:
+                    logger.warning(f"  Failed to check status for {batch_id}: {e}")
+                    # Fall back to local summary only
+                    summary = agent.batch_manager.get_batch_summary(batch_id)
+                    logger.info(f"\nBatch: {batch_id}")
+                    logger.info(f"  Total requests: {summary['total_requests']}")
+                    logger.info(f"  Status counts: {summary['status_counts']}")
+        else:
+            logger.info("No active batches")
+
+        logger.info("=" * 80)
+
+    return 0
 
 
 if __name__ == "__main__":

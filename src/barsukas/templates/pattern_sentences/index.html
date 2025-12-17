@@ -28,12 +28,14 @@
         </div>
     </div>
 
+    <!-- Step 1: Generate Candidates -->
     <div class="card">
         <div class="card-header">
-            <h5><i class="bi bi-play-circle"></i> Generate Sentences</h5>
+            <h5><i class="bi bi-1-circle"></i> Step 1: Generate Candidate Sentences</h5>
         </div>
         <div class="card-body">
-            <form id="generateForm">
+            <p class="text-muted">Generate candidate sentences with mechanical English templates (no translations yet).</p>
+            <form id="generateCandidatesForm">
                 <!-- Pattern Selection -->
                 <div class="mb-3">
                     <label class="form-label fw-bold">Select Patterns</label>
@@ -60,29 +62,11 @@
                     {% endfor %}
                 </div>
 
-                <!-- Language Selection -->
-                <div class="mb-3">
-                    <label class="form-label fw-bold">Target Languages <span class="text-muted">(English always included)</span></label>
-                    {% for lang in languages %}
-                    {% if lang.code != 'en' %}
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox"
-                               name="languages" value="{{ lang.code }}"
-                               id="lang_{{ lang.code }}"
-                               {% if lang.code == 'lt' %}checked{% endif %}>
-                        <label class="form-check-label" for="lang_{{ lang.code }}">
-                            {{ lang.name }}
-                        </label>
-                    </div>
-                    {% endif %}
-                    {% endfor %}
-                </div>
-
                 <!-- Limit -->
                 <div class="mb-3">
-                    <label for="limit" class="form-label fw-bold">Sentences per Pattern</label>
-                    <input type="number" class="form-control" id="limit" name="limit"
-                           value="10" min="1" max="100" style="width: 150px;">
+                    <label for="limit_candidates" class="form-label fw-bold">Sentences per Pattern</label>
+                    <input type="number" class="form-control" id="limit_candidates" name="limit"
+                           value="100" min="1" style="width: 150px;">
                     <small class="form-text text-muted">Maximum number of sentence variations to generate for each pattern</small>
                 </div>
 
@@ -95,24 +79,133 @@
                 </div>
 
                 <!-- Submit Button -->
-                <button type="submit" class="btn btn-primary" id="submitBtn">
-                    <i class="bi bi-play-fill"></i> Generate Sentences
-                </button>
-                <button type="button" class="btn btn-secondary" id="cancelBtn" style="display:none;">
-                    Cancel
+                <button type="submit" class="btn btn-primary" id="generateCandidatesBtn">
+                    <i class="bi bi-play-fill"></i> Generate Candidates
                 </button>
             </form>
 
             <!-- Progress/Output Display -->
-            <div id="outputSection" class="mt-4" style="display:none;">
+            <div id="candidatesOutputSection" class="mt-4" style="display:none;">
                 <h6>Output:</h6>
-                <div id="progressSpinner" class="text-center my-3">
+                <div id="candidatesProgressSpinner" class="text-center my-3">
                     <div class="spinner-border text-primary" role="status">
                         <span class="visually-hidden">Generating...</span>
                     </div>
-                    <p class="mt-2">Generating sentences... This may take several minutes.</p>
+                    <p class="mt-2">Generating candidates... This may take several minutes.</p>
                 </div>
-                <pre id="output" class="bg-light p-3 border rounded" style="max-height: 400px; overflow-y: auto;"></pre>
+                <pre id="candidatesOutput" class="bg-light p-3 border rounded" style="max-height: 400px; overflow-y: auto;"></pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 2: Submit Batch Translation -->
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5><i class="bi bi-2-circle"></i> Step 2: Submit Batch Translation</h5>
+        </div>
+        <div class="card-body">
+            <p class="text-muted">Submit untranslated candidates for batch translation (includes corrected English).</p>
+            <form id="submitBatchForm">
+                <!-- Language Selection -->
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Target Languages</label>
+                    {% for lang in languages %}
+                    {% if lang.code != 'en' %}
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox"
+                               name="languages" value="{{ lang.code }}"
+                               id="batch_lang_{{ lang.code }}"
+                               {% if lang.code == 'lt' %}checked{% endif %}>
+                        <label class="form-check-label" for="batch_lang_{{ lang.code }}">
+                            {{ lang.name }}
+                        </label>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+
+                <!-- Pattern Filter -->
+                <div class="mb-3">
+                    <label for="batch_pattern_id" class="form-label fw-bold">Filter by Pattern (Optional)</label>
+                    <select class="form-select" id="batch_pattern_id" name="pattern_id" style="width: 300px;">
+                        <option value="">All Patterns</option>
+                        {% for pattern in patterns %}
+                        <option value="{{ pattern.pattern_id }}">{{ pattern.pattern_id }}</option>
+                        {% endfor %}
+                    </select>
+                    <small class="form-text text-muted">Only translate sentences from this pattern</small>
+                </div>
+
+                <!-- Limit -->
+                <div class="mb-3">
+                    <label for="limit_batch" class="form-label fw-bold">Sentence Limit (Optional)</label>
+                    <input type="number" class="form-control" id="limit_batch" name="limit"
+                           value="" min="1" style="width: 150px;" placeholder="No limit">
+                    <small class="form-text text-muted">Maximum number of sentences to translate</small>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn btn-success" id="submitBatchBtn">
+                    <i class="bi bi-cloud-upload"></i> Submit Batch
+                </button>
+            </form>
+
+            <!-- Progress/Output Display -->
+            <div id="batchOutputSection" class="mt-4" style="display:none;">
+                <h6>Output:</h6>
+                <div id="batchProgressSpinner" class="text-center my-3">
+                    <div class="spinner-border text-success" role="status">
+                        <span class="visually-hidden">Submitting...</span>
+                    </div>
+                    <p class="mt-2">Submitting batch translation...</p>
+                </div>
+                <pre id="batchOutput" class="bg-light p-3 border rounded" style="max-height: 400px; overflow-y: auto;"></pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 3: Batch Status -->
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5><i class="bi bi-3-circle"></i> Step 3: Check & Retrieve Batch Results</h5>
+        </div>
+        <div class="card-body">
+            <p class="text-muted">Check the status of active batch translation jobs. Completed batches will be automatically retrieved.</p>
+
+            <!-- Check All Batches -->
+            <button type="button" class="btn btn-info" id="checkStatusBtn">
+                <i class="bi bi-arrow-clockwise"></i> Refresh All Batches
+            </button>
+
+            <!-- Status Display -->
+            <div id="statusOutputSection" class="mt-4" style="display:none;">
+                <h6>Active Batches:</h6>
+                <div id="statusBatchList" class="mb-3"></div>
+                <pre id="statusOutput" class="bg-light p-3 border rounded" style="max-height: 400px; overflow-y: auto;"></pre>
+            </div>
+
+            <!-- Check Specific Batch -->
+            <div class="mt-4">
+                <h6>Check Specific Batch:</h6>
+                <div class="input-group" style="max-width: 600px;">
+                    <input type="text" class="form-control" id="batchIdInput" placeholder="batch_xxx">
+                    <button class="btn btn-primary" type="button" id="checkBatchBtn">
+                        <i class="bi bi-search"></i> Check & Retrieve
+                    </button>
+                </div>
+                <small class="form-text text-muted">Enter a batch ID to check its status and automatically retrieve results if completed</small>
+            </div>
+
+            <!-- Specific Batch Output -->
+            <div id="batchCheckOutputSection" class="mt-4" style="display:none;">
+                <h6>Batch Details:</h6>
+                <div id="batchCheckProgressSpinner" class="text-center my-3">
+                    <div class="spinner-border text-info" role="status">
+                        <span class="visually-hidden">Checking...</span>
+                    </div>
+                    <p class="mt-2">Checking batch status...</p>
+                </div>
+                <pre id="batchCheckOutput" class="bg-light p-3 border rounded" style="max-height: 400px; overflow-y: auto;"></pre>
             </div>
         </div>
     </div>
@@ -128,13 +221,21 @@
                 from the database.
             </p>
             <p>
-                The system automatically:
+                The new two-step workflow:
+            </p>
+            <ol>
+                <li><strong>Generate Candidates:</strong> Creates all possible sentence combinations from patterns with mechanical English templates (e.g., "I have 12 ring").</li>
+                <li><strong>Submit Batch Translation:</strong> Sends untranslated candidates to OpenAI Batch API for translation into target languages, including grammatically corrected English.</li>
+            </ol>
+            <p>
+                Benefits of this approach:
             </p>
             <ul>
-                <li>Selects appropriate vocabulary words based on difficulty level and part of speech</li>
-                <li>Uses LLM to generate grammatically correct translations in all target languages</li>
+                <li>Generates ALL possible combinations (cartesian product) for comprehensive coverage</li>
+                <li>Cost-effective: Batch API provides 50% discount on translation costs</li>
+                <li>Separates sentence generation from translation for better control</li>
+                <li>Corrects English grammar automatically (e.g., "I have 12 ring" → "I have 12 rings")</li>
                 <li>Links sentences to their constituent words via GUIDs for difficulty tracking</li>
-                <li>Stores translations in the database for wireword export</li>
             </ul>
         </div>
     </div>
@@ -161,15 +262,14 @@ document.querySelectorAll('.pattern-checkbox').forEach(cb => {
     });
 });
 
-// Handle form submission
-document.getElementById('generateForm').addEventListener('submit', async function(e) {
+// Handle candidate generation form submission
+document.getElementById('generateCandidatesForm').addEventListener('submit', async function(e) {
     e.preventDefault();
 
-    const submitBtn = document.getElementById('submitBtn');
-    const cancelBtn = document.getElementById('cancelBtn');
-    const outputSection = document.getElementById('outputSection');
-    const progressSpinner = document.getElementById('progressSpinner');
-    const output = document.getElementById('output');
+    const submitBtn = document.getElementById('generateCandidatesBtn');
+    const outputSection = document.getElementById('candidatesOutputSection');
+    const progressSpinner = document.getElementById('candidatesProgressSpinner');
+    const output = document.getElementById('candidatesOutput');
 
     // Show output section
     outputSection.style.display = 'block';
@@ -177,15 +277,14 @@ document.getElementById('generateForm').addEventListener('submit', async functio
     output.textContent = '';
     output.style.display = 'none';
 
-    // Disable submit, enable cancel
+    // Disable submit
     submitBtn.disabled = true;
-    cancelBtn.style.display = 'inline-block';
 
     // Build form data
     const formData = new FormData(this);
 
     try {
-        const response = await fetch('{{ url_for("pattern_sentences.generate") }}', {
+        const response = await fetch('{{ url_for("pattern_sentences.generate_candidates") }}', {
             method: 'POST',
             body: formData
         });
@@ -211,9 +310,192 @@ document.getElementById('generateForm').addEventListener('submit', async functio
         output.style.display = 'block';
         output.textContent = 'ERROR: ' + error.message;
     } finally {
-        // Re-enable submit, hide cancel
+        // Re-enable submit
         submitBtn.disabled = false;
-        cancelBtn.style.display = 'none';
+    }
+});
+
+// Handle batch submission form
+document.getElementById('submitBatchForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const submitBtn = document.getElementById('submitBatchBtn');
+    const outputSection = document.getElementById('batchOutputSection');
+    const progressSpinner = document.getElementById('batchProgressSpinner');
+    const output = document.getElementById('batchOutput');
+
+    // Show output section
+    outputSection.style.display = 'block';
+    progressSpinner.style.display = 'block';
+    output.textContent = '';
+    output.style.display = 'none';
+
+    // Disable submit
+    submitBtn.disabled = true;
+
+    // Build form data
+    const formData = new FormData(this);
+
+    try {
+        const response = await fetch('{{ url_for("pattern_sentences.submit_batch") }}', {
+            method: 'POST',
+            body: formData
+        });
+
+        const result = await response.json();
+
+        // Hide spinner, show output
+        progressSpinner.style.display = 'none';
+        output.style.display = 'block';
+
+        if (result.success) {
+            output.textContent = result.stdout;
+            if (result.stderr) {
+                output.textContent += '\n\nSTDERR:\n' + result.stderr;
+            }
+        } else {
+            output.textContent = 'ERROR: ' + (result.error || 'Batch submission failed');
+            if (result.stdout) output.textContent += '\n\nSTDOUT:\n' + result.stdout;
+            if (result.stderr) output.textContent += '\n\nSTDERR:\n' + result.stderr;
+        }
+    } catch (error) {
+        progressSpinner.style.display = 'none';
+        output.style.display = 'block';
+        output.textContent = 'ERROR: ' + error.message;
+    } finally {
+        // Re-enable submit
+        submitBtn.disabled = false;
+    }
+});
+
+// Handle batch status check
+document.getElementById('checkStatusBtn').addEventListener('click', async function() {
+    const statusBtn = this;
+    const outputSection = document.getElementById('statusOutputSection');
+    const output = document.getElementById('statusOutput');
+
+    // Disable button temporarily
+    statusBtn.disabled = true;
+    output.textContent = 'Loading...';
+    outputSection.style.display = 'block';
+
+    try {
+        const response = await fetch('{{ url_for("pattern_sentences.batch_status") }}');
+        const result = await response.json();
+
+        if (result.success) {
+            output.textContent = result.stdout;
+            if (result.stderr) {
+                output.textContent += '\n\nSTDERR:\n' + result.stderr;
+            }
+
+            // Parse batch IDs from output and create clickable links
+            const batchIdRegex = /Batch: (batch_[a-zA-Z0-9]+)/g;
+            const batchIds = [];
+            let match;
+            while ((match = batchIdRegex.exec(result.stdout)) !== null) {
+                batchIds.push(match[1]);
+            }
+
+            if (batchIds.length > 0) {
+                const batchListDiv = document.getElementById('statusBatchList');
+                batchListDiv.innerHTML = '<p><strong>Quick Actions:</strong></p>';
+                batchIds.forEach(batchId => {
+                    const btn = document.createElement('button');
+                    btn.className = 'btn btn-sm btn-outline-primary me-2 mb-2';
+                    btn.textContent = `Check ${batchId}`;
+                    btn.onclick = () => {
+                        document.getElementById('batchIdInput').value = batchId;
+                        document.getElementById('checkBatchBtn').click();
+                    };
+                    batchListDiv.appendChild(btn);
+                });
+            }
+        } else {
+            output.textContent = 'ERROR: ' + (result.error || 'Failed to fetch status');
+            if (result.stdout) output.textContent += '\n\nSTDOUT:\n' + result.stdout;
+            if (result.stderr) output.textContent += '\n\nSTDERR:\n' + result.stderr;
+        }
+    } catch (error) {
+        output.textContent = 'ERROR: ' + error.message;
+    } finally {
+        statusBtn.disabled = false;
+    }
+});
+
+// Handle specific batch check
+document.getElementById('checkBatchBtn').addEventListener('click', async function() {
+    const batchId = document.getElementById('batchIdInput').value.trim();
+    if (!batchId) {
+        alert('Please enter a batch ID');
+        return;
+    }
+
+    const checkBtn = this;
+    const outputSection = document.getElementById('batchCheckOutputSection');
+    const progressSpinner = document.getElementById('batchCheckProgressSpinner');
+    const output = document.getElementById('batchCheckOutput');
+
+    // Show output section
+    outputSection.style.display = 'block';
+    progressSpinner.style.display = 'block';
+    output.textContent = '';
+    output.style.display = 'none';
+
+    // Disable button
+    checkBtn.disabled = true;
+
+    try {
+        console.log('Fetching batch status for:', batchId);
+        const response = await fetch(`/pattern-sentences/check-batch/${batchId}`);
+        console.log('Response status:', response.status);
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const result = await response.json();
+        console.log('Result:', result);
+
+        // Hide spinner, show output
+        progressSpinner.style.display = 'none';
+        output.style.display = 'block';
+
+        if (result.success) {
+            // Logging goes to stderr, so show that as main output
+            output.textContent = '=== BATCH STATUS ===\n' + (result.stderr || result.stdout);
+
+            // If batch was completed and retrieved
+            if (result.is_completed && result.retrieve_success) {
+                output.textContent += '\n\n=== RETRIEVAL RESULTS ===\n' + (result.retrieve_stderr || result.retrieve_stdout);
+                output.textContent += '\n\n✓ Batch results successfully retrieved and applied to database!';
+            } else if (result.is_completed && result.retrieve_success === false) {
+                output.textContent += '\n\n✗ Batch is completed but retrieval failed.';
+                if (result.retrieve_stderr) {
+                    output.textContent += '\n\nRETRIEVAL ERROR:\n' + result.retrieve_stderr;
+                }
+            } else if (!result.is_completed) {
+                output.textContent += '\n\nℹ Batch is not yet completed. Check back later.';
+            }
+        } else {
+            output.textContent = 'ERROR: ' + (result.error || 'Failed to check batch');
+            if (result.stdout) output.textContent += '\n\nSTDOUT:\n' + result.stdout;
+            if (result.stderr) output.textContent += '\n\nSTDERR:\n' + result.stderr;
+        }
+    } catch (error) {
+        console.error('Batch check error:', error);
+        progressSpinner.style.display = 'none';
+        output.style.display = 'block';
+        output.textContent = 'ERROR: ' + error.message + '\n\nCheck browser console for details.';
+    } finally {
+        checkBtn.disabled = false;
+    }
+});
+
+// Allow Enter key in batch ID input
+document.getElementById('batchIdInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        document.getElementById('checkBatchBtn').click();
     }
 });
 </script>

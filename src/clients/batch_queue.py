@@ -293,11 +293,35 @@ class BatchQueueManager:
         batch_info = self.batch_client.get_batch_status(batch_id)
         status = batch_info["status"]
 
-        # Update request statuses if batch is processing or completed
+        # Update request statuses based on batch status
         if status in [BatchStatus.IN_PROGRESS.value, BatchStatus.FINALIZING.value]:
+            # Update submitted requests to processing
             self.db.query(BatchQueue).filter_by(
                 batch_id=batch_id, status=BatchRequestStatus.SUBMITTED.value
             ).update({"status": BatchRequestStatus.PROCESSING.value})
+            self.db.commit()
+        elif status == BatchStatus.COMPLETED.value:
+            # Update all non-completed requests to indicate batch is ready for retrieval
+            # Note: Individual request statuses will be updated when retrieve_batch_results is called
+            self.db.query(BatchQueue).filter_by(
+                batch_id=batch_id
+            ).filter(
+                BatchQueue.status.in_([
+                    BatchRequestStatus.SUBMITTED.value,
+                    BatchRequestStatus.PROCESSING.value
+                ])
+            ).update({"status": BatchRequestStatus.PROCESSING.value})
+            self.db.commit()
+        elif status in [BatchStatus.FAILED.value, BatchStatus.EXPIRED.value, BatchStatus.CANCELLED.value]:
+            # Update all pending requests to failed/cancelled
+            self.db.query(BatchQueue).filter_by(
+                batch_id=batch_id
+            ).filter(
+                BatchQueue.status.in_([
+                    BatchRequestStatus.SUBMITTED.value,
+                    BatchRequestStatus.PROCESSING.value
+                ])
+            ).update({"status": BatchRequestStatus.FAILED.value})
             self.db.commit()
 
         return batch_info
@@ -485,7 +509,16 @@ def create_batch_database_session(db_path: str = BATCH_DB_PATH) -> Session:
 
     # Create engine and tables
     engine = create_engine(f"sqlite:///{db_path}")
-    Base.metadata.create_all(engine)
+
+    # Use checkfirst to avoid recreating existing tables/indexes
+    # Wrap in try/except to handle SQLite index issues
+    try:
+        Base.metadata.create_all(engine, checkfirst=True)
+    except Exception as e:
+        # If we get an "already exists" error, it's likely safe to ignore
+        # since the table/index already exists
+        if "already exists" not in str(e):
+            raise
 
     # Create session
     Session = sessionmaker(bind=engine)
