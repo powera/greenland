@@ -30,7 +30,12 @@ LANGUAGE_FIELDS = {
     "pt": ("pt", "Portuguese", True),
     "sw": ("sw", "Swahili", True),
     "vi": ("vi", "Vietnamese", True),
+    "ja": ("ja", "Japanese", True),
 }
+
+# Language display names (for use in prompts, UIs, etc.)
+# This is derived from LANGUAGE_FIELDS for convenience
+LANGUAGE_NAMES = {code: name for code, (_, name, _) in LANGUAGE_FIELDS.items()}
 
 
 def get_translation(session: Session, lemma: Lemma, lang_code: str) -> Optional[str]:

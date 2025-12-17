@@ -13,22 +13,10 @@ import logging
 from typing import Dict, List, Optional, Tuple
 
 from wordfreq.storage.models.schema import Sentence, SentenceTranslation, SentenceWord, Lemma, LemmaTranslation
-from wordfreq.storage.translation_helpers import get_translation
+from wordfreq.storage.translation_helpers import get_translation, LANGUAGE_NAMES
 from clients.unified_client import UnifiedLLMClient
 
 logger = logging.getLogger(__name__)
-
-# Language display names
-LANGUAGE_NAMES = {
-    "en": "English",
-    "lt": "Lithuanian",
-    "zh": "Chinese",
-    "ko": "Korean",
-    "fr": "French",
-    "de": "German",
-    "es": "Spanish",
-    "pt": "Portuguese",
-}
 
 
 def build_translation_prompt(

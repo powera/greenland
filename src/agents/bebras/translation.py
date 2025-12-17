@@ -13,23 +13,9 @@ import util.prompt_loader
 from clients.unified_client import UnifiedLLMClient
 from clients.types import Schema, SchemaProperty
 from wordfreq.storage.database import Sentence, add_sentence_translation
+from wordfreq.storage.translation_helpers import LANGUAGE_NAMES
 
 logger = logging.getLogger(__name__)
-
-
-# Language name mappings for prompts
-LANGUAGE_NAMES = {
-    "en": "English",
-    "lt": "Lithuanian",
-    "zh": "Chinese",
-    "fr": "French",
-    "ko": "Korean",
-    "sw": "Swahili",
-    "vi": "Vietnamese",
-    "de": "German",
-    "es": "Spanish",
-    "ja": "Japanese",
-}
 
 
 def ensure_translations(

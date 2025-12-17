@@ -59,6 +59,12 @@ from wordfreq.storage.models.schema import (
     SentenceTranslation,
     SentenceWord,
 )
+from wordfreq.storage.translation_helpers import get_translation, LANGUAGE_NAMES
+from wordfreq.translation.sentence import (
+    build_translation_prompt,
+    build_response_schema,
+    store_translation_results,
+)
 
 # Configure logging
 logging.basicConfig(
@@ -66,25 +72,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Language name mappings for prompts
-LANGUAGE_NAMES = {
-    "en": "English",
-    "lt": "Lithuanian",
-    "zh": "Chinese",
-    "fr": "French",
-    "ko": "Korean",
-    "de": "German",
-    "es": "Spanish",
-    "pt": "Portuguese",
-}
-
-# Language column mapping for direct translation columns
-LANGUAGE_COLUMN_MAP = {
-    "zh": "chinese_translation",
-    "ko": "korean_translation",
-    "fr": "french_translation",
-    "lt": "lithuanian_translation",
-}
 
 
 class BuivolasAgent:
@@ -158,35 +145,6 @@ class BuivolasAgent:
 
         lemmas = query.all()
         return [(lemma, lemma.guid) for lemma in lemmas]
-
-    def get_translation(self, session, lemma: Lemma, language_code: str) -> Optional[str]:
-        """
-        Get translation for a lemma in a specific language.
-
-        Args:
-            session: Database session
-            lemma: Lemma object
-            language_code: Language code (e.g., "lt", "zh")
-
-        Returns:
-            Translation text or None if not available
-        """
-        # English is the lemma text itself
-        if language_code == "en":
-            return lemma.lemma_text
-
-        # Check column-based translations
-        if language_code in LANGUAGE_COLUMN_MAP:
-            column_name = LANGUAGE_COLUMN_MAP[language_code]
-            return getattr(lemma, column_name, None)
-
-        # Check table-based translations (es, de, pt)
-        translation = (
-            session.query(LemmaTranslation)
-            .filter_by(lemma_id=lemma.id, language_code=language_code)
-            .first()
-        )
-        return translation.translation if translation else None
 
     def generate_all_combinations(
         self, session, pattern: Dict, max_combinations: int = None
@@ -568,152 +526,44 @@ class BuivolasAgent:
             # Queue batch requests
             requests_queued = 0
             for sentence in sentences:
-                # Get English text and word links
-                en_translation = (
-                    session.query(SentenceTranslation)
-                    .filter_by(sentence_id=sentence.id, language_code="en")
-                    .first()
-                )
-
-                if not en_translation:
-                    continue
-
-                template_text = en_translation.translation_text
-
-                # Get word translations for context
-                words = (
+                # Get word links for this sentence
+                sentence_words = (
                     session.query(SentenceWord)
                     .filter_by(sentence_id=sentence.id, language_code="en")
                     .all()
                 )
 
-                word_translations = {}
-                for word in words:
-                    lemma = session.query(Lemma).filter_by(id=word.lemma_id).first()
-                    if lemma:
-                        word_translations[word.word_role] = {
-                            "guid": lemma.guid if lemma.guid else ""
-                        }
-                        for lang in target_languages:
-                            trans = self.get_translation(session, lemma, lang)
-                            if trans:
-                                word_translations[word.word_role][lang] = trans
+                # Use shared helper to build prompt
+                try:
+                    context, prompt = build_translation_prompt(
+                        sentence, sentence_words, target_languages, session
+                    )
+                except ValueError:
+                    # No English translation found
+                    continue
 
                 # Build batch request
                 custom_id = f"sentence_{sentence.id}"
 
-                # Build prompt for translation
-                prompt_lines = [
-                    "You are translating a simple language learning sentence.",
-                    f"Template sentence: {template_text}",
-                    "",
-                    "Word translations for reference:"
-                ]
+                # Combine context and prompt for batch API
+                full_prompt = f"{context}\n\n{prompt}"
 
-                for word_role, translations in word_translations.items():
-                    guid = translations.get("guid", "")
-                    trans_items = [(lang, trans) for lang, trans in translations.items() if lang != "guid"]
-                    trans_str = ", ".join([f"{lang}={trans}" for lang, trans in trans_items])
-                    if guid:
-                        prompt_lines.append(f"  {word_role} (GUID: {guid}): {trans_str}")
-                    else:
-                        prompt_lines.append(f"  {word_role}: {trans_str}")
+                # Use shared helper to build response schema
+                inner_schema = build_response_schema(target_languages)
 
-                prompt_lines.extend([
-                    "",
-                    f"Translate this sentence naturally into: {', '.join([LANGUAGE_NAMES[lang] for lang in target_languages if lang in LANGUAGE_NAMES])}.",
-                    "",
-                    "IMPORTANT: Also provide a grammatically correct English version (fixing issues like singular/plural, articles, etc.).",
-                    "Use the provided word translations where appropriate, but adjust grammar as needed for natural sentences.",
-                    "",
-                    "For each target language, provide detailed word-by-word breakdown including:",
-                    "- word: the actual inflected form as it appears in the sentence",
-                    "- english: English translation of this specific word/phrase",
-                    "- guid: the GUID for this word if provided above (e.g., 'N08_001'), or empty string if not provided",
-                    "- role: grammatical role (subject, verb, object, adjective, adverb, article, preposition, determiner, etc.)",
-                    "- grammatical_form: grammatical details (e.g., '3s_present', '1p_past', 'accusative_plural', 'infinitive')",
-                    "- grammatical_case: case if applicable (nominative, accusative, genitive, dative, etc.) or null",
-                    "",
-                    "Provide words in the order they appear in the translated sentence."
-                ])
-
-                prompt = "\n".join(prompt_lines)
-
-                # Build JSON response schema for batch API
-                # Schema for individual word details
-                word_schema = {
-                    "type": "object",
-                    "properties": {
-                        "word": {
-                            "type": "string",
-                            "description": "The actual inflected form as it appears in the sentence"
-                        },
-                        "english": {
-                            "type": "string",
-                            "description": "English translation of this word/phrase"
-                        },
-                        "guid": {
-                            "type": "string",
-                            "description": "GUID for this word (e.g., 'N08_001'), or empty string if not applicable"
-                        },
-                        "role": {
-                            "type": "string",
-                            "description": "Grammatical role: subject, verb, object, adjective, adverb, article, preposition, determiner, etc."
-                        },
-                        "grammatical_form": {
-                            "type": ["string", "null"],
-                            "description": "Grammatical details like '3s_present', '1p_past', 'accusative_plural', 'infinitive'"
-                        },
-                        "grammatical_case": {
-                            "type": ["string", "null"],
-                            "description": "Case if applicable: nominative, accusative, genitive, dative, etc."
-                        }
-                    },
-                    "required": ["word", "english", "guid", "role", "grammatical_form", "grammatical_case"],
-                    "additionalProperties": False
-                }
-
-                # Build properties for sentences and word arrays
-                schema_properties = {
-                    "en": {
-                        "type": "string",
-                        "description": "Corrected grammatically correct English translation"
-                    }
-                }
-
-                required_fields = ["en"]
-
-                # Add sentence and words array for each target language
-                for lang in target_languages:
-                    lang_name = LANGUAGE_NAMES.get(lang, lang)
-                    schema_properties[lang] = {
-                        "type": "string",
-                        "description": f"Natural translation in {lang_name}"
-                    }
-                    schema_properties[f"words_{lang}"] = {
-                        "type": "array",
-                        "description": f"Word-by-word breakdown for {lang_name}",
-                        "items": word_schema
-                    }
-                    required_fields.extend([lang, f"words_{lang}"])
-
+                # Wrap in OpenAI Batch API format
                 response_format = {
                     "type": "json_schema",
                     "json_schema": {
                         "name": "SentenceTranslations",
                         "strict": True,
-                        "schema": {
-                            "type": "object",
-                            "properties": schema_properties,
-                            "required": required_fields,
-                            "additionalProperties": False
-                        }
+                        "schema": inner_schema
                     }
                 }
 
                 request_body = {
                     "model": self.model,
-                    "messages": [{"role": "user", "content": prompt}],
+                    "messages": [{"role": "user", "content": full_prompt}],
                     "response_format": response_format
                 }
 
@@ -786,79 +636,15 @@ class BuivolasAgent:
                 if not sentence_id:
                     continue
 
-                # Parse response
+                # Parse response and store results
                 try:
                     response = json.loads(req.response_body)
                     # Extract content from ChatCompletion response
                     content = response["body"]["choices"][0]["message"]["content"]
                     translations = json.loads(content)
 
-                    # Update sentence with translations
-                    # First, handle just the sentence text fields (en, lt, zh, etc.)
-                    for key, value in translations.items():
-                        if not key.startswith("words_"):
-                            lang_code = key
-                            translation_text = value
-
-                            # Check if translation already exists
-                            existing = (
-                                session.query(SentenceTranslation)
-                                .filter_by(sentence_id=sentence_id, language_code=lang_code)
-                                .first()
-                            )
-
-                            if existing:
-                                # Update with new translation
-                                existing.translation_text = translation_text
-                            else:
-                                # Add new translation
-                                new_trans = SentenceTranslation(
-                                    sentence_id=sentence_id,
-                                    language_code=lang_code,
-                                    translation_text=translation_text,
-                                    verified=False
-                                )
-                                session.add(new_trans)
-
-                    # Now handle word-by-word data
-                    for key, words_data in translations.items():
-                        if key.startswith("words_"):
-                            lang_code = key.replace("words_", "")
-
-                            # Delete existing word links for this language (we'll replace them)
-                            session.query(SentenceWord).filter_by(
-                                sentence_id=sentence_id,
-                                language_code=lang_code
-                            ).delete()
-
-                            # Add detailed word records
-                            for position, word_data in enumerate(words_data):
-                                # Find matching lemma by GUID if provided
-                                lemma_id = None
-                                guid = word_data.get("guid", "").strip()
-
-                                if guid:
-                                    # Look up lemma by GUID
-                                    lemma = session.query(Lemma).filter_by(guid=guid).first()
-                                    if lemma:
-                                        lemma_id = lemma.id
-
-                                # Create SentenceWord with detailed grammatical info
-                                new_word = SentenceWord(
-                                    sentence_id=sentence_id,
-                                    lemma_id=lemma_id,
-                                    language_code=lang_code,
-                                    position=position,
-                                    word_role=word_data.get("role"),
-                                    english_text=word_data.get("english"),
-                                    target_language_text=word_data.get("word"),
-                                    grammatical_form=word_data.get("grammatical_form"),
-                                    grammatical_case=word_data.get("grammatical_case"),
-                                    declined_form=word_data.get("word")
-                                )
-                                session.add(new_word)
-
-                    session.commit()
+                    # Use shared helper to store translation results
+                    store_translation_results(sentence_id, translations, session)
                     sentences_updated += 1
 
                 except Exception as e:

@@ -29,6 +29,7 @@ if GREENLAND_SRC_PATH not in sys.path:
 import constants
 from wordfreq.storage.database import create_database_session
 from wordfreq.storage.models.schema import Lemma, AudioQualityReview, LemmaTranslation
+from wordfreq.storage.translation_helpers import get_translation
 from clients.audio import AudioFormat
 from audioshoe.espeak import generate_audio, EspeakVoice, DEFAULT_ESPEAK_VOICES
 
@@ -37,16 +38,6 @@ logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
-
-# Language column mapping for direct translation columns
-LANGUAGE_COLUMN_MAP = {
-    "zh": "chinese_translation",
-    "ko": "korean_translation",
-    "fr": "french_translation",
-    "sw": "swahili_translation",
-    "lt": "lithuanian_translation",
-    "vi": "vietnamese_translation",
-}
 
 
 class StrazdasAgent:
@@ -93,18 +84,7 @@ class StrazdasAgent:
         Returns:
             Translation text or None if not available
         """
-        # Check if this is a column-based translation
-        if language_code in LANGUAGE_COLUMN_MAP:
-            column_name = LANGUAGE_COLUMN_MAP[language_code]
-            return getattr(lemma, column_name, None)
-
-        # Otherwise, check table-based translations (es, de, pt)
-        translation = (
-            session.query(LemmaTranslation)
-            .filter_by(lemma_id=lemma.id, language_code=language_code)
-            .first()
-        )
-        return translation.translation if translation else None
+        return get_translation(session, lemma, language_code)
 
     def generate_audio_for_lemma(
         self,
