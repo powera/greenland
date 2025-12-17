@@ -183,3 +183,46 @@ def update_level(sentence_id):
         g.db.rollback()
 
     return redirect(url_for("sentences.view_sentence", sentence_id=sentence_id))
+
+
+@bp.route("/<int:sentence_id>/translate", methods=["POST"])
+def translate_sentence(sentence_id):
+    """Translate a sentence to selected languages."""
+    sentence = g.db.query(Sentence).get(sentence_id)
+    if not sentence:
+        flash("Sentence not found", "error")
+        return redirect(url_for("sentences.list_sentences"))
+
+    # Get selected languages from form
+    selected_languages = request.form.getlist("languages")
+
+    if not selected_languages:
+        flash("Please select at least one language to translate to", "warning")
+        return redirect(url_for("sentences.view_sentence", sentence_id=sentence_id))
+
+    # Check if sentence has English translation
+    en_translation = (
+        g.db.query(SentenceTranslation)
+        .filter_by(sentence_id=sentence_id, language_code="en")
+        .first()
+    )
+
+    if not en_translation:
+        flash("Sentence must have an English translation before translating to other languages", "error")
+        return redirect(url_for("sentences.view_sentence", sentence_id=sentence_id))
+
+    try:
+        # Use the shared translation logic
+        from wordfreq.translation.sentence import translate_sentence as do_translation
+
+        # Translate the sentence
+        do_translation(sentence_id, selected_languages, g.db, model="gpt-5-mini")
+
+        lang_names = [get_supported_languages().get(lang, lang) for lang in selected_languages]
+        flash(f"Successfully translated sentence to: {', '.join(lang_names)}", "success")
+
+    except Exception as e:
+        flash(f"Error translating sentence: {e}", "error")
+        g.db.rollback()
+
+    return redirect(url_for("sentences.view_sentence", sentence_id=sentence_id))

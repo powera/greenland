@@ -89,10 +89,57 @@
 <div class="row mb-4">
     <div class="col">
         <div class="card">
-            <div class="card-header">
-                <i class="bi bi-translate"></i> Translations
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-translate"></i> Translations</span>
+                <button class="btn btn-sm btn-primary" data-bs-toggle="collapse" data-bs-target="#translateForm">
+                    <i class="bi bi-plus-circle"></i> Add Translation
+                </button>
             </div>
             <div class="card-body">
+                <!-- Translation Form (Collapsed by default) -->
+                <div class="collapse mb-3" id="translateForm">
+                    <div class="card card-body bg-light">
+                        <form method="POST" action="{{ url_for('sentences.translate_sentence', sentence_id=sentence.id) }}" id="translateForm">
+                            <h6>Select languages to translate to:</h6>
+                            <div class="row" id="languageCheckboxes">
+                                {% for lang_code, lang_name in language_names.items() %}
+                                    {% if lang_code != 'en' and not translations.get(lang_code) %}
+                                        <div class="col-md-4 col-sm-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input language-checkbox" type="checkbox" name="languages"
+                                                       value="{{ lang_code }}" id="lang_{{ lang_code }}">
+                                                <label class="form-check-label" for="lang_{{ lang_code }}">
+                                                    {{ lang_name }}
+                                                </label>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                            <div class="mt-3">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-translate"></i> Translate Selected
+                                </button>
+                                <button type="button" class="btn btn-success" onclick="selectAllLanguages()">
+                                    <i class="bi bi-check-all"></i> Select All
+                                </button>
+                                <button type="button" class="btn btn-secondary" data-bs-toggle="collapse" data-bs-target="#translateForm">
+                                    Cancel
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <script>
+                function selectAllLanguages() {
+                    document.querySelectorAll('.language-checkbox').forEach(checkbox => {
+                        checkbox.checked = true;
+                    });
+                }
+                </script>
+
+                <!-- Translations Table -->
                 <table class="table table-hover translation-table">
                     <thead>
                         <tr>
