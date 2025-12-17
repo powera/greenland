@@ -59,49 +59,61 @@ def build_translation_prompt(
         if not lemma:
             continue
 
-        word_translations[word.word_role] = {
-            "guid": lemma.guid if lemma.guid else ""
+        # Use English lemma text as the key (e.g., "fork", "apartment")
+        english_text = lemma.lemma_text
+        word_translations[english_text] = {
+            "guid": lemma.guid if lemma.guid else "",
+            "role": word.word_role  # Keep role for reference
         }
 
         for lang in target_languages:
             trans = get_translation(session, lemma, lang)
             if trans:
-                word_translations[word.word_role][lang] = trans
+                word_translations[english_text][lang] = trans
 
-    # Build context (instructions and word reference)
+    # Build context (general instructions only)
     context_lines = [
         "You are translating a simple language learning sentence.",
-        "",
-        "Word translations for reference:"
-    ]
-
-    for word_role, translations in word_translations.items():
-        guid = translations.get("guid", "")
-        trans_items = [(lang, trans) for lang, trans in translations.items() if lang != "guid"]
-        trans_str = ", ".join([f"{lang}={trans}" for lang, trans in trans_items])
-        if guid:
-            context_lines.append(f"  {word_role} (GUID: {guid}): {trans_str}")
-        else:
-            context_lines.append(f"  {word_role}: {trans_str}")
-
-    context_lines.extend([
-        "",
-        "IMPORTANT: Also provide a grammatically correct English version (fixing issues like singular/plural, articles, etc.).",
-        "Use the provided word translations where appropriate, but adjust grammar as needed for natural sentences.",
         "",
         "For each target language, provide detailed word-by-word breakdown including:",
         "- word: the actual inflected form as it appears in the sentence",
         "- english: English translation of this specific word/phrase",
-        "- guid: the GUID for this word if provided above (e.g., 'N08_001'), or empty string if not provided",
+        "- guid: the GUID for this word if provided in the word reference (e.g., 'N08_001'), or empty string if not provided",
         "- role: grammatical role (subject, verb, object, adjective, adverb, article, preposition, determiner, etc.)",
         "- grammatical_form: grammatical details (e.g., '3s_present', '1p_past', 'accusative_plural', 'infinitive')",
         "- grammatical_case: case if applicable (nominative, accusative, genitive, dative, etc.) or null",
         "",
+        "IMPORTANT: Do NOT include punctuation marks as separate words in the breakdown.",
         "Provide words in the order they appear in the translated sentence."
+    ]
+
+    # Build main prompt (the specific task with all relevant data)
+    prompt_lines = [
+        f"Template sentence: {template_text}",
+        "",
+        "Word translations for reference:"
+    ]
+
+    for english_word, translations in word_translations.items():
+        guid = translations.get("guid", "")
+        role = translations.get("role", "")
+        trans_items = [(lang, trans) for lang, trans in translations.items() if lang not in ("guid", "role")]
+        trans_str = ", ".join([f"{lang}={trans}" for lang, trans in trans_items])
+
+        # Format: "fork [object] (GUID: N08_001): lt=šakutė, zh=叉子, ..."
+        role_str = f" [{role}]" if role else ""
+        guid_str = f" (GUID: {guid})" if guid else ""
+        prompt_lines.append(f"  {english_word}{role_str}{guid_str}: {trans_str}")
+
+    prompt_lines.extend([
+        "",
+        f"Translate this sentence naturally into: {', '.join([LANGUAGE_NAMES[lang] for lang in target_languages if lang in LANGUAGE_NAMES])}.",
+        "",
+        "IMPORTANT: Also provide a grammatically correct English version (fixing issues like singular/plural, articles, etc.).",
+        "Use the provided word translations where appropriate, but adjust grammar as needed for natural sentences."
     ])
 
-    # Build main prompt (the actual task)
-    prompt = f"Template sentence: {template_text}\n\nTranslate this sentence naturally into: {', '.join([LANGUAGE_NAMES[lang] for lang in target_languages if lang in LANGUAGE_NAMES])}."
+    prompt = "\n".join(prompt_lines)
 
     return "\n".join(context_lines), prompt
 

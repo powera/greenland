@@ -30,7 +30,6 @@ LANGUAGE_FIELDS = {
     "pt": ("pt", "Portuguese", True),
     "sw": ("sw", "Swahili", True),
     "vi": ("vi", "Vietnamese", True),
-    "ja": ("ja", "Japanese", True),
 }
 
 # Language display names (for use in prompts, UIs, etc.)

@@ -143,6 +143,8 @@ def view_sentence(sentence_id):
                 "role": sw.word_role,
                 "english_text": sw.english_text,
                 "target_text": sw.target_language_text,
+                "grammatical_form": sw.grammatical_form,
+                "grammatical_case": sw.grammatical_case,
                 "lemma": lemma,
                 "lemma_id": sw.lemma_id,
             }
