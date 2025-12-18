@@ -80,7 +80,8 @@ class JSONLStorage(BaseStorage):
         """Load all lemma files from disk.
 
         New structure: lemmas are organized by POS type/subtype with per-language files:
-        lemmas/nouns/animal/en.jsonl (base + English data)
+        lemmas/nouns/animal/base.jsonl (concept definition)
+        lemmas/nouns/animal/en.jsonl (English-specific data)
         lemmas/nouns/animal/zh.jsonl (Chinese data)
         etc.
         """
@@ -88,23 +89,34 @@ class JSONLStorage(BaseStorage):
         if not lemmas_dir.exists():
             return
 
-        # First pass: Load all en.jsonl files (base + English data)
-        for en_file in lemmas_dir.rglob("en.jsonl"):
+        # First pass: Load all base.jsonl files (concept definition)
+        for base_file in lemmas_dir.rglob("base.jsonl"):
             try:
-                with open(en_file, "r", encoding="utf-8") as f:
+                with open(base_file, "r", encoding="utf-8") as f:
                     for line in f:
                         line = line.strip()
                         if not line:
                             continue
                         data = json.loads(line)
-                        lemma = models.Lemma.from_dict(data)
+
+                        # Create Lemma from base concept data
+                        lemma = models.Lemma()
+                        lemma.guid = data.get("guid")
+                        lemma.pos_type = data.get("pos_type", "")
+                        lemma.pos_subtype = data.get("pos_subtype")
+                        lemma.concept_label = data.get("concept_label", "")
+                        lemma.concept_definition = data.get("concept_definition", "")
+                        lemma.difficulty_level = data.get("difficulty_level")
+                        lemma.notes = data.get("notes")
+                        lemma.added_at = data.get("added_at")
+                        if isinstance(lemma.added_at, str):
+                            from datetime import datetime
+                            lemma.added_at = datetime.fromisoformat(lemma.added_at)
 
                         # Assign ID if not present
                         if lemma.id is None:
                             lemma.id = self._next_lemma_id
                             self._next_lemma_id += 1
-                        else:
-                            self._next_lemma_id = max(self._next_lemma_id, lemma.id + 1)
 
                         # Store by guid and id
                         if lemma.guid:
@@ -112,15 +124,15 @@ class JSONLStorage(BaseStorage):
                         self.lemmas_by_id[lemma.id] = lemma
 
             except Exception as e:
-                print(f"Error loading {en_file}: {e}")
+                print(f"Error loading {base_file}: {e}")
 
-        # Second pass: Load all other language files and merge data
+        # Second pass: Load all language files (including en.jsonl) and merge data
         for lang_file in lemmas_dir.rglob("*.jsonl"):
-            # Skip en.jsonl files (already loaded)
-            if lang_file.name == "en.jsonl":
+            # Skip base.jsonl files (already loaded)
+            if lang_file.name == "base.jsonl":
                 continue
 
-            lang_code = lang_file.stem  # e.g., "zh" from "zh.jsonl"
+            lang_code = lang_file.stem  # e.g., "en", "zh" from "en.jsonl", "zh.jsonl"
 
             try:
                 with open(lang_file, "r", encoding="utf-8") as f:
@@ -137,14 +149,61 @@ class JSONLStorage(BaseStorage):
 
                         # Merge language-specific data into existing lemma
                         lemma = self.lemmas[guid]
+
+                        # Handle translation field (now used for all languages including English)
                         if "translation" in data:
                             lemma.translations[lang_code] = data["translation"]
+
+                        # Backward compatibility: also accept lemma_text for English
+                        if lang_code == "en" and "lemma_text" in data:
+                            lemma.lemma_text = data["lemma_text"]
+                            if "lemma_text" in data and "translation" not in data:
+                                lemma.translations["en"] = data["lemma_text"]
+
+                        # Language-specific fields
+                        if "definition_text" in data:
+                            # Store in lemma for backward compatibility
+                            if lang_code == "en":
+                                lemma.definition_text = data["definition_text"]
+
+                        if "frequency_rank" in data:
+                            if lang_code == "en":
+                                lemma.frequency_rank = data["frequency_rank"]
+
+                        if "tags" in data:
+                            if lang_code == "en":
+                                lemma.tags = data["tags"]
+
+                        if "disambiguation" in data:
+                            if lang_code == "en":
+                                lemma.disambiguation = data["disambiguation"]
+
+                        if "confidence" in data:
+                            if lang_code == "en":
+                                lemma.confidence = data.get("confidence", 0.0)
+
+                        if "verified" in data:
+                            if lang_code == "en":
+                                lemma.verified = data.get("verified", False)
+
+                        if "updated_at" in data:
+                            if lang_code == "en":
+                                lemma.updated_at = data.get("updated_at")
+                                if isinstance(lemma.updated_at, str):
+                                    from datetime import datetime
+                                    lemma.updated_at = datetime.fromisoformat(lemma.updated_at)
+
+                        # Nested data structures
                         if "derivative_forms" in data:
                             lemma.derivative_forms[lang_code] = data["derivative_forms"]
+
                         if "audio_hashes" in data:
                             lemma.audio_hashes[lang_code] = data["audio_hashes"]
-                        if "difficulty_override" in data:
-                            lemma.difficulty_overrides[lang_code] = data["difficulty_override"]
+
+                        if "difficulty_level" in data:
+                            # This is a language-specific override
+                            lemma.difficulty_overrides[lang_code] = data["difficulty_level"]
+
                         if "grammar_facts" in data:
                             # Merge grammar facts with language_code tag
                             for fact in data["grammar_facts"]:
@@ -280,8 +339,11 @@ class JSONLStorage(BaseStorage):
             self.lemmas[lemma.guid] = lemma
         self.lemmas_by_id[lemma.id] = lemma
 
+        # Save base.jsonl file
+        self._rewrite_base_file(lemma)
+
         # Determine which languages are present in this lemma
-        languages_to_save = {"en"}  # Always save English/base data
+        languages_to_save = set()
         languages_to_save.update(lemma.translations.keys())
         languages_to_save.update(lemma.derivative_forms.keys())
         languages_to_save.update(lemma.audio_hashes.keys())
@@ -338,6 +400,75 @@ class JSONLStorage(BaseStorage):
         lemma_dir = self._get_lemma_dir_path(lemma)
         return lemma_dir / f"{lang_code}.jsonl"
 
+    def _rewrite_base_file(self, lemma: models.Lemma) -> None:
+        """Rewrite the base.jsonl file with all lemmas for that POS/subtype.
+
+        Args:
+            lemma: A lemma in the POS/subtype group being rewritten
+        """
+        # Get the directory for this POS/subtype
+        lemma_dir = self._get_lemma_dir_path(lemma)
+        file_path = lemma_dir / "base.jsonl"
+
+        # Collect all lemmas that belong to this POS/subtype
+        lemmas_for_file = []
+        for lem in self.lemmas.values():
+            if self._get_lemma_dir_path(lem) == lemma_dir:
+                lemmas_for_file.append(lem)
+
+        # Write atomically
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+
+        with tempfile.NamedTemporaryFile(
+            mode="w",
+            encoding="utf-8",
+            dir=file_path.parent,
+            delete=False,
+            suffix=".tmp",
+        ) as tmp_file:
+            for lem in lemmas_for_file:
+                # Extract base concept data
+                base_data = self._extract_base_data(lem)
+
+                if base_data:
+                    tmp_file.write(json.dumps(base_data, ensure_ascii=False) + "\n")
+
+            tmp_file.flush()
+            os.fsync(tmp_file.fileno())
+
+        # Atomic rename
+        os.replace(tmp_file.name, file_path)
+
+    def _extract_base_data(self, lemma: models.Lemma) -> dict:
+        """Extract base concept data from a lemma for base.jsonl.
+
+        Args:
+            lemma: The lemma
+
+        Returns:
+            Dictionary with base concept data
+        """
+        data = {
+            "guid": lemma.guid,
+            "pos_type": lemma.pos_type,
+            "pos_subtype": lemma.pos_subtype,
+            "concept_label": lemma.concept_label,
+            "concept_definition": lemma.concept_definition,
+        }
+
+        # Optional fields
+        if lemma.difficulty_level is not None:
+            data["difficulty_level"] = lemma.difficulty_level
+
+        if lemma.notes:
+            data["notes"] = lemma.notes
+
+        # Timestamps
+        if lemma.added_at:
+            data["added_at"] = lemma.added_at.isoformat()
+
+        return data
+
     def _rewrite_language_file(self, lemma: models.Lemma, lang_code: str) -> None:
         """Rewrite a language-specific JSONL file with all lemmas for that POS/subtype/language.
 
@@ -389,69 +520,74 @@ class JSONLStorage(BaseStorage):
         Returns:
             Dictionary with language-specific data, or None if no data for this language
         """
-        if lang_code == "en":
-            # English/base data
-            data = {
-                "guid": lemma.guid,
-                "lemma_text": lemma.lemma_text,
-                "definition_text": lemma.definition_text,
-                "pos_type": lemma.pos_type,
-                "pos_subtype": lemma.pos_subtype,
-                "difficulty_level": lemma.difficulty_level,
-                "frequency_rank": lemma.frequency_rank,
-                "tags": lemma.tags,
-                "disambiguation": lemma.disambiguation,
-                "confidence": lemma.confidence,
-                "verified": lemma.verified,
-                "notes": lemma.notes,
-            }
+        # All languages now use the same structure (including English)
+        data = {"guid": lemma.guid}
+        has_data = False
 
-            # Add timestamps
-            if lemma.added_at:
-                data["added_at"] = lemma.added_at.isoformat()
+        # Translation field (now used for all languages including English)
+        if lang_code in lemma.translations:
+            data["translation"] = lemma.translations[lang_code]
+            has_data = True
+        elif lang_code == "en" and lemma.lemma_text:
+            # Backward compatibility: if English translation not in dict, use lemma_text
+            data["translation"] = lemma.lemma_text
+            has_data = True
+
+        # Language-specific fields (only for English currently, but could be extended)
+        if lang_code == "en":
+            if lemma.definition_text:
+                data["definition_text"] = lemma.definition_text
+                has_data = True
+
+            if lemma.frequency_rank is not None:
+                data["frequency_rank"] = lemma.frequency_rank
+                has_data = True
+
+            if lemma.tags:
+                data["tags"] = lemma.tags
+                has_data = True
+
+            if lemma.disambiguation:
+                data["disambiguation"] = lemma.disambiguation
+                has_data = True
+
+            if lemma.confidence is not None and lemma.confidence != 0.0:
+                data["confidence"] = lemma.confidence
+                has_data = True
+
+            if lemma.verified:
+                data["verified"] = lemma.verified
+                has_data = True
+
             if lemma.updated_at:
                 data["updated_at"] = lemma.updated_at.isoformat()
-
-            # Add English derivative forms if present
-            if "en" in lemma.derivative_forms:
-                data["derivative_forms"] = lemma.derivative_forms["en"]
-
-            # Add English audio hashes if present
-            if "en" in lemma.audio_hashes:
-                data["audio_hashes"] = lemma.audio_hashes["en"]
-
-            return data
-        else:
-            # Non-English language data
-            data = {"guid": lemma.guid}
-            has_data = False
-
-            if lang_code in lemma.translations:
-                data["translation"] = lemma.translations[lang_code]
                 has_data = True
 
-            if lang_code in lemma.derivative_forms:
-                data["derivative_forms"] = lemma.derivative_forms[lang_code]
-                has_data = True
+        # Derivative forms for this language
+        if lang_code in lemma.derivative_forms:
+            data["derivative_forms"] = lemma.derivative_forms[lang_code]
+            has_data = True
 
-            if lang_code in lemma.audio_hashes:
-                data["audio_hashes"] = lemma.audio_hashes[lang_code]
-                has_data = True
+        # Audio hashes for this language
+        if lang_code in lemma.audio_hashes:
+            data["audio_hashes"] = lemma.audio_hashes[lang_code]
+            has_data = True
 
-            if lang_code in lemma.difficulty_overrides:
-                data["difficulty_override"] = lemma.difficulty_overrides[lang_code]
-                has_data = True
+        # Difficulty override for this language
+        if lang_code in lemma.difficulty_overrides:
+            data["difficulty_level"] = lemma.difficulty_overrides[lang_code]
+            has_data = True
 
-            # Extract grammar facts for this language
-            lang_grammar_facts = [
-                fact for fact in lemma.grammar_facts
-                if fact.get("language_code") == lang_code
-            ]
-            if lang_grammar_facts:
-                data["grammar_facts"] = lang_grammar_facts
-                has_data = True
+        # Extract grammar facts for this language
+        lang_grammar_facts = [
+            fact for fact in lemma.grammar_facts
+            if fact.get("language_code") == lang_code
+        ]
+        if lang_grammar_facts:
+            data["grammar_facts"] = lang_grammar_facts
+            has_data = True
 
-            return data if has_data else None
+        return data if has_data else None
 
     def save_sentence(self, sentence: models.Sentence) -> None:
         """Save a sentence to disk.

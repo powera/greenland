@@ -28,8 +28,54 @@ def datetime_deserializer(data: dict, field_name: str) -> Optional[datetime.date
 
 
 @dataclass
+class BaseConcept:
+    """JSONL model for base concept (stored in base.jsonl).
+
+    This represents the core concept independent of any specific language.
+    """
+
+    # Primary identifier
+    guid: str = ""
+
+    # Part of speech classification
+    pos_type: str = ""
+    pos_subtype: Optional[str] = None
+
+    # Concept identification (language-neutral, but likely English)
+    concept_label: str = ""
+    concept_definition: str = ""
+
+    # Base difficulty level (can be overridden per-language)
+    difficulty_level: Optional[int] = None
+
+    # Editorial notes about the concept (singleton for now)
+    notes: Optional[str] = None
+
+    # Timestamps
+    added_at: Optional[datetime.datetime] = None
+
+    def to_dict(self) -> dict:
+        """Convert to dictionary for JSONL serialization."""
+        data = asdict(self)
+        if self.added_at:
+            data["added_at"] = self.added_at.isoformat()
+        return data
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "BaseConcept":
+        """Create from dictionary (JSONL deserialization)."""
+        if "added_at" in data and data["added_at"]:
+            data["added_at"] = datetime.datetime.fromisoformat(data["added_at"])
+        return cls(**data)
+
+
+@dataclass
 class Lemma:
-    """JSONL model for lemmas."""
+    """JSONL model for lemmas.
+
+    This class represents the merged view of a lemma combining base concept
+    data from base.jsonl with language-specific data from language files.
+    """
 
     # Primary key for JSONL is guid
     guid: Optional[str] = None
@@ -37,14 +83,18 @@ class Lemma:
     # ID for compatibility with code that expects it (not stored in JSONL)
     id: Optional[int] = None
 
-    # Core fields
-    lemma_text: str = ""
-    definition_text: str = ""
+    # Core fields from base.jsonl
     pos_type: str = ""
     pos_subtype: Optional[str] = None
+    concept_label: str = ""  # From base.jsonl
+    concept_definition: str = ""  # From base.jsonl
+
+    # Legacy fields for backward compatibility during migration
+    lemma_text: str = ""  # Deprecated: use translations['en'] instead
+    definition_text: str = ""  # Deprecated: language-specific
 
     # Dictionary generation fields
-    difficulty_level: Optional[int] = None
+    difficulty_level: Optional[int] = None  # From base.jsonl, can be overridden
     frequency_rank: Optional[int] = None
     tags: Optional[str] = None  # JSON string
 
@@ -62,8 +112,8 @@ class Lemma:
     # Metadata
     confidence: float = 0.0
     verified: bool = False
-    notes: Optional[str] = None
-    added_at: Optional[datetime.datetime] = None
+    notes: Optional[str] = None  # From base.jsonl
+    added_at: Optional[datetime.datetime] = None  # From base.jsonl
     updated_at: Optional[datetime.datetime] = None
 
     # Nested relationships (stored as dicts in JSONL)
@@ -387,6 +437,7 @@ class GuidTombstone:
 
 # Model registry for dynamic lookup
 MODEL_REGISTRY = {
+    "BaseConcept": BaseConcept,
     "Lemma": Lemma,
     "LemmaTranslation": LemmaTranslation,
     "LemmaDifficultyOverride": LemmaDifficultyOverride,

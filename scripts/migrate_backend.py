@@ -113,9 +113,13 @@ def convert_sqlalchemy_lemma_to_jsonl(lemma, session):
     from wordfreq.storage import translation_helpers
 
     # Get translations from the new translation table
-    translations = translation_helpers.get_all_translations(session, lemma)
-    # Remove None values and English (English is handled separately)
-    translations = {k: v for k, v in translations.items() if v is not None and k != "en"}
+    all_translations = translation_helpers.get_all_translations(session, lemma)
+    # Remove None values
+    all_translations = {k: v for k, v in all_translations.items() if v is not None}
+
+    # Separate English from other translations
+    # English now goes into translations dict like all other languages
+    translations = all_translations.copy()
 
     # Get difficulty overrides
     difficulty_overrides = {}
@@ -147,29 +151,37 @@ def convert_sqlalchemy_lemma_to_jsonl(lemma, session):
             "verified": fact.verified,
         })
 
-    # Create JSONL lemma
+    # Create JSONL lemma with new base concept fields
     return jsonl_models.Lemma(
         id=lemma.id,
         guid=lemma.guid,
+        # New base concept fields
+        concept_label=lemma.lemma_text,  # Use English lemma text as concept label
+        concept_definition=lemma.definition_text,  # Use English definition as concept definition
+        # Legacy fields for backward compatibility
         lemma_text=lemma.lemma_text,
         definition_text=lemma.definition_text,
+        # Core fields
         pos_type=lemma.pos_type,
         pos_subtype=lemma.pos_subtype,
         difficulty_level=lemma.difficulty_level,
         frequency_rank=lemma.frequency_rank,
         tags=lemma.tags,
+        # Legacy translation fields
         chinese_translation=lemma.chinese_translation,
         french_translation=lemma.french_translation,
         korean_translation=lemma.korean_translation,
         swahili_translation=lemma.swahili_translation,
         lithuanian_translation=lemma.lithuanian_translation,
         vietnamese_translation=lemma.vietnamese_translation,
+        # Metadata
         disambiguation=lemma.disambiguation,
         confidence=lemma.confidence,
         verified=lemma.verified,
         notes=lemma.notes,
         added_at=lemma.added_at,
         updated_at=lemma.updated_at,
+        # Language-specific data (now includes English in translations)
         translations=translations,
         difficulty_overrides=difficulty_overrides,
         derivative_forms=derivative_forms,
