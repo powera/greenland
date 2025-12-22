@@ -91,10 +91,10 @@ Provide:
 1. A clear, concise definition (1-2 sentences)
 2. Part of speech (pos_type): Choose from: noun, verb, adjective, adverb, pronoun, preposition, conjunction, interjection, determiner, numeral
 3. Part of speech subtype (pos_subtype): Choose the most appropriate:
-   - For nouns: animal, body_part, building_structure, clothing_accessory, concept_idea, emotion_feeling, food_drink, human, material_substance, nationality, natural_feature, personal_name, place_name, plant, small_movable_object, temporal_name, time_period, tool_machine, unit_of_measurement
-   - For verbs: directional_movement, emotional_state, mental_state, physical_action, possession
-   - For adjectives: color, definite_quantity, quality, sequence, shape
-   - For adverbs: location, other, style
+   - For nouns: animal, body_part, building_structure, clothing_accessory, concept_idea, emotion_feeling, food, beverage, furniture, vehicle, plant, plant_part, human, material_substance, nationality, natural_feature, personal_name, place_name, small_movable_object, temporal_name, time_period, tool_machine, unit_of_measurement
+   - For verbs: physical_action, creation_action, destruction_action, mental_state, emotional_state, perception, communication, possession, existence, development, change, directional_movement, manner_movement
+   - For adjectives: size, color, shape, texture, personal_quality, condition, quality, aesthetic, importance, origin, purpose, material, definite_quantity, indefinite_quantity, duration, frequency, sequence
+   - For adverbs: style, attitude, specific_time, relative_time, duration, direction, location, distance, intensity, completeness, approximation, definite_frequency, indefinite_frequency
    - For other POS: use appropriate subtype or "other"
 
 The definition should be suitable for language learners."""

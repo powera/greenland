@@ -29,7 +29,7 @@ SIMPLE_PATTERNS = [
         "pattern_id": "i_eat_food",
         "en_template": "I eat [food].",
         "slots": [
-            {"name": "food", "pos_type": "noun", "pos_subtype": "food_drink", "min_level": 1, "max_level": 10}
+            {"name": "food", "pos_type": "noun", "pos_subtype": "food", "min_level": 1, "max_level": 10}
         ],
         "pattern_type": "SVO",
         "notes": "Eating specific food"
@@ -96,7 +96,7 @@ SIMPLE_PATTERNS = [
         "pattern_id": "i_like_food",
         "en_template": "I like [food].",
         "slots": [
-            {"name": "food", "pos_type": "noun", "pos_subtype": "food_drink", "min_level": 1, "max_level": 10}
+            {"name": "food", "pos_type": "noun", "pos_subtype": "food", "min_level": 1, "max_level": 10}
         ],
         "pattern_type": "SVO",
         "notes": "Expressing preference for food"
@@ -214,9 +214,9 @@ SIMPLE_PATTERNS = [
     },
     {
         "pattern_id": "i_drink_food",
-        "en_template": "I drink [food].",
+        "en_template": "I drink [beverage].",
         "slots": [
-            {"name": "food", "pos_type": "noun", "pos_subtype": "food_drink", "min_level": 1, "max_level": 10}
+            {"name": "beverage", "pos_type": "noun", "pos_subtype": "beverage", "min_level": 1, "max_level": 10}
         ],
         "pattern_type": "SVO",
         "notes": "Drinking beverages"
@@ -245,7 +245,7 @@ SIMPLE_PATTERNS = [
         "en_template": "The [animal] eats [food].",
         "slots": [
             {"name": "animal", "pos_type": "noun", "pos_subtype": "animal", "min_level": 1, "max_level": 10},
-            {"name": "food", "pos_type": "noun", "pos_subtype": "food_drink", "min_level": 1, "max_level": 10}
+            {"name": "food", "pos_type": "noun", "pos_subtype": "food", "min_level": 1, "max_level": 10}
         ],
         "pattern_type": "SVO",
         "notes": "Animal eating specific food"

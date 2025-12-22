@@ -17,17 +17,21 @@ class NounSubtype(enum.Enum):
     BODY_PART = "body_part"
     DISEASE_CONDITION = "disease_condition"
     PLANT = "plant"
+    PLANT_PART = "plant_part"  # Parts of plants (leaf, root, seed, petal, bark)
 
     # Food and Consumables
-    FOOD_DRINK = "food_drink"
+    FOOD = "food"  # Solid consumables (bread, apple, rice, meat)
+    BEVERAGE = "beverage"  # Liquid consumables (water, coffee, tea, juice)
 
     # Physical Objects and Structures
     BUILDING_STRUCTURE = "building_structure"
+    FURNITURE = "furniture"  # Furniture items (table, chair, desk, sofa, bed)
     SMALL_MOVABLE_OBJECT = "small_movable_object"
     CLOTHING_ACCESSORY = "clothing_accessory"
     ARTWORK_ARTIFACT = "artwork_artifact"
     NATURAL_FEATURE = "natural_feature"
     TOOL_MACHINE = "tool_machine"
+    VEHICLE = "vehicle"  # Transportation (car, truck, bicycle, boat, airplane)
     PATH_INFRASTRUCTURE = "path_infrastructure"
 
     # Materials and Substances
@@ -73,59 +77,69 @@ class NounSubtype(enum.Enum):
 class VerbSubtype(enum.Enum):
     """Subtypes for verbs."""
 
-    PHYSICAL_ACTION = "physical_action"
-    CREATION_ACTION = "creation_action"
-    DESTRUCTION_ACTION = "destruction_action"
-    MENTAL_STATE = "mental_state"
-    EMOTIONAL_STATE = "emotional_state"
-    POSSESSION = "possession"
-    DEVELOPMENT = "development"
-    CHANGE = "change"
-    SPEAKING = "speaking"
-    WRITING = "writing"
-    EXPRESSING = "expressing"
-    DIRECTIONAL_MOVEMENT = "directional_movement"
-    MANNER_MOVEMENT = "manner_movement"
+    PHYSICAL_ACTION = "physical_action"  # Physical actions (push, pull, lift, eat, drink)
+    CREATION_ACTION = "creation_action"  # Creating things (make, create, build)
+    DESTRUCTION_ACTION = "destruction_action"  # Destroying (break, destroy, demolish)
+    MENTAL_STATE = "mental_state"  # Cognition (know, believe, understand, think)
+    EMOTIONAL_STATE = "emotional_state"  # Feelings (love, hate, fear, enjoy)
+    PERCEPTION = "perception"  # Sensory verbs (see, hear, smell, taste, feel, touch)
+    COMMUNICATION = "communication"  # Speaking and writing (say, tell, speak, write, read)
+    POSSESSION = "possession"  # Having/owning (have, own, possess, give, take)
+    EXISTENCE = "existence"  # Living/existing (live, exist, die, survive, stay, remain)
+    DEVELOPMENT = "development"  # Growing/evolving (grow, develop, evolve, mature)
+    CHANGE = "change"  # Transforming (become, transform, change, turn)
+    DIRECTIONAL_MOVEMENT = "directional_movement"  # Moving with direction (go, come, enter, leave)
+    MANNER_MOVEMENT = "manner_movement"  # Way of moving (walk, run, swim, fly, crawl)
     OTHER = "other"
 
 
 class AdjectiveSubtype(enum.Enum):
     """Subtypes for adjectives."""
 
-    SIZE = "size"
-    COLOR = "color"
-    SHAPE = "shape"
-    TEXTURE = "texture"
-    QUALITY = "quality"
-    AESTHETIC = "aesthetic"
-    IMPORTANCE = "importance"
-    ORIGIN = "origin"
-    PURPOSE = "purpose"
-    MATERIAL = "material"
-    DEFINITE_QUANTITY = "definite_quantity"
-    INDEFINITE_QUANTITY = "indefinite_quantity"
-    DURATION = "duration"
-    FREQUENCY = "frequency"
-    SEQUENCE = "sequence"
+    SIZE = "size"  # Size descriptions (big, small, huge, tiny)
+    COLOR = "color"  # Color descriptions (red, blue, green, yellow)
+    SHAPE = "shape"  # Shape descriptions (round, square, triangular, oval)
+    TEXTURE = "texture"  # Texture descriptions (soft, hard, smooth, rough)
+    PERSONAL_QUALITY = "personal_quality"  # Character/personality traits (honest, kind, brave, lazy, clever, polite)
+    CONDITION = "condition"  # Physical/temporal state (hot, cold, wet, dry, clean, dirty, new, old, fresh)
+    QUALITY = "quality"  # Evaluative and measurable properties (good, bad, excellent, fast, slow, strong, weak, easy, hard, loud, quiet)
+    AESTHETIC = "aesthetic"  # Beauty or appearance (beautiful, ugly, pretty, handsome)
+    IMPORTANCE = "importance"  # Importance or priority (important, essential, trivial, critical)
+    ORIGIN = "origin"  # Origin or source (American, Chinese, domestic, foreign)
+    PURPOSE = "purpose"  # Purpose or function (educational, medical, industrial, recreational)
+    MATERIAL = "material"  # Material composition (wooden, metal, plastic, cotton)
+    DEFINITE_QUANTITY = "definite_quantity"  # Specific amounts (one, ten, hundred, first)
+    INDEFINITE_QUANTITY = "indefinite_quantity"  # Inexact amounts (many, few, some, several)
+    DURATION = "duration"  # Time duration (brief, long, eternal, temporary)
+    FREQUENCY = "frequency"  # Frequency of occurrence (daily, occasional, rare, frequent)
+    SEQUENCE = "sequence"  # Order or sequence (first, last, next, previous)
     OTHER = "other"
 
 
 class AdverbSubtype(enum.Enum):
     """Subtypes for adverbs."""
 
-    STYLE = "style"
-    ATTITUDE = "attitude"
-    SPECIFIC_TIME = "specific_time"
-    RELATIVE_TIME = "relative_time"
-    DURATION = "duration"
-    DIRECTION = "direction"
-    LOCATION = "location"
-    DISTANCE = "distance"
-    INTENSITY = "intensity"
-    COMPLETENESS = "completeness"
-    APPROXIMATION = "approximation"
-    DEFINITE_FREQUENCY = "definite_frequency"
-    INDEFINITE_FREQUENCY = "indefinite_frequency"
+    # Manner
+    STYLE = "style"  # Manner or style of action (quickly, carefully, well, slowly, badly, easily)
+    ATTITUDE = "attitude"  # Attitude or approach (eagerly, reluctantly, willingly, gladly, sadly)
+
+    # Temporal
+    SPECIFIC_TIME = "specific_time"  # Specific time references (now, today, yesterday, tomorrow, tonight)
+    RELATIVE_TIME = "relative_time"  # Relative time references (already, soon, recently, lately, previously)
+    DURATION = "duration"  # Duration of time (briefly, temporarily, permanently, forever, momentarily)
+    DEFINITE_FREQUENCY = "definite_frequency"  # Specific frequency (daily, weekly, monthly, yearly, hourly)
+    INDEFINITE_FREQUENCY = "indefinite_frequency"  # Inexact frequency (often, sometimes, rarely, seldom, always, never)
+
+    # Spatial
+    DIRECTION = "direction"  # Directional movement (up, down, forward, backward, left, right, north)
+    LOCATION = "location"  # Position or place (here, there, everywhere, nowhere, somewhere, inside, outside)
+    DISTANCE = "distance"  # Distance references (nearby, far, close, away, afar)
+
+    # Degree
+    INTENSITY = "intensity"  # Intensity or degree (very, extremely, slightly, quite, rather, too, enough)
+    COMPLETENESS = "completeness"  # Degree of completeness (entirely, partly, completely, fully, partially, halfway)
+    APPROXIMATION = "approximation"  # Approximation (almost, nearly, exactly, approximately, precisely, roughly)
+
     OTHER = "other"
 
 
