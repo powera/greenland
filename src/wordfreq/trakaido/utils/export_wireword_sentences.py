@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-WireWord sentences exporter for pattern-based simple sentences.
+WireWord sentences exporter for Trakaido app.
 
-This module exports pattern-generated sentences to JSON format for the
-Trakaido language learning app.
+This module exports sentences to JSON format for the Trakaido language learning app.
+Exports all sentences with level != -1 that have a translation in the target language.
 """
 
 import json
@@ -26,20 +26,21 @@ from wordfreq.storage.models.schema import (
     SentenceWord,
     AudioQualityReview,
 )
-from wordfreq.patterns.simple_patterns import SIMPLE_PATTERNS
+from wordfreq.tools.chinese_converter import to_simplified
 
 # Configure logging
 logger = logging.getLogger(__name__)
 
 
 class WirewordSentenceExporter:
-    """Exporter for pattern sentences in WireWord format."""
+    """Exporter for sentences in WireWord format."""
 
     def __init__(
         self,
         db_path: str = None,
         debug: bool = False,
         language: str = "lt",
+        simplified_chinese: bool = True,
     ):
         """
         Initialize the WirewordSentenceExporter.
@@ -48,10 +49,12 @@ class WirewordSentenceExporter:
             db_path: Database path (uses default if None)
             debug: Enable debug logging
             language: Target language code ('lt', 'zh', etc.)
+            simplified_chinese: If True and language is 'zh', convert to Simplified Chinese (default: True)
         """
         self.db_path = db_path or constants.WORDFREQ_DB_PATH
         self.debug = debug
         self.language = language
+        self.simplified_chinese = simplified_chinese
 
         if debug:
             logger.setLevel(logging.DEBUG)
@@ -102,46 +105,61 @@ class WirewordSentenceExporter:
 
         return audio_dict
 
-    def export_pattern_sentences(
-        self, pattern_id: Optional[str] = None, include_all_languages: bool = True
+    def export_sentences(
+        self, include_all_languages: bool = False
     ) -> Dict[str, Any]:
         """
-        Export pattern sentences to wireword format.
+        Export sentences to wireword format.
+
+        Exports all sentences where:
+        - minimum_level is not -1 (i.e., not excluded; NULL/None is OK)
+        - A translation exists for the target language
 
         Args:
-            pattern_id: Optional specific pattern to export (None for all)
-            include_all_languages: Include all translations (default: True)
+            include_all_languages: Include all translations (default: False, only target + English)
 
         Returns:
             Dictionary with exported sentence data
         """
         session = self.get_session()
         try:
-            # Build query
-            query = session.query(Sentence).filter(Sentence.source_filename.like("pattern:%"))
+            # Build query: get all sentences EXCEPT those with level = -1
+            # This includes NULL/None levels
+            query = session.query(Sentence).filter(
+                (Sentence.minimum_level != -1) | (Sentence.minimum_level == None)
+            )
 
-            # Filter by pattern if specified
-            if pattern_id:
-                query = query.filter(Sentence.source_filename == f"pattern:{pattern_id}")
+            all_sentences = query.all()
+            logger.info(f"Found {len(all_sentences)} sentences (excluding level = -1)")
 
-            sentences = query.all()
-            logger.info(f"Exporting {len(sentences)} pattern sentences")
+            # Filter to only sentences that have a translation in the target language
+            sentences = []
+            for sentence in all_sentences:
+                has_target_translation = any(
+                    trans.language_code == self.language
+                    for trans in sentence.translations
+                )
+                if has_target_translation:
+                    sentences.append(sentence)
+
+            logger.info(f"Exporting {len(sentences)} sentences with {self.language} translation")
 
             # Build output structure
             output = {
                 "language": self.language,
                 "generated_date": datetime.now().isoformat(),
-                "pattern_sentences": [],
+                "sentences": [],
             }
 
             for sentence in sentences:
-                # Extract pattern_id from source_filename
-                source_pattern_id = sentence.source_filename.replace("pattern:", "")
-
                 # Get all translations
                 translations = {}
                 for trans in sentence.translations:
-                    translations[trans.language_code] = trans.translation_text
+                    translation_text = trans.translation_text
+                    # Convert Chinese to simplified if needed
+                    if trans.language_code == "zh" and self.language == "zh" and self.simplified_chinese:
+                        translation_text = to_simplified(translation_text)
+                    translations[trans.language_code] = translation_text
 
                 # Filter to only include requested language + English
                 if not include_all_languages:
@@ -150,7 +168,7 @@ class WirewordSentenceExporter:
                         filtered_translations[self.language] = translations[self.language]
                     translations = filtered_translations
 
-                # Get audio for target language
+                # Get audio for target language (optional)
                 audio_dict = self.get_audio_for_sentence(session, sentence, self.language)
 
                 # Get linked words (GUIDs)
@@ -167,27 +185,26 @@ class WirewordSentenceExporter:
                 for sw in sentence_words:
                     if sw.lemma and sw.lemma.guid and sw.lemma.id not in seen_lemmas:
                         seen_lemmas.add(sw.lemma.id)
-                        linked_words.append(
-                            {
-                                "guid": sw.lemma.guid,
-                                "en": sw.lemma.lemma_text,
-                                "role": sw.word_role,
-                            }
-                        )
+                        linked_words.append(sw.lemma.guid)
 
                 # Build sentence entry
                 sentence_entry = {
-                    "pattern_id": source_pattern_id,
                     "sentence_id": sentence.id,
                     "translations": translations,
                     "linked_words": linked_words,
                 }
 
+                # Include optional metadata
+                if sentence.source_filename:
+                    sentence_entry["source"] = sentence.source_filename
+                if sentence.minimum_level is not None:
+                    sentence_entry["minimum_level"] = sentence.minimum_level
+
                 # Only include audio if present
                 if audio_dict:
                     sentence_entry["audio"] = audio_dict
 
-                output["pattern_sentences"].append(sentence_entry)
+                output["sentences"].append(sentence_entry)
 
             return output
 
@@ -197,22 +214,20 @@ class WirewordSentenceExporter:
     def export_to_file(
         self,
         output_path: str,
-        pattern_id: Optional[str] = None,
-        include_all_languages: bool = True,
+        include_all_languages: bool = False,
     ) -> int:
         """
-        Export pattern sentences to a JSON file.
+        Export sentences to a JSON file.
 
         Args:
             output_path: Path to output JSON file
-            pattern_id: Optional specific pattern to export
             include_all_languages: Include all translations
 
         Returns:
             Number of sentences exported
         """
-        data = self.export_pattern_sentences(
-            pattern_id=pattern_id, include_all_languages=include_all_languages
+        data = self.export_sentences(
+            include_all_languages=include_all_languages
         )
 
         # Create output directory if needed
@@ -222,45 +237,18 @@ class WirewordSentenceExporter:
         with open(output_path, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
 
-        sentence_count = len(data["pattern_sentences"])
+        sentence_count = len(data["sentences"])
         logger.info(f"Exported {sentence_count} sentences to {output_path}")
 
         return sentence_count
 
-    def export_by_pattern(self, output_dir: str) -> Dict[str, int]:
-        """
-        Export sentences grouped by pattern to separate files.
-
-        Args:
-            output_dir: Directory to write pattern files
-
-        Returns:
-            Dictionary mapping pattern_id to sentence count
-        """
-        output_dir_path = Path(output_dir)
-        output_dir_path.mkdir(parents=True, exist_ok=True)
-
-        results = {}
-
-        for pattern in SIMPLE_PATTERNS:
-            pattern_id = pattern["pattern_id"]
-            output_file = output_dir_path / f"pattern_{pattern_id}.json"
-
-            count = self.export_to_file(
-                output_path=str(output_file), pattern_id=pattern_id, include_all_languages=True
-            )
-
-            results[pattern_id] = count
-            logger.info(f"Exported pattern {pattern_id}: {count} sentences")
-
-        return results
 
 
 def main():
     """CLI entry point for wireword sentence export."""
     import argparse
 
-    parser = argparse.ArgumentParser(description="Export pattern sentences to wireword format")
+    parser = argparse.ArgumentParser(description="Export sentences to wireword format")
     parser.add_argument(
         "--db-path", help="Database path (uses default if not specified)"
     )
@@ -272,15 +260,7 @@ def main():
         help="Target language (default: lt)",
     )
     parser.add_argument(
-        "--output", required=True, help="Output file or directory path"
-    )
-    parser.add_argument(
-        "--pattern", help="Export only specific pattern (default: all patterns)"
-    )
-    parser.add_argument(
-        "--by-pattern",
-        action="store_true",
-        help="Export each pattern to a separate file (output is directory)",
+        "--output", required=True, help="Output file path"
     )
 
     args = parser.parse_args()
@@ -297,24 +277,14 @@ def main():
     )
 
     # Export
-    if args.by_pattern:
-        results = exporter.export_by_pattern(args.output)
-        total = sum(results.values())
-        logger.info("=" * 60)
-        logger.info("EXPORT COMPLETE")
-        logger.info("=" * 60)
-        logger.info(f"Total sentences exported: {total}")
-        logger.info(f"Patterns: {len(results)}")
-        logger.info(f"Output directory: {args.output}")
-    else:
-        count = exporter.export_to_file(
-            output_path=args.output, pattern_id=args.pattern, include_all_languages=True
-        )
-        logger.info("=" * 60)
-        logger.info("EXPORT COMPLETE")
-        logger.info("=" * 60)
-        logger.info(f"Sentences exported: {count}")
-        logger.info(f"Output file: {args.output}")
+    count = exporter.export_to_file(
+        output_path=args.output, include_all_languages=False
+    )
+    logger.info("=" * 60)
+    logger.info("EXPORT COMPLETE")
+    logger.info("=" * 60)
+    logger.info(f"Sentences exported: {count}")
+    logger.info(f"Output file: {args.output}")
 
 
 if __name__ == "__main__":

@@ -23,6 +23,7 @@ if GREENLAND_SRC_PATH not in sys.path:
 
 import constants
 from wordfreq.trakaido.utils.export_manager import TrakaidoExporter
+from wordfreq.trakaido.utils.export_wireword_sentences import WirewordSentenceExporter
 
 # Supported languages and their codes
 SUPPORTED_LANGUAGES = {"lt": "Lithuanian", "zh": "Chinese", "ko": "Korean", "fr": "French"}
@@ -77,6 +78,14 @@ class UngurysAgent:
 
         # Initialize exporter with language parameter and Chinese variant
         self.exporter = TrakaidoExporter(
+            db_path=self.db_path,
+            debug=debug,
+            language=self.language,
+            simplified_chinese=self.simplified_chinese if self.language == "zh" else True,
+        )
+
+        # Initialize sentence exporter with Chinese variant support
+        self.sentence_exporter = WirewordSentenceExporter(
             db_path=self.db_path,
             debug=debug,
             language=self.language,
@@ -194,6 +203,22 @@ class UngurysAgent:
             logger.info(f"  Files created: {len(results.get('files_created', []))}")
             logger.info(f"  Levels exported: {len(results.get('levels_exported', []))}")
             logger.info(f"  Subtypes exported: {len(results.get('subtypes_exported', []))}")
+
+            # Also export sentences
+            logger.info("Exporting sentences to wireword_sentences.json...")
+            sentence_success, sentence_count = self.export_wireword_sentences(
+                output_path=None,  # Use default path
+            )
+            if sentence_success:
+                logger.info(f"  Exported {sentence_count} sentences")
+                results['sentences_exported'] = sentence_count
+                # Add sentences file to files_created list
+                if 'files_created' not in results:
+                    results['files_created'] = []
+                results['files_created'].append('wireword_sentences.json')
+            else:
+                logger.warning("  Sentence export failed")
+                results['sentences_exported'] = 0
         else:
             logger.error(f"Failed to export to {output_dir}")
 
@@ -245,6 +270,37 @@ class UngurysAgent:
             logger.error(f"Failed to export verbs to {output_path}")
 
         return success, stats
+
+    def export_wireword_sentences(
+        self,
+        output_path: Optional[str] = None,
+    ) -> Tuple[bool, Optional[int]]:
+        """
+        Export sentences to a single WireWord format JSON file.
+
+        Args:
+            output_path: Path to write the JSON file (if None, uses default)
+
+        Returns:
+            Tuple of (success flag, sentence count)
+        """
+        # Use default path if not provided
+        if output_path is None:
+            lang_dir = self.get_language_output_dir()
+            output_path = os.path.join(lang_dir, "wireword", "wireword_sentences.json")
+
+        logger.info("Starting WireWord sentences export...")
+
+        try:
+            count = self.sentence_exporter.export_to_file(
+                output_path=output_path,
+                include_all_languages=False,
+            )
+            logger.info(f"Successfully exported {count} sentences to {output_path}")
+            return True, count
+        except Exception as e:
+            logger.error(f"Failed to export sentences: {e}")
+            return False, None
 
     def run_export(
         self,
@@ -331,6 +387,17 @@ class UngurysAgent:
             "note": "Verbs are always exported to separate wireword_verbs.json file",
         }
 
+        # Always export sentences to separate file (regardless of export mode)
+        logger.info("Exporting sentences to wireword_sentences.json file...")
+        sentence_success, sentence_count = self.export_wireword_sentences(
+            output_path=None,  # Use default path
+        )
+        results["exports"]["sentences"] = {
+            "success": sentence_success,
+            "count": sentence_count,
+            "note": "Sentences are always exported to wireword_sentences.json file",
+        }
+
         end_time = datetime.now()
         duration = (end_time - start_time).total_seconds()
         results["duration_seconds"] = duration
@@ -403,6 +470,18 @@ class UngurysAgent:
                     logger.info(f"  Total verb entries: {stats.total_entries}")
                     logger.info(f"  Entries with GUIDs: {stats.entries_with_guids}")
                 logger.info(f"  File: wireword_verbs.json")
+            else:
+                logger.info(f"  Status: FAILED")
+            logger.info("")
+
+        # Sentence export (separate file)
+        if "sentences" in results["exports"]:
+            sentences = results["exports"]["sentences"]
+            logger.info(f"SENTENCE EXPORT (separate file):")
+            if sentences["success"]:
+                logger.info(f"  Status: SUCCESS")
+                logger.info(f"  Total sentences: {sentences.get('count', 0)}")
+                logger.info(f"  File: wireword_sentences.json")
             else:
                 logger.info(f"  Status: FAILED")
             logger.info("")
