@@ -60,14 +60,14 @@ def export_sqlite_to_jsonl(sqlite_path: str, jsonl_dir: str):
             jsonl_lemma = convert_sqlalchemy_lemma_to_jsonl(lemma, source_session)
             target_session.add(jsonl_lemma)
 
-        # Export Sentences (DISABLED FOR NOW)
-        print("Skipping sentences (disabled)...")
-        # sentences = source_session.query(SQLiteSentence).all()
-        # print(f"Found {len(sentences)} sentences")
-        #
-        # for sentence in sentences:
-        #     jsonl_sentence = convert_sqlalchemy_sentence_to_jsonl(sentence)
-        #     target_session.add(jsonl_sentence)
+        # Export Sentences
+        print("Exporting sentences...")
+        sentences = source_session.query(SQLiteSentence).all()
+        print(f"Found {len(sentences)} sentences")
+
+        for sentence in sentences:
+            jsonl_sentence = convert_sqlalchemy_sentence_to_jsonl(sentence)
+            target_session.add(jsonl_sentence)
 
         # Export Audio Reviews
         print("Exporting audio reviews...")
@@ -191,7 +191,13 @@ def convert_sqlalchemy_lemma_to_jsonl(lemma, session):
 
 
 def convert_sqlalchemy_sentence_to_jsonl(sentence):
-    """Convert SQLAlchemy Sentence to JSONL dataclass."""
+    """Convert SQLAlchemy Sentence to JSONL dataclass.
+
+    Sentences are split into different locations based on their source:
+    - If source_filename starts with "pattern:": goes to sentences/pattern/{pattern_id}.jsonl (BUIVOLAS pattern sentences)
+    - Elif source_filename is set: goes to sentences/group/{source_filename}.jsonl (ZVIRDLIS grouped sentences)
+    - Else: goes to sentences/misc/misc.jsonl (miscellaneous sentences)
+    """
     from wordfreq.storage.backend.jsonl import models as jsonl_models
 
     # Get translations

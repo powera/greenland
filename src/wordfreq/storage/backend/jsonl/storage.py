@@ -664,8 +664,9 @@ class JSONLStorage(BaseStorage):
         """Get the shard file path for a sentence.
 
         Sentences are sharded by:
-        - pattern/{pattern_type}.jsonl for BUIVOLAS pattern sentences
-        - group/{group_name}.jsonl for ZVIRDLIS grouped sentences
+        - pattern/{pattern_id}.jsonl for BUIVOLAS pattern sentences (source_filename starts with "pattern:")
+        - group/{source_filename}.jsonl for ZVIRDLIS grouped sentences and other sourced sentences
+        - misc/misc.jsonl for sentences with no source
 
         Args:
             sentence: The sentence
@@ -673,16 +674,17 @@ class JSONLStorage(BaseStorage):
         Returns:
             Path to the sentence shard file
         """
-        if sentence.pattern_type:
-            # Pattern sentence (BUIVOLAS)
+        if sentence.source_filename and sentence.source_filename.startswith("pattern:"):
+            # Pattern sentence (BUIVOLAS) - extract pattern_id from "pattern:{pattern_id}"
+            pattern_id = sentence.source_filename[8:]  # Remove "pattern:" prefix
             shard_dir = self.data_dir / "sentences" / "pattern"
-            shard_file = f"{sentence.pattern_type}.jsonl"
+            shard_file = f"{pattern_id}.jsonl"
         elif sentence.source_filename:
-            # Grouped sentence (ZVIRDLIS)
+            # Grouped sentence (ZVIRDLIS) or other sourced sentence
             shard_dir = self.data_dir / "sentences" / "group"
             shard_file = f"{sentence.source_filename}.jsonl"
         else:
-            # Fallback to misc if neither pattern nor group
+            # Fallback to misc if no source
             shard_dir = self.data_dir / "sentences" / "misc"
             shard_file = "misc.jsonl"
 
