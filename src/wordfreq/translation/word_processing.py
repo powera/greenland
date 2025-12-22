@@ -101,7 +101,7 @@ def is_likely_base_form(word_text: str, lemma_text: str, pos_type: str) -> bool:
     return word_text == lemma_text
 
 
-def process_word(client, word: str, get_session_func, refresh: bool = False) -> bool:
+def process_word(client, word: str, get_session_func, refresh: bool = False, definitions_list: list = None) -> bool:
     """
     Process a word to get linguistic information and store in database using new schema.
 
@@ -110,6 +110,7 @@ def process_word(client, word: str, get_session_func, refresh: bool = False) -> 
         word: Word token to process
         get_session_func: Function to get database session
         refresh: If True, delete existing derivative forms and re-populate the word
+        definitions_list: Optional pre-fetched definitions list. If provided, skip LLM query.
 
     Returns:
         Success flag
@@ -136,12 +137,16 @@ def process_word(client, word: str, get_session_func, refresh: bool = False) -> 
                 # Refresh the word token object after deleting derivative forms
                 session.refresh(word_token)
 
-        # Query for definitions, POS, lemmas, and examples
-        definitions_list, success = definitions.query_definitions(client, word, get_session_func)
+        # Query for definitions, POS, lemmas, and examples (unless already provided)
+        if definitions_list is None:
+            definitions_list, success = definitions.query_definitions(client, word, get_session_func)
 
-        if not success:
-            logger.warning(f"Failed to process word '{word}'")
-            return False
+            if not success:
+                logger.warning(f"Failed to process word '{word}'")
+                return False
+        else:
+            # Using pre-fetched definitions
+            logger.info(f"Using {len(definitions_list)} pre-fetched definition(s) for '{word}'")
 
         # Process each definition/form
         for def_data in definitions_list:

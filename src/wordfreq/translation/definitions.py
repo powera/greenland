@@ -15,12 +15,13 @@ from wordfreq.translation.constants import VALID_POS_TYPES
 logger = logging.getLogger(__name__)
 
 
-def query_definitions(client, word: str, get_session_func) -> Tuple[List[Dict[str, Any]], bool]:
+def query_definitions(client, word: str, get_session_func, model: str = None) -> Tuple[List[Dict[str, Any]], bool]:
     """
     Query LLM for definitions, POS, and lemma information.
 
     Args:
         client: UnifiedLLMClient instance
+        model: Model name to use (optional, uses client.model if available)
         word: Word to analyze
         get_session_func: Function to get database session
 
@@ -117,10 +118,13 @@ def query_definitions(client, word: str, get_session_func) -> Tuple[List[Dict[st
     prompt_template = util.prompt_loader.get_prompt("wordfreq", "definitions")
     prompt = prompt_template.format(word=word)
 
+    # Get model name from parameter or client attribute
+    model_name = model or getattr(client, 'model', 'gpt-5-mini')
+
     try:
         # Make a single API call without retries
         response = client.generate_chat(
-            prompt=prompt, model=client.model, json_schema=schema, context=context
+            prompt=prompt, model=model_name, json_schema=schema, context=context
         )
 
         # Log successful query
@@ -132,7 +136,7 @@ def query_definitions(client, word: str, get_session_func) -> Tuple[List[Dict[st
                 query_type="definitions",
                 prompt=prompt,
                 response=json.dumps(response.structured_data),
-                model=client.model,
+                model=model_name,
             )
         except Exception as log_err:
             logger.error(f"Failed to log successful query: {log_err}")

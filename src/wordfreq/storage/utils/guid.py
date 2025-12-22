@@ -19,6 +19,11 @@ def generate_guid(session, pos_type: str, subtype: str) -> str:
     if pos_type not in SUBTYPE_GUID_PREFIXES:
         raise ValueError(f"Unknown pos_type: {pos_type}")
 
+    # Normalize common LLM output variations
+    # For interjection, "interjection" or "other" subtype should map to "interjection_other"
+    if pos_type == "interjection" and subtype in ("interjection", "other"):
+        subtype = "interjection_other"
+
     if subtype not in SUBTYPE_GUID_PREFIXES[pos_type]:
         raise ValueError(f"Unknown subtype '{subtype}' for pos_type '{pos_type}'")
 

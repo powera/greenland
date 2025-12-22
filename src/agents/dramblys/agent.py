@@ -9,7 +9,6 @@ high-priority words to add.
 "Dramblys" means "elephant" in Lithuanian - never forgets what's missing!
 """
 
-import logging
 import sys
 import time
 from datetime import datetime
@@ -22,6 +21,7 @@ if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
 import constants
+from util.logging_config import configure_logging, get_logger
 from wordfreq.storage.database import create_database_session
 from wordfreq.storage.models.schema import Lemma, WordToken, WordFrequency, Corpus, DerivativeForm
 from wordfreq.storage.models.imports import PendingImport, WordExclusion
@@ -32,10 +32,8 @@ from agents.dramblys.validation import is_valid_word
 from agents.dramblys import staging
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
-logger = logging.getLogger(__name__)
+configure_logging()
+logger = get_logger(__name__)
 
 
 class DramblysAgent:
@@ -542,10 +540,10 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
 
                 # Get translation from LinguisticClient
                 try:
-                    word_data = client.get_word_definitions(word)
+                    definitions_list, success = client.query_definitions(word)
                     translation = ""
-                    if word_data and "definitions" in word_data:
-                        for defn in word_data["definitions"]:
+                    if success and definitions_list:
+                        for defn in definitions_list:
                             if (
                                 defn.get("pos_type") == pos_type
                                 and defn.get("pos_subtype") == pos_subtype

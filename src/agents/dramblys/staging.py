@@ -8,7 +8,6 @@ This module handles the staging workflow for pending imports:
 - Staging new words for review
 """
 
-import logging
 import sys
 import time
 from pathlib import Path
@@ -19,10 +18,11 @@ GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent.parent)
 if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
+from util.logging_config import get_logger
 from wordfreq.storage.models.imports import PendingImport, WordExclusion
 from wordfreq.translation.client import LinguisticClient
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 def list_pending_imports(
@@ -116,11 +116,44 @@ def approve_pending_import(
             return {"error": f"Pending import ID {pending_import_id} not found", "success": False}
 
         word = pending.english_word
-        logger.info(f"Approving word '{word}'")
+        definition = pending.definition
+        pos_type = pending.pos_type
+        pos_subtype = pending.pos_subtype
 
-        # Use LinguisticClient to process the word and add to database
+        logger.info(f"Approving word '{word}' (sense: {definition[:60]}...)")
+
+        # Construct a minimal definition structure from pending_import data
+        # This matches the schema from definitions.py
+        definitions_list = [{
+            "definition": definition,
+            "pos": pos_type,
+            "pos_subtype": pos_subtype,
+            "lemma": word,  # Use the word itself as lemma for now
+            "is_base_form": True,  # Assume base form
+            "grammatical_form": None,  # Will be determined by process_word
+            # Translations will need to be generated later if needed
+        }]
+
+        # Use LinguisticClient to process the word with the specific definition
         client = LinguisticClient(model=model, db_path=db_path, debug=debug)
-        success = client.process_word(word, refresh=False)
+
+        try:
+            # Pass the definitions_list to avoid re-querying the LLM
+            from wordfreq.translation import word_processing
+            success = word_processing.process_word(
+                client.client,
+                word,
+                client.get_session,
+                refresh=False,
+                definitions_list=definitions_list
+            )
+        except ValueError as e:
+            # Handle subtype validation errors
+            if "Unknown subtype" in str(e):
+                logger.error(f"Subtype validation error for '{word}': {e}")
+                logger.error(f"The LLM returned an invalid subtype. This word needs manual review.")
+                return {"success": False, "word": word, "error": f"Invalid subtype: {e}"}
+            raise
 
         if success:
             # Delete the pending import entry
@@ -304,7 +337,15 @@ def stage_missing_words_for_import(
 
             # Query LLM for definition and translation
             # Use the linguistic client to get comprehensive word data
-            word_data = client.get_word_definitions(word)
+            definitions_list, success = client.query_definitions(word)
+            if not success:
+                logger.error(f"Failed to get definitions for '{word}'")
+                failed += 1
+                if i < len(words_to_stage):
+                    time.sleep(throttle)
+                continue
+
+            word_data = {"definitions": definitions_list}
 
             if not word_data or "definitions" not in word_data:
                 logger.error(f"Failed to get definitions for '{word}'")
@@ -317,17 +358,26 @@ def stage_missing_words_for_import(
             definitions = word_data.get("definitions", [])
             for definition_data in definitions:
                 definition_text = definition_data.get("definition", "")
-                pos_type = definition_data.get("pos_type", None)
+                # The schema uses "pos" not "pos_type"
+                pos_type = definition_data.get("pos", None)
                 pos_subtype = definition_data.get("pos_subtype", None)
 
                 # Get translation for disambiguation
-                translation = definition_data.get("translations", {}).get(target_language, "")
+                # The schema uses {language}_translation fields, not a translations dict
+                translation_key = f"{target_language}_translation"
+                translation = definition_data.get(translation_key, "")
 
-                if not translation or not definition_text:
+                if not definition_text:
                     logger.warning(
-                        f"Missing translation or definition for '{word}', skipping this sense"
+                        f"Missing definition for '{word}', skipping this sense"
                     )
                     continue
+
+                # Translation is optional - we can use definition as fallback for disambiguation
+                if not translation:
+                    logger.debug(
+                        f"No {target_language} translation for '{word}', will use definition for disambiguation"
+                    )
 
                 # Create pending import entry
                 pending = PendingImport(
