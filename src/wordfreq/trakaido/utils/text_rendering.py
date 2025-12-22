@@ -72,6 +72,12 @@ def format_subtype_display_name(subtype: str) -> str:
         "destruction_action": "Destruction Action",
         "mental_state": "Mental State",
         "emotional_state": "Emotional State",
+        "perception": "Perception",
+        "communication": "Communication",
+        "possession": "Possession",
+        "existence": "Existence",
+        "development": "Development",
+        "change": "Change",
         "directional_movement": "Directional Movement",
         "manner_movement": "Manner Movement",
         # Adjective subtypes

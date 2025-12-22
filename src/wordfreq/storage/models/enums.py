@@ -77,19 +77,19 @@ class NounSubtype(enum.Enum):
 class VerbSubtype(enum.Enum):
     """Subtypes for verbs."""
 
-    PHYSICAL_ACTION = "physical_action"
-    CREATION_ACTION = "creation_action"
-    DESTRUCTION_ACTION = "destruction_action"
-    MENTAL_STATE = "mental_state"
-    EMOTIONAL_STATE = "emotional_state"
-    POSSESSION = "possession"
-    DEVELOPMENT = "development"
-    CHANGE = "change"
-    SPEAKING = "speaking"
-    WRITING = "writing"
-    EXPRESSING = "expressing"
-    DIRECTIONAL_MOVEMENT = "directional_movement"
-    MANNER_MOVEMENT = "manner_movement"
+    PHYSICAL_ACTION = "physical_action"  # Physical actions (push, pull, lift, eat, drink)
+    CREATION_ACTION = "creation_action"  # Creating things (make, create, build)
+    DESTRUCTION_ACTION = "destruction_action"  # Destroying (break, destroy, demolish)
+    MENTAL_STATE = "mental_state"  # Cognition (know, believe, understand, think)
+    EMOTIONAL_STATE = "emotional_state"  # Feelings (love, hate, fear, enjoy)
+    PERCEPTION = "perception"  # Sensory verbs (see, hear, smell, taste, feel, touch)
+    COMMUNICATION = "communication"  # Speaking and writing (say, tell, speak, write, read)
+    POSSESSION = "possession"  # Having/owning (have, own, possess, give, take)
+    EXISTENCE = "existence"  # Living/existing (live, exist, die, survive, stay, remain)
+    DEVELOPMENT = "development"  # Growing/evolving (grow, develop, evolve, mature)
+    CHANGE = "change"  # Transforming (become, transform, change, turn)
+    DIRECTIONAL_MOVEMENT = "directional_movement"  # Moving with direction (go, come, enter, leave)
+    MANNER_MOVEMENT = "manner_movement"  # Way of moving (walk, run, swim, fly, crawl)
     OTHER = "other"
 
 

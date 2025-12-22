@@ -81,19 +81,19 @@ NOUN SUBTYPES:
 - **other**: Any noun that doesn't clearly fit into the above categories
 
 VERB SUBTYPES:
-- physical_action: Physical actions (run, jump, build)
-- creation_action: Creating things (make, create, construct)
-- destruction_action: Destroying things (break, destroy, demolish)
-- mental_state: Mental states (know, believe, understand)
-- emotional_state: Emotional states (love, hate, fear)
-- possession: Having or ownership (have, own, possess)
-- development: Development or growth (grow, evolve, develop)
-- change: Transformation (become, transform, alter)
-- speaking: Speaking communication (say, tell, talk)
-- writing: Written communication (write, record, type)
-- expressing: Showing or expressing (show, display, demonstrate)
-- directional_movement: Movement with direction (go, come, enter)
-- manner_movement: Way of moving (walk, swim, fly)
+- physical_action: Physical actions (run, jump, push, pull, lift, eat, drink)
+- creation_action: Creating things (make, create, build, construct)
+- destruction_action: Destroying things (break, destroy, demolish, ruin)
+- mental_state: Cognition and thinking (know, believe, understand, think, remember)
+- emotional_state: Emotional states and feelings (love, hate, fear, enjoy, worry)
+- perception: Sensory perception (see, hear, smell, taste, feel, touch)
+- communication: Speaking and writing (say, tell, speak, talk, write, read)
+- possession: Having, owning, giving, taking (have, own, possess, give, take, receive)
+- existence: Living and existing (live, exist, die, survive, stay, remain)
+- development: Development or growth (grow, evolve, develop, mature)
+- change: Transformation (become, transform, change, turn, alter)
+- directional_movement: Movement with direction (go, come, enter, leave, arrive, depart)
+- manner_movement: Way of moving (walk, run, swim, fly, crawl, dance)
 - other: Any verb that doesn't fit the above categories
 ADJECTIVE SUBTYPES:
 - size: Size descriptions (big, small, huge)
