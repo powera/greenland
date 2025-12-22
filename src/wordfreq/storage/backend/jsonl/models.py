@@ -51,21 +51,24 @@ class BaseConcept:
     # Editorial notes about the concept (singleton for now)
     notes: Optional[str] = None
 
-    # Timestamps
+    # Runtime field (not exported to JSONL - Git handles versioning)
     added_at: Optional[datetime.datetime] = None
 
     def to_dict(self) -> dict:
         """Convert to dictionary for JSONL serialization."""
         data = asdict(self)
-        if self.added_at:
-            data["added_at"] = self.added_at.isoformat()
+        # Remove runtime fields - Git handles versioning
+        data.pop("added_at", None)
         return data
 
     @classmethod
     def from_dict(cls, data: dict) -> "BaseConcept":
         """Create from dictionary (JSONL deserialization)."""
+        # Handle deprecated added_at for backward compatibility
         if "added_at" in data and data["added_at"]:
             data["added_at"] = datetime.datetime.fromisoformat(data["added_at"])
+        else:
+            data.setdefault("added_at", None)
         return cls(**data)
 
 
@@ -95,8 +98,10 @@ class Lemma:
 
     # Dictionary generation fields
     difficulty_level: Optional[int] = None  # From base.jsonl, can be overridden
-    frequency_rank: Optional[int] = None
     tags: Optional[str] = None  # JSON string
+
+    # Development-only field (not exported to JSONL)
+    frequency_rank: Optional[int] = None
 
     # Legacy translation fields (kept for backward compatibility)
     chinese_translation: Optional[str] = None
@@ -111,10 +116,12 @@ class Lemma:
 
     # Metadata
     confidence: float = 0.0
-    verified: bool = False
     notes: Optional[str] = None  # From base.jsonl
-    added_at: Optional[datetime.datetime] = None  # From base.jsonl
-    updated_at: Optional[datetime.datetime] = None
+
+    # Runtime/internal fields (not exported to JSONL)
+    verified: bool = False  # Moved to verifications.jsonl
+    added_at: Optional[datetime.datetime] = None  # Git handles versioning
+    updated_at: Optional[datetime.datetime] = None  # Git handles versioning
 
     # Nested relationships (stored as dicts in JSONL)
     translations: Dict[str, str] = field(default_factory=dict)  # lang_code -> translation
@@ -131,20 +138,19 @@ class Lemma:
         """Convert to dictionary for JSONL serialization."""
         data = asdict(self)
 
-        # Remove id field - GUID is the primary key in JSONL
+        # Remove runtime/internal fields not meant for JSONL export
         data.pop("id", None)
+        data.pop("verified", None)  # Now in verifications.jsonl
+        data.pop("added_at", None)  # Git handles versioning
+        data.pop("updated_at", None)  # Git handles versioning
+        data.pop("frequency_rank", None)  # Development only
 
-        # Convert datetime fields
-        if self.added_at:
-            data["added_at"] = self.added_at.isoformat()
-        if self.updated_at:
-            data["updated_at"] = self.updated_at.isoformat()
         return data
 
     @classmethod
     def from_dict(cls, data: dict) -> "Lemma":
         """Create from dictionary (JSONL deserialization)."""
-        # Handle datetime fields
+        # Handle deprecated datetime fields (for backward compatibility with old exports)
         if "added_at" in data and data["added_at"]:
             data["added_at"] = datetime.datetime.fromisoformat(data["added_at"])
         if "updated_at" in data and data["updated_at"]:
@@ -156,6 +162,10 @@ class Lemma:
         data.setdefault("derivative_forms", {})
         data.setdefault("grammar_facts", [])
         data.setdefault("audio_hashes", {})
+
+        # Set defaults for runtime fields that won't be in JSONL
+        data.setdefault("verified", False)
+        data.setdefault("frequency_rank", None)
 
         return cls(**data)
 
@@ -257,10 +267,12 @@ class Sentence:
     tense: Optional[str] = None
     minimum_level: Optional[int] = None
     source_filename: Optional[str] = None
-    verified: bool = False
     notes: Optional[str] = None
-    added_at: Optional[datetime.datetime] = None
-    updated_at: Optional[datetime.datetime] = None
+
+    # Runtime/internal fields (not exported to JSONL)
+    verified: bool = False  # Moved to verifications.jsonl
+    added_at: Optional[datetime.datetime] = None  # Git handles versioning
+    updated_at: Optional[datetime.datetime] = None  # Git handles versioning
 
     # Nested relationships
     translations: Dict[str, str] = field(default_factory=dict)  # lang_code -> text
@@ -269,15 +281,17 @@ class Sentence:
     def to_dict(self) -> dict:
         """Convert to dictionary for JSONL serialization."""
         data = asdict(self)
-        if self.added_at:
-            data["added_at"] = self.added_at.isoformat()
-        if self.updated_at:
-            data["updated_at"] = self.updated_at.isoformat()
+        # Remove runtime/internal fields not meant for JSONL export
+        data.pop("id", None)
+        data.pop("verified", None)  # Now in verifications.jsonl
+        data.pop("added_at", None)  # Git handles versioning
+        data.pop("updated_at", None)  # Git handles versioning
         return data
 
     @classmethod
     def from_dict(cls, data: dict) -> "Sentence":
         """Create from dictionary (JSONL deserialization)."""
+        # Handle deprecated datetime fields (for backward compatibility with old exports)
         if "added_at" in data and data["added_at"]:
             data["added_at"] = datetime.datetime.fromisoformat(data["added_at"])
         if "updated_at" in data and data["updated_at"]:
@@ -285,6 +299,9 @@ class Sentence:
 
         data.setdefault("translations", {})
         data.setdefault("words", [])
+
+        # Set defaults for runtime fields that won't be in JSONL
+        data.setdefault("verified", False)
 
         return cls(**data)
 
@@ -435,6 +452,40 @@ class GuidTombstone:
         return cls(**data)
 
 
+@dataclass
+class LemmaVerification:
+    """JSONL model for lemma verifications (stored in verifications/lemmas.jsonl)."""
+
+    guid: str = ""
+    verified: bool = False
+
+    def to_dict(self) -> dict:
+        """Convert to dictionary for JSONL serialization."""
+        return asdict(self)
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "LemmaVerification":
+        """Create from dictionary (JSONL deserialization)."""
+        return cls(**data)
+
+
+@dataclass
+class SentenceVerification:
+    """JSONL model for sentence verifications (stored in verifications/sentences.jsonl)."""
+
+    guid: str = ""
+    verified: bool = False
+
+    def to_dict(self) -> dict:
+        """Convert to dictionary for JSONL serialization."""
+        return asdict(self)
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "SentenceVerification":
+        """Create from dictionary (JSONL deserialization)."""
+        return cls(**data)
+
+
 # Model registry for dynamic lookup
 MODEL_REGISTRY = {
     "BaseConcept": BaseConcept,
@@ -449,4 +500,6 @@ MODEL_REGISTRY = {
     "AudioQualityReview": AudioQualityReview,
     "OperationLog": OperationLog,
     "GuidTombstone": GuidTombstone,
+    "LemmaVerification": LemmaVerification,
+    "SentenceVerification": SentenceVerification,
 }
