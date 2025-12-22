@@ -115,19 +115,19 @@ ADJECTIVE SUBTYPES:
 - sequence: Order or sequence (first, last, next, previous)
 - other: Any adjective that doesn't fit the above categories
 ADVERB SUBTYPES:
-- style: Manner or style (quickly, carefully, well)
-- attitude: Attitude or approach (eagerly, reluctantly, willingly)
-- specific_time: Specific times (now, yesterday, tomorrow)
-- relative_time: Relative times (already, soon, recently)
-- duration: Time duration (briefly, temporarily, permanently)
-- direction: Directional movement (up, down, forward)
-- location: Positions or locations (here, there, everywhere)
-- distance: Distance references (nearby, far, close)
-- intensity: Intensity or degree (very, extremely, slightly)
-- completeness: Completeness (entirely, partly, completely)
-- approximation: Approximation (almost, nearly, exactly)
-- definite_frequency: Specific frequency (daily, weekly, monthly)
-- indefinite_frequency: Inexact frequency (often, sometimes, rarely)
+- style: Manner or style of action (quickly, carefully, well, slowly, badly, easily, loudly, quietly, softly)
+- attitude: Attitude or approach (eagerly, reluctantly, willingly, gladly, sadly, happily, angrily, nervously)
+- specific_time: Specific time references (now, today, yesterday, tomorrow, tonight, Sunday, January)
+- relative_time: Relative time references (already, soon, recently, lately, previously, earlier, later, eventually)
+- duration: Duration of time (briefly, temporarily, permanently, forever, momentarily, eternally, always)
+- direction: Directional movement (up, down, forward, backward, left, right, north, south, east, west, upward, downward)
+- location: Position or place (here, there, everywhere, nowhere, somewhere, anywhere, inside, outside, nearby, above, below)
+- distance: Distance references (nearby, far, close, away, afar, near, distant)
+- intensity: Intensity or degree (very, extremely, slightly, quite, rather, too, enough, so, really, fairly, somewhat)
+- completeness: Degree of completeness (entirely, partly, completely, fully, partially, halfway, totally, utterly)
+- approximation: Approximation (almost, nearly, exactly, approximately, precisely, roughly, about, around)
+- definite_frequency: Specific frequency (daily, weekly, monthly, yearly, hourly, annually, quarterly)
+- indefinite_frequency: Inexact frequency (often, sometimes, rarely, seldom, always, never, usually, frequently, occasionally)
 - other: Any adverb that doesn't fit the above categories
 
 

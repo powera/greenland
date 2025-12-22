@@ -119,19 +119,27 @@ class AdjectiveSubtype(enum.Enum):
 class AdverbSubtype(enum.Enum):
     """Subtypes for adverbs."""
 
-    STYLE = "style"
-    ATTITUDE = "attitude"
-    SPECIFIC_TIME = "specific_time"
-    RELATIVE_TIME = "relative_time"
-    DURATION = "duration"
-    DIRECTION = "direction"
-    LOCATION = "location"
-    DISTANCE = "distance"
-    INTENSITY = "intensity"
-    COMPLETENESS = "completeness"
-    APPROXIMATION = "approximation"
-    DEFINITE_FREQUENCY = "definite_frequency"
-    INDEFINITE_FREQUENCY = "indefinite_frequency"
+    # Manner
+    STYLE = "style"  # Manner or style of action (quickly, carefully, well, slowly, badly, easily)
+    ATTITUDE = "attitude"  # Attitude or approach (eagerly, reluctantly, willingly, gladly, sadly)
+
+    # Temporal
+    SPECIFIC_TIME = "specific_time"  # Specific time references (now, today, yesterday, tomorrow, tonight)
+    RELATIVE_TIME = "relative_time"  # Relative time references (already, soon, recently, lately, previously)
+    DURATION = "duration"  # Duration of time (briefly, temporarily, permanently, forever, momentarily)
+    DEFINITE_FREQUENCY = "definite_frequency"  # Specific frequency (daily, weekly, monthly, yearly, hourly)
+    INDEFINITE_FREQUENCY = "indefinite_frequency"  # Inexact frequency (often, sometimes, rarely, seldom, always, never)
+
+    # Spatial
+    DIRECTION = "direction"  # Directional movement (up, down, forward, backward, left, right, north)
+    LOCATION = "location"  # Position or place (here, there, everywhere, nowhere, somewhere, inside, outside)
+    DISTANCE = "distance"  # Distance references (nearby, far, close, away, afar)
+
+    # Degree
+    INTENSITY = "intensity"  # Intensity or degree (very, extremely, slightly, quite, rather, too, enough)
+    COMPLETENESS = "completeness"  # Degree of completeness (entirely, partly, completely, fully, partially, halfway)
+    APPROXIMATION = "approximation"  # Approximation (almost, nearly, exactly, approximately, precisely, roughly)
+
     OTHER = "other"
 
 
