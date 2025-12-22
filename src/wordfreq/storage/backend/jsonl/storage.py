@@ -35,6 +35,8 @@ class JSONLStorage(BaseStorage):
         self.audio_reviews: List[models.AudioQualityReview] = []
         self.operation_logs: List[models.OperationLog] = []
         self.tombstones: List[models.GuidTombstone] = []
+        self.lemma_verifications: Dict[str, models.LemmaVerification] = {}  # guid -> verification
+        self.sentence_verifications: Dict[str, models.SentenceVerification] = {}  # guid -> verification
 
         # ID counters for new objects
         self._next_lemma_id = 1
@@ -63,6 +65,7 @@ class JSONLStorage(BaseStorage):
             self.data_dir / "audio_reviews",
             self.data_dir / "operation_logs",
             self.data_dir / "tombstones",
+            self.data_dir / "verifications",
         ]
 
         for directory in directories:
@@ -75,6 +78,7 @@ class JSONLStorage(BaseStorage):
         self._load_audio_reviews()
         self._load_operation_logs()
         self._load_tombstones()
+        self._load_verifications()
 
     def _load_lemmas(self) -> None:
         """Load all lemma files from disk.
@@ -214,34 +218,43 @@ class JSONLStorage(BaseStorage):
                 print(f"Error loading {lang_file}: {e}")
 
     def _load_sentences(self) -> None:
-        """Load all sentence files from disk."""
-        sentences_file = self.data_dir / "sentences" / "sentences.jsonl"
-        if not sentences_file.exists():
+        """Load all sentence files from disk.
+
+        Sentences are sharded across:
+        - sentences/pattern/{pattern_type}.jsonl (BUIVOLAS pattern sentences)
+        - sentences/group/{group_name}.jsonl (ZVIRDLIS grouped sentences)
+        - sentences/misc/misc.jsonl (miscellaneous sentences)
+        - sentences/sentences.jsonl (legacy format, for backward compatibility)
+        """
+        sentences_dir = self.data_dir / "sentences"
+        if not sentences_dir.exists():
             return
 
-        try:
-            with open(sentences_file, "r", encoding="utf-8") as f:
-                for line in f:
-                    line = line.strip()
-                    if not line:
-                        continue
-                    data = json.loads(line)
-                    sentence = models.Sentence.from_dict(data)
+        # Load from all JSONL files in sentences/ subdirectories
+        for sentences_file in sentences_dir.rglob("*.jsonl"):
+            try:
+                with open(sentences_file, "r", encoding="utf-8") as f:
+                    for line in f:
+                        line = line.strip()
+                        if not line:
+                            continue
+                        data = json.loads(line)
+                        sentence = models.Sentence.from_dict(data)
 
-                    # Assign ID if not present
-                    if sentence.id is None:
-                        sentence.id = self._next_sentence_id
-                        self._next_sentence_id += 1
-                    else:
-                        self._next_sentence_id = max(self._next_sentence_id, sentence.id + 1)
+                        # Assign ID if not present
+                        if sentence.id is None:
+                            sentence.id = self._next_sentence_id
+                            self._next_sentence_id += 1
+                        else:
+                            self._next_sentence_id = max(self._next_sentence_id, sentence.id + 1)
 
-                    # Store by guid and id
-                    if sentence.guid:
-                        self.sentences[sentence.guid] = sentence
-                    self.sentences_by_id[sentence.id] = sentence
+                        # Store by guid and id
+                        if sentence.guid:
+                            self.sentences[sentence.guid] = sentence
+                        self.sentences_by_id[sentence.id] = sentence
 
-        except Exception as e:
-            print(f"Error loading sentences: {e}")
+            except Exception as e:
+                print(f"Error loading {sentences_file}: {e}")
 
     def _load_audio_reviews(self) -> None:
         """Load audio reviews from disk."""
@@ -323,6 +336,48 @@ class JSONLStorage(BaseStorage):
         except Exception as e:
             print(f"Error loading tombstones: {e}")
 
+    def _load_verifications(self) -> None:
+        """Load verification data from disk."""
+        # Load lemma verifications
+        lemma_verif_file = self.data_dir / "verifications" / "lemmas.jsonl"
+        if lemma_verif_file.exists():
+            try:
+                with open(lemma_verif_file, "r", encoding="utf-8") as f:
+                    for line in f:
+                        line = line.strip()
+                        if not line:
+                            continue
+                        data = json.loads(line)
+                        verification = models.LemmaVerification.from_dict(data)
+                        self.lemma_verifications[verification.guid] = verification
+
+                        # Apply verification status to lemma if loaded
+                        if verification.guid in self.lemmas:
+                            self.lemmas[verification.guid].verified = verification.verified
+
+            except Exception as e:
+                print(f"Error loading lemma verifications: {e}")
+
+        # Load sentence verifications
+        sentence_verif_file = self.data_dir / "verifications" / "sentences.jsonl"
+        if sentence_verif_file.exists():
+            try:
+                with open(sentence_verif_file, "r", encoding="utf-8") as f:
+                    for line in f:
+                        line = line.strip()
+                        if not line:
+                            continue
+                        data = json.loads(line)
+                        verification = models.SentenceVerification.from_dict(data)
+                        self.sentence_verifications[verification.guid] = verification
+
+                        # Apply verification status to sentence if loaded
+                        if verification.guid in self.sentences:
+                            self.sentences[verification.guid].verified = verification.verified
+
+            except Exception as e:
+                print(f"Error loading sentence verifications: {e}")
+
     def save_lemma(self, lemma: models.Lemma) -> None:
         """Save a lemma to disk atomically.
 
@@ -357,6 +412,9 @@ class JSONLStorage(BaseStorage):
         # Rewrite all affected language files
         for lang_code in languages_to_save:
             self._rewrite_language_file(lemma, lang_code)
+
+        # Save verification status
+        self._save_lemma_verification(lemma)
 
     def _get_lemma_dir_path(self, lemma: models.Lemma) -> Path:
         """Get the directory path for a lemma's language files.
@@ -463,9 +521,7 @@ class JSONLStorage(BaseStorage):
         if lemma.notes:
             data["notes"] = lemma.notes
 
-        # Timestamps
-        if lemma.added_at:
-            data["added_at"] = lemma.added_at.isoformat()
+        # Note: added_at is not exported (Git handles versioning)
 
         return data
 
@@ -539,9 +595,7 @@ class JSONLStorage(BaseStorage):
                 data["definition_text"] = lemma.definition_text
                 has_data = True
 
-            if lemma.frequency_rank is not None:
-                data["frequency_rank"] = lemma.frequency_rank
-                has_data = True
+            # Note: frequency_rank is development-only and not exported
 
             if lemma.tags:
                 data["tags"] = lemma.tags
@@ -555,13 +609,8 @@ class JSONLStorage(BaseStorage):
                 data["confidence"] = lemma.confidence
                 has_data = True
 
-            if lemma.verified:
-                data["verified"] = lemma.verified
-                has_data = True
-
-            if lemma.updated_at:
-                data["updated_at"] = lemma.updated_at.isoformat()
-                has_data = True
+            # Note: verified is now stored in verifications.jsonl
+            # Note: updated_at is not exported (Git handles versioning)
 
         # Derivative forms for this language
         if lang_code in lemma.derivative_forms:
@@ -606,13 +655,51 @@ class JSONLStorage(BaseStorage):
         self.sentences_by_id[sentence.id] = sentence
 
         # Rewrite sentences file
-        self._rewrite_sentences_file()
+        self._rewrite_sentences_file(sentence)
 
-    def _rewrite_sentences_file(self) -> None:
-        """Rewrite the sentences JSONL file."""
-        file_path = self.data_dir / "sentences" / "sentences.jsonl"
+        # Save verification status
+        self._save_sentence_verification(sentence)
+
+    def _get_sentence_shard_path(self, sentence: models.Sentence) -> Path:
+        """Get the shard file path for a sentence.
+
+        Sentences are sharded by:
+        - pattern/{pattern_type}.jsonl for BUIVOLAS pattern sentences
+        - group/{group_name}.jsonl for ZVIRDLIS grouped sentences
+
+        Args:
+            sentence: The sentence
+
+        Returns:
+            Path to the sentence shard file
+        """
+        if sentence.pattern_type:
+            # Pattern sentence (BUIVOLAS)
+            shard_dir = self.data_dir / "sentences" / "pattern"
+            shard_file = f"{sentence.pattern_type}.jsonl"
+        elif sentence.source_filename:
+            # Grouped sentence (ZVIRDLIS)
+            shard_dir = self.data_dir / "sentences" / "group"
+            shard_file = f"{sentence.source_filename}.jsonl"
+        else:
+            # Fallback to misc if neither pattern nor group
+            shard_dir = self.data_dir / "sentences" / "misc"
+            shard_file = "misc.jsonl"
+
+        return shard_dir / shard_file
+
+    def _rewrite_sentences_file(self, sentence: models.Sentence) -> None:
+        """Rewrite the sentence shard file containing this sentence."""
+        file_path = self._get_sentence_shard_path(sentence)
         file_path.parent.mkdir(parents=True, exist_ok=True)
 
+        # Collect all sentences that belong to this shard
+        sentences_for_shard = []
+        for sent in self.sentences.values():
+            if self._get_sentence_shard_path(sent) == file_path:
+                sentences_for_shard.append(sent)
+
+        # Write atomically
         with tempfile.NamedTemporaryFile(
             mode="w",
             encoding="utf-8",
@@ -620,8 +707,8 @@ class JSONLStorage(BaseStorage):
             delete=False,
             suffix=".tmp",
         ) as tmp_file:
-            for sentence in self.sentences.values():
-                json_data = sentence.to_dict()
+            for sent in sentences_for_shard:
+                json_data = sent.to_dict()
                 tmp_file.write(json.dumps(json_data, ensure_ascii=False) + "\n")
             tmp_file.flush()
             os.fsync(tmp_file.fileno())
@@ -724,7 +811,73 @@ class JSONLStorage(BaseStorage):
             del self.sentences_by_id[sentence.id]
 
         # Rewrite file
-        self._rewrite_sentences_file()
+        self._rewrite_sentences_file(sentence)
+
+    def _save_lemma_verification(self, lemma: models.Lemma) -> None:
+        """Save lemma verification status to verifications/lemmas.jsonl.
+
+        Args:
+            lemma: The lemma whose verification to save
+        """
+        if not lemma.guid:
+            return
+
+        # Update in-memory verification
+        verification = models.LemmaVerification(guid=lemma.guid, verified=lemma.verified)
+        self.lemma_verifications[lemma.guid] = verification
+
+        # Rewrite entire verifications file (small file, simple approach)
+        file_path = self.data_dir / "verifications" / "lemmas.jsonl"
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+
+        with tempfile.NamedTemporaryFile(
+            mode="w",
+            encoding="utf-8",
+            dir=file_path.parent,
+            delete=False,
+            suffix=".tmp",
+        ) as tmp_file:
+            for verif in self.lemma_verifications.values():
+                if verif.verified:  # Only write verified=true entries
+                    json_data = verif.to_dict()
+                    tmp_file.write(json.dumps(json_data, ensure_ascii=False) + "\n")
+            tmp_file.flush()
+            os.fsync(tmp_file.fileno())
+
+        os.replace(tmp_file.name, file_path)
+
+    def _save_sentence_verification(self, sentence: models.Sentence) -> None:
+        """Save sentence verification status to verifications/sentences.jsonl.
+
+        Args:
+            sentence: The sentence whose verification to save
+        """
+        if not sentence.guid:
+            return
+
+        # Update in-memory verification
+        verification = models.SentenceVerification(guid=sentence.guid, verified=sentence.verified)
+        self.sentence_verifications[sentence.guid] = verification
+
+        # Rewrite entire verifications file (small file, simple approach)
+        file_path = self.data_dir / "verifications" / "sentences.jsonl"
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+
+        with tempfile.NamedTemporaryFile(
+            mode="w",
+            encoding="utf-8",
+            dir=file_path.parent,
+            delete=False,
+            suffix=".tmp",
+        ) as tmp_file:
+            for verif in self.sentence_verifications.values():
+                if verif.verified:  # Only write verified=true entries
+                    json_data = verif.to_dict()
+                    tmp_file.write(json.dumps(json_data, ensure_ascii=False) + "\n")
+            tmp_file.flush()
+            os.fsync(tmp_file.fileno())
+
+        os.replace(tmp_file.name, file_path)
 
     def create_session(self) -> BaseSession:
         """Create a new JSONL session.
