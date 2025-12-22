@@ -10,7 +10,7 @@ CRITICAL REQUIREMENTS:
 
 The Trakaido system organizes words by:
 - Part of speech types: noun, verb, adjective, adverb, etc.
-- Subtypes: specific categories like "food_drink", "body_part", "building_structure", etc.
+- Subtypes: specific categories like "food", "beverage", "body_part", "building_structure", "furniture", "vehicle", etc.
 
 For translations:
 - Lithuanian: Provide the most common, standard Lithuanian equivalent in base form
@@ -23,7 +23,7 @@ For translations:
 - Use the most common translation that matches the intended meaning
 
 For part-of-speech subtypes, use categories like:
-- Nouns: human, animal, body_part, food_drink, building_structure, small_movable_object, etc.
+- Nouns: human, animal, body_part, plant, plant_part, food, beverage, building_structure, furniture, vehicle, small_movable_object, etc.
 - Verbs: action, motion, communication, mental_process, etc.
 - Adjectives: physical_property, color, size, emotional_state, etc.
 - Adverbs: manner, time, place, degree, etc.

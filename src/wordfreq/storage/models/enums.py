@@ -17,17 +17,21 @@ class NounSubtype(enum.Enum):
     BODY_PART = "body_part"
     DISEASE_CONDITION = "disease_condition"
     PLANT = "plant"
+    PLANT_PART = "plant_part"  # Parts of plants (leaf, root, seed, petal, bark)
 
     # Food and Consumables
-    FOOD_DRINK = "food_drink"
+    FOOD = "food"  # Solid consumables (bread, apple, rice, meat)
+    BEVERAGE = "beverage"  # Liquid consumables (water, coffee, tea, juice)
 
     # Physical Objects and Structures
     BUILDING_STRUCTURE = "building_structure"
+    FURNITURE = "furniture"  # Furniture items (table, chair, desk, sofa, bed)
     SMALL_MOVABLE_OBJECT = "small_movable_object"
     CLOTHING_ACCESSORY = "clothing_accessory"
     ARTWORK_ARTIFACT = "artwork_artifact"
     NATURAL_FEATURE = "natural_feature"
     TOOL_MACHINE = "tool_machine"
+    VEHICLE = "vehicle"  # Transportation (car, truck, bicycle, boat, airplane)
     PATH_INFRASTRUCTURE = "path_infrastructure"
 
     # Materials and Substances

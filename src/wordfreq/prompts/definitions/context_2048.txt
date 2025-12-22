@@ -24,18 +24,22 @@ NOUN SUBTYPES:
 - **animal**: All non-human animals, including mammals, birds, fish, insects, etc. (dog, tiger, goldfish, butterfly)
 - **body_part**: Any part of a human or animal body (arm, liver, finger, tail, wing)
 - **disease_condition**: Medical conditions, disorders, or ailments (diabetes, influenza, arthritis)
-- **plant**: All plant life forms and their components (tree, flower, grass, root, moss)
+- **plant**: Living plant organisms (tree, flower, grass, moss, bush)
+- **plant_part**: Parts of plants (leaf, root, seed, petal, bark, fruit)
 
 ## Food and Consumables
-- **food_drink**: Edible items and beverages (bread, cheese, water, wine, curry)
+- **food**: Edible solid items (bread, cheese, rice, meat, curry)
+- **beverage**: Drinkable liquids (water, wine, coffee, tea, juice, milk)
 
 ## Physical Objects and Structures
 - **building_structure**: Buildings, structures, and permanent installations (laboratory, house, bridge, tower, stadium)
+- **furniture**: Furniture items (table, chair, desk, sofa, bed, shelf, cabinet)
 - **small_movable_object**: Portable items and objects (pen, book, phone, cup, scissors)
 - **clothing_accessory**: Wearable items (shirt, hat, jewelry, shoes)
 - **artwork_artifact**: Creative works and culturally significant items (painting, sculpture, mask, trophy)
 - **natural_feature**: Natural elements and landscape features (mountain, river, cloud, forest, ocean)
-- **tool_machine**: Tools, machines, devices, and equipment (engine, hammer, computer, drill, microscope, boat)
+- **tool_machine**: Tools, machines, devices, and equipment (engine, hammer, computer, drill, microscope)
+- **vehicle**: Transportation devices (car, truck, bicycle, boat, airplane, motorcycle)
 - **path_infrastructure**: Ways of travel or infrastructure (highway, road, bridge, railway)
 
 ## Materials and Substances

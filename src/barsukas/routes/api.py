@@ -91,7 +91,7 @@ Provide:
 1. A clear, concise definition (1-2 sentences)
 2. Part of speech (pos_type): Choose from: noun, verb, adjective, adverb, pronoun, preposition, conjunction, interjection, determiner, numeral
 3. Part of speech subtype (pos_subtype): Choose the most appropriate:
-   - For nouns: animal, body_part, building_structure, clothing_accessory, concept_idea, emotion_feeling, food_drink, human, material_substance, nationality, natural_feature, personal_name, place_name, plant, small_movable_object, temporal_name, time_period, tool_machine, unit_of_measurement
+   - For nouns: animal, body_part, building_structure, clothing_accessory, concept_idea, emotion_feeling, food, beverage, furniture, vehicle, plant, plant_part, human, material_substance, nationality, natural_feature, personal_name, place_name, small_movable_object, temporal_name, time_period, tool_machine, unit_of_measurement
    - For verbs: directional_movement, emotional_state, mental_state, physical_action, possession
    - For adjectives: color, definite_quantity, quality, sequence, shape
    - For adverbs: location, other, style

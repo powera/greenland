@@ -28,7 +28,11 @@ def format_subtype_display_name(subtype: str) -> str:
     special_cases = {
         # Noun subtypes
         "animal": "Animals",
-        "food_drink": "Food/Drink",
+        "food": "Food",
+        "beverage": "Beverage",
+        "furniture": "Furniture",
+        "vehicle": "Vehicle",
+        "plant_part": "Plant Part",
         "small_movable_object": "Small Movable Object",
         "clothing_accessory": "Clothing/Accessory",
         "building_structure": "Building/Structure",

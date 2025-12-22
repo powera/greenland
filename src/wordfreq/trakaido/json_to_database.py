@@ -20,7 +20,7 @@ Expected JSON format:
         "Lithuanian": "žodis", 
         "trakaido_level": 1,
         "POS": "noun",
-        "subtype": "food_drink",
+        "subtype": "food",
         "GUID": "some-guid-string"  // Optional - will be auto-generated if not provided
     },
     ...
@@ -187,8 +187,8 @@ def get_pos_and_subtype_for_category(display_category_name: str) -> tuple[str, O
     # Direct mapping from display names to (pos_type, pos_subtype)
     category_mapping = {
         # Food and consumables
-        "Food + Drink": ("noun", "food_drink"),
-        "Additional Foods": ("noun", "food_drink"),
+        "Food + Drink": ("noun", "food"),
+        "Additional Foods": ("noun", "food"),
         # Living things
         "Animals": ("noun", "animal"),
         "Plants": ("noun", "plant"),
@@ -196,7 +196,7 @@ def get_pos_and_subtype_for_category(display_category_name: str) -> tuple[str, O
         "Clothing": ("noun", "clothing_accessory"),
         "Small Physical Objects": ("noun", "small_movable_object"),
         "Buildings": ("noun", "building_structure"),
-        "Transportation": ("noun", "tool_machine"),
+        "Transportation": ("noun", "vehicle"),
         "Materials": ("noun", "material_substance"),
         "Technology": ("noun", "tool_machine"),
         # Body and health
@@ -276,7 +276,7 @@ def find_or_create_lemma(
         difficulty_level: Difficulty level to assign (1-5)
         existing_guid: GUID from the original trakaido database (optional)
         pos_type: Part of speech (noun, verb, adjective, etc.) (optional)
-        pos_subtype: POS subtype (food_drink, physical_action, etc.) (optional)
+        pos_subtype: POS subtype (food, beverage, physical_action, etc.) (optional)
         update_difficulty: Whether to update difficulty level on existing lemmas (default: True)
 
     Returns:
