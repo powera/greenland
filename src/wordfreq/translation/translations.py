@@ -121,14 +121,24 @@ def query_translations(
     # Format context with language instructions
     context = context_template.format(language_instructions=language_instructions)
 
+    # Conditionally format reference info and disambiguation instruction
+    # If reference language is English, we don't have a true reference translation
+    if ref_lang_code != "en":
+        reference_info = f'{reference_language_name}: "{ref_translation}" (lemma form)\n'
+        disambiguation_instruction = f"Ensure all translations match the specific meaning indicated by the English and {reference_language_name} translations."
+    else:
+        # No reference translation - rely on definition and POS
+        reference_info = ""
+        disambiguation_instruction = "Ensure all translations match the specific meaning indicated by the definition and part of speech."
+
     prompt = prompt_template.format(
         english_word=english_word,
-        reference_language=reference_language_name,
-        reference_translation=ref_translation,
+        reference_info=reference_info,
         definition=definition,
         pos_type=pos_type,
         subtype_info=subtype_info,
         languages_list=languages_list,
+        disambiguation_instruction=disambiguation_instruction,
     )
 
     try:

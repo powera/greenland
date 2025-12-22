@@ -133,13 +133,6 @@ def add_missing_translations(lemma_id):
                     reference_lang_code = lc
                     break
 
-        if not reference_translation:
-            flash(
-                "Cannot generate translations: at least one existing translation is required for context",
-                "warning",
-            )
-            return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
-
         from wordfreq.translation.client import LinguisticClient
 
         client = LinguisticClient(model=agent.model, db_path=Config.DB_PATH, debug=Config.DEBUG)
@@ -167,16 +160,29 @@ def add_missing_translations(lemma_id):
             return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
         # Query LLM for missing translations - ONE CALL
-        # Use the reference translation tuple for context
-        # The LLM uses this as a second language hint for accuracy
-        translations, success = client.query_translations(
-            english_word=lemma.lemma_text,
-            reference_translation=(reference_lang_code, reference_translation),
-            definition=lemma.definition_text,
-            pos_type=lemma.pos_type,
-            pos_subtype=lemma.pos_subtype,
-            languages=missing_lang_names,
-        )
+        if reference_translation:
+            # Use the reference translation tuple for context
+            # The LLM uses this as a second language hint for accuracy
+            translations, success = client.query_translations(
+                english_word=lemma.lemma_text,
+                reference_translation=(reference_lang_code, reference_translation),
+                definition=lemma.definition_text,
+                pos_type=lemma.pos_type,
+                pos_subtype=lemma.pos_subtype,
+                languages=missing_lang_names,
+            )
+        else:
+            # No reference translation available - generate from English + definition + POS
+            # Use a placeholder reference to make the API work
+            # The LLM will rely more heavily on the definition and POS for disambiguation
+            translations, success = client.query_translations(
+                english_word=lemma.lemma_text,
+                reference_translation=("en", lemma.lemma_text),  # Use English as "reference"
+                definition=lemma.definition_text,
+                pos_type=lemma.pos_type,
+                pos_subtype=lemma.pos_subtype,
+                languages=missing_lang_names,
+            )
 
         if not success or not translations:
             flash("Failed to generate translations", "error")

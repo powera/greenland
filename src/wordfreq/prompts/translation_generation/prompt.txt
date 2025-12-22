@@ -1,12 +1,11 @@
 Generate translations for the following word:
 
 English: "{english_word}" (lemma form)
-{reference_language}: "{reference_translation}" (lemma form)
-Definition: {definition}
+{reference_info}Definition: {definition}
 Part of Speech: {pos_type}
 {subtype_info}
 
 Provide translations in lemma/base form for:
 {languages_list}
 
-Ensure all translations match the specific meaning indicated by the English and {reference_language} translations.
+{disambiguation_instruction}
