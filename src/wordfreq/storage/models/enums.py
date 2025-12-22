@@ -96,21 +96,23 @@ class VerbSubtype(enum.Enum):
 class AdjectiveSubtype(enum.Enum):
     """Subtypes for adjectives."""
 
-    SIZE = "size"
-    COLOR = "color"
-    SHAPE = "shape"
-    TEXTURE = "texture"
-    QUALITY = "quality"
-    AESTHETIC = "aesthetic"
-    IMPORTANCE = "importance"
-    ORIGIN = "origin"
-    PURPOSE = "purpose"
-    MATERIAL = "material"
-    DEFINITE_QUANTITY = "definite_quantity"
-    INDEFINITE_QUANTITY = "indefinite_quantity"
-    DURATION = "duration"
-    FREQUENCY = "frequency"
-    SEQUENCE = "sequence"
+    SIZE = "size"  # Size descriptions (big, small, huge, tiny)
+    COLOR = "color"  # Color descriptions (red, blue, green, yellow)
+    SHAPE = "shape"  # Shape descriptions (round, square, triangular, oval)
+    TEXTURE = "texture"  # Texture descriptions (soft, hard, smooth, rough)
+    PERSONAL_QUALITY = "personal_quality"  # Character/personality traits (honest, kind, brave, lazy, clever, polite)
+    CONDITION = "condition"  # Physical/temporal state (hot, cold, wet, dry, clean, dirty, new, old, fresh)
+    QUALITY = "quality"  # Evaluative and measurable properties (good, bad, excellent, fast, slow, strong, weak, easy, hard, loud, quiet)
+    AESTHETIC = "aesthetic"  # Beauty or appearance (beautiful, ugly, pretty, handsome)
+    IMPORTANCE = "importance"  # Importance or priority (important, essential, trivial, critical)
+    ORIGIN = "origin"  # Origin or source (American, Chinese, domestic, foreign)
+    PURPOSE = "purpose"  # Purpose or function (educational, medical, industrial, recreational)
+    MATERIAL = "material"  # Material composition (wooden, metal, plastic, cotton)
+    DEFINITE_QUANTITY = "definite_quantity"  # Specific amounts (one, ten, hundred, first)
+    INDEFINITE_QUANTITY = "indefinite_quantity"  # Inexact amounts (many, few, some, several)
+    DURATION = "duration"  # Time duration (brief, long, eternal, temporary)
+    FREQUENCY = "frequency"  # Frequency of occurrence (daily, occasional, rare, frequent)
+    SEQUENCE = "sequence"  # Order or sequence (first, last, next, previous)
     OTHER = "other"
 
 

@@ -81,6 +81,8 @@ def format_subtype_display_name(subtype: str) -> str:
         "directional_movement": "Directional Movement",
         "manner_movement": "Manner Movement",
         # Adjective subtypes
+        "personal_quality": "Personal Quality",
+        "condition": "Condition",
         "definite_quantity": "Definite Quantity",
         "indefinite_quantity": "Indefinite Quantity",
         # Adverb subtypes

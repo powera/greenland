@@ -25,7 +25,7 @@ For translations:
 For part-of-speech subtypes, use categories like:
 - Nouns: human, animal, body_part, plant, plant_part, food, beverage, building_structure, furniture, vehicle, small_movable_object, etc.
 - Verbs: physical_action, creation_action, mental_state, emotional_state, perception, communication, possession, existence, development, change, directional_movement, manner_movement, etc.
-- Adjectives: size, color, shape, quality, etc.
-- Adverbs: style, specific_time, location, intensity, etc.
+- Adjectives: size, color, shape, texture, personal_quality, condition, quality, aesthetic, importance, etc.
+- Adverbs: style, attitude, specific_time, relative_time, location, direction, intensity, etc.
 
 Provide high confidence scores (0.8-1.0) for common words with clear translations, lower scores (0.3-0.7) for ambiguous or culturally specific terms.

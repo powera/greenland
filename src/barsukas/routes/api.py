@@ -93,7 +93,7 @@ Provide:
 3. Part of speech subtype (pos_subtype): Choose the most appropriate:
    - For nouns: animal, body_part, building_structure, clothing_accessory, concept_idea, emotion_feeling, food, beverage, furniture, vehicle, plant, plant_part, human, material_substance, nationality, natural_feature, personal_name, place_name, small_movable_object, temporal_name, time_period, tool_machine, unit_of_measurement
    - For verbs: physical_action, creation_action, destruction_action, mental_state, emotional_state, perception, communication, possession, existence, development, change, directional_movement, manner_movement
-   - For adjectives: color, definite_quantity, quality, sequence, shape
+   - For adjectives: size, color, shape, texture, personal_quality, condition, quality, aesthetic, importance, origin, purpose, material, definite_quantity, indefinite_quantity, duration, frequency, sequence
    - For adverbs: location, other, style
    - For other POS: use appropriate subtype or "other"
 

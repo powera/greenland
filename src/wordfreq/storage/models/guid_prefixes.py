@@ -67,6 +67,8 @@ SUBTYPE_GUID_PREFIXES = {
         "color": "A02",
         "shape": "A03",
         "texture": "A04",
+        "personal_quality": "A16",
+        "condition": "A17",
         "quality": "A05",
         "aesthetic": "A06",
         "importance": "A07",
