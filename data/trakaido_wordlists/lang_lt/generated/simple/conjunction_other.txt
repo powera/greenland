@@ -1,0 +1,19 @@
+[
+  {"en": "about", "lt": "apie"},
+  {"en": "and", "lt": "ir"},
+  {"en": "at", "lt": "prie"},
+  {"en": "because", "lt": "nes"},
+  {"en": "but", "lt": "bet"},
+  {"en": "for", "lt": "už"},
+  {"en": "from", "lt": "nuo"},
+  {"en": "if", "lt": "jei"},
+  {"en": "in", "lt": "į"},
+  {"en": "on", "lt": "ant"},
+  {"en": "or", "lt": "arba"},
+  {"en": "so", "lt": "tad"},
+  {"en": "that", "lt": "kad"},
+  {"en": "then", "lt": "tada"},
+  {"en": "to", "lt": "iki"},
+  {"en": "with", "lt": "su"},
+  {"en": "without", "lt": "be"}
+]

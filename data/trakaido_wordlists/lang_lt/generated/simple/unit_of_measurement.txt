@@ -1,0 +1,13 @@
+[
+  {"en": "celsius", "lt": "celsijaus"},
+  {"en": "centimeter", "lt": "centimetras"},
+  {"en": "degree", "lt": "laipsnis"},
+  {"en": "fahrenheit", "lt": "farenheitas"},
+  {"en": "gram", "lt": "gramas"},
+  {"en": "kilogram", "lt": "kilogramas"},
+  {"en": "kilometer", "lt": "kilometras"},
+  {"en": "liter", "lt": "litras"},
+  {"en": "meter", "lt": "metras"},
+  {"en": "mile", "lt": "mylia"},
+  {"en": "milliliter", "lt": "mililitras"}
+]

@@ -1,0 +1,12 @@
+[
+  {"en": "alone", "lt": "vienas"},
+  {"en": "badly", "lt": "blogai"},
+  {"en": "easily", "lt": "lengvai"},
+  {"en": "hard", "lt": "sunkiai"},
+  {"en": "loudly", "lt": "garsiai"},
+  {"en": "quickly", "lt": "greitai"},
+  {"en": "quietly", "lt": "tyliai"},
+  {"en": "slowly", "lt": "lėtai"},
+  {"en": "together", "lt": "kartu"},
+  {"en": "well", "lt": "gerai"}
+]

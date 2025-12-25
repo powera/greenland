@@ -1,0 +1,8 @@
+[
+  {"en": "maybe", "lt": "galbūt"},
+  {"en": "excuse me", "lt": "atsiprašau"},
+  {"en": "no", "lt": "ne"},
+  {"en": "please", "lt": "prašau"},
+  {"en": "thank you", "lt": "ačiū"},
+  {"en": "yes", "lt": "taip"}
+]

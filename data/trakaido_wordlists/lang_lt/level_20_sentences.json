@@ -1,0 +1,626 @@
+{
+  "metadata": {
+    "level": "level_20",
+    "total_sentences": 20,
+    "generated_date": "2025-08-01",
+    "description": "Simple sentences for Lithuanian learning level 20 - SVO and SVAO patterns only",
+    "version": "final",
+    "patterns_used": [
+      "SVO",
+      "SVAO"
+    ],
+    "llm_quality_control": false,
+    "sentence_library_used": true,
+    "generation_method": "library",
+    "dictionaries_used": {
+      "animals": 16,
+      "foods": 88,
+      "buildings": 17,
+      "colors": 8,
+      "objects": 26,
+      "humans": 63
+    }
+  },
+  "sentences": [
+    {
+      "english": "The black mouse played with a book.",
+      "lithuanian": "Juoda pelė žaidė su knyga.",
+      "subject": "mouse",
+      "verb": "play",
+      "object": "book",
+      "tense": "past",
+      "pattern": "SVO",
+      "llm_generated": true,
+      "library_generated": true,
+      "words_used": [
+        {
+          "english": "mouse",
+          "lithuanian": "pelė",
+          "type": "subject",
+          "guid": "N02_008"
+        },
+        {
+          "english": "play",
+          "lithuanian": "žaisti",
+          "type": "verb"
+        },
+        {
+          "english": "book",
+          "lithuanian": "knyga",
+          "type": "object",
+          "guid": "N08_005"
+        }
+      ]
+    },
+    {
+      "english": "The police officer has a yellow cheese.",
+      "lithuanian": "Policininkas turi geltoną sūrį.",
+      "subject": "police officer",
+      "verb": "have",
+      "object": "cheese",
+      "tense": "present",
+      "pattern": "SVO",
+      "llm_generated": true,
+      "library_generated": true,
+      "words_used": [
+        {
+          "english": "police officer",
+          "lithuanian": "policininkas",
+          "type": "subject",
+          "guid": "N01_006"
+        },
+        {
+          "english": "have",
+          "lithuanian": "turėti",
+          "type": "verb"
+        },
+        {
+          "english": "cheese",
+          "lithuanian": "sūris",
+          "type": "object",
+          "guid": "N06_010"
+        }
+      ]
+    },
+    {
+      "english": "The pilot already lived in Vilnius.",
+      "lithuanian": "Pilotas jau gyveno Vilniuje.",
+      "subject": "pilot",
+      "verb": "live",
+      "object": "already",
+      "tense": "past",
+      "pattern": "SVO",
+      "llm_generated": true,
+      "library_generated": true,
+      "words_used": [
+        {
+          "english": "pilot",
+          "lithuanian": "pilotas",
+          "type": "subject",
+          "guid": "N01_010"
+        },
+        {
+          "english": "live",
+          "lithuanian": "gyventi",
+          "type": "verb"
+        },
+        {
+          "english": "already",
+          "lithuanian": "jau",
+          "type": "object",
+          "guid": "D07_010"
+        }
+      ]
+    },
+    {
+      "english": "My niece often works.",
+      "lithuanian": "Mano dukterėčia dažnai dirba.",
+      "subject": "niece",
+      "verb": "work",
+      "object": "often",
+      "tense": "present",
+      "pattern": "SVO",
+      "llm_generated": true,
+      "library_generated": true,
+      "words_used": [
+        {
+          "english": "niece",
+          "lithuanian": "dukterėčia",
+          "type": "subject",
+          "guid": "N01_050"
+        },
+        {
+          "english": "work",
+          "lithuanian": "dirbti",
+          "type": "verb"
+        },
+        {
+          "english": "often",
+          "lithuanian": "dažnai",
+          "type": "object",
+          "guid": "D07_004"
+        }
+      ]
+    },
+    {
+      "english": "My fiancée will give me a black skirt.",
+      "lithuanian": "Mano sužadėtinė duos man juodą sijoną.",
+      "subject": "fiancée",
+      "verb": "give",
+      "object": "skirt",
+      "tense": "future",
+      "pattern": "SVO",
+      "llm_generated": true,
+      "library_generated": true,
+      "words_used": [
+        {
+          "english": "fiancée",
+          "lithuanian": "sužadėtinė",
+          "type": "subject",
+          "guid": "N01_052"
+        },
+        {
+          "english": "give",
+          "lithuanian": "duoti",
+          "type": "verb"
+        },
+        {
+          "english": "skirt",
+          "lithuanian": " sijonas",
+          "type": "object",
+          "guid": "N09_013"
+        }
+      ]
+    },
+    {
+      "english": "They lived there.",
+      "lithuanian": "Jie gyveno ten.",
+      "subject": "they",
+      "verb": "live",
+      "object": "there",
+      "tense": "past",
+      "pattern": "SVO",
+      "llm_generated": true,
+      "library_generated": true,
+      "words_used": [
+        {
+          "english": "they",
+          "lithuanian": "jie",
+          "type": "subject",
+          "guid": "PRON_006"
+        },
+        {
+          "english": "live",
+          "lithuanian": "gyventi",
+          "type": "verb"
+        },
+        {
+          "english": "there",
+          "lithuanian": "ten",
+          "type": "object",
+          "guid": "D07_007"
+        }
+      ]
+    },
+    {
+      "english": "The uncle will find out about a good uncle.",
+      "lithuanian": "Dėdė sužinos apie gerą dėdę.",
+      "subject": "uncle",
+      "verb": "know",
+      "object": "uncle",
+      "tense": "future",
+      "pattern": "SVO",
+      "llm_generated": true,
+      "library_generated": true,
+      "words_used": [
+        {
+          "english": "uncle",
+          "lithuanian": "dėdė",
+          "type": "subject",
+          "guid": "N01_038"
+        },
+        {
+          "english": "know",
+          "lithuanian": "žinoti",
+          "type": "verb"
+        },
+        {
+          "english": "uncle",
+          "lithuanian": "dėdė",
+          "type": "object",
+          "guid": "N01_038"
+        }
+      ]
+    },
+    {
+      "english": "The cow will play with the black speaker.",
+      "lithuanian": "Karvė žais su juodu garsiakalbiu.",
+      "subject": "cow",
+      "verb": "play",
+      "object": "speaker",
+      "tense": "future",
+      "pattern": "SVO",
+      "llm_generated": true,
+      "library_generated": true,
+      "words_used": [
+        {
+          "english": "cow",
+          "lithuanian": "karvė",
+          "type": "subject",
+          "guid": "N02_005"
+        },
+        {
+          "english": "play",
+          "lithuanian": "žaisti",
+          "type": "verb"
+        },
+        {
+          "english": "speaker",
+          "lithuanian": "garsiakalbis",
+          "type": "object",
+          "guid": "N12_022"
+        }
+      ]
+    },
+    {
+      "english": "The doctor took the black box.",
+      "lithuanian": "Gydytojas paėmė juodą dėžę.",
+      "subject": "doctor",
+      "verb": "take",
+      "object": "box",
+      "tense": "past",
+      "pattern": "SVO",
+      "llm_generated": true,
+      "library_generated": true,
+      "words_used": [
+        {
+          "english": "doctor",
+          "lithuanian": "gydytojas",
+          "type": "subject",
+          "guid": "N01_002"
+        },
+        {
+          "english": "take",
+          "lithuanian": "imti",
+          "type": "verb"
+        },
+        {
+          "english": "box",
+          "lithuanian": "dėžė",
+          "type": "object",
+          "guid": "N08_013"
+        }
+      ]
+    },
+    {
+      "english": "My boyfriend took a good coding course.",
+      "lithuanian": "Mano vaikinas lankė gerą programavimo kursą.",
+      "subject": "boyfriend",
+      "verb": "take",
+      "object": "coding",
+      "tense": "past",
+      "pattern": "SVO",
+      "llm_generated": true,
+      "library_generated": true,
+      "words_used": [
+        {
+          "english": "boyfriend",
+          "lithuanian": "vaikinas",
+          "type": "subject",
+          "guid": "N01_053"
+        },
+        {
+          "english": "take",
+          "lithuanian": "imti",
+          "type": "verb"
+        },
+        {
+          "english": "coding",
+          "lithuanian": "koduojimas",
+          "type": "object",
+          "guid": "N12_032"
+        }
+      ]
+    },
+    {
+      "english": "Grandfather is already here.",
+      "lithuanian": "Senelis jau yra čia.",
+      "subject": "grandfather",
+      "verb": "be",
+      "object": "already",
+      "tense": "present",
+      "pattern": "SVO",
+      "llm_generated": true,
+      "library_generated": true,
+      "words_used": [
+        {
+          "english": "grandfather",
+          "lithuanian": "senelis",
+          "type": "subject",
+          "guid": "N01_043"
+        },
+        {
+          "english": "be",
+          "lithuanian": "būti",
+          "type": "verb"
+        },
+        {
+          "english": "already",
+          "lithuanian": "jau",
+          "type": "object",
+          "guid": "D07_010"
+        }
+      ]
+    },
+    {
+      "english": "My sister listens to her partner.",
+      "lithuanian": "Mano sesuo klauso savo partnerio.",
+      "subject": "sister",
+      "verb": "listen",
+      "object": "partner",
+      "tense": "present",
+      "pattern": "SVO",
+      "llm_generated": true,
+      "library_generated": true,
+      "words_used": [
+        {
+          "english": "sister",
+          "lithuanian": "sesuo",
+          "type": "subject",
+          "guid": "N01_035"
+        },
+        {
+          "english": "listen",
+          "lithuanian": "klausyti",
+          "type": "verb"
+        },
+        {
+          "english": "partner",
+          "lithuanian": "partneris",
+          "type": "object",
+          "guid": "N01_041"
+        }
+      ]
+    },
+    {
+      "english": "The accountant will want a ripe peach.",
+      "lithuanian": "Buhalteris norės prinokusio persiko.",
+      "subject": "accountant",
+      "verb": "want",
+      "object": "peach",
+      "tense": "future",
+      "pattern": "SVO",
+      "llm_generated": true,
+      "library_generated": true,
+      "words_used": [
+        {
+          "english": "accountant",
+          "lithuanian": "buhalteris",
+          "type": "subject",
+          "guid": "N01_024"
+        },
+        {
+          "english": "want",
+          "lithuanian": "norėti",
+          "type": "verb"
+        },
+        {
+          "english": "peach",
+          "lithuanian": "perskas",
+          "type": "object",
+          "guid": "N06_049"
+        }
+      ]
+    },
+    {
+      "english": "The secretary will know the farmer.",
+      "lithuanian": "Sekretorė pažins ūkininką.",
+      "subject": "secretary",
+      "verb": "know",
+      "object": "farmer",
+      "tense": "future",
+      "pattern": "SVO",
+      "llm_generated": true,
+      "library_generated": true,
+      "words_used": [
+        {
+          "english": "secretary",
+          "lithuanian": "sekretorius",
+          "type": "subject",
+          "guid": "N01_025"
+        },
+        {
+          "english": "know",
+          "lithuanian": "žinoti",
+          "type": "verb"
+        },
+        {
+          "english": "farmer",
+          "lithuanian": "ūkininkas",
+          "type": "object",
+          "guid": "N01_009"
+        }
+      ]
+    },
+    {
+      "english": "The photographer will give the salmon a white tag.",
+      "lithuanian": "Fotografas pridės baltą žymeklį lašišai.",
+      "subject": "photographer",
+      "verb": "give",
+      "object": "salmon",
+      "tense": "future",
+      "pattern": "SVO",
+      "llm_generated": true,
+      "library_generated": true,
+      "words_used": [
+        {
+          "english": "photographer",
+          "lithuanian": "fotografas",
+          "type": "subject",
+          "guid": "N01_021"
+        },
+        {
+          "english": "give",
+          "lithuanian": "duoti",
+          "type": "verb"
+        },
+        {
+          "english": "salmon",
+          "lithuanian": "lašiša",
+          "type": "object",
+          "guid": "N06_079"
+        }
+      ]
+    },
+    {
+      "english": "My niece will work there tomorrow.",
+      "lithuanian": "Mano dukterėčia dirbs ten rytoj.",
+      "subject": "niece",
+      "verb": "work",
+      "object": "there",
+      "tense": "future",
+      "pattern": "SVO",
+      "llm_generated": true,
+      "library_generated": true,
+      "words_used": [
+        {
+          "english": "niece",
+          "lithuanian": "dukterėčia",
+          "type": "subject",
+          "guid": "N01_050"
+        },
+        {
+          "english": "work",
+          "lithuanian": "dirbti",
+          "type": "verb"
+        },
+        {
+          "english": "there",
+          "lithuanian": "ten",
+          "type": "object",
+          "guid": "D07_007"
+        }
+      ]
+    },
+    {
+      "english": "My spouse will take the monitor.",
+      "lithuanian": "Mano sutuoktinis/sutuoktinė paims monitorių.",
+      "subject": "spouse",
+      "verb": "take",
+      "object": "monitor",
+      "tense": "future",
+      "pattern": "SVO",
+      "llm_generated": true,
+      "library_generated": true,
+      "words_used": [
+        {
+          "english": "spouse",
+          "lithuanian": "sutuoktinis",
+          "type": "subject",
+          "guid": "N01_042"
+        },
+        {
+          "english": "take",
+          "lithuanian": "imti",
+          "type": "verb"
+        },
+        {
+          "english": "monitor",
+          "lithuanian": "skreenis",
+          "type": "object",
+          "guid": "N12_017"
+        }
+      ]
+    },
+    {
+      "english": "The police officer worked here.",
+      "lithuanian": "Policininkas dirbo čia.",
+      "subject": "police officer",
+      "verb": "work",
+      "object": "here",
+      "tense": "past",
+      "pattern": "SVO",
+      "llm_generated": true,
+      "library_generated": true,
+      "words_used": [
+        {
+          "english": "police officer",
+          "lithuanian": "policininkas",
+          "type": "subject",
+          "guid": "N01_006"
+        },
+        {
+          "english": "work",
+          "lithuanian": "dirbti",
+          "type": "verb"
+        },
+        {
+          "english": "here",
+          "lithuanian": "čia",
+          "type": "object",
+          "guid": "D07_006"
+        }
+      ]
+    },
+    {
+      "english": "She ate the sugar.",
+      "lithuanian": "Ji sugrų suvalgė.",
+      "subject": "she",
+      "verb": "eat",
+      "object": "sugar",
+      "tense": "past",
+      "pattern": "SVO",
+      "llm_generated": true,
+      "library_generated": true,
+      "words_used": [
+        {
+          "english": "she",
+          "lithuanian": "ji",
+          "type": "subject",
+          "guid": "PRON_004"
+        },
+        {
+          "english": "eat",
+          "lithuanian": "valgyti",
+          "type": "verb"
+        },
+        {
+          "english": "sugar",
+          "lithuanian": "cukrus",
+          "type": "object",
+          "guid": "N06_012"
+        }
+      ]
+    },
+    {
+      "english": "The electrician likes black tea.",
+      "lithuanian": "Elektrikas mėgsta juodą arbatą.",
+      "subject": "electrician",
+      "verb": "like",
+      "object": "tea",
+      "tense": "present",
+      "pattern": "SVO",
+      "llm_generated": true,
+      "library_generated": true,
+      "words_used": [
+        {
+          "english": "electrician",
+          "lithuanian": "elektrikas",
+          "type": "subject",
+          "guid": "N01_013"
+        },
+        {
+          "english": "like",
+          "lithuanian": "mėgti",
+          "type": "verb"
+        },
+        {
+          "english": "tea",
+          "lithuanian": "arbata",
+          "type": "object",
+          "guid": "N06_004"
+        }
+      ]
+    }
+  ]
+}

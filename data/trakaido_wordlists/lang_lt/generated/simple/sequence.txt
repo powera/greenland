@@ -1,0 +1,12 @@
+[
+  {"en": "eighth", "lt": "aštuntas"},
+  {"en": "fifth", "lt": "penktas"},
+  {"en": "first", "lt": "pirmas"},
+  {"en": "fourth", "lt": "ketvirtas"},
+  {"en": "ninth", "lt": "devintas"},
+  {"en": "second", "lt": "antras"},
+  {"en": "seventh", "lt": "septintas"},
+  {"en": "sixth", "lt": "šeštas"},
+  {"en": "tenth", "lt": "dešimtas"},
+  {"en": "third", "lt": "trečias"}
+]

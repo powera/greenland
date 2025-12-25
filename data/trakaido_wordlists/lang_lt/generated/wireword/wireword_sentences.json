@@ -1,0 +1,1484 @@
+{
+  "language": "lt",
+  "generated_date": "2025-12-22T14:40:20.528253",
+  "sentences": [
+    {
+      "sentence_id": 1,
+      "translations": {
+        "en": "I saw the bank.",
+        "lt": "Aš mačiau banką."
+      },
+      "linked_words": [
+        "N07_008"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 2,
+      "translations": {
+        "en": "The bank is here.",
+        "lt": "Bankas yra čia."
+      },
+      "linked_words": [
+        "N07_008"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 3,
+      "translations": {
+        "en": "I will go to the fire station.",
+        "lt": "Aš eisiu į gaisrinę."
+      },
+      "linked_words": [
+        "N07_011"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 4,
+      "translations": {
+        "en": "I worked at the fire station.",
+        "lt": "Aš dirbau gaisrinėje."
+      },
+      "linked_words": [
+        "N07_011"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 5,
+      "translations": {
+        "en": "I see the hospital.",
+        "lt": "Aš matau ligoninę."
+      },
+      "linked_words": [
+        "N07_003"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 6,
+      "translations": {
+        "en": "I work at the hospital.",
+        "lt": "Aš dirbu ligoninėje."
+      },
+      "linked_words": [
+        "N07_003"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 7,
+      "translations": {
+        "en": "I saw the hotel.",
+        "lt": "Aš mačiau viešbutį."
+      },
+      "linked_words": [
+        "N07_007"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 8,
+      "translations": {
+        "en": "I lived at the hotel.",
+        "lt": "Aš gyvenau viešbutyje."
+      },
+      "linked_words": [
+        "N07_007"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 9,
+      "translations": {
+        "en": "I see the house.",
+        "lt": "Aš matau namą."
+      },
+      "linked_words": [
+        "N07_001"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 10,
+      "translations": {
+        "en": "I live in a house.",
+        "lt": "Aš gyvenu name."
+      },
+      "linked_words": [
+        "N07_001"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 11,
+      "translations": {
+        "en": "I will go to the library.",
+        "lt": "Aš eisiu į biblioteką."
+      },
+      "linked_words": [
+        "N07_009"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 12,
+      "translations": {
+        "en": "I worked at the library.",
+        "lt": "Aš dirbau bibliotekoje."
+      },
+      "linked_words": [
+        "N07_009"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 13,
+      "translations": {
+        "en": "I saw the museum.",
+        "lt": "Aš mačiau muziejų."
+      },
+      "linked_words": [
+        "N07_010"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 14,
+      "translations": {
+        "en": "I liked the museum.",
+        "lt": "Aš mėgau muziejų."
+      },
+      "linked_words": [
+        "N07_010"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 15,
+      "translations": {
+        "en": "I will go to the restaurant.",
+        "lt": "Aš eisiu į restoraną."
+      },
+      "linked_words": [
+        "N07_006"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 16,
+      "translations": {
+        "en": "I ate at the restaurant.",
+        "lt": "Aš valgiau restorane."
+      },
+      "linked_words": [
+        "N07_006"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 17,
+      "translations": {
+        "en": "I go to school.",
+        "lt": "Aš einu į mokyklą."
+      },
+      "linked_words": [
+        "N07_002"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 18,
+      "translations": {
+        "en": "I worked at the school.",
+        "lt": "Aš dirbau mokykloje."
+      },
+      "linked_words": [
+        "N07_002"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 19,
+      "translations": {
+        "en": "I see the store.",
+        "lt": "Aš matau parduotuvę."
+      },
+      "linked_words": [
+        "N07_005"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 20,
+      "translations": {
+        "en": "I worked at the store.",
+        "lt": "Aš dirbau parduotuvėje."
+      },
+      "linked_words": [
+        "N07_005"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 21,
+      "translations": {
+        "en": "I saw the dress.",
+        "lt": "Aš mačiau suknelę."
+      },
+      "linked_words": [
+        "N09_003"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 22,
+      "translations": {
+        "en": "I bought a dress.",
+        "lt": "Aš pirkau suknelę."
+      },
+      "linked_words": [
+        "N09_003"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 23,
+      "translations": {
+        "en": "I have gloves.",
+        "lt": "Aš turiu pirštines."
+      },
+      "linked_words": [
+        "N09_009"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 24,
+      "translations": {
+        "en": "I will buy gloves.",
+        "lt": "Aš pirksiu pirštines."
+      },
+      "linked_words": [
+        "N09_009"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 25,
+      "translations": {
+        "en": "I had a hat.",
+        "lt": "Aš turėjau kepurę."
+      },
+      "linked_words": [
+        "N09_008"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 26,
+      "translations": {
+        "en": "I like the hat.",
+        "lt": "Aš mėgstu kepurę."
+      },
+      "linked_words": [
+        "N09_008"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 27,
+      "translations": {
+        "en": "I have a jacket.",
+        "lt": "Aš turiu striukę."
+      },
+      "linked_words": [
+        "N09_005"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 28,
+      "translations": {
+        "en": "I bought a jacket.",
+        "lt": "Aš pirkau striukę."
+      },
+      "linked_words": [
+        "N09_005"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 29,
+      "translations": {
+        "en": "I have pants.",
+        "lt": "Aš turiu kelnes."
+      },
+      "linked_words": [
+        "N09_002"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 30,
+      "translations": {
+        "en": "I will buy pants.",
+        "lt": "Aš pirksiu kelnes."
+      },
+      "linked_words": [
+        "N09_002"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 31,
+      "translations": {
+        "en": "I had a shirt.",
+        "lt": "Aš turėjau marškinius."
+      },
+      "linked_words": [
+        "N09_001"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 32,
+      "translations": {
+        "en": "I liked the shirt.",
+        "lt": "Aš mėgau marškinius."
+      },
+      "linked_words": [
+        "N09_001"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 33,
+      "translations": {
+        "en": "I have shoes.",
+        "lt": "Aš turiu batus."
+      },
+      "linked_words": [
+        "N09_006"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 34,
+      "translations": {
+        "en": "I bought shoes.",
+        "lt": "Aš pirkau batus."
+      },
+      "linked_words": [
+        "N09_006"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 35,
+      "translations": {
+        "en": "I had socks.",
+        "lt": "Aš turėjau kojines."
+      },
+      "linked_words": [
+        "N09_007"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 36,
+      "translations": {
+        "en": "I will buy socks.",
+        "lt": "Aš pirksiu kojines."
+      },
+      "linked_words": [
+        "N09_007"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 37,
+      "translations": {
+        "en": "I have a sweater.",
+        "lt": "Aš turiu megztinį."
+      },
+      "linked_words": [
+        "N09_011"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 38,
+      "translations": {
+        "en": "I liked the sweater.",
+        "lt": "Aš mėgau megztinį."
+      },
+      "linked_words": [
+        "N09_011"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 39,
+      "translations": {
+        "en": "I have underwear.",
+        "lt": "Aš turiu apatinius."
+      },
+      "linked_words": [
+        "N09_012"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 40,
+      "translations": {
+        "en": "I bought underwear.",
+        "lt": "Aš pirkau apatinius."
+      },
+      "linked_words": [
+        "N09_012"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 41,
+      "translations": {
+        "en": "I ate an apple.",
+        "lt": "Aš valgiau obuolį."
+      },
+      "linked_words": [
+        "N06_015"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 42,
+      "translations": {
+        "en": "I like apples.",
+        "lt": "Aš mėgstu obuolius."
+      },
+      "linked_words": [
+        "N06_015"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 43,
+      "translations": {
+        "en": "I will eat a banana.",
+        "lt": "Aš valgysiu bananą."
+      },
+      "linked_words": [
+        "N06_016"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 44,
+      "translations": {
+        "en": "I bought a banana.",
+        "lt": "Aš pirkau bananą."
+      },
+      "linked_words": [
+        "N06_016"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 45,
+      "translations": {
+        "en": "I drank beer.",
+        "lt": "Aš gėriau alų."
+      },
+      "linked_words": [
+        "N06_005"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 46,
+      "translations": {
+        "en": "I will buy beer.",
+        "lt": "Aš pirksiu alų."
+      },
+      "linked_words": [
+        "N06_005"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 47,
+      "translations": {
+        "en": "I eat bread.",
+        "lt": "Aš valgau duoną."
+      },
+      "linked_words": [
+        "N06_001"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 48,
+      "translations": {
+        "en": "I bought bread.",
+        "lt": "Aš pirkau duoną."
+      },
+      "linked_words": [
+        "N06_001"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 49,
+      "translations": {
+        "en": "I drink coffee.",
+        "lt": "Aš geriu kavą."
+      },
+      "linked_words": [
+        "N06_003"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 50,
+      "translations": {
+        "en": "I liked the coffee.",
+        "lt": "Aš mėgau kavą."
+      },
+      "linked_words": [
+        "N06_003"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 51,
+      "translations": {
+        "en": "I ate meat.",
+        "lt": "Aš valgiau mėsą."
+      },
+      "linked_words": [
+        "N06_007"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 52,
+      "translations": {
+        "en": "I will buy meat.",
+        "lt": "Aš pirksiu mėsą."
+      },
+      "linked_words": [
+        "N06_007"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 53,
+      "translations": {
+        "en": "I ate a potato.",
+        "lt": "Aš valgiau bulvę."
+      },
+      "linked_words": [
+        "N06_014"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 54,
+      "translations": {
+        "en": "I like potatoes.",
+        "lt": "Aš mėgstu bulves."
+      },
+      "linked_words": [
+        "N06_014"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 55,
+      "translations": {
+        "en": "I eat rice.",
+        "lt": "Aš valgau ryžius."
+      },
+      "linked_words": [
+        "N06_020"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 56,
+      "translations": {
+        "en": "I liked the rice.",
+        "lt": "Aš mėgau ryžius."
+      },
+      "linked_words": [
+        "N06_020"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 57,
+      "translations": {
+        "en": "I have salt.",
+        "lt": "Aš turiu druskos."
+      },
+      "linked_words": [
+        "N06_013"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 58,
+      "translations": {
+        "en": "I bought salt.",
+        "lt": "Aš pirkau druskos."
+      },
+      "linked_words": [
+        "N06_013"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 59,
+      "translations": {
+        "en": "I will eat soup.",
+        "lt": "Aš valgysiu sriubą."
+      },
+      "linked_words": [
+        "N06_021"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 60,
+      "translations": {
+        "en": "I like soup.",
+        "lt": "Aš mėgstu sriubą."
+      },
+      "linked_words": [
+        "N06_021"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 61,
+      "translations": {
+        "en": "I have sugar.",
+        "lt": "Aš turiu cukraus."
+      },
+      "linked_words": [
+        "N06_012"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 62,
+      "translations": {
+        "en": "I bought sugar.",
+        "lt": "Aš pirkau cukraus."
+      },
+      "linked_words": [
+        "N06_012"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 63,
+      "translations": {
+        "en": "I drank tea.",
+        "lt": "Aš gėriau arbatą."
+      },
+      "linked_words": [
+        "N06_004"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 64,
+      "translations": {
+        "en": "I like tea.",
+        "lt": "Aš mėgstu arbatą."
+      },
+      "linked_words": [
+        "N06_004"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 65,
+      "translations": {
+        "en": "I ate a tomato.",
+        "lt": "Aš valgiau pomidorą."
+      },
+      "linked_words": [
+        "N06_018"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 66,
+      "translations": {
+        "en": "I will buy a tomato.",
+        "lt": "Aš pirksiu pomidorą."
+      },
+      "linked_words": [
+        "N06_018"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 67,
+      "translations": {
+        "en": "I drink water.",
+        "lt": "Aš geriu vandenį."
+      },
+      "linked_words": [
+        "N06_002"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 68,
+      "translations": {
+        "en": "I wanted water.",
+        "lt": "Aš norėjau vandens."
+      },
+      "linked_words": [
+        "N06_002"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 69,
+      "translations": {
+        "en": "I drank wine.",
+        "lt": "Aš gėriau vyną."
+      },
+      "linked_words": [
+        "N06_006"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 70,
+      "translations": {
+        "en": "I will buy wine.",
+        "lt": "Aš pirksiu vyną."
+      },
+      "linked_words": [
+        "N06_006"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 74,
+      "translations": {
+        "en": "She eats a banana every morning.",
+        "lt": "Ji kas rytą suvalgo bananą."
+      },
+      "linked_words": [
+        "V01_006",
+        "N06_016",
+        "N25_004",
+        "A11_002"
+      ],
+      "source": "zvirblis_N06_016",
+      "minimum_level": 13
+    },
+    {
+      "sentence_id": 76,
+      "translations": {
+        "en": "The sweater is good.",
+        "lt": "Megztinis yra geras."
+      },
+      "linked_words": [
+        "N09_011",
+        "A05_015"
+      ],
+      "source": "pattern:the_noun_is_adjective"
+    },
+    {
+      "sentence_id": 77,
+      "translations": {
+        "en": "The musician is good.",
+        "lt": "Muzikas yra geras."
+      },
+      "linked_words": [
+        "N01_017",
+        "A05_015"
+      ],
+      "source": "pattern:the_noun_is_adjective"
+    },
+    {
+      "sentence_id": 78,
+      "translations": {
+        "en": "My anyone is black.",
+        "lt": "Mano bet kas yra juodas."
+      },
+      "linked_words": [
+        "N01_062",
+        "A02_001"
+      ],
+      "source": "pattern:my_noun_is_color"
+    },
+    {
+      "sentence_id": 79,
+      "translations": {
+        "en": "My flower is black.",
+        "lt": "Mano gėlė yra juoda."
+      },
+      "linked_words": [
+        "N05_002",
+        "A02_001"
+      ],
+      "source": "pattern:my_noun_is_color"
+    },
+    {
+      "sentence_id": 80,
+      "translations": {
+        "en": "I have one hundred ring.",
+        "lt": "Aš turiu šimtą žiedų."
+      },
+      "linked_words": [
+        "A11_029",
+        "N09_017"
+      ],
+      "source": "pattern:i_have_number_noun"
+    },
+    {
+      "sentence_id": 81,
+      "translations": {
+        "en": "I have one thousand bird.",
+        "lt": "Aš turiu tūkstantį paukščių."
+      },
+      "linked_words": [
+        "A11_030",
+        "N02_003"
+      ],
+      "source": "pattern:i_have_number_noun"
+    },
+    {
+      "sentence_id": 82,
+      "translations": {
+        "en": "I want to read.",
+        "lt": "Aš noriu skaityti."
+      },
+      "linked_words": [
+        "V04_003"
+      ],
+      "source": "pattern:i_want_to_verb"
+    },
+    {
+      "sentence_id": 83,
+      "translations": {
+        "en": "I want to be.",
+        "lt": "Aš noriu būti."
+      },
+      "linked_words": [
+        "V06_001"
+      ],
+      "source": "pattern:i_want_to_verb"
+    },
+    {
+      "sentence_id": 84,
+      "translations": {
+        "en": "The fork is in the house.",
+        "lt": "Šakutė yra name."
+      },
+      "linked_words": [
+        "N08_001",
+        "N07_001"
+      ],
+      "source": "pattern:object_is_in_place"
+    },
+    {
+      "sentence_id": 85,
+      "translations": {
+        "en": "The fork is in the school.",
+        "lt": "Šakutė yra mokykloje."
+      },
+      "linked_words": [
+        "N08_001",
+        "N07_002"
+      ],
+      "source": "pattern:object_is_in_place"
+    },
+    {
+      "sentence_id": 101,
+      "translations": {
+        "en": "The fork is in the apartment.",
+        "lt": "Šakutė yra bute."
+      },
+      "linked_words": [
+        "N08_001",
+        "N07_026"
+      ],
+      "source": "pattern:object_is_in_place"
+    },
+    {
+      "sentence_id": 184,
+      "translations": {
+        "en": "I like bread.",
+        "lt": "Man patinka duona."
+      },
+      "linked_words": [
+        "N06_001"
+      ],
+      "source": "pattern:i_like_food"
+    },
+    {
+      "sentence_id": 185,
+      "translations": {
+        "en": "I like water.",
+        "lt": "Man patinka vanduo."
+      },
+      "linked_words": [
+        "N06_002"
+      ],
+      "source": "pattern:i_like_food"
+    },
+    {
+      "sentence_id": 220,
+      "translations": {
+        "en": "Where is the fork?",
+        "lt": "Kur yra šakutė?"
+      },
+      "linked_words": [
+        "N08_001"
+      ],
+      "source": "pattern:where_is_object"
+    },
+    {
+      "sentence_id": 221,
+      "translations": {
+        "en": "Where is the spoon?",
+        "lt": "Kur yra šaukštas?"
+      },
+      "linked_words": [
+        "N08_002"
+      ],
+      "source": "pattern:where_is_object"
+    },
+    {
+      "sentence_id": 225,
+      "translations": {
+        "en": "My fork is black.",
+        "lt": "Mano šakutė yra juoda."
+      },
+      "linked_words": [
+        "N08_001",
+        "A02_001"
+      ],
+      "source": "pattern:my_object_is_color"
+    },
+    {
+      "sentence_id": 226,
+      "translations": {
+        "en": "My fork is white.",
+        "lt": "Mano šakutė yra balta."
+      },
+      "linked_words": [
+        "N08_001",
+        "A02_002"
+      ],
+      "source": "pattern:my_object_is_color"
+    },
+    {
+      "sentence_id": 230,
+      "translations": {
+        "en": "What is this fork?",
+        "lt": "Kas yra ši šakutė?"
+      },
+      "linked_words": [
+        "N08_001"
+      ],
+      "source": "pattern:what_is_this_object"
+    },
+    {
+      "sentence_id": 231,
+      "translations": {
+        "en": "What is this spoon?",
+        "lt": "Koks yra šis šaukštas?"
+      },
+      "linked_words": [
+        "N08_002"
+      ],
+      "source": "pattern:what_is_this_object"
+    },
+    {
+      "sentence_id": 240,
+      "translations": {
+        "en": "This is a fork.",
+        "lt": "Tai yra šakutė."
+      },
+      "linked_words": [
+        "N08_001"
+      ],
+      "source": "pattern:this_is_object"
+    },
+    {
+      "sentence_id": 241,
+      "translations": {
+        "en": "This is a spoon.",
+        "lt": "Tai yra šaukštas."
+      },
+      "linked_words": [
+        "N08_002"
+      ],
+      "source": "pattern:this_is_object"
+    },
+    {
+      "sentence_id": 244,
+      "translations": {
+        "en": "This is a book.",
+        "lt": "Tai yra knyga."
+      },
+      "linked_words": [
+        "N08_005"
+      ],
+      "source": "pattern:this_is_object"
+    },
+    {
+      "sentence_id": 246,
+      "translations": {
+        "en": "I like water.",
+        "lt": "Man patinka vanduo."
+      },
+      "linked_words": [
+        "N06_002"
+      ],
+      "source": "pattern:i_like_food"
+    },
+    {
+      "sentence_id": 250,
+      "translations": {
+        "en": "I need a car.",
+        "lt": "Man reikia automobilio."
+      },
+      "linked_words": [
+        "N12_001"
+      ],
+      "source": "pattern:i_need_tool"
+    },
+    {
+      "sentence_id": 251,
+      "translations": {
+        "en": "I need a bus.",
+        "lt": "Man reikia autobuso."
+      },
+      "linked_words": [
+        "N12_002"
+      ],
+      "source": "pattern:i_need_tool"
+    },
+    {
+      "sentence_id": 255,
+      "translations": {
+        "en": "The fork is black.",
+        "lt": "Šakutė yra juoda."
+      },
+      "linked_words": [
+        "N08_001",
+        "A02_001"
+      ],
+      "source": "pattern:object_is_color"
+    },
+    {
+      "sentence_id": 256,
+      "translations": {
+        "en": "The fork is white.",
+        "lt": "Šakutė yra balta."
+      },
+      "linked_words": [
+        "N08_001",
+        "A02_002"
+      ],
+      "source": "pattern:object_is_color"
+    },
+    {
+      "sentence_id": 265,
+      "translations": {
+        "en": "How many forks are there?",
+        "lt": "Kiek yra šakučių?"
+      },
+      "linked_words": [
+        "N08_001"
+      ],
+      "source": "pattern:how_many_objects"
+    },
+    {
+      "sentence_id": 266,
+      "translations": {
+        "en": "How many spoons?",
+        "lt": "Kiek šaukštų?"
+      },
+      "linked_words": [
+        "N08_002"
+      ],
+      "source": "pattern:how_many_objects"
+    },
+    {
+      "sentence_id": 270,
+      "translations": {
+        "en": "I want a shirt.",
+        "lt": "Aš noriu marškinių."
+      },
+      "linked_words": [
+        "N09_001"
+      ],
+      "source": "pattern:i_want_clothing"
+    },
+    {
+      "sentence_id": 271,
+      "translations": {
+        "en": "I want pants.",
+        "lt": "Aš noriu kelnių."
+      },
+      "linked_words": [
+        "N09_002"
+      ],
+      "source": "pattern:i_want_clothing"
+    },
+    {
+      "sentence_id": 275,
+      "translations": {
+        "en": "Where is the house?",
+        "lt": "Kur yra namas?"
+      },
+      "linked_words": [
+        "N07_001"
+      ],
+      "source": "pattern:where_is_building"
+    },
+    {
+      "sentence_id": 276,
+      "translations": {
+        "en": "Where is the school?",
+        "lt": "Kur yra mokykla?"
+      },
+      "linked_words": [
+        "N07_002"
+      ],
+      "source": "pattern:where_is_building"
+    },
+    {
+      "sentence_id": 280,
+      "translations": {
+        "en": "I eat bread.",
+        "lt": "Aš valgau duoną."
+      },
+      "linked_words": [
+        "N06_001"
+      ],
+      "source": "pattern:i_eat_food"
+    },
+    {
+      "sentence_id": 281,
+      "translations": {
+        "en": "I drink water.",
+        "lt": "Aš geriu vandenį."
+      },
+      "linked_words": [
+        "N06_002"
+      ],
+      "source": "pattern:i_eat_food"
+    },
+    {
+      "sentence_id": 285,
+      "translations": {
+        "en": "The dog is hardworking.",
+        "lt": "Šuo yra darbštus."
+      },
+      "linked_words": [
+        "N02_001",
+        "A05_008"
+      ],
+      "source": "pattern:the_animal_is_quality"
+    },
+    {
+      "sentence_id": 286,
+      "translations": {
+        "en": "The dog is dishonest.",
+        "lt": "Šuo yra nesąžiningas."
+      },
+      "linked_words": [
+        "N02_001",
+        "A05_012"
+      ],
+      "source": "pattern:the_animal_is_quality"
+    },
+    {
+      "sentence_id": 290,
+      "translations": {
+        "en": "I am hardworking.",
+        "lt": "Aš esu darbštus."
+      },
+      "linked_words": [
+        "A05_008"
+      ],
+      "source": "pattern:i_am_quality"
+    },
+    {
+      "sentence_id": 291,
+      "translations": {
+        "en": "I am dishonest.",
+        "lt": "Aš esu nesąžiningas."
+      },
+      "linked_words": [
+        "A05_012"
+      ],
+      "source": "pattern:i_am_quality"
+    },
+    {
+      "sentence_id": 295,
+      "translations": {
+        "en": "I feel happy.",
+        "lt": "Aš jaučiuosi laimingas."
+      },
+      "linked_words": [
+        "N23_001"
+      ],
+      "source": "pattern:i_feel_emotion"
+    },
+    {
+      "sentence_id": 296,
+      "translations": {
+        "en": "I feel sad.",
+        "lt": "Aš jaučiuosi liūdnas."
+      },
+      "linked_words": [
+        "N23_002"
+      ],
+      "source": "pattern:i_feel_emotion"
+    },
+    {
+      "sentence_id": 300,
+      "translations": {
+        "en": "My head hurts.",
+        "lt": "Man skauda galvą."
+      },
+      "linked_words": [
+        "N03_001"
+      ],
+      "source": "pattern:my_body_part_hurts"
+    },
+    {
+      "sentence_id": 301,
+      "translations": {
+        "en": "My face hurts.",
+        "lt": "Mano veidas skauda."
+      },
+      "linked_words": [
+        "N03_002"
+      ],
+      "source": "pattern:my_body_part_hurts"
+    },
+    {
+      "sentence_id": 305,
+      "translations": {
+        "en": "I drink bread.",
+        "lt": "Aš geriu duoną."
+      },
+      "linked_words": [
+        "N06_001"
+      ],
+      "source": "pattern:i_drink_food"
+    },
+    {
+      "sentence_id": 306,
+      "translations": {
+        "en": "I drink water.",
+        "lt": "Aš geriu vandenį."
+      },
+      "linked_words": [
+        "N06_002"
+      ],
+      "source": "pattern:i_drink_food"
+    },
+    {
+      "sentence_id": 307,
+      "translations": {
+        "en": "I drink coffee.",
+        "lt": "Aš geriu kavą."
+      },
+      "linked_words": [
+        "N06_003"
+      ],
+      "source": "pattern:i_drink_food"
+    },
+    {
+      "sentence_id": 310,
+      "translations": {
+        "en": "I go to the house.",
+        "lt": "Aš einu į namą."
+      },
+      "linked_words": [
+        "N07_001"
+      ],
+      "source": "pattern:i_go_to_place"
+    },
+    {
+      "sentence_id": 311,
+      "translations": {
+        "en": "I go to the school.",
+        "lt": "Aš einu į mokyklą."
+      },
+      "linked_words": [
+        "N07_002"
+      ],
+      "source": "pattern:i_go_to_place"
+    },
+    {
+      "sentence_id": 314,
+      "translations": {
+        "en": "I am going to the store.",
+        "lt": "Aš einu į parduotuvę."
+      },
+      "linked_words": [
+        "N07_005"
+      ],
+      "source": "pattern:i_go_to_place",
+      "minimum_level": 6
+    },
+    {
+      "sentence_id": 315,
+      "translations": {
+        "en": "The dog eats bread.",
+        "lt": "Šuo valgo duoną."
+      },
+      "linked_words": [
+        "N02_001",
+        "N06_001"
+      ],
+      "source": "pattern:the_animal_eats_food"
+    },
+    {
+      "sentence_id": 316,
+      "translations": {
+        "en": "The dog drinks water.",
+        "lt": "Šuo geria vandens."
+      },
+      "linked_words": [
+        "N02_001",
+        "N06_002"
+      ],
+      "source": "pattern:the_animal_eats_food"
+    },
+    {
+      "sentence_id": 320,
+      "translations": {
+        "en": "I wear a shirt.",
+        "lt": "Aš dėviu marškinį."
+      },
+      "linked_words": [
+        "N09_001"
+      ],
+      "source": "pattern:i_wear_clothing"
+    },
+    {
+      "sentence_id": 321,
+      "translations": {
+        "en": "I wear pants.",
+        "lt": "Aš dėviu kelnes."
+      },
+      "linked_words": [
+        "N09_002"
+      ],
+      "source": "pattern:i_wear_clothing"
+    },
+    {
+      "sentence_id": 325,
+      "translations": {
+        "en": "I use a car.",
+        "lt": "Aš naudoju automobilį."
+      },
+      "linked_words": [
+        "N12_001"
+      ],
+      "source": "pattern:i_use_tool"
+    },
+    {
+      "sentence_id": 326,
+      "translations": {
+        "en": "I use a bus.",
+        "lt": "Aš naudoju autobusą."
+      },
+      "linked_words": [
+        "N12_002"
+      ],
+      "source": "pattern:i_use_tool"
+    }
+  ]
+}

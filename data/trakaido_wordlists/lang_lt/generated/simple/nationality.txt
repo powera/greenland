@@ -1,0 +1,19 @@
+[
+  {"en": "american", "lt": "amerikietis"},
+  {"en": "canadian", "lt": "kanadietis"},
+  {"en": "chinese", "lt": "kinietis"},
+  {"en": "english", "lt": "anglas"},
+  {"en": "estonian", "lt": "estas"},
+  {"en": "finnish", "lt": "suomis"},
+  {"en": "french", "lt": "prancūzas"},
+  {"en": "german", "lt": "vokietis"},
+  {"en": "italian", "lt": "italas"},
+  {"en": "japanese", "lt": "japonas"},
+  {"en": "latvian", "lt": "latvis"},
+  {"en": "lithuanian", "lt": "lietuvis"},
+  {"en": "norwegian", "lt": "norvegas"},
+  {"en": "polish", "lt": "lenkas"},
+  {"en": "russian", "lt": "rusas"},
+  {"en": "spanish", "lt": "ispanas"},
+  {"en": "swedish", "lt": "švedas"}
+]

@@ -1,0 +1,10 @@
+[
+  {"en": "black", "lt": "juodas"},
+  {"en": "blue", "lt": "mėlynas"},
+  {"en": "brown", "lt": "rudas"},
+  {"en": "gray", "lt": "pilkas"},
+  {"en": "green", "lt": "žalias"},
+  {"en": "red", "lt": "raudonas"},
+  {"en": "white", "lt": "baltas"},
+  {"en": "yellow", "lt": "geltonas"}
+]

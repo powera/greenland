@@ -1,0 +1,21 @@
+[
+  {"en": "april", "lt": "balandis"},
+  {"en": "august", "lt": "rugpjūtis"},
+  {"en": "december", "lt": "gruodis"},
+  {"en": "february", "lt": "vasaris"},
+  {"en": "friday", "lt": "penktadienis"},
+  {"en": "january", "lt": "sausis"},
+  {"en": "july", "lt": "liepa"},
+  {"en": "june", "lt": "birželis"},
+  {"en": "march", "lt": "kovas"},
+  {"en": "may", "lt": "gegužė"},
+  {"en": "monday", "lt": "pirmadienis"},
+  {"en": "november", "lt": "lapkritis"},
+  {"en": "october", "lt": "spalis"},
+  {"en": "saturday", "lt": "šeštadienis"},
+  {"en": "september", "lt": "rugsėjis"},
+  {"en": "sunday", "lt": "sekmadienis"},
+  {"en": "thursday", "lt": "ketvirtadienis"},
+  {"en": "tuesday", "lt": "antradienis"},
+  {"en": "wednesday", "lt": "trečiadienis"}
+]

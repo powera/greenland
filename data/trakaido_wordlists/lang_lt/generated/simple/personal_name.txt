@@ -1,0 +1,15 @@
+[
+  {"en": "africa", "lt": "Afrika"},
+  {"en": "asia", "lt": "Azija"},
+  {"en": "christmas", "lt": "Kalėdos"},
+  {"en": "easter", "lt": "Velykos"},
+  {"en": "europe", "lt": "Europa"},
+  {"en": "atlantic ocean", "lt": "Atlanto vandenynas"},
+  {"en": "baltic sea", "lt": "Baltijos jūra"},
+  {"en": "independence day", "lt": "Nepriklausomybės diena"},
+  {"en": "mediterranean sea", "lt": "Viduržemio jūra"},
+  {"en": "new year", "lt": "Naujieji metai"},
+  {"en": "north america", "lt": "Šiaurės Amerika"},
+  {"en": "pacific ocean", "lt": "Ramusis vandenynas"},
+  {"en": "south america", "lt": "Pietų Amerika"}
+]

@@ -1,0 +1,19 @@
+[
+  {"en": "flower", "lt": "gėlė"},
+  {"en": "garden", "lt": "sodas"},
+  {"en": "grass", "lt": "žolė"},
+  {"en": "leaf", "lt": "lapas"},
+  {"en": "oak", "lt": "ąžuolas"},
+  {"en": "park", "lt": "parkas"},
+  {"en": "rose", "lt": "rožė"},
+  {"en": "tree", "lt": "medis"},
+  {"en": "bark", "lt": "žievė"},
+  {"en": "branch", "lt": "šaka"},
+  {"en": "forest", "lt": "miškas"},
+  {"en": "fruit", "lt": "vaisius"},
+  {"en": "pollen", "lt": "žiedadulkė"},
+  {"en": "root", "lt": "šaknis"},
+  {"en": "seed", "lt": "sėkla"},
+  {"en": "trunk", "lt": "kamienas"},
+  {"en": "weed", "lt": "piktžolė"}
+]

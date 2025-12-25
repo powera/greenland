@@ -1,0 +1,12 @@
+[
+  {"en": "how", "lt": "kaip"},
+  {"en": "how many", "lt": "kiek"},
+  {"en": "what", "lt": "ką"},
+  {"en": "when", "lt": "kada"},
+  {"en": "where", "lt": "kur"},
+  {"en": "which", "lt": "kuris"},
+  {"en": "who", "lt": "kas"},
+  {"en": "whom", "lt": "kam"},
+  {"en": "whose", "lt": "kieno"},
+  {"en": "why", "lt": "kodėl"}
+]

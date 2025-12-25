@@ -1,0 +1,632 @@
+{
+  "language": "zh",
+  "generated_date": "2025-12-22T14:40:28.363995",
+  "sentences": [
+    {
+      "sentence_id": 15,
+      "translations": {
+        "en": "I will go to the restaurant.",
+        "zh": "我要去餐厅。"
+      },
+      "linked_words": [
+        "N07_006"
+      ],
+      "source": "sentence_a1",
+      "minimum_level": 1
+    },
+    {
+      "sentence_id": 74,
+      "translations": {
+        "en": "She eats a banana every morning.",
+        "zh": "她每天早上吃一根香蕉。"
+      },
+      "linked_words": [
+        "V01_006",
+        "N06_016",
+        "N25_004",
+        "A11_002"
+      ],
+      "source": "zvirblis_N06_016",
+      "minimum_level": 13
+    },
+    {
+      "sentence_id": 78,
+      "translations": {
+        "en": "My anyone is black.",
+        "zh": "我的任何人是黑色的。"
+      },
+      "linked_words": [
+        "N01_062",
+        "A02_001"
+      ],
+      "source": "pattern:my_noun_is_color"
+    },
+    {
+      "sentence_id": 79,
+      "translations": {
+        "en": "My flower is black.",
+        "zh": "我的花是黑色的。"
+      },
+      "linked_words": [
+        "N05_002",
+        "A02_001"
+      ],
+      "source": "pattern:my_noun_is_color"
+    },
+    {
+      "sentence_id": 80,
+      "translations": {
+        "en": "I have one hundred ring.",
+        "zh": "我有一百个戒指。"
+      },
+      "linked_words": [
+        "A11_029",
+        "N09_017"
+      ],
+      "source": "pattern:i_have_number_noun"
+    },
+    {
+      "sentence_id": 81,
+      "translations": {
+        "en": "I have one thousand bird.",
+        "zh": "我有一千只鸟。"
+      },
+      "linked_words": [
+        "A11_030",
+        "N02_003"
+      ],
+      "source": "pattern:i_have_number_noun"
+    },
+    {
+      "sentence_id": 82,
+      "translations": {
+        "en": "I want to read.",
+        "zh": "我想阅读。"
+      },
+      "linked_words": [
+        "V04_003"
+      ],
+      "source": "pattern:i_want_to_verb"
+    },
+    {
+      "sentence_id": 83,
+      "translations": {
+        "en": "I want to be.",
+        "zh": "我想要有。"
+      },
+      "linked_words": [
+        "V06_001"
+      ],
+      "source": "pattern:i_want_to_verb"
+    },
+    {
+      "sentence_id": 84,
+      "translations": {
+        "en": "The fork is in the house.",
+        "zh": "叉子在房屋里。"
+      },
+      "linked_words": [
+        "N08_001",
+        "N07_001"
+      ],
+      "source": "pattern:object_is_in_place"
+    },
+    {
+      "sentence_id": 85,
+      "translations": {
+        "en": "The fork is in the school.",
+        "zh": "叉子在学校里。"
+      },
+      "linked_words": [
+        "N08_001",
+        "N07_002"
+      ],
+      "source": "pattern:object_is_in_place"
+    },
+    {
+      "sentence_id": 101,
+      "translations": {
+        "en": "The fork is in the apartment.",
+        "zh": "叉子在公寓里。"
+      },
+      "linked_words": [
+        "N08_001",
+        "N07_026"
+      ],
+      "source": "pattern:object_is_in_place"
+    },
+    {
+      "sentence_id": 184,
+      "translations": {
+        "en": "I like bread.",
+        "zh": "我喜欢面包。"
+      },
+      "linked_words": [
+        "N06_001"
+      ],
+      "source": "pattern:i_like_food"
+    },
+    {
+      "sentence_id": 185,
+      "translations": {
+        "en": "I like water.",
+        "zh": "我喜欢水。"
+      },
+      "linked_words": [
+        "N06_002"
+      ],
+      "source": "pattern:i_like_food"
+    },
+    {
+      "sentence_id": 220,
+      "translations": {
+        "en": "Where is the fork?",
+        "zh": "叉子在哪里？"
+      },
+      "linked_words": [
+        "N08_001"
+      ],
+      "source": "pattern:where_is_object"
+    },
+    {
+      "sentence_id": 221,
+      "translations": {
+        "en": "Where is the spoon?",
+        "zh": "勺子在哪里？"
+      },
+      "linked_words": [
+        "N08_002"
+      ],
+      "source": "pattern:where_is_object"
+    },
+    {
+      "sentence_id": 225,
+      "translations": {
+        "en": "My fork is black.",
+        "zh": "我的叉子是黑色的。"
+      },
+      "linked_words": [
+        "N08_001",
+        "A02_001"
+      ],
+      "source": "pattern:my_object_is_color"
+    },
+    {
+      "sentence_id": 226,
+      "translations": {
+        "en": "My fork is white.",
+        "zh": "我的叉子是白色的。"
+      },
+      "linked_words": [
+        "N08_001",
+        "A02_002"
+      ],
+      "source": "pattern:my_object_is_color"
+    },
+    {
+      "sentence_id": 230,
+      "translations": {
+        "en": "What is this fork?",
+        "zh": "这把叉子是什么？"
+      },
+      "linked_words": [
+        "N08_001"
+      ],
+      "source": "pattern:what_is_this_object"
+    },
+    {
+      "sentence_id": 231,
+      "translations": {
+        "en": "What is this spoon?",
+        "zh": "这是什么勺子？"
+      },
+      "linked_words": [
+        "N08_002"
+      ],
+      "source": "pattern:what_is_this_object"
+    },
+    {
+      "sentence_id": 240,
+      "translations": {
+        "en": "This is a fork.",
+        "zh": "这是一把叉子。"
+      },
+      "linked_words": [
+        "N08_001"
+      ],
+      "source": "pattern:this_is_object"
+    },
+    {
+      "sentence_id": 241,
+      "translations": {
+        "en": "This is a spoon.",
+        "zh": "这是一把勺子。"
+      },
+      "linked_words": [
+        "N08_002"
+      ],
+      "source": "pattern:this_is_object"
+    },
+    {
+      "sentence_id": 244,
+      "translations": {
+        "en": "This is a book.",
+        "zh": "这是一本书。"
+      },
+      "linked_words": [
+        "N08_005"
+      ],
+      "source": "pattern:this_is_object"
+    },
+    {
+      "sentence_id": 246,
+      "translations": {
+        "en": "I like water.",
+        "zh": "我喜欢水。"
+      },
+      "linked_words": [
+        "N06_002"
+      ],
+      "source": "pattern:i_like_food"
+    },
+    {
+      "sentence_id": 250,
+      "translations": {
+        "en": "I need a car.",
+        "zh": "我需要一辆汽车。"
+      },
+      "linked_words": [
+        "N12_001"
+      ],
+      "source": "pattern:i_need_tool"
+    },
+    {
+      "sentence_id": 251,
+      "translations": {
+        "en": "I need a bus.",
+        "zh": "我需要一辆巴士。"
+      },
+      "linked_words": [
+        "N12_002"
+      ],
+      "source": "pattern:i_need_tool"
+    },
+    {
+      "sentence_id": 255,
+      "translations": {
+        "en": "The fork is black.",
+        "zh": "叉子是黑色的。"
+      },
+      "linked_words": [
+        "N08_001",
+        "A02_001"
+      ],
+      "source": "pattern:object_is_color"
+    },
+    {
+      "sentence_id": 256,
+      "translations": {
+        "en": "The fork is white.",
+        "zh": "叉子是白色的。"
+      },
+      "linked_words": [
+        "N08_001",
+        "A02_002"
+      ],
+      "source": "pattern:object_is_color"
+    },
+    {
+      "sentence_id": 265,
+      "translations": {
+        "en": "How many forks are there?",
+        "zh": "有多少个叉子？"
+      },
+      "linked_words": [
+        "N08_001"
+      ],
+      "source": "pattern:how_many_objects"
+    },
+    {
+      "sentence_id": 266,
+      "translations": {
+        "en": "How many spoons?",
+        "zh": "多少个勺子？"
+      },
+      "linked_words": [
+        "N08_002"
+      ],
+      "source": "pattern:how_many_objects"
+    },
+    {
+      "sentence_id": 270,
+      "translations": {
+        "en": "I want a shirt.",
+        "zh": "我想要一件衬衫。"
+      },
+      "linked_words": [
+        "N09_001"
+      ],
+      "source": "pattern:i_want_clothing"
+    },
+    {
+      "sentence_id": 271,
+      "translations": {
+        "en": "I want pants.",
+        "zh": "我想要裤子。"
+      },
+      "linked_words": [
+        "N09_002"
+      ],
+      "source": "pattern:i_want_clothing"
+    },
+    {
+      "sentence_id": 275,
+      "translations": {
+        "en": "Where is the house?",
+        "zh": "房屋在哪里？"
+      },
+      "linked_words": [
+        "N07_001"
+      ],
+      "source": "pattern:where_is_building"
+    },
+    {
+      "sentence_id": 276,
+      "translations": {
+        "en": "Where is the school?",
+        "zh": "学校在哪里？"
+      },
+      "linked_words": [
+        "N07_002"
+      ],
+      "source": "pattern:where_is_building"
+    },
+    {
+      "sentence_id": 280,
+      "translations": {
+        "en": "I eat bread.",
+        "zh": "我吃面包。"
+      },
+      "linked_words": [
+        "N06_001"
+      ],
+      "source": "pattern:i_eat_food"
+    },
+    {
+      "sentence_id": 281,
+      "translations": {
+        "en": "I drink water.",
+        "zh": "我喝水。"
+      },
+      "linked_words": [
+        "N06_002"
+      ],
+      "source": "pattern:i_eat_food"
+    },
+    {
+      "sentence_id": 285,
+      "translations": {
+        "en": "The dog is hardworking.",
+        "zh": "这只狗很勤劳。"
+      },
+      "linked_words": [
+        "N02_001",
+        "A05_008"
+      ],
+      "source": "pattern:the_animal_is_quality"
+    },
+    {
+      "sentence_id": 286,
+      "translations": {
+        "en": "The dog is dishonest.",
+        "zh": "这只狗不诚实。"
+      },
+      "linked_words": [
+        "N02_001",
+        "A05_012"
+      ],
+      "source": "pattern:the_animal_is_quality"
+    },
+    {
+      "sentence_id": 290,
+      "translations": {
+        "en": "I am hardworking.",
+        "zh": "我很勤劳。"
+      },
+      "linked_words": [
+        "A05_008"
+      ],
+      "source": "pattern:i_am_quality"
+    },
+    {
+      "sentence_id": 291,
+      "translations": {
+        "en": "I am dishonest.",
+        "zh": "我不诚实。"
+      },
+      "linked_words": [
+        "A05_012"
+      ],
+      "source": "pattern:i_am_quality"
+    },
+    {
+      "sentence_id": 295,
+      "translations": {
+        "en": "I feel happy.",
+        "zh": "我感到快乐。"
+      },
+      "linked_words": [
+        "N23_001"
+      ],
+      "source": "pattern:i_feel_emotion"
+    },
+    {
+      "sentence_id": 296,
+      "translations": {
+        "en": "I feel sad.",
+        "zh": "我感到悲伤。"
+      },
+      "linked_words": [
+        "N23_002"
+      ],
+      "source": "pattern:i_feel_emotion"
+    },
+    {
+      "sentence_id": 300,
+      "translations": {
+        "en": "My head hurts.",
+        "zh": "我头痛。"
+      },
+      "linked_words": [
+        "N03_001"
+      ],
+      "source": "pattern:my_body_part_hurts"
+    },
+    {
+      "sentence_id": 301,
+      "translations": {
+        "en": "My face hurts.",
+        "zh": "我的脸疼。"
+      },
+      "linked_words": [
+        "N03_002"
+      ],
+      "source": "pattern:my_body_part_hurts"
+    },
+    {
+      "sentence_id": 305,
+      "translations": {
+        "en": "I drink bread.",
+        "zh": "我喝面包。"
+      },
+      "linked_words": [
+        "N06_001"
+      ],
+      "source": "pattern:i_drink_food"
+    },
+    {
+      "sentence_id": 306,
+      "translations": {
+        "en": "I drink water.",
+        "zh": "我喝水。"
+      },
+      "linked_words": [
+        "N06_002"
+      ],
+      "source": "pattern:i_drink_food"
+    },
+    {
+      "sentence_id": 307,
+      "translations": {
+        "en": "I drink coffee.",
+        "zh": "我喝咖啡。"
+      },
+      "linked_words": [
+        "N06_003"
+      ],
+      "source": "pattern:i_drink_food"
+    },
+    {
+      "sentence_id": 310,
+      "translations": {
+        "en": "I go to the house.",
+        "zh": "我去房子。"
+      },
+      "linked_words": [
+        "N07_001"
+      ],
+      "source": "pattern:i_go_to_place"
+    },
+    {
+      "sentence_id": 311,
+      "translations": {
+        "en": "I go to the school.",
+        "zh": "我去学校。"
+      },
+      "linked_words": [
+        "N07_002"
+      ],
+      "source": "pattern:i_go_to_place"
+    },
+    {
+      "sentence_id": 314,
+      "translations": {
+        "en": "I am going to the store.",
+        "zh": "我去商店。"
+      },
+      "linked_words": [
+        "N07_005"
+      ],
+      "source": "pattern:i_go_to_place",
+      "minimum_level": 6
+    },
+    {
+      "sentence_id": 315,
+      "translations": {
+        "en": "The dog eats bread.",
+        "zh": "狗吃面包。"
+      },
+      "linked_words": [
+        "N02_001",
+        "N06_001"
+      ],
+      "source": "pattern:the_animal_eats_food"
+    },
+    {
+      "sentence_id": 316,
+      "translations": {
+        "en": "The dog drinks water.",
+        "zh": "狗喝水。"
+      },
+      "linked_words": [
+        "N02_001",
+        "N06_002"
+      ],
+      "source": "pattern:the_animal_eats_food"
+    },
+    {
+      "sentence_id": 320,
+      "translations": {
+        "en": "I wear a shirt.",
+        "zh": "我穿着衬衫。"
+      },
+      "linked_words": [
+        "N09_001"
+      ],
+      "source": "pattern:i_wear_clothing"
+    },
+    {
+      "sentence_id": 321,
+      "translations": {
+        "en": "I wear pants.",
+        "zh": "我穿裤子。"
+      },
+      "linked_words": [
+        "N09_002"
+      ],
+      "source": "pattern:i_wear_clothing"
+    },
+    {
+      "sentence_id": 325,
+      "translations": {
+        "en": "I use a car.",
+        "zh": "我使用一辆汽车。"
+      },
+      "linked_words": [
+        "N12_001"
+      ],
+      "source": "pattern:i_use_tool"
+    },
+    {
+      "sentence_id": 326,
+      "translations": {
+        "en": "I use a bus.",
+        "zh": "我乘坐巴士。"
+      },
+      "linked_words": [
+        "N12_002"
+      ],
+      "source": "pattern:i_use_tool"
+    }
+  ]
+}

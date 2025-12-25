@@ -1,0 +1,1984 @@
+{
+  "metadata": {
+    "description": "Two sentences for each level 1 wireword noun with mixed tenses",
+    "total_sentences": 70,
+    "level_1_nouns_covered": 35,
+    "generated_date": "2025-10-21",
+    "version": "2.0",
+    "source": "wireword level 1 nouns and existing verbs",
+    "tenses_used": [
+      "present",
+      "past",
+      "future"
+    ],
+    "cases_used": [
+      "nominative",
+      "accusative",
+      "genitive",
+      "locative"
+    ],
+    "prefix": "sentence_a1"
+  },
+  "sentences": [
+    {
+      "english": "I saw the bank.",
+      "lithuanian": "Aš mačiau banką.",
+      "pattern": "SVO",
+      "tense": "past",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "see",
+          "lithuanian": "matyti",
+          "type": "verb",
+          "form": "1s_past"
+        },
+        {
+          "english": "bank",
+          "lithuanian": "bankas",
+          "type": "object",
+          "guid": "N07_008",
+          "case": "accusative",
+          "declined_form": "banką"
+        }
+      ],
+      "filename": "sentence_a1_1"
+    },
+    {
+      "english": "The bank is here.",
+      "lithuanian": "Bankas yra čia.",
+      "pattern": "SV",
+      "tense": "present",
+      "words_used": [
+        {
+          "english": "bank",
+          "lithuanian": "bankas",
+          "type": "subject",
+          "guid": "N07_008",
+          "case": "nominative",
+          "declined_form": "bankas"
+        },
+        {
+          "english": "be",
+          "lithuanian": "būti",
+          "type": "verb",
+          "form": "3s_pres"
+        },
+        {
+          "english": "here",
+          "lithuanian": "čia",
+          "type": "adverb"
+        }
+      ],
+      "filename": "sentence_a1_2"
+    },
+    {
+      "english": "I will go to the fire station.",
+      "lithuanian": "Aš eisiu į gaisrinę.",
+      "pattern": "SVO",
+      "tense": "future",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "go",
+          "lithuanian": "eiti",
+          "type": "verb",
+          "form": "1s_fut"
+        },
+        {
+          "english": "fire station",
+          "lithuanian": "gaisrinė",
+          "type": "object",
+          "guid": "N07_011",
+          "case": "accusative",
+          "declined_form": "gaisrinę"
+        }
+      ],
+      "filename": "sentence_a1_3"
+    },
+    {
+      "english": "I worked at the fire station.",
+      "lithuanian": "Aš dirbau gaisrinėje.",
+      "pattern": "SVO",
+      "tense": "past",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "work",
+          "lithuanian": "dirbti",
+          "type": "verb",
+          "form": "1s_past"
+        },
+        {
+          "english": "fire station",
+          "lithuanian": "gaisrinė",
+          "type": "object",
+          "guid": "N07_011",
+          "case": "locative",
+          "declined_form": "gaisrinėje"
+        }
+      ],
+      "filename": "sentence_a1_4"
+    },
+    {
+      "english": "I see the hospital.",
+      "lithuanian": "Aš matau ligoninę.",
+      "pattern": "SVO",
+      "tense": "present",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "see",
+          "lithuanian": "matyti",
+          "type": "verb",
+          "form": "1s_pres"
+        },
+        {
+          "english": "hospital",
+          "lithuanian": "ligoninė",
+          "type": "object",
+          "guid": "N07_003",
+          "case": "accusative",
+          "declined_form": "ligoninę"
+        }
+      ],
+      "filename": "sentence_a1_5"
+    },
+    {
+      "english": "I work at the hospital.",
+      "lithuanian": "Aš dirbu ligoninėje.",
+      "pattern": "SVO",
+      "tense": "present",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "work",
+          "lithuanian": "dirbti",
+          "type": "verb",
+          "form": "1s_pres"
+        },
+        {
+          "english": "hospital",
+          "lithuanian": "ligoninė",
+          "type": "object",
+          "guid": "N07_003",
+          "case": "locative",
+          "declined_form": "ligoninėje"
+        }
+      ],
+      "filename": "sentence_a1_6"
+    },
+    {
+      "english": "I saw the hotel.",
+      "lithuanian": "Aš mačiau viešbutį.",
+      "pattern": "SVO",
+      "tense": "past",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "see",
+          "lithuanian": "matyti",
+          "type": "verb",
+          "form": "1s_past"
+        },
+        {
+          "english": "hotel",
+          "lithuanian": "viešbutis",
+          "type": "object",
+          "guid": "N07_007",
+          "case": "accusative",
+          "declined_form": "viešbutį"
+        }
+      ],
+      "filename": "sentence_a1_7"
+    },
+    {
+      "english": "I lived at the hotel.",
+      "lithuanian": "Aš gyvenau viešbutyje.",
+      "pattern": "SVO",
+      "tense": "past",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "live",
+          "lithuanian": "gyventi",
+          "type": "verb",
+          "form": "1s_past"
+        },
+        {
+          "english": "hotel",
+          "lithuanian": "viešbutis",
+          "type": "object",
+          "guid": "N07_007",
+          "case": "locative",
+          "declined_form": "viešbutyje"
+        }
+      ],
+      "filename": "sentence_a1_8"
+    },
+    {
+      "english": "I see the house.",
+      "lithuanian": "Aš matau namą.",
+      "pattern": "SVO",
+      "tense": "present",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "see",
+          "lithuanian": "matyti",
+          "type": "verb",
+          "form": "1s_pres"
+        },
+        {
+          "english": "house",
+          "lithuanian": "namas",
+          "type": "object",
+          "guid": "N07_001",
+          "case": "accusative",
+          "declined_form": "namą"
+        }
+      ],
+      "filename": "sentence_a1_9"
+    },
+    {
+      "english": "I live in a house.",
+      "lithuanian": "Aš gyvenu name.",
+      "pattern": "SVO",
+      "tense": "present",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "live",
+          "lithuanian": "gyventi",
+          "type": "verb",
+          "form": "1s_pres"
+        },
+        {
+          "english": "house",
+          "lithuanian": "namas",
+          "type": "object",
+          "guid": "N07_001",
+          "case": "locative",
+          "declined_form": "name"
+        }
+      ],
+      "filename": "sentence_a1_10"
+    },
+    {
+      "english": "I will go to the library.",
+      "lithuanian": "Aš eisiu į biblioteką.",
+      "pattern": "SVO",
+      "tense": "future",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "go",
+          "lithuanian": "eiti",
+          "type": "verb",
+          "form": "1s_fut"
+        },
+        {
+          "english": "library",
+          "lithuanian": "biblioteka",
+          "type": "object",
+          "guid": "N07_009",
+          "case": "accusative",
+          "declined_form": "biblioteką"
+        }
+      ],
+      "filename": "sentence_a1_11"
+    },
+    {
+      "english": "I worked at the library.",
+      "lithuanian": "Aš dirbau bibliotekoje.",
+      "pattern": "SVO",
+      "tense": "past",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "work",
+          "lithuanian": "dirbti",
+          "type": "verb",
+          "form": "1s_past"
+        },
+        {
+          "english": "library",
+          "lithuanian": "biblioteka",
+          "type": "object",
+          "guid": "N07_009",
+          "case": "locative",
+          "declined_form": "bibliotekoje"
+        }
+      ],
+      "filename": "sentence_a1_12"
+    },
+    {
+      "english": "I saw the museum.",
+      "lithuanian": "Aš mačiau muziejų.",
+      "pattern": "SVO",
+      "tense": "past",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "see",
+          "lithuanian": "matyti",
+          "type": "verb",
+          "form": "1s_past"
+        },
+        {
+          "english": "museum",
+          "lithuanian": "muziejus",
+          "type": "object",
+          "guid": "N07_010",
+          "case": "accusative",
+          "declined_form": "muziejų"
+        }
+      ],
+      "filename": "sentence_a1_13"
+    },
+    {
+      "english": "I liked the museum.",
+      "lithuanian": "Aš mėgau muziejų.",
+      "pattern": "SVO",
+      "tense": "past",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "like",
+          "lithuanian": "mėgti",
+          "type": "verb",
+          "form": "1s_past"
+        },
+        {
+          "english": "museum",
+          "lithuanian": "muziejus",
+          "type": "object",
+          "guid": "N07_010",
+          "case": "accusative",
+          "declined_form": "muziejų"
+        }
+      ],
+      "filename": "sentence_a1_14"
+    },
+    {
+      "english": "I will go to the restaurant.",
+      "lithuanian": "Aš eisiu į restoraną.",
+      "pattern": "SVO",
+      "tense": "future",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "go",
+          "lithuanian": "eiti",
+          "type": "verb",
+          "form": "1s_fut"
+        },
+        {
+          "english": "restaurant",
+          "lithuanian": "restoranas",
+          "type": "object",
+          "guid": "N07_006",
+          "case": "accusative",
+          "declined_form": "restoraną"
+        }
+      ],
+      "filename": "sentence_a1_15"
+    },
+    {
+      "english": "I ate at the restaurant.",
+      "lithuanian": "Aš valgiau restorane.",
+      "pattern": "SVO",
+      "tense": "past",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "eat",
+          "lithuanian": "valgyti",
+          "type": "verb",
+          "form": "1s_past"
+        },
+        {
+          "english": "restaurant",
+          "lithuanian": "restoranas",
+          "type": "object",
+          "guid": "N07_006",
+          "case": "locative",
+          "declined_form": "restorane"
+        }
+      ],
+      "filename": "sentence_a1_16"
+    },
+    {
+      "english": "I go to school.",
+      "lithuanian": "Aš einu į mokyklą.",
+      "pattern": "SVO",
+      "tense": "present",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "go",
+          "lithuanian": "eiti",
+          "type": "verb",
+          "form": "1s_pres"
+        },
+        {
+          "english": "school",
+          "lithuanian": "mokykla",
+          "type": "object",
+          "guid": "N07_002",
+          "case": "accusative",
+          "declined_form": "mokyklą"
+        }
+      ],
+      "filename": "sentence_a1_17"
+    },
+    {
+      "english": "I worked at the school.",
+      "lithuanian": "Aš dirbau mokykloje.",
+      "pattern": "SVO",
+      "tense": "past",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "work",
+          "lithuanian": "dirbti",
+          "type": "verb",
+          "form": "1s_past"
+        },
+        {
+          "english": "school",
+          "lithuanian": "mokykla",
+          "type": "object",
+          "guid": "N07_002",
+          "case": "locative",
+          "declined_form": "mokykloje"
+        }
+      ],
+      "filename": "sentence_a1_18"
+    },
+    {
+      "english": "I see the store.",
+      "lithuanian": "Aš matau parduotuvę.",
+      "pattern": "SVO",
+      "tense": "present",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "see",
+          "lithuanian": "matyti",
+          "type": "verb",
+          "form": "1s_pres"
+        },
+        {
+          "english": "store",
+          "lithuanian": "parduotuvė",
+          "type": "object",
+          "guid": "N07_005",
+          "case": "accusative",
+          "declined_form": "parduotuvę"
+        }
+      ],
+      "filename": "sentence_a1_19"
+    },
+    {
+      "english": "I worked at the store.",
+      "lithuanian": "Aš dirbau parduotuvėje.",
+      "pattern": "SVO",
+      "tense": "past",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "work",
+          "lithuanian": "dirbti",
+          "type": "verb",
+          "form": "1s_past"
+        },
+        {
+          "english": "store",
+          "lithuanian": "parduotuvė",
+          "type": "object",
+          "guid": "N07_005",
+          "case": "locative",
+          "declined_form": "parduotuvėje"
+        }
+      ],
+      "filename": "sentence_a1_20"
+    },
+    {
+      "english": "I saw the dress.",
+      "lithuanian": "Aš mačiau suknelę.",
+      "pattern": "SVO",
+      "tense": "past",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "see",
+          "lithuanian": "matyti",
+          "type": "verb",
+          "form": "1s_past"
+        },
+        {
+          "english": "dress",
+          "lithuanian": "suknelė",
+          "type": "object",
+          "guid": "N09_003",
+          "case": "accusative",
+          "declined_form": "suknelę"
+        }
+      ],
+      "filename": "sentence_a1_21"
+    },
+    {
+      "english": "I bought a dress.",
+      "lithuanian": "Aš pirkau suknelę.",
+      "pattern": "SVO",
+      "tense": "past",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "buy",
+          "lithuanian": "pirkti",
+          "type": "verb",
+          "form": "1s_past"
+        },
+        {
+          "english": "dress",
+          "lithuanian": "suknelė",
+          "type": "object",
+          "guid": "N09_003",
+          "case": "accusative",
+          "declined_form": "suknelę"
+        }
+      ],
+      "filename": "sentence_a1_22"
+    },
+    {
+      "english": "I have gloves.",
+      "lithuanian": "Aš turiu pirštines.",
+      "pattern": "SVO",
+      "tense": "present",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "have",
+          "lithuanian": "turėti",
+          "type": "verb",
+          "form": "1s_pres"
+        },
+        {
+          "english": "gloves",
+          "lithuanian": "pirštinės",
+          "type": "object",
+          "guid": "N09_009",
+          "case": "accusative",
+          "declined_form": "pirštines"
+        }
+      ],
+      "filename": "sentence_a1_23"
+    },
+    {
+      "english": "I will buy gloves.",
+      "lithuanian": "Aš pirksiu pirštines.",
+      "pattern": "SVO",
+      "tense": "future",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "buy",
+          "lithuanian": "pirkti",
+          "type": "verb",
+          "form": "1s_fut"
+        },
+        {
+          "english": "gloves",
+          "lithuanian": "pirštinės",
+          "type": "object",
+          "guid": "N09_009",
+          "case": "accusative",
+          "declined_form": "pirštines"
+        }
+      ],
+      "filename": "sentence_a1_24"
+    },
+    {
+      "english": "I had a hat.",
+      "lithuanian": "Aš turėjau kepurę.",
+      "pattern": "SVO",
+      "tense": "past",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "have",
+          "lithuanian": "turėti",
+          "type": "verb",
+          "form": "1s_past"
+        },
+        {
+          "english": "hat",
+          "lithuanian": "kepurė",
+          "type": "object",
+          "guid": "N09_008",
+          "case": "accusative",
+          "declined_form": "kepurę"
+        }
+      ],
+      "filename": "sentence_a1_25"
+    },
+    {
+      "english": "I like the hat.",
+      "lithuanian": "Aš mėgstu kepurę.",
+      "pattern": "SVO",
+      "tense": "present",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "like",
+          "lithuanian": "mėgti",
+          "type": "verb",
+          "form": "1s_pres"
+        },
+        {
+          "english": "hat",
+          "lithuanian": "kepurė",
+          "type": "object",
+          "guid": "N09_008",
+          "case": "accusative",
+          "declined_form": "kepurę"
+        }
+      ],
+      "filename": "sentence_a1_26"
+    },
+    {
+      "english": "I have a jacket.",
+      "lithuanian": "Aš turiu striukę.",
+      "pattern": "SVO",
+      "tense": "present",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "have",
+          "lithuanian": "turėti",
+          "type": "verb",
+          "form": "1s_pres"
+        },
+        {
+          "english": "jacket",
+          "lithuanian": "striukė",
+          "type": "object",
+          "guid": "N09_005",
+          "case": "accusative",
+          "declined_form": "striukę"
+        }
+      ],
+      "filename": "sentence_a1_27"
+    },
+    {
+      "english": "I bought a jacket.",
+      "lithuanian": "Aš pirkau striukę.",
+      "pattern": "SVO",
+      "tense": "past",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "buy",
+          "lithuanian": "pirkti",
+          "type": "verb",
+          "form": "1s_past"
+        },
+        {
+          "english": "jacket",
+          "lithuanian": "striukė",
+          "type": "object",
+          "guid": "N09_005",
+          "case": "accusative",
+          "declined_form": "striukę"
+        }
+      ],
+      "filename": "sentence_a1_28"
+    },
+    {
+      "english": "I have pants.",
+      "lithuanian": "Aš turiu kelnes.",
+      "pattern": "SVO",
+      "tense": "present",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "have",
+          "lithuanian": "turėti",
+          "type": "verb",
+          "form": "1s_pres"
+        },
+        {
+          "english": "pants",
+          "lithuanian": "kelnės",
+          "type": "object",
+          "guid": "N09_002",
+          "case": "accusative",
+          "declined_form": "kelnes"
+        }
+      ],
+      "filename": "sentence_a1_29"
+    },
+    {
+      "english": "I will buy pants.",
+      "lithuanian": "Aš pirksiu kelnes.",
+      "pattern": "SVO",
+      "tense": "future",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "buy",
+          "lithuanian": "pirkti",
+          "type": "verb",
+          "form": "1s_fut"
+        },
+        {
+          "english": "pants",
+          "lithuanian": "kelnės",
+          "type": "object",
+          "guid": "N09_002",
+          "case": "accusative",
+          "declined_form": "kelnes"
+        }
+      ],
+      "filename": "sentence_a1_30"
+    },
+    {
+      "english": "I had a shirt.",
+      "lithuanian": "Aš turėjau marškinius.",
+      "pattern": "SVO",
+      "tense": "past",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "have",
+          "lithuanian": "turėti",
+          "type": "verb",
+          "form": "1s_past"
+        },
+        {
+          "english": "shirt",
+          "lithuanian": "marškiniai",
+          "type": "object",
+          "guid": "N09_001",
+          "case": "accusative",
+          "declined_form": "marškinius"
+        }
+      ],
+      "filename": "sentence_a1_31"
+    },
+    {
+      "english": "I liked the shirt.",
+      "lithuanian": "Aš mėgau marškinius.",
+      "pattern": "SVO",
+      "tense": "past",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "like",
+          "lithuanian": "mėgti",
+          "type": "verb",
+          "form": "1s_past"
+        },
+        {
+          "english": "shirt",
+          "lithuanian": "marškiniai",
+          "type": "object",
+          "guid": "N09_001",
+          "case": "accusative",
+          "declined_form": "marškinius"
+        }
+      ],
+      "filename": "sentence_a1_32"
+    },
+    {
+      "english": "I have shoes.",
+      "lithuanian": "Aš turiu batus.",
+      "pattern": "SVO",
+      "tense": "present",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "have",
+          "lithuanian": "turėti",
+          "type": "verb",
+          "form": "1s_pres"
+        },
+        {
+          "english": "shoes",
+          "lithuanian": "batai",
+          "type": "object",
+          "guid": "N09_006",
+          "case": "accusative",
+          "declined_form": "batus"
+        }
+      ],
+      "filename": "sentence_a1_33"
+    },
+    {
+      "english": "I bought shoes.",
+      "lithuanian": "Aš pirkau batus.",
+      "pattern": "SVO",
+      "tense": "past",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "buy",
+          "lithuanian": "pirkti",
+          "type": "verb",
+          "form": "1s_past"
+        },
+        {
+          "english": "shoes",
+          "lithuanian": "batai",
+          "type": "object",
+          "guid": "N09_006",
+          "case": "accusative",
+          "declined_form": "batus"
+        }
+      ],
+      "filename": "sentence_a1_34"
+    },
+    {
+      "english": "I had socks.",
+      "lithuanian": "Aš turėjau kojines.",
+      "pattern": "SVO",
+      "tense": "past",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "have",
+          "lithuanian": "turėti",
+          "type": "verb",
+          "form": "1s_past"
+        },
+        {
+          "english": "socks",
+          "lithuanian": "kojinės",
+          "type": "object",
+          "guid": "N09_007",
+          "case": "accusative",
+          "declined_form": "kojines"
+        }
+      ],
+      "filename": "sentence_a1_35"
+    },
+    {
+      "english": "I will buy socks.",
+      "lithuanian": "Aš pirksiu kojines.",
+      "pattern": "SVO",
+      "tense": "future",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "buy",
+          "lithuanian": "pirkti",
+          "type": "verb",
+          "form": "1s_fut"
+        },
+        {
+          "english": "socks",
+          "lithuanian": "kojinės",
+          "type": "object",
+          "guid": "N09_007",
+          "case": "accusative",
+          "declined_form": "kojines"
+        }
+      ],
+      "filename": "sentence_a1_36"
+    },
+    {
+      "english": "I have a sweater.",
+      "lithuanian": "Aš turiu megztinį.",
+      "pattern": "SVO",
+      "tense": "present",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "have",
+          "lithuanian": "turėti",
+          "type": "verb",
+          "form": "1s_pres"
+        },
+        {
+          "english": "sweater",
+          "lithuanian": "megztinis",
+          "type": "object",
+          "guid": "N09_011",
+          "case": "accusative",
+          "declined_form": "megztinį"
+        }
+      ],
+      "filename": "sentence_a1_37"
+    },
+    {
+      "english": "I liked the sweater.",
+      "lithuanian": "Aš mėgau megztinį.",
+      "pattern": "SVO",
+      "tense": "past",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "like",
+          "lithuanian": "mėgti",
+          "type": "verb",
+          "form": "1s_past"
+        },
+        {
+          "english": "sweater",
+          "lithuanian": "megztinis",
+          "type": "object",
+          "guid": "N09_011",
+          "case": "accusative",
+          "declined_form": "megztinį"
+        }
+      ],
+      "filename": "sentence_a1_38"
+    },
+    {
+      "english": "I have underwear.",
+      "lithuanian": "Aš turiu apatinius.",
+      "pattern": "SVO",
+      "tense": "present",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "have",
+          "lithuanian": "turėti",
+          "type": "verb",
+          "form": "1s_pres"
+        },
+        {
+          "english": "underwear",
+          "lithuanian": "apatiniai",
+          "type": "object",
+          "guid": "N09_012",
+          "case": "accusative",
+          "declined_form": "apatinius"
+        }
+      ],
+      "filename": "sentence_a1_39"
+    },
+    {
+      "english": "I bought underwear.",
+      "lithuanian": "Aš pirkau apatinius.",
+      "pattern": "SVO",
+      "tense": "past",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "buy",
+          "lithuanian": "pirkti",
+          "type": "verb",
+          "form": "1s_past"
+        },
+        {
+          "english": "underwear",
+          "lithuanian": "apatiniai",
+          "type": "object",
+          "guid": "N09_012",
+          "case": "accusative",
+          "declined_form": "apatinius"
+        }
+      ],
+      "filename": "sentence_a1_40"
+    },
+    {
+      "english": "I ate an apple.",
+      "lithuanian": "Aš valgiau obuolį.",
+      "pattern": "SVO",
+      "tense": "past",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "eat",
+          "lithuanian": "valgyti",
+          "type": "verb",
+          "form": "1s_past"
+        },
+        {
+          "english": "apple",
+          "lithuanian": "obuolys",
+          "type": "object",
+          "guid": "N06_015",
+          "case": "accusative",
+          "declined_form": "obuolį"
+        }
+      ],
+      "filename": "sentence_a1_41"
+    },
+    {
+      "english": "I like apples.",
+      "lithuanian": "Aš mėgstu obuolius.",
+      "pattern": "SVO",
+      "tense": "present",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "like",
+          "lithuanian": "mėgti",
+          "type": "verb",
+          "form": "1s_pres"
+        },
+        {
+          "english": "apple",
+          "lithuanian": "obuolys",
+          "type": "object",
+          "guid": "N06_015",
+          "case": "accusative",
+          "declined_form": "obuolius"
+        }
+      ],
+      "filename": "sentence_a1_42"
+    },
+    {
+      "english": "I will eat a banana.",
+      "lithuanian": "Aš valgysiu bananą.",
+      "pattern": "SVO",
+      "tense": "future",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "eat",
+          "lithuanian": "valgyti",
+          "type": "verb",
+          "form": "1s_fut"
+        },
+        {
+          "english": "banana",
+          "lithuanian": "bananas",
+          "type": "object",
+          "guid": "N06_016",
+          "case": "accusative",
+          "declined_form": "bananą"
+        }
+      ],
+      "filename": "sentence_a1_43"
+    },
+    {
+      "english": "I bought a banana.",
+      "lithuanian": "Aš pirkau bananą.",
+      "pattern": "SVO",
+      "tense": "past",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "buy",
+          "lithuanian": "pirkti",
+          "type": "verb",
+          "form": "1s_past"
+        },
+        {
+          "english": "banana",
+          "lithuanian": "bananas",
+          "type": "object",
+          "guid": "N06_016",
+          "case": "accusative",
+          "declined_form": "bananą"
+        }
+      ],
+      "filename": "sentence_a1_44"
+    },
+    {
+      "english": "I drank beer.",
+      "lithuanian": "Aš gėriau alų.",
+      "pattern": "SVO",
+      "tense": "past",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "drink",
+          "lithuanian": "gerti",
+          "type": "verb",
+          "form": "1s_past"
+        },
+        {
+          "english": "beer",
+          "lithuanian": "alus",
+          "type": "object",
+          "guid": "N06_005",
+          "case": "accusative",
+          "declined_form": "alų"
+        }
+      ],
+      "filename": "sentence_a1_45"
+    },
+    {
+      "english": "I will buy beer.",
+      "lithuanian": "Aš pirksiu alų.",
+      "pattern": "SVO",
+      "tense": "future",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "buy",
+          "lithuanian": "pirkti",
+          "type": "verb",
+          "form": "1s_fut"
+        },
+        {
+          "english": "beer",
+          "lithuanian": "alus",
+          "type": "object",
+          "guid": "N06_005",
+          "case": "accusative",
+          "declined_form": "alų"
+        }
+      ],
+      "filename": "sentence_a1_46"
+    },
+    {
+      "english": "I eat bread.",
+      "lithuanian": "Aš valgau duoną.",
+      "pattern": "SVO",
+      "tense": "present",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "eat",
+          "lithuanian": "valgyti",
+          "type": "verb",
+          "form": "1s_pres"
+        },
+        {
+          "english": "bread",
+          "lithuanian": "duona",
+          "type": "object",
+          "guid": "N06_001",
+          "case": "accusative",
+          "declined_form": "duoną"
+        }
+      ],
+      "filename": "sentence_a1_47"
+    },
+    {
+      "english": "I bought bread.",
+      "lithuanian": "Aš pirkau duoną.",
+      "pattern": "SVO",
+      "tense": "past",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "buy",
+          "lithuanian": "pirkti",
+          "type": "verb",
+          "form": "1s_past"
+        },
+        {
+          "english": "bread",
+          "lithuanian": "duona",
+          "type": "object",
+          "guid": "N06_001",
+          "case": "accusative",
+          "declined_form": "duoną"
+        }
+      ],
+      "filename": "sentence_a1_48"
+    },
+    {
+      "english": "I drink coffee.",
+      "lithuanian": "Aš geriu kavą.",
+      "pattern": "SVO",
+      "tense": "present",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "drink",
+          "lithuanian": "gerti",
+          "type": "verb",
+          "form": "1s_pres"
+        },
+        {
+          "english": "coffee",
+          "lithuanian": "kava",
+          "type": "object",
+          "guid": "N06_003",
+          "case": "accusative",
+          "declined_form": "kavą"
+        }
+      ],
+      "filename": "sentence_a1_49"
+    },
+    {
+      "english": "I liked the coffee.",
+      "lithuanian": "Aš mėgau kavą.",
+      "pattern": "SVO",
+      "tense": "past",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "like",
+          "lithuanian": "mėgti",
+          "type": "verb",
+          "form": "1s_past"
+        },
+        {
+          "english": "coffee",
+          "lithuanian": "kava",
+          "type": "object",
+          "guid": "N06_003",
+          "case": "accusative",
+          "declined_form": "kavą"
+        }
+      ],
+      "filename": "sentence_a1_50"
+    },
+    {
+      "english": "I ate meat.",
+      "lithuanian": "Aš valgiau mėsą.",
+      "pattern": "SVO",
+      "tense": "past",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "eat",
+          "lithuanian": "valgyti",
+          "type": "verb",
+          "form": "1s_past"
+        },
+        {
+          "english": "meat",
+          "lithuanian": "mėsa",
+          "type": "object",
+          "guid": "N06_007",
+          "case": "accusative",
+          "declined_form": "mėsą"
+        }
+      ],
+      "filename": "sentence_a1_51"
+    },
+    {
+      "english": "I will buy meat.",
+      "lithuanian": "Aš pirksiu mėsą.",
+      "pattern": "SVO",
+      "tense": "future",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "buy",
+          "lithuanian": "pirkti",
+          "type": "verb",
+          "form": "1s_fut"
+        },
+        {
+          "english": "meat",
+          "lithuanian": "mėsa",
+          "type": "object",
+          "guid": "N06_007",
+          "case": "accusative",
+          "declined_form": "mėsą"
+        }
+      ],
+      "filename": "sentence_a1_52"
+    },
+    {
+      "english": "I ate a potato.",
+      "lithuanian": "Aš valgiau bulvę.",
+      "pattern": "SVO",
+      "tense": "past",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "eat",
+          "lithuanian": "valgyti",
+          "type": "verb",
+          "form": "1s_past"
+        },
+        {
+          "english": "potato",
+          "lithuanian": "bulvė",
+          "type": "object",
+          "guid": "N06_014",
+          "case": "accusative",
+          "declined_form": "bulvę"
+        }
+      ],
+      "filename": "sentence_a1_53"
+    },
+    {
+      "english": "I like potatoes.",
+      "lithuanian": "Aš mėgstu bulves.",
+      "pattern": "SVO",
+      "tense": "present",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "like",
+          "lithuanian": "mėgti",
+          "type": "verb",
+          "form": "1s_pres"
+        },
+        {
+          "english": "potato",
+          "lithuanian": "bulvė",
+          "type": "object",
+          "guid": "N06_014",
+          "case": "accusative",
+          "declined_form": "bulves"
+        }
+      ],
+      "filename": "sentence_a1_54"
+    },
+    {
+      "english": "I eat rice.",
+      "lithuanian": "Aš valgau ryžius.",
+      "pattern": "SVO",
+      "tense": "present",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "eat",
+          "lithuanian": "valgyti",
+          "type": "verb",
+          "form": "1s_pres"
+        },
+        {
+          "english": "rice",
+          "lithuanian": "ryžiai",
+          "type": "object",
+          "guid": "N06_020",
+          "case": "accusative",
+          "declined_form": "ryžius"
+        }
+      ],
+      "filename": "sentence_a1_55"
+    },
+    {
+      "english": "I liked the rice.",
+      "lithuanian": "Aš mėgau ryžius.",
+      "pattern": "SVO",
+      "tense": "past",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "like",
+          "lithuanian": "mėgti",
+          "type": "verb",
+          "form": "1s_past"
+        },
+        {
+          "english": "rice",
+          "lithuanian": "ryžiai",
+          "type": "object",
+          "guid": "N06_020",
+          "case": "accusative",
+          "declined_form": "ryžius"
+        }
+      ],
+      "filename": "sentence_a1_56"
+    },
+    {
+      "english": "I have salt.",
+      "lithuanian": "Aš turiu druskos.",
+      "pattern": "SVO",
+      "tense": "present",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "have",
+          "lithuanian": "turėti",
+          "type": "verb",
+          "form": "1s_pres"
+        },
+        {
+          "english": "salt",
+          "lithuanian": "druska",
+          "type": "object",
+          "guid": "N06_013",
+          "case": "genitive",
+          "declined_form": "druskos"
+        }
+      ],
+      "filename": "sentence_a1_57"
+    },
+    {
+      "english": "I bought salt.",
+      "lithuanian": "Aš pirkau druskos.",
+      "pattern": "SVO",
+      "tense": "past",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "buy",
+          "lithuanian": "pirkti",
+          "type": "verb",
+          "form": "1s_past"
+        },
+        {
+          "english": "salt",
+          "lithuanian": "druska",
+          "type": "object",
+          "guid": "N06_013",
+          "case": "genitive",
+          "declined_form": "druskos"
+        }
+      ],
+      "filename": "sentence_a1_58"
+    },
+    {
+      "english": "I will eat soup.",
+      "lithuanian": "Aš valgysiu sriubą.",
+      "pattern": "SVO",
+      "tense": "future",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "eat",
+          "lithuanian": "valgyti",
+          "type": "verb",
+          "form": "1s_fut"
+        },
+        {
+          "english": "soup",
+          "lithuanian": "sriuba",
+          "type": "object",
+          "guid": "N06_021",
+          "case": "accusative",
+          "declined_form": "sriubą"
+        }
+      ],
+      "filename": "sentence_a1_59"
+    },
+    {
+      "english": "I like soup.",
+      "lithuanian": "Aš mėgstu sriubą.",
+      "pattern": "SVO",
+      "tense": "present",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "like",
+          "lithuanian": "mėgti",
+          "type": "verb",
+          "form": "1s_pres"
+        },
+        {
+          "english": "soup",
+          "lithuanian": "sriuba",
+          "type": "object",
+          "guid": "N06_021",
+          "case": "accusative",
+          "declined_form": "sriubą"
+        }
+      ],
+      "filename": "sentence_a1_60"
+    },
+    {
+      "english": "I have sugar.",
+      "lithuanian": "Aš turiu cukraus.",
+      "pattern": "SVO",
+      "tense": "present",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "have",
+          "lithuanian": "turėti",
+          "type": "verb",
+          "form": "1s_pres"
+        },
+        {
+          "english": "sugar",
+          "lithuanian": "cukrus",
+          "type": "object",
+          "guid": "N06_012",
+          "case": "genitive",
+          "declined_form": "cukraus"
+        }
+      ],
+      "filename": "sentence_a1_61"
+    },
+    {
+      "english": "I bought sugar.",
+      "lithuanian": "Aš pirkau cukraus.",
+      "pattern": "SVO",
+      "tense": "past",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "buy",
+          "lithuanian": "pirkti",
+          "type": "verb",
+          "form": "1s_past"
+        },
+        {
+          "english": "sugar",
+          "lithuanian": "cukrus",
+          "type": "object",
+          "guid": "N06_012",
+          "case": "genitive",
+          "declined_form": "cukraus"
+        }
+      ],
+      "filename": "sentence_a1_62"
+    },
+    {
+      "english": "I drank tea.",
+      "lithuanian": "Aš gėriau arbatą.",
+      "pattern": "SVO",
+      "tense": "past",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "drink",
+          "lithuanian": "gerti",
+          "type": "verb",
+          "form": "1s_past"
+        },
+        {
+          "english": "tea",
+          "lithuanian": "arbata",
+          "type": "object",
+          "guid": "N06_004",
+          "case": "accusative",
+          "declined_form": "arbatą"
+        }
+      ],
+      "filename": "sentence_a1_63"
+    },
+    {
+      "english": "I like tea.",
+      "lithuanian": "Aš mėgstu arbatą.",
+      "pattern": "SVO",
+      "tense": "present",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "like",
+          "lithuanian": "mėgti",
+          "type": "verb",
+          "form": "1s_pres"
+        },
+        {
+          "english": "tea",
+          "lithuanian": "arbata",
+          "type": "object",
+          "guid": "N06_004",
+          "case": "accusative",
+          "declined_form": "arbatą"
+        }
+      ],
+      "filename": "sentence_a1_64"
+    },
+    {
+      "english": "I ate a tomato.",
+      "lithuanian": "Aš valgiau pomidorą.",
+      "pattern": "SVO",
+      "tense": "past",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "eat",
+          "lithuanian": "valgyti",
+          "type": "verb",
+          "form": "1s_past"
+        },
+        {
+          "english": "tomato",
+          "lithuanian": "pomidoras",
+          "type": "object",
+          "guid": "N06_018",
+          "case": "accusative",
+          "declined_form": "pomidorą"
+        }
+      ],
+      "filename": "sentence_a1_65"
+    },
+    {
+      "english": "I will buy a tomato.",
+      "lithuanian": "Aš pirksiu pomidorą.",
+      "pattern": "SVO",
+      "tense": "future",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "buy",
+          "lithuanian": "pirkti",
+          "type": "verb",
+          "form": "1s_fut"
+        },
+        {
+          "english": "tomato",
+          "lithuanian": "pomidoras",
+          "type": "object",
+          "guid": "N06_018",
+          "case": "accusative",
+          "declined_form": "pomidorą"
+        }
+      ],
+      "filename": "sentence_a1_66"
+    },
+    {
+      "english": "I drink water.",
+      "lithuanian": "Aš geriu vandenį.",
+      "pattern": "SVO",
+      "tense": "present",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "drink",
+          "lithuanian": "gerti",
+          "type": "verb",
+          "form": "1s_pres"
+        },
+        {
+          "english": "water",
+          "lithuanian": "vanduo",
+          "type": "object",
+          "guid": "N06_002",
+          "case": "accusative",
+          "declined_form": "vandenį"
+        }
+      ],
+      "filename": "sentence_a1_67"
+    },
+    {
+      "english": "I wanted water.",
+      "lithuanian": "Aš norėjau vandens.",
+      "pattern": "SVO",
+      "tense": "past",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "want",
+          "lithuanian": "norėti",
+          "type": "verb",
+          "form": "1s_past"
+        },
+        {
+          "english": "water",
+          "lithuanian": "vanduo",
+          "type": "object",
+          "guid": "N06_002",
+          "case": "genitive",
+          "declined_form": "vandens"
+        }
+      ],
+      "filename": "sentence_a1_68"
+    },
+    {
+      "english": "I drank wine.",
+      "lithuanian": "Aš gėriau vyną.",
+      "pattern": "SVO",
+      "tense": "past",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "drink",
+          "lithuanian": "gerti",
+          "type": "verb",
+          "form": "1s_past"
+        },
+        {
+          "english": "wine",
+          "lithuanian": "vynas",
+          "type": "object",
+          "guid": "N06_006",
+          "case": "accusative",
+          "declined_form": "vyną"
+        }
+      ],
+      "filename": "sentence_a1_69"
+    },
+    {
+      "english": "I will buy wine.",
+      "lithuanian": "Aš pirksiu vyną.",
+      "pattern": "SVO",
+      "tense": "future",
+      "words_used": [
+        {
+          "english": "I",
+          "lithuanian": "aš",
+          "type": "pronoun"
+        },
+        {
+          "english": "buy",
+          "lithuanian": "pirkti",
+          "type": "verb",
+          "form": "1s_fut"
+        },
+        {
+          "english": "wine",
+          "lithuanian": "vynas",
+          "type": "object",
+          "guid": "N06_006",
+          "case": "accusative",
+          "declined_form": "vyną"
+        }
+      ],
+      "filename": "sentence_a1_70"
+    }
+  ]
+}

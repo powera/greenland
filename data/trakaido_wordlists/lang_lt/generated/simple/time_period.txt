@@ -1,0 +1,22 @@
+[
+  {"en": "day", "lt": "diena"},
+  {"en": "death", "lt": "mirtis"},
+  {"en": "decade", "lt": "dešimtmetis"},
+  {"en": "early", "lt": "anksti"},
+  {"en": "evening", "lt": "vakaras"},
+  {"en": "history", "lt": "istorija"},
+  {"en": "hour", "lt": "valanda"},
+  {"en": "late", "lt": "vėlu"},
+  {"en": "life", "lt": "gyvenimas"},
+  {"en": "minute", "lt": "minutė"},
+  {"en": "moment", "lt": "akimirka"},
+  {"en": "month", "lt": "mėnuo"},
+  {"en": "morning", "lt": "rytas"},
+  {"en": "night", "lt": "naktis"},
+  {"en": "old", "lt": "senas"},
+  {"en": "past", "lt": "praeitis"},
+  {"en": "today", "lt": "šiandien"},
+  {"en": "week", "lt": "savaitė"},
+  {"en": "year", "lt": "metai"},
+  {"en": "young", "lt": "jaunas"}
+]

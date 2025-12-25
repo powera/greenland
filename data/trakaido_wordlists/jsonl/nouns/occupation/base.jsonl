@@ -1,0 +1,13 @@
+{"guid": "N36_001", "pos_type": "noun", "pos_subtype": "occupation", "concept_label": "accountant", "concept_definition": "a person whose job is to prepare, examine, and maintain financial records, ensure accuracy and compliance with laws and regulations, and often manage tax returns and financial reporting for individuals or organizations.", "difficulty_level": 5}
+{"guid": "N36_002", "pos_type": "noun", "pos_subtype": "occupation", "concept_label": "king", "concept_definition": "a male ruler of a kingdom", "difficulty_level": 6}
+{"guid": "N36_003", "pos_type": "noun", "pos_subtype": "occupation", "concept_label": "lord", "concept_definition": "a person of high rank or authority", "difficulty_level": 6}
+{"guid": "N36_004", "pos_type": "noun", "pos_subtype": "occupation", "concept_label": "master", "concept_definition": "a person with control or authority; an expert", "difficulty_level": 6}
+{"guid": "N36_005", "pos_type": "noun", "pos_subtype": "occupation", "concept_label": "guard", "concept_definition": "a person who keeps watch or protects", "difficulty_level": 6}
+{"guid": "N36_006", "pos_type": "noun", "pos_subtype": "occupation", "concept_label": "captain", "concept_definition": "a person in command of a ship or military unit", "difficulty_level": 6}
+{"guid": "N36_007", "pos_type": "noun", "pos_subtype": "occupation", "concept_label": "wizard", "concept_definition": "a person who practices magic", "difficulty_level": 6}
+{"guid": "N36_008", "pos_type": "noun", "pos_subtype": "occupation", "concept_label": "chief", "concept_definition": "a leader or head of an organization", "difficulty_level": 6}
+{"guid": "N36_009", "pos_type": "noun", "pos_subtype": "occupation", "concept_label": "witch", "concept_definition": "a person who practices magic or sorcery", "difficulty_level": 6}
+{"guid": "N36_010", "pos_type": "noun", "pos_subtype": "occupation", "concept_label": "leader", "concept_definition": "a person who leads or commands", "difficulty_level": 6}
+{"guid": "N36_011", "pos_type": "noun", "pos_subtype": "occupation", "concept_label": "prince", "concept_definition": "the son of a monarch", "difficulty_level": 6}
+{"guid": "N36_012", "pos_type": "noun", "pos_subtype": "occupation", "concept_label": "queen", "concept_definition": "a female ruler of a kingdom", "difficulty_level": 6}
+{"guid": "N36_013", "pos_type": "noun", "pos_subtype": "occupation", "concept_label": "officer", "concept_definition": "a person holding a position of authority", "difficulty_level": 6}

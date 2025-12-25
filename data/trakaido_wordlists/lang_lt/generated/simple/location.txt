@@ -1,0 +1,14 @@
+[
+  {"en": "already", "lt": "jau"},
+  {"en": "always", "lt": "visada"},
+  {"en": "everywhere", "lt": "visur"},
+  {"en": "here", "lt": "čia"},
+  {"en": "never", "lt": "niekada"},
+  {"en": "now", "lt": "dabar"},
+  {"en": "nowhere", "lt": "niekur"},
+  {"en": "often", "lt": "dažnai"},
+  {"en": "recently", "lt": "neseniai"},
+  {"en": "sometimes", "lt": "kartais"},
+  {"en": "soon", "lt": "greitai"},
+  {"en": "there", "lt": "ten"}
+]

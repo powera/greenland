@@ -1,0 +1,34 @@
+{"guid": "D01_001", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "quickly", "concept_definition": "At a fast speed; with little delay or taking little time.", "difficulty_level": 11}
+{"guid": "D01_002", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "slowly", "concept_definition": "At a slow speed; not quickly; taking a relatively long time to move, happen, or be done.", "difficulty_level": 11}
+{"guid": "D01_003", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "well", "concept_definition": "In a good or satisfactory manner; to a high standard or degree (e.g., \"She sings well\").", "difficulty_level": 11}
+{"guid": "D01_004", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "badly", "concept_definition": "In a poor or unsatisfactory manner; to a severe or serious degree.", "difficulty_level": 11}
+{"guid": "D01_005", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "loudly", "concept_definition": "In a loud manner; with a high volume or great intensity of sound.", "difficulty_level": 11}
+{"guid": "D01_006", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "quietly", "concept_definition": "In a quiet manner; making little or no noise; without drawing attention (e.g., speaking or acting softly or silently).", "difficulty_level": 11}
+{"guid": "D01_007", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "easily", "concept_definition": "Without difficulty; in a way that is done or achieved with little effort or problems.", "difficulty_level": 11}
+{"guid": "D01_008", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "hard", "concept_definition": "in a way that requires a lot of effort or is difficult; with great force or intensity (e.g., \"She worked hard,\" \"The ball hit the window hard\").", "difficulty_level": 11}
+{"guid": "D01_009", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "together", "concept_definition": "In or into one group, body, mass, or place; with each other; in companionship or cooperation; simultaneously or at the same time.", "difficulty_level": 11}
+{"guid": "D01_010", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "alone", "concept_definition": "without anyone else present; by oneself", "difficulty_level": 11}
+{"guid": "D01_011", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "suddenly", "concept_definition": "suddenly (adverb)", "difficulty_level": 6}
+{"guid": "D01_012", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "almost", "concept_definition": "almost (adverb)", "difficulty_level": 6}
+{"guid": "D01_013", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "nearly", "concept_definition": "nearly (adverb)", "difficulty_level": 6}
+{"guid": "D01_014", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "hardly", "concept_definition": "hardly (adverb)", "difficulty_level": 6}
+{"guid": "D01_015", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "instead", "concept_definition": "instead (adverb)", "difficulty_level": 6}
+{"guid": "D01_016", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "slow", "concept_definition": "slow (adverb)", "difficulty_level": 6}
+{"guid": "D01_017", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "likely", "concept_definition": "likely (adverb)", "difficulty_level": 6}
+{"guid": "D01_018", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "completely", "concept_definition": "completely (adverb)", "difficulty_level": 6}
+{"guid": "D01_019", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "carefully", "concept_definition": "carefully (adverb)", "difficulty_level": 6}
+{"guid": "D01_020", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "surely", "concept_definition": "surely (adverb)", "difficulty_level": 6}
+{"guid": "D01_021", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "obviously", "concept_definition": "obviously (adverb)", "difficulty_level": 6}
+{"guid": "D01_022", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "especially", "concept_definition": "especially (adverb)", "difficulty_level": 6}
+{"guid": "D01_023", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "gently", "concept_definition": "gently (adverb)", "difficulty_level": 6}
+{"guid": "D01_024", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "swiftly", "concept_definition": "swiftly (adverb)", "difficulty_level": 6}
+{"guid": "D01_025", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "softly", "concept_definition": "softly (adverb)", "difficulty_level": 6}
+{"guid": "D01_026", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "slightly", "concept_definition": "slightly (adverb)", "difficulty_level": 6}
+{"guid": "D01_027", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "silently", "concept_definition": "silently (adverb)", "difficulty_level": 6}
+{"guid": "D01_028", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "according", "concept_definition": "according (adverb)", "difficulty_level": 6}
+{"guid": "D01_029", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "apparently", "concept_definition": "apparently (adverb)", "difficulty_level": 6}
+{"guid": "D01_030", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "evidently", "concept_definition": "evidently (adverb)", "difficulty_level": 6}
+{"guid": "D01_031", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "entirely", "concept_definition": "entirely (adverb)", "difficulty_level": 6}
+{"guid": "D01_032", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "possibly", "concept_definition": "possibly (adverb)", "difficulty_level": 6}
+{"guid": "D01_033", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "clearly", "concept_definition": "clearly (adverb)", "difficulty_level": 6}
+{"guid": "D01_034", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "otherwise", "concept_definition": "otherwise (adverb)", "difficulty_level": 6}

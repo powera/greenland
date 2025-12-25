@@ -1,0 +1,15 @@
+[
+  {"en": "circle", "lt": "apskritimas"},
+  {"en": "cone", "lt": "kūgis"},
+  {"en": "cube", "lt": "kubas"},
+  {"en": "cylinder", "lt": "cilindras"},
+  {"en": "hexagon", "lt": "šešiakampis"},
+  {"en": "octagon", "lt": "aštuonkampis"},
+  {"en": "oval", "lt": "ovalas"},
+  {"en": "pentagon", "lt": "penkiakampis"},
+  {"en": "pyramid", "lt": "piramidė"},
+  {"en": "rectangle", "lt": "stačiakampis"},
+  {"en": "sphere", "lt": "rutulys"},
+  {"en": "square", "lt": "kvadratas"},
+  {"en": "triangle", "lt": "trikampis"}
+]

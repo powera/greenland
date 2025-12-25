@@ -1,0 +1,24 @@
+{"guid": "D07_001", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "now", "concept_definition": "at the present time or moment; immediately", "difficulty_level": 9}
+{"guid": "D07_002", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "always", "concept_definition": "At all times; on every occasion; without exception.", "difficulty_level": 9}
+{"guid": "D07_003", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "never", "concept_definition": "At no time; not ever.", "difficulty_level": 9}
+{"guid": "D07_004", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "often", "concept_definition": "Frequently; many times or on many occasions.", "difficulty_level": 9}
+{"guid": "D07_005", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "sometimes", "concept_definition": "Occasionally; on some occasions but not always.", "difficulty_level": 9}
+{"guid": "D07_006", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "here", "concept_definition": "in, at, or to this place; at this location", "difficulty_level": 9}
+{"guid": "D07_007", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "there", "concept_definition": "in or at that place; to or toward that place (used to indicate a location away from the speaker or a previously mentioned place).", "difficulty_level": 9}
+{"guid": "D07_008", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "everywhere", "concept_definition": "in or to all places; in every place", "difficulty_level": 9}
+{"guid": "D07_009", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "nowhere", "concept_definition": "At no place; not in or at any location.", "difficulty_level": 9}
+{"guid": "D07_010", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "already", "concept_definition": "before now; by this time; earlier than expected (used to indicate that something has happened prior to a specified time)", "difficulty_level": 9}
+{"guid": "D07_011", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "soon", "concept_definition": "In a short time; shortly; before long.", "difficulty_level": 9}
+{"guid": "D07_012", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "recently", "concept_definition": "At a time not long before now; a short time ago.", "difficulty_level": 9}
+{"guid": "D07_013", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "away", "concept_definition": "away (adverb)", "difficulty_level": 6}
+{"guid": "D07_014", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "far", "concept_definition": "far (adverb)", "difficulty_level": 6}
+{"guid": "D07_015", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "near", "concept_definition": "near (adverb)", "difficulty_level": 6}
+{"guid": "D07_016", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "round", "concept_definition": "round (adverb)", "difficulty_level": 6}
+{"guid": "D07_017", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "forward", "concept_definition": "forward (adverb)", "difficulty_level": 6}
+{"guid": "D07_018", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "ahead", "concept_definition": "ahead (adverb)", "difficulty_level": 6}
+{"guid": "D07_019", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "distant", "concept_definition": "distant (adverb)", "difficulty_level": 6}
+{"guid": "D07_020", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "directly", "concept_definition": "directly (adverb)", "difficulty_level": 6}
+{"guid": "D07_021", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "anywhere", "concept_definition": "anywhere (adverb)", "difficulty_level": 6}
+{"guid": "D07_022", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "aside", "concept_definition": "aside (adverb)", "difficulty_level": 6}
+{"guid": "D07_023", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "forth", "concept_definition": "forth (adverb)", "difficulty_level": 6}
+{"guid": "D07_024", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "apart", "concept_definition": "apart (adverb)", "difficulty_level": 6}
