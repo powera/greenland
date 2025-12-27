@@ -26,6 +26,11 @@ if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
 import constants
+from agents.common_args import (
+    add_common_args,
+    add_processing_args,
+    confirm_operation,
+)
 from wordfreq.storage.database import create_database_session
 from wordfreq.storage.models.schema import Lemma, AudioQualityReview
 from wordfreq.storage.translation_helpers import get_translation
@@ -273,22 +278,21 @@ class VieversysAgent:
                 query = query.filter(Lemma.difficulty_level == difficulty_level)
 
             # Filter lemmas that have translation in target language
-            if language_code in LANGUAGE_COLUMN_MAP:
-                column_name = LANGUAGE_COLUMN_MAP[language_code]
-                query = query.filter(getattr(Lemma, column_name).isnot(None))
-            else:
-                # For table-based translations
-                from wordfreq.storage.models.schema import LemmaTranslation
-
-                query = query.join(LemmaTranslation).filter(
-                    LemmaTranslation.language_code == language_code
-                )
+            # Note: We'll filter in Python after fetching since get_translation handles both column and table-based lookups
+            # This is simpler and avoids needing to know which languages use which storage method
 
             # Apply limit
             if limit:
                 query = query.limit(limit)
 
-            lemmas = query.all()
+            all_lemmas = query.all()
+
+            # Filter to only lemmas that have translations in the target language
+            lemmas = []
+            for lemma in all_lemmas:
+                if self.get_translation_text(session, lemma, language_code):
+                    lemmas.append(lemma)
+
             logger.info(f"Generating audio for {len(lemmas)} lemmas in {language_code}")
 
             results = {
@@ -366,16 +370,19 @@ class VieversysAgent:
 def get_argument_parser():
     """Return the argument parser for introspection."""
     parser = argparse.ArgumentParser(description="Vieversys - Audio Generation Agent")
-    parser.add_argument("--db-path", help="Database path (uses default if not specified)")
+
+    # Common arguments
+    add_common_args(parser)
+    add_processing_args(parser)
+
+    # Vieversys-specific arguments
     parser.add_argument("--output-dir", help="Output directory for generated audio")
-    parser.add_argument("--debug", action="store_true", help="Enable debug logging")
     parser.add_argument(
         "--language",
         required=True,
         choices=["lt", "zh", "ko", "fr", "de", "es", "pt", "sw", "vi"],
         help="Target language code",
     )
-    parser.add_argument("--limit", type=int, help="Maximum number of lemmas to process")
     parser.add_argument(
         "--difficulty-level", type=int, help="Filter by difficulty level (1-20)"
     )
@@ -389,12 +396,6 @@ def get_argument_parser():
         "--generate-manifests",
         action="store_true",
         help="Generate audio_manifest.json files after generation",
-    )
-    parser.add_argument(
-        "--yes",
-        "-y",
-        action="store_true",
-        help="Skip confirmation prompt before generating audio",
     )
 
     return parser
@@ -421,29 +422,30 @@ def main():
             if args.difficulty_level is not None:
                 query = query.filter(Lemma.difficulty_level == args.difficulty_level)
 
-            if args.language in LANGUAGE_COLUMN_MAP:
-                column_name = LANGUAGE_COLUMN_MAP[args.language]
-                query = query.filter(getattr(Lemma, column_name).isnot(None))
-
             if args.limit:
                 query = query.limit(args.limit)
 
-            lemma_count = query.count()
+            # Get all lemmas and filter by translation availability
+            all_lemmas = query.all()
+            lemmas_with_translation = []
+            for lemma in all_lemmas:
+                if agent_temp.get_translation_text(session, lemma, args.language):
+                    lemmas_with_translation.append(lemma)
+
+            lemma_count = len(lemmas_with_translation)
             voice_count = len(voices) if voices else 3
             estimated_calls = lemma_count * voice_count
         finally:
             session.close()
 
-        print(f"\nThis will generate audio for {lemma_count} lemmas with {voice_count} voices each.")
-        print(f"Total API calls: {estimated_calls}")
-        print(f"This will use OpenAI TTS API and may incur costs.")
-        response = input("Do you want to proceed? [y/N]: ").strip().lower()
-
-        if response not in ["y", "yes"]:
+        if not confirm_operation(
+            message=f"This will generate audio for {lemma_count} lemmas with {voice_count} voices each.\nTotal API calls: {estimated_calls}\nThis will use OpenAI TTS API and may incur costs.",
+            estimated_calls=estimated_calls,
+            skip_confirmation=args.yes,
+            dry_run=False,
+        ):
             print("Aborted.")
             sys.exit(0)
-
-        print()  # Extra newline for readability
 
     # Create agent and run generation
     agent = VieversysAgent(

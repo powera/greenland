@@ -24,6 +24,14 @@ if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
 import constants
+from agents.common_args import (
+    add_common_args,
+    add_llm_args,
+    add_output_args,
+    add_processing_args,
+    add_guid_arg,
+    confirm_operation,
+)
 from wordfreq.storage.database import create_database_session
 from wordfreq.storage.models.schema import (
     DerivativeForm,
@@ -528,19 +536,15 @@ def get_argument_parser():
     parser = argparse.ArgumentParser(
         description="Papuga - Pronunciation Validation and Generation Agent"
     )
-    parser.add_argument("--db-path", help="Database path (uses default if not specified)")
-    parser.add_argument("--debug", action="store_true", help="Enable debug logging")
-    parser.add_argument("--output", help="Output JSON file for report")
-    parser.add_argument(
-        "--model", default="gpt-5-mini", help="LLM model to use (default: gpt-5-mini)"
-    )
-    parser.add_argument("--limit", type=int, help="Maximum items to check/process")
-    parser.add_argument(
-        "--sample-rate",
-        type=float,
-        default=1.0,
-        help="Fraction of items to sample for validation (0.0-1.0, default: 1.0)",
-    )
+
+    # Common arguments
+    add_common_args(parser)
+    add_llm_args(parser, default_model="gpt-5-mini")
+    add_output_args(parser)
+    add_processing_args(parser)
+    add_guid_arg(parser, help_text="Validate/generate pronunciation for the lemma with this GUID")
+
+    # Papuga-specific arguments
     parser.add_argument(
         "--confidence-threshold",
         type=float,
@@ -549,12 +553,6 @@ def get_argument_parser():
     )
     parser.add_argument(
         "--all-languages", action="store_true", help="Check all languages (default: English only)"
-    )
-    parser.add_argument(
-        "--yes",
-        "-y",
-        action="store_true",
-        help="Skip confirmation prompt before running LLM queries",
     )
 
     # Mode selection
@@ -569,11 +567,6 @@ def get_argument_parser():
         "--both", action="store_true", help="Check existing AND populate missing"
     )
 
-    parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="Show what would be done without making LLM API calls or database changes",
-    )
     parser.add_argument(
         "--base-forms-only",
         action="store_true",
@@ -598,10 +591,92 @@ def main():
 
     only_english = not args.all_languages
 
+    # Handle --guid mode
+    if args.guid:
+        agent = PapugaAgent(db_path=args.db_path, debug=args.debug, model=args.model)
+        session = agent.get_session()
+        try:
+            # Find the lemma by GUID
+            lemma = session.query(Lemma).filter(Lemma.guid == args.guid).first()
+            if not lemma:
+                print(f"\nError: No lemma found with GUID: {args.guid}")
+                sys.exit(1)
+
+            # Get the base form for this lemma
+            form = (
+                session.query(DerivativeForm)
+                .filter(
+                    DerivativeForm.lemma_id == lemma.id,
+                    DerivativeForm.is_base_form == True,
+                )
+                .first()
+            )
+
+            if not form:
+                print(f"\nError: No base form found for lemma: {lemma.lemma_text} ({args.guid})")
+                sys.exit(1)
+
+            print(f"\nProcessing pronunciation for: {form.derivative_form_text} (GUID: {args.guid})")
+
+            # Check if pronunciation exists
+            has_pronunciation = form.ipa_pronunciation or form.phonetic_pronunciation
+
+            if mode == "check" or mode == "both":
+                if has_pronunciation:
+                    # Validate existing pronunciation
+                    example_text = agent._get_example_sentence(session, lemma)
+                    result = validate_pronunciation(
+                        word=form.derivative_form_text,
+                        ipa_pronunciation=form.ipa_pronunciation,
+                        phonetic_pronunciation=form.phonetic_pronunciation,
+                        pos_type=lemma.pos_type,
+                        example_sentence=example_text,
+                        definition=lemma.definition_text,
+                        model=args.model,
+                    )
+
+                    print(f"\nValidation result:")
+                    print(f"  Needs update: {result['needs_update']}")
+                    print(f"  Confidence: {result['confidence']:.2f}")
+                    if result['issues']:
+                        print(f"  Issues: {', '.join(result['issues'])}")
+                    if result['suggested_ipa']:
+                        print(f"  Suggested IPA: {result['suggested_ipa']}")
+                    if result['suggested_phonetic']:
+                        print(f"  Suggested phonetic: {result['suggested_phonetic']}")
+                else:
+                    print(f"\nNo existing pronunciation to validate.")
+
+            if mode == "populate" or mode == "both":
+                if not has_pronunciation or mode == "both":
+                    # Generate pronunciation
+                    example_text = agent._get_example_sentence(session, lemma)
+                    result = generate_pronunciation(
+                        word=form.derivative_form_text,
+                        pos_type=lemma.pos_type,
+                        example_sentence=example_text,
+                        definition=lemma.definition_text,
+                        model=args.model,
+                    )
+
+                    print(f"\nGenerated pronunciation:")
+                    print(f"  IPA: {result['ipa_pronunciation']}")
+                    print(f"  Phonetic: {result['phonetic_pronunciation']}")
+                    print(f"  Confidence: {result['confidence']:.2f}")
+
+                    if not args.dry_run and result['confidence'] >= 0.5:
+                        form.ipa_pronunciation = result['ipa_pronunciation']
+                        form.phonetic_pronunciation = result['phonetic_pronunciation']
+                        session.commit()
+                        print(f"\n✓ Updated pronunciation in database")
+                    elif args.dry_run:
+                        print(f"\n[DRY RUN] Would update pronunciation")
+        finally:
+            session.close()
+        return
+
     # Confirm before running LLM queries (unless --yes or --dry-run was provided)
-    if args.dry_run:
-        logger.info("DRY RUN mode: No LLM API calls will be made")
-    elif not args.yes:
+    if not args.yes and not args.dry_run:
         agent_temp = PapugaAgent(db_path=args.db_path, debug=args.debug, model=args.model)
         session = agent_temp.get_session()
         try:
@@ -641,17 +716,14 @@ def main():
         finally:
             session.close()
 
-        print(
-            f"\nThis will make approximately {estimated_calls} LLM API calls using model '{args.model}'."
-        )
-        print("This may incur costs and take some time to complete.")
-        response = input("Do you want to proceed? [y/N]: ").strip().lower()
-
-        if response not in ["y", "yes"]:
+        if not confirm_operation(
+            message=f"Mode: {mode}\nModel: {args.model}\n\nThis may incur costs and take some time to complete.",
+            estimated_calls=estimated_calls,
+            skip_confirmation=args.yes,
+            dry_run=args.dry_run,
+        ):
             print("Aborted.")
             sys.exit(0)
-
-        print()  # Extra newline for readability
 
     agent = PapugaAgent(db_path=args.db_path, debug=args.debug, model=args.model)
 

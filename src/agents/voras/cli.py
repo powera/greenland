@@ -14,6 +14,14 @@ GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent.parent)
 if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
+from agents.common_args import (
+    add_common_args,
+    add_llm_args,
+    add_output_args,
+    add_processing_args,
+    add_guid_arg,
+)
+
 # Language mappings for CLI
 # Format: 'code': (field_name_or_code, display_name, use_lemma_translation_table)
 LANGUAGE_FIELDS = {
@@ -38,46 +46,38 @@ def get_argument_parser():
     parser = argparse.ArgumentParser(
         description="Voras - Multi-lingual Translation Validator and Populator"
     )
-    parser.add_argument("--db-path", help="Database path (uses default if not specified)")
-    parser.add_argument("--debug", action="store_true", help="Enable debug logging")
-    parser.add_argument("--output", help="Output JSON file for report")
+
+    # Common arguments
+    add_common_args(parser)
+    add_llm_args(parser, default_model="gpt-5-mini")
+    add_output_args(parser)
+    add_processing_args(parser)
+    add_guid_arg(parser, help_text="Process only the lemma with this GUID")
+
+    # Mode selection
     parser.add_argument(
         "--mode",
         choices=["check-only", "populate-only", "both", "coverage", "regenerate"],
         default="coverage",
         help="Operation mode: check-only (validate existing), populate-only (add missing), both (validate + populate), coverage (report only, default), regenerate (delete and regenerate, supports --batch)",
     )
+
+    # Language selection (multiple)
     parser.add_argument(
         "--language",
         "--languages",
         nargs="+",
+        dest="languages",
         choices=list(LANGUAGE_FIELDS.keys()),
         help="Specific language(s) to process (lt, zh, ko, fr, es, de, pt, sw, vi). Can specify multiple languages separated by spaces. If not specified, processes all languages.",
     )
-    parser.add_argument(
-        "--yes",
-        "-y",
-        action="store_true",
-        help="Skip confirmation prompt before running LLM queries",
-    )
-    parser.add_argument(
-        "--model", default="gpt-5-mini", help="LLM model to use (default: gpt-5-mini)"
-    )
-    parser.add_argument("--limit", type=int, help="Maximum items to process per language")
-    parser.add_argument(
-        "--sample-rate",
-        type=float,
-        default=1.0,
-        help="Fraction of items to sample for validation (0.0-1.0, default: 1.0)",
-    )
+
+    # Additional parameters
     parser.add_argument(
         "--confidence-threshold",
         type=float,
         default=0.7,
         help="Minimum confidence to flag issues (0.0-1.0, default: 0.7)",
-    )
-    parser.add_argument(
-        "--dry-run", action="store_true", help="Show what would be done without making changes"
     )
     parser.add_argument(
         "--batch",

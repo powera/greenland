@@ -26,6 +26,10 @@ if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
 import constants
+from agents.common_args import (
+    add_common_args,
+    add_output_args,
+)
 from wordfreq.trakaido.utils.export_manager import TrakaidoExporter
 
 # Supported languages and their codes
@@ -232,8 +236,8 @@ class ElniasAgent:
             return {"success": False, "error": str(e)}
 
 
-def main():
-    """Main entry point for command-line execution."""
+def get_argument_parser():
+    """Return the argument parser for introspection."""
     parser = argparse.ArgumentParser(
         description="Elnias - Bootstrap Export Agent",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -262,12 +266,11 @@ Examples:
         """,
     )
 
-    parser.add_argument(
-        "--db-path",
-        type=str,
-        help="Path to the database file (default: from constants.WORDFREQ_DB_PATH)",
-    )
+    # Common arguments
+    add_common_args(parser)
+    add_output_args(parser)
 
+    # Elnias-specific arguments
     parser.add_argument(
         "--language",
         type=str,
@@ -277,17 +280,15 @@ Examples:
     )
 
     parser.add_argument(
-        "--output",
-        type=str,
-        help="Output file path (default: data/trakaido_wordlists/lang_{code}/generated/bootstrap.json)",
-    )
-
-    parser.add_argument(
         "--include-unverified", action="store_true", help="Include unverified entries in export"
     )
 
-    parser.add_argument("--debug", action="store_true", help="Enable debug logging")
+    return parser
 
+
+def main():
+    """Main entry point for command-line execution."""
+    parser = get_argument_parser()
     args = parser.parse_args()
 
     # Handle Traditional Chinese flag

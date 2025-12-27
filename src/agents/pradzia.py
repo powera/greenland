@@ -21,6 +21,10 @@ if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
 import constants
+from agents.common_args import (
+    add_common_args,
+    add_output_args,
+)
 from wordfreq.storage.database import (
     create_database_session,
     ensure_tables_exist,
@@ -635,12 +639,10 @@ def get_argument_parser():
     command-line arguments without executing the main function.
     """
     parser = argparse.ArgumentParser(description="Pradzia - Database Initialization Agent")
-    parser.add_argument("--db-path", help="Database path (uses default if not specified)")
-    parser.add_argument("--debug", action="store_true", help="Enable debug logging")
-    parser.add_argument("--output", help="Output JSON file for report")
-    parser.add_argument(
-        "--dry-run", action="store_true", help="Report what would be done without making changes"
-    )
+
+    # Common arguments
+    add_common_args(parser)
+    add_output_args(parser)
 
     # Mode selection
     mode_group = parser.add_mutually_exclusive_group()

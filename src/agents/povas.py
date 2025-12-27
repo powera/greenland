@@ -30,6 +30,9 @@ if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
 import constants
+from agents.common_args import (
+    add_common_args,
+)
 from wordfreq.storage import database as linguistic_db
 from wordfreq.storage.connection_pool import get_session
 from wordfreq.storage.models.schema import WordToken, Lemma, DerivativeForm
@@ -122,7 +125,7 @@ class PovasAgent:
                     "rank": word_token.frequency_rank if word_token else None,
                     "lemma": lemma.lemma_text,
                     "definition": def_text,
-                    "example": example,
+                    "example": "",  # TODO: Could fetch example from sentences
                     "pronunciation": derivative_form.phonetic_pronunciation or "",
                     "ipa": derivative_form.ipa_pronunciation or "",
                     "chinese": lemma.chinese_translation or "",
@@ -443,13 +446,22 @@ class PovasAgent:
             session.close()
 
 
-def main():
-    """Main entry point for the povas agent."""
+def get_argument_parser():
+    """Return the argument parser for introspection."""
     parser = argparse.ArgumentParser(description="Povas - HTML Generation Agent for POS Subtypes")
-    parser.add_argument("--db-path", help="Database path (uses default if not specified)")
-    parser.add_argument("--debug", action="store_true", help="Enable debug logging")
+
+    # Common arguments
+    add_common_args(parser)
+
+    # Povas-specific arguments
     parser.add_argument("--index-only", action="store_true", help="Generate only the index page")
 
+    return parser
+
+
+def main():
+    """Main entry point for the povas agent."""
+    parser = get_argument_parser()
     args = parser.parse_args()
 
     agent = PovasAgent(db_path=args.db_path, debug=args.debug)

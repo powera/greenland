@@ -9,6 +9,15 @@ import argparse
 import sys
 from pathlib import Path
 
+from agents.common_args import (
+    add_common_args,
+    add_llm_args,
+    add_output_args,
+    add_processing_args,
+    add_guid_arg,
+    add_language_args,
+)
+
 
 def get_argument_parser():
     """Return the argument parser for introspection.
@@ -17,9 +26,15 @@ def get_argument_parser():
     command-line arguments without executing the main function.
     """
     parser = argparse.ArgumentParser(description="Vilkas - Lithuanian Word Forms Checker Agent")
-    parser.add_argument("--db-path", help="Database path (uses default if not specified)")
-    parser.add_argument("--debug", action="store_true", help="Enable debug logging")
-    parser.add_argument("--output", help="Output JSON file for report")
+
+    # Common arguments
+    add_common_args(parser)
+    add_llm_args(parser, default_model="gpt-5-mini")
+    add_output_args(parser)
+    add_processing_args(parser)
+    add_guid_arg(parser, help_text="Process only the lemma with this GUID")
+    add_language_args(parser, multiple=False)
+
     # Check mode options (reporting only, no changes)
     parser.add_argument(
         "--check",
@@ -35,35 +50,8 @@ def get_argument_parser():
         help="Fix mode: Generate missing word forms (supports Lithuanian nouns, French verbs)",
     )
     parser.add_argument(
-        "--language",
-        default="lt",
-        help="Language code for operations (lt=Lithuanian, fr=French, default: lt)",
-    )
-    parser.add_argument(
         "--pos-type",
         help="[Fix mode] Part of speech to fix (e.g., noun, verb). If not specified, fixes all supported types.",
-    )
-    parser.add_argument(
-        "--limit",
-        type=int,
-        default=20,
-        help="[Fix mode] Maximum number of lemmas to process (default: 20)",
-    )
-    parser.add_argument(
-        "--model",
-        default="gpt-5-mini",
-        help="[Fix mode] LLM model to use for form generation (default: gpt-5-mini)",
-    )
-    parser.add_argument(
-        "--throttle",
-        type=float,
-        default=1.0,
-        help="[Fix mode] Seconds to wait between API calls (default: 1.0)",
-    )
-    parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="[Fix mode] Show what would be fixed WITHOUT making any LLM calls or database changes",
     )
     parser.add_argument(
         "--source",
@@ -71,9 +59,9 @@ def get_argument_parser():
         default="llm",
         help="[Fix mode] Source for Lithuanian noun forms: llm (default) or wiki (Wiktionary)",
     )
-    parser.add_argument(
-        "--yes", "-y", action="store_true", help="[Fix mode] Skip confirmation prompt when fixing"
-    )
+
+    # Override default language
+    parser.set_defaults(language="lt")
 
     return parser
 
