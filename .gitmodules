@@ -4,3 +4,6 @@
 [submodule "audio"]
 	path = audio
 	url = git@github.com:powera/audiotools
+[submodule "data/greenland_input"]
+	path = data/greenland_input
+	url = git@github.com:powera/greenland-input.git
