@@ -13,7 +13,7 @@ from typing import List, Optional
 
 from .agent import BebrasAgent
 from .translation import get_language_name, validate_language_codes
-from ..common_args import add_common_args, add_llm_args, add_output_args
+from agents.common_args import add_common_args, add_llm_args, add_output_args
 
 # Configure logging
 logging.basicConfig(

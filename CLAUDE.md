@@ -18,6 +18,10 @@ tasks; currently it is expected that a remote ChatGPT/Claude/Gemini is used.
 Most of the remaining code of relevance is in src/wordfreq ; many of the other
 top-level directories in src/ are deprecated.
 
+IMPORTANT: Always use absolute imports (e.g., "from agents.common_args import")
+rather than relative updir imports (e.g., "from ..common_args import"). This
+ensures imports work correctly regardless of how the code is invoked.
+
 Tests are in src/tests ; any changes to src/clients require tests.  Changes to
 barsukas generally do not require tests.  Do not run any tests other than a
 pycompile to check for code mistakes; ask the developer to test the change in
