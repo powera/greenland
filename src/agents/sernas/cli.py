@@ -8,6 +8,14 @@ This module handles all CLI argument parsing and the main entry point.
 import argparse
 import sys
 
+from agents.common_args import (
+    add_common_args,
+    add_llm_args,
+    add_processing_args,
+    add_guid_arg,
+    add_language_args,
+)
+
 
 def get_argument_parser():
     """Return the argument parser for introspection.
@@ -18,8 +26,13 @@ def get_argument_parser():
     parser = argparse.ArgumentParser(
         description="Šernas - Synonym and Alternative Form Generator Agent"
     )
-    parser.add_argument("--db-path", help="Database path (uses default if not specified)")
-    parser.add_argument("--debug", action="store_true", help="Enable debug logging")
+
+    # Common arguments
+    add_common_args(parser)
+    add_llm_args(parser, default_model="gpt-5-mini")
+    add_processing_args(parser)
+    add_guid_arg(parser, help_text="Process only the lemma with this GUID")
+    add_language_args(parser, multiple=False)
 
     # Check mode options (reporting only, no changes)
     parser.add_argument(
@@ -36,11 +49,6 @@ def get_argument_parser():
         help="Fix mode: Generate missing synonyms and alternative forms",
     )
     parser.add_argument(
-        "--language",
-        default="en",
-        help="Language code for operations (en=English, lt=Lithuanian, etc., default: en)",
-    )
-    parser.add_argument(
         "--type",
         choices=[
             "synonym",
@@ -52,31 +60,9 @@ def get_argument_parser():
         ],
         help="[Check/Fix mode] Type to check/generate. Options: synonym, abbreviation, expanded_form, alternate_spelling, alternative_form (legacy), or all. Default: all",
     )
-    parser.add_argument(
-        "--limit",
-        type=int,
-        default=10,
-        help="[Fix mode] Maximum number of lemmas to process (default: 10)",
-    )
-    parser.add_argument(
-        "--model",
-        default="gpt-5-mini",
-        help="[Fix mode] LLM model to use for generation (default: gpt-5-mini)",
-    )
-    parser.add_argument(
-        "--throttle",
-        type=float,
-        default=1.0,
-        help="[Fix mode] Seconds to wait between API calls (default: 1.0)",
-    )
-    parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="[Fix mode] Show what would be generated WITHOUT making any LLM calls or database changes",
-    )
-    parser.add_argument(
-        "--yes", "-y", action="store_true", help="[Fix mode] Skip confirmation prompt when fixing"
-    )
+
+    # Override default language to 'en'
+    parser.set_defaults(language="en", limit=10)
 
     return parser
 

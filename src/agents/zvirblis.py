@@ -28,6 +28,11 @@ if GREENLAND_SRC_PATH not in sys.path:
 
 import constants
 import util.prompt_loader
+from agents.common_args import (
+    add_common_args,
+    add_llm_args,
+    add_guid_arg,
+)
 from clients.types import Schema, SchemaProperty
 from clients.unified_client import UnifiedLLMClient
 from wordfreq.storage.database import (
@@ -666,7 +671,13 @@ def get_argument_parser():
     command-line arguments without executing the main function.
     """
     parser = argparse.ArgumentParser(description="Generate example sentences for vocabulary words")
-    parser.add_argument("--guid", help="Generate sentences for a specific lemma GUID")
+
+    # Common arguments
+    add_common_args(parser)
+    add_llm_args(parser, default_model="gpt-5-mini")
+    add_guid_arg(parser, help_text="Generate sentences for this specific lemma GUID")
+
+    # Zvirblis-specific arguments
     parser.add_argument(
         "--level",
         type=int,
@@ -685,15 +696,6 @@ def get_argument_parser():
         default=["en", "lt"],
         help="Target languages for generation (default: en lt)",
     )
-    parser.add_argument(
-        "--model", default="gpt-5-mini", help="LLM model to use (default: gpt-5-mini)"
-    )
-    parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="Show what would be done without actually generating sentences",
-    )
-    parser.add_argument("--debug", action="store_true", help="Enable debug logging")
 
     return parser
 

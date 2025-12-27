@@ -36,6 +36,10 @@ if GREENLAND_SRC_PATH not in sys.path:
 
 import constants
 import util.prompt_loader
+from agents.common_args import (
+    add_common_args,
+    add_llm_args,
+)
 from wordfreq.storage.database import create_database_session
 from wordfreq.storage.models.schema import Lemma
 from wordfreq.storage.crud.grammar_fact import (
@@ -529,8 +533,8 @@ class LapeAgent:
                 session.close()
 
 
-def main():
-    """Command-line interface for the Lape agent."""
+def get_argument_parser():
+    """Return the argument parser for introspection."""
     parser = argparse.ArgumentParser(
         description="Lape - Grammar Facts Generator Agent",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -567,6 +571,11 @@ Future fact types (see code comments):
         """,
     )
 
+    # Common arguments
+    add_common_args(parser)
+    add_llm_args(parser, default_model="gpt-5-mini")
+
+    # Lape-specific arguments
     parser.add_argument(
         "--fact-type",
         required=True,
@@ -593,13 +602,13 @@ Future fact types (see code comments):
         default=0.7,
         help="Minimum confidence score to save fact (default: 0.7)",
     )
-    parser.add_argument("--dry-run", action="store_true", help="Run without saving to database")
-    parser.add_argument(
-        "--model", default="gpt-5-mini", help="LLM model to use (default: gpt-5-mini)"
-    )
-    parser.add_argument("--debug", action="store_true", help="Enable debug logging")
-    parser.add_argument("--db-path", help="Database path (default: from constants)")
 
+    return parser
+
+
+def main():
+    """Command-line interface for the Lape agent."""
+    parser = get_argument_parser()
     args = parser.parse_args()
 
     # Create agent

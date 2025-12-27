@@ -16,6 +16,15 @@ GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent.parent)
 if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
+from agents.common_args import (
+    add_common_args,
+    add_llm_args,
+    add_output_args,
+    add_processing_args,
+    add_guid_arg,
+    confirm_operation,
+)
+
 
 def get_argument_parser():
     """Return the argument parser for introspection.
@@ -24,9 +33,13 @@ def get_argument_parser():
     command-line arguments without executing the main function.
     """
     parser = argparse.ArgumentParser(description="Dramblys - Missing Words Detection Agent")
-    parser.add_argument("--db-path", help="Database path (uses default if not specified)")
-    parser.add_argument("--debug", action="store_true", help="Enable debug logging")
-    parser.add_argument("--output", help="Output JSON file for report")
+
+    # Common arguments
+    add_common_args(parser)
+    add_llm_args(parser, default_model="gpt-5-mini")
+    add_output_args(parser)
+    add_processing_args(parser)
+    add_guid_arg(parser, help_text="Process only the word with this GUID")
 
     # Check mode options (reporting only, no changes)
     parser.add_argument(
@@ -53,29 +66,6 @@ def get_argument_parser():
         "--fix",
         action="store_true",
         help="Fix mode: Process high-frequency missing words using LLM",
-    )
-    parser.add_argument(
-        "--limit",
-        type=int,
-        default=20,
-        help="[Fix mode] Maximum number of words to process (default: 20)",
-    )
-    parser.add_argument(
-        "--model", default="gpt-5-mini", help="[Fix mode] LLM model to use (default: gpt-5-mini)"
-    )
-    parser.add_argument(
-        "--throttle",
-        type=float,
-        default=1.0,
-        help="[Fix mode] Seconds to wait between API calls (default: 1.0)",
-    )
-    parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="[Fix mode] Show what would be fixed WITHOUT making any LLM calls",
-    )
-    parser.add_argument(
-        "--yes", "-y", action="store_true", help="[Fix mode] Skip confirmation prompt"
     )
 
     # Staging mode options (two-step import workflow)
@@ -201,24 +191,14 @@ def main():
 
     # Handle --stage mode
     if args.stage:
-        if not args.yes and not args.dry_run:
-            check_results = agent.check_high_frequency_missing_words(top_n=args.top_n)
-            total_missing = check_results.get("missing_count", 0)
-
-            print(f"\n{'='*60}")
-            print(f"Ready to stage high-frequency missing words")
-            print(f"Total missing words found: {total_missing}")
-            if args.limit:
-                print(f"Limit: {args.limit} words")
-            print(f"Model: {args.model}")
-            print(f"Target language: {args.target_language}")
-            print(f"Throttle: {args.throttle}s between calls")
-            print(f"\nWords will be added to pending_imports for review")
-            print(f"{'='*60}")
-            response = input("\nContinue? [y/N]: ")
-            if response.lower() not in ["y", "yes"]:
-                print("Aborted.")
-                return
+        if not confirm_operation(
+            message=f"Model: {args.model}\nTarget language: {args.target_language}\n\nWords will be added to pending_imports for review",
+            estimated_calls=agent.check_high_frequency_missing_words(top_n=args.top_n).get("missing_count", 0) if not args.yes and not args.dry_run else None,
+            skip_confirmation=args.yes,
+            dry_run=args.dry_run,
+        ):
+            print("Aborted.")
+            return
 
         results = agent.stage_missing_words_for_import(
             top_n=args.top_n,
@@ -295,18 +275,13 @@ def main():
                     print(f"\nError: {preview['error']}")
                     return
 
-                print(f"\n{'='*60}")
-                print(
-                    f"Found {preview['matches_found']} {args.pos_type} words for subtype '{args.pos_subtype}'"
-                )
-                print(f"Model: {args.model}")
-                print(f"Throttle: {args.throttle}s between calls")
-                print(f"\nSample words:")
-                for match in preview["matches"][:5]:
-                    print(f"  - '{match['word']}': {match['definition'][:60]}...")
-                print(f"{'='*60}")
-                response = input("\nContinue to add these words? [y/N]: ")
-                if response.lower() not in ["y", "yes"]:
+                sample_words = "\n".join([f"  - '{match['word']}': {match['definition'][:60]}..." for match in preview["matches"][:5]])
+                if not confirm_operation(
+                    message=f"Found {preview['matches_found']} {args.pos_type} words for subtype '{args.pos_subtype}'\nModel: {args.model}\n\nSample words:\n{sample_words}",
+                    estimated_calls=preview['matches_found'],
+                    skip_confirmation=args.yes,
+                    dry_run=args.dry_run,
+                ):
                     print("Aborted.")
                     return
 
@@ -339,30 +314,42 @@ def main():
                     print(f"  Skipped (already exist): {results['skipped']}")
         return
 
+    # Handle --guid mode
+    if args.guid:
+        results = agent.process_single_word_by_guid(
+            guid=args.guid,
+            model=args.model,
+            dry_run=args.dry_run,
+        )
+
+        if "error" in results:
+            print(f"\nError: {results['error']}")
+        else:
+            print(f"\nProcessed word with GUID: {args.guid}")
+            print(f"  Success: {results.get('success', False)}")
+            if results.get("word"):
+                print(f"  Word: {results['word']}")
+            if results.get("message"):
+                print(f"  Message: {results['message']}")
+        return
+
     # Handle --fix mode
     if args.fix:
         # Confirmation prompt (unless --yes or --dry-run)
-        if not args.yes and not args.dry_run:
-            check_results = agent.check_high_frequency_missing_words(top_n=args.top_n)
-            total_missing = check_results.get("missing_count", 0)
-
-            print(f"\n{'='*60}")
-            print(f"Ready to process high-frequency missing words using LLM")
-            print(f"Total missing words found: {total_missing}")
-            if args.limit:
-                print(f"Limit: {args.limit} words")
-            print(f"Model: {args.model}")
-            print(f"Throttle: {args.throttle}s between calls")
-            print(f"\nThis will:")
-            print(f"  - Query LLM for definitions, lemmas, and POS info")
-            print(f"  - Handle plurals, polysemous words, and grammatical words")
-            print(f"  - Create multiple lemmas for words with multiple meanings")
-            print(f"  - Correctly identify base forms vs. inflected forms")
-            print(f"{'='*60}")
-            response = input("\nContinue? [y/N]: ")
-            if response.lower() not in ["y", "yes"]:
-                print("Aborted.")
-                return
+        if not confirm_operation(
+            message=(
+                "This will:\n"
+                "  - Query LLM for definitions, lemmas, and POS info\n"
+                "  - Handle plurals, polysemous words, and grammatical words\n"
+                "  - Create multiple lemmas for words with multiple meanings\n"
+                "  - Correctly identify base forms vs. inflected forms"
+            ),
+            estimated_calls=agent.check_high_frequency_missing_words(top_n=args.top_n).get("missing_count", 0) if not args.yes and not args.dry_run else None,
+            skip_confirmation=args.yes,
+            dry_run=args.dry_run,
+        ):
+            print("Aborted.")
+            return
 
         results = agent.fix_missing_words(
             top_n=args.top_n,

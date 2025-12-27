@@ -13,6 +13,7 @@ from typing import List, Optional
 
 from .agent import BebrasAgent
 from .translation import get_language_name, validate_language_codes
+from ..common_args import add_common_args, add_llm_args, add_output_args
 
 # Configure logging
 logging.basicConfig(
@@ -68,14 +69,11 @@ Examples:
         "--interactive", action="store_true", help="Enable interactive disambiguation prompts"
     )
 
-    # Model and database options
-    parser.add_argument(
-        "--model", default="gpt-5-mini", help="LLM model to use (default: gpt-5-mini)"
-    )
-    parser.add_argument("--db-path", help="Database path (uses default if not specified)")
+    # Common arguments
+    add_common_args(parser)
+    add_llm_args(parser, default_model="gpt-5-mini")
 
     # Output options
-    parser.add_argument("--debug", action="store_true", help="Enable debug logging")
     parser.add_argument("--json", action="store_true", help="Output results as JSON")
 
     return parser

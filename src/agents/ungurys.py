@@ -22,6 +22,9 @@ if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
 import constants
+from agents.common_args import (
+    add_common_args,
+)
 from wordfreq.trakaido.utils.export_manager import TrakaidoExporter
 from wordfreq.trakaido.utils.export_wireword_sentences import WirewordSentenceExporter
 
@@ -489,11 +492,12 @@ class UngurysAgent:
         logger.info("=" * 80)
 
 
-def main():
-    """Main entry point for the ungurys agent."""
+def get_argument_parser():
+    """Return the argument parser for introspection."""
     parser = argparse.ArgumentParser(description="Ungurys - WireWord Export Agent")
-    parser.add_argument("--db-path", help="Database path (uses default if not specified)")
-    parser.add_argument("--debug", action="store_true", help="Enable debug logging")
+
+    # Common arguments
+    add_common_args(parser)
 
     # Language options
     language_help = f'Language code (default: lt). Supported: {", ".join(f"{k}={v}" for k, v in SUPPORTED_LANGUAGES.items())}, zh-Hant=Chinese (Traditional)'
@@ -543,6 +547,12 @@ def main():
         help="Include unverified entries (default: True)",
     )
 
+    return parser
+
+
+def main():
+    """Main entry point for the ungurys agent."""
+    parser = get_argument_parser()
     args = parser.parse_args()
 
     # Handle Traditional Chinese flag

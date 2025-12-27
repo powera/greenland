@@ -44,6 +44,10 @@ if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
 import constants
+from agents.common_args import (
+    add_common_args,
+    add_llm_args,
+)
 from clients.batch_queue import (
     BatchQueueManager,
     BatchRequestMetadata,
@@ -682,15 +686,9 @@ Examples:
         """
     )
 
-    # Global options
-    parser.add_argument("--db-path", help="Database path (uses default if not specified)")
-    parser.add_argument(
-        "--model", default="gpt-5-mini", help="LLM model to use (default: gpt-5-mini)"
-    )
-    parser.add_argument("--debug", action="store_true", help="Enable debug logging")
-    parser.add_argument(
-        "--dry-run", action="store_true", help="Don't save to database (for testing)"
-    )
+    # Common arguments
+    add_common_args(parser)
+    add_llm_args(parser, default_model="gpt-5-mini")
 
     # Subcommands
     subparsers = parser.add_subparsers(dest="command", help="Command to execute", required=True)

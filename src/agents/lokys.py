@@ -23,6 +23,14 @@ if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
 import constants
+from agents.common_args import (
+    add_common_args,
+    add_llm_args,
+    add_output_args,
+    add_processing_args,
+    add_guid_arg,
+    confirm_operation,
+)
 from wordfreq.storage.database import create_database_session
 from wordfreq.storage.models.schema import Lemma
 from wordfreq.tools.llm_validators import (
@@ -497,19 +505,15 @@ def get_argument_parser():
     command-line arguments without executing the main function.
     """
     parser = argparse.ArgumentParser(description="Lokys - English Lemma Validation Agent")
-    parser.add_argument("--db-path", help="Database path (uses default if not specified)")
-    parser.add_argument("--debug", action="store_true", help="Enable debug logging")
-    parser.add_argument("--output", help="Output JSON file for report")
-    parser.add_argument(
-        "--model", default="gpt-5-mini", help="LLM model to use (default: gpt-5-mini)"
-    )
-    parser.add_argument("--limit", type=int, help="Maximum items to check")
-    parser.add_argument(
-        "--sample-rate",
-        type=float,
-        default=1.0,
-        help="Fraction of items to sample (0.0-1.0, default: 1.0)",
-    )
+
+    # Common arguments
+    add_common_args(parser)
+    add_llm_args(parser, default_model="gpt-5-mini")
+    add_output_args(parser)
+    add_processing_args(parser)
+    add_guid_arg(parser, help_text="Validate only the lemma with this GUID")
+
+    # Lokys-specific arguments
     parser.add_argument(
         "--confidence-threshold",
         type=float,
@@ -522,12 +526,6 @@ def get_argument_parser():
         default="both",
         help='Type of checks to run: "lemma" (lemma form validation), "definitions" (definition validation), or "both" (default: both)',
     )
-    parser.add_argument(
-        "--yes",
-        "-y",
-        action="store_true",
-        help="Skip confirmation prompt before running LLM queries",
-    )
 
     return parser
 
@@ -537,11 +535,52 @@ def main():
     parser = get_argument_parser()
     args = parser.parse_args()
 
-    # Confirm before running LLM queries (unless --yes was provided)
-    if not args.yes:
+    agent = LokysAgent(db_path=args.db_path, debug=args.debug, model=args.model)
+
+    # Handle --guid mode
+    if args.guid:
+        session = agent.get_session()
+        try:
+            lemma = session.query(Lemma).filter(Lemma.guid == args.guid).first()
+            if not lemma:
+                print(f"\nError: No lemma found with GUID: {args.guid}")
+                sys.exit(1)
+
+            print(f"\nValidating lemma: {lemma.lemma_text} (GUID: {args.guid})")
+
+            # Validate lemma form
+            if args.check_type in ["lemma", "both"]:
+                result = validate_lemma_form(lemma.lemma_text, lemma.pos_type, args.model)
+                print(f"\nLemma form validation:")
+                print(f"  Is lemma: {result['is_lemma']}")
+                print(f"  Confidence: {result['confidence']:.2f}")
+                if not result['is_lemma']:
+                    print(f"  Suggested: {result['suggested_lemma']}")
+                    print(f"  Reason: {result['reason']}")
+
+            # Validate definition
+            if args.check_type in ["definitions", "both"]:
+                result = validate_definition(
+                    lemma.lemma_text,
+                    lemma.english_definition,
+                    lemma.pos_type,
+                    args.model
+                )
+                print(f"\nDefinition validation:")
+                print(f"  Is accurate: {result['is_accurate']}")
+                print(f"  Confidence: {result['confidence']:.2f}")
+                if not result['is_accurate']:
+                    print(f"  Issues: {result['issues']}")
+                    print(f"  Suggested: {result['suggested_definition']}")
+
+        finally:
+            session.close()
+        return
+
+    # Confirm before running LLM queries (unless --yes or --dry-run was provided)
+    if not args.yes and not args.dry_run:
         # Calculate estimated number of LLM calls
-        agent_temp = LokysAgent(db_path=args.db_path, debug=args.debug, model=args.model)
-        session = agent_temp.get_session()
+        session = agent.get_session()
         try:
             query = session.query(Lemma).filter(Lemma.guid.isnot(None))
             if args.limit:
@@ -557,20 +596,14 @@ def main():
         finally:
             session.close()
 
-        print(
-            f"\nThis will make approximately {estimated_calls} LLM API calls using model '{args.model}'."
-        )
-        print(f"Check type: {args.check_type}")
-        print("This may incur costs and take some time to complete.")
-        response = input("Do you want to proceed? [y/N]: ").strip().lower()
-
-        if response not in ["y", "yes"]:
+        if not confirm_operation(
+            message=f"Check type: {args.check_type}\nModel: {args.model}\n\nThis may incur costs and take some time to complete.",
+            estimated_calls=estimated_calls,
+            skip_confirmation=args.yes,
+            dry_run=args.dry_run,
+        ):
             print("Aborted.")
             sys.exit(0)
-
-        print()  # Extra newline for readability
-
-    agent = LokysAgent(db_path=args.db_path, debug=args.debug, model=args.model)
 
     agent.run_full_check(
         output_file=args.output,
