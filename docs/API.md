@@ -50,7 +50,99 @@ Get information about the API and available endpoints.
 }
 ```
 
-### 2. Get Lemma Information
+### 2. Search Lemmas
+
+**GET** `/api/v1/search`
+
+Search for lemmas by keyword across multiple fields (lemma text, definition, disambiguation, and translations).
+
+**Parameters:**
+- `q` (query, required): Search query string
+- `pos_type` (query, optional): Filter by part of speech (e.g., `noun`, `verb`)
+- `difficulty` (query, optional): Filter by difficulty level (1-20, `-1` for excluded, `null` for not set)
+- `limit` (query, optional): Maximum number of results to return (default: 20, max: 100)
+- `offset` (query, optional): Number of results to skip for pagination (default: 0)
+
+**Example Request:**
+```
+GET /api/v1/search?q=tire
+GET /api/v1/search?q=dog&pos_type=noun&difficulty=1
+GET /api/v1/search?q=gyventi&limit=10&offset=0
+```
+
+**Example Response:**
+```json
+{
+  "data": [
+    {
+      "guid": "N01_234",
+      "lemma_text": "tire",
+      "definition": "A rubber covering around a wheel",
+      "pos_type": "noun",
+      "pos_subtype": "small_movable_object",
+      "difficulty_level": 5,
+      "disambiguation": "wheel component",
+      "translations": {
+        "zh": "轮胎",
+        "fr": "pneu",
+        "lt": "padanga"
+      },
+      "verified": true
+    },
+    {
+      "guid": "V03_156",
+      "lemma_text": "tire",
+      "definition": "To become weary or fatigued",
+      "pos_type": "verb",
+      "pos_subtype": "physical_state",
+      "difficulty_level": 3,
+      "disambiguation": "to become weary",
+      "translations": {
+        "zh": "疲劳",
+        "fr": "se fatiguer",
+        "lt": "pavargti"
+      },
+      "verified": true
+    }
+  ],
+  "metadata": {
+    "query": "tire",
+    "total_results": 2,
+    "limit": 20,
+    "offset": 0,
+    "returned": 2,
+    "has_more": false
+  }
+}
+```
+
+**Fields:**
+- `guid`: The lemma's unique identifier
+- `lemma_text`: The lemma's base form (in English)
+- `definition`: The English definition (truncated to 200 chars if longer)
+- `pos_type`: Part of speech type
+- `pos_subtype`: Part of speech subtype (or `null`)
+- `difficulty_level`: Difficulty level (or `null`)
+- `disambiguation`: Disambiguation text to distinguish homonyms (or `null`)
+- `translations`: Sample of available translations (up to 3 languages shown)
+- `verified`: Whether the lemma has been verified
+
+**Metadata:**
+- `query`: The search query that was used
+- `total_results`: Total number of matching results (before pagination)
+- `limit`: The limit parameter used
+- `offset`: The offset parameter used
+- `returned`: Number of results in this response
+- `has_more`: Whether there are more results available
+- `next_offset`: The offset value to use for the next page (if `has_more` is true)
+
+**Notes:**
+- Results are ordered by relevance: exact matches first, then starts-with, then contains
+- The search is case-insensitive
+- For lemmas with many translations, only a sample (up to 3) is shown. Use the `/api/v1/lemma/<guid>/translations` endpoint to get all translations
+- Use the `disambiguation` field to distinguish between homonyms (e.g., "tire" the noun vs "tire" the verb)
+
+### 3. Get Lemma Information
 
 **GET** `/api/v1/lemma/<guid>`
 

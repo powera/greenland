@@ -18,6 +18,7 @@ from wordfreq.storage.models.schema import (
 from wordfreq.storage.crud.lemma import get_lemma_by_guid
 from wordfreq.storage.crud.grammar_fact import get_grammar_facts
 from wordfreq.storage.translation_helpers import get_all_translations
+from wordfreq.storage.queries.lemma import build_lemma_search_query
 from config import Config
 
 bp = Blueprint("api", __name__, url_prefix="/api")
@@ -183,6 +184,43 @@ def api_info():
     """
     endpoints = [
         {
+            "path": "/api/v1/search",
+            "method": "GET",
+            "description": "Search for lemmas by keyword",
+            "parameters": [
+                {
+                    "name": "q",
+                    "type": "query",
+                    "required": True,
+                    "description": "Search query (searches lemma text, definition, disambiguation, translations)",
+                },
+                {
+                    "name": "pos_type",
+                    "type": "query",
+                    "required": False,
+                    "description": "Filter by part of speech (e.g., 'noun', 'verb')",
+                },
+                {
+                    "name": "difficulty",
+                    "type": "query",
+                    "required": False,
+                    "description": "Filter by difficulty level (1-20, '-1' for excluded, 'null' for not set)",
+                },
+                {
+                    "name": "limit",
+                    "type": "query",
+                    "required": False,
+                    "description": "Max results to return (default: 20, max: 100)",
+                },
+                {
+                    "name": "offset",
+                    "type": "query",
+                    "required": False,
+                    "description": "Number of results to skip for pagination (default: 0)",
+                },
+            ],
+        },
+        {
             "path": "/api/v1/lemma/<guid>",
             "method": "GET",
             "description": "Get basic information about a lemma",
@@ -249,6 +287,134 @@ def api_info():
             "endpoints": endpoints,
         }
     )
+
+
+@bp.route("/v1/search")
+def search_lemmas():
+    """
+    Search for lemmas by keyword across multiple fields.
+
+    Query parameters:
+        - q: Required. Search query to find in lemma text, definition, disambiguation, and translations
+        - pos_type: Optional. Filter by part of speech (e.g., 'noun', 'verb')
+        - difficulty: Optional. Filter by difficulty level (1-20, '-1' for excluded, 'null' for not set)
+        - limit: Optional. Maximum number of results to return (default: 20, max: 100)
+        - offset: Optional. Number of results to skip for pagination (default: 0)
+
+    Returns a list of matching lemmas with enough information to distinguish between them.
+    Each result includes:
+        - guid: The lemma's unique identifier
+        - lemma_text: The lemma's base form (in English)
+        - definition: The English definition (truncated if very long)
+        - pos_type: Part of speech type
+        - pos_subtype: Part of speech subtype (if populated)
+        - difficulty_level: Difficulty level (or null)
+        - disambiguation: Disambiguation text (or null)
+        - translations: Sample of available translations (up to 3 languages)
+        - verified: Whether the lemma has been verified
+
+    The results are ordered by relevance (exact matches first, then starts-with, then contains).
+
+    Example:
+        GET /api/v1/search?q=tire
+        GET /api/v1/search?q=dog&pos_type=noun&difficulty=1
+        GET /api/v1/search?q=gyventi&limit=10&offset=0
+    """
+    # Get query parameters
+    search_query = request.args.get("q", "").strip()
+    pos_type = request.args.get("pos_type", "").strip()
+    difficulty = request.args.get("difficulty", "").strip()
+
+    # Pagination parameters
+    try:
+        limit = min(int(request.args.get("limit", "20")), 100)  # Max 100 results
+    except ValueError:
+        limit = 20
+
+    try:
+        offset = max(int(request.args.get("offset", "0")), 0)
+    except ValueError:
+        offset = 0
+
+    # Validate required parameter
+    if not search_query:
+        return _build_error_response("Query parameter 'q' is required", 400)
+
+    # Build the search query using existing function
+    query = build_lemma_search_query(
+        session=g.db,
+        search=search_query,
+        pos_type=pos_type or None,
+        difficulty=difficulty or None,
+    )
+
+    # Get total count before pagination
+    total_count = query.count()
+
+    # Apply pagination
+    results = query.limit(limit).offset(offset).all()
+
+    # Serialize results with enough info to distinguish between them
+    lemmas_data = []
+    for lemma in results:
+        # Get a sample of translations (up to 3 languages)
+        all_translations_raw = get_all_translations(g.db, lemma)
+        all_translations = {k: v for k, v in all_translations_raw.items() if v is not None and v.strip()}
+
+        # Pick up to 3 translations to show (prioritize common languages)
+        priority_langs = ['zh', 'fr', 'lt', 'es', 'ko', 'de', 'pt', 'sw', 'vi']
+        sample_translations = {}
+        for lang in priority_langs:
+            if lang in all_translations:
+                sample_translations[lang] = all_translations[lang]
+                if len(sample_translations) >= 3:
+                    break
+
+        # If we don't have 3 yet, add any remaining
+        if len(sample_translations) < 3:
+            for lang, trans in all_translations.items():
+                if lang not in sample_translations:
+                    sample_translations[lang] = trans
+                    if len(sample_translations) >= 3:
+                        break
+
+        # Truncate definition if very long (keep first 200 chars)
+        definition = lemma.definition_text
+        if len(definition) > 200:
+            definition = definition[:197] + "..."
+
+        lemmas_data.append({
+            "guid": lemma.guid,
+            "lemma_text": lemma.lemma_text,
+            "definition": definition,
+            "pos_type": lemma.pos_type,
+            "pos_subtype": _serialize_value(lemma.pos_subtype),
+            "difficulty_level": _serialize_value(lemma.difficulty_level),
+            "disambiguation": _serialize_value(lemma.disambiguation),
+            "translations": sample_translations,
+            "verified": lemma.verified,
+        })
+
+    # Build metadata
+    metadata = {
+        "query": search_query,
+        "total_results": total_count,
+        "limit": limit,
+        "offset": offset,
+        "returned": len(lemmas_data),
+    }
+
+    if pos_type:
+        metadata["pos_type_filter"] = pos_type
+    if difficulty:
+        metadata["difficulty_filter"] = difficulty
+
+    # Add pagination info
+    metadata["has_more"] = (offset + limit) < total_count
+    if metadata["has_more"]:
+        metadata["next_offset"] = offset + limit
+
+    return _build_success_response(lemmas_data, metadata)
 
 
 def _serialize_value(value: Any, field_name: str = "") -> Any:
