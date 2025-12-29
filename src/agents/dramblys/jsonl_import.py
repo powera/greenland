@@ -1,0 +1,560 @@
+#!/usr/bin/env python3
+"""
+JSONL Import Module for DRAMBLYS
+
+Handles importing lemmas from JSONL files with intelligent GUID collision handling
+and category migration support.
+"""
+
+import json
+import logging
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple, Any, Set
+from datetime import datetime
+
+from wordfreq.storage.models.schema import Lemma
+
+logger = logging.getLogger(__name__)
+
+
+class CategoryMigration:
+    """Handles category migration mappings."""
+
+    def __init__(self, migration_file: str):
+        """
+        Initialize category migration from JSON file.
+
+        Args:
+            migration_file: Path to the category migrations JSON file
+        """
+        self.migration_file = migration_file
+        self.splits = {}
+        self.renames = {}
+        self.guid_overrides = {}
+        self.import_rules = {}
+
+        self._load_migrations()
+
+    def _load_migrations(self):
+        """Load migration configuration from file."""
+        try:
+            with open(self.migration_file, "r", encoding="utf-8") as f:
+                config = json.load(f)
+
+            self.splits = config.get("category_splits", {})
+            self.renames = config.get("category_renames", {})
+            self.guid_overrides = config.get("guid_overrides", {})
+            self.import_rules = config.get("import_rules", {})
+
+            logger.info(f"Loaded migration config: {len(self.splits)} splits, "
+                       f"{len(self.renames)} renames, {len(self.guid_overrides)} GUID overrides")
+
+        except Exception as e:
+            logger.warning(f"Could not load migration file {self.migration_file}: {e}")
+            logger.warning("Proceeding without migration mappings")
+
+    def should_import_guid(self, guid: str, jsonl_data: Dict) -> Tuple[bool, Optional[str]]:
+        """
+        Check if a GUID should be imported based on overrides.
+
+        Args:
+            guid: The GUID to check
+            jsonl_data: The JSONL data for this GUID
+
+        Returns:
+            Tuple of (should_import, reason)
+        """
+        if guid in self.guid_overrides:
+            override = self.guid_overrides[guid]
+            action = override.get("action", "skip")
+            reason = override.get("reason", "No reason provided")
+
+            if action == "skip":
+                return False, f"Skipped per override: {reason}"
+            elif action == "manual_review":
+                return False, f"Requires manual review: {reason}"
+            # prefer_jsonl and prefer_db are handled by collision logic
+
+        return True, None
+
+    def get_category_targets(self, old_category: str) -> Optional[List[str]]:
+        """
+        Get target categories for a split category.
+
+        Args:
+            old_category: Original category name
+
+        Returns:
+            List of target categories if this is a split, None otherwise
+        """
+        if old_category in self.splits:
+            return self.splits[old_category].get("split_into", [])
+        return None
+
+    def resolve_category(self, old_category: str) -> str:
+        """
+        Resolve category through renames.
+
+        Args:
+            old_category: Original category name
+
+        Returns:
+            Resolved category name
+        """
+        return self.renames.get(old_category, old_category)
+
+
+class JSONLImporter:
+    """Handles importing lemmas from JSONL files."""
+
+    def __init__(
+        self,
+        session,
+        migration_config: Optional[CategoryMigration] = None,
+        dry_run: bool = False,
+    ):
+        """
+        Initialize JSONL importer.
+
+        Args:
+            session: Database session
+            migration_config: Category migration configuration
+            dry_run: If True, don't make database changes
+        """
+        self.session = session
+        self.migration = migration_config
+        self.dry_run = dry_run
+
+        # Statistics
+        self.stats = {
+            "files_processed": 0,
+            "records_read": 0,
+            "records_imported": 0,
+            "records_updated": 0,
+            "records_skipped": 0,
+            "guid_collisions": 0,
+            "category_mismatches": 0,
+            "errors": 0,
+            "skipped_details": [],
+            "error_details": [],
+            "collision_details": [],
+        }
+
+    def read_jsonl_file(self, file_path: Path) -> List[Dict[str, Any]]:
+        """
+        Read a JSONL file and return list of records.
+
+        Args:
+            file_path: Path to JSONL file
+
+        Returns:
+            List of parsed JSON records
+        """
+        records = []
+        try:
+            with open(file_path, "r", encoding="utf-8") as f:
+                for line_num, line in enumerate(f, 1):
+                    line = line.strip()
+                    if not line:
+                        continue
+
+                    try:
+                        data = json.loads(line)
+                        records.append(data)
+                    except json.JSONDecodeError as e:
+                        logger.error(f"JSON parse error in {file_path}:{line_num}: {e}")
+                        self.stats["errors"] += 1
+                        self.stats["error_details"].append({
+                            "file": str(file_path),
+                            "line": line_num,
+                            "error": str(e)
+                        })
+
+            logger.info(f"Read {len(records)} records from {file_path}")
+            return records
+
+        except Exception as e:
+            logger.error(f"Error reading {file_path}: {e}")
+            self.stats["errors"] += 1
+            self.stats["error_details"].append({
+                "file": str(file_path),
+                "error": str(e)
+            })
+            return []
+
+    def find_existing_lemma(self, guid: str) -> Optional[Lemma]:
+        """
+        Find existing lemma by GUID.
+
+        Args:
+            guid: The GUID to search for
+
+        Returns:
+            Existing lemma or None
+        """
+        return self.session.query(Lemma).filter(Lemma.guid == guid).first()
+
+    def check_category_coherence(
+        self,
+        existing: Lemma,
+        jsonl_data: Dict
+    ) -> Tuple[bool, Optional[str]]:
+        """
+        Check if JSONL data matches existing lemma's category.
+
+        Args:
+            existing: Existing lemma from database
+            jsonl_data: JSONL data to import
+
+        Returns:
+            Tuple of (is_coherent, reason_if_not)
+        """
+        existing_pos = existing.pos_type
+        existing_sub = existing.pos_subtype or ""
+        jsonl_pos = jsonl_data.get("pos_type", "")
+        jsonl_sub = jsonl_data.get("pos_subtype", "")
+
+        # Exact match is always coherent
+        if existing_pos == jsonl_pos and existing_sub == jsonl_sub:
+            return True, None
+
+        # Check if this is a known split
+        if self.migration:
+            targets = self.migration.get_category_targets(existing_sub)
+            if targets and jsonl_sub in targets:
+                return True, f"Category split: {existing_sub} → {jsonl_sub}"
+
+        # Category mismatch
+        return False, f"Category mismatch: DB has {existing_pos}/{existing_sub}, JSONL has {jsonl_pos}/{jsonl_sub}"
+
+    def get_field_differences(
+        self,
+        existing: Lemma,
+        jsonl_data: Dict
+    ) -> List[str]:
+        """
+        Get list of differences between existing lemma and JSONL data.
+
+        Args:
+            existing: Existing lemma from database
+            jsonl_data: JSONL data to import
+
+        Returns:
+            List of difference descriptions
+        """
+        diffs = []
+
+        # Compare concept_label (lemma_text)
+        jsonl_label = jsonl_data.get("concept_label", "")
+        if existing.lemma_text != jsonl_label:
+            diffs.append(f"concept_label: '{existing.lemma_text}' → '{jsonl_label}'")
+
+        # Compare concept_definition (definition_text)
+        jsonl_def = jsonl_data.get("concept_definition", "")
+        if existing.definition_text != jsonl_def:
+            # Truncate long definitions for display
+            existing_def_short = existing.definition_text[:60] + "..." if len(existing.definition_text) > 60 else existing.definition_text
+            jsonl_def_short = jsonl_def[:60] + "..." if len(jsonl_def) > 60 else jsonl_def
+            diffs.append(f"definition: '{existing_def_short}' → '{jsonl_def_short}'")
+
+        # Compare difficulty_level
+        jsonl_level = jsonl_data.get("difficulty_level")
+        if existing.difficulty_level != jsonl_level:
+            diffs.append(f"difficulty_level: {existing.difficulty_level} → {jsonl_level}")
+
+        # Compare pos_type/subtype
+        jsonl_pos = jsonl_data.get("pos_type", "")
+        jsonl_sub = jsonl_data.get("pos_subtype", "")
+        if existing.pos_type != jsonl_pos or existing.pos_subtype != jsonl_sub:
+            diffs.append(f"category: {existing.pos_type}/{existing.pos_subtype} → {jsonl_pos}/{jsonl_sub}")
+
+        return diffs
+
+    def should_prefer_jsonl(
+        self,
+        existing: Lemma,
+        jsonl_data: Dict,
+        guid: str
+    ) -> Tuple[bool, str]:
+        """
+        Determine whether to prefer JSONL data over existing DB entry.
+
+        Args:
+            existing: Existing lemma from database
+            jsonl_data: JSONL data to import
+            guid: The GUID
+
+        Returns:
+            Tuple of (prefer_jsonl, reason)
+        """
+        # Check GUID overrides first
+        if self.migration and guid in self.migration.guid_overrides:
+            override = self.migration.guid_overrides[guid]
+            action = override.get("action", "skip")
+            if action == "prefer_jsonl":
+                return True, f"Override: {override.get('reason', 'prefer JSONL')}"
+            elif action == "prefer_db":
+                return False, f"Override: {override.get('reason', 'prefer DB')}"
+
+        # Apply default rule
+        if self.migration:
+            default_rule = self.migration.import_rules.get("on_guid_collision", "prefer_jsonl")
+        else:
+            default_rule = "prefer_jsonl"
+
+        if default_rule == "prefer_jsonl":
+            return True, "Default rule: prefer JSONL"
+        elif default_rule == "prefer_db":
+            return False, "Default rule: prefer DB"
+        elif default_rule == "prefer_newer":
+            # Compare timestamps if available
+            jsonl_notes = jsonl_data.get("notes", "")
+            # Try to extract date from notes like "[2025-08-30 15:55]"
+            # For now, default to JSONL
+            return True, "Default rule: prefer newer (using JSONL)"
+        elif default_rule == "skip":
+            return False, "Default rule: skip on collision"
+        else:
+            return True, "Default rule: prefer JSONL"
+
+    def create_lemma_from_jsonl(self, jsonl_data: Dict) -> Lemma:
+        """
+        Create a Lemma object from JSONL data.
+
+        Args:
+            jsonl_data: JSONL record
+
+        Returns:
+            Lemma object
+        """
+        lemma = Lemma()
+        lemma.guid = jsonl_data.get("guid")
+        lemma.pos_type = jsonl_data.get("pos_type", "")
+        lemma.pos_subtype = jsonl_data.get("pos_subtype")
+
+        # Use concept_label as lemma_text and definition_text
+        concept_label = jsonl_data.get("concept_label", "")
+        concept_definition = jsonl_data.get("concept_definition", "")
+
+        lemma.lemma_text = concept_label
+        lemma.definition_text = concept_definition
+
+        lemma.difficulty_level = jsonl_data.get("difficulty_level")
+        lemma.notes = jsonl_data.get("notes")
+
+        return lemma
+
+    def update_lemma_from_jsonl(self, lemma: Lemma, jsonl_data: Dict):
+        """
+        Update existing lemma with JSONL data.
+
+        Args:
+            lemma: Existing lemma to update
+            jsonl_data: JSONL data
+        """
+        # Update fields
+        concept_label = jsonl_data.get("concept_label", "")
+        concept_definition = jsonl_data.get("concept_definition", "")
+
+        lemma.lemma_text = concept_label
+        lemma.definition_text = concept_definition
+        lemma.difficulty_level = jsonl_data.get("difficulty_level")
+
+        # Append to notes if different
+        new_notes = jsonl_data.get("notes", "")
+        if new_notes:
+            if lemma.notes:
+                lemma.notes = f"{lemma.notes}\n{new_notes}"
+            else:
+                lemma.notes = new_notes
+
+        lemma.updated_at = datetime.now()
+
+    def import_record(self, jsonl_data: Dict) -> Tuple[bool, str]:
+        """
+        Import a single JSONL record.
+
+        Args:
+            jsonl_data: JSONL record to import
+
+        Returns:
+            Tuple of (success, message)
+        """
+        guid = jsonl_data.get("guid")
+        if not guid:
+            return False, "Missing GUID"
+
+        # Check GUID overrides
+        if self.migration:
+            should_import, reason = self.migration.should_import_guid(guid, jsonl_data)
+            if not should_import:
+                self.stats["records_skipped"] += 1
+                self.stats["skipped_details"].append({
+                    "guid": guid,
+                    "reason": reason
+                })
+                return False, reason
+
+        # Check for existing lemma
+        existing = self.find_existing_lemma(guid)
+
+        if existing:
+            # GUID collision
+            self.stats["guid_collisions"] += 1
+
+            # Check category coherence
+            is_coherent, coherence_reason = self.check_category_coherence(existing, jsonl_data)
+
+            if not is_coherent:
+                self.stats["category_mismatches"] += 1
+
+                # Check if we should fail or handle via migration
+                if self.migration:
+                    on_mismatch = self.migration.import_rules.get("on_category_mismatch", "fail")
+                else:
+                    on_mismatch = "fail"
+
+                if on_mismatch == "fail":
+                    self.stats["records_skipped"] += 1
+                    self.stats["skipped_details"].append({
+                        "guid": guid,
+                        "reason": coherence_reason
+                    })
+                    return False, coherence_reason
+                # else: auto_migrate would continue with the split
+
+            # Decide whether to update
+            prefer_jsonl, reason = self.should_prefer_jsonl(existing, jsonl_data, guid)
+
+            # Get field differences
+            differences = self.get_field_differences(existing, jsonl_data)
+
+            self.stats["collision_details"].append({
+                "guid": guid,
+                "action": "update" if prefer_jsonl else "skip",
+                "reason": reason,
+                "differences": differences
+            })
+
+            if prefer_jsonl:
+                if not self.dry_run:
+                    self.update_lemma_from_jsonl(existing, jsonl_data)
+                    self.session.commit()
+                self.stats["records_updated"] += 1
+                return True, f"Updated: {reason}"
+            else:
+                self.stats["records_skipped"] += 1
+                self.stats["skipped_details"].append({
+                    "guid": guid,
+                    "reason": reason,
+                    "differences": differences
+                })
+                return False, f"Skipped: {reason}"
+
+        else:
+            # New lemma
+            if not self.dry_run:
+                lemma = self.create_lemma_from_jsonl(jsonl_data)
+                self.session.add(lemma)
+                self.session.commit()
+            self.stats["records_imported"] += 1
+            return True, "New lemma created"
+
+    def import_file(self, file_path: Path) -> Dict[str, int]:
+        """
+        Import all records from a JSONL file.
+
+        Args:
+            file_path: Path to JSONL file
+
+        Returns:
+            Statistics dict for this file
+        """
+        logger.info(f"Importing {file_path}...")
+
+        records = self.read_jsonl_file(file_path)
+        self.stats["files_processed"] += 1
+        self.stats["records_read"] += len(records)
+
+        for record in records:
+            success, message = self.import_record(record)
+            if not success:
+                logger.debug(f"  {record.get('guid')}: {message}")
+            else:
+                logger.debug(f"  {record.get('guid')}: {message}")
+
+        return {
+            "file": str(file_path),
+            "records": len(records),
+        }
+
+    def import_directory(
+        self,
+        directory: Path,
+        pattern: str = "**/*base.jsonl"
+    ) -> Dict[str, Any]:
+        """
+        Import all JSONL files from a directory.
+
+        Args:
+            directory: Base directory to search
+            pattern: Glob pattern for files (default: **/*base.jsonl)
+
+        Returns:
+            Import statistics
+        """
+        logger.info(f"Scanning {directory} for pattern {pattern}...")
+
+        files = list(directory.glob(pattern))
+        logger.info(f"Found {len(files)} files to import")
+
+        if not files:
+            logger.warning(f"No files found matching {pattern} in {directory}")
+
+        for file_path in sorted(files):
+            try:
+                self.import_file(file_path)
+            except Exception as e:
+                logger.error(f"Error importing {file_path}: {e}")
+                self.stats["errors"] += 1
+                self.stats["error_details"].append({
+                    "file": str(file_path),
+                    "error": str(e)
+                })
+
+        return self.stats
+
+    def get_summary(self) -> str:
+        """Get a human-readable summary of import results."""
+        lines = [
+            "\n" + "=" * 80,
+            "JSONL IMPORT SUMMARY",
+            "=" * 80,
+            f"Files processed: {self.stats['files_processed']}",
+            f"Records read: {self.stats['records_read']}",
+            f"Records imported (new): {self.stats['records_imported']}",
+            f"Records updated: {self.stats['records_updated']}",
+            f"Records skipped: {self.stats['records_skipped']}",
+            f"GUID collisions: {self.stats['guid_collisions']}",
+            f"Category mismatches: {self.stats['category_mismatches']}",
+            f"Errors: {self.stats['errors']}",
+        ]
+
+        if self.stats["collision_details"]:
+            lines.append(f"\nGUID Collision Details (showing first 10):")
+            for detail in self.stats["collision_details"][:10]:
+                lines.append(f"  {detail['guid']}: {detail['action']} - {detail['reason']}")
+
+        if self.stats["skipped_details"]:
+            lines.append(f"\nSkipped Records (showing first 10):")
+            for detail in self.stats["skipped_details"][:10]:
+                lines.append(f"  {detail['guid']}: {detail['reason']}")
+
+        if self.stats["error_details"]:
+            lines.append(f"\nErrors (showing first 10):")
+            for detail in self.stats["error_details"][:10]:
+                lines.append(f"  {detail.get('file', 'unknown')}: {detail['error']}")
+
+        lines.append("=" * 80)
+
+        return "\n".join(lines)

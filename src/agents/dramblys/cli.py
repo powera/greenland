@@ -120,6 +120,25 @@ def get_argument_parser():
         help="[Subtype mode] Stage to pending_imports instead of processing directly",
     )
 
+    # JSONL import mode options
+    parser.add_argument(
+        "--import-jsonl",
+        type=str,
+        metavar="PATH",
+        help="Import lemmas from JSONL file(s). PATH can be a file or directory.",
+    )
+    parser.add_argument(
+        "--migration-file",
+        type=str,
+        help="[Import mode] Path to category migrations JSON file (default: data/category_migrations.json)",
+    )
+    parser.add_argument(
+        "--pattern",
+        type=str,
+        default="**/base.jsonl",
+        help="[Import mode] Glob pattern for JSONL files when importing directory (default: **/base.jsonl)",
+    )
+
     return parser
 
 
@@ -372,6 +391,61 @@ def main():
                 print(f"  Processed: {results['processed']}")
                 print(f"  Successful: {results['successful']}")
                 print(f"  Failed: {results['failed']}")
+        return
+
+    # Handle --import-jsonl mode
+    if args.import_jsonl:
+        if not confirm_operation(
+            message=f"Import JSONL files from: {args.import_jsonl}\nPattern: {args.pattern}\nMigration file: {args.migration_file or 'data/category_migrations.json (default)'}",
+            skip_confirmation=args.yes,
+            dry_run=args.dry_run,
+        ):
+            print("Aborted.")
+            return
+
+        results = agent.import_jsonl(
+            source_path=args.import_jsonl,
+            migration_file=args.migration_file,
+            pattern=args.pattern,
+            dry_run=args.dry_run,
+        )
+
+        if "error" in results:
+            print(f"\nError: {results['error']}")
+        else:
+            if args.dry_run:
+                print("\nDRY RUN - No changes made to database")
+            print(f"\nImport Results:")
+            print(f"  Files processed: {results['files_processed']}")
+            print(f"  Records read: {results['records_read']}")
+            print(f"  Records imported (new): {results['records_imported']}")
+            print(f"  Records updated: {results['records_updated']}")
+            print(f"  Records skipped: {results['records_skipped']}")
+            print(f"  GUID collisions: {results['guid_collisions']}")
+            print(f"  Category mismatches: {results['category_mismatches']}")
+            print(f"  Errors: {results['errors']}")
+
+            if results.get("collision_details"):
+                print(f"\nGUID Collisions (first 10):")
+                for detail in results["collision_details"][:10]:
+                    print(f"  {detail['guid']}: {detail['action']} - {detail['reason']}")
+                    if detail.get("differences"):
+                        for diff in detail["differences"]:
+                            print(f"    • {diff}")
+
+            if results.get("skipped_details"):
+                print(f"\nSkipped Records (first 5):")
+                for detail in results["skipped_details"][:5]:
+                    print(f"  {detail['guid']}: {detail['reason']}")
+                    if detail.get("differences"):
+                        for diff in detail["differences"]:
+                            print(f"    • {diff}")
+
+            # Write to output file if requested
+            if args.output:
+                with open(args.output, "w", encoding="utf-8") as f:
+                    json.dump(results, f, indent=2, ensure_ascii=False)
+                print(f"\nFull results written to: {args.output}")
         return
 
     # Handle check mode (existing functionality)

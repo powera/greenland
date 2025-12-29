@@ -1,0 +1,38 @@
+{
+  "_comment": "Category migration mappings for JSONL import",
+  "_description": "Maps old POS subtypes to new ones for handling category splits and renames",
+
+  "category_splits": {
+    "food_drink": {
+      "split_into": ["food", "beverage"],
+      "description": "Split food_drink into separate food and beverage categories"
+    },
+    "human": {
+      "split_into": ["occupation", "family_relation"],
+      "description": "Split human into occupation and family_relation categories"
+    }
+  },
+
+  "category_renames": {
+    "_comment": "Direct 1:1 renames (old_name -> new_name)",
+    "_example": "old_category: new_category"
+  },
+
+  "guid_overrides": {
+    "_comment": "Specific GUID handling instructions",
+    "_description": "Actions: skip, prefer_jsonl, prefer_db, manual_review",
+    "_example": {
+      "N99_001": {
+        "action": "skip",
+        "reason": "Shape word needs manual fixing"
+      }
+    }
+  },
+
+  "import_rules": {
+    "on_guid_collision": "prefer_jsonl",
+    "_comment": "Options: fail, skip, prefer_jsonl, prefer_db, prefer_newer",
+    "on_category_mismatch": "fail",
+    "_comment_2": "Options: fail, auto_migrate (use splits above), manual_review"
+  }
+}

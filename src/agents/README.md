@@ -166,7 +166,7 @@ The agent provides:
 
 **Name:** "Dramblys" means "elephant" in Lithuanian - never forgets what's missing!
 
-**Purpose:** Identifies missing words that should be in the dictionary by scanning frequency corpora, and can automatically process them using LLM to add to the database.
+**Purpose:** Identifies missing words that should be in the dictionary by scanning frequency corpora, can automatically process them using LLM to add to the database, and can import words from curated JSONL files with intelligent GUID collision handling.
 
 **Usage:**
 ```bash
@@ -175,6 +175,9 @@ python dramblys.py [--check CHECK_TYPE] [--output REPORT.json] [--top-n N]
 
 # Fix mode (process missing words)
 python dramblys.py --fix [--limit N] [--dry-run]
+
+# Import mode (import from JSONL files)
+python dramblys.py --import-jsonl PATH [--migration-file FILE] [--dry-run]
 ```
 
 **Check Mode (Reporting Only):**
@@ -236,6 +239,50 @@ In fix mode:
 - Handles grammatical words (e.g., "since" → identifies correct POS and lemma)
 - Creates appropriate WordToken, Lemma, and DerivativeForm entries
 - Number of words successfully processed vs. failed
+
+**Import Mode (JSONL Import):**
+- `--import-jsonl PATH` - Import lemmas from JSONL file or directory
+- `--migration-file FILE` - Path to category migrations JSON file (default: data/category_migrations.json)
+- `--pattern PATTERN` - Glob pattern for files when importing directory (default: **/base.jsonl)
+- `--dry-run` - Show what would be imported without making changes
+- `--yes`, `-y` - Skip confirmation prompt
+
+**Import Mode Features:**
+- Intelligent GUID collision handling (prefer JSONL, prefer DB, skip, or fail)
+- Category migration support for splits (e.g., food_drink → food/beverage)
+- Per-GUID override rules for special cases
+- Validates category coherence (ensures same GUID isn't used for different categories)
+- Detailed import statistics and collision reports
+
+**Example Import Usage:**
+
+Import from directory (dry run):
+```bash
+python dramblys.py --import-jsonl data/trakaido_wordlists/jsonl --dry-run
+```
+
+Import single file:
+```bash
+python dramblys.py --import-jsonl data/trakaido_wordlists/jsonl/nouns/animal/base.jsonl --yes
+```
+
+Import with custom migration file:
+```bash
+python dramblys.py --import-jsonl data/trakaido_wordlists/jsonl --migration-file custom_migrations.json
+```
+
+Import with output report:
+```bash
+python dramblys.py --import-jsonl data/trakaido_wordlists/jsonl --output /tmp/import_report.json --yes
+```
+
+**Category Migrations:**
+
+The import mode supports category migrations via JSON configuration file (`data/category_migrations.json`):
+- **Category splits**: Handle subcategories that were split (e.g., `food_drink` → `food` and `beverage`)
+- **Category renames**: Simple 1:1 category renames
+- **GUID overrides**: Special handling for specific GUIDs (skip, prefer_jsonl, prefer_db, manual_review)
+- **Import rules**: Default behavior for GUID collisions and category mismatches
 
 ---
 
