@@ -34,6 +34,7 @@ import argparse
 import itertools
 import json
 import logging
+import re
 import sys
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
@@ -76,6 +77,29 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+
+
+def strip_disambiguation(text: str) -> str:
+    """
+    Strip disambiguation info from lemma text.
+
+    Removes parenthetical content from any position in the text.
+    Examples:
+        "mouse (computer)" -> "mouse"
+        "they(f.) walk" -> "they walk"
+        "(computer) monitor" -> "monitor"
+
+    Args:
+        text: Lemma text possibly containing parenthetical disambiguation
+
+    Returns:
+        Text with parenthetical content removed and extra spaces cleaned up
+    """
+    # Remove all parenthetical content (including the parentheses)
+    result = re.sub(r'\s*\([^)]*\)\s*', ' ', text)
+    # Clean up multiple spaces and strip
+    result = re.sub(r'\s+', ' ', result).strip()
+    return result
 
 
 class BuivolasAgent:
@@ -226,7 +250,9 @@ class BuivolasAgent:
         """
         en_sentence = pattern["en_template"]
         for slot_name, (lemma, guid) in filled_slots.items():
-            en_sentence = en_sentence.replace(f"[{slot_name}]", lemma.lemma_text)
+            # Strip disambiguation info from lemma text (e.g., "mouse (computer)" -> "mouse")
+            lemma_text = strip_disambiguation(lemma.lemma_text)
+            en_sentence = en_sentence.replace(f"[{slot_name}]", lemma_text)
         return en_sentence
 
     def lookup_fixed_words(self, session, pattern: Dict) -> List[Tuple[Lemma, str]]:
@@ -336,14 +362,18 @@ class BuivolasAgent:
 
             # Add slot variables
             for slot_name, (lemma, guid) in combination["lemmas"].items():
+                # Strip disambiguation info when storing the word in the sentence
+                # (e.g., "mouse (computer)" -> "mouse") to match the actual sentence text
+                lemma_text = strip_disambiguation(lemma.lemma_text)
+
                 sentence_word = SentenceWord(
                     sentence_id=sentence.id,
                     lemma_id=lemma.id,
                     language_code="en",
                     position=position,
                     word_role=slot_name,
-                    english_text=lemma.lemma_text,
-                    target_language_text=lemma.lemma_text,
+                    english_text=lemma_text,
+                    target_language_text=lemma_text,
                 )
                 session.add(sentence_word)
                 position += 1
