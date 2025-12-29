@@ -229,6 +229,34 @@ class BuivolasAgent:
             en_sentence = en_sentence.replace(f"[{slot_name}]", lemma.lemma_text)
         return en_sentence
 
+    def lookup_fixed_words(self, session, pattern: Dict) -> List[Tuple[Lemma, str]]:
+        """
+        Look up lemmas for fixed words in the pattern template.
+
+        Args:
+            session: Database session
+            pattern: Pattern definition
+
+        Returns:
+            List of (lemma, guid) tuples for fixed words
+        """
+        fixed_lemmas = []
+        for fixed_word in pattern.get("fixed_words", []):
+            query = session.query(Lemma).filter(
+                Lemma.lemma_text == fixed_word["lemma_text"],
+                Lemma.pos_type == fixed_word["pos_type"],
+                Lemma.guid.isnot(None)
+            )
+            lemma = query.first()
+            if lemma:
+                fixed_lemmas.append((lemma, lemma.guid))
+            else:
+                logger.warning(
+                    f"Could not find fixed word '{fixed_word['lemma_text']}' "
+                    f"(pos_type={fixed_word['pos_type']}) for pattern {pattern['pattern_id']}"
+                )
+        return fixed_lemmas
+
     def save_candidate_sentence(
         self, session, pattern: Dict, combination: Dict, template_text: str
     ):
@@ -303,6 +331,8 @@ class BuivolasAgent:
 
             # Add word links (for English only, for now)
             position = 0
+
+            # Add slot variables
             for slot_name, (lemma, guid) in combination["lemmas"].items():
                 sentence_word = SentenceWord(
                     sentence_id=sentence.id,
@@ -310,6 +340,21 @@ class BuivolasAgent:
                     language_code="en",
                     position=position,
                     word_role=slot_name,
+                    english_text=lemma.lemma_text,
+                    target_language_text=lemma.lemma_text,
+                )
+                session.add(sentence_word)
+                position += 1
+
+            # Add fixed words as dependencies
+            fixed_lemmas = self.lookup_fixed_words(session, pattern)
+            for lemma, guid in fixed_lemmas:
+                sentence_word = SentenceWord(
+                    sentence_id=sentence.id,
+                    lemma_id=lemma.id,
+                    language_code="en",
+                    position=position,
+                    word_role="fixed",
                     english_text=lemma.lemma_text,
                     target_language_text=lemma.lemma_text,
                 )

@@ -12,6 +12,9 @@ SIMPLE_PATTERNS = [
         "slots": [
             {"name": "small object", "pos_type": "noun", "pos_subtype": "small_movable_object", "min_level": 1, "max_level": 10}
         ],
+        "fixed_words": [
+            {"lemma_text": "where", "pos_type": "pronoun"}
+        ],
         "pattern_type": "question",
         "notes": "Basic question about location of an object"
     },
@@ -30,6 +33,9 @@ SIMPLE_PATTERNS = [
         "en_template": "I eat [food].",
         "slots": [
             {"name": "food", "pos_type": "noun", "pos_subtype": "food", "min_level": 1, "max_level": 10}
+        ],
+        "fixed_words": [
+            {"lemma_text": "eat", "pos_type": "verb"}
         ],
         "pattern_type": "SVO",
         "notes": "Eating specific food"
@@ -51,6 +57,9 @@ SIMPLE_PATTERNS = [
             {"name": "number", "pos_type": "numeral", "pos_subtype": None, "min_level": 1, "max_level": 5},
             {"name": "small object", "pos_type": "noun", "pos_subtype": "small_movable_object", "min_level": 1, "max_level": 10}
         ],
+        "fixed_words": [
+            {"lemma_text": "have", "pos_type": "verb"}
+        ],
         "pattern_type": "SVO",
         "notes": "Expressing quantity of possessed items"
     },
@@ -70,6 +79,9 @@ SIMPLE_PATTERNS = [
             {"name": "small object", "pos_type": "noun", "pos_subtype": "small_movable_object", "min_level": 1, "max_level": 10},
             {"name": "place", "pos_type": "noun", "pos_subtype": "building_structure", "min_level": 1, "max_level": 10}
         ],
+        "fixed_words": [
+            {"lemma_text": "in", "pos_type": "preposition"}
+        ],
         "pattern_type": "SVO",
         "notes": "Expressing location of an object in a building"
     },
@@ -78,6 +90,10 @@ SIMPLE_PATTERNS = [
         "en_template": "I want to [verb].",
         "slots": [
             {"name": "verb", "pos_type": "verb", "pos_subtype": None, "min_level": 1, "max_level": 10}
+        ],
+        "fixed_words": [
+            {"lemma_text": "want", "pos_type": "verb"},
+            {"lemma_text": "to", "pos_type": "conjunction"}
         ],
         "pattern_type": "SVO",
         "notes": "Expressing desire to perform an action"
@@ -98,17 +114,24 @@ SIMPLE_PATTERNS = [
         "slots": [
             {"name": "food", "pos_type": "noun", "pos_subtype": "food", "min_level": 1, "max_level": 10}
         ],
+        "fixed_words": [
+            {"lemma_text": "like", "pos_type": "verb"}
+        ],
         "pattern_type": "SVO",
         "notes": "Expressing preference for food"
     },
     {
-        "pattern_id": "i_verb",
-        "en_template": "I [verb].",
+        "pattern_id": "the_animal_drinks_water",
+        "en_template": "The [animal] drinks water.",
         "slots": [
-            {"name": "verb", "pos_type": "verb", "pos_subtype": None, "min_level": 1, "max_level": 10}
+            {"name": "animal", "pos_type": "noun", "pos_subtype": "animal", "min_level": 1, "max_level": 10}
+        ],
+        "fixed_words": [
+            {"lemma_text": "drink", "pos_type": "verb"},
+            {"lemma_text": "water", "pos_type": "noun"}
         ],
         "pattern_type": "SVO",
-        "notes": "Simple statement of action"
+        "notes": "Animal drinking water - demonstrates verb and noun with one variable"
     },
     {
         "pattern_id": "do_you_verb",
@@ -124,6 +147,9 @@ SIMPLE_PATTERNS = [
         "en_template": "I need a [tool].",
         "slots": [
             {"name": "tool", "pos_type": "noun", "pos_subtype": "tool_machine", "min_level": 1, "max_level": 10}
+        ],
+        "fixed_words": [
+            {"lemma_text": "need", "pos_type": "verb"}
         ],
         "pattern_type": "SVO",
         "notes": "Expressing necessity for a tool"
@@ -143,6 +169,9 @@ SIMPLE_PATTERNS = [
         "en_template": "I see a [animal].",
         "slots": [
             {"name": "animal", "pos_type": "noun", "pos_subtype": "animal", "min_level": 1, "max_level": 10}
+        ],
+        "fixed_words": [
+            {"lemma_text": "see", "pos_type": "verb"}
         ],
         "pattern_type": "SVO",
         "notes": "Observing an animal"
@@ -171,24 +200,57 @@ SIMPLE_PATTERNS = [
         "slots": [
             {"name": "clothing", "pos_type": "noun", "pos_subtype": "clothing_accessory", "min_level": 1, "max_level": 10}
         ],
+        "fixed_words": [
+            {"lemma_text": "want", "pos_type": "verb"}
+        ],
         "pattern_type": "SVO",
         "notes": "Expressing desire for clothing"
     },
     {
-        "pattern_id": "person_verb",
-        "en_template": "The [person] [verb].",
+        "pattern_id": "the_person_works",
+        "en_template": "The [person] works.",
         "slots": [
-            {"name": "person", "pos_type": "noun", "pos_subtype": "occupation", "min_level": 1, "max_level": 10},
-            {"name": "verb", "pos_type": "verb", "pos_subtype": None, "min_level": 1, "max_level": 10}
+            {"name": "person", "pos_type": "noun", "pos_subtype": "human", "min_level": 1, "max_level": 10}
+        ],
+        "fixed_words": [
+            {"lemma_text": "work", "pos_type": "verb"}
         ],
         "pattern_type": "SVO",
-        "notes": "Person performing an action"
+        "notes": "Person (modern profession) working"
+    },
+    {
+        "pattern_id": "my_relation_is_here",
+        "en_template": "My [relation] is here.",
+        "slots": [
+            {"name": "relation", "pos_type": "noun", "pos_subtype": "family_relation", "min_level": 1, "max_level": 10}
+        ],
+        "fixed_words": [
+            {"lemma_text": "be", "pos_type": "verb"},
+            {"lemma_text": "here", "pos_type": "adverb"}
+        ],
+        "pattern_type": "SVO",
+        "notes": "Family relation being present"
+    },
+    {
+        "pattern_id": "the_occupation_helps",
+        "en_template": "The [occupation] helps.",
+        "slots": [
+            {"name": "occupation", "pos_type": "noun", "pos_subtype": "occupation", "min_level": 1, "max_level": 10}
+        ],
+        "fixed_words": [
+            {"lemma_text": "help", "pos_type": "verb"}
+        ],
+        "pattern_type": "SVO",
+        "notes": "Occupation (fantasy/medieval role) performing action"
     },
     {
         "pattern_id": "where_is_building",
         "en_template": "Where is the [building]?",
         "slots": [
             {"name": "building", "pos_type": "noun", "pos_subtype": "building_structure", "min_level": 1, "max_level": 10}
+        ],
+        "fixed_words": [
+            {"lemma_text": "where", "pos_type": "pronoun"}
         ],
         "pattern_type": "question",
         "notes": "Asking about location of a building"
@@ -200,6 +262,9 @@ SIMPLE_PATTERNS = [
         "slots": [
             {"name": "emotion", "pos_type": "noun", "pos_subtype": "emotion_feeling", "min_level": 1, "max_level": 10}
         ],
+        "fixed_words": [
+            {"lemma_text": "feel", "pos_type": "verb"}
+        ],
         "pattern_type": "SVO",
         "notes": "Expressing an emotional state"
     },
@@ -209,6 +274,9 @@ SIMPLE_PATTERNS = [
         "slots": [
             {"name": "body part", "pos_type": "noun", "pos_subtype": "body_part", "min_level": 1, "max_level": 10}
         ],
+        "fixed_words": [
+            {"lemma_text": "hurt", "pos_type": "verb"}
+        ],
         "pattern_type": "SVO",
         "notes": "Expressing physical pain in a body part"
     },
@@ -217,6 +285,9 @@ SIMPLE_PATTERNS = [
         "en_template": "I drink [beverage].",
         "slots": [
             {"name": "beverage", "pos_type": "noun", "pos_subtype": "beverage", "min_level": 1, "max_level": 10}
+        ],
+        "fixed_words": [
+            {"lemma_text": "drink", "pos_type": "verb"}
         ],
         "pattern_type": "SVO",
         "notes": "Drinking beverages"
@@ -237,6 +308,10 @@ SIMPLE_PATTERNS = [
         "slots": [
             {"name": "place", "pos_type": "noun", "pos_subtype": "building_structure", "min_level": 1, "max_level": 10}
         ],
+        "fixed_words": [
+            {"lemma_text": "walk/go", "pos_type": "verb"},
+            {"lemma_text": "to", "pos_type": "preposition"}
+        ],
         "pattern_type": "SVO",
         "notes": "Going to a specific place"
     },
@@ -247,6 +322,9 @@ SIMPLE_PATTERNS = [
             {"name": "animal", "pos_type": "noun", "pos_subtype": "animal", "min_level": 1, "max_level": 10},
             {"name": "food", "pos_type": "noun", "pos_subtype": "food", "min_level": 1, "max_level": 10}
         ],
+        "fixed_words": [
+            {"lemma_text": "eat", "pos_type": "verb"}
+        ],
         "pattern_type": "SVO",
         "notes": "Animal eating specific food"
     },
@@ -256,6 +334,9 @@ SIMPLE_PATTERNS = [
         "slots": [
             {"name": "clothing", "pos_type": "noun", "pos_subtype": "clothing_accessory", "min_level": 1, "max_level": 10}
         ],
+        "fixed_words": [
+            {"lemma_text": "wear", "pos_type": "verb"}
+        ],
         "pattern_type": "SVO",
         "notes": "Wearing specific clothing"
     },
@@ -264,6 +345,9 @@ SIMPLE_PATTERNS = [
         "en_template": "I use a [tool].",
         "slots": [
             {"name": "tool", "pos_type": "noun", "pos_subtype": "tool_machine", "min_level": 1, "max_level": 10}
+        ],
+        "fixed_words": [
+            {"lemma_text": "use", "pos_type": "verb"}
         ],
         "pattern_type": "SVO",
         "notes": "Using a specific tool"
