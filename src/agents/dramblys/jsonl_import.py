@@ -130,14 +130,10 @@ class JSONLImporter:
             "files_processed": 0,
             "records_read": 0,
             "records_imported": 0,
-            "records_updated": 0,
             "records_skipped": 0,
             "guid_collisions": 0,
-            "category_mismatches": 0,
             "errors": 0,
-            "skipped_details": [],
             "error_details": [],
-            "collision_details": [],
         }
 
     def read_jsonl_file(self, file_path: Path) -> List[Dict[str, Any]]:
@@ -374,6 +370,11 @@ class JSONLImporter:
         """
         Import a single JSONL record.
 
+        Simple logic:
+        - If GUID exists and lemma_text matches: skip (already exists)
+        - If GUID exists but lemma_text differs: error (collision)
+        - If GUID is new: import it
+
         Args:
             jsonl_data: JSONL record to import
 
@@ -384,80 +385,41 @@ class JSONLImporter:
         if not guid:
             return False, "Missing GUID"
 
-        # Check GUID overrides
-        if self.migration:
-            should_import, reason = self.migration.should_import_guid(guid, jsonl_data)
-            if not should_import:
-                self.stats["records_skipped"] += 1
-                self.stats["skipped_details"].append({
-                    "guid": guid,
-                    "reason": reason
-                })
-                return False, reason
+        # Get lemma text for logging
+        lemma_text = jsonl_data.get("concept_label", "")
 
         # Check for existing lemma
         existing = self.find_existing_lemma(guid)
 
         if existing:
-            # GUID collision
-            self.stats["guid_collisions"] += 1
-
-            # Check category coherence
-            is_coherent, coherence_reason = self.check_category_coherence(existing, jsonl_data)
-
-            if not is_coherent:
-                self.stats["category_mismatches"] += 1
-
-                # Check if we should fail or handle via migration
-                if self.migration:
-                    on_mismatch = self.migration.import_rules.get("on_category_mismatch", "fail")
-                else:
-                    on_mismatch = "fail"
-
-                if on_mismatch == "fail":
-                    self.stats["records_skipped"] += 1
-                    self.stats["skipped_details"].append({
-                        "guid": guid,
-                        "reason": coherence_reason
-                    })
-                    return False, coherence_reason
-                # else: auto_migrate would continue with the split
-
-            # Decide whether to update
-            prefer_jsonl, reason = self.should_prefer_jsonl(existing, jsonl_data, guid)
-
-            # Get field differences
-            differences = self.get_field_differences(existing, jsonl_data)
-
-            self.stats["collision_details"].append({
-                "guid": guid,
-                "action": "update" if prefer_jsonl else "skip",
-                "reason": reason,
-                "differences": differences
-            })
-
-            if prefer_jsonl:
-                if not self.dry_run:
-                    self.update_lemma_from_jsonl(existing, jsonl_data)
-                    self.session.commit()
-                self.stats["records_updated"] += 1
-                return True, f"Updated: {reason}"
-            else:
+            # GUID exists - check if lemma_text matches
+            if existing.lemma_text == lemma_text:
+                # Same word, already exists - skip silently
                 self.stats["records_skipped"] += 1
-                self.stats["skipped_details"].append({
+                logger.debug(f"  SKIP: '{lemma_text}' [{guid}] - Already exists")
+                return False, "Already exists"
+            else:
+                # Same GUID but different lemma_text - collision error
+                error_msg = f"GUID collision: '{existing.lemma_text}' in DB vs '{lemma_text}' in JSONL"
+                self.stats["errors"] += 1
+                self.stats["guid_collisions"] += 1
+                self.stats["error_details"].append({
                     "guid": guid,
-                    "reason": reason,
-                    "differences": differences
+                    "error": error_msg,
+                    "db_lemma": existing.lemma_text,
+                    "jsonl_lemma": lemma_text
                 })
-                return False, f"Skipped: {reason}"
+                logger.error(f"  ERROR: [{guid}] - {error_msg}")
+                return False, error_msg
 
         else:
-            # New lemma
+            # New GUID - import it
             if not self.dry_run:
                 lemma = self.create_lemma_from_jsonl(jsonl_data)
                 self.session.add(lemma)
                 self.session.commit()
             self.stats["records_imported"] += 1
+            logger.info(f"  NEW: '{lemma_text}' [{guid}]")
             return True, "New lemma created"
 
     def import_file(self, file_path: Path) -> Dict[str, int]:
@@ -533,28 +495,26 @@ class JSONLImporter:
             f"Files processed: {self.stats['files_processed']}",
             f"Records read: {self.stats['records_read']}",
             f"Records imported (new): {self.stats['records_imported']}",
-            f"Records updated: {self.stats['records_updated']}",
-            f"Records skipped: {self.stats['records_skipped']}",
-            f"GUID collisions: {self.stats['guid_collisions']}",
-            f"Category mismatches: {self.stats['category_mismatches']}",
+            f"Records skipped (already exist): {self.stats['records_skipped']}",
             f"Errors: {self.stats['errors']}",
         ]
 
-        if self.stats["collision_details"]:
-            lines.append(f"\nGUID Collision Details (showing first 10):")
-            for detail in self.stats["collision_details"][:10]:
-                lines.append(f"  {detail['guid']}: {detail['action']} - {detail['reason']}")
-
-        if self.stats["skipped_details"]:
-            lines.append(f"\nSkipped Records (showing first 10):")
-            for detail in self.stats["skipped_details"][:10]:
-                lines.append(f"  {detail['guid']}: {detail['reason']}")
-
         if self.stats["error_details"]:
-            lines.append(f"\nErrors (showing first 10):")
+            lines.append(f"\nErrors:")
             for detail in self.stats["error_details"][:10]:
-                lines.append(f"  {detail.get('file', 'unknown')}: {detail['error']}")
+                if 'guid' in detail:
+                    # GUID collision error
+                    lines.append(f"  [{detail['guid']}]: {detail['error']}")
+                    if 'db_lemma' in detail and 'jsonl_lemma' in detail:
+                        lines.append(f"    DB: '{detail['db_lemma']}'")
+                        lines.append(f"    JSONL: '{detail['jsonl_lemma']}'")
+                else:
+                    # File/parsing error
+                    lines.append(f"  {detail.get('file', 'unknown')}: {detail['error']}")
 
         lines.append("=" * 80)
+        if self.dry_run:
+            lines.append("[DRY RUN MODE - No changes will be committed]")
+            lines.append("=" * 80)
 
         return "\n".join(lines)

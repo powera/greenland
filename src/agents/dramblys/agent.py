@@ -9,6 +9,7 @@ high-priority words to add.
 "Dramblys" means "elephant" in Lithuanian - never forgets what's missing!
 """
 
+import logging
 import sys
 import time
 from datetime import datetime

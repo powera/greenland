@@ -419,27 +419,21 @@ def main():
             print(f"  Files processed: {results['files_processed']}")
             print(f"  Records read: {results['records_read']}")
             print(f"  Records imported (new): {results['records_imported']}")
-            print(f"  Records updated: {results['records_updated']}")
-            print(f"  Records skipped: {results['records_skipped']}")
-            print(f"  GUID collisions: {results['guid_collisions']}")
-            print(f"  Category mismatches: {results['category_mismatches']}")
+            print(f"  Records skipped (already exist): {results['records_skipped']}")
             print(f"  Errors: {results['errors']}")
 
-            if results.get("collision_details"):
-                print(f"\nGUID Collisions (first 10):")
-                for detail in results["collision_details"][:10]:
-                    print(f"  {detail['guid']}: {detail['action']} - {detail['reason']}")
-                    if detail.get("differences"):
-                        for diff in detail["differences"]:
-                            print(f"    • {diff}")
-
-            if results.get("skipped_details"):
-                print(f"\nSkipped Records (first 5):")
-                for detail in results["skipped_details"][:5]:
-                    print(f"  {detail['guid']}: {detail['reason']}")
-                    if detail.get("differences"):
-                        for diff in detail["differences"]:
-                            print(f"    • {diff}")
+            if results.get("error_details"):
+                print(f"\nErrors:")
+                for detail in results["error_details"][:10]:
+                    if 'guid' in detail:
+                        # GUID collision error
+                        print(f"  [{detail['guid']}]: {detail['error']}")
+                        if 'db_lemma' in detail and 'jsonl_lemma' in detail:
+                            print(f"    DB: '{detail['db_lemma']}'")
+                            print(f"    JSONL: '{detail['jsonl_lemma']}'")
+                    else:
+                        # Other error
+                        print(f"  {detail.get('file', 'unknown')}: {detail['error']}")
 
             # Write to output file if requested
             if args.output:
