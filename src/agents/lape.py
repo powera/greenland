@@ -2,6 +2,11 @@
 """
 Lape - Grammar Facts Generator Agent
 
+⚠️  IMPORTANT: This agent has a custom Barsukas API in src/barsukas/routes/agents.py
+    If you modify the public interface of this agent, you MUST update:
+    - /agents/generate-grammar-fact/<lemma_id> endpoint
+    Keep the API contract in sync to prevent runtime errors!
+
 This agent generates language-specific grammatical facts for lemmas using LLM queries.
 It supports various types of grammar facts that can be specified via command line parameters.
 

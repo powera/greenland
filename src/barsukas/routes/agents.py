@@ -606,15 +606,8 @@ def check_definition(lemma_id):
         # Initialize LOKYS agent
         agent = LokysAgent(db_path=Config.DB_PATH, debug=Config.DEBUG)
 
-        # Validate definition
-        from wordfreq.tools.llm_validators import validate_definition
-
-        result = validate_definition(
-            word=lemma.lemma_text,
-            definition=lemma.definition_text,
-            pos_type=lemma.pos_type,
-            model="gpt-5-mini",
-        )
+        # Use the agent's helper method for cleaner code
+        result = agent.check_single_definition(lemma, session=g.db)
 
         if result["is_valid"] and result["confidence"] >= 0.7:
             flash("Definition looks good!", "success")
@@ -684,103 +677,41 @@ def check_disambiguation(lemma_id):
         # Initialize LOKYS agent
         agent = LokysAgent(db_path=Config.DB_PATH, debug=Config.DEBUG)
 
-        # Check for lemmas with the same lemma_text
-        duplicates = (
-            g.db.query(Lemma)
-            .filter(Lemma.lemma_text == lemma.lemma_text, Lemma.guid.isnot(None))
-            .all()
-        )
+        # Use the agent's helper method for cleaner code
+        result = agent.check_single_disambiguation(lemma, session=g.db)
 
-        if len(duplicates) <= 1:
-            flash(
-                f'No other lemmas found with lemma_text "{lemma.lemma_text}" - disambiguation not needed',
-                "info",
-            )
+        # Handle different cases based on result
+        if not result["needs_disambiguation"]:
+            if result["reason"] == "no_duplicates":
+                flash(
+                    f'No other lemmas found with lemma_text "{lemma.lemma_text}" - disambiguation not needed',
+                    "info",
+                )
+            elif result["reason"] == "translations_identical":
+                flash(
+                    f'Found {result["duplicate_count"]} lemmas with "{lemma.lemma_text}", but translations are the same - may be duplicates',
+                    "warning",
+                )
             return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
-        # Check if translations differ
-        from wordfreq.storage.translation_helpers import get_supported_languages, get_translation
-
-        supported_languages = get_supported_languages()
-        translations_by_guid = {}
-
-        for dup in duplicates:
-            translations = {}
-            for lang_code in supported_languages.keys():
-                try:
-                    translation = get_translation(g.db, dup, lang_code)
-                    if translation:
-                        translations[lang_code] = translation
-                except ValueError:
-                    continue
-            translations_by_guid[dup.guid] = translations
-
-        # Check if any translations differ
-        translations_differ = False
-        if len(translations_by_guid) > 1:
-            guids = list(translations_by_guid.keys())
-            for i in range(len(guids)):
-                for j in range(i + 1, len(guids)):
-                    trans_i = translations_by_guid[guids[i]]
-                    trans_j = translations_by_guid[guids[j]]
-
-                    # Check if any shared language has different translations
-                    for lang in set(trans_i.keys()) & set(trans_j.keys()):
-                        if trans_i[lang] != trans_j[lang]:
-                            translations_differ = True
-                            break
-                    if translations_differ:
-                        break
-
-        if not translations_differ:
-            flash(
-                f'Found {len(duplicates)} lemmas with "{lemma.lemma_text}", but translations are the same - may be duplicates',
-                "warning",
-            )
-            return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
-
-        # Check if this lemma has parentheticals
-        has_parenthetical = "(" in lemma.lemma_text and ")" in lemma.lemma_text
-
-        if has_parenthetical:
+        # Check if already has parentheticals
+        if result["has_parenthetical"]:
             flash(f'This lemma already has disambiguation: "{lemma.lemma_text}"', "success")
             return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
-        # Get LLM suggestions for disambiguation
-        from wordfreq.tools.llm_validators import suggest_disambiguation
-
-        definitions_data = []
-        for dup in duplicates:
-            item = {
-                "guid": dup.guid,
-                "definition": dup.definition_text or "No definition",
-                "translations": {},
-            }
-            for lang_code in supported_languages.keys():
-                try:
-                    trans = get_translation(g.db, dup, lang_code)
-                    if trans:
-                        item["translations"][lang_code] = trans
-                except ValueError:
-                    continue
-            definitions_data.append(item)
-
-        llm_result = suggest_disambiguation(
-            word=lemma.lemma_text, definitions=definitions_data, model="gpt-5-mini"
-        )
-
+        # Show LLM suggestions if available
+        llm_result = result["llm_suggestions"]
         if llm_result["success"] and llm_result["suggestions"]:
-            # Render a results page with suggestions
             return render_template(
                 "agents/disambiguation_suggestions.html",
                 lemma=lemma,
-                duplicates=duplicates,
+                duplicates=result["duplicates"],
                 suggestions=llm_result["suggestions"],
                 lemma_text=lemma.lemma_text,
             )
         else:
             flash(
-                f'⚠️ This lemma needs disambiguation! Found {len(duplicates)} different meanings for "{lemma.lemma_text}" with different translations',
+                f'⚠️ This lemma needs disambiguation! Found {result["duplicate_count"]} different meanings for "{lemma.lemma_text}" with different translations',
                 "warning",
             )
             flash(

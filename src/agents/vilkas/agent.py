@@ -1,6 +1,11 @@
 """
 Vilkas - Multi-language Word Forms Checker Agent
 
+⚠️  IMPORTANT: This agent has a custom Barsukas API in src/barsukas/routes/agents.py
+    If you modify the public interface of this agent, you MUST update:
+    - /agents/generate-forms/<lemma_id> endpoint
+    Keep the API contract in sync to prevent runtime errors!
+
 This agent runs autonomously to check for the presence of word forms
 across multiple languages in the database. It identifies lemmas that should
 have derivative forms but don't, and reports on data quality issues.

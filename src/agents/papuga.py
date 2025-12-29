@@ -2,6 +2,12 @@
 """
 Papuga - Pronunciation Validation and Generation Agent
 
+⚠️  IMPORTANT: This agent has a custom Barsukas API in src/barsukas/routes/agents.py
+    If you modify the public interface of this agent, you MUST update:
+    - /agents/check-pronunciations/<lemma_id> endpoint
+    - /agents/generate-pronunciations/<lemma_id> endpoint
+    Keep the API contract in sync to prevent runtime errors!
+
 This agent runs autonomously to validate and generate pronunciations:
 1. Validate existing IPA pronunciations for correctness
 2. Validate existing phonetic (simplified) pronunciations

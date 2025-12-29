@@ -2,6 +2,14 @@
 """
 Lokys - English Lemma Validation Agent
 
+⚠️  IMPORTANT: This agent has a custom Barsukas API in src/barsukas/routes/agents.py
+    If you modify the public interface of this agent, you MUST update:
+    - /agents/check-definition/<lemma_id> endpoint
+    - /agents/apply-definition/<lemma_id> endpoint
+    - /agents/check-disambiguation/<lemma_id> endpoint
+    - /agents/apply-disambiguation/<lemma_id> endpoint
+    Keep the API contract in sync to prevent runtime errors!
+
 This agent runs autonomously to validate English-language properties:
 1. Lemma forms are in proper dictionary/base form (e.g., "shoe" not "shoes")
 2. English definitions are accurate and well-formed
@@ -464,6 +472,143 @@ class LokysAgent:
                 logger.error(f"Failed to write output file: {e}")
 
         return results
+
+    # === Barsukas Web Interface Helper Methods ===
+    # These methods provide a simplified, single-lemma interface for the web UI
+
+    def check_single_definition(self, lemma, session=None) -> Dict[str, any]:
+        """
+        Check the definition of a single lemma using LLM validation.
+
+        This is a convenience method for the Barsukas web interface.
+        See src/barsukas/routes/agents.py for usage.
+
+        Args:
+            lemma: Lemma object to check
+            session: Optional database session (if None, uses internal session)
+
+        Returns:
+            Dictionary with validation result from validate_definition()
+        """
+        result = validate_definition(
+            word=lemma.lemma_text,
+            definition=lemma.definition_text or "",
+            pos_type=lemma.pos_type,
+            model=self.model,
+        )
+        return result
+
+    def check_single_disambiguation(self, lemma, session) -> Dict[str, any]:
+        """
+        Check if a lemma needs disambiguation (parentheticals in lemma_text).
+
+        This method finds other lemmas with the same lemma_text and checks if they
+        have different translations, indicating different meanings that need disambiguation.
+
+        This is a convenience method for the Barsukas web interface.
+        See src/barsukas/routes/agents.py for usage.
+
+        Args:
+            lemma: Lemma object to check
+            session: Database session
+
+        Returns:
+            Dictionary with:
+            - needs_disambiguation: bool
+            - duplicate_count: int
+            - has_parenthetical: bool
+            - duplicates: list of Lemma objects
+            - translations_by_guid: dict mapping GUID to translations
+            - llm_suggestions: dict from suggest_disambiguation (if applicable)
+        """
+        from wordfreq.storage.translation_helpers import get_supported_languages, get_translation
+        from wordfreq.tools.llm_validators import suggest_disambiguation
+
+        # Find duplicates
+        duplicates = (
+            session.query(Lemma)
+            .filter(Lemma.lemma_text == lemma.lemma_text, Lemma.guid.isnot(None))
+            .all()
+        )
+
+        if len(duplicates) <= 1:
+            return {
+                "needs_disambiguation": False,
+                "duplicate_count": len(duplicates),
+                "reason": "no_duplicates",
+            }
+
+        # Get translations for all duplicates
+        supported_languages = get_supported_languages()
+        translations_by_guid = {}
+
+        for dup in duplicates:
+            translations = {}
+            for lang_code in supported_languages.keys():
+                try:
+                    translation = get_translation(session, dup, lang_code)
+                    if translation:
+                        translations[lang_code] = translation
+                except ValueError:
+                    continue
+            translations_by_guid[dup.guid] = translations
+
+        # Check if translations differ
+        translations_differ = False
+        if len(translations_by_guid) > 1:
+            guids = list(translations_by_guid.keys())
+            for i in range(len(guids)):
+                for j in range(i + 1, len(guids)):
+                    trans_i = translations_by_guid[guids[i]]
+                    trans_j = translations_by_guid[guids[j]]
+                    for lang in set(trans_i.keys()) & set(trans_j.keys()):
+                        if trans_i[lang] != trans_j[lang]:
+                            translations_differ = True
+                            break
+                    if translations_differ:
+                        break
+
+        if not translations_differ:
+            return {
+                "needs_disambiguation": False,
+                "duplicate_count": len(duplicates),
+                "reason": "translations_identical",
+                "duplicates": duplicates,
+                "translations_by_guid": translations_by_guid,
+            }
+
+        # Check if already has parentheticals
+        has_parenthetical = "(" in lemma.lemma_text and ")" in lemma.lemma_text
+
+        # Get LLM suggestions
+        definitions_data = []
+        for dup in duplicates:
+            item = {
+                "guid": dup.guid,
+                "definition": dup.definition_text or "No definition",
+                "translations": {},
+            }
+            for lang_code in supported_languages.keys():
+                try:
+                    trans = get_translation(session, dup, lang_code)
+                    if trans:
+                        item["translations"][lang_code] = trans
+                except ValueError:
+                    continue
+            definitions_data.append(item)
+
+        llm_result = suggest_disambiguation(
+            word=lemma.lemma_text, definitions=definitions_data, model=self.model
+        )
+
+        return {
+            "needs_disambiguation": True,
+            "duplicate_count": len(duplicates),
+            "has_parenthetical": has_parenthetical,
+            "duplicates": duplicates,
+            "translations_by_guid": translations_by_guid,
+            "llm_suggestions": llm_result,
+        }
 
     def _print_summary(self, results: Dict, start_time: datetime, duration: float):
         """Print a summary of the check results."""

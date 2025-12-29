@@ -453,28 +453,26 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
             f"{'Staging' if stage_only else 'Adding'} {pos_type}/{pos_subtype} words from top {top_n}..."
         )
 
-        # Find matching words
+        if dry_run:
+            # In dry-run mode, skip LLM calls entirely
+            logger.info(f"DRY RUN: Skipping LLM calls (would find {pos_type}/{pos_subtype} words from top {top_n})")
+            return {
+                "pos_type": pos_type,
+                "pos_subtype": pos_subtype,
+                "would_add": 0,  # Unknown without LLM call
+                "dry_run": True,
+                "stage_only": stage_only,
+                "sample": [],
+                "message": "Dry-run mode: LLM calls skipped. Use without --dry-run to see actual matches.",
+            }
+
+        # Find matching words (makes LLM calls)
         find_results = self.find_words_for_subtype(pos_type, pos_subtype, top_n, model)
 
         if "error" in find_results:
             return find_results
 
         matches = find_results["matches"]
-
-        if dry_run:
-            logger.info(f"DRY RUN: Would {'stage' if stage_only else 'add'} {len(matches)} words:")
-            for match in matches[:20]:
-                logger.info(f"  - '{match['word']}': {match['definition'][:60]}...")
-            if len(matches) > 20:
-                logger.info(f"  ... and {len(matches) - 20} more")
-            return {
-                "pos_type": pos_type,
-                "pos_subtype": pos_subtype,
-                "would_add": len(matches),
-                "dry_run": True,
-                "stage_only": stage_only,
-                "sample": matches[:20],
-            }
 
         # Process each matched word
         session = self.get_session()

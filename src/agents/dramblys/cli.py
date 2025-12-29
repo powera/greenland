@@ -325,7 +325,10 @@ def main():
             else:
                 if args.dry_run:
                     action = "stage" if args.stage_only else "add"
-                    print(f"\nDRY RUN: Would {action} {results['would_add']} words")
+                    if "message" in results:
+                        print(f"\n{results['message']}")
+                    else:
+                        print(f"\nDRY RUN: Would {action} {results['would_add']} words")
                 else:
                     print(f"\nComplete:")
                     print(f"  Matches found: {results['matches_found']}")

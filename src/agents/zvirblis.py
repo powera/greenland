@@ -2,6 +2,12 @@
 """
 Žvirblis - Sentence Generation Agent
 
+⚠️  IMPORTANT: This agent has a custom Barsukas API in src/barsukas/routes/agents.py
+    If you modify the public interface of this agent, you MUST update:
+    - /agents/generate-sentences/<lemma_id> endpoint
+    - /agents/view-sentences/<lemma_id> endpoint
+    Keep the API contract in sync to prevent runtime errors!
+
 This agent autonomously generates example sentences for vocabulary words:
 1. Takes a noun (lemma) as a starting point
 2. Uses LLM to generate natural, contextual sentences
