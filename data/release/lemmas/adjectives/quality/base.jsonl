@@ -14,8 +14,6 @@
 {"guid": "A05_014", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "rude", "concept_definition": "Offensively impolite or disrespectful in speech or behavior; showing lack of courtesy or consideration for others.", "difficulty_level": 13}
 {"guid": "A05_015", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "good", "concept_definition": "Having desirable or positive qualities; satisfactory or beneficial; morally excellent or virtuous (e.g., a good book, a good person, good weather).", "difficulty_level": 9}
 {"guid": "A05_016", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "bad", "concept_definition": "not good in any way; harmful, unpleasant, of low quality, or morally wrong (e.g., a bad decision, bad weather, a bad person)", "difficulty_level": 9}
-{"guid": "A05_017", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "big", "concept_definition": "Of considerable size, extent, or magnitude; larger than average or usual.", "difficulty_level": 9}
-{"guid": "A05_018", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "small", "concept_definition": "Of little size, extent, or capacity; not large or great in amount, degree, or importance (e.g., a small box, a small amount of money, a small problem).", "difficulty_level": 9}
 {"guid": "A05_019", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "high", "concept_definition": "Of great vertical extent; measuring a large distance from bottom to top or from base to top (e.g., a high mountain).", "difficulty_level": 9}
 {"guid": "A05_020", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "low", "concept_definition": "(of a person or thing) of less than normal height or stature; situated at a small distance above the ground; (of sound) quiet or soft; (of amount or intensity) small in degree or below the usual level.", "difficulty_level": 9}
 {"guid": "A05_021", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "long", "concept_definition": "Of great length from one end to the other; extending a considerable distance or duration.", "difficulty_level": 9}
@@ -50,7 +48,6 @@
 {"guid": "A05_050", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "right", "concept_definition": "morally good or correct", "difficulty_level": -1}
 {"guid": "A05_051", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "own", "concept_definition": "belonging to oneself", "difficulty_level": -1}
 {"guid": "A05_052", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "true", "concept_definition": "in accordance with fact or reality", "difficulty_level": -1}
-{"guid": "A05_053", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "large", "concept_definition": "of considerable size or extent", "difficulty_level": -1}
 {"guid": "A05_054", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "able", "concept_definition": "having the power or skill to do something", "difficulty_level": -1}
 {"guid": "A05_055", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "ready", "concept_definition": "prepared or willing", "difficulty_level": -1}
 {"guid": "A05_056", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "afraid", "concept_definition": "feeling fear or anxiety", "difficulty_level": -1}
@@ -74,7 +71,6 @@
 {"guid": "A05_074", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "pretty", "concept_definition": "attractive in a delicate way", "difficulty_level": -1}
 {"guid": "A05_075", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "thick", "concept_definition": "having a large distance between opposite sides", "difficulty_level": -1}
 {"guid": "A05_076", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "quick", "concept_definition": "moving fast or doing something rapidly", "difficulty_level": -1}
-{"guid": "A05_077", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "huge", "concept_definition": "extremely large", "difficulty_level": -1}
 {"guid": "A05_078", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "tight", "concept_definition": "fixed or fastened firmly", "difficulty_level": -1}
 {"guid": "A05_079", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "mad", "concept_definition": "insane or very angry", "difficulty_level": -1}
 {"guid": "A05_080", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "loose", "concept_definition": "not firmly or tightly fixed", "difficulty_level": -1}
@@ -84,7 +80,6 @@
 {"guid": "A05_084", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "careful", "concept_definition": "taking care to avoid harm or errors", "difficulty_level": -1}
 {"guid": "A05_085", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "mighty", "concept_definition": "very powerful or strong", "difficulty_level": -1}
 {"guid": "A05_086", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "sweet", "concept_definition": "having the pleasant taste of sugar", "difficulty_level": -1}
-{"guid": "A05_087", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "tiny", "concept_definition": "very small", "difficulty_level": -1}
 {"guid": "A05_088", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "precious", "concept_definition": "of great value", "difficulty_level": -1}
 {"guid": "A05_089", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "odd", "concept_definition": "strange or unusual", "difficulty_level": -1}
 {"guid": "A05_090", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "main", "concept_definition": "chief or most important", "difficulty_level": -1}
