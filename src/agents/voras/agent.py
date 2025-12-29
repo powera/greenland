@@ -31,7 +31,8 @@ if GREENLAND_SRC_PATH not in sys.path:
 
 import constants
 from clients.batch_queue import BatchRequestMetadata, get_batch_manager
-from wordfreq.storage.database import create_database_session
+from wordfreq.storage.backend import create_session as create_backend_session
+from wordfreq.storage.backend.config import BackendConfig, BackendType
 from wordfreq.storage.models.schema import Lemma, LemmaTranslation
 from wordfreq.storage.crud.operation_log import log_translation_change
 from wordfreq.storage.translation_helpers import (
@@ -56,16 +57,42 @@ logger = logging.getLogger(__name__)
 class VorasAgent:
     """Agent for validating and populating multi-lingual translations."""
 
-    def __init__(self, db_path: str = None, debug: bool = False, model: str = None):
+    def __init__(
+        self,
+        db_path: str = None,
+        backend_config: BackendConfig = None,
+        debug: bool = False,
+        model: str = None,
+    ):
         """
         Initialize the Voras agent.
 
         Args:
-            db_path: Database path (uses default if None)
+            db_path: Database path (uses default if None) - for SQLite backend (backward compatibility)
+            backend_config: Backend configuration (if provided, overrides db_path)
             debug: Enable debug logging
             model: LLM model to use for validation and generation (default: gpt-5-mini for validation)
         """
-        self.db_path = db_path or constants.WORDFREQ_DB_PATH
+        # Set up backend configuration
+        if backend_config is not None:
+            self.backend_config = backend_config
+        elif db_path is not None:
+            # Backward compatibility: db_path implies SQLite backend
+            self.backend_config = BackendConfig(
+                backend_type=BackendType.SQLITE, sqlite_path=db_path
+            )
+        else:
+            # Use default SQLite path
+            self.backend_config = BackendConfig(
+                backend_type=BackendType.SQLITE, sqlite_path=constants.WORDFREQ_DB_PATH
+            )
+
+        # Keep db_path for backward compatibility with LinguisticClient
+        if self.backend_config.backend_type == BackendType.SQLITE:
+            self.db_path = self.backend_config.sqlite_path
+        else:
+            self.db_path = None
+
         self.debug = debug
         # Default to gpt-5-mini for translation validation (like lokys), but allow override
         self.model = model or "gpt-5-mini"
@@ -75,8 +102,8 @@ class VorasAgent:
             logger.setLevel(logging.DEBUG)
 
     def get_session(self):
-        """Get database session."""
-        return create_database_session(self.db_path)
+        """Get database session using backend abstraction."""
+        return create_backend_session(self.backend_config)
 
     def get_linguistic_client(self):
         """Get or create linguistic client for LLM queries."""
