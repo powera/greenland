@@ -112,6 +112,7 @@ class JSONLImporter:
         session,
         migration_config: Optional[CategoryMigration] = None,
         dry_run: bool = False,
+        import_level: Optional[int] = None,
     ):
         """
         Initialize JSONL importer.
@@ -120,10 +121,12 @@ class JSONLImporter:
             session: Database session
             migration_config: Category migration configuration
             dry_run: If True, don't make database changes
+            import_level: Optional difficulty level override for all imported lemmas
         """
         self.session = session
         self.migration = migration_config
         self.dry_run = dry_run
+        self.import_level = import_level
 
         # Statistics
         self.stats = {
@@ -335,7 +338,12 @@ class JSONLImporter:
         lemma.lemma_text = concept_label
         lemma.definition_text = concept_definition
 
-        lemma.difficulty_level = jsonl_data.get("difficulty_level")
+        # Use import_level override if provided, otherwise use JSONL data
+        if self.import_level is not None:
+            lemma.difficulty_level = self.import_level
+        else:
+            lemma.difficulty_level = jsonl_data.get("difficulty_level")
+
         lemma.notes = jsonl_data.get("notes")
 
         return lemma

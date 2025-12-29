@@ -138,6 +138,11 @@ def get_argument_parser():
         default="**/base.jsonl",
         help="[Import mode] Glob pattern for JSONL files when importing directory (default: **/base.jsonl)",
     )
+    parser.add_argument(
+        "--jsonl-import-level",
+        type=int,
+        help="[Import mode] Override difficulty_level for all imported lemmas (e.g., -1 for unassessed)",
+    )
 
     return parser
 
@@ -408,6 +413,7 @@ def main():
             migration_file=args.migration_file,
             pattern=args.pattern,
             dry_run=args.dry_run,
+            import_level=args.jsonl_import_level,
         )
 
         if "error" in results:

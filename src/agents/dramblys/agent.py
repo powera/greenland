@@ -1036,6 +1036,7 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
         migration_file: Optional[str] = None,
         pattern: str = "**/base.jsonl",
         dry_run: bool = False,
+        import_level: Optional[int] = None,
     ) -> Dict[str, any]:
         """
         Import lemmas from JSONL files.
@@ -1045,6 +1046,7 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
             migration_file: Path to category migrations JSON file
             pattern: Glob pattern for files if source_path is directory (default: **/base.jsonl)
             dry_run: If True, show what would be imported without making changes
+            import_level: Optional difficulty level override for all imported lemmas
 
         Returns:
             Dictionary with import results
@@ -1073,6 +1075,7 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
                 session=session,
                 migration_config=migration_config,
                 dry_run=dry_run,
+                import_level=import_level,
             )
 
             # Import from file or directory
