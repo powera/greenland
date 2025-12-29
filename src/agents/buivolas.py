@@ -280,7 +280,7 @@ class BuivolasAgent:
 
         try:
             # Check for duplicate based on pattern and lemmas used
-            # Find sentences with same pattern
+            # Find sentences with same pattern (including rejected ones to avoid regenerating)
             pattern_source = f"pattern:{pattern['pattern_id']}"
             existing_sentences = (
                 session.query(Sentence)
@@ -304,8 +304,10 @@ class BuivolasAgent:
 
                 # If same lemmas are used, this is a duplicate
                 if combination_lemma_ids == existing_lemma_ids:
+                    # Log whether it was rejected or just a regular duplicate
+                    status = "rejected" if existing_sentence.rejected else "duplicate"
                     logger.debug(
-                        f"Skipping duplicate sentence for pattern {pattern['pattern_id']}: "
+                        f"Skipping {status} sentence for pattern {pattern['pattern_id']}: "
                         f"{template_text} (already exists as sentence {existing_sentence.id})"
                     )
                     return "duplicate"

@@ -110,6 +110,16 @@
                        class="btn btn-sm btn-outline-primary">
                         <i class="bi bi-eye"></i> Details
                     </a>
+                    {% if not sentence.rejected %}
+                    <form method="POST" action="{{ url_for('pattern_sentences.reject_sentence', sentence_id=sentence.id) }}" class="d-inline-block ms-1">
+                        <button type="submit" class="btn btn-sm btn-danger" title="Mark as rejected (won't be regenerated)"
+                                onclick="return confirm('Reject this sentence? It will not be regenerated.')">
+                            <i class="bi bi-x-circle"></i> Reject
+                        </button>
+                    </form>
+                    {% else %}
+                    <span class="badge bg-danger ms-1">Rejected</span>
+                    {% endif %}
                 </div>
             </div>
         </div>

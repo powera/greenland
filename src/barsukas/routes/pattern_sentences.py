@@ -308,6 +308,26 @@ def retrieve_batch(batch_id):
         return jsonify({"success": False, "error": str(e)}), 500
 
 
+@bp.route("/<int:sentence_id>/reject", methods=["POST"])
+def reject_sentence(sentence_id):
+    """Mark a sentence as rejected so it won't be regenerated."""
+    sentence = g.db.query(Sentence).get(sentence_id)
+    if not sentence:
+        flash("Sentence not found", "error")
+        return redirect(url_for("pattern_sentences.view"))
+
+    try:
+        sentence.rejected = True
+        g.db.commit()
+        flash(f"Sentence #{sentence_id} marked as rejected", "success")
+    except Exception as e:
+        flash(f"Error rejecting sentence: {e}", "error")
+        g.db.rollback()
+
+    # Redirect back to the view page with current filters
+    return redirect(request.referrer or url_for("pattern_sentences.view"))
+
+
 @bp.route("/view")
 def view():
     """View generated pattern sentences with pagination."""
