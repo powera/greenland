@@ -328,6 +328,103 @@ def reject_sentence(sentence_id):
     return redirect(request.referrer or url_for("pattern_sentences.view"))
 
 
+@bp.route("/<int:sentence_id>/accept", methods=["POST"])
+def accept_sentence(sentence_id):
+    """Accept a sentence: generate translations for all languages and auto-populate level.
+
+    This does NOT verify the sentence - that requires a separate Verify action.
+    """
+    sentence = g.db.query(Sentence).get(sentence_id)
+    if not sentence:
+        flash("Sentence not found", "error")
+        return redirect(url_for("pattern_sentences.view"))
+
+    try:
+        # Check if any word has level -1
+        sentence_words = (
+            g.db.query(SentenceWord)
+            .filter(SentenceWord.sentence_id == sentence_id)
+            .filter(SentenceWord.lemma_id.isnot(None))
+            .all()
+        )
+
+        for sw in sentence_words:
+            lemma = g.db.query(Lemma).get(sw.lemma_id)
+            if lemma and lemma.difficulty_level == -1:
+                flash(f"Cannot accept: word '{lemma.guid or lemma.lemma_text}' has difficulty level -1", "error")
+                return redirect(request.referrer or url_for("pattern_sentences.view"))
+
+        # Check if sentence already has translations for all languages
+        existing_translations = {t.language_code for t in sentence.translations}
+        target_languages = [lang["code"] for lang in LANGUAGES if lang["code"] != "en"]
+        has_all_translations = all(lang in existing_translations for lang in target_languages)
+
+        # Generate missing translations
+        if not has_all_translations:
+            from wordfreq.translation.sentence import translate_sentence
+            translate_sentence(sentence_id, target_languages, g.db, model="gpt-5-mini")
+
+        # Auto-populate the level if not set
+        if sentence.minimum_level is None:
+            max_level = None
+            for sw in sentence_words:
+                lemma = g.db.query(Lemma).get(sw.lemma_id)
+                if lemma and lemma.difficulty_level is not None:
+                    if max_level is None or lemma.difficulty_level > max_level:
+                        max_level = lemma.difficulty_level
+
+            if max_level is not None:
+                sentence.minimum_level = max_level
+
+        g.db.commit()
+
+        if sentence.minimum_level is not None:
+            flash(f"Sentence #{sentence_id} accepted with level {sentence.minimum_level}. Click Verify when ready.", "success")
+        else:
+            flash(f"Sentence #{sentence_id} accepted (no level set - no words with difficulty levels). Click Verify when ready.", "warning")
+
+    except Exception as e:
+        flash(f"Error accepting sentence: {e}", "error")
+        g.db.rollback()
+
+    # Redirect back to the view page with current filters
+    return redirect(request.referrer or url_for("pattern_sentences.view"))
+
+
+@bp.route("/<int:sentence_id>/verify", methods=["POST"])
+def verify_sentence(sentence_id):
+    """Mark a sentence as verified. Requires translations and level to be set."""
+    sentence = g.db.query(Sentence).get(sentence_id)
+    if not sentence:
+        flash("Sentence not found", "error")
+        return redirect(url_for("pattern_sentences.view"))
+
+    try:
+        # Check that sentence has translations and level
+        existing_translations = {t.language_code for t in sentence.translations}
+        target_languages = [lang["code"] for lang in LANGUAGES if lang["code"] != "en"]
+        has_all_translations = all(lang in existing_translations for lang in target_languages)
+
+        if not has_all_translations:
+            flash(f"Cannot verify: sentence is missing translations. Click Accept first.", "error")
+            return redirect(request.referrer or url_for("pattern_sentences.view"))
+
+        if sentence.minimum_level is None:
+            flash(f"Cannot verify: sentence has no level set. Click Accept first.", "error")
+            return redirect(request.referrer or url_for("pattern_sentences.view"))
+
+        sentence.verified = True
+        g.db.commit()
+        flash(f"Sentence #{sentence_id} verified and removed from list", "success")
+
+    except Exception as e:
+        flash(f"Error verifying sentence: {e}", "error")
+        g.db.rollback()
+
+    # Redirect back to the view page with current filters
+    return redirect(request.referrer or url_for("pattern_sentences.view"))
+
+
 @bp.route("/view")
 def view():
     """View generated pattern sentences with pagination."""
@@ -335,10 +432,16 @@ def view():
     pattern_id = request.args.get("pattern_id", None)
     language_code = request.args.get("language_code", None)
     lemma_guid = request.args.get("lemma_guid", "").strip() or None
+    show_all = request.args.get("show_all", "no")
     per_page = 20
 
     # Build query
     query = g.db.query(Sentence).filter(Sentence.source_filename.like("pattern:%"))
+
+    # By default, exclude verified and rejected sentences unless specifically requested
+    if show_all != "yes":
+        query = query.filter(Sentence.verified == False)
+        query = query.filter(Sentence.rejected == False)
 
     # Filter by pattern if specified
     if pattern_id:
@@ -383,6 +486,7 @@ def view():
         pattern_id=pattern_id,
         language_code=language_code,
         lemma_guid=lemma_guid,
+        show_all=show_all,
         patterns=SIMPLE_PATTERNS,
         languages=LANGUAGES,
     )

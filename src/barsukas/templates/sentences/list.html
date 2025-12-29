@@ -34,7 +34,7 @@
                     {% endfor %}
                 </select>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <label for="minimum_level" class="form-label">Minimum Level</label>
                 <select class="form-select" id="minimum_level" name="minimum_level">
                     <option value="">All</option>
@@ -44,6 +44,13 @@
                             Level {{ i }}
                         </option>
                     {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="show_all" class="form-label">Show All</label>
+                <select class="form-select" id="show_all" name="show_all">
+                    <option value="no" {% if show_all != 'yes' %}selected{% endif %}>No</option>
+                    <option value="yes" {% if show_all == 'yes' %}selected{% endif %}>Yes</option>
                 </select>
             </div>
         </div>
@@ -96,10 +103,42 @@
                                 </div>
                             </div>
                             <div class="col-md-3 text-end">
-                                <a href="{{ url_for('sentences.view_sentence', sentence_id=sentence.id) }}"
-                                   class="btn btn-sm btn-outline-primary">
-                                    <i class="bi bi-eye"></i> View
-                                </a>
+                                <div class="d-flex flex-wrap justify-content-end gap-1">
+                                    <a href="{{ url_for('sentences.view_sentence', sentence_id=sentence.id) }}"
+                                       class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-eye"></i> View
+                                    </a>
+                                    {% if sentence.verified %}
+                                    <span class="badge bg-success align-self-center">Verified</span>
+                                    {% elif sentence.rejected %}
+                                    <span class="badge bg-danger align-self-center">Rejected</span>
+                                    {% else %}
+                                    {% set has_translations = sentence.translations|length > 1 %}
+                                    {% set has_level = sentence.minimum_level is not none %}
+                                    {% set is_ready_to_verify = has_translations and has_level %}
+                                    {% if not is_ready_to_verify %}
+                                    <form method="POST" action="{{ url_for('sentences.accept_sentence', sentence_id=sentence.id) }}" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-success" title="Generate translations and set level"
+                                                onclick="return confirm('Accept this sentence? This will generate translations for all languages and set the level based on word difficulty.')">
+                                            <i class="bi bi-check-circle"></i> Accept
+                                        </button>
+                                    </form>
+                                    {% else %}
+                                    <form method="POST" action="{{ url_for('sentences.verify_sentence', sentence_id=sentence.id) }}" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-primary" title="Mark as verified"
+                                                onclick="return confirm('Verify this sentence? It will be removed from the list.')">
+                                            <i class="bi bi-check-circle-fill"></i> Verify
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                    <form method="POST" action="{{ url_for('sentences.reject_sentence', sentence_id=sentence.id) }}" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-danger" title="Mark as rejected (won't be regenerated)"
+                                                onclick="return confirm('Reject this sentence? It will not be regenerated.')">
+                                            <i class="bi bi-x-circle"></i> Reject
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -111,7 +150,7 @@
                 <nav class="pagination-container" aria-label="Page navigation">
                     <ul class="pagination justify-content-center">
                         <li class="page-item {% if page == 1 %}disabled{% endif %}">
-                            <a class="page-link" href="{{ url_for('sentences.list_sentences', page=page-1, search=search, pattern_type=pattern_type, minimum_level=minimum_level) }}">
+                            <a class="page-link" href="{{ url_for('sentences.list_sentences', page=page-1, search=search, pattern_type=pattern_type, minimum_level=minimum_level, show_all=show_all) }}">
                                 Previous
                             </a>
                         </li>
@@ -119,7 +158,7 @@
                         {% for p in range(1, total_pages + 1) %}
                             {% if p == page or (p <= 3 or p > total_pages - 3 or (p >= page - 2 and p <= page + 2)) %}
                                 <li class="page-item {% if p == page %}active{% endif %}">
-                                    <a class="page-link" href="{{ url_for('sentences.list_sentences', page=p, search=search, pattern_type=pattern_type, minimum_level=minimum_level) }}">
+                                    <a class="page-link" href="{{ url_for('sentences.list_sentences', page=p, search=search, pattern_type=pattern_type, minimum_level=minimum_level, show_all=show_all) }}">
                                         {{ p }}
                                     </a>
                                 </li>
@@ -131,7 +170,7 @@
                         {% endfor %}
 
                         <li class="page-item {% if page == total_pages %}disabled{% endif %}">
-                            <a class="page-link" href="{{ url_for('sentences.list_sentences', page=page+1, search=search, pattern_type=pattern_type, minimum_level=minimum_level) }}">
+                            <a class="page-link" href="{{ url_for('sentences.list_sentences', page=page+1, search=search, pattern_type=pattern_type, minimum_level=minimum_level, show_all=show_all) }}">
                                 Next
                             </a>
                         </li>

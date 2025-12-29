@@ -60,6 +60,15 @@
                            style="width: 150px;">
                 </div>
                 <div class="col-auto">
+                    <label for="show_all" class="col-form-label">Show All:</label>
+                </div>
+                <div class="col-auto">
+                    <select class="form-select" id="show_all" name="show_all" onchange="this.form.submit()">
+                        <option value="no" {% if show_all != 'yes' %}selected{% endif %}>No (hide verified & rejected)</option>
+                        <option value="yes" {% if show_all == 'yes' %}selected{% endif %}>Yes (show all)</option>
+                    </select>
+                </div>
+                <div class="col-auto">
                     <button type="submit" class="btn btn-primary">Apply</button>
                 </div>
             </form>
@@ -88,30 +97,56 @@
                         {% endfor %}
                     </div>
 
-                    <!-- Linked Words -->
+                    <!-- Linked Words (de-duplicated) -->
                     {% if sentence.words %}
+                    {% set unique_lemmas = {} %}
+                    {% for word in sentence.words %}
+                        {% if word.lemma and word.lemma.id not in unique_lemmas %}
+                            {% set _ = unique_lemmas.update({word.lemma.id: word}) %}
+                        {% endif %}
+                    {% endfor %}
+                    {% if unique_lemmas %}
                     <div class="mt-2">
                         <small class="text-muted">Linked words:</small>
-                        {% for word in sentence.words %}
-                        {% if word.lemma %}
-                        <a href="{{ url_for('lemmas.view_lemma', lemma_id=word.lemma.id) }}"
+                        {% for lemma_id, word in unique_lemmas.items() %}
+                        <a href="{{ url_for('lemmas.view_lemma', lemma_id=lemma_id) }}"
                            class="badge bg-success text-decoration-none"
                            title="{{ word.word_role }}">
                             {{ word.lemma.guid or word.english_text }}
                         </a>
-                        {% endif %}
                         {% endfor %}
                     </div>
                     {% endif %}
+                    {% endif %}
                 </div>
 
-                <div class="ms-3">
+                <div class="ms-3 d-flex flex-nowrap align-items-start">
                     <a href="{{ url_for('sentences.view_sentence', sentence_id=sentence.id) }}"
                        class="btn btn-sm btn-outline-primary">
                         <i class="bi bi-eye"></i> Details
                     </a>
-                    {% if not sentence.rejected %}
-                    <form method="POST" action="{{ url_for('pattern_sentences.reject_sentence', sentence_id=sentence.id) }}" class="d-inline-block ms-1">
+                    {% if sentence.verified %}
+                    <span class="badge bg-success ms-1">Verified</span>
+                    {% elif not sentence.rejected %}
+                    {% set has_translations = sentence.translations|length > 1 %}
+                    {% set has_level = sentence.minimum_level is not none %}
+                    {% set is_ready_to_verify = has_translations and has_level %}
+                    {% if not is_ready_to_verify %}
+                    <form method="POST" action="{{ url_for('pattern_sentences.accept_sentence', sentence_id=sentence.id) }}" class="ms-1">
+                        <button type="submit" class="btn btn-sm btn-success" title="Generate translations and set level"
+                                onclick="return confirm('Accept this sentence? This will generate translations for all languages and set the level based on word difficulty.')">
+                            <i class="bi bi-check-circle"></i> Accept
+                        </button>
+                    </form>
+                    {% else %}
+                    <form method="POST" action="{{ url_for('pattern_sentences.verify_sentence', sentence_id=sentence.id) }}" class="ms-1">
+                        <button type="submit" class="btn btn-sm btn-primary" title="Mark as verified"
+                                onclick="return confirm('Verify this sentence? It will be removed from the list.')">
+                            <i class="bi bi-check-circle-fill"></i> Verify
+                        </button>
+                    </form>
+                    {% endif %}
+                    <form method="POST" action="{{ url_for('pattern_sentences.reject_sentence', sentence_id=sentence.id) }}" class="ms-1">
                         <button type="submit" class="btn btn-sm btn-danger" title="Mark as rejected (won't be regenerated)"
                                 onclick="return confirm('Reject this sentence? It will not be regenerated.')">
                             <i class="bi bi-x-circle"></i> Reject
@@ -132,7 +167,7 @@
         <ul class="pagination justify-content-center">
             {% if page > 1 %}
             <li class="page-item">
-                <a class="page-link" href="{{ url_for('pattern_sentences.view', page=page-1, pattern_id=pattern_id, language_code=language_code, lemma_guid=lemma_guid) }}">
+                <a class="page-link" href="{{ url_for('pattern_sentences.view', page=page-1, pattern_id=pattern_id, language_code=language_code, lemma_guid=lemma_guid, show_all=show_all) }}">
                     Previous
                 </a>
             </li>
@@ -145,7 +180,7 @@
             </li>
             {% elif p == 1 or p == total_pages or (p >= page - 2 and p <= page + 2) %}
             <li class="page-item">
-                <a class="page-link" href="{{ url_for('pattern_sentences.view', page=p, pattern_id=pattern_id, language_code=language_code, lemma_guid=lemma_guid) }}">
+                <a class="page-link" href="{{ url_for('pattern_sentences.view', page=p, pattern_id=pattern_id, language_code=language_code, lemma_guid=lemma_guid, show_all=show_all) }}">
                     {{ p }}
                 </a>
             </li>
@@ -158,7 +193,7 @@
 
             {% if page < total_pages %}
             <li class="page-item">
-                <a class="page-link" href="{{ url_for('pattern_sentences.view', page=page+1, pattern_id=pattern_id, language_code=language_code, lemma_guid=lemma_guid) }}">
+                <a class="page-link" href="{{ url_for('pattern_sentences.view', page=page+1, pattern_id=pattern_id, language_code=language_code, lemma_guid=lemma_guid, show_all=show_all) }}">
                     Next
                 </a>
             </li>

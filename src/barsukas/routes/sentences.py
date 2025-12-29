@@ -11,6 +11,18 @@ from config import Config
 
 bp = Blueprint("sentences", __name__, url_prefix="/sentences")
 
+# Supported languages for translation
+LANGUAGES = [
+    {"code": "en", "name": "English"},
+    {"code": "lt", "name": "Lithuanian"},
+    {"code": "zh", "name": "Chinese"},
+    {"code": "ko", "name": "Korean"},
+    {"code": "fr", "name": "French"},
+    {"code": "de", "name": "German"},
+    {"code": "es", "name": "Spanish"},
+    {"code": "pt", "name": "Portuguese"},
+]
+
 
 @bp.route("/")
 def list_sentences():
@@ -19,9 +31,15 @@ def list_sentences():
     search = request.args.get("search", "").strip()
     pattern_type = request.args.get("pattern_type", "").strip()
     minimum_level = request.args.get("minimum_level", "", type=str).strip()
+    show_all = request.args.get("show_all", "no")
 
     # Build query
     query = g.db.query(Sentence)
+
+    # By default, exclude verified and rejected sentences unless specifically requested
+    if show_all != "yes":
+        query = query.filter(Sentence.verified == False)
+        query = query.filter(Sentence.rejected == False)
 
     # Apply filters
     if search:
@@ -94,6 +112,7 @@ def list_sentences():
         search=search,
         pattern_type=pattern_type,
         minimum_level=minimum_level,
+        show_all=show_all,
         pattern_types=pattern_types,
     )
 
@@ -274,3 +293,120 @@ def translate_sentence(sentence_id):
         g.db.rollback()
 
     return redirect(url_for("sentences.view_sentence", sentence_id=sentence_id))
+
+
+@bp.route("/<int:sentence_id>/accept", methods=["POST"])
+def accept_sentence(sentence_id):
+    """Accept a sentence: generate translations for all languages and auto-populate level.
+
+    This does NOT verify the sentence - that requires a separate Verify action.
+    """
+    sentence = g.db.query(Sentence).get(sentence_id)
+    if not sentence:
+        flash("Sentence not found", "error")
+        return redirect(url_for("sentences.list_sentences"))
+
+    try:
+        # Check if any word has level -1
+        sentence_words = (
+            g.db.query(SentenceWord)
+            .filter(SentenceWord.sentence_id == sentence_id)
+            .filter(SentenceWord.lemma_id.isnot(None))
+            .all()
+        )
+
+        for sw in sentence_words:
+            lemma = g.db.query(Lemma).get(sw.lemma_id)
+            if lemma and lemma.difficulty_level == -1:
+                flash(f"Cannot accept: word '{lemma.guid or lemma.lemma_text}' has difficulty level -1", "error")
+                return redirect(request.referrer or url_for("sentences.list_sentences"))
+
+        # Check if sentence already has translations for all languages
+        existing_translations = {t.language_code for t in sentence.translations}
+        target_languages = [lang["code"] for lang in LANGUAGES if lang["code"] != "en"]
+        has_all_translations = all(lang in existing_translations for lang in target_languages)
+
+        # Generate missing translations
+        if not has_all_translations:
+            from wordfreq.translation.sentence import translate_sentence
+            translate_sentence(sentence_id, target_languages, g.db, model="gpt-5-mini")
+
+        # Auto-populate the level if not set
+        if sentence.minimum_level is None:
+            max_level = None
+            for sw in sentence_words:
+                lemma = g.db.query(Lemma).get(sw.lemma_id)
+                if lemma and lemma.difficulty_level is not None:
+                    if max_level is None or lemma.difficulty_level > max_level:
+                        max_level = lemma.difficulty_level
+
+            if max_level is not None:
+                sentence.minimum_level = max_level
+
+        g.db.commit()
+
+        if sentence.minimum_level is not None:
+            flash(f"Sentence #{sentence_id} accepted with level {sentence.minimum_level}. Click Verify when ready.", "success")
+        else:
+            flash(f"Sentence #{sentence_id} accepted (no level set - no words with difficulty levels). Click Verify when ready.", "warning")
+
+    except Exception as e:
+        flash(f"Error accepting sentence: {e}", "error")
+        g.db.rollback()
+
+    # Redirect back to the view page with current filters
+    return redirect(request.referrer or url_for("sentences.list_sentences"))
+
+
+@bp.route("/<int:sentence_id>/verify", methods=["POST"])
+def verify_sentence(sentence_id):
+    """Mark a sentence as verified. Requires translations and level to be set."""
+    sentence = g.db.query(Sentence).get(sentence_id)
+    if not sentence:
+        flash("Sentence not found", "error")
+        return redirect(url_for("sentences.list_sentences"))
+
+    try:
+        # Check that sentence has translations and level
+        existing_translations = {t.language_code for t in sentence.translations}
+        target_languages = [lang["code"] for lang in LANGUAGES if lang["code"] != "en"]
+        has_all_translations = all(lang in existing_translations for lang in target_languages)
+
+        if not has_all_translations:
+            flash(f"Cannot verify: sentence is missing translations. Click Accept first.", "error")
+            return redirect(request.referrer or url_for("sentences.list_sentences"))
+
+        if sentence.minimum_level is None:
+            flash(f"Cannot verify: sentence has no level set. Click Accept first.", "error")
+            return redirect(request.referrer or url_for("sentences.list_sentences"))
+
+        sentence.verified = True
+        g.db.commit()
+        flash(f"Sentence #{sentence_id} verified and removed from list", "success")
+
+    except Exception as e:
+        flash(f"Error verifying sentence: {e}", "error")
+        g.db.rollback()
+
+    # Redirect back to the view page with current filters
+    return redirect(request.referrer or url_for("sentences.list_sentences"))
+
+
+@bp.route("/<int:sentence_id>/reject", methods=["POST"])
+def reject_sentence(sentence_id):
+    """Mark a sentence as rejected so it won't be regenerated."""
+    sentence = g.db.query(Sentence).get(sentence_id)
+    if not sentence:
+        flash("Sentence not found", "error")
+        return redirect(url_for("sentences.list_sentences"))
+
+    try:
+        sentence.rejected = True
+        g.db.commit()
+        flash(f"Sentence #{sentence_id} marked as rejected", "success")
+    except Exception as e:
+        flash(f"Error rejecting sentence: {e}", "error")
+        g.db.rollback()
+
+    # Redirect back to the view page with current filters
+    return redirect(request.referrer or url_for("sentences.list_sentences"))
