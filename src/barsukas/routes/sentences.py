@@ -187,6 +187,52 @@ def update_level(sentence_id):
     return redirect(url_for("sentences.view_sentence", sentence_id=sentence_id))
 
 
+@bp.route("/<int:sentence_id>/auto_populate_level", methods=["POST"])
+def auto_populate_level(sentence_id):
+    """Auto-populate the minimum level based on max difficulty_level of words in the sentence."""
+    sentence = g.db.query(Sentence).get(sentence_id)
+    if not sentence:
+        flash("Sentence not found", "error")
+        return redirect(url_for("sentences.list_sentences"))
+
+    try:
+        # Get all words in the sentence with lemmas
+        sentence_words = (
+            g.db.query(SentenceWord)
+            .filter(SentenceWord.sentence_id == sentence_id)
+            .filter(SentenceWord.lemma_id.isnot(None))
+            .all()
+        )
+
+        if not sentence_words:
+            flash("No words with lemmas found in this sentence", "warning")
+            return redirect(url_for("sentences.view_sentence", sentence_id=sentence_id))
+
+        # Get the max difficulty_level from all lemmas
+        max_level = None
+        for sw in sentence_words:
+            lemma = g.db.query(Lemma).get(sw.lemma_id)
+            if lemma and lemma.difficulty_level is not None:
+                if max_level is None or lemma.difficulty_level > max_level:
+                    max_level = lemma.difficulty_level
+
+        if max_level is None:
+            flash("No lemmas with difficulty levels found in this sentence", "warning")
+            return redirect(url_for("sentences.view_sentence", sentence_id=sentence_id))
+
+        # Update the sentence level
+        sentence.minimum_level = max_level
+        g.db.commit()
+
+        flash(f"Sentence level auto-populated to {max_level} (max word level)", "success")
+
+    except Exception as e:
+        flash(f"Error auto-populating level: {e}", "error")
+        g.db.rollback()
+
+    return redirect(url_for("sentences.view_sentence", sentence_id=sentence_id))
+
+
 @bp.route("/<int:sentence_id>/translate", methods=["POST"])
 def translate_sentence(sentence_id):
     """Translate a sentence to selected languages."""
