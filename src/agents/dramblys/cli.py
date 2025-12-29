@@ -400,8 +400,29 @@ def main():
 
     # Handle --import-jsonl mode
     if args.import_jsonl:
+        # Get list of files that will be imported
+        source_path = Path(args.import_jsonl)
+        if source_path.is_file():
+            file_list = [source_path]
+        elif source_path.is_dir():
+            file_list = sorted(source_path.glob(args.pattern))
+        else:
+            print(f"Error: Source path does not exist or is not a file/directory: {args.import_jsonl}")
+            return
+
+        # Build confirmation message with file list
+        file_list_str = "\n".join([f"  - {f.relative_to(source_path.parent) if source_path.is_dir() else f.name}" for f in file_list])
+        confirmation_msg = (
+            f"Import JSONL files from: {args.import_jsonl}\n"
+            f"Pattern: {args.pattern}\n"
+            f"Migration file: {args.migration_file or 'data/category_migrations.json (default)'}\n"
+            f"\n"
+            f"Files to be imported ({len(file_list)}):\n"
+            f"{file_list_str}"
+        )
+
         if not confirm_operation(
-            message=f"Import JSONL files from: {args.import_jsonl}\nPattern: {args.pattern}\nMigration file: {args.migration_file or 'data/category_migrations.json (default)'}",
+            message=confirmation_msg,
             skip_confirmation=args.yes,
             dry_run=args.dry_run,
         ):

@@ -6,7 +6,7 @@ from flask import Blueprint, jsonify, request, g
 from sqlalchemy import or_, func
 from typing import Optional, Dict, Any, List
 
-from wordfreq.storage.models.schema import (
+from wordfreq.storage.models import (
     Lemma,
     DerivativeForm,
     GrammarFact,
