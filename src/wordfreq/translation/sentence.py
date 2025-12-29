@@ -166,10 +166,15 @@ def build_response_schema(target_languages: List[str]) -> Dict:
         "en": {
             "type": "string",
             "description": "Corrected grammatically correct English translation"
+        },
+        "words_en": {
+            "type": "array",
+            "description": "Word-by-word breakdown for English",
+            "items": word_schema
         }
     }
 
-    required_fields = ["en"]
+    required_fields = ["en", "words_en"]
 
     # Add sentence and words array for each target language
     for lang in target_languages:
