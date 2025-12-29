@@ -83,6 +83,28 @@ The following JSONL files were updated to remove duplicates:
 - `data/release/lemmas/nouns/small_movable_object/base.jsonl` (46 → 45 entries)
 - `data/release/lemmas/nouns/tool_machine/base.jsonl` (46 → 43 entries)
 
+## Additional Category Consolidation
+
+After the initial duplicate removal, the following entries were moved to their proper categories:
+
+### Vehicle Consolidation
+**Moved from tool_machine → vehicle:** 7 entries
+- airplane, bicycle, boat, ship, taxi, truck, motorcycle
+
+**Result:**
+- tool_machine: 43 → 36 entries (now contains only tools/machines/technology)
+- vehicle: 5 → 12 entries (all vehicle types consolidated)
+
+### Food Consolidation
+**Moved from food_drink → food:** 84 entries
+- All remaining food items (bread, meat, fish, fruits, vegetables, etc.)
+
+**Result:**
+- food_drink: 84 → 0 entries (now empty, ready for deprecation)
+- food: 1 → 85 entries (all food items consolidated)
+
+**Note:** The beverage category (7 entries) remains separate as a distinct category for drinks.
+
 ## Next Steps
 
 ### Database Loading
