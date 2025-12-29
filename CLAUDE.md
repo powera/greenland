@@ -22,6 +22,19 @@ IMPORTANT: Always use absolute imports (e.g., "from agents.common_args import")
 rather than relative updir imports (e.g., "from ..common_args import"). This
 ensures imports work correctly regardless of how the code is invoked.
 
+To run scripts, always use PYTHONPATH and never use cd commands:
+  PYTHONPATH=src python src/agents/dramblys.py --help
+
+For agent CLI scripts that should be runnable directly, add this at the top
+(before any local imports), adjusting the number of .parent calls to reach src/:
+  import sys
+  from pathlib import Path
+  if str(Path(__file__).parent.parent) not in sys.path:
+      sys.path.insert(0, str(Path(__file__).parent.parent))
+
+The number of .parent calls depends on depth: for src/agents/foo.py use .parent.parent,
+for src/agents/dramblys/__main__.py use .parent.parent.parent, etc.
+
 Tests are in src/tests ; any changes to src/clients require tests.  Changes to
 barsukas generally do not require tests.  Do not run any tests other than a
 pycompile to check for code mistakes; ask the developer to test the change in

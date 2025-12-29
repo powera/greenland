@@ -10,11 +10,8 @@ The actual implementation is in agents/dramblys/
 
 import sys
 from pathlib import Path
-
-# Add src directory to path
-GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent)
-if GREENLAND_SRC_PATH not in sys.path:
-    sys.path.insert(0, GREENLAND_SRC_PATH)
+if str(Path(__file__).parent.parent) not in sys.path:
+    sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from agents.dramblys.agent import DramblysAgent
 from agents.dramblys.cli import main
