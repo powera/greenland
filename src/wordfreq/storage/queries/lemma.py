@@ -79,6 +79,7 @@ def build_lemma_search_query(
     session,
     search: Optional[str] = None,
     pos_type: Optional[str] = None,
+    pos_subtype: Optional[str] = None,
     difficulty: Optional[str] = None,
 ):
     """
@@ -88,6 +89,7 @@ def build_lemma_search_query(
         session: Database session
         search: Search term to find in lemma text, definition, disambiguation, and translations
         pos_type: Filter by part of speech type
+        pos_subtype: Filter by part of speech subtype
         difficulty: Filter by difficulty level (supports "-1", "null", or numeric string)
 
     Returns:
@@ -124,6 +126,10 @@ def build_lemma_search_query(
     # Apply POS type filter
     if pos_type:
         query = query.filter(Lemma.pos_type == pos_type)
+
+    # Apply POS subtype filter
+    if pos_subtype:
+        query = query.filter(Lemma.pos_subtype == pos_subtype)
 
     # Apply difficulty filter
     if difficulty:

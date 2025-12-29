@@ -43,7 +43,11 @@
 
                             {% if lemma.pos_subtype %}
                                 <dt class="col-sm-5">POS Subtype:</dt>
-                                <dd class="col-sm-7"><span class="badge bg-light text-dark">{{ lemma.pos_subtype }}</span></dd>
+                                <dd class="col-sm-7">
+                                    <a href="{{ url_for('lemmas.list_lemmas', pos_subtype=lemma.pos_subtype) }}" class="text-decoration-none">
+                                        <span class="badge bg-light text-dark">{{ lemma.pos_subtype }}</span>
+                                    </a>
+                                </dd>
                             {% endif %}
 
                             <dt class="col-sm-5">GUID:</dt>

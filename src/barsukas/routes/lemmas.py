@@ -178,6 +178,7 @@ def list_lemmas():
     page = request.args.get("page", 1, type=int)
     search = request.args.get("search", "").strip()
     pos_type = request.args.get("pos_type", "").strip()
+    pos_subtype = request.args.get("pos_subtype", "").strip()
     difficulty = request.args.get("difficulty", "", type=str).strip()
 
     # Build filtered and ordered query
@@ -185,6 +186,7 @@ def list_lemmas():
         session=g.db,
         search=search or None,
         pos_type=pos_type or None,
+        pos_subtype=pos_subtype or None,
         difficulty=difficulty or None,
     )
 
@@ -195,6 +197,13 @@ def list_lemmas():
     # Get unique POS types for filter dropdown
     pos_types = g.db.query(Lemma.pos_type).distinct().order_by(Lemma.pos_type).all()
     pos_types = [p[0] for p in pos_types if p[0]]
+
+    # Get unique POS subtypes for filter dropdown (optionally filtered by POS type)
+    pos_subtypes_query = g.db.query(Lemma.pos_subtype).filter(Lemma.pos_subtype.isnot(None)).distinct()
+    if pos_type:
+        pos_subtypes_query = pos_subtypes_query.filter(Lemma.pos_type == pos_type)
+    pos_subtypes = pos_subtypes_query.order_by(Lemma.pos_subtype).all()
+    pos_subtypes = [p[0] for p in pos_subtypes if p[0]]
 
     # Calculate pagination
     total_pages = (total + Config.ITEMS_PER_PAGE - 1) // Config.ITEMS_PER_PAGE
@@ -207,8 +216,10 @@ def list_lemmas():
         total=total,
         search=search,
         pos_type=pos_type,
+        pos_subtype=pos_subtype,
         difficulty=difficulty,
         pos_types=pos_types,
+        pos_subtypes=pos_subtypes,
     )
 
 
