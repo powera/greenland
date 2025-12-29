@@ -1,0 +1,53 @@
+{"guid": "V04_001", "pos_type": "verb", "pos_subtype": "mental_state", "concept_label": "learn", "concept_definition": "learn (verb)", "difficulty_level": 10}
+{"guid": "V04_002", "pos_type": "verb", "pos_subtype": "mental_state", "concept_label": "teach", "concept_definition": "teach (verb)", "difficulty_level": 10}
+{"guid": "V04_003", "pos_type": "verb", "pos_subtype": "mental_state", "concept_label": "read", "concept_definition": "read (verb)", "difficulty_level": 10}
+{"guid": "V04_004", "pos_type": "verb", "pos_subtype": "mental_state", "concept_label": "write", "concept_definition": "write (verb)", "difficulty_level": 10}
+{"guid": "V04_005", "pos_type": "verb", "pos_subtype": "mental_state", "concept_label": "listen", "concept_definition": "listen (verb)", "difficulty_level": 10}
+{"guid": "V04_006", "pos_type": "verb", "pos_subtype": "mental_state", "concept_label": "know", "concept_definition": "know (verb)", "difficulty_level": 10}
+{"guid": "V04_007", "pos_type": "verb", "pos_subtype": "mental_state", "concept_label": "see", "concept_definition": "see (verb)", "difficulty_level": 10}
+{"guid": "V04_008", "pos_type": "verb", "pos_subtype": "mental_state", "concept_label": "think", "concept_definition": "think (verb)", "difficulty_level": -1}
+{"guid": "V04_009", "pos_type": "verb", "pos_subtype": "mental_state", "concept_label": "say", "concept_definition": "say (verb)", "difficulty_level": -1}
+{"guid": "V04_010", "pos_type": "verb", "pos_subtype": "mental_state", "concept_label": "tell", "concept_definition": "tell (verb)", "difficulty_level": -1}
+{"guid": "V04_011", "pos_type": "verb", "pos_subtype": "mental_state", "concept_label": "let", "concept_definition": "let (verb)", "difficulty_level": -1}
+{"guid": "V04_012", "pos_type": "verb", "pos_subtype": "mental_state", "concept_label": "need", "concept_definition": "need (verb)", "difficulty_level": -1}
+{"guid": "V04_013", "pos_type": "verb", "pos_subtype": "mental_state", "concept_label": "mean", "concept_definition": "mean (verb)", "difficulty_level": -1}
+{"guid": "V04_014", "pos_type": "verb", "pos_subtype": "mental_state", "concept_label": "call", "concept_definition": "call (verb)", "difficulty_level": -1}
+{"guid": "V04_015", "pos_type": "verb", "pos_subtype": "mental_state", "concept_label": "talk", "concept_definition": "talk (verb)", "difficulty_level": -1}
+{"guid": "V04_016", "pos_type": "verb", "pos_subtype": "mental_state", "concept_label": "remember", "concept_definition": "remember (verb)", "difficulty_level": -1}
+{"guid": "V04_017", "pos_type": "verb", "pos_subtype": "mental_state", "concept_label": "understand", "concept_definition": "understand (verb)", "difficulty_level": -1}
+{"guid": "V04_018", "pos_type": "verb", "pos_subtype": "mental_state", "concept_label": "wish", "concept_definition": "wish (verb)", "difficulty_level": -1}
+{"guid": "V04_019", "pos_type": "verb", "pos_subtype": "mental_state", "concept_label": "ask", "concept_definition": "ask (verb)", "difficulty_level": -1}
+{"guid": "V04_020", "pos_type": "verb", "pos_subtype": "mental_state", "concept_label": "believe", "concept_definition": "believe (verb)", "difficulty_level": -1}
+{"guid": "V04_021", "pos_type": "verb", "pos_subtype": "mental_state", "concept_label": "wonder", "concept_definition": "wonder (verb)", "difficulty_level": -1}
+{"guid": "V04_022", "pos_type": "verb", "pos_subtype": "mental_state", "concept_label": "become", "concept_definition": "become (verb)", "difficulty_level": -1}
+{"guid": "V04_023", "pos_type": "verb", "pos_subtype": "mental_state", "concept_label": "seem", "concept_definition": "seem (verb)", "difficulty_level": -1}
+{"guid": "V04_024", "pos_type": "verb", "pos_subtype": "mental_state", "concept_label": "suppose", "concept_definition": "suppose (verb)", "difficulty_level": -1}
+{"guid": "V04_025", "pos_type": "verb", "pos_subtype": "mental_state", "concept_label": "guess", "concept_definition": "guess (verb)", "difficulty_level": -1}
+{"guid": "V04_026", "pos_type": "verb", "pos_subtype": "mental_state", "concept_label": "forget", "concept_definition": "forget (verb)", "difficulty_level": -1}
+{"guid": "V04_027", "pos_type": "verb", "pos_subtype": "mental_state", "concept_label": "expect", "concept_definition": "expect (verb)", "difficulty_level": -1}
+{"guid": "V04_028", "pos_type": "verb", "pos_subtype": "mental_state", "concept_label": "happen", "concept_definition": "happen (verb)", "difficulty_level": -1}
+{"guid": "V04_029", "pos_type": "verb", "pos_subtype": "mental_state", "concept_label": "count", "concept_definition": "count (verb)", "difficulty_level": -1}
+{"guid": "V04_030", "pos_type": "verb", "pos_subtype": "mental_state", "concept_label": "explain", "concept_definition": "explain (verb)", "difficulty_level": -1}
+{"guid": "V04_031", "pos_type": "verb", "pos_subtype": "mental_state", "concept_label": "notice", "concept_definition": "notice (verb)", "difficulty_level": -1}
+{"guid": "V04_032", "pos_type": "verb", "pos_subtype": "mental_state", "concept_label": "accept", "concept_definition": "accept (verb)", "difficulty_level": -1}
+{"guid": "V04_033", "pos_type": "verb", "pos_subtype": "mental_state", "concept_label": "choose", "concept_definition": "choose (verb)", "difficulty_level": -1}
+{"guid": "V04_034", "pos_type": "verb", "pos_subtype": "mental_state", "concept_label": "imagine", "concept_definition": "imagine (verb)", "difficulty_level": -1}
+{"guid": "V04_035", "pos_type": "verb", "pos_subtype": "mental_state", "concept_label": "dare", "concept_definition": "dare (verb)", "difficulty_level": -1}
+{"guid": "V04_036", "pos_type": "verb", "pos_subtype": "mental_state", "concept_label": "realize", "concept_definition": "realize (verb)", "difficulty_level": -1}
+{"guid": "V04_037", "pos_type": "verb", "pos_subtype": "mental_state", "concept_label": "consider", "concept_definition": "consider (verb)", "difficulty_level": -1}
+{"guid": "V04_038", "pos_type": "verb", "pos_subtype": "mental_state", "concept_label": "study", "concept_definition": "study (verb)", "difficulty_level": -1}
+{"guid": "V04_039", "pos_type": "verb", "pos_subtype": "mental_state", "concept_label": "seem", "concept_definition": "to give the impression of being; to appear to be; to be apparently true.", "difficulty_level": -1}
+{"guid": "V04_040", "pos_type": "verb", "pos_subtype": "mental_state", "concept_label": "suppose", "concept_definition": "to assume or believe to be true; to think or imagine; to be expected or required to do something.", "difficulty_level": -1}
+{"guid": "V04_041", "pos_type": "verb", "pos_subtype": "mental_state", "concept_label": "expect", "concept_definition": "to regard as likely to happen; to anticipate; to consider reasonable or necessary.", "difficulty_level": -1}
+{"guid": "V04_042", "pos_type": "verb", "pos_subtype": "mental_state", "concept_label": "happen", "concept_definition": "to occur or take place; to come about by chance; to encounter or discover by chance.", "difficulty_level": -1}
+{"guid": "V04_043", "pos_type": "verb", "pos_subtype": "mental_state", "concept_label": "decide", "concept_definition": "to make a choice or judgment; to resolve or determine; to settle or conclude.", "difficulty_level": -1}
+{"guid": "V04_044", "pos_type": "verb", "pos_subtype": "mental_state", "concept_label": "forget", "concept_definition": "to fail to remember; to neglect or overlook; to stop thinking about.", "difficulty_level": -1}
+{"guid": "V04_045", "pos_type": "verb", "pos_subtype": "mental_state", "concept_label": "wonder", "concept_definition": "to be curious about; to desire to know; to be surprised or amazed.", "difficulty_level": -1}
+{"guid": "V04_046", "pos_type": "verb", "pos_subtype": "mental_state", "concept_label": "guess", "concept_definition": "to estimate or suppose without sufficient information; to form a correct opinion by chance.", "difficulty_level": -1}
+{"guid": "V04_047", "pos_type": "verb", "pos_subtype": "mental_state", "concept_label": "catch", "concept_definition": "to capture or seize; to intercept; to become infected with; to understand or perceive.", "difficulty_level": -1}
+{"guid": "V04_048", "pos_type": "verb", "pos_subtype": "mental_state", "concept_label": "recognize", "concept_definition": "to identify from previous knowledge or experience; to acknowledge the existence or validity of.", "difficulty_level": -1}
+{"guid": "V04_049", "pos_type": "verb", "pos_subtype": "mental_state", "concept_label": "agree", "concept_definition": "to have the same opinion; to consent or accept; to be consistent or compatible.", "difficulty_level": -1}
+{"guid": "V04_050", "pos_type": "verb", "pos_subtype": "mental_state", "concept_label": "whisper", "concept_definition": "to speak very softly or quietly; to spread rumors; to make a soft rustling sound.", "difficulty_level": -1}
+{"guid": "V04_051", "pos_type": "verb", "pos_subtype": "mental_state", "concept_label": "nod", "concept_definition": "to move the head up and down as a sign of agreement or greeting; to briefly lower the head.", "difficulty_level": -1}
+{"guid": "V04_052", "pos_type": "verb", "pos_subtype": "mental_state", "concept_label": "stare", "concept_definition": "to look fixedly or intently with wide-open eyes; to gaze steadily.", "difficulty_level": -1}
+{"guid": "V04_053", "pos_type": "verb", "pos_subtype": "mental_state", "concept_label": "glance", "concept_definition": "to look briefly or quickly; to take a quick look.", "difficulty_level": -1}

@@ -1,0 +1,2 @@
+{"guid": "N04_001", "pos_type": "noun", "pos_subtype": "disease_condition", "concept_label": "cold", "concept_definition": "a common viral infection of the nose and throat, with symptoms like coughing and sneezing.", "difficulty_level": -1}
+{"guid": "N04_002", "pos_type": "noun", "pos_subtype": "disease_condition", "concept_label": "fever", "concept_definition": "an abnormally high body temperature, usually as a symptom of illness.", "difficulty_level": 18}

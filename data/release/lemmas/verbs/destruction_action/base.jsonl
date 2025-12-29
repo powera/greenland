@@ -1,0 +1,3 @@
+{"guid": "V03_001", "pos_type": "verb", "pos_subtype": "destruction_action", "concept_label": "destroy", "concept_definition": "to put an end to the existence of something by damaging or attacking it.", "difficulty_level": -1}
+{"guid": "V03_002", "pos_type": "verb", "pos_subtype": "destruction_action", "concept_label": "break", "concept_definition": "to separate into pieces as a result of a blow, shock, or strain.", "difficulty_level": -1}
+{"guid": "V03_003", "pos_type": "verb", "pos_subtype": "destruction_action", "concept_label": "tear", "concept_definition": "to pull or rip something apart or to pieces with force.", "difficulty_level": -1}

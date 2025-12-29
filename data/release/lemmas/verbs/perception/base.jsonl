@@ -1,0 +1,5 @@
+{"guid": "V10_001", "pos_type": "verb", "pos_subtype": "perception", "concept_label": "see", "concept_definition": "to perceive with the eyes; to observe or watch.", "difficulty_level": -1}
+{"guid": "V10_002", "pos_type": "verb", "pos_subtype": "perception", "concept_label": "hear", "concept_definition": "to perceive sound with the ears.", "difficulty_level": -1}
+{"guid": "V10_003", "pos_type": "verb", "pos_subtype": "perception", "concept_label": "feel", "concept_definition": "to perceive through physical touch or sensation.", "difficulty_level": -1}
+{"guid": "V10_004", "pos_type": "verb", "pos_subtype": "perception", "concept_label": "smell", "concept_definition": "to perceive an odor using the nose.", "difficulty_level": -1}
+{"guid": "V10_005", "pos_type": "verb", "pos_subtype": "perception", "concept_label": "taste", "concept_definition": "to perceive or experience the flavor of something.", "difficulty_level": -1}

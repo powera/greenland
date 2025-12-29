@@ -8,8 +8,20 @@
       "description": "Split food_drink into separate food and beverage categories"
     },
     "human": {
-      "split_into": ["occupation", "family_relation"],
-      "description": "Split human into occupation and family_relation categories"
+      "split_into": ["human", "occupation", "family_relation"],
+      "description": "Occupation and family_relation subcategories split from human category"
+    },
+    "tool": {
+      "split_into": ["tool", "vehicle"],
+      "description": "Vehicle subcategory split from tool category"
+    },
+    "small_physical_object": {
+      "split_into": ["small_physical_object", "furniture"],
+      "description": "Furniture subcategory split from small_physical_object category"
+    },
+    "quality": {
+      "split_into": ["quality", "size"],
+      "description": "Size subcategory split from quality category"
     }
   },
 

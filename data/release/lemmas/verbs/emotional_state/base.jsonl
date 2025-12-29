@@ -1,0 +1,10 @@
+{"guid": "V05_001", "pos_type": "verb", "pos_subtype": "emotional_state", "concept_label": "like", "concept_definition": "like (verb)", "difficulty_level": 6}
+{"guid": "V05_002", "pos_type": "verb", "pos_subtype": "emotional_state", "concept_label": "speak", "concept_definition": "speak (verb)", "difficulty_level": 6}
+{"guid": "V05_003", "pos_type": "verb", "pos_subtype": "emotional_state", "concept_label": "be able/can", "concept_definition": "to have the ability, opportunity, or permission to do something", "difficulty_level": 6}
+{"guid": "V05_004", "pos_type": "verb", "pos_subtype": "emotional_state", "concept_label": "want", "concept_definition": "want (verb)", "difficulty_level": 6}
+{"guid": "V05_005", "pos_type": "verb", "pos_subtype": "emotional_state", "concept_label": "feel", "concept_definition": "feel (verb)", "difficulty_level": -1}
+{"guid": "V05_006", "pos_type": "verb", "pos_subtype": "emotional_state", "concept_label": "cry", "concept_definition": "cry (verb)", "difficulty_level": -1}
+{"guid": "V05_007", "pos_type": "verb", "pos_subtype": "emotional_state", "concept_label": "smile", "concept_definition": "smile (verb)", "difficulty_level": -1}
+{"guid": "V05_008", "pos_type": "verb", "pos_subtype": "emotional_state", "concept_label": "miss", "concept_definition": "miss (verb)", "difficulty_level": -1}
+{"guid": "V05_009", "pos_type": "verb", "pos_subtype": "emotional_state", "concept_label": "worry", "concept_definition": "worry (verb)", "difficulty_level": -1}
+{"guid": "V05_010", "pos_type": "verb", "pos_subtype": "emotional_state", "concept_label": "laugh", "concept_definition": "laugh (verb)", "difficulty_level": -1}

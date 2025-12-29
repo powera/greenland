@@ -1,0 +1,5 @@
+{"guid": "V09_001", "pos_type": "verb", "pos_subtype": "communication", "concept_label": "talk", "concept_definition": "to speak in order to give information or express ideas or feelings.", "difficulty_level": -1}
+{"guid": "V09_002", "pos_type": "verb", "pos_subtype": "communication", "concept_label": "speak", "concept_definition": "to say words aloud; to use the voice to communicate.", "difficulty_level": -1}
+{"guid": "V09_003", "pos_type": "verb", "pos_subtype": "communication", "concept_label": "tell", "concept_definition": "to communicate information or facts to someone.", "difficulty_level": -1}
+{"guid": "V09_004", "pos_type": "verb", "pos_subtype": "communication", "concept_label": "ask", "concept_definition": "to say something in order to obtain an answer or information.", "difficulty_level": -1}
+{"guid": "V09_005", "pos_type": "verb", "pos_subtype": "communication", "concept_label": "answer", "concept_definition": "to say or write something as a response to a question.", "difficulty_level": -1}

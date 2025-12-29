@@ -1,0 +1,78 @@
+{"guid": "V01_006", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "eat", "concept_definition": "eat (verb)", "difficulty_level": 6}
+{"guid": "V01_001", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "live", "concept_definition": "live (verb)", "difficulty_level": 6}
+{"guid": "V01_002", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "play", "concept_definition": "play (verb)", "difficulty_level": 6}
+{"guid": "V01_003", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "work", "concept_definition": "work (verb)", "difficulty_level": 6}
+{"guid": "V01_004", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "drink", "concept_definition": "drink (verb)", "difficulty_level": 6}
+{"guid": "V01_005", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "sleep", "concept_definition": "sleep (verb)", "difficulty_level": 6}
+{"guid": "V01_007", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "get", "concept_definition": "get (verb)", "difficulty_level": -1}
+{"guid": "V01_008", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "look", "concept_definition": "look (verb)", "difficulty_level": -1}
+{"guid": "V01_009", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "find", "concept_definition": "find (verb)", "difficulty_level": -1}
+{"guid": "V01_010", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "put", "concept_definition": "put (verb)", "difficulty_level": -1}
+{"guid": "V01_011", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "set", "concept_definition": "set (verb)", "difficulty_level": -1}
+{"guid": "V01_012", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "keep", "concept_definition": "keep (verb)", "difficulty_level": -1}
+{"guid": "V01_013", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "use", "concept_definition": "to employ or put into service for a purpose; to apply something for a particular function or purpose", "difficulty_level": 12}
+{"guid": "V01_014", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "help", "concept_definition": "help (verb)", "difficulty_level": -1}
+{"guid": "V01_015", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "hear", "concept_definition": "hear (verb)", "difficulty_level": -1}
+{"guid": "V01_016", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "close", "concept_definition": "close (verb)", "difficulty_level": -1}
+{"guid": "V01_017", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "stop", "concept_definition": "stop (verb)", "difficulty_level": -1}
+{"guid": "V01_018", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "try", "concept_definition": "try (verb)", "difficulty_level": -1}
+{"guid": "V01_019", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "hold", "concept_definition": "hold (verb)", "difficulty_level": -1}
+{"guid": "V01_020", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "stay", "concept_definition": "stay (verb)", "difficulty_level": -1}
+{"guid": "V01_024", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "change", "concept_definition": "change (verb)", "difficulty_level": -1}
+{"guid": "V01_026", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "catch", "concept_definition": "catch (verb)", "difficulty_level": -1}
+{"guid": "V01_040", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "begin", "concept_definition": "begin (verb)", "difficulty_level": -1}
+{"guid": "V01_041", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "grow", "concept_definition": "grow (verb)", "difficulty_level": -1}
+{"guid": "V01_042", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "cast", "concept_definition": "cast (verb)", "difficulty_level": -1}
+{"guid": "V01_043", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "lose", "concept_definition": "lose (verb)", "difficulty_level": -1}
+{"guid": "V01_044", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "remain", "concept_definition": "remain (verb)", "difficulty_level": -1}
+{"guid": "V01_045", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "join", "concept_definition": "join (verb)", "difficulty_level": -1}
+{"guid": "V01_046", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "fit", "concept_definition": "fit (verb)", "difficulty_level": -1}
+{"guid": "V01_047", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "destroy", "concept_definition": "destroy (verb)", "difficulty_level": -1}
+{"guid": "V01_048", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "hide", "concept_definition": "hide (verb)", "difficulty_level": -1}
+{"guid": "V01_049", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "win", "concept_definition": "win (verb)", "difficulty_level": -1}
+{"guid": "V01_050", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "appear", "concept_definition": "appear (verb)", "difficulty_level": -1}
+{"guid": "V01_051", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "wake", "concept_definition": "wake (verb)", "difficulty_level": -1}
+{"guid": "V01_052", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "throw", "concept_definition": "throw (verb)", "difficulty_level": -1}
+{"guid": "V01_053", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "burn", "concept_definition": "burn (verb)", "difficulty_level": -1}
+{"guid": "V01_054", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "wear", "concept_definition": "wear (verb)", "difficulty_level": 12}
+{"guid": "V01_055", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "breathe", "concept_definition": "breathe (verb)", "difficulty_level": -1}
+{"guid": "V01_056", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "sit", "concept_definition": "to rest with the body supported by the buttocks; to be seated; to be situated or located.", "difficulty_level": -1}
+{"guid": "V01_057", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "stand", "concept_definition": "to be in an upright position on the feet; to rise to one's feet; to remain valid or unchanged; to tolerate.", "difficulty_level": -1}
+{"guid": "V01_058", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "cut", "concept_definition": "to make an opening or wound with a sharp tool; to divide or separate; to reduce or shorten.", "difficulty_level": -1}
+{"guid": "V01_059", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "hit", "concept_definition": "to strike with force; to reach or attain; to affect suddenly.", "difficulty_level": -1}
+{"guid": "V01_060", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "break", "concept_definition": "to separate into pieces; to damage or destroy; to interrupt or pause; to surpass or exceed.", "difficulty_level": -1}
+{"guid": "V01_061", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "carry", "concept_definition": "to transport or bear from one place to another; to support the weight of; to have with one.", "difficulty_level": -1}
+{"guid": "V01_062", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "wait", "concept_definition": "to stay in a place or delay action until a particular time or event; to remain temporarily inactive.", "difficulty_level": -1}
+{"guid": "V01_063", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "save", "concept_definition": "to rescue from danger or harm; to keep safe; to store for future use; to prevent waste.", "difficulty_level": -1}
+{"guid": "V01_064", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "hurt", "concept_definition": "to cause physical pain or injury; to cause emotional pain or distress; to be painful.", "difficulty_level": -1}
+{"guid": "V01_065", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "die", "concept_definition": "to stop living; to cease to exist; to stop functioning.", "difficulty_level": -1}
+{"guid": "V01_066", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "kill", "concept_definition": "to cause the death of; to put an end to; to overwhelm or defeat completely.", "difficulty_level": -1}
+{"guid": "V01_067", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "fight", "concept_definition": "to engage in physical combat or battle; to struggle against; to argue or quarrel.", "difficulty_level": -1}
+{"guid": "V01_068", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "touch", "concept_definition": "to come into or be in contact with; to handle or feel with the hands; to affect emotionally.", "difficulty_level": -1}
+{"guid": "V01_069", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "strike", "concept_definition": "to hit forcefully; to attack; to occur suddenly; to impress or affect.", "difficulty_level": -1}
+{"guid": "V01_070", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "pull", "concept_definition": "to exert force to move something toward oneself; to draw or drag; to attract.", "difficulty_level": -1}
+{"guid": "V01_071", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "push", "concept_definition": "to exert force to move something away from oneself; to press or shove; to urge or encourage.", "difficulty_level": -1}
+{"guid": "V01_072", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "lift", "concept_definition": "to raise to a higher position; to pick up; to remove or end a restriction.", "difficulty_level": -1}
+{"guid": "V01_073", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "drop", "concept_definition": "to let fall; to fall or descend; to decrease or diminish; to abandon or discontinue.", "difficulty_level": -1}
+{"guid": "V01_074", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "pick", "concept_definition": "to choose or select; to gather or collect; to remove or extract.", "difficulty_level": -1}
+{"guid": "V01_075", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "hang", "concept_definition": "to attach or suspend from above; to be suspended; to execute by hanging; to spend time.", "difficulty_level": -1}
+{"guid": "V01_076", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "cover", "concept_definition": "to place something over or upon; to protect or conceal; to include or deal with; to travel a distance.", "difficulty_level": -1}
+{"guid": "V01_077", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "lie", "concept_definition": "to be in a horizontal or resting position; to be situated or located; to remain in a certain state.", "difficulty_level": -1}
+{"guid": "V01_078", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "watch", "concept_definition": "to look at or observe attentively; to keep under careful observation; to guard or protect.", "difficulty_level": -1}
+{"guid": "V01_079", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "show", "concept_definition": "to make visible; to display or exhibit; to demonstrate or prove; to guide or direct.", "difficulty_level": -1}
+{"guid": "V01_080", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "notice", "concept_definition": "to become aware of; to observe or perceive; to pay attention to.", "difficulty_level": -1}
+{"guid": "V01_081", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "meet", "concept_definition": "to come together with; to encounter; to satisfy or fulfill; to assemble or gather.", "difficulty_level": -1}
+{"guid": "V01_082", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "start", "concept_definition": "to begin or commence; to cause to begin; to set in motion; to jump suddenly.", "difficulty_level": -1}
+{"guid": "V01_083", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "enter", "concept_definition": "to come or go into; to become a member or participant; to record or register.", "difficulty_level": -1}
+{"guid": "V01_084", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "cross", "concept_definition": "to go from one side to the other; to intersect; to oppose or contradict.", "difficulty_level": -1}
+{"guid": "V01_085", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "shake", "concept_definition": "to move rapidly back and forth or up and down; to tremble or vibrate; to disturb or upset.", "difficulty_level": -1}
+{"guid": "V01_086", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "bend", "concept_definition": "to curve or cause to curve; to stoop or lean; to force to submit; to change direction.", "difficulty_level": -1}
+{"guid": "V01_087", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "slip", "concept_definition": "to slide accidentally; to move quietly or quickly; to escape or pass unnoticed; to decline in quality.", "difficulty_level": -1}
+{"guid": "V01_088", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "spread", "concept_definition": "to extend over a larger area; to distribute or apply; to disseminate information.", "difficulty_level": -1}
+{"guid": "V01_089", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "climb", "concept_definition": "to ascend or go up; to move upward using hands and feet; to rise or increase.", "difficulty_level": -1}
+{"guid": "V01_090", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "point", "concept_definition": "to direct attention toward; to indicate direction with a finger; to aim or face toward.", "difficulty_level": -1}
+{"guid": "V01_091", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "raise", "concept_definition": "to lift or move to a higher position; to increase in amount or level; to bring up or rear; to mention or introduce.", "difficulty_level": -1}
+{"guid": "V01_092", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "add", "concept_definition": "to join or combine; to increase by; to say or write further.", "difficulty_level": -1}
+{"guid": "V01_093", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "shoot", "concept_definition": "to fire a weapon; to kill or wound with a projectile; to move very quickly; to photograph or film.", "difficulty_level": -1}
+{"guid": "V01_094", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "shut", "concept_definition": "to close; to block or prevent passage; to confine or enclose.", "difficulty_level": -1}
+{"guid": "V01_095", "pos_type": "verb", "pos_subtype": "physical_action", "concept_label": "draw", "concept_definition": "to pull or drag; to attract or bring forth; to sketch or depict; to extract or take out; to make a conclusion.", "difficulty_level": -1}

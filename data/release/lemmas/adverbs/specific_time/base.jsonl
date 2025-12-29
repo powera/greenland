@@ -1,0 +1,4 @@
+{"guid": "D03_001", "pos_type": "adverb", "pos_subtype": "specific_time", "concept_label": "today", "concept_definition": "on or during this present day.", "difficulty_level": -1}
+{"guid": "D03_002", "pos_type": "adverb", "pos_subtype": "specific_time", "concept_label": "yesterday", "concept_definition": "on the day before today.", "difficulty_level": -1}
+{"guid": "D03_003", "pos_type": "adverb", "pos_subtype": "specific_time", "concept_label": "tomorrow", "concept_definition": "on the day after today.", "difficulty_level": -1}
+{"guid": "D03_004", "pos_type": "adverb", "pos_subtype": "specific_time", "concept_label": "tonight", "concept_definition": "on the present or approaching evening or night.", "difficulty_level": -1}

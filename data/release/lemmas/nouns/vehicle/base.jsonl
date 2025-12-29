@@ -1,0 +1,5 @@
+{"guid": "N40_001", "pos_type": "noun", "pos_subtype": "vehicle", "concept_label": "car", "concept_definition": "a road vehicle with four wheels, powered by an engine, used for transporting people.", "difficulty_level": -1}
+{"guid": "N40_002", "pos_type": "noun", "pos_subtype": "vehicle", "concept_label": "bus", "concept_definition": "a large motor vehicle for carrying passengers by road, typically along a fixed route.", "difficulty_level": -1}
+{"guid": "N40_003", "pos_type": "noun", "pos_subtype": "vehicle", "concept_label": "train", "concept_definition": "a series of connected vehicles that travel on railways, carrying people or goods.", "difficulty_level": -1}
+{"guid": "N40_004", "pos_type": "noun", "pos_subtype": "vehicle", "concept_label": "bike", "concept_definition": "a vehicle with two wheels that you ride by pushing pedals with your feet.", "difficulty_level": -1}
+{"guid": "N40_005", "pos_type": "noun", "pos_subtype": "vehicle", "concept_label": "plane", "concept_definition": "a powered flying vehicle with fixed wings.", "difficulty_level": -1}
