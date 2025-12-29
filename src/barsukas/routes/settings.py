@@ -3,6 +3,9 @@
 import os
 import subprocess
 import sys
+import signal
+import threading
+import time
 from pathlib import Path
 from flask import Blueprint, render_template, request, jsonify, flash, redirect, url_for, current_app
 
@@ -10,6 +13,11 @@ from wordfreq.storage.backend import get_backend_type
 from wordfreq.storage.backend.config import BackendType
 
 bp = Blueprint("settings", __name__, url_prefix="/settings")
+
+# Track active requests for graceful shutdown
+_active_requests = 0
+_active_requests_lock = threading.Lock()
+_shutdown_requested = False
 
 
 @bp.route("/")
@@ -172,3 +180,106 @@ def backend_info():
         info["jsonl_exists"] = Path(backend_config.jsonl_data_dir).exists()
 
     return jsonify(info)
+
+
+@bp.route("/restart", methods=["POST"])
+def restart():
+    """Initiate a graceful restart of the Barsukas process.
+
+    This endpoint:
+    1. Returns immediately to the client
+    2. Waits for all in-flight requests to complete
+    3. Restarts the process with the same arguments
+    """
+    global _shutdown_requested
+
+    if _shutdown_requested:
+        return jsonify({"error": "Restart already in progress"}), 409
+
+    _shutdown_requested = True
+
+    # Start restart in background thread
+    def do_restart():
+        # Wait a moment for this response to be sent
+        time.sleep(0.5)
+
+        # Wait for all other requests to complete
+        max_wait = 300  # 5 minutes max wait
+        start_time = time.time()
+
+        while time.time() - start_time < max_wait:
+            with _active_requests_lock:
+                # Only this request (the restart request) should remain
+                # (Status checks are not tracked, so they don't count)
+                if _active_requests <= 1:
+                    break
+            time.sleep(0.1)
+
+        print("\n" + "="*50)
+        print("Graceful restart initiated")
+        print("All requests completed, shutting down...")
+        print("="*50 + "\n")
+
+        # Flush output
+        sys.stdout.flush()
+        sys.stderr.flush()
+
+        # Exit with code 42 to signal the launch script to restart
+        # This is cleaner than fork/exec and lets the OS fully clean up
+        os._exit(42)
+
+    restart_thread = threading.Thread(target=do_restart, daemon=True)
+    restart_thread.start()
+
+    return jsonify({
+        "success": True,
+        "message": "Restart initiated. Waiting for active requests to complete..."
+    })
+
+
+@bp.route("/restart/status", methods=["GET"])
+def restart_status():
+    """Check the status of an ongoing restart.
+
+    Note: This endpoint is exempt from request tracking to avoid
+    interfering with the restart process.
+    """
+    with _active_requests_lock:
+        active = _active_requests
+
+    return jsonify({
+        "shutdown_requested": _shutdown_requested,
+        "active_requests": active,
+        "ready_to_restart": active <= 1 if _shutdown_requested else False
+    })
+
+
+@bp.before_request
+def track_request_start():
+    """Track when a request starts.
+
+    Exempt the restart/status endpoint from tracking so polling
+    doesn't prevent shutdown.
+    """
+    global _active_requests
+
+    # Don't track status checks during restart
+    if request.endpoint == 'settings.restart_status':
+        return
+
+    with _active_requests_lock:
+        _active_requests += 1
+
+
+@bp.after_request
+def track_request_end(response):
+    """Track when a request ends."""
+    global _active_requests
+
+    # Don't track status checks during restart
+    if request.endpoint == 'settings.restart_status':
+        return response
+
+    with _active_requests_lock:
+        _active_requests -= 1
+    return response

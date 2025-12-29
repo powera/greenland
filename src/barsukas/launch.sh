@@ -62,5 +62,23 @@ if [[ "$STORAGE_FORMAT" == "jsonl" ]]; then
 fi
 echo ""
 
-# Run the Flask app with remaining arguments
-python app.py $HOST_ARGS "$@"
+# Run the Flask app with remaining arguments in a loop for auto-restart
+# Exit code 0 = normal shutdown, don't restart
+# Exit code 42 = restart requested, restart immediately
+while true; do
+    python app.py $HOST_ARGS "$@"
+    EXIT_CODE=$?
+
+    if [ $EXIT_CODE -eq 42 ]; then
+        echo ""
+        echo "=========================================="
+        echo "Restarting Barsukas (exit code 42)..."
+        echo "=========================================="
+        echo ""
+        sleep 0.5  # Brief pause to ensure port is released
+    else
+        echo ""
+        echo "Barsukas exited with code $EXIT_CODE"
+        exit $EXIT_CODE
+    fi
+done
