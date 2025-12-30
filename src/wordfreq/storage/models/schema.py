@@ -120,6 +120,8 @@ class LemmaTranslation(Base):
 
     This table replaces the individual language columns (french_translation, etc.)
     on the Lemma table to support scalable multi-language translations.
+
+    Now includes definition_text to support definitions in multiple languages.
     """
 
     __tablename__ = "lemma_translations"
@@ -129,8 +131,9 @@ class LemmaTranslation(Base):
     lemma_id: Mapped[int] = mapped_column(ForeignKey("lemmas.id"), nullable=False)
     language_code: Mapped[str] = mapped_column(
         String, nullable=False, index=True
-    )  # e.g., "fr", "es", "de"
+    )  # e.g., "fr", "es", "de", "en"
     translation: Mapped[str] = mapped_column(String, nullable=False)  # Base form of the translation
+    definition_text: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # Definition in this language
 
     # Metadata
     verified: Mapped[bool] = mapped_column(Boolean, default=False)

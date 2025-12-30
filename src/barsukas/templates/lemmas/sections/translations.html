@@ -23,6 +23,7 @@
                         <tr>
                             <th>Language</th>
                             <th>Translation</th>
+                            <th>Definition</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -40,6 +41,13 @@
                                         {% endif %}
                                     {% else %}
                                         <span class="text-muted fst-italic">Not set</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if definitions[lang_code] %}
+                                        <small class="text-muted">{{ definitions[lang_code][:80] }}{% if definitions[lang_code]|length > 80 %}...{% endif %}</small>
+                                    {% else %}
+                                        <span class="text-muted fst-italic">-</span>
                                     {% endif %}
                                 </td>
                                 <td>

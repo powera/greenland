@@ -233,8 +233,11 @@ def view_lemma(lemma_id):
         flash("Lemma not found", "error")
         return redirect(url_for("lemmas.list_lemmas"))
 
-    # Get all translations
+    # Get all translations and definitions
+    from wordfreq.storage.translation_helpers import get_all_definitions
+
     translations = get_all_translations(g.db, lemma)
+    definitions = get_all_definitions(g.db, lemma)
     language_names = get_supported_languages()
 
     # Get difficulty overrides
@@ -332,6 +335,7 @@ def view_lemma(lemma_id):
         "lemmas/view.html",
         lemma=lemma,
         translations=translations,
+        definitions=definitions,
         language_names=language_names,
         overrides=overrides,
         effective_levels=effective_levels,
