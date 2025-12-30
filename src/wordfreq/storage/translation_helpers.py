@@ -85,8 +85,43 @@ def get_translation(session: Session, lemma: Lemma, lang_code: str) -> Optional[
         )
         return translation_obj.translation if translation_obj else None
     else:
-        # Get from Lemma table column
+        # Get from Lemma table column (English uses lemma_text)
         return getattr(lemma, field_name, None)
+
+
+def get_definition(session: Session, lemma: Lemma, lang_code: str) -> Optional[str]:
+    """
+    Get definition for a lemma in the specified language.
+
+    Args:
+        session: Database session
+        lemma: Lemma object
+        lang_code: Language code (e.g., 'es', 'fr', 'zh', 'en')
+
+    Returns:
+        Definition string if it exists, None otherwise
+
+    Raises:
+        ValueError: If lang_code is not supported
+    """
+    if lang_code not in LANGUAGE_FIELDS:
+        raise ValueError(f"Unsupported language code: {lang_code}")
+
+    field_name, _, use_translation_table = LANGUAGE_FIELDS[lang_code]
+
+    if use_translation_table:
+        # Query LemmaTranslation table
+        translation_obj = (
+            session.query(LemmaTranslation)
+            .filter(
+                LemmaTranslation.lemma_id == lemma.id, LemmaTranslation.language_code == field_name
+            )
+            .first()
+        )
+        return translation_obj.definition_text if translation_obj else None
+    else:
+        # For English, fall back to definition_text on Lemma table
+        return lemma.definition_text if lemma else None
 
 
 def get_all_translations(session: Session, lemma: Lemma) -> Dict[str, Optional[str]]:
@@ -107,8 +142,26 @@ def get_all_translations(session: Session, lemma: Lemma) -> Dict[str, Optional[s
     return translations
 
 
+def get_all_definitions(session: Session, lemma: Lemma) -> Dict[str, Optional[str]]:
+    """
+    Get all definitions for a lemma.
+
+    Args:
+        session: Database session
+        lemma: Lemma object
+
+    Returns:
+        Dictionary mapping language codes to definition strings.
+        Example: {'en': 'to eat', 'es': 'comer algo', ...}
+    """
+    definitions = {}
+    for lang_code in LANGUAGE_FIELDS.keys():
+        definitions[lang_code] = get_definition(session, lemma, lang_code)
+    return definitions
+
+
 def set_translation(
-    session: Session, lemma: Lemma, lang_code: str, translation: str
+    session: Session, lemma: Lemma, lang_code: str, translation: str, definition: Optional[str] = None
 ) -> Tuple[Optional[str], str]:
     """
     Set translation for a lemma in the specified language.
@@ -118,6 +171,7 @@ def set_translation(
         lemma: Lemma object
         lang_code: Language code (e.g., 'es', 'fr', 'zh')
         translation: Translation string to set
+        definition: Optional definition text in this language
 
     Returns:
         Tuple of (old_translation, new_translation)
@@ -145,16 +199,86 @@ def set_translation(
 
         if translation_obj:
             translation_obj.translation = translation
+            if definition is not None:
+                translation_obj.definition_text = definition
         else:
             translation_obj = LemmaTranslation(
-                lemma_id=lemma.id, language_code=field_name, translation=translation, verified=False
+                lemma_id=lemma.id,
+                language_code=field_name,
+                translation=translation,
+                definition_text=definition,
+                verified=False
             )
             session.add(translation_obj)
     else:
-        # Set on Lemma table column
+        # Set on Lemma table column (English uses lemma_text)
         setattr(lemma, field_name, translation)
+        if definition is not None and hasattr(lemma, 'definition_text'):
+            lemma.definition_text = definition
 
     return old_translation, translation
+
+
+def set_definition(
+    session: Session, lemma: Lemma, lang_code: str, definition: str
+) -> Tuple[Optional[str], str]:
+    """
+    Set definition for a lemma in the specified language.
+
+    Args:
+        session: Database session
+        lemma: Lemma object
+        lang_code: Language code (e.g., 'es', 'fr', 'zh', 'en')
+        definition: Definition text to set
+
+    Returns:
+        Tuple of (old_definition, new_definition)
+
+    Raises:
+        ValueError: If lang_code is not supported
+    """
+    if lang_code not in LANGUAGE_FIELDS:
+        raise ValueError(f"Unsupported language code: {lang_code}")
+
+    field_name, _, use_translation_table = LANGUAGE_FIELDS[lang_code]
+
+    # Get old definition for logging
+    old_definition = get_definition(session, lemma, lang_code)
+
+    if use_translation_table:
+        # Insert or update in LemmaTranslation table
+        translation_obj = (
+            session.query(LemmaTranslation)
+            .filter(
+                LemmaTranslation.lemma_id == lemma.id, LemmaTranslation.language_code == field_name
+            )
+            .first()
+        )
+
+        if translation_obj:
+            translation_obj.definition_text = definition
+        else:
+            # Need to create a row - but we need a translation too
+            # Use lemma_text as placeholder if English, otherwise raise error
+            if lang_code == 'en':
+                translation = lemma.lemma_text
+            else:
+                raise ValueError(f"Cannot set definition for {lang_code} without translation")
+
+            translation_obj = LemmaTranslation(
+                lemma_id=lemma.id,
+                language_code=field_name,
+                translation=translation,
+                definition_text=definition,
+                verified=False
+            )
+            session.add(translation_obj)
+    else:
+        # For English, set on Lemma table
+        if hasattr(lemma, 'definition_text'):
+            lemma.definition_text = definition
+
+    return old_definition, definition
 
 
 def has_translation(session: Session, lemma: Lemma, lang_code: str) -> bool:

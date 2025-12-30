@@ -110,6 +110,12 @@ class JSONLStorage(BaseStorage):
                         lemma.pos_subtype = data.get("pos_subtype")
                         lemma.concept_label = data.get("concept_label", "")
                         lemma.concept_definition = data.get("concept_definition", "")
+
+                        # Populate lemma_text and definition_text from concept fields
+                        # This ensures compatibility when no en.jsonl exists
+                        lemma.lemma_text = lemma.concept_label
+                        lemma.definition_text = lemma.concept_definition
+
                         lemma.difficulty_level = data.get("difficulty_level")
                         lemma.notes = data.get("notes")
                         lemma.added_at = data.get("added_at")
