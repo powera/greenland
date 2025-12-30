@@ -27,10 +27,14 @@ from datetime import datetime
 from typing import Dict, List, Optional, Tuple
 
 import constants
+from clients.barsukas_cache import BarsukasCacheClient
 from wordfreq.storage.backend import create_session as create_backend_session
-from wordfreq.storage.backend.config import BackendConfig, BackendType
+from wordfreq.storage.backend.config import DataSourceConfig, BackendType
 from wordfreq.storage.models.schema import Lemma, DerivativeForm
 from wordfreq.translation.client import LinguisticClient
+
+# Backward compatibility
+BackendConfig = DataSourceConfig
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -41,46 +45,78 @@ class VilkasAgent:
 
     def __init__(
         self,
+        config: DataSourceConfig = None,
         db_path: str = None,
-        backend_config: BackendConfig = None,
         debug: bool = False,
+        model: str = None,
+        barsukas_url: str = None,
+        cache_only: bool = False,
+        backend_config: DataSourceConfig = None,
     ):
         """
         Initialize the Vilkas agent.
 
         Args:
-            db_path: Database path (uses default if None) - for backward compatibility
-            backend_config: Backend configuration (if provided, overrides db_path)
+            config: DataSourceConfig with storage backend, cache, and LLM settings
+            db_path: Path to SQLite database (backward compatibility)
             debug: Enable debug logging
+            model: LLM model to use (backward compatibility)
+            barsukas_url: BARSUKAS cache server URL (backward compatibility)
+            cache_only: Strict cache mode (backward compatibility)
+            backend_config: Old name for config parameter (backward compatibility)
         """
-        # Set up backend configuration
-        if backend_config is not None:
-            self.backend_config = backend_config
-        elif db_path is not None:
-            # Backward compatibility: db_path implies SQLite backend
-            self.backend_config = BackendConfig(
-                backend_type=BackendType.SQLITE, sqlite_path=db_path
+        # Handle backward compatibility for parameter names
+        if backend_config is not None and config is None:
+            config = backend_config
+
+        # Set up data source configuration
+        if config is not None:
+            self.config = config
+        elif db_path is not None or model is not None or barsukas_url is not None:
+            # Backward compatibility: build config from individual parameters
+            self.config = DataSourceConfig(
+                backend_type=BackendType.SQLITE,
+                sqlite_path=db_path or constants.WORDFREQ_DB_PATH,
+                barsukas_url=barsukas_url,
+                cache_only=cache_only,
+                model=model,
             )
         else:
-            # Use default SQLite path
-            self.backend_config = BackendConfig(
-                backend_type=BackendType.SQLITE, sqlite_path=constants.WORDFREQ_DB_PATH
+            # Use default configuration
+            self.config = DataSourceConfig(
+                backend_type=BackendType.SQLITE,
+                sqlite_path=constants.WORDFREQ_DB_PATH,
             )
 
+        # Extract commonly-used config values
+        self.debug = debug
+        self.model = self.config.model
+
         # Keep db_path for backward compatibility with LinguisticClient
-        if self.backend_config.backend_type == BackendType.SQLITE:
-            self.db_path = self.backend_config.sqlite_path
+        if self.config.backend_type == BackendType.SQLITE:
+            self.db_path = self.config.sqlite_path
         else:
             self.db_path = None
 
-        self.debug = debug
+        # Lazy initialization
+        self.cache_client = None
 
         if debug:
             logger.setLevel(logging.DEBUG)
 
     def get_session(self):
         """Get database session using backend abstraction."""
-        return create_backend_session(self.backend_config)
+        return create_backend_session(self.config)
+
+    def get_cache_client(self):
+        """Get or create cache client for BARSUKAS queries."""
+        if self.cache_client is None and self.config.barsukas_url:
+            self.cache_client = BarsukasCacheClient(
+                base_url=self.config.barsukas_url,
+                cache_only=self.config.cache_only,
+                debug=self.debug
+            )
+        return self.cache_client
 
     def check_missing_lithuanian_base_forms(self) -> Dict[str, any]:
         """

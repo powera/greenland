@@ -37,11 +37,13 @@ from agents.common_args import (
     add_processing_args,
     add_guid_arg,
     add_backend_args,
-    get_backend_config,
+    get_data_source_config,
+    validate_cache_args,
     confirm_operation,
 )
+from clients.barsukas_cache import BarsukasCacheClient
 from wordfreq.storage.backend import create_session as create_backend_session
-from wordfreq.storage.backend.config import BackendConfig, BackendType
+from wordfreq.storage.backend.config import DataSourceConfig, BackendType
 from wordfreq.storage.models.schema import (
     DerivativeForm,
     Lemma,
@@ -50,6 +52,9 @@ from wordfreq.storage.models.schema import (
     SentenceWord,
 )
 from wordfreq.tools.llm_validators import validate_pronunciation, generate_pronunciation
+
+# Backward compatibility
+BackendConfig = DataSourceConfig
 
 # Configure logging
 logging.basicConfig(
@@ -63,49 +68,79 @@ class PapugaAgent:
 
     def __init__(
         self,
+        config: DataSourceConfig = None,
         db_path: str = None,
-        backend_config: BackendConfig = None,
         debug: bool = False,
-        model: str = "gpt-5-mini",
+        model: str = None,
+        barsukas_url: str = None,
+        cache_only: bool = False,
+        backend_config: DataSourceConfig = None,
     ):
         """
         Initialize the Papuga agent.
 
         Args:
-            db_path: Database path (uses default if None) - for backward compatibility
-            backend_config: Backend configuration (if provided, overrides db_path)
+            config: DataSourceConfig with storage backend, cache, and LLM settings
+            db_path: Path to SQLite database (backward compatibility)
             debug: Enable debug logging
-            model: LLM model to use for validation/generation
+            model: LLM model to use (backward compatibility)
+            barsukas_url: BARSUKAS cache server URL (backward compatibility)
+            cache_only: Strict cache mode (backward compatibility)
+            backend_config: Old name for config parameter (backward compatibility)
         """
-        # Set up backend configuration
-        if backend_config is not None:
-            self.backend_config = backend_config
-        elif db_path is not None:
-            # Backward compatibility: db_path implies SQLite backend
-            self.backend_config = BackendConfig(
-                backend_type=BackendType.SQLITE, sqlite_path=db_path
+        # Handle backward compatibility for parameter names
+        if backend_config is not None and config is None:
+            config = backend_config
+
+        # Set up data source configuration
+        if config is not None:
+            self.config = config
+        elif db_path is not None or model is not None or barsukas_url is not None:
+            # Backward compatibility: build config from individual parameters
+            self.config = DataSourceConfig(
+                backend_type=BackendType.SQLITE,
+                sqlite_path=db_path or constants.WORDFREQ_DB_PATH,
+                barsukas_url=barsukas_url,
+                cache_only=cache_only,
+                model=model or "gpt-5-mini",
             )
         else:
-            # Use default SQLite path
-            self.backend_config = BackendConfig(
-                backend_type=BackendType.SQLITE, sqlite_path=constants.WORDFREQ_DB_PATH
+            # Use default configuration
+            self.config = DataSourceConfig(
+                backend_type=BackendType.SQLITE,
+                sqlite_path=constants.WORDFREQ_DB_PATH,
+                model="gpt-5-mini",
             )
 
+        # Extract commonly-used config values
+        self.debug = debug
+        self.model = self.config.model or "gpt-5-mini"
+
         # Keep db_path for backward compatibility
-        if self.backend_config.backend_type == BackendType.SQLITE:
-            self.db_path = self.backend_config.sqlite_path
+        if self.config.backend_type == BackendType.SQLITE:
+            self.db_path = self.config.sqlite_path
         else:
             self.db_path = None
 
-        self.debug = debug
-        self.model = model
+        # Lazy initialization
+        self.cache_client = None
 
         if debug:
             logger.setLevel(logging.DEBUG)
 
     def get_session(self):
         """Get database session using backend abstraction."""
-        return create_backend_session(self.backend_config)
+        return create_backend_session(self.config)
+
+    def get_cache_client(self):
+        """Get or create cache client for BARSUKAS queries."""
+        if self.cache_client is None and self.config.barsukas_url:
+            self.cache_client = BarsukasCacheClient(
+                base_url=self.config.barsukas_url,
+                cache_only=self.config.cache_only,
+                debug=self.debug
+            )
+        return self.cache_client
 
     def _get_example_sentence(self, session, lemma: Lemma) -> Optional[str]:
         """
@@ -617,8 +652,11 @@ def main():
     parser = get_argument_parser()
     args = parser.parse_args()
 
-    # Create backend configuration using common helper
-    backend_config = get_backend_config(args)
+    # Validate cache arguments
+    validate_cache_args(args)
+
+    # Create data source configuration (includes backend, cache, and LLM model)
+    config = get_data_source_config(args, default_model="gpt-5-mini")
 
     # Determine mode
     if args.populate:
@@ -632,10 +670,7 @@ def main():
 
     # Handle --guid mode
     if args.guid:
-        if backend_config:
-            agent = PapugaAgent(backend_config=backend_config, debug=args.debug, model=args.model)
-        else:
-            agent = PapugaAgent(db_path=args.db_path, debug=args.debug, model=args.model)
+        agent = PapugaAgent(config=config, debug=args.debug)
         session = agent.get_session()
         try:
             # Find the lemma by GUID
@@ -719,10 +754,7 @@ def main():
 
     # Confirm before running LLM queries (unless --yes or --dry-run was provided)
     if not args.yes and not args.dry_run:
-        if backend_config:
-            agent_temp = PapugaAgent(backend_config=backend_config, debug=args.debug, model=args.model)
-        else:
-            agent_temp = PapugaAgent(db_path=args.db_path, debug=args.debug, model=args.model)
+        agent_temp = PapugaAgent(config=config, debug=args.debug)
         session = agent_temp.get_session()
         try:
             if mode in ["check", "both"]:
@@ -770,11 +802,8 @@ def main():
             print("Aborted.")
             sys.exit(0)
 
-    # Create agent with backend config
-    if backend_config:
-        agent = PapugaAgent(backend_config=backend_config, debug=args.debug, model=args.model)
-    else:
-        agent = PapugaAgent(db_path=args.db_path, debug=args.debug, model=args.model)
+    # Create agent with unified configuration
+    agent = PapugaAgent(config=config, debug=args.debug)
 
     if mode == "check":
         agent.run_full_check(

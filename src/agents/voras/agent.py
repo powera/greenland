@@ -66,7 +66,6 @@ class VorasAgent:
         config: DataSourceConfig = None,
         db_path: str = None,
         debug: bool = False,
-        # Deprecated parameters - kept for backward compatibility
         model: str = None,
         barsukas_url: str = None,
         cache_only: bool = False,
@@ -76,13 +75,13 @@ class VorasAgent:
         Initialize the Voras agent.
 
         Args:
-            config: DataSourceConfig with storage backend, cache, and LLM settings (recommended)
-            db_path: DEPRECATED - use config instead. Path to SQLite database (for backward compatibility)
+            config: DataSourceConfig with storage backend, cache, and LLM settings
+            db_path: Path to SQLite database (backward compatibility)
             debug: Enable debug logging
-            model: DEPRECATED - use config.model. LLM model to use
-            barsukas_url: DEPRECATED - use config.barsukas_url. BARSUKAS cache server URL
-            cache_only: DEPRECATED - use config.cache_only. Strict cache mode
-            backend_config: DEPRECATED - use config instead. Old name for DataSourceConfig
+            model: LLM model to use (backward compatibility)
+            barsukas_url: BARSUKAS cache server URL (backward compatibility)
+            cache_only: Strict cache mode (backward compatibility)
+            backend_config: Old name for config parameter (backward compatibility)
         """
         # Handle backward compatibility for parameter names
         if backend_config is not None and config is None:
