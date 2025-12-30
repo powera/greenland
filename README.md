@@ -252,10 +252,12 @@ CLI utilities:
 | **papuga** | Parrot | Pronunciation validation/generation |
 | **zvirblis** | Sparrow | Example sentence generator |
 | **buivolas** | Water Buffalo | Simple pattern-based sentence generator with batch translation |
+| **lape** | Fox | Grammar facts generator (measure words, gender, etc.) |
+| **strazdas** | Thrush | eSpeak-NG audio generation |
+| **vieversys** | Lark | OpenAI TTS audio generation |
 | **povas** | Peacock | HTML report generator |
 | **ungurys** | Eel | WireWord export agent |
 | **elnias** | Deer | WireWord bootstrap export |
-| **lape** | Fox | (Purpose to be determined) |
 
 **Running Agents:**
 

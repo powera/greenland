@@ -13,7 +13,13 @@ from typing import List, Optional
 
 from .agent import BebrasAgent
 from .translation import get_language_name, validate_language_codes
-from agents.common_args import add_common_args, add_llm_args, add_output_args
+from agents.common_args import (
+    add_common_args,
+    add_llm_args,
+    add_output_args,
+    add_backend_args,
+    get_backend_config,
+)
 
 # Configure logging
 logging.basicConfig(
@@ -72,6 +78,7 @@ Examples:
     # Common arguments
     add_common_args(parser)
     add_llm_args(parser, default_model="gpt-5-mini")
+    add_backend_args(parser)
 
     # Output options
     parser.add_argument("--json", action="store_true", help="Output results as JSON")
@@ -227,8 +234,14 @@ def main():
     logger.info(f"Source language: {source_name} ({args.source})")
     logger.info(f"Target languages: {', '.join(target_names)}")
 
+    # Create backend configuration using common helper
+    backend_config = get_backend_config(args)
+
     # Initialize agent
-    agent = BebrasAgent(db_path=args.db_path, debug=args.debug, model=args.model)
+    if backend_config:
+        agent = BebrasAgent(backend_config=backend_config, debug=args.debug, model=args.model)
+    else:
+        agent = BebrasAgent(db_path=args.db_path, debug=args.debug, model=args.model)
 
     # Process based on input mode
     if args.sentence:

@@ -23,7 +23,8 @@ if GREENLAND_SRC_PATH not in sys.path:
 
 import constants
 from util.logging_config import configure_logging, get_logger
-from wordfreq.storage.database import create_database_session
+from wordfreq.storage.backend import create_session as create_backend_session
+from wordfreq.storage.backend.config import BackendConfig, BackendType
 from wordfreq.storage.models.schema import Lemma, WordToken, WordFrequency, Corpus, DerivativeForm
 from wordfreq.storage.models.imports import PendingImport, WordExclusion
 from wordfreq.translation.client import LinguisticClient
@@ -40,23 +41,48 @@ logger = get_logger(__name__)
 class DramblysAgent:
     """Agent for detecting missing words in the dictionary."""
 
-    def __init__(self, db_path: str = None, debug: bool = False):
+    def __init__(
+        self,
+        db_path: str = None,
+        backend_config: BackendConfig = None,
+        debug: bool = False,
+    ):
         """
         Initialize the Dramblys agent.
 
         Args:
-            db_path: Database path (uses default if None)
+            db_path: Database path (uses default if None) - for backward compatibility
+            backend_config: Backend configuration (if provided, overrides db_path)
             debug: Enable debug logging
         """
-        self.db_path = db_path or constants.WORDFREQ_DB_PATH
+        # Set up backend configuration
+        if backend_config is not None:
+            self.backend_config = backend_config
+        elif db_path is not None:
+            # Backward compatibility: db_path implies SQLite backend
+            self.backend_config = BackendConfig(
+                backend_type=BackendType.SQLITE, sqlite_path=db_path
+            )
+        else:
+            # Use default SQLite path
+            self.backend_config = BackendConfig(
+                backend_type=BackendType.SQLITE, sqlite_path=constants.WORDFREQ_DB_PATH
+            )
+
+        # Keep db_path for backward compatibility with LinguisticClient
+        if self.backend_config.backend_type == BackendType.SQLITE:
+            self.db_path = self.backend_config.sqlite_path
+        else:
+            self.db_path = None
+
         self.debug = debug
 
         if debug:
             logger.setLevel(logging.DEBUG)
 
     def get_session(self):
-        """Get database session."""
-        return create_database_session(self.db_path)
+        """Get database session using backend abstraction."""
+        return create_backend_session(self.backend_config)
 
     def check_high_frequency_missing_words(
         self, top_n: int = 5000, min_rank: int = 1

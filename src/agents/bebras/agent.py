@@ -14,8 +14,9 @@ import constants
 import util.prompt_loader
 from clients.types import Schema, SchemaProperty
 from clients.unified_client import UnifiedLLMClient
+from wordfreq.storage.backend import create_session as create_backend_session
+from wordfreq.storage.backend.config import BackendConfig, BackendType
 from wordfreq.storage.database import (
-    create_database_session,
     Lemma,
     add_sentence,
     add_sentence_translation,
@@ -29,16 +30,42 @@ logger = logging.getLogger(__name__)
 class BebrasAgent:
     """Agent for managing sentence-word links."""
 
-    def __init__(self, db_path: str = None, debug: bool = False, model: str = "gpt-5-mini"):
+    def __init__(
+        self,
+        db_path: str = None,
+        backend_config: BackendConfig = None,
+        debug: bool = False,
+        model: str = "gpt-5-mini",
+    ):
         """
         Initialize the Bebras agent.
 
         Args:
-            db_path: Database path (uses default if None)
+            db_path: Database path (uses default if None) - for backward compatibility
+            backend_config: Backend configuration (if provided, overrides db_path)
             debug: Enable debug logging
             model: LLM model to use for word extraction
         """
-        self.db_path = db_path or constants.WORDFREQ_DB_PATH
+        # Set up backend configuration
+        if backend_config is not None:
+            self.backend_config = backend_config
+        elif db_path is not None:
+            # Backward compatibility: db_path implies SQLite backend
+            self.backend_config = BackendConfig(
+                backend_type=BackendType.SQLITE, sqlite_path=db_path
+            )
+        else:
+            # Use default SQLite path
+            self.backend_config = BackendConfig(
+                backend_type=BackendType.SQLITE, sqlite_path=constants.WORDFREQ_DB_PATH
+            )
+
+        # Keep db_path for backward compatibility
+        if self.backend_config.backend_type == BackendType.SQLITE:
+            self.db_path = self.backend_config.sqlite_path
+        else:
+            self.db_path = None
+
         self.debug = debug
         self.model = model
         self.llm_client = UnifiedLLMClient()
@@ -47,8 +74,8 @@ class BebrasAgent:
             logger.setLevel(logging.DEBUG)
 
     def get_session(self):
-        """Get database session."""
-        return create_database_session(self.db_path)
+        """Get database session using backend abstraction."""
+        return create_backend_session(self.backend_config)
 
     def analyze_sentence(
         self, sentence_text: str, source_language: str = "en", context: Optional[str] = None
