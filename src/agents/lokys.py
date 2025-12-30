@@ -710,6 +710,10 @@ def main():
     parser = get_argument_parser()
     args = parser.parse_args()
 
+    # Validate arguments: --dry-run is not allowed in batch mode (only in --guid mode)
+    if args.dry_run and not args.guid:
+        parser.error("--dry-run is not supported in batch mode. LOKYS always applies fixes in batch mode. Use --guid mode for testing individual lemmas.")
+
     # Create backend configuration using common helper
     backend_config = get_data_source_config(args)
 
@@ -745,16 +749,27 @@ def main():
             if args.check_type in ["definitions", "both"]:
                 result = validate_definition(
                     lemma.lemma_text,
-                    lemma.english_definition,
+                    lemma.definition_text,
                     lemma.pos_type,
                     args.model
                 )
                 print(f"\nDefinition validation:")
-                print(f"  Is accurate: {result['is_accurate']}")
+                print(f"  Is valid: {result['is_valid']}")
                 print(f"  Confidence: {result['confidence']:.2f}")
-                if not result['is_accurate']:
-                    print(f"  Issues: {result['issues']}")
-                    print(f"  Suggested: {result['suggested_definition']}")
+                if not result['is_valid']:
+                    print(f"  Issues: {', '.join(result['issues'])}")
+                    if result['suggested_definition']:
+                        print(f"  Suggested: {result['suggested_definition']}")
+                        # Apply the fix automatically (unless --dry-run)
+                        if not args.dry_run:
+                            old_definition = lemma.definition_text
+                            lemma.definition_text = result['suggested_definition']
+                            session.commit()
+                            print(f"  ✓ Updated definition: '{old_definition}' → '{result['suggested_definition']}'")
+                        else:
+                            print(f"  [DRY RUN] Would update: '{lemma.definition_text}' → '{result['suggested_definition']}'")
+                    else:
+                        print(f"  ⚠ No suggested definition provided by LLM")
 
         finally:
             session.close()
