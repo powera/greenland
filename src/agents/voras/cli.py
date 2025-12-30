@@ -146,31 +146,49 @@ def main():
                 print(f"\nMissing translations: {', '.join(missing_langs)}")
                 if not args.dry_run:
                     print("Generating missing translations...")
-                    # Use fix_missing_translations with limit=1 to process just this lemma
-                    # But we need to requery to get just this lemma
-                    # Actually simpler: just call the LLM client directly
-                    client = agent.get_linguistic_client()
-                    try:
-                        response = client.get_translations(
-                            word=lemma.lemma_text,
-                            definition=lemma.definition_text,
-                            pos_type=lemma.pos_type,
-                        )
 
-                        if response:
-                            print("\nGenerated translations:")
-                            for lang_code in missing_langs:
-                                field_name = LANGUAGE_FIELDS[lang_code][0]
-                                if lang_code in response and response[lang_code]:
-                                    agent.set_translation(session, lemma, lang_code, response[lang_code])
-                                    print(f"  {LANGUAGE_FIELDS[lang_code][1]} ({lang_code}): {response[lang_code]}")
-                            session.commit()
-                            print("\n✓ Translations saved")
+                    # Try cache first if available
+                    response = None
+                    cache_client = agent.get_cache_client()
+                    if cache_client:
+                        try:
+                            cached_translations = cache_client.get_translations(lemma.guid)
+                            if cached_translations:
+                                print("  Using cached translations from BARSUKAS server")
+                                response = cached_translations
+                        except Exception as cache_error:
+                            print(f"  Cache lookup failed: {cache_error}")
+                            if agent.config.cache_only:
+                                raise
+
+                    # If no cache hit, query LLM
+                    if not response:
+                        if agent.config.cache_only:
+                            print("\n✗ Cache-only mode: cannot generate translations (not in cache)")
                         else:
-                            print("\nFailed to generate translations")
-                    except Exception as e:
-                        print(f"\nError generating translations: {e}")
-                        session.rollback()
+                            client = agent.get_linguistic_client()
+                            try:
+                                response = client.get_translations(
+                                    word=lemma.lemma_text,
+                                    definition=lemma.definition_text,
+                                    pos_type=lemma.pos_type,
+                                )
+                            except Exception as e:
+                                print(f"\nError generating translations: {e}")
+                                session.rollback()
+                                response = None
+
+                    if response:
+                        print("\nGenerated translations:")
+                        for lang_code in missing_langs:
+                            field_name = LANGUAGE_FIELDS[lang_code][0]
+                            if lang_code in response and response[lang_code]:
+                                agent.set_translation(session, lemma, lang_code, response[lang_code])
+                                print(f"  {LANGUAGE_FIELDS[lang_code][1]} ({lang_code}): {response[lang_code]}")
+                        session.commit()
+                        print("\n✓ Translations saved")
+                    else:
+                        print("\nFailed to generate translations")
                 else:
                     print("[DRY RUN] Would generate missing translations")
         finally:
