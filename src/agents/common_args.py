@@ -314,29 +314,59 @@ def get_standard_db_path(args_db_path: Optional[str] = None) -> str:
     return str(Path(__file__).parent.parent.parent / "data" / "greenland.db")
 
 
-def get_backend_config(args: Any):
-    """Create BackendConfig from parsed arguments.
+def get_data_source_config(args: Any, default_model: str = None):
+    """Create DataSourceConfig from parsed arguments.
 
     Args:
-        args: Parsed arguments with --backend, --data-dir, and --db-path attributes
+        args: Parsed arguments with backend, cache, and LLM-related attributes
+        default_model: Default LLM model if not specified in args
 
     Returns:
-        BackendConfig instance or None (if neither backend nor db_path specified)
+        DataSourceConfig instance or None (if neither backend nor db_path specified)
     """
-    from wordfreq.storage.backend.config import BackendConfig, BackendType
+    from wordfreq.storage.backend.config import DataSourceConfig, BackendType
+
+    # Determine backend type and paths
+    backend_type = None
+    sqlite_path = None
+    jsonl_data_dir = None
 
     if hasattr(args, 'backend') and args.backend:
         if args.backend == "sqlite":
             import constants
+            backend_type = BackendType.SQLITE
             sqlite_path = args.db_path if hasattr(args, 'db_path') and args.db_path else constants.WORDFREQ_DB_PATH
-            return BackendConfig(backend_type=BackendType.SQLITE, sqlite_path=sqlite_path)
         elif args.backend == "jsonl":
             if not hasattr(args, 'data_dir') or not args.data_dir:
                 print("Error: --data-dir is required when using --backend jsonl")
                 sys.exit(1)
-            return BackendConfig(backend_type=BackendType.JSONL, jsonl_data_dir=args.data_dir)
+            backend_type = BackendType.JSONL
+            jsonl_data_dir = args.data_dir
     elif hasattr(args, 'db_path') and args.db_path:
         # Backward compatibility: db_path implies SQLite backend
-        return BackendConfig(backend_type=BackendType.SQLITE, sqlite_path=args.db_path)
+        backend_type = BackendType.SQLITE
+        sqlite_path = args.db_path
 
-    return None
+    # If no backend specified, return None (let agent handle defaults)
+    if backend_type is None:
+        return None
+
+    # Get cache configuration
+    barsukas_url = args.barsukas_url if hasattr(args, 'barsukas_url') else None
+    cache_only = args.cache_only if hasattr(args, 'cache_only') else False
+
+    # Get LLM model (prefer args.model, fall back to default_model)
+    model = args.model if hasattr(args, 'model') and args.model else default_model
+
+    return DataSourceConfig(
+        backend_type=backend_type,
+        sqlite_path=sqlite_path,
+        jsonl_data_dir=jsonl_data_dir,
+        barsukas_url=barsukas_url,
+        cache_only=cache_only,
+        model=model,
+    )
+
+
+# Backward compatibility alias
+get_backend_config = get_data_source_config
