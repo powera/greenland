@@ -15,7 +15,7 @@ from agents.common_args import (
     add_guid_arg,
     add_language_args,
     add_backend_args,
-    get_backend_config,
+    get_data_source_config,
 )
 
 
@@ -79,7 +79,7 @@ def main():
     args = parser.parse_args()
 
     # Create backend configuration using common helper
-    backend_config = get_backend_config(args)
+    backend_config = get_data_source_config(args)
 
     # Create agent with backend config
     if backend_config:

@@ -41,12 +41,10 @@ from wordfreq.storage.translation_helpers import (
     get_translation as get_translation_helper,
     set_translation as set_translation_helper,
     get_language_name,
+    convert_llm_response_to_lang_codes,
 )
 from wordfreq.tools.llm_validators import validate_all_translations_for_word
 from wordfreq.translation.client import LinguisticClient
-
-# Backward compatibility
-BackendConfig = DataSourceConfig
 
 # Import submodules
 from agents.voras import batch, coverage
@@ -776,22 +774,7 @@ class VorasAgent:
                             continue
 
                         # Convert LLM response format (field_name -> translation) to lang_code format
-                        llm_field_to_lang_code = {
-                            "chinese_translation": "zh",
-                            "korean_translation": "ko",
-                            "french_translation": "fr",
-                            "spanish_translation": "es",
-                            "german_translation": "de",
-                            "portuguese_translation": "pt",
-                            "swahili_translation": "sw",
-                            "vietnamese_translation": "vi",
-                            "lithuanian_translation": "lt",
-                        }
-                        translations_by_lang_code = {
-                            llm_field_to_lang_code[field_name]: translation
-                            for field_name, translation in llm_translations.items()
-                            if field_name in llm_field_to_lang_code
-                        }
+                        translations_by_lang_code = convert_llm_response_to_lang_codes(llm_translations)
 
                     # Apply translations to lemma (translations_by_lang_code now always uses lang_code keys)
                     for lang_code, language_name in missing_languages:

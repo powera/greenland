@@ -366,7 +366,3 @@ def get_data_source_config(args: Any, default_model: str = None):
         cache_only=cache_only,
         model=model,
     )
-
-
-# Backward compatibility alias
-get_backend_config = get_data_source_config

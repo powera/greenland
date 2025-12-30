@@ -21,7 +21,7 @@ if __name__ == "__main__":
         sys.path.insert(0, src_path)
 
 import constants
-from wordfreq.storage.backend.config import BackendConfig, BackendType
+from wordfreq.storage.backend.config import DataSourceConfig, BackendType
 from wordfreq.storage.backend.factory import create_session
 
 

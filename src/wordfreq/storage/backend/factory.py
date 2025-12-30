@@ -3,18 +3,18 @@
 from typing import Optional
 
 from wordfreq.storage.backend.base import BaseSession, BaseStorage
-from wordfreq.storage.backend.config import BackendConfig, BackendType
+from wordfreq.storage.backend.config import DataSourceConfig, BackendType
 
 
-_global_config: Optional[BackendConfig] = None
+_global_config: Optional[DataSourceConfig] = None
 _global_storage: Optional[BaseStorage] = None
 
 
-def configure_backend(config: BackendConfig) -> None:
+def configure_backend(config: DataSourceConfig) -> None:
     """Configure the global backend.
 
     Args:
-        config: Backend configuration
+        config: Data source configuration
     """
     global _global_config, _global_storage
     _global_config = config
@@ -29,19 +29,19 @@ def get_backend_type() -> BackendType:
     """
     global _global_config
     if _global_config is None:
-        _global_config = BackendConfig.from_env()
+        _global_config = DataSourceConfig.from_env()
     return _global_config.backend_type
 
 
-def get_backend_config() -> BackendConfig:
-    """Get the global backend configuration.
+def get_data_source_config() -> DataSourceConfig:
+    """Get the global data source configuration.
 
     Returns:
-        The backend configuration
+        The data source configuration
     """
     global _global_config
     if _global_config is None:
-        _global_config = BackendConfig.from_env()
+        _global_config = DataSourceConfig.from_env()
     return _global_config
 
 
@@ -55,7 +55,7 @@ def get_storage() -> BaseStorage:
 
     if _global_storage is None:
         if _global_config is None:
-            _global_config = BackendConfig.from_env()
+            _global_config = DataSourceConfig.from_env()
 
         if _global_config.backend_type == BackendType.SQLITE:
             from wordfreq.storage.backend.sqlite import SQLiteStorage
@@ -71,11 +71,11 @@ def get_storage() -> BaseStorage:
     return _global_storage
 
 
-def create_session(config: Optional[BackendConfig] = None) -> BaseSession:
+def create_session(config: Optional[DataSourceConfig] = None) -> BaseSession:
     """Create a new storage session.
 
     Args:
-        config: Optional backend configuration. If not provided, uses global config.
+        config: Optional data source configuration. If not provided, uses global config.
 
     Returns:
         A new session instance
@@ -99,11 +99,11 @@ def create_session(config: Optional[BackendConfig] = None) -> BaseSession:
         return storage.create_session()
 
 
-def create_scoped_session_factory(config: Optional[BackendConfig] = None):
+def create_scoped_session_factory(config: Optional[DataSourceConfig] = None):
     """Create a scoped session factory compatible with Flask.
 
     Args:
-        config: Optional backend configuration
+        config: Optional data source configuration
 
     Returns:
         A callable that returns sessions (compatible with Flask's scoped_session pattern)
@@ -112,7 +112,7 @@ def create_scoped_session_factory(config: Optional[BackendConfig] = None):
     class SessionFactory:
         """Session factory that creates sessions on demand."""
 
-        def __init__(self, config: Optional[BackendConfig] = None):
+        def __init__(self, config: Optional[DataSourceConfig] = None):
             self.config = config
 
         def __call__(self):

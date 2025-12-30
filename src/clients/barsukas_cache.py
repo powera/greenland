@@ -110,6 +110,86 @@ class BarsukasCacheClient:
             logger.warning(f"{error_msg}, skipping cache")
             return None
 
+    def get_pronunciations(self, guid: str, language: str = "en") -> Optional[Dict[str, str]]:
+        """
+        Fetch pronunciations for a lemma from the cache.
+
+        Args:
+            guid: Lemma GUID (e.g., "N14_001")
+            language: Language code to get pronunciations for (default: "en")
+
+        Returns:
+            Dictionary with 'ipa' and 'phonetic' keys (e.g., {"ipa": "/iːt/", "phonetic": "EET"})
+            Returns None on cache miss or network error (unless cache_only=True)
+
+        Raises:
+            CacheMissError: If cache_only=True and pronunciations not found in cache
+            CacheNetworkError: If cache_only=True and network error occurs
+        """
+        if not guid:
+            if self.cache_only:
+                raise CacheMissError("Cannot query cache: lemma has no GUID")
+            logger.debug("Lemma has no GUID, skipping cache lookup")
+            return None
+
+        url = f"{self.base_url}/api/v1/lemma/{guid}/pronunciations"
+
+        try:
+            logger.debug(f"Fetching pronunciations from cache: {url}?language={language}")
+            response = requests.get(url, params={"language": language}, timeout=10)
+
+            if response.status_code == 404:
+                if self.cache_only:
+                    raise CacheMissError(f"Lemma {guid} not found in cache (404)")
+                logger.debug(f"Cache miss: lemma {guid} not found (404)")
+                return None
+
+            if response.status_code != 200:
+                error_msg = f"Cache returned status {response.status_code} for {guid}"
+                if self.cache_only:
+                    raise CacheNetworkError(error_msg)
+                logger.warning(f"{error_msg}, skipping cache")
+                return None
+
+            data = response.json()
+
+            # The API returns {"data": {lang_code: {ipa: ..., phonetic: ...}}, "metadata": {...}}
+            # Extract the language-specific pronunciation if it exists
+            if not isinstance(data, dict) or "data" not in data:
+                error_msg = f"Cache returned invalid format for {guid}: missing 'data' key"
+                if self.cache_only:
+                    raise CacheNetworkError(error_msg)
+                logger.warning(f"{error_msg}, skipping cache")
+                return None
+
+            pronunciations = data["data"]
+
+            if language not in pronunciations:
+                if self.cache_only:
+                    raise CacheMissError(f"Lemma {guid} has no {language} pronunciations in cache")
+                logger.debug(f"Cache returned no {language} pronunciations for {guid}")
+                return None
+
+            pronunciation_data = pronunciations[language]
+
+            # Check if at least one pronunciation is populated
+            if not pronunciation_data.get("ipa") and not pronunciation_data.get("phonetic"):
+                if self.cache_only:
+                    raise CacheMissError(f"Lemma {guid} has empty {language} pronunciations in cache")
+                logger.debug(f"Cache returned empty {language} pronunciations for {guid}")
+                return None
+
+            logger.info(f"Cache hit for {guid} pronunciations ({language})")
+            logger.debug(f"Cached pronunciations for {guid}: {pronunciation_data}")
+            return pronunciation_data
+
+        except requests.RequestException as e:
+            error_msg = f"Network error fetching pronunciations from cache for {guid}: {e}"
+            if self.cache_only:
+                raise CacheNetworkError(error_msg) from e
+            logger.warning(f"{error_msg}, skipping cache")
+            return None
+
 
 class CacheMissError(Exception):
     """Raised when cache_only=True and translation not found in cache."""

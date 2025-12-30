@@ -126,7 +126,3 @@ class DataSourceConfig:
             parts.append(f"model={self.model}")
 
         return f"DataSourceConfig({', '.join(parts)})"
-
-
-# Backward compatibility alias
-BackendConfig = DataSourceConfig
