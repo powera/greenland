@@ -49,8 +49,6 @@ class VilkasAgent:
         db_path: str = None,
         debug: bool = False,
         model: str = None,
-        barsukas_url: str = None,
-        cache_only: bool = False,
         backend_config: DataSourceConfig = None,
     ):
         """
@@ -61,8 +59,6 @@ class VilkasAgent:
             db_path: Path to SQLite database (backward compatibility)
             debug: Enable debug logging
             model: LLM model to use (backward compatibility)
-            barsukas_url: BARSUKAS cache server URL (backward compatibility)
-            cache_only: Strict cache mode (backward compatibility)
             backend_config: Old name for config parameter (backward compatibility)
         """
         # Handle backward compatibility for parameter names
@@ -72,13 +68,11 @@ class VilkasAgent:
         # Set up data source configuration
         if config is not None:
             self.config = config
-        elif db_path is not None or model is not None or barsukas_url is not None:
+        elif db_path is not None or model is not None:
             # Backward compatibility: build config from individual parameters
             self.config = DataSourceConfig(
                 backend_type=BackendType.SQLITE,
                 sqlite_path=db_path or constants.WORDFREQ_DB_PATH,
-                barsukas_url=barsukas_url,
-                cache_only=cache_only,
                 model=model,
             )
         else:
