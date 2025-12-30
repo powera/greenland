@@ -732,30 +732,13 @@ class VorasAgent:
                             results["total_failed"] += 1
                         continue
 
-                    # Try to get translations from cache first
-                    translations = None
+                    # Try to get translations from cache first (cache returns lang_code -> translation)
+                    translations_by_lang_code = None
                     cache_client = self.get_cache_client()
                     if cache_client:
                         try:
-                            cached_translations = cache_client.get_translations(lemma.guid)
-                            if cached_translations:
-                                # Map cache format (lang_code -> translation) to LLM format (field_name -> translation)
-                                translation_field_map = {
-                                    "zh": "chinese_translation",
-                                    "ko": "korean_translation",
-                                    "fr": "french_translation",
-                                    "es": "spanish_translation",
-                                    "de": "german_translation",
-                                    "pt": "portuguese_translation",
-                                    "sw": "swahili_translation",
-                                    "vi": "vietnamese_translation",
-                                    "lt": "lithuanian_translation",
-                                }
-                                translations = {
-                                    translation_field_map[lang_code]: translation
-                                    for lang_code, translation in cached_translations.items()
-                                    if lang_code in translation_field_map
-                                }
+                            translations_by_lang_code = cache_client.get_translations(lemma.guid)
+                            if translations_by_lang_code:
                                 logger.info(f"Using cached translations for '{lemma.lemma_text}' (GUID: {lemma.guid})")
                         except Exception as cache_error:
                             # If cache_only mode, this will raise an exception that propagates
@@ -765,7 +748,7 @@ class VorasAgent:
                                 raise
 
                     # If no cache hit, query LLM for translations
-                    if not translations:
+                    if not translations_by_lang_code:
                         # Build list of language names (lowercase) for only the missing languages
                         # Map language codes to language names for query_translations
                         lang_code_to_name = {
@@ -786,7 +769,7 @@ class VorasAgent:
                         ]
 
                         # Query LLM for translations - ONE CALL for only missing languages
-                        translations, success = client.query_translations(
+                        llm_translations, success = client.query_translations(
                             english_word=lemma.lemma_text,
                             reference_translation=(reference_lang_code, reference_translation),
                             definition=lemma.definition_text,
@@ -795,29 +778,34 @@ class VorasAgent:
                             languages=missing_lang_names,
                         )
 
-                        if not success or not translations:
+                        if not success or not llm_translations:
                             logger.warning(f"Failed to get translations for '{lemma.lemma_text}'")
                             for lang_code, _ in missing_languages:
                                 results["by_language"][lang_code]["failed"] += 1
                                 results["total_failed"] += 1
                             continue
 
-                    # Map language codes to LLM response field names
-                    translation_field_map = {
-                        "zh": "chinese_translation",
-                        "ko": "korean_translation",
-                        "fr": "french_translation",
-                        "es": "spanish_translation",
-                        "de": "german_translation",
-                        "pt": "portuguese_translation",
-                        "sw": "swahili_translation",
-                        "vi": "vietnamese_translation",
-                        "lt": "lithuanian_translation",
-                    }
+                        # Convert LLM response format (field_name -> translation) to lang_code format
+                        llm_field_to_lang_code = {
+                            "chinese_translation": "zh",
+                            "korean_translation": "ko",
+                            "french_translation": "fr",
+                            "spanish_translation": "es",
+                            "german_translation": "de",
+                            "portuguese_translation": "pt",
+                            "swahili_translation": "sw",
+                            "vietnamese_translation": "vi",
+                            "lithuanian_translation": "lt",
+                        }
+                        translations_by_lang_code = {
+                            llm_field_to_lang_code[field_name]: translation
+                            for field_name, translation in llm_translations.items()
+                            if field_name in llm_field_to_lang_code
+                        }
 
+                    # Apply translations to lemma (translations_by_lang_code now always uses lang_code keys)
                     for lang_code, language_name in missing_languages:
-                        llm_field = translation_field_map.get(lang_code)
-                        translation = translations.get(llm_field, "").strip()
+                        translation = translations_by_lang_code.get(lang_code, "").strip()
 
                         if translation:
                             # Update the translation using helper method
