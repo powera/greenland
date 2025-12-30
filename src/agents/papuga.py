@@ -53,9 +53,6 @@ from wordfreq.storage.models.schema import (
 )
 from wordfreq.tools.llm_validators import validate_pronunciation, generate_pronunciation
 
-# Backward compatibility
-BackendConfig = DataSourceConfig
-
 # Configure logging
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -69,35 +66,18 @@ class PapugaAgent:
     def __init__(
         self,
         config: DataSourceConfig = None,
-        db_path: str = None,
         debug: bool = False,
-        model: str = None,
-        backend_config: DataSourceConfig = None,
     ):
         """
         Initialize the Papuga agent.
 
         Args:
             config: DataSourceConfig with storage backend, cache, and LLM settings
-            db_path: Path to SQLite database (backward compatibility)
             debug: Enable debug logging
-            model: LLM model to use (backward compatibility)
-            backend_config: Old name for config parameter (backward compatibility)
         """
-        # Handle backward compatibility for parameter names
-        if backend_config is not None and config is None:
-            config = backend_config
-
         # Set up data source configuration
         if config is not None:
             self.config = config
-        elif db_path is not None or model is not None:
-            # Backward compatibility: build config from individual parameters
-            self.config = DataSourceConfig(
-                backend_type=BackendType.SQLITE,
-                sqlite_path=db_path or constants.WORDFREQ_DB_PATH,
-                model=model or "gpt-5-mini",
-            )
         else:
             # Use default configuration
             self.config = DataSourceConfig(
