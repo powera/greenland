@@ -118,9 +118,17 @@ def introspect_agent_parser(agent_module_path: str) -> Dict[str, Any]:
         arguments = []
         modes = set()
 
+        # Arguments that BARSUKAS adds automatically and should not be shown in the form
+        # Also hide output since users view results in the web UI, not files
+        AUTO_ADDED_ARGS = {"db_path", "yes", "y", "output"}
+
         for action in parser._actions:
             # Skip positional arguments and help
             if not action.option_strings or action.dest == "help":
+                continue
+
+            # Skip arguments that BARSUKAS adds automatically
+            if action.dest in AUTO_ADDED_ARGS:
                 continue
 
             arg_info = ArgumentInfo(action)

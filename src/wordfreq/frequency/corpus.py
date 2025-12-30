@@ -64,11 +64,12 @@ class CorpusConfig:
 
 
 # Corpus configurations
+# Corpus files are located in data/greenland_input/lang_en/frequency_lists/
 CORPUS_CONFIGS = [
     CorpusConfig(
         name="19th_books",
         description="Word frequency data from 19th century books",
-        file_path="19th_books.json",
+        file_path="../../../data/greenland_input/lang_en/frequency_lists/19th_books.json",
         max_words=4000,
         file_type="json",
         value_type="auto",
@@ -79,7 +80,7 @@ CORPUS_CONFIGS = [
     CorpusConfig(
         name="20th_books",
         description="Word frequency data from 20th century books",
-        file_path="20th_books.json",
+        file_path="../../../data/greenland_input/lang_en/frequency_lists/20th_books.json",
         max_words=4000,
         file_type="json",
         value_type="auto",
@@ -89,19 +90,19 @@ CORPUS_CONFIGS = [
     ),
     CorpusConfig(
         name="subtitles",
-        description="Word frequency data from movie and TV subtitles",
+        description="Word frequency data from movie and TV subtitles (DEPRECATED - no longer available)",
         file_path="subtlex.txt",
         max_words=7500,
         file_type="subtlex",
         value_type="auto",
         corpus_weight=1.0,
         max_unknown_rank=12000,
-        enabled=True,
+        enabled=False,  # Disabled - data source no longer available
     ),
     CorpusConfig(
         name="wiki_vital",
         description="Word frequency data from Wikipedia vital articles",
-        file_path="wiki_vital.json",
+        file_path="../../../data/greenland_input/lang_en/frequency_lists/wiki_vital.json",
         max_words=6000,
         file_type="json",
         value_type="frequency",
@@ -112,7 +113,7 @@ CORPUS_CONFIGS = [
     CorpusConfig(
         name="cooking",
         description="Word frequency data from Cookbooks",
-        file_path="cooking_wordfreq.json",
+        file_path="../../../data/greenland_input/lang_en/frequency_lists/cooking_wordfreq.json",
         max_words=1000,
         file_type="json",
         value_type="frequency",

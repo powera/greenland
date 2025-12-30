@@ -335,6 +335,9 @@ def execute_agent(agent_name):
     # Add database path (always)
     args.extend(["--db-path", Config.DB_PATH])
 
+    # Add --yes flag for background execution (skip confirmation prompts)
+    args.append("--yes")
+
     try:
         # Generate unique task ID
         task_id = str(uuid.uuid4())

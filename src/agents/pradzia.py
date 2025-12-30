@@ -486,6 +486,138 @@ class PradziaAgent:
 
         return result
 
+    def import_from_jsonl(self, jsonl_dir: str, dry_run: bool = False) -> Dict[str, Any]:
+        """
+        Import lemmas from JSONL files to SQLite database.
+
+        Args:
+            jsonl_dir: Path to JSONL data directory (e.g., data/release)
+            dry_run: If True, only report what would be imported without writing
+
+        Returns:
+            Dictionary with import results
+        """
+        logger.info(f"Importing from JSONL directory: {jsonl_dir} (dry_run={dry_run})")
+        start_time = datetime.now()
+
+        from wordfreq.storage.backend.config import DataSourceConfig, BackendType
+        from wordfreq.storage.backend import create_session as create_backend_session
+        from wordfreq.storage.models.schema import Lemma as SQLLemma, LemmaTranslation
+
+        result = {
+            "dry_run": dry_run,
+            "jsonl_dir": jsonl_dir,
+            "sqlite_db": self.db_path,
+        }
+
+        # Create JSONL backend session (source)
+        jsonl_config = DataSourceConfig(backend_type=BackendType.JSONL, jsonl_data_dir=jsonl_dir)
+        jsonl_session = create_backend_session(jsonl_config)
+
+        # Use existing SQLite session (destination)
+        sqlite_session = self.get_session()
+
+        try:
+            # Query all lemmas from JSONL
+            logger.info("Reading lemmas from JSONL files...")
+            jsonl_lemmas = jsonl_session.query(SQLLemma).all()
+            logger.info(f"Found {len(jsonl_lemmas)} lemmas in JSONL files")
+
+            result["total_lemmas_found"] = len(jsonl_lemmas)
+
+            if dry_run:
+                result["message"] = f"Would import {len(jsonl_lemmas)} lemmas from JSONL"
+                logger.info(f"DRY RUN: Would import {len(jsonl_lemmas)} lemmas")
+                return result
+
+            # Import each lemma to SQLite
+            logger.info("Importing lemmas to SQLite database...")
+            imported_count = 0
+            skipped_count = 0
+            translation_count = 0
+
+            for lemma in jsonl_lemmas:
+                # Check if lemma already exists in SQLite
+                existing = (
+                    sqlite_session.query(SQLLemma).filter(SQLLemma.guid == lemma.guid).first()
+                    if lemma.guid
+                    else None
+                )
+
+                if existing:
+                    logger.debug(f"Skipping {lemma.lemma_text} (GUID: {lemma.guid}) - already exists")
+                    skipped_count += 1
+                    continue
+
+                # Create new lemma in SQLite
+                new_lemma = SQLLemma(
+                    guid=lemma.guid,
+                    lemma_text=lemma.lemma_text,
+                    definition_text=lemma.definition_text,
+                    pos_type=lemma.pos_type,
+                    pos_subtype=lemma.pos_subtype,
+                    difficulty_level=lemma.difficulty_level,
+                    frequency_rank=lemma.frequency_rank,
+                    tags=lemma.tags,
+                    disambiguation=lemma.disambiguation if hasattr(lemma, "disambiguation") else None,
+                    confidence=lemma.confidence if hasattr(lemma, "confidence") else 0.0,
+                    verified=lemma.verified if hasattr(lemma, "verified") else False,
+                    notes=lemma.notes if hasattr(lemma, "notes") else None,
+                )
+
+                sqlite_session.add(new_lemma)
+                sqlite_session.flush()  # Get the ID
+
+                # Import translations
+                jsonl_translations = (
+                    jsonl_session.query(LemmaTranslation)
+                    .filter(LemmaTranslation.lemma_id == lemma.id)
+                    .all()
+                )
+
+                for trans in jsonl_translations:
+                    new_trans = LemmaTranslation(
+                        lemma_id=new_lemma.id,
+                        language_code=trans.language_code,
+                        translation=trans.translation,
+                        verified=trans.verified if hasattr(trans, "verified") else False,
+                    )
+                    sqlite_session.add(new_trans)
+                    translation_count += 1
+
+                imported_count += 1
+
+                if imported_count % 100 == 0:
+                    logger.info(f"Imported {imported_count}/{len(jsonl_lemmas)} lemmas...")
+                    sqlite_session.commit()
+
+            # Final commit
+            sqlite_session.commit()
+
+            result["lemmas_imported"] = imported_count
+            result["lemmas_skipped"] = skipped_count
+            result["translations_imported"] = translation_count
+            result["success"] = True
+
+            logger.info(
+                f"Import complete: {imported_count} lemmas, {translation_count} translations imported"
+            )
+
+        except Exception as e:
+            logger.error(f"Error during import: {e}")
+            sqlite_session.rollback()
+            result["success"] = False
+            result["error"] = str(e)
+        finally:
+            jsonl_session.close()
+            sqlite_session.close()
+
+        end_time = datetime.now()
+        duration = (end_time - start_time).total_seconds()
+        result["duration_seconds"] = duration
+
+        return result
+
     def initialize_database(self, dry_run: bool = False) -> Dict[str, Any]:
         """
         Perform complete database initialization.
@@ -667,6 +799,11 @@ def get_argument_parser():
         metavar="JSON_PATH",
         help="Bootstrap database from trakaido JSON export (initial setup only)",
     )
+    mode_group.add_argument(
+        "--import-jsonl",
+        metavar="JSONL_DIR",
+        help="Import lemmas from JSONL files to SQLite database",
+    )
 
     # Bootstrap-specific options
     parser.add_argument(
@@ -764,6 +901,29 @@ def main():
         else:
             error_msg = result.get("error", "Unknown error")
             print(f"\n❌ Bootstrap failed: {error_msg}")
+
+    elif args.import_jsonl:
+        result = agent.import_from_jsonl(jsonl_dir=args.import_jsonl, dry_run=args.dry_run)
+
+        if args.output:
+            import json
+
+            with open(args.output, "w", encoding="utf-8") as f:
+                json.dump(result, f, indent=2, ensure_ascii=False)
+
+        if result.get("success"):
+            if not args.dry_run:
+                print(
+                    f"\n✅ Import complete: {result['lemmas_imported']} lemmas, "
+                    f"{result['translations_imported']} translations imported"
+                )
+                print(f"   Skipped (already exist): {result['lemmas_skipped']}")
+                print(f"   Duration: {result['duration_seconds']:.2f} seconds")
+            else:
+                print(f"\n✅ Dry run: Would import {result['total_lemmas_found']} lemmas")
+        else:
+            error_msg = result.get("error", "Unknown error")
+            print(f"\n❌ Import failed: {error_msg}")
 
     else:
         # Default: run check

@@ -7,6 +7,8 @@
 STORAGE_FORMAT="sqlite"
 # Default to all interfaces
 HOST_ARGS="--host 0.0.0.0"
+# Optional database path
+DB_PATH=""
 
 # Parse command-line arguments
 while [[ $# -gt 0 ]]; do
@@ -19,6 +21,10 @@ while [[ $# -gt 0 ]]; do
             HOST_ARGS="--host 0.0.0.0"
             shift
             ;;
+        --db-path)
+            DB_PATH="$2"
+            shift 2
+            ;;
         *)
             # Pass through any other arguments to the Flask app
             break
@@ -29,7 +35,7 @@ done
 # Validate storage format
 if [[ "$STORAGE_FORMAT" != "jsonl" && "$STORAGE_FORMAT" != "sqlite" ]]; then
     echo "Error: Invalid storage format '$STORAGE_FORMAT'"
-    echo "Usage: $0 [-f|--format jsonl|sqlite] [-a|--all-interfaces]"
+    echo "Usage: $0 [-f|--format jsonl|sqlite] [-a|--all-interfaces] [--db-path PATH]"
     exit 1
 fi
 
@@ -46,6 +52,13 @@ export PYTHONPATH="$REPO_ROOT/src:$PYTHONPATH"
 export STORAGE_BACKEND="$STORAGE_FORMAT"
 if [[ "$STORAGE_FORMAT" == "jsonl" ]]; then
     export JSONL_DATA_DIR="$REPO_ROOT/data/release"
+elif [[ "$STORAGE_FORMAT" == "sqlite" && -n "$DB_PATH" ]]; then
+    # Make path absolute if it's relative
+    if [[ "$DB_PATH" = /* ]]; then
+        export BARSUKAS_DB_PATH="$DB_PATH"
+    else
+        export BARSUKAS_DB_PATH="$REPO_ROOT/$DB_PATH"
+    fi
 fi
 
 # Change to barsukas directory
@@ -59,6 +72,8 @@ echo "PYTHONPATH: $PYTHONPATH"
 echo "Working directory: $(pwd)"
 if [[ "$STORAGE_FORMAT" == "jsonl" ]]; then
     echo "JSONL data directory: $JSONL_DATA_DIR"
+elif [[ "$STORAGE_FORMAT" == "sqlite" && -n "$BARSUKAS_DB_PATH" ]]; then
+    echo "SQLite database: $BARSUKAS_DB_PATH"
 fi
 echo ""
 
