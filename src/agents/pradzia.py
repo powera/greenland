@@ -30,6 +30,7 @@ from wordfreq.storage.database import (
     ensure_tables_exist,
     initialize_corpora,
 )
+from wordfreq.storage.models.schema import Corpus  # Ensure Corpus model is imported
 from wordfreq.frequency import corpus, analysis
 from wordfreq.trakaido import json_to_database
 
@@ -56,6 +57,11 @@ class PradziaAgent:
 
         if debug:
             logger.setLevel(logging.DEBUG)
+
+        # Log the database path being used (convert to absolute for clarity)
+        import os
+        abs_path = os.path.abspath(self.db_path)
+        logger.info(f"Using SQLite database: {abs_path}")
 
     def get_session(self):
         """Get database session."""
@@ -298,7 +304,7 @@ class PradziaAgent:
             for config in configs_to_load:
                 try:
                     logger.info(f"Loading corpus: {config.name}")
-                    imported, total = corpus.load_corpus(config.name)
+                    imported, total = corpus.load_corpus(config.name, db_path=self.db_path)
                     results[config.name] = {"imported": imported, "total": total, "success": True}
                     logger.info(f"Successfully loaded {config.name}: {imported}/{total} words")
                 except Exception as e:

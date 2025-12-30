@@ -456,7 +456,7 @@ def initialize_corpus_configs(
     return sync_corpus_configs_to_db(session, db_path)
 
 
-def load_corpus(corpus_name: str) -> tuple[int, int]:
+def load_corpus(corpus_name: str, db_path: Optional[str] = None) -> tuple[int, int]:
     """
     Load a corpus by name using its configuration.
 
@@ -465,6 +465,7 @@ def load_corpus(corpus_name: str) -> tuple[int, int]:
 
     Args:
         corpus_name: Name of the corpus to load
+        db_path: Database path (uses default if None)
 
     Returns:
         Tuple of (words imported, total words)
@@ -498,6 +499,7 @@ def load_corpus(corpus_name: str) -> tuple[int, int]:
         max_words=config.max_words,
         value_type=config.value_type,
         corpus_description=config.description,
+        db_path=db_path,
     )
 
 
