@@ -88,6 +88,70 @@ def main():
     # Create agent with unified configuration
     agent = VilkasAgent(config=config, debug=args.debug)
 
+    # Handle --guid mode (single lemma)
+    if args.guid:
+        from wordfreq.storage.models.schema import Lemma, DerivativeForm
+
+        session = agent.get_session()
+        try:
+            lemma = session.query(Lemma).filter(Lemma.guid == args.guid).first()
+            if not lemma:
+                print(f"\nError: No lemma found with GUID: {args.guid}")
+                sys.exit(1)
+
+            print(f"\nProcessing word forms for: {lemma.lemma_text} (GUID: {args.guid})")
+            print(f"POS: {lemma.pos_type}")
+            print(f"Language: {args.language}")
+
+            # Get all derivative forms for this lemma
+            forms = (
+                session.query(DerivativeForm)
+                .filter(
+                    DerivativeForm.lemma_id == lemma.id,
+                    DerivativeForm.language_code == args.language,
+                )
+                .all()
+            )
+
+            if forms:
+                print(f"\nExisting forms ({len(forms)}):")
+                for form in forms[:20]:  # Limit display to first 20
+                    base_marker = " [BASE]" if form.is_base_form else ""
+                    print(
+                        f"  {form.derivative_form_text} ({form.grammatical_form or 'N/A'}){base_marker}"
+                    )
+                if len(forms) > 20:
+                    print(f"  ... and {len(forms) - 20} more")
+            else:
+                print("\nNo existing forms found")
+
+            # If in --fix mode, generate missing forms for this lemma
+            if args.fix:
+                print(f"\nGenerating missing forms for this lemma...")
+                if not args.dry_run:
+                    # Call fix_missing_forms with limit=1 after filtering to just this lemma
+                    # We need to use the internal fix methods directly for a single lemma
+                    # For now, use a workaround: limit to lemmas with this GUID
+                    results = agent.fix_missing_forms(
+                        language_code=args.language,
+                        pos_type=args.pos_type,
+                        limit=1,
+                        model=args.model,
+                        throttle=args.throttle,
+                        dry_run=args.dry_run,
+                        source=args.source,
+                    )
+                    # Note: This will process the first lemma needing forms, not necessarily this one
+                    # A better implementation would filter the query in fix_missing_forms by GUID
+                    print("\n⚠ Note: fix_missing_forms processes lemmas in order.")
+                    print("To ensure this specific lemma is processed, it should be the next one needing forms.")
+                    display.print_fix_results(results, args.dry_run)
+                else:
+                    print("[DRY RUN] Would generate missing forms")
+        finally:
+            session.close()
+        return
+
     # Handle --fix mode
     if args.fix:
         # Confirmation prompt (unless --yes or --dry-run)

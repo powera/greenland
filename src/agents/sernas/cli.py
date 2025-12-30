@@ -88,6 +88,81 @@ def main():
         # Backward compatibility: use db_path
         agent = SernasAgent(db_path=args.db_path, debug=args.debug)
 
+    # Handle --guid mode (single lemma)
+    if args.guid:
+        from wordfreq.storage.models.schema import Lemma
+        from wordfreq.storage.crud.grammar_fact import get_alternate_forms_facts
+        from wordfreq.storage.translation_helpers import get_translation
+
+        session = agent.get_session()
+        try:
+            lemma = session.query(Lemma).filter(Lemma.guid == args.guid).first()
+            if not lemma:
+                print(f"\nError: No lemma found with GUID: {args.guid}")
+                sys.exit(1)
+
+            # Get the word in the target language
+            if args.language == "en":
+                word = lemma.lemma_text
+            else:
+                word = get_translation(session, lemma, args.language)
+
+            if not word or not word.strip():
+                print(f"\nError: No {args.language} translation found for GUID: {args.guid}")
+                print(f"English lemma: {lemma.lemma_text}")
+                sys.exit(1)
+
+            print(f"\nProcessing synonyms/alternatives for: {word} ({args.language})")
+            print(f"English lemma: {lemma.lemma_text}")
+            print(f"POS: {lemma.pos_type}")
+            print(f"GUID: {args.guid}")
+
+            # Get existing alternative forms
+            existing_forms = get_alternate_forms_facts(session, lemma.id, args.language)
+            if existing_forms:
+                print(f"\nExisting alternative forms ({len(existing_forms)}):")
+                for form_type, forms in existing_forms.items():
+                    if forms:
+                        print(f"  {form_type}: {', '.join(forms)}")
+            else:
+                print("\nNo existing alternative forms found")
+
+            # If in --fix mode, generate synonyms
+            if args.fix:
+                print(f"\nGenerating synonyms and alternative forms...")
+                result = agent.generate_synonyms_for_lemma(
+                    lemma_id=lemma.id,
+                    language_code=args.language,
+                    model=args.model,
+                    dry_run=args.dry_run,
+                )
+
+                if "error" in result:
+                    print(f"\nError: {result['error']}")
+                elif result.get("dry_run"):
+                    print("\n[DRY RUN] Would generate:")
+                    if result.get("synonyms"):
+                        print(f"  Synonyms: {', '.join(result['synonyms'])}")
+                    if result.get("abbreviations"):
+                        print(f"  Abbreviations: {', '.join(result['abbreviations'])}")
+                    if result.get("expanded_forms"):
+                        print(f"  Expanded forms: {', '.join(result['expanded_forms'])}")
+                    if result.get("alternate_spellings"):
+                        print(f"  Alternate spellings: {', '.join(result['alternate_spellings'])}")
+                else:
+                    print("\n✓ Generated and saved:")
+                    if result.get("synonyms"):
+                        print(f"  Synonyms: {', '.join(result['synonyms'])}")
+                    if result.get("abbreviations"):
+                        print(f"  Abbreviations: {', '.join(result['abbreviations'])}")
+                    if result.get("expanded_forms"):
+                        print(f"  Expanded forms: {', '.join(result['expanded_forms'])}")
+                    if result.get("alternate_spellings"):
+                        print(f"  Alternate spellings: {', '.join(result['alternate_spellings'])}")
+        finally:
+            session.close()
+        return
+
     # Convert --type argument to form_type
     form_type = None
     if args.type and args.type != "all":

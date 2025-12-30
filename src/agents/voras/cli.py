@@ -113,6 +113,88 @@ def main():
     # Create agent with unified configuration
     agent = VorasAgent(config=config, debug=args.debug)
 
+    # Handle --guid mode (single lemma)
+    if args.guid:
+        session = agent.get_session()
+        try:
+            lemma = session.query(Lemma).filter(Lemma.guid == args.guid).first()
+            if not lemma:
+                print(f"\nError: No lemma found with GUID: {args.guid}")
+                sys.exit(1)
+
+            print(f"\nProcessing translations for: {lemma.lemma_text} (GUID: {args.guid})")
+            print(f"POS: {lemma.pos_type}")
+            print(f"Definition: {lemma.definition_text or 'N/A'}")
+            print("\nCurrent translations:")
+
+            # Import here to get language names
+            from wordfreq.storage.translation_helpers import LANGUAGE_FIELDS
+
+            # Show all translations
+            missing_langs = []
+            for lang_code in LANGUAGE_FIELDS.keys():
+                translation = agent.get_translation(session, lemma, lang_code)
+                lang_name = LANGUAGE_FIELDS[lang_code][1]
+                if translation:
+                    print(f"  {lang_name} ({lang_code}): {translation}")
+                else:
+                    print(f"  {lang_name} ({lang_code}): [MISSING]")
+                    missing_langs.append(lang_code)
+
+            # If in populate mode or mode is "both", offer to populate missing
+            if args.mode in ["populate-only", "both"] and missing_langs:
+                print(f"\nMissing translations: {', '.join(missing_langs)}")
+                if not args.dry_run:
+                    print("Generating missing translations...")
+
+                    # Try cache first if available
+                    response = None
+                    cache_client = agent.get_cache_client()
+                    if cache_client:
+                        try:
+                            cached_translations = cache_client.get_translations(lemma.guid)
+                            if cached_translations:
+                                print("  Using cached translations from BARSUKAS server")
+                                response = cached_translations
+                        except Exception as cache_error:
+                            print(f"  Cache lookup failed: {cache_error}")
+                            if agent.config.cache_only:
+                                raise
+
+                    # If no cache hit, query LLM
+                    if not response:
+                        if agent.config.cache_only:
+                            print("\n✗ Cache-only mode: cannot generate translations (not in cache)")
+                        else:
+                            client = agent.get_linguistic_client()
+                            try:
+                                response = client.get_translations(
+                                    word=lemma.lemma_text,
+                                    definition=lemma.definition_text,
+                                    pos_type=lemma.pos_type,
+                                )
+                            except Exception as e:
+                                print(f"\nError generating translations: {e}")
+                                session.rollback()
+                                response = None
+
+                    if response:
+                        print("\nGenerated translations:")
+                        for lang_code in missing_langs:
+                            field_name = LANGUAGE_FIELDS[lang_code][0]
+                            if lang_code in response and response[lang_code]:
+                                agent.set_translation(session, lemma, lang_code, response[lang_code])
+                                print(f"  {LANGUAGE_FIELDS[lang_code][1]} ({lang_code}): {response[lang_code]}")
+                        session.commit()
+                        print("\n✓ Translations saved")
+                    else:
+                        print("\nFailed to generate translations")
+                else:
+                    print("[DRY RUN] Would generate missing translations")
+        finally:
+            session.close()
+        return
+
     # Handle batch operations first (special cases)
     if args.batch_submit:
         agent.submit_batch()
