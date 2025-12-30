@@ -17,9 +17,23 @@
 
     <hr class="my-4">
 
-    <div class="alert alert-primary">
+    <div class="alert alert-info">
         <i class="bi bi-info-circle"></i>
-        <strong>Configure and run:</strong> Set your arguments below (like <code>--guid</code> for testing a specific word, or <code>--dry-run</code> to preview), then click "Launch Agent" to execute.
+        <strong>Configure your agent:</strong> Set parameters below, then either <strong>generate the command line</strong> to copy/paste, or <strong>launch directly</strong> in the web UI.
+    </div>
+
+    <!-- Command Preview Card -->
+    <div class="card mb-3" id="commandPreviewCard" style="display: none;">
+        <div class="card-body">
+            <h6 class="card-title">Generated Command Line</h6>
+            <div class="input-group">
+                <input type="text" class="form-control font-monospace" id="generatedCommand" readonly>
+                <button class="btn btn-outline-secondary" type="button" id="copyCommandBtn">
+                    <i class="bi bi-clipboard"></i> Copy
+                </button>
+            </div>
+            <div class="form-text">You can copy this command and run it in your terminal</div>
+        </div>
     </div>
 
     <div class="card">
@@ -28,7 +42,7 @@
 
             {% if parser_info %}
                 <!-- Dynamic Form (from argparse introspection) -->
-                <form method="post" action="{{ url_for('agents_launcher.execute_agent', agent_name=agent.name) }}">
+                <form method="post" action="{{ url_for('agents_launcher.execute_agent', agent_name=agent.name) }}" id="agentForm">
                     {% if parser_info.description %}
                     <p class="text-muted">{{ parser_info.description }}</p>
                     {% endif %}
@@ -36,99 +50,112 @@
                     {% for group_name, group_args in argument_groups.items() %}
                         {% if group_args %}
                         <div class="argument-group mb-4">
-                            {% if group_name != 'common' %}
-                            <h6 class="text-capitalize">{{ group_name }} Mode Arguments</h6>
-                            {% else %}
-                            <h6>Common Arguments</h6>
-                            {% endif %}
+                            <div class="d-flex align-items-center mb-3">
+                                <h6 class="mb-0 me-2">
+                                    <i class="bi bi-chevron-down toggle-icon" data-bs-toggle="collapse"
+                                       data-bs-target="#group_{{ group_name }}" style="cursor: pointer;"></i>
+                                    {{ get_category_label(group_name) }}
+                                </h6>
+                            </div>
 
-                            {% for arg in group_args %}
-                            <div class="mb-3">
-                                {% if arg.type == 'boolean' %}
-                                    <!-- Boolean / Checkbox -->
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox"
-                                               id="arg_{{ arg.dest }}" name="arg_{{ arg.dest }}" value="true"
-                                               {% if arg.default %}checked{% endif %}>
-                                        <label class="form-check-label" for="arg_{{ arg.dest }}">
-                                            {{ arg.names[0] }}
-                                            {% if arg.help %}<span class="text-muted small">- {{ arg.help }}</span>{% endif %}
+                            <div class="collapse show" id="group_{{ group_name }}">
+                                {% for arg in group_args %}
+                                <div class="mb-3" data-arg="{{ arg.dest }}">
+                                    {% if arg.type == 'boolean' %}
+                                        <!-- Boolean / Checkbox -->
+                                        <div class="form-check">
+                                            <input class="form-check-input arg-input" type="checkbox"
+                                                   id="arg_{{ arg.dest }}" name="arg_{{ arg.dest }}" value="true"
+                                                   data-dest="{{ arg.dest }}"
+                                                   {% if arg.default %}checked{% endif %}>
+                                            <label class="form-check-label" for="arg_{{ arg.dest }}">
+                                                <code>{{ arg.names[0] }}</code>
+                                                {% if arg.help %}<span class="text-muted small">- {{ arg.help }}</span>{% endif %}
+                                            </label>
+                                        </div>
+                                    {% elif arg.type == 'choice' %}
+                                        <!-- Choice / Dropdown -->
+                                        <label for="arg_{{ arg.dest }}" class="form-label">
+                                            <code>{{ arg.names[0] }}</code>
+                                            {% if arg.required %}<span class="text-danger">*</span>{% endif %}
                                         </label>
-                                    </div>
-                                {% elif arg.type == 'choice' %}
-                                    <!-- Choice / Dropdown -->
-                                    <label for="arg_{{ arg.dest }}" class="form-label">
-                                        {{ arg.names[0] }}
-                                        {% if arg.required %}<span class="text-danger">*</span>{% endif %}
-                                    </label>
-                                    <select class="form-select" id="arg_{{ arg.dest }}" name="arg_{{ arg.dest }}"
-                                            {% if arg.required %}required{% endif %}>
-                                        <option value="">-- Select {{ arg.dest }} --</option>
-                                        {% for choice in arg.choices %}
-                                        <option value="{{ choice }}" {% if choice == arg.default %}selected{% endif %}>
-                                            {{ choice }}
-                                        </option>
-                                        {% endfor %}
-                                    </select>
-                                    {% if arg.help %}
-                                    <div class="form-text">{{ arg.help }}</div>
-                                    {% endif %}
-                                {% elif arg.type == 'list' %}
-                                    <!-- List / Multi-select -->
-                                    <label for="arg_{{ arg.dest }}" class="form-label">
-                                        {{ arg.names[0] }}
-                                        {% if arg.required %}<span class="text-danger">*</span>{% endif %}
-                                    </label>
-                                    {% if arg.choices %}
-                                        <select class="form-select" id="arg_{{ arg.dest }}" name="arg_{{ arg.dest }}"
-                                                multiple {% if arg.required %}required{% endif %}>
+                                        <select class="form-select arg-input" id="arg_{{ arg.dest }}" name="arg_{{ arg.dest }}"
+                                                data-dest="{{ arg.dest }}"
+                                                {% if arg.required %}required{% endif %}>
+                                            <option value="">-- Select {{ arg.dest }} --</option>
                                             {% for choice in arg.choices %}
-                                            <option value="{{ choice }}">{{ choice }}</option>
+                                            <option value="{{ choice }}" {% if choice == arg.default %}selected{% endif %}>
+                                                {{ choice }}
+                                            </option>
                                             {% endfor %}
                                         </select>
-                                    {% else %}
-                                        <input type="text" class="form-control" id="arg_{{ arg.dest }}" name="arg_{{ arg.dest }}"
-                                               placeholder="Comma-separated values"
+                                        {% if arg.help %}
+                                        <div class="form-text">{{ arg.help }}</div>
+                                        {% endif %}
+                                    {% elif arg.type == 'list' %}
+                                        <!-- List / Multi-select -->
+                                        <label for="arg_{{ arg.dest }}" class="form-label">
+                                            <code>{{ arg.names[0] }}</code>
+                                            {% if arg.required %}<span class="text-danger">*</span>{% endif %}
+                                        </label>
+                                        {% if arg.choices %}
+                                            <select class="form-select arg-input" id="arg_{{ arg.dest }}" name="arg_{{ arg.dest }}"
+                                                    data-dest="{{ arg.dest }}"
+                                                    multiple {% if arg.required %}required{% endif %}>
+                                                {% for choice in arg.choices %}
+                                                <option value="{{ choice }}">{{ choice }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        {% else %}
+                                            <input type="text" class="form-control arg-input" id="arg_{{ arg.dest }}" name="arg_{{ arg.dest }}"
+                                                   data-dest="{{ arg.dest }}"
+                                                   placeholder="Comma-separated values"
+                                                   {% if arg.required %}required{% endif %}>
+                                        {% endif %}
+                                        {% if arg.help %}
+                                        <div class="form-text">{{ arg.help }}</div>
+                                        {% endif %}
+                                    {% elif arg.type in ['integer', 'float'] %}
+                                        <!-- Number Input -->
+                                        <label for="arg_{{ arg.dest }}" class="form-label">
+                                            <code>{{ arg.names[0] }}</code>
+                                            {% if arg.required %}<span class="text-danger">*</span>{% endif %}
+                                        </label>
+                                        <input type="number" class="form-control arg-input" id="arg_{{ arg.dest }}" name="arg_{{ arg.dest }}"
+                                               data-dest="{{ arg.dest }}"
+                                               {% if arg.default %}value="{{ arg.default }}"{% endif %}
+                                               {% if arg.type == 'float' %}step="0.01"{% endif %}
                                                {% if arg.required %}required{% endif %}>
+                                        {% if arg.help %}
+                                        <div class="form-text">{{ arg.help }}</div>
+                                        {% endif %}
+                                    {% else %}
+                                        <!-- Text Input -->
+                                        <label for="arg_{{ arg.dest }}" class="form-label">
+                                            <code>{{ arg.names[0] }}</code>
+                                            {% if arg.required %}<span class="text-danger">*</span>{% endif %}
+                                        </label>
+                                        <input type="text" class="form-control arg-input" id="arg_{{ arg.dest }}" name="arg_{{ arg.dest }}"
+                                               data-dest="{{ arg.dest }}"
+                                               {% if arg.default %}value="{{ arg.default }}"{% endif %}
+                                               {% if arg.metavar %}placeholder="{{ arg.metavar }}"{% endif %}
+                                               {% if arg.required %}required{% endif %}>
+                                        {% if arg.help %}
+                                        <div class="form-text">{{ arg.help }}</div>
+                                        {% endif %}
                                     {% endif %}
-                                    {% if arg.help %}
-                                    <div class="form-text">{{ arg.help }}</div>
-                                    {% endif %}
-                                {% elif arg.type in ['integer', 'float'] %}
-                                    <!-- Number Input -->
-                                    <label for="arg_{{ arg.dest }}" class="form-label">
-                                        {{ arg.names[0] }}
-                                        {% if arg.required %}<span class="text-danger">*</span>{% endif %}
-                                    </label>
-                                    <input type="number" class="form-control" id="arg_{{ arg.dest }}" name="arg_{{ arg.dest }}"
-                                           {% if arg.default %}value="{{ arg.default }}"{% endif %}
-                                           {% if arg.type == 'float' %}step="0.01"{% endif %}
-                                           {% if arg.required %}required{% endif %}>
-                                    {% if arg.help %}
-                                    <div class="form-text">{{ arg.help }}</div>
-                                    {% endif %}
-                                {% else %}
-                                    <!-- Text Input -->
-                                    <label for="arg_{{ arg.dest }}" class="form-label">
-                                        {{ arg.names[0] }}
-                                        {% if arg.required %}<span class="text-danger">*</span>{% endif %}
-                                    </label>
-                                    <input type="text" class="form-control" id="arg_{{ arg.dest }}" name="arg_{{ arg.dest }}"
-                                           {% if arg.default %}value="{{ arg.default }}"{% endif %}
-                                           {% if arg.metavar %}placeholder="{{ arg.metavar }}"{% endif %}
-                                           {% if arg.required %}required{% endif %}>
-                                    {% if arg.help %}
-                                    <div class="form-text">{{ arg.help }}</div>
-                                    {% endif %}
-                                {% endif %}
+                                </div>
+                                {% endfor %}
                             </div>
-                            {% endfor %}
                         </div>
                         {% endif %}
                     {% endfor %}
 
                     <!-- Action Buttons -->
-                    <div class="d-flex gap-2">
+                    <div class="d-flex gap-2 flex-wrap">
+                        <button type="button" class="btn btn-outline-primary" id="generateCommandBtn">
+                            <i class="bi bi-terminal"></i> Generate Command Line
+                        </button>
                         <button type="submit" class="btn btn-primary" id="launchBtn">
                             <i class="bi bi-play-circle"></i> Launch Agent
                         </button>
@@ -218,6 +245,182 @@ document.addEventListener('DOMContentLoaded', function() {
                 modeInput.required = false;
                 modeInput.value = '';
             }
+        });
+    }
+
+    // Enhanced dynamic form handling
+    const agentForm = document.getElementById('agentForm');
+    if (agentForm) {
+        const generateBtn = document.getElementById('generateCommandBtn');
+        const copyBtn = document.getElementById('copyCommandBtn');
+        const commandPreview = document.getElementById('commandPreviewCard');
+        const commandInput = document.getElementById('generatedCommand');
+        const argInputs = document.querySelectorAll('.arg-input');
+
+        // Get agent script name from URL
+        const scriptName = "{{ agent.script }}";
+        const agentName = scriptName.replace('.py', '');
+
+        // Parameter conflict rules (mutual exclusions)
+        const conflictRules = {
+            'guid': ['limit', 'sample_rate', 'batch'],
+            'batch': ['guid'],
+            'limit': ['guid'],
+            'sample_rate': ['guid'],
+        };
+
+        // Apply parameter conflict detection
+        function checkConflicts() {
+            // Re-enable all inputs first
+            argInputs.forEach(input => {
+                input.disabled = false;
+                const container = input.closest('.mb-3');
+                if (container) {
+                    container.style.opacity = '1';
+                }
+            });
+
+            // Then apply conflict rules
+            argInputs.forEach(input => {
+                const dest = input.dataset.dest;
+                if (!dest) return;
+
+                // Check if this input has value
+                let hasValue = false;
+                if (input.type === 'checkbox') {
+                    hasValue = input.checked;
+                } else if (input.tagName === 'SELECT' && input.multiple) {
+                    hasValue = Array.from(input.selectedOptions).some(opt => opt.value);
+                } else {
+                    hasValue = input.value && input.value !== '';
+                }
+
+                // If this parameter has conflicts and has a value, disable conflicting params
+                if (hasValue && conflictRules[dest]) {
+                    conflictRules[dest].forEach(conflictDest => {
+                        const conflictInput = document.getElementById(`arg_${conflictDest}`);
+                        if (conflictInput && conflictInput !== input) {
+                            conflictInput.disabled = true;
+                            // Clear the value to avoid confusion
+                            if (conflictInput.type === 'checkbox') {
+                                conflictInput.checked = false;
+                            } else if (conflictInput.tagName !== 'SELECT' || !conflictInput.multiple) {
+                                // Don't clear multi-selects as they might have been deliberately set
+                                if (!conflictInput.value) {
+                                    conflictInput.value = '';
+                                }
+                            }
+                            const container = conflictInput.closest('.mb-3');
+                            if (container) {
+                                container.style.opacity = '0.5';
+                            }
+                        }
+                    });
+                }
+            });
+
+            // Special case: cache_only requires barsukas_url
+            const cacheOnlyInput = document.getElementById('arg_cache_only');
+            const barsukasUrlInput = document.getElementById('arg_barsukas_url');
+            if (cacheOnlyInput && cacheOnlyInput.checked && barsukasUrlInput) {
+                barsukasUrlInput.required = true;
+            } else if (barsukasUrlInput) {
+                barsukasUrlInput.required = false;
+            }
+        }
+
+        // Listen to all input changes
+        argInputs.forEach(input => {
+            input.addEventListener('change', checkConflicts);
+            input.addEventListener('input', checkConflicts);
+        });
+
+        // Initial check
+        checkConflicts();
+
+        // Generate command line
+        function generateCommandLine() {
+            const args = [`PYTHONPATH=src python src/agents/${agentName}.py`];
+
+            argInputs.forEach(input => {
+                const dest = input.dataset.dest;
+                if (!dest || input.disabled) return;
+
+                const argName = dest.replace(/_/g, '-');
+
+                if (input.type === 'checkbox') {
+                    if (input.checked) {
+                        args.push(`--${argName}`);
+                    }
+                } else if (input.tagName === 'SELECT' && input.multiple) {
+                    const selected = Array.from(input.selectedOptions).map(opt => opt.value).filter(v => v);
+                    if (selected.length > 0) {
+                        args.push(`--${argName}`);
+                        args.push(...selected);
+                    }
+                } else if (input.value && input.value !== '') {
+                    args.push(`--${argName}`);
+                    // Quote values with spaces
+                    if (input.value.includes(' ')) {
+                        args.push(`"${input.value}"`);
+                    } else {
+                        args.push(input.value);
+                    }
+                }
+            });
+
+            return args.join(' ');
+        }
+
+        // Generate command button
+        if (generateBtn) {
+            generateBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const command = generateCommandLine();
+                commandInput.value = command;
+                commandPreview.style.display = 'block';
+                commandPreview.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            });
+        }
+
+        // Copy command button
+        if (copyBtn) {
+            copyBtn.addEventListener('click', function() {
+                commandInput.select();
+                document.execCommand('copy');
+
+                // Visual feedback
+                const icon = copyBtn.querySelector('i');
+                const originalClass = icon.className;
+                icon.className = 'bi bi-check';
+                copyBtn.textContent = ' Copied!';
+                copyBtn.prepend(icon);
+
+                setTimeout(() => {
+                    icon.className = originalClass;
+                    copyBtn.textContent = ' Copy';
+                    copyBtn.prepend(icon);
+                }, 2000);
+            });
+        }
+
+        // Toggle collapse icons
+        document.querySelectorAll('[data-bs-toggle="collapse"]').forEach(trigger => {
+            trigger.addEventListener('click', function() {
+                const icon = this.querySelector('.toggle-icon');
+                if (icon) {
+                    setTimeout(() => {
+                        const target = document.querySelector(this.dataset.bsTarget);
+                        if (target && target.classList.contains('show')) {
+                            icon.classList.remove('bi-chevron-right');
+                            icon.classList.add('bi-chevron-down');
+                        } else {
+                            icon.classList.remove('bi-chevron-down');
+                            icon.classList.add('bi-chevron-right');
+                        }
+                    }, 100);
+                }
+            });
         });
     }
 });
