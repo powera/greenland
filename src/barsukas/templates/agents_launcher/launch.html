@@ -60,7 +60,7 @@
 
                             <div class="collapse show" id="group_{{ group_name }}">
                                 {% for arg in group_args %}
-                                <div class="mb-3" data-arg="{{ arg.dest }}">
+                                <div class="mb-3" data-arg="{{ arg.dest }}" {% if arg.mode_hint %}data-mode-hint="{{ arg.mode_hint }}"{% endif %}>
                                     {% if arg.type == 'boolean' %}
                                         <!-- Boolean / Checkbox -->
                                         <div class="form-check">
@@ -269,13 +269,118 @@ document.addEventListener('DOMContentLoaded', function() {
             'sample_rate': ['guid'],
         };
 
+        // Build mode-dependent parameter visibility map from mode_hints
+        const modeHints = {};
+        argInputs.forEach(input => {
+            const dest = input.dataset.dest;
+            const argDiv = input.closest('[data-arg]');
+            if (argDiv) {
+                const modeHint = argDiv.dataset.modeHint;
+                if (modeHint) {
+                    modeHints[dest] = modeHint;
+                }
+            }
+        });
+
+        // Detect mode selector parameters (typically 'mode', 'check', etc.)
+        const modeSelectors = ['mode', 'check', 'fix', 'stage', 'import_jsonl'];
+        const foundModeSelectors = [];
+
+        // Map parameter names to mode names (for cases where they differ)
+        const modeNameMap = {
+            'import_jsonl': 'import',
+            'check': 'check'  // can also be a select with choices
+        };
+
+        modeSelectors.forEach(selector => {
+            const input = document.getElementById(`arg_${selector}`);
+            if (input) {
+                foundModeSelectors.push(selector);
+            }
+        });
+
+        // Apply mode-dependent visibility
+        function updateModeVisibility() {
+            if (foundModeSelectors.length === 0) return;
+
+            // Determine which mode(s) are currently active
+            const activeModes = new Set();
+
+            foundModeSelectors.forEach(selector => {
+                const input = document.getElementById(`arg_${selector}`);
+                if (!input) return;
+
+                let modeName = modeNameMap[selector] || selector;
+
+                if (input.type === 'checkbox') {
+                    // Boolean mode flag (e.g., --fix, --stage)
+                    if (input.checked) {
+                        activeModes.add(modeName);
+                    }
+                } else if (input.tagName === 'SELECT') {
+                    // Select mode (e.g., --mode with choices, or --check with choices)
+                    if (input.value && input.value !== '') {
+                        activeModes.add(input.value);
+                    }
+                } else if (input.value && input.value !== '') {
+                    // Text/file input that acts as a mode selector (e.g., --import-jsonl)
+                    activeModes.add(modeName);
+                }
+            });
+
+            // Show/hide parameters based on active modes
+            argInputs.forEach(input => {
+                const dest = input.dataset.dest;
+                const argDiv = input.closest('[data-arg]');
+
+                // Don't hide the mode selectors themselves
+                if (!argDiv || foundModeSelectors.includes(dest)) return;
+
+                const modeHint = argDiv.dataset.modeHint;
+
+                if (modeHint) {
+                    // This parameter has a mode hint
+                    // Show if its mode hint matches any active mode with flexible matching
+                    const shouldShow = activeModes.size > 0 && Array.from(activeModes).some(mode => {
+                        // Exact match
+                        if (mode === modeHint) return true;
+                        // Mode hint contains the active mode (e.g., "check/fix" contains "fix")
+                        if (modeHint.includes(mode)) return true;
+                        // Active mode contains the mode hint (e.g., "subtypes" contains "subtype")
+                        if (mode.includes(modeHint)) return true;
+                        // Mode hint contains the active mode with word boundaries
+                        // (e.g., "import" matches "[Import mode]")
+                        if (modeHint.split(/[\/\s]+/).includes(mode)) return true;
+                        if (mode.split(/[\/\s]+/).includes(modeHint)) return true;
+                        return false;
+                    });
+
+                    if (shouldShow) {
+                        argDiv.style.display = 'block';
+                    } else {
+                        argDiv.style.display = 'none';
+                        // Clear value when hiding
+                        if (input.type === 'checkbox') {
+                            input.checked = false;
+                        } else if (input.tagName !== 'SELECT' || !input.multiple) {
+                            input.value = '';
+                        }
+                    }
+                } else {
+                    // No mode hint - always show (common parameter)
+                    argDiv.style.display = 'block';
+                }
+            });
+        }
+
         // Apply parameter conflict detection
         function checkConflicts() {
-            // Re-enable all inputs first
+            // Re-enable all visible inputs first
             argInputs.forEach(input => {
-                input.disabled = false;
                 const container = input.closest('.mb-3');
-                if (container) {
+                // Only reset if visible
+                if (container && container.style.display !== 'none') {
+                    input.disabled = false;
                     container.style.opacity = '1';
                 }
             });
@@ -283,7 +388,10 @@ document.addEventListener('DOMContentLoaded', function() {
             // Then apply conflict rules
             argInputs.forEach(input => {
                 const dest = input.dataset.dest;
-                if (!dest) return;
+                const inputContainer = input.closest('.mb-3');
+
+                // Skip if this input is hidden due to mode
+                if (!dest || (inputContainer && inputContainer.style.display === 'none')) return;
 
                 // Check if this input has value
                 let hasValue = false;
@@ -299,7 +407,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (hasValue && conflictRules[dest]) {
                     conflictRules[dest].forEach(conflictDest => {
                         const conflictInput = document.getElementById(`arg_${conflictDest}`);
-                        if (conflictInput && conflictInput !== input) {
+                        const conflictContainer = conflictInput ? conflictInput.closest('.mb-3') : null;
+
+                        // Only disable if visible and not already disabled by mode
+                        if (conflictInput && conflictInput !== input &&
+                            conflictContainer && conflictContainer.style.display !== 'none') {
                             conflictInput.disabled = true;
                             // Clear the value to avoid confusion
                             if (conflictInput.type === 'checkbox') {
@@ -310,10 +422,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                     conflictInput.value = '';
                                 }
                             }
-                            const container = conflictInput.closest('.mb-3');
-                            if (container) {
-                                container.style.opacity = '0.5';
-                            }
+                            conflictContainer.style.opacity = '0.5';
                         }
                     });
                 }
@@ -331,11 +440,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Listen to all input changes
         argInputs.forEach(input => {
-            input.addEventListener('change', checkConflicts);
-            input.addEventListener('input', checkConflicts);
+            input.addEventListener('change', function() {
+                updateModeVisibility();
+                checkConflicts();
+            });
+            input.addEventListener('input', function() {
+                updateModeVisibility();
+                checkConflicts();
+            });
         });
 
-        // Initial check
+        // Initial checks
+        updateModeVisibility();
         checkConflicts();
 
         // Generate command line
@@ -344,7 +460,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
             argInputs.forEach(input => {
                 const dest = input.dataset.dest;
-                if (!dest || input.disabled) return;
+                const argDiv = input.closest('[data-arg]');
+
+                // Skip disabled or hidden parameters
+                if (!dest || input.disabled || (argDiv && argDiv.style.display === 'none')) return;
 
                 const argName = dest.replace(/_/g, '-');
 
