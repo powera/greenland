@@ -5,8 +5,8 @@
 
 # Default storage format
 STORAGE_FORMAT="sqlite"
-# Default to localhost only for security
-HOST_ARGS=""
+# Default to all interfaces
+HOST_ARGS="--host 0.0.0.0"
 
 # Parse command-line arguments
 while [[ $# -gt 0 ]]; do
