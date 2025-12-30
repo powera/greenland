@@ -21,7 +21,8 @@ from agents.common_args import (
     add_processing_args,
     add_guid_arg,
     add_backend_args,
-    get_backend_config,
+    get_data_source_config,
+    validate_cache_args,
 )
 
 # Language mappings for CLI
@@ -114,15 +115,14 @@ def main():
     parser = get_argument_parser()
     args = parser.parse_args()
 
-    # Create backend configuration using common helper
-    backend_config = get_backend_config(args)
+    # Validate cache arguments
+    validate_cache_args(args)
 
-    # Create agent with model parameter and backend config
-    if backend_config:
-        agent = VorasAgent(backend_config=backend_config, debug=args.debug, model=args.model)
-    else:
-        # Backward compatibility: use db_path
-        agent = VorasAgent(db_path=args.db_path, debug=args.debug, model=args.model)
+    # Create data source configuration (includes backend, cache, and LLM model)
+    config = get_data_source_config(args, default_model="gpt-5-mini")
+
+    # Create agent with unified configuration
+    agent = VorasAgent(config=config, debug=args.debug)
 
     # Handle batch operations first (special cases)
     if args.batch_submit:

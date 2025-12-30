@@ -11,6 +11,11 @@ name.
 
 src/wordfreq/storage contains the SQLAlchemy schema for the main database.
 
+src/wordfreq/storage/translation_helpers.py contains all language code
+manipulation functions and constants (LLM_FIELD_TO_LANG_CODE,
+LANG_CODE_TO_LLM_FIELD, convert_llm_response_to_lang_codes, etc.).
+Do not create local language mappings - import from translation_helpers.py.
+
 src/clients/ contains all code to access LLMs.  The system was built around
 the expectation that different small local models would run for different
 tasks; currently it is expected that a remote ChatGPT/Claude/Gemini is used.

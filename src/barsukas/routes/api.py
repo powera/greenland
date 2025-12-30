@@ -266,6 +266,19 @@ def api_info():
             ],
         },
         {
+            "path": "/api/v1/lemma/<guid>/pronunciations",
+            "method": "GET",
+            "description": "Get pronunciations (IPA and phonetic) for base forms of a lemma",
+            "parameters": [
+                {
+                    "name": "language",
+                    "type": "query",
+                    "required": False,
+                    "description": "Filter to specific language code (e.g., 'en', 'lt', 'fr')",
+                }
+            ],
+        },
+        {
             "path": "/api/v1/lemma/<guid>/sentences",
             "method": "GET",
             "description": "Get example sentences that use this lemma",
@@ -666,6 +679,71 @@ def get_lemma_grammar(guid: str):
         metadata["is_populated"] = len(facts_data) > 0
 
     return _build_success_response(facts_data, metadata)
+
+
+@bp.route("/v1/lemma/<guid>/pronunciations")
+def get_lemma_pronunciations(guid: str):
+    """
+    Get pronunciations for the base forms of a lemma.
+
+    Query parameters:
+        - language: Optional. Filter to a specific language code (e.g., 'en', 'lt', 'fr')
+
+    Returns a dictionary mapping language codes to pronunciation objects.
+    Each pronunciation object contains:
+        - ipa: IPA pronunciation (if populated)
+        - phonetic: Phonetic/simplified pronunciation (if populated)
+
+    Only languages with at least one pronunciation populated will be included.
+
+    Example:
+        GET /api/v1/lemma/N01_001/pronunciations
+        GET /api/v1/lemma/N01_001/pronunciations?language=en
+    """
+    lemma = get_lemma_by_guid(g.db, guid)
+
+    if not lemma:
+        return _build_error_response(f"Lemma with GUID '{guid}' not found", 404)
+
+    language_filter = request.args.get("language", "").strip().lower()
+
+    # Query base forms with pronunciations
+    query = g.db.query(DerivativeForm).filter(
+        DerivativeForm.lemma_id == lemma.id,
+        DerivativeForm.is_base_form == True,
+    )
+
+    if language_filter:
+        query = query.filter(DerivativeForm.language_code == language_filter)
+
+    base_forms = query.all()
+
+    # Build pronunciations dictionary (only include if at least one pronunciation exists)
+    pronunciations = {}
+    languages_present = set()
+
+    for form in base_forms:
+        ipa = form.ipa_pronunciation
+        phonetic = form.phonetic_pronunciation
+
+        # Only include if at least one pronunciation is populated
+        if ipa or phonetic:
+            languages_present.add(form.language_code)
+            pronunciations[form.language_code] = {
+                "ipa": _serialize_value(ipa),
+                "phonetic": _serialize_value(phonetic),
+            }
+
+    metadata = {
+        "guid": guid,
+        "languages_with_pronunciations": sorted(list(languages_present)),
+    }
+
+    if language_filter:
+        metadata["requested_language"] = language_filter
+        metadata["is_populated"] = language_filter in pronunciations
+
+    return _build_success_response(pronunciations, metadata)
 
 
 @bp.route("/v1/lemma/<guid>/sentences")

@@ -15,7 +15,7 @@ import util.prompt_loader
 from clients.types import Schema, SchemaProperty
 from clients.unified_client import UnifiedLLMClient
 from wordfreq.storage.backend import create_session as create_backend_session
-from wordfreq.storage.backend.config import BackendConfig, BackendType
+from wordfreq.storage.backend.config import DataSourceConfig, BackendType
 from wordfreq.storage.database import (
     Lemma,
     add_sentence,

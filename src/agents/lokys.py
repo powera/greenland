@@ -38,11 +38,11 @@ from agents.common_args import (
     add_processing_args,
     add_guid_arg,
     add_backend_args,
-    get_backend_config,
+    get_data_source_config,
     confirm_operation,
 )
 from wordfreq.storage.backend import create_session as create_backend_session
-from wordfreq.storage.backend.config import BackendConfig, BackendType
+from wordfreq.storage.backend.config import DataSourceConfig, BackendType
 from wordfreq.storage.models.schema import Lemma
 from wordfreq.tools.llm_validators import (
     validate_lemma_form,
@@ -711,7 +711,7 @@ def main():
     args = parser.parse_args()
 
     # Create backend configuration using common helper
-    backend_config = get_backend_config(args)
+    backend_config = get_data_source_config(args)
 
     # Create agent with backend config
     if backend_config:

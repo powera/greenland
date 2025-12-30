@@ -18,7 +18,7 @@ from agents.common_args import (
     add_llm_args,
     add_output_args,
     add_backend_args,
-    get_backend_config,
+    get_data_source_config,
 )
 
 # Configure logging
@@ -235,7 +235,7 @@ def main():
     logger.info(f"Target languages: {', '.join(target_names)}")
 
     # Create backend configuration using common helper
-    backend_config = get_backend_config(args)
+    backend_config = get_data_source_config(args)
 
     # Initialize agent
     if backend_config:

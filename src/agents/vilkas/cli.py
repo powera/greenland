@@ -17,7 +17,8 @@ from agents.common_args import (
     add_guid_arg,
     add_language_args,
     add_backend_args,
-    get_backend_config,
+    get_data_source_config,
+    validate_cache_args,
 )
 
 
@@ -78,15 +79,14 @@ def main():
     parser = get_argument_parser()
     args = parser.parse_args()
 
-    # Create backend configuration using common helper
-    backend_config = get_backend_config(args)
+    # Validate cache arguments
+    validate_cache_args(args)
 
-    # Create agent with backend config
-    if backend_config:
-        agent = VilkasAgent(backend_config=backend_config, debug=args.debug)
-    else:
-        # Backward compatibility: use db_path
-        agent = VilkasAgent(db_path=args.db_path, debug=args.debug)
+    # Create data source configuration (includes backend, cache, and LLM model)
+    config = get_data_source_config(args, default_model="gpt-5-mini")
+
+    # Create agent with unified configuration
+    agent = VilkasAgent(config=config, debug=args.debug)
 
     # Handle --fix mode
     if args.fix:

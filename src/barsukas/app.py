@@ -31,7 +31,7 @@ from routes import (
     pattern_sentences,
 )
 from wordfreq.storage.backend import create_session, get_backend_type
-from wordfreq.storage.backend.config import BackendConfig, BackendType
+from wordfreq.storage.backend.config import DataSourceConfig, BackendType
 from pinyin_helper import generate_pinyin, generate_pinyin_ruby_html, is_chinese
 
 

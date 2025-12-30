@@ -36,7 +36,7 @@ from typing import Dict, List, Optional, Tuple
 
 import constants
 from wordfreq.storage.backend import create_session as create_backend_session
-from wordfreq.storage.backend.config import BackendConfig, BackendType
+from wordfreq.storage.backend.config import DataSourceConfig, BackendType
 from wordfreq.storage.models.schema import Lemma, DerivativeForm
 from wordfreq.storage.crud.derivative_form import add_derivative_form
 from wordfreq.storage.crud.word_token import add_word_token

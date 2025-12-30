@@ -49,7 +49,7 @@ from agents.common_args import (
     add_common_args,
     add_llm_args,
     add_backend_args,
-    get_backend_config,
+    get_data_source_config,
 )
 from clients.batch_queue import (
     BatchQueueManager,
@@ -59,7 +59,7 @@ from clients.batch_queue import (
 from clients.openai_batch_client import OpenAIBatchClient
 from wordfreq.patterns.simple_patterns import SIMPLE_PATTERNS
 from wordfreq.storage.backend import create_session as create_backend_session
-from wordfreq.storage.backend.config import BackendConfig, BackendType
+from wordfreq.storage.backend.config import DataSourceConfig, BackendType
 from wordfreq.storage.models.schema import (
     Lemma,
     LemmaTranslation,
@@ -863,7 +863,7 @@ def main():
     args = parser.parse_args()
 
     # Create backend configuration using common helper
-    backend_config = get_backend_config(args)
+    backend_config = get_data_source_config(args)
 
     # Create agent
     if backend_config:

@@ -31,15 +31,19 @@ if GREENLAND_SRC_PATH not in sys.path:
 
 import constants
 from clients.batch_queue import BatchRequestMetadata, get_batch_manager
+from clients.barsukas_cache import BarsukasCacheClient
 from wordfreq.storage.backend import create_session as create_backend_session
-from wordfreq.storage.backend.config import BackendConfig, BackendType
+from wordfreq.storage.backend.config import DataSourceConfig, BackendType
 from wordfreq.storage.models.schema import Lemma, LemmaTranslation
 from wordfreq.storage.crud.operation_log import log_translation_change
 from wordfreq.storage.translation_helpers import (
     LANGUAGE_FIELDS,
+    LANGUAGE_NAMES,
+    LANG_CODE_TO_LLM_FIELD,
     get_translation as get_translation_helper,
     set_translation as set_translation_helper,
     get_language_name,
+    convert_llm_response_to_lang_codes,
 )
 from wordfreq.tools.llm_validators import validate_all_translations_for_word
 from wordfreq.translation.client import LinguisticClient
@@ -59,51 +63,47 @@ class VorasAgent:
 
     def __init__(
         self,
-        db_path: str = None,
-        backend_config: BackendConfig = None,
+        config: DataSourceConfig = None,
         debug: bool = False,
-        model: str = None,
     ):
         """
         Initialize the Voras agent.
 
         Args:
-            db_path: Database path (uses default if None) - for SQLite backend (backward compatibility)
-            backend_config: Backend configuration (if provided, overrides db_path)
+            config: DataSourceConfig with storage backend, cache, and LLM settings
             debug: Enable debug logging
-            model: LLM model to use for validation and generation (default: gpt-5-mini for validation)
         """
-        # Set up backend configuration
-        if backend_config is not None:
-            self.backend_config = backend_config
-        elif db_path is not None:
-            # Backward compatibility: db_path implies SQLite backend
-            self.backend_config = BackendConfig(
-                backend_type=BackendType.SQLITE, sqlite_path=db_path
-            )
+        # Set up data source configuration
+        if config is not None:
+            self.config = config
         else:
-            # Use default SQLite path
-            self.backend_config = BackendConfig(
-                backend_type=BackendType.SQLITE, sqlite_path=constants.WORDFREQ_DB_PATH
+            # Use default configuration
+            self.config = DataSourceConfig(
+                backend_type=BackendType.SQLITE,
+                sqlite_path=constants.WORDFREQ_DB_PATH,
+                model="gpt-5-mini",
             )
 
+        # Extract commonly-used config values
+        self.debug = debug
+        self.model = self.config.model or "gpt-5-mini"
+
         # Keep db_path for backward compatibility with LinguisticClient
-        if self.backend_config.backend_type == BackendType.SQLITE:
-            self.db_path = self.backend_config.sqlite_path
+        if self.config.backend_type == BackendType.SQLITE:
+            self.db_path = self.config.sqlite_path
         else:
             self.db_path = None
 
-        self.debug = debug
-        # Default to gpt-5-mini for translation validation (like lokys), but allow override
-        self.model = model or "gpt-5-mini"
-        self.linguistic_client = None  # Lazy initialization
+        # Lazy initialization
+        self.linguistic_client = None
+        self.cache_client = None
 
         if debug:
             logger.setLevel(logging.DEBUG)
 
     def get_session(self):
         """Get database session using backend abstraction."""
-        return create_backend_session(self.backend_config)
+        return create_backend_session(self.config)
 
     def get_linguistic_client(self):
         """Get or create linguistic client for LLM queries."""
@@ -112,6 +112,16 @@ class VorasAgent:
                 model=self.model, db_path=self.db_path, debug=self.debug
             )
         return self.linguistic_client
+
+    def get_cache_client(self):
+        """Get or create cache client for BARSUKAS queries."""
+        if self.cache_client is None and self.config.barsukas_url:
+            self.cache_client = BarsukasCacheClient(
+                base_url=self.config.barsukas_url,
+                cache_only=self.config.cache_only,
+                debug=self.debug
+            )
+        return self.cache_client
 
     def get_translation(self, session, lemma: Lemma, lang_code: str) -> Optional[str]:
         """
@@ -534,20 +544,11 @@ class VorasAgent:
                             results["total_failed"] += 1
                             continue
 
-                        # Map language codes to field names
-                        translation_field_map = {
-                            "zh": "chinese_translation",
-                            "ko": "korean_translation",
-                            "fr": "french_translation",
-                            "sw": "swahili_translation",
-                            "vi": "vietnamese_translation",
-                        }
-
                         # Add all non-Lithuanian translations
                         added_this_word = 0
                         for lang_code in languages_to_regenerate:
                             field_name, language_name = LANGUAGE_FIELDS[lang_code]
-                            llm_field = translation_field_map.get(lang_code)
+                            llm_field = LANG_CODE_TO_LLM_FIELD.get(lang_code)
                             translation = translations.get(llm_field, "").strip()
 
                             if translation:
@@ -712,58 +713,53 @@ class VorasAgent:
                             results["total_failed"] += 1
                         continue
 
-                    # Build list of language names (lowercase) for only the missing languages
-                    # Map language codes to language names for query_translations
-                    lang_code_to_name = {
-                        "zh": "chinese",
-                        "ko": "korean",
-                        "fr": "french",
-                        "es": "spanish",
-                        "de": "german",
-                        "pt": "portuguese",
-                        "sw": "swahili",
-                        "vi": "vietnamese",
-                        "lt": "lithuanian",
-                    }
-                    missing_lang_names = [
-                        lang_code_to_name[lang_code]
-                        for lang_code, _ in missing_languages
-                        if lang_code in lang_code_to_name
-                    ]
+                    # Try to get translations from cache first (cache returns lang_code -> translation)
+                    translations_by_lang_code = None
+                    cache_client = self.get_cache_client()
+                    if cache_client:
+                        try:
+                            translations_by_lang_code = cache_client.get_translations(lemma.guid)
+                            if translations_by_lang_code:
+                                logger.info(f"Using cached translations for '{lemma.lemma_text}' (GUID: {lemma.guid})")
+                        except Exception as cache_error:
+                            # If cache_only mode, this will raise an exception that propagates
+                            # Otherwise, we'll fall through to LLM query
+                            logger.debug(f"Cache lookup failed for '{lemma.lemma_text}': {cache_error}")
+                            if self.config.cache_only:
+                                raise
 
-                    # Query LLM for translations - ONE CALL for only missing languages
-                    translations, success = client.query_translations(
-                        english_word=lemma.lemma_text,
-                        reference_translation=(reference_lang_code, reference_translation),
-                        definition=lemma.definition_text,
-                        pos_type=lemma.pos_type,
-                        pos_subtype=lemma.pos_subtype,
-                        languages=missing_lang_names,
-                    )
+                    # If no cache hit, query LLM for translations
+                    if not translations_by_lang_code:
+                        # Build list of language names (lowercase) for only the missing languages
+                        missing_lang_names = [
+                            LANGUAGE_NAMES[lang_code].lower()
+                            for lang_code, _ in missing_languages
+                            if lang_code in LANGUAGE_NAMES
+                        ]
 
-                    if not success or not translations:
-                        logger.warning(f"Failed to get translations for '{lemma.lemma_text}'")
-                        for lang_code, _ in missing_languages:
-                            results["by_language"][lang_code]["failed"] += 1
-                            results["total_failed"] += 1
-                        continue
+                        # Query LLM for translations - ONE CALL for only missing languages
+                        llm_translations, success = client.query_translations(
+                            english_word=lemma.lemma_text,
+                            reference_translation=(reference_lang_code, reference_translation),
+                            definition=lemma.definition_text,
+                            pos_type=lemma.pos_type,
+                            pos_subtype=lemma.pos_subtype,
+                            languages=missing_lang_names,
+                        )
 
-                    # Map language codes to LLM response field names
-                    translation_field_map = {
-                        "zh": "chinese_translation",
-                        "ko": "korean_translation",
-                        "fr": "french_translation",
-                        "es": "spanish_translation",
-                        "de": "german_translation",
-                        "pt": "portuguese_translation",
-                        "sw": "swahili_translation",
-                        "vi": "vietnamese_translation",
-                        "lt": "lithuanian_translation",
-                    }
+                        if not success or not llm_translations:
+                            logger.warning(f"Failed to get translations for '{lemma.lemma_text}'")
+                            for lang_code, _ in missing_languages:
+                                results["by_language"][lang_code]["failed"] += 1
+                                results["total_failed"] += 1
+                            continue
 
+                        # Convert LLM response format (field_name -> translation) to lang_code format
+                        translations_by_lang_code = convert_llm_response_to_lang_codes(llm_translations)
+
+                    # Apply translations to lemma (translations_by_lang_code now always uses lang_code keys)
                     for lang_code, language_name in missing_languages:
-                        llm_field = translation_field_map.get(lang_code)
-                        translation = translations.get(llm_field, "").strip()
+                        translation = translations_by_lang_code.get(lang_code, "").strip()
 
                         if translation:
                             # Update the translation using helper method
@@ -785,7 +781,7 @@ class VorasAgent:
                             lc
                             for lc, _ in missing_languages
                             if lc != "lt"
-                            and translations.get(translation_field_map.get(lc), "").strip()
+                            and translations_by_lang_code.get(lc, "").strip()
                         ]
                     )
                     logger.info(

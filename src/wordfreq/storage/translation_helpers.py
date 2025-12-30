@@ -36,6 +36,23 @@ LANGUAGE_FIELDS = {
 # This is derived from LANGUAGE_FIELDS for convenience
 LANGUAGE_NAMES = {code: name for code, (_, name, _) in LANGUAGE_FIELDS.items()}
 
+# LLM field name mappings (used for LLM responses)
+# Maps LLM field names (e.g., "chinese_translation") to language codes (e.g., "zh")
+LLM_FIELD_TO_LANG_CODE = {
+    "lithuanian_translation": "lt",
+    "chinese_translation": "zh",
+    "korean_translation": "ko",
+    "french_translation": "fr",
+    "spanish_translation": "es",
+    "german_translation": "de",
+    "portuguese_translation": "pt",
+    "swahili_translation": "sw",
+    "vietnamese_translation": "vi",
+}
+
+# Reverse mapping: language codes to LLM field names
+LANG_CODE_TO_LLM_FIELD = {v: k for k, v in LLM_FIELD_TO_LANG_CODE.items()}
+
 
 def get_translation(session: Session, lemma: Lemma, lang_code: str) -> Optional[str]:
     """
@@ -184,3 +201,48 @@ def get_supported_languages() -> Dict[str, str]:
         Example: {'es': 'Spanish', 'fr': 'French', ...}
     """
     return {code: name for code, (_, name, _) in LANGUAGE_FIELDS.items()}
+
+
+def llm_field_to_lang_code(field_name: str) -> Optional[str]:
+    """
+    Convert LLM field name to language code.
+
+    Args:
+        field_name: LLM field name (e.g., 'chinese_translation')
+
+    Returns:
+        Language code (e.g., 'zh') or None if not found
+    """
+    return LLM_FIELD_TO_LANG_CODE.get(field_name)
+
+
+def lang_code_to_llm_field(lang_code: str) -> Optional[str]:
+    """
+    Convert language code to LLM field name.
+
+    Args:
+        lang_code: Language code (e.g., 'zh')
+
+    Returns:
+        LLM field name (e.g., 'chinese_translation') or None if not found
+    """
+    return LANG_CODE_TO_LLM_FIELD.get(lang_code)
+
+
+def convert_llm_response_to_lang_codes(llm_response: Dict[str, str]) -> Dict[str, str]:
+    """
+    Convert LLM response with field names to language code format.
+
+    Args:
+        llm_response: Dictionary with LLM field names as keys
+                     (e.g., {'chinese_translation': '吃', 'french_translation': 'manger'})
+
+    Returns:
+        Dictionary with language codes as keys
+        (e.g., {'zh': '吃', 'fr': 'manger'})
+    """
+    return {
+        LLM_FIELD_TO_LANG_CODE[field_name]: translation
+        for field_name, translation in llm_response.items()
+        if field_name in LLM_FIELD_TO_LANG_CODE
+    }

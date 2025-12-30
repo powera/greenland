@@ -24,7 +24,7 @@ if GREENLAND_SRC_PATH not in sys.path:
 import constants
 from util.logging_config import configure_logging, get_logger
 from wordfreq.storage.backend import create_session as create_backend_session
-from wordfreq.storage.backend.config import BackendConfig, BackendType
+from wordfreq.storage.backend.config import DataSourceConfig, BackendType
 from wordfreq.storage.models.schema import Lemma, WordToken, WordFrequency, Corpus, DerivativeForm
 from wordfreq.storage.models.imports import PendingImport, WordExclusion
 from wordfreq.translation.client import LinguisticClient
