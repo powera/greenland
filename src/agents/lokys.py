@@ -63,7 +63,7 @@ class LokysAgent:
     def __init__(
         self,
         db_path: str = None,
-        backend_config: BackendConfig = None,
+        backend_config: Optional[DataSourceConfig] = None,
         debug: bool = False,
         model: str = "gpt-5-mini",
     ):
@@ -81,12 +81,12 @@ class LokysAgent:
             self.backend_config = backend_config
         elif db_path is not None:
             # Backward compatibility: db_path implies SQLite backend
-            self.backend_config = BackendConfig(
+            self.backend_config = DataSourceConfig(
                 backend_type=BackendType.SQLITE, sqlite_path=db_path
             )
         else:
             # Use default SQLite path
-            self.backend_config = BackendConfig(
+            self.backend_config = DataSourceConfig(
                 backend_type=BackendType.SQLITE, sqlite_path=constants.WORDFREQ_DB_PATH
             )
 

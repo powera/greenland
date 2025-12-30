@@ -49,10 +49,10 @@ def create_app(config_class=Config):
         if not Path(db_path).exists():
             print(f"Error: Database not found at {db_path}", file=sys.stderr)
             sys.exit(1)
-        backend_config = BackendConfig(backend_type=BackendType.SQLITE, sqlite_path=db_path)
+        backend_config = DataSourceConfig(backend_type=BackendType.SQLITE, sqlite_path=db_path)
     else:
         # JSONL backend
-        backend_config = BackendConfig.from_env()
+        backend_config = DataSourceConfig.from_env()
 
     # Store backend config in app
     app.backend_config = backend_config

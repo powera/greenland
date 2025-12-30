@@ -35,14 +35,14 @@ def export_sqlite_to_jsonl(sqlite_path: str, jsonl_dir: str):
     print(f"Exporting from SQLite ({sqlite_path}) to JSONL ({jsonl_dir})...")
 
     # Create source session (SQLite) - use wrapped session
-    source_config = BackendConfig(backend_type=BackendType.SQLITE, sqlite_path=sqlite_path)
+    source_config = DataSourceConfig(backend_type=BackendType.SQLITE, sqlite_path=sqlite_path)
     source_session_wrapper = create_session(source_config)
 
     # Get the underlying SQLAlchemy session for compatibility
     source_session = source_session_wrapper._sqlalchemy_session
 
     # Create target session (JSONL)
-    target_config = BackendConfig(backend_type=BackendType.JSONL, jsonl_data_dir=jsonl_dir)
+    target_config = DataSourceConfig(backend_type=BackendType.JSONL, jsonl_data_dir=jsonl_dir)
     target_session = create_session(target_config)
 
     # Import models
