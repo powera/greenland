@@ -38,6 +38,8 @@ from wordfreq.storage.models.schema import Lemma, LemmaTranslation
 from wordfreq.storage.crud.operation_log import log_translation_change
 from wordfreq.storage.translation_helpers import (
     LANGUAGE_FIELDS,
+    LANGUAGE_NAMES,
+    LANG_CODE_TO_LLM_FIELD,
     get_translation as get_translation_helper,
     set_translation as set_translation_helper,
     get_language_name,
@@ -542,20 +544,11 @@ class VorasAgent:
                             results["total_failed"] += 1
                             continue
 
-                        # Map language codes to field names
-                        translation_field_map = {
-                            "zh": "chinese_translation",
-                            "ko": "korean_translation",
-                            "fr": "french_translation",
-                            "sw": "swahili_translation",
-                            "vi": "vietnamese_translation",
-                        }
-
                         # Add all non-Lithuanian translations
                         added_this_word = 0
                         for lang_code in languages_to_regenerate:
                             field_name, language_name = LANGUAGE_FIELDS[lang_code]
-                            llm_field = translation_field_map.get(lang_code)
+                            llm_field = LANG_CODE_TO_LLM_FIELD.get(lang_code)
                             translation = translations.get(llm_field, "").strip()
 
                             if translation:
@@ -738,22 +731,10 @@ class VorasAgent:
                     # If no cache hit, query LLM for translations
                     if not translations_by_lang_code:
                         # Build list of language names (lowercase) for only the missing languages
-                        # Map language codes to language names for query_translations
-                        lang_code_to_name = {
-                            "zh": "chinese",
-                            "ko": "korean",
-                            "fr": "french",
-                            "es": "spanish",
-                            "de": "german",
-                            "pt": "portuguese",
-                            "sw": "swahili",
-                            "vi": "vietnamese",
-                            "lt": "lithuanian",
-                        }
                         missing_lang_names = [
-                            lang_code_to_name[lang_code]
+                            LANGUAGE_NAMES[lang_code].lower()
                             for lang_code, _ in missing_languages
-                            if lang_code in lang_code_to_name
+                            if lang_code in LANGUAGE_NAMES
                         ]
 
                         # Query LLM for translations - ONE CALL for only missing languages
@@ -800,7 +781,7 @@ class VorasAgent:
                             lc
                             for lc, _ in missing_languages
                             if lc != "lt"
-                            and translations.get(translation_field_map.get(lc), "").strip()
+                            and translations_by_lang_code.get(lc, "").strip()
                         ]
                     )
                     logger.info(
