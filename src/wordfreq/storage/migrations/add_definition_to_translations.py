@@ -18,7 +18,7 @@ if str(Path(__file__).parent.parent.parent.parent) not in sys.path:
 from sqlalchemy import text, inspect
 from wordfreq.storage.database import create_database_session
 from wordfreq.storage.models.schema import Lemma, LemmaTranslation
-from config import Config
+from constants import WORDFREQ_DB_PATH
 
 
 def check_column_exists(session, table_name: str, column_name: str) -> bool:
@@ -135,8 +135,8 @@ def main():
     )
     parser.add_argument(
         "--db-path",
-        default=Config.SQLITE_DB_PATH,
-        help=f"Path to SQLite database (default: {Config.SQLITE_DB_PATH})"
+        default=WORDFREQ_DB_PATH,
+        help=f"Path to SQLite database (default: {WORDFREQ_DB_PATH})"
     )
 
     args = parser.parse_args()
