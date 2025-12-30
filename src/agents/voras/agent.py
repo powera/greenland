@@ -63,6 +63,8 @@ class VorasAgent:
         backend_config: BackendConfig = None,
         debug: bool = False,
         model: str = None,
+        barsukas_url: str = None,
+        cache_only: bool = False,
     ):
         """
         Initialize the Voras agent.
@@ -72,6 +74,8 @@ class VorasAgent:
             backend_config: Backend configuration (if provided, overrides db_path)
             debug: Enable debug logging
             model: LLM model to use for validation and generation (default: gpt-5-mini for validation)
+            barsukas_url: URL of BARSUKAS server for cached translations (e.g., http://server:5000)
+            cache_only: If True, only use cached translations and fail if not in cache
         """
         # Set up backend configuration
         if backend_config is not None:
@@ -98,6 +102,11 @@ class VorasAgent:
         self.model = model or "gpt-5-mini"
         self.linguistic_client = None  # Lazy initialization
 
+        # Cache configuration
+        self.barsukas_url = barsukas_url
+        self.cache_only = cache_only
+        self.cache_client = None  # Lazy initialization
+
         if debug:
             logger.setLevel(logging.DEBUG)
 
@@ -112,6 +121,17 @@ class VorasAgent:
                 model=self.model, db_path=self.db_path, debug=self.debug
             )
         return self.linguistic_client
+
+    def get_cache_client(self):
+        """Get or create cache client for BARSUKAS queries."""
+        if self.cache_client is None and self.barsukas_url:
+            from clients.barsukas_cache import BarsukasCacheClient
+            self.cache_client = BarsukasCacheClient(
+                base_url=self.barsukas_url,
+                cache_only=self.cache_only,
+                debug=self.debug
+            )
+        return self.cache_client
 
     def get_translation(self, session, lemma: Lemma, lang_code: str) -> Optional[str]:
         """
@@ -712,41 +732,75 @@ class VorasAgent:
                             results["total_failed"] += 1
                         continue
 
-                    # Build list of language names (lowercase) for only the missing languages
-                    # Map language codes to language names for query_translations
-                    lang_code_to_name = {
-                        "zh": "chinese",
-                        "ko": "korean",
-                        "fr": "french",
-                        "es": "spanish",
-                        "de": "german",
-                        "pt": "portuguese",
-                        "sw": "swahili",
-                        "vi": "vietnamese",
-                        "lt": "lithuanian",
-                    }
-                    missing_lang_names = [
-                        lang_code_to_name[lang_code]
-                        for lang_code, _ in missing_languages
-                        if lang_code in lang_code_to_name
-                    ]
+                    # Try to get translations from cache first
+                    translations = None
+                    cache_client = self.get_cache_client()
+                    if cache_client:
+                        try:
+                            cached_translations = cache_client.get_translations(lemma.guid)
+                            if cached_translations:
+                                # Map cache format (lang_code -> translation) to LLM format (field_name -> translation)
+                                translation_field_map = {
+                                    "zh": "chinese_translation",
+                                    "ko": "korean_translation",
+                                    "fr": "french_translation",
+                                    "es": "spanish_translation",
+                                    "de": "german_translation",
+                                    "pt": "portuguese_translation",
+                                    "sw": "swahili_translation",
+                                    "vi": "vietnamese_translation",
+                                    "lt": "lithuanian_translation",
+                                }
+                                translations = {
+                                    translation_field_map[lang_code]: translation
+                                    for lang_code, translation in cached_translations.items()
+                                    if lang_code in translation_field_map
+                                }
+                                logger.info(f"Using cached translations for '{lemma.lemma_text}' (GUID: {lemma.guid})")
+                        except Exception as cache_error:
+                            # If cache_only mode, this will raise an exception that propagates
+                            # Otherwise, we'll fall through to LLM query
+                            logger.debug(f"Cache lookup failed for '{lemma.lemma_text}': {cache_error}")
+                            if self.cache_only:
+                                raise
 
-                    # Query LLM for translations - ONE CALL for only missing languages
-                    translations, success = client.query_translations(
-                        english_word=lemma.lemma_text,
-                        reference_translation=(reference_lang_code, reference_translation),
-                        definition=lemma.definition_text,
-                        pos_type=lemma.pos_type,
-                        pos_subtype=lemma.pos_subtype,
-                        languages=missing_lang_names,
-                    )
+                    # If no cache hit, query LLM for translations
+                    if not translations:
+                        # Build list of language names (lowercase) for only the missing languages
+                        # Map language codes to language names for query_translations
+                        lang_code_to_name = {
+                            "zh": "chinese",
+                            "ko": "korean",
+                            "fr": "french",
+                            "es": "spanish",
+                            "de": "german",
+                            "pt": "portuguese",
+                            "sw": "swahili",
+                            "vi": "vietnamese",
+                            "lt": "lithuanian",
+                        }
+                        missing_lang_names = [
+                            lang_code_to_name[lang_code]
+                            for lang_code, _ in missing_languages
+                            if lang_code in lang_code_to_name
+                        ]
 
-                    if not success or not translations:
-                        logger.warning(f"Failed to get translations for '{lemma.lemma_text}'")
-                        for lang_code, _ in missing_languages:
-                            results["by_language"][lang_code]["failed"] += 1
-                            results["total_failed"] += 1
-                        continue
+                        # Query LLM for translations - ONE CALL for only missing languages
+                        translations, success = client.query_translations(
+                            english_word=lemma.lemma_text,
+                            reference_translation=(reference_lang_code, reference_translation),
+                            definition=lemma.definition_text,
+                            pos_type=lemma.pos_type,
+                            pos_subtype=lemma.pos_subtype,
+                            languages=missing_lang_names,
+                        )
+
+                        if not success or not translations:
+                            logger.warning(f"Failed to get translations for '{lemma.lemma_text}'")
+                            for lang_code, _ in missing_languages:
+                                results["by_language"][lang_code]["failed"] += 1
+                                results["total_failed"] += 1
+                            continue
 
                     # Map language codes to LLM response field names
                     translation_field_map = {

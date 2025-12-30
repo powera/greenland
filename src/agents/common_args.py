@@ -72,6 +72,19 @@ def add_llm_args(parser: argparse.ArgumentParser, default_model: str = "gpt-4o-m
         help="Delay in seconds between LLM API calls (default: 1.0)",
     )
 
+    parser.add_argument(
+        "--barsukas-url",
+        type=str,
+        default=None,
+        help="URL of BARSUKAS server to query for cached translations (e.g., http://server:5000)",
+    )
+
+    parser.add_argument(
+        "--cache-only",
+        action="store_true",
+        help="Only use cached translations from --barsukas-url; fail if not in cache (requires --barsukas-url)",
+    )
+
     return parser
 
 
@@ -189,6 +202,21 @@ def add_language_args(parser: argparse.ArgumentParser, multiple: bool = False) -
         )
 
     return parser
+
+
+def validate_cache_args(args: Any) -> None:
+    """Validate cache-related arguments.
+
+    Args:
+        args: Parsed arguments namespace
+
+    Raises:
+        SystemExit: If validation fails
+    """
+    if hasattr(args, 'cache_only') and args.cache_only:
+        if not hasattr(args, 'barsukas_url') or not args.barsukas_url:
+            print("Error: --cache-only requires --barsukas-url to be specified")
+            sys.exit(1)
 
 
 def confirm_operation(
