@@ -44,19 +44,6 @@ from audioshoe.coqui import CoquiVoice, CoquiClient
 bp = Blueprint("audio", __name__, url_prefix="/audio")
 logger = logging.getLogger(__name__)
 
-# Mapping from language codes to directory names
-LANGUAGE_DIR_MAP = {
-    "zh": "chinese",
-    "lt": "lithuanian",
-    "ko": "korean",
-    "fr": "french",
-    "de": "german",
-    "es": "spanish",
-    "pt": "portuguese",
-    "sw": "swahili",
-    "vi": "vietnamese",
-}
-
 
 @bp.route("/")
 def index():
@@ -397,11 +384,9 @@ def download_filelist():
     # Generate file list
     file_lines = []
     for file in audio_files:
-        # Map language code to directory name (e.g., 'zh' -> 'chinese')
-        language_dir = LANGUAGE_DIR_MAP.get(file.language_code, file.language_code)
-
-        # Build file path
-        file_path = Path(audio_base_dir) / language_dir / file.voice_name / file.filename
+        # Use language code directly as directory name (e.g., 'zh', 'lt')
+        # The audio directory structure uses language codes, not full names
+        file_path = Path(audio_base_dir) / file.language_code / file.voice_name / file.filename
 
         # Add to list
         file_lines.append(str(file_path))
@@ -459,13 +444,14 @@ def serve_audio_file(language, voice, filename):
     if not audio_base_dir:
         return jsonify({"error": "Audio directory not configured and no S3 URL available"}), 500
 
-    # Try direct language code path first (new format)
+    # Try language code directory first (new structure: e.g., 'lt', 'zh')
     file_path = Path(audio_base_dir) / language / voice / filename
 
-    # If not found, try mapped language directory name (legacy format)
+    # If not found, try legacy language name directory (e.g., 'lithuanian', 'chinese')
     if not file_path.exists():
-        language_dir = LANGUAGE_DIR_MAP.get(language, language)
-        file_path = Path(audio_base_dir) / language_dir / voice / filename
+        from wordfreq.storage.translation_helpers import LANGUAGE_NAMES
+        legacy_name = LANGUAGE_NAMES.get(language, language).lower()
+        file_path = Path(audio_base_dir) / legacy_name / voice / filename
 
     logger.info(f"Serving audio file: {file_path} (exists: {file_path.exists()})")
 
