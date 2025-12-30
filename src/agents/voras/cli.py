@@ -213,15 +213,15 @@ def main():
         session = agent.get_session()
         try:
             estimated_calls = 0
-            # args.language is now a list or None
-            languages_to_process = args.language if args.language else list(LANGUAGE_FIELDS.keys())
+            # args.languages is now a list or None
+            languages_to_process = args.languages if args.languages else list(LANGUAGE_FIELDS.keys())
 
             if args.mode in ["check-only", "both"]:
                 # Calculate validation calls
-                if args.language and len(args.language) == 1:
+                if args.languages and len(args.languages) == 1:
                     # Single language: still validates all languages per word, just filters which words
                     field_name, language_name, use_translation_table = LANGUAGE_FIELDS[
-                        args.language[0]
+                        args.languages[0]
                     ]
                     query = session.query(Lemma).filter(
                         Lemma.guid.isnot(None),
@@ -237,10 +237,10 @@ def main():
                     logger.info(
                         f"{language_name}: {count} words to validate (all translations per word)"
                     )
-                elif args.language and len(args.language) > 1:
+                elif args.languages and len(args.languages) > 1:
                     # Multiple languages: validate words that have ANY of the specified language translations
                     has_translation_filter = None
-                    for lang_code in args.language:
+                    for lang_code in args.languages:
                         field_name, _, use_translation_table = LANGUAGE_FIELDS[lang_code]
                         field_filter = (getattr(Lemma, field_name).isnot(None)) & (
                             getattr(Lemma, field_name) != ""
@@ -259,7 +259,7 @@ def main():
                     if args.sample_rate < 1.0:
                         count = int(count * args.sample_rate)
                     estimated_calls += count
-                    lang_names = ", ".join([LANGUAGE_FIELDS[lc][1] for lc in args.language])
+                    lang_names = ", ".join([LANGUAGE_FIELDS[lc][1] for lc in args.languages])
                     logger.info(
                         f"{lang_names}: {count} words to validate (all translations per word)"
                     )
@@ -382,10 +382,10 @@ def main():
 
     if args.mode == "check-only":
         # Validate existing translations
-        if args.language and len(args.language) == 1:
+        if args.languages and len(args.languages) == 1:
             # Single language validation
             results = agent.validate_translations(
-                args.language[0],
+                args.languages[0],
                 limit=args.limit,
                 sample_rate=args.sample_rate,
                 confidence_threshold=args.confidence_threshold,
@@ -400,8 +400,8 @@ def main():
                 sample_rate=args.sample_rate,
                 confidence_threshold=args.confidence_threshold,
             )
-            if args.language and len(args.language) > 1:
-                lang_names = ", ".join([LANGUAGE_FIELDS[lc][1] for lc in args.language])
+            if args.languages and len(args.languages) > 1:
+                lang_names = ", ".join([LANGUAGE_FIELDS[lc][1] for lc in args.languages])
                 print(f"\nValidation results for {lang_names}:")
                 print(
                     f"  Total translation issues (all languages): {results['total_issues_all_languages']}"
@@ -414,7 +414,7 @@ def main():
     elif args.mode == "populate-only":
         # Generate missing translations only
         results = agent.fix_missing_translations(
-            language_code=args.language, limit=args.limit, dry_run=args.dry_run
+            language_code=args.languages, limit=args.limit, dry_run=args.dry_run
         )
         print("\n" + "=" * 80)
         print("TRANSLATION POPULATION SUMMARY")
@@ -431,10 +431,10 @@ def main():
     elif args.mode == "both":
         # First validate existing translations
         print("\n=== STEP 1: Validating Existing Translations ===\n")
-        if args.language and len(args.language) == 1:
+        if args.languages and len(args.languages) == 1:
             # Single language validation
             validation_results = agent.validate_translations(
-                args.language[0],
+                args.languages[0],
                 limit=args.limit,
                 sample_rate=args.sample_rate,
                 confidence_threshold=args.confidence_threshold,
@@ -450,7 +450,7 @@ def main():
         # Then populate missing translations
         print("\n=== STEP 2: Populating Missing Translations ===\n")
         population_results = agent.fix_missing_translations(
-            language_code=args.language, limit=args.limit, dry_run=args.dry_run
+            language_code=args.languages, limit=args.limit, dry_run=args.dry_run
         )
 
         # Combined summary
@@ -458,7 +458,7 @@ def main():
         print("COMBINED VALIDATION + POPULATION SUMMARY")
         print("=" * 80)
 
-        if args.language and len(args.language) == 1:
+        if args.languages and len(args.languages) == 1:
             # Single language validation results
             print(f"\nValidation ({validation_results['language_name']}):")
             print(
@@ -467,8 +467,8 @@ def main():
             print(f"  Issue rate: {validation_results['issue_rate']:.1f}%")
         else:
             # All languages or multiple languages validation results
-            if args.language and len(args.language) > 1:
-                lang_names = ", ".join([LANGUAGE_FIELDS[lc][1] for lc in args.language])
+            if args.languages and len(args.languages) > 1:
+                lang_names = ", ".join([LANGUAGE_FIELDS[lc][1] for lc in args.languages])
                 print(f"\nValidation ({lang_names}):")
             else:
                 print(f"\nValidation (all languages):")

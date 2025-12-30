@@ -17,13 +17,18 @@
 
     <hr class="my-4">
 
+    <div class="alert alert-primary">
+        <i class="bi bi-info-circle"></i>
+        <strong>Configure and run:</strong> Set your arguments below (like <code>--guid</code> for testing a specific word, or <code>--dry-run</code> to preview), then click "Launch Agent" to execute.
+    </div>
+
     <div class="card">
         <div class="card-body">
-            <h5 class="card-title">Launch Agent</h5>
+            <h5 class="card-title">Configure Arguments</h5>
 
             {% if parser_info %}
                 <!-- Dynamic Form (from argparse introspection) -->
-                <form id="launchForm">
+                <form method="post" action="{{ url_for('agents_launcher.execute_agent', agent_name=agent.name) }}">
                     {% if parser_info.description %}
                     <p class="text-muted">{{ parser_info.description }}</p>
                     {% endif %}
@@ -134,7 +139,7 @@
                 </form>
             {% else %}
                 <!-- Static Form (predefined modes) -->
-                <form id="launchForm">
+                <form method="post" action="{{ url_for('agents_launcher.execute_agent', agent_name=agent.name) }}">
                     <!-- Mode Selection -->
                     <div class="mb-3">
                         <label for="mode" class="form-label">Select Mode</label>
@@ -187,152 +192,33 @@
             {% endif %}
         </div>
     </div>
-
-    <!-- Output Display -->
-    <div id="outputContainer" style="display: none;" class="mt-4">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">
-                    <i class="bi bi-terminal"></i> Agent Output
-                    <span id="statusBadge" class="badge ms-2"></span>
-                </h5>
-            </div>
-            <div class="card-body">
-                <div id="outputContent"></div>
-            </div>
-        </div>
-    </div>
 </div>
-
-<style>
-#outputContent pre {
-    background: #f8f9fa;
-    padding: 15px;
-    border-radius: 5px;
-    max-height: 500px;
-    overflow-y: auto;
-}
-
-.spinner-border {
-    width: 1rem;
-    height: 1rem;
-}
-</style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('launchForm');
     const modeSelect = document.getElementById('mode');
-    const modeInputContainer = document.getElementById('modeInputContainer');
-    const modeInput = document.getElementById('modeInput');
-    const modeInputLabel = document.getElementById('modeInputLabel');
-    const launchBtn = document.getElementById('launchBtn');
-    const outputContainer = document.getElementById('outputContainer');
-    const outputContent = document.getElementById('outputContent');
-    const statusBadge = document.getElementById('statusBadge');
 
-    // Handle mode selection - show/hide input based on mode requirements
-    modeSelect.addEventListener('change', function() {
-        const selectedOption = this.options[this.selectedIndex];
-        const requiresInput = selectedOption.getAttribute('data-requires-input') === 'true';
-        const placeholder = selectedOption.getAttribute('data-input-placeholder');
+    // Only set up mode handling for static forms
+    if (modeSelect) {
+        const modeInputContainer = document.getElementById('modeInputContainer');
+        const modeInput = document.getElementById('modeInput');
 
-        if (requiresInput) {
-            modeInputContainer.style.display = 'block';
-            modeInput.placeholder = placeholder;
-            modeInput.required = true;
-        } else {
-            modeInputContainer.style.display = 'none';
-            modeInput.required = false;
-            modeInput.value = '';
-        }
-    });
+        // Handle mode selection - show/hide input based on mode requirements
+        modeSelect.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            const requiresInput = selectedOption.getAttribute('data-requires-input') === 'true';
+            const placeholder = selectedOption.getAttribute('data-input-placeholder');
 
-    // Handle form submission
-    form.addEventListener('submit', async function(e) {
-        e.preventDefault();
-
-        // Build form data
-        const formData = new FormData(form);
-
-        // For static forms, validate mode selection
-        if (modeSelect && !modeSelect.value) {
-            alert('Please select a mode');
-            return;
-        }
-
-        // Show loading state
-        launchBtn.disabled = true;
-        launchBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Launching...';
-        outputContainer.style.display = 'none';
-
-        // For static forms with mode input
-        if (modeSelect && modeInput && modeInput.value) {
-            let customArgs = document.getElementById('customArgs').value;
-            customArgs = modeInput.value + (customArgs ? ' ' + customArgs : '');
-            formData.set('custom_args', customArgs);
-        }
-
-        // Handle multi-select fields (convert to comma-separated string)
-        const multiSelects = form.querySelectorAll('select[multiple]');
-        multiSelects.forEach(select => {
-            const selectedOptions = Array.from(select.selectedOptions).map(opt => opt.value);
-            if (selectedOptions.length > 0) {
-                formData.set(select.name, selectedOptions.join(','));
+            if (requiresInput) {
+                modeInputContainer.style.display = 'block';
+                modeInput.placeholder = placeholder;
+                modeInput.required = true;
+            } else {
+                modeInputContainer.style.display = 'none';
+                modeInput.required = false;
+                modeInput.value = '';
             }
         });
-
-        try {
-            // Execute agent
-            const response = await fetch('{{ url_for("agents_launcher.execute_agent", agent_name=agent.name) }}', {
-                method: 'POST',
-                body: formData
-            });
-
-            const result = await response.json();
-
-            // Show output
-            outputContainer.style.display = 'block';
-
-            if (result.success) {
-                statusBadge.className = 'badge bg-success';
-                statusBadge.textContent = 'Success';
-                outputContent.innerHTML = `<pre>${escapeHtml(result.stdout)}</pre>`;
-            } else {
-                statusBadge.className = 'badge bg-danger';
-                statusBadge.textContent = 'Error';
-                outputContent.innerHTML = `
-                    <div class="alert alert-danger">
-                        <strong>Error:</strong> ${escapeHtml(result.error || 'Unknown error')}
-                    </div>
-                    ${result.stdout ? '<h6>Standard Output:</h6><pre>' + escapeHtml(result.stdout) + '</pre>' : ''}
-                    ${result.stderr ? '<h6>Error Output:</h6><pre>' + escapeHtml(result.stderr) + '</pre>' : ''}
-                `;
-            }
-
-            // Scroll to output
-            outputContainer.scrollIntoView({ behavior: 'smooth' });
-
-        } catch (error) {
-            outputContainer.style.display = 'block';
-            statusBadge.className = 'badge bg-danger';
-            statusBadge.textContent = 'Error';
-            outputContent.innerHTML = `
-                <div class="alert alert-danger">
-                    <strong>Error:</strong> ${escapeHtml(error.message)}
-                </div>
-            `;
-        } finally {
-            // Reset button
-            launchBtn.disabled = false;
-            launchBtn.innerHTML = '<i class="bi bi-play-circle"></i> Launch Agent';
-        }
-    });
-
-    function escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
     }
 });
 </script>

@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}{{ agent_display_name }} - Output{% endblock %}
+
+{% block content %}
+<div class="py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('agents_launcher.list_agents') }}">Agents</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('agents_launcher.launch_form', agent_name=agent_name) }}">{{ agent_display_name }}</a></li>
+            <li class="breadcrumb-item active">Output</li>
+        </ol>
+    </nav>
+
+    <h1><i class="bi bi-terminal"></i> {{ agent_display_name }} Output</h1>
+    <p class="lead">Real-time agent execution output</p>
+
+    <div class="card mt-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <i class="bi bi-play-circle"></i> Agent Output
+                <span id="statusBadge" class="badge bg-primary ms-2">Running...</span>
+            </h5>
+            <a href="{{ url_for('agents_launcher.launch_form', agent_name=agent_name) }}" class="btn btn-sm btn-secondary">
+                <i class="bi bi-arrow-left"></i> Back
+            </a>
+        </div>
+        <div class="card-body p-0">
+            <pre id="outputContent" class="m-0 p-3"></pre>
+        </div>
+    </div>
+</div>
+
+<style>
+#outputContent {
+    background: #1e1e1e;
+    color: #d4d4d4;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.9rem;
+    max-height: 600px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const outputContent = document.getElementById('outputContent');
+    const statusBadge = document.getElementById('statusBadge');
+    const taskId = '{{ task_id }}';
+
+    // Connect to SSE stream
+    const eventSource = new EventSource('{{ url_for("agents_launcher.stream_output", task_id=task_id) }}');
+
+    eventSource.onmessage = function(event) {
+        const data = JSON.parse(event.data);
+
+        if (data.type === 'output') {
+            // Append new line to output
+            outputContent.textContent += data.line;
+            // Auto-scroll to bottom
+            outputContent.scrollTop = outputContent.scrollHeight;
+        } else if (data.type === 'complete') {
+            // Process completed
+            eventSource.close();
+
+            if (data.returncode === 0) {
+                statusBadge.className = 'badge bg-success ms-2';
+                statusBadge.textContent = 'Completed Successfully';
+            } else {
+                statusBadge.className = 'badge bg-danger ms-2';
+                statusBadge.textContent = 'Failed (exit code: ' + data.returncode + ')';
+            }
+        }
+    };
+
+    eventSource.onerror = function(error) {
+        console.error('SSE Error:', error);
+        eventSource.close();
+        statusBadge.className = 'badge bg-danger ms-2';
+        statusBadge.textContent = 'Connection Error';
+    };
+});
+</script>
+{% endblock %}
