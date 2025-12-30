@@ -20,6 +20,8 @@ from agents.common_args import (
     add_output_args,
     add_processing_args,
     add_guid_arg,
+    add_backend_args,
+    get_backend_config,
 )
 
 # Language mappings for CLI
@@ -53,17 +55,7 @@ def get_argument_parser():
     add_output_args(parser)
     add_processing_args(parser)
     add_guid_arg(parser, help_text="Process only the lemma with this GUID")
-
-    # Backend selection
-    parser.add_argument(
-        "--backend",
-        choices=["sqlite", "jsonl"],
-        help="Storage backend type (default: sqlite, or use STORAGE_BACKEND env var)",
-    )
-    parser.add_argument(
-        "--data-dir",
-        help="Data directory for JSONL backend (e.g., data/release/lemmas). Only used with --backend jsonl",
-    )
+    add_backend_args(parser)
 
     # Mode selection
     parser.add_argument(
@@ -118,23 +110,12 @@ def main():
     # Import here to avoid circular imports
     from agents.voras.agent import VorasAgent
     from wordfreq.storage.models.schema import Lemma, LemmaTranslation
-    from wordfreq.storage.backend.config import BackendConfig, BackendType
 
     parser = get_argument_parser()
     args = parser.parse_args()
 
-    # Create backend configuration
-    backend_config = None
-    if args.backend:
-        if args.backend == "sqlite":
-            import constants
-            sqlite_path = args.db_path or constants.WORDFREQ_DB_PATH
-            backend_config = BackendConfig(backend_type=BackendType.SQLITE, sqlite_path=sqlite_path)
-        elif args.backend == "jsonl":
-            if not args.data_dir:
-                print("Error: --data-dir is required when using --backend jsonl")
-                sys.exit(1)
-            backend_config = BackendConfig(backend_type=BackendType.JSONL, jsonl_data_dir=args.data_dir)
+    # Create backend configuration using common helper
+    backend_config = get_backend_config(args)
 
     # Create agent with model parameter and backend config
     if backend_config:

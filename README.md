@@ -251,6 +251,7 @@ CLI utilities:
 | **sernas** | Boar | Synonym and alternative form generator |
 | **papuga** | Parrot | Pronunciation validation/generation |
 | **zvirblis** | Sparrow | Example sentence generator |
+| **buivolas** | Water Buffalo | Simple pattern-based sentence generator with batch translation |
 | **povas** | Peacock | HTML report generator |
 | **ungurys** | Eel | WireWord export agent |
 | **elnias** | Deer | WireWord bootstrap export |

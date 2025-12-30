@@ -48,6 +48,8 @@ import constants
 from agents.common_args import (
     add_common_args,
     add_llm_args,
+    add_backend_args,
+    get_backend_config,
 )
 from clients.batch_queue import (
     BatchQueueManager,
@@ -56,7 +58,8 @@ from clients.batch_queue import (
 )
 from clients.openai_batch_client import OpenAIBatchClient
 from wordfreq.patterns.simple_patterns import SIMPLE_PATTERNS
-from wordfreq.storage.database import create_database_session
+from wordfreq.storage.backend import create_session as create_backend_session
+from wordfreq.storage.backend.config import BackendConfig, BackendType
 from wordfreq.storage.models.schema import (
     Lemma,
     LemmaTranslation,
@@ -108,6 +111,7 @@ class BuivolasAgent:
     def __init__(
         self,
         db_path: str = None,
+        backend_config: BackendConfig = None,
         model: str = "gpt-4o-mini",
         debug: bool = False,
         dry_run: bool = False,
@@ -116,12 +120,32 @@ class BuivolasAgent:
         Initialize the Buivolas agent.
 
         Args:
-            db_path: Database path (uses default if None)
+            db_path: Database path (uses default if None) - for backward compatibility
+            backend_config: Backend configuration (if provided, overrides db_path)
             model: LLM model to use for translations
             debug: Enable debug logging
             dry_run: Don't save to database
         """
-        self.db_path = db_path or constants.WORDFREQ_DB_PATH
+        # Set up backend configuration
+        if backend_config is not None:
+            self.backend_config = backend_config
+        elif db_path is not None:
+            # Backward compatibility: db_path implies SQLite backend
+            self.backend_config = BackendConfig(
+                backend_type=BackendType.SQLITE, sqlite_path=db_path
+            )
+        else:
+            # Use default SQLite path
+            self.backend_config = BackendConfig(
+                backend_type=BackendType.SQLITE, sqlite_path=constants.WORDFREQ_DB_PATH
+            )
+
+        # Keep db_path for backward compatibility
+        if self.backend_config.backend_type == BackendType.SQLITE:
+            self.db_path = self.backend_config.sqlite_path
+        else:
+            self.db_path = None
+
         self.model = model
         self.debug = debug
         self.dry_run = dry_run
@@ -135,8 +159,8 @@ class BuivolasAgent:
         self.batch_manager = BatchQueueManager(self.batch_session, self.batch_client, debug=debug)
 
     def get_session(self):
-        """Get database session."""
-        return create_database_session(self.db_path)
+        """Get database session using backend abstraction."""
+        return create_backend_session(self.backend_config)
 
     def get_lemmas_for_slot(
         self, session, slot: Dict
@@ -766,6 +790,7 @@ Examples:
     # Common arguments
     add_common_args(parser)
     add_llm_args(parser, default_model="gpt-5-mini")
+    add_backend_args(parser)
 
     # Subcommands
     subparsers = parser.add_subparsers(dest="command", help="Command to execute", required=True)
@@ -837,10 +862,18 @@ def main():
     parser = get_argument_parser()
     args = parser.parse_args()
 
+    # Create backend configuration using common helper
+    backend_config = get_backend_config(args)
+
     # Create agent
-    agent = BuivolasAgent(
-        db_path=args.db_path, model=args.model, debug=args.debug, dry_run=args.dry_run
-    )
+    if backend_config:
+        agent = BuivolasAgent(
+            backend_config=backend_config, model=args.model, debug=args.debug, dry_run=args.dry_run
+        )
+    else:
+        agent = BuivolasAgent(
+            db_path=args.db_path, model=args.model, debug=args.debug, dry_run=args.dry_run
+        )
 
     # Handle commands
     if args.command == "generate-candidates":
