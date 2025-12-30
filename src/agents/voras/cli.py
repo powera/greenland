@@ -25,19 +25,8 @@ from agents.common_args import (
     validate_cache_args,
 )
 
-# Language mappings for CLI
-# Format: 'code': (field_name_or_code, display_name, use_lemma_translation_table)
-LANGUAGE_FIELDS = {
-    "lt": ("lithuanian_translation", "Lithuanian", False),
-    "zh": ("chinese_translation", "Chinese", False),
-    "ko": ("korean_translation", "Korean", False),
-    "fr": ("french_translation", "French", False),
-    "es": ("es", "Spanish", True),
-    "de": ("de", "German", True),
-    "pt": ("pt", "Portuguese", True),
-    "sw": ("swahili_translation", "Swahili", False),
-    "vi": ("vietnamese_translation", "Vietnamese", False),
-}
+# Import language mappings from translation_helpers (single source of truth)
+from wordfreq.storage.translation_helpers import LANGUAGE_FIELDS
 
 
 def get_argument_parser():
@@ -368,17 +357,26 @@ def main():
                         f"{language_name}: {missing_count} missing translations to populate"
                     )
 
-                logger.info(
-                    f"Total: {count} words to populate (1 LLM call per word for all missing translations)"
-                )
+                if args.cache_only:
+                    logger.info(
+                        f"Total: {count} words to populate (using cached translations only)"
+                    )
+                else:
+                    logger.info(
+                        f"Total: {count} words to populate (1 LLM call per word for all missing translations)"
+                    )
 
         finally:
             session.close()
 
-        print(
-            f"\nThis will make approximately {estimated_calls} LLM API calls using model '{args.model}'."
-        )
-        print("This may incur costs and take some time to complete.")
+        if args.cache_only:
+            print(f"\nCache-only mode: Will use cached translations from {args.barsukas_url}")
+            print("No LLM API calls will be made.")
+        else:
+            print(
+                f"\nThis will make approximately {estimated_calls} LLM API calls using model '{args.model}'."
+            )
+            print("This may incur costs and take some time to complete.")
         response = input("Do you want to proceed? [y/N]: ").strip().lower()
 
         if response not in ["y", "yes"]:

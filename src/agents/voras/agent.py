@@ -691,28 +691,6 @@ class VorasAgent:
                             results["total_fixed"] += 1
                         continue
 
-                    # Find a reference translation to use as context (prefer Lithuanian, but use any available)
-                    reference_translation = None
-                    reference_lang_code = None
-                    missing_lang_codes = [lc for lc, _ in missing_languages]
-
-                    for lc in ["lt", "zh", "ko", "fr", "es", "de", "pt", "sw", "vi"]:
-                        if lc not in missing_lang_codes:
-                            translation = self.get_translation(session, lemma, lc)
-                            if translation and translation.strip():
-                                reference_translation = translation
-                                reference_lang_code = lc
-                                break
-
-                    if not reference_translation:
-                        logger.warning(
-                            f"No reference translation available for '{lemma.lemma_text}', skipping"
-                        )
-                        for lang_code, _ in missing_languages:
-                            results["by_language"][lang_code]["failed"] += 1
-                            results["total_failed"] += 1
-                        continue
-
                     # Try to get translations from cache first (cache returns lang_code -> translation)
                     translations_by_lang_code = None
                     cache_client = self.get_cache_client()
@@ -727,6 +705,30 @@ class VorasAgent:
                             logger.debug(f"Cache lookup failed for '{lemma.lemma_text}': {cache_error}")
                             if self.config.cache_only:
                                 raise
+
+                    # If no cache hit, we need to query LLM - which requires a reference translation
+                    if not translations_by_lang_code:
+                        # Find a reference translation to use as context (prefer Lithuanian, but use any available)
+                        reference_translation = None
+                        reference_lang_code = None
+                        missing_lang_codes = [lc for lc, _ in missing_languages]
+
+                        for lc in ["lt", "zh", "ko", "fr", "es", "de", "pt", "sw", "vi"]:
+                            if lc not in missing_lang_codes:
+                                translation = self.get_translation(session, lemma, lc)
+                                if translation and translation.strip():
+                                    reference_translation = translation
+                                    reference_lang_code = lc
+                                    break
+
+                        if not reference_translation:
+                            logger.warning(
+                                f"No reference translation available for '{lemma.lemma_text}', skipping"
+                            )
+                            for lang_code, _ in missing_languages:
+                                results["by_language"][lang_code]["failed"] += 1
+                                results["total_failed"] += 1
+                            continue
 
                     # If no cache hit, query LLM for translations
                     if not translations_by_lang_code:

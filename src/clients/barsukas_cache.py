@@ -76,11 +76,20 @@ class BarsukasCacheClient:
                 logger.warning(f"{error_msg}, skipping cache")
                 return None
 
-            translations = response.json()
+            response_data = response.json()
 
-            # Validate response format
+            # Validate response format (API returns {"data": {...}, "metadata": {...}})
+            if not isinstance(response_data, dict):
+                error_msg = f"Cache returned invalid format for {guid}: expected dict, got {type(response_data)}"
+                if self.cache_only:
+                    raise CacheNetworkError(error_msg)
+                logger.warning(f"{error_msg}, skipping cache")
+                return None
+
+            # Extract translations from the "data" field
+            translations = response_data.get("data", {})
             if not isinstance(translations, dict):
-                error_msg = f"Cache returned invalid format for {guid}: expected dict, got {type(translations)}"
+                error_msg = f"Cache returned invalid 'data' field for {guid}: expected dict, got {type(translations)}"
                 if self.cache_only:
                     raise CacheNetworkError(error_msg)
                 logger.warning(f"{error_msg}, skipping cache")
@@ -90,7 +99,7 @@ class BarsukasCacheClient:
             filtered_translations = {
                 lang_code: translation
                 for lang_code, translation in translations.items()
-                if translation and translation.strip()
+                if translation and isinstance(translation, str) and translation.strip()
             }
 
             if not filtered_translations:
