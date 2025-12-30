@@ -14,6 +14,8 @@ from agents.common_args import (
     add_processing_args,
     add_guid_arg,
     add_language_args,
+    add_backend_args,
+    get_backend_config,
 )
 
 
@@ -33,6 +35,7 @@ def get_argument_parser():
     add_processing_args(parser)
     add_guid_arg(parser, help_text="Process only the lemma with this GUID")
     add_language_args(parser, multiple=False)
+    add_backend_args(parser)
 
     # Check mode options (reporting only, no changes)
     parser.add_argument(
@@ -75,7 +78,15 @@ def main():
     parser = get_argument_parser()
     args = parser.parse_args()
 
-    agent = SernasAgent(db_path=args.db_path, debug=args.debug)
+    # Create backend configuration using common helper
+    backend_config = get_backend_config(args)
+
+    # Create agent with backend config
+    if backend_config:
+        agent = SernasAgent(backend_config=backend_config, debug=args.debug)
+    else:
+        # Backward compatibility: use db_path
+        agent = SernasAgent(db_path=args.db_path, debug=args.debug)
 
     # Convert --type argument to form_type
     form_type = None

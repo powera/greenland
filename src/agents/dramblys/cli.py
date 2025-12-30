@@ -22,6 +22,8 @@ from agents.common_args import (
     add_output_args,
     add_processing_args,
     add_guid_arg,
+    add_backend_args,
+    get_backend_config,
     confirm_operation,
 )
 
@@ -40,6 +42,7 @@ def get_argument_parser():
     add_output_args(parser)
     add_processing_args(parser)
     add_guid_arg(parser, help_text="Process only the word with this GUID")
+    add_backend_args(parser)
 
     # Check mode options (reporting only, no changes)
     parser.add_argument(
@@ -155,7 +158,14 @@ def main():
     parser = get_argument_parser()
     args = parser.parse_args()
 
-    agent = DramblysAgent(db_path=args.db_path, debug=args.debug)
+    # Create backend configuration using common helper
+    backend_config = get_backend_config(args)
+
+    # Create agent
+    if backend_config:
+        agent = DramblysAgent(backend_config=backend_config, debug=args.debug)
+    else:
+        agent = DramblysAgent(db_path=args.db_path, debug=args.debug)
 
     # Handle --list-pending mode
     if args.list_pending:

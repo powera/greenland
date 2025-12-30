@@ -140,6 +140,28 @@ def add_guid_arg(parser: argparse.ArgumentParser, help_text: str = "Process only
     return parser
 
 
+def add_backend_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
+    """Add storage backend arguments.
+
+    Args:
+        parser: The argument parser to add arguments to
+
+    Returns:
+        The same parser with backend arguments added
+    """
+    parser.add_argument(
+        "--backend",
+        choices=["sqlite", "jsonl"],
+        help="Storage backend type (default: sqlite, or use STORAGE_BACKEND env var)",
+    )
+    parser.add_argument(
+        "--data-dir",
+        help="Data directory for JSONL backend (e.g., data/release/lemmas). Only used with --backend jsonl",
+    )
+
+    return parser
+
+
 def add_language_args(parser: argparse.ArgumentParser, multiple: bool = False) -> argparse.ArgumentParser:
     """Add language-related arguments.
 
@@ -262,3 +284,31 @@ def get_standard_db_path(args_db_path: Optional[str] = None) -> str:
 
     # Default fallback
     return str(Path(__file__).parent.parent.parent / "data" / "greenland.db")
+
+
+def get_backend_config(args: Any):
+    """Create BackendConfig from parsed arguments.
+
+    Args:
+        args: Parsed arguments with --backend, --data-dir, and --db-path attributes
+
+    Returns:
+        BackendConfig instance or None (if neither backend nor db_path specified)
+    """
+    from wordfreq.storage.backend.config import BackendConfig, BackendType
+
+    if hasattr(args, 'backend') and args.backend:
+        if args.backend == "sqlite":
+            import constants
+            sqlite_path = args.db_path if hasattr(args, 'db_path') and args.db_path else constants.WORDFREQ_DB_PATH
+            return BackendConfig(backend_type=BackendType.SQLITE, sqlite_path=sqlite_path)
+        elif args.backend == "jsonl":
+            if not hasattr(args, 'data_dir') or not args.data_dir:
+                print("Error: --data-dir is required when using --backend jsonl")
+                sys.exit(1)
+            return BackendConfig(backend_type=BackendType.JSONL, jsonl_data_dir=args.data_dir)
+    elif hasattr(args, 'db_path') and args.db_path:
+        # Backward compatibility: db_path implies SQLite backend
+        return BackendConfig(backend_type=BackendType.SQLITE, sqlite_path=args.db_path)
+
+    return None

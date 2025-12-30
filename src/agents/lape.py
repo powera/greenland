@@ -44,8 +44,11 @@ import util.prompt_loader
 from agents.common_args import (
     add_common_args,
     add_llm_args,
+    add_backend_args,
+    get_backend_config,
 )
-from wordfreq.storage.database import create_database_session
+from wordfreq.storage.backend import create_session as create_backend_session
+from wordfreq.storage.backend.config import BackendConfig, BackendType
 from wordfreq.storage.models.schema import Lemma
 from wordfreq.storage.crud.grammar_fact import (
     add_grammar_fact,
@@ -131,16 +134,42 @@ class LapeAgent:
         # },
     }
 
-    def __init__(self, db_path: str = None, debug: bool = False, model: str = None):
+    def __init__(
+        self,
+        db_path: str = None,
+        backend_config: BackendConfig = None,
+        debug: bool = False,
+        model: str = None,
+    ):
         """
         Initialize the Lape agent.
 
         Args:
-            db_path: Database path (uses default if None)
+            db_path: Database path (uses default if None) - for backward compatibility
+            backend_config: Backend configuration (if provided, overrides db_path)
             debug: Enable debug logging
             model: LLM model to use (default: gpt-5-mini)
         """
-        self.db_path = db_path or constants.WORDFREQ_DB_PATH
+        # Set up backend configuration
+        if backend_config is not None:
+            self.backend_config = backend_config
+        elif db_path is not None:
+            # Backward compatibility: db_path implies SQLite backend
+            self.backend_config = BackendConfig(
+                backend_type=BackendType.SQLITE, sqlite_path=db_path
+            )
+        else:
+            # Use default SQLite path
+            self.backend_config = BackendConfig(
+                backend_type=BackendType.SQLITE, sqlite_path=constants.WORDFREQ_DB_PATH
+            )
+
+        # Keep db_path for backward compatibility with LinguisticClient
+        if self.backend_config.backend_type == BackendType.SQLITE:
+            self.db_path = self.backend_config.sqlite_path
+        else:
+            self.db_path = None
+
         self.debug = debug
         self.model = model or "gpt-5-mini"
         self.linguistic_client = None  # Lazy initialization
@@ -150,8 +179,8 @@ class LapeAgent:
             logger.setLevel(logging.DEBUG)
 
     def get_session(self):
-        """Get database session."""
-        return create_database_session(self.db_path)
+        """Get database session using backend abstraction."""
+        return create_backend_session(self.backend_config)
 
     def get_linguistic_client(self):
         """Get or create linguistic client for LLM queries."""
@@ -579,6 +608,7 @@ Future fact types (see code comments):
     # Common arguments
     add_common_args(parser)
     add_llm_args(parser, default_model="gpt-5-mini")
+    add_backend_args(parser)
 
     # Lape-specific arguments
     parser.add_argument(
@@ -616,8 +646,14 @@ def main():
     parser = get_argument_parser()
     args = parser.parse_args()
 
+    # Create backend configuration using common helper
+    backend_config = get_backend_config(args)
+
     # Create agent
-    agent = LapeAgent(db_path=args.db_path, debug=args.debug, model=args.model)
+    if backend_config:
+        agent = LapeAgent(backend_config=backend_config, debug=args.debug, model=args.model)
+    else:
+        agent = LapeAgent(db_path=args.db_path, debug=args.debug, model=args.model)
 
     # Generate facts
     try:

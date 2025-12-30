@@ -36,9 +36,12 @@ from agents.common_args import (
     add_output_args,
     add_processing_args,
     add_guid_arg,
+    add_backend_args,
+    get_backend_config,
     confirm_operation,
 )
-from wordfreq.storage.database import create_database_session
+from wordfreq.storage.backend import create_session as create_backend_session
+from wordfreq.storage.backend.config import BackendConfig, BackendType
 from wordfreq.storage.models.schema import (
     DerivativeForm,
     Lemma,
@@ -58,16 +61,42 @@ logger = logging.getLogger(__name__)
 class PapugaAgent:
     """Agent for validating and generating pronunciations."""
 
-    def __init__(self, db_path: str = None, debug: bool = False, model: str = "gpt-5-mini"):
+    def __init__(
+        self,
+        db_path: str = None,
+        backend_config: BackendConfig = None,
+        debug: bool = False,
+        model: str = "gpt-5-mini",
+    ):
         """
         Initialize the Papuga agent.
 
         Args:
-            db_path: Database path (uses default if None)
+            db_path: Database path (uses default if None) - for backward compatibility
+            backend_config: Backend configuration (if provided, overrides db_path)
             debug: Enable debug logging
             model: LLM model to use for validation/generation
         """
-        self.db_path = db_path or constants.WORDFREQ_DB_PATH
+        # Set up backend configuration
+        if backend_config is not None:
+            self.backend_config = backend_config
+        elif db_path is not None:
+            # Backward compatibility: db_path implies SQLite backend
+            self.backend_config = BackendConfig(
+                backend_type=BackendType.SQLITE, sqlite_path=db_path
+            )
+        else:
+            # Use default SQLite path
+            self.backend_config = BackendConfig(
+                backend_type=BackendType.SQLITE, sqlite_path=constants.WORDFREQ_DB_PATH
+            )
+
+        # Keep db_path for backward compatibility
+        if self.backend_config.backend_type == BackendType.SQLITE:
+            self.db_path = self.backend_config.sqlite_path
+        else:
+            self.db_path = None
+
         self.debug = debug
         self.model = model
 
@@ -75,8 +104,8 @@ class PapugaAgent:
             logger.setLevel(logging.DEBUG)
 
     def get_session(self):
-        """Get database session."""
-        return create_database_session(self.db_path)
+        """Get database session using backend abstraction."""
+        return create_backend_session(self.backend_config)
 
     def _get_example_sentence(self, session, lemma: Lemma) -> Optional[str]:
         """
@@ -549,6 +578,7 @@ def get_argument_parser():
     add_output_args(parser)
     add_processing_args(parser)
     add_guid_arg(parser, help_text="Validate/generate pronunciation for the lemma with this GUID")
+    add_backend_args(parser)
 
     # Papuga-specific arguments
     parser.add_argument(
@@ -587,6 +617,9 @@ def main():
     parser = get_argument_parser()
     args = parser.parse_args()
 
+    # Create backend configuration using common helper
+    backend_config = get_backend_config(args)
+
     # Determine mode
     if args.populate:
         mode = "populate"
@@ -599,7 +632,10 @@ def main():
 
     # Handle --guid mode
     if args.guid:
-        agent = PapugaAgent(db_path=args.db_path, debug=args.debug, model=args.model)
+        if backend_config:
+            agent = PapugaAgent(backend_config=backend_config, debug=args.debug, model=args.model)
+        else:
+            agent = PapugaAgent(db_path=args.db_path, debug=args.debug, model=args.model)
         session = agent.get_session()
         try:
             # Find the lemma by GUID
@@ -683,7 +719,10 @@ def main():
 
     # Confirm before running LLM queries (unless --yes or --dry-run was provided)
     if not args.yes and not args.dry_run:
-        agent_temp = PapugaAgent(db_path=args.db_path, debug=args.debug, model=args.model)
+        if backend_config:
+            agent_temp = PapugaAgent(backend_config=backend_config, debug=args.debug, model=args.model)
+        else:
+            agent_temp = PapugaAgent(db_path=args.db_path, debug=args.debug, model=args.model)
         session = agent_temp.get_session()
         try:
             if mode in ["check", "both"]:
@@ -731,7 +770,11 @@ def main():
             print("Aborted.")
             sys.exit(0)
 
-    agent = PapugaAgent(db_path=args.db_path, debug=args.debug, model=args.model)
+    # Create agent with backend config
+    if backend_config:
+        agent = PapugaAgent(backend_config=backend_config, debug=args.debug, model=args.model)
+    else:
+        agent = PapugaAgent(db_path=args.db_path, debug=args.debug, model=args.model)
 
     if mode == "check":
         agent.run_full_check(

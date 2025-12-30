@@ -20,6 +20,8 @@ from agents.common_args import (
     add_output_args,
     add_processing_args,
     add_guid_arg,
+    add_backend_args,
+    get_backend_config,
 )
 
 # Language mappings for CLI
@@ -53,6 +55,7 @@ def get_argument_parser():
     add_output_args(parser)
     add_processing_args(parser)
     add_guid_arg(parser, help_text="Process only the lemma with this GUID")
+    add_backend_args(parser)
 
     # Mode selection
     parser.add_argument(
@@ -111,8 +114,15 @@ def main():
     parser = get_argument_parser()
     args = parser.parse_args()
 
-    # Create agent with model parameter
-    agent = VorasAgent(db_path=args.db_path, debug=args.debug, model=args.model)
+    # Create backend configuration using common helper
+    backend_config = get_backend_config(args)
+
+    # Create agent with model parameter and backend config
+    if backend_config:
+        agent = VorasAgent(backend_config=backend_config, debug=args.debug, model=args.model)
+    else:
+        # Backward compatibility: use db_path
+        agent = VorasAgent(db_path=args.db_path, debug=args.debug, model=args.model)
 
     # Handle batch operations first (special cases)
     if args.batch_submit:
