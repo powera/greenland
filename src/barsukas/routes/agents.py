@@ -2,8 +2,11 @@
 
 """Routes for agent operations (voras, vilkas, etc)."""
 
+import logging
+import traceback
 from flask import Blueprint, request, redirect, url_for, flash, g, jsonify, render_template
 
+import constants
 from wordfreq.storage.models.schema import Lemma, DerivativeForm
 from wordfreq.storage.translation_helpers import get_supported_languages
 from wordfreq.storage.backend.config import DataSourceConfig, BackendType
@@ -14,6 +17,31 @@ from agents.lokys import LokysAgent
 from config import Config
 
 bp = Blueprint("agents", __name__, url_prefix="/agents")
+logger = logging.getLogger(__name__)
+
+
+def log_and_flash_error(e: Exception, context: str):
+    """
+    Helper to log error with file/line info and flash to user.
+
+    Args:
+        e: The exception that was raised
+        context: Brief description of what operation failed (e.g., "checking translations")
+    """
+    # Get traceback info for file/line number
+    tb = traceback.extract_tb(e.__traceback__)
+    if tb:
+        last_frame = tb[-1]
+        error_location = f"{last_frame.filename}:{last_frame.lineno}"
+        error_msg = f"Error {context}: {str(e)} (at {error_location})"
+    else:
+        error_msg = f"Error {context}: {str(e)}"
+
+    # Log to console with full traceback
+    logger.warning(error_msg, exc_info=True)
+
+    # Flash to user
+    flash(error_msg, "error")
 
 
 @bp.route("/check-translations/<int:lemma_id>", methods=["POST"])
@@ -32,6 +60,7 @@ def check_translations(lemma_id):
         config = DataSourceConfig(
             backend_type=BackendType.SQLITE,
             sqlite_path=Config.DB_PATH,
+            model=constants.DEFAULT_MODEL,
             debug=Config.DEBUG,
         )
         agent = VorasAgent(config=config)
@@ -53,7 +82,7 @@ def check_translations(lemma_id):
         from wordfreq.tools.llm_validators import validate_all_translations_for_word
 
         validation_results = validate_all_translations_for_word(
-            lemma.lemma_text, translations, lemma.pos_type, agent.model
+            lemma.lemma_text, translations, lemma.pos_type, agent.config.model
         )
 
         # Format results for display
@@ -91,7 +120,7 @@ def check_translations(lemma_id):
             )
 
     except Exception as e:
-        flash(f"Error checking translations: {str(e)}", "error")
+        log_and_flash_error(e, "checking translations")
 
     return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
@@ -109,6 +138,7 @@ def add_missing_translations(lemma_id):
         config = DataSourceConfig(
             backend_type=BackendType.SQLITE,
             sqlite_path=Config.DB_PATH,
+            model=constants.DEFAULT_MODEL,
             debug=Config.DEBUG,
         )
         agent = VorasAgent(config=config)
@@ -139,7 +169,7 @@ def add_missing_translations(lemma_id):
 
         from wordfreq.translation.client import LinguisticClient
 
-        client = LinguisticClient(model=agent.model, db_path=config.sqlite_path, debug=Config.DEBUG)
+        client = LinguisticClient(model=agent.config.model, db_path=config.sqlite_path, debug=Config.DEBUG)
 
         # Map language codes to language names for query_translations
         lang_code_to_name = {
@@ -221,7 +251,7 @@ def add_missing_translations(lemma_id):
             flash("Could not generate any missing translations", "warning")
 
     except Exception as e:
-        flash(f"Error adding missing translations: {str(e)}", "error")
+        log_and_flash_error(e, "adding missing translations")
 
     return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
@@ -256,7 +286,7 @@ def check_pronunciations(lemma_id):
         config = DataSourceConfig(
             backend_type=BackendType.SQLITE,
             sqlite_path=Config.DB_PATH,
-            model="gpt-5-mini",
+            model=constants.DEFAULT_MODEL,
             debug=Config.DEBUG,
         )
         agent = PapugaAgent(config=config)
@@ -287,7 +317,7 @@ def check_pronunciations(lemma_id):
                 pos_type=lemma.pos_type,
                 example_sentence=example_text,
                 definition=lemma.definition_text,
-                model="gpt-5-mini",
+                model=constants.DEFAULT_MODEL,
             )
 
             if result["needs_update"] and result["confidence"] >= 0.7:
@@ -314,7 +344,7 @@ def check_pronunciations(lemma_id):
             )
 
     except Exception as e:
-        flash(f"Error checking pronunciations: {str(e)}", "error")
+        log_and_flash_error(e, "checking pronunciations")
 
     return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
@@ -351,7 +381,7 @@ def generate_pronunciations(lemma_id):
         config = DataSourceConfig(
             backend_type=BackendType.SQLITE,
             sqlite_path=Config.DB_PATH,
-            model="gpt-5-mini",
+            model=constants.DEFAULT_MODEL,
             debug=Config.DEBUG,
         )
         agent = PapugaAgent(config=config)
@@ -380,7 +410,7 @@ def generate_pronunciations(lemma_id):
                 pos_type=lemma.pos_type,
                 definition=lemma.definition_text,
                 example_sentence=example_text,
-                model="gpt-5-mini",
+                model=constants.DEFAULT_MODEL,
             )
 
             # Update the form with generated pronunciations
@@ -403,7 +433,7 @@ def generate_pronunciations(lemma_id):
 
     except Exception as e:
         g.db.rollback()
-        flash(f"Error generating pronunciations: {str(e)}", "error")
+        log_and_flash_error(e, "generating pronunciations")
 
     return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
@@ -425,6 +455,7 @@ def generate_forms(lemma_id):
         config = DataSourceConfig(
             backend_type=BackendType.SQLITE,
             sqlite_path=Config.DB_PATH,
+            model=constants.DEFAULT_MODEL,
             debug=Config.DEBUG,
         )
         agent = VilkasAgent(config=config)
@@ -483,7 +514,7 @@ def generate_forms(lemma_id):
         # the agent's fix_missing_forms for individual lemmas
         from wordfreq.translation.client import LinguisticClient
 
-        client = LinguisticClient(model="gpt-5-mini", db_path=config.sqlite_path, debug=Config.DEBUG)
+        client = LinguisticClient(model=constants.DEFAULT_MODEL, db_path=config.sqlite_path, debug=Config.DEBUG)
 
         # Route to appropriate generator based on language and POS type
         handler_key = f"{lang_code}_{pos_type}"
@@ -539,7 +570,7 @@ def generate_forms(lemma_id):
             flash(f"Could not generate {lang_code} {pos_type} forms", "warning")
 
     except Exception as e:
-        flash(f"Error generating forms: {str(e)}", "error")
+        log_and_flash_error(e, "generating forms")
 
     return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
@@ -562,6 +593,7 @@ def generate_synonyms(lemma_id):
         config = DataSourceConfig(
             backend_type=BackendType.SQLITE,
             sqlite_path=Config.DB_PATH,
+            model=constants.DEFAULT_MODEL,
             debug=Config.DEBUG,
         )
         agent = SernasAgent(config=config)
@@ -581,7 +613,7 @@ def generate_synonyms(lemma_id):
 
         # Generate synonyms for this lemma and language
         result = agent.generate_synonyms_for_lemma(
-            lemma_id=lemma_id, language_code=lang_code, model="gpt-5-mini", dry_run=False
+            lemma_id=lemma_id, language_code=lang_code, model=constants.DEFAULT_MODEL, dry_run=False
         )
 
         if "error" in result:
@@ -611,11 +643,7 @@ def generate_synonyms(lemma_id):
             )
 
     except Exception as e:
-        flash(f"Error generating synonyms: {str(e)}", "error")
-        import traceback
-
-        if Config.DEBUG:
-            flash(f"Debug: {traceback.format_exc()}", "error")
+        log_and_flash_error(e, "generating synonyms")
 
     return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
@@ -633,6 +661,7 @@ def check_definition(lemma_id):
         config = DataSourceConfig(
             backend_type=BackendType.SQLITE,
             sqlite_path=Config.DB_PATH,
+            model=constants.DEFAULT_MODEL,
             debug=Config.DEBUG,
         )
         agent = LokysAgent(config=config)
@@ -649,7 +678,7 @@ def check_definition(lemma_id):
             )
 
     except Exception as e:
-        flash(f"Error checking definition: {str(e)}", "error")
+        log_and_flash_error(e, "checking definition")
 
     return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
@@ -691,7 +720,7 @@ def apply_definition(lemma_id):
         flash("Definition updated successfully!", "success")
     except Exception as e:
         g.db.rollback()
-        flash(f"Error updating definition: {str(e)}", "error")
+        log_and_flash_error(e, "updating definition")
 
     return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
@@ -709,6 +738,7 @@ def check_disambiguation(lemma_id):
         config = DataSourceConfig(
             backend_type=BackendType.SQLITE,
             sqlite_path=Config.DB_PATH,
+            model=constants.DEFAULT_MODEL,
             debug=Config.DEBUG,
         )
         agent = LokysAgent(config=config)
@@ -756,7 +786,7 @@ def check_disambiguation(lemma_id):
             )
 
     except Exception as e:
-        flash(f"Error checking disambiguation: {str(e)}", "error")
+        log_and_flash_error(e, "checking disambiguation")
 
     return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
@@ -799,7 +829,7 @@ def apply_disambiguation(lemma_id):
         flash(f'✓ Updated GUID {lemma.guid}: "{old_lemma_text}" → "{new_lemma_text}"', "success")
     except Exception as e:
         g.db.rollback()
-        flash(f"Error applying disambiguation: {str(e)}", "error")
+        log_and_flash_error(e, "applying disambiguation")
 
     # Stay on suggestions page if requested, otherwise go to the updated lemma
     if return_to_suggestions and original_lemma_id:
@@ -836,6 +866,7 @@ def generate_sentences(lemma_id):
         config = DataSourceConfig(
             backend_type=BackendType.SQLITE,
             sqlite_path=Config.DB_PATH,
+            model=constants.DEFAULT_MODEL,
             debug=Config.DEBUG,
         )
         agent = ZvirblisAgent(config=config)
@@ -889,11 +920,7 @@ def generate_sentences(lemma_id):
                     flash(f"Error: {error}", "error")
 
     except Exception as e:
-        flash(f"Error generating sentences: {str(e)}", "error")
-        import traceback
-
-        if Config.DEBUG:
-            flash(f"Debug: {traceback.format_exc()}", "error")
+        log_and_flash_error(e, "generating sentences")
 
     return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
@@ -918,6 +945,7 @@ def generate_grammar_fact(lemma_id):
         config = DataSourceConfig(
             backend_type=BackendType.SQLITE,
             sqlite_path=Config.DB_PATH,
+            model=constants.DEFAULT_MODEL,
             debug=Config.DEBUG,
         )
         agent = LapeAgent(config=config)
@@ -1021,11 +1049,7 @@ def generate_grammar_fact(lemma_id):
 
     except Exception as e:
         g.db.rollback()
-        flash(f"Error generating grammar fact: {str(e)}", "error")
-        import traceback
-
-        if Config.DEBUG:
-            flash(f"Debug: {traceback.format_exc()}", "error")
+        log_and_flash_error(e, "generating grammar fact")
 
     return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
@@ -1055,5 +1079,5 @@ def view_sentences(lemma_id):
         return render_template("agents/view_sentences.html", lemma=lemma, sentences=sentences)
 
     except Exception as e:
-        flash(f"Error viewing sentences: {str(e)}", "error")
+        log_and_flash_error(e, "viewing sentences")
         return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
