@@ -370,3 +370,60 @@ def convert_llm_response_to_lang_codes(llm_response: Dict[str, str]) -> Dict[str
         for field_name, translation in llm_response.items()
         if field_name in LLM_FIELD_TO_LANG_CODE
     }
+
+
+def get_reference_translation(
+    session: Session,
+    lemma: Lemma,
+    exclude_languages: Optional[list] = None,
+    prefer_languages: Optional[list] = None
+) -> Tuple[Optional[str], Optional[str]]:
+    """
+    Find a reference translation for use in LLM queries.
+
+    This is useful when generating missing translations - we can provide an existing
+    translation in another language as context to improve LLM accuracy.
+
+    Args:
+        session: Database session
+        lemma: Lemma object
+        exclude_languages: Language codes to exclude (e.g., languages we're trying to generate)
+        prefer_languages: Ordered list of language codes to prefer. If not provided,
+                         defaults to ["lt", "zh", "ko", "fr", "es", "de", "pt", "sw", "vi", "en"]
+
+    Returns:
+        Tuple of (language_code, translation) for the reference translation.
+        Returns (None, None) if no suitable translation found.
+
+    Example:
+        # Get a reference translation, excluding Spanish and German (which we're generating)
+        lang_code, translation = get_reference_translation(
+            session, lemma, exclude_languages=["es", "de"]
+        )
+        if translation:
+            # Use this as context for LLM query
+            llm_response = client.query_translations(
+                english_word=lemma.lemma_text,
+                reference_translation=(lang_code, translation),
+                ...
+            )
+    """
+    if exclude_languages is None:
+        exclude_languages = []
+
+    if prefer_languages is None:
+        # Default preference: Lithuanian first (most reliable for this project),
+        # then other languages, with English as fallback
+        prefer_languages = ["lt", "zh", "ko", "fr", "es", "de", "pt", "sw", "vi", "en"]
+
+    # Search through languages in preference order
+    for lang_code in prefer_languages:
+        if lang_code in exclude_languages:
+            continue
+
+        translation = get_translation(session, lemma, lang_code)
+        if translation and translation.strip():
+            return lang_code, translation
+
+    # No reference translation found
+    return None, None

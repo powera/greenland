@@ -128,19 +128,12 @@ def add_missing_translations(lemma_id):
             return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
         # Use voras agent to fix missing translations for this single lemma
-        # We need at least one non-English translation to use as context
-        # Find any existing translation to use as the "reference" translation
-        reference_translation = None
-        reference_lang_code = None
+        # Find a reference translation using helper function
+        from wordfreq.storage.translation_helpers import get_reference_translation
 
-        # Prefer Lithuanian, but use any available translation as fallback
-        for lc in ["lt", "zh", "ko", "fr", "es", "de", "pt", "sw", "vi"]:
-            if lc not in missing_languages:
-                translation = agent.get_translation(g.db, lemma, lc)
-                if translation and translation.strip():
-                    reference_translation = translation
-                    reference_lang_code = lc
-                    break
+        reference_lang_code, reference_translation = get_reference_translation(
+            g.db, lemma, exclude_languages=missing_languages
+        )
 
         from wordfreq.translation.client import LinguisticClient
 

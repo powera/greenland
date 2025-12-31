@@ -168,11 +168,45 @@ def main():
                         else:
                             client = agent.get_linguistic_client()
                             try:
-                                response = client.get_translations(
-                                    word=lemma.lemma_text,
+                                # Find a reference translation using helper function
+                                from wordfreq.storage.translation_helpers import (
+                                    get_reference_translation,
+                                    LANGUAGE_NAMES,
+                                    convert_llm_response_to_lang_codes,
+                                )
+
+                                reference_lang_code, reference_translation = get_reference_translation(
+                                    session, lemma, exclude_languages=missing_langs
+                                )
+
+                                # If no reference translation, use English
+                                if not reference_translation:
+                                    reference_lang_code = "en"
+                                    reference_translation = lemma.lemma_text
+
+                                # Build list of missing language names for query_translations
+                                missing_lang_names = [
+                                    LANGUAGE_NAMES[lc].lower()
+                                    for lc in missing_langs
+                                    if lc in LANGUAGE_NAMES
+                                ]
+
+                                # Query translations
+                                llm_response, success = client.query_translations(
+                                    english_word=lemma.lemma_text,
+                                    reference_translation=(reference_lang_code, reference_translation),
                                     definition=lemma.definition_text,
                                     pos_type=lemma.pos_type,
+                                    pos_subtype=lemma.pos_subtype,
+                                    languages=missing_lang_names,
                                 )
+
+                                if success and llm_response:
+                                    # Convert LLM response to lang_code format
+                                    response = convert_llm_response_to_lang_codes(llm_response)
+                                else:
+                                    response = None
+
                             except Exception as e:
                                 print(f"\nError generating translations: {e}")
                                 session.rollback()

@@ -708,18 +708,11 @@ class VorasAgent:
 
                     # If no cache hit, we need to query LLM - which requires a reference translation
                     if not translations_by_lang_code:
-                        # Find a reference translation to use as context (prefer Lithuanian, but use any available)
-                        reference_translation = None
-                        reference_lang_code = None
+                        # Find a reference translation using helper function
                         missing_lang_codes = [lc for lc, _ in missing_languages]
-
-                        for lc in ["lt", "zh", "ko", "fr", "es", "de", "pt", "sw", "vi"]:
-                            if lc not in missing_lang_codes:
-                                translation = self.get_translation(session, lemma, lc)
-                                if translation and translation.strip():
-                                    reference_translation = translation
-                                    reference_lang_code = lc
-                                    break
+                        reference_lang_code, reference_translation = get_reference_translation(
+                            session, lemma, exclude_languages=missing_lang_codes
+                        )
 
                         if not reference_translation:
                             logger.warning(
