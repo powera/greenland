@@ -29,6 +29,8 @@ GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent.parent)
 if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
+from wordfreq.storage.translation_helpers import get_translation
+
 import constants
 from clients.batch_queue import BatchRequestMetadata, get_batch_manager
 from clients.barsukas_cache import BarsukasCacheClient
@@ -531,7 +533,7 @@ class VorasAgent:
                         # Use Lithuanian as reference translation
                         translations, success = client.query_translations(
                             english_word=lemma.lemma_text,
-                            reference_translation=("lt", lemma.lithuanian_translation or ""),
+                            reference_translation=("lt", get_translation(session, lemma, "lt") or ""),
                             definition=lemma.definition_text,
                             pos_type=lemma.pos_type,
                             pos_subtype=lemma.pos_subtype,

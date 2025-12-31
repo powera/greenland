@@ -44,6 +44,7 @@ from agents.common_args import (
 from wordfreq.storage.backend import create_session as create_backend_session
 from wordfreq.storage.backend.config import DataSourceConfig, BackendType
 from wordfreq.storage.models.schema import Lemma
+from wordfreq.storage.translation_helpers import get_translation
 from wordfreq.tools.llm_validators import (
     validate_lemma_form,
     validate_definition,
@@ -246,7 +247,7 @@ class LokysAgent:
                     lemma.pos_type,
                     self.model,
                     translation_language="Lithuanian",
-                    translation_text=lemma.lithuanian_translation,
+                    translation_text=get_translation(session, lemma, "lt"),
                 )
 
                 if not result["is_valid"] and result["confidence"] >= confidence_threshold:

@@ -28,6 +28,7 @@ from wordfreq.storage.database import (
 from wordfreq.storage.utils.guid import generate_guid
 from wordfreq.storage.models.enums import GrammaticalForm
 from wordfreq.storage.models.schema import DerivativeForm, Lemma, WordToken
+from wordfreq.storage.translation_helpers import get_translation, set_translation
 
 from .data_models import WordData, ReviewResult
 from .text_rendering import display_word_data, display_current_lemma_entry, get_user_confirmation
@@ -522,7 +523,7 @@ class WordManager:
                     {
                         "guid": lemma.guid,
                         "english": lemma.lemma_text,
-                        "lithuanian": lemma.lithuanian_translation,
+                        "lithuanian": get_translation(session, lemma, "lt"),
                         "level": lemma.difficulty_level,
                         "subtype": lemma.pos_subtype,
                         "verified": lemma.verified,
@@ -705,12 +706,13 @@ class WordManager:
                 return False
 
             print(f"Updating word: {lemma.lemma_text} ({lemma.guid})")
-            print(f"Current Lithuanian: {lemma.lithuanian_translation}")
+            lithuanian_translation = get_translation(session, lemma, "lt")
+            print(f"Current Lithuanian: {lithuanian_translation}")
 
             # Query LLM for updated word data using specified model
             print(f"Analyzing word '{lemma.lemma_text}' with {model}...")
             word_data, success = self._query_word_data(
-                lemma.lemma_text, lemma.lithuanian_translation, model_override=model
+                lemma.lemma_text, lithuanian_translation, model_override=model
             )
 
             if not success or not word_data:
@@ -719,7 +721,7 @@ class WordManager:
 
             # User review (unless auto-approve)
             if not auto_approve:
-                display_current_lemma_entry(lemma)
+                display_current_lemma_entry(session, lemma)
                 review = self._get_user_review(word_data)
 
                 if not review.approved:
@@ -734,29 +736,29 @@ class WordManager:
 
             # Update the lemma with new data
             old_values = {
-                "lithuanian_translation": lemma.lithuanian_translation,
+                "lithuanian_translation": get_translation(session, lemma, "lt"),
                 "definition_text": lemma.definition_text,
                 "pos_type": lemma.pos_type,
                 "pos_subtype": lemma.pos_subtype,
-                "chinese_translation": lemma.chinese_translation,
-                "korean_translation": lemma.korean_translation,
-                "french_translation": lemma.french_translation,
-                "swahili_translation": lemma.swahili_translation,
-                "vietnamese_translation": lemma.vietnamese_translation,
+                "chinese_translation": get_translation(session, lemma, "zh"),
+                "korean_translation": get_translation(session, lemma, "ko"),
+                "french_translation": get_translation(session, lemma, "fr"),
+                "swahili_translation": get_translation(session, lemma, "sw"),
+                "vietnamese_translation": get_translation(session, lemma, "vi"),
                 "confidence": lemma.confidence,
                 "notes": lemma.notes,
             }
 
             # Update all fields
-            lemma.lithuanian_translation = word_data.lithuanian
+            set_translation(session, lemma, "lt", word_data.lithuanian)
             lemma.definition_text = word_data.definition
             lemma.pos_type = word_data.pos_type
             lemma.pos_subtype = word_data.pos_subtype
-            lemma.chinese_translation = word_data.chinese_translation
-            lemma.korean_translation = word_data.korean_translation
-            lemma.french_translation = word_data.french_translation
-            lemma.swahili_translation = word_data.swahili_translation
-            lemma.vietnamese_translation = word_data.vietnamese_translation
+            set_translation(session, lemma, "zh", word_data.chinese_translation)
+            set_translation(session, lemma, "ko", word_data.korean_translation)
+            set_translation(session, lemma, "fr", word_data.french_translation)
+            set_translation(session, lemma, "sw", word_data.swahili_translation)
+            set_translation(session, lemma, "vi", word_data.vietnamese_translation)
             lemma.confidence = word_data.confidence
             lemma.verified = not auto_approve  # Mark as verified if user reviewed
 

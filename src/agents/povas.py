@@ -36,6 +36,7 @@ from agents.common_args import (
 from wordfreq.storage import database as linguistic_db
 from wordfreq.storage.connection_pool import get_session
 from wordfreq.storage.models.schema import WordToken, Lemma, DerivativeForm
+from wordfreq.storage.translation_helpers import get_translation
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -128,12 +129,12 @@ class PovasAgent:
                     "example": "",  # TODO: Could fetch example from sentences
                     "pronunciation": derivative_form.phonetic_pronunciation or "",
                     "ipa": derivative_form.ipa_pronunciation or "",
-                    "chinese": lemma.chinese_translation or "",
-                    "french": lemma.french_translation or "",
-                    "korean": lemma.korean_translation or "",
-                    "swahili": lemma.swahili_translation or "",
-                    "lithuanian": lemma.lithuanian_translation or "",
-                    "vietnamese": lemma.vietnamese_translation or "",
+                    "chinese": get_translation(session, lemma, "zh") or "",
+                    "french": get_translation(session, lemma, "fr") or "",
+                    "korean": get_translation(session, lemma, "ko") or "",
+                    "swahili": get_translation(session, lemma, "sw") or "",
+                    "lithuanian": get_translation(session, lemma, "lt") or "",
+                    "vietnamese": get_translation(session, lemma, "vi") or "",
                     "derivative_forms": (
                         [derivative_form.derivative_form_text]
                         if derivative_form.derivative_form_text

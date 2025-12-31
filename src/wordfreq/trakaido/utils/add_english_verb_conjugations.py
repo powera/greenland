@@ -21,6 +21,7 @@ from wordfreq.storage.database import (
     create_database_session,
 )
 from wordfreq.storage.models.schema import DerivativeForm, Lemma
+from wordfreq.storage.translation_helpers import get_translation
 
 # Add verbs.py directory to path
 sys.path.insert(0, os.path.join(GREENLAND_REPO_ROOT, "data", "trakaido_wordlists", "lang_lt"))
@@ -78,7 +79,7 @@ def main():
 
     for lemma in verbs_in_db:
         # Find matching verb in verbs.py by Lithuanian translation
-        lithuanian_infinitive = lemma.lithuanian_translation
+        lithuanian_infinitive = get_translation(session, lemma, "lt")
 
         if not lithuanian_infinitive or lithuanian_infinitive not in verbs_new:
             print(f"⚠️  Skipping {lemma.lemma_text} - no match in verbs.py")
