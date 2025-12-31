@@ -137,7 +137,7 @@ class LapeAgent:
     def __init__(
         self,
         db_path: str = None,
-        backend_config: DataSourceConfig = None,
+        config: DataSourceConfig = None,
         debug: bool = False,
         model: str = None,
     ):
@@ -146,27 +146,27 @@ class LapeAgent:
 
         Args:
             db_path: Database path (uses default if None) - for backward compatibility
-            backend_config: Backend configuration (if provided, overrides db_path)
+            config: Backend configuration (if provided, overrides db_path)
             debug: Enable debug logging
             model: LLM model to use (default: gpt-5-mini)
         """
         # Set up backend configuration
-        if backend_config is not None:
-            self.backend_config = backend_config
+        if config is not None:
+            self.config = config
         elif db_path is not None:
             # Backward compatibility: db_path implies SQLite backend
-            self.backend_config = DataSourceConfig(
+            self.config = DataSourceConfig(
                 backend_type=BackendType.SQLITE, sqlite_path=db_path
             )
         else:
             # Use default SQLite path
-            self.backend_config = DataSourceConfig(
+            self.config = DataSourceConfig(
                 backend_type=BackendType.SQLITE, sqlite_path=constants.WORDFREQ_DB_PATH
             )
 
         # Keep db_path for backward compatibility with LinguisticClient
-        if self.backend_config.backend_type == BackendType.SQLITE:
-            self.db_path = self.backend_config.sqlite_path
+        if self.config.backend_type == BackendType.SQLITE:
+            self.db_path = self.config.sqlite_path
         else:
             self.db_path = None
 
@@ -180,7 +180,7 @@ class LapeAgent:
 
     def get_session(self):
         """Get database session using backend abstraction."""
-        return create_backend_session(self.backend_config)
+        return create_backend_session(self.config)
 
     def get_linguistic_client(self):
         """Get or create linguistic client for LLM queries."""

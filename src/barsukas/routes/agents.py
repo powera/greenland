@@ -6,6 +6,7 @@ from flask import Blueprint, request, redirect, url_for, flash, g, jsonify, rend
 
 from wordfreq.storage.models.schema import Lemma, DerivativeForm
 from wordfreq.storage.translation_helpers import get_supported_languages
+from wordfreq.storage.backend.config import DataSourceConfig, BackendType
 from agents.voras.agent import VorasAgent
 from agents.papuga import PapugaAgent
 from agents.vilkas.agent import VilkasAgent
@@ -28,7 +29,11 @@ def check_translations(lemma_id):
 
     try:
         # Initialize voras agent
-        agent = VorasAgent(db_path=Config.DB_PATH, debug=Config.DEBUG)
+        config = DataSourceConfig(
+            backend_type=BackendType.SQLITE,
+            sqlite_path=Config.DB_PATH,
+        )
+        agent = VorasAgent(config=config, debug=Config.DEBUG)
 
         # Gather translations for this word
         from wordfreq.storage.translation_helpers import LANGUAGE_FIELDS
@@ -100,7 +105,11 @@ def add_missing_translations(lemma_id):
 
     try:
         # Initialize voras agent
-        agent = VorasAgent(db_path=Config.DB_PATH, debug=Config.DEBUG)
+        config = DataSourceConfig(
+            backend_type=BackendType.SQLITE,
+            sqlite_path=Config.DB_PATH,
+        )
+        agent = VorasAgent(config=config, debug=Config.DEBUG)
 
         # Find missing translations
         from wordfreq.storage.translation_helpers import LANGUAGE_FIELDS
@@ -135,7 +144,7 @@ def add_missing_translations(lemma_id):
 
         from wordfreq.translation.client import LinguisticClient
 
-        client = LinguisticClient(model=agent.model, db_path=Config.DB_PATH, debug=Config.DEBUG)
+        client = LinguisticClient(model=agent.model, db_path=config.sqlite_path, debug=Config.DEBUG)
 
         # Map language codes to language names for query_translations
         lang_code_to_name = {
@@ -249,7 +258,12 @@ def check_pronunciations(lemma_id):
             return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
         # Initialize PAPUGA agent
-        agent = PapugaAgent(db_path=Config.DB_PATH, debug=Config.DEBUG)
+        config = DataSourceConfig(
+            backend_type=BackendType.SQLITE,
+            sqlite_path=Config.DB_PATH,
+            model="gpt-5-mini",
+        )
+        agent = PapugaAgent(config=config, debug=Config.DEBUG)
 
         # Check pronunciations (using dry_run=False to actually validate)
         from wordfreq.tools.llm_validators import validate_pronunciation
@@ -338,7 +352,12 @@ def generate_pronunciations(lemma_id):
             return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
         # Initialize PAPUGA agent
-        agent = PapugaAgent(db_path=Config.DB_PATH, debug=Config.DEBUG)
+        config = DataSourceConfig(
+            backend_type=BackendType.SQLITE,
+            sqlite_path=Config.DB_PATH,
+            model="gpt-5-mini",
+        )
+        agent = PapugaAgent(config=config, debug=Config.DEBUG)
 
         # Generate pronunciations
         from wordfreq.tools.llm_validators import generate_pronunciation
@@ -406,7 +425,11 @@ def generate_forms(lemma_id):
 
     try:
         # Initialize VILKAS agent
-        agent = VilkasAgent(db_path=Config.DB_PATH, debug=Config.DEBUG)
+        config = DataSourceConfig(
+            backend_type=BackendType.SQLITE,
+            sqlite_path=Config.DB_PATH,
+        )
+        agent = VilkasAgent(config=config, debug=Config.DEBUG)
 
         # Check if the language/pos_type combination is supported
         # Only languages/POS combinations with individual lemma processing support
@@ -462,7 +485,7 @@ def generate_forms(lemma_id):
         # the agent's fix_missing_forms for individual lemmas
         from wordfreq.translation.client import LinguisticClient
 
-        client = LinguisticClient(model="gpt-5-mini", db_path=Config.DB_PATH, debug=Config.DEBUG)
+        client = LinguisticClient(model="gpt-5-mini", db_path=config.sqlite_path, debug=Config.DEBUG)
 
         # Route to appropriate generator based on language and POS type
         handler_key = f"{lang_code}_{pos_type}"
@@ -538,7 +561,11 @@ def generate_synonyms(lemma_id):
         # Initialize ŠERNAS agent
         from agents.sernas.agent import SernasAgent
 
-        agent = SernasAgent(db_path=Config.DB_PATH, debug=Config.DEBUG)
+        config = DataSourceConfig(
+            backend_type=BackendType.SQLITE,
+            sqlite_path=Config.DB_PATH,
+        )
+        agent = SernasAgent(config=config, debug=Config.DEBUG)
 
         # Check if translation exists for this language (skip for English since that's the lemma itself)
         if lang_code != "en":
@@ -604,7 +631,11 @@ def check_definition(lemma_id):
 
     try:
         # Initialize LOKYS agent
-        agent = LokysAgent(db_path=Config.DB_PATH, debug=Config.DEBUG)
+        config = DataSourceConfig(
+            backend_type=BackendType.SQLITE,
+            sqlite_path=Config.DB_PATH,
+        )
+        agent = LokysAgent(config=config, debug=Config.DEBUG)
 
         # Use the agent's helper method for cleaner code
         result = agent.check_single_definition(lemma, session=g.db)
@@ -675,7 +706,11 @@ def check_disambiguation(lemma_id):
 
     try:
         # Initialize LOKYS agent
-        agent = LokysAgent(db_path=Config.DB_PATH, debug=Config.DEBUG)
+        config = DataSourceConfig(
+            backend_type=BackendType.SQLITE,
+            sqlite_path=Config.DB_PATH,
+        )
+        agent = LokysAgent(config=config, debug=Config.DEBUG)
 
         # Use the agent's helper method for cleaner code
         result = agent.check_single_disambiguation(lemma, session=g.db)
@@ -797,7 +832,11 @@ def generate_sentences(lemma_id):
         from wordfreq.storage.models.schema import Sentence
 
         # Initialize agent
-        agent = ZvirblisAgent(db_path=Config.DB_PATH, debug=Config.DEBUG)
+        config = DataSourceConfig(
+            backend_type=BackendType.SQLITE,
+            sqlite_path=Config.DB_PATH,
+        )
+        agent = ZvirblisAgent(config=config, debug=Config.DEBUG)
 
         # Generate sentences
         result = agent.generate_sentences_for_noun(
@@ -874,7 +913,11 @@ def generate_grammar_fact(lemma_id):
         from agents.lape import LapeAgent
 
         # Initialize agent
-        agent = LapeAgent(db_path=Config.DB_PATH, debug=Config.DEBUG)
+        config = DataSourceConfig(
+            backend_type=BackendType.SQLITE,
+            sqlite_path=Config.DB_PATH,
+        )
+        agent = LapeAgent(config=config, debug=Config.DEBUG)
 
         # Validate fact type is supported
         if fact_type not in agent.SUPPORTED_FACT_TYPES:
