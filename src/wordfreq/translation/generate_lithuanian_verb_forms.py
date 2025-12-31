@@ -101,7 +101,7 @@ def get_lithuanian_verb_lemmas(db_path: str, limit: int = None) -> List[Dict]:
     return result
 
 
-def process_lemma_conjugations(client: LinguisticClient, lemma_id: int, db_path: str) -> bool:
+def process_lemma(client: LinguisticClient, lemma_id: int, db_path: str) -> bool:
     """
     Process a single lemma to generate and store all its conjugations.
 

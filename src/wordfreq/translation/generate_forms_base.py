@@ -165,6 +165,60 @@ def get_lemmas_without_translation(
     ]
 
 
+def get_lemmas_needing_forms(
+    db_path: str, config: FormGenerationConfig, limit: Optional[int] = None
+) -> List[Dict]:
+    """
+    Get lemmas that need forms generated (those with insufficient derivative forms).
+
+    Args:
+        db_path: Path to the database
+        config: FormGenerationConfig with language and POS settings
+        limit: Optional limit on number of lemmas
+
+    Returns:
+        List of dictionaries with lemma information
+    """
+    session = get_session(db_path)
+
+    # Get all lemmas of the specified POS type
+    query = (
+        session.query(linguistic_db.Lemma)
+        .filter(linguistic_db.Lemma.pos_type == config.pos_type)
+        .order_by(linguistic_db.Lemma.frequency_rank)
+    )
+
+    results = []
+    for lemma in query.all():
+        # Count existing derivative forms for this lemma in the target language
+        form_count = (
+            session.query(linguistic_db.DerivativeForm)
+            .filter(
+                linguistic_db.DerivativeForm.lemma_id == lemma.id,
+                linguistic_db.DerivativeForm.language_code == config.language_code,
+            )
+            .count()
+        )
+
+        # If forms are below threshold, this lemma needs forms generated
+        if form_count <= config.min_forms_threshold:
+            results.append(
+                {
+                    "id": lemma.id,
+                    "english": lemma.lemma_text,
+                    "pos_subtype": lemma.pos_subtype,
+                    "frequency_rank": lemma.frequency_rank,
+                    "current_form_count": form_count,
+                }
+            )
+
+            # Check if we've reached the limit
+            if limit and len(results) >= limit:
+                break
+
+    return results
+
+
 def detect_number_type_from_forms(forms_dict: Dict[str, str], config: FormGenerationConfig) -> str:
     """
     Detect if a noun is plurale tantum, singulare tantum, or regular.

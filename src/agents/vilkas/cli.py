@@ -146,7 +146,7 @@ def main():
     config = get_data_source_config(args, default_model="gpt-5-mini")
 
     # Create agent with unified configuration
-    agent = VilkasAgent(config=config, debug=args.debug)
+    agent = VilkasAgent(config=config, debug=args.debug, default_model="gpt-5-mini")
 
     # Handle --guid mode (single lemma)
     if args.guid:
@@ -189,22 +189,19 @@ def main():
             if args.fix:
                 print(f"\nGenerating missing forms for this lemma...")
                 if not args.dry_run:
-                    # Call fix_missing_forms with limit=1 after filtering to just this lemma
-                    # We need to use the internal fix methods directly for a single lemma
-                    # For now, use a workaround: limit to lemmas with this GUID
+                    # Use the lemma's actual POS type if pos_type wasn't explicitly provided
+                    pos_type_to_use = args.pos_type if args.pos_type else lemma.pos_type
+
+                    # Call fix_missing_forms with the GUID parameter to filter to just this lemma
                     results = agent.fix_missing_forms(
                         language_code=args.language,
-                        pos_type=args.pos_type,
-                        limit=1,
+                        pos_type=pos_type_to_use,
                         model=args.model,
                         throttle=args.throttle,
                         dry_run=args.dry_run,
                         source=args.source,
+                        guid=args.guid,
                     )
-                    # Note: This will process the first lemma needing forms, not necessarily this one
-                    # A better implementation would filter the query in fix_missing_forms by GUID
-                    print("\n⚠ Note: fix_missing_forms processes lemmas in order.")
-                    print("To ensure this specific lemma is processed, it should be the next one needing forms.")
                     display.print_fix_results(results, args.dry_run)
                 else:
                     print("[DRY RUN] Would generate missing forms")

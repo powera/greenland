@@ -88,7 +88,7 @@ def get_lithuanian_noun_lemmas(db_path: str, limit: int = None) -> List[Dict]:
     return result
 
 
-def process_lemma_declensions(
+def process_lemma(
     client: LinguisticClient, lemma_id: int, db_path: str, source: str = "llm"
 ) -> bool:
     """

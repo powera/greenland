@@ -28,7 +28,7 @@ def get_lithuanian_adverb_lemmas(db_path: str, limit: int = None):
     return get_lemmas_with_translation(db_path, CONFIG, limit)
 
 
-def process_lemma_forms(lemma, client, db_path: str, dry_run: bool = False) -> dict:
+def process_lemma(lemma, client, db_path: str, dry_run: bool = False) -> dict:
     """
     Process a single lemma to generate Lithuanian adverb forms.
 

@@ -26,6 +26,12 @@ def get_german_verb_lemmas(db_path: str, limit: int = None):
     return get_lemmas_with_translation(db_path, CONFIG, limit)
 
 
+def process_lemma(client, lemma_id: int, db_path: str) -> bool:
+    """Process a single lemma to generate German verb conjugations."""
+    from wordfreq.translation.generate_forms_base import process_lemma_forms as process_base
+    return process_base(client, lemma_id, db_path, CONFIG)
+
+
 def main():
     run_form_generation(CONFIG, get_german_verb_lemmas)
 

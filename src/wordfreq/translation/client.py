@@ -208,6 +208,18 @@ class LinguisticClient:
         """Query LLM for English verb conjugations."""
         return english.query_english_verb_conjugations(self.client, lemma_id, self.get_session)
 
+    def query_english_noun_forms(self, lemma_id: int) -> Tuple[Dict[str, str], bool]:
+        """Query LLM for English noun forms."""
+        return english.query_english_noun_forms(self.client, lemma_id, self.get_session, self.model)
+
+    def query_english_adjective_forms(self, lemma_id: int) -> Tuple[Dict[str, str], bool]:
+        """Query LLM for English adjective forms."""
+        return english.query_english_adjective_forms(self.client, lemma_id, self.get_session, self.model)
+
+    def query_english_adverb_forms(self, lemma_id: int) -> Tuple[Dict[str, str], bool]:
+        """Query LLM for English adverb forms."""
+        return english.query_english_adverb_forms(self.client, lemma_id, self.get_session, self.model)
+
     # Lithuanian forms
     def query_lithuanian_noun_declensions(self, lemma_id: int) -> Tuple[Dict[str, str], bool, str]:
         """Query LLM for Lithuanian noun declensions."""

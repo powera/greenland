@@ -59,7 +59,7 @@ VERB_FORM_MAPPING = {
 
 
 def query_english_verb_conjugations(
-    client, lemma_id: int, get_session_func
+    client, lemma_id: int, get_session_func, model: str
 ) -> Tuple[Dict[str, str], bool]:
     """
     Query LLM for all English verb conjugations (3 tenses × 6 persons + 2 imperatives).
@@ -127,7 +127,7 @@ def query_english_verb_conjugations(
         )
 
         response = client.generate_chat(
-            prompt=prompt, model=client.model, json_schema=schema, context=context
+            prompt=prompt, model=model, json_schema=schema, context=context
         )
 
         # Log successful query
@@ -138,7 +138,7 @@ def query_english_verb_conjugations(
                 query_type="english_verb_conjugations",
                 prompt=prompt,
                 response=json.dumps(response.structured_data),
-                model=client.model,
+                model=model,
             )
         except Exception as log_err:
             logger.error(f"Failed to log English conjugation query: {log_err}")
@@ -162,7 +162,7 @@ def query_english_verb_conjugations(
 
 
 def query_english_noun_forms(
-    client, lemma_id: int, get_session_func
+    client, lemma_id: int, get_session_func, model: str
 ) -> Tuple[Dict[str, str], bool]:
     """
     Query LLM for English noun forms (singular and plural).
@@ -227,7 +227,7 @@ def query_english_noun_forms(
         )
 
         response = client.generate_chat(
-            prompt=prompt, model=client.model, json_schema=schema, context=context
+            prompt=prompt, model=model, json_schema=schema, context=context
         )
 
         # Log successful query
@@ -238,7 +238,7 @@ def query_english_noun_forms(
                 query_type="english_noun_forms",
                 prompt=prompt,
                 response=json.dumps(response.structured_data),
-                model=client.model,
+                model=model,
             )
         except Exception as log_err:
             logger.error(f"Failed to log English noun query: {log_err}")
@@ -262,7 +262,7 @@ def query_english_noun_forms(
 
 
 def query_english_adjective_forms(
-    client, lemma_id: int, get_session_func
+    client, lemma_id: int, get_session_func, model: str
 ) -> Tuple[Dict[str, str], bool]:
     """
     Query LLM for English adjective forms (positive, comparative, superlative).
@@ -327,7 +327,7 @@ def query_english_adjective_forms(
         )
 
         response = client.generate_chat(
-            prompt=prompt, model=client.model, json_schema=schema, context=context
+            prompt=prompt, model=model, json_schema=schema, context=context
         )
 
         # Log successful query
@@ -338,7 +338,7 @@ def query_english_adjective_forms(
                 query_type="english_adjective_forms",
                 prompt=prompt,
                 response=json.dumps(response.structured_data),
-                model=client.model,
+                model=model,
             )
         except Exception as log_err:
             logger.error(f"Failed to log English adjective query: {log_err}")
@@ -362,7 +362,7 @@ def query_english_adjective_forms(
 
 
 def query_english_adverb_forms(
-    client, lemma_id: int, get_session_func
+    client, lemma_id: int, get_session_func, model: str
 ) -> Tuple[Dict[str, str], bool]:
     """
     Query LLM for English adverb forms (positive, comparative, superlative).
@@ -427,7 +427,7 @@ def query_english_adverb_forms(
         )
 
         response = client.generate_chat(
-            prompt=prompt, model=client.model, json_schema=schema, context=context
+            prompt=prompt, model=model, json_schema=schema, context=context
         )
 
         # Log successful query
@@ -438,7 +438,7 @@ def query_english_adverb_forms(
                 query_type="english_adverb_forms",
                 prompt=prompt,
                 response=json.dumps(response.structured_data),
-                model=client.model,
+                model=model,
             )
         except Exception as log_err:
             logger.error(f"Failed to log English adverb query: {log_err}")

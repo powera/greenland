@@ -28,22 +28,10 @@ def get_english_adjective_lemmas(db_path: str, limit: int = None):
     return get_lemmas_needing_forms(db_path, CONFIG, limit)
 
 
-def process_lemma_forms(lemma, client, db_path: str, dry_run: bool = False) -> dict:
-    """
-    Process a single lemma to generate English adjective forms.
-
-    Args:
-        lemma: The lemma to process
-        client: LLM client for generating forms
-        db_path: Path to database
-        dry_run: If True, don't save to database
-
-    Returns:
-        Dictionary with processing results
-    """
-    from wordfreq.translation.generate_forms_base import process_lemma_with_config
-
-    return process_lemma_with_config(lemma, client, db_path, CONFIG, dry_run=dry_run)
+def process_lemma(client, lemma_id: int, db_path: str) -> bool:
+    """Process a single lemma to generate English adjective forms."""
+    from wordfreq.translation.generate_forms_base import process_lemma_forms as process_base
+    return process_base(client, lemma_id, db_path, CONFIG)
 
 
 def main():

@@ -44,6 +44,7 @@ class VilkasAgent:
         self,
         config: DataSourceConfig = None,
         debug: bool = False,
+        default_model: str = "gpt-5-mini",
     ):
         """
         Initialize the Vilkas agent.
@@ -51,15 +52,20 @@ class VilkasAgent:
         Args:
             config: DataSourceConfig with storage backend, cache, and LLM settings
             debug: Enable debug logging
+            default_model: Default LLM model to use if config is None or config.model is None
         """
         # Set up data source configuration
         if config is not None:
             self.config = config
+            # If config exists but has no model, set the default
+            if self.config.model is None:
+                self.config.model = default_model
         else:
-            # Use default configuration
+            # Use default configuration with model
             self.config = DataSourceConfig(
                 backend_type=BackendType.SQLITE,
                 sqlite_path=constants.WORDFREQ_DB_PATH,
+                model=default_model,
             )
 
         # Extract commonly-used config values
@@ -348,10 +354,11 @@ class VilkasAgent:
         language_code: str = "lt",
         pos_type: Optional[str] = None,
         limit: Optional[int] = None,
-        model: str = "gpt-5-mini",
+        model: Optional[str] = None,
         throttle: float = 1.0,
         dry_run: bool = False,
         source: str = "llm",
+        guid: Optional[str] = None,
     ) -> Dict[str, any]:
         """
         Generate and store missing word forms for a specific language.
@@ -368,14 +375,17 @@ class VilkasAgent:
             language_code: Language code (e.g., 'lt', 'fr', 'de', 'es', 'pt', 'en')
             pos_type: Part of speech to fix (e.g., 'noun', 'verb', 'adjective'). If None, uses language-specific default.
             limit: Maximum number of lemmas to process
-            model: LLM model to use for generation
+            model: LLM model to use for generation (if None, uses self.model from config)
             throttle: Seconds to wait between API calls
             dry_run: If True, show what would be fixed without making changes
             source: Source for forms - 'llm' or 'wiki' (for Lithuanian nouns only)
+            guid: Optional GUID to process only a specific lemma
 
         Returns:
             Dictionary with fix results
         """
+        # Use provided model or fall back to instance model
+        effective_model = model if model is not None else self.model
         # Define supported languages and their supported POS types
         SUPPORTED_LANGUAGES = {
             "lt": ["noun", "verb", "adjective", "adverb"],
@@ -410,51 +420,89 @@ class VilkasAgent:
         # Route to appropriate handler based on language and POS type
         handler_key = f"{language_code}_{pos_type}"
 
-        # Map to handler methods
-        handlers = {
-            "lt_noun": self._fix_lithuanian_noun_declensions,
-            "lt_verb": self._fix_lithuanian_verb_conjugations,
-            "lt_adjective": self._fix_lithuanian_adjective_forms,
-            "lt_adverb": self._fix_lithuanian_adverb_forms,
-            "fr_noun": self._fix_french_noun_declensions,
-            "fr_verb": self._fix_french_verb_conjugations,
-            "de_noun": self._fix_german_noun_declensions,
-            "de_verb": self._fix_german_verb_conjugations,
-            "es_noun": self._fix_spanish_noun_declensions,
-            "es_verb": self._fix_spanish_verb_conjugations,
-            "pt_noun": self._fix_portuguese_noun_declensions,
-            "pt_verb": self._fix_portuguese_verb_conjugations,
-            "en_noun": self._fix_english_noun_declensions,
-            "en_verb": self._fix_english_verb_conjugations,
-            "en_adjective": self._fix_english_adjective_forms,
-            "en_adverb": self._fix_english_adverb_forms,
+        # Map language/POS combinations to their process functions and metadata
+        # Format: (process_module, process_func_name, uses_generic_handler, language_display_name)
+        from wordfreq.translation import (
+            generate_lithuanian_noun_forms,
+            generate_lithuanian_verb_forms,
+            generate_lithuanian_adjective_forms,
+            generate_lithuanian_adverb_forms,
+            generate_french_noun_forms,
+            generate_french_verb_forms,
+            generate_german_noun_forms,
+            generate_german_verb_forms,
+            generate_spanish_noun_forms,
+            generate_spanish_verb_forms,
+            generate_portuguese_noun_forms,
+            generate_portuguese_verb_forms,
+            generate_english_noun_forms,
+            generate_english_verb_forms,
+            generate_english_adjective_forms,
+            generate_english_adverb_forms,
+        )
+
+        handler_map = {
+            "lt_noun": (generate_lithuanian_noun_forms.process_lemma, "Lithuanian", False),
+            "lt_verb": (generate_lithuanian_verb_forms.process_lemma, "Lithuanian", True),
+            "lt_adjective": (generate_lithuanian_adjective_forms.process_lemma, "Lithuanian", True),
+            "lt_adverb": (generate_lithuanian_adverb_forms.process_lemma, "Lithuanian", True),
+            "fr_noun": (generate_french_noun_forms.process_lemma, "French", True),
+            "fr_verb": (generate_french_verb_forms.process_lemma, "French", True),
+            "de_noun": (generate_german_noun_forms.process_lemma, "German", True),
+            "de_verb": (generate_german_verb_forms.process_lemma, "German", True),
+            "es_noun": (generate_spanish_noun_forms.process_lemma, "Spanish", True),
+            "es_verb": (generate_spanish_verb_forms.process_lemma, "Spanish", True),
+            "pt_noun": (generate_portuguese_noun_forms.process_lemma, "Portuguese", True),
+            "pt_verb": (generate_portuguese_verb_forms.process_lemma, "Portuguese", True),
+            "en_noun": (generate_english_noun_forms.process_lemma, "English", True),
+            "en_verb": (generate_english_verb_forms.process_lemma, "English", True),
+            "en_adjective": (generate_english_adjective_forms.process_lemma, "English", True),
+            "en_adverb": (generate_english_adverb_forms.process_lemma, "English", True),
         }
 
-        if handler_key not in handlers:
+        if handler_key not in handler_map:
             logger.error(f"No handler found for {language_code} {pos_type}")
             return {
                 "error": f"Handler not implemented for {language_code} {pos_type}",
-                "supported_combinations": list(handlers.keys()),
+                "supported_combinations": list(handler_map.keys()),
             }
 
-        # Call the appropriate handler
-        handler = handlers[handler_key]
+        # Get the process function and metadata
+        process_func, language_name, use_generic = handler_map[handler_key]
 
-        # Only Lithuanian nouns support the 'source' parameter
+        # Call the appropriate handler
         if handler_key == "lt_noun":
-            return handler(
-                limit=limit, model=model, throttle=throttle, dry_run=dry_run, source=source
+            return self._fix_lithuanian_noun_declensions(
+                limit=limit, model=effective_model, throttle=throttle, dry_run=dry_run, source=source, guid=guid
+            )
+        elif handler_key == "fr_verb":
+            return self._fix_french_verb_conjugations(
+                limit=limit, model=effective_model, throttle=throttle, dry_run=dry_run, guid=guid
+            )
+        elif use_generic:
+            return self._fix_generic_forms(
+                language_code=language_code,
+                language_name=language_name,
+                pos_type=pos_type,
+                process_func=process_func,
+                limit=limit,
+                model=effective_model,
+                throttle=throttle,
+                dry_run=dry_run,
+                guid=guid,
             )
         else:
-            return handler(limit=limit, model=model, throttle=throttle, dry_run=dry_run)
+            logger.error(f"Unexpected handler configuration for {handler_key}")
+            return {"error": f"Handler configuration error for {handler_key}"}
 
     def _fix_lithuanian_noun_declensions(
         self,
         limit: Optional[int] = None,
-        model: str = "gpt-5-mini",
+        model: Optional[str] = None,
         throttle: float = 1.0,
         dry_run: bool = False,
         source: str = "llm",
+        guid: Optional[str] = None,
     ) -> Dict[str, any]:
         """
         Generate missing Lithuanian noun declensions.
@@ -464,29 +512,71 @@ class VilkasAgent:
 
         Args:
             limit: Maximum number of lemmas to process
-            model: LLM model to use
+            model: LLM model to use (if None, uses self.model)
             throttle: Seconds to wait between API calls
             dry_run: If True, show what would be fixed without making changes
             source: Source for forms - 'llm' or 'wiki'
+            guid: Optional GUID to process only a specific lemma
 
         Returns:
             Dictionary with fix results
         """
+        # Use provided model or fall back to instance model
+        effective_model = model if model is not None else self.model
         from wordfreq.translation.generate_lithuanian_noun_forms import (
-            process_lemma_declensions,
+            process_lemma,
             get_lithuanian_noun_lemmas,
         )
 
         logger.info("Finding Lithuanian nouns needing declensions...")
 
-        # Get noun declension coverage check results
-        check_results = self.check_noun_declension_coverage()
+        # If GUID is specified, process that specific lemma directly
+        if guid:
+            session = self.get_session()
+            try:
+                lemma = session.query(Lemma).filter(Lemma.guid == guid).first()
+                if not lemma:
+                    logger.info(f"Lemma with GUID {guid} not found")
+                    return {
+                        "total_needing_fix": 0,
+                        "processed": 0,
+                        "successful": 0,
+                        "failed": 0,
+                        "dry_run": dry_run,
+                        "guid_filter": guid,
+                    }
 
-        if "error" in check_results:
-            return check_results
+                if lemma.pos_type != "noun":
+                    logger.info(f"Lemma with GUID {guid} is not a noun (it's {lemma.pos_type})")
+                    return {
+                        "total_needing_fix": 0,
+                        "processed": 0,
+                        "successful": 0,
+                        "failed": 0,
+                        "dry_run": dry_run,
+                        "guid_filter": guid,
+                    }
 
-        nouns_needing_declensions = check_results["nouns_needing_declensions"]
-        total_needs_fix = len(nouns_needing_declensions)
+                nouns_needing_declensions = [{
+                    "guid": lemma.guid,
+                    "english": lemma.lemma_text,
+                    "lithuanian": lemma.lithuanian_translation or "(from LemmaTranslation)",
+                    "pos_subtype": lemma.pos_subtype,
+                    "difficulty_level": lemma.difficulty_level,
+                    "current_form_count": 0,
+                }]
+                total_needs_fix = 1
+            finally:
+                session.close()
+        else:
+            # Get noun declension coverage check results
+            check_results = self.check_noun_declension_coverage()
+
+            if "error" in check_results:
+                return check_results
+
+            nouns_needing_declensions = check_results["nouns_needing_declensions"]
+            total_needs_fix = len(nouns_needing_declensions)
 
         if total_needs_fix == 0:
             logger.info("No Lithuanian nouns need declensions!")
@@ -523,7 +613,7 @@ class VilkasAgent:
             }
 
         # Initialize client for LLM-based generation
-        client = LinguisticClient(model=model, db_path=self.db_path, debug=self.debug)
+        client = LinguisticClient(model=effective_model, db_path=self.db_path, debug=self.debug)
 
         # Process each noun
         successful = 0
@@ -545,8 +635,8 @@ class VilkasAgent:
                     failed += 1
                     continue
 
-                # Use the process_lemma_declensions function from generate_lithuanian_noun_forms
-                success = process_lemma_declensions(
+                # Use the process_lemma function from generate_lithuanian_noun_forms
+                success = process_lemma(
                     client=client, lemma_id=lemma.id, db_path=self.db_path, source=source
                 )
 
@@ -583,9 +673,10 @@ class VilkasAgent:
     def _fix_french_verb_conjugations(
         self,
         limit: Optional[int] = None,
-        model: str = "gpt-5-mini",
+        model: Optional[str] = None,
         throttle: float = 1.0,
         dry_run: bool = False,
+        guid: Optional[str] = None,
     ) -> Dict[str, any]:
         """
         Generate missing French verb conjugations.
@@ -595,28 +686,70 @@ class VilkasAgent:
 
         Args:
             limit: Maximum number of lemmas to process
-            model: LLM model to use
+            model: LLM model to use (if None, uses self.model)
             throttle: Seconds to wait between API calls
             dry_run: If True, show what would be fixed without making changes
+            guid: Optional GUID to process only a specific lemma
 
         Returns:
             Dictionary with fix results
         """
+        # Use provided model or fall back to instance model
+        effective_model = model if model is not None else self.model
         from wordfreq.translation.generate_french_verb_forms import (
-            process_lemma_conjugations,
+            process_lemma,
             get_french_verb_lemmas,
         )
 
         logger.info("Finding French verbs needing conjugations...")
 
-        # Get verb conjugation coverage check results
-        check_results = self.check_verb_conjugation_coverage(language_code="fr")
+        # If GUID is specified, process that specific lemma directly
+        if guid:
+            session = self.get_session()
+            try:
+                lemma = session.query(Lemma).filter(Lemma.guid == guid).first()
+                if not lemma:
+                    logger.info(f"Lemma with GUID {guid} not found")
+                    return {
+                        "total_needing_fix": 0,
+                        "processed": 0,
+                        "successful": 0,
+                        "failed": 0,
+                        "dry_run": dry_run,
+                        "guid_filter": guid,
+                    }
 
-        if "error" in check_results:
-            return check_results
+                if lemma.pos_type != "verb":
+                    logger.info(f"Lemma with GUID {guid} is not a verb (it's {lemma.pos_type})")
+                    return {
+                        "total_needing_fix": 0,
+                        "processed": 0,
+                        "successful": 0,
+                        "failed": 0,
+                        "dry_run": dry_run,
+                        "guid_filter": guid,
+                    }
 
-        verbs_needing_conjugations = check_results["verbs_needing_conjugations"]
-        total_needs_fix = len(verbs_needing_conjugations)
+                verbs_needing_conjugations = [{
+                    "guid": lemma.guid,
+                    "english": lemma.lemma_text,
+                    "translation": lemma.french_translation or "(from LemmaTranslation)",
+                    "pos_subtype": lemma.pos_subtype,
+                    "difficulty_level": lemma.difficulty_level,
+                    "current_form_count": 0,
+                }]
+                total_needs_fix = 1
+            finally:
+                session.close()
+        else:
+            # Get verb conjugation coverage check results
+            check_results = self.check_verb_conjugation_coverage(language_code="fr")
+
+            if "error" in check_results:
+                return check_results
+
+            verbs_needing_conjugations = check_results["verbs_needing_conjugations"]
+            total_needs_fix = len(verbs_needing_conjugations)
 
         if total_needs_fix == 0:
             logger.info("No French verbs need conjugations!")
@@ -653,7 +786,7 @@ class VilkasAgent:
             }
 
         # Initialize client for LLM-based generation
-        client = LinguisticClient(model=model, db_path=self.db_path, debug=self.debug)
+        client = LinguisticClient(model=effective_model, db_path=self.db_path, debug=self.debug)
 
         # Process each verb
         successful = 0
@@ -675,8 +808,8 @@ class VilkasAgent:
                     failed += 1
                     continue
 
-                # Use the process_lemma_conjugations function from generate_french_verb_forms
-                success = process_lemma_conjugations(
+                # Use the process_lemma function from generate_french_verb_forms
+                success = process_lemma(
                     client=client, lemma_id=lemma.id, db_path=self.db_path
                 )
 
@@ -710,300 +843,6 @@ class VilkasAgent:
             "dry_run": dry_run,
         }
 
-    def _fix_lithuanian_verb_conjugations(
-        self,
-        limit: Optional[int] = None,
-        model: str = "gpt-5-mini",
-        throttle: float = 1.0,
-        dry_run: bool = False,
-    ) -> Dict[str, any]:
-        """Generate missing Lithuanian verb conjugations."""
-        from wordfreq.translation.generate_lithuanian_verb_forms import process_lemma_conjugations
-
-        return self._fix_generic_forms(
-            language_code="lt",
-            language_name="Lithuanian",
-            pos_type="verb",
-            process_func=process_lemma_conjugations,
-            limit=limit,
-            model=model,
-            throttle=throttle,
-            dry_run=dry_run,
-        )
-
-    def _fix_lithuanian_adjective_forms(
-        self,
-        limit: Optional[int] = None,
-        model: str = "gpt-5-mini",
-        throttle: float = 1.0,
-        dry_run: bool = False,
-    ) -> Dict[str, any]:
-        """Generate missing Lithuanian adjective forms."""
-        from wordfreq.translation.generate_lithuanian_adjective_forms import process_lemma_forms
-
-        return self._fix_generic_forms(
-            language_code="lt",
-            language_name="Lithuanian",
-            pos_type="adjective",
-            process_func=process_lemma_forms,
-            limit=limit,
-            model=model,
-            throttle=throttle,
-            dry_run=dry_run,
-        )
-
-    def _fix_french_noun_declensions(
-        self,
-        limit: Optional[int] = None,
-        model: str = "gpt-5-mini",
-        throttle: float = 1.0,
-        dry_run: bool = False,
-    ) -> Dict[str, any]:
-        """Generate missing French noun declensions."""
-        from wordfreq.translation.generate_french_noun_forms import process_lemma_forms
-
-        return self._fix_generic_forms(
-            language_code="fr",
-            language_name="French",
-            pos_type="noun",
-            process_func=process_lemma_forms,
-            limit=limit,
-            model=model,
-            throttle=throttle,
-            dry_run=dry_run,
-        )
-
-    def _fix_german_noun_declensions(
-        self,
-        limit: Optional[int] = None,
-        model: str = "gpt-5-mini",
-        throttle: float = 1.0,
-        dry_run: bool = False,
-    ) -> Dict[str, any]:
-        """Generate missing German noun declensions."""
-        from wordfreq.translation.generate_german_noun_forms import process_lemma_forms
-
-        return self._fix_generic_forms(
-            language_code="de",
-            language_name="German",
-            pos_type="noun",
-            process_func=process_lemma_forms,
-            limit=limit,
-            model=model,
-            throttle=throttle,
-            dry_run=dry_run,
-        )
-
-    def _fix_german_verb_conjugations(
-        self,
-        limit: Optional[int] = None,
-        model: str = "gpt-5-mini",
-        throttle: float = 1.0,
-        dry_run: bool = False,
-    ) -> Dict[str, any]:
-        """Generate missing German verb conjugations."""
-        from wordfreq.translation.generate_german_verb_forms import process_lemma_conjugations
-
-        return self._fix_generic_forms(
-            language_code="de",
-            language_name="German",
-            pos_type="verb",
-            process_func=process_lemma_conjugations,
-            limit=limit,
-            model=model,
-            throttle=throttle,
-            dry_run=dry_run,
-        )
-
-    def _fix_spanish_noun_declensions(
-        self,
-        limit: Optional[int] = None,
-        model: str = "gpt-5-mini",
-        throttle: float = 1.0,
-        dry_run: bool = False,
-    ) -> Dict[str, any]:
-        """Generate missing Spanish noun declensions."""
-        from wordfreq.translation.generate_spanish_noun_forms import process_lemma_forms
-
-        return self._fix_generic_forms(
-            language_code="es",
-            language_name="Spanish",
-            pos_type="noun",
-            process_func=process_lemma_forms,
-            limit=limit,
-            model=model,
-            throttle=throttle,
-            dry_run=dry_run,
-        )
-
-    def _fix_spanish_verb_conjugations(
-        self,
-        limit: Optional[int] = None,
-        model: str = "gpt-5-mini",
-        throttle: float = 1.0,
-        dry_run: bool = False,
-    ) -> Dict[str, any]:
-        """Generate missing Spanish verb conjugations."""
-        from wordfreq.translation.generate_spanish_verb_forms import process_lemma_conjugations
-
-        return self._fix_generic_forms(
-            language_code="es",
-            language_name="Spanish",
-            pos_type="verb",
-            process_func=process_lemma_conjugations,
-            limit=limit,
-            model=model,
-            throttle=throttle,
-            dry_run=dry_run,
-        )
-
-    def _fix_portuguese_noun_declensions(
-        self,
-        limit: Optional[int] = None,
-        model: str = "gpt-5-mini",
-        throttle: float = 1.0,
-        dry_run: bool = False,
-    ) -> Dict[str, any]:
-        """Generate missing Portuguese noun declensions."""
-        from wordfreq.translation.generate_portuguese_noun_forms import process_lemma_forms
-
-        return self._fix_generic_forms(
-            language_code="pt",
-            language_name="Portuguese",
-            pos_type="noun",
-            process_func=process_lemma_forms,
-            limit=limit,
-            model=model,
-            throttle=throttle,
-            dry_run=dry_run,
-        )
-
-    def _fix_portuguese_verb_conjugations(
-        self,
-        limit: Optional[int] = None,
-        model: str = "gpt-5-mini",
-        throttle: float = 1.0,
-        dry_run: bool = False,
-    ) -> Dict[str, any]:
-        """Generate missing Portuguese verb conjugations."""
-        from wordfreq.translation.generate_portuguese_verb_forms import process_lemma_conjugations
-
-        return self._fix_generic_forms(
-            language_code="pt",
-            language_name="Portuguese",
-            pos_type="verb",
-            process_func=process_lemma_conjugations,
-            limit=limit,
-            model=model,
-            throttle=throttle,
-            dry_run=dry_run,
-        )
-
-    def _fix_english_verb_conjugations(
-        self,
-        limit: Optional[int] = None,
-        model: str = "gpt-5-mini",
-        throttle: float = 1.0,
-        dry_run: bool = False,
-    ) -> Dict[str, any]:
-        """Generate missing English verb conjugations."""
-        from wordfreq.translation.generate_english_verb_forms import process_lemma_conjugations
-
-        return self._fix_generic_forms(
-            language_code="en",
-            language_name="English",
-            pos_type="verb",
-            process_func=process_lemma_conjugations,
-            limit=limit,
-            model=model,
-            throttle=throttle,
-            dry_run=dry_run,
-        )
-
-    def _fix_english_noun_declensions(
-        self,
-        limit: Optional[int] = None,
-        model: str = "gpt-5-mini",
-        throttle: float = 1.0,
-        dry_run: bool = False,
-    ) -> Dict[str, any]:
-        """Generate missing English noun forms."""
-        from wordfreq.translation.generate_english_noun_forms import process_lemma_forms
-
-        return self._fix_generic_forms(
-            language_code="en",
-            language_name="English",
-            pos_type="noun",
-            process_func=process_lemma_forms,
-            limit=limit,
-            model=model,
-            throttle=throttle,
-            dry_run=dry_run,
-        )
-
-    def _fix_english_adjective_forms(
-        self,
-        limit: Optional[int] = None,
-        model: str = "gpt-5-mini",
-        throttle: float = 1.0,
-        dry_run: bool = False,
-    ) -> Dict[str, any]:
-        """Generate missing English adjective forms."""
-        from wordfreq.translation.generate_english_adjective_forms import process_lemma_forms
-
-        return self._fix_generic_forms(
-            language_code="en",
-            language_name="English",
-            pos_type="adjective",
-            process_func=process_lemma_forms,
-            limit=limit,
-            model=model,
-            throttle=throttle,
-            dry_run=dry_run,
-        )
-
-    def _fix_english_adverb_forms(
-        self,
-        limit: Optional[int] = None,
-        model: str = "gpt-5-mini",
-        throttle: float = 1.0,
-        dry_run: bool = False,
-    ) -> Dict[str, any]:
-        """Generate missing English adverb forms."""
-        from wordfreq.translation.generate_english_adverb_forms import process_lemma_forms
-
-        return self._fix_generic_forms(
-            language_code="en",
-            language_name="English",
-            pos_type="adverb",
-            process_func=process_lemma_forms,
-            limit=limit,
-            model=model,
-            throttle=throttle,
-            dry_run=dry_run,
-        )
-
-    def _fix_lithuanian_adverb_forms(
-        self,
-        limit: Optional[int] = None,
-        model: str = "gpt-5-mini",
-        throttle: float = 1.0,
-        dry_run: bool = False,
-    ) -> Dict[str, any]:
-        """Generate missing Lithuanian adverb forms."""
-        from wordfreq.translation.generate_lithuanian_adverb_forms import process_lemma_forms
-
-        return self._fix_generic_forms(
-            language_code="lt",
-            language_name="Lithuanian",
-            pos_type="adverb",
-            process_func=process_lemma_forms,
-            limit=limit,
-            model=model,
-            throttle=throttle,
-            dry_run=dry_run,
-        )
-
     def _fix_generic_forms(
         self,
         language_code: str,
@@ -1011,9 +850,10 @@ class VilkasAgent:
         pos_type: str,
         process_func,
         limit: Optional[int] = None,
-        model: str = "gpt-5-mini",
+        model: Optional[str] = None,
         throttle: float = 1.0,
         dry_run: bool = False,
+        guid: Optional[str] = None,
     ) -> Dict[str, any]:
         """
         Generic handler for generating missing word forms across languages.
@@ -1024,30 +864,72 @@ class VilkasAgent:
             pos_type: Part of speech type
             process_func: Function to call for processing each lemma
             limit: Maximum number of lemmas to process
-            model: LLM model to use
+            model: LLM model to use (if None, uses self.model)
             throttle: Seconds to wait between API calls
             dry_run: If True, show what would be fixed without making changes
+            guid: Optional GUID to process only a specific lemma
 
         Returns:
             Dictionary with fix results
         """
+        # Use provided model or fall back to instance model
+        effective_model = model if model is not None else self.model
         logger.info(f"Finding {language_name} {pos_type}s needing forms...")
 
-        # Get form coverage check results
-        check_results = (
-            self.check_verb_conjugation_coverage(language_code=language_code)
-            if pos_type == "verb"
-            else self.check_noun_declension_coverage()
-        )
+        # If GUID is specified, process that specific lemma directly
+        if guid:
+            session = self.get_session()
+            try:
+                lemma = session.query(Lemma).filter(Lemma.guid == guid).first()
+                if not lemma:
+                    logger.info(f"Lemma with GUID {guid} not found")
+                    return {
+                        "total_needing_fix": 0,
+                        "processed": 0,
+                        "successful": 0,
+                        "failed": 0,
+                        "dry_run": dry_run,
+                        "guid_filter": guid,
+                    }
 
-        if "error" in check_results:
-            return check_results
+                if lemma.pos_type != pos_type:
+                    logger.info(f"Lemma with GUID {guid} is not a {pos_type} (it's {lemma.pos_type})")
+                    return {
+                        "total_needing_fix": 0,
+                        "processed": 0,
+                        "successful": 0,
+                        "failed": 0,
+                        "dry_run": dry_run,
+                        "guid_filter": guid,
+                    }
 
-        items_key = (
-            "verbs_needing_conjugations" if pos_type == "verb" else "nouns_needing_declensions"
-        )
-        items_needing_forms = check_results.get(items_key, [])
-        total_needs_fix = len(items_needing_forms)
+                items_needing_forms = [{
+                    "guid": lemma.guid,
+                    "english": lemma.lemma_text,
+                    "translation": f"({language_code})",
+                    "pos_subtype": lemma.pos_subtype,
+                    "difficulty_level": lemma.difficulty_level,
+                    "current_form_count": 0,
+                }]
+                total_needs_fix = 1
+            finally:
+                session.close()
+        else:
+            # Get form coverage check results
+            check_results = (
+                self.check_verb_conjugation_coverage(language_code=language_code)
+                if pos_type == "verb"
+                else self.check_noun_declension_coverage()
+            )
+
+            if "error" in check_results:
+                return check_results
+
+            items_key = (
+                "verbs_needing_conjugations" if pos_type == "verb" else "nouns_needing_declensions"
+            )
+            items_needing_forms = check_results.get(items_key, [])
+            total_needs_fix = len(items_needing_forms)
 
         if total_needs_fix == 0:
             logger.info(f"No {language_name} {pos_type}s need forms!")
@@ -1084,7 +966,7 @@ class VilkasAgent:
             }
 
         # Initialize client
-        client = LinguisticClient(model=model, db_path=self.db_path, debug=self.debug)
+        client = LinguisticClient(model=effective_model, db_path=self.db_path, debug=self.debug)
 
         # Process each item
         successful = 0
