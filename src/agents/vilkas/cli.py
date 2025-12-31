@@ -23,12 +23,12 @@ from agents.common_args import (
 
 # Define supported languages and their forms (matches agent.py SUPPORTED_LANGUAGES)
 SUPPORTED_TASKS = {
-    "lt": ["noun", "verb", "adjective"],
+    "lt": ["noun", "verb", "adjective", "adverb"],
     "fr": ["noun", "verb"],
     "de": ["noun", "verb"],
     "es": ["noun", "verb"],
     "pt": ["noun", "verb"],
-    "en": ["noun", "verb"],
+    "en": ["noun", "verb", "adjective", "adverb"],
 }
 
 # Language names for display
@@ -69,6 +69,8 @@ def get_argument_parser():
                 task_choices.append(f"{lang}-verb-conjugations")
             elif pos == "adjective":
                 task_choices.append(f"{lang}-adjective-forms")
+            elif pos == "adverb":
+                task_choices.append(f"{lang}-adverb-forms")
     task_choices.append("all")
 
     # Task selection - explicit language/form combinations
@@ -77,9 +79,9 @@ def get_argument_parser():
         choices=task_choices,
         help=(
             "Specific task to perform (language + form type). "
-            "Supported: Lithuanian (noun/verb/adjective), "
+            "Supported: Lithuanian (noun/verb/adjective/adverb), "
             "French/German/Spanish/Portuguese (noun/verb), "
-            "English (verb). "
+            "English (noun/verb/adjective/adverb). "
             "Use 'all' to process all supported forms."
         ),
     )
@@ -230,6 +232,9 @@ def main():
                 elif form_category == "adjective":
                     inferred_pos_type = "adjective"
                     form_type_label = f"{LANGUAGE_NAMES.get(language_code, language_code)} adjective forms"
+                elif form_category == "adverb":
+                    inferred_pos_type = "adverb"
+                    form_type_label = f"{LANGUAGE_NAMES.get(language_code, language_code)} adverb forms"
         elif args.task == "all":
             language_code = None  # Process all languages
             form_type_label = "all forms (all languages)"
@@ -280,6 +285,7 @@ def main():
                         "noun": "noun declensions",
                         "verb": "verb conjugations",
                         "adjective": "adjective forms",
+                        "adverb": "adverb forms",
                     }.get(pos, f"{pos} forms")
 
                     print(f"\n{task_num}. {lang_name} {form_desc}:")

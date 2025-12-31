@@ -89,6 +89,12 @@ ADJECTIVE_FORM_MAPPING = {
     "vocative_plural_f": GrammaticalForm.ADJ_LT_VOCATIVE_PLURAL_F,
 }
 
+ADVERB_FORM_MAPPING = {
+    "positive": GrammaticalForm.ADVERB_LT_POSITIVE,
+    "comparative": GrammaticalForm.ADVERB_LT_COMPARATIVE,
+    "superlative": GrammaticalForm.ADVERB_LT_SUPERLATIVE,
+}
+
 
 def query_lithuanian_noun_declensions(
     client, lemma_id: int, get_session_func
@@ -515,5 +521,115 @@ def query_lithuanian_adjective_declensions(
     except Exception as e:
         logger.error(
             f"Error querying Lithuanian adjective declensions for '{adjective}': {type(e).__name__}: {e}"
+        )
+        return {}, False
+
+
+def query_lithuanian_adverb_forms(
+    client, lemma_id: int, get_session_func
+) -> Tuple[Dict[str, str], bool]:
+    """
+    Query LLM for Lithuanian adverb forms (positive, comparative, superlative).
+
+    Args:
+        client: UnifiedLLMClient instance
+        lemma_id: The ID of the lemma to generate adverb forms for
+        get_session_func: Function to get database session
+
+    Returns:
+        Tuple of (dict mapping form names to adverb forms, success flag)
+    """
+    session = get_session_func()
+
+    # Get the lemma
+    lemma = session.query(linguistic_db.Lemma).filter(linguistic_db.Lemma.id == lemma_id).first()
+    if not lemma:
+        logger.error(f"Lemma with ID {lemma_id} not found")
+        return {}, False
+
+    if not lemma.lithuanian_translation:
+        logger.error(f"Lemma ID {lemma_id} has no Lithuanian translation")
+        return {}, False
+
+    if lemma.pos_type.lower() != "adverb":
+        logger.error(f"Lemma ID {lemma_id} is not an adverb (pos_type: {lemma.pos_type})")
+        return {}, False
+
+    adverb = lemma.lithuanian_translation
+    english_adverb = lemma.lemma_text
+    definition = lemma.definition_text
+    pos_subtype = lemma.pos_subtype
+
+    # All 3 comparative forms
+    fields = ["positive", "comparative", "superlative"]
+
+    # Build schema properties
+    form_properties = {}
+    for form in fields:
+        form_properties[form] = SchemaProperty(
+            "string", f"Lithuanian {form} form (use empty string if not applicable)"
+        )
+
+    schema = Schema(
+        name="LithuanianAdverbForms",
+        description="Comparative forms for a Lithuanian adverb",
+        properties={
+            "forms": SchemaProperty(
+                type="object",
+                description="Dictionary of adverb forms",
+                properties=form_properties,
+            ),
+            "confidence": SchemaProperty("number", "Confidence score from 0-1"),
+            "notes": SchemaProperty(
+                "string", "Notes about the pattern (e.g., irregular, no comparative forms)"
+            ),
+        },
+    )
+
+    subtype_context = f" (category: {pos_subtype})" if pos_subtype else ""
+
+    try:
+        context = util.prompt_loader.get_context("wordfreq", "lithuanian_adverb_forms")
+        prompt_template = util.prompt_loader.get_prompt("wordfreq", "lithuanian_adverb_forms")
+        prompt = prompt_template.format(
+            adverb=adverb,
+            english_adverb=english_adverb,
+            definition=definition,
+            subtype_context=subtype_context,
+        )
+
+        response = client.generate_chat(
+            prompt=prompt, model=client.model, json_schema=schema, context=context
+        )
+
+        # Log successful query
+        try:
+            linguistic_db.log_query(
+                session,
+                word=adverb,
+                query_type="lithuanian_adverb_forms",
+                prompt=prompt,
+                response=json.dumps(response.structured_data),
+                model=client.model,
+            )
+        except Exception as log_err:
+            logger.error(f"Failed to log Lithuanian adverb query: {log_err}")
+
+        # Validate and return response data
+        if (
+            response.structured_data
+            and isinstance(response.structured_data, dict)
+            and "forms" in response.structured_data
+            and isinstance(response.structured_data["forms"], dict)
+        ):
+            forms = response.structured_data["forms"]
+            return forms, True
+        else:
+            logger.warning(f"Invalid response format for Lithuanian adverb '{adverb}'")
+            return {}, False
+
+    except Exception as e:
+        logger.error(
+            f"Error querying Lithuanian adverb forms for '{adverb}': {type(e).__name__}: {e}"
         )
         return {}, False

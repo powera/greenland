@@ -185,6 +185,16 @@ class GrammaticalForm(enum.Enum):
     NOUN_EN_SINGULAR = "noun/en_singular"
     NOUN_EN_PLURAL = "noun/en_plural"
 
+    # English adjective forms (comparative degrees)
+    ADJ_EN_POSITIVE = "adjective/en_positive"
+    ADJ_EN_COMPARATIVE = "adjective/en_comparative"
+    ADJ_EN_SUPERLATIVE = "adjective/en_superlative"
+
+    # English adverb forms (comparative degrees)
+    ADVERB_EN_POSITIVE = "adverb/en_positive"
+    ADVERB_EN_COMPARATIVE = "adverb/en_comparative"
+    ADVERB_EN_SUPERLATIVE = "adverb/en_superlative"
+
     # Lithuanian verb forms (person_tense with gender distinction)
     # Present tense
     VERB_LT_1S_PRES = "verb/lt_1s_pres"
@@ -280,6 +290,11 @@ class GrammaticalForm(enum.Enum):
     ADJ_LT_INSTRUMENTAL_PLURAL_F = "adjective/lt_instrumental_plural_f"
     ADJ_LT_LOCATIVE_PLURAL_F = "adjective/lt_locative_plural_f"
     ADJ_LT_VOCATIVE_PLURAL_F = "adjective/lt_vocative_plural_f"
+
+    # Lithuanian adverb forms (comparative degrees)
+    ADVERB_LT_POSITIVE = "adverb/lt_positive"
+    ADVERB_LT_COMPARATIVE = "adverb/lt_comparative"
+    ADVERB_LT_SUPERLATIVE = "adverb/lt_superlative"
 
     # French noun forms (singular/plural only - each noun has a fixed gender)
     NOUN_FR_SINGULAR = "noun/fr_singular"

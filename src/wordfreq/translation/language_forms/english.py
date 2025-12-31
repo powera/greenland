@@ -19,6 +19,20 @@ NOUN_FORM_MAPPING = {
     "plural": GrammaticalForm.NOUN_EN_PLURAL,
 }
 
+# Form mapping for English adjectives
+ADJECTIVE_FORM_MAPPING = {
+    "positive": GrammaticalForm.ADJ_EN_POSITIVE,
+    "comparative": GrammaticalForm.ADJ_EN_COMPARATIVE,
+    "superlative": GrammaticalForm.ADJ_EN_SUPERLATIVE,
+}
+
+# Form mapping for English adverbs
+ADVERB_FORM_MAPPING = {
+    "positive": GrammaticalForm.ADVERB_EN_POSITIVE,
+    "comparative": GrammaticalForm.ADVERB_EN_COMPARATIVE,
+    "superlative": GrammaticalForm.ADVERB_EN_SUPERLATIVE,
+}
+
 # Form mapping for English verbs
 VERB_FORM_MAPPING = {
     "1s_pres": GrammaticalForm.VERB_EN_1S_PRES,
@@ -244,4 +258,204 @@ def query_english_noun_forms(
 
     except Exception as e:
         logger.error(f"Error querying English noun forms for '{noun}': {type(e).__name__}: {e}")
+        return {}, False
+
+
+def query_english_adjective_forms(
+    client, lemma_id: int, get_session_func
+) -> Tuple[Dict[str, str], bool]:
+    """
+    Query LLM for English adjective forms (positive, comparative, superlative).
+
+    Args:
+        client: UnifiedLLMClient instance
+        lemma_id: The ID of the lemma to generate adjective forms for
+        get_session_func: Function to get database session
+
+    Returns:
+        Tuple of (dict mapping form names to adjective forms, success flag)
+    """
+    session = get_session_func()
+
+    # Get the lemma
+    lemma = session.query(linguistic_db.Lemma).filter(linguistic_db.Lemma.id == lemma_id).first()
+    if not lemma:
+        logger.error(f"Lemma with ID {lemma_id} not found")
+        return {}, False
+
+    if lemma.pos_type.lower() != "adjective":
+        logger.error(f"Lemma ID {lemma_id} is not an adjective (pos_type: {lemma.pos_type})")
+        return {}, False
+
+    adjective = lemma.lemma_text
+    definition = lemma.definition_text
+    pos_subtype = lemma.pos_subtype
+
+    # All 3 comparative forms
+    fields = ["positive", "comparative", "superlative"]
+
+    # Build schema properties
+    form_properties = {}
+    for form in fields:
+        form_properties[form] = SchemaProperty(
+            "string", f"English {form} form (use empty string if not applicable)"
+        )
+
+    schema = Schema(
+        name="EnglishAdjectiveForms",
+        description="Comparative forms for an English adjective",
+        properties={
+            "forms": SchemaProperty(
+                type="object",
+                description="Dictionary of adjective forms",
+                properties=form_properties,
+            ),
+            "confidence": SchemaProperty("number", "Confidence score from 0-1"),
+            "notes": SchemaProperty(
+                "string", "Notes about the pattern (e.g., irregular, absolute adjective)"
+            ),
+        },
+    )
+
+    subtype_context = f" (category: {pos_subtype})" if pos_subtype else ""
+
+    try:
+        context = util.prompt_loader.get_context("wordfreq", "english_adjective_forms")
+        prompt_template = util.prompt_loader.get_prompt("wordfreq", "english_adjective_forms")
+        prompt = prompt_template.format(
+            adjective=adjective, definition=definition, subtype_context=subtype_context
+        )
+
+        response = client.generate_chat(
+            prompt=prompt, model=client.model, json_schema=schema, context=context
+        )
+
+        # Log successful query
+        try:
+            linguistic_db.log_query(
+                session,
+                word=adjective,
+                query_type="english_adjective_forms",
+                prompt=prompt,
+                response=json.dumps(response.structured_data),
+                model=client.model,
+            )
+        except Exception as log_err:
+            logger.error(f"Failed to log English adjective query: {log_err}")
+
+        # Validate and return response data
+        if (
+            response.structured_data
+            and isinstance(response.structured_data, dict)
+            and "forms" in response.structured_data
+            and isinstance(response.structured_data["forms"], dict)
+        ):
+            forms = response.structured_data["forms"]
+            return forms, True
+        else:
+            logger.warning(f"Invalid response format for English adjective '{adjective}'")
+            return {}, False
+
+    except Exception as e:
+        logger.error(f"Error querying English adjective forms for '{adjective}': {type(e).__name__}: {e}")
+        return {}, False
+
+
+def query_english_adverb_forms(
+    client, lemma_id: int, get_session_func
+) -> Tuple[Dict[str, str], bool]:
+    """
+    Query LLM for English adverb forms (positive, comparative, superlative).
+
+    Args:
+        client: UnifiedLLMClient instance
+        lemma_id: The ID of the lemma to generate adverb forms for
+        get_session_func: Function to get database session
+
+    Returns:
+        Tuple of (dict mapping form names to adverb forms, success flag)
+    """
+    session = get_session_func()
+
+    # Get the lemma
+    lemma = session.query(linguistic_db.Lemma).filter(linguistic_db.Lemma.id == lemma_id).first()
+    if not lemma:
+        logger.error(f"Lemma with ID {lemma_id} not found")
+        return {}, False
+
+    if lemma.pos_type.lower() != "adverb":
+        logger.error(f"Lemma ID {lemma_id} is not an adverb (pos_type: {lemma.pos_type})")
+        return {}, False
+
+    adverb = lemma.lemma_text
+    definition = lemma.definition_text
+    pos_subtype = lemma.pos_subtype
+
+    # All 3 comparative forms
+    fields = ["positive", "comparative", "superlative"]
+
+    # Build schema properties
+    form_properties = {}
+    for form in fields:
+        form_properties[form] = SchemaProperty(
+            "string", f"English {form} form (use empty string if not applicable)"
+        )
+
+    schema = Schema(
+        name="EnglishAdverbForms",
+        description="Comparative forms for an English adverb",
+        properties={
+            "forms": SchemaProperty(
+                type="object",
+                description="Dictionary of adverb forms",
+                properties=form_properties,
+            ),
+            "confidence": SchemaProperty("number", "Confidence score from 0-1"),
+            "notes": SchemaProperty(
+                "string", "Notes about the pattern (e.g., irregular, no comparative forms)"
+            ),
+        },
+    )
+
+    subtype_context = f" (category: {pos_subtype})" if pos_subtype else ""
+
+    try:
+        context = util.prompt_loader.get_context("wordfreq", "english_adverb_forms")
+        prompt_template = util.prompt_loader.get_prompt("wordfreq", "english_adverb_forms")
+        prompt = prompt_template.format(
+            adverb=adverb, definition=definition, subtype_context=subtype_context
+        )
+
+        response = client.generate_chat(
+            prompt=prompt, model=client.model, json_schema=schema, context=context
+        )
+
+        # Log successful query
+        try:
+            linguistic_db.log_query(
+                session,
+                word=adverb,
+                query_type="english_adverb_forms",
+                prompt=prompt,
+                response=json.dumps(response.structured_data),
+                model=client.model,
+            )
+        except Exception as log_err:
+            logger.error(f"Failed to log English adverb query: {log_err}")
+
+        # Validate and return response data
+        if (
+            response.structured_data
+            and isinstance(response.structured_data, dict)
+            and "forms" in response.structured_data
+            and isinstance(response.structured_data["forms"], dict)
+        ):
+            forms = response.structured_data["forms"]
+            return forms, True
+        else:
+            logger.warning(f"Invalid response format for English adverb '{adverb}'")
+            return {}, False
+
+    except Exception as e:
+        logger.error(f"Error querying English adverb forms for '{adverb}': {type(e).__name__}: {e}")
         return {}, False
