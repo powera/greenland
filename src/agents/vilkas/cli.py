@@ -54,8 +54,13 @@ def get_argument_parser():
         help="Fix mode: Generate missing word forms (supports Lithuanian nouns, French verbs)",
     )
     parser.add_argument(
+        "--form-type",
+        choices=["base-forms", "noun-declensions", "verb-conjugations", "all"],
+        help="[Fix mode] Which form type to fix: base-forms, noun-declensions, verb-conjugations, or all (default: inferred from --pos-type or all)",
+    )
+    parser.add_argument(
         "--pos-type",
-        help="[Fix mode] Part of speech to fix (e.g., noun, verb). If not specified, fixes all supported types.",
+        help="[Fix mode] Part of speech to fix (e.g., noun, verb). If not specified with --form-type, fixes all supported types.",
     )
     parser.add_argument(
         "--source",
@@ -154,6 +159,24 @@ def main():
 
     # Handle --fix mode
     if args.fix:
+        # Map form-type to pos-type if specified
+        inferred_pos_type = args.pos_type
+        form_type_label = "forms"
+
+        if args.form_type:
+            if args.form_type == "base-forms":
+                form_type_label = "base forms"
+                # Base forms can be any POS, use pos_type if specified
+            elif args.form_type == "noun-declensions":
+                inferred_pos_type = "noun"
+                form_type_label = "noun declensions"
+            elif args.form_type == "verb-conjugations":
+                inferred_pos_type = "verb"
+                form_type_label = "verb conjugations"
+            elif args.form_type == "all":
+                form_type_label = "all forms"
+                # Don't set pos_type, let it fix all
+
         # Confirmation prompt (unless --yes or --dry-run)
         if not args.yes and not args.dry_run:
             # Determine what we're fixing based on language and pos-type
@@ -161,29 +184,31 @@ def main():
             lang_name = language_names.get(args.language, args.language.upper())
 
             # Get appropriate check results based on language and POS type
-            if args.language == "lt" and (not args.pos_type or args.pos_type == "noun"):
+            if args.language == "lt" and (not inferred_pos_type or inferred_pos_type == "noun"):
                 check_results = agent.check_noun_declension_coverage()
                 needs_fix = check_results.get("needs_declensions", 0)
-                form_type = "noun declensions"
-            elif args.language == "fr" and (not args.pos_type or args.pos_type == "verb"):
+                if not args.form_type:
+                    form_type_label = "noun declensions"
+            elif args.language == "fr" and (not inferred_pos_type or inferred_pos_type == "verb"):
                 check_results = agent.check_verb_conjugation_coverage(language_code="fr")
                 needs_fix = check_results.get("needs_conjugations", 0)
-                form_type = "verb conjugations"
-            elif args.language == "lt" and args.pos_type == "verb":
+                if not args.form_type:
+                    form_type_label = "verb conjugations"
+            elif args.language == "lt" and inferred_pos_type == "verb":
                 check_results = agent.check_verb_conjugation_coverage(language_code="lt")
                 needs_fix = check_results.get("needs_conjugations", 0)
-                form_type = "verb conjugations"
+                if not args.form_type:
+                    form_type_label = "verb conjugations"
             else:
                 needs_fix = 0
-                form_type = "forms"
 
-            if not display.print_fix_confirmation(lang_name, form_type, needs_fix, args):
+            if not display.print_fix_confirmation(lang_name, form_type_label, needs_fix, args):
                 print("Aborted.")
                 return
 
         results = agent.fix_missing_forms(
             language_code=args.language,
-            pos_type=args.pos_type,
+            pos_type=inferred_pos_type,
             limit=args.limit,
             model=args.model,
             throttle=args.throttle,

@@ -62,7 +62,7 @@ class ArgumentInfo:
         dest = self.dest.lower()
 
         # Operation Mode - what operation to perform
-        if dest in ['mode', 'check_type', 'check', 'fix', 'stage', 'import_jsonl']:
+        if dest in ['mode', 'check_type', 'check', 'fix', 'stage', 'import_jsonl', 'form_type']:
             return "operation_mode"
 
         # Data Source / Scope - what data to process
