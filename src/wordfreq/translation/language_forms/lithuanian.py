@@ -193,7 +193,7 @@ def query_lithuanian_noun_declensions(
         )
 
         response = client.generate_chat(
-            prompt=prompt, model=client.model, json_schema=schema, context=context
+            prompt=prompt, model=client.default_model, json_schema=schema, context=context
         )
 
         # Log successful query
@@ -204,7 +204,7 @@ def query_lithuanian_noun_declensions(
                 query_type="lithuanian_noun_declensions",
                 prompt=prompt,
                 response=json.dumps(response.structured_data),
-                model=client.model,
+                model=client.default_model,
             )
         except Exception as log_err:
             logger.error(f"Failed to log Lithuanian declension query: {log_err}")
@@ -342,7 +342,7 @@ def query_lithuanian_verb_conjugations(
         )
 
         response = client.generate_chat(
-            prompt=prompt, model=client.model, json_schema=schema, context=context
+            prompt=prompt, model=client.default_model, json_schema=schema, context=context
         )
 
         # Log successful query
@@ -353,7 +353,7 @@ def query_lithuanian_verb_conjugations(
                 query_type="lithuanian_verb_conjugations",
                 prompt=prompt,
                 response=json.dumps(response.structured_data),
-                model=client.model,
+                model=client.default_model,
             )
         except Exception as log_err:
             logger.error(f"Failed to log Lithuanian conjugation query: {log_err}")
@@ -493,7 +493,7 @@ def query_lithuanian_adjective_declensions(
         )
 
         response = client.generate_chat(
-            prompt=prompt, model=client.model, json_schema=schema, context=context
+            prompt=prompt, model=client.default_model, json_schema=schema, context=context
         )
 
         # Log successful query
@@ -504,7 +504,7 @@ def query_lithuanian_adjective_declensions(
                 query_type="lithuanian_adjective_declensions",
                 prompt=prompt,
                 response=json.dumps(response.structured_data),
-                model=client.model,
+                model=client.default_model,
             )
         except Exception as log_err:
             logger.error(f"Failed to log Lithuanian adjective declension query: {log_err}")
@@ -604,7 +604,7 @@ def query_lithuanian_adverb_forms(
         )
 
         response = client.generate_chat(
-            prompt=prompt, model=client.model, json_schema=schema, context=context
+            prompt=prompt, model=client.default_model, json_schema=schema, context=context
         )
 
         # Log successful query
@@ -615,7 +615,7 @@ def query_lithuanian_adverb_forms(
                 query_type="lithuanian_adverb_forms",
                 prompt=prompt,
                 response=json.dumps(response.structured_data),
-                model=client.model,
+                model=client.default_model,
             )
         except Exception as log_err:
             logger.error(f"Failed to log Lithuanian adverb query: {log_err}")

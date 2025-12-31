@@ -74,7 +74,7 @@ def query_pos_subtype(
 
     try:
         response = client.generate_chat(
-            prompt=prompt, model=client.model, json_schema=schema, context=context
+            prompt=prompt, model=client.default_model, json_schema=schema, context=context
         )
 
         # Log successful query
@@ -86,7 +86,7 @@ def query_pos_subtype(
                 query_type=f"pos_subtype_{pos_type}",
                 prompt=prompt,
                 response=json.dumps(response.structured_data),
-                model=client.model,
+                model=client.default_model,
             )
         except Exception as log_err:
             logger.error(f"Failed to log successful subtype query: {log_err}")

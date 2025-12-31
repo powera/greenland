@@ -83,7 +83,7 @@ def query_pronunciation(
 
     try:
         response = client.generate_chat(
-            prompt=prompt, model=client.model, json_schema=schema, context=context
+            prompt=prompt, model=client.default_model, json_schema=schema, context=context
         )
 
         # Log successful query
@@ -95,7 +95,7 @@ def query_pronunciation(
                 query_type="pronunciation",
                 prompt=prompt,
                 response=json.dumps(response.structured_data),
-                model=client.model,
+                model=client.default_model,
             )
         except Exception as log_err:
             logger.error(f"Failed to log successful pronunciation query: {log_err}")

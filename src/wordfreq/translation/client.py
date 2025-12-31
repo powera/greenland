@@ -55,6 +55,7 @@ class LinguisticClient:
         self.db_path = db_path or constants.WORDFREQ_DB_PATH
         self.debug = debug
         self.client = UnifiedLLMClient(debug=debug)
+        self.client.default_model = model
 
         if debug:
             logger.setLevel(logging.DEBUG)

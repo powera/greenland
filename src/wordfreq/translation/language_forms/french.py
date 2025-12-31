@@ -100,7 +100,7 @@ def query_french_noun_forms(client, lemma_id: int, get_session_func) -> Tuple[Di
             subtype_context=f" (category: {pos_subtype})" if pos_subtype else "",
         )
         response = client.generate_chat(
-            prompt=prompt, model=client.model, json_schema=schema, context=context
+            prompt=prompt, model=client.default_model, json_schema=schema, context=context
         )
         linguistic_db.log_query(
             session,
@@ -108,7 +108,7 @@ def query_french_noun_forms(client, lemma_id: int, get_session_func) -> Tuple[Di
             query_type="french_noun_forms",
             prompt=prompt,
             response=json.dumps(response.structured_data),
-            model=client.model,
+            model=client.default_model,
         )
         if response.structured_data and "forms" in response.structured_data:
             return response.structured_data["forms"], True
@@ -168,7 +168,7 @@ def query_french_verb_conjugations(
             subtype_context=f" (category: {pos_subtype})" if pos_subtype else "",
         )
         response = client.generate_chat(
-            prompt=prompt, model=client.model, json_schema=schema, context=context
+            prompt=prompt, model=client.default_model, json_schema=schema, context=context
         )
         linguistic_db.log_query(
             session,
@@ -176,7 +176,7 @@ def query_french_verb_conjugations(
             query_type="french_verb_conjugations",
             prompt=prompt,
             response=json.dumps(response.structured_data),
-            model=client.model,
+            model=client.default_model,
         )
         if response.structured_data and "forms" in response.structured_data:
             return response.structured_data["forms"], True
