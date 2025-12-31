@@ -234,14 +234,11 @@ def main():
     logger.info(f"Source language: {source_name} ({args.source})")
     logger.info(f"Target languages: {', '.join(target_names)}")
 
-    # Create backend configuration using common helper
-    backend_config = get_data_source_config(args)
+    # Create configuration from args (always returns a valid config with defaults)
+    config = get_data_source_config(args)
 
     # Initialize agent
-    if backend_config:
-        agent = BebrasAgent(config=backend_config, debug=args.debug, model=args.model)
-    else:
-        agent = BebrasAgent(db_path=args.db_path, debug=args.debug, model=args.model)
+    agent = BebrasAgent(config=config)
 
     # Process based on input mode
     if args.sentence:
