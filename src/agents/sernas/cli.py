@@ -78,15 +78,11 @@ def main():
     parser = get_argument_parser()
     args = parser.parse_args()
 
-    # Create backend configuration using common helper
-    backend_config = get_data_source_config(args)
+    # Create configuration from args (always returns a valid config with defaults)
+    config = get_data_source_config(args)
 
-    # Create agent with backend config
-    if backend_config:
-        agent = SernasAgent(config=backend_config, debug=args.debug)
-    else:
-        # Backward compatibility: use db_path
-        agent = SernasAgent(db_path=args.db_path, debug=args.debug)
+    # Create agent with config
+    agent = SernasAgent(config=config)
 
     # Handle --guid mode (single lemma)
     if args.guid:

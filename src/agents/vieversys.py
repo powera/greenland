@@ -29,9 +29,12 @@ import constants
 from agents.common_args import (
     add_common_args,
     add_processing_args,
+    add_backend_args,
     confirm_operation,
+    get_data_source_config,
 )
-from wordfreq.storage.database import create_database_session
+from wordfreq.storage.backend import create_session as create_backend_session
+from wordfreq.storage.backend.config import DataSourceConfig, BackendType
 from wordfreq.storage.models.schema import Lemma, AudioQualityReview
 from wordfreq.storage.translation_helpers import get_translation
 from clients.audio import generate_audio, Voice, AudioFormat
@@ -61,23 +64,21 @@ class VieversysAgent:
 
     def __init__(
         self,
-        db_path: str = None,
+        config: DataSourceConfig,
         output_dir: str = None,
-        debug: bool = False,
     ):
         """
         Initialize the Vieversys agent.
 
         Args:
-            db_path: Database path (uses default if None)
+            config: DataSourceConfig with model, debug, and backend settings (required)
             output_dir: Output directory for generated audio (uses temp dir if None)
-            debug: Enable debug logging
         """
-        self.db_path = db_path or constants.WORDFREQ_DB_PATH
+        self.config = config
+        self.debug = config.debug
         self.output_dir = Path(output_dir) if output_dir else Path(tempfile.mkdtemp(prefix="vieversys_"))
-        self.debug = debug
 
-        if debug:
+        if self.debug:
             logger.setLevel(logging.DEBUG)
 
         # Ensure output directory exists
@@ -85,8 +86,8 @@ class VieversysAgent:
         logger.info(f"Output directory: {self.output_dir}")
 
     def get_session(self):
-        """Get database session."""
-        return create_database_session(self.db_path)
+        """Get database session using backend abstraction."""
+        return create_backend_session(self.config)
 
     def get_translation_text(self, session, lemma: Lemma, language_code: str) -> Optional[str]:
         """
@@ -374,6 +375,7 @@ def get_argument_parser():
     # Common arguments
     add_common_args(parser)
     add_processing_args(parser)
+    add_backend_args(parser)
 
     # Vieversys-specific arguments
     parser.add_argument("--output-dir", help="Output directory for generated audio")
@@ -406,6 +408,9 @@ def main():
     parser = get_argument_parser()
     args = parser.parse_args()
 
+    # Create configuration from args (always returns a valid config with defaults)
+    config = get_data_source_config(args)
+
     # Convert voice names to Voice enums
     voices = None
     if args.voices:
@@ -414,7 +419,7 @@ def main():
     # Confirm before running (unless --yes was provided)
     if not args.yes:
         # Estimate API calls
-        agent_temp = VieversysAgent(db_path=args.db_path, debug=args.debug)
+        agent_temp = VieversysAgent(config=config)
         session = agent_temp.get_session()
         try:
             query = session.query(Lemma).filter(Lemma.guid.isnot(None))
@@ -447,11 +452,10 @@ def main():
             print("Aborted.")
             sys.exit(0)
 
-    # Create agent and run generation
+    # Create agent with config
     agent = VieversysAgent(
-        db_path=args.db_path,
+        config=config,
         output_dir=args.output_dir,
-        debug=args.debug,
     )
 
     start_time = datetime.now()

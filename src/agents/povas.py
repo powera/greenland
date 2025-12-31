@@ -32,9 +32,12 @@ if GREENLAND_SRC_PATH not in sys.path:
 import constants
 from agents.common_args import (
     add_common_args,
+    add_backend_args,
+    get_data_source_config,
 )
 from wordfreq.storage import database as linguistic_db
-from wordfreq.storage.connection_pool import get_session
+from wordfreq.storage.backend import create_session as create_backend_session
+from wordfreq.storage.backend.config import DataSourceConfig, BackendType
 from wordfreq.storage.models.schema import WordToken, Lemma, DerivativeForm
 from wordfreq.storage.translation_helpers import get_translation
 
@@ -55,23 +58,22 @@ class PovasAgent:
     JS_FILENAME = "pos_subtypes.js"
     JS_TEMPLATE_PATH = os.path.join(constants.WORDFREQ_TEMPLATE_DIR, JS_FILENAME)
 
-    def __init__(self, db_path: str = None, debug: bool = False):
+    def __init__(self, config: DataSourceConfig):
         """
         Initialize the Povas agent.
 
         Args:
-            db_path: Database path (uses default if None)
-            debug: Enable debug logging
+            config: DataSourceConfig with model, debug, and backend settings (required)
         """
-        self.db_path = db_path or constants.WORDFREQ_DB_PATH
-        self.debug = debug
+        self.config = config
+        self.debug = config.debug
 
-        if debug:
+        if self.debug:
             logger.setLevel(logging.DEBUG)
 
     def get_session(self):
-        """Get database session."""
-        return get_session(self.db_path)
+        """Get database session using backend abstraction."""
+        return create_backend_session(self.config)
 
     def ensure_directory(self, directory: str) -> None:
         """Ensure the specified directory exists."""
@@ -453,6 +455,7 @@ def get_argument_parser():
 
     # Common arguments
     add_common_args(parser)
+    add_backend_args(parser)
 
     # Povas-specific arguments
     parser.add_argument("--index-only", action="store_true", help="Generate only the index page")
@@ -465,7 +468,11 @@ def main():
     parser = get_argument_parser()
     args = parser.parse_args()
 
-    agent = PovasAgent(db_path=args.db_path, debug=args.debug)
+    # Create configuration from args (always returns a valid config with defaults)
+    config = get_data_source_config(args)
+
+    # Create agent with config
+    agent = PovasAgent(config=config)
 
     if args.index_only:
         # Generate only the index page

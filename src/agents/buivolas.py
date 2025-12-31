@@ -108,59 +108,29 @@ def strip_disambiguation(text: str) -> str:
 class BuivolasAgent:
     """Agent for generating pattern-based simple sentences."""
 
-    def __init__(
-        self,
-        db_path: str = None,
-        backend_config: DataSourceConfig = None,
-        model: str = "gpt-4o-mini",
-        debug: bool = False,
-        dry_run: bool = False,
-    ):
+    def __init__(self, config: DataSourceConfig, dry_run: bool = False):
         """
         Initialize the Buivolas agent.
 
         Args:
-            db_path: Database path (uses default if None) - for backward compatibility
-            backend_config: Backend configuration (if provided, overrides db_path)
-            model: LLM model to use for translations
-            debug: Enable debug logging
-            dry_run: Don't save to database
+            config: DataSourceConfig with model, debug, and backend settings (required)
+            dry_run: Don't save to database (optional)
         """
-        # Set up backend configuration
-        if backend_config is not None:
-            self.backend_config = backend_config
-        elif db_path is not None:
-            # Backward compatibility: db_path implies SQLite backend
-            self.backend_config = DataSourceConfig(
-                backend_type=BackendType.SQLITE, sqlite_path=db_path
-            )
-        else:
-            # Use default SQLite path
-            self.backend_config = DataSourceConfig(
-                backend_type=BackendType.SQLITE, sqlite_path=constants.WORDFREQ_DB_PATH
-            )
-
-        # Keep db_path for backward compatibility
-        if self.backend_config.backend_type == BackendType.SQLITE:
-            self.db_path = self.backend_config.sqlite_path
-        else:
-            self.db_path = None
-
-        self.model = model
-        self.debug = debug
+        self.config = config
+        self.debug = config.debug
         self.dry_run = dry_run
 
-        if debug:
+        if self.debug:
             logger.setLevel(logging.DEBUG)
 
         # Initialize batch client and queue manager
-        self.batch_client = OpenAIBatchClient(debug=debug)
+        self.batch_client = OpenAIBatchClient(debug=self.debug)
         self.batch_session = create_batch_database_session()
-        self.batch_manager = BatchQueueManager(self.batch_session, self.batch_client, debug=debug)
+        self.batch_manager = BatchQueueManager(self.batch_session, self.batch_client, debug=self.debug)
 
     def get_session(self):
         """Get database session using backend abstraction."""
-        return create_backend_session(self.backend_config)
+        return create_backend_session(self.config)
 
     def get_lemmas_for_slot(
         self, session, slot: Dict
@@ -667,7 +637,7 @@ class BuivolasAgent:
                 }
 
                 request_body = {
-                    "model": self.model,
+                    "model": self.config.model,
                     "messages": [{"role": "user", "content": full_prompt}],
                     "response_format": response_format
                 }
@@ -862,18 +832,11 @@ def main():
     parser = get_argument_parser()
     args = parser.parse_args()
 
-    # Create backend configuration using common helper
-    backend_config = get_data_source_config(args)
+    # Create configuration from args (always returns a valid config with defaults)
+    config = get_data_source_config(args)
 
-    # Create agent
-    if backend_config:
-        agent = BuivolasAgent(
-            config=backend_config, model=args.model, debug=args.debug, dry_run=args.dry_run
-        )
-    else:
-        agent = BuivolasAgent(
-            db_path=args.db_path, model=args.model, debug=args.debug, dry_run=args.dry_run
-        )
+    # Create agent with config
+    agent = BuivolasAgent(config=config, dry_run=args.dry_run)
 
     # Handle commands
     if args.command == "generate-candidates":

@@ -63,43 +63,20 @@ logger = logging.getLogger(__name__)
 class PapugaAgent:
     """Agent for validating and generating pronunciations."""
 
-    def __init__(
-        self,
-        config: DataSourceConfig = None,
-        debug: bool = False,
-    ):
+    def __init__(self, config: DataSourceConfig):
         """
         Initialize the Papuga agent.
 
         Args:
-            config: DataSourceConfig with storage backend, cache, and LLM settings
-            debug: Enable debug logging
+            config: DataSourceConfig with model, debug, and backend settings (required)
         """
-        # Set up data source configuration
-        if config is not None:
-            self.config = config
-        else:
-            # Use default configuration
-            self.config = DataSourceConfig(
-                backend_type=BackendType.SQLITE,
-                sqlite_path=constants.WORDFREQ_DB_PATH,
-                model="gpt-5-mini",
-            )
-
-        # Extract commonly-used config values
-        self.debug = debug
-        self.model = self.config.model or "gpt-5-mini"
-
-        # Keep db_path for backward compatibility
-        if self.config.backend_type == BackendType.SQLITE:
-            self.db_path = self.config.sqlite_path
-        else:
-            self.db_path = None
+        self.config = config
+        self.debug = config.debug
 
         # Lazy initialization
         self.cache_client = None
 
-        if debug:
+        if self.debug:
             logger.setLevel(logging.DEBUG)
 
     def get_session(self):
@@ -232,7 +209,7 @@ class PapugaAgent:
                         pos_type=lemma.pos_type,
                         example_sentence=example_text,
                         definition=lemma.definition_text,
-                        model=self.model,
+                        model=self.config.model,
                     )
 
                     if result["needs_update"] and result["confidence"] >= confidence_threshold:
@@ -423,7 +400,7 @@ class PapugaAgent:
                             pos_type=lemma.pos_type,
                             example_sentence=example_text,
                             definition=lemma.definition_text,
-                            model=self.model,
+                            model=self.config.model,
                         )
 
                         if result["confidence"] >= 0.5:  # Minimum confidence threshold
@@ -497,7 +474,7 @@ class PapugaAgent:
         results = {
             "timestamp": start_time.isoformat(),
             "database_path": self.db_path,
-            "model": self.model,
+            "model": self.config.model,
             "sample_rate": sample_rate,
             "confidence_threshold": confidence_threshold,
             "only_english": only_english,
@@ -644,7 +621,7 @@ def main():
 
     # Handle --guid mode
     if args.guid:
-        agent = PapugaAgent(config=config, debug=args.debug)
+        agent = PapugaAgent(config=config)
         session = agent.get_session()
         try:
             # Find the lemma by GUID
@@ -728,7 +705,7 @@ def main():
 
     # Confirm before running LLM queries (unless --yes or --dry-run was provided)
     if not args.yes and not args.dry_run:
-        agent_temp = PapugaAgent(config=config, debug=args.debug)
+        agent_temp = PapugaAgent(config=config)
         session = agent_temp.get_session()
         try:
             if mode in ["check", "both"]:
@@ -777,7 +754,7 @@ def main():
             sys.exit(0)
 
     # Create agent with unified configuration
-    agent = PapugaAgent(config=config, debug=args.debug)
+    agent = PapugaAgent(config=config)
 
     if mode == "check":
         agent.run_full_check(
