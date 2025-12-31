@@ -63,32 +63,15 @@ logger = logging.getLogger(__name__)
 class VorasAgent:
     """Agent for validating and populating multi-lingual translations."""
 
-    def __init__(
-        self,
-        config: DataSourceConfig = None,
-        debug: bool = False,
-    ):
+    def __init__(self, config: DataSourceConfig):
         """
         Initialize the Voras agent.
 
         Args:
-            config: DataSourceConfig with storage backend, cache, and LLM settings
-            debug: Enable debug logging
+            config: DataSourceConfig with model, debug, and backend settings (required)
         """
-        # Set up data source configuration
-        if config is not None:
-            self.config = config
-        else:
-            # Use default configuration
-            self.config = DataSourceConfig(
-                backend_type=BackendType.SQLITE,
-                sqlite_path=constants.WORDFREQ_DB_PATH,
-                model="gpt-5-mini",
-            )
-
-        # Extract commonly-used config values
-        self.debug = debug
-        self.model = self.config.model or "gpt-5-mini"
+        self.config = config
+        self.debug = config.debug
 
         # Keep db_path for backward compatibility with LinguisticClient
         if self.config.backend_type == BackendType.SQLITE:
@@ -100,7 +83,7 @@ class VorasAgent:
         self.linguistic_client = None
         self.cache_client = None
 
-        if debug:
+        if self.debug:
             logger.setLevel(logging.DEBUG)
 
     def get_session(self):
@@ -111,7 +94,7 @@ class VorasAgent:
         """Get or create linguistic client for LLM queries."""
         if self.linguistic_client is None:
             self.linguistic_client = LinguisticClient(
-                model=self.model, db_path=self.db_path, debug=self.debug
+                model=self.config.model, db_path=self.db_path, debug=self.debug
             )
         return self.linguistic_client
 
@@ -148,7 +131,7 @@ class VorasAgent:
         # Log the translation change
         log_translation_change(
             session=session,
-            source=f"voras-agent/{self.model}",
+            source=f"voras-agent/{self.config.model}",
             operation_type="translation",
             lemma_id=lemma.id,
             language_code=lang_code,
@@ -233,7 +216,7 @@ class VorasAgent:
 
                 # Validate all translations in one call
                 validation_results = validate_all_translations_for_word(
-                    lemma.lemma_text, translations, lemma.pos_type, self.model
+                    lemma.lemma_text, translations, lemma.pos_type, self.config.model
                 )
 
                 # Only process results for the requested language
@@ -380,7 +363,7 @@ class VorasAgent:
 
                 # Validate all translations in one call
                 validation_results = validate_all_translations_for_word(
-                    lemma.lemma_text, translations, lemma.pos_type, self.model
+                    lemma.lemma_text, translations, lemma.pos_type, self.config.model
                 )
 
                 # Process results for each language

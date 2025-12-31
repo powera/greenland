@@ -107,11 +107,11 @@ def main():
     # Validate cache arguments
     validate_cache_args(args)
 
-    # Create data source configuration (includes backend, cache, and LLM model)
-    config = get_data_source_config(args, default_model="gpt-5-mini")
+    # Create configuration from args (always returns a valid config with defaults)
+    config = get_data_source_config(args)
 
     # Create agent with unified configuration
-    agent = VorasAgent(config=config, debug=args.debug)
+    agent = VorasAgent(config=config)
 
     # Handle --guid mode (single lemma)
     if args.guid:
