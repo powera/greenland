@@ -29,7 +29,10 @@ import constants
 from agents.common_args import (
     add_common_args,
     add_output_args,
+    add_backend_args,
+    get_data_source_config,
 )
+from wordfreq.storage.backend.config import DataSourceConfig, BackendType
 from wordfreq.trakaido.utils.export_manager import TrakaidoExporter
 
 # Supported languages and their codes
@@ -47,8 +50,7 @@ class ElniasAgent:
 
     def __init__(
         self,
-        db_path: str = None,
-        debug: bool = False,
+        config: DataSourceConfig,
         language: str = "lt",
         simplified_chinese: bool = True,
     ):
@@ -56,13 +58,12 @@ class ElniasAgent:
         Initialize the Elnias agent.
 
         Args:
-            db_path: Database path (uses default if None)
-            debug: Enable debug logging
+            config: DataSourceConfig with model, debug, and backend settings (required)
             language: Language code ('lt' for Lithuanian, 'zh' for Chinese, 'zh-Hant' for Traditional Chinese)
             simplified_chinese: For 'zh', whether to convert to Simplified (default: True)
         """
-        self.db_path = db_path or constants.WORDFREQ_DB_PATH
-        self.debug = debug
+        self.config = config
+        self.debug = config.debug
         self.simplified_chinese = simplified_chinese
 
         # Handle language variants
@@ -74,7 +75,7 @@ class ElniasAgent:
             self.language = language
             self.language_suffix = language
 
-        if debug:
+        if self.debug:
             logger.setLevel(logging.DEBUG)
 
         # Validate language
@@ -83,10 +84,16 @@ class ElniasAgent:
                 f"Unsupported language: {self.language}. Supported: {', '.join(SUPPORTED_LANGUAGES.keys())}"
             )
 
+        # Get db_path from config (TrakaidoExporter still uses db_path)
+        if config.backend_type == BackendType.SQLITE:
+            db_path = config.sqlite_path
+        else:
+            db_path = constants.WORDFREQ_DB_PATH  # fallback
+
         # Initialize exporter with language parameter and Chinese variant
         self.exporter = TrakaidoExporter(
-            db_path=self.db_path,
-            debug=debug,
+            db_path=db_path,
+            debug=self.debug,
             language=self.language,
             simplified_chinese=self.simplified_chinese if self.language == "zh" else True,
         )
@@ -269,6 +276,7 @@ Examples:
     # Common arguments
     add_common_args(parser)
     add_output_args(parser)
+    add_backend_args(parser)
 
     # Elnias-specific arguments
     parser.add_argument(
@@ -291,15 +299,17 @@ def main():
     parser = get_argument_parser()
     args = parser.parse_args()
 
+    # Create configuration from args (always returns a valid config with defaults)
+    config = get_data_source_config(args)
+
     # Handle Traditional Chinese flag
     simplified_chinese = True
     if args.language == "zh-Hant":
         simplified_chinese = False
 
-    # Create agent
+    # Create agent with config
     agent = ElniasAgent(
-        db_path=args.db_path,
-        debug=args.debug,
+        config=config,
         language=args.language,
         simplified_chinese=simplified_chinese,
     )

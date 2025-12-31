@@ -44,6 +44,7 @@ from agents.common_args import (
 from wordfreq.storage.backend import create_session as create_backend_session
 from wordfreq.storage.backend.config import DataSourceConfig, BackendType
 from wordfreq.storage.models.schema import Lemma
+from wordfreq.storage.translation_helpers import get_translation
 from wordfreq.tools.llm_validators import (
     validate_lemma_form,
     validate_definition,
@@ -60,46 +61,17 @@ logger = logging.getLogger(__name__)
 class LokysAgent:
     """Agent for validating English lemma forms and properties."""
 
-    def __init__(
-        self,
-        db_path: str = None,
-        config: Optional[DataSourceConfig] = None,
-        debug: bool = False,
-        model: str = "gpt-5-mini",
-    ):
+    def __init__(self, config: DataSourceConfig):
         """
         Initialize the Lokys agent.
 
         Args:
-            db_path: Database path (uses default if None) - for backward compatibility
-            config: Backend configuration (if provided, overrides db_path)
-            debug: Enable debug logging
-            model: LLM model to use for validation
+            config: DataSourceConfig with model, debug, and backend settings (required)
         """
-        # Set up backend configuration
-        if config is not None:
-            self.config = config
-        elif db_path is not None:
-            # Backward compatibility: db_path implies SQLite backend
-            self.config = DataSourceConfig(
-                backend_type=BackendType.SQLITE, sqlite_path=db_path
-            )
-        else:
-            # Use default SQLite path
-            self.config = DataSourceConfig(
-                backend_type=BackendType.SQLITE, sqlite_path=constants.WORDFREQ_DB_PATH
-            )
+        self.config = config
+        self.debug = config.debug
 
-        # Keep db_path for backward compatibility
-        if self.config.backend_type == BackendType.SQLITE:
-            self.db_path = self.config.sqlite_path
-        else:
-            self.db_path = None
-
-        self.debug = debug
-        self.model = model
-
-        if debug:
+        if self.debug:
             logger.setLevel(logging.DEBUG)
 
     def get_session(self):
@@ -153,7 +125,7 @@ class LokysAgent:
                 if checked_count % 10 == 0:
                     logger.info(f"Checked {checked_count}/{len(lemmas)} lemmas...")
 
-                result = validate_lemma_form(lemma.lemma_text, lemma.pos_type, self.model)
+                result = validate_lemma_form(lemma.lemma_text, lemma.pos_type, self.config.model)
 
                 if not result["is_lemma"] and result["confidence"] >= confidence_threshold:
                     issues_found.append(
@@ -244,9 +216,9 @@ class LokysAgent:
                     lemma.lemma_text,
                     lemma.definition_text or "",
                     lemma.pos_type,
-                    self.model,
+                    self.config.model,
                     translation_language="Lithuanian",
-                    translation_text=lemma.lithuanian_translation,
+                    translation_text=get_translation(session, lemma, "lt"),
                 )
 
                 if not result["is_valid"] and result["confidence"] >= confidence_threshold:
@@ -463,7 +435,7 @@ class LokysAgent:
         results = {
             "timestamp": start_time.isoformat(),
             "database_path": self.db_path,
-            "model": self.model,
+            "model": self.config.model,
             "sample_rate": sample_rate,
             "confidence_threshold": confidence_threshold,
             "check_type": check_type,
@@ -523,7 +495,7 @@ class LokysAgent:
             word=lemma.lemma_text,
             definition=lemma.definition_text or "",
             pos_type=lemma.pos_type,
-            model=self.model,
+            model=self.config.model,
         )
         return result
 
@@ -627,7 +599,7 @@ class LokysAgent:
             definitions_data.append(item)
 
         llm_result = suggest_disambiguation(
-            word=lemma.lemma_text, definitions=definitions_data, model=self.model
+            word=lemma.lemma_text, definitions=definitions_data, model=self.config.model
         )
 
         return {
@@ -714,15 +686,11 @@ def main():
     if args.dry_run and not args.guid:
         parser.error("--dry-run is not supported in batch mode. LOKYS always applies fixes in batch mode. Use --guid mode for testing individual lemmas.")
 
-    # Create backend configuration using common helper
-    backend_config = get_data_source_config(args)
+    # Create configuration from args (always returns a valid config with defaults)
+    config = get_data_source_config(args)
 
-    # Create agent with backend config
-    if backend_config:
-        agent = LokysAgent(config=backend_config, debug=args.debug, model=args.model)
-    else:
-        # Backward compatibility: use db_path
-        agent = LokysAgent(db_path=args.db_path, debug=args.debug, model=args.model)
+    # Create agent with config
+    agent = LokysAgent(config=config)
 
     # Handle --guid mode
     if args.guid:

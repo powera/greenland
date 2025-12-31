@@ -158,14 +158,11 @@ def main():
     parser = get_argument_parser()
     args = parser.parse_args()
 
-    # Create backend configuration using common helper
-    backend_config = get_data_source_config(args)
+    # Create configuration from args (always returns a valid config with defaults)
+    config = get_data_source_config(args)
 
     # Create agent
-    if backend_config:
-        agent = DramblysAgent(config=backend_config, debug=args.debug)
-    else:
-        agent = DramblysAgent(db_path=args.db_path, debug=args.debug)
+    agent = DramblysAgent(config=config)
 
     # Handle --list-pending mode
     if args.list_pending:
@@ -272,7 +269,6 @@ def main():
                 pos_type=args.pos_type,
                 pos_subtype=args.pos_subtype,
                 top_n=args.top_n,
-                model=args.model,
             )
 
             if "error" in results:
@@ -302,7 +298,6 @@ def main():
                     pos_type=args.pos_type,
                     pos_subtype=args.pos_subtype,
                     top_n=args.top_n,
-                    model=args.model,
                 )
 
                 if "error" in preview:
@@ -323,7 +318,6 @@ def main():
                 pos_type=args.pos_type,
                 pos_subtype=args.pos_subtype,
                 top_n=args.top_n,
-                model=args.model,
                 throttle=args.throttle,
                 dry_run=args.dry_run,
                 stage_only=args.stage_only,

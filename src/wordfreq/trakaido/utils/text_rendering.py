@@ -8,6 +8,7 @@ text-based output in a consistent format.
 
 from typing import Dict, Any, List
 from dataclasses import dataclass
+from wordfreq.storage.translation_helpers import get_translation
 
 
 def format_subtype_display_name(subtype: str) -> str:
@@ -148,27 +149,28 @@ def display_word_data(word_data) -> None:
     print("=" * 60)
 
 
-def display_current_lemma_entry(lemma) -> None:
+def display_current_lemma_entry(session, lemma) -> None:
     """
     Display current lemma entry information in a formatted table.
 
     Args:
+        session: Database session
         lemma: Lemma object from database
     """
     print("\n" + "=" * 60)
     print("CURRENT ENTRY:")
     print("=" * 60)
     print(f"English: {lemma.lemma_text}")
-    print(f"Lithuanian: {lemma.lithuanian_translation}")
+    print(f"Lithuanian: {get_translation(session, lemma, 'lt')}")
     print(f"Part of Speech: {lemma.pos_type}")
     print(f"Subtype: {lemma.pos_subtype}")
     print(f"Definition: {lemma.definition_text}")
     print(f"Level: {lemma.difficulty_level}")
-    print(f"Chinese: {lemma.chinese_translation or 'N/A'}")
-    print(f"Korean: {lemma.korean_translation or 'N/A'}")
-    print(f"French: {lemma.french_translation or 'N/A'}")
-    print(f"Swahili: {lemma.swahili_translation or 'N/A'}")
-    print(f"Vietnamese: {lemma.vietnamese_translation or 'N/A'}")
+    print(f"Chinese: {get_translation(session, lemma, 'zh') or 'N/A'}")
+    print(f"Korean: {get_translation(session, lemma, 'ko') or 'N/A'}")
+    print(f"French: {get_translation(session, lemma, 'fr') or 'N/A'}")
+    print(f"Swahili: {get_translation(session, lemma, 'sw') or 'N/A'}")
+    print(f"Vietnamese: {get_translation(session, lemma, 'vi') or 'N/A'}")
     print(f"Notes: {lemma.notes or 'N/A'}")
     print("=" * 60)
 

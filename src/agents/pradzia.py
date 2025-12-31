@@ -24,7 +24,11 @@ import constants
 from agents.common_args import (
     add_common_args,
     add_output_args,
+    add_backend_args,
+    get_data_source_config,
 )
+from wordfreq.storage.backend import create_session as create_backend_session
+from wordfreq.storage.backend.config import DataSourceConfig, BackendType
 from wordfreq.storage.database import (
     create_database_session,
     ensure_tables_exist,
@@ -44,28 +48,34 @@ logger = logging.getLogger(__name__)
 class PradziaAgent:
     """Agent for database initialization and corpus management."""
 
-    def __init__(self, db_path: str = None, debug: bool = False):
+    def __init__(self, config: DataSourceConfig):
         """
         Initialize the Pradzia agent.
 
         Args:
-            db_path: Database path (uses default if None)
-            debug: Enable debug logging
+            config: DataSourceConfig with backend settings (required)
         """
-        self.db_path = db_path or constants.WORDFREQ_DB_PATH
-        self.debug = debug
+        self.config = config
+        self.debug = config.debug
 
-        if debug:
+        # Keep db_path for backward compatibility
+        if config.backend_type == BackendType.SQLITE:
+            self.db_path = config.sqlite_path
+        else:
+            self.db_path = None
+
+        if self.debug:
             logger.setLevel(logging.DEBUG)
 
         # Log the database path being used (convert to absolute for clarity)
-        import os
-        abs_path = os.path.abspath(self.db_path)
-        logger.info(f"Using SQLite database: {abs_path}")
+        if self.db_path:
+            import os
+            abs_path = os.path.abspath(self.db_path)
+            logger.info(f"Using SQLite database: {abs_path}")
 
     def get_session(self):
-        """Get database session."""
-        return create_database_session(self.db_path)
+        """Get database session using backend abstraction."""
+        return create_backend_session(self.config)
 
     def check_configuration(self) -> Dict[str, Any]:
         """
@@ -826,7 +836,10 @@ def main():
     parser = get_argument_parser()
     args = parser.parse_args()
 
-    agent = PradziaAgent(db_path=args.db_path, debug=args.debug)
+    # Create configuration from args (always returns a valid config with defaults)
+    config = get_data_source_config(args)
+
+    agent = PradziaAgent(config=config)
 
     if args.check:
         agent.run_check(output_file=args.output)

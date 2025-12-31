@@ -31,6 +31,7 @@ from clients.barsukas_cache import BarsukasCacheClient
 from wordfreq.storage.backend import create_session as create_backend_session
 from wordfreq.storage.backend.config import DataSourceConfig, BackendType
 from wordfreq.storage.models.schema import Lemma, DerivativeForm
+from wordfreq.storage.translation_helpers import get_translation
 from wordfreq.translation.client import LinguisticClient
 
 # Configure logging
@@ -138,7 +139,7 @@ class VilkasAgent:
                         {
                             "guid": lemma.guid,
                             "english": lemma.lemma_text,
-                            "lithuanian_translation": lemma.lithuanian_translation,
+                            "lithuanian_translation": get_translation(session, lemma, "lt"),
                             "pos_type": lemma.pos_type,
                             "pos_subtype": lemma.pos_subtype,
                             "difficulty_level": lemma.difficulty_level,
@@ -217,7 +218,7 @@ class VilkasAgent:
                         {
                             "guid": lemma.guid,
                             "english": lemma.lemma_text,
-                            "lithuanian": lemma.lithuanian_translation,
+                            "lithuanian": get_translation(session, lemma, "lt"),
                             "pos_subtype": lemma.pos_subtype,
                             "difficulty_level": lemma.difficulty_level,
                             "current_form_count": len(lt_forms),
@@ -560,7 +561,7 @@ class VilkasAgent:
                 nouns_needing_declensions = [{
                     "guid": lemma.guid,
                     "english": lemma.lemma_text,
-                    "lithuanian": lemma.lithuanian_translation or "(from LemmaTranslation)",
+                    "lithuanian": get_translation(session, lemma, "lt") or "(from LemmaTranslation)",
                     "pos_subtype": lemma.pos_subtype,
                     "difficulty_level": lemma.difficulty_level,
                     "current_form_count": 0,
@@ -733,7 +734,7 @@ class VilkasAgent:
                 verbs_needing_conjugations = [{
                     "guid": lemma.guid,
                     "english": lemma.lemma_text,
-                    "translation": lemma.french_translation or "(from LemmaTranslation)",
+                    "translation": get_translation(session, lemma, "fr") or "(from LemmaTranslation)",
                     "pos_subtype": lemma.pos_subtype,
                     "difficulty_level": lemma.difficulty_level,
                     "current_form_count": 0,

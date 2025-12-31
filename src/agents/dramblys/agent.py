@@ -41,48 +41,28 @@ logger = get_logger(__name__)
 class DramblysAgent:
     """Agent for detecting missing words in the dictionary."""
 
-    def __init__(
-        self,
-        db_path: str = None,
-        backend_config: DataSourceConfig = None,
-        debug: bool = False,
-    ):
+    def __init__(self, config: DataSourceConfig):
         """
         Initialize the Dramblys agent.
 
         Args:
-            db_path: Database path (uses default if None) - for backward compatibility
-            backend_config: Backend configuration (if provided, overrides db_path)
-            debug: Enable debug logging
+            config: DataSourceConfig with model, debug, and backend settings (required)
         """
-        # Set up backend configuration
-        if backend_config is not None:
-            self.backend_config = backend_config
-        elif db_path is not None:
-            # Backward compatibility: db_path implies SQLite backend
-            self.backend_config = DataSourceConfig(
-                backend_type=BackendType.SQLITE, sqlite_path=db_path
-            )
-        else:
-            # Use default SQLite path
-            self.backend_config = DataSourceConfig(
-                backend_type=BackendType.SQLITE, sqlite_path=constants.WORDFREQ_DB_PATH
-            )
+        self.config = config
+        self.debug = config.debug
 
         # Keep db_path for backward compatibility with LinguisticClient
-        if self.backend_config.backend_type == BackendType.SQLITE:
-            self.db_path = self.backend_config.sqlite_path
+        if self.config.backend_type == BackendType.SQLITE:
+            self.db_path = self.config.sqlite_path
         else:
             self.db_path = None
 
-        self.debug = debug
-
-        if debug:
+        if self.debug:
             logger.setLevel(logging.DEBUG)
 
     def get_session(self):
         """Get database session using backend abstraction."""
-        return create_backend_session(self.backend_config)
+        return create_backend_session(self.config)
 
     def check_high_frequency_missing_words(
         self, top_n: int = 5000, min_rank: int = 1
@@ -321,7 +301,7 @@ class DramblysAgent:
             session.close()
 
     def find_words_for_subtype(
-        self, pos_type: str, pos_subtype: str, top_n: int = 250, model: str = "gpt-5-mini"
+        self, pos_type: str, pos_subtype: str, top_n: int = 250
     ) -> Dict[str, any]:
         """
         Use LLM to identify which high-frequency words have meanings in a specific POS subtype.
@@ -330,7 +310,6 @@ class DramblysAgent:
             pos_type: Part of speech (noun, verb, adjective, adverb)
             pos_subtype: Specific subtype (e.g., 'animals', 'physical_action')
             top_n: Number of top frequency words to review
-            model: LLM model to use
 
         Returns:
             Dictionary with words that fit the subtype
@@ -373,7 +352,7 @@ class DramblysAgent:
             from clients.unified_client import UnifiedLLMClient
             from clients.types import Schema, SchemaProperty
 
-            client = UnifiedLLMClient(debug=self.debug)
+            client = UnifiedLLMClient.from_config(self.config)
 
             schema = Schema(
                 name="SubtypeWords",
@@ -413,7 +392,7 @@ For each word that has a meaning in this category, provide:
 Only include words where you're confident they have a {pos_subtype} {pos_type} meaning.
 """
 
-            response = client.generate_chat(prompt=prompt, model=model, json_schema=schema)
+            response = client.generate_chat(prompt=prompt, json_schema=schema)
 
             if response.structured_data and "matches" in response.structured_data:
                 matches = response.structured_data["matches"]
@@ -453,7 +432,6 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
         pos_type: str,
         pos_subtype: str,
         top_n: int = 250,
-        model: str = "gpt-5-mini",
         throttle: float = 1.0,
         dry_run: bool = False,
         stage_only: bool = False,
@@ -466,7 +444,6 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
             pos_type: Part of speech (noun, verb, adjective, adverb)
             pos_subtype: Specific subtype (e.g., 'animals', 'physical_action')
             top_n: Number of top frequency words to review
-            model: LLM model to use
             throttle: Seconds to wait between API calls
             dry_run: If True, show what would be added without making changes
             stage_only: If True, add to pending_imports instead of processing directly
@@ -493,7 +470,7 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
             }
 
         # Find matching words (makes LLM calls)
-        find_results = self.find_words_for_subtype(pos_type, pos_subtype, top_n, model)
+        find_results = self.find_words_for_subtype(pos_type, pos_subtype, top_n)
 
         if "error" in find_results:
             return find_results
@@ -502,7 +479,7 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
 
         # Process each matched word
         session = self.get_session()
-        client = LinguisticClient(model=model, db_path=self.db_path, debug=self.debug)
+        client = LinguisticClient(model=self.config.model, db_path=self.db_path, debug=self.debug)
 
         successful = 0
         failed = 0

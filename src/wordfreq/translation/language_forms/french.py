@@ -10,6 +10,7 @@ from clients.types import Schema, SchemaProperty
 from wordfreq.storage.models.enums import GrammaticalForm
 import util.prompt_loader
 from wordfreq.storage import database as linguistic_db
+from wordfreq.storage.translation_helpers import get_translation
 
 logger = logging.getLogger(__name__)
 
@@ -64,12 +65,13 @@ def query_french_noun_forms(client, lemma_id: int, get_session_func) -> Tuple[Di
     """Query LLM for French noun forms (2 genders × 2 numbers = 4 forms)."""
     session = get_session_func()
     lemma = session.query(linguistic_db.Lemma).filter(linguistic_db.Lemma.id == lemma_id).first()
-    if not lemma or not lemma.french_translation or lemma.pos_type.lower() != "noun":
+    french_translation = get_translation(session, lemma, "fr") if lemma else None
+    if not lemma or not french_translation or lemma.pos_type.lower() != "noun":
         logger.error(f"Invalid lemma for French noun forms: {lemma_id}")
         return {}, False
 
     noun, english_noun, definition, pos_subtype = (
-        lemma.french_translation,
+        french_translation,
         lemma.lemma_text,
         lemma.definition_text,
         lemma.pos_subtype,

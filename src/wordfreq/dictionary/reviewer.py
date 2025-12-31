@@ -9,6 +9,7 @@ from dataclasses import dataclass
 
 import constants
 from wordfreq.storage import database as linguistic_db
+from wordfreq.storage.translation_helpers import get_translation
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -113,29 +114,35 @@ class LinguisticReviewer:
                     )
 
                 # Translations are now in the lemma
-                if derivative_form.lemma.chinese_translation:
+                chinese = get_translation(self.session, derivative_form.lemma, "zh")
+                if chinese:
                     print(
-                        f"    {self.c.BLUE}Chinese:{self.c.ENDC} {derivative_form.lemma.chinese_translation}"
+                        f"    {self.c.BLUE}Chinese:{self.c.ENDC} {chinese}"
                     )
-                if derivative_form.lemma.french_translation:
+                french = get_translation(self.session, derivative_form.lemma, "fr")
+                if french:
                     print(
-                        f"    {self.c.BLUE}French:{self.c.ENDC} {derivative_form.lemma.french_translation}"
+                        f"    {self.c.BLUE}French:{self.c.ENDC} {french}"
                     )
-                if derivative_form.lemma.korean_translation:
+                korean = get_translation(self.session, derivative_form.lemma, "ko")
+                if korean:
                     print(
-                        f"    {self.c.BLUE}Korean:{self.c.ENDC} {derivative_form.lemma.korean_translation}"
+                        f"    {self.c.BLUE}Korean:{self.c.ENDC} {korean}"
                     )
-                if derivative_form.lemma.swahili_translation:
+                swahili = get_translation(self.session, derivative_form.lemma, "sw")
+                if swahili:
                     print(
-                        f"    {self.c.BLUE}Swahili:{self.c.ENDC} {derivative_form.lemma.swahili_translation}"
+                        f"    {self.c.BLUE}Swahili:{self.c.ENDC} {swahili}"
                     )
-                if derivative_form.lemma.lithuanian_translation:
+                lithuanian = get_translation(self.session, derivative_form.lemma, "lt")
+                if lithuanian:
                     print(
-                        f"    {self.c.BLUE}Lithuanian:{self.c.ENDC} {derivative_form.lemma.lithuanian_translation}"
+                        f"    {self.c.BLUE}Lithuanian:{self.c.ENDC} {lithuanian}"
                     )
-                if derivative_form.lemma.vietnamese_translation:
+                vietnamese = get_translation(self.session, derivative_form.lemma, "vi")
+                if vietnamese:
                     print(
-                        f"    {self.c.BLUE}Vietnamese:{self.c.ENDC} {derivative_form.lemma.vietnamese_translation}"
+                        f"    {self.c.BLUE}Vietnamese:{self.c.ENDC} {vietnamese}"
                     )
 
                 if derivative_form.notes:

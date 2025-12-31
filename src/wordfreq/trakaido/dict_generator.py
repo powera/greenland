@@ -37,6 +37,7 @@ from wordfreq.storage.database import (
     get_lemmas_by_subtype_and_level,
 )
 from wordfreq.storage.models.schema import Lemma, DerivativeForm
+from wordfreq.storage.translation_helpers import get_translation
 from wordfreq.tools.chinese_converter import to_simplified
 import constants
 
@@ -57,9 +58,10 @@ def get_english_word_for_lemma(session, lemma: Lemma) -> str:
 
 def get_lithuanian_word_for_lemma(session, lemma: Lemma) -> str:
     """Get the primary Lithuanian translation for a lemma."""
-    # First try to get from the lemma's direct translation field
-    if lemma.lithuanian_translation:
-        return lemma.lithuanian_translation
+    # First try to get from the translation table
+    lithuanian_translation = get_translation(session, lemma, "lt")
+    if lithuanian_translation:
+        return lithuanian_translation
 
     # Fallback to Lithuanian base forms
     for form in lemma.derivative_forms:
@@ -87,9 +89,9 @@ def get_chinese_word_for_lemma(session, lemma: Lemma, simplified: bool = True) -
     Returns:
         Chinese translation (default: Simplified)
     """
-    # Get from the lemma's direct translation field (stored as Traditional)
-    if lemma.chinese_translation:
-        traditional = lemma.chinese_translation
+    # Get from the translation table (stored as Traditional)
+    traditional = get_translation(session, lemma, "zh")
+    if traditional:
         if simplified:
             return to_simplified(traditional)
         else:

@@ -134,35 +134,15 @@ class LapeAgent:
         # },
     }
 
-    def __init__(
-        self,
-        db_path: str = None,
-        config: DataSourceConfig = None,
-        debug: bool = False,
-        model: str = None,
-    ):
+    def __init__(self, config: DataSourceConfig):
         """
         Initialize the Lape agent.
 
         Args:
-            db_path: Database path (uses default if None) - for backward compatibility
-            config: Backend configuration (if provided, overrides db_path)
-            debug: Enable debug logging
-            model: LLM model to use (default: gpt-5-mini)
+            config: DataSourceConfig with model, debug, and backend settings (required)
         """
-        # Set up backend configuration
-        if config is not None:
-            self.config = config
-        elif db_path is not None:
-            # Backward compatibility: db_path implies SQLite backend
-            self.config = DataSourceConfig(
-                backend_type=BackendType.SQLITE, sqlite_path=db_path
-            )
-        else:
-            # Use default SQLite path
-            self.config = DataSourceConfig(
-                backend_type=BackendType.SQLITE, sqlite_path=constants.WORDFREQ_DB_PATH
-            )
+        self.config = config
+        self.debug = config.debug
 
         # Keep db_path for backward compatibility with LinguisticClient
         if self.config.backend_type == BackendType.SQLITE:
@@ -170,12 +150,10 @@ class LapeAgent:
         else:
             self.db_path = None
 
-        self.debug = debug
-        self.model = model or "gpt-5-mini"
         self.linguistic_client = None  # Lazy initialization
         self.llm_client = None  # For direct LLM calls
 
-        if debug:
+        if self.debug:
             logger.setLevel(logging.DEBUG)
 
     def get_session(self):
@@ -186,15 +164,16 @@ class LapeAgent:
         """Get or create linguistic client for LLM queries."""
         if self.linguistic_client is None:
             self.linguistic_client = LinguisticClient(
-                model=self.model, db_path=self.db_path, debug=self.debug
+                model=self.config.model, db_path=self.db_path, debug=self.debug
             )
         return self.linguistic_client
 
     def get_llm_client(self):
         """Get or create LLM client for direct queries."""
         if self.llm_client is None:
-            self.llm_client = UnifiedLLMClient(debug=self.debug)
-            self.llm_client.warm_model(self.model)
+            self.llm_client = UnifiedLLMClient.from_config(self.config)
+            if self.config.model:
+                self.llm_client.warm_model(self.config.model)
         return self.llm_client
 
     def generate_measure_words(
@@ -259,7 +238,7 @@ class LapeAgent:
         try:
             client = self.get_llm_client()
             response = client.generate_chat(
-                prompt=prompt_text, model=self.model, json_schema=schema, context=context
+                prompt=prompt_text, json_schema=schema, context=context
             )
 
             # Extract structured data
@@ -362,7 +341,7 @@ class LapeAgent:
         try:
             client = self.get_llm_client()
             response = client.generate_chat(
-                prompt=prompt_text, model=self.model, json_schema=schema, context=context
+                prompt=prompt_text, json_schema=schema, context=context
             )
 
             # Extract structured data
@@ -518,7 +497,7 @@ class LapeAgent:
                                 "fact_value": fact_value,
                                 "confidence": confidence,
                                 "agent": "lape",
-                                "model": self.model,
+                                "model": self.config.model,
                             },
                         )
                         session.commit()
@@ -646,14 +625,11 @@ def main():
     parser = get_argument_parser()
     args = parser.parse_args()
 
-    # Create backend configuration using common helper
-    backend_config = get_data_source_config(args)
+    # Create configuration from args (always returns a valid config with defaults)
+    config = get_data_source_config(args)
 
     # Create agent
-    if backend_config:
-        agent = LapeAgent(config=backend_config, debug=args.debug, model=args.model)
-    else:
-        agent = LapeAgent(db_path=args.db_path, debug=args.debug, model=args.model)
+    agent = LapeAgent(config=config)
 
     # Generate facts
     try:

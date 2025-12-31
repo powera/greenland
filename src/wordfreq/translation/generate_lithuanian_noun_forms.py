@@ -19,6 +19,7 @@ from wordfreq.translation.client import LinguisticClient
 from wordfreq.storage import database as linguistic_db
 from wordfreq.storage.models.enums import GrammaticalForm
 from wordfreq.storage.connection_pool import get_session
+from wordfreq.storage.translation_helpers import get_translation
 import constants
 
 # Configure logging
@@ -79,7 +80,7 @@ def get_lithuanian_noun_lemmas(db_path: str, limit: int = None) -> List[Dict]:
             {
                 "id": lemma.id,
                 "english": lemma.lemma_text,
-                "lithuanian": lemma.lithuanian_translation,
+                "lithuanian": get_translation(session, lemma, "lt"),
                 "pos_subtype": lemma.pos_subtype,
                 "frequency_rank": lemma.frequency_rank,
             }
@@ -140,8 +141,9 @@ def process_lemma(
             return True
 
         # Query for declensions based on source
+        lithuanian_translation = get_translation(session, lemma, "lt")
         logger.info(
-            f"Querying declensions for lemma ID {lemma_id}: {lemma.lemma_text} -> {lemma.lithuanian_translation} (source: {source})"
+            f"Querying declensions for lemma ID {lemma_id}: {lemma.lemma_text} -> {lithuanian_translation} (source: {source})"
         )
 
         number_type = "regular"  # Default value
@@ -149,7 +151,7 @@ def process_lemma(
             # Use Wiktionary-based implementation
             from wordfreq.translation.wiki import get_lithuanian_noun_forms
 
-            forms_dict, success = get_lithuanian_noun_forms(lemma.lithuanian_translation)
+            forms_dict, success = get_lithuanian_noun_forms(lithuanian_translation)
             # Wiki implementation doesn't return number_type, so we'll try to detect it
             # from the forms: if all singular forms are missing/empty, it's plurale_tantum
             if success and forms_dict:

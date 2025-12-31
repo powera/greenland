@@ -10,6 +10,7 @@ from clients.types import Schema, SchemaProperty
 from wordfreq.storage.models.enums import GrammaticalForm
 import util.prompt_loader
 from wordfreq.storage import database as linguistic_db
+from wordfreq.storage.translation_helpers import get_translation
 
 logger = logging.getLogger(__name__)
 
@@ -119,7 +120,8 @@ def query_lithuanian_noun_declensions(
         logger.error(f"Lemma with ID {lemma_id} not found")
         return {}, False, "regular"
 
-    if not lemma.lithuanian_translation:
+    lithuanian_translation = get_translation(session, lemma, "lt")
+    if not lithuanian_translation:
         logger.error(f"Lemma ID {lemma_id} has no Lithuanian translation")
         return {}, False, "regular"
 
@@ -127,7 +129,7 @@ def query_lithuanian_noun_declensions(
         logger.error(f"Lemma ID {lemma_id} is not a noun (pos_type: {lemma.pos_type})")
         return {}, False, "regular"
 
-    noun = lemma.lithuanian_translation
+    noun = lithuanian_translation
     english_word = lemma.lemma_text
     definition = lemma.definition_text
     pos_subtype = lemma.pos_subtype
@@ -259,7 +261,8 @@ def query_lithuanian_verb_conjugations(
         logger.error(f"Lemma with ID {lemma_id} not found")
         return {}, False
 
-    if not lemma.lithuanian_translation:
+    lithuanian_translation = get_translation(session, lemma, "lt")
+    if not lithuanian_translation:
         logger.error(f"Lemma ID {lemma_id} has no Lithuanian translation")
         return {}, False
 
@@ -267,7 +270,7 @@ def query_lithuanian_verb_conjugations(
         logger.error(f"Lemma ID {lemma_id} is not a verb (pos_type: {lemma.pos_type})")
         return {}, False
 
-    verb = lemma.lithuanian_translation
+    verb = lithuanian_translation
     english_verb = lemma.lemma_text
     definition = lemma.definition_text
     pos_subtype = lemma.pos_subtype
@@ -397,7 +400,8 @@ def query_lithuanian_adjective_declensions(
         logger.error(f"Lemma with ID {lemma_id} not found")
         return {}, False
 
-    if not lemma.lithuanian_translation:
+    lithuanian_translation = get_translation(session, lemma, "lt")
+    if not lithuanian_translation:
         logger.error(f"Lemma ID {lemma_id} has no Lithuanian translation")
         return {}, False
 
@@ -405,7 +409,7 @@ def query_lithuanian_adjective_declensions(
         logger.error(f"Lemma ID {lemma_id} is not an adjective (pos_type: {lemma.pos_type})")
         return {}, False
 
-    adjective = lemma.lithuanian_translation
+    adjective = lithuanian_translation
     english_adjective = lemma.lemma_text
     definition = lemma.definition_text
     pos_subtype = lemma.pos_subtype
@@ -547,7 +551,8 @@ def query_lithuanian_adverb_forms(
         logger.error(f"Lemma with ID {lemma_id} not found")
         return {}, False
 
-    if not lemma.lithuanian_translation:
+    lithuanian_translation = get_translation(session, lemma, "lt")
+    if not lithuanian_translation:
         logger.error(f"Lemma ID {lemma_id} has no Lithuanian translation")
         return {}, False
 
@@ -555,7 +560,7 @@ def query_lithuanian_adverb_forms(
         logger.error(f"Lemma ID {lemma_id} is not an adverb (pos_type: {lemma.pos_type})")
         return {}, False
 
-    adverb = lemma.lithuanian_translation
+    adverb = lithuanian_translation
     english_adverb = lemma.lemma_text
     definition = lemma.definition_text
     pos_subtype = lemma.pos_subtype

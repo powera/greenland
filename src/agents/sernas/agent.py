@@ -51,33 +51,15 @@ logger = logging.getLogger(__name__)
 class SernasAgent:
     """Agent for generating synonyms and alternative forms across multiple languages."""
 
-    def __init__(
-        self,
-        db_path: str = None,
-        config: DataSourceConfig = None,
-        debug: bool = False,
-    ):
+    def __init__(self, config: DataSourceConfig):
         """
         Initialize the Šernas agent.
 
         Args:
-            db_path: Database path (uses default if None) - for backward compatibility
-            config: Backend configuration (if provided, overrides db_path)
-            debug: Enable debug logging
+            config: DataSourceConfig with model, debug, and backend settings (required)
         """
-        # Set up backend configuration
-        if config is not None:
-            self.config = config
-        elif db_path is not None:
-            # Backward compatibility: db_path implies SQLite backend
-            self.config = DataSourceConfig(
-                backend_type=BackendType.SQLITE, sqlite_path=db_path
-            )
-        else:
-            # Use default SQLite path
-            self.config = DataSourceConfig(
-                backend_type=BackendType.SQLITE, sqlite_path=constants.WORDFREQ_DB_PATH
-            )
+        self.config = config
+        self.debug = config.debug
 
         # Keep db_path for backward compatibility with LinguisticClient
         if self.config.backend_type == BackendType.SQLITE:
@@ -85,9 +67,7 @@ class SernasAgent:
         else:
             self.db_path = None
 
-        self.debug = debug
-
-        if debug:
+        if self.debug:
             logger.setLevel(logging.DEBUG)
 
     def get_session(self):
