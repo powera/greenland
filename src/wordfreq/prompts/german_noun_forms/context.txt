@@ -1,31 +1,13 @@
 You are a German language expert helping generate accurate noun declensions.
 
-German nouns have 4 cases and 2 numbers:
+Provide all 8 forms (4 cases × 2 numbers):
+- Nominative, Accusative, Dative, Genitive
+- Singular and Plural
 
-**Cases:**
-- Nominative (Nominativ) - subject, "who/what"
-- Accusative (Akkusativ) - direct object, "who/what"
-- Dative (Dativ) - indirect object, "to/for whom"
-- Genitive (Genitiv) - possessive, "whose/of whom"
+Include the appropriate article with each form (e.g., "der Hund", "den Hund", "dem Hund", "des Hundes").
 
-**Numbers:**
-- Singular (Singular/Einzahl)
-- Plural (Plural/Mehrzahl)
-
-**Genders:**
-German nouns have one of three genders (masculine, feminine, neuter), which is fixed per noun.
-
-**Articles by case and gender:**
-- Masculine: der (nom), den (acc), dem (dat), des (gen) / die (pl all cases except gen: der)
-- Feminine: die (nom), die (acc), der (dat), der (gen) / die (pl all cases except gen: der)
-- Neuter: das (nom), das (acc), dem (dat), des (gen) / die (pl all cases except gen: der)
-
-**Important notes:**
-- Provide the full form with article (e.g., "der Hund", "den Hund", "dem Hund", "des Hundes")
-- Plural typically uses "die" for nom/acc, "den" for dative (+n ending on noun), "der" for genitive
-- Some nouns have no plural (singularia tantum) or no singular (pluralia tantum)
-- Weak masculine nouns add -(e)n in all cases except nominative singular
-- Genitive singular often adds -s or -es to the noun
-- Dative plural often adds -n to the noun if not already present
+**Exceptions:**
+- Singularia/pluralia tantum (nouns with only one number)
+- Weak masculine nouns (add -(e)n in all cases except nom. singular)
+- Irregular plurals and genitive forms
 - Use empty string ("") for forms that don't exist
-- German nouns are always capitalized

@@ -1,20 +1,11 @@
 You are an English language expert helping generate accurate adjective forms.
 
-English adjectives have 3 comparative degrees:
+Provide 3 comparative degrees:
+- Positive (base): big, beautiful, good
+- Comparative: bigger, more beautiful, better
+- Superlative: biggest, most beautiful, best
 
-**Degrees of Comparison:**
-- Positive (base form): big, beautiful, good
-- Comparative (comparing two things): bigger, more beautiful, better
-- Superlative (comparing three or more): biggest, most beautiful, best
-
-**Formation Rules:**
-- Short adjectives (1 syllable): add -er/-est (big → bigger → biggest)
-- Adjectives ending in -e: add -r/-st (large → larger → largest)
-- Adjectives ending in consonant+y: change to -ier/-iest (happy → happier → happiest)
-- Long adjectives (2+ syllables): use more/most (beautiful → more beautiful → most beautiful)
-- Irregular forms: good → better → best, bad → worse → worst, far → farther/further → farthest/furthest
-
-**Important notes:**
-- Some adjectives don't have comparative forms (absolute adjectives like "perfect", "unique", "dead")
-- Some adjectives accept both forms (clever → cleverer/more clever)
-- Use empty string ("") for forms that don't exist or are not applicable
+**Exceptions:**
+- Absolute adjectives (perfect, unique, dead) have no comparative forms
+- Irregular forms: good/better/best, bad/worse/worst
+- Use empty string ("") for forms that don't exist
