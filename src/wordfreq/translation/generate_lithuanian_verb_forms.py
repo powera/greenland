@@ -19,6 +19,7 @@ from wordfreq.translation.client import LinguisticClient
 from wordfreq.storage import database as linguistic_db
 from wordfreq.storage.models.enums import GrammaticalForm
 from wordfreq.storage.connection_pool import get_session
+from wordfreq.storage.translation_helpers import get_translation
 import constants
 
 # Configure logging
@@ -92,7 +93,7 @@ def get_lithuanian_verb_lemmas(db_path: str, limit: int = None) -> List[Dict]:
             {
                 "id": lemma.id,
                 "english": lemma.lemma_text,
-                "lithuanian": lemma.lithuanian_translation,
+                "lithuanian": get_translation(session, lemma, "lt"),
                 "pos_subtype": lemma.pos_subtype,
                 "frequency_rank": lemma.frequency_rank,
             }
@@ -150,8 +151,9 @@ def process_lemma(client: LinguisticClient, lemma_id: int, db_path: str) -> bool
             return True
 
         # Query for conjugations
+        lithuanian_translation = get_translation(session, lemma, "lt")
         logger.info(
-            f"Querying conjugations for lemma ID {lemma_id}: {lemma.lemma_text} -> {lemma.lithuanian_translation}"
+            f"Querying conjugations for lemma ID {lemma_id}: {lemma.lemma_text} -> {lithuanian_translation}"
         )
 
         forms_dict, success = client.query_lithuanian_verb_conjugations(lemma_id)

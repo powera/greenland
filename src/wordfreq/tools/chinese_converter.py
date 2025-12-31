@@ -9,6 +9,7 @@ and this utility converts them to Simplified when needed for export/display.
 
 import logging
 from typing import Optional
+from wordfreq.storage.translation_helpers import get_translation
 
 try:
     from opencc import OpenCC
@@ -116,21 +117,21 @@ def to_traditional(text: str) -> str:
         return text
 
 
-def get_chinese_translation(lemma, simplified: bool = False) -> Optional[str]:
+def get_chinese_translation(session, lemma, simplified: bool = False) -> Optional[str]:
     """
     Get Chinese translation from a lemma object.
 
     Args:
-        lemma: Lemma object with chinese_translation field (stored as Traditional)
+        session: Database session
+        lemma: Lemma object
         simplified: If True, convert to Simplified Chinese; if False, return Traditional
 
     Returns:
         Chinese translation in requested form, or None if not available
     """
-    if not hasattr(lemma, "chinese_translation") or not lemma.chinese_translation:
+    traditional = get_translation(session, lemma, "zh")
+    if not traditional:
         return None
-
-    traditional = lemma.chinese_translation
 
     if simplified:
         return to_simplified(traditional)
