@@ -159,7 +159,7 @@ class UnifiedLLMClient:
     def generate_chat(
         self,
         prompt: str,
-        model: str,
+        model: Optional[str] = None,
         brief: bool = False,
         json_schema: Optional[Any] = None,
         context: Optional[str] = None,
@@ -170,7 +170,7 @@ class UnifiedLLMClient:
 
         Args:
             prompt: The main prompt/question
-            model: Model name (determines backend)
+            model: Model name (determines backend). If not provided, uses default_model from config.
             brief: Whether to limit response length
             json_schema: Schema for structured response (if provided, returns JSON) - either a dict (old) or a types.Schema
             context: Optional context to include before the prompt
@@ -185,7 +185,14 @@ class UnifiedLLMClient:
             TimeoutError: If request exceeds configured timeout
             ConnectionError: If connection to backend fails
             RuntimeError: For other request failures
+            ValueError: If model is not provided and no default_model is set
         """
+        # Use default model if not provided
+        if model is None:
+            if not hasattr(self, 'default_model') or self.default_model is None:
+                raise ValueError("No model specified and no default_model configured")
+            model = self.default_model
+
         if self.debug:
             logger.debug(
                 "Chat request: model=%s, brief=%s, schema=%s", model, brief, bool(json_schema)

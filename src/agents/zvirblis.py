@@ -65,50 +65,18 @@ logger = logging.getLogger(__name__)
 class ZvirblisAgent:
     """Agent for generating example sentences from vocabulary words."""
 
-    def __init__(
-        self,
-        config: DataSourceConfig = None,
-        db_path: str = None,
-    ):
+    def __init__(self, config: DataSourceConfig):
         """
         Initialize the Žvirblis agent.
 
         Args:
-            config: DataSourceConfig with model, debug, and backend settings (recommended)
-            db_path: Database path (backward compatibility - will create basic config)
+            config: DataSourceConfig with model, debug, and backend settings (required)
         """
-        # Set up backend configuration
-        if config is not None:
-            self.config = config
-        elif db_path is not None:
-            # Backward compatibility: db_path implies SQLite backend
-            self.config = DataSourceConfig(
-                backend_type=BackendType.SQLITE,
-                sqlite_path=db_path,
-                model=constants.DEFAULT_MODEL,
-                debug=False,
-            )
-        else:
-            # Use default SQLite path
-            self.config = DataSourceConfig(
-                backend_type=BackendType.SQLITE,
-                sqlite_path=constants.WORDFREQ_DB_PATH,
-                model=constants.DEFAULT_MODEL,
-                debug=False,
-            )
-
-        # Keep db_path for backward compatibility
-        if self.config.backend_type == BackendType.SQLITE:
-            self.db_path = self.config.sqlite_path
-        else:
-            self.db_path = None
-
-        # Extract settings from config
-        self.debug = self.config.debug
-        self.model = self.config.model
+        self.config = config
+        self.debug = config.debug
 
         # Create LLM client from config
-        self.llm_client = UnifiedLLMClient.from_config(self.config)
+        self.llm_client = UnifiedLLMClient.from_config(config)
 
         if self.debug:
             logger.setLevel(logging.DEBUG)
@@ -382,7 +350,6 @@ Focus on variety, natural language usage, and accurate translations."""
         try:
             response = self.llm_client.generate_chat(
                 prompt=prompt,
-                model=self.model,
                 json_schema=schema,
                 timeout=60,  # 60 seconds for web UX - reasonable for single sentence
             )
@@ -746,15 +713,11 @@ def main():
     parser = get_argument_parser()
     args = parser.parse_args()
 
-    # Create backend configuration using common helper (includes model and debug from args)
-    backend_config = get_data_source_config(args, default_model=constants.DEFAULT_MODEL)
+    # Create configuration from args (always returns a valid config with defaults)
+    config = get_data_source_config(args)
 
     # Initialize agent with config
-    if backend_config:
-        agent = ZvirblisAgent(config=backend_config)
-    else:
-        # Fallback: create config from db_path
-        agent = ZvirblisAgent(db_path=args.db_path)
+    agent = ZvirblisAgent(config=config)
 
     if args.guid:
         # Generate for specific GUID

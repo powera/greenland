@@ -324,9 +324,10 @@ def get_data_source_config(args: Any, default_model: str = None):
         default_model: Default LLM model if not specified in args
 
     Returns:
-        DataSourceConfig instance or None (if neither backend nor db_path specified)
+        DataSourceConfig instance (always returns a valid config)
     """
     from wordfreq.storage.backend.config import DataSourceConfig, BackendType
+    import constants
 
     # Determine backend type and paths
     backend_type = None
@@ -335,7 +336,6 @@ def get_data_source_config(args: Any, default_model: str = None):
 
     if hasattr(args, 'backend') and args.backend:
         if args.backend == "sqlite":
-            import constants
             backend_type = BackendType.SQLITE
             sqlite_path = args.db_path if hasattr(args, 'db_path') and args.db_path else constants.WORDFREQ_DB_PATH
         elif args.backend == "jsonl":
@@ -349,16 +349,17 @@ def get_data_source_config(args: Any, default_model: str = None):
         backend_type = BackendType.SQLITE
         sqlite_path = args.db_path
 
-    # If no backend specified, return None (let agent handle defaults)
+    # If no backend specified, use default SQLite backend
     if backend_type is None:
-        return None
+        backend_type = BackendType.SQLITE
+        sqlite_path = constants.WORDFREQ_DB_PATH
 
     # Get cache configuration
     barsukas_url = args.barsukas_url if hasattr(args, 'barsukas_url') else None
     cache_only = args.cache_only if hasattr(args, 'cache_only') else False
 
-    # Get LLM model (prefer args.model, fall back to default_model)
-    model = args.model if hasattr(args, 'model') and args.model else default_model
+    # Get LLM model (prefer args.model, fall back to default_model or DEFAULT_MODEL)
+    model = args.model if hasattr(args, 'model') and args.model else (default_model or DEFAULT_MODEL)
 
     # Get debug flag
     debug = args.debug if hasattr(args, 'debug') else False
