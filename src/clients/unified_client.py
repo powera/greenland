@@ -45,26 +45,27 @@ class UnifiedLLMClient:
         self.gemini = gemini_client.GeminiClient(timeout=timeout, debug=False)
 
     @classmethod
-    def from_config(cls, config: "DataSourceConfig", timeout: int = DEFAULT_TIMEOUT, debug: bool = True) -> "UnifiedLLMClient":
+    def from_config(cls, config: "DataSourceConfig", timeout: int = DEFAULT_TIMEOUT) -> "UnifiedLLMClient":
         """
         Create a UnifiedLLMClient from a DataSourceConfig.
 
-        This is a thin wrapper that extracts the model from the config for future use.
+        This extracts the model and debug settings from the config.
         The model parameter from config will be used when making LLM requests.
 
         Args:
-            config: DataSourceConfig containing model and other configuration
+            config: DataSourceConfig containing model, debug, and other configuration
             timeout: Request timeout in seconds for all backends
-            debug: Whether to enable debug logging
 
         Returns:
-            UnifiedLLMClient instance with model from config
+            UnifiedLLMClient instance with model and debug from config
 
         Example:
             config = get_data_source_config(args)
             client = UnifiedLLMClient.from_config(config)
-            # Client now knows to use config.model for requests
+            # Client now has config.model and config.debug settings
         """
+        # Use debug setting from config
+        debug = config.debug if hasattr(config, 'debug') else False
         client = cls(timeout=timeout, debug=debug)
         # Store the model from config for use in requests
         # This allows agents to just call client methods without passing model each time

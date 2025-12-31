@@ -67,19 +67,15 @@ class ZvirblisAgent:
 
     def __init__(
         self,
-        db_path: str = None,
         config: DataSourceConfig = None,
-        debug: bool = False,
-        model: str = "gpt-5-mini",
+        db_path: str = None,
     ):
         """
         Initialize the Žvirblis agent.
 
         Args:
-            db_path: Database path (uses default if None) - for backward compatibility
-            config: Backend configuration (if provided, overrides db_path)
-            debug: Enable debug logging
-            model: LLM model to use for sentence generation
+            config: DataSourceConfig with model, debug, and backend settings (recommended)
+            db_path: Database path (backward compatibility - will create basic config)
         """
         # Set up backend configuration
         if config is not None:
@@ -87,12 +83,18 @@ class ZvirblisAgent:
         elif db_path is not None:
             # Backward compatibility: db_path implies SQLite backend
             self.config = DataSourceConfig(
-                backend_type=BackendType.SQLITE, sqlite_path=db_path
+                backend_type=BackendType.SQLITE,
+                sqlite_path=db_path,
+                model=constants.DEFAULT_MODEL,
+                debug=False,
             )
         else:
             # Use default SQLite path
             self.config = DataSourceConfig(
-                backend_type=BackendType.SQLITE, sqlite_path=constants.WORDFREQ_DB_PATH
+                backend_type=BackendType.SQLITE,
+                sqlite_path=constants.WORDFREQ_DB_PATH,
+                model=constants.DEFAULT_MODEL,
+                debug=False,
             )
 
         # Keep db_path for backward compatibility
@@ -101,11 +103,14 @@ class ZvirblisAgent:
         else:
             self.db_path = None
 
-        self.debug = debug
-        self.model = model
-        self.llm_client = UnifiedLLMClient()
+        # Extract settings from config
+        self.debug = self.config.debug
+        self.model = self.config.model
 
-        if debug:
+        # Create LLM client from config
+        self.llm_client = UnifiedLLMClient.from_config(self.config)
+
+        if self.debug:
             logger.setLevel(logging.DEBUG)
 
     def get_session(self):
@@ -741,14 +746,15 @@ def main():
     parser = get_argument_parser()
     args = parser.parse_args()
 
-    # Create backend configuration using common helper
-    backend_config = get_data_source_config(args)
+    # Create backend configuration using common helper (includes model and debug from args)
+    backend_config = get_data_source_config(args, default_model=constants.DEFAULT_MODEL)
 
-    # Initialize agent
+    # Initialize agent with config
     if backend_config:
-        agent = ZvirblisAgent(config=backend_config, debug=args.debug, model=args.model)
+        agent = ZvirblisAgent(config=backend_config)
     else:
-        agent = ZvirblisAgent(db_path=args.db_path, debug=args.debug, model=args.model)
+        # Fallback: create config from db_path
+        agent = ZvirblisAgent(db_path=args.db_path)
 
     if args.guid:
         # Generate for specific GUID

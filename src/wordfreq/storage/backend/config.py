@@ -31,6 +31,7 @@ class DataSourceConfig:
         barsukas_url: Optional[str] = None,
         cache_only: bool = False,
         model: Optional[str] = None,
+        debug: bool = False,
     ):
         """Initialize data source configuration.
 
@@ -41,6 +42,7 @@ class DataSourceConfig:
             barsukas_url: URL of BARSUKAS server for cached translations (e.g., http://server:5000)
             cache_only: If True, only use cached translations and fail if not in cache
             model: LLM model to use (e.g., "gpt-4o-mini", "claude-sonnet-4")
+            debug: Enable debug logging
         """
         # Determine backend type from env var or default
         if backend_type is None:
@@ -76,6 +78,9 @@ class DataSourceConfig:
         # LLM configuration
         self.model = model
 
+        # Debug configuration
+        self.debug = debug
+
     @classmethod
     def from_env(cls) -> "DataSourceConfig":
         """Create configuration from environment variables.
@@ -87,6 +92,7 @@ class DataSourceConfig:
             BARSUKAS_CACHE_URL: URL of BARSUKAS cache server (optional)
             CACHE_ONLY: "true" or "false" (default: "false")
             LLM_MODEL: Default LLM model to use (optional)
+            DEBUG: "true" or "false" (default: "false")
 
         Returns:
             DataSourceConfig instance
@@ -99,6 +105,7 @@ class DataSourceConfig:
         barsukas_url = os.environ.get("BARSUKAS_CACHE_URL")
         cache_only = os.environ.get("CACHE_ONLY", "false").lower() == "true"
         model = os.environ.get("LLM_MODEL")
+        debug = os.environ.get("DEBUG", "false").lower() == "true"
 
         return cls(
             backend_type=backend_type,
@@ -107,6 +114,7 @@ class DataSourceConfig:
             barsukas_url=barsukas_url,
             cache_only=cache_only,
             model=model,
+            debug=debug,
         )
 
     def __repr__(self) -> str:
@@ -124,5 +132,7 @@ class DataSourceConfig:
             parts.append("cache_only=True")
         if self.model:
             parts.append(f"model={self.model}")
+        if self.debug:
+            parts.append("debug=True")
 
         return f"DataSourceConfig({', '.join(parts)})"

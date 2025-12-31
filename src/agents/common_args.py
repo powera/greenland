@@ -360,6 +360,9 @@ def get_data_source_config(args: Any, default_model: str = None):
     # Get LLM model (prefer args.model, fall back to default_model)
     model = args.model if hasattr(args, 'model') and args.model else default_model
 
+    # Get debug flag
+    debug = args.debug if hasattr(args, 'debug') else False
+
     return DataSourceConfig(
         backend_type=backend_type,
         sqlite_path=sqlite_path,
@@ -367,4 +370,5 @@ def get_data_source_config(args: Any, default_model: str = None):
         barsukas_url=barsukas_url,
         cache_only=cache_only,
         model=model,
+        debug=debug,
     )
