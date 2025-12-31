@@ -13,12 +13,12 @@ have derivative forms but don't, and reports on data quality issues.
 "Vilkas" means "wolf" in Lithuanian - a watchful guardian of the word database.
 
 Supported languages and forms:
-- Lithuanian (lt): noun declensions, verb conjugations, adjective forms, adverb forms
-- French (fr): noun declensions, verb conjugations
-- German (de): noun declensions, verb conjugations
-- Spanish (es): noun declensions, verb conjugations
-- Portuguese (pt): noun declensions, verb conjugations
-- English (en): noun forms, verb conjugations, adjective forms, adverb forms
+- Lithuanian (lt): noun declensions (7 cases), verb conjugations, adjective forms, adverb forms
+- French (fr): noun forms (singular/plural), verb conjugations
+- German (de): noun declensions (4 cases), verb conjugations
+- Spanish (es): noun forms (singular/plural), verb conjugations
+- Portuguese (pt): noun forms (singular/plural), verb conjugations
+- English (en): noun forms (singular/plural), verb conjugations, adjective forms, adverb forms
 """
 
 import logging
@@ -357,12 +357,12 @@ class VilkasAgent:
         Generate and store missing word forms for a specific language.
 
         Supported languages and forms:
-        - Lithuanian (lt): noun declensions, verb conjugations, adjective forms, adverb forms
-        - French (fr): noun declensions, verb conjugations
-        - German (de): noun declensions, verb conjugations
-        - Spanish (es): noun declensions, verb conjugations
-        - Portuguese (pt): noun declensions, verb conjugations
-        - English (en): noun forms, verb conjugations, adjective forms, adverb forms
+        - Lithuanian (lt): noun declensions (7 cases), verb conjugations, adjective forms, adverb forms
+        - French (fr): noun forms (singular/plural), verb conjugations
+        - German (de): noun declensions (4 cases), verb conjugations
+        - Spanish (es): noun forms (singular/plural), verb conjugations
+        - Portuguese (pt): noun forms (singular/plural), verb conjugations
+        - English (en): noun forms (singular/plural), verb conjugations, adjective forms, adverb forms
 
         Args:
             language_code: Language code (e.g., 'lt', 'fr', 'de', 'es', 'pt', 'en')

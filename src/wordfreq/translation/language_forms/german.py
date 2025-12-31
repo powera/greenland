@@ -15,8 +15,14 @@ logger = logging.getLogger(__name__)
 
 # Form mappings
 NOUN_FORM_MAPPING = {
-    "singular": GrammaticalForm.NOUN_DE_SINGULAR,
-    "plural": GrammaticalForm.NOUN_DE_PLURAL,
+    "nominative_singular": GrammaticalForm.NOUN_DE_NOMINATIVE_SINGULAR,
+    "accusative_singular": GrammaticalForm.NOUN_DE_ACCUSATIVE_SINGULAR,
+    "dative_singular": GrammaticalForm.NOUN_DE_DATIVE_SINGULAR,
+    "genitive_singular": GrammaticalForm.NOUN_DE_GENITIVE_SINGULAR,
+    "nominative_plural": GrammaticalForm.NOUN_DE_NOMINATIVE_PLURAL,
+    "accusative_plural": GrammaticalForm.NOUN_DE_ACCUSATIVE_PLURAL,
+    "dative_plural": GrammaticalForm.NOUN_DE_DATIVE_PLURAL,
+    "genitive_plural": GrammaticalForm.NOUN_DE_GENITIVE_PLURAL,
 }
 
 VERB_FORM_MAPPING = {
@@ -51,7 +57,7 @@ VERB_FORM_MAPPING = {
 
 
 def query_german_noun_forms(client, lemma_id: int, get_session_func) -> Tuple[Dict[str, str], bool]:
-    """Query LLM for German noun forms (singular and plural)."""
+    """Query LLM for German noun declensions (4 cases × 2 numbers = 8 forms)."""
     session = get_session_func()
     lemma = session.query(linguistic_db.Lemma).filter(linguistic_db.Lemma.id == lemma_id).first()
 
@@ -75,18 +81,37 @@ def query_german_noun_forms(client, lemma_id: int, get_session_func) -> Tuple[Di
         lemma.definition_text,
         lemma.pos_subtype,
     )
-    fields = ["singular", "plural"]
-    form_properties = {f: SchemaProperty("string", f"German {f}") for f in fields}
+
+    # All 8 forms (4 cases × 2 numbers)
+    singular_fields = [
+        "nominative_singular",
+        "accusative_singular",
+        "dative_singular",
+        "genitive_singular",
+    ]
+    plural_fields = [
+        "nominative_plural",
+        "accusative_plural",
+        "dative_plural",
+        "genitive_plural",
+    ]
+
+    # Build schema properties for all forms
+    form_properties = {}
+    for form in singular_fields + plural_fields:
+        form_properties[form] = SchemaProperty(
+            "string", f"German {form.replace('_', ' ')} (use empty string if not applicable)"
+        )
 
     schema = Schema(
-        name="GermanNounForms",
-        description="German noun forms",
+        name="GermanNounDeclensions",
+        description="All declension forms for a German noun (4 cases × 2 numbers)",
         properties={
             "forms": SchemaProperty(
-                "object", "Dictionary of noun forms", properties=form_properties
+                "object", "Dictionary of all noun declension forms", properties=form_properties
             ),
             "confidence": SchemaProperty("number", "Confidence 0-1"),
-            "notes": SchemaProperty("string", "Notes"),
+            "notes": SchemaProperty("string", "Notes about the declension pattern"),
         },
     )
 

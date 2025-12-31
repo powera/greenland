@@ -388,9 +388,17 @@ class GrammaticalForm(enum.Enum):
     VERB_ES_3P_M_FUT = "verb/es_3p-m_fut"
     VERB_ES_3P_F_FUT = "verb/es_3p-f_fut"
 
-    # German noun forms (singular/plural only)
-    NOUN_DE_SINGULAR = "noun/de_singular"
-    NOUN_DE_PLURAL = "noun/de_plural"
+    # German noun forms (4 cases × 2 numbers = 8 forms)
+    # Singular
+    NOUN_DE_NOMINATIVE_SINGULAR = "noun/de_nominative_singular"
+    NOUN_DE_ACCUSATIVE_SINGULAR = "noun/de_accusative_singular"
+    NOUN_DE_DATIVE_SINGULAR = "noun/de_dative_singular"
+    NOUN_DE_GENITIVE_SINGULAR = "noun/de_genitive_singular"
+    # Plural
+    NOUN_DE_NOMINATIVE_PLURAL = "noun/de_nominative_plural"
+    NOUN_DE_ACCUSATIVE_PLURAL = "noun/de_accusative_plural"
+    NOUN_DE_DATIVE_PLURAL = "noun/de_dative_plural"
+    NOUN_DE_GENITIVE_PLURAL = "noun/de_genitive_plural"
 
     # German adjective forms (2 genders × 2 numbers = 4 forms, simplified)
     ADJ_DE_SINGULAR_M = "adjective/de_singular_m"

@@ -64,7 +64,12 @@ def get_argument_parser():
     for lang, pos_types in SUPPORTED_TASKS.items():
         for pos in pos_types:
             if pos == "noun":
-                task_choices.append(f"{lang}-noun-declensions")
+                # Use "declensions" for languages with case systems (LT, DE)
+                # Use "forms" for languages without cases (EN, FR, ES, PT)
+                if lang in ["lt", "de"]:
+                    task_choices.append(f"{lang}-noun-declensions")
+                else:
+                    task_choices.append(f"{lang}-noun-forms")
             elif pos == "verb":
                 task_choices.append(f"{lang}-verb-conjugations")
             elif pos == "adjective":
@@ -79,9 +84,10 @@ def get_argument_parser():
         choices=task_choices,
         help=(
             "Specific task to perform (language + form type). "
-            "Supported: Lithuanian (noun/verb/adjective/adverb), "
-            "French/German/Spanish/Portuguese (noun/verb), "
-            "English (noun/verb/adjective/adverb). "
+            "Supported: Lithuanian (noun-declensions/verb/adjective/adverb), "
+            "French/Spanish/Portuguese (noun-forms/verb), "
+            "German (noun-declensions/verb), "
+            "English (noun-forms/verb/adjective/adverb). "
             "Use 'all' to process all supported forms."
         ),
     )
@@ -225,7 +231,11 @@ def main():
                 # Map form category to POS type and label
                 if form_category == "noun":
                     inferred_pos_type = "noun"
-                    form_type_label = f"{LANGUAGE_NAMES.get(language_code, language_code)} noun declensions"
+                    # Use "declensions" for case languages (LT, DE), "forms" for others
+                    if language_code in ["lt", "de"]:
+                        form_type_label = f"{LANGUAGE_NAMES.get(language_code, language_code)} noun declensions"
+                    else:
+                        form_type_label = f"{LANGUAGE_NAMES.get(language_code, language_code)} noun forms"
                 elif form_category == "verb":
                     inferred_pos_type = "verb"
                     form_type_label = f"{LANGUAGE_NAMES.get(language_code, language_code)} verb conjugations"
@@ -281,12 +291,16 @@ def main():
             for lang, pos_types in SUPPORTED_TASKS.items():
                 lang_name = LANGUAGE_NAMES.get(lang, lang.upper())
                 for pos in pos_types:
-                    form_desc = {
-                        "noun": "noun declensions",
-                        "verb": "verb conjugations",
-                        "adjective": "adjective forms",
-                        "adverb": "adverb forms",
-                    }.get(pos, f"{pos} forms")
+                    # Use correct terminology based on language and POS type
+                    if pos == "noun":
+                        # Use "declensions" for case languages (LT, DE), "forms" for others
+                        form_desc = "noun declensions" if lang in ["lt", "de"] else "noun forms"
+                    else:
+                        form_desc = {
+                            "verb": "verb conjugations",
+                            "adjective": "adjective forms",
+                            "adverb": "adverb forms",
+                        }.get(pos, f"{pos} forms")
 
                     print(f"\n{task_num}. {lang_name} {form_desc}:")
 
