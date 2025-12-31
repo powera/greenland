@@ -2,12 +2,15 @@
 """Unified client for routing requests to appropriate LLM backends."""
 
 import logging
-from typing import Dict, Optional, Tuple, Any
+from typing import Dict, Optional, Tuple, Any, TYPE_CHECKING
 
 from clients import ollama_client, openai_client, anthropic_client, lmstudio_client, gemini_client
 from telemetry import LLMUsage
 from clients.types import Response
 import benchmarks.datastore.common  # Assuming datastore.common is available
+
+if TYPE_CHECKING:
+    from wordfreq.storage.backend.config import DataSourceConfig
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -40,6 +43,33 @@ class UnifiedLLMClient:
         self.openai = openai_client.OpenAIClient(timeout=timeout, debug=False)
         self.anthropic = anthropic_client.AnthropicClient(timeout=timeout, debug=False)
         self.gemini = gemini_client.GeminiClient(timeout=timeout, debug=False)
+
+    @classmethod
+    def from_config(cls, config: "DataSourceConfig", timeout: int = DEFAULT_TIMEOUT, debug: bool = True) -> "UnifiedLLMClient":
+        """
+        Create a UnifiedLLMClient from a DataSourceConfig.
+
+        This is a thin wrapper that extracts the model from the config for future use.
+        The model parameter from config will be used when making LLM requests.
+
+        Args:
+            config: DataSourceConfig containing model and other configuration
+            timeout: Request timeout in seconds for all backends
+            debug: Whether to enable debug logging
+
+        Returns:
+            UnifiedLLMClient instance with model from config
+
+        Example:
+            config = get_data_source_config(args)
+            client = UnifiedLLMClient.from_config(config)
+            # Client now knows to use config.model for requests
+        """
+        client = cls(timeout=timeout, debug=debug)
+        # Store the model from config for use in requests
+        # This allows agents to just call client methods without passing model each time
+        client.default_model = config.model
+        return client
 
     def _get_client(self, model: str) -> Tuple[Any, str]:
         """

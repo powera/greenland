@@ -1,6 +1,6 @@
 import os
 
-DEFAULT_MODEL = "gemma-3-12b-it-q4_k_m.gguf"
+DEFAULT_MODEL = "gpt-5-mini"
 
 # Get the src directory
 SRC_DIR = os.path.dirname(os.path.abspath(__file__))

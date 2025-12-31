@@ -9,6 +9,8 @@ import sys
 from pathlib import Path
 from typing import Optional, Callable, Any
 
+from constants import DEFAULT_MODEL
+
 
 def add_common_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     """Add common arguments that nearly all agents use.
@@ -48,7 +50,7 @@ def add_common_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     return parser
 
 
-def add_llm_args(parser: argparse.ArgumentParser, default_model: str = "gpt-4o-mini") -> argparse.ArgumentParser:
+def add_llm_args(parser: argparse.ArgumentParser, default_model: str = DEFAULT_MODEL) -> argparse.ArgumentParser:
     """Add LLM-related arguments.
 
     Args:
