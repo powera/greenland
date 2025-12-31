@@ -91,26 +91,11 @@ def get_argument_parser():
         ),
     )
 
-    # Legacy check mode options (reporting only, no changes)
-    parser.add_argument(
-        "--check",
-        choices=["base-forms", "noun-declensions", "verb-conjugations", "all"],
-        default="all",
-        help="[Legacy] Which check to run in reporting mode (default: all). Consider using --task instead.",
-    )
-
     # Fix mode options (generate missing forms)
     parser.add_argument(
         "--fix",
         action="store_true",
         help="Fix mode: Generate missing word forms. Use --task to specify which forms to fix.",
-    )
-
-    # Legacy parameters (kept for backward compatibility)
-    parser.add_argument(
-        "--form-type",
-        choices=["base-forms", "noun-declensions", "verb-conjugations", "all"],
-        help="[Legacy] Which form type to fix (use --task instead for clearer language/form selection)",
     )
     parser.add_argument(
         "--source",
@@ -140,17 +125,20 @@ def main():
     # Create agent with unified configuration
     agent = VilkasAgent(config=config)
 
-    # Handle --guid mode (single lemma)
+    # Require --task
+    if not args.task:
+        print("\nError: --task is required")
+        print("Examples:")
+        print("  --task lt-noun-declensions              # Check Lithuanian nouns")
+        print("  --task lt-noun-declensions --fix        # Generate Lithuanian nouns")
+        print("  --task all --fix                        # Generate all forms")
+        print("  --guid N06_015 --task all               # Check all languages for specific lemma")
+        print("  --guid N06_015 --task all --fix         # Generate all forms for specific lemma")
+        sys.exit(1)
+
+    # Handle --guid mode (filter to single lemma)
     if args.guid:
         from wordfreq.storage.models.schema import Lemma, DerivativeForm
-
-        # Extract language from task
-        if not args.task:
-            print("\nError: --task is required when using --guid")
-            print("Example: --guid <guid> --task lt-noun-declensions")
-            sys.exit(1)
-
-        language_code = args.task.split("-")[0] if args.task != "all" else "lt"
 
         session = agent.get_session()
         try:
@@ -161,34 +149,91 @@ def main():
 
             print(f"\nProcessing word forms for: {lemma.lemma_text} (GUID: {args.guid})")
             print(f"POS: {lemma.pos_type}")
-            print(f"Language: {language_code}")
 
-            # Get all derivative forms for this lemma
-            forms = (
-                session.query(DerivativeForm)
-                .filter(
-                    DerivativeForm.lemma_id == lemma.id,
-                    DerivativeForm.language_code == language_code,
-                )
-                .all()
-            )
+            # If task=all, process all supported languages for this lemma's POS type
+            if args.task == "all":
+                pos_type = lemma.pos_type
 
-            if forms:
-                print(f"\nExisting forms ({len(forms)}):")
-                for form in forms[:20]:  # Limit display to first 20
-                    base_marker = " [BASE]" if form.is_base_form else ""
-                    print(
-                        f"  {form.derivative_form_text} ({form.grammatical_form or 'N/A'}){base_marker}"
-                    )
-                if len(forms) > 20:
-                    print(f"  ... and {len(forms) - 20} more")
+                # Find all supported languages for this POS type
+                languages_to_process = []
+                for lang, pos_types in SUPPORTED_TASKS.items():
+                    if pos_type in pos_types:
+                        languages_to_process.append(lang)
+
+                print(f"Languages to process: {', '.join(languages_to_process)}")
+
+                if args.fix:
+                    print(f"\nGenerating missing forms for this lemma across all languages...")
+                    for lang in languages_to_process:
+                        lang_name = LANGUAGE_NAMES.get(lang, lang.upper())
+                        print(f"\n--- Processing {lang_name} forms ---")
+
+                        kwargs = {
+                            "language_code": lang,
+                            "pos_type": pos_type,
+                            "model": args.model,
+                            "throttle": args.throttle,
+                            "dry_run": args.dry_run,
+                            "guid": args.guid,
+                        }
+                        if lang == "lt" and pos_type == "noun":
+                            kwargs["source"] = args.source
+
+                        results = agent.fix_missing_forms(**kwargs)
+                        display.print_fix_results(results, args.dry_run)
+                else:
+                    # Just show existing forms for all languages
+                    for lang in languages_to_process:
+                        forms = (
+                            session.query(DerivativeForm)
+                            .filter(
+                                DerivativeForm.lemma_id == lemma.id,
+                                DerivativeForm.language_code == lang,
+                            )
+                            .all()
+                        )
+                        lang_name = LANGUAGE_NAMES.get(lang, lang.upper())
+                        print(f"\n{lang_name} forms ({len(forms)}):")
+                        if forms:
+                            for form in forms[:20]:
+                                base_marker = " [BASE]" if form.is_base_form else ""
+                                print(
+                                    f"  {form.derivative_form_text} ({form.grammatical_form or 'N/A'}){base_marker}"
+                                )
+                            if len(forms) > 20:
+                                print(f"  ... and {len(forms) - 20} more")
+                        else:
+                            print("  No forms found")
             else:
-                print("\nNo existing forms found")
+                # Single language mode
+                language_code = args.task.split("-")[0]
+                print(f"Language: {language_code}")
 
-            # If in --fix mode, generate missing forms for this lemma
-            if args.fix:
-                print(f"\nGenerating missing forms for this lemma...")
-                if not args.dry_run:
+                # Get all derivative forms for this lemma
+                forms = (
+                    session.query(DerivativeForm)
+                    .filter(
+                        DerivativeForm.lemma_id == lemma.id,
+                        DerivativeForm.language_code == language_code,
+                    )
+                    .all()
+                )
+
+                if forms:
+                    print(f"\nExisting forms ({len(forms)}):")
+                    for form in forms[:20]:  # Limit display to first 20
+                        base_marker = " [BASE]" if form.is_base_form else ""
+                        print(
+                            f"  {form.derivative_form_text} ({form.grammatical_form or 'N/A'}){base_marker}"
+                        )
+                    if len(forms) > 20:
+                        print(f"  ... and {len(forms) - 20} more")
+                else:
+                    print("\nNo existing forms found")
+
+                # If in --fix mode, generate missing forms for this lemma
+                if args.fix:
+                    print(f"\nGenerating missing forms for this lemma...")
                     # Use the lemma's actual POS type
                     pos_type_to_use = lemma.pos_type
 
@@ -203,19 +248,12 @@ def main():
                         guid=args.guid,
                     )
                     display.print_fix_results(results, args.dry_run)
-                else:
-                    print("[DRY RUN] Would generate missing forms")
         finally:
             session.close()
         return
 
-    # Handle --fix mode
+    # Handle bulk processing (no --guid filter)
     if args.fix:
-        # Require --task for fix mode
-        if not args.task:
-            print("\nError: --task is required for --fix mode")
-            print("Example: --fix --task lt-noun-declensions")
-            sys.exit(1)
 
         # Parse --task parameter to get language and form type
         language_code = None
@@ -251,18 +289,6 @@ def main():
         elif args.task == "all":
             language_code = None  # Process all languages
             form_type_label = "all forms (all languages)"
-        # Legacy form-type parameter
-        elif args.form_type:
-            if args.form_type == "base-forms":
-                form_type_label = "base forms"
-            elif args.form_type == "noun-declensions":
-                inferred_pos_type = "noun"
-                form_type_label = "noun declensions"
-            elif args.form_type == "verb-conjugations":
-                inferred_pos_type = "verb"
-                form_type_label = "verb conjugations"
-            elif args.form_type == "all":
-                form_type_label = "all forms"
 
         # Confirmation prompt (unless --yes or --dry-run)
         if not args.yes and not args.dry_run:
@@ -339,29 +365,12 @@ def main():
 
         return
 
-    # Handle check mode (existing functionality)
-    # For check mode, derive language from --task if provided, otherwise default to 'lt'
-    check_language = "lt"
-    if args.task and args.task != "all":
-        check_language = args.task.split("-")[0]
-
-    if args.check == "base-forms":
-        # Only Lithuanian has base forms check currently
-        results = agent.check_missing_lithuanian_base_forms()
-        display.print_base_forms_check(results)
-
-    elif args.check == "noun-declensions":
-        # Only Lithuanian has noun declensions currently
-        results = agent.check_noun_declension_coverage()
-        display.print_noun_declensions_check(results)
-
-    elif args.check == "verb-conjugations":
-        # Support both Lithuanian and French verb conjugations
-        results = agent.check_verb_conjugation_coverage(language_code=check_language)
-        display.print_verb_conjugations_check(results, check_language)
-
-    else:  # all
-        agent.run_full_check(output_file=args.output)
+    # If we get here, user wants to check/report (not fix)
+    # This is the equivalent of the old --check mode
+    print("\nCheck/Report mode (use --fix to actually generate forms)")
+    print("This functionality is not yet implemented in the new CLI.")
+    print("Use --guid to check a specific lemma, or --fix to generate forms.")
+    sys.exit(1)
 
 
 if __name__ == "__main__":

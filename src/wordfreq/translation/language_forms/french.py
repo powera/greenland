@@ -62,7 +62,7 @@ VERB_FORM_MAPPING = {
 
 
 def query_french_noun_forms(client, lemma_id: int, get_session_func) -> Tuple[Dict[str, str], bool]:
-    """Query LLM for French noun forms (2 genders × 2 numbers = 4 forms)."""
+    """Query LLM for French noun forms (singular and plural for the noun's gender)."""
     session = get_session_func()
     lemma = session.query(linguistic_db.Lemma).filter(linguistic_db.Lemma.id == lemma_id).first()
     french_translation = get_translation(session, lemma, "fr") if lemma else None
@@ -76,15 +76,18 @@ def query_french_noun_forms(client, lemma_id: int, get_session_func) -> Tuple[Di
         lemma.definition_text,
         lemma.pos_subtype,
     )
-    fields = ["singular_m", "plural_m", "singular_f", "plural_f"]
-    form_properties = {f: SchemaProperty("string", f"French {f.replace('_', ' ')}") for f in fields}
+
+    # Schema for getting both forms AND gender
+    fields = ["singular", "plural"]
+    form_properties = {f: SchemaProperty("string", f"French {f}") for f in fields}
 
     schema = Schema(
         name="FrenchNounForms",
-        description="French noun forms",
+        description="French noun forms with gender",
         properties={
+            "gender": SchemaProperty("string", "Gender: 'masculine' or 'feminine'"),
             "forms": SchemaProperty(
-                "object", "Dictionary of noun forms", properties=form_properties
+                "object", "Dictionary of noun forms (singular and plural)", properties=form_properties
             ),
             "confidence": SchemaProperty("number", "Confidence 0-1"),
             "notes": SchemaProperty("string", "Notes"),
@@ -124,12 +127,13 @@ def query_french_verb_conjugations(
     """Query LLM for French verb conjugations (8 persons × 4 tenses = 32 forms)."""
     session = get_session_func()
     lemma = session.query(linguistic_db.Lemma).filter(linguistic_db.Lemma.id == lemma_id).first()
-    if not lemma or not lemma.french_translation or lemma.pos_type.lower() != "verb":
+    french_translation = get_translation(session, lemma, "fr") if lemma else None
+    if not lemma or not french_translation or lemma.pos_type.lower() != "verb":
         logger.error(f"Invalid lemma for French verb conjugations: {lemma_id}")
         return {}, False
 
     verb, english_verb, definition, pos_subtype = (
-        lemma.french_translation,
+        french_translation,
         lemma.lemma_text,
         lemma.definition_text,
         lemma.pos_subtype,

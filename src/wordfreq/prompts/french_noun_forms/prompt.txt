@@ -1,6 +1,11 @@
-Generate all French noun forms for the French noun "{noun}".
+Generate the French noun forms for the French noun "{noun}".
 
 English noun: {english_noun}
 Definition: {definition}{subtype_context}
 
-Please provide all 4 forms (2 genders × 2 numbers), using empty strings for forms that don't exist.
+Please provide:
+1. The gender of this noun (masculine or feminine)
+2. The singular form
+3. The plural form
+
+Note: French nouns have a fixed gender. Provide only the forms for the noun's actual gender.

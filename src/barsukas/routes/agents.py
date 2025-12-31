@@ -32,8 +32,9 @@ def check_translations(lemma_id):
         config = DataSourceConfig(
             backend_type=BackendType.SQLITE,
             sqlite_path=Config.DB_PATH,
+            debug=Config.DEBUG,
         )
-        agent = VorasAgent(config=config, debug=Config.DEBUG)
+        agent = VorasAgent(config=config)
 
         # Gather translations for this word
         from wordfreq.storage.translation_helpers import LANGUAGE_FIELDS
@@ -108,8 +109,9 @@ def add_missing_translations(lemma_id):
         config = DataSourceConfig(
             backend_type=BackendType.SQLITE,
             sqlite_path=Config.DB_PATH,
+            debug=Config.DEBUG,
         )
-        agent = VorasAgent(config=config, debug=Config.DEBUG)
+        agent = VorasAgent(config=config)
 
         # Find missing translations
         from wordfreq.storage.translation_helpers import LANGUAGE_FIELDS
@@ -255,8 +257,9 @@ def check_pronunciations(lemma_id):
             backend_type=BackendType.SQLITE,
             sqlite_path=Config.DB_PATH,
             model="gpt-5-mini",
+            debug=Config.DEBUG,
         )
-        agent = PapugaAgent(config=config, debug=Config.DEBUG)
+        agent = PapugaAgent(config=config)
 
         # Check pronunciations (using dry_run=False to actually validate)
         from wordfreq.tools.llm_validators import validate_pronunciation
@@ -349,8 +352,9 @@ def generate_pronunciations(lemma_id):
             backend_type=BackendType.SQLITE,
             sqlite_path=Config.DB_PATH,
             model="gpt-5-mini",
+            debug=Config.DEBUG,
         )
-        agent = PapugaAgent(config=config, debug=Config.DEBUG)
+        agent = PapugaAgent(config=config)
 
         # Generate pronunciations
         from wordfreq.tools.llm_validators import generate_pronunciation
@@ -421,8 +425,9 @@ def generate_forms(lemma_id):
         config = DataSourceConfig(
             backend_type=BackendType.SQLITE,
             sqlite_path=Config.DB_PATH,
+            debug=Config.DEBUG,
         )
-        agent = VilkasAgent(config=config, debug=Config.DEBUG)
+        agent = VilkasAgent(config=config)
 
         # Check if the language/pos_type combination is supported
         # Only languages/POS combinations with individual lemma processing support
@@ -557,8 +562,9 @@ def generate_synonyms(lemma_id):
         config = DataSourceConfig(
             backend_type=BackendType.SQLITE,
             sqlite_path=Config.DB_PATH,
+            debug=Config.DEBUG,
         )
-        agent = SernasAgent(config=config, debug=Config.DEBUG)
+        agent = SernasAgent(config=config)
 
         # Check if translation exists for this language (skip for English since that's the lemma itself)
         if lang_code != "en":
@@ -627,8 +633,9 @@ def check_definition(lemma_id):
         config = DataSourceConfig(
             backend_type=BackendType.SQLITE,
             sqlite_path=Config.DB_PATH,
+            debug=Config.DEBUG,
         )
-        agent = LokysAgent(config=config, debug=Config.DEBUG)
+        agent = LokysAgent(config=config)
 
         # Use the agent's helper method for cleaner code
         result = agent.check_single_definition(lemma, session=g.db)
@@ -702,8 +709,9 @@ def check_disambiguation(lemma_id):
         config = DataSourceConfig(
             backend_type=BackendType.SQLITE,
             sqlite_path=Config.DB_PATH,
+            debug=Config.DEBUG,
         )
-        agent = LokysAgent(config=config, debug=Config.DEBUG)
+        agent = LokysAgent(config=config)
 
         # Use the agent's helper method for cleaner code
         result = agent.check_single_disambiguation(lemma, session=g.db)
@@ -828,8 +836,9 @@ def generate_sentences(lemma_id):
         config = DataSourceConfig(
             backend_type=BackendType.SQLITE,
             sqlite_path=Config.DB_PATH,
+            debug=Config.DEBUG,
         )
-        agent = ZvirblisAgent(config=config, debug=Config.DEBUG)
+        agent = ZvirblisAgent(config=config)
 
         # Generate sentences
         result = agent.generate_sentences_for_noun(
@@ -909,8 +918,9 @@ def generate_grammar_fact(lemma_id):
         config = DataSourceConfig(
             backend_type=BackendType.SQLITE,
             sqlite_path=Config.DB_PATH,
+            debug=Config.DEBUG,
         )
-        agent = LapeAgent(config=config, debug=Config.DEBUG)
+        agent = LapeAgent(config=config)
 
         # Validate fact type is supported
         if fact_type not in agent.SUPPORTED_FACT_TYPES:

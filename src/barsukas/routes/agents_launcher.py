@@ -364,6 +364,7 @@ def execute_agent(agent_name):
             "returncode": None,
             "agent_name": agent_name,
             "agent_display_name": agent["display_name"],
+            "cmdline": " ".join(args),
         }
 
         # Start background thread to read output
@@ -403,6 +404,7 @@ def view_output(task_id):
         task_id=task_id,
         agent_name=task.get("agent_name", "Unknown"),
         agent_display_name=task.get("agent_display_name", "Agent"),
+        cmdline=task.get("cmdline", ""),
     )
 
 

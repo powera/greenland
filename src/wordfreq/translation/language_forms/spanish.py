@@ -10,6 +10,7 @@ from clients.types import Schema, SchemaProperty
 from wordfreq.storage.models.enums import GrammaticalForm
 import util.prompt_loader
 from wordfreq.storage import database as linguistic_db
+from wordfreq.storage.translation_helpers import get_translation
 
 logger = logging.getLogger(__name__)
 
@@ -125,23 +126,14 @@ def query_spanish_verb_conjugations(
     """Query LLM for Spanish verb conjugations (8 persons × 3 tenses = 24 forms)."""
     session = get_session_func()
     lemma = session.query(linguistic_db.Lemma).filter(linguistic_db.Lemma.id == lemma_id).first()
-
-    # Get Spanish translation from lemma_translations table
-    spanish_translation = (
-        session.query(linguistic_db.LemmaTranslation)
-        .filter(
-            linguistic_db.LemmaTranslation.lemma_id == lemma_id,
-            linguistic_db.LemmaTranslation.language_code == "es",
-        )
-        .first()
-    )
+    spanish_translation = get_translation(session, lemma, "es") if lemma else None
 
     if not lemma or not spanish_translation or lemma.pos_type.lower() != "verb":
         logger.error(f"Invalid lemma for Spanish verb conjugations: {lemma_id}")
         return {}, False
 
     verb, english_verb, definition, pos_subtype = (
-        spanish_translation.translation,
+        spanish_translation,
         lemma.lemma_text,
         lemma.definition_text,
         lemma.pos_subtype,

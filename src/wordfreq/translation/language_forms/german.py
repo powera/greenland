@@ -10,6 +10,7 @@ from clients.types import Schema, SchemaProperty
 from wordfreq.storage.models.enums import GrammaticalForm
 import util.prompt_loader
 from wordfreq.storage import database as linguistic_db
+from wordfreq.storage.translation_helpers import get_translation
 
 logger = logging.getLogger(__name__)
 
@@ -148,23 +149,14 @@ def query_german_verb_conjugations(
     """Query LLM for German verb conjugations (8 persons × 3 tenses = 24 forms)."""
     session = get_session_func()
     lemma = session.query(linguistic_db.Lemma).filter(linguistic_db.Lemma.id == lemma_id).first()
-
-    # Get German translation from lemma_translations table
-    german_translation = (
-        session.query(linguistic_db.LemmaTranslation)
-        .filter(
-            linguistic_db.LemmaTranslation.lemma_id == lemma_id,
-            linguistic_db.LemmaTranslation.language_code == "de",
-        )
-        .first()
-    )
+    german_translation = get_translation(session, lemma, "de") if lemma else None
 
     if not lemma or not german_translation or lemma.pos_type.lower() != "verb":
         logger.error(f"Invalid lemma for German verb conjugations: {lemma_id}")
         return {}, False
 
     verb, english_verb, definition, pos_subtype = (
-        german_translation.translation,
+        german_translation,
         lemma.lemma_text,
         lemma.definition_text,
         lemma.pos_subtype,
