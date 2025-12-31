@@ -14,11 +14,11 @@ have derivative forms but don't, and reports on data quality issues.
 
 Supported languages and forms:
 - Lithuanian (lt): noun declensions, verb conjugations, adjective forms
-- French (fr): verb conjugations, noun declensions
-- German (de): verb conjugations, noun declensions
-- Spanish (es): verb conjugations, noun declensions
-- Portuguese (pt): verb conjugations, noun declensions
-- English (en): verb conjugations
+- French (fr): noun declensions, verb conjugations
+- German (de): noun declensions, verb conjugations
+- Spanish (es): noun declensions, verb conjugations
+- Portuguese (pt): noun declensions, verb conjugations
+- English (en): noun declensions, verb conjugations
 """
 
 import logging
@@ -358,11 +358,11 @@ class VilkasAgent:
 
         Supported languages and forms:
         - Lithuanian (lt): noun declensions, verb conjugations, adjective forms
-        - French (fr): verb conjugations, noun declensions
-        - German (de): verb conjugations, noun declensions
-        - Spanish (es): verb conjugations, noun declensions
-        - Portuguese (pt): verb conjugations, noun declensions
-        - English (en): verb conjugations
+        - French (fr): noun declensions, verb conjugations
+        - German (de): noun declensions, verb conjugations
+        - Spanish (es): noun declensions, verb conjugations
+        - Portuguese (pt): noun declensions, verb conjugations
+        - English (en): noun declensions, verb conjugations
 
         Args:
             language_code: Language code (e.g., 'lt', 'fr', 'de', 'es', 'pt', 'en')
@@ -383,7 +383,7 @@ class VilkasAgent:
             "de": ["noun", "verb"],
             "es": ["noun", "verb"],
             "pt": ["noun", "verb"],
-            "en": ["verb"],
+            "en": ["noun", "verb"],
         }
 
         if language_code not in SUPPORTED_LANGUAGES:
@@ -423,6 +423,7 @@ class VilkasAgent:
             "es_verb": self._fix_spanish_verb_conjugations,
             "pt_noun": self._fix_portuguese_noun_declensions,
             "pt_verb": self._fix_portuguese_verb_conjugations,
+            "en_noun": self._fix_english_noun_declensions,
             "en_verb": self._fix_english_verb_conjugations,
         }
 
@@ -910,6 +911,27 @@ class VilkasAgent:
             language_name="English",
             pos_type="verb",
             process_func=process_lemma_conjugations,
+            limit=limit,
+            model=model,
+            throttle=throttle,
+            dry_run=dry_run,
+        )
+
+    def _fix_english_noun_declensions(
+        self,
+        limit: Optional[int] = None,
+        model: str = "gpt-5-mini",
+        throttle: float = 1.0,
+        dry_run: bool = False,
+    ) -> Dict[str, any]:
+        """Generate missing English noun forms."""
+        from wordfreq.translation.generate_english_noun_forms import process_lemma_forms
+
+        return self._fix_generic_forms(
+            language_code="en",
+            language_name="English",
+            pos_type="noun",
+            process_func=process_lemma_forms,
             limit=limit,
             model=model,
             throttle=throttle,

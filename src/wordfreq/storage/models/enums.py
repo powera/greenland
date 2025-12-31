@@ -181,6 +181,10 @@ class GrammaticalForm(enum.Enum):
     VERB_EN_2S_IMP = "verb/en_2s_imp"
     VERB_EN_2P_IMP = "verb/en_2p_imp"
 
+    # English noun forms (singular/plural only)
+    NOUN_EN_SINGULAR = "noun/en_singular"
+    NOUN_EN_PLURAL = "noun/en_plural"
+
     # Lithuanian verb forms (person_tense with gender distinction)
     # Present tense
     VERB_LT_1S_PRES = "verb/lt_1s_pres"

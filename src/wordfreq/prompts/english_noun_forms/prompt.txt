@@ -1,0 +1,5 @@
+Generate the singular and plural forms for the English noun "{noun}".
+
+Definition: {definition}{subtype_context}
+
+Please provide both forms (singular and plural), using empty strings for forms that don't exist or are not applicable (e.g., mass nouns with no plural).

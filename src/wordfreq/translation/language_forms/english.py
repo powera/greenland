@@ -13,6 +13,12 @@ from wordfreq.storage import database as linguistic_db
 
 logger = logging.getLogger(__name__)
 
+# Form mapping for English nouns
+NOUN_FORM_MAPPING = {
+    "singular": GrammaticalForm.NOUN_EN_SINGULAR,
+    "plural": GrammaticalForm.NOUN_EN_PLURAL,
+}
+
 # Form mapping for English verbs
 VERB_FORM_MAPPING = {
     "1s_pres": GrammaticalForm.VERB_EN_1S_PRES,
@@ -138,4 +144,104 @@ def query_english_verb_conjugations(
 
     except Exception as e:
         logger.error(f"Error querying English conjugations for '{verb}': {type(e).__name__}: {e}")
+        return {}, False
+
+
+def query_english_noun_forms(
+    client, lemma_id: int, get_session_func
+) -> Tuple[Dict[str, str], bool]:
+    """
+    Query LLM for English noun forms (singular and plural).
+
+    Args:
+        client: UnifiedLLMClient instance
+        lemma_id: The ID of the lemma to generate noun forms for
+        get_session_func: Function to get database session
+
+    Returns:
+        Tuple of (dict mapping form names to noun forms, success flag)
+    """
+    session = get_session_func()
+
+    # Get the lemma
+    lemma = session.query(linguistic_db.Lemma).filter(linguistic_db.Lemma.id == lemma_id).first()
+    if not lemma:
+        logger.error(f"Lemma with ID {lemma_id} not found")
+        return {}, False
+
+    if lemma.pos_type.lower() != "noun":
+        logger.error(f"Lemma ID {lemma_id} is not a noun (pos_type: {lemma.pos_type})")
+        return {}, False
+
+    noun = lemma.lemma_text
+    definition = lemma.definition_text
+    pos_subtype = lemma.pos_subtype
+
+    # Both singular and plural forms
+    fields = ["singular", "plural"]
+
+    # Build schema properties
+    form_properties = {}
+    for form in fields:
+        form_properties[form] = SchemaProperty(
+            "string", f"English {form} form (use empty string if not applicable)"
+        )
+
+    schema = Schema(
+        name="EnglishNounForms",
+        description="Singular and plural forms for an English noun",
+        properties={
+            "forms": SchemaProperty(
+                type="object",
+                description="Dictionary of noun forms",
+                properties=form_properties,
+            ),
+            "confidence": SchemaProperty("number", "Confidence score from 0-1"),
+            "notes": SchemaProperty(
+                "string", "Notes about the noun pattern (e.g., irregular plural, mass noun)"
+            ),
+        },
+    )
+
+    subtype_context = f" (category: {pos_subtype})" if pos_subtype else ""
+
+    try:
+        context = util.prompt_loader.get_context("wordfreq", "english_noun_forms")
+        prompt_template = util.prompt_loader.get_prompt("wordfreq", "english_noun_forms")
+        prompt = prompt_template.format(
+            noun=noun, definition=definition, subtype_context=subtype_context
+        )
+
+        response = client.generate_chat(
+            prompt=prompt, model=client.model, json_schema=schema, context=context
+        )
+
+        # Log successful query
+        try:
+            linguistic_db.log_query(
+                session,
+                word=noun,
+                query_type="english_noun_forms",
+                prompt=prompt,
+                response=json.dumps(response.structured_data),
+                model=client.model,
+            )
+        except Exception as log_err:
+            logger.error(f"Failed to log English noun query: {log_err}")
+
+        # Validate and return response data
+        if (
+            response.structured_data
+            and isinstance(response.structured_data, dict)
+            and "forms" in response.structured_data
+            and isinstance(response.structured_data["forms"], dict)
+        ):
+            forms = response.structured_data["forms"]
+            return forms, True
+        else:
+            logger.warning(f"Invalid response format for English noun '{noun}'")
+            return {}, False
+
+    except Exception as e:
+        logger.error(f"Error querying English noun forms for '{noun}': {type(e).__name__}: {e}")
         return {}, False

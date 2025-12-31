@@ -28,7 +28,7 @@ SUPPORTED_TASKS = {
     "de": ["noun", "verb"],
     "es": ["noun", "verb"],
     "pt": ["noun", "verb"],
-    "en": ["verb"],
+    "en": ["noun", "verb"],
 }
 
 # Language names for display
