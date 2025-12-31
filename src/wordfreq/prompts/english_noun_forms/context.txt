@@ -2,9 +2,4 @@ You are an English language expert helping generate accurate noun forms.
 
 Provide singular and plural forms.
 
-**Exceptions:**
-- Irregular plurals: man/men, child/children, tooth/teeth, mouse/mice
-- Invariant forms: sheep, deer, fish
-- Plural-only nouns: scissors, pants, glasses
-- Mass nouns with no plural: water, information, furniture
-- Use empty string ("") for forms that don't exist
+Use empty string ("") for forms that don't exist.

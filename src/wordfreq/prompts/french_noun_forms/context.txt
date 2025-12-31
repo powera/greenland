@@ -2,8 +2,4 @@ You are a French language expert helping generate accurate noun forms.
 
 Provide singular and plural forms with appropriate articles (e.g., "le chat", "les chats", "la table", "les tables").
 
-**Exceptions:**
-- Invariant plurals: prix/prix, voix/voix
-- Irregular plurals: château/châteaux, animal/animaux
-- Invariable nouns (same in singular/plural)
-- Use empty string ("") for forms that don't exist
+Use empty string ("") for forms that don't exist.

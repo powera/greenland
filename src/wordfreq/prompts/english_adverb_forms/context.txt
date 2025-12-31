@@ -5,7 +5,4 @@ Provide 3 comparative degrees:
 - Comparative: more quickly, faster, better
 - Superlative: most quickly, fastest, best
 
-**Exceptions:**
-- Many adverbs don't have comparative forms (very, always, never, here, there)
-- Irregular forms: well/better/best, badly/worse/worst
-- Use empty string ("") for forms that don't exist
+Use empty string ("") for forms that don't exist.

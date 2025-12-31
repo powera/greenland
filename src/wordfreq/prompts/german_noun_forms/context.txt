@@ -6,8 +6,4 @@ Provide all 8 forms (4 cases × 2 numbers):
 
 Include the appropriate article with each form (e.g., "der Hund", "den Hund", "dem Hund", "des Hundes").
 
-**Exceptions:**
-- Singularia/pluralia tantum (nouns with only one number)
-- Weak masculine nouns (add -(e)n in all cases except nom. singular)
-- Irregular plurals and genitive forms
-- Use empty string ("") for forms that don't exist
+Use empty string ("") for forms that don't exist.

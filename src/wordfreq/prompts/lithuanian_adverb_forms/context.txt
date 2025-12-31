@@ -5,7 +5,4 @@ Provide 3 comparative degrees:
 - Comparative (aukštesnysis laipsnis): greičiau, geriau
 - Superlative (aukščiausiasis laipsnis): greičiausiai, geriausiai
 
-**Exceptions:**
-- Time/place adverbs (dabar, čia) have no comparative forms
-- Some use periphrastic forms (labiau, labiausiai)
-- Use empty string ("") for forms that don't exist
+Use empty string ("") for forms that don't exist.
