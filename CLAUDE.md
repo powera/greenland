@@ -9,7 +9,8 @@ src/agents contains scripts to do bulk operations against the database,
 generally making LLM calls.  Each agent is named with a Lithuanian animal
 name.
 
-src/wordfreq/storage contains the SQLAlchemy schema for the main database.
+src/wordfreq/storage contains the SQLAlchemy schema for the main database;
+the default location is src/wordfreq/data/linguistics.sqlite .
 
 src/wordfreq/storage/translation_helpers.py contains all language code
 manipulation functions and constants (LLM_FIELD_TO_LANG_CODE,
@@ -23,9 +24,8 @@ tasks; currently it is expected that a remote ChatGPT/Claude/Gemini is used.
 Most of the remaining code of relevance is in src/wordfreq ; many of the other
 top-level directories in src/ are deprecated.
 
-IMPORTANT: Always use absolute imports (e.g., "from agents.common_args import")
-rather than relative updir imports (e.g., "from ..common_args import"). This
-ensures imports work correctly regardless of how the code is invoked.
+Always use absolute imports (e.g., "from agents.common_args import")
+rather than relative updir imports (e.g., "from ..common_args import").
 
 To run scripts, always use PYTHONPATH and never use cd commands:
   PYTHONPATH=src python src/agents/dramblys.py --help
@@ -36,9 +36,6 @@ For agent CLI scripts that should be runnable directly, add this at the top
   from pathlib import Path
   if str(Path(__file__).parent.parent) not in sys.path:
       sys.path.insert(0, str(Path(__file__).parent.parent))
-
-The number of .parent calls depends on depth: for src/agents/foo.py use .parent.parent,
-for src/agents/dramblys/__main__.py use .parent.parent.parent, etc.
 
 Tests are in src/tests ; any changes to src/clients require tests.  Changes to
 barsukas generally do not require tests.  Do not run any tests other than a
