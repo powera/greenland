@@ -15,6 +15,8 @@ from barsukas.utils.argparse_introspection import (
     introspect_agent_parser,
     get_agent_cli_module_path,
     group_arguments_by_mode,
+    group_arguments_by_category,
+    get_category_label,
 )
 
 bp = Blueprint("agents_launcher", __name__, url_prefix="/agents-launcher")
@@ -249,7 +251,8 @@ def launch_form(agent_name):
         try:
             module_path = get_agent_cli_module_path(agent["script"])
             parser_info = introspect_agent_parser(module_path)
-            argument_groups = group_arguments_by_mode(parser_info["arguments"])
+            # Use semantic category grouping instead of mode-based grouping
+            argument_groups = group_arguments_by_category(parser_info["arguments"])
         except Exception as e:
             flash(f"Error introspecting agent arguments: {str(e)}", "error")
             # Fall back to basic form
@@ -261,6 +264,7 @@ def launch_form(agent_name):
         agent=agent,
         parser_info=parser_info,
         argument_groups=argument_groups,
+        get_category_label=get_category_label,
     )
 
 

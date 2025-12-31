@@ -181,6 +181,20 @@ class GrammaticalForm(enum.Enum):
     VERB_EN_2S_IMP = "verb/en_2s_imp"
     VERB_EN_2P_IMP = "verb/en_2p_imp"
 
+    # English noun forms (singular/plural only)
+    NOUN_EN_SINGULAR = "noun/en_singular"
+    NOUN_EN_PLURAL = "noun/en_plural"
+
+    # English adjective forms (comparative degrees)
+    ADJ_EN_POSITIVE = "adjective/en_positive"
+    ADJ_EN_COMPARATIVE = "adjective/en_comparative"
+    ADJ_EN_SUPERLATIVE = "adjective/en_superlative"
+
+    # English adverb forms (comparative degrees)
+    ADVERB_EN_POSITIVE = "adverb/en_positive"
+    ADVERB_EN_COMPARATIVE = "adverb/en_comparative"
+    ADVERB_EN_SUPERLATIVE = "adverb/en_superlative"
+
     # Lithuanian verb forms (person_tense with gender distinction)
     # Present tense
     VERB_LT_1S_PRES = "verb/lt_1s_pres"
@@ -277,6 +291,11 @@ class GrammaticalForm(enum.Enum):
     ADJ_LT_LOCATIVE_PLURAL_F = "adjective/lt_locative_plural_f"
     ADJ_LT_VOCATIVE_PLURAL_F = "adjective/lt_vocative_plural_f"
 
+    # Lithuanian adverb forms (comparative degrees)
+    ADVERB_LT_POSITIVE = "adverb/lt_positive"
+    ADVERB_LT_COMPARATIVE = "adverb/lt_comparative"
+    ADVERB_LT_SUPERLATIVE = "adverb/lt_superlative"
+
     # French noun forms (singular/plural only - each noun has a fixed gender)
     NOUN_FR_SINGULAR = "noun/fr_singular"
     NOUN_FR_PLURAL = "noun/fr_plural"
@@ -369,9 +388,17 @@ class GrammaticalForm(enum.Enum):
     VERB_ES_3P_M_FUT = "verb/es_3p-m_fut"
     VERB_ES_3P_F_FUT = "verb/es_3p-f_fut"
 
-    # German noun forms (singular/plural only)
-    NOUN_DE_SINGULAR = "noun/de_singular"
-    NOUN_DE_PLURAL = "noun/de_plural"
+    # German noun forms (4 cases × 2 numbers = 8 forms)
+    # Singular
+    NOUN_DE_NOMINATIVE_SINGULAR = "noun/de_nominative_singular"
+    NOUN_DE_ACCUSATIVE_SINGULAR = "noun/de_accusative_singular"
+    NOUN_DE_DATIVE_SINGULAR = "noun/de_dative_singular"
+    NOUN_DE_GENITIVE_SINGULAR = "noun/de_genitive_singular"
+    # Plural
+    NOUN_DE_NOMINATIVE_PLURAL = "noun/de_nominative_plural"
+    NOUN_DE_ACCUSATIVE_PLURAL = "noun/de_accusative_plural"
+    NOUN_DE_DATIVE_PLURAL = "noun/de_dative_plural"
+    NOUN_DE_GENITIVE_PLURAL = "noun/de_genitive_plural"
 
     # German adjective forms (2 genders × 2 numbers = 4 forms, simplified)
     ADJ_DE_SINGULAR_M = "adjective/de_singular_m"

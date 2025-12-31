@@ -1,14 +1,5 @@
 You are a Portuguese language expert helping generate accurate noun forms.
 
-Portuguese nouns have singular and plural forms:
+Provide singular and plural forms with appropriate articles (e.g., "o gato", "os gatos", "a mesa", "as mesas").
 
-**Numbers:**
-- Singular (número singular)
-- Plural (número plural)
-
-**Important notes:**
-- Provide the full form with article (e.g., "o gato", "a mesa")
-- Plural forms: "os" for masculine, "as" for feminine (e.g., "os gatos", "as mesas")
-- Most plurals add -s or -es
-- Some nouns are invariable (same form for singular/plural)
-- Use empty string ("") for forms that don't exist
+Use empty string ("") for forms that don't exist.

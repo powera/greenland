@@ -21,6 +21,26 @@ from agents.common_args import (
     validate_cache_args,
 )
 
+# Define supported languages and their forms (matches agent.py SUPPORTED_LANGUAGES)
+SUPPORTED_TASKS = {
+    "lt": ["noun", "verb", "adjective", "adverb"],
+    "fr": ["noun", "verb"],
+    "de": ["noun", "verb"],
+    "es": ["noun", "verb"],
+    "pt": ["noun", "verb"],
+    "en": ["noun", "verb", "adjective", "adverb"],
+}
+
+# Language names for display
+LANGUAGE_NAMES = {
+    "lt": "Lithuanian",
+    "fr": "French",
+    "de": "German",
+    "es": "Spanish",
+    "pt": "Portuguese",
+    "en": "English",
+}
+
 
 def get_argument_parser():
     """Return the argument parser for introspection.
@@ -39,23 +59,63 @@ def get_argument_parser():
     add_language_args(parser, multiple=False)
     add_backend_args(parser)
 
-    # Check mode options (reporting only, no changes)
+    # Build task choices dynamically from module-level SUPPORTED_TASKS
+    task_choices = []
+    for lang, pos_types in SUPPORTED_TASKS.items():
+        for pos in pos_types:
+            if pos == "noun":
+                # Use "declensions" for languages with case systems (LT, DE)
+                # Use "forms" for languages without cases (EN, FR, ES, PT)
+                if lang in ["lt", "de"]:
+                    task_choices.append(f"{lang}-noun-declensions")
+                else:
+                    task_choices.append(f"{lang}-noun-forms")
+            elif pos == "verb":
+                task_choices.append(f"{lang}-verb-conjugations")
+            elif pos == "adjective":
+                task_choices.append(f"{lang}-adjective-forms")
+            elif pos == "adverb":
+                task_choices.append(f"{lang}-adverb-forms")
+    task_choices.append("all")
+
+    # Task selection - explicit language/form combinations
+    parser.add_argument(
+        "--task",
+        choices=task_choices,
+        help=(
+            "Specific task to perform (language + form type). "
+            "Supported: Lithuanian (noun-declensions/verb/adjective/adverb), "
+            "French/Spanish/Portuguese (noun-forms/verb), "
+            "German (noun-declensions/verb), "
+            "English (noun-forms/verb/adjective/adverb). "
+            "Use 'all' to process all supported forms."
+        ),
+    )
+
+    # Legacy check mode options (reporting only, no changes)
     parser.add_argument(
         "--check",
         choices=["base-forms", "noun-declensions", "verb-conjugations", "all"],
         default="all",
-        help="Which check to run in reporting mode (default: all)",
+        help="[Legacy] Which check to run in reporting mode (default: all). Consider using --task instead.",
     )
 
     # Fix mode options (generate missing forms)
     parser.add_argument(
         "--fix",
         action="store_true",
-        help="Fix mode: Generate missing word forms (supports Lithuanian nouns, French verbs)",
+        help="Fix mode: Generate missing word forms. Use --task to specify which forms to fix.",
+    )
+
+    # Legacy parameters (kept for backward compatibility)
+    parser.add_argument(
+        "--form-type",
+        choices=["base-forms", "noun-declensions", "verb-conjugations", "all"],
+        help="[Legacy] Which form type to fix (use --task instead for clearer language/form selection)",
     )
     parser.add_argument(
         "--pos-type",
-        help="[Fix mode] Part of speech to fix (e.g., noun, verb). If not specified, fixes all supported types.",
+        help="[Legacy] Part of speech to fix (use --task instead)",
     )
     parser.add_argument(
         "--source",
@@ -154,44 +214,126 @@ def main():
 
     # Handle --fix mode
     if args.fix:
+        # Parse --task parameter to get language and form type
+        language_code = args.language
+        inferred_pos_type = args.pos_type
+        form_type_label = "forms"
+
+        # Task parameter takes precedence
+        if args.task and args.task != "all":
+            # Parse task string: "{lang}-{type}-{suffix}"
+            # e.g., "lt-noun-declensions", "fr-verb-conjugations", "lt-adjective-forms"
+            parts = args.task.split("-")
+            if len(parts) >= 2:
+                language_code = parts[0]
+                form_category = parts[1]  # noun, verb, adjective
+
+                # Map form category to POS type and label
+                if form_category == "noun":
+                    inferred_pos_type = "noun"
+                    # Use "declensions" for case languages (LT, DE), "forms" for others
+                    if language_code in ["lt", "de"]:
+                        form_type_label = f"{LANGUAGE_NAMES.get(language_code, language_code)} noun declensions"
+                    else:
+                        form_type_label = f"{LANGUAGE_NAMES.get(language_code, language_code)} noun forms"
+                elif form_category == "verb":
+                    inferred_pos_type = "verb"
+                    form_type_label = f"{LANGUAGE_NAMES.get(language_code, language_code)} verb conjugations"
+                elif form_category == "adjective":
+                    inferred_pos_type = "adjective"
+                    form_type_label = f"{LANGUAGE_NAMES.get(language_code, language_code)} adjective forms"
+                elif form_category == "adverb":
+                    inferred_pos_type = "adverb"
+                    form_type_label = f"{LANGUAGE_NAMES.get(language_code, language_code)} adverb forms"
+        elif args.task == "all":
+            language_code = None  # Process all languages
+            form_type_label = "all forms (all languages)"
+        # Legacy form-type parameter
+        elif args.form_type:
+            if args.form_type == "base-forms":
+                form_type_label = "base forms"
+            elif args.form_type == "noun-declensions":
+                inferred_pos_type = "noun"
+                form_type_label = "noun declensions"
+            elif args.form_type == "verb-conjugations":
+                inferred_pos_type = "verb"
+                form_type_label = "verb conjugations"
+            elif args.form_type == "all":
+                form_type_label = "all forms"
+
         # Confirmation prompt (unless --yes or --dry-run)
         if not args.yes and not args.dry_run:
-            # Determine what we're fixing based on language and pos-type
+            # Get appropriate check results for confirmation
             language_names = {"lt": "Lithuanian", "fr": "French"}
-            lang_name = language_names.get(args.language, args.language.upper())
+            lang_name = language_names.get(language_code, language_code.upper()) if language_code else "All"
 
-            # Get appropriate check results based on language and POS type
-            if args.language == "lt" and (not args.pos_type or args.pos_type == "noun"):
+            needs_fix = 0
+            if language_code == "lt" and inferred_pos_type == "noun":
                 check_results = agent.check_noun_declension_coverage()
                 needs_fix = check_results.get("needs_declensions", 0)
-                form_type = "noun declensions"
-            elif args.language == "fr" and (not args.pos_type or args.pos_type == "verb"):
+            elif language_code == "fr" and inferred_pos_type == "verb":
                 check_results = agent.check_verb_conjugation_coverage(language_code="fr")
                 needs_fix = check_results.get("needs_conjugations", 0)
-                form_type = "verb conjugations"
-            elif args.language == "lt" and args.pos_type == "verb":
+            elif language_code == "lt" and inferred_pos_type == "verb":
                 check_results = agent.check_verb_conjugation_coverage(language_code="lt")
                 needs_fix = check_results.get("needs_conjugations", 0)
-                form_type = "verb conjugations"
-            else:
-                needs_fix = 0
-                form_type = "forms"
 
-            if not display.print_fix_confirmation(lang_name, form_type, needs_fix, args):
+            if not display.print_fix_confirmation(lang_name, form_type_label, needs_fix, args):
                 print("Aborted.")
                 return
 
-        results = agent.fix_missing_forms(
-            language_code=args.language,
-            pos_type=args.pos_type,
-            limit=args.limit,
-            model=args.model,
-            throttle=args.throttle,
-            dry_run=args.dry_run,
-            source=args.source,
-        )
+        # For "all" task, we need to process each supported combination
+        if args.task == "all":
+            print("\n=== Processing all supported forms ===\n")
 
-        display.print_fix_results(results, args.dry_run)
+            # Process each supported language/POS combination
+            task_num = 1
+            for lang, pos_types in SUPPORTED_TASKS.items():
+                lang_name = LANGUAGE_NAMES.get(lang, lang.upper())
+                for pos in pos_types:
+                    # Use correct terminology based on language and POS type
+                    if pos == "noun":
+                        # Use "declensions" for case languages (LT, DE), "forms" for others
+                        form_desc = "noun declensions" if lang in ["lt", "de"] else "noun forms"
+                    else:
+                        form_desc = {
+                            "verb": "verb conjugations",
+                            "adjective": "adjective forms",
+                            "adverb": "adverb forms",
+                        }.get(pos, f"{pos} forms")
+
+                    print(f"\n{task_num}. {lang_name} {form_desc}:")
+
+                    # Only pass source for Lithuanian nouns
+                    kwargs = {
+                        "language_code": lang,
+                        "pos_type": pos,
+                        "limit": args.limit,
+                        "model": args.model,
+                        "throttle": args.throttle,
+                        "dry_run": args.dry_run,
+                    }
+                    if lang == "lt" and pos == "noun":
+                        kwargs["source"] = args.source
+
+                    results = agent.fix_missing_forms(**kwargs)
+                    display.print_fix_results(results, args.dry_run)
+                    task_num += 1
+
+            print("\n=== All forms processed ===")
+        else:
+            # Single task
+            results = agent.fix_missing_forms(
+                language_code=language_code,
+                pos_type=inferred_pos_type,
+                limit=args.limit,
+                model=args.model,
+                throttle=args.throttle,
+                dry_run=args.dry_run,
+                source=args.source,
+            )
+            display.print_fix_results(results, args.dry_run)
+
         return
 
     # Handle check mode (existing functionality)

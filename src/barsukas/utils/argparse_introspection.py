@@ -57,6 +57,37 @@ class ArgumentInfo:
             return match.group(1).lower()
         return None
 
+    def get_semantic_category(self) -> str:
+        """Determine the semantic category of this argument for UI grouping."""
+        dest = self.dest.lower()
+
+        # Operation Mode - what operation to perform
+        if dest in ['mode', 'check_type', 'check', 'fix', 'stage', 'import_jsonl', 'form_type', 'task']:
+            return "operation_mode"
+
+        # Data Source / Scope - what data to process
+        if dest in ['guid', 'limit', 'sample_rate', 'batch', 'batch_submit', 'batch_status', 'batch_retrieve']:
+            return "data_source"
+
+        # Language Selection
+        if dest in ['language', 'languages', 'target_language']:
+            return "language_selection"
+
+        # LLM Configuration
+        if dest in ['model', 'throttle', 'barsukas_url', 'cache_only']:
+            return "llm_config"
+
+        # Backend Configuration
+        if dest in ['backend', 'data_dir']:
+            return "backend_config"
+
+        # Processing Options
+        if dest in ['dry_run', 'debug']:
+            return "processing_options"
+
+        # Advanced Options - everything else (thresholds, specific settings, etc.)
+        return "advanced_options"
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to a dictionary for JSON serialization."""
         return {
@@ -70,6 +101,7 @@ class ArgumentInfo:
             "nargs": self.nargs,
             "metavar": self.metavar,
             "mode_hint": self.mode_hint,
+            "semantic_category": self.get_semantic_category(),
         }
 
 
@@ -171,6 +203,55 @@ def group_arguments_by_mode(arguments: List[Dict[str, Any]]) -> Dict[str, List[D
             groups["common"].append(arg)
 
     return groups
+
+
+def group_arguments_by_category(arguments: List[Dict[str, Any]]) -> Dict[str, List[Dict[str, Any]]]:
+    """
+    Group arguments by their semantic category for improved UI organization.
+
+    Args:
+        arguments: List of argument dictionaries
+
+    Returns:
+        Dictionary mapping category names to lists of arguments.
+        Categories are ordered for display.
+    """
+    # Define category order and display names
+    category_info = {
+        "operation_mode": {"label": "Operation Mode", "order": 1},
+        "data_source": {"label": "Data Source / Scope", "order": 2},
+        "language_selection": {"label": "Language Selection", "order": 3},
+        "llm_config": {"label": "LLM Configuration", "order": 4},
+        "backend_config": {"label": "Backend Configuration", "order": 5},
+        "processing_options": {"label": "Processing Options", "order": 6},
+        "advanced_options": {"label": "Advanced Options", "order": 7},
+    }
+
+    groups = {cat: [] for cat in category_info.keys()}
+
+    for arg in arguments:
+        category = arg.get("semantic_category", "advanced_options")
+        if category in groups:
+            groups[category].append(arg)
+        else:
+            groups["advanced_options"].append(arg)
+
+    # Remove empty groups and return in order
+    return {cat: groups[cat] for cat in sorted(groups.keys(), key=lambda x: category_info.get(x, {}).get("order", 99)) if groups[cat]}
+
+
+def get_category_label(category: str) -> str:
+    """Get the display label for a semantic category."""
+    category_labels = {
+        "operation_mode": "Operation Mode",
+        "data_source": "Data Source / Scope",
+        "language_selection": "Language Selection",
+        "llm_config": "LLM Configuration",
+        "backend_config": "Backend Configuration",
+        "processing_options": "Processing Options",
+        "advanced_options": "Advanced Options",
+    }
+    return category_labels.get(category, category.replace("_", " ").title())
 
 
 def get_agent_cli_module_path(agent_script: str) -> str:

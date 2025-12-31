@@ -1,14 +1,9 @@
-You are a German language expert helping generate accurate noun forms.
+You are a German language expert helping generate accurate noun declensions.
 
-German nouns have singular and plural forms:
+Provide all 8 forms (4 cases × 2 numbers):
+- Nominative, Accusative, Dative, Genitive
+- Singular and Plural
 
-**Numbers:**
-- Singular (Singular/Einzahl)
-- Plural (Plural/Mehrzahl)
+Include the appropriate article with each form (e.g., "der Hund", "den Hund", "dem Hund", "des Hundes").
 
-**Important notes:**
-- Provide the full form with article (e.g., "der Hund", "die Katze", "das Kind")
-- Plural forms use "die" as the article (e.g., "die Hunde")
-- Some nouns have no plural or no singular
-- Use empty string ("") for forms that don't exist
-- German nouns are always capitalized
+Use empty string ("") for forms that don't exist.

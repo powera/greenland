@@ -13,12 +13,12 @@ have derivative forms but don't, and reports on data quality issues.
 "Vilkas" means "wolf" in Lithuanian - a watchful guardian of the word database.
 
 Supported languages and forms:
-- Lithuanian (lt): noun declensions, verb conjugations, adjective forms
-- French (fr): verb conjugations, noun declensions
-- German (de): verb conjugations, noun declensions
-- Spanish (es): verb conjugations, noun declensions
-- Portuguese (pt): verb conjugations, noun declensions
-- English (en): verb conjugations
+- Lithuanian (lt): noun declensions (7 cases), verb conjugations, adjective forms, adverb forms
+- French (fr): noun forms (singular/plural), verb conjugations
+- German (de): noun declensions (4 cases), verb conjugations
+- Spanish (es): noun forms (singular/plural), verb conjugations
+- Portuguese (pt): noun forms (singular/plural), verb conjugations
+- English (en): noun forms (singular/plural), verb conjugations, adjective forms, adverb forms
 """
 
 import logging
@@ -357,12 +357,12 @@ class VilkasAgent:
         Generate and store missing word forms for a specific language.
 
         Supported languages and forms:
-        - Lithuanian (lt): noun declensions, verb conjugations, adjective forms
-        - French (fr): verb conjugations, noun declensions
-        - German (de): verb conjugations, noun declensions
-        - Spanish (es): verb conjugations, noun declensions
-        - Portuguese (pt): verb conjugations, noun declensions
-        - English (en): verb conjugations
+        - Lithuanian (lt): noun declensions (7 cases), verb conjugations, adjective forms, adverb forms
+        - French (fr): noun forms (singular/plural), verb conjugations
+        - German (de): noun declensions (4 cases), verb conjugations
+        - Spanish (es): noun forms (singular/plural), verb conjugations
+        - Portuguese (pt): noun forms (singular/plural), verb conjugations
+        - English (en): noun forms (singular/plural), verb conjugations, adjective forms, adverb forms
 
         Args:
             language_code: Language code (e.g., 'lt', 'fr', 'de', 'es', 'pt', 'en')
@@ -378,12 +378,12 @@ class VilkasAgent:
         """
         # Define supported languages and their supported POS types
         SUPPORTED_LANGUAGES = {
-            "lt": ["noun", "verb", "adjective"],
+            "lt": ["noun", "verb", "adjective", "adverb"],
             "fr": ["noun", "verb"],
             "de": ["noun", "verb"],
             "es": ["noun", "verb"],
             "pt": ["noun", "verb"],
-            "en": ["verb"],
+            "en": ["noun", "verb", "adjective", "adverb"],
         }
 
         if language_code not in SUPPORTED_LANGUAGES:
@@ -415,6 +415,7 @@ class VilkasAgent:
             "lt_noun": self._fix_lithuanian_noun_declensions,
             "lt_verb": self._fix_lithuanian_verb_conjugations,
             "lt_adjective": self._fix_lithuanian_adjective_forms,
+            "lt_adverb": self._fix_lithuanian_adverb_forms,
             "fr_noun": self._fix_french_noun_declensions,
             "fr_verb": self._fix_french_verb_conjugations,
             "de_noun": self._fix_german_noun_declensions,
@@ -423,7 +424,10 @@ class VilkasAgent:
             "es_verb": self._fix_spanish_verb_conjugations,
             "pt_noun": self._fix_portuguese_noun_declensions,
             "pt_verb": self._fix_portuguese_verb_conjugations,
+            "en_noun": self._fix_english_noun_declensions,
             "en_verb": self._fix_english_verb_conjugations,
+            "en_adjective": self._fix_english_adjective_forms,
+            "en_adverb": self._fix_english_adverb_forms,
         }
 
         if handler_key not in handlers:
@@ -910,6 +914,90 @@ class VilkasAgent:
             language_name="English",
             pos_type="verb",
             process_func=process_lemma_conjugations,
+            limit=limit,
+            model=model,
+            throttle=throttle,
+            dry_run=dry_run,
+        )
+
+    def _fix_english_noun_declensions(
+        self,
+        limit: Optional[int] = None,
+        model: str = "gpt-5-mini",
+        throttle: float = 1.0,
+        dry_run: bool = False,
+    ) -> Dict[str, any]:
+        """Generate missing English noun forms."""
+        from wordfreq.translation.generate_english_noun_forms import process_lemma_forms
+
+        return self._fix_generic_forms(
+            language_code="en",
+            language_name="English",
+            pos_type="noun",
+            process_func=process_lemma_forms,
+            limit=limit,
+            model=model,
+            throttle=throttle,
+            dry_run=dry_run,
+        )
+
+    def _fix_english_adjective_forms(
+        self,
+        limit: Optional[int] = None,
+        model: str = "gpt-5-mini",
+        throttle: float = 1.0,
+        dry_run: bool = False,
+    ) -> Dict[str, any]:
+        """Generate missing English adjective forms."""
+        from wordfreq.translation.generate_english_adjective_forms import process_lemma_forms
+
+        return self._fix_generic_forms(
+            language_code="en",
+            language_name="English",
+            pos_type="adjective",
+            process_func=process_lemma_forms,
+            limit=limit,
+            model=model,
+            throttle=throttle,
+            dry_run=dry_run,
+        )
+
+    def _fix_english_adverb_forms(
+        self,
+        limit: Optional[int] = None,
+        model: str = "gpt-5-mini",
+        throttle: float = 1.0,
+        dry_run: bool = False,
+    ) -> Dict[str, any]:
+        """Generate missing English adverb forms."""
+        from wordfreq.translation.generate_english_adverb_forms import process_lemma_forms
+
+        return self._fix_generic_forms(
+            language_code="en",
+            language_name="English",
+            pos_type="adverb",
+            process_func=process_lemma_forms,
+            limit=limit,
+            model=model,
+            throttle=throttle,
+            dry_run=dry_run,
+        )
+
+    def _fix_lithuanian_adverb_forms(
+        self,
+        limit: Optional[int] = None,
+        model: str = "gpt-5-mini",
+        throttle: float = 1.0,
+        dry_run: bool = False,
+    ) -> Dict[str, any]:
+        """Generate missing Lithuanian adverb forms."""
+        from wordfreq.translation.generate_lithuanian_adverb_forms import process_lemma_forms
+
+        return self._fix_generic_forms(
+            language_code="lt",
+            language_name="Lithuanian",
+            pos_type="adverb",
+            process_func=process_lemma_forms,
             limit=limit,
             model=model,
             throttle=throttle,
