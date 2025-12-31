@@ -66,11 +66,11 @@
                                         <div class="form-check">
                                             <input class="form-check-input arg-input" type="checkbox"
                                                    id="arg_{{ arg.dest }}" name="arg_{{ arg.dest }}" value="true"
-                                                   data-dest="{{ arg.dest }}"
-                                                   {% if arg.default %}checked{% endif %}>
+                                                   data-dest="{{ arg.dest }}">
                                             <label class="form-check-label" for="arg_{{ arg.dest }}">
                                                 <code>{{ arg.names[0] }}</code>
                                                 {% if arg.help %}<span class="text-muted small">- {{ arg.help }}</span>{% endif %}
+                                                {% if arg.default %}<span class="text-muted small">(default: {{ arg.default }})</span>{% endif %}
                                             </label>
                                         </div>
                                     {% elif arg.type == 'choice' %}
@@ -84,13 +84,13 @@
                                                 {% if arg.required %}required{% endif %}>
                                             <option value="">-- Select {{ arg.dest }} --</option>
                                             {% for choice in arg.choices %}
-                                            <option value="{{ choice }}" {% if choice == arg.default %}selected{% endif %}>
+                                            <option value="{{ choice }}">
                                                 {{ choice }}
                                             </option>
                                             {% endfor %}
                                         </select>
                                         {% if arg.help %}
-                                        <div class="form-text">{{ arg.help }}</div>
+                                        <div class="form-text">{{ arg.help }}{% if arg.default %} (default: {{ arg.default }}){% endif %}</div>
                                         {% endif %}
                                     {% elif arg.type == 'list' %}
                                         <!-- List / Multi-select -->
@@ -123,11 +123,11 @@
                                         </label>
                                         <input type="number" class="form-control arg-input" id="arg_{{ arg.dest }}" name="arg_{{ arg.dest }}"
                                                data-dest="{{ arg.dest }}"
-                                               {% if arg.default %}value="{{ arg.default }}"{% endif %}
                                                {% if arg.type == 'float' %}step="0.01"{% endif %}
+                                               {% if arg.metavar %}placeholder="{{ arg.metavar }}"{% endif %}
                                                {% if arg.required %}required{% endif %}>
                                         {% if arg.help %}
-                                        <div class="form-text">{{ arg.help }}</div>
+                                        <div class="form-text">{{ arg.help }}{% if arg.default %} (default: {{ arg.default }}){% endif %}</div>
                                         {% endif %}
                                     {% else %}
                                         <!-- Text Input -->
@@ -137,11 +137,10 @@
                                         </label>
                                         <input type="text" class="form-control arg-input" id="arg_{{ arg.dest }}" name="arg_{{ arg.dest }}"
                                                data-dest="{{ arg.dest }}"
-                                               {% if arg.default %}value="{{ arg.default }}"{% endif %}
                                                {% if arg.metavar %}placeholder="{{ arg.metavar }}"{% endif %}
                                                {% if arg.required %}required{% endif %}>
                                         {% if arg.help %}
-                                        <div class="form-text">{{ arg.help }}</div>
+                                        <div class="form-text">{{ arg.help }}{% if arg.default %} (default: {{ arg.default }}){% endif %}</div>
                                         {% endif %}
                                     {% endif %}
                                 </div>

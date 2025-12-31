@@ -83,7 +83,7 @@ def main():
 
     # Create agent with backend config
     if backend_config:
-        agent = SernasAgent(backend_config=backend_config, debug=args.debug)
+        agent = SernasAgent(config=backend_config, debug=args.debug)
     else:
         # Backward compatibility: use db_path
         agent = SernasAgent(db_path=args.db_path, debug=args.debug)

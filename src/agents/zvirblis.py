@@ -746,7 +746,7 @@ def main():
 
     # Initialize agent
     if backend_config:
-        agent = ZvirblisAgent(backend_config=backend_config, debug=args.debug, model=args.model)
+        agent = ZvirblisAgent(config=backend_config, debug=args.debug, model=args.model)
     else:
         agent = ZvirblisAgent(db_path=args.db_path, debug=args.debug, model=args.model)
 

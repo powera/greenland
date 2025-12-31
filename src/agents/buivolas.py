@@ -868,7 +868,7 @@ def main():
     # Create agent
     if backend_config:
         agent = BuivolasAgent(
-            backend_config=backend_config, model=args.model, debug=args.debug, dry_run=args.dry_run
+            config=backend_config, model=args.model, debug=args.debug, dry_run=args.dry_run
         )
     else:
         agent = BuivolasAgent(

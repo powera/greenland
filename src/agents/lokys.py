@@ -719,7 +719,7 @@ def main():
 
     # Create agent with backend config
     if backend_config:
-        agent = LokysAgent(backend_config=backend_config, debug=args.debug, model=args.model)
+        agent = LokysAgent(config=backend_config, debug=args.debug, model=args.model)
     else:
         # Backward compatibility: use db_path
         agent = LokysAgent(db_path=args.db_path, debug=args.debug, model=args.model)

@@ -163,7 +163,7 @@ def main():
 
     # Create agent
     if backend_config:
-        agent = DramblysAgent(backend_config=backend_config, debug=args.debug)
+        agent = DramblysAgent(config=backend_config, debug=args.debug)
     else:
         agent = DramblysAgent(db_path=args.db_path, debug=args.debug)
 

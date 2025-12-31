@@ -239,7 +239,7 @@ def main():
 
     # Initialize agent
     if backend_config:
-        agent = BebrasAgent(backend_config=backend_config, debug=args.debug, model=args.model)
+        agent = BebrasAgent(config=backend_config, debug=args.debug, model=args.model)
     else:
         agent = BebrasAgent(db_path=args.db_path, debug=args.debug, model=args.model)
 
