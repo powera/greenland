@@ -267,7 +267,7 @@ def get_agent_cli_module_path(agent_script: str) -> str:
     agent_name = agent_script.replace(".py", "")
 
     # Check if it's a multi-file agent (has a directory)
-    multi_file_agents = ["voras", "vilkas", "dramblys"]
+    multi_file_agents = ["voras", "vilkas", "dramblys", "sernas", "bebras"]
 
     if agent_name in multi_file_agents:
         return f"agents.{agent_name}.cli"
