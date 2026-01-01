@@ -21,7 +21,7 @@ if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
 import constants
-from agents.common_args import (
+from src.agents.common.common_args import (
     add_common_args,
     add_output_args,
     add_backend_args,

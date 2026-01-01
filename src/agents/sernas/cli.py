@@ -8,7 +8,7 @@ This module handles all CLI argument parsing and the main entry point.
 import argparse
 import sys
 
-from agents.common_args import (
+from src.agents.common.common_args import (
     add_common_args,
     add_llm_args,
     add_processing_args,

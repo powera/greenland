@@ -31,7 +31,7 @@ if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
 import constants
-from agents.common_args import (
+from src.agents.common.common_args import (
     add_common_args,
     add_llm_args,
     add_output_args,
@@ -41,7 +41,7 @@ from agents.common_args import (
     get_data_source_config,
     confirm_operation,
 )
-from agents.lemma_selection import (
+from src.agents.common.lemma_selection import (
     find_lemma_by_guid,
     LemmaQueryBuilder,
     count_for_confirmation,

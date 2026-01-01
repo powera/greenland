@@ -16,7 +16,7 @@ import argparse
 from unittest.mock import Mock, patch, MagicMock
 from io import StringIO
 
-from agents.common_args import (
+from src.agents.common.common_args import (
     add_common_args,
     add_llm_args,
     add_output_args,

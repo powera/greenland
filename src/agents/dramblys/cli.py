@@ -16,7 +16,7 @@ GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent.parent)
 if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
-from agents.common_args import (
+from src.agents.common.common_args import (
     add_common_args,
     add_llm_args,
     add_output_args,

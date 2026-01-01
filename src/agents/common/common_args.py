@@ -316,7 +316,7 @@ def get_standard_db_path(args_db_path: Optional[str] = None) -> str:
     return str(Path(__file__).parent.parent.parent / "data" / "greenland.db")
 
 
-def get_data_source_config(args: Any, default_model: str = None):
+def get_data_source_config(args: Any, default_model: Optional[str] = None):
     """Create DataSourceConfig from parsed arguments.
 
     Args:

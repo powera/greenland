@@ -27,7 +27,7 @@ if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
 import constants
-from agents.common_args import (
+from src.agents.common.common_args import (
     add_common_args,
     add_processing_args,
     add_backend_args,
@@ -36,7 +36,7 @@ from agents.common_args import (
     confirm_operation,
     get_data_source_config,
 )
-from agents.lemma_selection import find_lemma_by_guid
+from src.agents.common.lemma_selection import find_lemma_by_guid
 from wordfreq.storage.backend import create_session as create_backend_session
 from wordfreq.storage.backend.config import DataSourceConfig, BackendType
 from wordfreq.storage.models.schema import Lemma, AudioQualityReview, LemmaTranslation

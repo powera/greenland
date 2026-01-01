@@ -9,7 +9,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from agents.common_args import (
+from src.agents.common.common_args import (
     add_common_args,
     add_llm_args,
     add_output_args,

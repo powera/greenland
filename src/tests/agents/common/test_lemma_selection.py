@@ -13,7 +13,7 @@ if str(Path(__file__).parent.parent.parent) not in sys.path:
 
 import unittest
 from unittest.mock import Mock, MagicMock, patch, call
-from agents.lemma_selection import (
+from src.agents.common.lemma_selection import (
     find_lemma_by_guid,
     LemmaQueryBuilder,
     apply_limit_and_sample_rate,

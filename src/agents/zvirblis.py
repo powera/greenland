@@ -34,7 +34,7 @@ if GREENLAND_SRC_PATH not in sys.path:
 
 import constants
 import util.prompt_loader
-from agents.common_args import (
+from src.agents.common.common_args import (
     add_common_args,
     add_llm_args,
     add_guid_arg,
