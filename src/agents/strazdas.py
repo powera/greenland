@@ -31,6 +31,8 @@ from agents.common_args import (
     add_common_args,
     add_processing_args,
     add_backend_args,
+    add_guid_arg,
+    add_llm_args,
     confirm_operation,
     get_data_source_config,
 )
@@ -339,16 +341,25 @@ def get_argument_parser():
 
     # Common arguments
     add_common_args(parser)
+    add_llm_args(parser)
     add_processing_args(parser)
+    add_guid_arg(parser, help_text="Process only the lemma with this GUID")
     add_backend_args(parser)
+
+    # Mode selection
+    parser.add_argument(
+        "--mode",
+        choices=["check-existing", "populate-only", "regenerate", "coverage"],
+        default="coverage",
+        help="Operation mode: check-existing (list existing audio), populate-only (generate missing only), regenerate (delete and regenerate), coverage (report only, default)",
+    )
 
     # Strazdas-specific arguments
     parser.add_argument("--output-dir", help="Output directory for generated audio")
     parser.add_argument(
         "--language",
-        required=True,
         choices=["lt", "zh", "ko", "fr", "de", "es", "pt", "sw", "vi"],
-        help="Target language code",
+        help="Target language code (required for populate-only and regenerate modes)",
     )
     parser.add_argument(
         "--difficulty-level", type=int, help="Filter by difficulty level (1-20)"
@@ -393,53 +404,10 @@ def main():
     # Create configuration from args (always returns a valid config with defaults)
     config = get_data_source_config(args)
 
-    # Convert voice names to EspeakVoice enums
-    voices = None
-    if args.voices:
-        try:
-            voices = [EspeakVoice[v.upper()] for v in args.voices]
-        except KeyError as e:
-            print(f"Error: Unknown voice name: {e}")
-            print(f"Use --list-voices to see available voices for {args.language}")
-            sys.exit(1)
-
-    # Confirm before running (unless --yes was provided)
-    if not args.yes:
-        # Estimate number of files
-        agent_temp = StrazdasAgent(config=config)
-        session = agent_temp.get_session()
-        try:
-            query = session.query(Lemma).filter(Lemma.guid.isnot(None))
-
-            if args.difficulty_level is not None:
-                query = query.filter(Lemma.difficulty_level == args.difficulty_level)
-
-            if args.limit:
-                query = query.limit(args.limit)
-
-            # Get all lemmas and filter by translation availability
-            all_lemmas = query.all()
-            lemmas_with_translation = []
-            for lemma in all_lemmas:
-                if agent_temp.get_translation_text(session, lemma, args.language):
-                    lemmas_with_translation.append(lemma)
-
-            lemma_count = len(lemmas_with_translation)
-            voice_list = voices or DEFAULT_ESPEAK_VOICES.get(args.language, [])
-            voice_count = len(voice_list)
-            estimated_files = lemma_count * voice_count
-        finally:
-            session.close()
-
-        voices_str = ', '.join(v.name for v in voices) if voices else ', '.join(v.name for v in voice_list)
-        if not confirm_operation(
-            message=f"This will generate audio for {lemma_count} lemmas with {voice_count} voices each.\nTotal files: {estimated_files}\nVoices: {voices_str}\nThis will use eSpeak-NG TTS (free, local generation).",
-            estimated_calls=None,  # No API calls, local generation
-            skip_confirmation=args.yes,
-            dry_run=False,
-        ):
-            print("Aborted.")
-            sys.exit(0)
+    # Validate mode-specific requirements
+    if args.mode in ["populate-only", "regenerate"] and not args.language:
+        print(f"Error: --language is required for --mode {args.mode}")
+        sys.exit(1)
 
     # Create agent with config
     agent = StrazdasAgent(
@@ -447,28 +415,201 @@ def main():
         output_dir=args.output_dir,
     )
 
-    start_time = datetime.now()
-    results = agent.generate_batch(
-        language_code=args.language,
-        limit=args.limit,
-        difficulty_level=args.difficulty_level,
-        voices=voices,
-        use_ipa=args.use_ipa,
-    )
-    duration = (datetime.now() - start_time).total_seconds()
+    # Convert voice names to EspeakVoice enums
+    voices = None
+    if args.voices:
+        try:
+            voices = [EspeakVoice[v.upper()] for v in args.voices]
+        except KeyError as e:
+            print(f"Error: Unknown voice name: {e}")
+            print(f"Use --list-voices to see available voices")
+            sys.exit(1)
 
-    # Print summary
-    logger.info("=" * 80)
-    logger.info("STRAZDAS AGENT REPORT - eSpeak-NG Audio Generation")
-    logger.info("=" * 80)
-    logger.info(f"Language: {results['language_code']}")
-    logger.info(f"Total lemmas: {results['total_lemmas']}")
-    logger.info(f"Voices: {', '.join(results['voices'])}")
-    logger.info(f"Successful: {results['success_count']}")
-    logger.info(f"Errors: {results['error_count']}")
-    logger.info(f"Duration: {duration:.2f} seconds")
-    logger.info(f"Output directory: {results['output_dir']}")
-    logger.info("=" * 80)
+    # Handle --guid mode (single lemma)
+    if args.guid:
+        session = agent.get_session()
+        try:
+            lemma = session.query(Lemma).filter(Lemma.guid == args.guid).first()
+            if not lemma:
+                print(f"\nError: No lemma found with GUID: {args.guid}")
+                sys.exit(1)
+
+            print(f"\nProcessing audio for: {lemma.lemma_text} (GUID: {args.guid})")
+            print(f"POS: {lemma.pos_type}")
+
+            # For single lemma, require language
+            if not args.language:
+                print("Error: --language is required when using --guid")
+                sys.exit(1)
+
+            # Check if translation exists
+            translation = agent.get_translation_text(session, lemma, args.language)
+            if not translation:
+                print(f"Error: No {args.language} translation found for this lemma")
+                sys.exit(1)
+
+            print(f"Translation ({args.language}): {translation}")
+
+            # Use default voices if not specified
+            voice_list = voices or DEFAULT_ESPEAK_VOICES.get(args.language, [])
+
+            print(f"\nGenerating audio with voices: {', '.join(v.name for v in voice_list)}")
+
+            # Generate audio for the single lemma
+            result = agent.generate_audio_for_lemma(
+                session, lemma, args.language, voice_list, create_review_record=True, use_ipa=args.use_ipa
+            )
+
+            if result["success"]:
+                print(f"\n✓ Successfully generated audio for {len(result['voices'])} voice(s)")
+                for voice_result in result['voices']:
+                    if voice_result['success']:
+                        print(f"  {voice_result['voice']}: {voice_result['filename']}")
+                    else:
+                        print(f"  {voice_result['voice']}: ERROR - {voice_result.get('error', 'Unknown')}")
+            else:
+                print(f"\n✗ Failed: {result.get('error', 'Unknown error')}")
+                sys.exit(1)
+
+        finally:
+            session.close()
+        return
+
+    # Handle batch modes
+    if args.mode == "coverage":
+        # Report on audio coverage
+        print("\nAudio Coverage Report (eSpeak-NG)")
+        print("=" * 80)
+        print("This mode reports on existing audio files in the AudioQualityReview table.")
+        print("Use --language to filter by language.")
+
+        session = agent.get_session()
+        try:
+            from sqlalchemy import func
+
+            # Get counts by language and voice
+            if args.language:
+                query = session.query(
+                    AudioQualityReview.voice_name,
+                    func.count(AudioQualityReview.id)
+                ).filter(AudioQualityReview.language_code == args.language).group_by(
+                    AudioQualityReview.voice_name
+                )
+                results = query.all()
+                print(f"\nLanguage: {args.language}")
+                for voice_name, count in results:
+                    print(f"  {voice_name}: {count} audio files")
+            else:
+                query = session.query(
+                    AudioQualityReview.language_code,
+                    AudioQualityReview.voice_name,
+                    func.count(AudioQualityReview.id)
+                ).group_by(
+                    AudioQualityReview.language_code,
+                    AudioQualityReview.voice_name
+                )
+                results = query.all()
+                current_lang = None
+                for lang_code, voice_name, count in results:
+                    if lang_code != current_lang:
+                        print(f"\n{lang_code}:")
+                        current_lang = lang_code
+                    print(f"  {voice_name}: {count} audio files")
+        finally:
+            session.close()
+        return
+
+    elif args.mode == "check-existing":
+        # List existing audio files
+        print("\nExisting Audio Files (eSpeak-NG)")
+        print("=" * 80)
+
+        session = agent.get_session()
+        try:
+            query = session.query(AudioQualityReview)
+
+            if args.language:
+                query = query.filter(AudioQualityReview.language_code == args.language)
+
+            if args.limit:
+                query = query.limit(args.limit)
+
+            audio_files = query.all()
+
+            for audio in audio_files:
+                print(f"{audio.guid} | {audio.language_code}/{audio.voice_name} | {audio.filename} | {audio.status}")
+
+            print(f"\nTotal: {len(audio_files)} audio files")
+        finally:
+            session.close()
+        return
+
+    elif args.mode in ["populate-only", "regenerate"]:
+        # Validate language is required
+        if not args.language:
+            print(f"Error: --language is required for --mode {args.mode}")
+            sys.exit(1)
+
+        # Confirm before running (unless --yes was provided)
+        if not args.yes and not args.dry_run:
+            # Estimate number of files
+            session = agent.get_session()
+            try:
+                query = session.query(Lemma).filter(Lemma.guid.isnot(None))
+
+                if args.difficulty_level is not None:
+                    query = query.filter(Lemma.difficulty_level == args.difficulty_level)
+
+                if args.limit:
+                    query = query.limit(args.limit)
+
+                # Get all lemmas and filter by translation availability
+                all_lemmas = query.all()
+                lemmas_with_translation = []
+                for lemma in all_lemmas:
+                    if agent.get_translation_text(session, lemma, args.language):
+                        lemmas_with_translation.append(lemma)
+
+                lemma_count = len(lemmas_with_translation)
+                voice_list = voices or DEFAULT_ESPEAK_VOICES.get(args.language, [])
+                voice_count = len(voice_list)
+                estimated_files = lemma_count * voice_count
+            finally:
+                session.close()
+
+            voices_str = ', '.join(v.name for v in voices) if voices else ', '.join(v.name for v in voice_list)
+            if not confirm_operation(
+                message=f"This will generate audio for {lemma_count} lemmas with {voice_count} voices each.\nTotal files: {estimated_files}\nVoices: {voices_str}\nThis will use eSpeak-NG TTS (free, local generation).",
+                estimated_calls=None,  # No API calls, local generation
+                skip_confirmation=args.yes,
+                dry_run=args.dry_run,
+            ):
+                print("Aborted.")
+                sys.exit(0)
+
+        # Run batch generation
+        start_time = datetime.now()
+        results = agent.generate_batch(
+            language_code=args.language,
+            limit=args.limit,
+            difficulty_level=args.difficulty_level,
+            voices=voices,
+            use_ipa=args.use_ipa,
+        )
+        duration = (datetime.now() - start_time).total_seconds()
+
+        # Print summary
+        logger.info("=" * 80)
+        logger.info("STRAZDAS AGENT REPORT - eSpeak-NG Audio Generation")
+        logger.info("=" * 80)
+        logger.info(f"Language: {results['language_code']}")
+        logger.info(f"Total lemmas: {results['total_lemmas']}")
+        logger.info(f"Voices: {', '.join(results['voices'])}")
+        logger.info(f"Successful: {results['success_count']}")
+        logger.info(f"Errors: {results['error_count']}")
+        logger.info(f"Duration: {duration:.2f} seconds")
+        logger.info(f"Output directory: {results['output_dir']}")
+        logger.info("=" * 80)
 
 
 if __name__ == "__main__":

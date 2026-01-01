@@ -642,8 +642,19 @@ def generate():
         else:
             audio_base_dir = Path(audio_base_dir)
 
+        # Create DataSourceConfig for agents
+        from wordfreq.storage.backend.config import DataSourceConfig, BackendType
+        from config import Config
+
+        config = DataSourceConfig(
+            backend_type=BackendType.SQLITE,
+            sqlite_path=Config.DB_PATH,
+            model=constants.DEFAULT_MODEL,
+            debug=Config.DEBUG,
+        )
+
         if tts_engine == "espeak-ng":
-            agent = StrazdasAgent(output_dir=str(audio_base_dir))
+            agent = StrazdasAgent(config=config, output_dir=str(audio_base_dir))
             results = agent.generate_batch(
                 language_code=language_code,
                 limit=limit,
@@ -653,7 +664,7 @@ def generate():
             )
             engine_name = "eSpeak-NG"
         else:
-            agent = VieversysAgent(output_dir=str(audio_base_dir))
+            agent = VieversysAgent(config=config, output_dir=str(audio_base_dir))
             results = agent.generate_batch(
                 language_code=language_code,
                 limit=limit,
@@ -892,9 +903,20 @@ def generate_single(guid):
         if not audio_base_dir:
             raise ValueError("AUDIO_BASE_DIR not configured")
 
+        # Create DataSourceConfig for agents
+        from wordfreq.storage.backend.config import DataSourceConfig, BackendType
+        from config import Config
+
+        config = DataSourceConfig(
+            backend_type=BackendType.SQLITE,
+            sqlite_path=Config.DB_PATH,
+            model=constants.DEFAULT_MODEL,
+            debug=Config.DEBUG,
+        )
+
         # Run the appropriate agent based on TTS engine
         if tts_engine == "espeak-ng":
-            agent = StrazdasAgent(output_dir=audio_base_dir)
+            agent = StrazdasAgent(config=config, output_dir=audio_base_dir)
             result = agent.generate_audio_for_lemma(
                 g.db, lemma, language_code, voice_enums, create_review_record=True, use_ipa=use_ipa
             )
@@ -909,7 +931,7 @@ def generate_single(guid):
                 g.db, lemma, language_code, voice_enums, audio_base_dir
             )
         else:
-            agent = VieversysAgent(output_dir=audio_base_dir)
+            agent = VieversysAgent(config=config, output_dir=audio_base_dir)
             result = agent.generate_audio_for_lemma(
                 g.db, lemma, language_code, voice_enums, create_review_record=True
             )
