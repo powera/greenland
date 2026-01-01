@@ -39,6 +39,11 @@ if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
 import constants
+from agents.common_args import (
+    add_common_args, add_llm_args, add_processing_args,
+    add_guid_arg, confirm_operation, get_data_source_config
+)
+from agents.lemma_selection import find_lemma_by_guid, get_lemmas_for_processing
 from wordfreq.storage.database import create_database_session
 from wordfreq.storage.models.schema import Lemma, DerivativeForm  # etc.
 
@@ -131,14 +136,17 @@ def main():
     parser = argparse.ArgumentParser(description="MyAgent - Description")
     parser.add_argument('--check', action='store_true', help='Run checks only')
     parser.add_argument('--fix', action='store_true', help='Fix issues')
-    parser.add_argument('--dry-run', action='store_true', help='Preview changes')
-    parser.add_argument('--limit', type=int, help='Limit items to process')
-    parser.add_argument('--model', default='gpt-5-mini', help='LLM model to use')
-    parser.add_argument('--db-path', help='Custom database path')
-    parser.add_argument('--debug', action='store_true', help='Enable debug logging')
-    parser.add_argument('--yes', '-y', action='store_true', help='Skip confirmation')
+
+    # Use standardized argument functions
+    add_common_args(parser)      # --db-path, --debug, --yes, --dry-run
+    add_llm_args(parser)          # --model, --throttle, --barsukas-url
+    add_processing_args(parser)   # --limit, --sample-rate
+    add_guid_arg(parser)          # --guid
 
     args = parser.parse_args()
+
+    # Use standardized config builder
+    config = get_data_source_config(args)
 
     agent = MyAgent(
         db_path=args.db_path,
@@ -146,17 +154,40 @@ def main():
         model=args.model
     )
 
+    # Handle single lemma mode with --guid
+    if args.guid:
+        session = agent.get_session()
+        try:
+            lemma = find_lemma_by_guid(session, args.guid)
+            logger.info(f"Processing: {lemma.lemma_text}")
+            # Process single lemma...
+        finally:
+            session.close()
+        return 0
+
+    # Batch mode with confirmation
+    if not args.yes and not args.dry_run:
+        session = agent.get_session()
+        try:
+            from agents.lemma_selection import LemmaQueryBuilder, count_for_confirmation
+            query = LemmaQueryBuilder(session).curated_only().build()
+            count = count_for_confirmation(query, args.limit, args.sample_rate)
+        finally:
+            session.close()
+
+        if not confirm_operation(
+            message=f"Will process {count} lemmas",
+            estimated_calls=count,
+            skip_confirmation=args.yes,
+            dry_run=args.dry_run,
+        ):
+            return 0
+
     if args.check or not args.fix:
         results = agent.check(limit=args.limit)
         logger.info(f"Check results: {results}")
 
     if args.fix:
-        if not args.yes:
-            confirm = input("Proceed with fixes? [y/N]: ")
-            if confirm.lower() != 'y':
-                logger.info("Aborted")
-                return 1
-
         results = agent.fix(limit=args.limit, dry_run=args.dry_run)
         logger.info(f"Fix results: {results}")
 
@@ -387,7 +418,144 @@ for item in items:
 results = queue.execute()
 ```
 
-### Query Patterns
+### Lemma Selection (RECOMMENDED)
+
+**Use `agents.lemma_selection` for all lemma querying** - this standardized module prevents bugs and reduces duplication.
+
+```python
+from agents.lemma_selection import (
+    find_lemma_by_guid,
+    LemmaQueryBuilder,
+    apply_limit_and_sample_rate,
+    count_for_confirmation,
+    get_lemmas_for_processing,
+)
+```
+
+#### Single Lemma by GUID
+
+```python
+# RECOMMENDED: Standardized GUID lookup with consistent error handling
+lemma = find_lemma_by_guid(session, args.guid)
+# Automatically prints helpful error and exits if not found
+
+# For optional lookup (don't exit on missing):
+lemma = find_lemma_by_guid(session, guid, error_on_missing=False)
+if lemma is None:
+    print("Not found, but continuing...")
+```
+
+#### Batch Query Building
+
+```python
+# RECOMMENDED: Fluent query builder with common filters
+query = (
+    LemmaQueryBuilder(session)
+    .curated_only()                    # Only lemmas with GUIDs
+    .by_difficulty_level(args.level)   # Filter by difficulty (if provided)
+    .has_translation_in('fr')          # Filter to lemmas with French translation
+    .order_by_id()                     # Reproducible ordering
+    .build()
+)
+
+lemmas = apply_limit_and_sample_rate(query, args.limit, args.sample_rate)
+```
+
+#### Confirmation Counting
+
+```python
+# RECOMMENDED: Count items for confirmation prompts
+from agents.common_args import confirm_operation
+
+query = LemmaQueryBuilder(session).curated_only().build()
+count = count_for_confirmation(query, args.limit, args.sample_rate)
+
+if not confirm_operation(
+    message=f"Will process {count} lemmas",
+    estimated_calls=count * 2,  # If making 2 calls per lemma
+    skip_confirmation=args.yes,
+    dry_run=args.dry_run,
+):
+    sys.exit(0)
+```
+
+#### High-Level Convenience Function
+
+```python
+# RECOMMENDED: One function handles both GUID and batch modes
+lemmas = get_lemmas_for_processing(
+    session,
+    guid=args.guid,              # If provided, returns single-item list
+    curated_only=True,           # Only lemmas with GUIDs
+    difficulty_level=args.level, # Optional difficulty filter
+    language_code='fr',          # Optional language filter
+    limit=args.limit,
+    sample_rate=args.sample_rate,
+    order_by_id=True,
+)
+
+# Now process lemmas uniformly whether GUID or batch mode
+for lemma in lemmas:
+    process(lemma)
+```
+
+#### Custom Filters
+
+```python
+# For agent-specific filters, use filter_custom()
+def only_verbs(query):
+    return query.filter(Lemma.pos_type == 'verb')
+
+query = (
+    LemmaQueryBuilder(session)
+    .curated_only()
+    .filter_custom(only_verbs)
+    .build()
+)
+```
+
+#### Why Use lemma_selection?
+
+✅ **Consistent error messages** - Users get the same helpful error across all agents
+✅ **Prevents bugs** - Centralized, tested logic catches edge cases
+✅ **Reduces duplication** - Same GUID lookup was copy-pasted across 15+ agents
+✅ **Easier maintenance** - Fix once, benefit everywhere
+✅ **Tested** - Comprehensive unit tests in `tests/agents/test_lemma_selection.py`
+
+#### Migration Example
+
+**Before (❌ Don't do this):**
+```python
+if args.guid:
+    lemma = session.query(Lemma).filter(Lemma.guid == args.guid).first()
+    if not lemma:
+        print(f"Error: No lemma found with GUID: {args.guid}")
+        sys.exit(1)
+    lemmas = [lemma]
+else:
+    query = session.query(Lemma).filter(Lemma.guid.isnot(None))
+    if args.limit:
+        query = query.limit(args.limit)
+    lemmas = query.all()
+    if args.sample_rate < 1.0:
+        sample_size = int(len(lemmas) * args.sample_rate)
+        lemmas = random.sample(lemmas, sample_size)
+```
+
+**After (✅ Do this):**
+```python
+lemmas = get_lemmas_for_processing(
+    session,
+    guid=args.guid,
+    curated_only=True,
+    limit=args.limit,
+    sample_rate=args.sample_rate,
+)
+```
+
+### Legacy Query Patterns (Avoid)
+
+Only use raw SQLAlchemy queries when `lemma_selection` doesn't support your use case:
 
 ```python
 from wordfreq.storage.models.schema import Lemma
@@ -575,13 +743,23 @@ Use unified LLM client from `clients.unified_client`:
 When creating or modifying agents:
 
 1. **Always follow the architecture pattern** - Don't reinvent the wheel
-2. **Check existing agents** for similar functionality before creating new ones
-3. **Maintain idempotency** - Critical for production use
-4. **Add comprehensive logging** - Helps with debugging
-5. **Support dry-run mode** - Users need to preview changes
-6. **Handle errors gracefully** - Database operations can fail
-7. **Update documentation** - Both README.md and CLAUDE.md
-8. **Test all modes** - check, fix, dry-run must all work correctly
+2. **Use standardized modules** - Import from `agents.common_args` and `agents.lemma_selection`
+3. **Check existing agents** for similar functionality before creating new ones
+4. **Maintain idempotency** - Critical for production use
+5. **Add comprehensive logging** - Helps with debugging
+6. **Support dry-run mode** - Users need to preview changes
+7. **Handle errors gracefully** - Database operations can fail
+8. **Update documentation** - Both README.md and CLAUDE.md
+9. **Test all modes** - check, fix, dry-run must all work correctly
+
+**Required imports for all agents:**
+```python
+from agents.common_args import (
+    add_common_args, add_llm_args, add_processing_args,
+    add_guid_arg, confirm_operation, get_data_source_config
+)
+from agents.lemma_selection import find_lemma_by_guid, get_lemmas_for_processing
+```
 
 When asked to create a new agent:
 1. Ask user for the agent's purpose and Lithuanian name
