@@ -41,6 +41,11 @@ from agents.common_args import (
     get_data_source_config,
     confirm_operation,
 )
+from agents.lemma_selection import (
+    find_lemma_by_guid,
+    LemmaQueryBuilder,
+    count_for_confirmation,
+)
 from wordfreq.storage.backend import create_session as create_backend_session
 from wordfreq.storage.backend.config import DataSourceConfig, BackendType
 from wordfreq.storage.models.schema import Lemma
@@ -696,11 +701,7 @@ def main():
     if args.guid:
         session = agent.get_session()
         try:
-            lemma = session.query(Lemma).filter(Lemma.guid == args.guid).first()
-            if not lemma:
-                print(f"\nError: No lemma found with GUID: {args.guid}")
-                sys.exit(1)
-
+            lemma = find_lemma_by_guid(session, args.guid)
             print(f"\nValidating lemma: {lemma.lemma_text} (GUID: {args.guid})")
 
             # Validate lemma form
@@ -748,12 +749,8 @@ def main():
         # Calculate estimated number of LLM calls
         session = agent.get_session()
         try:
-            query = session.query(Lemma).filter(Lemma.guid.isnot(None))
-            if args.limit:
-                query = query.limit(args.limit)
-            lemma_count = query.count()
-            if args.sample_rate < 1.0:
-                lemma_count = int(lemma_count * args.sample_rate)
+            query = LemmaQueryBuilder(session).curated_only().build()
+            lemma_count = count_for_confirmation(query, args.limit, args.sample_rate)
             # Calculate based on check_type
             if args.check_type == "both":
                 estimated_calls = lemma_count * 2

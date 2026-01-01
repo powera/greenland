@@ -36,6 +36,7 @@ from agents.common_args import (
     confirm_operation,
     get_data_source_config,
 )
+from agents.lemma_selection import find_lemma_by_guid
 from wordfreq.storage.backend import create_session as create_backend_session
 from wordfreq.storage.backend.config import DataSourceConfig, BackendType
 from wordfreq.storage.models.schema import Lemma, AudioQualityReview, LemmaTranslation
@@ -429,11 +430,7 @@ def main():
     if args.guid:
         session = agent.get_session()
         try:
-            lemma = session.query(Lemma).filter(Lemma.guid == args.guid).first()
-            if not lemma:
-                print(f"\nError: No lemma found with GUID: {args.guid}")
-                sys.exit(1)
-
+            lemma = find_lemma_by_guid(session, args.guid)
             print(f"\nProcessing audio for: {lemma.lemma_text} (GUID: {args.guid})")
             print(f"POS: {lemma.pos_type}")
 
