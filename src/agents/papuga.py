@@ -137,6 +137,7 @@ class PapugaAgent:
         confidence_threshold: float = 0.7,
         only_english: bool = True,
         dry_run: bool = False,
+        lemma_id: Optional[int] = None,
     ) -> Dict[str, any]:
         """
         Check existing pronunciations for correctness.
@@ -147,6 +148,7 @@ class PapugaAgent:
             confidence_threshold: Minimum confidence to flag issues
             only_english: Only check English forms (language_code='en')
             dry_run: If True, don't make LLM API calls, just count what would be checked
+            lemma_id: Optional lemma ID to filter to a specific lemma
 
         Returns:
             Dictionary with check results
@@ -160,6 +162,9 @@ class PapugaAgent:
                 (DerivativeForm.ipa_pronunciation.isnot(None))
                 | (DerivativeForm.phonetic_pronunciation.isnot(None))
             )
+
+            if lemma_id:
+                query = query.filter(DerivativeForm.lemma_id == lemma_id)
 
             if only_english:
                 query = query.filter(DerivativeForm.language_code == "en")
@@ -210,6 +215,9 @@ class PapugaAgent:
                         example_sentence=example_text,
                         definition=lemma.definition_text,
                         model=self.config.model,
+                        language_code=form.language_code,
+                        grammatical_form=form.grammatical_form,
+                        english_translation=lemma.lemma_text if form.language_code != "en" else None,
                     )
 
                     if result["needs_update"] and result["confidence"] >= confidence_threshold:
@@ -255,7 +263,7 @@ class PapugaAgent:
             session.close()
 
     def check_missing_pronunciations(
-        self, limit: Optional[int] = None, only_english: bool = True, only_base_forms: bool = False
+        self, limit: Optional[int] = None, only_english: bool = True, only_base_forms: bool = False, lemma_id: Optional[int] = None
     ) -> Dict[str, any]:
         """
         Find derivative forms that are missing pronunciations.
@@ -264,6 +272,7 @@ class PapugaAgent:
             limit: Maximum number to report
             only_english: Only check English forms (language_code='en')
             only_base_forms: Only check base forms (is_base_form=True)
+            lemma_id: Optional lemma ID to filter to a specific lemma
 
         Returns:
             Dictionary with missing pronunciation counts
@@ -277,6 +286,9 @@ class PapugaAgent:
                 DerivativeForm.ipa_pronunciation.is_(None),
                 DerivativeForm.phonetic_pronunciation.is_(None),
             )
+
+            if lemma_id:
+                query = query.filter(DerivativeForm.lemma_id == lemma_id)
 
             if only_english:
                 query = query.filter(DerivativeForm.language_code == "en")
@@ -327,6 +339,7 @@ class PapugaAgent:
         only_english: bool = True,
         only_base_forms: bool = False,
         dry_run: bool = False,
+        lemma_id: Optional[int] = None,
     ) -> Dict[str, any]:
         """
         Generate pronunciations for forms that are missing them.
@@ -336,6 +349,7 @@ class PapugaAgent:
             only_english: Only process English forms
             only_base_forms: Only process base forms
             dry_run: If True, don't actually update the database
+            lemma_id: Optional lemma ID to filter to a specific lemma
 
         Returns:
             Dictionary with population results
@@ -349,6 +363,9 @@ class PapugaAgent:
                 DerivativeForm.ipa_pronunciation.is_(None),
                 DerivativeForm.phonetic_pronunciation.is_(None),
             )
+
+            if lemma_id:
+                query = query.filter(DerivativeForm.lemma_id == lemma_id)
 
             if only_english:
                 query = query.filter(DerivativeForm.language_code == "en")
@@ -401,6 +418,9 @@ class PapugaAgent:
                             example_sentence=example_text,
                             definition=lemma.definition_text,
                             model=self.config.model,
+                            language_code=form.language_code,
+                            grammatical_form=form.grammatical_form,
+                            english_translation=lemma.lemma_text if form.language_code != "en" else None,
                         )
 
                         if result["confidence"] >= 0.5:  # Minimum confidence threshold
@@ -453,6 +473,7 @@ class PapugaAgent:
         confidence_threshold: float = 0.7,
         only_english: bool = True,
         dry_run: bool = False,
+        lemma_id: Optional[int] = None,
     ) -> Dict[str, any]:
         """
         Run full pronunciation validation and generate a comprehensive report.
@@ -464,6 +485,7 @@ class PapugaAgent:
             confidence_threshold: Minimum confidence to flag issues
             only_english: Only check English forms
             dry_run: If True, don't make LLM API calls, just count what would be checked
+            lemma_id: Optional lemma ID to filter to a specific lemma
 
         Returns:
             Dictionary with all check results
@@ -489,11 +511,12 @@ class PapugaAgent:
             confidence_threshold=confidence_threshold,
             only_english=only_english,
             dry_run=dry_run,
+            lemma_id=lemma_id,
         )
 
         # Check for missing pronunciations
         results["checks"]["missing_pronunciations"] = self.check_missing_pronunciations(
-            limit=limit, only_english=only_english, only_base_forms=False
+            limit=limit, only_english=only_english, only_base_forms=False, lemma_id=lemma_id
         )
 
         end_time = datetime.now()
@@ -578,15 +601,11 @@ def get_argument_parser():
     )
 
     # Mode selection
-    mode_group = parser.add_mutually_exclusive_group()
-    mode_group.add_argument(
-        "--check", action="store_true", help="Check existing pronunciations only (default)"
-    )
-    mode_group.add_argument(
-        "--populate", action="store_true", help="Generate missing pronunciations"
-    )
-    mode_group.add_argument(
-        "--both", action="store_true", help="Check existing AND populate missing"
+    parser.add_argument(
+        "--mode",
+        choices=["check", "populate", "both"],
+        default="check",
+        help="Operation mode: check existing pronunciations, populate missing ones, or both (default: check)"
     )
 
     parser.add_argument(
@@ -609,17 +628,13 @@ def main():
     # Create data source configuration (includes backend, cache, and LLM model)
     config = get_data_source_config(args, default_model="gpt-5-mini")
 
-    # Determine mode
-    if args.populate:
-        mode = "populate"
-    elif args.both:
-        mode = "both"
-    else:
-        mode = "check"  # default
+    # Get mode from args
+    mode = args.mode
 
     only_english = not args.all_languages
 
-    # Handle --guid mode
+    # Selection phase: determine lemma_id if --guid is provided
+    lemma_id = None
     if args.guid:
         agent = PapugaAgent(config=config)
         session = agent.get_session()
@@ -629,79 +644,10 @@ def main():
             if not lemma:
                 print(f"\nError: No lemma found with GUID: {args.guid}")
                 sys.exit(1)
-
-            # Get the base form for this lemma
-            form = (
-                session.query(DerivativeForm)
-                .filter(
-                    DerivativeForm.lemma_id == lemma.id,
-                    DerivativeForm.is_base_form == True,
-                )
-                .first()
-            )
-
-            if not form:
-                print(f"\nError: No base form found for lemma: {lemma.lemma_text} ({args.guid})")
-                sys.exit(1)
-
-            print(f"\nProcessing pronunciation for: {form.derivative_form_text} (GUID: {args.guid})")
-
-            # Check if pronunciation exists
-            has_pronunciation = form.ipa_pronunciation or form.phonetic_pronunciation
-
-            if mode == "check" or mode == "both":
-                if has_pronunciation:
-                    # Validate existing pronunciation
-                    example_text = agent._get_example_sentence(session, lemma)
-                    result = validate_pronunciation(
-                        word=form.derivative_form_text,
-                        ipa_pronunciation=form.ipa_pronunciation,
-                        phonetic_pronunciation=form.phonetic_pronunciation,
-                        pos_type=lemma.pos_type,
-                        example_sentence=example_text,
-                        definition=lemma.definition_text,
-                        model=args.model,
-                    )
-
-                    print(f"\nValidation result:")
-                    print(f"  Needs update: {result['needs_update']}")
-                    print(f"  Confidence: {result['confidence']:.2f}")
-                    if result['issues']:
-                        print(f"  Issues: {', '.join(result['issues'])}")
-                    if result['suggested_ipa']:
-                        print(f"  Suggested IPA: {result['suggested_ipa']}")
-                    if result['suggested_phonetic']:
-                        print(f"  Suggested phonetic: {result['suggested_phonetic']}")
-                else:
-                    print(f"\nNo existing pronunciation to validate.")
-
-            if mode == "populate" or mode == "both":
-                if not has_pronunciation or mode == "both":
-                    # Generate pronunciation
-                    example_text = agent._get_example_sentence(session, lemma)
-                    result = generate_pronunciation(
-                        word=form.derivative_form_text,
-                        pos_type=lemma.pos_type,
-                        example_sentence=example_text,
-                        definition=lemma.definition_text,
-                        model=args.model,
-                    )
-
-                    print(f"\nGenerated pronunciation:")
-                    print(f"  IPA: {result['ipa_pronunciation']}")
-                    print(f"  Phonetic: {result['phonetic_pronunciation']}")
-                    print(f"  Confidence: {result['confidence']:.2f}")
-
-                    if not args.dry_run and result['confidence'] >= 0.5:
-                        form.ipa_pronunciation = result['ipa_pronunciation']
-                        form.phonetic_pronunciation = result['phonetic_pronunciation']
-                        session.commit()
-                        print(f"\n✓ Updated pronunciation in database")
-                    elif args.dry_run:
-                        print(f"\n[DRY RUN] Would update pronunciation")
+            lemma_id = lemma.id
+            logger.info(f"Processing lemma: {lemma.lemma_text} (GUID: {args.guid}, ID: {lemma_id})")
         finally:
             session.close()
-        return
 
     # Confirm before running LLM queries (unless --yes or --dry-run was provided)
     if not args.yes and not args.dry_run:
@@ -714,6 +660,8 @@ def main():
                     (DerivativeForm.ipa_pronunciation.isnot(None))
                     | (DerivativeForm.phonetic_pronunciation.isnot(None))
                 )
+                if lemma_id:
+                    query = query.filter(DerivativeForm.lemma_id == lemma_id)
                 if only_english:
                     query = query.filter(DerivativeForm.language_code == "en")
                 if args.limit:
@@ -730,6 +678,8 @@ def main():
                     DerivativeForm.ipa_pronunciation.is_(None),
                     DerivativeForm.phonetic_pronunciation.is_(None),
                 )
+                if lemma_id:
+                    query = query.filter(DerivativeForm.lemma_id == lemma_id)
                 if only_english:
                     query = query.filter(DerivativeForm.language_code == "en")
                 if args.base_forms_only:
@@ -756,6 +706,7 @@ def main():
     # Create agent with unified configuration
     agent = PapugaAgent(config=config)
 
+    # Work phase: execute the requested mode with all filters applied
     if mode == "check":
         agent.run_full_check(
             output_file=args.output,
@@ -764,6 +715,7 @@ def main():
             confidence_threshold=args.confidence_threshold,
             only_english=only_english,
             dry_run=args.dry_run,
+            lemma_id=lemma_id,
         )
     elif mode == "populate":
         result = agent.populate_missing_pronunciations(
@@ -771,6 +723,7 @@ def main():
             only_english=only_english,
             only_base_forms=args.base_forms_only,
             dry_run=args.dry_run,
+            lemma_id=lemma_id,
         )
         logger.info(
             f"\nPopulation complete: {result['populated']} populated, {result['failed']} failed"
@@ -784,6 +737,7 @@ def main():
             confidence_threshold=args.confidence_threshold,
             only_english=only_english,
             dry_run=args.dry_run,
+            lemma_id=lemma_id,
         )
         # Then populate
         result = agent.populate_missing_pronunciations(
@@ -791,6 +745,7 @@ def main():
             only_english=only_english,
             only_base_forms=args.base_forms_only,
             dry_run=args.dry_run,
+            lemma_id=lemma_id,
         )
         logger.info(
             f"\nPopulation complete: {result['populated']} populated, {result['failed']} failed"
