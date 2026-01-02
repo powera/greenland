@@ -34,13 +34,14 @@ if GREENLAND_SRC_PATH not in sys.path:
 
 import constants
 import util.prompt_loader
-from src.agents.common.common_args import (
+from agents.common.common_args import (
     add_common_args,
     add_llm_args,
     add_guid_arg,
     add_backend_args,
     get_data_source_config,
 )
+from agents.common.lemma_selection import find_lemma_by_guid
 from clients.types import Schema, SchemaProperty
 from clients.unified_client import UnifiedLLMClient
 from wordfreq.storage.backend import create_session as create_backend_session
@@ -51,7 +52,6 @@ from wordfreq.storage.database import (
     add_sentence_translation,
     add_sentence_word,
     calculate_minimum_level,
-    find_lemma_by_guid,
 )
 from wordfreq.storage.translation_helpers import get_translation, get_all_translations
 
@@ -723,11 +723,7 @@ def main():
         # Generate for specific GUID
         session = agent.get_session()
         try:
-            lemma = session.query(Lemma).filter(Lemma.guid == args.guid).first()
-
-            if not lemma:
-                logger.error(f"No lemma found with GUID: {args.guid}")
-                return 1
+            lemma = find_lemma_by_guid(session, args.guid)
 
             logger.info(f"Generating sentences for: {lemma.lemma_text} ({lemma.guid})")
 

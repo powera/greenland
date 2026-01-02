@@ -32,6 +32,7 @@ if GREENLAND_SRC_PATH not in sys.path:
 from wordfreq.storage.translation_helpers import get_translation
 
 import constants
+from agents.common.lemma_selection import LemmaQueryBuilder, apply_limit_and_sample_rate
 from clients.batch_queue import BatchRequestMetadata, get_batch_manager
 from clients.barsukas_cache import BarsukasCacheClient
 from wordfreq.storage.backend import create_session as create_backend_session
@@ -170,26 +171,15 @@ class VorasAgent:
         try:
             # Get lemmas with this language translation
             query = (
-                session.query(Lemma)
-                .filter(
-                    Lemma.guid.isnot(None),
-                    getattr(Lemma, field_name).isnot(None),
-                    getattr(Lemma, field_name) != "",
-                )
-                .order_by(Lemma.id)
+                LemmaQueryBuilder(session)
+                .curated_only()
+                .has_translation_in(language_code)
+                .order_by_id()
+                .build()
             )
 
-            if limit:
-                query = query.limit(limit)
-
-            lemmas = query.all()
+            lemmas = apply_limit_and_sample_rate(query, limit, sample_rate)
             logger.info(f"Found {len(lemmas)} lemmas with {language_name} translations")
-
-            # Sample if needed
-            if sample_rate < 1.0:
-                sample_size = int(len(lemmas) * sample_rate)
-                lemmas = random.sample(lemmas, sample_size)
-                logger.info(f"Sampling {len(lemmas)} words ({sample_rate*100:.0f}%)")
 
             # Validate translations
             issues_found = []
@@ -458,12 +448,14 @@ class VorasAgent:
 
         try:
             # Get all lemmas with GUIDs (curated words)
-            query = session.query(Lemma).filter(Lemma.guid.isnot(None)).order_by(Lemma.id)
+            query = (
+                LemmaQueryBuilder(session)
+                .curated_only()
+                .order_by_id()
+                .build()
+            )
 
-            if limit:
-                query = query.limit(limit)
-
-            words_to_process = query.all()
+            words_to_process = apply_limit_and_sample_rate(query, limit, sample_rate=1.0)
             total_words = len(words_to_process)
 
             logger.info(f"Found {total_words} curated words to process")

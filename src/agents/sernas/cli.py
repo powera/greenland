@@ -17,6 +17,7 @@ from src.agents.common.common_args import (
     add_backend_args,
     get_data_source_config,
 )
+from src.agents.common.lemma_selection import find_lemma_by_guid
 
 
 def get_argument_parser():
@@ -86,10 +87,7 @@ def main():
 
         session = agent.get_session()
         try:
-            lemma = session.query(Lemma).filter(Lemma.guid == args.guid).first()
-            if not lemma:
-                print(f"\nError: No lemma found with GUID: {args.guid}")
-                sys.exit(1)
+            lemma = find_lemma_by_guid(session, args.guid)
 
             print(f"\nProcessing lemma: {lemma.lemma_text}")
             print(f"POS: {lemma.pos_type}")

@@ -39,11 +39,11 @@ if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
 import constants
-from agents.common_args import (
+from src.agents.common.common_args import (
     add_common_args, add_llm_args, add_processing_args,
     add_guid_arg, confirm_operation, get_data_source_config
 )
-from agents.lemma_selection import find_lemma_by_guid, get_lemmas_for_processing
+from src.agents.common.lemma_selection import find_lemma_by_guid, get_lemmas_for_processing
 from wordfreq.storage.database import create_database_session
 from wordfreq.storage.models.schema import Lemma, DerivativeForm  # etc.
 
@@ -420,10 +420,10 @@ results = queue.execute()
 
 ### Lemma Selection (RECOMMENDED)
 
-**Use `agents.lemma_selection` for all lemma querying** - this standardized module prevents bugs and reduces duplication.
+**Use `src.agents.common.lemma_selection` for all lemma querying** - this standardized module prevents bugs and reduces duplication.
 
 ```python
-from agents.lemma_selection import (
+from src.agents.common.lemma_selection import (
     find_lemma_by_guid,
     LemmaQueryBuilder,
     apply_limit_and_sample_rate,
@@ -465,7 +465,7 @@ lemmas = apply_limit_and_sample_rate(query, args.limit, args.sample_rate)
 
 ```python
 # RECOMMENDED: Count items for confirmation prompts
-from agents.common_args import confirm_operation
+from src.agents.common.common_args import confirm_operation
 
 query = LemmaQueryBuilder(session).curated_only().build()
 count = count_for_confirmation(query, args.limit, args.sample_rate)
@@ -754,11 +754,11 @@ When creating or modifying agents:
 
 **Required imports for all agents:**
 ```python
-from agents.common_args import (
+from src.agents.common.common_args import (
     add_common_args, add_llm_args, add_processing_args,
     add_guid_arg, confirm_operation, get_data_source_config
 )
-from agents.lemma_selection import find_lemma_by_guid, get_lemmas_for_processing
+from src.agents.common.lemma_selection import find_lemma_by_guid, get_lemmas_for_processing
 ```
 
 When asked to create a new agent:

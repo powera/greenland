@@ -28,6 +28,7 @@ from typing import Dict, List, Optional, Tuple
 
 import constants
 from clients.barsukas_cache import BarsukasCacheClient
+from agents.common.lemma_selection import find_lemma_by_guid
 from wordfreq.storage.backend import create_session as create_backend_session
 from wordfreq.storage.backend.config import DataSourceConfig, BackendType
 from wordfreq.storage.models.schema import Lemma, DerivativeForm
@@ -449,7 +450,7 @@ class VilkasAgent:
         if guid:
             session = self.get_session()
             try:
-                lemma = session.query(Lemma).filter(Lemma.guid == guid).first()
+                lemma = find_lemma_by_guid(session, guid, error_on_missing=False)
                 if not lemma:
                     logger.info(f"Lemma with GUID {guid} not found")
                     return {

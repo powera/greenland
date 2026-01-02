@@ -26,7 +26,7 @@ if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
 import constants
-from src.agents.common.common_args import (
+from agents.common.common_args import (
     add_common_args,
     add_processing_args,
     add_backend_args,
@@ -35,6 +35,7 @@ from src.agents.common.common_args import (
     confirm_operation,
     get_data_source_config,
 )
+from agents.common.lemma_selection import find_lemma_by_guid, LemmaQueryBuilder, apply_limit_and_sample_rate
 from wordfreq.storage.backend import create_session as create_backend_session
 from wordfreq.storage.backend.config import DataSourceConfig, BackendType
 from wordfreq.storage.models.schema import Lemma, AudioQualityReview
@@ -274,11 +275,13 @@ class VieversysAgent:
 
         try:
             # Build query
-            query = session.query(Lemma).filter(Lemma.guid.isnot(None))
+            builder = LemmaQueryBuilder(session).curated_only().order_by_id()
 
             # Filter by difficulty level if specified
             if difficulty_level is not None:
-                query = query.filter(Lemma.difficulty_level == difficulty_level)
+                builder = builder.by_difficulty_level(difficulty_level)
+
+            query = builder.build()
 
             # Filter lemmas that have translation in target language
             # Note: We'll filter in Python after fetching since get_translation handles both column and table-based lookups
@@ -442,10 +445,7 @@ def main():
     if args.guid:
         session = agent.get_session()
         try:
-            lemma = session.query(Lemma).filter(Lemma.guid == args.guid).first()
-            if not lemma:
-                print(f"\nError: No lemma found with GUID: {args.guid}")
-                sys.exit(1)
+            lemma = find_lemma_by_guid(session, args.guid)
 
             print(f"\nProcessing audio for: {lemma.lemma_text} (GUID: {args.guid})")
             print(f"POS: {lemma.pos_type}")
@@ -568,13 +568,15 @@ def main():
             # Estimate API calls
             session = agent.get_session()
             try:
-                query = session.query(Lemma).filter(Lemma.guid.isnot(None))
+                builder = LemmaQueryBuilder(session).curated_only().order_by_id()
 
                 if args.difficulty_level is not None:
-                    query = query.filter(Lemma.difficulty_level == args.difficulty_level)
+                    builder = builder.by_difficulty_level(args.difficulty_level)
 
                 if args.limit:
-                    query = query.limit(args.limit)
+                    query = builder.build().limit(args.limit)
+                else:
+                    query = builder.build()
 
                 # Get all lemmas and filter by translation availability
                 all_lemmas = query.all()

@@ -41,6 +41,7 @@ from src.agents.common.common_args import (
     validate_cache_args,
     confirm_operation,
 )
+from src.agents.common.lemma_selection import find_lemma_by_guid
 from clients.barsukas_cache import BarsukasCacheClient
 from wordfreq.storage.backend import create_session as create_backend_session
 from wordfreq.storage.backend.config import DataSourceConfig, BackendType
@@ -640,10 +641,7 @@ def main():
         session = agent.get_session()
         try:
             # Find the lemma by GUID
-            lemma = session.query(Lemma).filter(Lemma.guid == args.guid).first()
-            if not lemma:
-                print(f"\nError: No lemma found with GUID: {args.guid}")
-                sys.exit(1)
+            lemma = find_lemma_by_guid(session, args.guid)
             lemma_id = lemma.id
             logger.info(f"Processing lemma: {lemma.lemma_text} (GUID: {args.guid}, ID: {lemma_id})")
         finally:

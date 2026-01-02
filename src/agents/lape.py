@@ -45,7 +45,13 @@ from src.agents.common.common_args import (
     add_common_args,
     add_llm_args,
     add_backend_args,
+    add_guid_arg,
     get_data_source_config,
+)
+from src.agents.common.lemma_selection import (
+    find_lemma_by_guid,
+    LemmaQueryBuilder,
+    apply_limit_and_sample_rate,
 )
 from wordfreq.storage.backend import create_session as create_backend_session
 from wordfreq.storage.backend.config import DataSourceConfig, BackendType
@@ -370,6 +376,7 @@ class LapeAgent:
         self,
         fact_type: str,
         language_code: str,
+        guid: Optional[str] = None,
         limit: Optional[int] = None,
         skip_existing: bool = True,
         min_confidence: float = 0.7,
@@ -381,6 +388,7 @@ class LapeAgent:
         Args:
             fact_type: Type of grammar fact to generate (e.g., 'measure_words')
             language_code: Language code (e.g., 'zh', 'fr')
+            guid: Optional GUID to process only a single lemma
             limit: Maximum number of lemmas to process
             skip_existing: Skip lemmas that already have this fact
             min_confidence: Minimum confidence to save the fact
@@ -411,18 +419,28 @@ class LapeAgent:
 
         session = self.get_session()
         try:
-            # Get lemmas that need this fact
-            query = (
-                session.query(Lemma)
-                .filter(Lemma.pos_type.in_(fact_config["required_pos"]))
-                .order_by(Lemma.id)
-            )
+            # Handle single lemma by GUID
+            if guid:
+                lemma = find_lemma_by_guid(session, guid)
+                lemmas = [lemma]
+                logger.info(f"Processing single lemma: {lemma.lemma_text} (GUID: {guid})")
+            else:
+                # Get lemmas that need this fact
+                def pos_filter(query):
+                    return query.filter(Lemma.pos_type.in_(fact_config["required_pos"]))
 
-            if limit:
-                query = query.limit(limit * 2)  # Get extra in case we skip some
+                query = (
+                    LemmaQueryBuilder(session)
+                    .curated_only()
+                    .filter_custom(pos_filter)
+                    .order_by_id()
+                    .build()
+                )
 
-            lemmas = query.all()
-            logger.info(f"Found {len(lemmas)} candidate lemmas")
+                # Get extra in case we skip some due to existing facts
+                fetch_limit = limit * 2 if limit else None
+                lemmas = apply_limit_and_sample_rate(query, fetch_limit, 1.0)
+                logger.info(f"Found {len(lemmas)} candidate lemmas")
 
             # Process lemmas
             processed_count = 0
@@ -562,6 +580,9 @@ Examples:
   # Generate Lithuanian grammatical gender for nouns
   python lape.py --fact-type grammatical_gender --language lt --limit 10
 
+  # Generate for a single lemma by GUID
+  python lape.py --fact-type grammatical_gender --language fr --guid N14_001
+
   # Dry run to see what would be generated
   python lape.py --fact-type grammatical_gender --language fr --limit 5 --dry-run
 
@@ -590,6 +611,7 @@ Future fact types (see code comments):
     add_backend_args(parser)
 
     # Lape-specific arguments
+    add_guid_arg(parser, help_text="Process only the lemma with this GUID")
     parser.add_argument(
         "--fact-type",
         required=True,
@@ -636,6 +658,7 @@ def main():
         results = agent.generate_grammar_facts(
             fact_type=args.fact_type,
             language_code=args.language,
+            guid=args.guid if hasattr(args, 'guid') else None,
             limit=args.limit,
             skip_existing=args.skip_existing,
             min_confidence=args.min_confidence,

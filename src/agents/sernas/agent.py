@@ -35,6 +35,7 @@ from datetime import datetime
 from typing import Dict, List, Optional, Tuple
 
 import constants
+from agents.common.lemma_selection import find_lemma_by_guid, LemmaQueryBuilder
 from wordfreq.storage.backend import create_session as create_backend_session
 from wordfreq.storage.backend.config import DataSourceConfig, BackendType
 from wordfreq.storage.models.schema import Lemma, DerivativeForm
@@ -128,8 +129,9 @@ class SernasAgent:
 
         session = self.get_session()
         try:
-            # Get all lemmas
-            lemmas = session.query(Lemma).all()
+            # Get all curated lemmas
+            query = LemmaQueryBuilder(session).curated_only().order_by_id().build()
+            lemmas = query.all()
             logger.info(f"Found {len(lemmas)} lemmas in database")
 
             # Determine which language codes to check
@@ -646,7 +648,7 @@ Respond ONLY with valid JSON, no other text."""
                 )
 
                 # Get lemma object
-                lemma = session.query(Lemma).filter(Lemma.guid == lemma_info["guid"]).first()
+                lemma = find_lemma_by_guid(session, lemma_info["guid"], error_on_missing=False)
                 if not lemma:
                     logger.error(f"Could not find lemma with GUID {lemma_info['guid']}")
                     failed += 1
