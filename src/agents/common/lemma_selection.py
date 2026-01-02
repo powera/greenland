@@ -31,11 +31,10 @@ Usage:
 
 import sys
 import random
-from typing import Optional, List, Callable, TYPE_CHECKING
+from typing import Optional, List, Callable
 
-if TYPE_CHECKING:
-    from sqlalchemy.orm import Query
-    from wordfreq.storage.backend.base import BaseSession
+from sqlalchemy.orm import Query
+from wordfreq.storage.backend.base import BaseSession
 
 from wordfreq.storage.models.schema import Lemma
 
@@ -173,7 +172,7 @@ class LemmaQueryBuilder:
             self.query = self.query.order_by(Lemma.id.desc())
         return self
 
-    def filter_custom(self, filter_func: Callable[[Query], Query]) -> 'LemmaQueryBuilder':
+    def filter_custom(self, filter_func: Callable) -> 'LemmaQueryBuilder':
         """Apply a custom filter function to the query.
 
         This allows agents to add specialized filters while still using
@@ -320,7 +319,10 @@ def get_lemmas_for_processing(
     # Single lemma mode
     if guid:
         lemma = find_lemma_by_guid(session, guid, error_on_missing=True)
-        return [lemma]
+        if lemma:
+            return [lemma]
+        else:
+            raise Exception(f"Unexpected error: Lemma with GUID {guid} not found.")
 
     # Batch mode: build query with filters
     builder = LemmaQueryBuilder(session)

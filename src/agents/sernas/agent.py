@@ -411,7 +411,7 @@ class SernasAgent:
 
         except Exception as e:
             session.rollback()
-            logger.error(f"Error generating synonyms for lemma {lemma_id}: {e}")
+            logger.exception(f"Error generating synonyms for lemma {lemma_id}: {e}")
             return {"error": str(e), "lemma_id": lemma_id, "language_code": language_code}
         finally:
             session.close()

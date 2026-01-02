@@ -19,10 +19,18 @@ GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent)
 if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
+# Configure logging early so imported modules use the shared format
+from src.logging_config import configure_logging, get_logger
+configure_logging()
+
 from agents.sernas.agent import SernasAgent
 from agents.sernas.cli import main
 
 __all__ = ["SernasAgent", "main"]
 
 if __name__ == "__main__":
-    main()
+    logger = get_logger(__name__)
+    try:
+        main()
+    except Exception:
+        logger.exception("Unhandled exception in sernas main")
