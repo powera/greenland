@@ -31,8 +31,11 @@ Usage:
 
 import sys
 import random
-from typing import Optional, List, Callable
-from sqlalchemy.orm import Session, Query
+from typing import Optional, List, Callable, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from sqlalchemy.orm import Query
+    from wordfreq.storage.backend.base import BaseSession
 
 from wordfreq.storage.models.schema import Lemma
 
@@ -43,7 +46,7 @@ class LemmaNotFoundError(Exception):
 
 
 def find_lemma_by_guid(
-    session: Session,
+    session: "BaseSession",
     guid: str,
     error_on_missing: bool = True,
 ) -> Optional[Lemma]:
@@ -93,7 +96,7 @@ class LemmaQueryBuilder:
         lemmas = query.all()
     """
 
-    def __init__(self, session: Session):
+    def __init__(self, session: "BaseSession"):
         """Initialize query builder.
 
         Args:
@@ -273,7 +276,7 @@ def count_for_confirmation(
 
 
 def get_lemmas_for_processing(
-    session: Session,
+    session: "BaseSession",
     guid: Optional[str] = None,
     curated_only: bool = True,
     difficulty_level: Optional[int] = None,
@@ -337,3 +340,36 @@ def get_lemmas_for_processing(
     query = builder.build()
 
     return apply_limit_and_sample_rate(query, limit, sample_rate)
+
+
+def get_lemmas_for_agent(session: "BaseSession", args) -> List[Lemma]:
+    """Get lemmas for processing based on command-line arguments.
+
+    This is the standard entry point for agents that need to process lemmas.
+    It extracts the relevant arguments and delegates to get_lemmas_for_processing.
+
+    Args:
+        session: Database session
+        args: Parsed command-line arguments (argparse Namespace)
+              Expected attributes: guid, limit, sample_rate, difficulty_level (optional)
+
+    Returns:
+        List of Lemma objects to process
+
+    Example:
+        # In agent CLI main():
+        session = agent.get_session()
+        lemmas = get_lemmas_for_agent(session, args)
+        for lemma in lemmas:
+            process(lemma)
+    """
+    return get_lemmas_for_processing(
+        session=session,
+        guid=getattr(args, 'guid', None),
+        curated_only=True,
+        difficulty_level=getattr(args, 'difficulty_level', None),
+        language_code=getattr(args, 'language', None),
+        limit=getattr(args, 'limit', None),
+        sample_rate=getattr(args, 'sample_rate', 1.0),
+        order_by_id=True,
+    )

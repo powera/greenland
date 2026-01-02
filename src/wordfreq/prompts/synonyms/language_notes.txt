@@ -1,0 +1,6 @@
+{{#if is_chinese}}
+- For Chinese, provide Traditional Chinese characters (繁體字) (e.g., 街道, 馬路 for 'street')
+{{/if}}
+{{#if is_korean}}
+- For Korean, provide words in Hangul (e.g., 거리, 길 for 'street')
+{{/if}}

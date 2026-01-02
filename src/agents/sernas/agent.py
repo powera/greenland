@@ -32,9 +32,10 @@ import logging
 import time
 import json
 from datetime import datetime
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Any
 
 import constants
+import util.prompt_loader
 from agents.common.lemma_selection import find_lemma_by_guid, LemmaQueryBuilder
 from wordfreq.storage.backend import create_session as create_backend_session
 from wordfreq.storage.backend.config import DataSourceConfig, BackendType
@@ -44,6 +45,7 @@ from wordfreq.storage.crud.word_token import add_word_token
 from wordfreq.storage.crud.grammar_fact import add_grammar_fact, get_alternate_forms_facts
 from wordfreq.storage.translation_helpers import get_translation, get_supported_languages
 from wordfreq.translation.client import LinguisticClient
+from wordfreq.tools.text_utils import is_numeral
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -62,11 +64,8 @@ class SernasAgent:
         self.config = config
         self.debug = config.debug
 
-        # Keep db_path for backward compatibility with LinguisticClient
-        if self.config.backend_type == BackendType.SQLITE:
-            self.db_path = self.config.sqlite_path
-        else:
-            self.db_path = None
+        # Lazy initialization for LinguisticClient
+        self._linguistic_client = None
 
         if self.debug:
             logger.setLevel(logging.DEBUG)
@@ -75,49 +74,27 @@ class SernasAgent:
         """Get database session using backend abstraction."""
         return create_backend_session(self.config)
 
-    def _is_numeral(self, text: str) -> bool:
-        """
-        Check if a string is primarily a numeral or numeral variant.
-
-        Args:
-            text: The text to check
+    def get_linguistic_client(self) -> LinguisticClient:
+        """Get or create the linguistic client (lazy initialization).
 
         Returns:
-            True if the text is a numeral (e.g., "1000", "42", "1K", "4th"), False otherwise
+            LinguisticClient instance
         """
-        if not text:
-            return False
-
-        # Strip whitespace
-        text = text.strip()
-
-        # Check if it's purely digits
-        if text.isdigit():
-            return True
-
-        import re
-
-        # Check if it's a number with common separators (1,000 or 1.000)
-        if re.match(r"^[\d,.\s]+$", text):
-            return True
-
-        # Check for abbreviated numbers with K/M/B suffix (1K, 2.5M, etc.)
-        if re.match(r"^\d+[.,]?\d*[KMBkmb]$", text):
-            return True
-
-        # Check for ordinal numbers (1st, 2nd, 3rd, 4th, etc.)
-        if re.match(r"^\d+(st|nd|rd|th)$", text, re.IGNORECASE):
-            return True
-
-        return False
+        if self._linguistic_client is None:
+            self._linguistic_client = LinguisticClient(config=self.config)
+        return self._linguistic_client
 
     def check_missing_synonyms(
-        self, language_code: Optional[str] = None, form_type: Optional[str] = None
-    ) -> Dict[str, any]:
+        self,
+        lemmas: Optional[List[Lemma]] = None,
+        language_code: Optional[str] = None,
+        form_type: Optional[str] = None
+    ) -> Dict[str, Any]:
         """
         Check for lemmas missing synonyms or alternative forms.
 
         Args:
+            lemmas: List of Lemma objects to check. If None, checks all curated lemmas.
             language_code: Language to check (e.g., 'en', 'lt'). If None, check all.
             form_type: Type to check (e.g., 'synonym', 'abbreviation', 'expanded_form', 'alternate_spelling').
                       If None, checks all types.
@@ -129,10 +106,11 @@ class SernasAgent:
 
         session = self.get_session()
         try:
-            # Get all curated lemmas
-            query = LemmaQueryBuilder(session).curated_only().order_by_id().build()
-            lemmas = query.all()
-            logger.info(f"Found {len(lemmas)} lemmas in database")
+            # Get lemmas to check
+            if lemmas is None:
+                query = LemmaQueryBuilder(session).curated_only().order_by_id().build()
+                lemmas = query.all()
+            logger.info(f"Checking {len(lemmas)} lemmas")
 
             # Determine which language codes to check
             if language_code:
@@ -225,7 +203,7 @@ class SernasAgent:
 
     def generate_synonyms_for_lemma(
         self, lemma_id: int, language_code: str, model: str = "gpt-5-mini", dry_run: bool = False
-    ) -> Dict[str, any]:
+    ) -> Dict[str, Any]:
         """
         Generate synonyms and alternative forms for a specific lemma and language.
 
@@ -260,8 +238,8 @@ class SernasAgent:
 
             logger.info(f"Generating synonyms for '{word}' ({language_code})")
 
-            # Initialize LLM client
-            client = LinguisticClient(model=model, db_path=self.db_path, debug=self.debug)
+            # Get LinguisticClient
+            client = self.get_linguistic_client()
 
             # Generate synonyms using LLM
             result = self._query_synonyms(
@@ -281,13 +259,13 @@ class SernasAgent:
                 }
 
             # Extract results and filter out numerals
-            synonyms = [s for s in result.get("synonyms", []) if not self._is_numeral(s)]
-            abbreviations = [a for a in result.get("abbreviations", []) if not self._is_numeral(a)]
+            synonyms = [s for s in result.get("synonyms", []) if not is_numeral(s)]
+            abbreviations = [a for a in result.get("abbreviations", []) if not is_numeral(a)]
             expanded_forms = [
-                e for e in result.get("expanded_forms", []) if not self._is_numeral(e)
+                e for e in result.get("expanded_forms", []) if not is_numeral(e)
             ]
             alternate_spellings = [
-                a for a in result.get("alternate_spellings", []) if not self._is_numeral(a)
+                a for a in result.get("alternate_spellings", []) if not is_numeral(a)
             ]
 
             if dry_run:
@@ -446,7 +424,7 @@ class SernasAgent:
         pos_type: str,
         definition: str,
         english_word: str,
-    ) -> Dict[str, any]:
+    ) -> Dict[str, Any]:
         """
         Query LLM for synonyms and alternative forms.
 
@@ -468,57 +446,27 @@ class SernasAgent:
         else:
             language_name = language_names.get(language_code, language_code)
 
-        # Build the prompt
-        prompt = f"""You are a linguistic expert helping to generate synonyms and alternative forms for vocabulary learning software called Trakaido.
+        # Load prompt templates from files
+        system_prompt = util.prompt_loader.get_prompt("synonyms", "system")
+        context_prompt = util.prompt_loader.get_prompt("synonyms", "context")
+        output_format = util.prompt_loader.get_prompt("synonyms", "output_format")
 
-**Task:** For the {language_name} word "{word}" (part of speech: {pos_type}), generate:
-1. **Abbreviations**: Shortened forms of the word (e.g., "television" → "TV", "Doctor" → "Dr.", "Avenue" → "Ave")
-2. **Expanded forms**: Longer/fuller forms of the word (e.g., "thousand" → "one thousand", "TV" → "television", "Dr." → "Doctor")
-3. **Alternate spellings**: Spelling variants of the SAME word (e.g., "gray" → "grey", "color" → "colour", "doughnut" → "donut")
-4. **Synonyms**: Words that can be used INTERCHANGEABLY in most contexts (e.g., "street" → "road", "mad" → "angry", "start" → "begin")
+        # Build context with variables
+        context = context_prompt.replace("{{language_name}}", language_name)
+        context = context.replace("{{word}}", word)
+        context = context.replace("{{pos_type}}", pos_type)
+        context = context.replace("{{english_word}}", english_word)
+        context = context.replace("{{definition}}", definition or "")
 
-**Context:**
-- English lemma: {english_word}
-- Definition: {definition}
-- This is for language learning, so focus on common, useful forms that learners might encounter
-- Consider whether forms would be appropriate/correct in Trakaido learning context
-
-**IMPORTANT Guidelines:**
-- For abbreviations: Only include shortened forms of the same word (initialisms, truncations, contractions)
-- For expanded_forms: Only include longer/fuller versions of the same word or phrase
-- For alternate_spellings: Only include different spelling variations (regional, historical, informal spellings)
-- For synonyms: ONLY include words that can replace the original in MOST contexts
-  * Do NOT include hyponyms (specific types): "cheddar" is NOT a synonym of "cheese"
-  * Do NOT include hypernyms (categories): "dairy product" is NOT a synonym of "cheese"
-  * Do NOT include related words: "fromage" is NOT a synonym of "cheese" (it's the same word in another language)
-  * Do NOT include examples or variants of the thing
-  * TRUE synonyms are rare - most words will have ZERO synonyms
-- **RETURN EMPTY ARRAYS when no valid forms exist** - this is completely normal and expected
-- Most words will have ZERO items in most categories - only return items when they genuinely exist
-- Do NOT make up forms, add explanations, or include text like "(no common alternate spelling)"
-- Do NOT include the original word itself
-- Do NOT include pure numerals (e.g., "1000", "42") - only word forms
-- Prefer common, useful forms over rare or archaic ones
-- Consider the part of speech and usage context
-"""
-
+        # Add language-specific notes
+        language_note = ""
         if language_code == "zh":
-            prompt += "\n- For Chinese, provide Traditional Chinese characters (繁體字) (e.g., 街道, 馬路 for 'street')"
+            language_note = "\n- For Chinese, provide Traditional Chinese characters (繁體字) (e.g., 街道, 馬路 for 'street')"
         elif language_code == "ko":
-            prompt += "\n- For Korean, provide words in Hangul (e.g., 거리, 길 for 'street')"
+            language_note = "\n- For Korean, provide words in Hangul (e.g., 거리, 길 for 'street')"
 
-        prompt += """
-
-**Output Format (JSON):**
-{
-  "abbreviations": ["abbr1", "abbr2"],
-  "expanded_forms": ["expanded1", "expanded2"],
-  "alternate_spellings": ["spelling1", "spelling2"],
-  "synonyms": ["syn1", "syn2", "syn3"],
-  "explanation": "Brief note about your choices"
-}
-
-Respond ONLY with valid JSON, no other text."""
+        # Combine prompt parts
+        prompt = f"{system_prompt}\n\n{context}{language_note}\n\n{output_format}"
 
         try:
             # Query the LLM using generate_chat with JSON schema
@@ -563,17 +511,19 @@ Respond ONLY with valid JSON, no other text."""
 
     def fix_missing_synonyms(
         self,
+        lemmas: Optional[List[Lemma]] = None,
         language_code: Optional[str] = None,
         form_type: Optional[str] = None,
         limit: Optional[int] = None,
         model: str = "gpt-5-mini",
         throttle: float = 1.0,
         dry_run: bool = False,
-    ) -> Dict[str, any]:
+    ) -> Dict[str, Any]:
         """
         Generate missing synonyms and alternative forms for lemmas.
 
         Args:
+            lemmas: List of Lemma objects to process. If None, processes all curated lemmas.
             language_code: Language to fix (e.g., 'en', 'lt'). If None, defaults to English.
             form_type: Type to generate ('synonym' or 'alternative_form'). If None, generates both.
             limit: Maximum number of lemmas to process
@@ -591,7 +541,7 @@ Respond ONLY with valid JSON, no other text."""
 
         # Check what's missing
         check_results = self.check_missing_synonyms(
-            language_code=language_code, form_type=form_type
+            lemmas=lemmas, language_code=language_code, form_type=form_type
         )
 
         if "error" in check_results:

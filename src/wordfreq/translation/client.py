@@ -4,11 +4,12 @@
 
 import logging
 import threading
-from typing import Dict, List, Optional, Any, Tuple
+from typing import Dict, List, Optional, Any, Tuple, Union
 
 from clients.unified_client import UnifiedLLMClient
 from wordfreq.storage import database as linguistic_db
 from wordfreq.storage.connection_pool import get_session, close_thread_sessions
+from wordfreq.storage.backend.config import DataSourceConfig, BackendType
 import constants
 
 # Import specialized modules
@@ -42,30 +43,62 @@ class LinguisticClient:
     # Lock for thread safety
     _lock = threading.Lock()
 
-    def __init__(self, model: str = DEFAULT_MODEL, db_path: str = None, debug: bool = False):
+    def __init__(
+        self,
+        config: Optional[Union[DataSourceConfig, str]] = None,
+        model: str = None,
+        db_path: str = None,
+        debug: bool = False
+    ):
         """
-        Initialize client with model and database path.
+        Initialize client with configuration or legacy parameters.
 
         Args:
-            model: Model name to use for queries
-            db_path: Path to the SQLite database, or None to use default
-            debug: Whether to enable debug logging
-        """
-        self.model = model
-        self.db_path = db_path or constants.WORDFREQ_DB_PATH
-        self.debug = debug
-        self.client = UnifiedLLMClient(debug=debug)
-        self.client.default_model = model
+            config: DataSourceConfig object (preferred) OR string db_path (legacy)
+            model: Model name to use for queries (ignored if config provided)
+            db_path: Path to the SQLite database (legacy, use config instead)
+            debug: Whether to enable debug logging (ignored if config provided)
 
-        if debug:
+        Examples:
+            # New style (preferred):
+            client = LinguisticClient(config=data_source_config)
+
+            # Legacy style (backward compatible):
+            client = LinguisticClient(model="gpt-4", db_path="/path/to/db")
+            client = LinguisticClient(db_path="/path/to/db")  # config as positional arg
+        """
+        # Handle backward compatibility: config can be a string (db_path)
+        if isinstance(config, str):
+            db_path = config
+            config = None
+
+        # Extract values from config or use legacy parameters
+        if isinstance(config, DataSourceConfig):
+            self.model = config.model or DEFAULT_MODEL
+            self.debug = config.debug
+            # Extract db_path from config
+            if config.backend_type == BackendType.SQLITE:
+                self.db_path = config.sqlite_path or constants.WORDFREQ_DB_PATH
+            else:
+                self.db_path = constants.WORDFREQ_DB_PATH  # fallback
+        else:
+            # Legacy mode: use individual parameters
+            self.model = model or DEFAULT_MODEL
+            self.db_path = db_path or constants.WORDFREQ_DB_PATH
+            self.debug = debug
+
+        self.client = UnifiedLLMClient(debug=self.debug)
+        self.client.default_model = self.model
+
+        if self.debug:
             logger.setLevel(logging.DEBUG)
 
         # Warm up the model
         try:
-            self.client.warm_model(model)
-            logger.info(f"Model {model} warmed up successfully")
+            self.client.warm_model(self.model)
+            logger.info(f"Model {self.model} warmed up successfully")
         except Exception as e:
-            logger.warning(f"Failed to warm up model {model}: {e}")
+            logger.warning(f"Failed to warm up model {self.model}: {e}")
 
     @classmethod
     def get_instance(

@@ -1,0 +1,10 @@
+**Output Format (JSON):**
+{
+  "abbreviations": ["abbr1", "abbr2"],
+  "expanded_forms": ["expanded1", "expanded2"],
+  "alternate_spellings": ["spelling1", "spelling2"],
+  "synonyms": ["syn1", "syn2", "syn3"],
+  "explanation": "Brief note about your choices"
+}
+
+Respond ONLY with valid JSON, no other text.
