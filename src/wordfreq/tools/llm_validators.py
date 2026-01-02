@@ -606,17 +606,9 @@ def validate_pronunciation(
             },
         )
 
-    # Map language codes to full names
-    language_names = {
-        "en": "English",
-        "lt": "Lithuanian",
-        "zh": "Chinese",
-        "ko": "Korean",
-        "fr": "French",
-        "sw": "Swahili",
-        "vi": "Vietnamese",
-    }
-    language_name = language_names.get(language_code, language_code)
+    # Get language name from translation_helpers
+    from wordfreq.storage.translation_helpers import LANGUAGE_NAMES
+    language_name = LANGUAGE_NAMES.get(language_code, language_code)
 
     # Build language-appropriate context
     if language_code == "en":
@@ -642,14 +634,12 @@ Requirements:
 
     # Build context for non-English words differently
     if language_code != "en":
-        # For non-English, use translation + definition + grammatical form as context
+        # For non-English, use translation + definition as context (grammatical_form goes in prompt header)
         context_parts = []
         if english_translation:
             context_parts.append(f"English translation: {english_translation}")
         if definition:
             context_parts.append(f"English definition: {definition}")
-        if grammatical_form:
-            context_parts.append(f"Grammatical form: {grammatical_form}")
         context_info = "\n".join(context_parts) if context_parts else f"Word form in {language_name}"
     else:
         # For English, use example sentence or definition
@@ -670,7 +660,12 @@ Requirements:
         current_text = ", ".join(current_info)
 
         if language_code != "en":
-            prompt = f"""Validate the pronunciation for the {language_name} word '{word}' (POS: {pos_type}):
+            # Build word description with grammatical form if available
+            word_desc = f"'{word}'"
+            if grammatical_form:
+                word_desc = f"'{word}' ({grammatical_form})"
+
+            prompt = f"""Validate the pronunciation for the {language_name} word {word_desc}:
 
 Current pronunciation: {current_text}
 
@@ -694,7 +689,12 @@ If incorrect, provide the correct pronunciations. If correct, confirm them."""
     else:
         # Generation mode
         if language_code != "en":
-            prompt = f"""Generate the pronunciation for the {language_name} word '{word}' (POS: {pos_type}):
+            # Build word description with grammatical form if available
+            word_desc = f"'{word}'"
+            if grammatical_form:
+                word_desc = f"'{word}' ({grammatical_form})"
+
+            prompt = f"""Generate the pronunciation for the {language_name} word {word_desc}:
 
 {context_info}
 
