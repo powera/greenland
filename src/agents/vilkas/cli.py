@@ -9,7 +9,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from src.agents.common.common_args import (
+from agents.common.common_args import (
     add_common_args,
     add_llm_args,
     add_output_args,
@@ -112,6 +112,8 @@ def main():
     # Import here to avoid circular imports
     from agents.vilkas.agent import VilkasAgent
     from agents.vilkas import display
+    from agents.common.lemma_selection import get_lemmas_for_agent, find_lemma_by_guid
+    from agents.common.cli_display import display_language_header
 
     parser = get_argument_parser()
     args = parser.parse_args()
@@ -142,10 +144,7 @@ def main():
 
         session = agent.get_session()
         try:
-            lemma = session.query(Lemma).filter(Lemma.guid == args.guid).first()
-            if not lemma:
-                print(f"\nError: No lemma found with GUID: {args.guid}")
-                sys.exit(1)
+            lemma = find_lemma_by_guid(session, args.guid, error_on_missing=True)
 
             print(f"\nProcessing word forms for: {lemma.lemma_text} (GUID: {args.guid})")
             print(f"POS: {lemma.pos_type}")
@@ -164,9 +163,9 @@ def main():
 
                 if args.fix:
                     print(f"\nGenerating missing forms for this lemma across all languages...")
-                    for lang in languages_to_process:
+                    for lang_idx, lang in enumerate(languages_to_process):
                         lang_name = LANGUAGE_NAMES.get(lang, lang.upper())
-                        print(f"\n--- Processing {lang_name} forms ---")
+                        display_language_header(lang, lang_idx + 1, len(languages_to_process))
 
                         kwargs = {
                             "language_code": lang,

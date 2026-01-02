@@ -121,9 +121,18 @@ class VilkasAgent:
 
         session = self.get_session()
         try:
-            # Find lemmas that are verbs, then filter by presence of translation
-            all_verbs = session.query(Lemma).filter(Lemma.pos_type == "verb").all()
-            verb_lemmas = [v for v in all_verbs if get_translation(session, v, language_code)]
+            # Find verbs with translation in the target language
+            from agents.common.lemma_selection import LemmaQueryBuilder
+
+            query_builder = LemmaQueryBuilder(session).filter_custom(
+                lambda q: q.filter(Lemma.pos_type == "verb")
+            )
+
+            # Add language filter if not English
+            if language_code != "en":
+                query_builder = query_builder.has_translation_in(language_code)
+
+            verb_lemmas = query_builder.build().all()
 
             logger.info(f"Found {len(verb_lemmas)} verb lemmas with {language_name} translations")
 
@@ -550,7 +559,7 @@ class VilkasAgent:
                 )
 
                 # Get the full lemma object
-                lemma = session.query(Lemma).filter(Lemma.guid == item_info["guid"]).first()
+                lemma = find_lemma_by_guid(session, item_info["guid"], error_on_missing=False)
 
                 if not lemma:
                     logger.error(f"Could not find lemma with GUID {item_info['guid']}")
