@@ -38,10 +38,12 @@ from agents.common.common_args import (
     add_common_args,
     add_llm_args,
     add_guid_arg,
+    add_language_args,
     add_backend_args,
     get_data_source_config,
 )
-from agents.common.lemma_selection import find_lemma_by_guid
+from agents.common.lemma_selection import get_lemmas_for_agent
+from agents.common.cli_display import display_language_header
 from clients.types import Schema, SchemaProperty
 from clients.unified_client import UnifiedLLMClient
 from wordfreq.storage.backend import create_session as create_backend_session
@@ -53,7 +55,7 @@ from wordfreq.storage.database import (
     add_sentence_word,
     calculate_minimum_level,
 )
-from wordfreq.storage.translation_helpers import get_translation, get_all_translations
+from wordfreq.storage.translation_helpers import get_translation, get_all_translations, LANGUAGE_NAMES
 
 # Configure logging
 logging.basicConfig(
@@ -569,108 +571,6 @@ Focus on variety, natural language usage, and accurate translations."""
         logger.debug(f"No lemma found for word '{word_text}' (role: {word_role})")
         return None
 
-    def generate_for_difficulty_level(
-        self,
-        difficulty_level: int,
-        limit: Optional[int] = None,
-        sentences_per_noun: int = 3,
-        target_languages: List[str] = ["en", "lt"],
-        dry_run: bool = False,
-    ) -> Dict[str, any]:
-        """
-        Generate sentences for all nouns at a specific difficulty level.
-
-        Args:
-            difficulty_level: Trakaido difficulty level (1-20)
-            limit: Maximum number of nouns to process
-            sentences_per_noun: Number of sentences to generate per noun
-            target_languages: Languages to generate sentences in
-            dry_run: If True, don't actually generate or store sentences
-
-        Returns:
-            Dictionary with generation statistics
-        """
-        logger.info(
-            f"{'DRY RUN: ' if dry_run else ''}Generating sentences for difficulty level {difficulty_level}"
-        )
-
-        session = self.get_session()
-        try:
-            # Query nouns at this difficulty level
-            query = (
-                session.query(Lemma)
-                .filter(Lemma.pos_type == "noun", Lemma.difficulty_level == difficulty_level)
-                .order_by(Lemma.id)
-            )
-
-            if limit:
-                query = query.limit(limit)
-
-            nouns = query.all()
-            logger.info(f"Found {len(nouns)} nouns at level {difficulty_level}")
-
-            if dry_run:
-                return {
-                    "nouns_found": len(nouns),
-                    "sentences_generated": 0,
-                    "sentences_stored": 0,
-                    "dry_run": True,
-                }
-
-            total_generated = 0
-            total_stored = 0
-            total_failed = 0
-
-            for i, noun in enumerate(nouns, 1):
-                logger.info(f"\n[{i}/{len(nouns)}] Processing: {noun.lemma_text} ({noun.guid})")
-
-                # Generate sentences
-                result = self.generate_sentences_for_noun(
-                    lemma=noun,
-                    target_languages=target_languages,
-                    num_sentences=sentences_per_noun,
-                    difficulty_context=difficulty_level,
-                )
-
-                if result.get("success") and result.get("sentences"):
-                    sentences = result["sentences"]
-                    total_generated += len(sentences)
-
-                    # Store sentences
-                    store_result = self.store_sentences(
-                        sentences_data=sentences, source_lemma=noun, session=session
-                    )
-
-                    total_stored += store_result["stored"]
-                    total_failed += store_result["failed"]
-
-            logger.info(f"\n{'='*60}")
-            logger.info(f"Generation complete!")
-            logger.info(f"Nouns processed: {len(nouns)}")
-            logger.info(f"Sentences generated: {total_generated}")
-            logger.info(f"Sentences stored: {total_stored}")
-            logger.info(f"Sentences failed: {total_failed}")
-            logger.info(f"{'='*60}")
-
-            return {
-                "nouns_found": len(nouns),
-                "sentences_generated": total_generated,
-                "sentences_stored": total_stored,
-                "sentences_failed": total_failed,
-            }
-
-        except Exception as e:
-            logger.error(f"Error in generation process: {e}", exc_info=True)
-            return {
-                "error": str(e),
-                "nouns_found": 0,
-                "sentences_generated": 0,
-                "sentences_stored": 0,
-            }
-        finally:
-            session.close()
-
-
 def get_argument_parser():
     """Return the argument parser for introspection.
 
@@ -683,6 +583,7 @@ def get_argument_parser():
     add_common_args(parser)
     add_llm_args(parser, default_model="gpt-5-mini")
     add_guid_arg(parser, help_text="Generate sentences for this specific lemma GUID")
+    add_language_args(parser, multiple=True)
     add_backend_args(parser)
 
     # Zvirblis-specific arguments
@@ -698,12 +599,9 @@ def get_argument_parser():
         default=3,
         help="Number of sentences to generate per noun (default: 3)",
     )
-    parser.add_argument(
-        "--languages",
-        nargs="+",
-        default=["en", "lt"],
-        help="Target languages for generation (default: en lt)",
-    )
+
+    # Set default languages to all supported languages
+    parser.set_defaults(languages=["en", "lt", "zh", "ko", "fr", "es", "de", "pt", "sw", "vi"])
 
     return parser
 
@@ -719,53 +617,103 @@ def main():
     # Initialize agent with config
     agent = ZvirblisAgent(config=config)
 
-    if args.guid:
-        # Generate for specific GUID
-        session = agent.get_session()
-        try:
-            lemma = find_lemma_by_guid(session, args.guid)
+    # Get lemmas to process (either single lemma from --guid or batch from --level/--limit)
+    session = agent.get_session()
+    try:
+        # If --level is specified, we need to filter by that in addition to guid/limit
+        if args.level:
+            # Custom query for difficulty level + noun filtering
+            from agents.common.lemma_selection import LemmaQueryBuilder, apply_limit_and_sample_rate
 
-            logger.info(f"Generating sentences for: {lemma.lemma_text} ({lemma.guid})")
-
-            result = agent.generate_sentences_for_noun(
-                lemma=lemma, target_languages=args.languages, num_sentences=args.num_sentences
+            query = (
+                LemmaQueryBuilder(session)
+                .curated_only()
+                .by_difficulty_level(args.level)
+                .filter_custom(lambda q: q.filter(Lemma.pos_type == "noun"))
+                .order_by_id()
+                .build()
             )
+            lemmas = apply_limit_and_sample_rate(query, args.limit, getattr(args, 'sample_rate', 1.0))
+        else:
+            # Standard lemma selection (guid or curated batch)
+            lemmas = get_lemmas_for_agent(session, args)
+            # Filter to nouns only for sentence generation
+            lemmas = [l for l in lemmas if l.pos_type == "noun"]
+    finally:
+        session.close()
 
-            if result.get("success") and result.get("sentences"):
-                if not args.dry_run:
+    # Validate we have lemmas to process
+    if not lemmas:
+        if args.guid:
+            logger.error(f"Lemma {args.guid} is not a noun or does not exist")
+        elif args.level:
+            logger.error(f"No nouns found at difficulty level {args.level}")
+        else:
+            logger.error("No lemmas to process. Specify --guid or --level")
+            parser.print_help()
+        return 1
+
+    # Show what we're processing
+    if len(lemmas) == 1:
+        lemma = lemmas[0]
+        logger.info(f"Processing: {lemma.lemma_text} (GUID: {lemma.guid})")
+    else:
+        logger.info(f"Processing {len(lemmas)} nouns")
+        if args.level:
+            logger.info(f"Difficulty level: {args.level}")
+
+    # Process all lemmas
+    total_generated = 0
+    total_stored = 0
+    total_failed = 0
+
+    for i, lemma in enumerate(lemmas, 1):
+        if len(lemmas) > 1:
+            logger.info(f"\n[{i}/{len(lemmas)}] Processing: {lemma.lemma_text} ({lemma.guid})")
+
+        # Generate sentences
+        result = agent.generate_sentences_for_noun(
+            lemma=lemma,
+            target_languages=args.languages,
+            num_sentences=args.num_sentences,
+            difficulty_context=args.level if args.level else None
+        )
+
+        if result.get("success") and result.get("sentences"):
+            sentences = result["sentences"]
+            total_generated += len(sentences)
+
+            if not args.dry_run:
+                # Store sentences
+                session = agent.get_session()
+                try:
                     store_result = agent.store_sentences(
-                        sentences_data=result["sentences"], source_lemma=lemma, session=session
+                        sentences_data=sentences, source_lemma=lemma, session=session
                     )
+                    total_stored += store_result["stored"]
+                    total_failed += store_result["failed"]
+
                     logger.info(
                         f"Stored: {store_result['stored']}, Failed: {store_result['failed']}"
                     )
-                else:
-                    logger.info(f"Would store {len(result['sentences'])} sentences (dry run)")
+                finally:
+                    session.close()
             else:
-                logger.error(f"Generation failed: {result.get('error')}")
-                return 1
+                logger.info(f"Would store {len(sentences)} sentences (dry run)")
+        else:
+            logger.error(f"Generation failed for {lemma.lemma_text}: {result.get('error')}")
+            total_failed += 1
 
-        finally:
-            session.close()
-
-    elif args.level:
-        # Generate for all nouns at difficulty level
-        result = agent.generate_for_difficulty_level(
-            difficulty_level=args.level,
-            limit=args.limit,
-            sentences_per_noun=args.num_sentences,
-            target_languages=args.languages,
-            dry_run=args.dry_run,
-        )
-
-        if result.get("error"):
-            logger.error(f"Generation failed: {result['error']}")
-            return 1
-
-    else:
-        logger.error("Must specify either --guid or --level")
-        parser.print_help()
-        return 1
+    # Print summary for batch processing
+    if len(lemmas) > 1:
+        logger.info(f"\n{'='*60}")
+        logger.info(f"Generation complete!")
+        logger.info(f"Nouns processed: {len(lemmas)}")
+        logger.info(f"Sentences generated: {total_generated}")
+        if not args.dry_run:
+            logger.info(f"Sentences stored: {total_stored}")
+            logger.info(f"Sentences failed: {total_failed}")
+        logger.info(f"{'='*60}")
 
     return 0
 
