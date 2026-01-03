@@ -41,15 +41,15 @@ if GREENLAND_SRC_PATH not in sys.path:
 
 import constants
 import util.prompt_loader
-from src.agents.common.common_args import (
+from agents.common.common_args import (
     add_common_args,
     add_llm_args,
     add_backend_args,
     add_guid_arg,
     get_data_source_config,
 )
-from src.agents.common.lemma_selection import (
-    find_lemma_by_guid,
+from agents.common.lemma_selection import (
+    get_lemmas_for_agent,
     LemmaQueryBuilder,
     apply_limit_and_sample_rate,
 )
@@ -376,7 +376,7 @@ class LapeAgent:
         self,
         fact_type: str,
         language_code: str,
-        guid: Optional[str] = None,
+        lemmas: Optional[List[Lemma]] = None,
         limit: Optional[int] = None,
         skip_existing: bool = True,
         min_confidence: float = 0.7,
@@ -388,7 +388,7 @@ class LapeAgent:
         Args:
             fact_type: Type of grammar fact to generate (e.g., 'measure_words')
             language_code: Language code (e.g., 'zh', 'fr')
-            guid: Optional GUID to process only a single lemma
+            lemmas: List of lemmas to process (if None, returns empty result)
             limit: Maximum number of lemmas to process
             skip_existing: Skip lemmas that already have this fact
             min_confidence: Minimum confidence to save the fact
@@ -417,30 +417,26 @@ class LapeAgent:
         if dry_run:
             logger.info("DRY RUN MODE - No changes will be saved")
 
+        # If no lemmas provided, return empty result
+        if not lemmas:
+            return {
+                "fact_type": fact_type,
+                "language_code": language_code,
+                "processed": 0,
+                "success": 0,
+                "failed": 0,
+                "skipped": 0,
+                "results": [],
+                "dry_run": dry_run,
+            }
+
         session = self.get_session()
         try:
-            # Handle single lemma by GUID
-            if guid:
-                lemma = find_lemma_by_guid(session, guid)
-                lemmas = [lemma]
-                logger.info(f"Processing single lemma: {lemma.lemma_text} (GUID: {guid})")
-            else:
-                # Get lemmas that need this fact
-                def pos_filter(query):
-                    return query.filter(Lemma.pos_type.in_(fact_config["required_pos"]))
+            # Filter lemmas by required POS types for this fact type
+            required_pos = fact_config["required_pos"]
+            lemmas = [l for l in lemmas if l.pos_type in required_pos]
 
-                query = (
-                    LemmaQueryBuilder(session)
-                    .curated_only()
-                    .filter_custom(pos_filter)
-                    .order_by_id()
-                    .build()
-                )
-
-                # Get extra in case we skip some due to existing facts
-                fetch_limit = limit * 2 if limit else None
-                lemmas = apply_limit_and_sample_rate(query, fetch_limit, 1.0)
-                logger.info(f"Found {len(lemmas)} candidate lemmas")
+            logger.info(f"Found {len(lemmas)} candidate lemmas")
 
             # Process lemmas
             processed_count = 0
@@ -653,12 +649,29 @@ def main():
     # Create agent
     agent = LapeAgent(config=config)
 
+    # Get lemmas to process (either single lemma from --guid or batch)
+    session = agent.get_session()
+    try:
+        lemmas = get_lemmas_for_agent(session, args)
+    finally:
+        session.close()
+
+    # Show what we're processing
+    if len(lemmas) == 1:
+        lemma = lemmas[0]
+        logger.info(f"Processing: {lemma.lemma_text} (GUID: {lemma.guid}, POS: {lemma.pos_type})")
+    elif len(lemmas) == 0:
+        logger.error("No lemmas found to process")
+        sys.exit(1)
+    else:
+        logger.info(f"Processing {len(lemmas)} lemmas")
+
     # Generate facts
     try:
         results = agent.generate_grammar_facts(
             fact_type=args.fact_type,
             language_code=args.language,
-            guid=args.guid if hasattr(args, 'guid') else None,
+            lemmas=lemmas,
             limit=args.limit,
             skip_existing=args.skip_existing,
             min_confidence=args.min_confidence,
