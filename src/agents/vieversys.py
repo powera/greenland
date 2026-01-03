@@ -437,7 +437,7 @@ def main():
     # Get lemmas to process (either single lemma from --guid or batch)
     # Only needed for modes that process lemmas (not coverage or check-existing)
     lemmas = None
-    if args.mode in ["populate-only", "regenerate"] or args.guid:
+    if args.mode in ["populate-only", "regenerate"]:
         # Require language for lemma processing
         if not args.language:
             print("Error: --language is required for lemma processing")
@@ -454,47 +454,11 @@ def main():
             lemma = lemmas[0]
             print(f"\nProcessing audio for: {lemma.lemma_text} (GUID: {lemma.guid})")
             print(f"POS: {lemma.pos_type}")
-
-            # Check if translation exists
-            session = agent.get_session()
-            try:
-                translation = agent.get_translation_text(session, lemma, args.language)
-            finally:
-                session.close()
-
-            if not translation:
-                print(f"Error: No {args.language} translation found for this lemma")
-                sys.exit(1)
-
-            print(f"Translation ({args.language}): {translation}")
-
-            # Use default voices if not specified
-            voice_list = voices or DEFAULT_VOICES.get(args.language, [Voice.ASH, Voice.ALLOY, Voice.NOVA])
-            print(f"\nGenerating audio with voices: {', '.join(v.value for v in voice_list)}")
-
-            # Generate audio for the single lemma
-            session = agent.get_session()
-            try:
-                result = agent.generate_audio_for_lemma(
-                    session, lemma, args.language, voice_list, create_review_record=True
-                )
-            finally:
-                session.close()
-
-            if result["success"]:
-                print(f"\n✓ Successfully generated audio for {len(result['voices'])} voice(s)")
-                for voice_result in result['voices']:
-                    if voice_result['success']:
-                        print(f"  {voice_result['voice']}: {voice_result['filename']}")
-                    else:
-                        print(f"  {voice_result['voice']}: ERROR - {voice_result.get('error', 'Unknown')}")
-            else:
-                print(f"\n✗ Failed: {result.get('error', 'Unknown error')}")
-                sys.exit(1)
-            return
         elif len(lemmas) == 0:
             print("\nNo lemmas found to process")
             sys.exit(1)
+        else:
+            print(f"\nProcessing audio for {len(lemmas)} lemmas")
 
     # Handle batch modes
     if args.mode == "coverage":
