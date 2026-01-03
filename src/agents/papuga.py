@@ -30,7 +30,7 @@ if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
 import constants
-from src.agents.common.common_args import (
+from agents.common.common_args import (
     add_common_args,
     add_llm_args,
     add_output_args,
@@ -41,7 +41,7 @@ from src.agents.common.common_args import (
     validate_cache_args,
     confirm_operation,
 )
-from src.agents.common.lemma_selection import find_lemma_by_guid
+from agents.common.lemma_selection import get_lemmas_for_agent
 from clients.barsukas_cache import BarsukasCacheClient
 from wordfreq.storage.backend import create_session as create_backend_session
 from wordfreq.storage.backend.config import DataSourceConfig, BackendType
@@ -634,18 +634,23 @@ def main():
 
     only_english = not args.all_languages
 
-    # Selection phase: determine lemma_id if --guid is provided
+    # Get lemmas to process (either single lemma from --guid or batch)
+    agent_temp = PapugaAgent(config=config)
+    session = agent_temp.get_session()
+    try:
+        lemmas = get_lemmas_for_agent(session, args)
+    finally:
+        session.close()
+
+    # Extract lemma_id if processing a single lemma
     lemma_id = None
-    if args.guid:
-        agent = PapugaAgent(config=config)
-        session = agent.get_session()
-        try:
-            # Find the lemma by GUID
-            lemma = find_lemma_by_guid(session, args.guid)
-            lemma_id = lemma.id
-            logger.info(f"Processing lemma: {lemma.lemma_text} (GUID: {args.guid}, ID: {lemma_id})")
-        finally:
-            session.close()
+    if len(lemmas) == 1:
+        lemma = lemmas[0]
+        lemma_id = lemma.id
+        logger.info(f"Processing lemma: {lemma.lemma_text} (GUID: {lemma.guid}, ID: {lemma_id})")
+    elif len(lemmas) == 0:
+        logger.error("No lemmas found to process")
+        sys.exit(1)
 
     # Confirm before running LLM queries (unless --yes or --dry-run was provided)
     if not args.yes and not args.dry_run:
