@@ -1,8 +1,8 @@
 # Agent Refactoring Status
 
-## Recent Refactoring Pattern (6 commits)
+## Recent Refactoring Pattern (7 commits)
 
-The recent refactoring of ŠERNAS, VILKAS, VORAS, ŽVIRBLIS, VIEVERSYS, and STRAZDAS established a consistent pattern:
+The recent refactoring of ŠERNAS, VILKAS, VORAS, ŽVIRBLIS, VIEVERSYS, STRAZDAS, and LAPE established a consistent pattern:
 
 ### Key Changes:
 
@@ -55,6 +55,14 @@ The recent refactoring of ŠERNAS, VILKAS, VORAS, ŽVIRBLIS, VIEVERSYS, and STRA
    - Pass lemmas to generate_batch() method
    - Fix import paths (removed src. prefix)
 
+7. **LAPE** (8441089): Refactor LAPE to use shared lemma selection pattern
+   - Use `get_lemmas_for_agent()` instead of find_lemma_by_guid
+   - Remove guid parameter from agent method
+   - Remove guid handling inside agent method
+   - Pass lemmas to generate_grammar_facts() method
+   - Fix import paths (removed src. prefix)
+   - Filter lemmas by required POS types inside agent
+
 ---
 
 ## Agents Status
@@ -95,6 +103,13 @@ The recent refactoring of ŠERNAS, VILKAS, VORAS, ŽVIRBLIS, VIEVERSYS, and STRA
    - ✅ Passes lemmas to generate_batch()
    - ✅ Fixed import paths (removed src. prefix)
 
+7. **LAPE** (lape.py) - Grammar Facts Generator
+   - ✅ Uses `get_lemmas_for_agent()`
+   - ✅ No "if args.guid" conditionals
+   - ✅ Passes lemmas to generate_grammar_facts()
+   - ✅ Fixed import paths (removed src. prefix)
+   - ✅ Agent method accepts lemmas, not guid
+
 ---
 
 ### ⚠️ NEEDS REFACTORING (Still has old pattern):
@@ -119,14 +134,6 @@ The recent refactoring of ŠERNAS, VILKAS, VORAS, ŽVIRBLIS, VIEVERSYS, and STRA
    - 📄 Single file agent
    - ⚠️ Has Barsukas API integration (check if API needs updates)
    - Uses `from src.agents.common` (needs to remove `src.` prefix)
-
-4. **LAPE** (lape.py) - Grammar Facts Generator
-   - ❌ Agent method accepts `guid` parameter (line 379)
-   - ❌ Has guid handling inside agent method (lines 422-426)
-   - 📄 Single file agent
-   - ⚠️ Has Barsukas API integration (check if API needs updates)
-   - Uses `from src.agents.common` (needs to remove `src.` prefix)
-   - Different pattern: guid handling in agent method, not CLI
 
 ---
 
@@ -202,9 +209,9 @@ Based on complexity and usage:
 1. ~~**DRAMBLYS**~~ - Has subfolder, but --guid doesn't make sense for this agent
 2. **LOKYS** - Single file, Barsukas API integration, careful changes needed
 3. **PAPUGA** - Single file, Barsukas API integration, careful changes needed
-4. **LAPE** - Single file, different pattern (guid in agent method), Barsukas API
-5. ~~**VIEVERSYS**~~ - ✅ **COMPLETED** (commit 54505ff)
-6. ~~**STRAZDAS**~~ - ✅ **COMPLETED** (commit 54505ff)
+4. ~~**LAPE**~~ - ✅ **COMPLETED** (commit 8441089)
+5. ~~**VIEVERSYS**~~ - ✅ **COMPLETED** (commit 54505ff, fixed in 1646c88)
+6. ~~**STRAZDAS**~~ - ✅ **COMPLETED** (commit 54505ff, fixed in 1646c88)
 
 ---
 
