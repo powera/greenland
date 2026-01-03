@@ -121,9 +121,18 @@ class VilkasAgent:
 
         session = self.get_session()
         try:
-            # Find lemmas that are verbs, then filter by presence of translation
-            all_verbs = session.query(Lemma).filter(Lemma.pos_type == "verb").all()
-            verb_lemmas = [v for v in all_verbs if get_translation(session, v, language_code)]
+            # Find verbs with translation in the target language
+            from agents.common.lemma_selection import LemmaQueryBuilder
+
+            query_builder = LemmaQueryBuilder(session).filter_custom(
+                lambda q: q.filter(Lemma.pos_type == "verb")
+            )
+
+            # Add language filter if not English
+            if language_code != "en":
+                query_builder = query_builder.has_translation_in(language_code)
+
+            verb_lemmas = query_builder.build().all()
 
             logger.info(f"Found {len(verb_lemmas)} verb lemmas with {language_name} translations")
 
@@ -190,6 +199,7 @@ class VilkasAgent:
 
     def fix_missing_forms(
         self,
+        lemmas: Optional[List[Lemma]] = None,
         language_code: str = "lt",
         pos_type: Optional[str] = None,
         limit: Optional[int] = None,
@@ -197,7 +207,6 @@ class VilkasAgent:
         throttle: float = 1.0,
         dry_run: bool = False,
         source: str = "llm",
-        guid: Optional[str] = None,
     ) -> Dict[str, any]:
         """
         Generate and store missing word forms for a specific language.
@@ -211,6 +220,7 @@ class VilkasAgent:
         - English (en): noun forms (singular/plural), verb conjugations, adjective forms, adverb forms
 
         Args:
+            lemmas: List of Lemma objects to process. If None, processes all curated lemmas.
             language_code: Language code (e.g., 'lt', 'fr', 'de', 'es', 'pt', 'en')
             pos_type: Part of speech to fix (e.g., 'noun', 'verb', 'adjective'). If None, uses language-specific default.
             limit: Maximum number of lemmas to process
@@ -218,7 +228,6 @@ class VilkasAgent:
             throttle: Seconds to wait between API calls
             dry_run: If True, show what would be fixed without making changes
             source: Source for forms - 'llm' or 'wiki' (for Lithuanian nouns only)
-            guid: Optional GUID to process only a specific lemma
 
         Returns:
             Dictionary with fix results
@@ -312,14 +321,15 @@ class VilkasAgent:
         # Call the appropriate handler
         if handler_key == "lt_noun":
             return self._fix_lithuanian_noun_declensions(
-                limit=limit, model=effective_model, throttle=throttle, dry_run=dry_run, source=source, guid=guid
+                lemmas=lemmas, limit=limit, model=effective_model, throttle=throttle, dry_run=dry_run, source=source
             )
         elif handler_key == "fr_verb":
             return self._fix_french_verb_conjugations(
-                limit=limit, model=effective_model, throttle=throttle, dry_run=dry_run, guid=guid
+                lemmas=lemmas, limit=limit, model=effective_model, throttle=throttle, dry_run=dry_run
             )
         elif use_generic:
             return self._fix_generic_forms(
+                lemmas=lemmas,
                 language_code=language_code,
                 language_name=language_name,
                 pos_type=pos_type,
@@ -328,7 +338,6 @@ class VilkasAgent:
                 model=effective_model,
                 throttle=throttle,
                 dry_run=dry_run,
-                guid=guid,
             )
         else:
             logger.error(f"Unexpected handler configuration for {handler_key}")
@@ -336,12 +345,12 @@ class VilkasAgent:
 
     def _fix_lithuanian_noun_declensions(
         self,
+        lemmas: Optional[List[Lemma]] = None,
         limit: Optional[int] = None,
         model: Optional[str] = None,
         throttle: float = 1.0,
         dry_run: bool = False,
         source: str = "llm",
-        guid: Optional[str] = None,
     ) -> Dict[str, any]:
         """
         Generate missing Lithuanian noun declensions.
@@ -350,12 +359,12 @@ class VilkasAgent:
         wordfreq.translation.generate_lithuanian_noun_forms.
 
         Args:
+            lemmas: List of Lemma objects to process. If None, processes all curated lemmas.
             limit: Maximum number of lemmas to process
             model: LLM model to use (if None, uses config.model)
             throttle: Seconds to wait between API calls
             dry_run: If True, show what would be fixed without making changes
             source: Source for forms - 'llm' or 'wiki'
-            guid: Optional GUID to process only a specific lemma
 
         Returns:
             Dictionary with fix results
@@ -367,21 +376,21 @@ class VilkasAgent:
 
         return fix_lithuanian_noun_declensions(
             agent=self,
+            lemmas=lemmas,
             limit=limit,
             model=model,
             throttle=throttle,
             dry_run=dry_run,
             source=source,
-            guid=guid,
         )
 
     def _fix_french_verb_conjugations(
         self,
+        lemmas: Optional[List[Lemma]] = None,
         limit: Optional[int] = None,
         model: Optional[str] = None,
         throttle: float = 1.0,
         dry_run: bool = False,
-        guid: Optional[str] = None,
     ) -> Dict[str, any]:
         """
         Generate missing French verb conjugations.
@@ -390,11 +399,11 @@ class VilkasAgent:
         wordfreq.translation.generate_french_verb_forms.
 
         Args:
+            lemmas: List of Lemma objects to process. If None, processes all curated lemmas.
             limit: Maximum number of lemmas to process
             model: LLM model to use (if None, uses config.model)
             throttle: Seconds to wait between API calls
             dry_run: If True, show what would be fixed without making changes
-            guid: Optional GUID to process only a specific lemma
 
         Returns:
             Dictionary with fix results
@@ -406,29 +415,30 @@ class VilkasAgent:
 
         return fix_french_verb_conjugations(
             agent=self,
+            lemmas=lemmas,
             limit=limit,
             model=model,
             throttle=throttle,
             dry_run=dry_run,
-            guid=guid,
         )
 
     def _fix_generic_forms(
         self,
-        language_code: str,
-        language_name: str,
-        pos_type: str,
-        process_func,
+        lemmas: Optional[List[Lemma]] = None,
+        language_code: str = "lt",
+        language_name: str = "Lithuanian",
+        pos_type: str = "verb",
+        process_func = None,
         limit: Optional[int] = None,
         model: Optional[str] = None,
         throttle: float = 1.0,
         dry_run: bool = False,
-        guid: Optional[str] = None,
     ) -> Dict[str, any]:
         """
         Generic handler for generating missing word forms across languages.
 
         Args:
+            lemmas: List of Lemma objects to process. If None, uses check methods to find lemmas needing forms.
             language_code: Language code (e.g., 'fr', 'de')
             language_name: Human-readable language name
             pos_type: Part of speech type
@@ -437,7 +447,6 @@ class VilkasAgent:
             model: LLM model to use (if None, uses config.model)
             throttle: Seconds to wait between API calls
             dry_run: If True, show what would be fixed without making changes
-            guid: Optional GUID to process only a specific lemma
 
         Returns:
             Dictionary with fix results
@@ -446,44 +455,23 @@ class VilkasAgent:
         effective_model = model if model is not None else self.config.model
         logger.info(f"Finding {language_name} {pos_type}s needing forms...")
 
-        # If GUID is specified, process that specific lemma directly
-        if guid:
-            session = self.get_session()
-            try:
-                lemma = find_lemma_by_guid(session, guid, error_on_missing=False)
-                if not lemma:
-                    logger.info(f"Lemma with GUID {guid} not found")
-                    return {
-                        "total_needing_fix": 0,
-                        "processed": 0,
-                        "successful": 0,
-                        "failed": 0,
-                        "dry_run": dry_run,
-                        "guid_filter": guid,
-                    }
+        # If lemmas are provided, use them directly
+        if lemmas:
+            # Filter to just the specified pos_type
+            filtered_lemmas = [l for l in lemmas if l.pos_type == pos_type]
 
-                if lemma.pos_type != pos_type:
-                    logger.info(f"Lemma with GUID {guid} is not a {pos_type} (it's {lemma.pos_type})")
-                    return {
-                        "total_needing_fix": 0,
-                        "processed": 0,
-                        "successful": 0,
-                        "failed": 0,
-                        "dry_run": dry_run,
-                        "guid_filter": guid,
-                    }
-
-                items_needing_forms = [{
+            items_needing_forms = []
+            for lemma in filtered_lemmas:
+                translation = get_translation(self.get_session(), lemma, language_code) if language_code != "en" else lemma.lemma_text
+                items_needing_forms.append({
                     "guid": lemma.guid,
                     "english": lemma.lemma_text,
-                    "translation": f"({language_code})",
+                    "translation": translation or f"({language_code})",
                     "pos_subtype": lemma.pos_subtype,
                     "difficulty_level": lemma.difficulty_level,
                     "current_form_count": 0,
-                }]
-                total_needs_fix = 1
-            finally:
-                session.close()
+                })
+            total_needs_fix = len(items_needing_forms)
         else:
             # Get form coverage check results
             check_results = (
@@ -550,7 +538,7 @@ class VilkasAgent:
                 )
 
                 # Get the full lemma object
-                lemma = session.query(Lemma).filter(Lemma.guid == item_info["guid"]).first()
+                lemma = find_lemma_by_guid(session, item_info["guid"], error_on_missing=False)
 
                 if not lemma:
                     logger.error(f"Could not find lemma with GUID {item_info['guid']}")

@@ -9,7 +9,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from src.agents.common.common_args import (
+from agents.common.common_args import (
     add_common_args,
     add_llm_args,
     add_output_args,
@@ -112,6 +112,8 @@ def main():
     # Import here to avoid circular imports
     from agents.vilkas.agent import VilkasAgent
     from agents.vilkas import display
+    from agents.common.lemma_selection import get_lemmas_for_agent
+    from agents.common.cli_display import display_language_header
 
     parser = get_argument_parser()
     args = parser.parse_args()
@@ -136,125 +138,24 @@ def main():
         print("  --guid N06_015 --task all --fix         # Generate all forms for specific lemma")
         sys.exit(1)
 
-    # Handle --guid mode (filter to single lemma)
-    if args.guid:
-        from wordfreq.storage.models.schema import Lemma, DerivativeForm
+    # Get lemmas to process (either single lemma from --guid or batch)
+    session = agent.get_session()
+    try:
+        lemmas = get_lemmas_for_agent(session, args)
+    finally:
+        session.close()
 
-        session = agent.get_session()
-        try:
-            lemma = session.query(Lemma).filter(Lemma.guid == args.guid).first()
-            if not lemma:
-                print(f"\nError: No lemma found with GUID: {args.guid}")
-                sys.exit(1)
-
-            print(f"\nProcessing word forms for: {lemma.lemma_text} (GUID: {args.guid})")
-            print(f"POS: {lemma.pos_type}")
-
-            # If task=all, process all supported languages for this lemma's POS type
-            if args.task == "all":
-                pos_type = lemma.pos_type
-
-                # Find all supported languages for this POS type
-                languages_to_process = []
-                for lang, pos_types in SUPPORTED_TASKS.items():
-                    if pos_type in pos_types:
-                        languages_to_process.append(lang)
-
-                print(f"Languages to process: {', '.join(languages_to_process)}")
-
-                if args.fix:
-                    print(f"\nGenerating missing forms for this lemma across all languages...")
-                    for lang in languages_to_process:
-                        lang_name = LANGUAGE_NAMES.get(lang, lang.upper())
-                        print(f"\n--- Processing {lang_name} forms ---")
-
-                        kwargs = {
-                            "language_code": lang,
-                            "pos_type": pos_type,
-                            "model": args.model,
-                            "throttle": args.throttle,
-                            "dry_run": args.dry_run,
-                            "guid": args.guid,
-                        }
-                        if lang == "lt" and pos_type == "noun":
-                            kwargs["source"] = args.source
-
-                        results = agent.fix_missing_forms(**kwargs)
-                        display.print_fix_results(results, args.dry_run)
-                else:
-                    # Just show existing forms for all languages
-                    for lang in languages_to_process:
-                        forms = (
-                            session.query(DerivativeForm)
-                            .filter(
-                                DerivativeForm.lemma_id == lemma.id,
-                                DerivativeForm.language_code == lang,
-                            )
-                            .all()
-                        )
-                        lang_name = LANGUAGE_NAMES.get(lang, lang.upper())
-                        print(f"\n{lang_name} forms ({len(forms)}):")
-                        if forms:
-                            for form in forms[:20]:
-                                base_marker = " [BASE]" if form.is_base_form else ""
-                                print(
-                                    f"  {form.derivative_form_text} ({form.grammatical_form or 'N/A'}){base_marker}"
-                                )
-                            if len(forms) > 20:
-                                print(f"  ... and {len(forms) - 20} more")
-                        else:
-                            print("  No forms found")
-            else:
-                # Single language mode
-                language_code = args.task.split("-")[0]
-                print(f"Language: {language_code}")
-
-                # Get all derivative forms for this lemma
-                forms = (
-                    session.query(DerivativeForm)
-                    .filter(
-                        DerivativeForm.lemma_id == lemma.id,
-                        DerivativeForm.language_code == language_code,
-                    )
-                    .all()
-                )
-
-                if forms:
-                    print(f"\nExisting forms ({len(forms)}):")
-                    for form in forms[:20]:  # Limit display to first 20
-                        base_marker = " [BASE]" if form.is_base_form else ""
-                        print(
-                            f"  {form.derivative_form_text} ({form.grammatical_form or 'N/A'}){base_marker}"
-                        )
-                    if len(forms) > 20:
-                        print(f"  ... and {len(forms) - 20} more")
-                else:
-                    print("\nNo existing forms found")
-
-                # If in --fix mode, generate missing forms for this lemma
-                if args.fix:
-                    print(f"\nGenerating missing forms for this lemma...")
-                    # Use the lemma's actual POS type
-                    pos_type_to_use = lemma.pos_type
-
-                    # Call fix_missing_forms with the GUID parameter to filter to just this lemma
-                    results = agent.fix_missing_forms(
-                        language_code=language_code,
-                        pos_type=pos_type_to_use,
-                        model=args.model,
-                        throttle=args.throttle,
-                        dry_run=args.dry_run,
-                        source=args.source,
-                        guid=args.guid,
-                    )
-                    display.print_fix_results(results, args.dry_run)
-        finally:
-            session.close()
-        return
+    # Show what we're processing
+    if len(lemmas) == 1:
+        lemma = lemmas[0]
+        print(f"\nProcessing word forms for: {lemma.lemma_text} (GUID: {lemma.guid})")
+        print(f"POS: {lemma.pos_type}")
+    elif len(lemmas) == 0:
+        print(f"\nNo lemmas found to process")
+        sys.exit(1)
 
     # Handle bulk processing (no --guid filter)
     if args.fix:
-
         # Parse --task parameter to get language and form type
         language_code = None
         inferred_pos_type = None
@@ -315,44 +216,53 @@ def main():
         if args.task == "all":
             print("\n=== Processing all supported forms ===\n")
 
-            # Process each supported language/POS combination
-            task_num = 1
+            # Process all language/POS combinations
+            languages_and_pos = []
             for lang, pos_types in SUPPORTED_TASKS.items():
-                lang_name = LANGUAGE_NAMES.get(lang, lang.upper())
                 for pos in pos_types:
-                    # Use correct terminology based on language and POS type
-                    if pos == "noun":
-                        # Use "declensions" for case languages (LT, DE), "forms" for others
-                        form_desc = "noun declensions" if lang in ["lt", "de"] else "noun forms"
-                    else:
-                        form_desc = {
-                            "verb": "verb conjugations",
-                            "adjective": "adjective forms",
-                            "adverb": "adverb forms",
-                        }.get(pos, f"{pos} forms")
+                    languages_and_pos.append((lang, pos))
 
-                    print(f"\n{task_num}. {lang_name} {form_desc}:")
+            # Process each language/POS combination
+            task_num = 1
+            for lang, pos in languages_and_pos:
+                lang_name = LANGUAGE_NAMES.get(lang, lang.upper())
 
-                    # Only pass source for Lithuanian nouns
-                    kwargs = {
-                        "language_code": lang,
-                        "pos_type": pos,
-                        "limit": args.limit,
-                        "model": args.model,
-                        "throttle": args.throttle,
-                        "dry_run": args.dry_run,
-                    }
-                    if lang == "lt" and pos == "noun":
-                        kwargs["source"] = args.source
+                # Use correct terminology based on language and POS type
+                if pos == "noun":
+                    # Use "declensions" for case languages (LT, DE), "forms" for others
+                    form_desc = "noun declensions" if lang in ["lt", "de"] else "noun forms"
+                else:
+                    form_desc = {
+                        "verb": "verb conjugations",
+                        "adjective": "adjective forms",
+                        "adverb": "adverb forms",
+                    }.get(pos, f"{pos} forms")
 
-                    results = agent.fix_missing_forms(**kwargs)
-                    display.print_fix_results(results, args.dry_run)
-                    task_num += 1
+                display_language_header(lang, task_num, len(languages_and_pos))
+                print(f"{lang_name} {form_desc}:")
+
+                # Only pass source for Lithuanian nouns
+                kwargs = {
+                    "lemmas": lemmas,
+                    "language_code": lang,
+                    "pos_type": pos,
+                    "limit": args.limit,
+                    "model": args.model,
+                    "throttle": args.throttle,
+                    "dry_run": args.dry_run,
+                }
+                if lang == "lt" and pos == "noun":
+                    kwargs["source"] = args.source
+
+                results = agent.fix_missing_forms(**kwargs)
+                display.print_fix_results(results, args.dry_run)
+                task_num += 1
 
             print("\n=== All forms processed ===")
         else:
             # Single task
             results = agent.fix_missing_forms(
+                lemmas=lemmas,
                 language_code=language_code,
                 pos_type=inferred_pos_type,
                 limit=args.limit,
