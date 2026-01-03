@@ -146,14 +146,13 @@ def main():
         session.close()
 
     # Show what we're processing
-    if args.guid:
-        if lemmas:
-            lemma = lemmas[0]
-            print(f"\nProcessing word forms for: {lemma.lemma_text} (GUID: {args.guid})")
-            print(f"POS: {lemma.pos_type}")
-        else:
-            print(f"\nNo lemma found with GUID: {args.guid}")
-            sys.exit(1)
+    if len(lemmas) == 1:
+        lemma = lemmas[0]
+        print(f"\nProcessing word forms for: {lemma.lemma_text} (GUID: {lemma.guid})")
+        print(f"POS: {lemma.pos_type}")
+    elif len(lemmas) == 0:
+        print(f"\nNo lemmas found to process")
+        sys.exit(1)
 
     # Handle bulk processing (no --guid filter)
     if args.fix:
@@ -192,8 +191,8 @@ def main():
             language_code = None  # Process all languages
             form_type_label = "all forms (all languages)"
 
-        # Confirmation prompt (unless --yes or --dry-run or --guid)
-        if not args.yes and not args.dry_run and not args.guid:
+        # Confirmation prompt (unless --yes or --dry-run)
+        if not args.yes and not args.dry_run:
             # Get appropriate check results for confirmation
             language_names = {"lt": "Lithuanian", "fr": "French"}
             lang_name = language_names.get(language_code, language_code.upper()) if language_code else "All"
@@ -217,21 +216,11 @@ def main():
         if args.task == "all":
             print("\n=== Processing all supported forms ===\n")
 
-            # Determine which languages to process based on lemma POS type (if --guid specified)
-            if args.guid and lemmas:
-                pos_type = lemmas[0].pos_type
-                # Find all supported languages for this POS type
-                languages_and_pos = []
-                for lang, pos_types in SUPPORTED_TASKS.items():
-                    if pos_type in pos_types:
-                        languages_and_pos.append((lang, pos_type))
-                print(f"Languages to process for {pos_type}: {', '.join([l for l, _ in languages_and_pos])}")
-            else:
-                # Process all combinations
-                languages_and_pos = []
-                for lang, pos_types in SUPPORTED_TASKS.items():
-                    for pos in pos_types:
-                        languages_and_pos.append((lang, pos))
+            # Process all language/POS combinations
+            languages_and_pos = []
+            for lang, pos_types in SUPPORTED_TASKS.items():
+                for pos in pos_types:
+                    languages_and_pos.append((lang, pos))
 
             # Process each language/POS combination
             task_num = 1
