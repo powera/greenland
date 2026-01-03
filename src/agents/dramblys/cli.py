@@ -16,12 +16,11 @@ GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent.parent)
 if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
-from src.agents.common.common_args import (
+from agents.common.common_args import (
     add_common_args,
     add_llm_args,
     add_output_args,
     add_processing_args,
-    add_guid_arg,
     add_backend_args,
     get_data_source_config,
     confirm_operation,
@@ -41,7 +40,6 @@ def get_argument_parser():
     add_llm_args(parser, default_model="gpt-5-mini")
     add_output_args(parser)
     add_processing_args(parser)
-    add_guid_arg(parser, help_text="Process only the word with this GUID")
     add_backend_args(parser)
 
     # Check mode options (reporting only, no changes)
@@ -343,25 +341,6 @@ def main():
                         print(f"  Successfully added: {results['successful']}")
                     print(f"  Failed: {results['failed']}")
                     print(f"  Skipped (already exist): {results['skipped']}")
-        return
-
-    # Handle --guid mode
-    if args.guid:
-        results = agent.process_single_word_by_guid(
-            guid=args.guid,
-            model=args.model,
-            dry_run=args.dry_run,
-        )
-
-        if "error" in results:
-            print(f"\nError: {results['error']}")
-        else:
-            print(f"\nProcessed word with GUID: {args.guid}")
-            print(f"  Success: {results.get('success', False)}")
-            if results.get("word"):
-                print(f"  Word: {results['word']}")
-            if results.get("message"):
-                print(f"  Message: {results['message']}")
         return
 
     # Handle --fix mode

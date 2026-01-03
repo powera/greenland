@@ -911,7 +911,7 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
 
         results = {
             "timestamp": start_time.isoformat(),
-            "database_path": self.db_path,
+            "backend_type": str(self.config.backend_type),
             "checks": {
                 "high_frequency_missing": self.check_high_frequency_missing_words(
                     top_n=top_n_frequency
