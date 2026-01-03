@@ -63,11 +63,12 @@ The recent refactoring of ŠERNAS, VILKAS, VORAS, ŽVIRBLIS, VIEVERSYS, STRAZDAS
    - Fix import paths (removed src. prefix)
    - Filter lemmas by required POS types inside agent
 
-8. **LOKYS** (c4af0a4): Refactor LOKYS to use shared lemma selection pattern
+8. **LOKYS** (c4af0a4, fe06c54): Refactor LOKYS to use shared lemma selection pattern
    - Use `get_lemmas_for_agent()` instead of find_lemma_by_guid
    - Remove "if args.guid" conditionals
    - Fix import paths (removed src. prefix)
-   - Created lokys_display.py for display functions
+   - Restructured into subdirectory: lokys/agent.py, lokys/cli.py, lokys/display.py
+   - Fixed db_path → use backend_type from DataSourceConfig
    - Separated display logic from core logic
 
 9. **PAPUGA** (c4af0a4): Refactor PAPUGA to use shared lemma selection pattern
@@ -123,11 +124,12 @@ The recent refactoring of ŠERNAS, VILKAS, VORAS, ŽVIRBLIS, VIEVERSYS, STRAZDAS
    - ✅ Fixed import paths (removed src. prefix)
    - ✅ Agent method accepts lemmas, not guid
 
-8. **LOKYS** (lokys.py) - English Lemma Validation
+8. **LOKYS** (lokys/) - English Lemma Validation
    - ✅ Uses `get_lemmas_for_agent()`
    - ✅ No "if args.guid" conditionals
    - ✅ Fixed import paths (removed src. prefix)
-   - ✅ Has lokys_display.py for display functions
+   - ✅ Subdirectory structure: lokys/agent.py, lokys/cli.py, lokys/display.py
+   - ✅ Fixed db_path → use backend_type from DataSourceConfig
    - ✅ Separated display logic from core logic
 
 9. **PAPUGA** (papuga.py) - Pronunciation Validation
@@ -220,8 +222,8 @@ For each agent that needs refactoring:
 Based on complexity and usage:
 
 1. ~~**DRAMBLYS**~~ - Has subfolder, but --guid doesn't make sense for this agent
-2. **LOKYS** - Single file, Barsukas API integration, careful changes needed
-3. **PAPUGA** - Single file, Barsukas API integration, careful changes needed
+2. ~~**LOKYS**~~ - ✅ **COMPLETED** (commits c4af0a4, fe06c54) - Subdirectory structure
+3. ~~**PAPUGA**~~ - ✅ **COMPLETED** (commit c4af0a4)
 4. ~~**LAPE**~~ - ✅ **COMPLETED** (commit 8441089)
 5. ~~**VIEVERSYS**~~ - ✅ **COMPLETED** (commit 54505ff, fixed in 1646c88)
 6. ~~**STRAZDAS**~~ - ✅ **COMPLETED** (commit 54505ff, fixed in 1646c88)
@@ -256,12 +258,10 @@ Agents with Barsukas API integrations (LOKYS, PAPUGA, LAPE):
 
 ### About Import Paths:
 
-Several agents still use `from src.agents.common` instead of `from agents.common`:
-- DRAMBLYS
-- LOKYS
-- PAPUGA
-- STRAZDAS
-- LAPE
+Only DRAMBLYS still uses `from src.agents.common` instead of `from agents.common`.
 
-These should be updated to use `from agents.common` (without `src.` prefix) as per
-project conventions.
+All other agents (LOKYS, PAPUGA, STRAZDAS, LAPE, VIEVERSYS) have been updated to use
+`from agents.common` (without `src.` prefix) as per project conventions.
+
+DRAMBLYS is not planned for refactoring since --guid mode doesn't apply to its purpose
+(finding missing words can't be done for just one word).
