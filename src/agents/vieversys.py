@@ -35,7 +35,7 @@ from agents.common.common_args import (
     confirm_operation,
     get_data_source_config,
 )
-from agents.common.lemma_selection import find_lemma_by_guid, LemmaQueryBuilder, apply_limit_and_sample_rate
+from agents.common.lemma_selection import get_lemmas_for_agent, LemmaQueryBuilder, apply_limit_and_sample_rate
 from wordfreq.storage.backend import create_session as create_backend_session
 from wordfreq.storage.backend.config import DataSourceConfig, BackendType
 from wordfreq.storage.models.schema import Lemma, AudioQualityReview
@@ -254,8 +254,7 @@ class VieversysAgent:
     def generate_batch(
         self,
         language_code: str,
-        limit: Optional[int] = None,
-        difficulty_level: Optional[int] = None,
+        lemmas: Optional[List[Lemma]] = None,
         voices: Optional[List[Voice]] = None,
     ) -> Dict:
         """
@@ -263,8 +262,7 @@ class VieversysAgent:
 
         Args:
             language_code: Target language code
-            limit: Maximum number of lemmas to process
-            difficulty_level: Filter by difficulty level
+            lemmas: List of lemmas to process (if None, returns empty result)
             voices: Voices to use (defaults to language's default voices)
 
         Returns:
@@ -274,30 +272,25 @@ class VieversysAgent:
         voices = voices or DEFAULT_VOICES.get(language_code, [Voice.ASH, Voice.ALLOY, Voice.NOVA])
 
         try:
-            # Build query
-            builder = LemmaQueryBuilder(session).curated_only().order_by_id()
-
-            # Filter by difficulty level if specified
-            if difficulty_level is not None:
-                builder = builder.by_difficulty_level(difficulty_level)
-
-            query = builder.build()
-
-            # Filter lemmas that have translation in target language
-            # Note: We'll filter in Python after fetching since get_translation handles both column and table-based lookups
-            # This is simpler and avoids needing to know which languages use which storage method
-
-            # Apply limit
-            if limit:
-                query = query.limit(limit)
-
-            all_lemmas = query.all()
+            # If no lemmas provided, return empty result
+            if not lemmas:
+                return {
+                    "language_code": language_code,
+                    "total_lemmas": 0,
+                    "voices": [v.value for v in voices],
+                    "output_dir": str(self.output_dir),
+                    "lemmas": [],
+                    "success_count": 0,
+                    "error_count": 0,
+                }
 
             # Filter to only lemmas that have translations in the target language
-            lemmas = []
-            for lemma in all_lemmas:
+            lemmas_with_translation = []
+            for lemma in lemmas:
                 if self.get_translation_text(session, lemma, language_code):
-                    lemmas.append(lemma)
+                    lemmas_with_translation.append(lemma)
+
+            lemmas = lemmas_with_translation
 
             logger.info(f"Generating audio for {len(lemmas)} lemmas in {language_code}")
 
@@ -441,22 +434,34 @@ def main():
     if args.voices:
         voices = [Voice(v) for v in args.voices]
 
-    # Handle --guid mode (single lemma)
-    if args.guid:
+    # Get lemmas to process (either single lemma from --guid or batch)
+    # Only needed for modes that process lemmas (not coverage or check-existing)
+    lemmas = None
+    if args.mode in ["populate-only", "regenerate"] or args.guid:
+        # Require language for lemma processing
+        if not args.language:
+            print("Error: --language is required for lemma processing")
+            sys.exit(1)
+
         session = agent.get_session()
         try:
-            lemma = find_lemma_by_guid(session, args.guid)
+            lemmas = get_lemmas_for_agent(session, args)
+        finally:
+            session.close()
 
-            print(f"\nProcessing audio for: {lemma.lemma_text} (GUID: {args.guid})")
+        # Show what we're processing
+        if len(lemmas) == 1:
+            lemma = lemmas[0]
+            print(f"\nProcessing audio for: {lemma.lemma_text} (GUID: {lemma.guid})")
             print(f"POS: {lemma.pos_type}")
 
-            # For single lemma, require language
-            if not args.language:
-                print("Error: --language is required when using --guid")
-                sys.exit(1)
-
             # Check if translation exists
-            translation = agent.get_translation_text(session, lemma, args.language)
+            session = agent.get_session()
+            try:
+                translation = agent.get_translation_text(session, lemma, args.language)
+            finally:
+                session.close()
+
             if not translation:
                 print(f"Error: No {args.language} translation found for this lemma")
                 sys.exit(1)
@@ -465,13 +470,16 @@ def main():
 
             # Use default voices if not specified
             voice_list = voices or DEFAULT_VOICES.get(args.language, [Voice.ASH, Voice.ALLOY, Voice.NOVA])
-
             print(f"\nGenerating audio with voices: {', '.join(v.value for v in voice_list)}")
 
             # Generate audio for the single lemma
-            result = agent.generate_audio_for_lemma(
-                session, lemma, args.language, voice_list, create_review_record=True
-            )
+            session = agent.get_session()
+            try:
+                result = agent.generate_audio_for_lemma(
+                    session, lemma, args.language, voice_list, create_review_record=True
+                )
+            finally:
+                session.close()
 
             if result["success"]:
                 print(f"\n✓ Successfully generated audio for {len(result['voices'])} voice(s)")
@@ -483,10 +491,10 @@ def main():
             else:
                 print(f"\n✗ Failed: {result.get('error', 'Unknown error')}")
                 sys.exit(1)
-
-        finally:
-            session.close()
-        return
+            return
+        elif len(lemmas) == 0:
+            print("\nNo lemmas found to process")
+            sys.exit(1)
 
     # Handle batch modes
     if args.mode == "coverage":
@@ -565,31 +573,19 @@ def main():
 
         # Confirm before running (unless --yes was provided)
         if not args.yes and not args.dry_run:
-            # Estimate API calls
+            # Count lemmas with translations
             session = agent.get_session()
             try:
-                builder = LemmaQueryBuilder(session).curated_only().order_by_id()
-
-                if args.difficulty_level is not None:
-                    builder = builder.by_difficulty_level(args.difficulty_level)
-
-                if args.limit:
-                    query = builder.build().limit(args.limit)
-                else:
-                    query = builder.build()
-
-                # Get all lemmas and filter by translation availability
-                all_lemmas = query.all()
                 lemmas_with_translation = []
-                for lemma in all_lemmas:
+                for lemma in lemmas:
                     if agent.get_translation_text(session, lemma, args.language):
                         lemmas_with_translation.append(lemma)
-
                 lemma_count = len(lemmas_with_translation)
-                voice_count = len(voices) if voices else 3
-                estimated_calls = lemma_count * voice_count
             finally:
                 session.close()
+
+            voice_count = len(voices) if voices else 3
+            estimated_calls = lemma_count * voice_count
 
             if not confirm_operation(
                 message=f"This will generate audio for {lemma_count} lemmas with {voice_count} voices each.\nTotal API calls: {estimated_calls}\nThis will use OpenAI TTS API and may incur costs.",
@@ -604,8 +600,7 @@ def main():
         start_time = datetime.now()
         results = agent.generate_batch(
             language_code=args.language,
-            limit=args.limit,
-            difficulty_level=args.difficulty_level,
+            lemmas=lemmas,
             voices=voices,
         )
         duration = (datetime.now() - start_time).total_seconds()
