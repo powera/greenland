@@ -31,7 +31,7 @@ if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
 import constants
-from src.agents.common.common_args import (
+from agents.common.common_args import (
     add_common_args,
     add_llm_args,
     add_output_args,
@@ -41,10 +41,16 @@ from src.agents.common.common_args import (
     get_data_source_config,
     confirm_operation,
 )
-from src.agents.common.lemma_selection import (
-    find_lemma_by_guid,
+from agents.common.lemma_selection import (
+    get_lemmas_for_agent,
     LemmaQueryBuilder,
     count_for_confirmation,
+)
+from agents.lokys_display import (
+    display_lemma_validation_result,
+    display_definition_validation_result,
+    display_single_lemma_header,
+    display_fix_applied,
 )
 from wordfreq.storage.backend import create_session as create_backend_session
 from wordfreq.storage.backend.config import DataSourceConfig, BackendType
@@ -687,64 +693,62 @@ def main():
     parser = get_argument_parser()
     args = parser.parse_args()
 
-    # Validate arguments: --dry-run is not allowed in batch mode (only in --guid mode)
-    if args.dry_run and not args.guid:
-        parser.error("--dry-run is not supported in batch mode. LOKYS always applies fixes in batch mode. Use --guid mode for testing individual lemmas.")
-
     # Create configuration from args (always returns a valid config with defaults)
     config = get_data_source_config(args)
 
     # Create agent with config
     agent = LokysAgent(config=config)
 
-    # Handle --guid mode
-    if args.guid:
-        session = agent.get_session()
-        try:
-            lemma = find_lemma_by_guid(session, args.guid)
-            print(f"\nValidating lemma: {lemma.lemma_text} (GUID: {args.guid})")
+    # Get lemmas to process (either single lemma from --guid or batch)
+    session = agent.get_session()
+    try:
+        lemmas = get_lemmas_for_agent(session, args)
+    finally:
+        session.close()
 
-            # Validate lemma form
-            if args.check_type in ["lemma", "both"]:
-                result = validate_lemma_form(lemma.lemma_text, lemma.pos_type, args.model)
-                print(f"\nLemma form validation:")
-                print(f"  Is lemma: {result['is_lemma']}")
-                print(f"  Confidence: {result['confidence']:.2f}")
-                if not result['is_lemma']:
-                    print(f"  Suggested: {result['suggested_lemma']}")
-                    print(f"  Reason: {result['reason']}")
+    # Show what we're processing
+    if len(lemmas) == 1:
+        lemma = lemmas[0]
+        display_single_lemma_header(lemma, lemma.guid)
 
-            # Validate definition
-            if args.check_type in ["definitions", "both"]:
-                result = validate_definition(
-                    lemma.lemma_text,
-                    lemma.definition_text,
-                    lemma.pos_type,
-                    args.model
-                )
-                print(f"\nDefinition validation:")
-                print(f"  Is valid: {result['is_valid']}")
-                print(f"  Confidence: {result['confidence']:.2f}")
-                if not result['is_valid']:
-                    print(f"  Issues: {', '.join(result['issues'])}")
-                    if result['suggested_definition']:
-                        print(f"  Suggested: {result['suggested_definition']}")
-                        # Apply the fix automatically (unless --dry-run)
-                        if not args.dry_run:
-                            old_definition = lemma.definition_text
-                            lemma.definition_text = result['suggested_definition']
-                            session.commit()
-                            print(f"  ✓ Updated definition: '{old_definition}' → '{result['suggested_definition']}'")
-                        else:
-                            print(f"  [DRY RUN] Would update: '{lemma.definition_text}' → '{result['suggested_definition']}'")
-                    else:
-                        print(f"  ⚠ No suggested definition provided by LLM")
+        # Validate lemma form
+        if args.check_type in ["lemma", "both"]:
+            result = validate_lemma_form(lemma.lemma_text, lemma.pos_type, args.model)
+            display_lemma_validation_result(result, lemma.lemma_text)
 
-        finally:
-            session.close()
+        # Validate definition
+        if args.check_type in ["definitions", "both"]:
+            result = validate_definition(
+                lemma.lemma_text,
+                lemma.definition_text,
+                lemma.pos_type,
+                args.model
+            )
+            should_apply_fix, new_definition = display_definition_validation_result(
+                result, lemma.lemma_text, lemma.definition_text, dry_run=args.dry_run
+            )
+
+            # Apply the fix if suggested
+            if should_apply_fix and new_definition:
+                session = agent.get_session()
+                try:
+                    old_definition = lemma.definition_text
+                    lemma.definition_text = new_definition
+                    session.commit()
+                    display_fix_applied(old_definition, new_definition)
+                finally:
+                    session.close()
+
         return
+    elif len(lemmas) == 0:
+        logger.error("No lemmas found to process")
+        sys.exit(1)
 
-    # Confirm before running LLM queries (unless --yes or --dry-run was provided)
+    # Batch mode - validate arguments
+    if args.dry_run:
+        parser.error("--dry-run is not supported in batch mode. LOKYS always applies fixes in batch mode. Use --guid mode for testing individual lemmas.")
+
+    # Confirm before running LLM queries (unless --yes was provided)
     if not args.yes and not args.dry_run:
         # Calculate estimated number of LLM calls
         session = agent.get_session()
