@@ -1,8 +1,8 @@
 # Agent Refactoring Status
 
-## Recent Refactoring Pattern (4 commits)
+## Recent Refactoring Pattern (6 commits)
 
-The recent refactoring of ŠERNAS, VILKAS, VORAS, and ŽVIRBLIS established a consistent pattern:
+The recent refactoring of ŠERNAS, VILKAS, VORAS, ŽVIRBLIS, VIEVERSYS, and STRAZDAS established a consistent pattern:
 
 ### Key Changes:
 
@@ -44,6 +44,17 @@ The recent refactoring of ŠERNAS, VILKAS, VORAS, and ŽVIRBLIS established a co
    - Import display utilities from `agents.common.cli_display`
    - Remove "if args.guid" conditionals
 
+5. **VIEVERSYS** (54505ff): Refactor VIEVERSYS to use shared lemma selection pattern
+   - Use `get_lemmas_for_agent()` instead of find_lemma_by_guid
+   - Remove "if args.guid" conditionals
+   - Pass lemmas to generate_batch() method
+
+6. **STRAZDAS** (54505ff): Refactor STRAZDAS to use shared lemma selection pattern
+   - Use `get_lemmas_for_agent()` instead of find_lemma_by_guid
+   - Remove "if args.guid" conditionals
+   - Pass lemmas to generate_batch() method
+   - Fix import paths (removed src. prefix)
+
 ---
 
 ## Agents Status
@@ -72,6 +83,18 @@ The recent refactoring of ŠERNAS, VILKAS, VORAS, and ŽVIRBLIS established a co
    - ✅ No "if args.guid" conditionals
    - ✅ Uses shared cli_display
 
+5. **VIEVERSYS** (vieversys.py) - OpenAI TTS Audio Generation
+   - ✅ Uses `get_lemmas_for_agent()`
+   - ✅ No "if args.guid" conditionals
+   - ✅ Passes lemmas to generate_batch()
+   - ✅ Uses correct import paths (agents.common)
+
+6. **STRAZDAS** (strazdas.py) - eSpeak-NG Audio Generation
+   - ✅ Uses `get_lemmas_for_agent()`
+   - ✅ No "if args.guid" conditionals
+   - ✅ Passes lemmas to generate_batch()
+   - ✅ Fixed import paths (removed src. prefix)
+
 ---
 
 ### ⚠️ NEEDS REFACTORING (Still has old pattern):
@@ -81,11 +104,13 @@ The recent refactoring of ŠERNAS, VILKAS, VORAS, and ŽVIRBLIS established a co
    - ❌ Uses old pattern
    - 📁 Has subfolder structure (could add cli_display.py)
    - Uses `from src.agents.common.common_args` (needs to remove `src.` prefix)
+   - ⚠️ NOTE: --guid doesn't make sense for this agent (finding missing words can't be done for just one word)
 
 2. **LOKYS** (lokys.py) - English Lemma Validation
    - ❌ Has "if args.guid" conditionals
    - ❌ Uses `find_lemma_by_guid` directly
    - 📄 Single file agent
+   - ⚠️ Has Barsukas API integration (check if API needs updates)
    - Uses `from src.agents.common` (needs to remove `src.` prefix)
 
 3. **PAPUGA** (papuga.py) - Pronunciation Validation
@@ -95,19 +120,7 @@ The recent refactoring of ŠERNAS, VILKAS, VORAS, and ŽVIRBLIS established a co
    - ⚠️ Has Barsukas API integration (check if API needs updates)
    - Uses `from src.agents.common` (needs to remove `src.` prefix)
 
-4. **STRAZDAS** (strazdas.py) - eSpeak-NG Audio Generation
-   - ❌ Has "if args.guid" conditionals
-   - ❌ Uses `find_lemma_by_guid` directly
-   - 📄 Single file agent
-   - Uses `from src.agents.common` (needs to remove `src.` prefix)
-
-5. **VIEVERSYS** (vieversys.py) - OpenAI TTS Audio Generation
-   - ❌ Has "if args.guid" conditionals
-   - ❌ Uses `find_lemma_by_guid` and `LemmaQueryBuilder` but with old pattern
-   - 📄 Single file agent
-   - Uses `from agents.common` (already correct imports)
-
-6. **LAPE** (lape.py) - Grammar Facts Generator
+4. **LAPE** (lape.py) - Grammar Facts Generator
    - ❌ Agent method accepts `guid` parameter (line 379)
    - ❌ Has guid handling inside agent method (lines 422-426)
    - 📄 Single file agent
@@ -186,12 +199,12 @@ For each agent that needs refactoring:
 
 Based on complexity and usage:
 
-1. **DRAMBLYS** - Has subfolder, complex agent, active use
+1. ~~**DRAMBLYS**~~ - Has subfolder, but --guid doesn't make sense for this agent
 2. **LOKYS** - Single file, Barsukas API integration, careful changes needed
 3. **PAPUGA** - Single file, Barsukas API integration, careful changes needed
 4. **LAPE** - Single file, different pattern (guid in agent method), Barsukas API
-5. **VIEVERSYS** - Single file, already has some new utilities
-6. **STRAZDAS** - Single file, similar to VIEVERSYS
+5. ~~**VIEVERSYS**~~ - ✅ **COMPLETED** (commit 54505ff)
+6. ~~**STRAZDAS**~~ - ✅ **COMPLETED** (commit 54505ff)
 
 ---
 
