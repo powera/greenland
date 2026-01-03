@@ -1,8 +1,8 @@
 # Agent Refactoring Status
 
-## Recent Refactoring Pattern (7 commits)
+## Recent Refactoring Pattern (8 commits)
 
-The recent refactoring of ŠERNAS, VILKAS, VORAS, ŽVIRBLIS, VIEVERSYS, STRAZDAS, and LAPE established a consistent pattern:
+The recent refactoring of ŠERNAS, VILKAS, VORAS, ŽVIRBLIS, VIEVERSYS, STRAZDAS, LAPE, LOKYS, and PAPUGA established a consistent pattern:
 
 ### Key Changes:
 
@@ -63,6 +63,19 @@ The recent refactoring of ŠERNAS, VILKAS, VORAS, ŽVIRBLIS, VIEVERSYS, STRAZDAS
    - Fix import paths (removed src. prefix)
    - Filter lemmas by required POS types inside agent
 
+8. **LOKYS** (c4af0a4): Refactor LOKYS to use shared lemma selection pattern
+   - Use `get_lemmas_for_agent()` instead of find_lemma_by_guid
+   - Remove "if args.guid" conditionals
+   - Fix import paths (removed src. prefix)
+   - Created lokys_display.py for display functions
+   - Separated display logic from core logic
+
+9. **PAPUGA** (c4af0a4): Refactor PAPUGA to use shared lemma selection pattern
+   - Use `get_lemmas_for_agent()` instead of find_lemma_by_guid
+   - Remove "if args.guid" conditionals
+   - Fix import paths (removed src. prefix)
+   - Extract lemma_id from lemmas list
+
 ---
 
 ## Agents Status
@@ -110,6 +123,19 @@ The recent refactoring of ŠERNAS, VILKAS, VORAS, ŽVIRBLIS, VIEVERSYS, STRAZDAS
    - ✅ Fixed import paths (removed src. prefix)
    - ✅ Agent method accepts lemmas, not guid
 
+8. **LOKYS** (lokys.py) - English Lemma Validation
+   - ✅ Uses `get_lemmas_for_agent()`
+   - ✅ No "if args.guid" conditionals
+   - ✅ Fixed import paths (removed src. prefix)
+   - ✅ Has lokys_display.py for display functions
+   - ✅ Separated display logic from core logic
+
+9. **PAPUGA** (papuga.py) - Pronunciation Validation
+   - ✅ Uses `get_lemmas_for_agent()`
+   - ✅ No "if args.guid" conditionals
+   - ✅ Fixed import paths (removed src. prefix)
+   - ✅ Extracts lemma_id from lemmas list
+
 ---
 
 ### ⚠️ NEEDS REFACTORING (Still has old pattern):
@@ -120,20 +146,7 @@ The recent refactoring of ŠERNAS, VILKAS, VORAS, ŽVIRBLIS, VIEVERSYS, STRAZDAS
    - 📁 Has subfolder structure (could add cli_display.py)
    - Uses `from src.agents.common.common_args` (needs to remove `src.` prefix)
    - ⚠️ NOTE: --guid doesn't make sense for this agent (finding missing words can't be done for just one word)
-
-2. **LOKYS** (lokys.py) - English Lemma Validation
-   - ❌ Has "if args.guid" conditionals
-   - ❌ Uses `find_lemma_by_guid` directly
-   - 📄 Single file agent
-   - ⚠️ Has Barsukas API integration (check if API needs updates)
-   - Uses `from src.agents.common` (needs to remove `src.` prefix)
-
-3. **PAPUGA** (papuga.py) - Pronunciation Validation
-   - ❌ Has "if args.guid" conditionals
-   - ❌ Uses `find_lemma_by_guid` directly
-   - 📄 Single file agent
-   - ⚠️ Has Barsukas API integration (check if API needs updates)
-   - Uses `from src.agents.common` (needs to remove `src.` prefix)
+   - **NOT PLANNED FOR REFACTORING** - --guid mode doesn't apply to this agent's purpose
 
 ---
 
