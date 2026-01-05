@@ -9,6 +9,7 @@ and difficulty levels in the linguistics database.
 
 import sys
 import argparse
+import logging
 from pathlib import Path
 
 from flask import Flask, render_template, g
@@ -37,6 +38,12 @@ from pinyin_helper import generate_pinyin, generate_pinyin_ruby_html, is_chinese
 
 def create_app(config_class=Config):
     """Create and configure the Flask application."""
+    logging.basicConfig(
+        level=logging.DEBUG if config_class.DEBUG else logging.INFO,
+        format="%(asctime)s - %(levelname)s - %(name)s - %(filename)s:%(lineno)d - %(message)s",
+        force=True,
+    )
+
     app = Flask(__name__)
     app.config.from_object(config_class)
 

@@ -74,6 +74,7 @@ class LinguisticClient:
 
         # Extract values from config or use legacy parameters
         if isinstance(config, DataSourceConfig):
+            self.config = config
             self.model = config.model or DEFAULT_MODEL
             self.debug = config.debug
             # Extract db_path from config
@@ -86,6 +87,12 @@ class LinguisticClient:
             self.model = model or DEFAULT_MODEL
             self.db_path = db_path or constants.WORDFREQ_DB_PATH
             self.debug = debug
+            self.config = DataSourceConfig(
+                backend_type=BackendType.SQLITE,
+                sqlite_path=self.db_path,
+                model=self.model,
+                debug=self.debug,
+            )
 
         self.client = UnifiedLLMClient(debug=self.debug)
         self.client.default_model = self.model
@@ -133,7 +140,7 @@ class LinguisticClient:
         Returns:
             Thread-local database session
         """
-        return get_session(self.db_path, echo=self.debug)
+        return get_session(self.config, echo=self.debug)
 
     # Definition queries
     def query_definitions(self, word: str) -> Tuple[List[Dict[str, Any]], bool]:
