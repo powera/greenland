@@ -34,6 +34,10 @@ from wordfreq.storage.backend.config import DataSourceConfig, BackendType
 from wordfreq.storage.models.schema import Lemma, DerivativeForm
 from wordfreq.storage.translation_helpers import get_translation, get_language_name
 from wordfreq.translation.client import LinguisticClient
+from wordfreq.translation.generate_forms_tasks import (
+    get_task_key,
+    process_lemma_for_task,
+)
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -270,42 +274,23 @@ class VilkasAgent:
 
         # Map language/POS combinations to their process functions and metadata
         # Format: (process_module, process_func_name, uses_generic_handler, language_display_name)
-        from wordfreq.translation import (
-            generate_lithuanian_noun_forms,
-            generate_lithuanian_verb_forms,
-            generate_lithuanian_adjective_forms,
-            generate_lithuanian_adverb_forms,
-            generate_french_noun_forms,
-            generate_french_verb_forms,
-            generate_german_noun_forms,
-            generate_german_verb_forms,
-            generate_spanish_noun_forms,
-            generate_spanish_verb_forms,
-            generate_portuguese_noun_forms,
-            generate_portuguese_verb_forms,
-            generate_english_noun_forms,
-            generate_english_verb_forms,
-            generate_english_adjective_forms,
-            generate_english_adverb_forms,
-        )
-
         handler_map = {
-            "lt_noun": (generate_lithuanian_noun_forms.process_lemma, "Lithuanian", False),
-            "lt_verb": (generate_lithuanian_verb_forms.process_lemma, "Lithuanian", True),
-            "lt_adjective": (generate_lithuanian_adjective_forms.process_lemma, "Lithuanian", True),
-            "lt_adverb": (generate_lithuanian_adverb_forms.process_lemma, "Lithuanian", True),
-            "fr_noun": (generate_french_noun_forms.process_lemma, "French", True),
-            "fr_verb": (generate_french_verb_forms.process_lemma, "French", True),
-            "de_noun": (generate_german_noun_forms.process_lemma, "German", True),
-            "de_verb": (generate_german_verb_forms.process_lemma, "German", True),
-            "es_noun": (generate_spanish_noun_forms.process_lemma, "Spanish", True),
-            "es_verb": (generate_spanish_verb_forms.process_lemma, "Spanish", True),
-            "pt_noun": (generate_portuguese_noun_forms.process_lemma, "Portuguese", True),
-            "pt_verb": (generate_portuguese_verb_forms.process_lemma, "Portuguese", True),
-            "en_noun": (generate_english_noun_forms.process_lemma, "English", True),
-            "en_verb": (generate_english_verb_forms.process_lemma, "English", True),
-            "en_adjective": (generate_english_adjective_forms.process_lemma, "English", True),
-            "en_adverb": (generate_english_adverb_forms.process_lemma, "English", True),
+            "lt_noun": (get_task_key("lt", "noun"), "Lithuanian", False),
+            "lt_verb": (get_task_key("lt", "verb"), "Lithuanian", True),
+            "lt_adjective": (get_task_key("lt", "adjective"), "Lithuanian", True),
+            "lt_adverb": (get_task_key("lt", "adverb"), "Lithuanian", True),
+            "fr_noun": (get_task_key("fr", "noun"), "French", True),
+            "fr_verb": (get_task_key("fr", "verb"), "French", True),
+            "de_noun": (get_task_key("de", "noun"), "German", True),
+            "de_verb": (get_task_key("de", "verb"), "German", True),
+            "es_noun": (get_task_key("es", "noun"), "Spanish", True),
+            "es_verb": (get_task_key("es", "verb"), "Spanish", True),
+            "pt_noun": (get_task_key("pt", "noun"), "Portuguese", True),
+            "pt_verb": (get_task_key("pt", "verb"), "Portuguese", True),
+            "en_noun": (get_task_key("en", "noun"), "English", True),
+            "en_verb": (get_task_key("en", "verb"), "English", True),
+            "en_adjective": (get_task_key("en", "adjective"), "English", True),
+            "en_adverb": (get_task_key("en", "adverb"), "English", True),
         }
 
         if handler_key not in handler_map:
@@ -316,7 +301,7 @@ class VilkasAgent:
             }
 
         # Get the process function and metadata
-        process_func, language_name, use_generic = handler_map[handler_key]
+        task_key, language_name, use_generic = handler_map[handler_key]
 
         # Call the appropriate handler
         if handler_key == "lt_noun":
@@ -333,7 +318,7 @@ class VilkasAgent:
                 language_code=language_code,
                 language_name=language_name,
                 pos_type=pos_type,
-                process_func=process_func,
+                task_key=task_key,
                 limit=limit,
                 model=effective_model,
                 throttle=throttle,
@@ -428,7 +413,7 @@ class VilkasAgent:
         language_code: str = "lt",
         language_name: str = "Lithuanian",
         pos_type: str = "verb",
-        process_func = None,
+        task_key: str = "",
         limit: Optional[int] = None,
         model: Optional[str] = None,
         throttle: float = 1.0,
@@ -442,7 +427,7 @@ class VilkasAgent:
             language_code: Language code (e.g., 'fr', 'de')
             language_name: Human-readable language name
             pos_type: Part of speech type
-            process_func: Function to call for processing each lemma
+            task_key: Registered form-generation task key
             limit: Maximum number of lemmas to process
             model: LLM model to use (if None, uses config.model)
             throttle: Seconds to wait between API calls
@@ -524,7 +509,7 @@ class VilkasAgent:
             }
 
         # Initialize client
-        client = LinguisticClient(model=effective_model, db_path=self.db_path, debug=self.debug)
+        client = LinguisticClient(config=self.config)
 
         # Process each item
         successful = 0
@@ -546,7 +531,7 @@ class VilkasAgent:
                     continue
 
                 # Call the process function
-                success = process_func(client=client, lemma_id=lemma.id, db_path=self.db_path)
+                success = process_lemma_for_task(task_key, lemma.id, self.config, client)
 
                 if success:
                     successful += 1

@@ -7,6 +7,8 @@ scripts.
 from dataclasses import dataclass
 from typing import Callable, Dict, List, Optional
 
+from wordfreq.translation.client import LinguisticClient
+from wordfreq.translation.generate_forms_base import process_lemma_forms
 from wordfreq.storage.backend.config import DataSourceConfig
 from wordfreq.translation.generate_forms_base import (
     FormGenerationConfig,
@@ -307,3 +309,29 @@ def run_form_generation_task(task_key: str) -> None:
 
     task = FORM_GENERATION_TASKS[task_key]
     run_form_generation(task.config, task.lemma_fetcher)
+
+
+def get_task_key(language_code: str, pos_type: str) -> str:
+    """Resolve a task key for a language/POS combination."""
+
+    for key, task in FORM_GENERATION_TASKS.items():
+        if (
+            task.config.language_code == language_code
+            and task.config.pos_type == pos_type
+        ):
+            return key
+
+    raise KeyError(f"No task registered for {language_code} {pos_type}")
+
+
+def process_lemma_for_task(
+    task_key: str, lemma_id: int, data_config: DataSourceConfig, client: LinguisticClient = None
+) -> bool:
+    """Process a single lemma for a registered task."""
+
+    if task_key not in FORM_GENERATION_TASKS:
+        raise KeyError(f"Unknown form generation task: {task_key}")
+
+    task = FORM_GENERATION_TASKS[task_key]
+    client = client or LinguisticClient(config=data_config)
+    return process_lemma_forms(client, lemma_id, data_config, task.config)
