@@ -1,39 +1,24 @@
 #!/usr/bin/env python3
 
-"""Batch script to generate English verb conjugations for all verbs in the database."""
+"""Generate English verb forms using the shared task registry."""
+from typing import Optional
 
-from wordfreq.translation.language_forms.english import VERB_FORM_MAPPING
-from wordfreq.translation.generate_forms_base import (
-    FormGenerationConfig,
-    get_lemmas_without_translation,
-    run_form_generation,
+from wordfreq.storage.backend.config import DataSourceConfig
+from wordfreq.translation.generate_forms_tasks import (
+    FORM_GENERATION_TASKS,
+    run_form_generation_task,
 )
 
-CONFIG = FormGenerationConfig(
-    language_code="en",
-    language_name="English",
-    pos_type="verb",
-    form_mapping=VERB_FORM_MAPPING,
-    client_method_name="query_english_verb_conjugations",
-    min_forms_threshold=3,
-    base_form_identifier="1s_pres",
-    use_legacy_translation=False,
-)
+TASK_KEY = "english_verbs"
+CONFIG = FORM_GENERATION_TASKS[TASK_KEY].config
 
 
-def get_english_verb_lemmas(db_path: str, limit: int = None):
-    """Get all lemmas that are English verbs."""
-    return get_lemmas_without_translation(db_path, "verb", limit)
-
-
-def process_lemma(client, lemma_id: int, db_path: str) -> bool:
-    """Process a single lemma to generate English verb conjugations."""
-    from wordfreq.translation.generate_forms_base import process_lemma_forms as process_base
-    return process_base(client, lemma_id, db_path, CONFIG)
+def get_english_verb_lemmas(config: DataSourceConfig, limit: Optional[int] = None):
+    return FORM_GENERATION_TASKS[TASK_KEY].lemma_fetcher(config, limit)
 
 
 def main():
-    run_form_generation(CONFIG, get_english_verb_lemmas)
+    run_form_generation_task(TASK_KEY)
 
 
 if __name__ == "__main__":

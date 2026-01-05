@@ -512,57 +512,21 @@ def generate_forms(lemma_id):
         # For now, we'll use the language-specific generators directly
         # This is a simplified version - a more complete implementation would call
         # the agent's fix_missing_forms for individual lemmas
+        from wordfreq.translation.generate_forms_tasks import (
+            get_task_key,
+            process_lemma_for_task,
+        )
         from wordfreq.translation.client import LinguisticClient
 
-        client = LinguisticClient(model=constants.DEFAULT_MODEL, db_path=config.sqlite_path, debug=Config.DEBUG)
+        client = LinguisticClient(config=config)
 
-        # Route to appropriate generator based on language and POS type
-        handler_key = f"{lang_code}_{pos_type}"
-
-        # Import the appropriate generator
-        if handler_key == "lt_noun":
-            from wordfreq.translation.generate_lithuanian_noun_forms import (
-                process_lemma_declensions,
-            )
-
-            success = process_lemma_declensions(g.db, lemma, client, source="llm")
-        elif handler_key == "lt_verb":
-            from wordfreq.translation.generate_lithuanian_verb_forms import (
-                process_lemma_conjugations,
-            )
-
-            success = process_lemma_conjugations(g.db, lemma, client)
-        elif handler_key == "lt_adjective":
-            from wordfreq.translation.generate_lithuanian_adjective_forms import (
-                process_lemma_adjective_forms,
-            )
-
-            success = process_lemma_adjective_forms(g.db, lemma, client)
-        elif handler_key == "fr_verb":
-            from wordfreq.translation.generate_french_verb_forms import process_lemma_conjugations
-
-            success = process_lemma_conjugations(g.db, lemma, client)
-        elif handler_key == "de_verb":
-            from wordfreq.translation.generate_german_verb_forms import process_lemma_conjugations
-
-            success = process_lemma_conjugations(g.db, lemma, client)
-        elif handler_key == "es_verb":
-            from wordfreq.translation.generate_spanish_verb_forms import process_lemma_conjugations
-
-            success = process_lemma_conjugations(g.db, lemma, client)
-        elif handler_key == "pt_verb":
-            from wordfreq.translation.generate_portuguese_verb_forms import (
-                process_lemma_conjugations,
-            )
-
-            success = process_lemma_conjugations(g.db, lemma, client)
-        elif handler_key == "en_verb":
-            from wordfreq.translation.generate_english_verb_forms import process_lemma_conjugations
-
-            success = process_lemma_conjugations(g.db, lemma, client)
-        else:
+        try:
+            task_key = get_task_key(lang_code, pos_type)
+        except KeyError:
             flash(f"Handler not implemented for {lang_code} {pos_type}", "error")
             return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
+
+        success = process_lemma_for_task(task_key, lemma.id, config, client)
 
         if success:
             flash(f"Successfully generated {lang_code} {pos_type} forms!", "success")

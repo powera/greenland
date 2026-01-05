@@ -12,6 +12,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import sessionmaker, Session
 
+from wordfreq.storage.backend.config import DataSourceConfig, BackendType
+
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
@@ -115,20 +117,23 @@ class ConnectionPool:
 pool = ConnectionPool()
 
 
-def get_session(db_path: str, echo: bool = False) -> Session:
+def get_session(config: DataSourceConfig, echo: bool = False) -> Session:
     """
-    Get a thread-local session for the given database path.
+    Get a thread-local session for the given database configuration.
 
     This is a convenience function that forwards to the singleton pool.
 
     Args:
-        db_path: Path to the SQLite database
+        config: DataSourceConfig object with database configuration
         echo: Whether to enable SQLAlchemy echo mode
 
     Returns:
         Thread-local SQLAlchemy session
     """
-    return pool.get_session(db_path, echo)
+    if config.backend_type != BackendType.SQLITE:
+        raise ValueError(f"Unsupported backend type: {config.backend_type}. Only SQLite is supported.")
+
+    return pool.get_session(config.sqlite_path, echo)
 
 
 def close_thread_sessions():

@@ -3,6 +3,10 @@ This project primarily uses Python, with a PYTHONROOT of src/ .
 The main purpose of the project is to create a multilingual linguistic
 database, and to generate files for the Trakaido language-learning app.
 
+Use DataSourceConfig (defined in src/wordfreq/storage/backend/config.py) to
+pass configuration (db_path, model_name, debug, backend_type, etc.) to agents
+and other components. Do not pass db_path or similar parameters directly.
+
 src/barsukas is the main web UX used by humans to interact with the database.
 
 src/agents contains scripts to do bulk operations against the database,

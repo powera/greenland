@@ -2,4 +2,12 @@ Generate all English verb conjugation forms for the English verb "{verb}".
 
 Definition: {definition}{subtype_context}
 
-Please provide all forms (3 tenses × 6 persons + 2 imperatives), using empty strings for forms that don't exist or aren't standard.
+Please provide all forms (3 tenses × 8 persons (with gender for 3rd person) + 2 imperatives), using empty strings for forms that don't exist or aren't standard.
+
+Include clarifying markers in parentheses:
+- Use "you(s.)" for 2nd person singular (e.g., "you(s.) eat")
+- Use "you(pl.)" for 2nd person plural (e.g., "you(pl.) eat")
+- Use "he" and "she" for 3rd person singular (e.g., "he eats", "she eats")
+- Use "they(m.)" and "they(f.)" for 3rd person plural (e.g., "they(m.) eat", "they(f.) eat")
+
+Note: The system will automatically remove parentheticals when they're not needed for disambiguation.
