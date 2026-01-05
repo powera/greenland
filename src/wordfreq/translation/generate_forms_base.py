@@ -17,6 +17,8 @@ from wordfreq.translation.client import LinguisticClient
 from wordfreq.storage import database as linguistic_db
 from wordfreq.storage.models.enums import GrammaticalForm
 from wordfreq.storage.connection_pool import get_session
+from wordfreq.storage.backend.config import DataSourceConfig
+from agents.common.common_args import get_data_source_config
 import constants
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -43,7 +45,9 @@ class FormGenerationConfig:
 
 
 def get_lemmas_with_translation(
-    db_path: str, config: FormGenerationConfig, limit: Optional[int] = None
+    config: DataSourceConfig,
+    form_config: FormGenerationConfig,
+    limit: Optional[int] = None
 ) -> List[Dict]:
     """
     Get lemmas with translations for a specific language and POS type.
@@ -52,22 +56,22 @@ def get_lemmas_with_translation(
     (LemmaTranslation table).
 
     Args:
-        db_path: Path to the database
-        config: FormGenerationConfig with language and POS settings
+        config: DataSourceConfig with database configuration
+        form_config: FormGenerationConfig with language and POS settings
         limit: Optional limit on number of lemmas
 
     Returns:
         List of dictionaries with lemma information
     """
-    session = get_session(db_path)
+    session = get_session(config)
 
-    if config.use_legacy_translation:
+    if form_config.use_legacy_translation:
         # Old schema: direct translation column on Lemma table
-        translation_column = getattr(linguistic_db.Lemma, config.translation_field_name)
+        translation_column = getattr(linguistic_db.Lemma, form_config.translation_field_name)
         query = (
             session.query(linguistic_db.Lemma)
             .filter(
-                linguistic_db.Lemma.pos_type == config.pos_type,
+                linguistic_db.Lemma.pos_type == form_config.pos_type,
                 translation_column.isnot(None),
                 translation_column != "",
             )
@@ -79,12 +83,12 @@ def get_lemmas_with_translation(
 
         results = []
         for lemma in query.all():
-            translation = getattr(lemma, config.translation_field_name)
+            translation = getattr(lemma, form_config.translation_field_name)
             results.append(
                 {
                     "id": lemma.id,
                     "english": lemma.lemma_text,
-                    config.language_code: translation,
+                    form_config.language_code: translation,
                     "pos_subtype": lemma.pos_subtype,
                 }
             )
@@ -96,9 +100,9 @@ def get_lemmas_with_translation(
             .join(
                 linguistic_db.LemmaTranslation,
                 (linguistic_db.Lemma.id == linguistic_db.LemmaTranslation.lemma_id)
-                & (linguistic_db.LemmaTranslation.language_code == config.language_code),
+                & (linguistic_db.LemmaTranslation.language_code == form_config.language_code),
             )
-            .filter(linguistic_db.Lemma.pos_type == config.pos_type)
+            .filter(linguistic_db.Lemma.pos_type == form_config.pos_type)
             .order_by(linguistic_db.Lemma.frequency_rank)
         )
 
@@ -111,7 +115,7 @@ def get_lemmas_with_translation(
                 session.query(linguistic_db.LemmaTranslation)
                 .filter(
                     linguistic_db.LemmaTranslation.lemma_id == lemma.id,
-                    linguistic_db.LemmaTranslation.language_code == config.language_code,
+                    linguistic_db.LemmaTranslation.language_code == form_config.language_code,
                 )
                 .first()
             )
@@ -121,7 +125,7 @@ def get_lemmas_with_translation(
                     {
                         "id": lemma.id,
                         "english": lemma.lemma_text,
-                        config.language_code: translation.translation,
+                        form_config.language_code: translation.translation,
                         "pos_subtype": lemma.pos_subtype,
                     }
                 )
@@ -130,20 +134,20 @@ def get_lemmas_with_translation(
 
 
 def get_lemmas_without_translation(
-    db_path: str, pos_type: str, limit: Optional[int] = None
+    config: DataSourceConfig, pos_type: str, limit: Optional[int] = None
 ) -> List[Dict]:
     """
     Get lemmas without requiring translations (e.g., for English forms).
 
     Args:
-        db_path: Path to the database
+        config: DataSourceConfig with database configuration
         pos_type: Part of speech type (e.g., 'verb', 'noun')
         limit: Optional limit on number of lemmas
 
     Returns:
         List of dictionaries with lemma information
     """
-    session = get_session(db_path)
+    session = get_session(config)
 
     query = (
         session.query(linguistic_db.Lemma)
@@ -166,25 +170,25 @@ def get_lemmas_without_translation(
 
 
 def get_lemmas_needing_forms(
-    db_path: str, config: FormGenerationConfig, limit: Optional[int] = None
+    config: DataSourceConfig, form_config: FormGenerationConfig, limit: Optional[int] = None
 ) -> List[Dict]:
     """
     Get lemmas that need forms generated (those with insufficient derivative forms).
 
     Args:
-        db_path: Path to the database
-        config: FormGenerationConfig with language and POS settings
+        config: DataSourceConfig with database configuration
+        form_config: FormGenerationConfig with language and POS settings
         limit: Optional limit on number of lemmas
 
     Returns:
         List of dictionaries with lemma information
     """
-    session = get_session(db_path)
+    session = get_session(config)
 
     # Get all lemmas of the specified POS type
     query = (
         session.query(linguistic_db.Lemma)
-        .filter(linguistic_db.Lemma.pos_type == config.pos_type)
+        .filter(linguistic_db.Lemma.pos_type == form_config.pos_type)
         .order_by(linguistic_db.Lemma.frequency_rank)
     )
 
@@ -195,13 +199,13 @@ def get_lemmas_needing_forms(
             session.query(linguistic_db.DerivativeForm)
             .filter(
                 linguistic_db.DerivativeForm.lemma_id == lemma.id,
-                linguistic_db.DerivativeForm.language_code == config.language_code,
+                linguistic_db.DerivativeForm.language_code == form_config.language_code,
             )
             .count()
         )
 
         # If forms are below threshold, this lemma needs forms generated
-        if form_count <= config.min_forms_threshold:
+        if form_count <= form_config.min_forms_threshold:
             results.append(
                 {
                     "id": lemma.id,
@@ -296,7 +300,7 @@ def extract_gender_from_forms(
 
 
 def process_lemma_forms(
-    client: LinguisticClient, lemma_id: int, db_path: str, config: FormGenerationConfig
+    client: LinguisticClient, lemma_id: int, data_config: DataSourceConfig, form_config: FormGenerationConfig
 ) -> bool:
     """
     Process and store forms for a single lemma.
@@ -304,13 +308,13 @@ def process_lemma_forms(
     Args:
         client: LinguisticClient instance
         lemma_id: ID of the lemma to process
-        db_path: Path to the database
-        config: FormGenerationConfig with language and form settings
+        data_config: DataSourceConfig with database configuration
+        form_config: FormGenerationConfig with language and form settings
 
     Returns:
         True if successful, False otherwise
     """
-    session = get_session(db_path)
+    session = get_session(data_config)
 
     try:
         lemma = (
@@ -326,7 +330,7 @@ def process_lemma_forms(
             session.query(linguistic_db.DerivativeForm)
             .filter(
                 linguistic_db.DerivativeForm.lemma_id == lemma_id,
-                linguistic_db.DerivativeForm.language_code == config.language_code,
+                linguistic_db.DerivativeForm.language_code == form_config.language_code,
             )
             .all()
         )
@@ -335,18 +339,18 @@ def process_lemma_forms(
         existing_count = sum(
             1
             for f in existing_forms
-            if f.grammatical_form in [g.value for g in config.form_mapping.values()]
+            if f.grammatical_form in [g.value for g in form_config.form_mapping.values()]
         )
 
-        if existing_count >= config.min_forms_threshold:
+        if existing_count >= form_config.min_forms_threshold:
             logger.info(
                 f"Lemma ID {lemma_id} already has {existing_count} "
-                f"{config.language_name} forms, skipping"
+                f"{form_config.language_name} forms, skipping"
             )
             return True
 
         # Query forms using the specified client method
-        client_method = getattr(client, config.client_method_name)
+        client_method = getattr(client, form_config.client_method_name)
         forms_dict, success = client_method(lemma_id)
 
         if not success or not forms_dict:
@@ -356,7 +360,7 @@ def process_lemma_forms(
         # Store each form
         stored = 0
         for form_name, form_text in forms_dict.items():
-            if form_name not in config.form_mapping:
+            if form_name not in form_config.form_mapping:
                 logger.debug(f"Unknown form name: {form_name}, skipping")
                 continue
 
@@ -365,7 +369,7 @@ def process_lemma_forms(
                 continue
 
             # Get or create word token
-            word_token = linguistic_db.add_word_token(session, form_text, config.language_code)
+            word_token = linguistic_db.add_word_token(session, form_text, form_config.language_code)
 
             # Create derivative form
             session.add(
@@ -373,9 +377,9 @@ def process_lemma_forms(
                     lemma_id=lemma_id,
                     derivative_form_text=form_text,
                     word_token_id=word_token.id,
-                    language_code=config.language_code,
-                    grammatical_form=config.form_mapping[form_name].value,
-                    is_base_form=(form_name == config.base_form_identifier),
+                    language_code=form_config.language_code,
+                    grammatical_form=form_config.form_mapping[form_name].value,
+                    is_base_form=(form_name == form_config.base_form_identifier),
                     verified=False,
                 )
             )
@@ -383,16 +387,16 @@ def process_lemma_forms(
 
         # Detect and store grammatical properties
         # Detect number type (plurale_tantum, singulare_tantum) for nouns
-        if config.detect_number_type:
-            number_type = detect_number_type_from_forms(forms_dict, config)
+        if form_config.detect_number_type:
+            number_type = detect_number_type_from_forms(forms_dict, form_config)
             if number_type != "regular":
                 grammar_fact = linguistic_db.add_grammar_fact(
                     session,
                     lemma_id=lemma_id,
-                    language_code=config.language_code,
+                    language_code=form_config.language_code,
                     fact_type="number_type",
                     fact_value=number_type,
-                    notes=f"Detected during {config.pos_type} form generation",
+                    notes=f"Detected during {form_config.pos_type} form generation",
                     verified=False,
                 )
                 if grammar_fact:
@@ -405,16 +409,16 @@ def process_lemma_forms(
                     )
 
         # Extract and store grammatical gender for gendered languages
-        if config.extract_gender:
-            gender = extract_gender_from_forms(forms_dict, config)
+        if form_config.extract_gender:
+            gender = extract_gender_from_forms(forms_dict, form_config)
             if gender:
                 grammar_fact = linguistic_db.add_grammar_fact(
                     session,
                     lemma_id=lemma_id,
-                    language_code=config.language_code,
+                    language_code=form_config.language_code,
                     fact_type="gender",
                     fact_value=gender,
-                    notes=f"Extracted from {config.pos_type} forms",
+                    notes=f"Extracted from {form_config.pos_type} forms",
                     verified=False,
                 )
                 if grammar_fact:
@@ -434,16 +438,16 @@ def process_lemma_forms(
         return False
 
 
-def run_form_generation(config: FormGenerationConfig, get_lemmas_func: Callable):
+def run_form_generation(form_config: FormGenerationConfig, get_lemmas_func: Callable):
     """
     Main entry point for form generation scripts.
 
     Args:
-        config: FormGenerationConfig with language and form settings
-        get_lemmas_func: Function to retrieve lemmas (takes db_path and limit)
+        form_config: FormGenerationConfig with language and form settings
+        get_lemmas_func: Function to retrieve lemmas (takes DataSourceConfig and limit)
     """
     parser = argparse.ArgumentParser(
-        description=f"Generate {config.language_name} {config.pos_type} forms"
+        description=f"Generate {form_config.language_name} {form_config.pos_type} forms"
     )
     parser.add_argument("--limit", type=int, help="Limit number of lemmas")
     parser.add_argument("--throttle", type=float, default=1.0, help="Seconds between calls")
@@ -456,9 +460,12 @@ def run_form_generation(config: FormGenerationConfig, get_lemmas_func: Callable)
     if args.debug:
         logger.setLevel(logging.DEBUG)
 
+    # Create DataSourceConfig from args
+    data_config = get_data_source_config(args, default_model=args.model)
+
     # Get lemmas
-    logger.info(f"Fetching {config.language_name} {config.pos_type} lemmas...")
-    lemmas = get_lemmas_func(args.db_path, args.limit)
+    logger.info(f"Fetching {form_config.language_name} {form_config.pos_type} lemmas...")
+    lemmas = get_lemmas_func(data_config, args.limit)
     logger.info(f"Found {len(lemmas)} lemmas to process")
 
     if not lemmas:
@@ -468,9 +475,9 @@ def run_form_generation(config: FormGenerationConfig, get_lemmas_func: Callable)
     # Confirmation prompt
     if not args.yes:
         print(f"\n{'='*60}")
-        print(f"Ready to process {len(lemmas)} {config.pos_type}s")
-        print(f"Language: {config.language_name} ({config.language_code})")
-        print(f"Model: {args.model}")
+        print(f"Ready to process {len(lemmas)} {form_config.pos_type}s")
+        print(f"Language: {form_config.language_name} ({form_config.language_code})")
+        print(f"Model: {data_config.model}")
         print(f"Throttle: {args.throttle}s between calls")
         print(f"{'='*60}")
         if input("\nContinue? [y/N]: ").lower() not in ["y", "yes"]:
@@ -478,20 +485,20 @@ def run_form_generation(config: FormGenerationConfig, get_lemmas_func: Callable)
             return
 
     # Initialize client and process
-    client = LinguisticClient(model=args.model, db_path=args.db_path, debug=args.debug)
+    client = LinguisticClient(config=data_config)
     successful = failed = 0
 
     for i, lemma_info in enumerate(lemmas, 1):
         # Format log message based on available fields
         english = lemma_info.get("english", lemma_info.get("verb", "unknown"))
-        translation = lemma_info.get(config.language_code, "")
+        translation = lemma_info.get(form_config.language_code, "")
 
         if translation:
             logger.info(f"\n[{i}/{len(lemmas)}] {english} -> {translation}")
         else:
             logger.info(f"\n[{i}/{len(lemmas)}] {english}")
 
-        if process_lemma_forms(client, lemma_info["id"], args.db_path, config):
+        if process_lemma_forms(client, lemma_info["id"], data_config, form_config):
             successful += 1
         else:
             failed += 1

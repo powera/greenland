@@ -156,26 +156,32 @@ class GrammaticalForm(enum.Enum):
     # Present tense
     VERB_EN_1S_PRES = "verb/en_1s_pres"
     VERB_EN_2S_PRES = "verb/en_2s_pres"
-    VERB_EN_3S_PRES = "verb/en_3s_pres"
+    VERB_EN_3S_M_PRES = "verb/en_3s-m_pres"  # "he eats"
+    VERB_EN_3S_F_PRES = "verb/en_3s-f_pres"  # "she eats"
     VERB_EN_1P_PRES = "verb/en_1p_pres"
     VERB_EN_2P_PRES = "verb/en_2p_pres"
-    VERB_EN_3P_PRES = "verb/en_3p_pres"
+    VERB_EN_3P_M_PRES = "verb/en_3p-m_pres"  # "they(m.) eat"
+    VERB_EN_3P_F_PRES = "verb/en_3p-f_pres"  # "they(f.) eat"
 
     # Past tense
     VERB_EN_1S_PAST = "verb/en_1s_past"
     VERB_EN_2S_PAST = "verb/en_2s_past"
-    VERB_EN_3S_PAST = "verb/en_3s_past"
+    VERB_EN_3S_M_PAST = "verb/en_3s-m_past"  # "he ate"
+    VERB_EN_3S_F_PAST = "verb/en_3s-f_past"  # "she ate"
     VERB_EN_1P_PAST = "verb/en_1p_past"
     VERB_EN_2P_PAST = "verb/en_2p_past"
-    VERB_EN_3P_PAST = "verb/en_3p_past"
+    VERB_EN_3P_M_PAST = "verb/en_3p-m_past"  # "they(m.) ate"
+    VERB_EN_3P_F_PAST = "verb/en_3p-f_past"  # "they(f.) ate"
 
     # Future tense
     VERB_EN_1S_FUT = "verb/en_1s_fut"
     VERB_EN_2S_FUT = "verb/en_2s_fut"
-    VERB_EN_3S_FUT = "verb/en_3s_fut"
+    VERB_EN_3S_M_FUT = "verb/en_3s-m_fut"  # "he will eat"
+    VERB_EN_3S_F_FUT = "verb/en_3s-f_fut"  # "she will eat"
     VERB_EN_1P_FUT = "verb/en_1p_fut"
     VERB_EN_2P_FUT = "verb/en_2p_fut"
-    VERB_EN_3P_FUT = "verb/en_3p_fut"
+    VERB_EN_3P_M_FUT = "verb/en_3p-m_fut"  # "they(m.) will eat"
+    VERB_EN_3P_F_FUT = "verb/en_3p-f_fut"  # "they(f.) will eat"
 
     # Imperative
     VERB_EN_2S_IMP = "verb/en_2s_imp"

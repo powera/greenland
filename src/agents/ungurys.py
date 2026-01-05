@@ -22,7 +22,7 @@ if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
 import constants
-from src.agents.common.common_args import (
+from agents.common.common_args import (
     add_common_args,
     add_backend_args,
     get_data_source_config,
@@ -342,9 +342,11 @@ class UngurysAgent:
             Dictionary with export results
         """
         start_time = datetime.now()
+        # Get database path from config
+        db_path = self.config.sqlite_path if self.config.backend_type == BackendType.SQLITE else None
         results = {
             "timestamp": start_time.isoformat(),
-            "database_path": self.db_path,
+            "database_path": db_path,
             "export_mode": export_mode,
             "exports": {},
         }

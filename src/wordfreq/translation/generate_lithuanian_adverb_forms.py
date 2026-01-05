@@ -7,7 +7,9 @@ from wordfreq.translation.generate_forms_base import (
     FormGenerationConfig,
     get_lemmas_with_translation,
     run_form_generation,
+    process_lemma_forms,
 )
+from wordfreq.storage.backend.config import DataSourceConfig
 
 CONFIG = FormGenerationConfig(
     language_code="lt",
@@ -23,9 +25,9 @@ CONFIG = FormGenerationConfig(
 )
 
 
-def get_lithuanian_adverb_lemmas(db_path: str, limit: int = None):
+def get_lithuanian_adverb_lemmas(config: DataSourceConfig, limit: int = None):
     """Get all adverbs with Lithuanian translations from database."""
-    return get_lemmas_with_translation(db_path, CONFIG, limit)
+    return get_lemmas_with_translation(config, CONFIG, limit)
 
 
 def process_lemma(lemma, client, db_path: str, dry_run: bool = False) -> dict:

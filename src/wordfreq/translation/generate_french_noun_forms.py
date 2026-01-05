@@ -7,7 +7,9 @@ from wordfreq.translation.generate_forms_base import (
     FormGenerationConfig,
     get_lemmas_with_translation,
     run_form_generation,
+    process_lemma_forms,
 )
+from wordfreq.storage.backend.config import DataSourceConfig
 
 CONFIG = FormGenerationConfig(
     language_code="fr",
@@ -23,15 +25,14 @@ CONFIG = FormGenerationConfig(
 )
 
 
-def get_french_noun_lemmas(db_path: str, limit: int = None):
+def get_french_noun_lemmas(config: DataSourceConfig, limit: int = None):
     """Get all nouns with French translations from database."""
-    return get_lemmas_with_translation(db_path, CONFIG, limit)
+    return get_lemmas_with_translation(config, CONFIG, limit)
 
 
-def process_lemma(client, lemma_id: int, db_path: str) -> bool:
+def process_lemma(client, lemma_id: int, config: DataSourceConfig) -> bool:
     """Process a single lemma to generate French noun forms."""
-    from wordfreq.translation.generate_forms_base import process_lemma_forms as process_base
-    return process_base(client, lemma_id, db_path, CONFIG)
+    return process_lemma_forms(client, lemma_id, config, CONFIG)
 
 
 def main():

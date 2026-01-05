@@ -8,6 +8,7 @@ from datetime import datetime
 
 from agents.ungurys import UngurysAgent, SUPPORTED_LANGUAGES
 from config import Config
+from wordfreq.storage.backend.config import DataSourceConfig, BackendType
 
 bp = Blueprint("wireword", __name__, url_prefix="/wireword")
 
@@ -46,10 +47,16 @@ def export_wireword():
     pos_filter = pos_type if pos_type and pos_type != "all" else None
 
     try:
+        # Create DataSourceConfig
+        config = DataSourceConfig(
+            backend_type=BackendType.SQLITE,
+            sqlite_path=Config.DB_PATH,
+            debug=Config.DEBUG,
+        )
+
         # Initialize agent
         agent = UngurysAgent(
-            db_path=Config.DB_PATH,
-            debug=Config.DEBUG,
+            config=config,
             language=language if language != "zh-Hant" else "zh",
             simplified_chinese=simplified_chinese,
         )
