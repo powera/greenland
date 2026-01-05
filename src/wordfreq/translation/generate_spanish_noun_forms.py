@@ -1,41 +1,24 @@
 #!/usr/bin/env python3
 
-"""Batch script to generate Spanish noun forms for all nouns in the database."""
-
-from wordfreq.translation.language_forms.spanish import NOUN_FORM_MAPPING
-from wordfreq.translation.generate_forms_base import (
-    FormGenerationConfig,
-    get_lemmas_with_translation,
-    run_form_generation,
-    process_lemma_forms,
-)
+"""Generate Spanish noun forms using the shared task registry."""
+from typing import Optional
 
 from wordfreq.storage.backend.config import DataSourceConfig
-
-CONFIG = FormGenerationConfig(
-    language_code="es",
-    language_name="Spanish",
-    pos_type="noun",
-    form_mapping=NOUN_FORM_MAPPING,
-    client_method_name="query_spanish_noun_forms",
-    min_forms_threshold=2,
-    base_form_identifier="singular",
-    use_legacy_translation=False,
+from wordfreq.translation.generate_forms_tasks import (
+    FORM_GENERATION_TASKS,
+    run_form_generation_task,
 )
 
-
-def get_spanish_noun_lemmas(config: DataSourceConfig, limit: int = None):
-    """Get all nouns with Spanish translations from database."""
-    return get_lemmas_with_translation(config, CONFIG, limit)
+TASK_KEY = "spanish_nouns"
+CONFIG = FORM_GENERATION_TASKS[TASK_KEY].config
 
 
-def process_lemma(client, lemma_id: int, config: DataSourceConfig) -> bool:
-    """Process a single lemma to generate Spanish noun forms."""
-    return process_lemma_forms(client, lemma_id, config, CONFIG)
+def get_spanish_noun_lemmas(config: DataSourceConfig, limit: Optional[int] = None):
+    return FORM_GENERATION_TASKS[TASK_KEY].lemma_fetcher(config, limit)
 
 
 def main():
-    run_form_generation(CONFIG, get_spanish_noun_lemmas)
+    run_form_generation_task(TASK_KEY)
 
 
 if __name__ == "__main__":
