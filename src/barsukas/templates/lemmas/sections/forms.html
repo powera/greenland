@@ -73,12 +73,9 @@
             <form method="post" action="{{ url_for('agents.generate_forms', lemma_id=lemma.id) }}">
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label for="pos_type" class="form-label">POS Type</label>
-                        <select class="form-select" id="pos_type" name="pos_type" required>
-                            <option value="noun" {% if lemma.pos_type == 'noun' %}selected{% endif %}>Noun</option>
-                            <option value="verb" {% if lemma.pos_type == 'verb' %}selected{% endif %}>Verb</option>
-                            <option value="adjective" {% if lemma.pos_type == 'adjective' %}selected{% endif %}>Adjective</option>
-                        </select>
+                        <label class="form-label">Part of Speech</label>
+                        <p class="form-control-plaintext mb-0 text-capitalize">{{ lemma.pos_type }}</p>
+                        <input type="hidden" name="pos_type" value="{{ lemma.pos_type }}">
                     </div>
                     <div class="mb-3">
                         <label for="lang_code" class="form-label">Language</label>
@@ -105,9 +102,10 @@
 <script>
 // Supported language/POS combinations for form generation
 const SUPPORTED_FORM_GENERATION = {
-    'noun': ['lt'],
+    'noun': ['lt', 'fr', 'de', 'es', 'pt', 'en'],
     'verb': ['lt', 'fr', 'de', 'es', 'pt', 'en'],
-    'adjective': ['lt']
+    'adjective': ['lt', 'en'],
+    'adverb': ['en']
 };
 
 const LANGUAGE_NAMES = {
@@ -119,10 +117,11 @@ const LANGUAGE_NAMES = {
     'en': 'English'
 };
 
+const LEMMA_POS = "{{ lemma.pos_type }}";
+
 function updateLanguageOptions() {
-    const posType = document.getElementById('pos_type').value;
     const langSelect = document.getElementById('lang_code');
-    const supportedLangs = SUPPORTED_FORM_GENERATION[posType] || [];
+    const supportedLangs = SUPPORTED_FORM_GENERATION[LEMMA_POS] || [];
 
     // Clear existing options
     langSelect.innerHTML = '';
@@ -147,9 +146,6 @@ function updateLanguageOptions() {
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
     updateLanguageOptions();
-
-    // Update when POS type changes
-    document.getElementById('pos_type').addEventListener('change', updateLanguageOptions);
 });
 </script>
 {% endif %}
