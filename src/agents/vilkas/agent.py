@@ -109,6 +109,43 @@ class VilkasAgent:
 
         return _check(self)
 
+    def generate_forms_for_lemma(
+        self,
+        lemma_guid: str,
+        language_code: str,
+        pos_type: str,
+        client: Optional[LinguisticClient] = None,
+    ) -> bool:
+        """Generate forms for a single lemma by GUID using configured tasks."""
+
+        session = self.get_session()
+        try:
+            lemma = find_lemma_by_guid(session, lemma_guid, error_on_missing=False)
+            if not lemma:
+                logger.error(f"Lemma with GUID {lemma_guid} not found")
+                return False
+
+            if lemma.pos_type != pos_type:
+                logger.warning(
+                    "Requested POS type %s differs from lemma POS %s for GUID %s",
+                    pos_type,
+                    lemma.pos_type,
+                    lemma_guid,
+                )
+
+            try:
+                task_key = get_task_key(language_code, pos_type)
+            except KeyError:
+                logger.error(
+                    "No form generation task registered for %s %s", language_code, pos_type
+                )
+                return False
+
+            client = client or LinguisticClient(config=self.config)
+            return process_lemma_for_task(task_key, lemma.id, self.config, client)
+        finally:
+            session.close()
+
     def check_verb_conjugation_coverage(self, language_code: str = "lt") -> Dict[str, any]:
         """
         Check for verbs that have base forms but missing conjugations.

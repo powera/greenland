@@ -446,9 +446,13 @@ def generate_forms(lemma_id):
         flash("Lemma not found", "error")
         return redirect(url_for("lemmas.list_lemmas"))
 
+    if not lemma.guid:
+        flash("Lemma is missing a GUID, cannot request form generation", "error")
+        return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
+
     # Get language code and pos_type from form
     lang_code = request.form.get("lang_code", "lt")
-    pos_type = request.form.get("pos_type", lemma.pos_type)
+    pos_type = lemma.pos_type
 
     try:
         # Initialize VILKAS agent
@@ -461,16 +465,13 @@ def generate_forms(lemma_id):
         agent = VilkasAgent(config=config)
 
         # Check if the language/pos_type combination is supported
-        # Only languages/POS combinations with individual lemma processing support
-        # Note: German, French, Spanish, Portuguese nouns use the new base system
-        # and only support batch processing (not available in web interface yet)
         SUPPORTED_LANGUAGES = {
             "lt": ["noun", "verb", "adjective"],
-            "fr": ["verb"],
-            "de": ["verb"],
-            "es": ["verb"],
-            "pt": ["verb"],
-            "en": ["verb"],
+            "fr": ["noun", "verb"],
+            "de": ["noun", "verb"],
+            "es": ["noun", "verb"],
+            "pt": ["noun", "verb"],
+            "en": ["noun", "verb", "adjective", "adverb"],
         }
 
         if lang_code not in SUPPORTED_LANGUAGES:
@@ -512,10 +513,7 @@ def generate_forms(lemma_id):
         # For now, we'll use the language-specific generators directly
         # This is a simplified version - a more complete implementation would call
         # the agent's fix_missing_forms for individual lemmas
-        from wordfreq.translation.generate_forms_tasks import (
-            get_task_key,
-            process_lemma_for_task,
-        )
+        from wordfreq.translation.generate_forms_tasks import get_task_key
         from wordfreq.translation.client import LinguisticClient
 
         client = LinguisticClient(config=config)
@@ -526,7 +524,12 @@ def generate_forms(lemma_id):
             flash(f"Handler not implemented for {lang_code} {pos_type}", "error")
             return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
-        success = process_lemma_for_task(task_key, lemma.id, config, client)
+        success = agent.generate_forms_for_lemma(
+            lemma_guid=lemma.guid,
+            language_code=lang_code,
+            pos_type=pos_type,
+            client=client,
+        )
 
         if success:
             flash(f"Successfully generated {lang_code} {pos_type} forms!", "success")
