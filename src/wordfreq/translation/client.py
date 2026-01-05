@@ -271,6 +271,12 @@ class LinguisticClient:
             self.client, lemma_id, self.get_session
         )
 
+    def query_lithuanian_adverb_forms(self, lemma_id: int) -> Tuple[Dict[str, str], bool]:
+        """Query LLM for Lithuanian adverb forms."""
+        return lithuanian.query_lithuanian_adverb_forms(
+            self.client, lemma_id, self.get_session
+        )
+
     def get_lithuanian_noun_forms(
         self, word: str = None, lemma_id: int = None, source: str = "llm"
     ) -> Tuple[Dict[str, str], bool]:

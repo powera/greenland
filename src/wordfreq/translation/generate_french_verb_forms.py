@@ -1,41 +1,24 @@
 #!/usr/bin/env python3
 
-"""Batch script to generate French verb conjugations for all verbs in the database."""
+"""Generate French verb forms using the shared task registry."""
+from typing import Optional
 
-from wordfreq.translation.language_forms.french import VERB_FORM_MAPPING
-from wordfreq.translation.generate_forms_base import (
-    FormGenerationConfig,
-    get_lemmas_with_translation,
-    run_form_generation,
-    process_lemma_forms,
-)
 from wordfreq.storage.backend.config import DataSourceConfig
-
-CONFIG = FormGenerationConfig(
-    language_code="fr",
-    language_name="French",
-    pos_type="verb",
-    form_mapping=VERB_FORM_MAPPING,
-    client_method_name="query_french_verb_conjugations",
-    min_forms_threshold=25,
-    base_form_identifier="1s_pres",
-    use_legacy_translation=True,
-    translation_field_name="french_translation",
+from wordfreq.translation.generate_forms_tasks import (
+    FORM_GENERATION_TASKS,
+    run_form_generation_task,
 )
 
-
-def get_french_verb_lemmas(config: DataSourceConfig, limit: int = None):
-    """Get all verbs with French translations from database."""
-    return get_lemmas_with_translation(config, CONFIG, limit)
+TASK_KEY = "french_verbs"
+CONFIG = FORM_GENERATION_TASKS[TASK_KEY].config
 
 
-def process_lemma(client, lemma_id: int, config: DataSourceConfig) -> bool:
-    """Process a single lemma to generate French verb conjugations."""
-    return process_lemma_forms(client, lemma_id, config, CONFIG)
+def get_french_verb_lemmas(config: DataSourceConfig, limit: Optional[int] = None):
+    return FORM_GENERATION_TASKS[TASK_KEY].lemma_fetcher(config, limit)
 
 
 def main():
-    run_form_generation(CONFIG, get_french_verb_lemmas)
+    run_form_generation_task(TASK_KEY)
 
 
 if __name__ == "__main__":

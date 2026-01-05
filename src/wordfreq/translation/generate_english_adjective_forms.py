@@ -1,42 +1,26 @@
 #!/usr/bin/env python3
 
-"""Batch script to generate English adjective forms for all adjectives in the database."""
+"""Generate English adjective forms using the shared task registry."""
+from typing import Optional
 
-from wordfreq.translation.language_forms.english import ADJECTIVE_FORM_MAPPING
-from wordfreq.translation.generate_forms_base import (
-    FormGenerationConfig,
-    get_lemmas_needing_forms,
-    run_form_generation,
-    process_lemma_forms,
-)
 from wordfreq.storage.backend.config import DataSourceConfig
-
-CONFIG = FormGenerationConfig(
-    language_code="en",
-    language_name="English",
-    pos_type="adjective",
-    form_mapping=ADJECTIVE_FORM_MAPPING,
-    client_method_name="query_english_adjective_forms",
-    min_forms_threshold=1,
-    base_form_identifier="positive",
-    use_legacy_translation=False,
-    translation_field_name=None,  # English uses lemma_text directly
-    extract_gender=False,
+from wordfreq.translation.generate_forms_tasks import (
+    FORM_GENERATION_TASKS,
+    run_form_generation_task,
 )
 
-
-def get_english_adjective_lemmas(config: DataSourceConfig, limit: int = None):
-    """Get all English adjectives from database that need forms."""
-    return get_lemmas_needing_forms(config, CONFIG, limit)
+TASK_KEY = "english_adjectives"
+CONFIG = FORM_GENERATION_TASKS[TASK_KEY].config
 
 
-def process_lemma(client, lemma_id: int, config: DataSourceConfig) -> bool:
-    """Process a single lemma to generate English adjective forms."""
-    return process_lemma_forms(client, lemma_id, config, CONFIG)
+def get_english_adjective_lemmas(
+    config: DataSourceConfig, limit: Optional[int] = None
+):
+    return FORM_GENERATION_TASKS[TASK_KEY].lemma_fetcher(config, limit)
 
 
 def main():
-    run_form_generation(CONFIG, get_english_adjective_lemmas)
+    run_form_generation_task(TASK_KEY)
 
 
 if __name__ == "__main__":
