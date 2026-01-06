@@ -18,6 +18,7 @@ from barsukas.utils.argparse_introspection import (
     group_arguments_by_category,
     get_category_label,
 )
+from barsukas.helpers.flash_helpers import flash_and_log
 
 bp = Blueprint("agents_launcher", __name__, url_prefix="/agents-launcher")
 
@@ -307,7 +308,7 @@ def launch_form(agent_name):
     # Find the agent
     agent = next((a for a in AGENTS if a["name"] == agent_name), None)
     if not agent:
-        flash(f"Agent {agent_name} not found", "error")
+        flash_and_log(f"Agent {agent_name} not found", "error")
         return redirect(url_for("agents_launcher.list_agents"))
 
     # If agent has redirect_to, redirect there
@@ -324,7 +325,7 @@ def launch_form(agent_name):
             # Use semantic category grouping instead of mode-based grouping
             argument_groups = group_arguments_by_category(parser_info["arguments"])
         except Exception as e:
-            flash(f"Error introspecting agent arguments: {str(e)}", "error")
+            flash_and_log(f"Error introspecting agent arguments: {str(e)}", "error")
             # Fall back to basic form
             parser_info = None
             argument_groups = None
@@ -344,14 +345,14 @@ def execute_agent(agent_name):
     # Find the agent
     agent = next((a for a in AGENTS if a["name"] == agent_name), None)
     if not agent:
-        flash(f"Agent {agent_name} not found", "error")
+        flash_and_log(f"Agent {agent_name} not found", "error")
         return redirect(url_for("agents_launcher.list_agents"))
 
     # Build command
     script_path = Path(constants.AGENTS_DIR) / agent["script"]
 
     if not script_path.exists():
-        flash(f"Script not found: {script_path}", "error")
+        flash_and_log(f"Script not found: {script_path}", "error")
         return redirect(url_for("agents_launcher.launch_form", agent_name=agent_name))
 
     # Build arguments
@@ -457,7 +458,7 @@ def execute_agent(agent_name):
         return redirect(url_for("agents_launcher.view_output", task_id=task_id))
 
     except Exception as e:
-        flash(f"Error starting agent: {str(e)}", "error")
+        flash_and_log(f"Error starting agent: {str(e)}", "error")
         return redirect(url_for("agents_launcher.launch_form", agent_name=agent_name))
 
 
@@ -465,7 +466,7 @@ def execute_agent(agent_name):
 def view_output(task_id):
     """Display the output page for a running/completed agent task."""
     if task_id not in running_tasks:
-        flash("Task not found or expired", "error")
+        flash_and_log("Task not found or expired", "error")
         return redirect(url_for("agents_launcher.list_agents"))
 
     task = running_tasks[task_id]

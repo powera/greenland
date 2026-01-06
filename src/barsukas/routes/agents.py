@@ -15,6 +15,7 @@ from agents.papuga import PapugaAgent
 from agents.vilkas.agent import VilkasAgent
 from agents.lokys import LokysAgent
 from config import Config
+from barsukas.helpers.flash_helpers import flash_and_log
 
 bp = Blueprint("agents", __name__, url_prefix="/agents")
 logger = logging.getLogger(__name__)
@@ -219,7 +220,7 @@ def add_missing_translations(lemma_id):
             )
 
         if not success or not translations:
-            flash("Failed to generate translations", "error")
+            flash_and_log("Failed to generate translations", "error")
             return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
         # Map language codes to LLM response field names
@@ -447,7 +448,7 @@ def generate_forms(lemma_id):
         return redirect(url_for("lemmas.list_lemmas"))
 
     if not lemma.guid:
-        flash("Lemma is missing a GUID, cannot request form generation", "error")
+        flash_and_log("Lemma is missing a GUID, cannot request form generation", "error")
         return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
     # Get language code and pos_type from form
@@ -475,7 +476,7 @@ def generate_forms(lemma_id):
         }
 
         if lang_code not in SUPPORTED_LANGUAGES:
-            flash(f"Language {lang_code} is not yet supported for form generation", "error")
+            flash_and_log(f"Language {lang_code} is not yet supported for form generation", "error")
             return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
         if pos_type not in SUPPORTED_LANGUAGES[lang_code]:
@@ -521,7 +522,7 @@ def generate_forms(lemma_id):
         try:
             task_key = get_task_key(lang_code, pos_type)
         except KeyError:
-            flash(f"Handler not implemented for {lang_code} {pos_type}", "error")
+            flash_and_log(f"Handler not implemented for {lang_code} {pos_type}", "error")
             return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
         success = agent.generate_forms_for_lemma(
@@ -847,7 +848,7 @@ def generate_sentences(lemma_id):
         )
 
         if not result.get("success"):
-            flash(f'Failed to generate sentences: {result.get("error", "Unknown error")}', "error")
+            flash_and_log(f'Failed to generate sentences: {result.get("error", "Unknown error")}', "error")
             return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
         # Store the generated sentences
@@ -881,7 +882,7 @@ def generate_sentences(lemma_id):
                 generated_count=store_result["stored"],
             )
         else:
-            flash("Failed to store generated sentences", "error")
+            flash_and_log("Failed to store generated sentences", "error")
             if store_result.get("errors"):
                 for error in store_result["errors"][:3]:  # Show first 3 errors
                     flash(f"Error: {error}", "error")
@@ -965,7 +966,7 @@ def generate_grammar_fact(lemma_id):
                 lemma, translation, language_code, g.db
             )
         else:
-            flash(f"Handler not yet implemented for fact type: {fact_type}", "error")
+            flash_and_log(f"Handler not yet implemented for fact type: {fact_type}", "error")
             return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
         if fact_value and confidence >= 0.7:
