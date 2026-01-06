@@ -260,10 +260,6 @@ class TestOpenAISchemaStrictMode(unittest.TestCase):
                                             "type": "string",
                                             "description": "Form used (e.g., '3s_present', 'past_participle')",
                                         },
-                                        "grammatical_case": {
-                                            "type": "string",
-                                            "description": "Case if applicable (nominative, accusative, etc.)",
-                                        },
                                         "declined_form": {
                                             "type": "string",
                                             "description": "Actual form used in sentence",

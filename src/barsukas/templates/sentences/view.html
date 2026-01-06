@@ -198,7 +198,6 @@
                                 <th>English</th>
                                 <th>{{ lang_name }}</th>
                                 <th>Grammatical Form</th>
-                                <th>Grammatical Case</th>
                                 <th>Lemma</th>
                             </tr>
                         </thead>
@@ -212,13 +211,6 @@
                                     <td>
                                         {% if word.grammatical_form %}
                                             <span class="badge bg-light text-dark">{{ word.grammatical_form }}</span>
-                                        {% else %}
-                                            <span class="text-muted">-</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {% if word.grammatical_case %}
-                                            <span class="badge bg-light text-dark">{{ word.grammatical_case }}</span>
                                         {% else %}
                                             <span class="text-muted">-</span>
                                         {% endif %}

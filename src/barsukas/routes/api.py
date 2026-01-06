@@ -828,7 +828,6 @@ def get_lemma_sentences(guid: str):
                 "english_text": _serialize_value(sw.english_text),
                 "target_language_text": _serialize_value(sw.target_language_text),
                 "grammatical_form": _serialize_value(sw.grammatical_form),
-                "grammatical_case": _serialize_value(sw.grammatical_case),
                 "declined_form": _serialize_value(sw.declined_form),
                 "language_code": sw.language_code,
             })
