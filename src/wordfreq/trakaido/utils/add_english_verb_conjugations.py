@@ -31,14 +31,14 @@ from verbs import verbs_new
 # Form mapping from verbs.py to database format
 FORM_MAPPING = {
     # Present tense
-    "1s_pres": "verb/lt_1s_pres",
-    "2s_pres": "verb/lt_2s_pres",
-    "3s-m_pres": "verb/lt_3s_m_pres",
-    "3s-f_pres": "verb/lt_3s_f_pres",
-    "1p_pres": "verb/lt_1p_pres",
-    "2p_pres": "verb/lt_2p_pres",
-    "3p-m_pres": "verb/lt_3p_m_pres",
-    "3p-f_pres": "verb/lt_3p_f_pres",
+    "1s_present": "verb/lt_1s_present",
+    "2s_present": "verb/lt_2s_present",
+    "3s-m_present": "verb/lt_3s_m_present",
+    "3s-f_present": "verb/lt_3s_f_present",
+    "1p_present": "verb/lt_1p_present",
+    "2p_present": "verb/lt_2p_present",
+    "3p-m_present": "verb/lt_3p_m_present",
+    "3p-f_present": "verb/lt_3p_f_present",
     # Past tense
     "1s_past": "verb/lt_1s_past",
     "2s_past": "verb/lt_2s_past",
@@ -49,17 +49,21 @@ FORM_MAPPING = {
     "3p-m_past": "verb/lt_3p_m_past",
     "3p-f_past": "verb/lt_3p_f_past",
     # Future tense
-    "1s_fut": "verb/lt_1s_fut",
-    "2s_fut": "verb/lt_2s_fut",
-    "3s-m_fut": "verb/lt_3s_m_fut",
-    "3s-f_fut": "verb/lt_3s_f_fut",
-    "1p_fut": "verb/lt_1p_fut",
-    "2p_fut": "verb/lt_2p_fut",
-    "3p-m_fut": "verb/lt_3p_m_fut",
-    "3p-f_fut": "verb/lt_3p_f_fut",
+    "1s_future": "verb/lt_1s_future",
+    "2s_future": "verb/lt_2s_future",
+    "3s-m_future": "verb/lt_3s_m_future",
+    "3s-f_future": "verb/lt_3s_f_future",
+    "1p_future": "verb/lt_1p_future",
+    "2p_future": "verb/lt_2p_future",
+    "3p-m_future": "verb/lt_3p_m_future",
+    "3p-f_future": "verb/lt_3p_f_future",
 }
 
-TENSE_MAPPING = {"present_tense": "pres", "past_tense": "past", "future": "fut"}
+TENSE_MAPPING = {
+    "present_tense": "present",
+    "past_tense": "past",
+    "future": "future",
+}
 
 
 def main():

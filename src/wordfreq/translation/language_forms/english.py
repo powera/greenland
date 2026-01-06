@@ -35,14 +35,14 @@ ADVERB_FORM_MAPPING = {
 
 # Form mapping for English verbs
 VERB_FORM_MAPPING = {
-    "1s_pres": GrammaticalForm.VERB_EN_1S_PRES,
-    "2s_pres": GrammaticalForm.VERB_EN_2S_PRES,
-    "3s-m_pres": GrammaticalForm.VERB_EN_3S_M_PRES,
-    "3s-f_pres": GrammaticalForm.VERB_EN_3S_F_PRES,
-    "1p_pres": GrammaticalForm.VERB_EN_1P_PRES,
-    "2p_pres": GrammaticalForm.VERB_EN_2P_PRES,
-    "3p-m_pres": GrammaticalForm.VERB_EN_3P_M_PRES,
-    "3p-f_pres": GrammaticalForm.VERB_EN_3P_F_PRES,
+    "1s_present": GrammaticalForm.VERB_EN_1S_PRESENT,
+    "2s_present": GrammaticalForm.VERB_EN_2S_PRESENT,
+    "3s-m_present": GrammaticalForm.VERB_EN_3S_M_PRESENT,
+    "3s-f_present": GrammaticalForm.VERB_EN_3S_F_PRESENT,
+    "1p_present": GrammaticalForm.VERB_EN_1P_PRESENT,
+    "2p_present": GrammaticalForm.VERB_EN_2P_PRESENT,
+    "3p-m_present": GrammaticalForm.VERB_EN_3P_M_PRESENT,
+    "3p-f_present": GrammaticalForm.VERB_EN_3P_F_PRESENT,
     "1s_past": GrammaticalForm.VERB_EN_1S_PAST,
     "2s_past": GrammaticalForm.VERB_EN_2S_PAST,
     "3s-m_past": GrammaticalForm.VERB_EN_3S_M_PAST,
@@ -51,14 +51,14 @@ VERB_FORM_MAPPING = {
     "2p_past": GrammaticalForm.VERB_EN_2P_PAST,
     "3p-m_past": GrammaticalForm.VERB_EN_3P_M_PAST,
     "3p-f_past": GrammaticalForm.VERB_EN_3P_F_PAST,
-    "1s_fut": GrammaticalForm.VERB_EN_1S_FUT,
-    "2s_fut": GrammaticalForm.VERB_EN_2S_FUT,
-    "3s-m_fut": GrammaticalForm.VERB_EN_3S_M_FUT,
-    "3s-f_fut": GrammaticalForm.VERB_EN_3S_F_FUT,
-    "1p_fut": GrammaticalForm.VERB_EN_1P_FUT,
-    "2p_fut": GrammaticalForm.VERB_EN_2P_FUT,
-    "3p-m_fut": GrammaticalForm.VERB_EN_3P_M_FUT,
-    "3p-f_fut": GrammaticalForm.VERB_EN_3P_F_FUT,
+    "1s_future": GrammaticalForm.VERB_EN_1S_FUTURE,
+    "2s_future": GrammaticalForm.VERB_EN_2S_FUTURE,
+    "3s-m_future": GrammaticalForm.VERB_EN_3S_M_FUTURE,
+    "3s-f_future": GrammaticalForm.VERB_EN_3S_F_FUTURE,
+    "1p_future": GrammaticalForm.VERB_EN_1P_FUTURE,
+    "2p_future": GrammaticalForm.VERB_EN_2P_FUTURE,
+    "3p-m_future": GrammaticalForm.VERB_EN_3P_M_FUTURE,
+    "3p-f_future": GrammaticalForm.VERB_EN_3P_F_FUTURE,
     "2s_imp": GrammaticalForm.VERB_EN_2S_IMP,
     "2p_imp": GrammaticalForm.VERB_EN_2P_IMP,
 }
@@ -95,9 +95,9 @@ def query_english_verb_conjugations(
     pos_subtype = lemma.pos_subtype
 
     # All 26 forms (3 tenses × 8 persons (with gender for 3rd person) + 2 imperatives)
-    present_fields = ["1s_pres", "2s_pres", "3s-m_pres", "3s-f_pres", "1p_pres", "2p_pres", "3p-m_pres", "3p-f_pres"]
+    present_fields = ["1s_present", "2s_present", "3s-m_present", "3s-f_present", "1p_present", "2p_present", "3p-m_present", "3p-f_present"]
     past_fields = ["1s_past", "2s_past", "3s-m_past", "3s-f_past", "1p_past", "2p_past", "3p-m_past", "3p-f_past"]
-    future_fields = ["1s_fut", "2s_fut", "3s-m_fut", "3s-f_fut", "1p_fut", "2p_fut", "3p-m_fut", "3p-f_fut"]
+    future_fields = ["1s_future", "2s_future", "3s-m_future", "3s-f_future", "1p_future", "2p_future", "3p-m_future", "3p-f_future"]
     imperative_fields = ["2s_imp", "2p_imp"]
 
     # Build schema properties for all forms

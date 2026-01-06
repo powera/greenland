@@ -253,7 +253,7 @@ GET /api/v1/lemma/V01_001/forms?language=lt
     {
       "form_text": "gyvenu",
       "language_code": "lt",
-      "grammatical_form": "1s_pres",
+      "grammatical_form": "1s_present",
       "is_base_form": false,
       "ipa_pronunciation": "/ɡʲiːˈvʲɛnʊ/",
       "phonetic_pronunciation": null,
@@ -370,7 +370,7 @@ GET /api/v1/lemma/V01_001/sentences?language=lt
           "word_role": "verb",
           "english_text": "live",
           "target_language_text": "gyventi",
-          "grammatical_form": "1s_pres",
+          "grammatical_form": "1s_present",
           "grammatical_case": null,
           "declined_form": "gyvenu",
           "language_code": "lt"
@@ -397,7 +397,7 @@ GET /api/v1/lemma/V01_001/sentences?language=lt
   - `word_role`: Role in the sentence (e.g., "subject", "verb", "object")
   - `english_text`: English form of the word
   - `target_language_text`: Base form in target language
-  - `grammatical_form`: Grammatical form used (e.g., "1s_pres")
+  - `grammatical_form`: Grammatical form used (e.g., "1s_present")
   - `grammatical_case`: Grammatical case (or `null`)
   - `declined_form`: Actual form used in the sentence
   - `language_code`: Language code

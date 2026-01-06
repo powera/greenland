@@ -143,7 +143,7 @@ FORM_GENERATION_TASKS: Dict[str, FormGenerationTask] = {
             form_mapping=FR_VERB_FORM_MAPPING,
             client_method_name="query_french_verb_conjugations",
             min_forms_threshold=25,
-            base_form_identifier="1s_pres",
+            base_form_identifier="1s_present",
             use_legacy_translation=True,
             translation_field_name="french_translation",
         )
@@ -171,7 +171,7 @@ FORM_GENERATION_TASKS: Dict[str, FormGenerationTask] = {
             form_mapping=DE_VERB_FORM_MAPPING,
             client_method_name="query_german_verb_conjugations",
             min_forms_threshold=10,
-            base_form_identifier="1s_pres",
+            base_form_identifier="1s_present",
             use_legacy_translation=True,
             translation_field_name="german_translation",
         )
@@ -199,7 +199,7 @@ FORM_GENERATION_TASKS: Dict[str, FormGenerationTask] = {
             form_mapping=LT_VERB_FORM_MAPPING,
             client_method_name="query_lithuanian_verb_conjugations",
             min_forms_threshold=6,
-            base_form_identifier="1s_pres",
+            base_form_identifier="1s_present",
             use_legacy_translation=True,
             translation_field_name="lithuanian_translation",
         )
@@ -252,7 +252,7 @@ FORM_GENERATION_TASKS: Dict[str, FormGenerationTask] = {
             form_mapping=PT_VERB_FORM_MAPPING,
             client_method_name="query_portuguese_verb_conjugations",
             min_forms_threshold=10,
-            base_form_identifier="1s_pres",
+            base_form_identifier="1s_present",
             use_legacy_translation=True,
             translation_field_name="portuguese_translation",
         )
@@ -280,7 +280,7 @@ FORM_GENERATION_TASKS: Dict[str, FormGenerationTask] = {
             form_mapping=ES_VERB_FORM_MAPPING,
             client_method_name="query_spanish_verb_conjugations",
             min_forms_threshold=10,
-            base_form_identifier="1s_pres",
+            base_form_identifier="1s_present",
             use_legacy_translation=True,
             translation_field_name="spanish_translation",
         )

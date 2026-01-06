@@ -23,14 +23,14 @@ NOUN_FORM_MAPPING = {
 
 VERB_FORM_MAPPING = {
     # Present (8 persons)
-    "1s_pres": GrammaticalForm.VERB_FR_1S_PRES,
-    "2s_pres": GrammaticalForm.VERB_FR_2S_PRES,
-    "3s-m_pres": GrammaticalForm.VERB_FR_3S_M_PRES,
-    "3s-f_pres": GrammaticalForm.VERB_FR_3S_F_PRES,
-    "1p_pres": GrammaticalForm.VERB_FR_1P_PRES,
-    "2p_pres": GrammaticalForm.VERB_FR_2P_PRES,
-    "3p-m_pres": GrammaticalForm.VERB_FR_3P_M_PRES,
-    "3p-f_pres": GrammaticalForm.VERB_FR_3P_F_PRES,
+    "1s_present": GrammaticalForm.VERB_FR_1S_PRESENT,
+    "2s_present": GrammaticalForm.VERB_FR_2S_PRESENT,
+    "3s-m_present": GrammaticalForm.VERB_FR_3S_M_PRESENT,
+    "3s-f_present": GrammaticalForm.VERB_FR_3S_F_PRESENT,
+    "1p_present": GrammaticalForm.VERB_FR_1P_PRESENT,
+    "2p_present": GrammaticalForm.VERB_FR_2P_PRESENT,
+    "3p-m_present": GrammaticalForm.VERB_FR_3P_M_PRESENT,
+    "3p-f_present": GrammaticalForm.VERB_FR_3P_F_PRESENT,
     # Imperfect (8 persons)
     "1s_impf": GrammaticalForm.VERB_FR_1S_IMPF,
     "2s_impf": GrammaticalForm.VERB_FR_2S_IMPF,
@@ -41,14 +41,14 @@ VERB_FORM_MAPPING = {
     "3p-m_impf": GrammaticalForm.VERB_FR_3P_M_IMPF,
     "3p-f_impf": GrammaticalForm.VERB_FR_3P_F_IMPF,
     # Future (8 persons)
-    "1s_fut": GrammaticalForm.VERB_FR_1S_FUT,
-    "2s_fut": GrammaticalForm.VERB_FR_2S_FUT,
-    "3s-m_fut": GrammaticalForm.VERB_FR_3S_M_FUT,
-    "3s-f_fut": GrammaticalForm.VERB_FR_3S_F_FUT,
-    "1p_fut": GrammaticalForm.VERB_FR_1P_FUT,
-    "2p_fut": GrammaticalForm.VERB_FR_2P_FUT,
-    "3p-m_fut": GrammaticalForm.VERB_FR_3P_M_FUT,
-    "3p-f_fut": GrammaticalForm.VERB_FR_3P_F_FUT,
+    "1s_future": GrammaticalForm.VERB_FR_1S_FUTURE,
+    "2s_future": GrammaticalForm.VERB_FR_2S_FUTURE,
+    "3s-m_future": GrammaticalForm.VERB_FR_3S_M_FUTURE,
+    "3s-f_future": GrammaticalForm.VERB_FR_3S_F_FUTURE,
+    "1p_future": GrammaticalForm.VERB_FR_1P_FUTURE,
+    "2p_future": GrammaticalForm.VERB_FR_2P_FUTURE,
+    "3p-m_future": GrammaticalForm.VERB_FR_3P_M_FUTURE,
+    "3p-f_future": GrammaticalForm.VERB_FR_3P_F_FUTURE,
     # Passé composé (8 persons)
     "1s_pc": GrammaticalForm.VERB_FR_1S_PC,
     "2s_pc": GrammaticalForm.VERB_FR_2S_PC,
@@ -139,9 +139,9 @@ def query_french_verb_conjugations(
         lemma.pos_subtype,
     )
     tenses = [
-        ("pres", "present"),
+        ("present", "present"),
         ("impf", "imperfect"),
-        ("fut", "future"),
+        ("future", "future"),
         ("pc", "passé composé"),
     ]
     fields = [
