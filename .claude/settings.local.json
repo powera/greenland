@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -m py_compile:*)",
+      "Bash(python3 -m py_compile:*)",
+      "Bash(wc:*)",
+      "Bash(git add:*)",
+      "Bash(sqlite3:*)"
+    ]
+  }
+}

@@ -172,16 +172,16 @@ class WirewordSentenceExporter:
                 # Get audio for target language (optional)
                 audio_dict = self.get_audio_for_sentence(session, sentence, self.language)
 
-        # Get linked words (GUIDs)
+                # Get linked words (GUIDs) for the target language only
                 linked_words = []
                 sentence_words = (
                     session.query(SentenceWord)
-                    .filter_by(sentence_id=sentence.id)
+                    .filter_by(sentence_id=sentence.id, language_code=self.language)
                     .filter(SentenceWord.lemma_id.isnot(None))
                     .all()
                 )
 
-                # Deduplicate by lemma + grammatical form (same word may appear in multiple languages)
+                # Deduplicate by lemma + grammatical form (same word may appear multiple times)
                 seen_forms: Set[Tuple[int, Optional[str]]] = set()
                 for sw in sentence_words:
                     if not (sw.lemma and sw.lemma.guid):
