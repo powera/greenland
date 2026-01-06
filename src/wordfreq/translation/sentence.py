@@ -264,12 +264,6 @@ def translate_sentence(
         context=context
     )
 
-    # DEBUG: Print raw result
-    logger.info(f"=== LLM Raw Result for sentence {sentence_id} ===")
-    logger.info(f"result.response_text: {result.response_text}")
-    logger.info(f"result.structured_data: {result.structured_data}")
-    logger.info("=" * 50)
-
     # Parse response - check both structured_data and response_text
     if result.structured_data:
         translations = result.structured_data
@@ -278,13 +272,6 @@ def translate_sentence(
         translations = json.loads(result.response_text)
     else:
         raise ValueError("No response data found in LLM result")
-
-    # DEBUG: Print parsed response
-    logger.info(f"=== Parsed Response for sentence {sentence_id} ===")
-    logger.info(f"Response type: {type(translations)}")
-    logger.info(f"Response keys: {translations.keys() if isinstance(translations, dict) else 'N/A'}")
-    logger.info(f"Full response: {translations}")
-    logger.info("=" * 50)
 
     # Store translations in database
     store_translation_results(sentence_id, translations, session)
