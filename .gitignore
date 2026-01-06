@@ -28,6 +28,9 @@ src/clients/data/batch_tracking.sqlite
 # for claude staging
 claude/staging
 
+# Claude Code local settings
+.claude/settings.local.json
+
 # wordfreq local data / tmp
 src/wordfreq/data_old/
 src/wordfreq/output/
