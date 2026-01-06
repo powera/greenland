@@ -118,7 +118,14 @@ class VorasAgent:
         """
         return get_translation_helper(session, lemma, lang_code)
 
-    def set_translation(self, session, lemma: Lemma, lang_code: str, translation: str):
+    def set_translation(
+        self,
+        session,
+        lemma: Lemma,
+        lang_code: str,
+        translation: str,
+        source: Optional[str] = None,
+    ):
         """
         Set translation for a lemma in the specified language.
 
@@ -133,7 +140,7 @@ class VorasAgent:
         # Log the translation change
         log_translation_change(
             session=session,
-            source=f"voras-agent/{self.config.model}",
+            source=source or f"voras-agent/{self.config.model}",
             operation_type="translation",
             lemma_id=lemma.id,
             language_code=lang_code,
@@ -671,12 +678,14 @@ class VorasAgent:
 
                     # Try to get translations from cache first (cache returns lang_code -> translation)
                     translations_by_lang_code = None
+                    translation_source = None
                     cache_client = self.get_cache_client()
                     if cache_client:
                         try:
                             translations_by_lang_code = cache_client.get_translations(lemma.guid)
                             if translations_by_lang_code:
                                 logger.info(f"Using cached translations for '{lemma.lemma_text}' (GUID: {lemma.guid})")
+                                translation_source = "barsukas-proxy"
                         except Exception as cache_error:
                             # If cache_only mode, this will raise an exception that propagates
                             # Otherwise, we'll fall through to LLM query
@@ -729,6 +738,7 @@ class VorasAgent:
 
                         # Convert LLM response format (field_name -> translation) to lang_code format
                         translations_by_lang_code = convert_llm_response_to_lang_codes(llm_translations)
+                        translation_source = f"voras-agent/{self.config.model}"
 
                     # Apply translations to lemma (translations_by_lang_code now always uses lang_code keys)
                     for lang_code, language_name in missing_languages:
@@ -736,7 +746,13 @@ class VorasAgent:
 
                         if translation:
                             # Update the translation using helper method
-                            self.set_translation(session, lemma, lang_code, translation)
+                            self.set_translation(
+                                session,
+                                lemma,
+                                lang_code,
+                                translation,
+                                source=translation_source,
+                            )
                             logger.debug(f"  Added {language_name} translation: '{translation}'")
                             results["by_language"][lang_code]["fixed"] += 1
                             results["total_fixed"] += 1
