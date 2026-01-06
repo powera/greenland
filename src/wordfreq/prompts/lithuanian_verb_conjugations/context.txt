@@ -7,19 +7,17 @@ Lithuanian verbs conjugate across 3 tenses and 8 persons (with gender distinctio
 2. Past tense (būtasis laikas)
 3. Future tense (būsimasis laikas)
 
-**Persons (with gender in 3rd person):**
-1. 1st person singular (aš - I)
-2. 2nd person singular (tu - you, singular)
-3. 3rd person singular masculine (jis - he)
-4. 3rd person singular feminine (ji - she)
-5. 1st person plural (mes - we)
-6. 2nd person plural (jūs - you, plural/formal)
-7. 3rd person plural masculine (jie - they, masculine)
-8. 3rd person plural feminine (jos - they, feminine)
+**Persons:**
+1. 1st person singular
+2. 2nd person singular
+3. 3rd person singular
+4. 1st person plural
+5. 2nd person plural
+6. 3rd person plural
 
 **Important notes:**
-- Lithuanian verbs in 3rd person distinguish gender (masculine vs feminine)
+- Do NOT include any pronouns with each form (e.g., "valgau" not "aš valgau")
 - The infinitive form typically ends in -ti (e.g., valgyti - to eat, būti - to be)
 - Some verbs may be irregular or have special conjugation patterns
-- Include the full conjugated form (e.g., "aš valgau" not just "valgau")
+- Lithuanian verbs do not inflect by gender - only provide one 3rd person form per tense
 - Use empty string ("") for any forms that are non-standard or don't exist for this verb

@@ -37,28 +37,22 @@ ADVERB_FORM_MAPPING = {
 VERB_FORM_MAPPING = {
     "1s_present": GrammaticalForm.VERB_EN_1S_PRESENT,
     "2s_present": GrammaticalForm.VERB_EN_2S_PRESENT,
-    "3s-m_present": GrammaticalForm.VERB_EN_3S_M_PRESENT,
-    "3s-f_present": GrammaticalForm.VERB_EN_3S_F_PRESENT,
+    "3s_present": GrammaticalForm.VERB_EN_3S_PRESENT,
     "1p_present": GrammaticalForm.VERB_EN_1P_PRESENT,
     "2p_present": GrammaticalForm.VERB_EN_2P_PRESENT,
-    "3p-m_present": GrammaticalForm.VERB_EN_3P_M_PRESENT,
-    "3p-f_present": GrammaticalForm.VERB_EN_3P_F_PRESENT,
+    "3p_present": GrammaticalForm.VERB_EN_3P_PRESENT,
     "1s_past": GrammaticalForm.VERB_EN_1S_PAST,
     "2s_past": GrammaticalForm.VERB_EN_2S_PAST,
-    "3s-m_past": GrammaticalForm.VERB_EN_3S_M_PAST,
-    "3s-f_past": GrammaticalForm.VERB_EN_3S_F_PAST,
+    "3s_past": GrammaticalForm.VERB_EN_3S_PAST,
     "1p_past": GrammaticalForm.VERB_EN_1P_PAST,
     "2p_past": GrammaticalForm.VERB_EN_2P_PAST,
-    "3p-m_past": GrammaticalForm.VERB_EN_3P_M_PAST,
-    "3p-f_past": GrammaticalForm.VERB_EN_3P_F_PAST,
+    "3p_past": GrammaticalForm.VERB_EN_3P_PAST,
     "1s_future": GrammaticalForm.VERB_EN_1S_FUTURE,
     "2s_future": GrammaticalForm.VERB_EN_2S_FUTURE,
-    "3s-m_future": GrammaticalForm.VERB_EN_3S_M_FUTURE,
-    "3s-f_future": GrammaticalForm.VERB_EN_3S_F_FUTURE,
+    "3s_future": GrammaticalForm.VERB_EN_3S_FUTURE,
     "1p_future": GrammaticalForm.VERB_EN_1P_FUTURE,
     "2p_future": GrammaticalForm.VERB_EN_2P_FUTURE,
-    "3p-m_future": GrammaticalForm.VERB_EN_3P_M_FUTURE,
-    "3p-f_future": GrammaticalForm.VERB_EN_3P_F_FUTURE,
+    "3p_future": GrammaticalForm.VERB_EN_3P_FUTURE,
     "2s_imp": GrammaticalForm.VERB_EN_2S_IMP,
     "2p_imp": GrammaticalForm.VERB_EN_2P_IMP,
 }
@@ -68,7 +62,7 @@ def query_english_verb_conjugations(
     client, lemma_id: int, get_session_func
 ) -> Tuple[Dict[str, str], bool]:
     """
-    Query LLM for all English verb conjugations (3 tenses × 6 persons + 2 imperatives).
+    Query LLM for all English verb conjugations (6 persons × 3 tenses + 2 imperatives = 20 forms).
 
     Args:
         client: UnifiedLLMClient instance
@@ -94,10 +88,10 @@ def query_english_verb_conjugations(
     definition = lemma.definition_text
     pos_subtype = lemma.pos_subtype
 
-    # All 26 forms (3 tenses × 8 persons (with gender for 3rd person) + 2 imperatives)
-    present_fields = ["1s_present", "2s_present", "3s-m_present", "3s-f_present", "1p_present", "2p_present", "3p-m_present", "3p-f_present"]
-    past_fields = ["1s_past", "2s_past", "3s-m_past", "3s-f_past", "1p_past", "2p_past", "3p-m_past", "3p-f_past"]
-    future_fields = ["1s_future", "2s_future", "3s-m_future", "3s-f_future", "1p_future", "2p_future", "3p-m_future", "3p-f_future"]
+    # All 20 forms (6 persons × 3 tenses + 2 imperatives)
+    present_fields = ["1s_present", "2s_present", "3s_present", "1p_present", "2p_present", "3p_present"]
+    past_fields = ["1s_past", "2s_past", "3s_past", "1p_past", "2p_past", "3p_past"]
+    future_fields = ["1s_future", "2s_future", "3s_future", "1p_future", "2p_future", "3p_future"]
     imperative_fields = ["2s_imp", "2p_imp"]
 
     # Build schema properties for all forms

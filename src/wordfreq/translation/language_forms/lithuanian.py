@@ -35,28 +35,22 @@ NOUN_FORM_MAPPING = {
 VERB_FORM_MAPPING = {
     "1s_present": GrammaticalForm.VERB_LT_1S_PRESENT,
     "2s_present": GrammaticalForm.VERB_LT_2S_PRESENT,
-    "3s_m_present": GrammaticalForm.VERB_LT_3S_M_PRESENT,
-    "3s_f_present": GrammaticalForm.VERB_LT_3S_F_PRESENT,
+    "3s_present": GrammaticalForm.VERB_LT_3S_PRESENT,
     "1p_present": GrammaticalForm.VERB_LT_1P_PRESENT,
     "2p_present": GrammaticalForm.VERB_LT_2P_PRESENT,
-    "3p_m_present": GrammaticalForm.VERB_LT_3P_M_PRESENT,
-    "3p_f_present": GrammaticalForm.VERB_LT_3P_F_PRESENT,
+    "3p_present": GrammaticalForm.VERB_LT_3P_PRESENT,
     "1s_past": GrammaticalForm.VERB_LT_1S_PAST,
     "2s_past": GrammaticalForm.VERB_LT_2S_PAST,
-    "3s_m_past": GrammaticalForm.VERB_LT_3S_M_PAST,
-    "3s_f_past": GrammaticalForm.VERB_LT_3S_F_PAST,
+    "3s_past": GrammaticalForm.VERB_LT_3S_PAST,
     "1p_past": GrammaticalForm.VERB_LT_1P_PAST,
     "2p_past": GrammaticalForm.VERB_LT_2P_PAST,
-    "3p_m_past": GrammaticalForm.VERB_LT_3P_M_PAST,
-    "3p_f_past": GrammaticalForm.VERB_LT_3P_F_PAST,
+    "3p_past": GrammaticalForm.VERB_LT_3P_PAST,
     "1s_future": GrammaticalForm.VERB_LT_1S_FUTURE,
     "2s_future": GrammaticalForm.VERB_LT_2S_FUTURE,
-    "3s_m_future": GrammaticalForm.VERB_LT_3S_M_FUTURE,
-    "3s_f_future": GrammaticalForm.VERB_LT_3S_F_FUTURE,
+    "3s_future": GrammaticalForm.VERB_LT_3S_FUTURE,
     "1p_future": GrammaticalForm.VERB_LT_1P_FUTURE,
     "2p_future": GrammaticalForm.VERB_LT_2P_FUTURE,
-    "3p_m_future": GrammaticalForm.VERB_LT_3P_M_FUTURE,
-    "3p_f_future": GrammaticalForm.VERB_LT_3P_F_FUTURE,
+    "3p_future": GrammaticalForm.VERB_LT_3P_FUTURE,
 }
 
 ADJECTIVE_FORM_MAPPING = {
@@ -243,7 +237,7 @@ def query_lithuanian_verb_conjugations(
     client, lemma_id: int, get_session_func
 ) -> Tuple[Dict[str, str], bool]:
     """
-    Query LLM for all Lithuanian verb conjugations (3 tenses × 8 persons).
+    Query LLM for all Lithuanian verb conjugations (6 persons × 3 tenses = 18 forms).
 
     Args:
         client: UnifiedLLMClient instance
@@ -275,37 +269,10 @@ def query_lithuanian_verb_conjugations(
     definition = lemma.definition_text
     pos_subtype = lemma.pos_subtype
 
-    # All 24 forms (3 tenses × 8 persons with gender distinction)
-    present_fields = [
-        "1s_present",
-        "2s_present",
-        "3s_m_present",
-        "3s_f_present",
-        "1p_present",
-        "2p_present",
-        "3p_m_present",
-        "3p_f_present",
-    ]
-    past_fields = [
-        "1s_past",
-        "2s_past",
-        "3s_m_past",
-        "3s_f_past",
-        "1p_past",
-        "2p_past",
-        "3p_m_past",
-        "3p_f_past",
-    ]
-    future_fields = [
-        "1s_future",
-        "2s_future",
-        "3s_m_future",
-        "3s_f_future",
-        "1p_future",
-        "2p_future",
-        "3p_m_future",
-        "3p_f_future",
-    ]
+    # All 18 forms (6 persons × 3 tenses)
+    present_fields = ["1s_present", "2s_present", "3s_present", "1p_present", "2p_present", "3p_present"]
+    past_fields = ["1s_past", "2s_past", "3s_past", "1p_past", "2p_past", "3p_past"]
+    future_fields = ["1s_future", "2s_future", "3s_future", "1p_future", "2p_future", "3p_future"]
 
     # Build schema properties for all forms
     form_properties = {}
