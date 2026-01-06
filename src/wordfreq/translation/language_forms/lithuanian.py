@@ -33,14 +33,14 @@ NOUN_FORM_MAPPING = {
 }
 
 VERB_FORM_MAPPING = {
-    "1s_pres": GrammaticalForm.VERB_LT_1S_PRES,
-    "2s_pres": GrammaticalForm.VERB_LT_2S_PRES,
-    "3s_m_pres": GrammaticalForm.VERB_LT_3S_M_PRES,
-    "3s_f_pres": GrammaticalForm.VERB_LT_3S_F_PRES,
-    "1p_pres": GrammaticalForm.VERB_LT_1P_PRES,
-    "2p_pres": GrammaticalForm.VERB_LT_2P_PRES,
-    "3p_m_pres": GrammaticalForm.VERB_LT_3P_M_PRES,
-    "3p_f_pres": GrammaticalForm.VERB_LT_3P_F_PRES,
+    "1s_present": GrammaticalForm.VERB_LT_1S_PRESENT,
+    "2s_present": GrammaticalForm.VERB_LT_2S_PRESENT,
+    "3s_m_present": GrammaticalForm.VERB_LT_3S_M_PRESENT,
+    "3s_f_present": GrammaticalForm.VERB_LT_3S_F_PRESENT,
+    "1p_present": GrammaticalForm.VERB_LT_1P_PRESENT,
+    "2p_present": GrammaticalForm.VERB_LT_2P_PRESENT,
+    "3p_m_present": GrammaticalForm.VERB_LT_3P_M_PRESENT,
+    "3p_f_present": GrammaticalForm.VERB_LT_3P_F_PRESENT,
     "1s_past": GrammaticalForm.VERB_LT_1S_PAST,
     "2s_past": GrammaticalForm.VERB_LT_2S_PAST,
     "3s_m_past": GrammaticalForm.VERB_LT_3S_M_PAST,
@@ -49,14 +49,14 @@ VERB_FORM_MAPPING = {
     "2p_past": GrammaticalForm.VERB_LT_2P_PAST,
     "3p_m_past": GrammaticalForm.VERB_LT_3P_M_PAST,
     "3p_f_past": GrammaticalForm.VERB_LT_3P_F_PAST,
-    "1s_fut": GrammaticalForm.VERB_LT_1S_FUT,
-    "2s_fut": GrammaticalForm.VERB_LT_2S_FUT,
-    "3s_m_fut": GrammaticalForm.VERB_LT_3S_M_FUT,
-    "3s_f_fut": GrammaticalForm.VERB_LT_3S_F_FUT,
-    "1p_fut": GrammaticalForm.VERB_LT_1P_FUT,
-    "2p_fut": GrammaticalForm.VERB_LT_2P_FUT,
-    "3p_m_fut": GrammaticalForm.VERB_LT_3P_M_FUT,
-    "3p_f_fut": GrammaticalForm.VERB_LT_3P_F_FUT,
+    "1s_future": GrammaticalForm.VERB_LT_1S_FUTURE,
+    "2s_future": GrammaticalForm.VERB_LT_2S_FUTURE,
+    "3s_m_future": GrammaticalForm.VERB_LT_3S_M_FUTURE,
+    "3s_f_future": GrammaticalForm.VERB_LT_3S_F_FUTURE,
+    "1p_future": GrammaticalForm.VERB_LT_1P_FUTURE,
+    "2p_future": GrammaticalForm.VERB_LT_2P_FUTURE,
+    "3p_m_future": GrammaticalForm.VERB_LT_3P_M_FUTURE,
+    "3p_f_future": GrammaticalForm.VERB_LT_3P_F_FUTURE,
 }
 
 ADJECTIVE_FORM_MAPPING = {
@@ -277,14 +277,14 @@ def query_lithuanian_verb_conjugations(
 
     # All 24 forms (3 tenses × 8 persons with gender distinction)
     present_fields = [
-        "1s_pres",
-        "2s_pres",
-        "3s_m_pres",
-        "3s_f_pres",
-        "1p_pres",
-        "2p_pres",
-        "3p_m_pres",
-        "3p_f_pres",
+        "1s_present",
+        "2s_present",
+        "3s_m_present",
+        "3s_f_present",
+        "1p_present",
+        "2p_present",
+        "3p_m_present",
+        "3p_f_present",
     ]
     past_fields = [
         "1s_past",
@@ -297,14 +297,14 @@ def query_lithuanian_verb_conjugations(
         "3p_f_past",
     ]
     future_fields = [
-        "1s_fut",
-        "2s_fut",
-        "3s_m_fut",
-        "3s_f_fut",
-        "1p_fut",
-        "2p_fut",
-        "3p_m_fut",
-        "3p_f_fut",
+        "1s_future",
+        "2s_future",
+        "3s_m_future",
+        "3s_f_future",
+        "1p_future",
+        "2p_future",
+        "3p_m_future",
+        "3p_f_future",
     ]
 
     # Build schema properties for all forms

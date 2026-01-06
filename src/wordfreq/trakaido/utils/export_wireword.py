@@ -343,7 +343,7 @@ class WirewordExporter:
             session: Database session
             guid: Lemma GUID (e.g., "N01_001") or word text (e.g., "gyventi")
             language: Language code (e.g., "zh")
-            grammatical_form: Optional grammatical form (e.g., "1s_pres"), None for base form
+            grammatical_form: Optional grammatical form (e.g., "1s_present"), None for base form
 
         Returns:
             Dict mapping voice names to MD5 hashes, e.g.:
@@ -814,45 +814,45 @@ class WirewordExporter:
         """
         Convert database grammatical form key format to WireWord format.
 
-        Converts from database format like "verb/lt_3s_m_pres" or "verb/fr_1s_pres"
-        to WireWord format like "3s-m_pres" or "1s_pres".
+        Converts from database format like "verb/lt_3s_m_present" or "verb/fr_1s_present"
+        to WireWord format like "3s-m_present" or "1s_present".
 
         The key transformations:
         - Remove "verb/{lang}_" prefix
         - Replace underscores between person/number components with hyphens (3s_m -> 3s-m)
 
         Args:
-            grammatical_form: Database grammatical form key (e.g., "verb/lt_3s_m_pres")
+            grammatical_form: Database grammatical form key (e.g., "verb/lt_3s_m_present")
 
         Returns:
-            WireWord format key (e.g., "3s-m_pres")
+            WireWord format key (e.g., "3s-m_present")
         """
         # If already in WireWord format (no prefix), return as-is
         if not grammatical_form.startswith("verb/"):
             return grammatical_form
 
         # Remove "verb/{lang}_" prefix
-        # Format: "verb/lt_1s_pres" or "verb/fr_3p_fut"
+        # Format: "verb/lt_1s_present" or "verb/fr_3p_future"
         parts = grammatical_form.split("_", 1)  # Split on first underscore only
         if len(parts) < 2:
             return grammatical_form  # Return original if format unexpected
 
         # parts[0] is "verb/lt" or "verb/fr"
-        # parts[1] is "1s_pres" or "3s_m_pres" or similar
+        # parts[1] is "1s_present" or "3s_m_present" or similar
         key_without_prefix = parts[1]
 
         # Now convert underscores to hyphens in person/number part
-        # e.g., "3s_m_pres" -> "3s-m_pres"
+        # e.g., "3s_m_present" -> "3s-m_present"
         # The pattern is: {person}{number}_{gender}_{tense}
         # We want hyphens between person/number/gender, but underscore before tense
 
         # Split by underscore to find components
         components = key_without_prefix.split("_")
         if len(components) == 2:
-            # Simple case: "1s_pres" or "1p_past"
+            # Simple case: "1s_present" or "1p_past"
             return key_without_prefix
         elif len(components) == 3:
-            # Has gender: "3s_m_pres" -> "3s-m_pres"
+            # Has gender: "3s_m_present" -> "3s-m_present"
             person_num = components[0]
             gender = components[1]
             tense = components[2]
@@ -948,7 +948,7 @@ class WirewordExporter:
         Args:
             session: Database session
             lemma_id: The lemma ID
-            grammatical_form: The grammatical form (e.g., "verb/lt_1s_pres", "verb/fr_1p_impf")
+            grammatical_form: The grammatical form (e.g., "verb/lt_1s_present", "verb/fr_1p_impf")
 
         Returns:
             English translation string, or None if not found
@@ -961,12 +961,12 @@ class WirewordExporter:
         elif grammatical_form.startswith("verb/fr_"):
             fr_to_en_mapping = {
                 # Present tense
-                "verb/fr_1s_pres": "verb/en_1s_pres",
-                "verb/fr_2s_pres": "verb/en_2s_pres",
-                "verb/fr_3s_pres": "verb/en_3s_m_pres",  # Use masculine for he/she
-                "verb/fr_1p_pres": "verb/en_1p_pres",
-                "verb/fr_2p_pres": "verb/en_2p_pres",
-                "verb/fr_3p_pres": "verb/en_3p_m_pres",  # Use masculine for they
+                "verb/fr_1s_present": "verb/en_1s_present",
+                "verb/fr_2s_present": "verb/en_2s_present",
+                "verb/fr_3s_present": "verb/en_3s_m_present",  # Use masculine for he/she
+                "verb/fr_1p_present": "verb/en_1p_present",
+                "verb/fr_2p_present": "verb/en_2p_present",
+                "verb/fr_3p_present": "verb/en_3p_m_present",  # Use masculine for they
                 # Imperfect → Past tense (closest equivalent)
                 "verb/fr_1s_impf": "verb/en_1s_past",
                 "verb/fr_2s_impf": "verb/en_2s_past",
@@ -975,12 +975,12 @@ class WirewordExporter:
                 "verb/fr_2p_impf": "verb/en_2p_past",
                 "verb/fr_3p_impf": "verb/en_3p_m_past",
                 # Future tense
-                "verb/fr_1s_fut": "verb/en_1s_fut",
-                "verb/fr_2s_fut": "verb/en_2s_fut",
-                "verb/fr_3s_fut": "verb/en_3s_m_fut",
-                "verb/fr_1p_fut": "verb/en_1p_fut",
-                "verb/fr_2p_fut": "verb/en_2p_fut",
-                "verb/fr_3p_fut": "verb/en_3p_m_fut",
+                "verb/fr_1s_future": "verb/en_1s_future",
+                "verb/fr_2s_future": "verb/en_2s_future",
+                "verb/fr_3s_future": "verb/en_3s_m_future",
+                "verb/fr_1p_future": "verb/en_1p_future",
+                "verb/fr_2p_future": "verb/en_2p_future",
+                "verb/fr_3p_future": "verb/en_3p_m_future",
                 # Passé composé → Past tense
                 "verb/fr_1s_pc": "verb/en_1s_past",
                 "verb/fr_2s_pc": "verb/en_2s_past",
@@ -1022,7 +1022,7 @@ class WirewordExporter:
         Fallback for non-Lithuanian languages only.
 
         Args:
-            grammatical_form: The grammatical form identifier (e.g., "verb/fr_1s_pres", "noun/fr_plural")
+            grammatical_form: The grammatical form identifier (e.g., "verb/fr_1s_present", "noun/fr_plural")
             base_english: The base English word
             pos_type: Part of speech type
 
@@ -1038,24 +1038,24 @@ class WirewordExporter:
 
         # French verb tenses
         french_verb_forms = {
-            "verb/fr_1s_pres": f"{base_english} (I, present)",
-            "verb/fr_2s_pres": f"{base_english} (you, present)",
-            "verb/fr_3s_pres": f"{base_english} (he/she, present)",
-            "verb/fr_1p_pres": f"{base_english} (we, present)",
-            "verb/fr_2p_pres": f"{base_english} (you all, present)",
-            "verb/fr_3p_pres": f"{base_english} (they, present)",
+            "verb/fr_1s_present": f"{base_english} (I, present)",
+            "verb/fr_2s_present": f"{base_english} (you, present)",
+            "verb/fr_3s_present": f"{base_english} (he/she, present)",
+            "verb/fr_1p_present": f"{base_english} (we, present)",
+            "verb/fr_2p_present": f"{base_english} (you all, present)",
+            "verb/fr_3p_present": f"{base_english} (they, present)",
             "verb/fr_1s_impf": f"{base_english} (I, imperfect)",
             "verb/fr_2s_impf": f"{base_english} (you, imperfect)",
             "verb/fr_3s_impf": f"{base_english} (he/she, imperfect)",
             "verb/fr_1p_impf": f"{base_english} (we, imperfect)",
             "verb/fr_2p_impf": f"{base_english} (you all, imperfect)",
             "verb/fr_3p_impf": f"{base_english} (they, imperfect)",
-            "verb/fr_1s_fut": f"{base_english} (I, future)",
-            "verb/fr_2s_fut": f"{base_english} (you, future)",
-            "verb/fr_3s_fut": f"{base_english} (he/she, future)",
-            "verb/fr_1p_fut": f"{base_english} (we, future)",
-            "verb/fr_2p_fut": f"{base_english} (you all, future)",
-            "verb/fr_3p_fut": f"{base_english} (they, future)",
+            "verb/fr_1s_future": f"{base_english} (I, future)",
+            "verb/fr_2s_future": f"{base_english} (you, future)",
+            "verb/fr_3s_future": f"{base_english} (he/she, future)",
+            "verb/fr_1p_future": f"{base_english} (we, future)",
+            "verb/fr_2p_future": f"{base_english} (you all, future)",
+            "verb/fr_3p_future": f"{base_english} (they, future)",
             "verb/fr_1s_cond": f"{base_english} (I, conditional)",
             "verb/fr_2s_cond": f"{base_english} (you, conditional)",
             "verb/fr_3s_cond": f"{base_english} (he/she, conditional)",
@@ -1376,30 +1376,30 @@ class WirewordExporter:
 
                             # For French, only export present, passé composé (past), and future
                             if self.language == "fr":
-                                # Extract tense from grammatical_form (format: "verb/fr_1s_pres", "verb/fr_1p_pc", etc.)
+                                # Extract tense from grammatical_form (format: "verb/fr_1s_present", "verb/fr_1p_pc", etc.)
                                 if "_" in form.grammatical_form:
                                     tense_suffix = form.grammatical_form.split("_")[-1]
-                                    # Only allow pres (present), pc (passé composé), and fut (future)
-                                    if tense_suffix not in ["pres", "pc", "fut"]:
+                                    # Only allow present, pc (passé composé), and future
+                                    if tense_suffix not in ["present", "pc", "future"]:
                                         continue  # Skip imperfect, conditional, subjunctive
 
                                     # Apply tense-specific minimum levels
                                     if tense_suffix == "pc":
                                         # Passé composé (past) minimum level is 7
                                         form_level = max(form_level, 7)
-                                    elif tense_suffix == "fut":
+                                    elif tense_suffix == "future":
                                         # Future tense minimum level is 12
                                         form_level = max(form_level, 12)
 
                             # Apply tense-specific minimum levels for Lithuanian
                             elif self.language == "lt":
-                                # Extract tense from grammatical_form (format: "1s_past", "3p-m_fut", etc.)
+                                # Extract tense from grammatical_form (format: "1s_past", "3p-m_future", etc.)
                                 if "_" in form.grammatical_form:
                                     tense_suffix = form.grammatical_form.split("_")[-1]
                                     if tense_suffix == "past":
                                         # Past tense minimum level is 7
                                         form_level = max(form_level, 7)
-                                    elif tense_suffix == "fut":
+                                    elif tense_suffix == "future":
                                         # Future tense minimum level is 12
                                         form_level = max(form_level, 12)
 
@@ -1435,7 +1435,7 @@ class WirewordExporter:
                                     gram_form["target_pinyin"] = pinyin
 
                             # Convert grammatical form key to WireWord format
-                            # e.g., "verb/lt_3s_m_pres" -> "3s-m_pres"
+                            # e.g., "verb/lt_3s_m_present" -> "3s-m_present"
                             wireword_key = self._convert_to_wireword_grammatical_form_key(
                                 form.grammatical_form
                             )
