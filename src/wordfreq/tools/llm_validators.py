@@ -700,7 +700,29 @@ If incorrect, provide the correct pronunciations. If correct, confirm them."""
 
 Provide IPA and simplified phonetic (romanization) pronunciations following standard {language_name} phonology."""
         else:
-            prompt = prompt_template.format(word=word, sentence=context_info if "sentence" in context_info.lower() else f'Context: {context_info}')
+            # For English, build detailed word description with grammatical form and definition
+            word_desc = f"'{word}'"
+            context_parts = []
+
+            if grammatical_form:
+                context_parts.append(f"Grammatical form: {grammatical_form}")
+            if definition:
+                context_parts.append(f"Definition: {definition}")
+
+            additional_context = "\n".join(context_parts) if context_parts else ""
+
+            if additional_context:
+                prompt = f"""Provide the pronunciation for the word {word_desc}:
+
+{additional_context}
+
+Important: Pay attention to the grammatical form and definition to determine the correct pronunciation,
+especially for words with multiple pronunciations depending on usage (e.g., "read", "tear", "wind").
+
+Return the IPA and simplified phonetic pronunciation, along with any alternative pronunciations."""
+            else:
+                # Fallback to template if no additional context
+                prompt = prompt_template.format(word=word, sentence=context_info if "sentence" in context_info.lower() else f'Context: {context_info}')
 
     logger.debug(f"Validating/generating pronunciation for word: '{word}' (POS: {pos_type})")
 
