@@ -150,34 +150,17 @@ def build_response_schema(target_languages: List[str]) -> Dict:
     Returns:
         Schema dict suitable for clients.lib.schema_from_dict()
     """
-    # Schema for individual word details
+    # Schema for individual word details - no descriptions to reduce token usage
+    # (detailed field explanations are in the prompt context)
     word_schema = {
         "type": "object",
         "properties": {
-            "word": {
-                "type": "string",
-                "description": "The actual inflected form as it appears in the sentence"
-            },
-            "english": {
-                "type": "string",
-                "description": "English translation of this word/phrase"
-            },
-            "guid": {
-                "type": "string",
-                "description": "GUID for this word (e.g., 'N08_001'), or empty string if not applicable"
-            },
-            "role": {
-                "type": "string",
-                "description": "Grammatical role: subject, verb, object, adjective, adverb, article, preposition, determiner, etc."
-            },
-            "grammatical_form": {
-                "type": ["string", "null"],
-                "description": "Grammatical details like '3s_present', '1p_past', 'accusative_plural', 'infinitive'"
-            },
-            "grammatical_case": {
-                "type": ["string", "null"],
-                "description": "Case if applicable: nominative, accusative, genitive, dative, etc."
-            }
+            "word": {"type": "string"},
+            "english": {"type": "string"},
+            "guid": {"type": "string"},
+            "role": {"type": "string"},
+            "grammatical_form": {"type": ["string", "null"]},
+            "grammatical_case": {"type": ["string", "null"]}
         },
         "required": ["word", "english", "guid", "role", "grammatical_form", "grammatical_case"],
         "additionalProperties": False
@@ -187,11 +170,11 @@ def build_response_schema(target_languages: List[str]) -> Dict:
     schema_properties = {
         "en": {
             "type": "string",
-            "description": "Corrected grammatically correct English translation"
+            "description": "Grammatically corrected English sentence"
         },
         "words_en": {
             "type": "array",
-            "description": "Word-by-word breakdown for English",
+            "description": "English word breakdown",
             "items": word_schema
         }
     }
@@ -203,11 +186,11 @@ def build_response_schema(target_languages: List[str]) -> Dict:
         lang_name = LANGUAGE_NAMES.get(lang, lang)
         schema_properties[lang] = {
             "type": "string",
-            "description": f"Natural translation in {lang_name}"
+            "description": f"{lang_name} translation"
         }
         schema_properties[f"words_{lang}"] = {
             "type": "array",
-            "description": f"Word-by-word breakdown for {lang_name}",
+            "description": f"{lang_name} word breakdown",
             "items": word_schema
         }
         required_fields.extend([lang, f"words_{lang}"])
