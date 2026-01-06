@@ -331,6 +331,35 @@ def accept_sentence(sentence_id):
             from wordfreq.translation.sentence import translate_sentence
             translate_sentence(sentence_id, target_languages, g.db, model="gpt-5-mini")
 
+        # Check that all per-word lemma translations exist
+        from wordfreq.storage.translation_helpers import get_translation
+        missing_translations = []
+
+        for sw in sentence_words:
+            lemma = g.db.query(Lemma).get(sw.lemma_id)
+            if lemma:
+                for lang_code in target_languages:
+                    if not get_translation(g.db, lemma, lang_code):
+                        missing_translations.append({
+                            'word': lemma.lemma_text,
+                            'language': lang_code
+                        })
+
+        if missing_translations:
+            # Group by word for cleaner error messages
+            by_word = {}
+            for item in missing_translations:
+                word = item['word']
+                lang = item['language']
+                if word not in by_word:
+                    by_word[word] = []
+                by_word[word].append(lang)
+
+            error_parts = [f"'{word}' ({', '.join(langs)})" for word, langs in by_word.items()]
+            error_msg = f"Cannot accept: Missing per-word translations for: {'; '.join(error_parts)}"
+            flash(error_msg, "error")
+            return redirect(request.referrer or url_for("sentences.list_sentences"))
+
         # Auto-populate the level if not set
         if sentence.minimum_level is None:
             max_level = None
