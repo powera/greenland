@@ -10,7 +10,7 @@ import json
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any, Optional, Set, Tuple
 import sys
 
 # Add the src directory to the path for imports
@@ -26,6 +26,7 @@ from wordfreq.storage.models.schema import (
     SentenceWord,
     AudioQualityReview,
 )
+from wordfreq.storage.models.enums import GrammaticalForm
 from wordfreq.tools.chinese_converter import to_simplified
 
 # Configure logging
@@ -171,7 +172,7 @@ class WirewordSentenceExporter:
                 # Get audio for target language (optional)
                 audio_dict = self.get_audio_for_sentence(session, sentence, self.language)
 
-                # Get linked words (GUIDs)
+        # Get linked words (GUIDs)
                 linked_words = []
                 sentence_words = (
                     session.query(SentenceWord)
@@ -180,12 +181,25 @@ class WirewordSentenceExporter:
                     .all()
                 )
 
-                # Deduplicate by lemma (same word may appear in multiple languages)
-                seen_lemmas = set()
+                # Deduplicate by lemma + grammatical form (same word may appear in multiple languages)
+                seen_forms: Set[Tuple[int, Optional[str]]] = set()
                 for sw in sentence_words:
-                    if sw.lemma and sw.lemma.guid and sw.lemma.id not in seen_lemmas:
-                        seen_lemmas.add(sw.lemma.id)
-                        linked_words.append(sw.lemma.guid)
+                    if not (sw.lemma and sw.lemma.guid):
+                        continue
+
+                    grammatical_form = self._get_sentence_word_grammatical_form(sw)
+                    key = (sw.lemma.id, grammatical_form)
+
+                    if key in seen_forms:
+                        continue
+
+                    seen_forms.add(key)
+                    linked_words.append(
+                        {
+                            "guid": sw.lemma.guid,
+                            "grammatical_form": grammatical_form,
+                        }
+                    )
 
                 # Build sentence entry
                 sentence_entry = {
@@ -241,6 +255,22 @@ class WirewordSentenceExporter:
         logger.info(f"Exported {sentence_count} sentences to {output_path}")
 
         return sentence_count
+
+    def _get_sentence_word_grammatical_form(
+        self, sentence_word: SentenceWord
+    ) -> Optional[str]:
+        """Return the WireWord grammatical form value for a sentence word.
+
+        Prefers the stored grammatical_form when it matches an existing
+        GrammaticalForm enum value used by wireword nouns/verbs exports. Falls
+        back to None if no compatible form is available.
+        """
+
+        grammatical_form = sentence_word.grammatical_form
+        if grammatical_form and grammatical_form in GrammaticalForm._value2member_map_:
+            return grammatical_form
+
+        return None
 
 
 
