@@ -56,6 +56,7 @@ def get_argument_parser():
     add_output_args(parser)
     add_processing_args(parser)
     add_guid_arg(parser, help_text="Process only the lemma with this GUID")
+    add_language_args(parser, multiple=True)
     add_backend_args(parser)
 
     # Build task choices dynamically from module-level SUPPORTED_TASKS
@@ -117,6 +118,29 @@ def main():
 
     parser = get_argument_parser()
     args = parser.parse_args()
+
+    selected_languages = list(SUPPORTED_TASKS.keys())
+    if args.languages:
+        selected_languages = []
+        unsupported_languages = []
+
+        for lang in args.languages:
+            lang_code = lang.lower()
+            if lang_code in SUPPORTED_TASKS:
+                if lang_code not in selected_languages:
+                    selected_languages.append(lang_code)
+            else:
+                unsupported_languages.append(lang_code)
+
+        if unsupported_languages:
+            print(
+                "Warning: Skipping unsupported languages: "
+                + ", ".join(sorted(set(unsupported_languages)))
+            )
+
+        if not selected_languages:
+            print("Error: None of the provided languages are supported by Vilkas")
+            sys.exit(1)
 
     # Validate cache arguments
     validate_cache_args(args)
@@ -189,7 +213,16 @@ def main():
                     form_type_label = f"{LANGUAGE_NAMES.get(language_code, language_code)} adverb forms"
         elif args.task == "all":
             language_code = None  # Process all languages
-            form_type_label = "all forms (all languages)"
+            if args.languages:
+                form_type_label = f"all forms ({', '.join(selected_languages)})"
+            else:
+                form_type_label = "all forms (all languages)"
+        elif args.languages and language_code not in selected_languages:
+            print(
+                f"Error: Language '{language_code}' is not included in --languages: "
+                f"{', '.join(selected_languages)}"
+            )
+            sys.exit(1)
 
         # Confirmation prompt (unless --yes or --dry-run)
         if not args.yes and not args.dry_run:
@@ -218,8 +251,8 @@ def main():
 
             # Process all language/POS combinations
             languages_and_pos = []
-            for lang, pos_types in SUPPORTED_TASKS.items():
-                for pos in pos_types:
+            for lang in selected_languages:
+                for pos in SUPPORTED_TASKS[lang]:
                     languages_and_pos.append((lang, pos))
 
             # Process each language/POS combination
