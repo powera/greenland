@@ -216,8 +216,10 @@ class UngurysAgent:
 
             # Also export sentences
             logger.info("Exporting sentences to wireword_sentences.json...")
+            wireword_dir = os.path.join(output_dir, "wireword")
+            sentences_path = os.path.join(wireword_dir, "wireword_sentences.json")
             sentence_success, sentence_count = self.export_wireword_sentences(
-                output_path=None,  # Use default path
+                output_path=sentences_path,
             )
             if sentence_success:
                 logger.info(f"  Exported {sentence_count} sentences")
@@ -225,7 +227,7 @@ class UngurysAgent:
                 # Add sentences file to files_created list
                 if 'files_created' not in results:
                     results['files_created'] = []
-                results['files_created'].append('wireword_sentences.json')
+                results['files_created'].append(sentences_path)
             else:
                 logger.warning("  Sentence export failed")
                 results['sentences_exported'] = 0
