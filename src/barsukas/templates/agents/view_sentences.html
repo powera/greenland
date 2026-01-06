@@ -133,8 +133,9 @@
                                         {% if word.declined_form %}
                                             → <em>{{ word.declined_form }}</em>
                                         {% endif %}
-                                        {% if word.grammatical_case %}
-                                            <span class="text-muted small">({{ word.grammatical_case }})</span>
+                                        {% set case = word.grammatical_form | extract_case %}
+                                        {% if case %}
+                                            <span class="text-muted small">({{ case }})</span>
                                         {% endif %}
                                         {% if word.grammatical_form %}
                                             <span class="text-muted small">[{{ word.grammatical_form }}]</span>

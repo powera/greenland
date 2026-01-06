@@ -290,10 +290,6 @@ Focus on variety, natural language usage, and accurate translations."""
                             "type": "string",
                             "description": "Grammatical form (e.g., '3s_present')",
                         },
-                        "grammatical_case": {
-                            "type": "string",
-                            "description": "Grammatical case if applicable",
-                        },
                         "english_lemma": {
                             "type": "string",
                             "description": "English lemma for linking to vocabulary",
@@ -459,7 +455,7 @@ Focus on variety, natural language usage, and accurate translations."""
                             english_text=word_data.get("english"),
                             target_language_text=word_data.get("lemma"),
                             grammatical_form=word_data.get("grammatical_form"),
-                            grammatical_case=word_data.get("grammatical_case"),
+                            grammatical_case=None,
                             declined_form=word_data.get("word"),
                             language_code=lang_code,
                         )

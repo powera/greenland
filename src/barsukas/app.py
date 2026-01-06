@@ -96,6 +96,37 @@ def create_app(config_class=Config):
 
     app.jinja_env.filters["fromjson"] = json.loads
 
+    # Register filter to extract grammatical case from grammatical_form
+    def extract_case(grammatical_form):
+        """Extract case from grammatical_form string.
+
+        For Lithuanian/German, grammatical_form includes case like:
+        'noun/lt_nominative_singular' -> 'nominative'
+        'noun/de_accusative_plural' -> 'accusative'
+
+        Returns None if no case found.
+        """
+        if not grammatical_form or '/' not in grammatical_form:
+            return None
+
+        # Split to get the details part (e.g., "lt_nominative_singular")
+        parts = grammatical_form.split('/')
+        if len(parts) < 2:
+            return None
+
+        details = parts[1]  # e.g., "lt_nominative_singular"
+
+        # Known grammatical cases
+        cases = ['nominative', 'accusative', 'genitive', 'dative', 'instrumental', 'locative', 'vocative']
+
+        for case in cases:
+            if case in details:
+                return case
+
+        return None
+
+    app.jinja_env.filters["extract_case"] = extract_case
+
     @app.before_request
     def before_request():
         """Set up database session for each request."""

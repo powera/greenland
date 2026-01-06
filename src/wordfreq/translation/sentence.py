@@ -103,7 +103,6 @@ def build_translation_prompt(
         "    - 'pronoun/objective' (for 'me', 'you', 'him', 'her', 'us', 'them')",
         "    - 'pronoun/possessive' (for 'my', 'your', 'his', 'her', 'our', 'their')",
         "  * For invariant words: 'preposition/base', 'conjunction/base', 'article/base'",
-        "- grammatical_case: case if applicable (nominative, accusative, genitive, dative, instrumental, locative, vocative) or null",
         "",
         "IMPORTANT: Do NOT include punctuation marks as separate words in the breakdown.",
         "Provide words in the order they appear in the translated sentence."
@@ -159,10 +158,9 @@ def build_response_schema(target_languages: List[str]) -> Dict:
             "english": {"type": "string"},
             "guid": {"type": "string"},
             "role": {"type": "string"},
-            "grammatical_form": {"type": ["string", "null"]},
-            "grammatical_case": {"type": ["string", "null"]}
+            "grammatical_form": {"type": ["string", "null"]}
         },
-        "required": ["word", "english", "guid", "role", "grammatical_form", "grammatical_case"],
+        "required": ["word", "english", "guid", "role", "grammatical_form"],
         "additionalProperties": False
     }
 
@@ -351,7 +349,7 @@ def store_translation_results(sentence_id: int, translations: Dict, session):
                 english_text=word_data.get("english"),
                 target_language_text=word_data.get("word"),
                 grammatical_form=word_data.get("grammatical_form"),
-                grammatical_case=word_data.get("grammatical_case"),
+                grammatical_case=None,
                 declined_form=word_data.get("word")
             )
             session.add(new_word)
