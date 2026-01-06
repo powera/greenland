@@ -140,6 +140,13 @@ class LapeAgent:
         # },
     }
 
+    # Grouped task presets mapping to multiple fact types
+    TASK_PRESETS = {
+        "all": list(SUPPORTED_FACT_TYPES.keys()),
+        "gender": ["grammatical_gender"],
+        "measure-words": ["measure_words"],
+    }
+
     def __init__(self, config: DataSourceConfig):
         """
         Initialize the Lape agent.
@@ -588,6 +595,10 @@ Examples:
   # Use a different model
   python lape.py --fact-type grammatical_gender --language de --model gpt-5 --limit 10
 
+  # Use grouped tasks to process multiple fact types
+  python lape.py --task all --language fr --limit 10
+  python lape.py --task gender --language lt --guid N14_001
+
 Supported fact types:
   - measure_words: Chinese measure words/classifiers for nouns (languages: zh)
   - grammatical_gender: Noun gender (languages: fr, lt, es, de, pt, ru, it)
@@ -608,11 +619,16 @@ Future fact types (see code comments):
 
     # Lape-specific arguments
     add_guid_arg(parser, help_text="Process only the lemma with this GUID")
-    parser.add_argument(
+    task_group = parser.add_mutually_exclusive_group(required=True)
+    task_group.add_argument(
         "--fact-type",
-        required=True,
         choices=LapeAgent.SUPPORTED_FACT_TYPES.keys(),
         help="Type of grammar fact to generate",
+    )
+    task_group.add_argument(
+        "--task",
+        choices=LapeAgent.TASK_PRESETS.keys(),
+        help="Run a grouped task preset that maps to multiple fact types",
     )
     parser.add_argument("--language", required=True, help="Language code (e.g., zh, fr, es)")
     parser.add_argument("--limit", type=int, help="Maximum number of lemmas to process")
@@ -649,6 +665,12 @@ def main():
     # Create agent
     agent = LapeAgent(config=config)
 
+    # Determine which fact types to run (either explicit type or grouped task)
+    if args.fact_type:
+        fact_types_to_run = [args.fact_type]
+    else:
+        fact_types_to_run = LapeAgent.TASK_PRESETS[args.task]
+
     # Get lemmas to process (either single lemma from --guid or batch)
     session = agent.get_session()
     try:
@@ -666,41 +688,42 @@ def main():
     else:
         logger.info(f"Processing {len(lemmas)} lemmas")
 
-    # Generate facts
+    # Generate facts for each requested fact type
     try:
-        results = agent.generate_grammar_facts(
-            fact_type=args.fact_type,
-            language_code=args.language,
-            lemmas=lemmas,
-            limit=args.limit,
-            skip_existing=args.skip_existing,
-            min_confidence=args.min_confidence,
-            dry_run=args.dry_run,
-        )
+        for fact_type in fact_types_to_run:
+            results = agent.generate_grammar_facts(
+                fact_type=fact_type,
+                language_code=args.language,
+                lemmas=lemmas,
+                limit=args.limit,
+                skip_existing=args.skip_existing,
+                min_confidence=args.min_confidence,
+                dry_run=args.dry_run,
+            )
 
-        # Print summary
-        print("\n" + "=" * 60)
-        print("GRAMMAR FACTS GENERATION SUMMARY")
-        print("=" * 60)
-        print(f"Fact Type: {results['fact_type']}")
-        print(f"Language: {results['language_code']}")
-        print(f"Processed: {results['processed']}")
-        print(f"Success: {results['success']}")
-        print(f"Failed: {results['failed']}")
-        print(f"Skipped: {results['skipped']}")
-        if results["dry_run"]:
-            print("\n⚠️  DRY RUN - No changes saved to database")
-        print("=" * 60)
+            # Print summary
+            print("\n" + "=" * 60)
+            print("GRAMMAR FACTS GENERATION SUMMARY")
+            print("=" * 60)
+            print(f"Fact Type: {results['fact_type']}")
+            print(f"Language: {results['language_code']}")
+            print(f"Processed: {results['processed']}")
+            print(f"Success: {results['success']}")
+            print(f"Failed: {results['failed']}")
+            print(f"Skipped: {results['skipped']}")
+            if results["dry_run"]:
+                print("\n⚠️  DRY RUN - No changes saved to database")
+            print("=" * 60)
 
-        # Print some examples
-        if results["results"]:
-            print("\nSample results:")
-            for i, result in enumerate(results["results"][:5], 1):
-                print(f"{i}. {result['lemma_text']} ({result['translation']})")
-                print(f"   → {result['fact_value']}")
-                print(f"   Confidence: {result['confidence']:.2f}")
-                if result["notes"]:
-                    print(f"   Notes: {result['notes']}")
+            # Print some examples
+            if results["results"]:
+                print("\nSample results:")
+                for i, result in enumerate(results["results"][:5], 1):
+                    print(f"{i}. {result['lemma_text']} ({result['translation']})")
+                    print(f"   → {result['fact_value']}")
+                    print(f"   Confidence: {result['confidence']:.2f}")
+                    if result["notes"]:
+                        print(f"   Notes: {result['notes']}")
 
     except Exception as e:
         logger.error(f"Failed to generate grammar facts: {e}")
