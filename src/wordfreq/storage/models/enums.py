@@ -156,30 +156,36 @@ class GrammaticalForm(enum.Enum):
     # Present tense
     VERB_EN_1S_PRES = "verb/en_1s_pres"
     VERB_EN_2S_PRES = "verb/en_2s_pres"
+    VERB_EN_3S_PRES = "verb/en_3s_pres"  # "eats" (gender-neutral)
     VERB_EN_3S_M_PRES = "verb/en_3s-m_pres"  # "he eats"
     VERB_EN_3S_F_PRES = "verb/en_3s-f_pres"  # "she eats"
     VERB_EN_1P_PRES = "verb/en_1p_pres"
     VERB_EN_2P_PRES = "verb/en_2p_pres"
+    VERB_EN_3P_PRES = "verb/en_3p_pres"  # "eat" (gender-neutral)
     VERB_EN_3P_M_PRES = "verb/en_3p-m_pres"  # "they(m.) eat"
     VERB_EN_3P_F_PRES = "verb/en_3p-f_pres"  # "they(f.) eat"
 
     # Past tense
     VERB_EN_1S_PAST = "verb/en_1s_past"
     VERB_EN_2S_PAST = "verb/en_2s_past"
+    VERB_EN_3S_PAST = "verb/en_3s_past"  # "ate" (gender-neutral)
     VERB_EN_3S_M_PAST = "verb/en_3s-m_past"  # "he ate"
     VERB_EN_3S_F_PAST = "verb/en_3s-f_past"  # "she ate"
     VERB_EN_1P_PAST = "verb/en_1p_past"
     VERB_EN_2P_PAST = "verb/en_2p_past"
+    VERB_EN_3P_PAST = "verb/en_3p_past"  # "ate" (gender-neutral)
     VERB_EN_3P_M_PAST = "verb/en_3p-m_past"  # "they(m.) ate"
     VERB_EN_3P_F_PAST = "verb/en_3p-f_past"  # "they(f.) ate"
 
     # Future tense
     VERB_EN_1S_FUT = "verb/en_1s_fut"
     VERB_EN_2S_FUT = "verb/en_2s_fut"
+    VERB_EN_3S_FUT = "verb/en_3s_fut"  # "will eat" (gender-neutral)
     VERB_EN_3S_M_FUT = "verb/en_3s-m_fut"  # "he will eat"
     VERB_EN_3S_F_FUT = "verb/en_3s-f_fut"  # "she will eat"
     VERB_EN_1P_FUT = "verb/en_1p_fut"
     VERB_EN_2P_FUT = "verb/en_2p_fut"
+    VERB_EN_3P_FUT = "verb/en_3p_fut"  # "will eat" (gender-neutral)
     VERB_EN_3P_M_FUT = "verb/en_3p-m_fut"  # "they(m.) will eat"
     VERB_EN_3P_F_FUT = "verb/en_3p-f_fut"  # "they(f.) will eat"
 
@@ -205,30 +211,36 @@ class GrammaticalForm(enum.Enum):
     # Present tense
     VERB_LT_1S_PRES = "verb/lt_1s_pres"
     VERB_LT_2S_PRES = "verb/lt_2s_pres"
+    VERB_LT_3S_PRES = "verb/lt_3s_pres"  # "dirba" (gender-neutral, verb doesn't change)
     VERB_LT_3S_M_PRES = "verb/lt_3s-m_pres"
     VERB_LT_3S_F_PRES = "verb/lt_3s-f_pres"
     VERB_LT_1P_PRES = "verb/lt_1p_pres"
     VERB_LT_2P_PRES = "verb/lt_2p_pres"
+    VERB_LT_3P_PRES = "verb/lt_3p_pres"  # "dirba" (gender-neutral, verb doesn't change)
     VERB_LT_3P_M_PRES = "verb/lt_3p-m_pres"
     VERB_LT_3P_F_PRES = "verb/lt_3p-f_pres"
 
     # Past tense
     VERB_LT_1S_PAST = "verb/lt_1s_past"
     VERB_LT_2S_PAST = "verb/lt_2s_past"
+    VERB_LT_3S_PAST = "verb/lt_3s_past"  # "dirbo" (gender-neutral, verb doesn't change)
     VERB_LT_3S_M_PAST = "verb/lt_3s-m_past"
     VERB_LT_3S_F_PAST = "verb/lt_3s-f_past"
     VERB_LT_1P_PAST = "verb/lt_1p_past"
     VERB_LT_2P_PAST = "verb/lt_2p_past"
+    VERB_LT_3P_PAST = "verb/lt_3p_past"  # "dirbo" (gender-neutral, verb doesn't change)
     VERB_LT_3P_M_PAST = "verb/lt_3p-m_past"
     VERB_LT_3P_F_PAST = "verb/lt_3p-f_past"
 
     # Future tense
     VERB_LT_1S_FUT = "verb/lt_1s_fut"
     VERB_LT_2S_FUT = "verb/lt_2s_fut"
+    VERB_LT_3S_FUT = "verb/lt_3s_fut"  # "dirbs" (gender-neutral, verb doesn't change)
     VERB_LT_3S_M_FUT = "verb/lt_3s-m_fut"
     VERB_LT_3S_F_FUT = "verb/lt_3s-f_fut"
     VERB_LT_1P_FUT = "verb/lt_1p_fut"
     VERB_LT_2P_FUT = "verb/lt_2p_fut"
+    VERB_LT_3P_FUT = "verb/lt_3p_fut"  # "dirbs" (gender-neutral, verb doesn't change)
     VERB_LT_3P_M_FUT = "verb/lt_3p-m_fut"
     VERB_LT_3P_F_FUT = "verb/lt_3p-f_fut"
 
@@ -316,40 +328,48 @@ class GrammaticalForm(enum.Enum):
     # Present tense (présent de l'indicatif)
     VERB_FR_1S_PRES = "verb/fr_1s_pres"
     VERB_FR_2S_PRES = "verb/fr_2s_pres"
+    VERB_FR_3S_PRES = "verb/fr_3s_pres"  # "va" (gender-neutral)
     VERB_FR_3S_M_PRES = "verb/fr_3s-m_pres"
     VERB_FR_3S_F_PRES = "verb/fr_3s-f_pres"
     VERB_FR_1P_PRES = "verb/fr_1p_pres"
     VERB_FR_2P_PRES = "verb/fr_2p_pres"
+    VERB_FR_3P_PRES = "verb/fr_3p_pres"  # "vont" (gender-neutral)
     VERB_FR_3P_M_PRES = "verb/fr_3p-m_pres"
     VERB_FR_3P_F_PRES = "verb/fr_3p-f_pres"
 
     # Imperfect (imparfait)
     VERB_FR_1S_IMPF = "verb/fr_1s_impf"
     VERB_FR_2S_IMPF = "verb/fr_2s_impf"
+    VERB_FR_3S_IMPF = "verb/fr_3s_impf"  # "allait" (gender-neutral)
     VERB_FR_3S_M_IMPF = "verb/fr_3s-m_impf"
     VERB_FR_3S_F_IMPF = "verb/fr_3s-f_impf"
     VERB_FR_1P_IMPF = "verb/fr_1p_impf"
     VERB_FR_2P_IMPF = "verb/fr_2p_impf"
+    VERB_FR_3P_IMPF = "verb/fr_3p_impf"  # "allaient" (gender-neutral)
     VERB_FR_3P_M_IMPF = "verb/fr_3p-m_impf"
     VERB_FR_3P_F_IMPF = "verb/fr_3p-f_impf"
 
     # Future (futur simple)
     VERB_FR_1S_FUT = "verb/fr_1s_fut"
     VERB_FR_2S_FUT = "verb/fr_2s_fut"
+    VERB_FR_3S_FUT = "verb/fr_3s_fut"  # "ira" (gender-neutral)
     VERB_FR_3S_M_FUT = "verb/fr_3s-m_fut"
     VERB_FR_3S_F_FUT = "verb/fr_3s-f_fut"
     VERB_FR_1P_FUT = "verb/fr_1p_fut"
     VERB_FR_2P_FUT = "verb/fr_2p_fut"
+    VERB_FR_3P_FUT = "verb/fr_3p_fut"  # "iront" (gender-neutral)
     VERB_FR_3P_M_FUT = "verb/fr_3p-m_fut"
     VERB_FR_3P_F_FUT = "verb/fr_3p-f_fut"
 
     # Passé composé (compound past with auxiliary)
     VERB_FR_1S_PC = "verb/fr_1s_pc"
     VERB_FR_2S_PC = "verb/fr_2s_pc"
+    VERB_FR_3S_PC = "verb/fr_3s_pc"  # "est allé" (gender-neutral, but participle may vary)
     VERB_FR_3S_M_PC = "verb/fr_3s-m_pc"
     VERB_FR_3S_F_PC = "verb/fr_3s-f_pc"
     VERB_FR_1P_PC = "verb/fr_1p_pc"
     VERB_FR_2P_PC = "verb/fr_2p_pc"
+    VERB_FR_3P_PC = "verb/fr_3p_pc"  # "sont allés" (gender-neutral, but participle may vary)
     VERB_FR_3P_M_PC = "verb/fr_3p-m_pc"
     VERB_FR_3P_F_PC = "verb/fr_3p-f_pc"
 
@@ -367,30 +387,36 @@ class GrammaticalForm(enum.Enum):
     # Present tense (presente de indicativo)
     VERB_ES_1S_PRES = "verb/es_1s_pres"
     VERB_ES_2S_PRES = "verb/es_2s_pres"
+    VERB_ES_3S_PRES = "verb/es_3s_pres"  # "va" (gender-neutral)
     VERB_ES_3S_M_PRES = "verb/es_3s-m_pres"
     VERB_ES_3S_F_PRES = "verb/es_3s-f_pres"
     VERB_ES_1P_PRES = "verb/es_1p_pres"
     VERB_ES_2P_PRES = "verb/es_2p_pres"
+    VERB_ES_3P_PRES = "verb/es_3p_pres"  # "van" (gender-neutral)
     VERB_ES_3P_M_PRES = "verb/es_3p-m_pres"
     VERB_ES_3P_F_PRES = "verb/es_3p-f_pres"
 
     # Preterite (pretérito perfecto simple - simple past)
     VERB_ES_1S_PAST = "verb/es_1s_past"
     VERB_ES_2S_PAST = "verb/es_2s_past"
+    VERB_ES_3S_PAST = "verb/es_3s_past"  # "fue" (gender-neutral)
     VERB_ES_3S_M_PAST = "verb/es_3s-m_past"
     VERB_ES_3S_F_PAST = "verb/es_3s-f_past"
     VERB_ES_1P_PAST = "verb/es_1p_past"
     VERB_ES_2P_PAST = "verb/es_2p_past"
+    VERB_ES_3P_PAST = "verb/es_3p_past"  # "fueron" (gender-neutral)
     VERB_ES_3P_M_PAST = "verb/es_3p-m_past"
     VERB_ES_3P_F_PAST = "verb/es_3p-f_past"
 
     # Future (futuro simple)
     VERB_ES_1S_FUT = "verb/es_1s_fut"
     VERB_ES_2S_FUT = "verb/es_2s_fut"
+    VERB_ES_3S_FUT = "verb/es_3s_fut"  # "irá" (gender-neutral)
     VERB_ES_3S_M_FUT = "verb/es_3s-m_fut"
     VERB_ES_3S_F_FUT = "verb/es_3s-f_fut"
     VERB_ES_1P_FUT = "verb/es_1p_fut"
     VERB_ES_2P_FUT = "verb/es_2p_fut"
+    VERB_ES_3P_FUT = "verb/es_3p_fut"  # "irán" (gender-neutral)
     VERB_ES_3P_M_FUT = "verb/es_3p-m_fut"
     VERB_ES_3P_F_FUT = "verb/es_3p-f_fut"
 
@@ -416,30 +442,36 @@ class GrammaticalForm(enum.Enum):
     # Present tense (Präsens)
     VERB_DE_1S_PRES = "verb/de_1s_pres"
     VERB_DE_2S_PRES = "verb/de_2s_pres"
+    VERB_DE_3S_PRES = "verb/de_3s_pres"  # "geht" (gender-neutral)
     VERB_DE_3S_M_PRES = "verb/de_3s-m_pres"
     VERB_DE_3S_F_PRES = "verb/de_3s-f_pres"
     VERB_DE_1P_PRES = "verb/de_1p_pres"
     VERB_DE_2P_PRES = "verb/de_2p_pres"
+    VERB_DE_3P_PRES = "verb/de_3p_pres"  # "gehen" (gender-neutral)
     VERB_DE_3P_M_PRES = "verb/de_3p-m_pres"
     VERB_DE_3P_F_PRES = "verb/de_3p-f_pres"
 
     # Perfect (Perfekt - compound past, most common in spoken German)
     VERB_DE_1S_PAST = "verb/de_1s_past"
     VERB_DE_2S_PAST = "verb/de_2s_past"
+    VERB_DE_3S_PAST = "verb/de_3s_past"  # "hat gegangen" (gender-neutral)
     VERB_DE_3S_M_PAST = "verb/de_3s-m_past"
     VERB_DE_3S_F_PAST = "verb/de_3s-f_past"
     VERB_DE_1P_PAST = "verb/de_1p_past"
     VERB_DE_2P_PAST = "verb/de_2p_past"
+    VERB_DE_3P_PAST = "verb/de_3p_past"  # "haben gegangen" (gender-neutral)
     VERB_DE_3P_M_PAST = "verb/de_3p-m_past"
     VERB_DE_3P_F_PAST = "verb/de_3p-f_past"
 
     # Future (Futur I)
     VERB_DE_1S_FUT = "verb/de_1s_fut"
     VERB_DE_2S_FUT = "verb/de_2s_fut"
+    VERB_DE_3S_FUT = "verb/de_3s_fut"  # "wird gehen" (gender-neutral)
     VERB_DE_3S_M_FUT = "verb/de_3s-m_fut"
     VERB_DE_3S_F_FUT = "verb/de_3s-f_fut"
     VERB_DE_1P_FUT = "verb/de_1p_fut"
     VERB_DE_2P_FUT = "verb/de_2p_fut"
+    VERB_DE_3P_FUT = "verb/de_3p_fut"  # "werden gehen" (gender-neutral)
     VERB_DE_3P_M_FUT = "verb/de_3p-m_fut"
     VERB_DE_3P_F_FUT = "verb/de_3p-f_fut"
 
@@ -457,30 +489,36 @@ class GrammaticalForm(enum.Enum):
     # Present tense (presente do indicativo)
     VERB_PT_1S_PRES = "verb/pt_1s_pres"
     VERB_PT_2S_PRES = "verb/pt_2s_pres"
+    VERB_PT_3S_PRES = "verb/pt_3s_pres"  # "vai" (gender-neutral)
     VERB_PT_3S_M_PRES = "verb/pt_3s-m_pres"
     VERB_PT_3S_F_PRES = "verb/pt_3s-f_pres"
     VERB_PT_1P_PRES = "verb/pt_1p_pres"
     VERB_PT_2P_PRES = "verb/pt_2p_pres"
+    VERB_PT_3P_PRES = "verb/pt_3p_pres"  # "vão" (gender-neutral)
     VERB_PT_3P_M_PRES = "verb/pt_3p-m_pres"
     VERB_PT_3P_F_PRES = "verb/pt_3p-f_pres"
 
     # Preterite (pretérito perfeito - simple past)
     VERB_PT_1S_PAST = "verb/pt_1s_past"
     VERB_PT_2S_PAST = "verb/pt_2s_past"
+    VERB_PT_3S_PAST = "verb/pt_3s_past"  # "foi" (gender-neutral)
     VERB_PT_3S_M_PAST = "verb/pt_3s-m_past"
     VERB_PT_3S_F_PAST = "verb/pt_3s-f_past"
     VERB_PT_1P_PAST = "verb/pt_1p_past"
     VERB_PT_2P_PAST = "verb/pt_2p_past"
+    VERB_PT_3P_PAST = "verb/pt_3p_past"  # "foram" (gender-neutral)
     VERB_PT_3P_M_PAST = "verb/pt_3p-m_past"
     VERB_PT_3P_F_PAST = "verb/pt_3p-f_past"
 
     # Future (futuro do presente)
     VERB_PT_1S_FUT = "verb/pt_1s_fut"
     VERB_PT_2S_FUT = "verb/pt_2s_fut"
+    VERB_PT_3S_FUT = "verb/pt_3s_fut"  # "irá" (gender-neutral)
     VERB_PT_3S_M_FUT = "verb/pt_3s-m_fut"
     VERB_PT_3S_F_FUT = "verb/pt_3s-f_fut"
     VERB_PT_1P_FUT = "verb/pt_1p_fut"
     VERB_PT_2P_FUT = "verb/pt_2p_fut"
+    VERB_PT_3P_FUT = "verb/pt_3p_fut"  # "irão" (gender-neutral)
     VERB_PT_3P_M_FUT = "verb/pt_3p-m_fut"
     VERB_PT_3P_F_FUT = "verb/pt_3p-f_fut"
 
@@ -488,6 +526,16 @@ class GrammaticalForm(enum.Enum):
     ADVERB_POSITIVE = "adverb/positive"
     ADVERB_COMPARATIVE = "adverb/comparative"
     ADVERB_SUPERLATIVE = "adverb/superlative"
+
+    # Language-specific adverb base forms (invariant adverbs)
+    ADVERB_EN_BASE = "adverb/en_base"
+    ADVERB_LT_BASE = "adverb/lt_base"
+    ADVERB_FR_BASE = "adverb/fr_base"
+    ADVERB_DE_BASE = "adverb/de_base"
+    ADVERB_ES_BASE = "adverb/es_base"
+    ADVERB_PT_BASE = "adverb/pt_base"
+    ADVERB_KO_BASE = "adverb/ko_base"
+    ADVERB_ZH_BASE = "adverb/zh_base"
 
     # Pronoun forms
     PRONOUN_SUBJECTIVE = "pronoun/subjective"
@@ -501,6 +549,22 @@ class GrammaticalForm(enum.Enum):
     INTERJECTION = "interjection/base"
     DETERMINER = "determiner/base"
     ARTICLE = "article/base"
+
+    # Language-specific article forms
+    ARTICLE_EN_BASE = "article/en_base"
+    ARTICLE_FR_MASCULINE_SINGULAR = "article/fr_masculine_singular"
+    ARTICLE_FR_FEMININE_SINGULAR = "article/fr_feminine_singular"
+    ARTICLE_FR_PLURAL = "article/fr_plural"
+    ARTICLE_DE_MASCULINE_SINGULAR = "article/de_masculine_singular"
+    ARTICLE_DE_FEMININE_SINGULAR = "article/de_feminine_singular"
+    ARTICLE_DE_NEUTER_SINGULAR = "article/de_neuter_singular"
+    ARTICLE_DE_PLURAL = "article/de_plural"
+    ARTICLE_ES_MASCULINE_SINGULAR = "article/es_masculine_singular"
+    ARTICLE_ES_FEMININE_SINGULAR = "article/es_feminine_singular"
+    ARTICLE_ES_PLURAL = "article/es_plural"
+    ARTICLE_PT_MASCULINE_SINGULAR = "article/pt_masculine_singular"
+    ARTICLE_PT_FEMININE_SINGULAR = "article/pt_feminine_singular"
+    ARTICLE_PT_PLURAL = "article/pt_plural"
 
     # Generic forms
     BASE_FORM = "base_form"
