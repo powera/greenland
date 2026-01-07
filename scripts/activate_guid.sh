@@ -82,9 +82,8 @@ run_step "Translations" \
   python -m agents.voras.cli --guid "$GUID" --mode populate-only --languages ${LANGUAGES} --yes
 
 # Grammatical forms (Vilkas) - generate/repair forms for all supported languages
-# TODO: Add a language limiter once Vilkas supports selecting from LANGUAGES instead of only task scopes.
 run_step "Grammatical forms" \
-  python -m agents.vilkas.cli --guid "$GUID" --task all --fix --yes
+  python -m agents.vilkas.cli --guid "$GUID" --task all --fix --languages ${LANGUAGES} --yes
 
 # Synonyms and alternative forms (Šernas)
 run_step "Synonyms" \
