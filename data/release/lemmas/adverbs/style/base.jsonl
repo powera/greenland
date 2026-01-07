@@ -8,30 +8,30 @@
 {"guid": "D01_008", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "hard", "concept_definition": "in a way that requires a lot of effort or is difficult; with great force or intensity (e.g., \"She worked hard,\" \"The ball hit the window hard\").", "difficulty_level": 11}
 {"guid": "D01_009", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "together", "concept_definition": "In or into one group, body, mass, or place; with each other; in companionship or cooperation; simultaneously or at the same time.", "difficulty_level": 11}
 {"guid": "D01_010", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "alone", "concept_definition": "without anyone else present; by oneself", "difficulty_level": 11}
-{"guid": "D01_011", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "suddenly", "concept_definition": "suddenly (adverb)", "difficulty_level": -1}
-{"guid": "D01_012", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "almost", "concept_definition": "almost (adverb)", "difficulty_level": -1}
-{"guid": "D01_013", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "nearly", "concept_definition": "nearly (adverb)", "difficulty_level": -1}
-{"guid": "D01_014", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "hardly", "concept_definition": "hardly (adverb)", "difficulty_level": -1}
-{"guid": "D01_015", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "instead", "concept_definition": "instead (adverb)", "difficulty_level": -1}
-{"guid": "D01_016", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "slow", "concept_definition": "slow (adverb)", "difficulty_level": -1}
-{"guid": "D01_017", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "likely", "concept_definition": "likely (adverb)", "difficulty_level": -1}
-{"guid": "D01_018", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "completely", "concept_definition": "completely (adverb)", "difficulty_level": -1}
-{"guid": "D01_019", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "carefully", "concept_definition": "carefully (adverb)", "difficulty_level": -1}
-{"guid": "D01_020", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "surely", "concept_definition": "surely (adverb)", "difficulty_level": -1}
-{"guid": "D01_021", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "obviously", "concept_definition": "obviously (adverb)", "difficulty_level": -1}
-{"guid": "D01_022", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "especially", "concept_definition": "especially (adverb)", "difficulty_level": -1}
-{"guid": "D01_023", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "gently", "concept_definition": "gently (adverb)", "difficulty_level": -1}
-{"guid": "D01_024", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "swiftly", "concept_definition": "swiftly (adverb)", "difficulty_level": -1}
-{"guid": "D01_025", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "softly", "concept_definition": "softly (adverb)", "difficulty_level": -1}
-{"guid": "D01_026", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "slightly", "concept_definition": "slightly (adverb)", "difficulty_level": -1}
-{"guid": "D01_027", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "silently", "concept_definition": "silently (adverb)", "difficulty_level": -1}
-{"guid": "D01_028", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "according", "concept_definition": "according (adverb)", "difficulty_level": -1}
-{"guid": "D01_029", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "apparently", "concept_definition": "apparently (adverb)", "difficulty_level": -1}
-{"guid": "D01_030", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "evidently", "concept_definition": "evidently (adverb)", "difficulty_level": -1}
-{"guid": "D01_031", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "entirely", "concept_definition": "entirely (adverb)", "difficulty_level": -1}
-{"guid": "D01_032", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "possibly", "concept_definition": "possibly (adverb)", "difficulty_level": -1}
-{"guid": "D01_033", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "clearly", "concept_definition": "clearly (adverb)", "difficulty_level": -1}
-{"guid": "D01_034", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "otherwise", "concept_definition": "otherwise (adverb)", "difficulty_level": -1}
+{"guid": "D01_011", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "suddenly", "concept_definition": "happening quickly and unexpectedly; all at once.", "difficulty_level": -1}
+{"guid": "D01_012", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "almost", "concept_definition": "nearly; not quite.", "difficulty_level": -1}
+{"guid": "D01_013", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "nearly", "concept_definition": "almost; very close to.", "difficulty_level": -1}
+{"guid": "D01_014", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "hardly", "concept_definition": "scarcely; almost not.", "difficulty_level": -1}
+{"guid": "D01_015", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "instead", "concept_definition": "as a replacement or alternative; rather.", "difficulty_level": -1}
+{"guid": "D01_016", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "slow", "concept_definition": "in a slow manner; not quickly.", "difficulty_level": -1}
+{"guid": "D01_017", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "likely", "concept_definition": "probably; in all likelihood.", "difficulty_level": -1}
+{"guid": "D01_018", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "completely", "concept_definition": "entirely; fully.", "difficulty_level": -1}
+{"guid": "D01_019", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "carefully", "concept_definition": "with care; in a cautious way.", "difficulty_level": -1}
+{"guid": "D01_020", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "surely", "concept_definition": "certainly; without doubt.", "difficulty_level": -1}
+{"guid": "D01_021", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "obviously", "concept_definition": "in a way that is easy to see or understand; clearly.", "difficulty_level": -1}
+{"guid": "D01_022", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "especially", "concept_definition": "particularly; to an exceptional degree.", "difficulty_level": -1}
+{"guid": "D01_023", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "gently", "concept_definition": "in a gentle manner; softly.", "difficulty_level": -1}
+{"guid": "D01_024", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "swiftly", "concept_definition": "quickly; at high speed.", "difficulty_level": -1}
+{"guid": "D01_025", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "softly", "concept_definition": "in a soft or quiet manner.", "difficulty_level": -1}
+{"guid": "D01_026", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "slightly", "concept_definition": "to a small degree; a little.", "difficulty_level": -1}
+{"guid": "D01_027", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "silently", "concept_definition": "without sound; quietly.", "difficulty_level": -1}
+{"guid": "D01_028", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "according", "concept_definition": "in accordance; as stated or reported (usually with \"to\").", "difficulty_level": -1}
+{"guid": "D01_029", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "apparently", "concept_definition": "as far as one knows; seemingly.", "difficulty_level": -1}
+{"guid": "D01_030", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "evidently", "concept_definition": "clearly; obviously; apparently.", "difficulty_level": -1}
+{"guid": "D01_031", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "entirely", "concept_definition": "completely; wholly.", "difficulty_level": -1}
+{"guid": "D01_032", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "possibly", "concept_definition": "perhaps; maybe.", "difficulty_level": -1}
+{"guid": "D01_033", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "clearly", "concept_definition": "in a way that is easy to understand; plainly.", "difficulty_level": -1}
+{"guid": "D01_034", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "otherwise", "concept_definition": "in a different way; if not.", "difficulty_level": -1}
 {"guid": "D01_035", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "just", "concept_definition": "exactly; precisely; only; simply; very recently; a short time ago (e.g., \"just right\", \"just a moment\", \"I just arrived\").", "difficulty_level": -1}
 {"guid": "D01_036", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "very", "concept_definition": "to a high degree; extremely; used to emphasize an adjective or adverb (e.g., \"very tall\", \"very quickly\").", "difficulty_level": -1}
 {"guid": "D01_037", "pos_type": "adverb", "pos_subtype": "style", "concept_label": "quite", "concept_definition": "to a certain degree; fairly; rather; completely or entirely (e.g., \"quite good\", \"quite certain\").", "difficulty_level": -1}

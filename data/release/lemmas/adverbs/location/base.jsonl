@@ -10,18 +10,18 @@
 {"guid": "D07_010", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "already", "concept_definition": "before now; by this time; earlier than expected (used to indicate that something has happened prior to a specified time)", "difficulty_level": 9}
 {"guid": "D07_011", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "soon", "concept_definition": "In a short time; shortly; before long.", "difficulty_level": 9}
 {"guid": "D07_012", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "recently", "concept_definition": "At a time not long before now; a short time ago.", "difficulty_level": 9}
-{"guid": "D07_013", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "away", "concept_definition": "away (adverb)", "difficulty_level": -1}
-{"guid": "D07_014", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "far", "concept_definition": "far (adverb)", "difficulty_level": -1}
-{"guid": "D07_015", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "near", "concept_definition": "near (adverb)", "difficulty_level": -1}
-{"guid": "D07_016", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "round", "concept_definition": "round (adverb)", "difficulty_level": -1}
-{"guid": "D07_017", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "forward", "concept_definition": "forward (adverb)", "difficulty_level": -1}
-{"guid": "D07_018", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "ahead", "concept_definition": "ahead (adverb)", "difficulty_level": -1}
-{"guid": "D07_019", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "distant", "concept_definition": "distant (adverb)", "difficulty_level": -1}
-{"guid": "D07_020", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "directly", "concept_definition": "directly (adverb)", "difficulty_level": -1}
-{"guid": "D07_021", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "anywhere", "concept_definition": "anywhere (adverb)", "difficulty_level": -1}
-{"guid": "D07_022", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "aside", "concept_definition": "aside (adverb)", "difficulty_level": -1}
-{"guid": "D07_023", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "forth", "concept_definition": "forth (adverb)", "difficulty_level": -1}
-{"guid": "D07_024", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "apart", "concept_definition": "apart (adverb)", "difficulty_level": -1}
+{"guid": "D07_013", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "away", "concept_definition": "to or at a distance; not here.", "difficulty_level": -1}
+{"guid": "D07_014", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "far", "concept_definition": "at or to a great distance.", "difficulty_level": -1}
+{"guid": "D07_015", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "near", "concept_definition": "close by; at a short distance.", "difficulty_level": -1}
+{"guid": "D07_016", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "round", "concept_definition": "around; in a circular route.", "difficulty_level": -1}
+{"guid": "D07_017", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "forward", "concept_definition": "toward the front or ahead.", "difficulty_level": -1}
+{"guid": "D07_018", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "ahead", "concept_definition": "in front; further forward.", "difficulty_level": -1}
+{"guid": "D07_019", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "distant", "concept_definition": "far away; at a distance.", "difficulty_level": -1}
+{"guid": "D07_020", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "directly", "concept_definition": "without deviation; straight.", "difficulty_level": -1}
+{"guid": "D07_021", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "anywhere", "concept_definition": "in or to any place.", "difficulty_level": -1}
+{"guid": "D07_022", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "aside", "concept_definition": "to one side; apart.", "difficulty_level": -1}
+{"guid": "D07_023", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "forth", "concept_definition": "forward; outward.", "difficulty_level": -1}
+{"guid": "D07_024", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "apart", "concept_definition": "separated; at a distance from each other.", "difficulty_level": -1}
 {"guid": "D07_025", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "out", "concept_definition": "away from the inside; not at home; outside (e.g., \"go out\", \"look out\", \"out of town\").", "difficulty_level": -1}
 {"guid": "D07_026", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "up", "concept_definition": "toward or in a higher place or position; upward (e.g., \"climb up\", \"look up\", \"stand up\").", "difficulty_level": -1}
 {"guid": "D07_027", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "down", "concept_definition": "toward or in a lower place or position; downward (e.g., \"sit down\", \"fall down\", \"go down\").", "difficulty_level": -1}
