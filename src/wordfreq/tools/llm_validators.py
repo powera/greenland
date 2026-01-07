@@ -819,6 +819,158 @@ def generate_pronunciation(
     }
 
 
+def batch_generate_pronunciations(
+    lemma: str,
+    definition: str,
+    pos_type: str,
+    forms: List[Dict[str, str]],
+    model: str = "gpt-5-mini",
+    language_code: str = "en",
+    english_translation: Optional[str] = None,
+) -> Dict[str, Dict[str, any]]:
+    """
+    Generate pronunciations for multiple word forms in a single LLM call.
+
+    Args:
+        lemma: The lemma (base form) of the word
+        definition: English definition of the lemma
+        pos_type: Part of speech
+        forms: List of dicts with 'form' (grammatical form name) and 'word' (the text) keys
+               e.g., [{'form': 'verb/en_present', 'word': 'run'}, {'form': 'verb/en_past', 'word': 'ran'}]
+        model: LLM model to use
+        language_code: Language code (e.g., "en", "lt", "ko")
+        english_translation: Optional English translation (lemma word) for non-English
+
+    Returns:
+        Dictionary mapping form names to pronunciation results:
+        {
+            'verb/en_present': {
+                'word': 'run',
+                'ipa_pronunciation': '/rʌn/',
+                'phonetic_pronunciation': 'RUN',
+                'confidence': 0.95
+            },
+            'verb/en_past': {
+                'word': 'ran',
+                'ipa_pronunciation': '/ræn/',
+                'phonetic_pronunciation': 'RAN',
+                'confidence': 0.95
+            },
+            ...
+        }
+    """
+    client = UnifiedLLMClient()
+
+    # Get language name from translation_helpers
+    from wordfreq.storage.translation_helpers import LANGUAGE_NAMES
+    language_name = LANGUAGE_NAMES.get(language_code, language_code)
+
+    # Build schema with properties for each form
+    form_properties = {}
+    for form_info in forms:
+        form_key = form_info["form"]
+        safe_key = form_key.replace("/", "_").replace("-", "_")
+
+        form_properties[f"{safe_key}_ipa"] = SchemaProperty(
+            "string", f"IPA pronunciation for {form_key} ('{form_info['word']}')"
+        )
+        form_properties[f"{safe_key}_phonetic"] = SchemaProperty(
+            "string", f"Simplified phonetic pronunciation for {form_key} ('{form_info['word']}')"
+        )
+        form_properties[f"{safe_key}_confidence"] = SchemaProperty(
+            "number", f"Confidence score 0.0-1.0 for {form_key}", minimum=0.0, maximum=1.0
+        )
+
+    schema = Schema(
+        name="BatchPronunciationGeneration",
+        description=f"Batch pronunciation generation for multiple forms of '{lemma}'",
+        properties=form_properties,
+    )
+
+    # Build forms list for prompt
+    forms_list_items = []
+    for idx, form_info in enumerate(forms, 1):
+        forms_list_items.append(
+            f"{idx}. Form: {form_info['form']}\n   Word: {form_info['word']}"
+        )
+    forms_list = "\n".join(forms_list_items)
+
+    # Load prompt from files
+    context = util.prompt_loader.get_context("wordfreq", "pronunciation_batch")
+    prompt_template = util.prompt_loader.get_prompt("wordfreq", "pronunciation_batch")
+
+    # Build additional context for non-English
+    if language_code != "en" and english_translation:
+        definition = f"{definition} (English: {english_translation})"
+
+    prompt = prompt_template.format(
+        lemma=lemma,
+        definition=definition,
+        pos_type=pos_type,
+        language=language_name,
+        forms_list=forms_list,
+        num_forms=len(forms)
+    )
+
+    logger.debug(
+        f"Batch generating pronunciations for {len(forms)} forms of '{lemma}' ({language_name})"
+    )
+
+    try:
+        response = client.generate_chat(
+            prompt=prompt, model=model, json_schema=schema, context=context
+        )
+
+        if response.structured_data:
+            # Parse results back into per-form dictionaries
+            results = {}
+            for form_info in forms:
+                form_key = form_info["form"]
+                safe_key = form_key.replace("/", "_").replace("-", "_")
+
+                ipa = response.structured_data.get(f"{safe_key}_ipa", "")
+                phonetic = response.structured_data.get(f"{safe_key}_phonetic", "")
+                confidence = response.structured_data.get(f"{safe_key}_confidence", 0.0)
+
+                results[form_key] = {
+                    "word": form_info["word"],
+                    "ipa_pronunciation": ipa,
+                    "phonetic_pronunciation": phonetic,
+                    "confidence": confidence,
+                }
+
+            return results
+        else:
+            logger.error(
+                f"No structured data received for batch pronunciation generation of '{lemma}'"
+            )
+            # Return empty results for all forms
+            return {
+                form_info["form"]: {
+                    "word": form_info["word"],
+                    "ipa_pronunciation": "",
+                    "phonetic_pronunciation": "",
+                    "confidence": 0.0,
+                    "error": "No structured data received",
+                }
+                for form_info in forms
+            }
+
+    except Exception as e:
+        logger.error(f"Error in batch pronunciation generation for '{lemma}': {e}")
+        # Return error results for all forms
+        return {
+            form_info["form"]: {
+                "word": form_info["word"],
+                "ipa_pronunciation": "",
+                "phonetic_pronunciation": "",
+                "confidence": 0.0,
+                "error": str(e),
+            }
+            for form_info in forms
+        }
+
+
 def suggest_disambiguation(
     word: str, definitions: List[Dict[str, str]], model: str = "gpt-5-mini"
 ) -> Dict[str, any]:

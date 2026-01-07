@@ -52,7 +52,11 @@ from wordfreq.storage.models.schema import (
     SentenceTranslation,
     SentenceWord,
 )
-from wordfreq.tools.llm_validators import validate_pronunciation, generate_pronunciation
+from wordfreq.tools.llm_validators import (
+    validate_pronunciation,
+    generate_pronunciation,
+    batch_generate_pronunciations,
+)
 
 # Configure logging
 logging.basicConfig(
@@ -345,8 +349,11 @@ class PapugaAgent:
         """
         Generate pronunciations for forms that are missing them.
 
+        Uses intelligent batching: groups forms by lemma/language and uses batch
+        generation for multiple forms, single generation for individual forms.
+
         Args:
-            limit: Maximum number of forms to process
+            limit: Maximum number of lemmas to process
             only_english: Only process English forms
             only_base_forms: Only process base forms
             dry_run: If True, don't actually update the database
@@ -374,82 +381,183 @@ class PapugaAgent:
             if only_base_forms:
                 query = query.filter(DerivativeForm.is_base_form == True)
 
-            query = query.order_by(DerivativeForm.id)
-
-            if limit:
-                query = query.limit(limit)
+            query = query.order_by(DerivativeForm.lemma_id, DerivativeForm.language_code)
 
             forms = query.all()
             logger.info(f"Found {len(forms)} forms to populate")
 
+            # Group forms by (lemma_id, language_code) for intelligent batching
+            from collections import defaultdict
+            forms_by_lemma_lang = defaultdict(list)
+
+            for form in forms:
+                key = (form.lemma_id, form.language_code)
+                forms_by_lemma_lang[key].append(form)
+
+            # Apply limit to number of lemma/language combinations
+            lemma_lang_pairs = list(forms_by_lemma_lang.keys())
+            if limit:
+                lemma_lang_pairs = lemma_lang_pairs[:limit]
+                logger.info(f"Limiting to {limit} lemma/language combinations")
+
             populated_count = 0
             failed_count = 0
+            total_forms = sum(len(forms_by_lemma_lang[key]) for key in lemma_lang_pairs)
+            batch_count = 0
+            single_count = 0
 
             if dry_run:
-                # In dry run, just count what would be processed
+                # In dry run, just show what would be processed
                 logger.info(
-                    f"Would process {len(forms)} forms to generate pronunciations (dry run)"
+                    f"Would process {len(lemma_lang_pairs)} lemma/language pairs ({total_forms} forms total)"
                 )
-                # Show a few examples
-                for idx, form in enumerate(forms[:5], 1):
-                    lemma = session.query(Lemma).filter(Lemma.id == form.lemma_id).first()
+                for idx, (lemma_id_key, lang_code) in enumerate(lemma_lang_pairs[:5], 1):
+                    lemma = session.query(Lemma).filter(Lemma.id == lemma_id_key).first()
+                    num_forms = len(forms_by_lemma_lang[(lemma_id_key, lang_code)])
+                    mode = "BATCH" if num_forms > 1 else "SINGLE"
                     logger.info(
-                        f"  {idx}. '{form.derivative_form_text}' ({lemma.pos_type if lemma else 'unknown'})"
+                        f"  {idx}. '{lemma.lemma_text}' ({lang_code}): {num_forms} forms [{mode}]"
                     )
-                if len(forms) > 5:
-                    logger.info(f"  ... and {len(forms) - 5} more")
+                if len(lemma_lang_pairs) > 5:
+                    logger.info(f"  ... and {len(lemma_lang_pairs) - 5} more")
             else:
-                for idx, form in enumerate(forms, 1):
-                    logger.info(f"Processing {idx}/{len(forms)}: '{form.derivative_form_text}'...")
+                # Process each lemma/language combination
+                for idx, (lemma_id_key, lang_code) in enumerate(lemma_lang_pairs, 1):
+                    forms_to_process = forms_by_lemma_lang[(lemma_id_key, lang_code)]
 
-                    # Get lemma info for POS type and definition
-                    lemma = session.query(Lemma).filter(Lemma.id == form.lemma_id).first()
+                    # Get lemma info
+                    lemma = session.query(Lemma).filter(Lemma.id == lemma_id_key).first()
                     if not lemma:
-                        logger.warning(f"No lemma found for form {form.id}")
-                        failed_count += 1
+                        logger.warning(f"No lemma found for ID {lemma_id_key}")
+                        failed_count += len(forms_to_process)
                         continue
 
-                    # Get example sentence from the new sentences system if available
-                    example_text = self._get_example_sentence(session, lemma)
+                    num_forms = len(forms_to_process)
+                    mode = "BATCH" if num_forms > 1 else "SINGLE"
 
-                    try:
-                        result = generate_pronunciation(
-                            word=form.derivative_form_text,
-                            pos_type=lemma.pos_type,
-                            example_sentence=example_text,
-                            definition=lemma.definition_text,
-                            model=self.config.model,
-                            language_code=form.language_code,
-                            grammatical_form=form.grammatical_form,
-                            english_translation=lemma.lemma_text if form.language_code != "en" else None,
-                        )
+                    logger.info(
+                        f"Processing {idx}/{len(lemma_lang_pairs)}: '{lemma.lemma_text}' "
+                        f"({lang_code}, {num_forms} form{'s' if num_forms != 1 else ''}) [{mode}]..."
+                    )
 
-                        if result["confidence"] >= 0.5:  # Minimum confidence threshold
-                            form.ipa_pronunciation = result["ipa_pronunciation"]
-                            form.phonetic_pronunciation = result["phonetic_pronunciation"]
+                    # Choose strategy based on number of forms
+                    if num_forms == 1:
+                        # Single form: use individual generation (no batch scaffolding)
+                        single_count += 1
+                        form = forms_to_process[0]
+
+                        # Get example sentence if available
+                        example_text = self._get_example_sentence(session, lemma)
+
+                        try:
+                            result = generate_pronunciation(
+                                word=form.derivative_form_text,
+                                pos_type=lemma.pos_type,
+                                example_sentence=example_text,
+                                definition=lemma.definition_text,
+                                model=self.config.model,
+                                language_code=lang_code,
+                                grammatical_form=form.grammatical_form,
+                                english_translation=lemma.lemma_text if lang_code != "en" else None,
+                            )
+
+                            if result["confidence"] >= 0.5:
+                                form.ipa_pronunciation = result["ipa_pronunciation"]
+                                form.phonetic_pronunciation = result["phonetic_pronunciation"]
+                                session.commit()
+                                logger.info(
+                                    f"  Generated: IPA={result['ipa_pronunciation']}, "
+                                    f"Phonetic={result['phonetic_pronunciation']} "
+                                    f"(confidence: {result['confidence']:.2f})"
+                                )
+                                populated_count += 1
+                            else:
+                                logger.warning(
+                                    f"  Low confidence ({result['confidence']:.2f}), skipping"
+                                )
+                                failed_count += 1
+
+                        except Exception as e:
+                            logger.error(f"  Failed to generate pronunciation: {e}")
+                            failed_count += 1
+
+                    else:
+                        # Multiple forms: use batch generation
+                        batch_count += 1
+
+                        # Build forms list for batch call
+                        forms_list = []
+                        form_id_map = {}  # Map grammatical_form to DerivativeForm object
+
+                        for form in forms_to_process:
+                            forms_list.append({
+                                "form": form.grammatical_form,
+                                "word": form.derivative_form_text,
+                            })
+                            form_id_map[form.grammatical_form] = form
+
+                        try:
+                            # Make batch pronunciation call
+                            results = batch_generate_pronunciations(
+                                lemma=lemma.lemma_text,
+                                definition=lemma.definition_text,
+                                pos_type=lemma.pos_type,
+                                forms=forms_list,
+                                model=self.config.model,
+                                language_code=lang_code,
+                                english_translation=lemma.lemma_text if lang_code != "en" else None,
+                            )
+
+                            # Update each form with its pronunciation
+                            batch_populated = 0
+                            batch_failed = 0
+
+                            for grammatical_form, result in results.items():
+                                form_obj = form_id_map.get(grammatical_form)
+                                if not form_obj:
+                                    logger.warning(f"No form object found for {grammatical_form}")
+                                    batch_failed += 1
+                                    continue
+
+                                if "error" in result:
+                                    logger.warning(
+                                        f"  Error for {grammatical_form} ('{result['word']}'): {result['error']}"
+                                    )
+                                    batch_failed += 1
+                                    continue
+
+                                if result["confidence"] >= 0.5:
+                                    form_obj.ipa_pronunciation = result["ipa_pronunciation"]
+                                    form_obj.phonetic_pronunciation = result["phonetic_pronunciation"]
+                                    batch_populated += 1
+                                else:
+                                    logger.warning(
+                                        f"  Low confidence ({result['confidence']:.2f}) for {grammatical_form}, skipping"
+                                    )
+                                    batch_failed += 1
+
+                            # Commit all updates for this batch
                             session.commit()
 
                             logger.info(
-                                f"  Generated: IPA={result['ipa_pronunciation']}, "
-                                f"Phonetic={result['phonetic_pronunciation']} "
-                                f"(confidence: {result['confidence']:.2f})"
+                                f"  Batch complete: {batch_populated} populated, {batch_failed} failed"
                             )
-                            populated_count += 1
-                        else:
-                            logger.warning(
-                                f"  Low confidence ({result['confidence']:.2f}), skipping"
-                            )
-                            failed_count += 1
+                            populated_count += batch_populated
+                            failed_count += batch_failed
 
-                    except Exception as e:
-                        logger.error(f"  Failed to generate pronunciation: {e}")
-                        failed_count += 1
+                        except Exception as e:
+                            logger.error(f"  Failed to process batch: {e}")
+                            failed_count += len(forms_to_process)
+                            session.rollback()
 
             return {
-                "total_processed": len(forms),
+                "total_processed": total_forms if not dry_run else 0,
                 "populated": populated_count,
                 "failed": failed_count,
                 "dry_run": dry_run,
+                "lemma_lang_pairs": len(lemma_lang_pairs),
+                "batch_calls": batch_count,
+                "single_calls": single_count,
             }
 
         except Exception as e:
@@ -729,7 +837,9 @@ def main():
             lemma_id=lemma_id,
         )
         logger.info(
-            f"\nPopulation complete: {result['populated']} populated, {result['failed']} failed"
+            f"\nPopulation complete: {result['populated']} populated, {result['failed']} failed "
+            f"({result.get('lemma_lang_pairs', 0)} lemma/language pairs: "
+            f"{result.get('batch_calls', 0)} batch, {result.get('single_calls', 0)} single)"
         )
     elif mode == "both":
         # First check
@@ -751,7 +861,9 @@ def main():
             lemma_id=lemma_id,
         )
         logger.info(
-            f"\nPopulation complete: {result['populated']} populated, {result['failed']} failed"
+            f"\nPopulation complete: {result['populated']} populated, {result['failed']} failed "
+            f"({result.get('lemma_lang_pairs', 0)} lemma/language pairs: "
+            f"{result.get('batch_calls', 0)} batch, {result.get('single_calls', 0)} single)"
         )
 
 
