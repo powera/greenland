@@ -392,23 +392,48 @@ class VilkasAgent:
             # Filter to just the specified pos_type
             filtered_lemmas = [l for l in lemmas if l.pos_type == pos_type]
 
+            # Get task configuration to check for existing forms
+            from wordfreq.translation.generate_forms_tasks import FORM_GENERATION_TASKS
+
+            task_config = FORM_GENERATION_TASKS[task_key].config
+            expected_grammatical_forms = {g.value for g in task_config.form_mapping.values()}
+
             items_needing_forms = []
-            for lemma in filtered_lemmas:
-                translation = (
-                    get_translation(self.get_session(), lemma, language_code)
-                    if language_code != "en"
-                    else lemma.lemma_text
-                )
-                items_needing_forms.append(
-                    {
-                        "guid": lemma.guid,
-                        "english": lemma.lemma_text,
-                        "translation": translation or f"({language_code})",
-                        "pos_subtype": lemma.pos_subtype,
-                        "difficulty_level": lemma.difficulty_level,
-                        "current_form_count": 0,
-                    }
-                )
+            session = self.get_session()
+            try:
+                for lemma in filtered_lemmas:
+                    # Check how many forms this lemma already has
+                    existing_forms = (
+                        session.query(DerivativeForm)
+                        .filter(
+                            DerivativeForm.lemma_id == lemma.id,
+                            DerivativeForm.language_code == language_code,
+                        )
+                        .all()
+                    )
+                    existing_grammatical_forms = {f.grammatical_form for f in existing_forms}
+                    current_form_count = len(existing_grammatical_forms & expected_grammatical_forms)
+
+                    # Only add to list if it needs forms
+                    if current_form_count < task_config.min_forms_threshold:
+                        translation = (
+                            get_translation(session, lemma, language_code)
+                            if language_code != "en"
+                            else lemma.lemma_text
+                        )
+                        items_needing_forms.append(
+                            {
+                                "guid": lemma.guid,
+                                "english": lemma.lemma_text,
+                                "translation": translation or f"({language_code})",
+                                "pos_subtype": lemma.pos_subtype,
+                                "difficulty_level": lemma.difficulty_level,
+                                "current_form_count": current_form_count,
+                            }
+                        )
+            finally:
+                session.close()
+
             total_needs_fix = len(items_needing_forms)
         else:
             # Get form coverage check results
