@@ -809,7 +809,7 @@ def apply_disambiguation(lemma_id):
 
 @bp.route("/generate-sentences/<int:lemma_id>", methods=["POST"])
 def generate_sentences(lemma_id):
-    """Generate example sentences for a lemma using the Žvirblis agent."""
+    """Generate example sentences for a lemma using the Buivolas agent."""
     lemma = g.db.query(Lemma).get(lemma_id)
     if not lemma:
         flash("Lemma not found", "error")
@@ -826,8 +826,8 @@ def generate_sentences(lemma_id):
     languages = [lang.strip() for lang in languages if lang.strip()]
 
     try:
-        # Import Žvirblis agent
-        from agents.zvirblis import ZvirblisAgent
+        # Import Buivolas agent for sentence creation
+        from agents.buivolas import BuivolasAgent
         from wordfreq.storage.models.schema import Sentence
 
         # Initialize agent
@@ -837,10 +837,10 @@ def generate_sentences(lemma_id):
             model=constants.DEFAULT_MODEL,
             debug=Config.DEBUG,
         )
-        agent = ZvirblisAgent(config=config)
+        agent = BuivolasAgent(config=config)
 
         # Generate sentences
-        result = agent.generate_sentences_for_noun(
+        result = agent.generate_llm_sentences_for_lemma(
             lemma=lemma,
             target_languages=languages,
             num_sentences=num_sentences,
@@ -857,7 +857,7 @@ def generate_sentences(lemma_id):
             flash("No sentences were generated", "warning")
             return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
-        store_result = agent.store_sentences(
+        store_result = agent.store_llm_sentences(
             sentences_data=sentences_data, source_lemma=lemma, session=g.db
         )
 

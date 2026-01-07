@@ -7,6 +7,8 @@
 #
 # Environment overrides:
 #   LANGUAGES              - Space-separated list of languages for all applicable steps (default: "lt zh ko fr es de pt sw vi")
+#   SENTENCE_COUNT         - Number of sentences to generate per lemma (default: 3)
+#   SENTENCE_TRANSLATION_LIMIT - Target count of fully translated sentences per lemma (optional)
 #   GRAMMAR_FACT_TYPES     - Space-separated fact types for Lape (optional; overrides grouped tasks)
 #   GRAMMAR_FACT_TASK      - Lape grouped task preset (default: "all")
 #   AUDIO_VOICES           - Optional voice names for Strazdas (space-separated)
@@ -45,6 +47,8 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO_ROOT"
 
 LANGUAGES=${LANGUAGES:-"lt zh ko fr es de pt sw vi"}
+SENTENCE_COUNT=${SENTENCE_COUNT:-3}
+SENTENCE_TRANSLATION_LIMIT=${SENTENCE_TRANSLATION_LIMIT:-""}
 GRAMMAR_FACT_TYPES=${GRAMMAR_FACT_TYPES:-""}
 GRAMMAR_FACT_TASK=${GRAMMAR_FACT_TASK:-"all"}
 AUDIO_VOICES=${AUDIO_VOICES:-""}
@@ -54,6 +58,23 @@ if [[ -n "${GRAMMAR_FACT_TYPES// }" ]]; then
   read -r -a GRAMMAR_FACT_TYPE_LIST <<< "$GRAMMAR_FACT_TYPES"
 else
   GRAMMAR_FACT_TYPE_LIST=()
+fi
+
+SENTENCE_LANGUAGE_LIST=("${LANGUAGE_LIST[@]}")
+NEEDS_SENTENCE_EN=true
+for lang in "${SENTENCE_LANGUAGE_LIST[@]}"; do
+  if [[ "$lang" == "en" ]]; then
+    NEEDS_SENTENCE_EN=false
+    break
+  fi
+done
+if [[ "$NEEDS_SENTENCE_EN" == true ]]; then
+  SENTENCE_LANGUAGE_LIST+=("en")
+fi
+
+SENTENCE_TRANSLATION_ARGS=()
+if [[ -n "$SENTENCE_TRANSLATION_LIMIT" ]]; then
+  SENTENCE_TRANSLATION_ARGS+=(--translation-limit "$SENTENCE_TRANSLATION_LIMIT")
 fi
 
 run_step() {
@@ -89,6 +110,9 @@ run_step "Grammatical forms" \
 run_step "Synonyms" \
   python -m agents.sernas.cli --guid "$GUID" --mode populate-only --languages ${LANGUAGES} --yes
 
+run_step "Pattern sentences" \
+  python -m agents.buivolas generate-sentences --mode pattern --guid "$GUID"
+
 # Grammatical facts (Lape) - run once across languages and supported tasks
 LAPE_LANGUAGES=("${LANGUAGE_LIST[@]}")
 NEEDS_EN=true
@@ -112,9 +136,11 @@ else
     python -m agents.lape --guid "$GUID" --task "$GRAMMAR_FACT_TASK" --languages ${LAPE_LANGUAGES[*]}
 fi
 
-# TODO: Sentence generation once --guid is supported for the sentence agents
-# run_step "Sentences" python -m agents.zvirblis --guid "$GUID" --num-sentences 3
-# run_step "Sentence translations" python -m agents.zvirblis --guid "$GUID" --num-sentences 3 --languages en lt
+run_step "Sentences" \
+  python -m agents.buivolas generate-sentences --mode llm --guid "$GUID" --num-sentences "$SENTENCE_COUNT" --languages ${SENTENCE_LANGUAGE_LIST[*]}
+
+run_step "Sentence translations" \
+  python -m agents.zvirblis --guid "$GUID" --languages ${SENTENCE_LANGUAGE_LIST[*]} ${SENTENCE_TRANSLATION_ARGS[@]+"${SENTENCE_TRANSLATION_ARGS[@]}"}
 
 # Audio generation (Strazdas - eSpeak-NG)
 for lang in "${LANGUAGE_LIST[@]}"; do

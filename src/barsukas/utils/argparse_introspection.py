@@ -259,17 +259,18 @@ def get_agent_cli_module_path(agent_script: str) -> str:
     Get the Python module path for an agent's CLI.
 
     Args:
-        agent_script: Script name like 'voras.py' or 'bebras.py'
+        agent_script: Script name like 'voras.py' or 'buivolas/cli.py'
 
     Returns:
-        Module path like 'agents.voras.cli' or 'agents.bebras'
+        Module path like 'agents.voras.cli' or 'agents.buivolas.cli'
     """
-    agent_name = agent_script.replace(".py", "")
+    module_stub = agent_script.replace(".py", "").replace("/", ".")
+    agent_name = module_stub.split(".")[0]
 
     # Check if it's a multi-file agent (has a directory)
-    multi_file_agents = ["voras", "vilkas", "dramblys", "sernas", "bebras"]
+    multi_file_agents = ["voras", "vilkas", "dramblys", "sernas", "bebras", "buivolas"]
 
-    if agent_name in multi_file_agents:
+    if agent_name in multi_file_agents and module_stub == agent_name:
         return f"agents.{agent_name}.cli"
-    else:
-        return f"agents.{agent_name}"
+
+    return f"agents.{module_stub}"
