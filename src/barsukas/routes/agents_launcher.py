@@ -104,10 +104,10 @@ AGENTS = [
     {
         "name": "ZVIRBLIS",
         "display_name": "Žvirblis",
-        "subtitle": "Sentence Generator",
-        "description": "Generates example sentences for vocabulary words using LLM, with automatic difficulty calculation.",
+        "subtitle": "Sentence Translator",
+        "description": "Translates existing sentences linked to vocabulary words into target languages.",
         "script": "zvirblis.py",
-        "icon": "bi-chat-quote",
+        "icon": "bi-grid-3x3",
         "use_dynamic_form": True,
     },
     {
@@ -115,7 +115,7 @@ AGENTS = [
         "display_name": "Buivolas",
         "subtitle": "Pattern Sentence Generator",
         "description": "Generates simple pattern-based sentences for language learning across multiple languages.",
-        "script": "buivolas.py",
+        "script": "buivolas/cli.py",
         "icon": "bi-grid-3x3",
         "use_dynamic_form": True,
         "redirect_to": "pattern_sentences.index",
@@ -220,19 +220,19 @@ PIPELINE = [
     },
     {
         "step": 6,
-        "agent_name": "ZVIRBLIS",
+        "agent_name": "BUIVOLAS",
         "display_name": "Generate Example Sentences",
-        "description": "Generate example sentences with automatic difficulty calculation",
-        "icon": "bi-chat-quote",
-        "typical_args": "--mode generate-sentences",
+        "description": "Generate example sentences for vocabulary words",
+        "icon": "bi-grid-3x3",
+        "typical_args": "generate-sentences --mode llm",
     },
     {
         "step": 7,
-        "agent_name": "BUIVOLAS",
-        "display_name": "Generate Pattern Sentences",
-        "description": "Generate simple pattern-based sentences for learning",
-        "icon": "bi-grid-3x3",
-        "typical_args": "--mode generate-patterns",
+        "agent_name": "ZVIRBLIS",
+        "display_name": "Translate Sentences",
+        "description": "Translate sentences linked to lemmas into target languages",
+        "icon": "bi-chat-quote",
+        "typical_args": "--guid N06_001 --languages lt zh",
     },
     {
         "step": 8,
@@ -511,4 +511,3 @@ def stream_output(task_id):
             time.sleep(0.1)
 
     return Response(generate(), mimetype="text/event-stream")
-

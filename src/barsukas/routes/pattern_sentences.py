@@ -59,7 +59,7 @@ def generate_candidates():
     dry_run = request.form.get("dry_run") == "on"
 
     # Build buivolas command
-    script_path = Path(constants.AGENTS_DIR) / "buivolas.py"
+    script_path = Path(constants.AGENTS_DIR) / "buivolas/cli.py"
 
     if not script_path.exists():
         return jsonify({"success": False, "error": f"Buivolas agent not found"}), 404
@@ -136,7 +136,7 @@ def submit_batch():
         return jsonify({"success": False, "error": "No languages selected"}), 400
 
     # Build buivolas command
-    script_path = Path(constants.AGENTS_DIR) / "buivolas.py"
+    script_path = Path(constants.AGENTS_DIR) / "buivolas/cli.py"
 
     if not script_path.exists():
         return jsonify({"success": False, "error": f"Buivolas agent not found"}), 404
@@ -198,7 +198,7 @@ def submit_batch():
 @bp.route("/batch-status")
 def batch_status():
     """Get status of all active batches."""
-    script_path = Path(constants.AGENTS_DIR) / "buivolas.py"
+    script_path = Path(constants.AGENTS_DIR) / "buivolas/cli.py"
 
     if not script_path.exists():
         return jsonify({"success": False, "error": f"Buivolas agent not found"}), 404
@@ -226,7 +226,7 @@ def batch_status():
 @bp.route("/check-batch/<batch_id>")
 def check_batch(batch_id):
     """Check status of a specific batch and retrieve results if completed."""
-    script_path = Path(constants.AGENTS_DIR) / "buivolas.py"
+    script_path = Path(constants.AGENTS_DIR) / "buivolas/cli.py"
 
     if not script_path.exists():
         return jsonify({"success": False, "error": f"Buivolas agent not found"}), 404
@@ -271,7 +271,7 @@ def check_batch(batch_id):
 @bp.route("/retrieve-batch/<batch_id>", methods=["POST"])
 def retrieve_batch(batch_id):
     """Retrieve and apply results from a completed batch."""
-    script_path = Path(constants.AGENTS_DIR) / "buivolas.py"
+    script_path = Path(constants.AGENTS_DIR) / "buivolas/cli.py"
 
     if not script_path.exists():
         return jsonify({"success": False, "error": f"Buivolas agent not found"}), 404
