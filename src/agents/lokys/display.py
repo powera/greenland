@@ -55,6 +55,33 @@ def display_definition_validation_result(result: dict, lemma_text: str, definiti
     return False, None
 
 
+def display_disambiguation_validation_result(result: dict, lemma_text: str):
+    """
+    Display disambiguation validation results.
+
+    Args:
+        result: Validation result dictionary from check_single_disambiguation
+        lemma_text: The lemma text being validated
+    """
+    print(f"\nDisambiguation validation:")
+    print(f"  Needs disambiguation: {result['needs_disambiguation']}")
+    if not result["needs_disambiguation"]:
+        print(f"  Reason: {result.get('reason', 'n/a')}")
+        return
+
+    if result.get("has_parenthetical"):
+        print(f"  Already disambiguated: {lemma_text}")
+        return
+
+    suggestions = result.get("llm_suggestions", {})
+    suggested = suggestions.get("suggested_disambiguation")
+    confidence = suggestions.get("confidence")
+    if suggested:
+        print(f"  Suggested: {lemma_text} ({suggested})")
+    if confidence is not None:
+        print(f"  Confidence: {confidence:.2f}")
+
+
 def display_single_lemma_header(lemma, guid: str):
     """
     Display header for single lemma validation.

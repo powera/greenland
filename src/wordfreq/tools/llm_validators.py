@@ -896,3 +896,92 @@ Provide a short disambiguation term for each definition."""
     except Exception as e:
         logger.error(f"Error getting disambiguation suggestions: {e}")
         return {"success": False, "error": str(e), "suggestions": {}}
+
+
+def validate_disambiguation_need(
+    word: str,
+    pos_type: str,
+    definition: str,
+    translations: Optional[Dict[str, str]] = None,
+    has_parenthetical: bool = False,
+    model: str = "gpt-5-mini",
+) -> Dict[str, any]:
+    """
+    Validate whether a lemma needs parenthetical disambiguation.
+
+    Args:
+        word: The English word to validate
+        pos_type: Part of speech
+        definition: Current definition text
+        translations: Optional translations for context (language code -> translation)
+        has_parenthetical: Whether the lemma already includes a parenthetical
+        model: LLM model to use
+
+    Returns:
+        Dictionary with validation results:
+        - needs_disambiguation: bool indicating if parenthetical is needed
+        - suggested_disambiguation: short parenthetical for this sense, if needed
+        - reason: short explanation
+        - confidence: float 0-1
+    """
+    client = UnifiedLLMClient()
+
+    schema = Schema(
+        name="DisambiguationNeedValidation",
+        description="Validation of whether an English lemma needs parenthetical disambiguation",
+        properties={
+            "needs_disambiguation": SchemaProperty(
+                "boolean", "True if the lemma should have a parenthetical disambiguation"
+            ),
+            "suggested_disambiguation": SchemaProperty(
+                "string", "Short parenthetical for this sense (1-2 words) if needed"
+            ),
+            "reason": SchemaProperty("string", "Short explanation of the decision"),
+            "confidence": SchemaProperty(
+                "number", "Confidence score 0.0-1.0", minimum=0.0, maximum=1.0
+            ),
+        },
+    )
+
+    context = util.prompt_loader.get_context("wordfreq", "disambiguation_validation")
+    prompt_template = util.prompt_loader.get_prompt("wordfreq", "disambiguation_validation")
+
+    if translations:
+        translations_info = ", ".join(f"{lang}: {text}" for lang, text in translations.items())
+    else:
+        translations_info = "No translations available"
+
+    prompt = prompt_template.format(
+        word=word,
+        pos_type=pos_type,
+        definition=definition or "No definition provided",
+        translations_info=translations_info,
+        has_parenthetical="yes" if has_parenthetical else "no",
+    )
+
+    logger.debug(f"Validating disambiguation need for word: '{word}' (POS: {pos_type})")
+
+    try:
+        response = client.generate_chat(
+            prompt=prompt, model=model, json_schema=schema, context=context
+        )
+
+        if response.structured_data:
+            return response.structured_data
+        else:
+            logger.error(f"No structured data received for disambiguation validation of '{word}'")
+            return {
+                "needs_disambiguation": False,
+                "suggested_disambiguation": "",
+                "reason": "Validation failed",
+                "confidence": 0.0,
+            }
+
+    except Exception as e:
+        logger.error(f"Error validating disambiguation need for '{word}': {e}")
+        return {
+            "needs_disambiguation": False,
+            "suggested_disambiguation": "",
+            "reason": f"Error: {str(e)}",
+            "confidence": 0.0,
+        }

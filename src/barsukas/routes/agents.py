@@ -439,11 +439,27 @@ def check_disambiguation(lemma_id):
                     f'Found {result["duplicate_count"]} lemmas with "{lemma.lemma_text}", but translations are the same - may be duplicates',
                     "warning",
                 )
+            elif result["reason"] == "already_disambiguated":
+                flash(f'This lemma already has disambiguation: "{lemma.lemma_text}"', "success")
             return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
         # Check if already has parentheticals
         if result["has_parenthetical"]:
             flash(f'This lemma already has disambiguation: "{lemma.lemma_text}"', "success")
+            return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
+
+        if result.get("reason") == "polysemy_detected":
+            suggestion = result.get("llm_suggestions", {}).get("suggested_disambiguation")
+            if suggestion:
+                flash(
+                    f'⚠️ This lemma appears polysemous. Consider "{lemma.lemma_text} ({suggestion})" for this sense.',
+                    "warning",
+                )
+            else:
+                flash(
+                    f'⚠️ This lemma appears polysemous and may need disambiguation (e.g., "{lemma.lemma_text} (sense)").',
+                    "warning",
+                )
             return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
         # Show LLM suggestions if available

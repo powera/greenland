@@ -27,6 +27,7 @@ from agents.lokys.display import (
     display_definition_validation_result,
     display_single_lemma_header,
     display_fix_applied,
+    display_disambiguation_validation_result,
 )
 from wordfreq.tools.llm_validators import validate_lemma_form, validate_definition
 
@@ -59,9 +60,9 @@ def get_argument_parser():
     )
     parser.add_argument(
         "--check-type",
-        choices=["lemma", "definitions", "both"],
+        choices=["lemma", "definitions", "disambiguation", "both"],
         default="both",
-        help='Type of checks to run: "lemma" (lemma form validation), "definitions" (definition validation), or "both" (default: both)',
+        help='Type of checks to run: "lemma" (lemma form validation), "definitions" (definition validation), "disambiguation" (polysemy/disambiguation checks), or "both" (default: all checks)',
     )
 
     return parser
@@ -117,6 +118,14 @@ def main():
                     display_fix_applied(old_definition, new_definition)
                 finally:
                     session.close()
+
+        if args.check_type in ["disambiguation", "both"]:
+            session = agent.get_session()
+            try:
+                result = agent.check_single_disambiguation(lemma, session=session)
+            finally:
+                session.close()
+            display_disambiguation_validation_result(result, lemma.lemma_text)
 
         return
     elif len(lemmas) == 0:

@@ -117,7 +117,9 @@ When running `--init-full`, the agent performs these steps:
 
 **Name:** "Lokys" means "bear" in Lithuanian - thorough and careful in checking quality.
 
-**Purpose:** Validates English-language properties including lemma forms (ensuring they're in proper dictionary/base form like "shoe" not "shoes"), definitions, and POS types.
+**Purpose:** Validates English-language properties including lemma forms (ensuring they're in proper dictionary/base form like "shoe" not "shoes"), definitions, POS types, and disambiguation for common polysemous lemmas.
+
+**Note:** The base concept label/definition comes from base.json inputs and may not be English; Lokys focuses on ensuring the English translation/definition are present and well-formed.
 
 **Usage:**
 ```bash
@@ -986,4 +988,3 @@ The agent integrates with the new sentence support added to the database:
 3. Generate for multiple languages to maximize utility
 4. Review generated sentences periodically and mark as verified
 5. Use dry-run mode to preview before committing to large batches
-
