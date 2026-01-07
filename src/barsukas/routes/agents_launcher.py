@@ -18,6 +18,7 @@ from barsukas.utils.argparse_introspection import (
     group_arguments_by_category,
     get_category_label,
 )
+from barsukas.helpers.flash_helpers import flash_and_log
 
 bp = Blueprint("agents_launcher", __name__, url_prefix="/agents-launcher")
 
@@ -103,10 +104,10 @@ AGENTS = [
     {
         "name": "ZVIRBLIS",
         "display_name": "Žvirblis",
-        "subtitle": "Sentence Generator",
-        "description": "Generates example sentences for vocabulary words using LLM, with automatic difficulty calculation.",
+        "subtitle": "Sentence Translator",
+        "description": "Translates existing sentences linked to vocabulary words into target languages.",
         "script": "zvirblis.py",
-        "icon": "bi-chat-quote",
+        "icon": "bi-grid-3x3",
         "use_dynamic_form": True,
     },
     {
@@ -114,7 +115,7 @@ AGENTS = [
         "display_name": "Buivolas",
         "subtitle": "Pattern Sentence Generator",
         "description": "Generates simple pattern-based sentences for language learning across multiple languages.",
-        "script": "buivolas.py",
+        "script": "buivolas/cli.py",
         "icon": "bi-grid-3x3",
         "use_dynamic_form": True,
         "redirect_to": "pattern_sentences.index",
@@ -219,19 +220,19 @@ PIPELINE = [
     },
     {
         "step": 6,
-        "agent_name": "ZVIRBLIS",
+        "agent_name": "BUIVOLAS",
         "display_name": "Generate Example Sentences",
-        "description": "Generate example sentences with automatic difficulty calculation",
-        "icon": "bi-chat-quote",
-        "typical_args": "--mode generate-sentences",
+        "description": "Generate example sentences for vocabulary words",
+        "icon": "bi-grid-3x3",
+        "typical_args": "generate-sentences --mode llm",
     },
     {
         "step": 7,
-        "agent_name": "BUIVOLAS",
-        "display_name": "Generate Pattern Sentences",
-        "description": "Generate simple pattern-based sentences for learning",
-        "icon": "bi-grid-3x3",
-        "typical_args": "--mode generate-patterns",
+        "agent_name": "ZVIRBLIS",
+        "display_name": "Translate Sentences",
+        "description": "Translate sentences linked to lemmas into target languages",
+        "icon": "bi-chat-quote",
+        "typical_args": "--guid N06_001 --languages lt zh",
     },
     {
         "step": 8,
@@ -307,7 +308,7 @@ def launch_form(agent_name):
     # Find the agent
     agent = next((a for a in AGENTS if a["name"] == agent_name), None)
     if not agent:
-        flash(f"Agent {agent_name} not found", "error")
+        flash_and_log(f"Agent {agent_name} not found", "error")
         return redirect(url_for("agents_launcher.list_agents"))
 
     # If agent has redirect_to, redirect there
@@ -324,7 +325,7 @@ def launch_form(agent_name):
             # Use semantic category grouping instead of mode-based grouping
             argument_groups = group_arguments_by_category(parser_info["arguments"])
         except Exception as e:
-            flash(f"Error introspecting agent arguments: {str(e)}", "error")
+            flash_and_log(f"Error introspecting agent arguments: {str(e)}", "error")
             # Fall back to basic form
             parser_info = None
             argument_groups = None
@@ -344,14 +345,14 @@ def execute_agent(agent_name):
     # Find the agent
     agent = next((a for a in AGENTS if a["name"] == agent_name), None)
     if not agent:
-        flash(f"Agent {agent_name} not found", "error")
+        flash_and_log(f"Agent {agent_name} not found", "error")
         return redirect(url_for("agents_launcher.list_agents"))
 
     # Build command
     script_path = Path(constants.AGENTS_DIR) / agent["script"]
 
     if not script_path.exists():
-        flash(f"Script not found: {script_path}", "error")
+        flash_and_log(f"Script not found: {script_path}", "error")
         return redirect(url_for("agents_launcher.launch_form", agent_name=agent_name))
 
     # Build arguments
@@ -457,7 +458,7 @@ def execute_agent(agent_name):
         return redirect(url_for("agents_launcher.view_output", task_id=task_id))
 
     except Exception as e:
-        flash(f"Error starting agent: {str(e)}", "error")
+        flash_and_log(f"Error starting agent: {str(e)}", "error")
         return redirect(url_for("agents_launcher.launch_form", agent_name=agent_name))
 
 
@@ -465,7 +466,7 @@ def execute_agent(agent_name):
 def view_output(task_id):
     """Display the output page for a running/completed agent task."""
     if task_id not in running_tasks:
-        flash("Task not found or expired", "error")
+        flash_and_log("Task not found or expired", "error")
         return redirect(url_for("agents_launcher.list_agents"))
 
     task = running_tasks[task_id]
@@ -510,4 +511,3 @@ def stream_output(task_id):
             time.sleep(0.1)
 
     return Response(generate(), mimetype="text/event-stream")
-

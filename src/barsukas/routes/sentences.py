@@ -8,6 +8,7 @@ from sqlalchemy import or_, func, case
 from wordfreq.storage.models.schema import Sentence, SentenceTranslation, SentenceWord, Lemma
 from wordfreq.storage.translation_helpers import get_supported_languages
 from config import Config
+from barsukas.helpers.flash_helpers import flash_and_log
 
 bp = Blueprint("sentences", __name__, url_prefix="/sentences")
 
@@ -163,7 +164,6 @@ def view_sentence(sentence_id):
                 "english_text": sw.english_text,
                 "target_text": sw.target_language_text,
                 "grammatical_form": sw.grammatical_form,
-                "grammatical_case": sw.grammatical_case,
                 "lemma": lemma,
                 "lemma_id": sw.lemma_id,
             }
@@ -326,12 +326,7 @@ def accept_sentence(sentence_id):
         target_languages = [lang["code"] for lang in LANGUAGES if lang["code"] != "en"]
         has_all_translations = all(lang in existing_translations for lang in target_languages)
 
-        # Generate missing translations
-        if not has_all_translations:
-            from wordfreq.translation.sentence import translate_sentence
-            translate_sentence(sentence_id, target_languages, g.db, model="gpt-5-mini")
-
-        # Check that all per-word lemma translations exist
+        # Check that all per-word lemma translations exist BEFORE generating sentence translations
         from wordfreq.storage.translation_helpers import get_translation
         missing_translations = []
 
@@ -357,8 +352,13 @@ def accept_sentence(sentence_id):
 
             error_parts = [f"'{word}' ({', '.join(langs)})" for word, langs in by_word.items()]
             error_msg = f"Cannot accept: Missing per-word translations for: {'; '.join(error_parts)}"
-            flash(error_msg, "error")
+            flash_and_log(error_msg, "error")
             return redirect(request.referrer or url_for("sentences.list_sentences"))
+
+        # Generate missing translations (only if validation passed)
+        if not has_all_translations:
+            from wordfreq.translation.sentence import translate_sentence
+            translate_sentence(sentence_id, target_languages, g.db, model="gpt-5-mini")
 
         # Auto-populate the level if not set
         if sentence.minimum_level is None:

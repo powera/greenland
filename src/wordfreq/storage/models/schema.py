@@ -453,7 +453,7 @@ class AudioQualityReview(Base):
     )  # e.g., "ash", "alloy", "echo"
     grammatical_form: Mapped[Optional[str]] = mapped_column(
         String, nullable=True, index=True
-    )  # e.g., "1s_pres", null for base forms
+    )  # e.g., "1s_present", null for base forms
     filename: Mapped[str] = mapped_column(
         String, nullable=False, index=True
     )  # e.g., "N01_001.mp3" or "aš_gyvenu.mp3"

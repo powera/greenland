@@ -79,9 +79,30 @@ def build_translation_prompt(
         "- word: the actual inflected form as it appears in the sentence",
         "- english: English translation of this specific word/phrase",
         "- guid: the GUID for this word if provided in the word reference (e.g., 'N08_001'), or empty string if not provided",
-        "- role: grammatical role (subject, verb, object, adjective, adverb, article, preposition, determiner, etc.)",
-        "- grammatical_form: grammatical details (e.g., '3s_present', '1p_past', 'accusative_plural', 'infinitive')",
-        "- grammatical_case: case if applicable (nominative, accusative, genitive, dative, etc.) or null",
+        "- role: grammatical role (subject, verb, object, adjective, adverb, article, preposition, determiner, pronoun, etc.)",
+        "- grammatical_form: Use format 'pos/lang_details' where:",
+        "  * pos = part of speech (verb, noun, adjective, adverb, pronoun, preposition, conjunction, article, etc.)",
+        "  * lang = language code for the target language (en, lt, fr, de, es, pt, ko, zh)",
+        "  * details = specific form using this notation:",
+        "    - Person/number: 1s, 2s, 3s, 1p, 2p, 3p (no gender unless the WORD FORM itself differs by gender)",
+        "    - Gender ONLY when word form differs: use hyphen for person (3s-m, 3s-f, 3p-m, 3p-f) or underscore for case (singular_m, plural_f)",
+        "    - Tense: present, past, future, impf, pc (passé composé), inf (infinitive), etc.",
+        "    - Case (Lithuanian, German only): nominative, accusative, genitive, dative, instrumental, locative, vocative",
+        "    - For languages WITHOUT grammatical case (English, French, Spanish, Portuguese, Korean, Chinese):",
+        "      Use ONLY singular/plural without case: 'noun/en_singular', 'noun/fr_plural', 'noun/zh_singular'",
+        "    - For languages WITH grammatical case (Lithuanian, German):",
+        "      Use case_number: 'noun/lt_nominative_singular', 'noun/de_accusative_plural'",
+        "    - Combine with underscores: nominative_singular, accusative_plural_m, etc.",
+        "  * Examples:",
+        "    - 'verb/lt_3s_present' (Lithuanian 'dirba' - same form for he/she)",
+        "    - 'verb/fr_3s_present' (French 'va' - same form for he/she)",
+        "    - 'verb/fr_past_participle_f' (French 'partagée' - feminine participle)",
+        "    - 'noun/de_accusative_singular' (German noun in accusative)",
+        "    - 'adjective/es_plural_f' (Spanish feminine plural adjective)",
+        "    - 'pronoun/subjective' (for 'I', 'you', 'he', 'she', 'we', 'they')",
+        "    - 'pronoun/objective' (for 'me', 'you', 'him', 'her', 'us', 'them')",
+        "    - 'pronoun/possessive' (for 'my', 'your', 'his', 'her', 'our', 'their')",
+        "  * For invariant words: 'preposition/base', 'conjunction/base', 'article/base'",
         "",
         "IMPORTANT: Do NOT include punctuation marks as separate words in the breakdown.",
         "Provide words in the order they appear in the translated sentence."
@@ -128,36 +149,18 @@ def build_response_schema(target_languages: List[str]) -> Dict:
     Returns:
         Schema dict suitable for clients.lib.schema_from_dict()
     """
-    # Schema for individual word details
+    # Schema for individual word details - no descriptions to reduce token usage
+    # (detailed field explanations are in the prompt context)
     word_schema = {
         "type": "object",
         "properties": {
-            "word": {
-                "type": "string",
-                "description": "The actual inflected form as it appears in the sentence"
-            },
-            "english": {
-                "type": "string",
-                "description": "English translation of this word/phrase"
-            },
-            "guid": {
-                "type": "string",
-                "description": "GUID for this word (e.g., 'N08_001'), or empty string if not applicable"
-            },
-            "role": {
-                "type": "string",
-                "description": "Grammatical role: subject, verb, object, adjective, adverb, article, preposition, determiner, etc."
-            },
-            "grammatical_form": {
-                "type": ["string", "null"],
-                "description": "Grammatical details like '3s_present', '1p_past', 'accusative_plural', 'infinitive'"
-            },
-            "grammatical_case": {
-                "type": ["string", "null"],
-                "description": "Case if applicable: nominative, accusative, genitive, dative, etc."
-            }
+            "word": {"type": "string"},
+            "english": {"type": "string"},
+            "guid": {"type": "string"},
+            "role": {"type": "string"},
+            "grammatical_form": {"type": ["string", "null"]}
         },
-        "required": ["word", "english", "guid", "role", "grammatical_form", "grammatical_case"],
+        "required": ["word", "english", "guid", "role", "grammatical_form"],
         "additionalProperties": False
     }
 
@@ -165,11 +168,11 @@ def build_response_schema(target_languages: List[str]) -> Dict:
     schema_properties = {
         "en": {
             "type": "string",
-            "description": "Corrected grammatically correct English translation"
+            "description": "Grammatically corrected English sentence"
         },
         "words_en": {
             "type": "array",
-            "description": "Word-by-word breakdown for English",
+            "description": "English word breakdown",
             "items": word_schema
         }
     }
@@ -181,11 +184,11 @@ def build_response_schema(target_languages: List[str]) -> Dict:
         lang_name = LANGUAGE_NAMES.get(lang, lang)
         schema_properties[lang] = {
             "type": "string",
-            "description": f"Natural translation in {lang_name}"
+            "description": f"{lang_name} translation"
         }
         schema_properties[f"words_{lang}"] = {
             "type": "array",
-            "description": f"Word-by-word breakdown for {lang_name}",
+            "description": f"{lang_name} word breakdown",
             "items": word_schema
         }
         required_fields.extend([lang, f"words_{lang}"])
@@ -242,12 +245,6 @@ def translate_sentence(
         context=context
     )
 
-    # DEBUG: Print raw result
-    logger.info(f"=== LLM Raw Result for sentence {sentence_id} ===")
-    logger.info(f"result.response_text: {result.response_text}")
-    logger.info(f"result.structured_data: {result.structured_data}")
-    logger.info("=" * 50)
-
     # Parse response - check both structured_data and response_text
     if result.structured_data:
         translations = result.structured_data
@@ -256,13 +253,6 @@ def translate_sentence(
         translations = json.loads(result.response_text)
     else:
         raise ValueError("No response data found in LLM result")
-
-    # DEBUG: Print parsed response
-    logger.info(f"=== Parsed Response for sentence {sentence_id} ===")
-    logger.info(f"Response type: {type(translations)}")
-    logger.info(f"Response keys: {translations.keys() if isinstance(translations, dict) else 'N/A'}")
-    logger.info(f"Full response: {translations}")
-    logger.info("=" * 50)
 
     # Store translations in database
     store_translation_results(sentence_id, translations, session)
@@ -359,7 +349,7 @@ def store_translation_results(sentence_id: int, translations: Dict, session):
                 english_text=word_data.get("english"),
                 target_language_text=word_data.get("word"),
                 grammatical_form=word_data.get("grammatical_form"),
-                grammatical_case=word_data.get("grammatical_case"),
+                grammatical_case=None,
                 declined_form=word_data.get("word")
             )
             session.add(new_word)

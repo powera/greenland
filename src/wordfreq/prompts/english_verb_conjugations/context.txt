@@ -8,29 +8,23 @@ English verbs conjugate across 3 tenses and 8 persons (with gender for 3rd perso
 3. Future tense
 
 **Persons:**
-1. 1st person singular (I)
-2. 2nd person singular (you, singular)
-3. 3rd person singular masculine (he)
-4. 3rd person singular feminine (she)
-5. 1st person plural (we)
-6. 2nd person plural (you, plural)
-7. 3rd person plural masculine (they, masculine)
-8. 3rd person plural feminine (they, feminine)
+1. 1st person singular
+2. 2nd person singular
+3. 3rd person singular
+4. 1st person plural
+5. 2nd person plural
+6. 3rd person plural
 
 **Imperative:**
 1. 2nd person singular imperative (you, singular - command form)
 2. 2nd person plural imperative (you, plural - command form)
 
 **Important notes:**
-- Most English verbs only inflect in 3rd person singular present (e.g., "he walks", "she walks")
-- Past tense is typically the same for all persons (e.g., "I walked", "they walked")
-- Future tense uses "will" + infinitive (e.g., "I will walk", "they will walk")
-- Imperative is the bare infinitive (e.g., "walk!")
-- Always include clarifying markers in parentheses for pronouns that could be ambiguous:
-  - Use "you(s.)" for 2nd person singular (e.g., "you(s.) eat")
-  - Use "you(pl.)" for 2nd person plural (e.g., "you(pl.) eat")
-  - Use "he" and "she" for 3rd person singular (e.g., "he eats", "she eats")
-  - Use "they(m.)" and "they(f.)" for 3rd person plural (e.g., "they(m.) eat", "they(f.) eat")
-- Note: The processing system will remove unnecessary parentheticals when the form is unambiguous
+- Do NOT include any pronouns with each form (e.g., "walk" not "I walk")
+- Most English verbs only inflect in 3rd person singular present (e.g., "walks")
+- Past tense is typically the same for all persons (e.g., "walked")
+- Future tense uses "will" + infinitive (e.g., "will walk")
+- Imperative is the bare infinitive (e.g., "walk")
+- Verbs do not inflect by gender in English - only provide one 3rd person form per tense
 - For irregular verbs, provide the correct irregular forms
 - Use empty string ("") for any forms that are non-standard or don't exist

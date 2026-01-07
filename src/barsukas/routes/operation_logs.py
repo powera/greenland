@@ -2,12 +2,13 @@
 
 """Routes for viewing operation logs."""
 
-from flask import Blueprint, render_template, request, g
+from flask import Blueprint, render_template, request, g, flash, redirect, url_for
 import json
 
 from wordfreq.storage.models.operation_log import OperationLog
 from wordfreq.storage.models.schema import Lemma
 from config import Config
+from barsukas.helpers.flash_helpers import flash_and_log
 
 bp = Blueprint("operation_logs", __name__, url_prefix="/logs")
 
@@ -92,9 +93,7 @@ def view_log(log_id):
     """View a single operation log entry."""
     log = g.db.query(OperationLog).get(log_id)
     if not log:
-        from flask import flash, redirect, url_for
-
-        flash("Log entry not found", "error")
+        flash_and_log("Log entry not found", "error")
         return redirect(url_for("operation_logs.list_logs"))
 
     try:

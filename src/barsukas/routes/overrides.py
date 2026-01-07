@@ -13,6 +13,7 @@ from wordfreq.storage.crud.difficulty_override import (
 from wordfreq.storage.crud.operation_log import log_translation_change
 from wordfreq.storage.translation_helpers import get_supported_languages
 from config import Config
+from barsukas.helpers.flash_helpers import flash_and_log
 
 bp = Blueprint("overrides", __name__, url_prefix="/overrides")
 
@@ -23,12 +24,12 @@ def add_override(lemma_id):
     from flask import current_app
 
     if current_app.config.get("READONLY", False):
-        flash("Cannot add override: running in read-only mode", "error")
+        flash_and_log("Cannot add override: running in read-only mode", "error")
         return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
     lemma = g.db.query(Lemma).get(lemma_id)
     if not lemma:
-        flash("Lemma not found", "error")
+        flash_and_log("Lemma not found", "error")
         return redirect(url_for("lemmas.list_lemmas"))
 
     # Get form data
@@ -38,7 +39,7 @@ def add_override(lemma_id):
 
     # Validate language code
     if lang_code not in get_supported_languages():
-        flash("Invalid language code", "error")
+        flash_and_log("Invalid language code", "error")
         return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
     # Validate difficulty level
@@ -54,7 +55,7 @@ def add_override(lemma_id):
             )
             return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
     except ValueError:
-        flash("Invalid difficulty level", "error")
+        flash_and_log("Invalid difficulty level", "error")
         return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
     # Check if override already exists
@@ -97,18 +98,18 @@ def delete_override(lemma_id, lang_code):
     from flask import current_app
 
     if current_app.config.get("READONLY", False):
-        flash("Cannot delete override: running in read-only mode", "error")
+        flash_and_log("Cannot delete override: running in read-only mode", "error")
         return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
     lemma = g.db.query(Lemma).get(lemma_id)
     if not lemma:
-        flash("Lemma not found", "error")
+        flash_and_log("Lemma not found", "error")
         return redirect(url_for("lemmas.list_lemmas"))
 
     # Get old override for logging
     old_override = get_difficulty_override(g.db, lemma_id, lang_code)
     if not old_override:
-        flash("Override not found", "error")
+        flash_and_log("Override not found", "error")
         return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
     old_level = old_override.difficulty_level
@@ -133,6 +134,6 @@ def delete_override(lemma_id, lang_code):
         lang_name = get_supported_languages()[lang_code]
         flash(f"Deleted difficulty override for {lang_name}", "success")
     else:
-        flash("Failed to delete override", "error")
+        flash_and_log("Failed to delete override", "error")
 
     return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))

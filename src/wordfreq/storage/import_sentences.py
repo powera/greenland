@@ -158,7 +158,7 @@ def import_sentence_from_dict(
                 "lithuanian"
             ),  # Could be made dynamic based on target language
             grammatical_form=word_data.get("form"),
-            grammatical_case=word_data.get("case"),
+            grammatical_case=None,
             declined_form=word_data.get("declined_form"),
         )
 

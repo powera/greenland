@@ -22,42 +22,30 @@ NOUN_FORM_MAPPING = {
 }
 
 VERB_FORM_MAPPING = {
-    # Present (8 persons)
-    "1s_pres": GrammaticalForm.VERB_FR_1S_PRES,
-    "2s_pres": GrammaticalForm.VERB_FR_2S_PRES,
-    "3s-m_pres": GrammaticalForm.VERB_FR_3S_M_PRES,
-    "3s-f_pres": GrammaticalForm.VERB_FR_3S_F_PRES,
-    "1p_pres": GrammaticalForm.VERB_FR_1P_PRES,
-    "2p_pres": GrammaticalForm.VERB_FR_2P_PRES,
-    "3p-m_pres": GrammaticalForm.VERB_FR_3P_M_PRES,
-    "3p-f_pres": GrammaticalForm.VERB_FR_3P_F_PRES,
-    # Imperfect (8 persons)
+    # Present (6 persons)
+    "1s_present": GrammaticalForm.VERB_FR_1S_PRESENT,
+    "2s_present": GrammaticalForm.VERB_FR_2S_PRESENT,
+    "3s_present": GrammaticalForm.VERB_FR_3S_PRESENT,
+    "1p_present": GrammaticalForm.VERB_FR_1P_PRESENT,
+    "2p_present": GrammaticalForm.VERB_FR_2P_PRESENT,
+    "3p_present": GrammaticalForm.VERB_FR_3P_PRESENT,
+    # Imperfect (6 persons)
     "1s_impf": GrammaticalForm.VERB_FR_1S_IMPF,
     "2s_impf": GrammaticalForm.VERB_FR_2S_IMPF,
-    "3s-m_impf": GrammaticalForm.VERB_FR_3S_M_IMPF,
-    "3s-f_impf": GrammaticalForm.VERB_FR_3S_F_IMPF,
+    "3s_impf": GrammaticalForm.VERB_FR_3S_IMPF,
     "1p_impf": GrammaticalForm.VERB_FR_1P_IMPF,
     "2p_impf": GrammaticalForm.VERB_FR_2P_IMPF,
-    "3p-m_impf": GrammaticalForm.VERB_FR_3P_M_IMPF,
-    "3p-f_impf": GrammaticalForm.VERB_FR_3P_F_IMPF,
-    # Future (8 persons)
-    "1s_fut": GrammaticalForm.VERB_FR_1S_FUT,
-    "2s_fut": GrammaticalForm.VERB_FR_2S_FUT,
-    "3s-m_fut": GrammaticalForm.VERB_FR_3S_M_FUT,
-    "3s-f_fut": GrammaticalForm.VERB_FR_3S_F_FUT,
-    "1p_fut": GrammaticalForm.VERB_FR_1P_FUT,
-    "2p_fut": GrammaticalForm.VERB_FR_2P_FUT,
-    "3p-m_fut": GrammaticalForm.VERB_FR_3P_M_FUT,
-    "3p-f_fut": GrammaticalForm.VERB_FR_3P_F_FUT,
-    # Passé composé (8 persons)
-    "1s_pc": GrammaticalForm.VERB_FR_1S_PC,
-    "2s_pc": GrammaticalForm.VERB_FR_2S_PC,
-    "3s-m_pc": GrammaticalForm.VERB_FR_3S_M_PC,
-    "3s-f_pc": GrammaticalForm.VERB_FR_3S_F_PC,
-    "1p_pc": GrammaticalForm.VERB_FR_1P_PC,
-    "2p_pc": GrammaticalForm.VERB_FR_2P_PC,
-    "3p-m_pc": GrammaticalForm.VERB_FR_3P_M_PC,
-    "3p-f_pc": GrammaticalForm.VERB_FR_3P_F_PC,
+    "3p_impf": GrammaticalForm.VERB_FR_3P_IMPF,
+    # Future (6 persons)
+    "1s_future": GrammaticalForm.VERB_FR_1S_FUTURE,
+    "2s_future": GrammaticalForm.VERB_FR_2S_FUTURE,
+    "3s_future": GrammaticalForm.VERB_FR_3S_FUTURE,
+    "1p_future": GrammaticalForm.VERB_FR_1P_FUTURE,
+    "2p_future": GrammaticalForm.VERB_FR_2P_FUTURE,
+    "3p_future": GrammaticalForm.VERB_FR_3P_FUTURE,
+    # Passé composé (2 past participle forms)
+    "pc_m": GrammaticalForm.VERB_FR_PC_M,
+    "pc_f": GrammaticalForm.VERB_FR_PC_F,
 }
 
 
@@ -124,7 +112,7 @@ def query_french_noun_forms(client, lemma_id: int, get_session_func) -> Tuple[Di
 def query_french_verb_conjugations(
     client, lemma_id: int, get_session_func
 ) -> Tuple[Dict[str, str], bool]:
-    """Query LLM for French verb conjugations (8 persons × 4 tenses = 32 forms)."""
+    """Query LLM for French verb conjugations (6 persons × 3 tenses + 2 past participles = 20 forms)."""
     session = get_session_func()
     lemma = session.query(linguistic_db.Lemma).filter(linguistic_db.Lemma.id == lemma_id).first()
     french_translation = get_translation(session, lemma, "fr") if lemma else None
@@ -138,17 +126,15 @@ def query_french_verb_conjugations(
         lemma.definition_text,
         lemma.pos_subtype,
     )
-    tenses = [
-        ("pres", "present"),
-        ("impf", "imperfect"),
-        ("fut", "future"),
-        ("pc", "passé composé"),
-    ]
+    # 6 persons for present, imperfect, future
+    regular_tenses = [("present", "present"), ("impf", "imperfect"), ("future", "future")]
     fields = [
         f"{p}_{t}"
-        for t, _ in tenses
-        for p in ["1s", "2s", "3s-m", "3s-f", "1p", "2p", "3p-m", "3p-f"]
+        for t, _ in regular_tenses
+        for p in ["1s", "2s", "3s", "1p", "2p", "3p"]
     ]
+    # Add past participle forms (masculine and feminine)
+    fields.extend(["pc_m", "pc_f"])
     form_properties = {f: SchemaProperty("string", f"French {f.replace('_', ' ')}") for f in fields}
 
     schema = Schema(

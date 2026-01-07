@@ -15,6 +15,7 @@ from agents.papuga import PapugaAgent
 from agents.lokys import LokysAgent
 from config import Config
 from barsukas.utils.task_queue import enqueue_task, TaskType
+from barsukas.helpers.flash_helpers import flash_and_log
 
 bp = Blueprint("agents", __name__, url_prefix="/agents")
 logger = logging.getLogger(__name__)
@@ -290,7 +291,7 @@ def generate_forms(lemma_id):
         return redirect(url_for("lemmas.list_lemmas"))
 
     if not lemma.guid:
-        flash("Lemma is missing a GUID, cannot request form generation", "error")
+        flash_and_log("Lemma is missing a GUID, cannot request form generation", "error")
         return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
     # Get language code and pos_type from form
@@ -545,7 +546,7 @@ def apply_disambiguation(lemma_id):
 
 @bp.route("/generate-sentences/<int:lemma_id>", methods=["POST"])
 def generate_sentences(lemma_id):
-    """Generate example sentences for a lemma using the Žvirblis agent."""
+    """Generate example sentences for a lemma using the Buivolas agent."""
     lemma = g.db.query(Lemma).get(lemma_id)
     if not lemma:
         flash("Lemma not found", "error")
@@ -562,8 +563,8 @@ def generate_sentences(lemma_id):
     languages = [lang.strip() for lang in languages if lang.strip()]
 
     try:
-        # Import Žvirblis agent
-        from agents.zvirblis import ZvirblisAgent
+        # Import Buivolas agent for sentence creation
+        from agents.buivolas import BuivolasAgent
         from wordfreq.storage.models.schema import Sentence
 
         # Initialize agent
@@ -573,10 +574,10 @@ def generate_sentences(lemma_id):
             model=constants.DEFAULT_MODEL,
             debug=Config.DEBUG,
         )
-        agent = ZvirblisAgent(config=config)
+        agent = BuivolasAgent(config=config)
 
         # Generate sentences
-        result = agent.generate_sentences_for_noun(
+        result = agent.generate_llm_sentences_for_lemma(
             lemma=lemma,
             target_languages=languages,
             num_sentences=num_sentences,
@@ -584,7 +585,7 @@ def generate_sentences(lemma_id):
         )
 
         if not result.get("success"):
-            flash(f'Failed to generate sentences: {result.get("error", "Unknown error")}', "error")
+            flash_and_log(f'Failed to generate sentences: {result.get("error", "Unknown error")}', "error")
             return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
         # Store the generated sentences
@@ -593,7 +594,7 @@ def generate_sentences(lemma_id):
             flash("No sentences were generated", "warning")
             return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
-        store_result = agent.store_sentences(
+        store_result = agent.store_llm_sentences(
             sentences_data=sentences_data, source_lemma=lemma, session=g.db
         )
 
@@ -618,7 +619,7 @@ def generate_sentences(lemma_id):
                 generated_count=store_result["stored"],
             )
         else:
-            flash("Failed to store generated sentences", "error")
+            flash_and_log("Failed to store generated sentences", "error")
             if store_result.get("errors"):
                 for error in store_result["errors"][:3]:  # Show first 3 errors
                     flash(f"Error: {error}", "error")
@@ -702,7 +703,7 @@ def generate_grammar_fact(lemma_id):
                 lemma, translation, language_code, g.db
             )
         else:
-            flash(f"Handler not yet implemented for fact type: {fact_type}", "error")
+            flash_and_log(f"Handler not yet implemented for fact type: {fact_type}", "error")
             return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
         if fact_value and confidence >= 0.7:
