@@ -238,11 +238,19 @@ class PatternSentenceGenerator:
     def lookup_fixed_words(self, session, pattern: Dict) -> List[Tuple[Lemma, str]]:
         fixed_lemmas = []
         for fixed_word in pattern.get("fixed_words", []):
-            query = session.query(Lemma).filter(
-                Lemma.lemma_text == fixed_word["lemma_text"],
-                Lemma.pos_type == fixed_word["pos_type"],
-                Lemma.guid.isnot(None),
-            )
+            if fixed_word.get("guid"):
+                query = session.query(Lemma).filter(
+                    Lemma.guid == fixed_word["guid"],
+                    Lemma.guid.isnot(None),
+                )
+                if fixed_word.get("pos_type"):
+                    query = query.filter(Lemma.pos_type == fixed_word["pos_type"])
+            else:
+                query = session.query(Lemma).filter(
+                    Lemma.lemma_text == fixed_word["lemma_text"],
+                    Lemma.pos_type == fixed_word["pos_type"],
+                    Lemma.guid.isnot(None),
+                )
             lemma = query.first()
             if lemma:
                 fixed_lemmas.append((lemma, lemma.guid))

@@ -356,10 +356,7 @@ SIMPLE_PATTERNS = [
                 "max_level": 10,
             }
         ],
-        "fixed_words": [
-            {"lemma_text": "be", "pos_type": "verb"},
-            {"lemma_text": "here", "pos_type": "adverb"},
-        ],
+        "fixed_words": [{"lemma_text": "here", "pos_type": "adverb"}],
         "pattern_type": "SVO",
         "notes": "Family relation being present",
     },
@@ -562,10 +559,7 @@ SIMPLE_PATTERNS = [
                 "max_level": 10,
             }
         ],
-        "fixed_words": [
-            {"lemma_text": "be", "pos_type": "verb"},
-            {"lemma_text": "here", "pos_type": "adverb"},
-        ],
+        "fixed_words": [{"lemma_text": "here", "pos_type": "adverb"}],
         "pattern_type": "SVO",
         "notes": "Locating furniture items",
     },
@@ -582,7 +576,6 @@ SIMPLE_PATTERNS = [
             }
         ],
         "fixed_words": [
-            {"lemma_text": "be", "pos_type": "verb"},
             {"lemma_text": "make", "pos_type": "verb"},
             {"lemma_text": "of", "pos_type": "preposition"},
         ],
@@ -601,7 +594,6 @@ SIMPLE_PATTERNS = [
                 "max_level": 10,
             }
         ],
-        "fixed_words": [{"lemma_text": "be", "pos_type": "verb"}],
         "pattern_type": "SVO",
         "notes": "Stating a person's nationality",
     },
@@ -633,7 +625,6 @@ SIMPLE_PATTERNS = [
                 "max_level": 10,
             }
         ],
-        "fixed_words": [{"lemma_text": "be", "pos_type": "verb"}],
         "pattern_type": "SVO",
         "notes": "Introducing a personal name",
     },
@@ -684,7 +675,6 @@ SIMPLE_PATTERNS = [
                 "max_level": 10,
             }
         ],
-        "fixed_words": [{"lemma_text": "be", "pos_type": "verb"}],
         "pattern_type": "SVO",
         "notes": "Identifying a shape",
     },
@@ -700,10 +690,7 @@ SIMPLE_PATTERNS = [
                 "max_level": 10,
             }
         ],
-        "fixed_words": [
-            {"lemma_text": "today", "pos_type": "adverb"},
-            {"lemma_text": "be", "pos_type": "verb"},
-        ],
+        "fixed_words": [{"lemma_text": "today", "pos_type": "adverb"}],
         "pattern_type": "SVO",
         "notes": "Stating a named day or month",
     },
@@ -735,7 +722,6 @@ SIMPLE_PATTERNS = [
                 "max_level": 10,
             }
         ],
-        "fixed_words": [{"lemma_text": "be", "pos_type": "verb"}],
         "pattern_type": "SVO",
         "notes": "Stating a unit of measurement",
     },
