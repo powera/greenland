@@ -65,7 +65,7 @@ DEFAULT_TRANSLATION_LANGUAGES = {
         "field": "german_translation",
         "code": "de",
         "description": "German translation in lemma form",
-        "instructions": "- German: Provide standard German in base form (infinitive for verbs, singular nominative for nouns with article)",
+        "instructions": "- German: Provide standard German in base form (infinitive for verbs, singular nominative for nouns without an article)",
     },
     "portuguese": {
         "field": "portuguese_translation",
