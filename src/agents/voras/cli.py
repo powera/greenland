@@ -81,18 +81,6 @@ def get_argument_parser():
     parser.add_argument(
         "--batch-submit", action="store_true", help="Submit all pending batch requests to OpenAI"
     )
-    parser.add_argument(
-        "--batch-status",
-        type=str,
-        metavar="BATCH_ID",
-        help="Check status of a submitted batch (requires only batch ID)",
-    )
-    parser.add_argument(
-        "--batch-retrieve",
-        type=str,
-        metavar="BATCH_ID",
-        help="Retrieve and process results from a completed batch (requires only batch ID)",
-    )
     return parser
 
 
@@ -217,17 +205,9 @@ def main():
     # Create agent with unified configuration
     agent = VorasAgent(config=config)
 
-    # Handle batch operations first (special cases - don't need lemmas)
+    # Handle batch submit first (no lemmas needed)
     if args.batch_submit:
         agent.submit_batch()
-        return
-
-    if args.batch_status:
-        agent.check_batch_status(args.batch_status)
-        return
-
-    if args.batch_retrieve:
-        agent.retrieve_batch_results(args.batch_retrieve)
         return
 
     # Handle coverage mode (no lemmas needed)

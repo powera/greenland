@@ -1,7 +1,7 @@
 """Shared Buivolas agent wrapper for sentence creation."""
 
 import logging
-from typing import Dict, List, Optional
+from typing import Dict, Optional
 
 from agents.buivolas.llm_sentences import LlmSentenceGenerator
 from agents.buivolas.pattern_sentences import PatternSentenceGenerator
@@ -39,13 +39,11 @@ class BuivolasAgent:
     def generate_llm_sentences_for_lemma(
         self,
         lemma: Lemma,
-        target_languages: List[str],
         num_sentences: int = 3,
         difficulty_context: Optional[int] = None,
     ) -> Dict[str, any]:
         return self.llm_generator.generate_sentences_for_noun(
             lemma=lemma,
-            target_languages=target_languages,
             num_sentences=num_sentences,
             difficulty_context=difficulty_context,
         )

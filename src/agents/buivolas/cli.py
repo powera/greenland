@@ -22,7 +22,6 @@ from agents.common.common_args import (
     add_backend_args,
     add_common_args,
     add_guid_arg,
-    add_language_args,
     add_llm_args,
     get_data_source_config,
 )
@@ -104,38 +103,6 @@ Examples:
         type=int,
         help="Limit number of lemmas to process (llm mode)",
     )
-    add_language_args(sentence_parser, multiple=True)
-
-    submit_parser = subparsers.add_parser(
-        "submit-batch",
-        help="Submit batch translation job for untranslated sentences",
-    )
-    submit_parser.add_argument(
-        "--languages",
-        nargs="+",
-        required=True,
-        choices=["lt", "zh", "ko", "fr", "de", "es", "pt"],
-        help="Target languages to translate to",
-    )
-    submit_parser.add_argument("--limit", type=int, help="Max sentences to translate")
-    submit_parser.add_argument("--pattern-id", help="Only translate sentences from this pattern")
-
-    check_parser = subparsers.add_parser(
-        "check-batch",
-        help="Check status of a batch translation job",
-    )
-    check_parser.add_argument("--batch-id", required=True, help="Batch ID to check")
-
-    retrieve_parser = subparsers.add_parser(
-        "retrieve-batch",
-        help="Retrieve and apply batch translation results",
-    )
-    retrieve_parser.add_argument("--batch-id", required=True, help="Batch ID to retrieve")
-
-    subparsers.add_parser("list-batches", help="List active batch translation jobs")
-
-    parser.set_defaults(languages=["en", "lt", "zh", "ko", "fr", "es", "de", "pt", "sw", "vi"])
-
     return parser
 
 
@@ -290,7 +257,6 @@ def main() -> int:
 
                 result = agent.generate_llm_sentences_for_lemma(
                     lemma=lemma,
-                    target_languages=args.languages,
                     num_sentences=args.num_sentences,
                     difficulty_context=args.level if args.level else None,
                 )
@@ -336,97 +302,6 @@ def main() -> int:
                     logger.info("Sentences stored: %s", total_stored)
                     logger.info("Sentences failed: %s", total_failed)
                 logger.info("%s", "=" * 60)
-
-    elif args.command == "submit-batch":
-        batch_id, count = agent.pattern_generator.submit_batch_translation(
-            target_languages=args.languages,
-            limit=args.limit,
-            pattern_id=args.pattern_id,
-        )
-
-        if batch_id:
-            logger.info("=" * 80)
-            logger.info("BUIVOLAS - BATCH SUBMISSION REPORT")
-            logger.info("=" * 80)
-            logger.info("Batch ID: %s", batch_id)
-            logger.info("Requests submitted: %s", count)
-            logger.info("Target languages: %s", ", ".join(args.languages))
-            logger.info("=" * 80)
-            logger.info(
-                "Check status with: python -m agents.buivolas.cli check-batch --batch-id %s",
-                batch_id,
-            )
-        else:
-            logger.warning("No batch submitted (no untranslated sentences found)")
-
-    elif args.command == "check-batch":
-        batch_info = agent.pattern_generator.check_batch_status(args.batch_id)
-
-        logger.info("=" * 80)
-        logger.info("BUIVOLAS - BATCH STATUS")
-        logger.info("=" * 80)
-        logger.info("Batch ID: %s", batch_info["id"])
-        logger.info("Status: %s", batch_info["status"])
-        logger.info("Created at: %s", batch_info.get("created_at"))
-
-        counts = batch_info.get("request_counts", {})
-        logger.info("Total requests: %s", counts.get("total", 0))
-        logger.info("Completed: %s", counts.get("completed", 0))
-        logger.info("Failed: %s", counts.get("failed", 0))
-        logger.info("=" * 80)
-
-        if batch_info["status"] == "completed":
-            logger.info(
-                "Retrieve results with: python -m agents.buivolas.cli retrieve-batch --batch-id %s",
-                args.batch_id,
-            )
-
-    elif args.command == "retrieve-batch":
-        count = agent.pattern_generator.retrieve_batch_results(args.batch_id)
-
-        logger.info("=" * 80)
-        logger.info("BUIVOLAS - BATCH RESULTS APPLIED")
-        logger.info("=" * 80)
-        logger.info("Batch ID: %s", args.batch_id)
-        logger.info("Sentences updated: %s", count)
-        logger.info("=" * 80)
-
-    elif args.command == "list-batches":
-        active_batches = agent.pattern_generator.batch_manager.list_active_batches()
-
-        logger.info("=" * 80)
-        logger.info("BUIVOLAS - ACTIVE BATCHES")
-        logger.info("=" * 80)
-
-        if active_batches:
-            for batch_id in active_batches:
-                try:
-                    batch_info = agent.pattern_generator.check_batch_status(batch_id)
-                    openai_status = batch_info.get("status", "unknown")
-                    logger.info("\nBatch: %s", batch_id)
-                    logger.info("  OpenAI Status: %s", openai_status)
-
-                    if "request_counts" in batch_info:
-                        counts = batch_info["request_counts"]
-                        logger.info(
-                            "  Total: %s, Completed: %s, Failed: %s",
-                            counts.get("total", 0),
-                            counts.get("completed", 0),
-                            counts.get("failed", 0),
-                        )
-
-                    summary = agent.pattern_generator.batch_manager.get_batch_summary(batch_id)
-                    logger.info("  Local DB status counts: %s", summary["status_counts"])
-                except Exception as e:
-                    logger.warning("  Failed to check status for %s: %s", batch_id, e)
-                    summary = agent.pattern_generator.batch_manager.get_batch_summary(batch_id)
-                    logger.info("\nBatch: %s", batch_id)
-                    logger.info("  Total requests: %s", summary["total_requests"])
-                    logger.info("  Status counts: %s", summary["status_counts"])
-        else:
-            logger.info("No active batches")
-
-        logger.info("=" * 80)
 
     return 0
 

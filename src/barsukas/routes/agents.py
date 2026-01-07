@@ -549,14 +549,6 @@ def generate_sentences(lemma_id):
 
     # Get parameters from form
     num_sentences = int(request.form.get("num_sentences", 3))
-    # Get languages from checkboxes (multiple values with same name)
-    languages = request.form.getlist("languages")
-    # Always include English as the source language
-    if "en" not in languages:
-        languages = ["en"] + languages
-    # Remove empty strings
-    languages = [lang.strip() for lang in languages if lang.strip()]
-
     try:
         # Import Buivolas agent for sentence creation
         from agents.buivolas import BuivolasAgent
@@ -574,7 +566,6 @@ def generate_sentences(lemma_id):
         # Generate sentences
         result = agent.generate_llm_sentences_for_lemma(
             lemma=lemma,
-            target_languages=languages,
             num_sentences=num_sentences,
             difficulty_context=lemma.difficulty_level,
         )

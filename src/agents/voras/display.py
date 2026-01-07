@@ -26,8 +26,8 @@ def print_regeneration_summary(results, batch_mode=False):
         print()
         print("Next steps:")
         print(f"  1. Submit batch: python -m agents.voras --batch-submit")
-        print(f"  2. Check status: python -m agents.voras --batch-status <batch_id>")
-        print(f"  3. Retrieve results: python -m agents.voras --batch-retrieve <batch_id>")
+        print("  2. Check status: python -m agents.common.batch status --batch-id <batch_id>")
+        print("  3. Complete batch: python -m agents.common.batch complete --batch-id <batch_id>")
     else:
         print("REGENERATION COMPLETE")
         print("=" * 80)
