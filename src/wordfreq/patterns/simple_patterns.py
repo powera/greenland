@@ -268,7 +268,7 @@ SIMPLE_PATTERNS = [
     },
     {
         "pattern_id": "i_see_animal",
-        "en_template": "I see a [animal].",
+        "en_template": "I see the [animal].",
         "slots": [
             {
                 "name": "animal",
@@ -356,10 +356,7 @@ SIMPLE_PATTERNS = [
                 "max_level": 10,
             }
         ],
-        "fixed_words": [
-            {"lemma_text": "be", "pos_type": "verb"},
-            {"lemma_text": "here", "pos_type": "adverb"},
-        ],
+        "fixed_words": [{"lemma_text": "here", "pos_type": "adverb"}],
         "pattern_type": "SVO",
         "notes": "Family relation being present",
     },
@@ -414,7 +411,7 @@ SIMPLE_PATTERNS = [
     },
     {
         "pattern_id": "my_body_part_hurts",
-        "en_template": "My [body part] hurts.",
+        "en_template": "My [body part] aches.",
         "slots": [
             {
                 "name": "body part",
@@ -424,7 +421,7 @@ SIMPLE_PATTERNS = [
                 "max_level": 10,
             }
         ],
-        "fixed_words": [{"lemma_text": "hurt", "pos_type": "verb"}],
+        "fixed_words": [{"lemma_text": "ache", "pos_type": "verb"}],
         "pattern_type": "SVO",
         "notes": "Expressing physical pain in a body part",
     },
@@ -486,29 +483,6 @@ SIMPLE_PATTERNS = [
         "notes": "Going to a specific place",
     },
     {
-        "pattern_id": "the_animal_eats_food",
-        "en_template": "The [animal] eats [food].",
-        "slots": [
-            {
-                "name": "animal",
-                "pos_type": "noun",
-                "pos_subtype": "animal",
-                "min_level": 1,
-                "max_level": 10,
-            },
-            {
-                "name": "food",
-                "pos_type": "noun",
-                "pos_subtype": "food",
-                "min_level": 1,
-                "max_level": 10,
-            },
-        ],
-        "fixed_words": [{"lemma_text": "eat", "pos_type": "verb"}],
-        "pattern_type": "SVO",
-        "notes": "Animal eating specific food",
-    },
-    {
         "pattern_id": "i_wear_clothing",
         "en_template": "I wear [clothing].",
         "slots": [
@@ -539,5 +513,248 @@ SIMPLE_PATTERNS = [
         "fixed_words": [{"lemma_text": "use", "pos_type": "verb"}],
         "pattern_type": "SVO",
         "notes": "Using a specific tool",
+    },
+    # Noun subtype coverage
+    {
+        "pattern_id": "we_discuss_concept",
+        "en_template": "We discuss [concept].",
+        "slots": [
+            {
+                "name": "concept",
+                "pos_type": "noun",
+                "pos_subtype": "concept_idea",
+                "min_level": 1,
+                "max_level": 10,
+            }
+        ],
+        "fixed_words": [{"lemma_text": "discuss", "pos_type": "verb"}],
+        "pattern_type": "SVO",
+        "notes": "Talking about an idea or concept",
+    },
+    {
+        "pattern_id": "i_have_condition",
+        "en_template": "I have [condition].",
+        "slots": [
+            {
+                "name": "condition",
+                "pos_type": "noun",
+                "pos_subtype": "disease_condition",
+                "min_level": 1,
+                "max_level": 10,
+            }
+        ],
+        "fixed_words": [{"lemma_text": "have", "pos_type": "verb"}],
+        "pattern_type": "SVO",
+        "notes": "Stating a health condition",
+    },
+    {
+        "pattern_id": "the_furniture_is_here",
+        "en_template": "The [furniture] is here.",
+        "slots": [
+            {
+                "name": "furniture",
+                "pos_type": "noun",
+                "pos_subtype": "furniture",
+                "min_level": 1,
+                "max_level": 10,
+            }
+        ],
+        "fixed_words": [{"lemma_text": "here", "pos_type": "adverb"}],
+        "pattern_type": "SVO",
+        "notes": "Locating furniture items",
+    },
+    {
+        "pattern_id": "made_of_material",
+        "en_template": "It is made of [material].",
+        "slots": [
+            {
+                "name": "material",
+                "pos_type": "noun",
+                "pos_subtype": "material_substance",
+                "min_level": 1,
+                "max_level": 10,
+            }
+        ],
+        "fixed_words": [
+            {"lemma_text": "make", "pos_type": "verb"},
+            {"lemma_text": "of", "pos_type": "preposition"},
+        ],
+        "pattern_type": "SVO",
+        "notes": "Describing a material substance",
+    },
+    {
+        "pattern_id": "she_is_nationality",
+        "en_template": "She is [nationality].",
+        "slots": [
+            {
+                "name": "nationality",
+                "pos_type": "noun",
+                "pos_subtype": "nationality",
+                "min_level": 1,
+                "max_level": 10,
+            }
+        ],
+        "pattern_type": "SVO",
+        "notes": "Stating a person's nationality",
+    },
+    {
+        "pattern_id": "we_see_natural_feature",
+        "en_template": "We see the [natural feature].",
+        "slots": [
+            {
+                "name": "natural feature",
+                "pos_type": "noun",
+                "pos_subtype": "natural_feature",
+                "min_level": 1,
+                "max_level": 10,
+            }
+        ],
+        "fixed_words": [{"lemma_text": "see", "pos_type": "verb"}],
+        "pattern_type": "SVO",
+        "notes": "Observing a natural feature",
+    },
+    {
+        "pattern_id": "my_name_is_personal_name",
+        "en_template": "My name is [name].",
+        "slots": [
+            {
+                "name": "name",
+                "pos_type": "noun",
+                "pos_subtype": "personal_name",
+                "min_level": 1,
+                "max_level": 10,
+            }
+        ],
+        "pattern_type": "SVO",
+        "notes": "Introducing a personal name",
+    },
+    {
+        "pattern_id": "i_live_in_place_name",
+        "en_template": "I live in [place name].",
+        "slots": [
+            {
+                "name": "place name",
+                "pos_type": "noun",
+                "pos_subtype": "place_name",
+                "min_level": 1,
+                "max_level": 10,
+            }
+        ],
+        "fixed_words": [
+            {"lemma_text": "live", "pos_type": "verb"},
+            {"lemma_text": "in", "pos_type": "preposition"},
+        ],
+        "pattern_type": "SVO",
+        "notes": "Describing where someone lives",
+    },
+    {
+        "pattern_id": "the_plant_grows",
+        "en_template": "The [plant] grows.",
+        "slots": [
+            {
+                "name": "plant",
+                "pos_type": "noun",
+                "pos_subtype": "plant",
+                "min_level": 1,
+                "max_level": 10,
+            }
+        ],
+        "fixed_words": [{"lemma_text": "grow", "pos_type": "verb"}],
+        "pattern_type": "SVO",
+        "notes": "Describing a plant",
+    },
+    {
+        "pattern_id": "it_is_shape",
+        "en_template": "It is a [shape].",
+        "slots": [
+            {
+                "name": "shape",
+                "pos_type": "noun",
+                "pos_subtype": "shape",
+                "min_level": 1,
+                "max_level": 10,
+            }
+        ],
+        "pattern_type": "SVO",
+        "notes": "Identifying a shape",
+    },
+    {
+        "pattern_id": "today_is_temporal_name",
+        "en_template": "Today is [temporal name].",
+        "slots": [
+            {
+                "name": "temporal name",
+                "pos_type": "noun",
+                "pos_subtype": "temporal_name",
+                "min_level": 1,
+                "max_level": 10,
+            }
+        ],
+        "fixed_words": [{"lemma_text": "today", "pos_type": "adverb"}],
+        "pattern_type": "SVO",
+        "notes": "Stating a named day or month",
+    },
+    {
+        "pattern_id": "we_wait_time_period",
+        "en_template": "We wait a [time period].",
+        "slots": [
+            {
+                "name": "time period",
+                "pos_type": "noun",
+                "pos_subtype": "time_period",
+                "min_level": 1,
+                "max_level": 10,
+            }
+        ],
+        "fixed_words": [{"lemma_text": "wait", "pos_type": "verb"}],
+        "pattern_type": "SVO",
+        "notes": "Waiting for a span of time",
+    },
+    {
+        "pattern_id": "it_is_one_unit",
+        "en_template": "It is one [unit].",
+        "slots": [
+            {
+                "name": "unit",
+                "pos_type": "noun",
+                "pos_subtype": "unit_of_measurement",
+                "min_level": 1,
+                "max_level": 10,
+            }
+        ],
+        "pattern_type": "SVO",
+        "notes": "Stating a unit of measurement",
+    },
+    {
+        "pattern_id": "the_vehicle_moves",
+        "en_template": "The [vehicle] moves.",
+        "slots": [
+            {
+                "name": "vehicle",
+                "pos_type": "noun",
+                "pos_subtype": "vehicle",
+                "min_level": 1,
+                "max_level": 10,
+            }
+        ],
+        "fixed_words": [{"lemma_text": "move", "pos_type": "verb"}],
+        "pattern_type": "SVO",
+        "notes": "Describing a vehicle",
+    },
+    {
+        "pattern_id": "i_order_food_drink",
+        "en_template": "I order [food drink].",
+        "slots": [
+            {
+                "name": "food drink",
+                "pos_type": "noun",
+                "pos_subtype": "food_drink",
+                "min_level": 1,
+                "max_level": 10,
+            }
+        ],
+        "fixed_words": [{"lemma_text": "order", "pos_type": "verb"}],
+        "pattern_type": "SVO",
+        "notes": "Ordering a meal or drink",
     },
 ]
