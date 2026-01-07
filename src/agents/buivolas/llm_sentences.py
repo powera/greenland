@@ -134,20 +134,19 @@ class LlmSentenceGenerator:
                 + "\n".join(f"- {s}" for s in previous_sentences)
             )
 
-        prompt = f"""Generate 1 English example sentence for language learning that features the following noun.
+        prompt = f"""Generate 1 English example sentence for language learning that features the following word.
 
 {context}
 {previous_context}
 
 Requirements:
-1. Create 1 ENGLISH sentence using the noun "{lemma.lemma_text}"
-2. Vary the sentence pattern (SVO, SOV, etc.) and use different verbs/contexts
+1. Create 1 ENGLISH sentence using the word "{lemma.lemma_text}"
+2. Use varied contexts and sentence structures
 3. Keep sentences simple and natural (appropriate for language learners)
 4. Use common, everyday vocabulary for other words in the sentence
 
 For the sentence, provide:
-- Pattern type (SVO, SVAO, etc.) - based on English structure
-- Tense used (present, past, future)
+- Tense used (present, past, future, or N/A if not applicable)
 - English translation (key 'en')
 
 Focus on variety and natural language usage."""
@@ -169,11 +168,8 @@ Focus on variety and natural language usage."""
                 description="English sentence",
                 object_schema=translations_schema,
             ),
-            "pattern": SchemaProperty(
-                type="string", description="Sentence pattern type (SVO, SVAO, etc.)"
-            ),
             "tense": SchemaProperty(
-                type="string", description="Verb tense (present, past, future)"
+                type="string", description="Verb tense (present, past, future, or N/A)"
             ),
         }
 
@@ -212,7 +208,7 @@ Focus on variety and natural language usage."""
             try:
                 sentence = add_sentence(
                     session=session,
-                    pattern_type=sentence_data.get("pattern"),
+                    pattern_type=sentence_data.get("pattern", "unknown"),
                     tense=sentence_data.get("tense"),
                     source_filename=f"buivolas_{source_lemma.guid}",
                     verified=False,
