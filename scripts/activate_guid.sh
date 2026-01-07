@@ -7,7 +7,8 @@
 #
 # Environment overrides:
 #   LANGUAGES              - Space-separated list of languages for all applicable steps (default: "lt zh ko fr es de pt sw vi")
-#   GRAMMAR_FACT_TYPES     - Space-separated fact types for Lape (default: "grammatical_gender")
+#   GRAMMAR_FACT_TYPES     - Space-separated fact types for Lape (optional; overrides grouped tasks)
+#   GRAMMAR_FACT_TASK      - Lape grouped task preset (default: "all")
 #   AUDIO_VOICES           - Optional voice names for Strazdas (space-separated)
 
 set -euo pipefail
@@ -44,11 +45,16 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO_ROOT"
 
 LANGUAGES=${LANGUAGES:-"lt zh ko fr es de pt sw vi"}
-GRAMMAR_FACT_TYPES=${GRAMMAR_FACT_TYPES:-"grammatical_gender"}
+GRAMMAR_FACT_TYPES=${GRAMMAR_FACT_TYPES:-""}
+GRAMMAR_FACT_TASK=${GRAMMAR_FACT_TASK:-"all"}
 AUDIO_VOICES=${AUDIO_VOICES:-""}
 
 read -r -a LANGUAGE_LIST <<< "$LANGUAGES"
-read -r -a GRAMMAR_FACT_TYPE_LIST <<< "$GRAMMAR_FACT_TYPES"
+if [[ -n "${GRAMMAR_FACT_TYPES// }" ]]; then
+  read -r -a GRAMMAR_FACT_TYPE_LIST <<< "$GRAMMAR_FACT_TYPES"
+else
+  GRAMMAR_FACT_TYPE_LIST=()
+fi
 
 run_step() {
   local title="$1"
@@ -84,7 +90,7 @@ run_step "Grammatical forms" \
 run_step "Synonyms" \
   python -m agents.sernas.cli --guid "$GUID" --mode populate-only --languages ${LANGUAGES} --yes
 
-# Grammatical facts (Lape) - run per language
+# Grammatical facts (Lape) - run once across languages and supported tasks
 LAPE_LANGUAGES=("${LANGUAGE_LIST[@]}")
 NEEDS_EN=true
 for lang in "${LAPE_LANGUAGES[@]}"; do
@@ -97,13 +103,15 @@ if [[ "$NEEDS_EN" == true ]]; then
   LAPE_LANGUAGES+=("en")
 fi
 
-for lang in "${LAPE_LANGUAGES[@]}"; do
+if [[ ${#GRAMMAR_FACT_TYPE_LIST[@]} -gt 0 ]]; then
   for fact_type in "${GRAMMAR_FACT_TYPE_LIST[@]}"; do
-    # TODO: Refactor Lape to support grouped fact tasks similar to Vilkas (e.g., case systems + gender).
-    run_step "Grammatical facts (${lang} - ${fact_type})" \
-      python -m agents.lape --guid "$GUID" --fact-type "$fact_type" --language "$lang"
+    run_step "Grammatical facts (languages: ${LAPE_LANGUAGES[*]} - ${fact_type})" \
+      python -m agents.lape --guid "$GUID" --fact-type "$fact_type" --languages ${LAPE_LANGUAGES[*]}
   done
-done
+else
+  run_step "Grammatical facts (languages: ${LAPE_LANGUAGES[*]} - task: ${GRAMMAR_FACT_TASK})" \
+    python -m agents.lape --guid "$GUID" --task "$GRAMMAR_FACT_TASK" --languages ${LAPE_LANGUAGES[*]}
+fi
 
 # TODO: Sentence generation once --guid is supported for the sentence agents
 # run_step "Sentences" python -m agents.zvirblis --guid "$GUID" --num-sentences 3
