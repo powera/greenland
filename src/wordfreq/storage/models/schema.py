@@ -508,3 +508,29 @@ class AudioQualityReview(Base):
     def display_voice(cls):
         """SQL expression for display_voice."""
         return cls.language_code + literal_column("'/'") + cls.voice_name
+
+
+class BarsukasTask(Base):
+    """Background task queued by the Barsukas web app.
+
+    These tasks allow Barsukas to defer long-running LLM work to a worker process
+    while keeping the web UI responsive.
+    """
+
+    __tablename__ = "barsukas_tasks"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    task_type: Mapped[str] = mapped_column(String, nullable=False, index=True)
+    target_type: Mapped[Optional[str]] = mapped_column(String, nullable=True, index=True)
+    target_id: Mapped[Optional[int]] = mapped_column(Integer, nullable=True, index=True)
+    dedup_key: Mapped[Optional[str]] = mapped_column(String, nullable=True, index=True)
+    status: Mapped[str] = mapped_column(String, default="pending", index=True)
+    payload: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    result_message: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    error_detail: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now())
+    updated_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP, server_default=func.now(), onupdate=func.now()
+    )
+    started_at: Mapped[Optional[datetime.datetime]] = mapped_column(TIMESTAMP, nullable=True)
+    finished_at: Mapped[Optional[datetime.datetime]] = mapped_column(TIMESTAMP, nullable=True)

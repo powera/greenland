@@ -56,6 +56,17 @@ cd src/wordfreq/barsukas
 
 The web interface will be available at: **http://127.0.0.1:5555**
 
+### Run the background task worker (LLM jobs)
+
+LLM-heavy actions triggered from Barsukas (like generating translations, pronunciations, and forms) now queue a background
+task so the UI responds immediately. Start the worker in a second shell:
+
+```bash
+PYTHONPATH=src python -m barsukas.workers.task_worker --poll-interval 2
+```
+
+Queued tasks are deduplicated per lemma/language, and the lemma page shows their latest status.
+
 ### Custom Configuration
 
 You can pass command-line arguments to the launch script:
