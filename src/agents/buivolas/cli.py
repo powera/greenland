@@ -60,7 +60,6 @@ Examples:
     add_common_args(parser)
     add_llm_args(parser, default_model="gpt-5-mini")
     add_guid_arg(parser, help_text="Target this lemma GUID")
-    add_language_args(parser, multiple=True)
     add_backend_args(parser)
 
     subparsers = parser.add_subparsers(dest="command", help="Command to execute", required=True)
@@ -105,6 +104,7 @@ Examples:
         type=int,
         help="Limit number of lemmas to process (llm mode)",
     )
+    add_language_args(sentence_parser, multiple=True)
 
     submit_parser = subparsers.add_parser(
         "submit-batch",

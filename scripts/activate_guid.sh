@@ -14,6 +14,7 @@
 #   AUDIO_VOICES           - Optional voice names for Strazdas (space-separated)
 
 set -euo pipefail
+set -x
 
 ASSUME_YES=false
 
@@ -83,7 +84,8 @@ fi
 run_step() {
   local title="$1"
   shift
-  echo "\n=== ${title} ==="
+  echo ""
+  echo "=== ${title} ==="
   if [[ "$ASSUME_YES" == true ]]; then
     "$@"
     return
@@ -114,7 +116,7 @@ run_step "Synonyms" \
   python -m agents.sernas.cli --guid "$GUID" --mode populate-only --languages ${LANGUAGES} --yes
 
 run_step "Pattern sentences" \
-  python -m agents.buivolas generate-sentences --mode pattern --guid "$GUID"
+  python -m agents.buivolas --guid "$GUID" generate-sentences --mode pattern
 
 # Grammatical facts (Lape) - run once across languages and supported tasks
 LAPE_LANGUAGES=("${LANGUAGE_LIST[@]}")
@@ -140,7 +142,7 @@ else
 fi
 
 run_step "Sentences" \
-  python -m agents.buivolas generate-sentences --mode llm --guid "$GUID" --num-sentences "$SENTENCE_COUNT" --languages ${SENTENCE_LANGUAGE_LIST[*]}
+  python -m agents.buivolas --guid "$GUID" generate-sentences --mode llm --num-sentences "$SENTENCE_COUNT" --language ${SENTENCE_LANGUAGE_LIST[*]}
 
 run_step "Sentence translations" \
   python -m agents.zvirblis --guid "$GUID" --languages ${SENTENCE_LANGUAGE_LIST[*]} ${SENTENCE_TRANSLATION_ARGS[@]+"${SENTENCE_TRANSLATION_ARGS[@]}"}
