@@ -246,7 +246,6 @@ class VilkasAgent:
         model: Optional[str] = None,
         throttle: float = 1.0,
         dry_run: bool = False,
-        source: str = "llm",
     ) -> Dict[str, any]:
         """
         Generate and store missing word forms for a specific language.
@@ -267,7 +266,6 @@ class VilkasAgent:
             model: LLM model to use for generation (if None, uses config.model)
             throttle: Seconds to wait between API calls
             dry_run: If True, show what would be fixed without making changes
-            source: Source for forms - 'llm' or 'wiki' (for Lithuanian nouns only)
 
         Returns:
             Dictionary with fix results
@@ -311,7 +309,7 @@ class VilkasAgent:
         # Map language/POS combinations to their process functions and metadata
         # Format: (process_module, process_func_name, uses_generic_handler, language_display_name)
         handler_map = {
-            "lt_noun": (get_task_key("lt", "noun"), "Lithuanian", False),
+            "lt_noun": (get_task_key("lt", "noun"), "Lithuanian", True),
             "lt_verb": (get_task_key("lt", "verb"), "Lithuanian", True),
             "lt_adjective": (get_task_key("lt", "adjective"), "Lithuanian", True),
             "lt_adverb": (get_task_key("lt", "adverb"), "Lithuanian", True),
@@ -340,24 +338,7 @@ class VilkasAgent:
         task_key, language_name, use_generic = handler_map[handler_key]
 
         # Call the appropriate handler
-        if handler_key == "lt_noun":
-            return self._fix_lithuanian_noun_declensions(
-                lemmas=lemmas,
-                limit=limit,
-                model=effective_model,
-                throttle=throttle,
-                dry_run=dry_run,
-                source=source,
-            )
-        elif handler_key == "fr_verb":
-            return self._fix_french_verb_conjugations(
-                lemmas=lemmas,
-                limit=limit,
-                model=effective_model,
-                throttle=throttle,
-                dry_run=dry_run,
-            )
-        elif use_generic:
+        if use_generic:
             return self._fix_generic_forms(
                 lemmas=lemmas,
                 language_code=language_code,
@@ -372,83 +353,6 @@ class VilkasAgent:
         else:
             logger.error(f"Unexpected handler configuration for {handler_key}")
             return {"error": f"Handler configuration error for {handler_key}"}
-
-    def _fix_lithuanian_noun_declensions(
-        self,
-        lemmas: Optional[List[Lemma]] = None,
-        limit: Optional[int] = None,
-        model: Optional[str] = None,
-        throttle: float = 1.0,
-        dry_run: bool = False,
-        source: str = "llm",
-    ) -> Dict[str, any]:
-        """
-        Generate missing Lithuanian noun declensions.
-
-        This method uses the existing infrastructure from
-        wordfreq.translation.generate_lithuanian_noun_forms.
-
-        Args:
-            lemmas: List of Lemma objects to process. If None, processes all curated lemmas.
-            limit: Maximum number of lemmas to process
-            model: LLM model to use (if None, uses config.model)
-            throttle: Seconds to wait between API calls
-            dry_run: If True, show what would be fixed without making changes
-            source: Source for forms - 'llm' or 'wiki'
-
-        Returns:
-            Dictionary with fix results
-        """
-        # Delegate to translation helper module
-        from wordfreq.translation.fix_lithuanian_noun_declensions import (
-            fix_lithuanian_noun_declensions,
-        )
-
-        return fix_lithuanian_noun_declensions(
-            agent=self,
-            lemmas=lemmas,
-            limit=limit,
-            model=model,
-            throttle=throttle,
-            dry_run=dry_run,
-            source=source,
-        )
-
-    def _fix_french_verb_conjugations(
-        self,
-        lemmas: Optional[List[Lemma]] = None,
-        limit: Optional[int] = None,
-        model: Optional[str] = None,
-        throttle: float = 1.0,
-        dry_run: bool = False,
-    ) -> Dict[str, any]:
-        """
-        Generate missing French verb conjugations.
-
-        This method uses the existing infrastructure from
-        wordfreq.translation.generate_french_verb_forms.
-
-        Args:
-            lemmas: List of Lemma objects to process. If None, processes all curated lemmas.
-            limit: Maximum number of lemmas to process
-            model: LLM model to use (if None, uses config.model)
-            throttle: Seconds to wait between API calls
-            dry_run: If True, show what would be fixed without making changes
-
-        Returns:
-            Dictionary with fix results
-        """
-        # Delegate to translation helper module
-        from wordfreq.translation.fix_french_verb_conjugations import fix_french_verb_conjugations
-
-        return fix_french_verb_conjugations(
-            agent=self,
-            lemmas=lemmas,
-            limit=limit,
-            model=model,
-            throttle=throttle,
-            dry_run=dry_run,
-        )
 
     def _fix_generic_forms(
         self,

@@ -98,12 +98,6 @@ def get_argument_parser():
         action="store_true",
         help="Fix mode: Generate missing word forms. Use --task to specify which forms to fix.",
     )
-    parser.add_argument(
-        "--source",
-        choices=["llm", "wiki"],
-        default="llm",
-        help="[Fix mode] Source for Lithuanian noun forms: llm (default) or wiki (Wiktionary)",
-    )
 
     return parser
 
@@ -286,7 +280,6 @@ def main():
                 display_language_header(lang, task_num, len(languages_and_pos))
                 print(f"{lang_name} {form_desc}:")
 
-                # Only pass source for Lithuanian nouns
                 kwargs = {
                     "lemmas": lemmas,
                     "language_code": lang,
@@ -296,8 +289,6 @@ def main():
                     "throttle": args.throttle,
                     "dry_run": args.dry_run,
                 }
-                if lang == "lt" and pos == "noun":
-                    kwargs["source"] = args.source
 
                 results = agent.fix_missing_forms(**kwargs)
                 display.print_fix_results(results, args.dry_run)
@@ -314,7 +305,6 @@ def main():
                 model=args.model,
                 throttle=args.throttle,
                 dry_run=args.dry_run,
-                source=args.source,
             )
             display.print_fix_results(results, args.dry_run)
 

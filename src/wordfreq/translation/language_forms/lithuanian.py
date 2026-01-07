@@ -93,7 +93,7 @@ ADVERB_FORM_MAPPING = {
 
 def query_lithuanian_noun_declensions(
     client, lemma_id: int, get_session_func
-) -> Tuple[Dict[str, str], bool, str]:
+) -> Tuple[Dict[str, str], bool]:
     """
     Query LLM for all Lithuanian noun declensions (7 cases × 2 numbers).
 
@@ -103,8 +103,7 @@ def query_lithuanian_noun_declensions(
         get_session_func: Function to get database session
 
     Returns:
-        Tuple of (dict mapping form names to declensions, success flag, number_type)
-        where number_type is one of: 'regular', 'plurale_tantum', 'singulare_tantum'
+        Tuple of (dict mapping form names to declensions, success flag)
     """
     session = get_session_func()
 
@@ -112,16 +111,16 @@ def query_lithuanian_noun_declensions(
     lemma = session.query(linguistic_db.Lemma).filter(linguistic_db.Lemma.id == lemma_id).first()
     if not lemma:
         logger.error(f"Lemma with ID {lemma_id} not found")
-        return {}, False, "regular"
+        return {}, False
 
     lithuanian_translation = get_translation(session, lemma, "lt")
     if not lithuanian_translation:
         logger.error(f"Lemma ID {lemma_id} has no Lithuanian translation")
-        return {}, False, "regular"
+        return {}, False
 
     if lemma.pos_type.lower() != "noun":
         logger.error(f"Lemma ID {lemma_id} is not a noun (pos_type: {lemma.pos_type})")
-        return {}, False, "regular"
+        return {}, False
 
     noun = lithuanian_translation
     english_word = lemma.lemma_text
@@ -210,27 +209,17 @@ def query_lithuanian_noun_declensions(
             and "forms" in response.structured_data
             and isinstance(response.structured_data["forms"], dict)
         ):
-            # Filter out forms based on number_type
+            # Return all forms - the task system will handle number_type detection
             forms = response.structured_data["forms"]
-            number_type = response.structured_data.get("number_type", "regular")
 
-            # For plurale_tantum, remove all singular forms
-            if number_type == "plurale_tantum":
-                forms = {k: v for k, v in forms.items() if not k.endswith("_singular")}
-                logger.info(f"Filtered singular forms for plurale_tantum noun '{noun}'")
-            # For singulare_tantum, remove all plural forms
-            elif number_type == "singulare_tantum":
-                forms = {k: v for k, v in forms.items() if not k.endswith("_plural")}
-                logger.info(f"Filtered plural forms for singulare_tantum noun '{noun}'")
-
-            return forms, True, number_type
+            return forms, True
         else:
             logger.warning(f"Invalid response format for Lithuanian noun '{noun}'")
-            return {}, False, "regular"
+            return {}, False
 
     except Exception as e:
         logger.error(f"Error querying Lithuanian declensions for '{noun}': {type(e).__name__}: {e}")
-        return {}, False, "regular"
+        return {}, False
 
 
 def query_lithuanian_verb_conjugations(
