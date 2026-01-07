@@ -52,7 +52,11 @@ from wordfreq.storage.models.schema import (
     SentenceTranslation,
     SentenceWord,
 )
-from wordfreq.tools.llm_validators import validate_pronunciation, generate_pronunciation
+from wordfreq.tools.llm_validators import (
+    validate_pronunciation,
+    generate_pronunciation,
+    batch_generate_pronunciations,
+)
 
 # Configure logging
 logging.basicConfig(
@@ -466,6 +470,192 @@ class PapugaAgent:
         finally:
             session.close()
 
+    def populate_missing_pronunciations_batch(
+        self,
+        limit: Optional[int] = None,
+        only_english: bool = True,
+        only_base_forms: bool = False,
+        dry_run: bool = False,
+        lemma_id: Optional[int] = None,
+    ) -> Dict[str, any]:
+        """
+        Generate pronunciations for forms using batch processing (all forms of a lemma at once).
+
+        This method groups derivative forms by lemma and language, then makes a single
+        LLM call per (lemma, language) pair to generate pronunciations for all forms.
+        This is much more efficient than individual calls per form.
+
+        Args:
+            limit: Maximum number of lemmas to process (not forms)
+            only_english: Only process English forms
+            only_base_forms: Only process base forms
+            dry_run: If True, don't actually update the database
+            lemma_id: Optional lemma ID to filter to a specific lemma
+
+        Returns:
+            Dictionary with population results
+        """
+        logger.info(f"{'DRY RUN: ' if dry_run else ''}Populating missing pronunciations (BATCH MODE)...")
+
+        session = self.get_session()
+        try:
+            # Get derivative forms without pronunciations
+            query = session.query(DerivativeForm).filter(
+                DerivativeForm.ipa_pronunciation.is_(None),
+                DerivativeForm.phonetic_pronunciation.is_(None),
+            )
+
+            if lemma_id:
+                query = query.filter(DerivativeForm.lemma_id == lemma_id)
+
+            if only_english:
+                query = query.filter(DerivativeForm.language_code == "en")
+
+            if only_base_forms:
+                query = query.filter(DerivativeForm.is_base_form == True)
+
+            query = query.order_by(DerivativeForm.lemma_id, DerivativeForm.language_code)
+
+            forms = query.all()
+            logger.info(f"Found {len(forms)} forms to populate")
+
+            # Group forms by (lemma_id, language_code)
+            from collections import defaultdict
+            forms_by_lemma_lang = defaultdict(list)
+
+            for form in forms:
+                key = (form.lemma_id, form.language_code)
+                forms_by_lemma_lang[key].append(form)
+
+            # Apply limit to number of lemma/language combinations
+            lemma_lang_pairs = list(forms_by_lemma_lang.keys())
+            if limit:
+                lemma_lang_pairs = lemma_lang_pairs[:limit]
+                logger.info(f"Limiting to {limit} lemma/language combinations")
+
+            populated_count = 0
+            failed_count = 0
+            total_forms = sum(len(forms_by_lemma_lang[key]) for key in lemma_lang_pairs)
+
+            if dry_run:
+                # In dry run, just show what would be processed
+                logger.info(
+                    f"Would process {len(lemma_lang_pairs)} lemma/language pairs ({total_forms} forms total) in batch mode"
+                )
+                for idx, (lemma_id_key, lang_code) in enumerate(lemma_lang_pairs[:5], 1):
+                    lemma = session.query(Lemma).filter(Lemma.id == lemma_id_key).first()
+                    num_forms = len(forms_by_lemma_lang[(lemma_id_key, lang_code)])
+                    logger.info(
+                        f"  {idx}. '{lemma.lemma_text}' ({lang_code}): {num_forms} forms"
+                    )
+                if len(lemma_lang_pairs) > 5:
+                    logger.info(f"  ... and {len(lemma_lang_pairs) - 5} more")
+            else:
+                # Process each lemma/language combination
+                for idx, (lemma_id_key, lang_code) in enumerate(lemma_lang_pairs, 1):
+                    forms_to_process = forms_by_lemma_lang[(lemma_id_key, lang_code)]
+
+                    # Get lemma info
+                    lemma = session.query(Lemma).filter(Lemma.id == lemma_id_key).first()
+                    if not lemma:
+                        logger.warning(f"No lemma found for ID {lemma_id_key}")
+                        failed_count += len(forms_to_process)
+                        continue
+
+                    logger.info(
+                        f"Processing {idx}/{len(lemma_lang_pairs)}: '{lemma.lemma_text}' "
+                        f"({lang_code}, {len(forms_to_process)} forms)..."
+                    )
+
+                    # Build forms list for batch call
+                    forms_list = []
+                    form_id_map = {}  # Map grammatical_form to DerivativeForm object
+
+                    for form in forms_to_process:
+                        forms_list.append({
+                            "form": form.grammatical_form,
+                            "word": form.derivative_form_text,
+                        })
+                        form_id_map[form.grammatical_form] = form
+
+                    try:
+                        # Make batch pronunciation call
+                        results = batch_generate_pronunciations(
+                            lemma=lemma.lemma_text,
+                            definition=lemma.definition_text,
+                            pos_type=lemma.pos_type,
+                            forms=forms_list,
+                            model=self.config.model,
+                            language_code=lang_code,
+                            english_translation=lemma.lemma_text if lang_code != "en" else None,
+                        )
+
+                        # Update each form with its pronunciation
+                        batch_populated = 0
+                        batch_failed = 0
+
+                        for grammatical_form, result in results.items():
+                            form_obj = form_id_map.get(grammatical_form)
+                            if not form_obj:
+                                logger.warning(f"No form object found for {grammatical_form}")
+                                batch_failed += 1
+                                continue
+
+                            if "error" in result:
+                                logger.warning(
+                                    f"  Error for {grammatical_form} ('{result['word']}'): {result['error']}"
+                                )
+                                batch_failed += 1
+                                continue
+
+                            if result["confidence"] >= 0.5:  # Minimum confidence threshold
+                                form_obj.ipa_pronunciation = result["ipa_pronunciation"]
+                                form_obj.phonetic_pronunciation = result["phonetic_pronunciation"]
+                                batch_populated += 1
+                            else:
+                                logger.warning(
+                                    f"  Low confidence ({result['confidence']:.2f}) for {grammatical_form}, skipping"
+                                )
+                                batch_failed += 1
+
+                        # Commit all updates for this batch
+                        session.commit()
+
+                        logger.info(
+                            f"  Batch complete: {batch_populated} populated, {batch_failed} failed"
+                        )
+                        populated_count += batch_populated
+                        failed_count += batch_failed
+
+                    except Exception as e:
+                        logger.error(f"  Failed to process batch: {e}")
+                        failed_count += len(forms_to_process)
+                        session.rollback()
+
+            return {
+                "total_processed": total_forms if not dry_run else 0,
+                "populated": populated_count,
+                "failed": failed_count,
+                "dry_run": dry_run,
+                "batch_mode": True,
+                "lemma_lang_pairs": len(lemma_lang_pairs),
+            }
+
+        except Exception as e:
+            logger.error(f"Error populating pronunciations (batch): {e}")
+            if not dry_run:
+                session.rollback()
+            return {
+                "error": str(e),
+                "total_processed": 0,
+                "populated": 0,
+                "failed": 0,
+                "dry_run": dry_run,
+                "batch_mode": True,
+            }
+        finally:
+            session.close()
+
     def run_full_check(
         self,
         output_file: Optional[str] = None,
@@ -615,6 +805,12 @@ def get_argument_parser():
         help="Only process base forms (populate mode only)",
     )
 
+    parser.add_argument(
+        "--batch",
+        action="store_true",
+        help="Use batch mode to generate pronunciations (all forms of a lemma in one LLM call)",
+    )
+
     return parser
 
 
@@ -721,16 +917,29 @@ def main():
             lemma_id=lemma_id,
         )
     elif mode == "populate":
-        result = agent.populate_missing_pronunciations(
-            limit=args.limit,
-            only_english=only_english,
-            only_base_forms=args.base_forms_only,
-            dry_run=args.dry_run,
-            lemma_id=lemma_id,
-        )
-        logger.info(
-            f"\nPopulation complete: {result['populated']} populated, {result['failed']} failed"
-        )
+        if args.batch:
+            result = agent.populate_missing_pronunciations_batch(
+                limit=args.limit,
+                only_english=only_english,
+                only_base_forms=args.base_forms_only,
+                dry_run=args.dry_run,
+                lemma_id=lemma_id,
+            )
+            logger.info(
+                f"\nBatch population complete: {result['populated']} populated, {result['failed']} failed "
+                f"({result.get('lemma_lang_pairs', 0)} lemma/language pairs)"
+            )
+        else:
+            result = agent.populate_missing_pronunciations(
+                limit=args.limit,
+                only_english=only_english,
+                only_base_forms=args.base_forms_only,
+                dry_run=args.dry_run,
+                lemma_id=lemma_id,
+            )
+            logger.info(
+                f"\nPopulation complete: {result['populated']} populated, {result['failed']} failed"
+            )
     elif mode == "both":
         # First check
         agent.run_full_check(
@@ -743,16 +952,29 @@ def main():
             lemma_id=lemma_id,
         )
         # Then populate
-        result = agent.populate_missing_pronunciations(
-            limit=args.limit,
-            only_english=only_english,
-            only_base_forms=args.base_forms_only,
-            dry_run=args.dry_run,
-            lemma_id=lemma_id,
-        )
-        logger.info(
-            f"\nPopulation complete: {result['populated']} populated, {result['failed']} failed"
-        )
+        if args.batch:
+            result = agent.populate_missing_pronunciations_batch(
+                limit=args.limit,
+                only_english=only_english,
+                only_base_forms=args.base_forms_only,
+                dry_run=args.dry_run,
+                lemma_id=lemma_id,
+            )
+            logger.info(
+                f"\nBatch population complete: {result['populated']} populated, {result['failed']} failed "
+                f"({result.get('lemma_lang_pairs', 0)} lemma/language pairs)"
+            )
+        else:
+            result = agent.populate_missing_pronunciations(
+                limit=args.limit,
+                only_english=only_english,
+                only_base_forms=args.base_forms_only,
+                dry_run=args.dry_run,
+                lemma_id=lemma_id,
+            )
+            logger.info(
+                f"\nPopulation complete: {result['populated']} populated, {result['failed']} failed"
+            )
 
 
 if __name__ == "__main__":
