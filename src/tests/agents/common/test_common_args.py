@@ -6,18 +6,12 @@ Tests the standardized command-line argument patterns and utilities
 used across all agents.
 """
 
-import sys
-from pathlib import Path
-
-if str(Path(__file__).parent.parent.parent) not in sys.path:
-    sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-
 import argparse
 import unittest
 from io import StringIO
 from unittest.mock import MagicMock, Mock, patch
 
-from src.agents.common.common_args import (
+from agents.common.common_args import (
     add_backend_args,
     add_common_args,
     add_guid_arg,

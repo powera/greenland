@@ -31,7 +31,7 @@ if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
 import constants
-from src.agents.common.common_args import add_backend_args, add_common_args, get_data_source_config
+from agents.common.common_args import add_backend_args, add_common_args, get_data_source_config
 from wordfreq.storage import database as linguistic_db
 from wordfreq.storage.backend import create_session as create_backend_session
 from wordfreq.storage.backend.config import BackendType, DataSourceConfig

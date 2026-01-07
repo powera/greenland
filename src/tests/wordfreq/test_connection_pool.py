@@ -29,7 +29,7 @@ class TestConnectionPool(unittest.TestCase):
         ConnectionPool._initialized = False
 
         # Create a patch for the logger to avoid logging during tests
-        self.patch_logger = patch("wordfreq.connection_pool.logger")
+        self.patch_logger = patch("wordfreq.storage.connection_pool.logger")
         self.mock_logger = self.patch_logger.start()
 
     def tearDown(self):

@@ -6,16 +6,10 @@ Tests the standardized lemma selection and filtering utilities without
 requiring a full database. Uses mocking to test query building logic.
 """
 
-import sys
-from pathlib import Path
-
-if str(Path(__file__).parent.parent.parent) not in sys.path:
-    sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-
 import unittest
 from unittest.mock import MagicMock, Mock, call, patch
 
-from src.agents.common.lemma_selection import (
+from agents.common.lemma_selection import (
     LemmaNotFoundError,
     LemmaQueryBuilder,
     apply_limit_and_sample_rate,

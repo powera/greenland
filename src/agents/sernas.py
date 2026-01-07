@@ -20,7 +20,7 @@ if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
 # Configure logging early so imported modules use the shared format
-from src.logging_config import configure_logging, get_logger
+from logging_config import configure_logging, get_logger
 
 configure_logging()
 
