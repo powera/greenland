@@ -373,6 +373,10 @@ class GrammaticalForm(enum.Enum):
     VERB_FR_3P_M_PC = "verb/fr_3p-m_pc"
     VERB_FR_3P_F_PC = "verb/fr_3p-f_pc"
 
+    # Past participles (masculine and feminine forms)
+    VERB_FR_PC_M = "verb/fr_pc_m"  # masculine past participle, e.g., "allé"
+    VERB_FR_PC_F = "verb/fr_pc_f"  # feminine past participle, e.g., "allée"
+
     # Spanish noun forms (singular/plural only - each noun has a fixed gender)
     NOUN_ES_SINGULAR = "noun/es_singular"
     NOUN_ES_PLURAL = "noun/es_plural"
