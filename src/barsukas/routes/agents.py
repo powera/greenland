@@ -44,6 +44,11 @@ def log_and_flash_error(e: Exception, context: str):
     flash(error_msg, "error")
 
 
+def flash_and_log(e: Exception, context: str) -> None:
+    """Backward-compatible alias for error logging/flash helper."""
+    log_and_flash_error(e, context)
+
+
 @bp.route("/check-translations/<int:lemma_id>", methods=["POST"])
 def check_translations(lemma_id):
     """Check translations for a lemma using the voras agent."""
