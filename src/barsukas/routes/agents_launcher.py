@@ -220,6 +220,14 @@ PIPELINE = [
     },
     {
         "step": 6,
+        "agent_name": "LAPE",
+        "display_name": "Generate Grammar Facts",
+        "description": "Generate language-specific grammar facts (measure words, gender, etc.)",
+        "icon": "bi-tag",
+        "typical_args": "--fact-type measure_words --language zh",
+    },
+    {
+        "step": 7,
         "agent_name": "BUIVOLAS",
         "display_name": "Generate Example Sentences",
         "description": "Generate example sentences for vocabulary words",
@@ -227,20 +235,12 @@ PIPELINE = [
         "typical_args": "generate-sentences --mode llm",
     },
     {
-        "step": 7,
+        "step": 8,
         "agent_name": "ZVIRBLIS",
         "display_name": "Translate Sentences",
         "description": "Translate sentences linked to lemmas into target languages",
         "icon": "bi-chat-quote",
         "typical_args": "--guid N06_001 --languages lt zh",
-    },
-    {
-        "step": 8,
-        "agent_name": "LAPE",
-        "display_name": "Generate Grammar Facts",
-        "description": "Generate language-specific grammar facts (measure words, gender, etc.)",
-        "icon": "bi-tag",
-        "typical_args": "--fact-type measure_words --language zh",
     },
     {
         "step": 9,
