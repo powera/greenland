@@ -69,7 +69,7 @@ chunks = segment_audio(file_path)
 print(f"Number of segments: {len(chunks)}")
 
 # Assuming you have already loaded your Whisper model and processor
-from transformers import WhisperProcessor, WhisperForConditionalGeneration
+from transformers import WhisperForConditionalGeneration, WhisperProcessor
 
 processor = WhisperProcessor.from_pretrained("openai/whisper-base")
 model = WhisperForConditionalGeneration.from_pretrained("openai/whisper-base")

@@ -3,7 +3,7 @@
 """Spell check benchmark runner implementation."""
 
 import logging
-from typing import Dict, Optional, Tuple, Any
+from typing import Any, Dict, Optional, Tuple
 
 from lib.benchmarks.base import BenchmarkRunner
 from lib.benchmarks.data_models import BenchmarkMetadata

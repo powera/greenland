@@ -2,17 +2,17 @@
 
 """Unit tests for the ConnectionPool class."""
 
-import unittest
-import threading
-import tempfile
 import os
 import sys
-from unittest.mock import patch, MagicMock
+import tempfile
+import threading
+import unittest
+from unittest.mock import MagicMock, patch
 
 # Add the src directory to the path so we can import the module
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
-from wordfreq.storage.connection_pool import ConnectionPool, get_session, close_thread_sessions
+from wordfreq.storage.connection_pool import ConnectionPool, close_thread_sessions, get_session
 
 
 class TestConnectionPool(unittest.TestCase):

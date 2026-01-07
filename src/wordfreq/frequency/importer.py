@@ -2,20 +2,20 @@
 
 """Functions for importing corpus frequency data."""
 
-import json
 import csv
+import json
 import logging
 import os
 import re
 import time
-from typing import Dict, List, Optional, Any, Tuple, Literal
+from typing import Any, Dict, List, Literal, Optional, Tuple
 
 import constants
+import wordfreq.frequency.corpus
 from wordfreq.storage import database
 from wordfreq.storage.connection_pool import get_session
-from wordfreq.storage.models.schema import WordToken, Corpus, WordFrequency
+from wordfreq.storage.models.schema import Corpus, WordFrequency, WordToken
 from wordfreq.translation.client import LinguisticClient
-import wordfreq.frequency.corpus
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -311,13 +311,13 @@ def process_stopwords(refresh: bool = False, model: str = None) -> Dict[str, boo
         Dictionary mapping words to success flags
     """
     from util.stopwords import (
+        COMMON_ADVERBS,
+        COMMON_NOUNS,
+        COMMON_VERBS,
+        CONTRACTIONS,
+        MISC_WORDS,
         all_stopwords,
         stopwords,
-        CONTRACTIONS,
-        COMMON_VERBS,
-        COMMON_NOUNS,
-        COMMON_ADVERBS,
-        MISC_WORDS,
     )
 
     logger.info(f"Processing stop words (refresh={refresh})")

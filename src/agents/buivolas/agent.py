@@ -3,12 +3,11 @@
 import logging
 from typing import Dict, List, Optional
 
+from agents.buivolas.llm_sentences import LlmSentenceGenerator
+from agents.buivolas.pattern_sentences import PatternSentenceGenerator
 from wordfreq.storage.backend import create_session as create_backend_session
 from wordfreq.storage.backend.config import DataSourceConfig
 from wordfreq.storage.models.schema import Lemma
-
-from agents.buivolas.llm_sentences import LlmSentenceGenerator
-from agents.buivolas.pattern_sentences import PatternSentenceGenerator
 
 logger = logging.getLogger(__name__)
 

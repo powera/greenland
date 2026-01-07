@@ -5,17 +5,17 @@ Unit tests for benchmark generator 'from file' and 'local' code paths.
 Verifies that these paths work correctly without making LLM calls.
 """
 
-import unittest
-import os
 import json
+import os
 import tempfile
-from unittest.mock import patch, MagicMock, ANY
+import unittest
+from unittest.mock import ANY, MagicMock, patch
 
-from lib.benchmarks.data_models import BenchmarkMetadata
 from lib.benchmarks.base_generator import BenchmarkGenerator
-from lib.benchmarks.generators.spell_check_generator import SpellCheckGenerator
+from lib.benchmarks.data_models import BenchmarkMetadata
 from lib.benchmarks.generators.definitions_generator import DefinitionsGenerator
 from lib.benchmarks.generators.letter_count_generator import LetterCountGenerator
+from lib.benchmarks.generators.spell_check_generator import SpellCheckGenerator
 
 
 class TestBenchmarkGenerators(unittest.TestCase):

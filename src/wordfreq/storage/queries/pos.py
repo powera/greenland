@@ -1,8 +1,8 @@
 """POS-based query functions."""
 
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 
-from wordfreq.storage.models.schema import WordToken, DerivativeForm, Lemma, WordFrequency, Corpus
+from wordfreq.storage.models.schema import Corpus, DerivativeForm, Lemma, WordFrequency, WordToken
 
 
 def get_common_words_by_pos(

@@ -4,13 +4,13 @@
 
 import logging
 import random
-from typing import Dict, List, Iterator, Optional, Any, Tuple
+from typing import Any, Dict, Iterator, List, Optional, Tuple
 
-from lib.benchmarks.base import BenchmarkGenerator, COUNTRIES, CITIES, MOUNTAINS, RIVERS
+from lib.benchmarks.base import CITIES, COUNTRIES, MOUNTAINS, RIVERS, BenchmarkGenerator
 from lib.benchmarks.data_models import (
-    BenchmarkQuestion,
-    BenchmarkMetadata,
     AnswerType,
+    BenchmarkMetadata,
+    BenchmarkQuestion,
     Difficulty,
     EvaluationCriteria,
 )

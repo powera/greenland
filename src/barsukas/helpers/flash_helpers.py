@@ -1,9 +1,10 @@
 """Utilities for flash messages with logging."""
 
-import logging
 import inspect
+import logging
 import traceback
 from pathlib import Path
+
 from flask import flash
 
 logger = logging.getLogger(__name__)

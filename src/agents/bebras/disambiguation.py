@@ -7,12 +7,12 @@ lemmas in the database, especially when there are multiple candidates (polysemes
 """
 
 import logging
-from typing import Optional, List
+from typing import List, Optional
 
 import util.prompt_loader
-from wordfreq.storage.database import Lemma
-from clients.unified_client import UnifiedLLMClient
 from clients.types import Schema, SchemaProperty
+from clients.unified_client import UnifiedLLMClient
+from wordfreq.storage.database import Lemma
 
 logger = logging.getLogger(__name__)
 

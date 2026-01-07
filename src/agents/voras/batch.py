@@ -22,9 +22,9 @@ from clients.batch_queue import get_batch_manager
 from wordfreq.storage.crud.operation_log import log_translation_change
 from wordfreq.storage.translation_helpers import (
     LANGUAGE_FIELDS,
+    get_language_name,
     get_translation,
     set_translation,
-    get_language_name,
 )
 
 logger = logging.getLogger(__name__)

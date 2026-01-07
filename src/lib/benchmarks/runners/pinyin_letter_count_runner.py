@@ -4,7 +4,7 @@
 
 import json
 import logging
-from typing import Dict, Tuple, Optional, Any
+from typing import Any, Dict, Optional, Tuple
 
 from lib.benchmarks.base import BenchmarkRunner
 from lib.benchmarks.data_models import BenchmarkMetadata

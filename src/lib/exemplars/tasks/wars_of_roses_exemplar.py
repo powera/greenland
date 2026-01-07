@@ -4,7 +4,7 @@
 Exemplar task for writing a historical essay.
 """
 
-from lib.exemplars.base import register_exemplar, ExemplarType, compare_models, generate_report
+from lib.exemplars.base import ExemplarType, compare_models, generate_report, register_exemplar
 
 # Register the Wars of the Roses essay exemplar
 register_exemplar(

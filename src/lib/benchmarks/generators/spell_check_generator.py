@@ -6,16 +6,16 @@ import json
 import logging
 import os
 import random
-from typing import Dict, List, Optional, Tuple, Iterator
+from typing import Dict, Iterator, List, Optional, Tuple
 
 from sqlalchemy.orm import Session
 
 import constants
 from lib.benchmarks.base import *
 from lib.benchmarks.data_models import (
-    BenchmarkQuestion,
-    BenchmarkMetadata,
     AnswerType,
+    BenchmarkMetadata,
+    BenchmarkQuestion,
     Difficulty,
     EvaluationCriteria,
 )

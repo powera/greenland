@@ -9,13 +9,13 @@ import signal
 import time
 from threading import Event
 
-import constants
 from config import Config
-from wordfreq.storage.backend import create_session
-from wordfreq.storage.backend.config import BackendType, DataSourceConfig
 
+import constants
 from barsukas.helpers.task_handlers import TASK_HANDLERS
 from barsukas.utils.task_queue import claim_next_task, mark_task_complete, mark_task_failed
+from wordfreq.storage.backend import create_session
+from wordfreq.storage.backend.config import BackendType, DataSourceConfig
 
 logger = logging.getLogger(__name__)
 STOP_EVENT = Event()

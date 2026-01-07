@@ -4,18 +4,17 @@ from __future__ import annotations
 
 from typing import Dict
 
-import constants
 from config import Config
+
+import constants
+from agents.papuga import PapugaAgent
+from agents.sernas.agent import SernasAgent
+from agents.vilkas.agent import VilkasAgent
+from agents.voras.agent import VorasAgent
 from wordfreq.storage.backend.config import BackendType, DataSourceConfig
 from wordfreq.storage.models.schema import Lemma
-from wordfreq.storage.translation_helpers import LANGUAGE_FIELDS
-
-from agents.papuga import PapugaAgent
-from agents.vilkas.agent import VilkasAgent
-from agents.sernas.agent import SernasAgent
-from agents.voras.agent import VorasAgent
+from wordfreq.storage.translation_helpers import LANGUAGE_FIELDS, get_reference_translation
 from wordfreq.translation.client import LinguisticClient
-from wordfreq.storage.translation_helpers import get_reference_translation
 
 
 def _build_config() -> DataSourceConfig:

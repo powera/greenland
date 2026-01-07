@@ -4,10 +4,10 @@
 
 import json
 import logging
-from typing import Dict, List, Any, Tuple
+from typing import Any, Dict, List, Tuple
 
-from clients.types import Schema, SchemaProperty
 import util.prompt_loader
+from clients.types import Schema, SchemaProperty
 from wordfreq.storage import database as linguistic_db
 from wordfreq.storage.models.enums import GrammaticalForm
 from wordfreq.translation.constants import VALID_POS_TYPES

@@ -3,13 +3,13 @@
 import json
 import os
 import tempfile
-from pathlib import Path
-from typing import Dict, List, Optional, Type, Any
 from collections import defaultdict
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Type
 
-from wordfreq.storage.backend.base import BaseStorage, BaseSession
-from wordfreq.storage.backend.jsonl.session import JSONLSession
+from wordfreq.storage.backend.base import BaseSession, BaseStorage
 from wordfreq.storage.backend.jsonl import models
+from wordfreq.storage.backend.jsonl.session import JSONLSession
 
 
 class JSONLStorage(BaseStorage):

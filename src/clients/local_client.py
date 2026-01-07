@@ -6,8 +6,8 @@ import asyncio
 import gc
 import os
 
-from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
 import torch
+from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
 
 
 async def text_completion(prompt, model_dir):

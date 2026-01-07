@@ -14,10 +14,11 @@ GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent)
 if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
+from wordfreq.trakaido.utils.cli import main
+from wordfreq.trakaido.utils.export_manager import TrakaidoExporter
+
 # Re-export main components for backward compatibility
 from wordfreq.trakaido.utils.word_manager import WordManager
-from wordfreq.trakaido.utils.export_manager import TrakaidoExporter
-from wordfreq.trakaido.utils.cli import main
 
 __all__ = ["WordManager", "TrakaidoExporter", "main"]
 

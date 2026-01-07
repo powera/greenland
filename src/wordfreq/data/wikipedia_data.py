@@ -8,17 +8,18 @@ It uses the WikiLoader to extract text content from articles listed in a file,
 cleans the wiki markup, and counts word frequencies.
 """
 
-import re
 import os
+import re
+import string
 import sys
 import time
-import string
 from collections import Counter
 from typing import Dict, List, Set, Tuple
 
+import constants
+
 # Import the WikiLoader from the uploaded module
 from util.wiki_loader import WikiLoader
-import constants
 
 # Configure paths
 DATA_DIR = os.path.join(constants.PROJECT_ROOT, "data")

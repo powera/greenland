@@ -5,17 +5,17 @@
 import json
 import os
 import random
-from typing import Dict, List, Optional, Any, Iterator
+from typing import Any, Dict, Iterator, List, Optional
 
+import constants
 from lib.benchmarks.base_generator import BenchmarkGenerator
 from lib.benchmarks.data_models import (
-    BenchmarkQuestion,
-    BenchmarkMetadata,
     AnswerType,
+    BenchmarkMetadata,
+    BenchmarkQuestion,
     Difficulty,
     EvaluationCriteria,
 )
-import constants
 
 
 class LemmaGenerator(BenchmarkGenerator):

@@ -2,7 +2,8 @@
 
 from typing import Any, Optional, Type, TypeVar
 
-from sqlalchemy.orm import Session as SQLAlchemySession, Query as SQLAlchemyQuery
+from sqlalchemy.orm import Query as SQLAlchemyQuery
+from sqlalchemy.orm import Session as SQLAlchemySession
 
 from wordfreq.storage.backend.base import BaseSession
 

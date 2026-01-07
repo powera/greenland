@@ -10,17 +10,17 @@ import os
 import sys
 from typing import List, Optional
 
+import benchmarks.datastore.common
 from lib.exemplars.base import (
+    compare_models,
+    generate_all_reports,
+    generate_report,
     registry,
-    runner,
-    storage,
     report_generator,
     run_exemplar,
-    compare_models,
-    generate_report,
-    generate_all_reports,
+    runner,
+    storage,
 )
-import benchmarks.datastore.common
 
 
 def load_exemplar_modules():

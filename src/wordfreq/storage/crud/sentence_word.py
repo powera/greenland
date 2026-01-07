@@ -1,9 +1,10 @@
 """CRUD operations for SentenceWord model."""
 
-from typing import Optional, List
+from typing import List, Optional
+
 from sqlalchemy.orm import Session, joinedload
 
-from wordfreq.storage.models.schema import Sentence, SentenceWord, Lemma
+from wordfreq.storage.models.schema import Lemma, Sentence, SentenceWord
 
 
 def add_sentence_word(

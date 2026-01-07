@@ -7,29 +7,29 @@ import logging
 import sys
 
 from agents.common.common_args import (
+    add_backend_args,
     add_common_args,
+    add_guid_arg,
     add_llm_args,
     add_output_args,
     add_processing_args,
-    add_guid_arg,
-    add_backend_args,
-    get_data_source_config,
     confirm_operation,
+    get_data_source_config,
 )
 from agents.common.lemma_selection import (
-    get_lemmas_for_agent,
     LemmaQueryBuilder,
     count_for_confirmation,
+    get_lemmas_for_agent,
 )
 from agents.lokys.agent import LokysAgent
 from agents.lokys.display import (
-    display_lemma_validation_result,
     display_definition_validation_result,
-    display_single_lemma_header,
-    display_fix_applied,
     display_disambiguation_validation_result,
+    display_fix_applied,
+    display_lemma_validation_result,
+    display_single_lemma_header,
 )
-from wordfreq.tools.llm_validators import validate_lemma_form, validate_definition
+from wordfreq.tools.llm_validators import validate_definition, validate_lemma_form
 
 # Configure logging
 logger = logging.getLogger(__name__)

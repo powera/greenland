@@ -4,10 +4,10 @@
 
 import json
 import logging
-from typing import Dict, Tuple, Optional, List, Any
+from typing import Any, Dict, List, Optional, Tuple
 
 from lib.benchmarks.base_runner import BenchmarkRunner
-from lib.benchmarks.data_models import BenchmarkMetadata, AnswerType
+from lib.benchmarks.data_models import AnswerType, BenchmarkMetadata
 
 logger = logging.getLogger(__name__)
 

@@ -3,7 +3,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from wordfreq.storage.backend.base import BaseStorage, BaseSession
+from wordfreq.storage.backend.base import BaseSession, BaseStorage
 from wordfreq.storage.backend.sqlite.session import SQLiteSession
 from wordfreq.storage.models.schema import Base
 

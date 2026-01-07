@@ -9,6 +9,7 @@ and this utility converts them to Simplified when needed for export/display.
 
 import logging
 from typing import Optional
+
 from wordfreq.storage.translation_helpers import get_translation
 
 try:

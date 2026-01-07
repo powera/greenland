@@ -7,7 +7,6 @@ from sqlalchemy.exc import IntegrityError
 
 from wordfreq.storage.models.grammar_fact import GrammarFact
 
-
 logger = logging.getLogger(__name__)
 
 

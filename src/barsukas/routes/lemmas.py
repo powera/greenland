@@ -2,24 +2,24 @@
 
 """Routes for lemma management."""
 
-from flask import Blueprint, render_template, request, redirect, url_for, flash, g
+from config import Config
+from flask import Blueprint, flash, g, redirect, render_template, request, url_for
 
-from wordfreq.storage.models.schema import Lemma, DerivativeForm
-from wordfreq.storage.crud.operation_log import log_translation_change
+from audioshoe.coqui.types import CoquiVoice
+from audioshoe.espeak.types import EspeakVoice
+from audioshoe.piper.types import PiperVoice
+from barsukas.helpers.lemma_display import get_difficulty_stats, group_derivative_forms
+from barsukas.utils.task_queue import get_tasks_for_target
+from wordfreq.storage.crud.derivative_form import delete_derivative_form
 from wordfreq.storage.crud.difficulty_override import (
     get_all_overrides_for_lemma,
     get_effective_difficulty_level,
 )
-from wordfreq.storage.translation_helpers import get_all_translations, get_supported_languages
-from wordfreq.storage.crud.derivative_form import delete_derivative_form
 from wordfreq.storage.crud.lemma import handle_lemma_type_subtype_change
+from wordfreq.storage.crud.operation_log import log_translation_change
+from wordfreq.storage.models.schema import DerivativeForm, Lemma
 from wordfreq.storage.queries.lemma import build_lemma_search_query
-from barsukas.helpers.lemma_display import get_difficulty_stats, group_derivative_forms
-from barsukas.utils.task_queue import get_tasks_for_target
-from audioshoe.espeak.types import EspeakVoice
-from audioshoe.piper.types import PiperVoice
-from audioshoe.coqui.types import CoquiVoice
-from config import Config
+from wordfreq.storage.translation_helpers import get_all_translations, get_supported_languages
 
 bp = Blueprint("lemmas", __name__, url_prefix="/lemmas")
 
@@ -27,9 +27,11 @@ bp = Blueprint("lemmas", __name__, url_prefix="/lemmas")
 @bp.route("/add", methods=["GET", "POST"])
 def add_lemma():
     """Add a new lemma."""
-    from flask import current_app
-    from wordfreq.storage.utils.enums import VALID_POS_TYPES, get_subtype_values_for_pos
     import json
+
+    from flask import current_app
+
+    from wordfreq.storage.utils.enums import VALID_POS_TYPES, get_subtype_values_for_pos
 
     if request.method == "POST":
         if current_app.config.get("READONLY", False):
@@ -539,8 +541,9 @@ def edit_lemma(lemma_id):
     difficulty_stats = get_difficulty_stats(g.db, lemma.pos_type, lemma.pos_subtype)
 
     # Get POS types and subtypes for dropdowns
-    from wordfreq.storage.utils.enums import VALID_POS_TYPES, get_subtype_values_for_pos
     import json
+
+    from wordfreq.storage.utils.enums import VALID_POS_TYPES, get_subtype_values_for_pos
 
     pos_types = sorted(list(VALID_POS_TYPES))
 
@@ -564,6 +567,7 @@ def edit_lemma(lemma_id):
 def delete_synonym(lemma_id, form_id):
     """Delete a single synonym or alternative form."""
     from flask import current_app
+
     from wordfreq.storage.crud.grammar_fact import update_alternate_forms_facts_after_deletion
 
     if current_app.config.get("READONLY", False):
@@ -618,6 +622,7 @@ def delete_synonym(lemma_id, form_id):
 def delete_all_synonyms(lemma_id):
     """Delete all synonyms and/or alternative forms for a lemma."""
     from flask import current_app
+
     from wordfreq.storage.crud.grammar_fact import update_alternate_forms_facts_after_deletion
 
     if current_app.config.get("READONLY", False):

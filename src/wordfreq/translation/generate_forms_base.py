@@ -10,16 +10,16 @@ language-specific form generation scripts.
 import argparse
 import logging
 import time
-from typing import Dict, List, Callable, Optional
 from dataclasses import dataclass
+from typing import Callable, Dict, List, Optional
 
-from wordfreq.translation.client import LinguisticClient
-from wordfreq.storage import database as linguistic_db
-from wordfreq.storage.models.enums import GrammaticalForm
-from wordfreq.storage.connection_pool import get_session
-from wordfreq.storage.backend.config import DataSourceConfig
-from agents.common.common_args import get_data_source_config
 import constants
+from agents.common.common_args import get_data_source_config
+from wordfreq.storage import database as linguistic_db
+from wordfreq.storage.backend.config import DataSourceConfig
+from wordfreq.storage.connection_pool import get_session
+from wordfreq.storage.models.enums import GrammaticalForm
+from wordfreq.translation.client import LinguisticClient
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)

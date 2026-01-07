@@ -4,16 +4,17 @@
 
 import logging
 import os
-from typing import Dict, List, Any, Optional
 from dataclasses import dataclass
+from typing import Any, Dict, List, Optional
+
 from sqlalchemy.orm import Session
 
-import wordfreq.storage.connection_pool
-import wordfreq.storage.models.schema
+import constants
 import wordfreq.frequency.analysis
 import wordfreq.frequency.importer
-import constants
+import wordfreq.storage.connection_pool
 import wordfreq.storage.database
+import wordfreq.storage.models.schema
 
 # Configure logging
 logger = logging.getLogger(__name__)

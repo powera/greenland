@@ -1,6 +1,5 @@
-import constants
-
 import benchmarks.schema.load_schema
+import constants
 
 benchmarks.schema.load_schema.create_tables()
 

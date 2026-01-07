@@ -1,11 +1,12 @@
 #!/usr/bin/python3
 """Generates HTML score tables and detailed reports for benchmark results."""
 
+import logging
 import os
 from dataclasses import dataclass
 from typing import Dict, List, Optional
+
 from jinja2 import Environment, FileSystemLoader
-import logging
 
 import benchmarks.datastore.benchmarks
 import benchmarks.datastore.common

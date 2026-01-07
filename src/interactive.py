@@ -14,11 +14,11 @@ import wordfreq.dictionary.reviewer
 rv = wordfreq.dictionary.reviewer.LinguisticReviewer()
 
 import wordfreq.storage.database
-
 import wordfreq.translation.processor
 
 prcs = wordfreq.translation.processor.WordProcessor(model=MODEL)
 
+import lib.benchmarks.registry
+
 # imports for benchmarks
 import lib.run_benchmark
-import lib.benchmarks.registry

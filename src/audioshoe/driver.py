@@ -1,9 +1,8 @@
 # from README for whisper
 
 import torch
-from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
 from datasets import load_dataset
-
+from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
 
 model_id = "openai/whisper-large-v3"
 

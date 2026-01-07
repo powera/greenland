@@ -9,10 +9,10 @@ including nouns, verbs, and complete directory exports.
 import json
 import logging
 import os
+import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Any, Optional, Tuple
-import sys
+from typing import Any, Dict, List, Optional, Tuple
 
 # Add the src directory to the path for imports
 GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent.parent)
@@ -21,14 +21,14 @@ if GREENLAND_SRC_PATH not in sys.path:
 
 import constants
 from wordfreq.storage.database import create_database_session
-from wordfreq.storage.models.schema import WordToken, Lemma, DerivativeForm, AudioQualityReview
 from wordfreq.storage.models.grammar_fact import GrammarFact
-from wordfreq.storage.translation_helpers import get_translation, LANGUAGE_FIELDS
+from wordfreq.storage.models.schema import AudioQualityReview, DerivativeForm, Lemma, WordToken
+from wordfreq.storage.translation_helpers import LANGUAGE_FIELDS, get_translation
 from wordfreq.tools.chinese_converter import to_simplified
 
 # Import pypinyin for Chinese pinyin generation
 try:
-    from pypinyin import lazy_pinyin, Style
+    from pypinyin import Style, lazy_pinyin
 
     PYPINYIN_AVAILABLE = True
 except ImportError:
@@ -115,8 +115,9 @@ class WirewordExporter:
         than SQL filtering but works correctly with the LemmaTranslation table.
         """
         from sqlalchemy import func
-        from wordfreq.storage.models.schema import LemmaDifficultyOverride
+
         from wordfreq.storage.crud.difficulty_override import get_effective_difficulty_level
+        from wordfreq.storage.models.schema import LemmaDifficultyOverride
 
         logger.info(f"Querying database for trakaido data (language: {self.language_name})...")
 
@@ -1266,8 +1267,9 @@ class WirewordExporter:
             Tuple of (success flag, export statistics)
         """
         from sqlalchemy import func
-        from wordfreq.storage.models.schema import LemmaDifficultyOverride
+
         from wordfreq.storage.crud.difficulty_override import get_effective_difficulty_level
+        from wordfreq.storage.models.schema import LemmaDifficultyOverride
 
         session = self.get_session()
         try:

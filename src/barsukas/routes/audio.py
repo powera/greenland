@@ -17,29 +17,29 @@ from typing import Optional
 
 from flask import (
     Blueprint,
+    Response,
+    current_app,
+    flash,
+    g,
+    jsonify,
+    redirect,
     render_template,
     request,
-    jsonify,
-    g,
-    flash,
-    redirect,
-    url_for,
     send_file,
-    current_app,
-    Response,
+    url_for,
 )
 from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 
+from agents.strazdas import StrazdasAgent
+from agents.vieversys import VieversysAgent
+from audioshoe.coqui import CoquiClient, CoquiVoice
+from audioshoe.espeak import EspeakVoice
+from audioshoe.piper import PiperClient, PiperVoice
+from barsukas.helpers.audio_helpers import link_audio_to_lemma, validate_audio_translation
+from clients.audio import Voice
 from wordfreq.storage.models.schema import AudioQualityReview, Lemma, LemmaDifficultyOverride
 from wordfreq.storage.queries.lemma import apply_effective_difficulty_filter
-from clients.audio import Voice
-from barsukas.helpers.audio_helpers import link_audio_to_lemma, validate_audio_translation
-from agents.vieversys import VieversysAgent
-from agents.strazdas import StrazdasAgent
-from audioshoe.espeak import EspeakVoice
-from audioshoe.piper import PiperVoice, PiperClient
-from audioshoe.coqui import CoquiVoice, CoquiClient
 
 bp = Blueprint("audio", __name__, url_prefix="/audio")
 logger = logging.getLogger(__name__)
@@ -656,8 +656,9 @@ def generate():
             audio_base_dir = Path(audio_base_dir)
 
         # Create DataSourceConfig for agents
-        from wordfreq.storage.backend.config import DataSourceConfig, BackendType
         from config import Config
+
+        from wordfreq.storage.backend.config import BackendType, DataSourceConfig
 
         config = DataSourceConfig(
             backend_type=BackendType.SQLITE,
@@ -716,9 +717,10 @@ def _generate_audio_piper(session, lemma, language_code, voices, output_dir):
     Returns:
         dict with success, voices, and error information
     """
-    from wordfreq.storage.translation_helpers import get_translation
-    from clients.audio.types import AudioFormat
     import hashlib
+
+    from clients.audio.types import AudioFormat
+    from wordfreq.storage.translation_helpers import get_translation
 
     try:
         # Get translation for the language
@@ -800,9 +802,10 @@ def _generate_audio_coqui(session, lemma, language_code, voices, output_dir):
     Returns:
         dict with success, voices, and error information
     """
-    from wordfreq.storage.translation_helpers import get_translation
-    from clients.audio.types import AudioFormat
     import hashlib
+
+    from clients.audio.types import AudioFormat
+    from wordfreq.storage.translation_helpers import get_translation
 
     try:
         # Get translation for the language
@@ -925,8 +928,9 @@ def generate_single(guid):
             raise ValueError("AUDIO_BASE_DIR not configured")
 
         # Create DataSourceConfig for agents
-        from wordfreq.storage.backend.config import DataSourceConfig, BackendType
         from config import Config
+
+        from wordfreq.storage.backend.config import BackendType, DataSourceConfig
 
         config = DataSourceConfig(
             backend_type=BackendType.SQLITE,

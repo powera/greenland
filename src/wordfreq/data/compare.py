@@ -1,10 +1,10 @@
-import json
-import heapq
-import statistics
-import csv
-from pathlib import Path
 import argparse
-from typing import Dict, List, Tuple, Set, Any
+import csv
+import heapq
+import json
+import statistics
+from pathlib import Path
+from typing import Any, Dict, List, Set, Tuple
 
 
 def load_frequency_data(file_path: str) -> Dict[str, int]:

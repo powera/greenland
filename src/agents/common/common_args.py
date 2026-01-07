@@ -7,7 +7,7 @@ to standardize command-line interfaces across all agents.
 import argparse
 import sys
 from pathlib import Path
-from typing import Optional, Callable, Any
+from typing import Any, Callable, Optional
 
 from constants import DEFAULT_MODEL
 
@@ -335,8 +335,8 @@ def get_data_source_config(args: Any, default_model: Optional[str] = None):
     Returns:
         DataSourceConfig instance (always returns a valid config)
     """
-    from wordfreq.storage.backend.config import DataSourceConfig, BackendType
     import constants
+    from wordfreq.storage.backend.config import BackendType, DataSourceConfig
 
     # Determine backend type and paths
     backend_type = None

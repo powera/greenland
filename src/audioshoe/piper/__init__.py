@@ -2,11 +2,7 @@
 """Piper neural text-to-speech audio generation."""
 
 from .piper_tts import PiperClient, generate_audio
-from .types import (
-    PiperVoice,
-    DEFAULT_PIPER_VOICES,
-    RECOMMENDED_VOICES,
-)
+from .types import DEFAULT_PIPER_VOICES, RECOMMENDED_VOICES, PiperVoice
 
 __all__ = [
     "PiperClient",

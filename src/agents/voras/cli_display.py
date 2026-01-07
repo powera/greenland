@@ -4,7 +4,8 @@ This module contains display functions for VORAS-specific output formats,
 keeping the main CLI clean and focused on logic.
 """
 
-from typing import Dict, Any, List
+from typing import Any, Dict, List
+
 from wordfreq.storage.translation_helpers import LANGUAGE_FIELDS
 
 

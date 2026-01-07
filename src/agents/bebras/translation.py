@@ -7,11 +7,11 @@ in multiple target languages using LLM-based translation.
 """
 
 import logging
-from typing import List, Dict, Optional
+from typing import Dict, List, Optional
 
 import util.prompt_loader
-from clients.unified_client import UnifiedLLMClient
 from clients.types import Schema, SchemaProperty
+from clients.unified_client import UnifiedLLMClient
 from wordfreq.storage.database import Sentence, add_sentence_translation
 from wordfreq.storage.translation_helpers import LANGUAGE_NAMES
 

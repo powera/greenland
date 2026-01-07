@@ -9,11 +9,11 @@ LemmaTranslation table. Code should use these helper functions instead of
 directly accessing translation fields.
 """
 
-from typing import Optional, Dict, Tuple
+from typing import Dict, Optional, Tuple
+
 from sqlalchemy.orm import Session
 
 from wordfreq.storage.models.schema import Lemma, LemmaTranslation
-
 
 # Language mappings
 # Format: 'code': (field_name_or_code, display_name, use_lemma_translation_table)

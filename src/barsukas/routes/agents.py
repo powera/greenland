@@ -4,18 +4,19 @@
 
 import logging
 import traceback
-from flask import Blueprint, request, redirect, url_for, flash, g, jsonify, render_template
+
+from config import Config
+from flask import Blueprint, flash, g, jsonify, redirect, render_template, request, url_for
 
 import constants
-from wordfreq.storage.models.schema import Lemma, DerivativeForm
-from wordfreq.storage.translation_helpers import get_supported_languages
-from wordfreq.storage.backend.config import DataSourceConfig, BackendType
-from agents.voras.agent import VorasAgent
-from agents.papuga import PapugaAgent
 from agents.lokys import LokysAgent
-from config import Config
-from barsukas.utils.task_queue import enqueue_task, TaskType
+from agents.papuga import PapugaAgent
+from agents.voras.agent import VorasAgent
 from barsukas.helpers.flash_helpers import flash_and_log, log_and_flash_error
+from barsukas.utils.task_queue import TaskType, enqueue_task
+from wordfreq.storage.backend.config import BackendType, DataSourceConfig
+from wordfreq.storage.models.schema import DerivativeForm, Lemma
+from wordfreq.storage.translation_helpers import get_supported_languages
 
 bp = Blueprint("agents", __name__, url_prefix="/agents")
 logger = logging.getLogger(__name__)
@@ -168,8 +169,8 @@ def check_pronunciations(lemma_id):
         agent = PapugaAgent(config=config)
 
         # Check pronunciations (using dry_run=False to actually validate)
-        from wordfreq.tools.llm_validators import validate_pronunciation
         from wordfreq.storage.models.schema import Sentence, SentenceTranslation, SentenceWord
+        from wordfreq.tools.llm_validators import validate_pronunciation
 
         issues = []
         for form in forms_with_pronunciations:
@@ -765,8 +766,9 @@ def view_sentences(lemma_id):
 
     try:
         # Query sentences that use this lemma
-        from wordfreq.storage.models.schema import Sentence, SentenceWord
         from sqlalchemy.orm import joinedload
+
+        from wordfreq.storage.models.schema import Sentence, SentenceWord
 
         sentences = (
             g.db.query(Sentence)

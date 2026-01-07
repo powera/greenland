@@ -11,12 +11,12 @@ import html
 import json
 import logging
 import os
-from dataclasses import dataclass, asdict, field
+from dataclasses import asdict, dataclass, field
 from enum import Enum
-from typing import Dict, List, Optional, Any, Union, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
-import constants
 import benchmarks.datastore.common
+import constants
 from clients import unified_client
 from clients.types import Response
 

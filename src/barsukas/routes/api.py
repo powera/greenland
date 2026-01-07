@@ -2,24 +2,25 @@
 
 """API routes for AJAX requests and REST API endpoints."""
 
-from flask import Blueprint, jsonify, request, g
-from sqlalchemy import or_, func
-from typing import Optional, Dict, Any, List
+from typing import Any, Dict, List, Optional
 
+from config import Config
+from flask import Blueprint, g, jsonify, request
+from sqlalchemy import func, or_
+
+from wordfreq.storage.crud.grammar_fact import get_grammar_facts
+from wordfreq.storage.crud.lemma import get_lemma_by_guid
 from wordfreq.storage.models import (
-    Lemma,
     DerivativeForm,
     GrammarFact,
+    Lemma,
+    LemmaTranslation,
     Sentence,
     SentenceTranslation,
     SentenceWord,
-    LemmaTranslation,
 )
-from wordfreq.storage.crud.lemma import get_lemma_by_guid
-from wordfreq.storage.crud.grammar_fact import get_grammar_facts
-from wordfreq.storage.translation_helpers import get_all_translations
 from wordfreq.storage.queries.lemma import build_lemma_search_query
-from config import Config
+from wordfreq.storage.translation_helpers import get_all_translations
 
 bp = Blueprint("api", __name__, url_prefix="/api")
 

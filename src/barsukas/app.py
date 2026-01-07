@@ -7,33 +7,33 @@ A lightweight Flask web interface for manual edits to lemmas, translations,
 and difficulty levels in the linguistics database.
 """
 
-import sys
 import argparse
 import logging
+import sys
 from pathlib import Path
 
-from flask import Flask, render_template, g
-
 from config import Config
-from routes import (
-    lemmas,
-    translations,
-    overrides,
-    agents,
-    operation_logs,
-    wireword,
-    api,
-    agents_launcher,
-    exports,
-    sentences,
-    audio,
-    rapid_review,
-    settings,
-    pattern_sentences,
-)
-from wordfreq.storage.backend import create_session, get_backend_type
-from wordfreq.storage.backend.config import DataSourceConfig, BackendType
+from flask import Flask, g, render_template
 from pinyin_helper import generate_pinyin, generate_pinyin_ruby_html, is_chinese
+from routes import (
+    agents,
+    agents_launcher,
+    api,
+    audio,
+    exports,
+    lemmas,
+    operation_logs,
+    overrides,
+    pattern_sentences,
+    rapid_review,
+    sentences,
+    settings,
+    translations,
+    wireword,
+)
+
+from wordfreq.storage.backend import create_session, get_backend_type
+from wordfreq.storage.backend.config import BackendType, DataSourceConfig
 
 
 def create_app(config_class=Config):

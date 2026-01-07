@@ -1,9 +1,10 @@
 """Statistics and reporting query functions."""
 
-from typing import Dict, Any, List
+from typing import Any, Dict, List
+
 from sqlalchemy.sql import func
 
-from wordfreq.storage.models.schema import WordToken, DerivativeForm, Lemma, WordFrequency, Corpus
+from wordfreq.storage.models.schema import Corpus, DerivativeForm, Lemma, WordFrequency, WordToken
 
 
 def get_processing_stats(session) -> Dict[str, Any]:

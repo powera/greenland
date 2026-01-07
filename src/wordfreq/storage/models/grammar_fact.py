@@ -7,15 +7,16 @@ such as gender, declension class, and number restrictions (plurale tantum, etc.)
 
 import datetime
 from typing import Optional
+
 from sqlalchemy import (
-    String,
-    Integer,
-    Text,
+    TIMESTAMP,
     Boolean,
     ForeignKey,
-    TIMESTAMP,
-    UniqueConstraint,
     Index,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
     func,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship

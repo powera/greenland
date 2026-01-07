@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 from sqlalchemy.exc import SQLAlchemyError
+
 import benchmarks.datastore.benchmarks
 from benchmarks.datastore.benchmarks import Run, RunDetail
 

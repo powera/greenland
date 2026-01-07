@@ -8,8 +8,8 @@ This package provides modular components for:
 - Text rendering and formatting
 """
 
-from .word_manager import WordManager
-from .export_manager import TrakaidoExporter
 from .cli import main
+from .export_manager import TrakaidoExporter
+from .word_manager import WordManager
 
 __all__ = ["WordManager", "TrakaidoExporter", "main"]

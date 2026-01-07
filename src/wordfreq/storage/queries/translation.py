@@ -2,8 +2,8 @@
 
 from typing import List
 
-from wordfreq.storage.models.schema import Lemma
 from wordfreq.storage.crud.operation_log import log_translation_change
+from wordfreq.storage.models.schema import Lemma
 
 
 def get_lemmas_without_translation(session, language: str, limit: int = 100) -> List[Lemma]:

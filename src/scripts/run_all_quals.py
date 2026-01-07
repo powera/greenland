@@ -2,11 +2,12 @@
 
 """Run all qualification tests against all models in database."""
 
-import logging
 import argparse
-from typing import List, Set, Optional
-import benchmarks.datastore.quals
+import logging
+from typing import List, Optional, Set
+
 import benchmarks.datastore.common
+import benchmarks.datastore.quals
 import lib.run_quals
 
 # Configure logging

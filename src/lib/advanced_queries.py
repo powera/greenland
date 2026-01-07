@@ -3,9 +3,9 @@
 """Advanced query functions for generating explanations and analyzing text."""
 
 import logging
-from enum import Enum
-from typing import Tuple, Dict, List, Union, Callable, Optional
 from dataclasses import dataclass
+from enum import Enum
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
 from clients import unified_client
 from telemetry import LLMUsage

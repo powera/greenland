@@ -3,18 +3,19 @@
 """Database models for storing linguistic information about words."""
 
 import datetime
-from typing import Optional, List
+from typing import List, Optional
+
 from sqlalchemy import (
-    String,
-    Integer,
-    Text,
-    Float,
-    ForeignKey,
     TIMESTAMP,
     Boolean,
-    func,
-    UniqueConstraint,
     CheckConstraint,
+    Float,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
+    func,
     literal_column,
 )
 from sqlalchemy.ext.hybrid import hybrid_property

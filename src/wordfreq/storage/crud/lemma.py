@@ -1,11 +1,11 @@
 """CRUD operations for Lemma model."""
 
 import json
-from typing import List, Optional, Dict
+from typing import Dict, List, Optional
 
-from wordfreq.storage.models.schema import Lemma, LemmaTranslation, DerivativeForm
-from wordfreq.storage.utils.guid import generate_guid
 from wordfreq.storage.crud.operation_log import log_translation_change
+from wordfreq.storage.models.schema import DerivativeForm, Lemma, LemmaTranslation
+from wordfreq.storage.utils.guid import generate_guid
 
 
 def add_lemma(
@@ -271,6 +271,7 @@ def get_lemmas_by_subtype_and_level(
         List of Lemma objects
     """
     from sqlalchemy import func
+
     from wordfreq.storage.models.schema import LemmaDifficultyOverride
 
     # Convert lang parameter to language code if needed
@@ -489,7 +490,7 @@ def handle_lemma_type_subtype_change(
     # Step 3: Clear translations only if pos_type changed
     # Subtype changes don't affect translation validity
     if type_changed:
-        from wordfreq.storage.translation_helpers import get_all_translations, LANGUAGE_FIELDS
+        from wordfreq.storage.translation_helpers import LANGUAGE_FIELDS, get_all_translations
 
         # Get all translations for this lemma
         translations = get_all_translations(session, lemma)

@@ -3,15 +3,15 @@
 """Generator for word length benchmark questions."""
 
 import logging
-import random
 import os
+import random
 from typing import Iterator
 
 from lib.benchmarks.base import *
 from lib.benchmarks.data_models import (
-    BenchmarkQuestion,
-    BenchmarkMetadata,
     AnswerType,
+    BenchmarkMetadata,
+    BenchmarkQuestion,
     Difficulty,
     EvaluationCriteria,
 )

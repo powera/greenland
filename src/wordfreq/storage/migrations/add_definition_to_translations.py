@@ -15,10 +15,11 @@ from pathlib import Path
 if str(Path(__file__).parent.parent.parent.parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
-from sqlalchemy import text, inspect
+from sqlalchemy import inspect, text
+
+from constants import WORDFREQ_DB_PATH
 from wordfreq.storage.database import create_database_session
 from wordfreq.storage.models.schema import Lemma, LemmaTranslation
-from constants import WORDFREQ_DB_PATH
 
 
 def check_column_exists(session, table_name: str, column_name: str) -> bool:

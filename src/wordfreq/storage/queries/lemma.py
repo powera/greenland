@@ -1,6 +1,7 @@
 """General-purpose lemma query functions."""
 
 from typing import Optional
+
 from sqlalchemy import case, func, or_
 
 from wordfreq.storage.models.schema import Lemma, LemmaDifficultyOverride, LemmaTranslation

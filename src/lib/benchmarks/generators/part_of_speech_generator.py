@@ -5,13 +5,13 @@
 import json
 import logging
 import random
-from typing import Dict, List, Optional, Any, Iterator
+from typing import Any, Dict, Iterator, List, Optional
 
 from lib.benchmarks.base import *
 from lib.benchmarks.data_models import (
-    BenchmarkQuestion,
-    BenchmarkMetadata,
     AnswerType,
+    BenchmarkMetadata,
+    BenchmarkQuestion,
     Difficulty,
     EvaluationCriteria,
 )

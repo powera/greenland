@@ -2,12 +2,12 @@
 
 """Script runner with logging setup."""
 
+import argparse
+import importlib
+import logging
 import os
 import sys
-import logging
-import argparse
 import traceback
-import importlib
 
 
 def run_script(script_path: str, args: list) -> None:

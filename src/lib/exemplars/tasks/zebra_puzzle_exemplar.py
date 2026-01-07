@@ -4,7 +4,7 @@
 Exemplar task for solving a logical reasoning puzzle involving multiple interconnected statements.
 """
 
-from lib.exemplars.base import register_exemplar, ExemplarType, compare_models, generate_report
+from lib.exemplars.base import ExemplarType, compare_models, generate_report, register_exemplar
 
 # The solution (for reference)
 SOLUTION = """

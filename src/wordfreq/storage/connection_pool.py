@@ -5,14 +5,15 @@ Connection pool for SQLite connections to ensure thread safety.
 This module provides a thread-safe connection pool for SQLite databases.
 """
 
-import threading
 import logging
+import threading
 from typing import Dict, Optional
+
 from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import Session, sessionmaker
 
-from wordfreq.storage.backend.config import DataSourceConfig, BackendType
+from wordfreq.storage.backend.config import BackendType, DataSourceConfig
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")

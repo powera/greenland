@@ -13,14 +13,15 @@ if str(Path(__file__).parent.parent.parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 import unittest
-from unittest.mock import Mock, MagicMock, patch, call
+from unittest.mock import MagicMock, Mock, call, patch
+
 from src.agents.common.lemma_selection import (
-    find_lemma_by_guid,
+    LemmaNotFoundError,
     LemmaQueryBuilder,
     apply_limit_and_sample_rate,
     count_for_confirmation,
+    find_lemma_by_guid,
     get_lemmas_for_processing,
-    LemmaNotFoundError,
 )
 
 

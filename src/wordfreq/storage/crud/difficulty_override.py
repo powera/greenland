@@ -1,9 +1,10 @@
 """CRUD operations for LemmaDifficultyOverride model."""
 
-from typing import Optional, List, Dict
+from typing import Dict, List, Optional
+
 from sqlalchemy import and_
 
-from wordfreq.storage.models.schema import LemmaDifficultyOverride, Lemma
+from wordfreq.storage.models.schema import Lemma, LemmaDifficultyOverride
 
 
 def add_difficulty_override(

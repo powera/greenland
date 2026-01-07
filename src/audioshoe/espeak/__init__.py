@@ -2,12 +2,7 @@
 """eSpeak-NG text-to-speech audio generation with MBROLA support."""
 
 from .espeak_tts import EspeakNGClient, generate_audio
-from .types import (
-    EspeakVoice,
-    DEFAULT_ESPEAK_VOICES,
-    MBROLA_VOICES,
-    RECOMMENDED_VOICES,
-)
+from .types import DEFAULT_ESPEAK_VOICES, MBROLA_VOICES, RECOMMENDED_VOICES, EspeakVoice
 
 __all__ = [
     "EspeakNGClient",

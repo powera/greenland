@@ -1,8 +1,8 @@
 # from Claude AI
 
-import torch
-from transformers import WhisperProcessor, WhisperForConditionalGeneration
 import librosa
+import torch
+from transformers import WhisperForConditionalGeneration, WhisperProcessor
 
 # Load model and processor
 model = WhisperForConditionalGeneration.from_pretrained("openai/whisper-base")

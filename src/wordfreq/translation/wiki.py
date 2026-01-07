@@ -8,11 +8,12 @@ declension table data.
 """
 
 import logging
-import requests
-from typing import Dict, Optional, List, Tuple
 import re
-from bs4 import BeautifulSoup
 import unicodedata
+from typing import Dict, List, Optional, Tuple
+
+import requests
+from bs4 import BeautifulSoup
 
 logger = logging.getLogger(__name__)
 

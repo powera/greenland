@@ -3,19 +3,19 @@
 """Generator for antonym benchmark questions."""
 
 import logging
-from typing import Optional, Iterator
+from typing import Iterator, Optional
 
 from sqlalchemy.orm import Session
 
 from lib.benchmarks.base import *
 from lib.benchmarks.data_models import (
-    BenchmarkQuestion,
     AnswerType,
+    BenchmarkMetadata,
+    BenchmarkQuestion,
     Difficulty,
     EvaluationCriteria,
-    BenchmarkMetadata,
 )
-from lib.benchmarks.factory import generator, benchmark
+from lib.benchmarks.factory import benchmark, generator
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")

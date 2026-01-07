@@ -2,8 +2,9 @@
 
 # intended to run a single regression test of speech2txt
 import os
-import torch
+
 import librosa
+import torch
 from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
 
 model_id = "openai/whisper-large-v3-turbo"

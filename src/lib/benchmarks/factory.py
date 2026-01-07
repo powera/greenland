@@ -3,7 +3,7 @@
 """Factory for creating benchmark generators and runners."""
 
 import logging
-from typing import Dict, Optional, Type, Any
+from typing import Any, Dict, Optional, Type
 
 from lib.benchmarks.base import BenchmarkGenerator, BenchmarkRunner
 from lib.benchmarks.data_models import BenchmarkMetadata

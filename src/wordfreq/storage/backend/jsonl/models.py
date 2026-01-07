@@ -6,8 +6,8 @@ serialization to/from JSONL format.
 
 import datetime
 import json
-from dataclasses import dataclass, field, asdict
-from typing import Optional, List, Dict, Any
+from dataclasses import asdict, dataclass, field
+from typing import Any, Dict, List, Optional
 
 
 def datetime_serializer(obj: Any) -> Any:

@@ -2,27 +2,27 @@
 
 """Benchmark system for evaluating language models."""
 
+# Import base classes
+from lib.benchmarks.base import BenchmarkGenerator, BenchmarkRunner
+
 # Import data models
 from lib.benchmarks.data_models import (
+    AnswerType,
+    BenchmarkMetadata,
     BenchmarkQuestion,
     BenchmarkResult,
-    BenchmarkMetadata,
-    AnswerType,
     Difficulty,
     EvaluationCriteria,
 )
 
-# Import base classes
-from lib.benchmarks.base import BenchmarkGenerator, BenchmarkRunner
-
 # Import factory functions
 from lib.benchmarks.factory import (
-    get_generator,
-    get_runner,
-    get_all_benchmark_codes,
-    get_benchmark_metadata,
     benchmark,
     generator,
+    get_all_benchmark_codes,
+    get_benchmark_metadata,
+    get_generator,
+    get_runner,
     runner,
 )
 

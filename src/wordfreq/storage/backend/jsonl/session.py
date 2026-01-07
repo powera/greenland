@@ -1,7 +1,7 @@
 """JSONL session implementation."""
 
 import datetime
-from typing import Any, Optional, Type, TypeVar, Dict, List
+from typing import Any, Dict, List, Optional, Type, TypeVar
 
 from sqlalchemy.orm import Query as SQLAlchemyQuery
 
@@ -40,8 +40,10 @@ class JSONLSession(BaseSession):
         """
         if self._sqlite_session is None:
             import logging
+
             from sqlalchemy import create_engine
             from sqlalchemy.orm import sessionmaker
+
             from wordfreq.storage.models.schema import Base
 
             logger = logging.getLogger(__name__)
@@ -58,14 +60,11 @@ class JSONLSession(BaseSession):
             self._populate_sqlite()
 
             # Log statistics about what was loaded
-            from wordfreq.storage.models.schema import (
-                Lemma as SQLLemma,
-                LemmaTranslation,
-                Sentence as SQLSentence,
-                SentenceTranslation,
-                SentenceWord,
-            )
             from wordfreq.storage.models.grammar_fact import GrammarFact as SQLGrammarFact
+            from wordfreq.storage.models.schema import Lemma as SQLLemma
+            from wordfreq.storage.models.schema import LemmaTranslation
+            from wordfreq.storage.models.schema import Sentence as SQLSentence
+            from wordfreq.storage.models.schema import SentenceTranslation, SentenceWord
 
             lemma_count = self._sqlite_session.query(SQLLemma).count()
             translation_count = self._sqlite_session.query(LemmaTranslation).count()
@@ -92,16 +91,16 @@ class JSONLSession(BaseSession):
         Returns:
             Dictionary mapping JSONL models to SQLAlchemy models
         """
-        from wordfreq.storage.models.schema import (
-            Lemma as SQLLemma,
-            LemmaTranslation as SQLLemmaTranslation,
-            LemmaDifficultyOverride as SQLLemmaDifficultyOverride,
-            DerivativeForm as SQLDerivativeForm,
-            Sentence as SQLSentence,
-            SentenceTranslation as SQLSentenceTranslation,
-            SentenceWord as SQLSentenceWord,
-        )
         from wordfreq.storage.models.grammar_fact import GrammarFact as SQLGrammarFact
+        from wordfreq.storage.models.schema import DerivativeForm as SQLDerivativeForm
+        from wordfreq.storage.models.schema import Lemma as SQLLemma
+        from wordfreq.storage.models.schema import (
+            LemmaDifficultyOverride as SQLLemmaDifficultyOverride,
+        )
+        from wordfreq.storage.models.schema import LemmaTranslation as SQLLemmaTranslation
+        from wordfreq.storage.models.schema import Sentence as SQLSentence
+        from wordfreq.storage.models.schema import SentenceTranslation as SQLSentenceTranslation
+        from wordfreq.storage.models.schema import SentenceWord as SQLSentenceWord
 
         return {
             models.Lemma: SQLLemma,
@@ -116,14 +115,11 @@ class JSONLSession(BaseSession):
 
     def _populate_sqlite(self):
         """Populate the temporary SQLite database with data from JSONL storage."""
-        from wordfreq.storage.models.schema import (
-            Lemma as SQLLemma,
-            LemmaTranslation,
-            Sentence as SQLSentence,
-            SentenceTranslation,
-            SentenceWord,
-        )
         from wordfreq.storage.models.grammar_fact import GrammarFact as SQLGrammarFact
+        from wordfreq.storage.models.schema import Lemma as SQLLemma
+        from wordfreq.storage.models.schema import LemmaTranslation
+        from wordfreq.storage.models.schema import Sentence as SQLSentence
+        from wordfreq.storage.models.schema import SentenceTranslation, SentenceWord
 
         # Use bulk operations for better performance
         lemmas = []

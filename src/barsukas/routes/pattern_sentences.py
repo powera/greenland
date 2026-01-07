@@ -2,13 +2,15 @@
 
 """Routes for pattern-based simple sentence generation."""
 
-from flask import Blueprint, render_template, request, jsonify, flash, redirect, url_for, g
 import subprocess
 from pathlib import Path
+
 from config import Config
+from flask import Blueprint, flash, g, jsonify, redirect, render_template, request, url_for
+
 import constants
 from wordfreq.patterns.simple_patterns import SIMPLE_PATTERNS
-from wordfreq.storage.models.schema import Sentence, SentenceTranslation, SentenceWord, Lemma
+from wordfreq.storage.models.schema import Lemma, Sentence, SentenceTranslation, SentenceWord
 
 bp = Blueprint("pattern_sentences", __name__, url_prefix="/pattern-sentences")
 

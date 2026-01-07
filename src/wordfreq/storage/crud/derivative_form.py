@@ -1,11 +1,10 @@
 """CRUD operations for DerivativeForm model."""
 
 import logging
-from typing import List, Optional, Dict
+from typing import Dict, List, Optional
 
-from wordfreq.storage.models.schema import DerivativeForm, Lemma, WordToken
 from wordfreq.storage.crud.word_token import add_word_token
-
+from wordfreq.storage.models.schema import DerivativeForm, Lemma, WordToken
 
 logger = logging.getLogger(__name__)
 

@@ -10,9 +10,9 @@ Import from there instead.
 from .utils.export_manager import (
     TrakaidoExporter,
     export_trakaido_data,
-    write_json_file,
-    get_english_word_from_lemma,
     format_subtype_display_name,
+    get_english_word_from_lemma,
+    write_json_file,
 )
 
 __all__ = [

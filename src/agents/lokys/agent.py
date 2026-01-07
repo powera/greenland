@@ -31,10 +31,10 @@ from wordfreq.storage.backend.config import DataSourceConfig
 from wordfreq.storage.models.schema import Lemma
 from wordfreq.storage.translation_helpers import get_translation
 from wordfreq.tools.llm_validators import (
-    validate_lemma_form,
-    validate_definition,
     suggest_disambiguation,
+    validate_definition,
     validate_disambiguation_need,
+    validate_lemma_form,
 )
 
 # Configure logging
@@ -275,6 +275,7 @@ class LokysAgent:
         session = self.get_session()
         try:
             from sqlalchemy import func
+
             from wordfreq.storage.translation_helpers import get_supported_languages
 
             # Find lemma_text values that appear multiple times

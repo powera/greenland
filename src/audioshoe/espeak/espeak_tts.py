@@ -18,8 +18,8 @@ GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent)
 if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
-from clients.audio.types import AudioFormat, AudioGenerationResult
 from audioshoe.espeak.types import EspeakVoice
+from clients.audio.types import AudioFormat, AudioGenerationResult
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")

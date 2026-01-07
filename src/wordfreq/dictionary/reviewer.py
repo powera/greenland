@@ -4,8 +4,8 @@
 
 import logging
 import sys
-from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
+from typing import Any, Dict, List, Optional
 
 import constants
 from wordfreq.storage import database as linguistic_db

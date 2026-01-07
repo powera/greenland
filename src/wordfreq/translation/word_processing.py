@@ -4,13 +4,13 @@
 
 import logging
 import time
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
 from wordfreq.storage import database as linguistic_db
-from wordfreq.storage.models.translations import Translation, TranslationSet
 from wordfreq.storage.models.enums import GrammaticalForm
-from wordfreq.translation.constants import VALID_POS_TYPES
+from wordfreq.storage.models.translations import Translation, TranslationSet
 from wordfreq.translation import definitions
+from wordfreq.translation.constants import VALID_POS_TYPES
 
 logger = logging.getLogger(__name__)
 

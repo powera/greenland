@@ -2,19 +2,19 @@
 
 """Processor for loading and analyzing word token lists."""
 
-import json
 import csv
+import json
 import logging
-import time
 import os
 import threading
-from typing import Dict, List, Optional, Any, Set, Tuple
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 import constants
 from wordfreq.storage import database as linguistic_db
+from wordfreq.storage.connection_pool import close_thread_sessions, get_session
 from wordfreq.translation.client import LinguisticClient
-from wordfreq.storage.connection_pool import get_session, close_thread_sessions
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")

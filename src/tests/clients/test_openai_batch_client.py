@@ -1,15 +1,15 @@
 #!/usr/bin/python3
 """Unit tests for OpenAI Batch API client."""
 
-import unittest
 import json
 import os
 import sys
-from unittest.mock import Mock, MagicMock, patch
+import unittest
+from unittest.mock import MagicMock, Mock, patch
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
-from clients.openai_batch_client import OpenAIBatchClient, BatchStatus
+from clients.openai_batch_client import BatchStatus, OpenAIBatchClient
 
 
 class OpenAIBatchClientTestCase(unittest.TestCase):

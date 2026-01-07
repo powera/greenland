@@ -19,11 +19,11 @@ if GREENLAND_SRC_PATH not in sys.path:
 
 from agents.buivolas.agent import BuivolasAgent
 from agents.common.common_args import (
+    add_backend_args,
     add_common_args,
-    add_llm_args,
     add_guid_arg,
     add_language_args,
-    add_backend_args,
+    add_llm_args,
     get_data_source_config,
 )
 from agents.common.lemma_selection import get_lemmas_for_agent
@@ -143,10 +143,7 @@ def _get_llm_lemmas(agent: BuivolasAgent, args) -> list[Lemma]:
     session = agent.get_session()
     try:
         if args.level:
-            from agents.common.lemma_selection import (
-                LemmaQueryBuilder,
-                apply_limit_and_sample_rate,
-            )
+            from agents.common.lemma_selection import LemmaQueryBuilder, apply_limit_and_sample_rate
 
             query = (
                 LemmaQueryBuilder(session)

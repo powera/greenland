@@ -6,15 +6,15 @@ This module provides utilities for generating Pinyin transliterations
 with graceful degradation if pypinyin is not available.
 """
 
+import logging
 import re
 from typing import Optional
-import logging
 
 logger = logging.getLogger(__name__)
 
 # Try to import pypinyin, gracefully handle if not available
 try:
-    from pypinyin import lazy_pinyin, Style
+    from pypinyin import Style, lazy_pinyin
 
     PYPINYIN_AVAILABLE = True
 except ImportError:

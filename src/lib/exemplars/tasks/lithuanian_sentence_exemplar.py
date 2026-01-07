@@ -11,12 +11,12 @@ This exemplar provides a single demonstration of the sentence generation system.
 """
 
 import json
-from typing import Dict, List, Optional, Any
+from typing import Any, Dict, List, Optional
 
-from lib.exemplars.base import register_exemplar, ExemplarType
-from lib.sentence_generation import SentenceGenerator
-from clients.unified_client import UnifiedLLMClient
 from clients.types import Schema, SchemaProperty
+from clients.unified_client import UnifiedLLMClient
+from lib.exemplars.base import ExemplarType, register_exemplar
+from lib.sentence_generation import SentenceGenerator
 
 # Sample word matrices for demonstration
 SAMPLE_WORD_MATRICES = {

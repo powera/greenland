@@ -12,15 +12,15 @@ import json
 import logging
 from typing import Dict, List, Optional, Tuple
 
+from clients.unified_client import UnifiedLLMClient
 from wordfreq.storage.models.schema import (
+    Lemma,
+    LemmaTranslation,
     Sentence,
     SentenceTranslation,
     SentenceWord,
-    Lemma,
-    LemmaTranslation,
 )
-from wordfreq.storage.translation_helpers import get_translation, LANGUAGE_NAMES
-from clients.unified_client import UnifiedLLMClient
+from wordfreq.storage.translation_helpers import LANGUAGE_NAMES, get_translation
 
 logger = logging.getLogger(__name__)
 

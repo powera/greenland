@@ -18,7 +18,8 @@ to provide context for what the lemma represents.
 """
 
 import logging
-from wordfreq.storage.database import create_database_session, Lemma, LemmaTranslation
+
+from wordfreq.storage.database import Lemma, LemmaTranslation, create_database_session
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)

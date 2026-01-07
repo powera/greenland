@@ -6,12 +6,12 @@ or import data from JSONL to SQLite.
 """
 
 import argparse
-import sys
-import os
 import json
+import os
+import sys
 import tempfile
-from pathlib import Path
 from collections import defaultdict
+from pathlib import Path
 from typing import Dict, Set
 
 # Add src to path if running as script
@@ -21,7 +21,7 @@ if __name__ == "__main__":
         sys.path.insert(0, src_path)
 
 import constants
-from wordfreq.storage.backend.config import DataSourceConfig, BackendType
+from wordfreq.storage.backend.config import BackendType, DataSourceConfig
 from wordfreq.storage.backend.factory import create_session
 
 
@@ -46,14 +46,12 @@ def export_sqlite_to_jsonl(sqlite_path: str, jsonl_dir: str):
     target_session = create_session(target_config)
 
     # Import models
-    from wordfreq.storage.models.schema import (
-        Lemma as SQLiteLemma,
-        Sentence as SQLiteSentence,
-        AudioQualityReview as SQLiteAudioQualityReview,
-    )
-    from wordfreq.storage.models.operation_log import OperationLog as SQLiteOperationLog
-    from wordfreq.storage.models.guid_tombstone import GuidTombstone as SQLiteGuidTombstone
     from wordfreq.storage.backend.jsonl import models as jsonl_models
+    from wordfreq.storage.models.guid_tombstone import GuidTombstone as SQLiteGuidTombstone
+    from wordfreq.storage.models.operation_log import OperationLog as SQLiteOperationLog
+    from wordfreq.storage.models.schema import AudioQualityReview as SQLiteAudioQualityReview
+    from wordfreq.storage.models.schema import Lemma as SQLiteLemma
+    from wordfreq.storage.models.schema import Sentence as SQLiteSentence
 
     try:
         # Export Lemmas
@@ -115,8 +113,8 @@ def export_sqlite_to_jsonl(sqlite_path: str, jsonl_dir: str):
 
 def convert_sqlalchemy_lemma_to_jsonl(lemma, session):
     """Convert SQLAlchemy Lemma to JSONL dataclass."""
-    from wordfreq.storage.backend.jsonl import models as jsonl_models
     from wordfreq.storage import translation_helpers
+    from wordfreq.storage.backend.jsonl import models as jsonl_models
 
     # Get translations from the new translation table
     all_translations = translation_helpers.get_all_translations(session, lemma)
@@ -324,9 +322,9 @@ def export_sqlite_to_release(sqlite_path: str, release_dir: str):
     """
     print(f"Exporting from SQLite ({sqlite_path}) to release format ({release_dir})...")
 
+    from wordfreq.storage import translation_helpers
     from wordfreq.storage.database import create_database_session
     from wordfreq.storage.models.schema import Lemma
-    from wordfreq.storage import translation_helpers
 
     session = create_database_session(sqlite_path)
 

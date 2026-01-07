@@ -6,10 +6,10 @@ import json
 import logging
 from typing import Dict, Tuple
 
-from clients.types import Schema, SchemaProperty
-from wordfreq.storage.models.enums import GrammaticalForm
 import util.prompt_loader
+from clients.types import Schema, SchemaProperty
 from wordfreq.storage import database as linguistic_db
+from wordfreq.storage.models.enums import GrammaticalForm
 
 logger = logging.getLogger(__name__)
 

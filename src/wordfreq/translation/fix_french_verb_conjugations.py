@@ -7,11 +7,11 @@ Functions here mirror the behavior previously implemented inside
 
 import logging
 import time
-from typing import Optional, Dict
+from typing import Dict, Optional
 
-from wordfreq.translation.client import LinguisticClient
 from wordfreq.storage.models.schema import Lemma
 from wordfreq.storage.translation_helpers import get_translation
+from wordfreq.translation.client import LinguisticClient
 
 logger = logging.getLogger(__name__)
 
@@ -33,8 +33,8 @@ def fix_french_verb_conjugations(
     effective_model = model if model is not None else agent.config.model
 
     from wordfreq.translation.generate_french_verb_forms import (
-        process_lemma,
         get_french_verb_lemmas,
+        process_lemma,
     )
 
     logger.info("Finding French verbs needing conjugations...")

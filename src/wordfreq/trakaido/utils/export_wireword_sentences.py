@@ -8,10 +8,10 @@ Exports all sentences with level != -1 that have a translation in the target lan
 
 import json
 import logging
+import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Any, Optional, Set, Tuple
-import sys
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 # Add the src directory to the path for imports
 GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent.parent)
@@ -20,13 +20,13 @@ if GREENLAND_SRC_PATH not in sys.path:
 
 import constants
 from wordfreq.storage.database import create_database_session
+from wordfreq.storage.models.enums import GrammaticalForm
 from wordfreq.storage.models.schema import (
+    AudioQualityReview,
     Sentence,
     SentenceTranslation,
     SentenceWord,
-    AudioQualityReview,
 )
-from wordfreq.storage.models.enums import GrammaticalForm
 from wordfreq.tools.chinese_converter import to_simplified
 
 # Configure logging

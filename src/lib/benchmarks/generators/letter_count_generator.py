@@ -2,17 +2,17 @@
 
 """Generator for letter count benchmark questions."""
 
-import logging
-import random
-import os
 import json
-from typing import List, Optional, Dict, Iterator
+import logging
+import os
+import random
+from typing import Dict, Iterator, List, Optional
 
 from lib.benchmarks.base import *
 from lib.benchmarks.data_models import (
-    BenchmarkQuestion,
-    BenchmarkMetadata,
     AnswerType,
+    BenchmarkMetadata,
+    BenchmarkQuestion,
     Difficulty,
     EvaluationCriteria,
 )

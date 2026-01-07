@@ -2,12 +2,12 @@
 """Unified client for routing requests to appropriate LLM backends."""
 
 import logging
-from typing import Dict, Optional, Tuple, Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple
 
-from clients import ollama_client, openai_client, anthropic_client, lmstudio_client, gemini_client
-from telemetry import LLMUsage
-from clients.types import Response
 import benchmarks.datastore.common  # Assuming datastore.common is available
+from clients import anthropic_client, gemini_client, lmstudio_client, ollama_client, openai_client
+from clients.types import Response
+from telemetry import LLMUsage
 
 if TYPE_CHECKING:
     from wordfreq.storage.backend.config import DataSourceConfig

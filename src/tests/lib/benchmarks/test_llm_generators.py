@@ -15,20 +15,20 @@ Options:
     --seed SEED        Random seed for deterministic tests (default: 42)
 """
 
-import unittest
-import logging
-import json
-import os
-import sys
 import argparse
 import hashlib
+import json
+import logging
+import os
 import pickle
 import random
-from unittest.mock import patch, MagicMock
-from typing import Dict, List, Any, Optional, Type, Tuple
+import sys
+import unittest
+from typing import Any, Dict, List, Optional, Tuple, Type
+from unittest.mock import MagicMock, patch
 
 from lib.benchmarks.base import BenchmarkGenerator
-from lib.benchmarks.data_models import BenchmarkQuestion, BenchmarkMetadata
+from lib.benchmarks.data_models import BenchmarkMetadata, BenchmarkQuestion
 from lib.benchmarks.factory import get_all_benchmark_codes, get_generator
 
 # Configure logging

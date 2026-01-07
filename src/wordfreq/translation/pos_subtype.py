@@ -5,10 +5,10 @@
 import json
 import logging
 import time
-from typing import Dict, Any, Tuple
+from typing import Any, Dict, Tuple
 
-from clients.types import Schema, SchemaProperty
 import util.prompt_loader
+from clients.types import Schema, SchemaProperty
 from wordfreq.storage import database as linguistic_db
 
 logger = logging.getLogger(__name__)

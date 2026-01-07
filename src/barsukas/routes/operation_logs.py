@@ -2,13 +2,14 @@
 
 """Routes for viewing operation logs."""
 
-from flask import Blueprint, render_template, request, g, flash, redirect, url_for
 import json
 
+from config import Config
+from flask import Blueprint, flash, g, redirect, render_template, request, url_for
+
+from barsukas.helpers.flash_helpers import flash_and_log
 from wordfreq.storage.models.operation_log import OperationLog
 from wordfreq.storage.models.schema import Lemma
-from config import Config
-from barsukas.helpers.flash_helpers import flash_and_log
 
 bp = Blueprint("operation_logs", __name__, url_prefix="/logs")
 

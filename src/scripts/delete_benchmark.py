@@ -1,5 +1,6 @@
-import benchmarks.datastore.benchmarks
 from sqlalchemy import delete
+
+import benchmarks.datastore.benchmarks
 from benchmarks.datastore.common import create_dev_session
 
 

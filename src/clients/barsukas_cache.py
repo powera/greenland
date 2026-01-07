@@ -8,6 +8,7 @@ database, allowing agents to reuse existing translations without making LLM call
 
 import logging
 from typing import Dict, Optional
+
 import requests
 
 logger = logging.getLogger(__name__)

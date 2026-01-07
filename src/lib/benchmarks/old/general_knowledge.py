@@ -7,7 +7,7 @@ import logging
 
 from clients import unified_client
 from clients.ollama_client import OllamaTimeoutError
-from lib.benchmarks.base import BenchmarkRunner, BenchmarkResult
+from lib.benchmarks.base import BenchmarkResult, BenchmarkRunner
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")

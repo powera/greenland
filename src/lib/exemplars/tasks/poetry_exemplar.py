@@ -4,7 +4,7 @@
 Exemplar task for generating sonnets about daffodils in spring.
 """
 
-from lib.exemplars.base import register_exemplar, ExemplarType, compare_models, generate_report
+from lib.exemplars.base import ExemplarType, compare_models, generate_report, register_exemplar
 
 # Register the sonnet exemplar
 register_exemplar(

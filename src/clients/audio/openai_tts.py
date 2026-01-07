@@ -1,9 +1,9 @@
 #!/usr/bin/python3
 """OpenAI TTS client for audio generation."""
 
+import logging
 import os
 import time
-import logging
 from pathlib import Path
 from typing import Optional
 
@@ -11,7 +11,8 @@ import requests
 
 import constants
 from clients.keys import load_key
-from .types import Voice, AudioFormat, AudioGenerationResult
+
+from .types import AudioFormat, AudioGenerationResult, Voice
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")

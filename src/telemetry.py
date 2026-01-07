@@ -4,8 +4,8 @@
 
 import logging
 from dataclasses import dataclass, field
-from typing import Dict, Any, Optional
 from enum import Enum, auto
+from typing import Any, Dict, Optional
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")

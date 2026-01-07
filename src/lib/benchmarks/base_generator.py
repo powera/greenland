@@ -6,24 +6,24 @@ import itertools
 import json
 import logging
 import os
-import uuid
 import random
-from typing import Dict, List, Optional, Any, Union, Tuple, Set, Iterator
+import uuid
+from typing import Any, Dict, Iterator, List, Optional, Set, Tuple, Union
 
 import benchmarks.datastore.benchmarks
 import constants
-from clients import unified_client, ollama_client
+import lib.score_table
+import lib.validation
+from clients import ollama_client, unified_client
 from clients.ollama_client import OllamaTimeoutError
 from lib.benchmarks.data_models import (
+    AnswerType,
+    BenchmarkMetadata,
     BenchmarkQuestion,
     BenchmarkResult,
-    BenchmarkMetadata,
-    AnswerType,
     Difficulty,
     EvaluationCriteria,
 )
-import lib.score_table
-import lib.validation
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")

@@ -10,19 +10,19 @@ This module manages the lifecycle of batch requests:
 Uses a separate SQLite database for tracking batch requests.
 """
 
+import datetime
 import json
 import logging
-import datetime
 import os
-from typing import Dict, List, Optional, Any, Tuple
+from dataclasses import asdict, dataclass
 from enum import Enum
-from dataclasses import dataclass, asdict
+from typing import Any, Dict, List, Optional, Tuple
 
-from sqlalchemy import String, Text, Integer, TIMESTAMP, func, Index, create_engine
-from sqlalchemy.orm import Mapped, mapped_column, Session, DeclarativeBase, sessionmaker
+from sqlalchemy import TIMESTAMP, Index, Integer, String, Text, create_engine, func
+from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, sessionmaker
 
-from clients.openai_batch_client import OpenAIBatchClient, BatchStatus
 import constants
+from clients.openai_batch_client import BatchStatus, OpenAIBatchClient
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")

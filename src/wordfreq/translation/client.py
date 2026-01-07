@@ -4,31 +4,31 @@
 
 import logging
 import threading
-from typing import Dict, List, Optional, Any, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
+import constants
 from clients.unified_client import UnifiedLLMClient
 from wordfreq.storage import database as linguistic_db
-from wordfreq.storage.connection_pool import get_session, close_thread_sessions
-from wordfreq.storage.backend.config import DataSourceConfig, BackendType
-import constants
+from wordfreq.storage.backend.config import BackendType, DataSourceConfig
+from wordfreq.storage.connection_pool import close_thread_sessions, get_session
 
 # Import specialized modules
 from wordfreq.translation import (
     definitions,
-    translations,
-    pronunciation,
     pos_subtype,
+    pronunciation,
+    translations,
     word_processing,
 )
+from wordfreq.translation.constants import DEFAULT_MODEL
 from wordfreq.translation.language_forms import (
     english,
-    lithuanian,
     french,
-    spanish,
     german,
+    lithuanian,
     portuguese,
+    spanish,
 )
-from wordfreq.translation.constants import DEFAULT_MODEL
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")

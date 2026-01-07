@@ -22,16 +22,16 @@ if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
 import constants
-from util.logging_config import configure_logging, get_logger
-from wordfreq.storage.backend import create_session as create_backend_session
-from wordfreq.storage.backend.config import DataSourceConfig, BackendType
-from wordfreq.storage.models.schema import Lemma, WordToken, WordFrequency, Corpus, DerivativeForm
-from wordfreq.storage.models.imports import PendingImport, WordExclusion
-from wordfreq.translation.client import LinguisticClient
+from agents.dramblys import staging
 
 # Import validation and staging operations
 from agents.dramblys.validation import is_valid_word
-from agents.dramblys import staging
+from util.logging_config import configure_logging, get_logger
+from wordfreq.storage.backend import create_session as create_backend_session
+from wordfreq.storage.backend.config import BackendType, DataSourceConfig
+from wordfreq.storage.models.imports import PendingImport, WordExclusion
+from wordfreq.storage.models.schema import Corpus, DerivativeForm, Lemma, WordFrequency, WordToken
+from wordfreq.translation.client import LinguisticClient
 
 # Configure logging
 configure_logging()
@@ -349,8 +349,8 @@ class DramblysAgent:
             logger.info(f"Querying LLM to identify {pos_type}/{pos_subtype} words in this list...")
 
             # Query LLM
-            from clients.unified_client import UnifiedLLMClient
             from clients.types import Schema, SchemaProperty
+            from clients.unified_client import UnifiedLLMClient
 
             client = UnifiedLLMClient.from_config(self.config)
 
@@ -1057,7 +1057,8 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
         logger.info(f"Starting JSONL import from {source_path}...")
 
         from pathlib import Path
-        from agents.dramblys.jsonl_import import JSONLImporter, CategoryMigration
+
+        from agents.dramblys.jsonl_import import CategoryMigration, JSONLImporter
 
         source = Path(source_path)
         if not source.exists():

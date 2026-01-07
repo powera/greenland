@@ -13,10 +13,11 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..
 src_dir = os.path.join(project_root, "src")
 sys.path.insert(0, src_dir)
 
-# Direct imports from the notebook
-import wordfreq.translation.client
 import wordfreq.dictionary.reviewer
 import wordfreq.storage.database
+
+# Direct imports from the notebook
+import wordfreq.translation.client
 
 # Initialize client and reviewer (from notebook cells)
 CLIENT = wordfreq.translation.client.LinguisticClient()

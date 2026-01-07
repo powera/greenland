@@ -1,12 +1,12 @@
 """Database session management utilities."""
 
 import logging
+
 from sqlalchemy import create_engine, inspect, text
 from sqlalchemy.orm import sessionmaker
 
 import constants
 from wordfreq.storage.models.schema import Base
-
 
 logger = logging.getLogger(__name__)
 

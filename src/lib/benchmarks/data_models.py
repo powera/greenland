@@ -3,9 +3,9 @@
 """Data models for benchmark system."""
 
 import json
-from dataclasses import dataclass, asdict, field
+from dataclasses import asdict, dataclass, field
 from enum import Enum
-from typing import Dict, List, Optional, Any, Union, Set
+from typing import Any, Dict, List, Optional, Set, Union
 
 
 class AnswerType(str, Enum):

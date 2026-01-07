@@ -2,7 +2,7 @@
 
 from typing import List, Optional
 
-from wordfreq.storage.models.schema import WordToken, DerivativeForm, WordFrequency, Corpus
+from wordfreq.storage.models.schema import Corpus, DerivativeForm, WordFrequency, WordToken
 
 
 def add_word_token(session, token: str, language_code: str) -> WordToken:

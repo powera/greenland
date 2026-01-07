@@ -1,8 +1,9 @@
 """CRUD operations for SentenceTranslation model."""
 
 from typing import Optional
-from sqlalchemy.orm import Session
+
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
 
 from wordfreq.storage.models.schema import Sentence, SentenceTranslation
 

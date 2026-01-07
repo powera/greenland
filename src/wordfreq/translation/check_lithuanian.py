@@ -9,7 +9,7 @@ can be reused elsewhere.
 import logging
 from typing import Dict
 
-from wordfreq.storage.models.schema import Lemma, DerivativeForm
+from wordfreq.storage.models.schema import DerivativeForm, Lemma
 from wordfreq.storage.translation_helpers import get_translation
 
 logger = logging.getLogger(__name__)

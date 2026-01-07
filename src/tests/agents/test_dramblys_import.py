@@ -12,6 +12,7 @@ if str(Path(__file__).parent.parent.parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 import unittest
+
 from agents.dramblys.jsonl_import import JSONLImporter
 
 

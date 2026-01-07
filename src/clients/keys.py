@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 """Centralized API key management for all clients."""
 
-import os
 import logging
+import os
 from typing import Optional
 
 import constants

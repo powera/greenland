@@ -1,22 +1,22 @@
 import json
-import random
 import logging
-from typing import List, Dict, Tuple, Optional, Any
+import random
+from typing import Any, Dict, List, Optional, Tuple
 
 import benchmarks.datastore.benchmarks
 import constants
+import lib.score_table
+import lib.validation
 from clients import unified_client
 from clients.ollama_client import OllamaTimeoutError
 from lib.benchmarks.data_models import (
+    AnswerType,
+    BenchmarkMetadata,
     BenchmarkQuestion,
     BenchmarkResult,
-    BenchmarkMetadata,
-    AnswerType,
     Difficulty,
     EvaluationCriteria,
 )
-import lib.score_table
-import lib.validation
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")

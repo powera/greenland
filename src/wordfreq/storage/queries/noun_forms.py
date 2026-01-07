@@ -1,11 +1,10 @@
 """Noun form query functions."""
 
 import logging
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 
-from wordfreq.storage.models.schema import DerivativeForm
 from wordfreq.storage.crud.lemma import get_lemma_by_guid
-
+from wordfreq.storage.models.schema import DerivativeForm
 
 logger = logging.getLogger(__name__)
 

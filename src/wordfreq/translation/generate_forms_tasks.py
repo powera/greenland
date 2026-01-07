@@ -8,43 +8,39 @@ scripts.
 from dataclasses import dataclass
 from typing import Callable, Dict, List, Optional
 
-from wordfreq.translation.client import LinguisticClient
-from wordfreq.translation.generate_forms_base import process_lemma_forms
 from wordfreq.storage.backend.config import DataSourceConfig
+from wordfreq.translation.client import LinguisticClient
 from wordfreq.translation.generate_forms_base import (
     FormGenerationConfig,
     get_lemmas_needing_forms,
     get_lemmas_with_translation,
+    process_lemma_forms,
     run_form_generation,
 )
 from wordfreq.translation.language_forms.english import (
     ADJECTIVE_FORM_MAPPING as EN_ADJECTIVE_FORM_MAPPING,
+)
+from wordfreq.translation.language_forms.english import (
     ADVERB_FORM_MAPPING as EN_ADVERB_FORM_MAPPING,
-    NOUN_FORM_MAPPING as EN_NOUN_FORM_MAPPING,
-    VERB_FORM_MAPPING as EN_VERB_FORM_MAPPING,
 )
-from wordfreq.translation.language_forms.french import (
-    NOUN_FORM_MAPPING as FR_NOUN_FORM_MAPPING,
-    VERB_FORM_MAPPING as FR_VERB_FORM_MAPPING,
-)
-from wordfreq.translation.language_forms.german import (
-    NOUN_FORM_MAPPING as DE_NOUN_FORM_MAPPING,
-    VERB_FORM_MAPPING as DE_VERB_FORM_MAPPING,
-)
+from wordfreq.translation.language_forms.english import NOUN_FORM_MAPPING as EN_NOUN_FORM_MAPPING
+from wordfreq.translation.language_forms.english import VERB_FORM_MAPPING as EN_VERB_FORM_MAPPING
+from wordfreq.translation.language_forms.french import NOUN_FORM_MAPPING as FR_NOUN_FORM_MAPPING
+from wordfreq.translation.language_forms.french import VERB_FORM_MAPPING as FR_VERB_FORM_MAPPING
+from wordfreq.translation.language_forms.german import NOUN_FORM_MAPPING as DE_NOUN_FORM_MAPPING
+from wordfreq.translation.language_forms.german import VERB_FORM_MAPPING as DE_VERB_FORM_MAPPING
 from wordfreq.translation.language_forms.lithuanian import (
     ADJECTIVE_FORM_MAPPING as LT_ADJECTIVE_FORM_MAPPING,
+)
+from wordfreq.translation.language_forms.lithuanian import (
     ADVERB_FORM_MAPPING as LT_ADVERB_FORM_MAPPING,
-    NOUN_FORM_MAPPING as LT_NOUN_FORM_MAPPING,
-    VERB_FORM_MAPPING as LT_VERB_FORM_MAPPING,
 )
-from wordfreq.translation.language_forms.portuguese import (
-    NOUN_FORM_MAPPING as PT_NOUN_FORM_MAPPING,
-    VERB_FORM_MAPPING as PT_VERB_FORM_MAPPING,
-)
-from wordfreq.translation.language_forms.spanish import (
-    NOUN_FORM_MAPPING as ES_NOUN_FORM_MAPPING,
-    VERB_FORM_MAPPING as ES_VERB_FORM_MAPPING,
-)
+from wordfreq.translation.language_forms.lithuanian import NOUN_FORM_MAPPING as LT_NOUN_FORM_MAPPING
+from wordfreq.translation.language_forms.lithuanian import VERB_FORM_MAPPING as LT_VERB_FORM_MAPPING
+from wordfreq.translation.language_forms.portuguese import NOUN_FORM_MAPPING as PT_NOUN_FORM_MAPPING
+from wordfreq.translation.language_forms.portuguese import VERB_FORM_MAPPING as PT_VERB_FORM_MAPPING
+from wordfreq.translation.language_forms.spanish import NOUN_FORM_MAPPING as ES_NOUN_FORM_MAPPING
+from wordfreq.translation.language_forms.spanish import VERB_FORM_MAPPING as ES_VERB_FORM_MAPPING
 
 
 @dataclass

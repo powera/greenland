@@ -2,16 +2,16 @@
 
 """Routes for translation management."""
 
-from flask import Blueprint, request, redirect, url_for, flash, g, jsonify
+from config import Config
+from flask import Blueprint, flash, g, jsonify, redirect, request, url_for
 
+from wordfreq.storage.crud.operation_log import log_translation_change
 from wordfreq.storage.models.schema import Lemma
 from wordfreq.storage.translation_helpers import (
-    set_translation,
-    get_translation,
     get_supported_languages,
+    get_translation,
+    set_translation,
 )
-from wordfreq.storage.crud.operation_log import log_translation_change
-from config import Config
 
 bp = Blueprint("translations", __name__, url_prefix="/translations")
 

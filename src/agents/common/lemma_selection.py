@@ -29,13 +29,13 @@ Usage:
     lemmas = apply_limit_and_sample_rate(query, args.limit, args.sample_rate)
 """
 
-import sys
 import random
-from typing import Optional, List, Callable
+import sys
+from typing import Callable, List, Optional
 
 from sqlalchemy.orm import Query
-from wordfreq.storage.backend.base import BaseSession
 
+from wordfreq.storage.backend.base import BaseSession
 from wordfreq.storage.models.schema import Lemma
 
 

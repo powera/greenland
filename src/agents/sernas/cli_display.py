@@ -4,7 +4,7 @@ This module contains display functions for SERNAS-specific output formats,
 keeping the main CLI clean and focused on logic.
 """
 
-from typing import Dict, Any
+from typing import Any, Dict
 
 
 def display_synonym_results(result: Dict[str, Any], dry_run: bool = False) -> None:

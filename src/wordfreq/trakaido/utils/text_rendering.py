@@ -6,8 +6,9 @@ Provides reusable functions for displaying word data, statistics, and other
 text-based output in a consistent format.
 """
 
-from typing import Dict, Any, List
 from dataclasses import dataclass
+from typing import Any, Dict, List
+
 from wordfreq.storage.translation_helpers import get_translation
 
 

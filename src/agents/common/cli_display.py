@@ -4,7 +4,7 @@ This module provides reusable functions for displaying results, progress,
 and errors in agent command-line interfaces.
 """
 
-from typing import Dict, Optional, Any
+from typing import Any, Dict, Optional
 
 
 def display_result_summary(results: Dict[str, Any], prefix: str = "") -> None:

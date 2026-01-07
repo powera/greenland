@@ -6,16 +6,17 @@ import json
 import os
 import random
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Any
+from typing import Any, Dict, List, Optional
+
 from sqlalchemy.orm import Session
 
-from clients import ollama_client
 import benchmarks.datastore.benchmarks
 import constants
 import lib.validation
+from clients import ollama_client
 from lib.benchmarks.base import BenchmarkGenerator
-from lib.benchmarks.spell_check import SpellCheckGenerator
 from lib.benchmarks.definitions import DefinitionsGenerator
+from lib.benchmarks.spell_check import SpellCheckGenerator
 from lib.benchmarks.translation import TranslationGenerator
 
 

@@ -4,8 +4,10 @@
 
 import datetime
 from typing import Optional
-from sqlalchemy import String, Text, Integer, TIMESTAMP, func
+
+from sqlalchemy import TIMESTAMP, Integer, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column
+
 from wordfreq.storage.models.schema import Base
 
 

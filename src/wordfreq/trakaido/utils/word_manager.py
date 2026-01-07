@@ -7,8 +7,8 @@ in the trakaido database.
 """
 
 import logging
-import sys
 import os
+import sys
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -25,13 +25,13 @@ from wordfreq.storage.database import (
     create_database_session,
     get_subtype_values_for_pos,
 )
-from wordfreq.storage.utils.guid import generate_guid
 from wordfreq.storage.models.enums import GrammaticalForm
 from wordfreq.storage.models.schema import DerivativeForm, Lemma, WordToken
 from wordfreq.storage.translation_helpers import get_translation, set_translation
+from wordfreq.storage.utils.guid import generate_guid
 
-from .data_models import WordData, ReviewResult
-from .text_rendering import display_word_data, display_current_lemma_entry, get_user_confirmation
+from .data_models import ReviewResult, WordData
+from .text_rendering import display_current_lemma_entry, display_word_data, get_user_confirmation
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")

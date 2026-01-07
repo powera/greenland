@@ -6,10 +6,10 @@ This module provides tools for introspecting argparse parsers from agent CLI mod
 to dynamically generate web forms without duplicating flag definitions.
 """
 
-import importlib
 import argparse
-from typing import Dict, List, Any, Optional
+import importlib
 from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 
 class ArgumentInfo:

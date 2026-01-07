@@ -1,6 +1,7 @@
 """Lemma display and UI helper functions for Barsukas."""
 
 from typing import Dict, List, Tuple
+
 from wordfreq.storage.queries.lemma import get_difficulty_stats
 
 

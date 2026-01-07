@@ -4,13 +4,13 @@
 
 import json
 import logging
-from typing import Dict, List, Optional, Tuple, Any
+from typing import Any, Dict, List, Optional, Tuple
 
 from clients import unified_client
 from clients.ollama_client import OllamaTimeoutError
 from lib.benchmarks.base import BenchmarkRunner
-from lib.benchmarks.data_models import BenchmarkResult, BenchmarkMetadata, AnswerType
-from lib.benchmarks.factory import runner, get_benchmark_metadata, benchmark
+from lib.benchmarks.data_models import AnswerType, BenchmarkMetadata, BenchmarkResult
+from lib.benchmarks.factory import benchmark, get_benchmark_metadata, runner
 from lib.benchmarks.generators.translations_generator import VALID_LANGS, get_translation_metadata
 
 # Configure logging

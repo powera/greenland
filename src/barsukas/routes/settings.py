@@ -1,21 +1,22 @@
 """Settings and backend management routes."""
 
 import os
+import signal
 import subprocess
 import sys
-import signal
 import threading
 import time
 from pathlib import Path
+
 from flask import (
     Blueprint,
+    current_app,
+    flash,
+    jsonify,
+    redirect,
     render_template,
     request,
-    jsonify,
-    flash,
-    redirect,
     url_for,
-    current_app,
 )
 
 from wordfreq.storage.backend import get_backend_type

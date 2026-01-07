@@ -2,8 +2,10 @@
 
 """CRUD operations for GUID tombstones."""
 
-from typing import Optional, List
+from typing import List, Optional
+
 from sqlalchemy.orm import Session
+
 from wordfreq.storage.models.guid_tombstone import GuidTombstone
 
 

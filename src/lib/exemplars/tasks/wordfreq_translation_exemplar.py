@@ -8,13 +8,13 @@ with specific words to ensure the translation and linguistic analysis system wor
 """
 
 import json
-from typing import Dict, List, Optional, Any
+from typing import Any, Dict, List, Optional
 
-from lib.exemplars.base import register_exemplar, ExemplarType, compare_models, generate_report
-from clients.types import Schema, SchemaProperty
 import util.prompt_loader
-from wordfreq.storage.models.enums import GrammaticalForm
+from clients.types import Schema, SchemaProperty
+from lib.exemplars.base import ExemplarType, compare_models, generate_report, register_exemplar
 from wordfreq.storage import database as linguistic_db
+from wordfreq.storage.models.enums import GrammaticalForm
 
 # Get the context used by the actual wordfreq system
 wordfreq_context = util.prompt_loader.get_context("wordfreq", "definitions")
@@ -177,7 +177,7 @@ def run_wordfreq_exemplar(
     Returns:
         List of ExemplarResult objects
     """
-    from lib.exemplars.base import ExemplarRunner, ExemplarRegistry, ExemplarStorage
+    from lib.exemplars.base import ExemplarRegistry, ExemplarRunner, ExemplarStorage
 
     # Determine exemplar ID based on word
     exemplar_id = f"wordfreq_{word.lower()}"

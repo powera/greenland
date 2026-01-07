@@ -1,23 +1,22 @@
 #!/usr/bin/python3
 """Unit tests for schema conversion library."""
 
-import unittest
 import json
-from typing import Dict, Any
-
 import os
 import sys
+import unittest
+from typing import Any, Dict
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
 from clients.lib import (
     Schema,
     SchemaProperty,
-    to_openai_schema,
+    schema_from_dict,
     to_anthropic_schema,
     to_gemini_schema,
     to_ollama_schema,
-    schema_from_dict,
+    to_openai_schema,
 )
 
 

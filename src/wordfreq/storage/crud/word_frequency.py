@@ -2,7 +2,7 @@
 
 from typing import Optional
 
-from wordfreq.storage.models.schema import WordToken, WordFrequency, Corpus
+from wordfreq.storage.models.schema import Corpus, WordFrequency, WordToken
 
 
 def add_word_frequency(

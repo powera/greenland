@@ -9,13 +9,13 @@ Provides streamlined keyboard-driven audio quality review interface.
 import json
 from datetime import datetime
 
-from flask import Blueprint, render_template, request, jsonify, g, flash, redirect, url_for
-from sqlalchemy import or_, and_
+from flask import Blueprint, flash, g, jsonify, redirect, render_template, request, url_for
+from sqlalchemy import and_, or_
 from sqlalchemy.orm import joinedload
 
+from barsukas.helpers.audio_helpers import validate_audio_translation
 from wordfreq.storage.models.schema import AudioQualityReview, Lemma
 from wordfreq.storage.queries.lemma import apply_effective_difficulty_filter
-from barsukas.helpers.audio_helpers import validate_audio_translation
 
 bp = Blueprint("rapid_review", __name__, url_prefix="/audio/rapid-review")
 

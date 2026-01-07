@@ -15,12 +15,12 @@ if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
 from agents.common.common_args import (
+    add_backend_args,
     add_common_args,
+    add_guid_arg,
     add_llm_args,
     add_output_args,
     add_processing_args,
-    add_guid_arg,
-    add_backend_args,
     get_data_source_config,
     validate_cache_args,
 )
@@ -110,9 +110,9 @@ def _handle_single_lemma_populate(agent, lemma, session, args):
     """
     from agents.voras import cli_display
     from wordfreq.storage.translation_helpers import (
-        get_reference_translation,
         LANGUAGE_NAMES,
         convert_llm_response_to_lang_codes,
+        get_reference_translation,
     )
 
     missing_langs = cli_display.display_lemma_translations(lemma, agent, session)
@@ -201,8 +201,8 @@ def _handle_single_lemma_populate(agent, lemma, session, args):
 def main():
     """Main entry point for the voras agent."""
     # Import here to avoid circular imports
-    from agents.voras.agent import VorasAgent
     from agents.voras import cli_display
+    from agents.voras.agent import VorasAgent
     from wordfreq.storage.models.schema import Lemma
 
     parser = get_argument_parser()

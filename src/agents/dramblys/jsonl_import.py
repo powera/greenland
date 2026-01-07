@@ -8,9 +8,9 @@ and category migration support.
 
 import json
 import logging
-from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Any, Set
 from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 from wordfreq.storage.models.schema import Lemma
 

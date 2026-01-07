@@ -13,7 +13,7 @@ from typing import Dict, List, Optional
 
 import constants
 from wordfreq.storage.database import create_database_session
-from wordfreq.storage.models.schema import Lemma, WordToken, DerivativeForm, Corpus, WordFrequency
+from wordfreq.storage.models.schema import Corpus, DerivativeForm, Lemma, WordFrequency, WordToken
 
 logger = logging.getLogger(__name__)
 

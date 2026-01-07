@@ -2,13 +2,13 @@
 
 """Routes for sentence management."""
 
-from flask import Blueprint, render_template, request, redirect, url_for, flash, g
-from sqlalchemy import or_, func, case
-
-from wordfreq.storage.models.schema import Sentence, SentenceTranslation, SentenceWord, Lemma
-from wordfreq.storage.translation_helpers import get_supported_languages
 from config import Config
+from flask import Blueprint, flash, g, redirect, render_template, request, url_for
+from sqlalchemy import case, func, or_
+
 from barsukas.helpers.flash_helpers import flash_and_log
+from wordfreq.storage.models.schema import Lemma, Sentence, SentenceTranslation, SentenceWord
+from wordfreq.storage.translation_helpers import get_supported_languages
 
 bp = Blueprint("sentences", __name__, url_prefix="/sentences")
 

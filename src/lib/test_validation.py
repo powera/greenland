@@ -1,10 +1,10 @@
 #!/usr/bin/python3
 """Unit tests for validation module with precise response mocking."""
 
-import unittest
-from unittest.mock import patch, MagicMock
 import json
 import re
+import unittest
+from unittest.mock import MagicMock, patch
 
 from lib.validation import ResponseValidator, ValidationResult
 

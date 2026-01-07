@@ -43,10 +43,10 @@ import logging
 from pathlib import Path
 from typing import Dict, List, Optional
 
-from wordfreq.storage.database import create_database_session
 from wordfreq.storage.crud.sentence import add_sentence, calculate_minimum_level
 from wordfreq.storage.crud.sentence_translation import add_sentence_translation
 from wordfreq.storage.crud.sentence_word import add_sentence_word, find_lemma_by_guid
+from wordfreq.storage.database import create_database_session
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)

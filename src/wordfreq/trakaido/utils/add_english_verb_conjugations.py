@@ -6,8 +6,8 @@ This script loads the English conjugations from verbs.py and adds them
 to verbs that are already in the database but missing English conjugation forms.
 """
 
-import sys
 import os
+import sys
 from pathlib import Path
 
 # Add the src directory to the path for imports
@@ -16,17 +16,13 @@ GREENLAND_REPO_ROOT = os.path.abspath(os.path.join(GREENLAND_SRC_PATH, ".."))
 sys.path.append(GREENLAND_SRC_PATH)
 
 import constants
-from wordfreq.storage.database import (
-    add_word_token,
-    create_database_session,
-)
+from wordfreq.storage.database import add_word_token, create_database_session
 from wordfreq.storage.models.schema import DerivativeForm, Lemma
 from wordfreq.storage.translation_helpers import get_translation
 
 # Add verbs.py directory to path
 sys.path.insert(0, os.path.join(GREENLAND_REPO_ROOT, "data", "trakaido_wordlists", "lang_lt"))
 from verbs import verbs_new
-
 
 # Form mapping from verbs.py to database format
 FORM_MAPPING = {

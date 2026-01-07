@@ -3,15 +3,16 @@
 """Functions for calculating combined word frequency rankings."""
 
 import logging
+from typing import Any, Dict, List, Optional, Set, Tuple
+
 import numpy as np
-from typing import Dict, List, Optional, Any, Set, Tuple
-from sqlalchemy import func, case, or_
+from sqlalchemy import case, func, or_
 
 import constants
+import wordfreq.frequency.corpus
 from wordfreq.storage import database
 from wordfreq.storage.connection_pool import get_session
-from wordfreq.storage.models.schema import WordToken, Corpus, WordFrequency
-import wordfreq.frequency.corpus
+from wordfreq.storage.models.schema import Corpus, WordFrequency, WordToken
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")

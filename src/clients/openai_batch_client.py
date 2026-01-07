@@ -5,8 +5,8 @@ import json
 import logging
 import os
 import time
-from typing import Dict, List, Optional, Any
 from enum import Enum
+from typing import Any, Dict, List, Optional
 
 import requests
 

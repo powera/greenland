@@ -6,6 +6,9 @@
 from lib.benchmarks.runners.antonym_runner import AntonymRunner
 from lib.benchmarks.runners.definitions_runner import DefinitionsRunner
 from lib.benchmarks.runners.english_to_ipa_runner import EnglishToIPARunner
+
+# Knowledge questions
+from lib.benchmarks.runners.geography_runner import GeographyRunner
 from lib.benchmarks.runners.lemma_runner import LemmaRunner
 from lib.benchmarks.runners.letter_count_runner import LetterCountRunner
 from lib.benchmarks.runners.part_of_speech_runner import PartOfSpeechRunner
@@ -14,6 +17,3 @@ from lib.benchmarks.runners.spell_check_runner import SpellCheckRunner
 from lib.benchmarks.runners.translations_runner import TranslationRunner
 from lib.benchmarks.runners.unit_conversion_runner import UnitConversionRunner
 from lib.benchmarks.runners.word_length_runner import WordLengthRunner
-
-# Knowledge questions
-from lib.benchmarks.runners.geography_runner import GeographyRunner

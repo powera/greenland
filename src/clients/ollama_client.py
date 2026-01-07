@@ -6,13 +6,14 @@ import json
 import logging
 import re
 from dataclasses import dataclass
-from typing import Dict, Optional, Union, Any, List
-import requests
-from requests.exceptions import Timeout, RequestException
+from typing import Any, Dict, List, Optional, Union
 
-from telemetry import LLMUsage
-from clients.types import Response
+import requests
+from requests.exceptions import RequestException, Timeout
+
 import clients.lib
+from clients.types import Response
+from telemetry import LLMUsage
 
 # Configure logging with DEBUG level option
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")

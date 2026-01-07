@@ -5,6 +5,7 @@ Registry for various benchmarks.
 """
 
 import logging
+
 from lib.benchmarks.data_models import BenchmarkMetadata
 from lib.benchmarks.factory import benchmark, register_generator, register_runner
 

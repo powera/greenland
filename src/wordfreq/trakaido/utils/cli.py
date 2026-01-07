@@ -15,9 +15,10 @@ GREENLAND_SRC_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..
 sys.path.append(GREENLAND_SRC_PATH)
 
 import constants
-from .word_manager import WordManager
-from .verb_manager import VerbManager
+
 from .export_manager import TrakaidoExporter
+from .verb_manager import VerbManager
+from .word_manager import WordManager
 
 # from .noun_forms import generate_noun_forms_for_lemmas  # Function not implemented
 

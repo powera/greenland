@@ -5,11 +5,11 @@ import enum
 import json
 import logging
 from dataclasses import dataclass
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Optional, Tuple
+
 import pydantic
 
-from clients import openai_client, ollama_client, unified_client
-
+from clients import ollama_client, openai_client, unified_client
 from lib.benchmarks.data_models import BenchmarkQuestion
 
 # Configure logging

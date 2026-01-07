@@ -4,10 +4,10 @@
 
 import json
 import logging
-from typing import Dict, List, Tuple, Optional, Any
+from typing import Any, Dict, List, Optional, Tuple
 
 from lib.benchmarks.base_runner import BenchmarkRunner
-from lib.benchmarks.data_models import BenchmarkMetadata, BenchmarkResult, AnswerType
+from lib.benchmarks.data_models import AnswerType, BenchmarkMetadata, BenchmarkResult
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")

@@ -5,10 +5,10 @@ Tests for OpenAI TTS client.
 These tests verify the audio generation client works correctly.
 """
 
-import unittest
 import sys
+import unittest
 from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import MagicMock, Mock, patch
 
 # Add src directory to path
 GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent.parent)
@@ -16,7 +16,7 @@ if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
 from clients.audio.openai_tts import OpenAITTSClient
-from clients.audio.types import Voice, AudioFormat, AudioGenerationResult
+from clients.audio.types import AudioFormat, AudioGenerationResult, Voice
 
 
 class TestOpenAITTSClient(unittest.TestCase):

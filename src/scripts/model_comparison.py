@@ -3,15 +3,15 @@
 
 """Tools to run a barrage of models/prompts via script."""
 
+import argparse
 import json
 import os
 import re
-import argparse
 from typing import Dict, List
 
-from clients import ollama_client, openai_client
 import constants
 import lib.validation
+from clients import ollama_client, openai_client
 
 # Directory aliases for easy updating if paths change in constants.py
 CACHE_DIR = os.path.join(constants.DATA_DIR, "responses")

@@ -11,7 +11,7 @@ converted to the appropriate format for different LLM clients:
 """
 
 import copy
-from typing import Dict, Any
+from typing import Any, Dict
 
 from clients.types import Schema, SchemaProperty
 

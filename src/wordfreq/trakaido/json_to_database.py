@@ -34,12 +34,12 @@ Usage:
         --no-update-difficulty: Don't update difficulty levels on existing lemmas (default: update them)
 """
 
-import sys
-import os
-import json
-import re
 import argparse
-from typing import Dict, List, Any, Optional
+import json
+import os
+import re
+import sys
+from typing import Any, Dict, List, Optional
 
 # Configuration - Update these paths as needed
 GREENLAND_SRC_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
@@ -47,17 +47,17 @@ DEFAULT_JSON_PATH = os.path.join(os.path.dirname(__file__), "nouns.json")
 
 # Add paths for imports
 sys.path.append(GREENLAND_SRC_PATH)
-from wordfreq.storage.database import (
-    create_database_session,
-    get_word_token_by_text,
-    add_lemma,
-    add_derivative_form,
-    generate_guid,
-    update_lemma_translation,
-    add_alternative_form,
-)
-from wordfreq.storage.models.schema import WordToken, Lemma, DerivativeForm
 import constants
+from wordfreq.storage.database import (
+    add_alternative_form,
+    add_derivative_form,
+    add_lemma,
+    create_database_session,
+    generate_guid,
+    get_word_token_by_text,
+    update_lemma_translation,
+)
+from wordfreq.storage.models.schema import DerivativeForm, Lemma, WordToken
 
 english_alternative_map = {
     "bicycle": ["bike"],

@@ -3,8 +3,9 @@
 """Benchmark definitions and database models."""
 
 import datetime
-from typing import Dict, List, Optional, Any, Tuple
-from sqlalchemy import String, Integer, ForeignKey, TIMESTAMP
+from typing import Any, Dict, List, Optional, Tuple
+
+from sqlalchemy import TIMESTAMP, ForeignKey, Integer, String
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
@@ -12,8 +13,8 @@ from sqlalchemy.sql import func
 from benchmarks.datastore.common import (
     Base,
     Model,
-    create_dev_session,
     create_database_and_session,
+    create_dev_session,
     decode_json,
 )
 

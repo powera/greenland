@@ -4,7 +4,8 @@
 
 import datetime
 from typing import Optional
-from sqlalchemy import String, Integer, Text, TIMESTAMP, func
+
+from sqlalchemy import TIMESTAMP, Integer, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from .schema import Base

@@ -8,9 +8,9 @@ OpenAI's strict schema mode requires:
 3. The "required" array must contain exactly the keys in "properties" (no extras, no missing)
 """
 
-import unittest
 import json
 import sys
+import unittest
 from pathlib import Path
 
 # Add src directory to path

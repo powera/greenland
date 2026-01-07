@@ -2,19 +2,19 @@
 
 """Word definitions benchmark generator implementation."""
 
-import random
 import os
-from typing import List, Iterator
+import random
+from typing import Iterator, List
 
 from lib.benchmarks.base import *
 from lib.benchmarks.data_models import (
-    BenchmarkQuestion,
-    BenchmarkMetadata,
     AnswerType,
+    BenchmarkMetadata,
+    BenchmarkQuestion,
     Difficulty,
     EvaluationCriteria,
 )
-from lib.benchmarks.factory import generator, benchmark
+from lib.benchmarks.factory import benchmark, generator
 
 # Define benchmark metadata
 BENCHMARK_CODE = "0020_definitions"

@@ -1,7 +1,7 @@
 """Base session interface for storage backends."""
 
 from abc import ABC, abstractmethod
-from typing import Any, Optional, Type, TypeVar, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Optional, Type, TypeVar
 
 if TYPE_CHECKING:
     from sqlalchemy.orm import Query as SQLAlchemyQuery

@@ -3,18 +3,18 @@
 """Generator for the Pinyin Letter Count benchmark."""
 
 import json
-import random
 import logging
-from typing import Dict, List, Optional, Iterator, Any
+import random
+from typing import Any, Dict, Iterator, List, Optional
 
-from pypinyin import pinyin, Style
 import jieba
+from pypinyin import Style, pinyin
 
 from lib.benchmarks.base import BenchmarkGenerator
 from lib.benchmarks.data_models import (
-    BenchmarkQuestion,
-    BenchmarkMetadata,
     AnswerType,
+    BenchmarkMetadata,
+    BenchmarkQuestion,
     Difficulty,
     EvaluationCriteria,
 )

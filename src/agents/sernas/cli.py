@@ -9,12 +9,12 @@ import argparse
 import sys
 
 from agents.common.common_args import (
+    add_backend_args,
     add_common_args,
-    add_llm_args,
-    add_processing_args,
     add_guid_arg,
     add_language_args,
-    add_backend_args,
+    add_llm_args,
+    add_processing_args,
     get_data_source_config,
 )
 
@@ -65,11 +65,11 @@ def get_argument_parser():
 
 def main():
     """Main entry point for the šernas agent."""
-    from agents.sernas.agent import SernasAgent
-    from wordfreq.storage.translation_helpers import get_supported_languages
-    from agents.common.lemma_selection import get_lemmas_for_agent
     from agents.common.cli_display import display_language_header
+    from agents.common.lemma_selection import get_lemmas_for_agent
+    from agents.sernas.agent import SernasAgent
     from agents.sernas.cli_display import display_batch_results
+    from wordfreq.storage.translation_helpers import get_supported_languages
 
     parser = get_argument_parser()
     args = parser.parse_args()

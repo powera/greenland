@@ -27,17 +27,14 @@ from datetime import datetime
 from typing import Dict, List, Optional, Tuple
 
 import constants
-from clients.barsukas_cache import BarsukasCacheClient
 from agents.common.lemma_selection import find_lemma_by_guid
+from clients.barsukas_cache import BarsukasCacheClient
 from wordfreq.storage.backend import create_session as create_backend_session
-from wordfreq.storage.backend.config import DataSourceConfig, BackendType
-from wordfreq.storage.models.schema import Lemma, DerivativeForm
-from wordfreq.storage.translation_helpers import get_translation, get_language_name
+from wordfreq.storage.backend.config import BackendType, DataSourceConfig
+from wordfreq.storage.models.schema import DerivativeForm, Lemma
+from wordfreq.storage.translation_helpers import get_language_name, get_translation
 from wordfreq.translation.client import LinguisticClient
-from wordfreq.translation.generate_forms_tasks import (
-    get_task_key,
-    process_lemma_for_task,
-)
+from wordfreq.translation.generate_forms_tasks import get_task_key, process_lemma_for_task
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -442,9 +439,7 @@ class VilkasAgent:
             Dictionary with fix results
         """
         # Delegate to translation helper module
-        from wordfreq.translation.fix_french_verb_conjugations import (
-            fix_french_verb_conjugations,
-        )
+        from wordfreq.translation.fix_french_verb_conjugations import fix_french_verb_conjugations
 
         return fix_french_verb_conjugations(
             agent=self,

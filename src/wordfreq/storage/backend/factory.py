@@ -3,8 +3,7 @@
 from typing import Optional
 
 from wordfreq.storage.backend.base import BaseSession, BaseStorage
-from wordfreq.storage.backend.config import DataSourceConfig, BackendType
-
+from wordfreq.storage.backend.config import BackendType, DataSourceConfig
 
 _global_config: Optional[DataSourceConfig] = None
 _global_storage: Optional[BaseStorage] = None

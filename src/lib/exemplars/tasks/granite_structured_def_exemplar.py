@@ -7,9 +7,9 @@ Exemplar task for generating comprehensive word definitions with a structured JS
 import os
 from typing import Dict, List, Optional
 
-from lib.exemplars.base import register_exemplar, ExemplarType, compare_models, generate_report
-from clients.types import Schema, SchemaProperty
 import util.prompt_loader
+from clients.types import Schema, SchemaProperty
+from lib.exemplars.base import ExemplarType, compare_models, generate_report, register_exemplar
 
 
 # Create a Schema for word definitions using the classes from clients/types.py
@@ -125,7 +125,7 @@ def run_definition_exemplar(word="granite", models=None, num_models=3):
         models: List of model names to use (if None, uses top models from database)
         num_models: Number of models to use if models parameter is None
     """
-    from lib.exemplars import runner, storage, registry
+    from lib.exemplars import registry, runner, storage
 
     # Update the prompt with the specific word
     exemplar = registry.get_exemplar("comprehensive_definition")

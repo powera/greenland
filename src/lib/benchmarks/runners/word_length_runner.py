@@ -3,7 +3,7 @@
 """Runner for word length benchmark."""
 
 import logging
-from typing import Dict, Optional, Any, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 from lib.benchmarks.base import BenchmarkRunner
 from lib.benchmarks.factory import runner

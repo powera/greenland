@@ -3,7 +3,7 @@
 """Chat moderation functions to detect problematic content."""
 
 import logging
-from typing import Tuple, Dict
+from typing import Dict, Tuple
 
 from clients import unified_client
 from telemetry import LLMUsage

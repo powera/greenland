@@ -14,12 +14,12 @@ Usage:
 """
 
 
-import os
-import json
 import argparse
+import json
 import keyword
+import os
 import re
-from typing import Dict, List, Any, Optional
+from typing import Any, Dict, List, Optional
 
 # Configuration
 GREENLAND_SRC_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
@@ -30,16 +30,16 @@ import sys
 
 sys.path.append(GREENLAND_SRC_PATH)
 
+import constants
 from wordfreq.storage.database import (
     create_database_session,
     get_all_subtypes,
     get_lemmas_by_subtype,
     get_lemmas_by_subtype_and_level,
 )
-from wordfreq.storage.models.schema import Lemma, DerivativeForm
+from wordfreq.storage.models.schema import DerivativeForm, Lemma
 from wordfreq.storage.translation_helpers import get_translation
 from wordfreq.tools.chinese_converter import to_simplified
-import constants
 
 
 def get_english_word_for_lemma(session, lemma: Lemma) -> str:

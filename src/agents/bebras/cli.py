@@ -11,15 +11,16 @@ import logging
 import sys
 from typing import List, Optional
 
-from .agent import BebrasAgent
-from .translation import get_language_name, validate_language_codes
 from src.agents.common.common_args import (
+    add_backend_args,
     add_common_args,
     add_llm_args,
     add_output_args,
-    add_backend_args,
     get_data_source_config,
 )
+
+from .agent import BebrasAgent
+from .translation import get_language_name, validate_language_codes
 
 # Configure logging
 logging.basicConfig(

@@ -10,13 +10,13 @@ import sys
 from pathlib import Path
 
 from agents.common.common_args import (
+    add_backend_args,
     add_common_args,
+    add_guid_arg,
+    add_language_args,
     add_llm_args,
     add_output_args,
     add_processing_args,
-    add_guid_arg,
-    add_language_args,
-    add_backend_args,
     get_data_source_config,
     validate_cache_args,
 )
@@ -111,10 +111,10 @@ def get_argument_parser():
 def main():
     """Main entry point for the vilkas agent."""
     # Import here to avoid circular imports
-    from agents.vilkas.agent import VilkasAgent
-    from agents.vilkas import display
-    from agents.common.lemma_selection import get_lemmas_for_agent
     from agents.common.cli_display import display_language_header
+    from agents.common.lemma_selection import get_lemmas_for_agent
+    from agents.vilkas import display
+    from agents.vilkas.agent import VilkasAgent
 
     parser = get_argument_parser()
     args = parser.parse_args()

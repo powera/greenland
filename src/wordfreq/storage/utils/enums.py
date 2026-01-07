@@ -3,8 +3,7 @@
 import enum
 from typing import List, Optional
 
-from wordfreq.storage.models.enums import NounSubtype, VerbSubtype, AdjectiveSubtype, AdverbSubtype
-
+from wordfreq.storage.models.enums import AdjectiveSubtype, AdverbSubtype, NounSubtype, VerbSubtype
 
 # TODO: de-dupe
 VALID_POS_TYPES = {

@@ -4,7 +4,7 @@
 Exemplar task for generating comprehensive word definitions.
 """
 
-from lib.exemplars.base import register_exemplar, ExemplarType, compare_models, generate_report
+from lib.exemplars.base import ExemplarType, compare_models, generate_report, register_exemplar
 
 # Register the word definition exemplar
 register_exemplar(
