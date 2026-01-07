@@ -9,6 +9,7 @@ import sys
 from pathlib import Path
 from typing import Any, Callable, Optional
 
+import constants
 from constants import DEFAULT_MODEL
 
 
@@ -335,7 +336,6 @@ def get_data_source_config(args: Any, default_model: Optional[str] = None):
     Returns:
         DataSourceConfig instance (always returns a valid config)
     """
-    import constants
     from wordfreq.storage.backend.config import BackendType, DataSourceConfig
 
     # Determine backend type and paths
@@ -352,11 +352,11 @@ def get_data_source_config(args: Any, default_model: Optional[str] = None):
                 else constants.WORDFREQ_DB_PATH
             )
         elif args.backend == "jsonl":
-            if not hasattr(args, "data_dir") or not args.data_dir:
+            if not hasattr(args, "data_dir") or not getattr(args, "data_dir", None):
                 print("Error: --data-dir is required when using --backend jsonl")
                 sys.exit(1)
             backend_type = BackendType.JSONL
-            jsonl_data_dir = args.data_dir
+            jsonl_data_dir = getattr(args, "data_dir", None)
     elif hasattr(args, "db_path") and args.db_path:
         # Backward compatibility: db_path implies SQLite backend
         backend_type = BackendType.SQLITE

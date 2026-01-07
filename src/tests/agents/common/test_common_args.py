@@ -25,6 +25,7 @@ from agents.common.common_args import (
     get_standard_db_path,
     validate_cache_args,
 )
+from wordfreq.storage.backend.config import BackendType
 
 
 class TestAddCommonArgs(unittest.TestCase):
@@ -469,20 +470,18 @@ class TestGetStandardDbPath(unittest.TestCase):
 class TestGetDataSourceConfig(unittest.TestCase):
     """Test get_data_source_config function."""
 
-    @patch("agents.common_args.DEFAULT_MODEL", "default-model")
-    @patch("agents.common_args.constants.WORDFREQ_DB_PATH", "/default/db.sqlite")
+    @patch("agents.common.common_args.DEFAULT_MODEL", "default-model")
+    @patch("agents.common.common_args.constants.WORDFREQ_DB_PATH", "/default/db.sqlite")
     def test_default_sqlite_config(self):
         """Test default SQLite configuration."""
         args = argparse.Namespace()
         config = get_data_source_config(args)
 
-        from wordfreq.storage.backend.config import BackendType
-
         self.assertEqual(config.backend_type, BackendType.SQLITE)
         self.assertEqual(config.sqlite_path, "/default/db.sqlite")
         self.assertEqual(config.model, "default-model")
 
-    @patch("agents.common_args.constants.WORDFREQ_DB_PATH", "/default/db.sqlite")
+    @patch("agents.common.common_args.constants.WORDFREQ_DB_PATH", "/default/db.sqlite")
     def test_explicit_sqlite_backend(self):
         """Test explicit SQLite backend selection."""
         args = argparse.Namespace(
@@ -490,8 +489,6 @@ class TestGetDataSourceConfig(unittest.TestCase):
             db_path="/custom/db.sqlite",
         )
         config = get_data_source_config(args)
-
-        from wordfreq.storage.backend.config import BackendType
 
         self.assertEqual(config.backend_type, BackendType.SQLITE)
         self.assertEqual(config.sqlite_path, "/custom/db.sqlite")
@@ -503,8 +500,6 @@ class TestGetDataSourceConfig(unittest.TestCase):
             data_dir="/path/to/jsonl/data",
         )
         config = get_data_source_config(args)
-
-        from wordfreq.storage.backend.config import BackendType
 
         self.assertEqual(config.backend_type, BackendType.JSONL)
         self.assertEqual(config.jsonl_data_dir, "/path/to/jsonl/data")
@@ -551,15 +546,13 @@ class TestGetDataSourceConfig(unittest.TestCase):
 
         self.assertTrue(config.debug)
 
-    @patch("agents.common_args.constants.WORDFREQ_DB_PATH", "/default/db.sqlite")
+    @patch("agents.common.common_args.constants.WORDFREQ_DB_PATH", "/default/db.sqlite")
     def test_db_path_implies_sqlite(self):
         """Test that providing db_path without backend implies SQLite."""
         args = argparse.Namespace(
             db_path="/custom/db.sqlite",
         )
         config = get_data_source_config(args)
-
-        from wordfreq.storage.backend.config import BackendType
 
         self.assertEqual(config.backend_type, BackendType.SQLITE)
         self.assertEqual(config.sqlite_path, "/custom/db.sqlite")
