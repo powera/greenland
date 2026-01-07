@@ -1,6 +1,6 @@
 """SQLite storage backend."""
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker
 
 from wordfreq.storage.backend.base import BaseSession, BaseStorage
@@ -18,7 +18,27 @@ class SQLiteStorage(BaseStorage):
             db_path: Path to the SQLite database file
         """
         self.db_path = db_path
-        self.engine = create_engine(f"sqlite:///{db_path}")
+
+        # Create engine with settings optimized for concurrent access
+        self.engine = create_engine(
+            f"sqlite:///{db_path}",
+            connect_args={
+                "timeout": 30,  # Wait up to 30 seconds for locks
+                "check_same_thread": False,  # Allow multi-threaded access
+            },
+            pool_pre_ping=True,  # Verify connections before using
+            pool_recycle=3600,  # Recycle connections after 1 hour
+        )
+
+        # Enable WAL mode for better concurrency (allows concurrent reads during writes)
+        @event.listens_for(self.engine, "connect")
+        def set_sqlite_pragma(dbapi_conn, connection_record):
+            cursor = dbapi_conn.cursor()
+            cursor.execute("PRAGMA journal_mode=WAL")
+            cursor.execute("PRAGMA busy_timeout=30000")  # 30 second timeout
+            cursor.execute("PRAGMA synchronous=NORMAL")  # Faster, still safe with WAL
+            cursor.close()
+
         self.SessionFactory = sessionmaker(bind=self.engine)
 
     def create_session(self) -> BaseSession:

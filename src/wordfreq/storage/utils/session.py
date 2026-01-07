@@ -2,7 +2,7 @@
 
 import logging
 
-from sqlalchemy import create_engine, inspect, text
+from sqlalchemy import create_engine, event, inspect, text
 from sqlalchemy.orm import sessionmaker
 
 import constants
@@ -11,9 +11,27 @@ from wordfreq.storage.models.schema import Base
 logger = logging.getLogger(__name__)
 
 
+def _configure_sqlite_connection(dbapi_conn, connection_record):
+    """Configure SQLite connection for better concurrency."""
+    cursor = dbapi_conn.cursor()
+    cursor.execute("PRAGMA journal_mode=WAL")
+    cursor.execute("PRAGMA busy_timeout=30000")  # 30 second timeout
+    cursor.execute("PRAGMA synchronous=NORMAL")  # Faster, still safe with WAL
+    cursor.close()
+
+
 def create_database_session(db_path: str = constants.WORDFREQ_DB_PATH):
     """Create a new database session."""
-    engine = create_engine(f"sqlite:///{db_path}")
+    engine = create_engine(
+        f"sqlite:///{db_path}",
+        connect_args={
+            "timeout": 30,
+            "check_same_thread": False,
+        },
+        pool_pre_ping=True,
+        pool_recycle=3600,
+    )
+    event.listens_for(engine, "connect")(_configure_sqlite_connection)
     Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
     return Session()

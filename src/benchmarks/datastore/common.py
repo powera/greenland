@@ -6,7 +6,7 @@ import datetime
 import json
 from typing import Any, Dict, List, Optional, Tuple
 
-from sqlalchemy import TIMESTAMP, ForeignKey, Integer, String, Text, create_engine, func
+from sqlalchemy import TIMESTAMP, ForeignKey, Integer, String, Text, create_engine, event, func
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, sessionmaker
 from sqlalchemy.sql import func
@@ -35,17 +35,40 @@ class Model(Base):
     # benchmark runs and qual runs are populated in those files.
 
 
+def _configure_sqlite_connection(dbapi_conn, connection_record):
+    """Configure SQLite connection for better concurrency."""
+    cursor = dbapi_conn.cursor()
+    cursor.execute("PRAGMA journal_mode=WAL")
+    cursor.execute("PRAGMA busy_timeout=30000")
+    cursor.execute("PRAGMA synchronous=NORMAL")
+    cursor.close()
+
+
 def create_dev_session():
     """Create a database session for development."""
     db_path = constants.SQLITE_DB_PATH
-    engine = create_engine(f"sqlite:///{db_path}", echo=False)
+    engine = create_engine(
+        f"sqlite:///{db_path}",
+        echo=False,
+        connect_args={"timeout": 30, "check_same_thread": False},
+        pool_pre_ping=True,
+        pool_recycle=3600,
+    )
+    event.listens_for(engine, "connect")(_configure_sqlite_connection)
     Session = sessionmaker(bind=engine)
     return Session()
 
 
 def create_database_and_session(db_path="benchmarks.sqlite"):
     """Create a SQLite database engine and session."""
-    engine = create_engine(f"sqlite:///{db_path}", echo=False)
+    engine = create_engine(
+        f"sqlite:///{db_path}",
+        echo=False,
+        connect_args={"timeout": 30, "check_same_thread": False},
+        pool_pre_ping=True,
+        pool_recycle=3600,
+    )
+    event.listens_for(engine, "connect")(_configure_sqlite_connection)
     Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
     return Session()

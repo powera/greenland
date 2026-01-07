@@ -18,7 +18,7 @@ from dataclasses import asdict, dataclass
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
 
-from sqlalchemy import TIMESTAMP, Index, Integer, String, Text, create_engine, func
+from sqlalchemy import TIMESTAMP, Index, Integer, String, Text, create_engine, event, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, sessionmaker
 
 import constants
@@ -505,8 +505,25 @@ def create_batch_database_session(db_path: str = BATCH_DB_PATH) -> Session:
     # Ensure the directory exists
     os.makedirs(os.path.dirname(db_path), exist_ok=True)
 
-    # Create engine and tables
-    engine = create_engine(f"sqlite:///{db_path}")
+    # Create engine with settings optimized for concurrent access
+    engine = create_engine(
+        f"sqlite:///{db_path}",
+        connect_args={
+            "timeout": 30,
+            "check_same_thread": False,
+        },
+        pool_pre_ping=True,
+        pool_recycle=3600,
+    )
+
+    # Enable WAL mode for better concurrency
+    @event.listens_for(engine, "connect")
+    def set_sqlite_pragma(dbapi_conn, connection_record):
+        cursor = dbapi_conn.cursor()
+        cursor.execute("PRAGMA journal_mode=WAL")
+        cursor.execute("PRAGMA busy_timeout=30000")
+        cursor.execute("PRAGMA synchronous=NORMAL")
+        cursor.close()
 
     # Use checkfirst to avoid recreating existing tables/indexes
     # Wrap in try/except to handle SQLite index issues
