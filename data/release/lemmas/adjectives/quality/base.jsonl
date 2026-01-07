@@ -16,7 +16,7 @@
 {"guid": "A05_016", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "bad", "concept_definition": "not good in any way; harmful, unpleasant, of low quality, or morally wrong (e.g., a bad decision, bad weather, a bad person)", "difficulty_level": 9}
 {"guid": "A05_019", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "high", "concept_definition": "Of great vertical extent; measuring a large distance from bottom to top or from base to top (e.g., a high mountain).", "difficulty_level": 9}
 {"guid": "A05_020", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "low", "concept_definition": "(of a person or thing) of less than normal height or stature; situated at a small distance above the ground; (of sound) quiet or soft; (of amount or intensity) small in degree or below the usual level.", "difficulty_level": 9}
-{"guid": "A05_021", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "long", "concept_definition": "Of great length from one end to the other; extending a considerable distance or duration.", "difficulty_level": 9}
+{"guid": "A05_021", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "long (length)", "concept_definition": "Of great length from one end to the other; extending a considerable distance or duration.", "difficulty_level": 9}
 {"guid": "A05_022", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "short", "concept_definition": "Of small length or duration; measuring a small distance from end to end (e.g., a short rope), brief in time (e.g., a short meeting), or lacking in height (e.g., a short person).", "difficulty_level": 9}
 {"guid": "A05_023", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "wide", "concept_definition": "Extending a large distance from one side to the other; having great breadth or extent across; not narrow.", "difficulty_level": 9}
 {"guid": "A05_024", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "deep", "concept_definition": "Extending far down from the top or surface; having a large distance from top to bottom (e.g., a deep well). Also: intense or profound in degree or feeling (e.g., deep sleep; deep sorrow).", "difficulty_level": 9}
@@ -45,7 +45,7 @@
 {"guid": "A05_047", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "empty", "concept_definition": "containing nothing; having no people or things inside", "difficulty_level": 13}
 {"guid": "A05_048", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "great", "concept_definition": "of above average size or quality", "difficulty_level": -1}
 {"guid": "A05_049", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "little", "concept_definition": "small in size or amount", "difficulty_level": -1}
-{"guid": "A05_050", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "right", "concept_definition": "morally good or correct", "difficulty_level": -1}
+{"guid": "A05_050", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "right (correct)", "concept_definition": "morally good or correct", "difficulty_level": -1}
 {"guid": "A05_051", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "own", "concept_definition": "belonging to oneself", "difficulty_level": -1}
 {"guid": "A05_052", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "true", "concept_definition": "in accordance with fact or reality", "difficulty_level": -1}
 {"guid": "A05_054", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "able", "concept_definition": "having the power or skill to do something", "difficulty_level": -1}
@@ -53,7 +53,7 @@
 {"guid": "A05_056", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "afraid", "concept_definition": "feeling fear or anxiety", "difficulty_level": -1}
 {"guid": "A05_057", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "evil", "concept_definition": "profoundly immoral or wicked", "difficulty_level": -1}
 {"guid": "A05_058", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "silent", "concept_definition": "making no sound", "difficulty_level": -1}
-{"guid": "A05_059", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "fair", "concept_definition": "treating people equally; light in color", "difficulty_level": -1}
+{"guid": "A05_059", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "fair (just)", "concept_definition": "treating people equally; impartial", "difficulty_level": -1}
 {"guid": "A05_060", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "certain", "concept_definition": "known for sure; confident", "difficulty_level": -1}
 {"guid": "A05_061", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "heavy", "concept_definition": "of great weight", "difficulty_level": -1}
 {"guid": "A05_062", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "tall", "concept_definition": "of great height", "difficulty_level": -1}
@@ -64,7 +64,7 @@
 {"guid": "A05_067", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "bright", "concept_definition": "giving out or reflecting much light", "difficulty_level": -1}
 {"guid": "A05_068", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "alive", "concept_definition": "living; not dead", "difficulty_level": -1}
 {"guid": "A05_069", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "terrible", "concept_definition": "extremely bad or serious", "difficulty_level": -1}
-{"guid": "A05_070", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "poor", "concept_definition": "lacking sufficient money; of low quality", "difficulty_level": -1}
+{"guid": "A05_070", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "poor (low income)", "concept_definition": "lacking sufficient money; impoverished", "difficulty_level": -1}
 {"guid": "A05_071", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "dangerous", "concept_definition": "able or likely to cause harm", "difficulty_level": -1}
 {"guid": "A05_072", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "sudden", "concept_definition": "occurring quickly and unexpectedly", "difficulty_level": -1}
 {"guid": "A05_073", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "ancient", "concept_definition": "belonging to the very distant past", "difficulty_level": -1}
@@ -72,10 +72,10 @@
 {"guid": "A05_075", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "thick", "concept_definition": "having a large distance between opposite sides", "difficulty_level": -1}
 {"guid": "A05_076", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "quick", "concept_definition": "moving fast or doing something rapidly", "difficulty_level": -1}
 {"guid": "A05_078", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "tight", "concept_definition": "fixed or fastened firmly", "difficulty_level": -1}
-{"guid": "A05_079", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "mad", "concept_definition": "insane or very angry", "difficulty_level": -1}
+{"guid": "A05_079", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "mad (angry)", "concept_definition": "very angry", "difficulty_level": -1}
 {"guid": "A05_080", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "loose", "concept_definition": "not firmly or tightly fixed", "difficulty_level": -1}
 {"guid": "A05_081", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "broad", "concept_definition": "wide or extensive", "difficulty_level": -1}
-{"guid": "A05_082", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "cool", "concept_definition": "fairly cold; fashionably attractive", "difficulty_level": -1}
+{"guid": "A05_082", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "cool (temperature)", "concept_definition": "fairly cold; not warm", "difficulty_level": -1}
 {"guid": "A05_083", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "complete", "concept_definition": "having all necessary parts", "difficulty_level": -1}
 {"guid": "A05_084", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "careful", "concept_definition": "taking care to avoid harm or errors", "difficulty_level": -1}
 {"guid": "A05_085", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "mighty", "concept_definition": "very powerful or strong", "difficulty_level": -1}
@@ -124,12 +124,12 @@
 {"guid": "A05_129", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "frozen", "concept_definition": "turned into ice; very cold", "difficulty_level": -1}
 {"guid": "A05_130", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "eyed", "concept_definition": "having eyes of a specified kind", "difficulty_level": -1}
 {"guid": "A05_131", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "named", "concept_definition": "having a specified name", "difficulty_level": -1}
-{"guid": "A05_132", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "light", "concept_definition": "having little weight; not heavy; of little intensity; pale in color (e.g., \"light blue\", \"light rain\").", "difficulty_level": -1}
+{"guid": "A05_132", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "light (weight)", "concept_definition": "having little weight; not heavy", "difficulty_level": -1}
 {"guid": "A05_133", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "dead", "concept_definition": "no longer alive; not living; lacking power or effect (e.g., \"dead battery\").", "difficulty_level": -1}
-{"guid": "A05_134", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "open", "concept_definition": "not closed, fastened, or restricted; accessible; frank or honest.", "difficulty_level": -1}
+{"guid": "A05_134", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "open (not closed)", "concept_definition": "not closed, fastened, or restricted; accessible", "difficulty_level": -1}
 {"guid": "A05_135", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "sure", "concept_definition": "certain; confident; reliable or steady (e.g., \"I'm sure\", \"a sure bet\").", "difficulty_level": -1}
 {"guid": "A05_136", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "strange", "concept_definition": "unusual or surprising; unfamiliar or foreign; odd or peculiar.", "difficulty_level": -1}
-{"guid": "A05_137", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "left", "concept_definition": "on or toward the side of the body where the heart is; remaining (e.g., \"turn left\", \"what's left\").", "difficulty_level": -1}
+{"guid": "A05_137", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "left (direction)", "concept_definition": "on or toward the side of the body where the heart is (e.g., \"turn left\")", "difficulty_level": -1}
 {"guid": "A05_138", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "lost", "concept_definition": "unable to find one's way; no longer possessed or existing; confused or uncertain.", "difficulty_level": -1}
 {"guid": "A05_139", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "gone", "concept_definition": "no longer present; departed; past or finished; used up or consumed.", "difficulty_level": -1}
 {"guid": "A05_140", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "broken", "concept_definition": "having been fractured or damaged; not functioning; interrupted or discontinued.", "difficulty_level": -1}
@@ -146,7 +146,7 @@
 {"guid": "A05_151", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "soft", "concept_definition": "easy to mold or compress; smooth and pleasant to touch; gentle or quiet; not harsh.", "difficulty_level": -1}
 {"guid": "A05_152", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "plain", "concept_definition": "simple or basic; without decoration; clear or obvious; ordinary in appearance.", "difficulty_level": -1}
 {"guid": "A05_153", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "dear", "concept_definition": "beloved; cherished; expensive; used as an affectionate form of address.", "difficulty_level": -1}
-{"guid": "A05_154", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "fine", "concept_definition": "of high quality; satisfactory; thin or delicate; consisting of small particles; subtle.", "difficulty_level": -1}
+{"guid": "A05_154", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "fine (quality)", "concept_definition": "of high quality; satisfactory", "difficulty_level": -1}
 {"guid": "A05_155", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "worse", "concept_definition": "of poorer quality or lower standard; more serious or severe; less well or healthy.", "difficulty_level": -1}
 {"guid": "A05_156", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "single", "concept_definition": "one only; individual; unmarried; consisting of one part; separate.", "difficulty_level": -1}
 {"guid": "A05_157", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "major", "concept_definition": "important, serious, or significant; greater in size or extent; principal.", "difficulty_level": -1}
@@ -157,3 +157,11 @@
 {"guid": "A05_162", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "present", "concept_definition": "existing or occurring now; being in a particular place; attentive or focused.", "difficulty_level": -1}
 {"guid": "A05_163", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "asleep", "concept_definition": "sleeping; in a state of sleep; inactive or dormant; numb.", "difficulty_level": -1}
 {"guid": "A05_164", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "random", "concept_definition": "made, done, or happening without method or conscious decision; unpredictable; lacking pattern.", "difficulty_level": -1}
+{"guid": "A05_165", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "fair (light-colored)", "concept_definition": "light in color; pale", "difficulty_level": -1}
+{"guid": "A05_166", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "poor (low quality)", "concept_definition": "of low quality; inferior", "difficulty_level": -1}
+{"guid": "A05_167", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "mad (insane)", "concept_definition": "insane; mentally ill", "difficulty_level": -1}
+{"guid": "A05_168", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "cool (fashionable)", "concept_definition": "fashionably attractive; stylish", "difficulty_level": -1}
+{"guid": "A05_169", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "light (color)", "concept_definition": "pale in color or low in intensity (e.g., \"light blue\", \"light rain\")", "difficulty_level": -1}
+{"guid": "A05_170", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "open (frank)", "concept_definition": "frank or honest; not secretive", "difficulty_level": -1}
+{"guid": "A05_171", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "left (remaining)", "concept_definition": "remaining; still available (e.g., \"what's left\")", "difficulty_level": -1}
+{"guid": "A05_172", "pos_type": "adjective", "pos_subtype": "quality", "concept_label": "fine (thin)", "concept_definition": "thin or delicate; consisting of small particles; subtle", "difficulty_level": -1}
