@@ -326,7 +326,7 @@ def process_lemma_forms(
             logger.error(f"Lemma ID {lemma_id} not found")
             return False
 
-        # Check if forms already exist
+        # Check if forms already exist - skip LLM query if they do
         existing_forms = (
             session.query(linguistic_db.DerivativeForm)
             .filter(
@@ -336,12 +336,12 @@ def process_lemma_forms(
             .all()
         )
 
+        # Build set of existing grammatical forms for efficient lookup
+        existing_grammatical_forms = {f.grammatical_form for f in existing_forms}
+        expected_grammatical_forms = {g.value for g in form_config.form_mapping.values()}
+
         # Count existing forms that match our form mapping
-        existing_count = sum(
-            1
-            for f in existing_forms
-            if f.grammatical_form in [g.value for g in form_config.form_mapping.values()]
-        )
+        existing_count = len(existing_grammatical_forms & expected_grammatical_forms)
 
         if existing_count >= form_config.min_forms_threshold:
             logger.info(
@@ -360,6 +360,7 @@ def process_lemma_forms(
 
         # Store each form
         stored = 0
+        skipped = 0
         for form_name, form_text in forms_dict.items():
             if form_name not in form_config.form_mapping:
                 logger.debug(f"Unknown form name: {form_name}, skipping")
@@ -367,6 +368,15 @@ def process_lemma_forms(
 
             if not form_text or not form_text.strip():
                 logger.debug(f"Skipping empty form: {form_name}")
+                continue
+
+            # Check if this specific form already exists (using the set we built earlier)
+            grammatical_form_enum = form_config.form_mapping[form_name].value
+            if grammatical_form_enum in existing_grammatical_forms:
+                logger.debug(
+                    f"Form {form_name} already exists for lemma ID {lemma_id}, skipping"
+                )
+                skipped += 1
                 continue
 
             # Get or create word token
@@ -379,7 +389,7 @@ def process_lemma_forms(
                     derivative_form_text=form_text,
                     word_token_id=word_token.id,
                     language_code=form_config.language_code,
-                    grammatical_form=form_config.form_mapping[form_name].value,
+                    grammatical_form=grammatical_form_enum,
                     is_base_form=(form_name == form_config.base_form_identifier),
                     verified=False,
                 )
