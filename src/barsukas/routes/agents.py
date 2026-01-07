@@ -15,34 +15,10 @@ from agents.papuga import PapugaAgent
 from agents.lokys import LokysAgent
 from config import Config
 from barsukas.utils.task_queue import enqueue_task, TaskType
-from barsukas.helpers.flash_helpers import flash_and_log
+from barsukas.helpers.flash_helpers import flash_and_log, log_and_flash_error
 
 bp = Blueprint("agents", __name__, url_prefix="/agents")
 logger = logging.getLogger(__name__)
-
-
-def log_and_flash_error(e: Exception, context: str):
-    """
-    Helper to log error with file/line info and flash to user.
-
-    Args:
-        e: The exception that was raised
-        context: Brief description of what operation failed (e.g., "checking translations")
-    """
-    # Get traceback info for file/line number
-    tb = traceback.extract_tb(e.__traceback__)
-    if tb:
-        last_frame = tb[-1]
-        error_location = f"{last_frame.filename}:{last_frame.lineno}"
-        error_msg = f"Error {context}: {str(e)} (at {error_location})"
-    else:
-        error_msg = f"Error {context}: {str(e)}"
-
-    # Log to console with full traceback
-    logger.warning(error_msg, exc_info=True)
-
-    # Flash to user
-    flash(error_msg, "error")
 
 
 @bp.route("/check-translations/<int:lemma_id>", methods=["POST"])
