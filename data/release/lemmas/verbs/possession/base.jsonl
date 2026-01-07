@@ -1,6 +1,6 @@
-{"guid": "V06_001", "pos_type": "verb", "pos_subtype": "possession", "concept_label": "be", "concept_definition": "be (verb)", "difficulty_level": 3}
-{"guid": "V06_002", "pos_type": "verb", "pos_subtype": "possession", "concept_label": "have", "concept_definition": "have (verb)", "difficulty_level": 6}
-{"guid": "V06_003", "pos_type": "verb", "pos_subtype": "possession", "concept_label": "make", "concept_definition": "make (verb)", "difficulty_level": 6}
-{"guid": "V06_004", "pos_type": "verb", "pos_subtype": "possession", "concept_label": "buy", "concept_definition": "buy (verb)", "difficulty_level": 6}
-{"guid": "V06_005", "pos_type": "verb", "pos_subtype": "possession", "concept_label": "give", "concept_definition": "give (verb)", "difficulty_level": 6}
-{"guid": "V06_006", "pos_type": "verb", "pos_subtype": "possession", "concept_label": "take", "concept_definition": "take (verb)", "difficulty_level": 6}
+{"guid": "V06_001", "pos_type": "verb", "pos_subtype": "possession", "concept_label": "be", "concept_definition": "to exist or to be in a particular state or identity.", "difficulty_level": 3}
+{"guid": "V06_002", "pos_type": "verb", "pos_subtype": "possession", "concept_label": "have", "concept_definition": "to possess or own something.", "difficulty_level": 6}
+{"guid": "V06_003", "pos_type": "verb", "pos_subtype": "possession", "concept_label": "make (earn)", "concept_definition": "to earn or gain, especially money.", "difficulty_level": 6}
+{"guid": "V06_004", "pos_type": "verb", "pos_subtype": "possession", "concept_label": "buy", "concept_definition": "to purchase in exchange for money.", "difficulty_level": 6}
+{"guid": "V06_005", "pos_type": "verb", "pos_subtype": "possession", "concept_label": "give", "concept_definition": "to hand or pass something to someone; to give.", "difficulty_level": 6}
+{"guid": "V06_006", "pos_type": "verb", "pos_subtype": "possession", "concept_label": "take", "concept_definition": "to take or get into one's possession.", "difficulty_level": 6}
