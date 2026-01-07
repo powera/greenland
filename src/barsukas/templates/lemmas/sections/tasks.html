@@ -1,0 +1,44 @@
+{% if queued_tasks %}
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Background tasks</span>
+        <small class="text-muted">Processed by the Barsukas worker</small>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-sm align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th scope="col">Task</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Updated</th>
+                        <th scope="col">Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for task in queued_tasks %}
+                    <tr class="{% if task.status == 'failed' %}table-danger{% elif task.status == 'completed' %}table-success{% elif task.status == 'running' %}table-warning{% else %}table-light{% endif %}">
+                        <td class="text-nowrap">{{ task.task_type.replace('_', ' ')|title }}</td>
+                        <td>
+                            <span class="badge bg-{% if task.status == 'completed' %}success{% elif task.status == 'failed' %}danger{% elif task.status == 'running' %}warning text-dark{% else %}secondary{% endif %}">{{ task.status|capitalize }}</span>
+                        </td>
+                        <td class="text-nowrap">{{ (task.updated_at or task.created_at) }}</td>
+                        <td class="small mb-0">{{ task.result_message or 'Waiting for worker...' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <p class="small text-muted mt-2 mb-0">Tasks are deduplicated per lemma, so you can click once and let the worker finish.</p>
+    </div>
+</div>
+{% else %}
+<div class="alert alert-light border mb-4">
+    <div class="d-flex align-items-center">
+        <div class="flex-grow-1">
+            <div class="fw-semibold">No queued background work</div>
+            <div class="small text-muted">LLM-heavy actions will appear here once you queue them.</div>
+        </div>
+    </div>
+</div>
+{% endif %}

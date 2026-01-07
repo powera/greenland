@@ -2,6 +2,7 @@
 
 import logging
 import inspect
+import traceback
 from pathlib import Path
 from flask import flash
 
@@ -40,3 +41,26 @@ def flash_and_log(message: str, category: str = "info", log_level: str = None):
     # Log the message with location
     log_func = getattr(logger, log_level.lower(), logger.info)
     log_func(f"[{category.upper()}] {location}: {message}")
+
+
+def log_and_flash_error(e: Exception, context: str):
+    """Flash an error message and log exception with traceback.
+
+    Args:
+        e: The exception that was raised
+        context: Brief description of what operation failed (e.g., "checking translations")
+    """
+    # Get traceback info for file/line number
+    tb = traceback.extract_tb(e.__traceback__)
+    if tb:
+        last_frame = tb[-1]
+        error_location = f"{last_frame.filename}:{last_frame.lineno}"
+        error_msg = f"Error {context}: {str(e)} (at {error_location})"
+    else:
+        error_msg = f"Error {context}: {str(e)}"
+
+    # Flash to user
+    flash(error_msg, "error")
+
+    # Log to console with full traceback
+    logger.warning(error_msg, exc_info=True)

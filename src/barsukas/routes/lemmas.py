@@ -15,6 +15,7 @@ from wordfreq.storage.crud.derivative_form import delete_derivative_form
 from wordfreq.storage.crud.lemma import handle_lemma_type_subtype_change
 from wordfreq.storage.queries.lemma import build_lemma_search_query
 from barsukas.helpers.lemma_display import get_difficulty_stats, group_derivative_forms
+from barsukas.utils.task_queue import get_tasks_for_target
 from audioshoe.espeak.types import EspeakVoice
 from audioshoe.piper.types import PiperVoice
 from audioshoe.coqui.types import CoquiVoice
@@ -331,6 +332,8 @@ def view_lemma(lemma_id):
         voices = CoquiVoice.get_voices_for_language(lang_code)
         coqui_voices[lang_code] = [{"name": v.name, "ui_name": v.ui_name, "gender": v.gender} for v in voices]
 
+    queued_tasks = get_tasks_for_target(g.db, "lemma", lemma_id, limit=8)
+
     return render_template(
         "lemmas/view.html",
         lemma=lemma,
@@ -353,6 +356,7 @@ def view_lemma(lemma_id):
         espeak_voices=espeak_voices,
         piper_voices=piper_voices,
         coqui_voices=coqui_voices,
+        queued_tasks=queued_tasks,
     )
 
 

@@ -12,37 +12,13 @@ from wordfreq.storage.translation_helpers import get_supported_languages
 from wordfreq.storage.backend.config import DataSourceConfig, BackendType
 from agents.voras.agent import VorasAgent
 from agents.papuga import PapugaAgent
-from agents.vilkas.agent import VilkasAgent
 from agents.lokys import LokysAgent
 from config import Config
-from barsukas.helpers.flash_helpers import flash_and_log
+from barsukas.utils.task_queue import enqueue_task, TaskType
+from barsukas.helpers.flash_helpers import flash_and_log, log_and_flash_error
 
 bp = Blueprint("agents", __name__, url_prefix="/agents")
 logger = logging.getLogger(__name__)
-
-
-def log_and_flash_error(e: Exception, context: str):
-    """
-    Helper to log error with file/line info and flash to user.
-
-    Args:
-        e: The exception that was raised
-        context: Brief description of what operation failed (e.g., "checking translations")
-    """
-    # Get traceback info for file/line number
-    tb = traceback.extract_tb(e.__traceback__)
-    if tb:
-        last_frame = tb[-1]
-        error_location = f"{last_frame.filename}:{last_frame.lineno}"
-        error_msg = f"Error {context}: {str(e)} (at {error_location})"
-    else:
-        error_msg = f"Error {context}: {str(e)}"
-
-    # Log to console with full traceback
-    logger.warning(error_msg, exc_info=True)
-
-    # Flash to user
-    flash(error_msg, "error")
 
 
 @bp.route("/check-translations/<int:lemma_id>", methods=["POST"])
@@ -135,122 +111,21 @@ def add_missing_translations(lemma_id):
         return redirect(url_for("lemmas.list_lemmas"))
 
     try:
-        # Initialize voras agent
-        config = DataSourceConfig(
-            backend_type=BackendType.SQLITE,
-            sqlite_path=Config.DB_PATH,
-            model=constants.DEFAULT_MODEL,
-            debug=Config.DEBUG,
+        result = enqueue_task(
+            g.db,
+            task_type=TaskType.ADD_MISSING_TRANSLATIONS,
+            target_type="lemma",
+            target_id=lemma_id,
+            payload={"lemma_id": lemma_id},
+            dedup_key=f"{TaskType.ADD_MISSING_TRANSLATIONS}:{lemma_id}",
         )
-        agent = VorasAgent(config=config)
-
-        # Find missing translations
-        from wordfreq.storage.translation_helpers import LANGUAGE_FIELDS
-
-        missing_languages = []
-        for lc in LANGUAGE_FIELDS.keys():
-            translation = agent.get_translation(g.db, lemma, lc)
-            if not translation or not translation.strip():
-                missing_languages.append(lc)
-
-        if not missing_languages:
+        if result.created:
             flash(
-                "No missing translations found - all languages already have translations!",
-                "success",
-            )
-            return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
-
-        # Use voras agent to fix missing translations for this single lemma
-        # Find a reference translation using helper function
-        from wordfreq.storage.translation_helpers import get_reference_translation
-
-        reference_lang_code, reference_translation = get_reference_translation(
-            g.db, lemma, exclude_languages=missing_languages
-        )
-
-        from wordfreq.translation.client import LinguisticClient
-
-        client = LinguisticClient(model=agent.config.model, db_path=config.sqlite_path, debug=Config.DEBUG)
-
-        # Map language codes to language names for query_translations
-        lang_code_to_name = {
-            "zh": "chinese",
-            "ko": "korean",
-            "fr": "french",
-            "es": "spanish",
-            "de": "german",
-            "pt": "portuguese",
-            "sw": "swahili",
-            "vi": "vietnamese",
-            "lt": "lithuanian",
-        }
-        missing_lang_names = [
-            lang_code_to_name[lang_code]
-            for lang_code in missing_languages
-            if lang_code in lang_code_to_name
-        ]
-
-        if not missing_lang_names:
-            flash("No valid languages to generate", "warning")
-            return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
-
-        # Query LLM for missing translations - ONE CALL
-        if reference_translation:
-            # Use the reference translation tuple for context
-            # The LLM uses this as a second language hint for accuracy
-            translations, success = client.query_translations(
-                english_word=lemma.lemma_text,
-                reference_translation=(reference_lang_code, reference_translation),
-                definition=lemma.definition_text,
-                pos_type=lemma.pos_type,
-                pos_subtype=lemma.pos_subtype,
-                languages=missing_lang_names,
+                "Queued missing translation generation. Results will be applied soon.",
+                "info",
             )
         else:
-            # No reference translation available - generate from English + definition + POS
-            # Use a placeholder reference to make the API work
-            # The LLM will rely more heavily on the definition and POS for disambiguation
-            translations, success = client.query_translations(
-                english_word=lemma.lemma_text,
-                reference_translation=("en", lemma.lemma_text),  # Use English as "reference"
-                definition=lemma.definition_text,
-                pos_type=lemma.pos_type,
-                pos_subtype=lemma.pos_subtype,
-                languages=missing_lang_names,
-            )
-
-        if not success or not translations:
-            flash_and_log("Failed to generate translations", "error")
-            return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
-
-        # Map language codes to LLM response field names
-        translation_field_map = {
-            "zh": "chinese_translation",
-            "ko": "korean_translation",
-            "fr": "french_translation",
-            "es": "spanish_translation",
-            "de": "german_translation",
-            "pt": "portuguese_translation",
-            "sw": "swahili_translation",
-            "vi": "vietnamese_translation",
-            "lt": "lithuanian_translation",
-        }
-
-        added_count = 0
-        for lang_code in missing_languages:
-            llm_field = translation_field_map.get(lang_code)
-            translation = translations.get(llm_field, "").strip()
-
-            if translation:
-                # Update the translation using agent's method which includes logging
-                agent.set_translation(g.db, lemma, lang_code, translation)
-                added_count += 1
-
-        if added_count > 0:
-            flash(f"Successfully added {added_count} missing translation(s)!", "success")
-        else:
-            flash("Could not generate any missing translations", "warning")
-
+            flash("Translation generation already in progress for this lemma.", "warning")
     except Exception as e:
         log_and_flash_error(e, "adding missing translations")
 
@@ -362,78 +237,22 @@ def generate_pronunciations(lemma_id):
     lang_code = request.form.get("lang_code", "en")
 
     try:
-        # Get derivative forms without pronunciations for this lemma
-        forms_missing_pronunciations = (
-            g.db.query(DerivativeForm)
-            .filter(
-                DerivativeForm.lemma_id == lemma_id,
-                DerivativeForm.language_code == lang_code,
-                DerivativeForm.ipa_pronunciation.is_(None),
-                DerivativeForm.phonetic_pronunciation.is_(None),
-            )
-            .all()
+        result = enqueue_task(
+            g.db,
+            task_type=TaskType.GENERATE_PRONUNCIATIONS,
+            target_type="lemma",
+            target_id=lemma_id,
+            payload={"lemma_id": lemma_id, "lang_code": lang_code},
+            dedup_key=f"{TaskType.GENERATE_PRONUNCIATIONS}:{lemma_id}:{lang_code}",
         )
-
-        if not forms_missing_pronunciations:
-            flash(f"No missing pronunciations for {lang_code} forms", "success")
-            return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
-
-        # Initialize PAPUGA agent
-        config = DataSourceConfig(
-            backend_type=BackendType.SQLITE,
-            sqlite_path=Config.DB_PATH,
-            model=constants.DEFAULT_MODEL,
-            debug=Config.DEBUG,
-        )
-        agent = PapugaAgent(config=config)
-
-        # Generate pronunciations
-        from wordfreq.tools.llm_validators import generate_pronunciation
-        from wordfreq.storage.models.schema import Sentence, SentenceTranslation, SentenceWord
-
-        generated_count = 0
-        for form in forms_missing_pronunciations:
-            # Get example sentence for context - find sentences that use the lemma
-            example_translation = (
-                g.db.query(SentenceTranslation)
-                .join(Sentence)
-                .join(SentenceWord)
-                .filter(
-                    SentenceWord.lemma_id == lemma_id,
-                    SentenceTranslation.language_code == "en",  # Get English version for context
-                )
-                .first()
-            )
-            example_text = example_translation.translation_text if example_translation else None
-
-            result = generate_pronunciation(
-                word=form.derivative_form_text,
-                pos_type=lemma.pos_type,
-                definition=lemma.definition_text,
-                example_sentence=example_text,
-                model=constants.DEFAULT_MODEL,
-            )
-
-            # Update the form with generated pronunciations
-            if result.get("ipa_pronunciation"):
-                form.ipa_pronunciation = result["ipa_pronunciation"]
-            if result.get("phonetic_pronunciation"):
-                form.phonetic_pronunciation = result["phonetic_pronunciation"]
-
-            # Count as generated if we got at least one pronunciation
-            if result.get("ipa_pronunciation") or result.get("phonetic_pronunciation"):
-                generated_count += 1
-
-        if generated_count > 0:
-            g.db.commit()
+        if result.created:
             flash(
-                f"Successfully generated pronunciations for {generated_count} form(s)!", "success"
+                f"Queued pronunciation generation for {lang_code}. A worker will process it shortly.",
+                "info",
             )
         else:
-            flash("Could not generate any pronunciations", "warning")
-
+            flash("Pronunciation generation already in progress for this lemma/language.", "warning")
     except Exception as e:
-        g.db.rollback()
         log_and_flash_error(e, "generating pronunciations")
 
     return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
@@ -456,87 +275,21 @@ def generate_forms(lemma_id):
     pos_type = lemma.pos_type
 
     try:
-        # Initialize VILKAS agent
-        config = DataSourceConfig(
-            backend_type=BackendType.SQLITE,
-            sqlite_path=Config.DB_PATH,
-            model=constants.DEFAULT_MODEL,
-            debug=Config.DEBUG,
+        result = enqueue_task(
+            g.db,
+            task_type=TaskType.GENERATE_FORMS,
+            target_type="lemma",
+            target_id=lemma_id,
+            payload={"lemma_id": lemma_id, "lang_code": lang_code},
+            dedup_key=f"{TaskType.GENERATE_FORMS}:{lemma_id}:{lang_code}",
         )
-        agent = VilkasAgent(config=config)
-
-        # Check if the language/pos_type combination is supported
-        SUPPORTED_LANGUAGES = {
-            "lt": ["noun", "verb", "adjective"],
-            "fr": ["noun", "verb"],
-            "de": ["noun", "verb"],
-            "es": ["noun", "verb"],
-            "pt": ["noun", "verb"],
-            "en": ["noun", "verb", "adjective", "adverb"],
-        }
-
-        if lang_code not in SUPPORTED_LANGUAGES:
-            flash_and_log(f"Language {lang_code} is not yet supported for form generation", "error")
-            return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
-
-        if pos_type not in SUPPORTED_LANGUAGES[lang_code]:
-            flash(f"POS type {pos_type} is not supported for {lang_code}", "error")
-            return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
-
-        # Check if translation exists for this language
-        from wordfreq.storage.translation_helpers import LANGUAGE_FIELDS
-
-        translation = None
-        if lang_code in LANGUAGE_FIELDS:
-            field_name, _, uses_table = LANGUAGE_FIELDS[lang_code]
-            if uses_table:
-                from wordfreq.storage.models.schema import LemmaTranslation
-
-                trans_obj = (
-                    g.db.query(LemmaTranslation)
-                    .filter(
-                        LemmaTranslation.lemma_id == lemma_id,
-                        LemmaTranslation.language_code == lang_code,
-                    )
-                    .first()
-                )
-                translation = trans_obj.translation if trans_obj else None
-            else:
-                translation = getattr(lemma, field_name, None)
-
-        if not translation or not translation.strip():
+        if result.created:
             flash(
-                f"No {lang_code} translation found for this lemma. Add a translation first.",
-                "warning",
+                f"Queued {lang_code} form generation. A worker will store results soon.",
+                "info",
             )
-            return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
-
-        # For now, we'll use the language-specific generators directly
-        # This is a simplified version - a more complete implementation would call
-        # the agent's fix_missing_forms for individual lemmas
-        from wordfreq.translation.generate_forms_tasks import get_task_key
-        from wordfreq.translation.client import LinguisticClient
-
-        client = LinguisticClient(config=config)
-
-        try:
-            task_key = get_task_key(lang_code, pos_type)
-        except KeyError:
-            flash_and_log(f"Handler not implemented for {lang_code} {pos_type}", "error")
-            return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
-
-        success = agent.generate_forms_for_lemma(
-            lemma_guid=lemma.guid,
-            language_code=lang_code,
-            pos_type=pos_type,
-            client=client,
-        )
-
-        if success:
-            flash(f"Successfully generated {lang_code} {pos_type} forms!", "success")
         else:
-            flash(f"Could not generate {lang_code} {pos_type} forms", "warning")
-
+            flash("Form generation already queued for this lemma/language.", "warning")
     except Exception as e:
         log_and_flash_error(e, "generating forms")
 
@@ -555,61 +308,21 @@ def generate_synonyms(lemma_id):
     lang_code = request.form.get("lang_code", "en")
 
     try:
-        # Initialize ŠERNAS agent
-        from agents.sernas.agent import SernasAgent
-
-        config = DataSourceConfig(
-            backend_type=BackendType.SQLITE,
-            sqlite_path=Config.DB_PATH,
-            model=constants.DEFAULT_MODEL,
-            debug=Config.DEBUG,
+        result = enqueue_task(
+            g.db,
+            task_type=TaskType.GENERATE_SYNONYMS,
+            target_type="lemma",
+            target_id=lemma_id,
+            payload={"lemma_id": lemma_id, "lang_code": lang_code},
+            dedup_key=f"{TaskType.GENERATE_SYNONYMS}:{lemma_id}:{lang_code}",
         )
-        agent = SernasAgent(config=config)
-
-        # Check if translation exists for this language (skip for English since that's the lemma itself)
-        if lang_code != "en":
-            from wordfreq.storage.translation_helpers import get_translation
-
-            translation = get_translation(g.db, lemma, lang_code)
-
-            if not translation or not translation.strip():
-                flash(
-                    f"No {lang_code} translation found for this lemma. Add a translation first.",
-                    "warning",
-                )
-                return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
-
-        # Generate synonyms for this lemma and language
-        result = agent.generate_synonyms_for_lemma(
-            lemma_id=lemma_id, language_code=lang_code, model=constants.DEFAULT_MODEL, dry_run=False
-        )
-
-        if "error" in result:
-            flash(f'Error: {result["error"]}', "error")
-            return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
-
-        # Show results
-        synonyms_count = result.get("stored_synonyms", 0)
-        # Sum all alternative form types (new specific types + legacy)
-        alternatives_count = (
-            result.get("stored_abbreviations", 0)
-            + result.get("stored_expanded", 0)
-            + result.get("stored_spellings", 0)
-            + result.get("stored_alternatives", 0)  # Legacy field for backward compatibility
-        )
-        total_count = synonyms_count + alternatives_count
-
-        if total_count > 0:
+        if result.created:
             flash(
-                f"Successfully generated {synonyms_count} synonym(s) and {alternatives_count} alternative form(s)!",
-                "success",
-            )
-        else:
-            flash(
-                "No synonyms or alternative forms were generated. This word may not have common synonyms.",
+                "Queued synonym generation. Check back after the worker finishes writing results.",
                 "info",
             )
-
+        else:
+            flash("Synonym generation already queued for this lemma/language.", "warning")
     except Exception as e:
         log_and_flash_error(e, "generating synonyms")
 
