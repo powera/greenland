@@ -23,7 +23,7 @@ DEFAULT_UNKNOWN_RANK = 12500  # Default rank for words not in a corpus
 
 
 def calculate_combined_ranks(
-    db_path: Optional[str] = constants.WORDFREQ_DB_PATH,
+    config: Optional['DataSourceConfig'] = None,
     corpus_names: Optional[List[str]] = None,
     outlier_threshold: float = 2.0,
     unknown_rank: int = DEFAULT_UNKNOWN_RANK,
@@ -37,7 +37,7 @@ def calculate_combined_ranks(
     providing more robust rankings for domain-specific corpora.
 
     Args:
-        db_path: Optional database path
+        config: DataSourceConfig with backend settings (uses default if None)
         corpus_names: List of corpus names to include (or all if None)
         outlier_threshold: Z-score threshold for outlier detection
         unknown_rank: Default rank for words not in a corpus (used as penalty/placeholder)
@@ -46,10 +46,15 @@ def calculate_combined_ranks(
     Returns:
         List of words with their combined ranks and outlier information
     """
+    from wordfreq.storage.backend import create_session
+    from wordfreq.storage.backend.config import DataSourceConfig
+
     logger.info("Calculating combined ranks using harmonic-geometric mean")
 
     # Get session
-    session = get_session(db_path) if db_path else get_session()
+    if config is None:
+        config = DataSourceConfig()
+    session = create_session(config)
 
     # Get corpora to include (only enabled ones)
     if corpus_names:

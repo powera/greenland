@@ -312,17 +312,17 @@ class PradziaAgent:
             results = {}
             errors = []
 
-            for config in configs_to_load:
+            for corpus_config in configs_to_load:
                 try:
-                    logger.info(f"Loading corpus: {config.name}")
-                    imported, total = corpus.load_corpus(config.name, db_path=self.db_path)
-                    results[config.name] = {"imported": imported, "total": total, "success": True}
-                    logger.info(f"Successfully loaded {config.name}: {imported}/{total} words")
+                    logger.info(f"Loading corpus: {corpus_config.name}")
+                    imported, total = corpus.load_corpus(corpus_config.name, config=self.config)
+                    results[corpus_config.name] = {"imported": imported, "total": total, "success": True}
+                    logger.info(f"Successfully loaded {corpus_config.name}: {imported}/{total} words")
                 except Exception as e:
-                    error_msg = f"Failed to load corpus {config.name}: {e}"
+                    error_msg = f"Failed to load corpus {corpus_config.name}: {e}"
                     logger.error(error_msg)
                     errors.append(error_msg)
-                    results[config.name] = {
+                    results[corpus_config.name] = {
                         "imported": 0,
                         "total": 0,
                         "success": False,
@@ -375,7 +375,7 @@ class PradziaAgent:
             # Actually calculate ranks
             try:
                 logger.info("Calculating combined ranks using harmonic mean...")
-                analysis.calculate_combined_ranks(db_path=self.db_path)
+                analysis.calculate_combined_ranks(config=self.config)
 
                 result = {
                     "dry_run": False,

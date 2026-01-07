@@ -457,7 +457,7 @@ def initialize_corpus_configs(
     return sync_corpus_configs_to_db(session, db_path)
 
 
-def load_corpus(corpus_name: str, db_path: Optional[str] = None) -> tuple[int, int]:
+def load_corpus(corpus_name: str, config: Optional['DataSourceConfig'] = None) -> tuple[int, int]:
     """
     Load a corpus by name using its configuration.
 
@@ -466,7 +466,7 @@ def load_corpus(corpus_name: str, db_path: Optional[str] = None) -> tuple[int, i
 
     Args:
         corpus_name: Name of the corpus to load
-        db_path: Database path (uses default if None)
+        config: DataSourceConfig with backend settings (uses default if None)
 
     Returns:
         Tuple of (words imported, total words)
@@ -474,16 +474,18 @@ def load_corpus(corpus_name: str, db_path: Optional[str] = None) -> tuple[int, i
     Raises:
         ValueError: If corpus_name is not found in configuration
     """
+    from wordfreq.storage.backend.config import DataSourceConfig
+
     # Find the corpus configuration
-    config = get_corpus_config(corpus_name)
-    if config is None:
+    corpus_config = get_corpus_config(corpus_name)
+    if corpus_config is None:
         raise ValueError(f"Corpus '{corpus_name}' not found in configuration")
 
     # Build the full file path
     # Assume data files are in src/wordfreq/data directory
     project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
     data_dir = os.path.join(project_root, "src", "wordfreq", "data")
-    full_file_path = os.path.join(data_dir, config.file_path)
+    full_file_path = os.path.join(data_dir, corpus_config.file_path)
 
     # Check if file exists
     if not os.path.exists(full_file_path):
@@ -494,13 +496,13 @@ def load_corpus(corpus_name: str, db_path: Optional[str] = None) -> tuple[int, i
     # Call the import function with the configuration parameters
     return wordfreq.frequency.importer.import_frequency_data(
         file_path=full_file_path,
-        corpus_name=config.name,
-        language_code=config.language_code,
-        file_type=config.file_type,
-        max_words=config.max_words,
-        value_type=config.value_type,
-        corpus_description=config.description,
-        db_path=db_path,
+        corpus_name=corpus_config.name,
+        language_code=corpus_config.language_code,
+        file_type=corpus_config.file_type,
+        max_words=corpus_config.max_words,
+        value_type=corpus_config.value_type,
+        corpus_description=corpus_config.description,
+        config=config,
     )
 
 

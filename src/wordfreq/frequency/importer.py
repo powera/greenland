@@ -33,7 +33,7 @@ def import_frequency_data(
     max_words: int = 5000,
     value_type: str = "auto",  # Parameter to specify what the numeric values represent: "rank", "frequency", or "auto"
     corpus_description: Optional[str] = None,  # Optional description for new corpus
-    db_path: Optional[str] = None,  # Database path (uses default if None)
+    config: Optional['DataSourceConfig'] = None,  # DataSourceConfig with backend settings (uses default if None)
 ) -> Tuple[int, int]:
     """
     Import word frequency data from a file into the database.
@@ -49,17 +49,22 @@ def import_frequency_data(
                    - "frequency": Values are treated as frequencies (higher is more frequent)
                    - "auto": Auto-detect based on data characteristics
         corpus_description: Optional description for the corpus if it needs to be created
-        db_path: Database path (uses default if None)
+        config: DataSourceConfig with backend settings (uses default if None)
 
     Returns:
         Tuple of (words imported, total words)
     """
+    from wordfreq.storage.backend import create_session
+    from wordfreq.storage.backend.config import DataSourceConfig
+
     logger.info(
         f"Importing frequency data from {file_path} for corpus '{corpus_name}' (language: {language_code})"
     )
 
-    # Get session and ensure corpus configurations are synced
-    session = get_session(db_path or constants.WORDFREQ_DB_PATH)
+    # Get session using DataSourceConfig
+    if config is None:
+        config = DataSourceConfig()
+    session = create_session(config)
 
     # Sync corpus configurations from config file to database
     sync_result = wordfreq.frequency.corpus.sync_corpus_configs_to_db(session)

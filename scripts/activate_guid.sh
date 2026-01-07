@@ -46,6 +46,9 @@ GUID="$1"
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO_ROOT"
 
+# Set PYTHONPATH to include src/ directory
+export PYTHONPATH="${REPO_ROOT}/src"
+
 LANGUAGES=${LANGUAGES:-"lt zh ko fr es de pt sw vi"}
 SENTENCE_COUNT=${SENTENCE_COUNT:-3}
 SENTENCE_TRANSLATION_LIMIT=${SENTENCE_TRANSLATION_LIMIT:-""}
