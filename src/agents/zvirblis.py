@@ -20,6 +20,12 @@ if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
 from agents.bebras.translation import ensure_translations
+from clients.batch_queue import (
+    BatchQueueManager,
+    BatchRequestMetadata,
+    create_batch_database_session,
+)
+from clients.openai_batch_client import OpenAIBatchClient
 from agents.common.common_args import (
     add_backend_args,
     add_common_args,
@@ -31,6 +37,7 @@ from agents.common.common_args import (
 from wordfreq.storage.backend import create_session as create_backend_session
 from wordfreq.storage.backend.config import DataSourceConfig
 from wordfreq.storage.models.schema import Lemma, Sentence, SentenceTranslation, SentenceWord
+from wordfreq.translation.sentence import build_response_schema, build_translation_prompt
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -47,6 +54,12 @@ class ZvirblisAgent:
 
         if self.debug:
             logger.setLevel(logging.DEBUG)
+
+        self.batch_client = OpenAIBatchClient(debug=self.debug)
+        self.batch_session = create_batch_database_session()
+        self.batch_manager = BatchQueueManager(
+            self.batch_session, self.batch_client, debug=self.debug
+        )
 
     def get_session(self):
         return create_backend_session(self.config)
@@ -170,6 +183,118 @@ class ZvirblisAgent:
         finally:
             session.close()
 
+    def submit_batch_translation(
+        self, target_languages: List[str], limit: Optional[int] = None, pattern_id: str = None
+    ) -> tuple[Optional[str], int]:
+        session = self.get_session()
+        try:
+            from sqlalchemy import func as sql_func
+
+            sentences_with_only_en = (
+                session.query(Sentence.id, sql_func.count(SentenceTranslation.id))
+                .join(SentenceTranslation)
+                .group_by(Sentence.id)
+                .having(sql_func.count(SentenceTranslation.id) == 1)
+                .subquery()
+            )
+
+            query = (
+                session.query(Sentence)
+                .join(SentenceTranslation)
+                .filter(SentenceTranslation.language_code == "en")
+                .filter(Sentence.id.in_(session.query(sentences_with_only_en.c.id)))
+                .order_by(Sentence.id)
+            )
+
+            if pattern_id:
+                query = query.filter(Sentence.source_filename == f"pattern:{pattern_id}")
+
+            if limit:
+                query = query.limit(limit)
+
+            sentences = query.all()
+
+            if not sentences:
+                logger.warning("No untranslated sentences found")
+                return None, 0
+
+            requests_queued = 0
+            for sentence in sentences:
+                sentence_words = (
+                    session.query(SentenceWord)
+                    .filter_by(sentence_id=sentence.id, language_code="en")
+                    .all()
+                )
+
+                try:
+                    context, prompt = build_translation_prompt(
+                        sentence, sentence_words, target_languages, session
+                    )
+                except ValueError:
+                    continue
+
+                custom_id = f"sentence_{sentence.id}"
+                full_prompt = f"{context}\n\n{prompt}"
+                inner_schema = build_response_schema(target_languages)
+
+                response_format = {
+                    "type": "json_schema",
+                    "json_schema": {
+                        "name": "SentenceTranslations",
+                        "strict": True,
+                        "schema": inner_schema,
+                    },
+                }
+
+                request_body = {
+                    "model": self.config.model,
+                    "messages": [{"role": "user", "content": full_prompt}],
+                    "response_format": response_format,
+                }
+
+                metadata = BatchRequestMetadata(
+                    custom_id=custom_id,
+                    agent_name="zvirblis",
+                    operation_type="translate_sentence",
+                    entity_id=sentence.id,
+                    entity_type="sentence",
+                )
+
+                try:
+                    self.batch_manager.queue_request(
+                        custom_id=custom_id,
+                        request_body=request_body,
+                        metadata=metadata,
+                        endpoint="/v1/chat/completions",
+                    )
+                    requests_queued += 1
+                except ValueError as e:
+                    logger.debug("Skipping sentence %s: %s", sentence.id, e)
+
+            logger.info("Queued %s translation requests", requests_queued)
+
+            if requests_queued > 0:
+                pending_requests = self.batch_manager.get_pending_requests(
+                    agent_name="zvirblis", operation_type="translate_sentence"
+                )
+                batch_id, _ = self.batch_manager.submit_batch(
+                    pending_requests,
+                    batch_metadata={
+                        "agent": "zvirblis",
+                        "operation": "translate_sentences",
+                    },
+                )
+                logger.info(
+                    "Submitted batch %s with %s requests",
+                    batch_id,
+                    len(pending_requests),
+                )
+                return batch_id, len(pending_requests)
+
+            return None, 0
+
+        finally:
+            session.close()
 
 def get_argument_parser():
     """Return the argument parser for introspection."""
@@ -190,6 +315,22 @@ def get_argument_parser():
         ),
     )
 
+    subparsers = parser.add_subparsers(dest="command", help="Batch translation commands")
+
+    submit_parser = subparsers.add_parser(
+        "submit-batch",
+        help="Submit batch translation job for untranslated sentences",
+    )
+    submit_parser.add_argument(
+        "--languages",
+        nargs="+",
+        required=True,
+        choices=["lt", "zh", "ko", "fr", "de", "es", "pt", "sw", "vi"],
+        help="Target languages to translate to",
+    )
+    submit_parser.add_argument("--limit", type=int, help="Max sentences to translate")
+    submit_parser.add_argument("--pattern-id", help="Only translate sentences from this pattern")
+
     parser.set_defaults(languages=["en", "lt", "zh", "ko", "fr", "es", "de", "pt", "sw", "vi"])
 
     return parser
@@ -201,6 +342,39 @@ def main():
 
     config = get_data_source_config(args)
     agent = ZvirblisAgent(config=config)
+
+    if args.command == "submit-batch":
+        target_languages = [lang for lang in args.languages if lang != "en"]
+        if not target_languages:
+            logger.error("Provide at least one non-English language for batch translation")
+            return 1
+
+        batch_id, count = agent.submit_batch_translation(
+            target_languages=target_languages,
+            limit=args.limit,
+            pattern_id=args.pattern_id,
+        )
+
+        if batch_id:
+            logger.info("=" * 80)
+            logger.info("ZVIRBLIS - BATCH SUBMISSION REPORT")
+            logger.info("=" * 80)
+            logger.info("Batch ID: %s", batch_id)
+            logger.info("Requests submitted: %s", count)
+            logger.info("Target languages: %s", ", ".join(target_languages))
+            logger.info("=" * 80)
+            logger.info(
+                "Check status with: python -m agents.common.batch status --batch-id %s",
+                batch_id,
+            )
+            logger.info(
+                "Complete batch with: python -m agents.common.batch complete --batch-id %s",
+                batch_id,
+            )
+            return 0
+
+        logger.warning("No batch submitted (no untranslated sentences found)")
+        return 0
 
     if not args.guid:
         logger.error("--guid is required to translate sentences")

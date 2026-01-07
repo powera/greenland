@@ -126,7 +126,7 @@ AGENTS = [
         "name": "BUIVOLAS",
         "display_name": "Buivolas",
         "subtitle": "Pattern Sentence Generator",
-        "description": "Generates simple pattern-based sentences for language learning across multiple languages.",
+        "description": "Generates English-only pattern or LLM sentences for language learning.",
         "script": "buivolas/cli.py",
         "icon": "bi-grid-3x3",
         "use_dynamic_form": True,

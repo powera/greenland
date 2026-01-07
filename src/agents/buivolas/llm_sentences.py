@@ -1,6 +1,5 @@
 """LLM-driven sentence generation for Buivolas."""
 
-import json
 import logging
 from typing import Dict, List, Optional
 
@@ -37,7 +36,6 @@ class LlmSentenceGenerator:
     def generate_sentences_for_noun(
         self,
         lemma: Lemma,
-        target_languages: List[str],
         num_sentences: int = 3,
         difficulty_context: Optional[int] = None,
     ) -> Dict[str, any]:
@@ -52,19 +50,7 @@ class LlmSentenceGenerator:
             lemma.guid,
         )
 
-        session = self.get_session()
         try:
-            noun_translations = {}
-            for lang_code in target_languages:
-                if lang_code == "en":
-                    noun_translations[lang_code] = lemma.lemma_text
-                else:
-                    from wordfreq.storage.translation_helpers import get_translation
-
-                    translation = get_translation(session, lemma, lang_code)
-                    if translation:
-                        noun_translations[lang_code] = translation
-
             context = self._build_sentence_context(lemma, difficulty_context)
 
             generated_sentences = []
@@ -80,8 +66,6 @@ class LlmSentenceGenerator:
 
                 result = self._call_llm_for_sentence(
                     lemma=lemma,
-                    noun_translations=noun_translations,
-                    target_languages=target_languages,
                     context=context,
                     previous_sentences=previous_sentences,
                 )
@@ -121,8 +105,6 @@ class LlmSentenceGenerator:
                 exc_info=True,
             )
             return {"success": False, "error": str(e)}
-        finally:
-            session.close()
 
     def _build_sentence_context(self, lemma: Lemma, difficulty_level: Optional[int]) -> str:
         context_parts = [
@@ -142,14 +124,9 @@ class LlmSentenceGenerator:
     def _call_llm_for_sentence(
         self,
         lemma: Lemma,
-        noun_translations: Dict[str, str],
-        target_languages: List[str],
         context: str,
         previous_sentences: Optional[List[str]] = None,
     ) -> Optional[Dict]:
-        langs_str = ", ".join(target_languages)
-        translations_str = json.dumps(noun_translations, indent=2)
-
         previous_context = ""
         if previous_sentences:
             previous_context = (
@@ -160,9 +137,6 @@ class LlmSentenceGenerator:
         prompt = f"""Generate 1 English example sentence for language learning that features the following noun.
 
 {context}
-
-Translations of the noun in target languages:
-{translations_str}
 {previous_context}
 
 Requirements:
@@ -170,86 +144,29 @@ Requirements:
 2. Vary the sentence pattern (SVO, SOV, etc.) and use different verbs/contexts
 3. Keep sentences simple and natural (appropriate for language learners)
 4. Use common, everyday vocabulary for other words in the sentence
-5. Translate the English sentence to ALL target languages: {langs_str}
-   - Provide natural, idiomatic translations (not word-for-word)
-   - Ensure grammatical correctness in each language
 
 For the sentence, provide:
 - Pattern type (SVO, SVAO, etc.) - based on English structure
 - Tense used (present, past, future)
-- Translations in all languages (keys are language codes like 'en', 'lt', etc.)
-- For EACH target language sentence, list ALL words in order with their:
-  - The actual word/phrase as it appears (e.g., "Le chocolat", "초콜릿은")
-  - English translation of this word/phrase (e.g., "the chocolate", "chocolate")
-  - Base/lemma form in that language (e.g., "chocolat", "초콜릿")
-  - Role in sentence (subject, verb, object, adjective, preposition, article, etc.)
-  - For nouns/adjectives: grammatical case (e.g., "accusative", "nominative")
-  - For verbs: grammatical form (e.g., "3s_present", "1s_past")
-  - English lemma for vocabulary linking (e.g., "chocolate", "melt", "sun")
+- English translation (key 'en')
 
-Important: List words in the order they appear in that language's sentence, not English order.
-Include ALL words including articles, prepositions, particles.
-
-Focus on variety, natural language usage, and accurate translations."""
-
-        translations_properties = {}
-        words_by_language_properties = {}
-
-        for lang_code in target_languages:
-            translations_properties[lang_code] = {
-                "type": "string",
-                "description": f"Sentence in {lang_code}",
-            }
-
-            words_by_language_properties[f"words_{lang_code}"] = {
-                "type": "array",
-                "description": f"All words in the {lang_code} sentence, in order",
-                "items": {
-                    "type": "object",
-                    "properties": {
-                        "word": {
-                            "type": "string",
-                            "description": "The word/phrase as it appears in sentence",
-                        },
-                        "english": {
-                            "type": "string",
-                            "description": "English translation of this word",
-                        },
-                        "lemma": {
-                            "type": "string",
-                            "description": "Base/lemma form in this language",
-                        },
-                        "role": {"type": "string", "description": "Role in sentence"},
-                        "grammatical_form": {
-                            "type": "string",
-                            "description": "Grammatical form (e.g., '3s_present')",
-                        },
-                        "english_lemma": {
-                            "type": "string",
-                            "description": "English lemma for linking to vocabulary",
-                        },
-                    },
-                    "required": ["word", "english", "lemma", "role"],
-                },
-            }
-
-        translations_schema_props = {}
-        for lang_code, lang_def in translations_properties.items():
-            translations_schema_props[lang_code] = SchemaProperty(
-                type=lang_def["type"],
-                description=lang_def.get("description", ""),
-            )
+Focus on variety and natural language usage."""
 
         translations_schema = Schema(
             name="Translations",
-            description="Sentence in each language",
-            properties=translations_schema_props,
+            description="English sentence",
+            properties={
+                "en": SchemaProperty(
+                    type="string",
+                    description="Sentence in English",
+                )
+            },
         )
 
         top_level_properties = {
             "translations": SchemaProperty(
                 type="object",
-                description="Sentence in each language",
+                description="English sentence",
                 object_schema=translations_schema,
             ),
             "pattern": SchemaProperty(
@@ -259,16 +176,6 @@ Focus on variety, natural language usage, and accurate translations."""
                 type="string", description="Verb tense (present, past, future)"
             ),
         }
-
-        for lang_code in target_languages:
-            if lang_code == "en":
-                continue
-            words_key = f"words_{lang_code}"
-            top_level_properties[words_key] = SchemaProperty(
-                type="array",
-                description=f"All words in the {lang_code} sentence, in order",
-                items=words_by_language_properties[words_key],
-            )
 
         schema = Schema(
             name="SentenceGeneration",

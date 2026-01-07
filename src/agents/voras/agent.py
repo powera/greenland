@@ -33,7 +33,7 @@ import constants
 from agents.common.lemma_selection import LemmaQueryBuilder, apply_limit_and_sample_rate
 
 # Import submodules
-from agents.voras import batch, coverage
+from agents.voras import coverage
 from clients.barsukas_cache import BarsukasCacheClient
 from clients.batch_queue import BatchRequestMetadata, get_batch_manager
 from wordfreq.storage.backend import create_session as create_backend_session
@@ -800,22 +800,23 @@ class VorasAgent:
 
         return results
 
-    # Delegate batch operations to batch module
     def submit_batch(self, agent_name: str = "voras", metadata: Optional[Dict[str, str]] = None):
-        """Submit batch requests. Delegates to batch module."""
-        return batch.submit_batch(self.debug, agent_name, metadata)
+        """Submit pending batch requests to OpenAI."""
+        batch_manager = get_batch_manager(debug=self.debug)
+        pending = batch_manager.get_pending_requests(agent_name=agent_name)
 
-    def check_batch_status(self, batch_id: str):
-        """Check batch status. Delegates to batch module."""
-        return batch.check_batch_status(batch_id, self.debug)
+        if not pending:
+            logger.warning("No pending batch requests found")
+            return {"batch_id": None, "file_id": None, "count": 0}
 
-    def retrieve_batch_results(self, batch_id: str):
-        """Retrieve batch results. Delegates to batch module."""
-        session = self.get_session()
-        try:
-            return batch.retrieve_batch_results(batch_id, session, self.debug)
-        finally:
-            session.close()
+        logger.info("Submitting %s pending requests as a batch...", len(pending))
+        batch_id, file_id = batch_manager.submit_batch(pending, batch_metadata=metadata)
+
+        logger.info("Batch submitted successfully!")
+        logger.info("  Batch ID: %s", batch_id)
+        logger.info("  File ID: %s", file_id)
+        logger.info("  Request count: %s", len(pending))
+        return {"batch_id": batch_id, "file_id": file_id, "count": len(pending)}
 
     # Delegate coverage operations to coverage module
     def check_overall_coverage(self):

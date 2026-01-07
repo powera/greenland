@@ -3,7 +3,7 @@
 """Shared translation logic for sentence translation.
 
 This module provides reusable translation functionality that can be used by:
-- BUIVOLAS agent (batch translation)
+- ZVIRBLIS agent (batch translation)
 - Barsukas web UI (single sentence translation)
 - Future translation agents
 """
