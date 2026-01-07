@@ -13,6 +13,11 @@ This agent runs autonomously to validate English-language properties:
 1. Lemma forms are in proper dictionary/base form (e.g., "shoe" not "shoes")
 2. English definitions are accurate and well-formed
 3. POS types and subtypes are correct
+4. Lemmas are properly disambiguated when English polysemy requires it
+
+Note: The base concept label/definition can come from base.json inputs and may
+not be English. LOKYS focuses on populating and validating the English lemma
+text and definition when they are missing or need correction.
 
 "Lokys" means "bear" in Lithuanian - thorough and careful in checking quality.
 """
@@ -29,6 +34,7 @@ from wordfreq.tools.llm_validators import (
     validate_lemma_form,
     validate_definition,
     suggest_disambiguation,
+    validate_disambiguation_need,
 )
 
 # Configure logging
@@ -37,6 +43,8 @@ logger = logging.getLogger(__name__)
 
 class LokysAgent:
     """Agent for validating English lemma forms and properties."""
+
+    disambiguation_confidence_threshold = 0.7
 
     def __init__(self, config: DataSourceConfig):
         """
@@ -398,7 +406,7 @@ class LokysAgent:
             limit: Maximum items to check
             sample_rate: Fraction to sample (0.0-1.0)
             confidence_threshold: Minimum confidence to flag issues
-            check_type: Type of check to run ("lemma", "definitions", or "both")
+            check_type: Type of check to run ("lemma", "definitions", "disambiguation", or "both")
 
         Returns:
             Dictionary with all check results
@@ -427,6 +435,10 @@ class LokysAgent:
             results["checks"]["definitions"] = self.check_definitions(
                 limit=limit, sample_rate=sample_rate, confidence_threshold=confidence_threshold
             )
+
+        # Check disambiguation
+        if check_type in ["disambiguation", "both"]:
+            results["checks"]["disambiguation"] = self.check_disambiguation(limit=limit)
 
         end_time = datetime.now()
         duration = (end_time - start_time).total_seconds()
@@ -506,11 +518,9 @@ class LokysAgent:
         )
 
         if len(duplicates) <= 1:
-            return {
-                "needs_disambiguation": False,
-                "duplicate_count": len(duplicates),
-                "reason": "no_duplicates",
-            }
+            return self._check_polysemy_disambiguation(
+                lemma=lemma, session=session, duplicate_count=len(duplicates)
+            )
 
         # Get translations for all duplicates
         supported_languages = get_supported_languages()
@@ -543,13 +553,14 @@ class LokysAgent:
                         break
 
         if not translations_differ:
-            return {
-                "needs_disambiguation": False,
-                "duplicate_count": len(duplicates),
-                "reason": "translations_identical",
-                "duplicates": duplicates,
-                "translations_by_guid": translations_by_guid,
-            }
+            return self._check_polysemy_disambiguation(
+                lemma=lemma,
+                session=session,
+                duplicate_count=len(duplicates),
+                duplicates=duplicates,
+                translations_by_guid=translations_by_guid,
+                reason="translations_identical",
+            )
 
         # Check if already has parentheticals
         has_parenthetical = "(" in lemma.lemma_text and ")" in lemma.lemma_text
@@ -584,6 +595,63 @@ class LokysAgent:
             "llm_suggestions": llm_result,
         }
 
+    def _check_polysemy_disambiguation(
+        self,
+        lemma: Lemma,
+        session,
+        duplicate_count: int,
+        duplicates: Optional[List[Lemma]] = None,
+        translations_by_guid: Optional[Dict[str, Dict[str, str]]] = None,
+        reason: str = "no_duplicates",
+    ) -> Dict[str, any]:
+        """Check for disambiguation needs when duplicates aren't sufficient."""
+        from wordfreq.storage.translation_helpers import get_supported_languages
+
+        has_parenthetical = "(" in lemma.lemma_text and ")" in lemma.lemma_text
+        if has_parenthetical:
+            return {
+                "needs_disambiguation": False,
+                "duplicate_count": duplicate_count,
+                "reason": "already_disambiguated",
+                "has_parenthetical": has_parenthetical,
+                "duplicates": duplicates or [],
+                "translations_by_guid": translations_by_guid or {},
+            }
+
+        supported_languages = get_supported_languages()
+        translations = {}
+        for lang_code in supported_languages.keys():
+            try:
+                translation = get_translation(session, lemma, lang_code)
+                if translation:
+                    translations[lang_code] = translation
+            except ValueError:
+                continue
+
+        llm_result = validate_disambiguation_need(
+            word=lemma.lemma_text,
+            pos_type=lemma.pos_type,
+            definition=lemma.definition_text or "",
+            translations=translations,
+            has_parenthetical=has_parenthetical,
+            model=self.config.model,
+        )
+
+        needs_disambiguation = (
+            llm_result.get("needs_disambiguation", False)
+            and llm_result.get("confidence", 0.0) >= self.disambiguation_confidence_threshold
+        )
+
+        return {
+            "needs_disambiguation": needs_disambiguation,
+            "duplicate_count": duplicate_count,
+            "reason": "polysemy_detected" if needs_disambiguation else reason,
+            "has_parenthetical": has_parenthetical,
+            "duplicates": duplicates or [],
+            "translations_by_guid": translations_by_guid or {},
+            "llm_suggestions": llm_result,
+        }
+
     def _print_summary(self, results: Dict, start_time: datetime, duration: float):
         """Print a summary of the check results."""
         logger.info("=" * 80)
@@ -612,6 +680,15 @@ class LokysAgent:
             logger.info(f"  Total checked: {def_check['total_checked']}")
             logger.info(f"  Issues found: {def_check['issues_found']}")
             logger.info(f"  Issue rate: {def_check['issue_rate']:.1f}%")
+            logger.info("")
+
+        # Disambiguation check
+        if "disambiguation" in results["checks"]:
+            dis_check = results["checks"]["disambiguation"]
+            logger.info("DISAMBIGUATION:")
+            logger.info(f"  Total checked: {dis_check['total_checked']}")
+            logger.info(f"  Duplicate groups: {dis_check['duplicate_groups']}")
+            logger.info(f"  Needs disambiguation: {dis_check['needs_disambiguation']}")
             logger.info("")
 
         logger.info("=" * 80)

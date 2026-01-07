@@ -1,0 +1,13 @@
+Word: "{word}"
+Part of speech: {pos_type}
+Current definition: {definition}
+Existing translations: {translations_info}
+Already has parenthetical: {has_parenthetical}
+
+Determine whether this entry needs parenthetical disambiguation.
+
+Return:
+- needs_disambiguation: true if the word has other distinct senses that should be split into
+  separate lemmas, and this entry represents only one of them.
+- suggested_disambiguation: a short (1-2 word) parenthetical for this specific sense, if needed.
+- reason: a short explanation.
