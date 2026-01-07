@@ -31,10 +31,7 @@ class CoquiClient:
     """Client for generating audio using Coqui TTS."""
 
     def __init__(
-        self,
-        use_gpu: bool = True,
-        speaker_wav_dir: Optional[Path] = None,
-        debug: bool = False
+        self, use_gpu: bool = True, speaker_wav_dir: Optional[Path] = None, debug: bool = False
     ):
         """
         Initialize Coqui TTS client.
@@ -65,6 +62,7 @@ class CoquiClient:
         # Verify TTS library is available
         try:
             import TTS
+
             logger.info(f"Coqui TTS library version: {TTS.__version__}")
         except ImportError:
             logger.error("Coqui TTS library not found. Please install it: pip install TTS")
@@ -154,7 +152,9 @@ class CoquiClient:
 
         # Validate audio format
         if audio_format not in [AudioFormat.MP3, AudioFormat.WAV]:
-            error_msg = f"Unsupported audio format: {audio_format.value}. Only MP3 and WAV are supported."
+            error_msg = (
+                f"Unsupported audio format: {audio_format.value}. Only MP3 and WAV are supported."
+            )
             logger.error(error_msg)
             return AudioGenerationResult(
                 audio_data=b"",
@@ -229,9 +229,12 @@ class CoquiClient:
                     # Use ffmpeg to convert WAV to MP3
                     ffmpeg_cmd = [
                         "ffmpeg",
-                        "-i", str(wav_path),
-                        "-codec:a", "libmp3lame",
-                        "-qscale:a", "2",  # High quality
+                        "-i",
+                        str(wav_path),
+                        "-codec:a",
+                        "libmp3lame",
+                        "-qscale:a",
+                        "2",  # High quality
                         "-y",  # Overwrite output file
                         str(mp3_path),
                     ]
@@ -284,6 +287,7 @@ class CoquiClient:
             logger.error(error_msg)
             if self.debug:
                 import traceback
+
                 logger.debug(traceback.format_exc())
             return AudioGenerationResult(
                 audio_data=b"",

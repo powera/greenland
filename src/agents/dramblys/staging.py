@@ -124,15 +124,17 @@ def approve_pending_import(
 
         # Construct a minimal definition structure from pending_import data
         # This matches the schema from definitions.py
-        definitions_list = [{
-            "definition": definition,
-            "pos": pos_type,
-            "pos_subtype": pos_subtype,
-            "lemma": word,  # Use the word itself as lemma for now
-            "is_base_form": True,  # Assume base form
-            "grammatical_form": None,  # Will be determined by process_word
-            # Translations will need to be generated later if needed
-        }]
+        definitions_list = [
+            {
+                "definition": definition,
+                "pos": pos_type,
+                "pos_subtype": pos_subtype,
+                "lemma": word,  # Use the word itself as lemma for now
+                "is_base_form": True,  # Assume base form
+                "grammatical_form": None,  # Will be determined by process_word
+                # Translations will need to be generated later if needed
+            }
+        ]
 
         # Use LinguisticClient to process the word with the specific definition
         client = LinguisticClient(model=model, db_path=db_path, debug=debug)
@@ -140,12 +142,13 @@ def approve_pending_import(
         try:
             # Pass the definitions_list to avoid re-querying the LLM
             from wordfreq.translation import word_processing
+
             success = word_processing.process_word(
                 client.client,
                 word,
                 client.get_session,
                 refresh=False,
-                definitions_list=definitions_list
+                definitions_list=definitions_list,
             )
         except ValueError as e:
             # Handle subtype validation errors
@@ -368,9 +371,7 @@ def stage_missing_words_for_import(
                 translation = definition_data.get(translation_key, "")
 
                 if not definition_text:
-                    logger.warning(
-                        f"Missing definition for '{word}', skipping this sense"
-                    )
+                    logger.warning(f"Missing definition for '{word}', skipping this sense")
                     continue
 
                 # Translation is optional - we can use definition as fallback for disambiguation

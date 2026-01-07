@@ -223,14 +223,14 @@ class UngurysAgent:
             )
             if sentence_success:
                 logger.info(f"  Exported {sentence_count} sentences")
-                results['sentences_exported'] = sentence_count
+                results["sentences_exported"] = sentence_count
                 # Add sentences file to files_created list
-                if 'files_created' not in results:
-                    results['files_created'] = []
-                results['files_created'].append(sentences_path)
+                if "files_created" not in results:
+                    results["files_created"] = []
+                results["files_created"].append(sentences_path)
             else:
                 logger.warning("  Sentence export failed")
-                results['sentences_exported'] = 0
+                results["sentences_exported"] = 0
         else:
             logger.error(f"Failed to export to {output_dir}")
 
@@ -345,7 +345,9 @@ class UngurysAgent:
         """
         start_time = datetime.now()
         # Get database path from config
-        db_path = self.config.sqlite_path if self.config.backend_type == BackendType.SQLITE else None
+        db_path = (
+            self.config.sqlite_path if self.config.backend_type == BackendType.SQLITE else None
+        )
         results = {
             "timestamp": start_time.isoformat(),
             "database_path": db_path,

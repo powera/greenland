@@ -94,7 +94,7 @@ class PapugaAgent:
             self.cache_client = BarsukasCacheClient(
                 base_url=self.config.barsukas_url,
                 cache_only=self.config.cache_only,
-                debug=self.debug
+                debug=self.debug,
             )
         return self.cache_client
 
@@ -222,7 +222,9 @@ class PapugaAgent:
                         model=self.config.model,
                         language_code=form.language_code,
                         grammatical_form=form.grammatical_form,
-                        english_translation=lemma.lemma_text if form.language_code != "en" else None,
+                        english_translation=(
+                            lemma.lemma_text if form.language_code != "en" else None
+                        ),
                     )
 
                     if result["needs_update"] and result["confidence"] >= confidence_threshold:
@@ -268,7 +270,11 @@ class PapugaAgent:
             session.close()
 
     def check_missing_pronunciations(
-        self, limit: Optional[int] = None, only_english: bool = True, only_base_forms: bool = False, lemma_id: Optional[int] = None
+        self,
+        limit: Optional[int] = None,
+        only_english: bool = True,
+        only_base_forms: bool = False,
+        lemma_id: Optional[int] = None,
     ) -> Dict[str, any]:
         """
         Find derivative forms that are missing pronunciations.
@@ -388,6 +394,7 @@ class PapugaAgent:
 
             # Group forms by (lemma_id, language_code) for intelligent batching
             from collections import defaultdict
+
             forms_by_lemma_lang = defaultdict(list)
 
             for form in forms:
@@ -490,10 +497,12 @@ class PapugaAgent:
                         form_id_map = {}  # Map grammatical_form to DerivativeForm object
 
                         for form in forms_to_process:
-                            forms_list.append({
-                                "form": form.grammatical_form,
-                                "word": form.derivative_form_text,
-                            })
+                            forms_list.append(
+                                {
+                                    "form": form.grammatical_form,
+                                    "word": form.derivative_form_text,
+                                }
+                            )
                             form_id_map[form.grammatical_form] = form
 
                         try:
@@ -528,7 +537,9 @@ class PapugaAgent:
 
                                 if result["confidence"] >= 0.5:
                                     form_obj.ipa_pronunciation = result["ipa_pronunciation"]
-                                    form_obj.phonetic_pronunciation = result["phonetic_pronunciation"]
+                                    form_obj.phonetic_pronunciation = result[
+                                        "phonetic_pronunciation"
+                                    ]
                                     batch_populated += 1
                                 else:
                                     logger.warning(
@@ -714,7 +725,7 @@ def get_argument_parser():
         "--mode",
         choices=["check", "populate", "both"],
         default="check",
-        help="Operation mode: check existing pronunciations, populate missing ones, or both (default: check)"
+        help="Operation mode: check existing pronunciations, populate missing ones, or both (default: check)",
     )
 
     parser.add_argument(

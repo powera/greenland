@@ -45,9 +45,7 @@ class FormGenerationConfig:
 
 
 def get_lemmas_with_translation(
-    config: DataSourceConfig,
-    form_config: FormGenerationConfig,
-    limit: Optional[int] = None
+    config: DataSourceConfig, form_config: FormGenerationConfig, limit: Optional[int] = None
 ) -> List[Dict]:
     """
     Get lemmas with translations for a specific language and POS type.
@@ -300,7 +298,10 @@ def extract_gender_from_forms(
 
 
 def process_lemma_forms(
-    client: LinguisticClient, lemma_id: int, data_config: DataSourceConfig, form_config: FormGenerationConfig
+    client: LinguisticClient,
+    lemma_id: int,
+    data_config: DataSourceConfig,
+    form_config: FormGenerationConfig,
 ) -> bool:
     """
     Process and store forms for a single lemma.

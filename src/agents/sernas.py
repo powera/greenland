@@ -21,6 +21,7 @@ if GREENLAND_SRC_PATH not in sys.path:
 
 # Configure logging early so imported modules use the shared format
 from src.logging_config import configure_logging, get_logger
+
 configure_logging()
 
 from agents.sernas.agent import SernasAgent

@@ -161,7 +161,11 @@ def get_all_definitions(session: Session, lemma: Lemma) -> Dict[str, Optional[st
 
 
 def set_translation(
-    session: Session, lemma: Lemma, lang_code: str, translation: str, definition: Optional[str] = None
+    session: Session,
+    lemma: Lemma,
+    lang_code: str,
+    translation: str,
+    definition: Optional[str] = None,
 ) -> Tuple[Optional[str], str]:
     """
     Set translation for a lemma in the specified language.
@@ -207,13 +211,13 @@ def set_translation(
                 language_code=field_name,
                 translation=translation,
                 definition_text=definition,
-                verified=False
+                verified=False,
             )
             session.add(translation_obj)
     else:
         # Set on Lemma table column (English uses lemma_text)
         setattr(lemma, field_name, translation)
-        if definition is not None and hasattr(lemma, 'definition_text'):
+        if definition is not None and hasattr(lemma, "definition_text"):
             lemma.definition_text = definition
 
     return old_translation, translation
@@ -260,7 +264,7 @@ def set_definition(
         else:
             # Need to create a row - but we need a translation too
             # Use lemma_text as placeholder if English, otherwise raise error
-            if lang_code == 'en':
+            if lang_code == "en":
                 translation = lemma.lemma_text
             else:
                 raise ValueError(f"Cannot set definition for {lang_code} without translation")
@@ -270,12 +274,12 @@ def set_definition(
                 language_code=field_name,
                 translation=translation,
                 definition_text=definition,
-                verified=False
+                verified=False,
             )
             session.add(translation_obj)
     else:
         # For English, set on Lemma table
-        if hasattr(lemma, 'definition_text'):
+        if hasattr(lemma, "definition_text"):
             lemma.definition_text = definition
 
     return old_definition, definition
@@ -376,7 +380,7 @@ def get_reference_translation(
     session: Session,
     lemma: Lemma,
     exclude_languages: Optional[list] = None,
-    prefer_languages: Optional[list] = None
+    prefer_languages: Optional[list] = None,
 ) -> Tuple[Optional[str], Optional[str]]:
     """
     Find a reference translation for use in LLM queries.

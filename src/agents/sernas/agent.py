@@ -88,7 +88,7 @@ class SernasAgent:
         self,
         lemmas: Optional[List[Lemma]] = None,
         language_code: Optional[str] = None,
-        form_type: Optional[str] = None
+        form_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """
         Check for lemmas missing synonyms or alternative forms.
@@ -261,9 +261,7 @@ class SernasAgent:
             # Extract results and filter out numerals
             synonyms = [s for s in result.get("synonyms", []) if not is_numeral(s)]
             abbreviations = [a for a in result.get("abbreviations", []) if not is_numeral(a)]
-            expanded_forms = [
-                e for e in result.get("expanded_forms", []) if not is_numeral(e)
-            ]
+            expanded_forms = [e for e in result.get("expanded_forms", []) if not is_numeral(e)]
             alternate_spellings = [
                 a for a in result.get("alternate_spellings", []) if not is_numeral(a)
             ]

@@ -355,7 +355,10 @@ def main() -> int:
             logger.info("Requests submitted: %s", count)
             logger.info("Target languages: %s", ", ".join(args.languages))
             logger.info("=" * 80)
-            logger.info("Check status with: python -m agents.buivolas.cli check-batch --batch-id %s", batch_id)
+            logger.info(
+                "Check status with: python -m agents.buivolas.cli check-batch --batch-id %s",
+                batch_id,
+            )
         else:
             logger.warning("No batch submitted (no untranslated sentences found)")
 

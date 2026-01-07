@@ -149,13 +149,15 @@ def convert_sqlalchemy_lemma_to_jsonl(lemma, session):
     # Get grammar facts
     grammar_facts = []
     for fact in lemma.grammar_facts:
-        grammar_facts.append({
-            "language_code": fact.language_code,
-            "fact_type": fact.fact_type,
-            "fact_value": fact.fact_value,
-            "notes": fact.notes,
-            "verified": fact.verified,
-        })
+        grammar_facts.append(
+            {
+                "language_code": fact.language_code,
+                "fact_type": fact.fact_type,
+                "fact_value": fact.fact_value,
+                "notes": fact.notes,
+                "verified": fact.verified,
+            }
+        )
 
     # Create JSONL lemma with new base concept fields
     return jsonl_models.Lemma(
@@ -214,17 +216,19 @@ def convert_sqlalchemy_sentence_to_jsonl(sentence):
     # Get words
     words = []
     for word in sentence.words:
-        words.append({
-            "lemma_id": word.lemma_id,
-            "language_code": word.language_code,
-            "position": word.position,
-            "word_role": word.word_role,
-            "english_text": word.english_text,
-            "target_language_text": word.target_language_text,
-            "grammatical_form": word.grammatical_form,
-            "grammatical_case": word.grammatical_case,
-            "declined_form": word.declined_form,
-        })
+        words.append(
+            {
+                "lemma_id": word.lemma_id,
+                "language_code": word.language_code,
+                "position": word.position,
+                "word_role": word.word_role,
+                "english_text": word.english_text,
+                "target_language_text": word.target_language_text,
+                "grammatical_form": word.grammatical_form,
+                "grammatical_case": word.grammatical_case,
+                "declined_form": word.declined_form,
+            }
+        )
 
     return jsonl_models.Sentence(
         id=sentence.id,
@@ -392,10 +396,9 @@ def export_sqlite_to_release(sqlite_path: str, release_dir: str):
                 for lang_code, translation in all_translations.items():
                     if translation and translation.strip():
                         all_languages.add(lang_code)
-                        lang_records[lang_code].append({
-                            "guid": lemma.guid,
-                            "translation": translation
-                        })
+                        lang_records[lang_code].append(
+                            {"guid": lemma.guid, "translation": translation}
+                        )
 
             # Write base.jsonl
             base_file = category_dir / "base.jsonl"
@@ -422,14 +425,10 @@ def _write_jsonl_atomic(file_path: Path, records: list):
     """
     # Write to temp file first
     with tempfile.NamedTemporaryFile(
-        mode='w',
-        encoding='utf-8',
-        dir=file_path.parent,
-        delete=False,
-        suffix='.tmp'
+        mode="w", encoding="utf-8", dir=file_path.parent, delete=False, suffix=".tmp"
     ) as tmp_file:
         for record in records:
-            tmp_file.write(json.dumps(record, ensure_ascii=False) + '\n')
+            tmp_file.write(json.dumps(record, ensure_ascii=False) + "\n")
         tmp_file.flush()
         os.fsync(tmp_file.fileno())
 

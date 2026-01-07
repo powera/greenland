@@ -275,7 +275,10 @@ def translate_sentence(sentence_id):
     )
 
     if not en_translation:
-        flash("Sentence must have an English translation before translating to other languages", "error")
+        flash(
+            "Sentence must have an English translation before translating to other languages",
+            "error",
+        )
         return redirect(url_for("sentences.view_sentence", sentence_id=sentence_id))
 
     try:
@@ -318,7 +321,10 @@ def accept_sentence(sentence_id):
         for sw in sentence_words:
             lemma = g.db.query(Lemma).get(sw.lemma_id)
             if lemma and lemma.difficulty_level == -1:
-                flash(f"Cannot accept: word '{lemma.guid or lemma.lemma_text}' has difficulty level -1", "error")
+                flash(
+                    f"Cannot accept: word '{lemma.guid or lemma.lemma_text}' has difficulty level -1",
+                    "error",
+                )
                 return redirect(request.referrer or url_for("sentences.list_sentences"))
 
         # Check if sentence already has translations for all languages
@@ -328,6 +334,7 @@ def accept_sentence(sentence_id):
 
         # Check that all per-word lemma translations exist BEFORE generating sentence translations
         from wordfreq.storage.translation_helpers import get_translation
+
         missing_translations = []
 
         for sw in sentence_words:
@@ -335,29 +342,31 @@ def accept_sentence(sentence_id):
             if lemma:
                 for lang_code in target_languages:
                     if not get_translation(g.db, lemma, lang_code):
-                        missing_translations.append({
-                            'word': lemma.lemma_text,
-                            'language': lang_code
-                        })
+                        missing_translations.append(
+                            {"word": lemma.lemma_text, "language": lang_code}
+                        )
 
         if missing_translations:
             # Group by word for cleaner error messages
             by_word = {}
             for item in missing_translations:
-                word = item['word']
-                lang = item['language']
+                word = item["word"]
+                lang = item["language"]
                 if word not in by_word:
                     by_word[word] = []
                 by_word[word].append(lang)
 
             error_parts = [f"'{word}' ({', '.join(langs)})" for word, langs in by_word.items()]
-            error_msg = f"Cannot accept: Missing per-word translations for: {'; '.join(error_parts)}"
+            error_msg = (
+                f"Cannot accept: Missing per-word translations for: {'; '.join(error_parts)}"
+            )
             flash_and_log(error_msg, "error")
             return redirect(request.referrer or url_for("sentences.list_sentences"))
 
         # Generate missing translations (only if validation passed)
         if not has_all_translations:
             from wordfreq.translation.sentence import translate_sentence
+
             translate_sentence(sentence_id, target_languages, g.db, model="gpt-5-mini")
 
         # Auto-populate the level if not set
@@ -375,9 +384,15 @@ def accept_sentence(sentence_id):
         g.db.commit()
 
         if sentence.minimum_level is not None:
-            flash(f"Sentence #{sentence_id} accepted with level {sentence.minimum_level}. Click Verify when ready.", "success")
+            flash(
+                f"Sentence #{sentence_id} accepted with level {sentence.minimum_level}. Click Verify when ready.",
+                "success",
+            )
         else:
-            flash(f"Sentence #{sentence_id} accepted (no level set - no words with difficulty levels). Click Verify when ready.", "warning")
+            flash(
+                f"Sentence #{sentence_id} accepted (no level set - no words with difficulty levels). Click Verify when ready.",
+                "warning",
+            )
 
     except Exception as e:
         flash(f"Error accepting sentence: {e}", "error")

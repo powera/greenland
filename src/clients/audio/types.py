@@ -8,6 +8,7 @@ from typing import Optional
 
 class Voice(Enum):
     """Available OpenAI TTS voices."""
+
     ALLOY = "alloy"
     ASH = "ash"
     BALLAD = "ballad"
@@ -22,6 +23,7 @@ class Voice(Enum):
 
 class AudioFormat(Enum):
     """Supported audio output formats."""
+
     MP3 = "mp3"
     OPUS = "opus"
     AAC = "aac"
@@ -33,6 +35,7 @@ class AudioFormat(Enum):
 @dataclass
 class AudioGenerationResult:
     """Result of an audio generation request."""
+
     audio_data: bytes
     text: str
     voice: Voice

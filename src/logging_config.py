@@ -3,6 +3,7 @@
 Provides a simple `configure_logging` helper that sets a standard formatter
 including file path and line number, and `get_logger` to obtain loggers.
 """
+
 from __future__ import annotations
 
 import logging
@@ -22,7 +23,9 @@ class RelPathFormatter(logging.Formatter):
     def __init__(self, fmt: str | None = None, repo_root: Path | None = None):
         super().__init__(fmt)
         self.repo_root = (
-            Path(repo_root).resolve() if repo_root is not None else Path(__file__).resolve().parents[1]
+            Path(repo_root).resolve()
+            if repo_root is not None
+            else Path(__file__).resolve().parents[1]
         )
 
     def format(self, record: logging.LogRecord) -> str:

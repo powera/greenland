@@ -36,7 +36,9 @@ class JSONLStorage(BaseStorage):
         self.operation_logs: List[models.OperationLog] = []
         self.tombstones: List[models.GuidTombstone] = []
         self.lemma_verifications: Dict[str, models.LemmaVerification] = {}  # guid -> verification
-        self.sentence_verifications: Dict[str, models.SentenceVerification] = {}  # guid -> verification
+        self.sentence_verifications: Dict[str, models.SentenceVerification] = (
+            {}
+        )  # guid -> verification
 
         # ID counters for new objects
         self._next_lemma_id = 1
@@ -121,6 +123,7 @@ class JSONLStorage(BaseStorage):
                         lemma.added_at = data.get("added_at")
                         if isinstance(lemma.added_at, str):
                             from datetime import datetime
+
                             lemma.added_at = datetime.fromisoformat(lemma.added_at)
 
                         # Assign ID if not present
@@ -154,7 +157,9 @@ class JSONLStorage(BaseStorage):
                         guid = data.get("guid")
 
                         if not guid or guid not in self.lemmas:
-                            print(f"Warning: {lang_file} contains guid {guid} not found in base data")
+                            print(
+                                f"Warning: {lang_file} contains guid {guid} not found in base data"
+                            )
                             continue
 
                         # Merge language-specific data into existing lemma
@@ -201,6 +206,7 @@ class JSONLStorage(BaseStorage):
                                 lemma.updated_at = data.get("updated_at")
                                 if isinstance(lemma.updated_at, str):
                                     from datetime import datetime
+
                                     lemma.updated_at = datetime.fromisoformat(lemma.updated_at)
 
                         # Nested data structures
@@ -281,9 +287,7 @@ class JSONLStorage(BaseStorage):
                         review.id = self._next_audio_review_id
                         self._next_audio_review_id += 1
                     else:
-                        self._next_audio_review_id = max(
-                            self._next_audio_review_id, review.id + 1
-                        )
+                        self._next_audio_review_id = max(self._next_audio_review_id, review.id + 1)
 
                     self.audio_reviews.append(review)
 
@@ -635,8 +639,7 @@ class JSONLStorage(BaseStorage):
 
         # Extract grammar facts for this language
         lang_grammar_facts = [
-            fact for fact in lemma.grammar_facts
-            if fact.get("language_code") == lang_code
+            fact for fact in lemma.grammar_facts if fact.get("language_code") == lang_code
         ]
         if lang_grammar_facts:
             data["grammar_facts"] = lang_grammar_facts

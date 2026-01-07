@@ -458,7 +458,9 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
 
         if dry_run:
             # In dry-run mode, skip LLM calls entirely
-            logger.info(f"DRY RUN: Skipping LLM calls (would find {pos_type}/{pos_subtype} words from top {top_n})")
+            logger.info(
+                f"DRY RUN: Skipping LLM calls (would find {pos_type}/{pos_subtype} words from top {top_n})"
+            )
             return {
                 "pos_type": pos_type,
                 "pos_subtype": pos_subtype,

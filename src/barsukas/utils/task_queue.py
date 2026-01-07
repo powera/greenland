@@ -4,6 +4,7 @@ This module stores queue metadata in the shared SQLite database using the
 `BarsukasTask` model. It keeps the web UI responsive by deferring expensive LLM
 calls to a separate worker process while preventing duplicate in-flight tasks.
 """
+
 from __future__ import annotations
 
 import json
@@ -107,7 +108,9 @@ def mark_task_complete(session, task: BarsukasTask, message: str) -> None:
     session.flush()
 
 
-def mark_task_failed(session, task: BarsukasTask, message: str, error_detail: Optional[str] = None) -> None:
+def mark_task_failed(
+    session, task: BarsukasTask, message: str, error_detail: Optional[str] = None
+) -> None:
     task.status = TaskStatus.FAILED
     task.result_message = message
     task.error_detail = error_detail

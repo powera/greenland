@@ -251,7 +251,9 @@ def generate_pronunciations(lemma_id):
                 "info",
             )
         else:
-            flash("Pronunciation generation already in progress for this lemma/language.", "warning")
+            flash(
+                "Pronunciation generation already in progress for this lemma/language.", "warning"
+            )
     except Exception as e:
         log_and_flash_error(e, "generating pronunciations")
 
@@ -577,7 +579,9 @@ def generate_sentences(lemma_id):
         )
 
         if not result.get("success"):
-            flash_and_log(f'Failed to generate sentences: {result.get("error", "Unknown error")}', "error")
+            flash_and_log(
+                f'Failed to generate sentences: {result.get("error", "Unknown error")}', "error"
+            )
             return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
         # Store the generated sentences

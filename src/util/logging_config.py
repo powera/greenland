@@ -22,7 +22,7 @@ def configure_logging(level=logging.INFO, debug=False):
     logging.basicConfig(
         level=level,
         format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s",
-        force=True  # Override any existing configuration
+        force=True,  # Override any existing configuration
     )
 
 

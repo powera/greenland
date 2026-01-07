@@ -124,9 +124,7 @@ class LlmSentenceGenerator:
         finally:
             session.close()
 
-    def _build_sentence_context(
-        self, lemma: Lemma, difficulty_level: Optional[int]
-    ) -> str:
+    def _build_sentence_context(self, lemma: Lemma, difficulty_level: Optional[int]) -> str:
         context_parts = [
             f"Word: {lemma.lemma_text}",
             f"Definition: {lemma.definition_text}",
@@ -134,9 +132,7 @@ class LlmSentenceGenerator:
         ]
 
         if difficulty_level:
-            context_parts.append(
-                f"Difficulty Level: {difficulty_level} (Trakaido level 1-20)"
-            )
+            context_parts.append(f"Difficulty Level: {difficulty_level} (Trakaido level 1-20)")
 
         if lemma.disambiguation:
             context_parts.append(f"Disambiguation: {lemma.disambiguation}")
@@ -314,7 +310,8 @@ Focus on variety, natural language usage, and accurate translations."""
                     source_filename=f"buivolas_{source_lemma.guid}",
                     verified=False,
                     notes=(
-                        "Generated for %s (GUID: %s)" % (
+                        "Generated for %s (GUID: %s)"
+                        % (
                             source_lemma.lemma_text,
                             source_lemma.guid,
                         )

@@ -147,12 +147,7 @@ class OpenAITTSClient:
             logger.info(f"  Payload: {payload}")
             logger.info(f"  Timeout: {self.timeout}s")
 
-            response = requests.post(
-                url,
-                headers=self.headers,
-                json=payload,
-                timeout=self.timeout
-            )
+            response = requests.post(url, headers=self.headers, json=payload, timeout=self.timeout)
 
             logger.info(f"API response status: {response.status_code}")
 
@@ -167,7 +162,7 @@ class OpenAITTSClient:
                     model=model,
                     duration_ms=0,
                     success=False,
-                    error=error_msg
+                    error=error_msg,
                 )
 
             duration_ms = (time.time() - start_time) * 1000
@@ -184,7 +179,7 @@ class OpenAITTSClient:
                 model=model,
                 duration_ms=duration_ms,
                 success=True,
-                error=None
+                error=None,
             )
 
         except Exception as e:
@@ -198,7 +193,7 @@ class OpenAITTSClient:
                 model=model,
                 duration_ms=0,
                 success=False,
-                error=error_msg
+                error=error_msg,
             )
 
 

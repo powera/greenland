@@ -233,9 +233,7 @@ class PatternSentenceGenerator:
         )
         return combinations
 
-    def build_template_text(
-        self, pattern: Dict, filled_slots: Dict[str, Tuple[Lemma, str]]
-    ) -> str:
+    def build_template_text(self, pattern: Dict, filled_slots: Dict[str, Tuple[Lemma, str]]) -> str:
         en_sentence = pattern["en_template"]
         for slot_name, (lemma, guid) in filled_slots.items():
             lemma_text = strip_disambiguation(lemma.lemma_text)
@@ -272,14 +270,10 @@ class PatternSentenceGenerator:
         try:
             pattern_source = f"pattern:{pattern['pattern_id']}"
             existing_sentences = (
-                session.query(Sentence)
-                .filter_by(source_filename=pattern_source)
-                .all()
+                session.query(Sentence).filter_by(source_filename=pattern_source).all()
             )
 
-            combination_lemma_ids = {
-                lemma.id for lemma, guid in combination["lemmas"].values()
-            }
+            combination_lemma_ids = {lemma.id for lemma, guid in combination["lemmas"].values()}
 
             for existing_sentence in existing_sentences:
                 existing_lemma_ids = {
@@ -362,9 +356,7 @@ class PatternSentenceGenerator:
 
         session = self.get_session()
         try:
-            combinations = self.generate_all_combinations(
-                session, pattern, max_combinations
-            )
+            combinations = self.generate_all_combinations(session, pattern, max_combinations)
 
             if not combinations:
                 return {
@@ -386,9 +378,7 @@ class PatternSentenceGenerator:
                     logger.info("Processed %s/%s candidates...", i, len(combinations))
 
                 template_text = self.build_template_text(pattern, combo["lemmas"])
-                result = self.save_candidate_sentence(
-                    session, pattern, combo, template_text
-                )
+                result = self.save_candidate_sentence(session, pattern, combo, template_text)
 
                 if result == "duplicate":
                     results["duplicate_count"] += 1
@@ -463,12 +453,8 @@ class PatternSentenceGenerator:
                             len(combinations),
                         )
 
-                    template_text = self.build_template_text(
-                        pattern, combo["lemmas"]
-                    )
-                    result = self.save_candidate_sentence(
-                        session, pattern, combo, template_text
-                    )
+                    template_text = self.build_template_text(pattern, combo["lemmas"])
+                    result = self.save_candidate_sentence(session, pattern, combo, template_text)
 
                     if result == "duplicate":
                         results["duplicates"] += 1
@@ -497,9 +483,7 @@ class PatternSentenceGenerator:
         }
 
         for pattern in SIMPLE_PATTERNS:
-            result = self.generate_candidates_for_pattern(
-                pattern, max_combinations=max_per_pattern
-            )
+            result = self.generate_candidates_for_pattern(pattern, max_combinations=max_per_pattern)
             overall_results["patterns_processed"] += 1
             overall_results["total_candidates"] += result.get("total", 0)
             overall_results["total_success"] += result.get("success_count", 0)
@@ -533,9 +517,7 @@ class PatternSentenceGenerator:
                     .subquery()
                 )
 
-                query = query.filter(
-                    Sentence.id.in_(session.query(sentences_with_only_en.c.id))
-                )
+                query = query.filter(Sentence.id.in_(session.query(sentences_with_only_en.c.id)))
 
                 if limit:
                     query = query.limit(limit)
@@ -595,9 +577,7 @@ class PatternSentenceGenerator:
                     pattern_query = (
                         session.query(Sentence)
                         .filter(Sentence.source_filename == pattern_source)
-                        .filter(
-                            Sentence.id.in_(session.query(sentences_with_only_en.c.id))
-                        )
+                        .filter(Sentence.id.in_(session.query(sentences_with_only_en.c.id)))
                     )
 
                     if per_pattern_limit:
@@ -706,9 +686,7 @@ class PatternSentenceGenerator:
 
         session = self.get_session()
         try:
-            completed_requests = self.batch_manager.get_completed_requests(
-                batch_id=batch_id
-            )
+            completed_requests = self.batch_manager.get_completed_requests(batch_id=batch_id)
             sentences_updated = 0
 
             for req in completed_requests:

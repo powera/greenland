@@ -7,7 +7,16 @@ import signal
 import threading
 import time
 from pathlib import Path
-from flask import Blueprint, render_template, request, jsonify, flash, redirect, url_for, current_app
+from flask import (
+    Blueprint,
+    render_template,
+    request,
+    jsonify,
+    flash,
+    redirect,
+    url_for,
+    current_app,
+)
 
 from wordfreq.storage.backend import get_backend_type
 from wordfreq.storage.backend.config import BackendType
@@ -113,18 +122,25 @@ def migrate():
         # Run migration
         result = subprocess.run(cmd, capture_output=True, text=True, check=True)
 
-        return jsonify({
-            "success": True,
-            "message": "Migration completed successfully",
-            "output": result.stdout,
-        })
+        return jsonify(
+            {
+                "success": True,
+                "message": "Migration completed successfully",
+                "output": result.stdout,
+            }
+        )
 
     except subprocess.CalledProcessError as e:
-        return jsonify({
-            "error": "Migration failed",
-            "stdout": e.stdout,
-            "stderr": e.stderr,
-        }), 500
+        return (
+            jsonify(
+                {
+                    "error": "Migration failed",
+                    "stdout": e.stdout,
+                    "stderr": e.stderr,
+                }
+            ),
+            500,
+        )
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -215,10 +231,10 @@ def restart():
                     break
             time.sleep(0.1)
 
-        print("\n" + "="*50)
+        print("\n" + "=" * 50)
         print("Graceful restart initiated")
         print("All requests completed, shutting down...")
-        print("="*50 + "\n")
+        print("=" * 50 + "\n")
 
         # Flush output
         sys.stdout.flush()
@@ -231,10 +247,12 @@ def restart():
     restart_thread = threading.Thread(target=do_restart, daemon=True)
     restart_thread.start()
 
-    return jsonify({
-        "success": True,
-        "message": "Restart initiated. Waiting for active requests to complete..."
-    })
+    return jsonify(
+        {
+            "success": True,
+            "message": "Restart initiated. Waiting for active requests to complete...",
+        }
+    )
 
 
 @bp.route("/restart/status", methods=["GET"])
@@ -247,11 +265,13 @@ def restart_status():
     with _active_requests_lock:
         active = _active_requests
 
-    return jsonify({
-        "shutdown_requested": _shutdown_requested,
-        "active_requests": active,
-        "ready_to_restart": active <= 1 if _shutdown_requested else False
-    })
+    return jsonify(
+        {
+            "shutdown_requested": _shutdown_requested,
+            "active_requests": active,
+            "ready_to_restart": active <= 1 if _shutdown_requested else False,
+        }
+    )
 
 
 @bp.before_request
@@ -264,7 +284,7 @@ def track_request_start():
     global _active_requests
 
     # Don't track status checks during restart
-    if request.endpoint == 'settings.restart_status':
+    if request.endpoint == "settings.restart_status":
         return
 
     with _active_requests_lock:
@@ -277,7 +297,7 @@ def track_request_end(response):
     global _active_requests
 
     # Don't track status checks during restart
-    if request.endpoint == 'settings.restart_status':
+    if request.endpoint == "settings.restart_status":
         return response
 
     with _active_requests_lock:

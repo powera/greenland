@@ -75,7 +75,9 @@ def query_french_noun_forms(client, lemma_id: int, get_session_func) -> Tuple[Di
         properties={
             "gender": SchemaProperty("string", "Gender: 'masculine' or 'feminine'"),
             "forms": SchemaProperty(
-                "object", "Dictionary of noun forms (singular and plural)", properties=form_properties
+                "object",
+                "Dictionary of noun forms (singular and plural)",
+                properties=form_properties,
             ),
             "confidence": SchemaProperty("number", "Confidence 0-1"),
             "notes": SchemaProperty("string", "Notes"),
@@ -128,11 +130,7 @@ def query_french_verb_conjugations(
     )
     # 6 persons for present, imperfect, future
     regular_tenses = [("present", "present"), ("impf", "imperfect"), ("future", "future")]
-    fields = [
-        f"{p}_{t}"
-        for t, _ in regular_tenses
-        for p in ["1s", "2s", "3s", "1p", "2p", "3p"]
-    ]
+    fields = [f"{p}_{t}" for t, _ in regular_tenses for p in ["1s", "2s", "3s", "1p", "2p", "3p"]]
     # Add past participle forms (masculine and feminine)
     fields.extend(["pc_m", "pc_f"])
     form_properties = {f: SchemaProperty("string", f"French {f.replace('_', ' ')}") for f in fields}

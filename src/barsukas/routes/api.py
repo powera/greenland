@@ -372,10 +372,12 @@ def search_lemmas():
     for lemma in results:
         # Get a sample of translations (up to 3 languages)
         all_translations_raw = get_all_translations(g.db, lemma)
-        all_translations = {k: v for k, v in all_translations_raw.items() if v is not None and v.strip()}
+        all_translations = {
+            k: v for k, v in all_translations_raw.items() if v is not None and v.strip()
+        }
 
         # Pick up to 3 translations to show (prioritize common languages)
-        priority_langs = ['zh', 'fr', 'lt', 'es', 'ko', 'de', 'pt', 'sw', 'vi']
+        priority_langs = ["zh", "fr", "lt", "es", "ko", "de", "pt", "sw", "vi"]
         sample_translations = {}
         for lang in priority_langs:
             if lang in all_translations:
@@ -396,17 +398,19 @@ def search_lemmas():
         if len(definition) > 200:
             definition = definition[:197] + "..."
 
-        lemmas_data.append({
-            "guid": lemma.guid,
-            "lemma_text": lemma.lemma_text,
-            "definition": definition,
-            "pos_type": lemma.pos_type,
-            "pos_subtype": _serialize_value(lemma.pos_subtype),
-            "difficulty_level": _serialize_value(lemma.difficulty_level),
-            "disambiguation": _serialize_value(lemma.disambiguation),
-            "translations": sample_translations,
-            "verified": lemma.verified,
-        })
+        lemmas_data.append(
+            {
+                "guid": lemma.guid,
+                "lemma_text": lemma.lemma_text,
+                "definition": definition,
+                "pos_type": lemma.pos_type,
+                "pos_subtype": _serialize_value(lemma.pos_subtype),
+                "difficulty_level": _serialize_value(lemma.difficulty_level),
+                "disambiguation": _serialize_value(lemma.disambiguation),
+                "translations": sample_translations,
+                "verified": lemma.verified,
+            }
+        )
 
     # Build metadata
     metadata = {
@@ -455,7 +459,9 @@ def _build_error_response(message: str, status_code: int = 400) -> tuple:
     return jsonify({"error": message}), status_code
 
 
-def _build_success_response(data: Dict[str, Any], metadata: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+def _build_success_response(
+    data: Dict[str, Any], metadata: Optional[Dict[str, Any]] = None
+) -> Dict[str, Any]:
     """Build a standardized success response with optional metadata."""
     response = {"data": data}
     if metadata:
@@ -527,7 +533,9 @@ def get_lemma_translations(guid: str):
 
     # Get all translations for this lemma (only include populated ones)
     all_translations_raw = get_all_translations(g.db, lemma)
-    all_translations = {k: v for k, v in all_translations_raw.items() if v is not None and v.strip()}
+    all_translations = {
+        k: v for k, v in all_translations_raw.items() if v is not None and v.strip()
+    }
 
     # Filter by language if requested
     if language_filter:
@@ -588,7 +596,7 @@ def get_lemma_forms(guid: str):
     forms = query.order_by(
         DerivativeForm.language_code,
         DerivativeForm.is_base_form.desc(),
-        DerivativeForm.grammatical_form
+        DerivativeForm.grammatical_form,
     ).all()
 
     # Serialize forms
@@ -597,15 +605,17 @@ def get_lemma_forms(guid: str):
 
     for form in forms:
         languages_present.add(form.language_code)
-        forms_data.append({
-            "form_text": form.derivative_form_text,
-            "language_code": form.language_code,
-            "grammatical_form": form.grammatical_form,
-            "is_base_form": form.is_base_form,
-            "ipa_pronunciation": _serialize_value(form.ipa_pronunciation),
-            "phonetic_pronunciation": _serialize_value(form.phonetic_pronunciation),
-            "verified": form.verified,
-        })
+        forms_data.append(
+            {
+                "form_text": form.derivative_form_text,
+                "language_code": form.language_code,
+                "grammatical_form": form.grammatical_form,
+                "is_base_form": form.is_base_form,
+                "ipa_pronunciation": _serialize_value(form.ipa_pronunciation),
+                "phonetic_pronunciation": _serialize_value(form.phonetic_pronunciation),
+                "verified": form.verified,
+            }
+        )
 
     metadata = {
         "guid": guid,
@@ -660,13 +670,15 @@ def get_lemma_grammar(guid: str):
 
     for fact in facts:
         languages_present.add(fact.language_code)
-        facts_data.append({
-            "language_code": fact.language_code,
-            "fact_type": fact.fact_type,
-            "fact_value": _serialize_value(fact.fact_value),
-            "notes": _serialize_value(fact.notes),
-            "verified": fact.verified,
-        })
+        facts_data.append(
+            {
+                "language_code": fact.language_code,
+                "fact_type": fact.fact_type,
+                "fact_value": _serialize_value(fact.fact_value),
+                "notes": _serialize_value(fact.notes),
+                "verified": fact.verified,
+            }
+        )
 
     metadata = {
         "guid": guid,
@@ -805,42 +817,40 @@ def get_lemma_sentences(guid: str):
                 SentenceTranslation.language_code == language_filter
             )
 
-        translations = {
-            t.language_code: t.translation_text
-            for t in translations_query.all()
-        }
+        translations = {t.language_code: t.translation_text for t in translations_query.all()}
 
         # Skip this sentence if language filter is set and no translation exists
         if language_filter and not translations:
             continue
 
         # Find how this lemma is used in the sentence
-        word_info_list = [
-            sw for sw in sentence_words
-            if sw.sentence_id == sentence.id
-        ]
+        word_info_list = [sw for sw in sentence_words if sw.sentence_id == sentence.id]
 
         word_info = []
         for sw in word_info_list:
-            word_info.append({
-                "position": sw.position,
-                "word_role": sw.word_role,
-                "english_text": _serialize_value(sw.english_text),
-                "target_language_text": _serialize_value(sw.target_language_text),
-                "grammatical_form": _serialize_value(sw.grammatical_form),
-                "declined_form": _serialize_value(sw.declined_form),
-                "language_code": sw.language_code,
-            })
+            word_info.append(
+                {
+                    "position": sw.position,
+                    "word_role": sw.word_role,
+                    "english_text": _serialize_value(sw.english_text),
+                    "target_language_text": _serialize_value(sw.target_language_text),
+                    "grammatical_form": _serialize_value(sw.grammatical_form),
+                    "declined_form": _serialize_value(sw.declined_form),
+                    "language_code": sw.language_code,
+                }
+            )
 
-        sentences_data.append({
-            "sentence_id": sentence.id,
-            "translations": translations,
-            "minimum_level": _serialize_value(sentence.minimum_level),
-            "pattern_type": _serialize_value(sentence.pattern_type),
-            "tense": _serialize_value(sentence.tense),
-            "verified": sentence.verified,
-            "word_info": word_info,
-        })
+        sentences_data.append(
+            {
+                "sentence_id": sentence.id,
+                "translations": translations,
+                "minimum_level": _serialize_value(sentence.minimum_level),
+                "pattern_type": _serialize_value(sentence.pattern_type),
+                "tense": _serialize_value(sentence.tense),
+                "verified": sentence.verified,
+                "word_info": word_info,
+            }
+        )
 
     metadata = {
         "guid": guid,

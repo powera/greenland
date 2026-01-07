@@ -8,6 +8,7 @@ used across all agents.
 
 import sys
 from pathlib import Path
+
 if str(Path(__file__).parent.parent.parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
@@ -39,14 +40,14 @@ class TestAddCommonArgs(unittest.TestCase):
         """Test that --db-path argument is added."""
         parser = argparse.ArgumentParser()
         add_common_args(parser)
-        args = parser.parse_args(['--db-path', '/path/to/db.sqlite'])
-        self.assertEqual(args.db_path, '/path/to/db.sqlite')
+        args = parser.parse_args(["--db-path", "/path/to/db.sqlite"])
+        self.assertEqual(args.db_path, "/path/to/db.sqlite")
 
     def test_adds_debug_flag(self):
         """Test that --debug flag is added."""
         parser = argparse.ArgumentParser()
         add_common_args(parser)
-        args = parser.parse_args(['--debug'])
+        args = parser.parse_args(["--debug"])
         self.assertTrue(args.debug)
 
     def test_adds_yes_flag(self):
@@ -55,18 +56,18 @@ class TestAddCommonArgs(unittest.TestCase):
         add_common_args(parser)
 
         # Test --yes
-        args = parser.parse_args(['--yes'])
+        args = parser.parse_args(["--yes"])
         self.assertTrue(args.yes)
 
         # Test -y
-        args = parser.parse_args(['-y'])
+        args = parser.parse_args(["-y"])
         self.assertTrue(args.yes)
 
     def test_adds_dry_run_flag(self):
         """Test that --dry-run flag is added."""
         parser = argparse.ArgumentParser()
         add_common_args(parser)
-        args = parser.parse_args(['--dry-run'])
+        args = parser.parse_args(["--dry-run"])
         self.assertTrue(args.dry_run)
 
     def test_default_values(self):
@@ -88,35 +89,35 @@ class TestAddLlmArgs(unittest.TestCase):
         """Test that --model argument is added."""
         parser = argparse.ArgumentParser()
         add_llm_args(parser)
-        args = parser.parse_args(['--model', 'gpt-4'])
-        self.assertEqual(args.model, 'gpt-4')
+        args = parser.parse_args(["--model", "gpt-4"])
+        self.assertEqual(args.model, "gpt-4")
 
     def test_model_default_value(self):
         """Test that model has correct default value."""
         parser = argparse.ArgumentParser()
-        add_llm_args(parser, default_model='custom-model')
+        add_llm_args(parser, default_model="custom-model")
         args = parser.parse_args([])
-        self.assertEqual(args.model, 'custom-model')
+        self.assertEqual(args.model, "custom-model")
 
     def test_adds_throttle_arg(self):
         """Test that --throttle argument is added."""
         parser = argparse.ArgumentParser()
         add_llm_args(parser)
-        args = parser.parse_args(['--throttle', '2.5'])
+        args = parser.parse_args(["--throttle", "2.5"])
         self.assertEqual(args.throttle, 2.5)
 
     def test_adds_barsukas_url_arg(self):
         """Test that --barsukas-url argument is added."""
         parser = argparse.ArgumentParser()
         add_llm_args(parser)
-        args = parser.parse_args(['--barsukas-url', 'http://localhost:5000'])
-        self.assertEqual(args.barsukas_url, 'http://localhost:5000')
+        args = parser.parse_args(["--barsukas-url", "http://localhost:5000"])
+        self.assertEqual(args.barsukas_url, "http://localhost:5000")
 
     def test_adds_cache_only_flag(self):
         """Test that --cache-only flag is added."""
         parser = argparse.ArgumentParser()
         add_llm_args(parser)
-        args = parser.parse_args(['--cache-only'])
+        args = parser.parse_args(["--cache-only"])
         self.assertTrue(args.cache_only)
 
 
@@ -127,8 +128,8 @@ class TestAddOutputArgs(unittest.TestCase):
         """Test that --output argument is added."""
         parser = argparse.ArgumentParser()
         add_output_args(parser)
-        args = parser.parse_args(['--output', '/path/to/output.json'])
-        self.assertEqual(args.output, '/path/to/output.json')
+        args = parser.parse_args(["--output", "/path/to/output.json"])
+        self.assertEqual(args.output, "/path/to/output.json")
 
 
 class TestAddProcessingArgs(unittest.TestCase):
@@ -138,14 +139,14 @@ class TestAddProcessingArgs(unittest.TestCase):
         """Test that --limit argument is added."""
         parser = argparse.ArgumentParser()
         add_processing_args(parser)
-        args = parser.parse_args(['--limit', '100'])
+        args = parser.parse_args(["--limit", "100"])
         self.assertEqual(args.limit, 100)
 
     def test_adds_sample_rate_arg(self):
         """Test that --sample-rate argument is added."""
         parser = argparse.ArgumentParser()
         add_processing_args(parser)
-        args = parser.parse_args(['--sample-rate', '0.5'])
+        args = parser.parse_args(["--sample-rate", "0.5"])
         self.assertEqual(args.sample_rate, 0.5)
 
     def test_sample_rate_default(self):
@@ -163,8 +164,8 @@ class TestAddGuidArg(unittest.TestCase):
         """Test that --guid argument is added."""
         parser = argparse.ArgumentParser()
         add_guid_arg(parser)
-        args = parser.parse_args(['--guid', 'A01_001'])
-        self.assertEqual(args.guid, 'A01_001')
+        args = parser.parse_args(["--guid", "A01_001"])
+        self.assertEqual(args.guid, "A01_001")
 
     def test_custom_help_text(self):
         """Test that custom help text is used."""
@@ -184,8 +185,8 @@ class TestAddBackendArgs(unittest.TestCase):
         """Test that --backend argument is added."""
         parser = argparse.ArgumentParser()
         add_backend_args(parser)
-        args = parser.parse_args(['--backend', 'sqlite'])
-        self.assertEqual(args.backend, 'sqlite')
+        args = parser.parse_args(["--backend", "sqlite"])
+        self.assertEqual(args.backend, "sqlite")
 
     def test_backend_choices(self):
         """Test that --backend only accepts valid choices."""
@@ -193,19 +194,19 @@ class TestAddBackendArgs(unittest.TestCase):
         add_backend_args(parser)
 
         # Valid choice
-        args = parser.parse_args(['--backend', 'jsonl'])
-        self.assertEqual(args.backend, 'jsonl')
+        args = parser.parse_args(["--backend", "jsonl"])
+        self.assertEqual(args.backend, "jsonl")
 
         # Invalid choice should raise error
         with self.assertRaises(SystemExit):
-            parser.parse_args(['--backend', 'invalid'])
+            parser.parse_args(["--backend", "invalid"])
 
     def test_adds_data_dir_arg(self):
         """Test that --data-dir argument is added."""
         parser = argparse.ArgumentParser()
         add_backend_args(parser)
-        args = parser.parse_args(['--data-dir', '/path/to/data'])
-        self.assertEqual(args.data_dir, '/path/to/data')
+        args = parser.parse_args(["--data-dir", "/path/to/data"])
+        self.assertEqual(args.data_dir, "/path/to/data")
 
 
 class TestAddLanguageArgs(unittest.TestCase):
@@ -215,29 +216,29 @@ class TestAddLanguageArgs(unittest.TestCase):
         """Test single language argument mode."""
         parser = argparse.ArgumentParser()
         add_language_args(parser, multiple=False)
-        args = parser.parse_args(['--language', 'fr'])
-        self.assertEqual(args.language, 'fr')
+        args = parser.parse_args(["--language", "fr"])
+        self.assertEqual(args.language, "fr")
 
     def test_multiple_languages_mode(self):
         """Test multiple languages argument mode."""
         parser = argparse.ArgumentParser()
         add_language_args(parser, multiple=True)
-        args = parser.parse_args(['--languages', 'fr', 'es', 'de'])
-        self.assertEqual(args.languages, ['fr', 'es', 'de'])
+        args = parser.parse_args(["--languages", "fr", "es", "de"])
+        self.assertEqual(args.languages, ["fr", "es", "de"])
 
     def test_language_alias(self):
         """Test that --language alias works in multiple mode."""
         parser = argparse.ArgumentParser()
         add_language_args(parser, multiple=True)
-        args = parser.parse_args(['--language', 'en'])
-        self.assertEqual(args.languages, ['en'])
+        args = parser.parse_args(["--language", "en"])
+        self.assertEqual(args.languages, ["en"])
 
 
 class TestValidateCacheArgs(unittest.TestCase):
     """Test validate_cache_args function."""
 
-    @patch('sys.exit')
-    @patch('builtins.print')
+    @patch("sys.exit")
+    @patch("builtins.print")
     def test_cache_only_without_barsukas_url_fails(self, mock_print, mock_exit):
         """Test that --cache-only without --barsukas-url fails validation."""
         args = argparse.Namespace(cache_only=True, barsukas_url=None)
@@ -249,7 +250,7 @@ class TestValidateCacheArgs(unittest.TestCase):
 
     def test_cache_only_with_barsukas_url_passes(self):
         """Test that --cache-only with --barsukas-url passes validation."""
-        args = argparse.Namespace(cache_only=True, barsukas_url='http://localhost:5000')
+        args = argparse.Namespace(cache_only=True, barsukas_url="http://localhost:5000")
         # Should not raise or exit
         validate_cache_args(args)
 
@@ -277,7 +278,7 @@ class TestConfirmOperation(unittest.TestCase):
         )
         self.assertTrue(result)
 
-    @patch('builtins.print')
+    @patch("builtins.print")
     def test_dry_run_returns_true(self, mock_print):
         """Test that dry_run=True returns True and prints message."""
         result = confirm_operation(
@@ -286,10 +287,10 @@ class TestConfirmOperation(unittest.TestCase):
         )
         self.assertTrue(result)
         # Should print dry run message
-        self.assertTrue(any('DRY RUN' in str(call) for call in mock_print.call_args_list))
+        self.assertTrue(any("DRY RUN" in str(call) for call in mock_print.call_args_list))
 
-    @patch('builtins.input', return_value='y')
-    @patch('builtins.print')
+    @patch("builtins.input", return_value="y")
+    @patch("builtins.print")
     def test_user_confirms_with_y(self, mock_print, mock_input):
         """Test that user entering 'y' confirms operation."""
         result = confirm_operation(
@@ -299,38 +300,38 @@ class TestConfirmOperation(unittest.TestCase):
         self.assertTrue(result)
         mock_input.assert_called_once()
 
-    @patch('builtins.input', return_value='yes')
-    @patch('builtins.print')
+    @patch("builtins.input", return_value="yes")
+    @patch("builtins.print")
     def test_user_confirms_with_yes(self, mock_print, mock_input):
         """Test that user entering 'yes' confirms operation."""
         result = confirm_operation(message="Proceed?")
         self.assertTrue(result)
 
-    @patch('builtins.input', return_value='n')
-    @patch('builtins.print')
+    @patch("builtins.input", return_value="n")
+    @patch("builtins.print")
     def test_user_declines_with_n(self, mock_print, mock_input):
         """Test that user entering 'n' declines operation."""
         result = confirm_operation(message="Proceed?")
         self.assertFalse(result)
         # Should print "Aborted."
-        self.assertTrue(any('Aborted' in str(call) for call in mock_print.call_args_list))
+        self.assertTrue(any("Aborted" in str(call) for call in mock_print.call_args_list))
 
-    @patch('builtins.input', return_value='')
-    @patch('builtins.print')
+    @patch("builtins.input", return_value="")
+    @patch("builtins.print")
     def test_user_declines_with_empty(self, mock_print, mock_input):
         """Test that empty input declines operation."""
         result = confirm_operation(message="Proceed?")
         self.assertFalse(result)
 
-    @patch('builtins.input', return_value='invalid')
-    @patch('builtins.print')
+    @patch("builtins.input", return_value="invalid")
+    @patch("builtins.print")
     def test_user_declines_with_invalid(self, mock_print, mock_input):
         """Test that invalid input declines operation."""
         result = confirm_operation(message="Proceed?")
         self.assertFalse(result)
 
-    @patch('builtins.input', return_value='y')
-    @patch('builtins.print')
+    @patch("builtins.input", return_value="y")
+    @patch("builtins.print")
     def test_estimated_calls_displayed(self, mock_print, mock_input):
         """Test that estimated calls are displayed in prompt."""
         confirm_operation(
@@ -339,9 +340,9 @@ class TestConfirmOperation(unittest.TestCase):
         )
 
         # Check that estimated calls were printed
-        printed_text = ' '.join(str(call) for call in mock_print.call_args_list)
-        self.assertIn('42', printed_text)
-        self.assertIn('LLM API calls', printed_text)
+        printed_text = " ".join(str(call) for call in mock_print.call_args_list)
+        self.assertIn("42", printed_text)
+        self.assertIn("LLM API calls", printed_text)
 
 
 class TestCountItemsForConfirmation(unittest.TestCase):
@@ -454,95 +455,98 @@ class TestGetStandardDbPath(unittest.TestCase):
 
     def test_returns_provided_path(self):
         """Test that provided path is returned."""
-        path = get_standard_db_path('/custom/path/db.sqlite')
-        self.assertEqual(path, '/custom/path/db.sqlite')
+        path = get_standard_db_path("/custom/path/db.sqlite")
+        self.assertEqual(path, "/custom/path/db.sqlite")
 
-    @patch.dict('os.environ', {'GREENLAND_DB': '/env/path/db.sqlite'})
+    @patch.dict("os.environ", {"GREENLAND_DB": "/env/path/db.sqlite"})
     def test_returns_env_var_when_no_arg(self):
         """Test that environment variable is used when no arg provided."""
         path = get_standard_db_path(None)
-        self.assertEqual(path, '/env/path/db.sqlite')
+        self.assertEqual(path, "/env/path/db.sqlite")
 
-    @patch.dict('os.environ', {}, clear=True)
+    @patch.dict("os.environ", {}, clear=True)
     def test_returns_default_when_no_arg_or_env(self):
         """Test that default path is returned when no arg or env var."""
         path = get_standard_db_path(None)
         # Should return default path
-        self.assertIn('greenland.db', path)
+        self.assertIn("greenland.db", path)
 
 
 class TestGetDataSourceConfig(unittest.TestCase):
     """Test get_data_source_config function."""
 
-    @patch('agents.common_args.DEFAULT_MODEL', 'default-model')
-    @patch('agents.common_args.constants.WORDFREQ_DB_PATH', '/default/db.sqlite')
+    @patch("agents.common_args.DEFAULT_MODEL", "default-model")
+    @patch("agents.common_args.constants.WORDFREQ_DB_PATH", "/default/db.sqlite")
     def test_default_sqlite_config(self):
         """Test default SQLite configuration."""
         args = argparse.Namespace()
         config = get_data_source_config(args)
 
         from wordfreq.storage.backend.config import BackendType
-        self.assertEqual(config.backend_type, BackendType.SQLITE)
-        self.assertEqual(config.sqlite_path, '/default/db.sqlite')
-        self.assertEqual(config.model, 'default-model')
 
-    @patch('agents.common_args.constants.WORDFREQ_DB_PATH', '/default/db.sqlite')
+        self.assertEqual(config.backend_type, BackendType.SQLITE)
+        self.assertEqual(config.sqlite_path, "/default/db.sqlite")
+        self.assertEqual(config.model, "default-model")
+
+    @patch("agents.common_args.constants.WORDFREQ_DB_PATH", "/default/db.sqlite")
     def test_explicit_sqlite_backend(self):
         """Test explicit SQLite backend selection."""
         args = argparse.Namespace(
-            backend='sqlite',
-            db_path='/custom/db.sqlite',
+            backend="sqlite",
+            db_path="/custom/db.sqlite",
         )
         config = get_data_source_config(args)
 
         from wordfreq.storage.backend.config import BackendType
+
         self.assertEqual(config.backend_type, BackendType.SQLITE)
-        self.assertEqual(config.sqlite_path, '/custom/db.sqlite')
+        self.assertEqual(config.sqlite_path, "/custom/db.sqlite")
 
     def test_jsonl_backend(self):
         """Test JSONL backend configuration."""
         args = argparse.Namespace(
-            backend='jsonl',
-            data_dir='/path/to/jsonl/data',
+            backend="jsonl",
+            data_dir="/path/to/jsonl/data",
         )
         config = get_data_source_config(args)
 
         from wordfreq.storage.backend.config import BackendType
-        self.assertEqual(config.backend_type, BackendType.JSONL)
-        self.assertEqual(config.jsonl_data_dir, '/path/to/jsonl/data')
 
-    @patch('sys.exit')
-    @patch('builtins.print')
+        self.assertEqual(config.backend_type, BackendType.JSONL)
+        self.assertEqual(config.jsonl_data_dir, "/path/to/jsonl/data")
+
+    @patch("sys.exit")
+    @patch("builtins.print")
     def test_jsonl_backend_without_data_dir_fails(self, mock_print, mock_exit):
         """Test that JSONL backend without data_dir fails."""
         args = argparse.Namespace(
-            backend='jsonl',
+            backend="jsonl",
         )
         get_data_source_config(args)
 
         mock_print.assert_called_once()
-        self.assertIn('--data-dir is required', mock_print.call_args[0][0])
+        self.assertIn("--data-dir is required", mock_print.call_args[0][0])
         mock_exit.assert_called_once_with(1)
 
     def test_cache_configuration(self):
         """Test cache URL and cache_only configuration."""
         args = argparse.Namespace(
-            barsukas_url='http://localhost:5000',
+            barsukas_url="http://localhost:5000",
             cache_only=True,
         )
         config = get_data_source_config(args)
 
-        self.assertEqual(config.barsukas_url, 'http://localhost:5000')
+        self.assertEqual(config.barsukas_url, "http://localhost:5000")
         self.assertTrue(config.cache_only)
 
     def test_custom_model(self):
         """Test custom model configuration."""
         args = argparse.Namespace(
-            model='custom-model',
+            model="custom-model",
         )
         config = get_data_source_config(args)
 
-        self.assertEqual(config.model, 'custom-model')
+        self.assertEqual(config.model, "custom-model")
 
     def test_debug_flag(self):
         """Test debug flag configuration."""
@@ -553,18 +557,19 @@ class TestGetDataSourceConfig(unittest.TestCase):
 
         self.assertTrue(config.debug)
 
-    @patch('agents.common_args.constants.WORDFREQ_DB_PATH', '/default/db.sqlite')
+    @patch("agents.common_args.constants.WORDFREQ_DB_PATH", "/default/db.sqlite")
     def test_db_path_implies_sqlite(self):
         """Test that providing db_path without backend implies SQLite."""
         args = argparse.Namespace(
-            db_path='/custom/db.sqlite',
+            db_path="/custom/db.sqlite",
         )
         config = get_data_source_config(args)
 
         from wordfreq.storage.backend.config import BackendType
+
         self.assertEqual(config.backend_type, BackendType.SQLITE)
-        self.assertEqual(config.sqlite_path, '/custom/db.sqlite')
+        self.assertEqual(config.sqlite_path, "/custom/db.sqlite")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

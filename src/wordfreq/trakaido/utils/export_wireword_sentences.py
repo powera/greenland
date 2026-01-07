@@ -64,7 +64,9 @@ class WirewordSentenceExporter:
         """Get database session."""
         return create_database_session(self.db_path)
 
-    def get_audio_for_sentence(self, session, sentence: Sentence, language_code: str) -> Dict[str, str]:
+    def get_audio_for_sentence(
+        self, session, sentence: Sentence, language_code: str
+    ) -> Dict[str, str]:
         """
         Get audio MD5 hashes for a sentence in a specific language.
 
@@ -106,9 +108,7 @@ class WirewordSentenceExporter:
 
         return audio_dict
 
-    def export_sentences(
-        self, include_all_languages: bool = False
-    ) -> Dict[str, Any]:
+    def export_sentences(self, include_all_languages: bool = False) -> Dict[str, Any]:
         """
         Export sentences to wireword format.
 
@@ -137,8 +137,7 @@ class WirewordSentenceExporter:
             sentences = []
             for sentence in all_sentences:
                 has_target_translation = any(
-                    trans.language_code == self.language
-                    for trans in sentence.translations
+                    trans.language_code == self.language for trans in sentence.translations
                 )
                 if has_target_translation:
                     sentences.append(sentence)
@@ -158,7 +157,11 @@ class WirewordSentenceExporter:
                 for trans in sentence.translations:
                     translation_text = trans.translation_text
                     # Convert Chinese to simplified if needed
-                    if trans.language_code == "zh" and self.language == "zh" and self.simplified_chinese:
+                    if (
+                        trans.language_code == "zh"
+                        and self.language == "zh"
+                        and self.simplified_chinese
+                    ):
                         translation_text = to_simplified(translation_text)
                     translations[trans.language_code] = translation_text
 
@@ -240,9 +243,7 @@ class WirewordSentenceExporter:
         Returns:
             Number of sentences exported
         """
-        data = self.export_sentences(
-            include_all_languages=include_all_languages
-        )
+        data = self.export_sentences(include_all_languages=include_all_languages)
 
         # Create output directory if needed
         Path(output_path).parent.mkdir(parents=True, exist_ok=True)
@@ -256,9 +257,7 @@ class WirewordSentenceExporter:
 
         return sentence_count
 
-    def _get_sentence_word_grammatical_form(
-        self, sentence_word: SentenceWord
-    ) -> Optional[str]:
+    def _get_sentence_word_grammatical_form(self, sentence_word: SentenceWord) -> Optional[str]:
         """Return the WireWord grammatical form value for a sentence word.
 
         Prefers the stored grammatical_form when it matches an existing
@@ -273,15 +272,12 @@ class WirewordSentenceExporter:
         return None
 
 
-
 def main():
     """CLI entry point for wireword sentence export."""
     import argparse
 
     parser = argparse.ArgumentParser(description="Export sentences to wireword format")
-    parser.add_argument(
-        "--db-path", help="Database path (uses default if not specified)"
-    )
+    parser.add_argument("--db-path", help="Database path (uses default if not specified)")
     parser.add_argument("--debug", action="store_true", help="Enable debug logging")
     parser.add_argument(
         "--language",
@@ -289,9 +285,7 @@ def main():
         choices=["lt", "zh", "ko", "fr", "de", "es", "pt"],
         help="Target language (default: lt)",
     )
-    parser.add_argument(
-        "--output", required=True, help="Output file path"
-    )
+    parser.add_argument("--output", required=True, help="Output file path")
 
     args = parser.parse_args()
 
@@ -307,9 +301,7 @@ def main():
     )
 
     # Export
-    count = exporter.export_to_file(
-        output_path=args.output, include_all_languages=False
-    )
+    count = exporter.export_to_file(output_path=args.output, include_all_languages=False)
     logger.info("=" * 60)
     logger.info("EXPORT COMPLETE")
     logger.info("=" * 60)

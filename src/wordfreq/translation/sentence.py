@@ -12,7 +12,13 @@ import json
 import logging
 from typing import Dict, List, Optional, Tuple
 
-from wordfreq.storage.models.schema import Sentence, SentenceTranslation, SentenceWord, Lemma, LemmaTranslation
+from wordfreq.storage.models.schema import (
+    Sentence,
+    SentenceTranslation,
+    SentenceWord,
+    Lemma,
+    LemmaTranslation,
+)
 from wordfreq.storage.translation_helpers import get_translation, LANGUAGE_NAMES
 from clients.unified_client import UnifiedLLMClient
 
@@ -20,10 +26,7 @@ logger = logging.getLogger(__name__)
 
 
 def build_translation_prompt(
-    sentence: Sentence,
-    sentence_words: List[SentenceWord],
-    target_languages: List[str],
-    session
+    sentence: Sentence, sentence_words: List[SentenceWord], target_languages: List[str], session
 ) -> Tuple[str, str]:
     """
     Build LLM prompt for translating a sentence.
@@ -63,7 +66,7 @@ def build_translation_prompt(
         english_text = lemma.lemma_text
         word_translations[english_text] = {
             "guid": lemma.guid if lemma.guid else "",
-            "role": word.word_role  # Keep role for reference
+            "role": word.word_role,  # Keep role for reference
         }
 
         for lang in target_languages:
@@ -105,20 +108,18 @@ def build_translation_prompt(
         "  * For invariant words: 'preposition/base', 'conjunction/base', 'article/base'",
         "",
         "IMPORTANT: Do NOT include punctuation marks as separate words in the breakdown.",
-        "Provide words in the order they appear in the translated sentence."
+        "Provide words in the order they appear in the translated sentence.",
     ]
 
     # Build main prompt (the specific task with all relevant data)
-    prompt_lines = [
-        f"Template sentence: {template_text}",
-        "",
-        "Word translations for reference:"
-    ]
+    prompt_lines = [f"Template sentence: {template_text}", "", "Word translations for reference:"]
 
     for english_word, translations in word_translations.items():
         guid = translations.get("guid", "")
         role = translations.get("role", "")
-        trans_items = [(lang, trans) for lang, trans in translations.items() if lang not in ("guid", "role")]
+        trans_items = [
+            (lang, trans) for lang, trans in translations.items() if lang not in ("guid", "role")
+        ]
         trans_str = ", ".join([f"{lang}={trans}" for lang, trans in trans_items])
 
         # Format: "fork [object] (GUID: N08_001): lt=šakutė, zh=叉子, ..."
@@ -126,13 +127,15 @@ def build_translation_prompt(
         guid_str = f" (GUID: {guid})" if guid else ""
         prompt_lines.append(f"  {english_word}{role_str}{guid_str}: {trans_str}")
 
-    prompt_lines.extend([
-        "",
-        f"Translate this sentence naturally into: {', '.join([LANGUAGE_NAMES[lang] for lang in target_languages if lang in LANGUAGE_NAMES])}.",
-        "",
-        "IMPORTANT: Also provide a grammatically correct English version (fixing issues like singular/plural, articles, etc.).",
-        "Use the provided word translations where appropriate, but adjust grammar as needed for natural sentences."
-    ])
+    prompt_lines.extend(
+        [
+            "",
+            f"Translate this sentence naturally into: {', '.join([LANGUAGE_NAMES[lang] for lang in target_languages if lang in LANGUAGE_NAMES])}.",
+            "",
+            "IMPORTANT: Also provide a grammatically correct English version (fixing issues like singular/plural, articles, etc.).",
+            "Use the provided word translations where appropriate, but adjust grammar as needed for natural sentences.",
+        ]
+    )
 
     prompt = "\n".join(prompt_lines)
 
@@ -158,23 +161,20 @@ def build_response_schema(target_languages: List[str]) -> Dict:
             "english": {"type": "string"},
             "guid": {"type": "string"},
             "role": {"type": "string"},
-            "grammatical_form": {"type": ["string", "null"]}
+            "grammatical_form": {"type": ["string", "null"]},
         },
         "required": ["word", "english", "guid", "role", "grammatical_form"],
-        "additionalProperties": False
+        "additionalProperties": False,
     }
 
     # Build properties for sentences and word arrays
     schema_properties = {
-        "en": {
-            "type": "string",
-            "description": "Grammatically corrected English sentence"
-        },
+        "en": {"type": "string", "description": "Grammatically corrected English sentence"},
         "words_en": {
             "type": "array",
             "description": "English word breakdown",
-            "items": word_schema
-        }
+            "items": word_schema,
+        },
     }
 
     required_fields = ["en", "words_en"]
@@ -182,14 +182,11 @@ def build_response_schema(target_languages: List[str]) -> Dict:
     # Add sentence and words array for each target language
     for lang in target_languages:
         lang_name = LANGUAGE_NAMES.get(lang, lang)
-        schema_properties[lang] = {
-            "type": "string",
-            "description": f"{lang_name} translation"
-        }
+        schema_properties[lang] = {"type": "string", "description": f"{lang_name} translation"}
         schema_properties[f"words_{lang}"] = {
             "type": "array",
             "description": f"{lang_name} word breakdown",
-            "items": word_schema
+            "items": word_schema,
         }
         required_fields.extend([lang, f"words_{lang}"])
 
@@ -198,15 +195,12 @@ def build_response_schema(target_languages: List[str]) -> Dict:
         "type": "object",
         "properties": schema_properties,
         "required": required_fields,
-        "additionalProperties": False
+        "additionalProperties": False,
     }
 
 
 def translate_sentence(
-    sentence_id: int,
-    target_languages: List[str],
-    session,
-    model: str = "gpt-5-mini"
+    sentence_id: int, target_languages: List[str], session, model: str = "gpt-5-mini"
 ) -> Dict:
     """
     Translate a single sentence to target languages using LLM.
@@ -227,9 +221,7 @@ def translate_sentence(
 
     # Get English words with lemma links
     sentence_words = (
-        session.query(SentenceWord)
-        .filter_by(sentence_id=sentence_id, language_code="en")
-        .all()
+        session.query(SentenceWord).filter_by(sentence_id=sentence_id, language_code="en").all()
     )
 
     # Build context, prompt and schema
@@ -238,12 +230,7 @@ def translate_sentence(
 
     # Call LLM
     client = UnifiedLLMClient()
-    result = client.generate_chat(
-        prompt=prompt,
-        model=model,
-        json_schema=schema,
-        context=context
-    )
+    result = client.generate_chat(prompt=prompt, model=model, json_schema=schema, context=context)
 
     # Parse response - check both structured_data and response_text
     if result.structured_data:
@@ -309,7 +296,7 @@ def store_translation_results(sentence_id: int, translations: Dict, session):
                 sentence_id=sentence_id,
                 language_code=lang_code,
                 translation_text=translation_text,
-                verified=False
+                verified=False,
             )
             session.add(new_translation)
 
@@ -323,8 +310,7 @@ def store_translation_results(sentence_id: int, translations: Dict, session):
 
         # Delete existing word links for this language
         session.query(SentenceWord).filter_by(
-            sentence_id=sentence_id,
-            language_code=lang_code
+            sentence_id=sentence_id, language_code=lang_code
         ).delete()
 
         # Add detailed word records
@@ -350,7 +336,7 @@ def store_translation_results(sentence_id: int, translations: Dict, session):
                 target_language_text=word_data.get("word"),
                 grammatical_form=word_data.get("grammatical_form"),
                 grammatical_case=None,
-                declined_form=word_data.get("word")
+                declined_form=word_data.get("word"),
             )
             session.add(new_word)
 

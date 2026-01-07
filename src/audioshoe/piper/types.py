@@ -5,15 +5,15 @@ from enum import Enum
 
 # Mapping of our language codes to Piper language/region codes
 PIPER_LANGUAGE_CODES = {
-    "zh": "zh_CN",    # Chinese (Mandarin)
-    "ko": "ko_KR",    # Korean
-    "lt": "lt_LT",    # Lithuanian
-    "vi": "vi_VN",    # Vietnamese
-    "sw": "sw_CD",    # Swahili
-    "fr": "fr_FR",    # French (France)
-    "de": "de_DE",    # German
-    "es": "es_ES",    # Spanish (Spain)
-    "pt": "pt_PT",    # Portuguese (Portugal)
+    "zh": "zh_CN",  # Chinese (Mandarin)
+    "ko": "ko_KR",  # Korean
+    "lt": "lt_LT",  # Lithuanian
+    "vi": "vi_VN",  # Vietnamese
+    "sw": "sw_CD",  # Swahili
+    "fr": "fr_FR",  # French (France)
+    "de": "de_DE",  # German
+    "es": "es_ES",  # Spanish (Spain)
+    "pt": "pt_PT",  # Portuguese (Portugal)
 }
 
 
@@ -42,27 +42,27 @@ class PiperVoice(Enum):
 
     # Chinese (Mandarin) voices
     PIPER_ZH_M1 = ("zh", "m", "huayan-medium")  # Male voice
-    PIPER_ZH_F1 = ("zh", "f", "huayan-x_low")   # Female voice
+    PIPER_ZH_F1 = ("zh", "f", "huayan-x_low")  # Female voice
 
     # Korean voices
-    PIPER_KO_M1 = ("ko", "m", "human-medium")   # Male voice
+    PIPER_KO_M1 = ("ko", "m", "human-medium")  # Male voice
 
     # French voices
-    PIPER_FR_M1 = ("fr", "m", "tom-medium")     # Male voice
-    PIPER_FR_F1 = ("fr", "f", "siwis-medium")   # Female voice
-    PIPER_FR_F2 = ("fr", "f", "upmc-medium")    # Female voice
+    PIPER_FR_M1 = ("fr", "m", "tom-medium")  # Male voice
+    PIPER_FR_F1 = ("fr", "f", "siwis-medium")  # Female voice
+    PIPER_FR_F2 = ("fr", "f", "upmc-medium")  # Female voice
 
     # German voices
     PIPER_DE_M1 = ("de", "m", "thorsten-high")  # Male voice (high quality)
-    PIPER_DE_F1 = ("de", "f", "eva_k-x_low")    # Female voice
-    PIPER_DE_F2 = ("de", "f", "karlsson-low")   # Female voice
+    PIPER_DE_F1 = ("de", "f", "eva_k-x_low")  # Female voice
+    PIPER_DE_F2 = ("de", "f", "karlsson-low")  # Female voice
 
     # Spanish voices
-    PIPER_ES_M1 = ("es", "m", "carlfm-x_low")   # Male voice
+    PIPER_ES_M1 = ("es", "m", "carlfm-x_low")  # Male voice
     PIPER_ES_M2 = ("es", "m", "davefx-medium")  # Male voice
 
     # Portuguese voices
-    PIPER_PT_M1 = ("pt", "m", "tugao-medium")   # Male voice
+    PIPER_PT_M1 = ("pt", "m", "tugao-medium")  # Male voice
 
     # Vietnamese voices
     PIPER_VI_M1 = ("vi", "m", "vais1000-medium")  # Male voice

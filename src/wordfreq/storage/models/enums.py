@@ -101,7 +101,9 @@ class AdjectiveSubtype(enum.Enum):
     SHAPE = "shape"  # Shape descriptions (round, square, triangular, oval)
     TEXTURE = "texture"  # Texture descriptions (soft, hard, smooth, rough)
     PERSONAL_QUALITY = "personal_quality"  # Character/personality traits (honest, kind, brave, lazy, clever, polite)
-    CONDITION = "condition"  # Physical/temporal state (hot, cold, wet, dry, clean, dirty, new, old, fresh)
+    CONDITION = (
+        "condition"  # Physical/temporal state (hot, cold, wet, dry, clean, dirty, new, old, fresh)
+    )
     QUALITY = "quality"  # Evaluative and measurable properties (good, bad, excellent, fast, slow, strong, weak, easy, hard, loud, quiet)
     AESTHETIC = "aesthetic"  # Beauty or appearance (beautiful, ugly, pretty, handsome)
     IMPORTANCE = "importance"  # Importance or priority (important, essential, trivial, critical)
@@ -124,19 +126,31 @@ class AdverbSubtype(enum.Enum):
     ATTITUDE = "attitude"  # Attitude or approach (eagerly, reluctantly, willingly, gladly, sadly)
 
     # Temporal
-    SPECIFIC_TIME = "specific_time"  # Specific time references (now, today, yesterday, tomorrow, tonight)
-    RELATIVE_TIME = "relative_time"  # Relative time references (already, soon, recently, lately, previously)
-    DURATION = "duration"  # Duration of time (briefly, temporarily, permanently, forever, momentarily)
-    DEFINITE_FREQUENCY = "definite_frequency"  # Specific frequency (daily, weekly, monthly, yearly, hourly)
+    SPECIFIC_TIME = (
+        "specific_time"  # Specific time references (now, today, yesterday, tomorrow, tonight)
+    )
+    RELATIVE_TIME = (
+        "relative_time"  # Relative time references (already, soon, recently, lately, previously)
+    )
+    DURATION = (
+        "duration"  # Duration of time (briefly, temporarily, permanently, forever, momentarily)
+    )
+    DEFINITE_FREQUENCY = (
+        "definite_frequency"  # Specific frequency (daily, weekly, monthly, yearly, hourly)
+    )
     INDEFINITE_FREQUENCY = "indefinite_frequency"  # Inexact frequency (often, sometimes, rarely, seldom, always, never)
 
     # Spatial
-    DIRECTION = "direction"  # Directional movement (up, down, forward, backward, left, right, north)
+    DIRECTION = (
+        "direction"  # Directional movement (up, down, forward, backward, left, right, north)
+    )
     LOCATION = "location"  # Position or place (here, there, everywhere, nowhere, somewhere, inside, outside)
     DISTANCE = "distance"  # Distance references (nearby, far, close, away, afar)
 
     # Degree
-    INTENSITY = "intensity"  # Intensity or degree (very, extremely, slightly, quite, rather, too, enough)
+    INTENSITY = (
+        "intensity"  # Intensity or degree (very, extremely, slightly, quite, rather, too, enough)
+    )
     COMPLETENESS = "completeness"  # Degree of completeness (entirely, partly, completely, fully, partially, halfway)
     APPROXIMATION = "approximation"  # Approximation (almost, nearly, exactly, approximately, precisely, roughly)
 

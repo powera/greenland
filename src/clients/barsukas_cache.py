@@ -184,7 +184,9 @@ class BarsukasCacheClient:
             # Check if at least one pronunciation is populated
             if not pronunciation_data.get("ipa") and not pronunciation_data.get("phonetic"):
                 if self.cache_only:
-                    raise CacheMissError(f"Lemma {guid} has empty {language} pronunciations in cache")
+                    raise CacheMissError(
+                        f"Lemma {guid} has empty {language} pronunciations in cache"
+                    )
                 logger.debug(f"Cache returned empty {language} pronunciations for {guid}")
                 return None
 
@@ -202,9 +204,11 @@ class BarsukasCacheClient:
 
 class CacheMissError(Exception):
     """Raised when cache_only=True and translation not found in cache."""
+
     pass
 
 
 class CacheNetworkError(Exception):
     """Raised when cache_only=True and network error occurs."""
+
     pass

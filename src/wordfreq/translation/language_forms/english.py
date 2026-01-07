@@ -89,7 +89,14 @@ def query_english_verb_conjugations(
     pos_subtype = lemma.pos_subtype
 
     # All 20 forms (6 persons × 3 tenses + 2 imperatives)
-    present_fields = ["1s_present", "2s_present", "3s_present", "1p_present", "2p_present", "3p_present"]
+    present_fields = [
+        "1s_present",
+        "2s_present",
+        "3s_present",
+        "1p_present",
+        "2p_present",
+        "3p_present",
+    ]
     past_fields = ["1s_past", "2s_past", "3s_past", "1p_past", "2p_past", "3p_past"]
     future_fields = ["1s_future", "2s_future", "3s_future", "1p_future", "2p_future", "3p_future"]
     imperative_fields = ["2s_imp", "2p_imp"]
@@ -357,7 +364,9 @@ def query_english_adjective_forms(
             return {}, False
 
     except Exception as e:
-        logger.error(f"Error querying English adjective forms for '{adjective}': {type(e).__name__}: {e}")
+        logger.error(
+            f"Error querying English adjective forms for '{adjective}': {type(e).__name__}: {e}"
+        )
         return {}, False
 
 

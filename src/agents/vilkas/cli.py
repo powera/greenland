@@ -199,18 +199,28 @@ def main():
                     inferred_pos_type = "noun"
                     # Use "declensions" for case languages (LT, DE), "forms" for others
                     if language_code in ["lt", "de"]:
-                        form_type_label = f"{LANGUAGE_NAMES.get(language_code, language_code)} noun declensions"
+                        form_type_label = (
+                            f"{LANGUAGE_NAMES.get(language_code, language_code)} noun declensions"
+                        )
                     else:
-                        form_type_label = f"{LANGUAGE_NAMES.get(language_code, language_code)} noun forms"
+                        form_type_label = (
+                            f"{LANGUAGE_NAMES.get(language_code, language_code)} noun forms"
+                        )
                 elif form_category == "verb":
                     inferred_pos_type = "verb"
-                    form_type_label = f"{LANGUAGE_NAMES.get(language_code, language_code)} verb conjugations"
+                    form_type_label = (
+                        f"{LANGUAGE_NAMES.get(language_code, language_code)} verb conjugations"
+                    )
                 elif form_category == "adjective":
                     inferred_pos_type = "adjective"
-                    form_type_label = f"{LANGUAGE_NAMES.get(language_code, language_code)} adjective forms"
+                    form_type_label = (
+                        f"{LANGUAGE_NAMES.get(language_code, language_code)} adjective forms"
+                    )
                 elif form_category == "adverb":
                     inferred_pos_type = "adverb"
-                    form_type_label = f"{LANGUAGE_NAMES.get(language_code, language_code)} adverb forms"
+                    form_type_label = (
+                        f"{LANGUAGE_NAMES.get(language_code, language_code)} adverb forms"
+                    )
         elif args.task == "all":
             language_code = None  # Process all languages
             if args.languages:
@@ -228,7 +238,9 @@ def main():
         if not args.yes and not args.dry_run:
             # Get appropriate check results for confirmation
             language_names = {"lt": "Lithuanian", "fr": "French"}
-            lang_name = language_names.get(language_code, language_code.upper()) if language_code else "All"
+            lang_name = (
+                language_names.get(language_code, language_code.upper()) if language_code else "All"
+            )
 
             needs_fix = 0
             if language_code == "lt" and inferred_pos_type == "noun":

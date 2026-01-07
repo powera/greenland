@@ -105,7 +105,7 @@ def main():
             results = agent.check_missing_synonyms(
                 lemmas=lemmas,
                 language_code=languages_to_process[0] if len(languages_to_process) == 1 else None,
-                form_type=form_type
+                form_type=form_type,
             )
 
             if "error" in results:
@@ -127,7 +127,9 @@ def main():
                 if missing:
                     print("Sample lemmas needing forms:")
                     for i, lemma in enumerate(missing[:10], 1):
-                        print(f"  {i}. {lemma['english']} -> {lemma['translation']} ({lemma['pos_type']})")
+                        print(
+                            f"  {i}. {lemma['english']} -> {lemma['translation']} ({lemma['pos_type']})"
+                        )
                     if len(missing) > 10:
                         print(f"  ... and {len(missing) - 10} more")
                 print(f"{'='*60}")
@@ -168,7 +170,9 @@ def main():
                 if missing:
                     print("Sample lemmas needing forms:")
                     for i, lemma in enumerate(missing[:10], 1):
-                        print(f"  {i}. {lemma['english']} -> {lemma['translation']} ({lemma['pos_type']})")
+                        print(
+                            f"  {i}. {lemma['english']} -> {lemma['translation']} ({lemma['pos_type']})"
+                        )
                     if len(missing) > 10:
                         print(f"  ... and {len(missing) - 10} more")
 

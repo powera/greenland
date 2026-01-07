@@ -131,7 +131,9 @@ def get_session(config: DataSourceConfig, echo: bool = False) -> Session:
         Thread-local SQLAlchemy session
     """
     if config.backend_type != BackendType.SQLITE:
-        raise ValueError(f"Unsupported backend type: {config.backend_type}. Only SQLite is supported.")
+        raise ValueError(
+            f"Unsupported backend type: {config.backend_type}. Only SQLite is supported."
+        )
 
     return pool.get_session(config.sqlite_path, echo)
 

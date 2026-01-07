@@ -7,15 +7,15 @@ from enum import Enum
 # Some languages need the primary code (not alias) for variant notation to work
 # Based on: espeak-ng --voices output
 ESPEAK_LANGUAGE_CODES = {
-    "zh": "cmn",      # Chinese (Mandarin) - primary code is 'cmn', 'zh' is alias
-    "ko": "ko",       # Korean
-    "lt": "lt",       # Lithuanian
-    "vi": "vi",       # Vietnamese (Northern)
-    "sw": "sw",       # Swahili
-    "fr": "fr-fr",    # French (France)
-    "de": "de",       # German
-    "es": "es",       # Spanish (Spain)
-    "pt": "pt",       # Portuguese (Portugal)
+    "zh": "cmn",  # Chinese (Mandarin) - primary code is 'cmn', 'zh' is alias
+    "ko": "ko",  # Korean
+    "lt": "lt",  # Lithuanian
+    "vi": "vi",  # Vietnamese (Northern)
+    "sw": "sw",  # Swahili
+    "fr": "fr-fr",  # French (France)
+    "de": "de",  # German
+    "es": "es",  # Spanish (Spain)
+    "pt": "pt",  # Portuguese (Portugal)
 }
 
 
@@ -33,76 +33,76 @@ class EspeakVoice(Enum):
     """
 
     # Lithuanian voices (2F/2M regular + 2M MBROLA)
-    ONA = ("lt", "f", 1)        # Female, variant 1
-    JONAS = ("lt", "m", 1)      # Male, variant 1
-    RUTA = ("lt", "f", 2)       # Female, variant 2
-    TOMAS = ("lt", "m", 2)      # Male, variant 2
+    ONA = ("lt", "f", 1)  # Female, variant 1
+    JONAS = ("lt", "m", 1)  # Male, variant 1
+    RUTA = ("lt", "f", 2)  # Female, variant 2
+    TOMAS = ("lt", "m", 2)  # Male, variant 2
     VYTAUTAS = ("lt", "m", "mb-lt1")  # MBROLA Male, high quality
-    DARIUS = ("lt", "m", "mb-lt2")    # MBROLA Male, high quality
+    DARIUS = ("lt", "m", "mb-lt2")  # MBROLA Male, high quality
 
     # Chinese (Mandarin) voices (2F/2M regular + 1F MBROLA)
-    MEI = ("zh", "f", 1)        # Female, variant 1
-    WEI = ("zh", "m", 1)        # Male, variant 1
-    LING = ("zh", "f", 2)       # Female, variant 2
-    JUN = ("zh", "m", 2)        # Male, variant 2
+    MEI = ("zh", "f", 1)  # Female, variant 1
+    WEI = ("zh", "m", 1)  # Male, variant 1
+    LING = ("zh", "f", 2)  # Female, variant 2
+    JUN = ("zh", "m", 2)  # Male, variant 2
     XIAOMEI = ("zh", "f", "mb-cn1")  # MBROLA Female, high quality
 
     # Korean voices (2F/2M regular + 1M MBROLA)
-    MINJI = ("ko", "f", 1)      # Female, variant 1
-    JOON = ("ko", "m", 1)       # Male, variant 1
-    SORA = ("ko", "f", 2)       # Female, variant 2
-    MINSU = ("ko", "m", 2)      # Male, variant 2
-    JIHOON = ("ko", "m", "mb-hn1")   # MBROLA Male, high quality
+    MINJI = ("ko", "f", 1)  # Female, variant 1
+    JOON = ("ko", "m", 1)  # Male, variant 1
+    SORA = ("ko", "f", 2)  # Female, variant 2
+    MINSU = ("ko", "m", 2)  # Male, variant 2
+    JIHOON = ("ko", "m", "mb-hn1")  # MBROLA Male, high quality
 
     # French voices (2F/2M regular + 2F/2M MBROLA)
-    CLAIRE = ("fr", "f", 1)     # Female, variant 1
-    PIERRE = ("fr", "m", 1)     # Male, variant 1
-    MARIE = ("fr", "f", 2)      # Female, variant 2
-    LUC = ("fr", "m", 2)        # Male, variant 2
+    CLAIRE = ("fr", "f", 1)  # Female, variant 1
+    PIERRE = ("fr", "m", 1)  # Male, variant 1
+    MARIE = ("fr", "f", 2)  # Female, variant 2
+    LUC = ("fr", "m", 2)  # Male, variant 2
     CAMILLE = ("fr", "f", "mb-fr2")  # MBROLA Female, high quality
     JACQUES = ("fr", "m", "mb-fr1")  # MBROLA Male, high quality
-    SOPHIE = ("fr", "f", "mb-fr4")   # MBROLA Female, high quality
+    SOPHIE = ("fr", "f", "mb-fr4")  # MBROLA Female, high quality
     BERNARD = ("fr", "m", "mb-fr3")  # MBROLA Male, high quality
 
     # German voices (2F/2M regular + 2F/2M MBROLA)
-    ANNA = ("de", "f", 1)       # Female, variant 1
-    HANS = ("de", "m", 1)       # Male, variant 1
-    GRETA = ("de", "f", 2)      # Female, variant 2
-    KARL = ("de", "m", 2)       # Male, variant 2
-    PETRA = ("de", "f", "mb-de1")    # MBROLA Female, high quality
-    KLAUS = ("de", "m", "mb-de2")    # MBROLA Male, high quality
-    BIRGIT = ("de", "f", "mb-de5")   # MBROLA Female, high quality
-    STEFAN = ("de", "m", "mb-de4")   # MBROLA Male, high quality
+    ANNA = ("de", "f", 1)  # Female, variant 1
+    HANS = ("de", "m", 1)  # Male, variant 1
+    GRETA = ("de", "f", 2)  # Female, variant 2
+    KARL = ("de", "m", 2)  # Male, variant 2
+    PETRA = ("de", "f", "mb-de1")  # MBROLA Female, high quality
+    KLAUS = ("de", "m", "mb-de2")  # MBROLA Male, high quality
+    BIRGIT = ("de", "f", "mb-de5")  # MBROLA Female, high quality
+    STEFAN = ("de", "m", "mb-de4")  # MBROLA Male, high quality
 
     # Spanish voices (2F/2M regular + 1F/2M MBROLA)
-    SOFIA = ("es", "f", 1)      # Female, variant 1
-    CARLOS = ("es", "m", 1)     # Male, variant 1
-    ISABEL = ("es", "f", 2)     # Female, variant 2
-    DIEGO = ("es", "m", 2)      # Male, variant 2
-    CARMEN = ("es", "f", "mb-es3")   # MBROLA Female, high quality
-    RAUL = ("es", "m", "mb-es1")     # MBROLA Male, high quality
-    MIGUEL = ("es", "m", "mb-es2")   # MBROLA Male, high quality
+    SOFIA = ("es", "f", 1)  # Female, variant 1
+    CARLOS = ("es", "m", 1)  # Male, variant 1
+    ISABEL = ("es", "f", 2)  # Female, variant 2
+    DIEGO = ("es", "m", 2)  # Male, variant 2
+    CARMEN = ("es", "f", "mb-es3")  # MBROLA Female, high quality
+    RAUL = ("es", "m", "mb-es1")  # MBROLA Male, high quality
+    MIGUEL = ("es", "m", "mb-es2")  # MBROLA Male, high quality
 
     # Portuguese voices (2F/2M regular + 1F/2M MBROLA)
-    ANA = ("pt", "f", 1)        # Female, variant 1
-    JOAO = ("pt", "m", 1)       # Male, variant 1
-    MARIA = ("pt", "f", 2)      # Female, variant 2
-    PEDRO = ("pt", "m", 2)      # Male, variant 2
+    ANA = ("pt", "f", 1)  # Female, variant 1
+    JOAO = ("pt", "m", 1)  # Male, variant 1
+    MARIA = ("pt", "f", 2)  # Female, variant 2
+    PEDRO = ("pt", "m", 2)  # Male, variant 2
     GABRIELA = ("pt", "f", "mb-br4")  # MBROLA Female (Brazilian), high quality
-    RICARDO = ("pt", "m", "mb-br1")   # MBROLA Male (Brazilian), high quality
+    RICARDO = ("pt", "m", "mb-br1")  # MBROLA Male (Brazilian), high quality
     FERNANDO = ("pt", "m", "mb-br3")  # MBROLA Male (Brazilian), high quality
 
     # Swahili voices (2F/2M regular - no MBROLA available)
-    AMANI = ("sw", "f", 1)      # Female, variant 1
-    JABARI = ("sw", "m", 1)     # Male, variant 1
-    ZARA = ("sw", "f", 2)       # Female, variant 2
-    KIANO = ("sw", "m", 2)      # Male, variant 2
+    AMANI = ("sw", "f", 1)  # Female, variant 1
+    JABARI = ("sw", "m", 1)  # Male, variant 1
+    ZARA = ("sw", "f", 2)  # Female, variant 2
+    KIANO = ("sw", "m", 2)  # Male, variant 2
 
     # Vietnamese voices (2F/2M regular - no MBROLA available)
-    LINH = ("vi", "f", 1)       # Female, variant 1
-    MINH = ("vi", "m", 1)       # Male, variant 1
-    HOA = ("vi", "f", 2)        # Female, variant 2
-    TUAN = ("vi", "m", 2)       # Male, variant 2
+    LINH = ("vi", "f", 1)  # Female, variant 1
+    MINH = ("vi", "m", 1)  # Male, variant 1
+    HOA = ("vi", "f", 2)  # Female, variant 2
+    TUAN = ("vi", "m", 2)  # Male, variant 2
 
     @property
     def language_code(self) -> str:
@@ -175,7 +175,9 @@ class EspeakVoice(Enum):
     @classmethod
     def get_regular_voices_for_language(cls, language_code: str):
         """Get only regular eSpeak voices (non-MBROLA) for a specific language."""
-        return [voice for voice in cls if voice.language_code == language_code and not voice.is_mbrola]
+        return [
+            voice for voice in cls if voice.language_code == language_code and not voice.is_mbrola
+        ]
 
 
 # Default voices for each language (regular eSpeak voices: 2F/2M per language)

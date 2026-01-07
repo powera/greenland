@@ -35,7 +35,8 @@ def add_common_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     )
 
     parser.add_argument(
-        "--yes", "-y",
+        "--yes",
+        "-y",
         action="store_true",
         dest="yes",
         help="Skip confirmation prompts and proceed automatically",
@@ -50,7 +51,9 @@ def add_common_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     return parser
 
 
-def add_llm_args(parser: argparse.ArgumentParser, default_model: str = DEFAULT_MODEL) -> argparse.ArgumentParser:
+def add_llm_args(
+    parser: argparse.ArgumentParser, default_model: str = DEFAULT_MODEL
+) -> argparse.ArgumentParser:
     """Add LLM-related arguments.
 
     Args:
@@ -135,7 +138,9 @@ def add_processing_args(parser: argparse.ArgumentParser) -> argparse.ArgumentPar
     return parser
 
 
-def add_guid_arg(parser: argparse.ArgumentParser, help_text: str = "Process only the item with this GUID") -> argparse.ArgumentParser:
+def add_guid_arg(
+    parser: argparse.ArgumentParser, help_text: str = "Process only the item with this GUID"
+) -> argparse.ArgumentParser:
     """Add --guid argument for processing a single item.
 
     Args:
@@ -177,7 +182,9 @@ def add_backend_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser
     return parser
 
 
-def add_language_args(parser: argparse.ArgumentParser, multiple: bool = False) -> argparse.ArgumentParser:
+def add_language_args(
+    parser: argparse.ArgumentParser, multiple: bool = False
+) -> argparse.ArgumentParser:
     """Add language-related arguments.
 
     Args:
@@ -189,7 +196,8 @@ def add_language_args(parser: argparse.ArgumentParser, multiple: bool = False) -
     """
     if multiple:
         parser.add_argument(
-            "--language", "--languages",
+            "--language",
+            "--languages",
             type=str,
             nargs="+",
             dest="languages",
@@ -215,8 +223,8 @@ def validate_cache_args(args: Any) -> None:
     Raises:
         SystemExit: If validation fails
     """
-    if hasattr(args, 'cache_only') and args.cache_only:
-        if not hasattr(args, 'barsukas_url') or not args.barsukas_url:
+    if hasattr(args, "cache_only") and args.cache_only:
+        if not hasattr(args, "barsukas_url") or not args.barsukas_url:
             print("Error: --cache-only requires --barsukas-url to be specified")
             sys.exit(1)
 
@@ -282,12 +290,12 @@ def count_items_for_confirmation(
     try:
         query = query_builder(session, args)
 
-        if hasattr(args, 'limit') and args.limit:
+        if hasattr(args, "limit") and args.limit:
             query = query.limit(args.limit)
 
         count = query.count()
 
-        if hasattr(args, 'sample_rate') and args.sample_rate < 1.0:
+        if hasattr(args, "sample_rate") and args.sample_rate < 1.0:
             count = int(count * args.sample_rate)
 
         return count * multiplier
@@ -309,8 +317,9 @@ def get_standard_db_path(args_db_path: Optional[str] = None) -> str:
 
     # Try environment variable
     import os
-    if 'GREENLAND_DB' in os.environ:
-        return os.environ['GREENLAND_DB']
+
+    if "GREENLAND_DB" in os.environ:
+        return os.environ["GREENLAND_DB"]
 
     # Default fallback
     return str(Path(__file__).parent.parent.parent / "data" / "greenland.db")
@@ -334,17 +343,21 @@ def get_data_source_config(args: Any, default_model: Optional[str] = None):
     sqlite_path = None
     jsonl_data_dir = None
 
-    if hasattr(args, 'backend') and args.backend:
+    if hasattr(args, "backend") and args.backend:
         if args.backend == "sqlite":
             backend_type = BackendType.SQLITE
-            sqlite_path = args.db_path if hasattr(args, 'db_path') and args.db_path else constants.WORDFREQ_DB_PATH
+            sqlite_path = (
+                args.db_path
+                if hasattr(args, "db_path") and args.db_path
+                else constants.WORDFREQ_DB_PATH
+            )
         elif args.backend == "jsonl":
-            if not hasattr(args, 'data_dir') or not args.data_dir:
+            if not hasattr(args, "data_dir") or not args.data_dir:
                 print("Error: --data-dir is required when using --backend jsonl")
                 sys.exit(1)
             backend_type = BackendType.JSONL
             jsonl_data_dir = args.data_dir
-    elif hasattr(args, 'db_path') and args.db_path:
+    elif hasattr(args, "db_path") and args.db_path:
         # Backward compatibility: db_path implies SQLite backend
         backend_type = BackendType.SQLITE
         sqlite_path = args.db_path
@@ -355,14 +368,16 @@ def get_data_source_config(args: Any, default_model: Optional[str] = None):
         sqlite_path = constants.WORDFREQ_DB_PATH
 
     # Get cache configuration
-    barsukas_url = args.barsukas_url if hasattr(args, 'barsukas_url') else None
-    cache_only = args.cache_only if hasattr(args, 'cache_only') else False
+    barsukas_url = args.barsukas_url if hasattr(args, "barsukas_url") else None
+    cache_only = args.cache_only if hasattr(args, "cache_only") else False
 
     # Get LLM model (prefer args.model, fall back to default_model or DEFAULT_MODEL)
-    model = args.model if hasattr(args, 'model') and args.model else (default_model or DEFAULT_MODEL)
+    model = (
+        args.model if hasattr(args, "model") and args.model else (default_model or DEFAULT_MODEL)
+    )
 
     # Get debug flag
-    debug = args.debug if hasattr(args, 'debug') else False
+    debug = args.debug if hasattr(args, "debug") else False
 
     return DataSourceConfig(
         backend_type=backend_type,

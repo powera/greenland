@@ -68,7 +68,9 @@ class StrazdasAgent:
         """
         self.config = config
         self.debug = config.debug
-        self.output_dir = Path(output_dir) if output_dir else Path(tempfile.mkdtemp(prefix="strazdas_"))
+        self.output_dir = (
+            Path(output_dir) if output_dir else Path(tempfile.mkdtemp(prefix="strazdas_"))
+        )
 
         if self.debug:
             logger.setLevel(logging.DEBUG)
@@ -131,7 +133,7 @@ class StrazdasAgent:
 
         # Check if we should use IPA
         ipa_text = None
-        if use_ipa and hasattr(lemma, 'ipa') and lemma.ipa:
+        if use_ipa and hasattr(lemma, "ipa") and lemma.ipa:
             ipa_text = lemma.ipa
             logger.info(f"Using IPA for generation: {ipa_text}")
 
@@ -316,7 +318,12 @@ class StrazdasAgent:
                 logger.info(f"[{i}/{len(lemmas)}] Processing {lemma.guid}")
 
                 result = self.generate_audio_for_lemma(
-                    session, lemma, language_code, voices, create_review_record=True, use_ipa=use_ipa
+                    session,
+                    lemma,
+                    language_code,
+                    voices,
+                    create_review_record=True,
+                    use_ipa=use_ipa,
                 )
 
                 results["lemmas"].append(result)
@@ -357,9 +364,7 @@ def get_argument_parser():
         choices=["lt", "zh", "ko", "fr", "de", "es", "pt", "sw", "vi"],
         help="Target language code (required for populate-only and regenerate modes)",
     )
-    parser.add_argument(
-        "--difficulty-level", type=int, help="Filter by difficulty level (1-20)"
-    )
+    parser.add_argument("--difficulty-level", type=int, help="Filter by difficulty level (1-20)")
     parser.add_argument(
         "--voices",
         nargs="+",
@@ -461,11 +466,10 @@ def main():
 
             # Get counts by language and voice
             if args.language:
-                query = session.query(
-                    AudioQualityReview.voice_name,
-                    func.count(AudioQualityReview.id)
-                ).filter(AudioQualityReview.language_code == args.language).group_by(
-                    AudioQualityReview.voice_name
+                query = (
+                    session.query(AudioQualityReview.voice_name, func.count(AudioQualityReview.id))
+                    .filter(AudioQualityReview.language_code == args.language)
+                    .group_by(AudioQualityReview.voice_name)
                 )
                 results = query.all()
                 print(f"\nLanguage: {args.language}")
@@ -475,11 +479,8 @@ def main():
                 query = session.query(
                     AudioQualityReview.language_code,
                     AudioQualityReview.voice_name,
-                    func.count(AudioQualityReview.id)
-                ).group_by(
-                    AudioQualityReview.language_code,
-                    AudioQualityReview.voice_name
-                )
+                    func.count(AudioQualityReview.id),
+                ).group_by(AudioQualityReview.language_code, AudioQualityReview.voice_name)
                 results = query.all()
                 current_lang = None
                 for lang_code, voice_name, count in results:
@@ -509,7 +510,9 @@ def main():
             audio_files = query.all()
 
             for audio in audio_files:
-                print(f"{audio.guid} | {audio.language_code}/{audio.voice_name} | {audio.filename} | {audio.status}")
+                print(
+                    f"{audio.guid} | {audio.language_code}/{audio.voice_name} | {audio.filename} | {audio.status}"
+                )
 
             print(f"\nTotal: {len(audio_files)} audio files")
         finally:
@@ -539,7 +542,11 @@ def main():
             voice_count = len(voice_list)
             estimated_files = lemma_count * voice_count
 
-            voices_str = ', '.join(v.name for v in voices) if voices else ', '.join(v.name for v in voice_list)
+            voices_str = (
+                ", ".join(v.name for v in voices)
+                if voices
+                else ", ".join(v.name for v in voice_list)
+            )
             if not confirm_operation(
                 message=f"This will generate audio for {lemma_count} lemmas with {voice_count} voices each.\nTotal files: {estimated_files}\nVoices: {voices_str}\nThis will use eSpeak-NG TTS (free, local generation).",
                 estimated_calls=None,  # No API calls, local generation

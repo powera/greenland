@@ -144,9 +144,7 @@ class ZvirblisAgent:
                     translations_added += result.get("added", 0)
                 else:
                     error_msg = result.get("error", "Unknown translation error")
-                    logger.error(
-                        "Failed to translate sentence %s: %s", sentence.id, error_msg
-                    )
+                    logger.error("Failed to translate sentence %s: %s", sentence.id, error_msg)
                     errors.append(error_msg)
 
                 session.flush()
@@ -167,9 +165,7 @@ class ZvirblisAgent:
             }
 
         except Exception as e:
-            logger.error(
-                "Error translating sentences for %s: %s", lemma.guid, e, exc_info=True
-            )
+            logger.error("Error translating sentences for %s: %s", lemma.guid, e, exc_info=True)
             return {"success": False, "translated": 0, "errors": [str(e)]}
         finally:
             session.close()

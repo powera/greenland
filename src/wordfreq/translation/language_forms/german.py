@@ -156,11 +156,7 @@ def query_german_verb_conjugations(
         lemma.pos_subtype,
     )
     tenses = [("present", "present"), ("past", "past"), ("future", "future")]
-    fields = [
-        f"{p}_{t}"
-        for t, _ in tenses
-        for p in ["1s", "2s", "3s", "1p", "2p", "3p"]
-    ]
+    fields = [f"{p}_{t}" for t, _ in tenses for p in ["1s", "2s", "3s", "1p", "2p", "3p"]]
     form_properties = {f: SchemaProperty("string", f"German {f.replace('_', ' ')}") for f in fields}
 
     schema = Schema(

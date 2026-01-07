@@ -545,7 +545,9 @@ def validate_pronunciation(
                 "needs_update": SchemaProperty(
                     "boolean", "True if the current pronunciation is incorrect or missing"
                 ),
-                "suggested_ipa": SchemaProperty("string", "Correct IPA pronunciation (e.g., /ˈwɜːrd/)"),
+                "suggested_ipa": SchemaProperty(
+                    "string", "Correct IPA pronunciation (e.g., /ˈwɜːrd/)"
+                ),
                 "suggested_phonetic": SchemaProperty(
                     "string", "Simplified phonetic pronunciation (e.g., WURD)"
                 ),
@@ -608,6 +610,7 @@ def validate_pronunciation(
 
     # Get language name from translation_helpers
     from wordfreq.storage.translation_helpers import LANGUAGE_NAMES
+
     language_name = LANGUAGE_NAMES.get(language_code, language_code)
 
     # Build language-appropriate context
@@ -640,11 +643,13 @@ Requirements:
             context_parts.append(f"English translation: {english_translation}")
         if definition:
             context_parts.append(f"English definition: {definition}")
-        context_info = "\n".join(context_parts) if context_parts else f"Word form in {language_name}"
+        context_info = (
+            "\n".join(context_parts) if context_parts else f"Word form in {language_name}"
+        )
     else:
         # For English, use example sentence or definition
         if example_sentence:
-            context_info = f"Context sentence: \"{example_sentence}\""
+            context_info = f'Context sentence: "{example_sentence}"'
         elif definition:
             context_info = f"Definition: {definition}"
         else:
@@ -722,7 +727,14 @@ especially for words with multiple pronunciations depending on usage (e.g., "rea
 Return the IPA and simplified phonetic pronunciation, along with any alternative pronunciations."""
             else:
                 # Fallback to template if no additional context
-                prompt = prompt_template.format(word=word, sentence=context_info if "sentence" in context_info.lower() else f'Context: {context_info}')
+                prompt = prompt_template.format(
+                    word=word,
+                    sentence=(
+                        context_info
+                        if "sentence" in context_info.lower()
+                        else f"Context: {context_info}"
+                    ),
+                )
 
     logger.debug(f"Validating/generating pronunciation for word: '{word}' (POS: {pos_type})")
 
@@ -863,6 +875,7 @@ def batch_generate_pronunciations(
 
     # Get language name from translation_helpers
     from wordfreq.storage.translation_helpers import LANGUAGE_NAMES
+
     language_name = LANGUAGE_NAMES.get(language_code, language_code)
 
     # Build schema with properties for each form
@@ -890,9 +903,7 @@ def batch_generate_pronunciations(
     # Build forms list for prompt
     forms_list_items = []
     for idx, form_info in enumerate(forms, 1):
-        forms_list_items.append(
-            f"{idx}. Form: {form_info['form']}\n   Word: {form_info['word']}"
-        )
+        forms_list_items.append(f"{idx}. Form: {form_info['form']}\n   Word: {form_info['word']}")
     forms_list = "\n".join(forms_list_items)
 
     # Load prompt from files
@@ -909,7 +920,7 @@ def batch_generate_pronunciations(
         pos_type=pos_type,
         language=language_name,
         forms_list=forms_list,
-        num_forms=len(forms)
+        num_forms=len(forms),
     )
 
     logger.debug(

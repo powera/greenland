@@ -122,7 +122,9 @@ class AnthropicClient:
         """
         # Check if API key is available
         if not self.api_key:
-            raise RuntimeError("Anthropic API key not available. Please ensure the key file exists.")
+            raise RuntimeError(
+                "Anthropic API key not available. Please ensure the key file exists."
+            )
 
         if self.debug:
             logger.debug("Generating chat response")

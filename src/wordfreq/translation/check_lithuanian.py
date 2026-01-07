@@ -5,6 +5,7 @@ This module provides functions that perform the same checks as the
 original `VilkasAgent` methods but accept an `agent` parameter so they
 can be reused elsewhere.
 """
+
 import logging
 from typing import Dict
 

@@ -200,7 +200,9 @@ def list_lemmas():
     pos_types = [p[0] for p in pos_types if p[0]]
 
     # Get unique POS subtypes for filter dropdown (optionally filtered by POS type)
-    pos_subtypes_query = g.db.query(Lemma.pos_subtype).filter(Lemma.pos_subtype.isnot(None)).distinct()
+    pos_subtypes_query = (
+        g.db.query(Lemma.pos_subtype).filter(Lemma.pos_subtype.isnot(None)).distinct()
+    )
     if pos_type:
         pos_subtypes_query = pos_subtypes_query.filter(Lemma.pos_type == pos_type)
     pos_subtypes = pos_subtypes_query.order_by(Lemma.pos_subtype).all()
@@ -312,7 +314,18 @@ def view_lemma(lemma_id):
     tombstones = get_tombstones_by_lemma_id(g.db, lemma_id)
 
     # Prepare voice options for audio generation
-    openai_voices = ["ash", "alloy", "nova", "ballad", "coral", "echo", "fable", "onyx", "sage", "shimmer"]
+    openai_voices = [
+        "ash",
+        "alloy",
+        "nova",
+        "ballad",
+        "coral",
+        "echo",
+        "fable",
+        "onyx",
+        "sage",
+        "shimmer",
+    ]
 
     # eSpeak-NG voices by language
     espeak_voices = {}
@@ -324,13 +337,17 @@ def view_lemma(lemma_id):
     piper_voices = {}
     for lang_code in language_names.keys():
         voices = PiperVoice.get_voices_for_language(lang_code)
-        piper_voices[lang_code] = [{"name": v.name, "ui_name": v.ui_name, "gender": v.gender} for v in voices]
+        piper_voices[lang_code] = [
+            {"name": v.name, "ui_name": v.ui_name, "gender": v.gender} for v in voices
+        ]
 
     # Coqui voices by language
     coqui_voices = {}
     for lang_code in language_names.keys():
         voices = CoquiVoice.get_voices_for_language(lang_code)
-        coqui_voices[lang_code] = [{"name": v.name, "ui_name": v.ui_name, "gender": v.gender} for v in voices]
+        coqui_voices[lang_code] = [
+            {"name": v.name, "ui_name": v.ui_name, "gender": v.gender} for v in voices
+        ]
 
     queued_tasks = get_tasks_for_target(g.db, "lemma", lemma_id, limit=8)
 
@@ -412,7 +429,11 @@ def edit_lemma(lemma_id):
                 changes.append(("pos_type", result.get("old_guid", lemma.pos_type), new_pos_type))
             if subtype_changed:
                 changes.append(
-                    ("pos_subtype", lemma.pos_subtype if not subtype_changed else None, new_pos_subtype)
+                    (
+                        "pos_subtype",
+                        lemma.pos_subtype if not subtype_changed else None,
+                        new_pos_subtype,
+                    )
                 )
 
             # Flash informative message about the type/subtype change

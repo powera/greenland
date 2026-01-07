@@ -99,10 +99,7 @@ def main():
         # Validate definition
         if args.check_type in ["definitions", "both"]:
             result = validate_definition(
-                lemma.lemma_text,
-                lemma.definition_text,
-                lemma.pos_type,
-                args.model
+                lemma.lemma_text, lemma.definition_text, lemma.pos_type, args.model
             )
             should_apply_fix, new_definition = display_definition_validation_result(
                 result, lemma.lemma_text, lemma.definition_text, dry_run=args.dry_run
@@ -134,7 +131,9 @@ def main():
 
     # Batch mode - validate arguments
     if args.dry_run:
-        parser.error("--dry-run is not supported in batch mode. LOKYS always applies fixes in batch mode. Use --guid mode for testing individual lemmas.")
+        parser.error(
+            "--dry-run is not supported in batch mode. LOKYS always applies fixes in batch mode. Use --guid mode for testing individual lemmas."
+        )
 
     # Confirm before running LLM queries (unless --yes was provided)
     if not args.yes and not args.dry_run:

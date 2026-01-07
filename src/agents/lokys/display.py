@@ -17,12 +17,14 @@ def display_lemma_validation_result(result: dict, lemma_text: str):
     print(f"\nLemma form validation:")
     print(f"  Is lemma: {result['is_lemma']}")
     print(f"  Confidence: {result['confidence']:.2f}")
-    if not result['is_lemma']:
+    if not result["is_lemma"]:
         print(f"  Suggested: {result['suggested_lemma']}")
         print(f"  Reason: {result['reason']}")
 
 
-def display_definition_validation_result(result: dict, lemma_text: str, definition_text: str, dry_run: bool = False):
+def display_definition_validation_result(
+    result: dict, lemma_text: str, definition_text: str, dry_run: bool = False
+):
     """
     Display definition validation results.
 
@@ -39,15 +41,17 @@ def display_definition_validation_result(result: dict, lemma_text: str, definiti
     print(f"  Is valid: {result['is_valid']}")
     print(f"  Confidence: {result['confidence']:.2f}")
 
-    if not result['is_valid']:
+    if not result["is_valid"]:
         print(f"  Issues: {', '.join(result['issues'])}")
-        if result['suggested_definition']:
+        if result["suggested_definition"]:
             print(f"  Suggested: {result['suggested_definition']}")
             if dry_run:
-                print(f"  [DRY RUN] Would update: '{definition_text}' → '{result['suggested_definition']}'")
+                print(
+                    f"  [DRY RUN] Would update: '{definition_text}' → '{result['suggested_definition']}'"
+                )
                 return False, None
             else:
-                return True, result['suggested_definition']
+                return True, result["suggested_definition"]
         else:
             print(f"  ⚠ No suggested definition provided by LLM")
             return False, None

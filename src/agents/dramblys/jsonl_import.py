@@ -46,8 +46,10 @@ class CategoryMigration:
             self.guid_overrides = config.get("guid_overrides", {})
             self.import_rules = config.get("import_rules", {})
 
-            logger.info(f"Loaded migration config: {len(self.splits)} splits, "
-                       f"{len(self.renames)} renames, {len(self.guid_overrides)} GUID overrides")
+            logger.info(
+                f"Loaded migration config: {len(self.splits)} splits, "
+                f"{len(self.renames)} renames, {len(self.guid_overrides)} GUID overrides"
+            )
 
         except Exception as e:
             logger.warning(f"Could not load migration file {self.migration_file}: {e}")
@@ -163,11 +165,9 @@ class JSONLImporter:
                     except json.JSONDecodeError as e:
                         logger.error(f"JSON parse error in {file_path}:{line_num}: {e}")
                         self.stats["errors"] += 1
-                        self.stats["error_details"].append({
-                            "file": str(file_path),
-                            "line": line_num,
-                            "error": str(e)
-                        })
+                        self.stats["error_details"].append(
+                            {"file": str(file_path), "line": line_num, "error": str(e)}
+                        )
 
             logger.info(f"Read {len(records)} records from {file_path}")
             return records
@@ -175,10 +175,7 @@ class JSONLImporter:
         except Exception as e:
             logger.error(f"Error reading {file_path}: {e}")
             self.stats["errors"] += 1
-            self.stats["error_details"].append({
-                "file": str(file_path),
-                "error": str(e)
-            })
+            self.stats["error_details"].append({"file": str(file_path), "error": str(e)})
             return []
 
     def find_existing_lemma(self, guid: str) -> Optional[Lemma]:
@@ -194,9 +191,7 @@ class JSONLImporter:
         return self.session.query(Lemma).filter(Lemma.guid == guid).first()
 
     def check_category_coherence(
-        self,
-        existing: Lemma,
-        jsonl_data: Dict
+        self, existing: Lemma, jsonl_data: Dict
     ) -> Tuple[bool, Optional[str]]:
         """
         Check if JSONL data matches existing lemma's category.
@@ -224,13 +219,12 @@ class JSONLImporter:
                 return True, f"Category split: {existing_sub} → {jsonl_sub}"
 
         # Category mismatch
-        return False, f"Category mismatch: DB has {existing_pos}/{existing_sub}, JSONL has {jsonl_pos}/{jsonl_sub}"
+        return (
+            False,
+            f"Category mismatch: DB has {existing_pos}/{existing_sub}, JSONL has {jsonl_pos}/{jsonl_sub}",
+        )
 
-    def get_field_differences(
-        self,
-        existing: Lemma,
-        jsonl_data: Dict
-    ) -> List[str]:
+    def get_field_differences(self, existing: Lemma, jsonl_data: Dict) -> List[str]:
         """
         Get list of differences between existing lemma and JSONL data.
 
@@ -252,7 +246,11 @@ class JSONLImporter:
         jsonl_def = jsonl_data.get("concept_definition", "")
         if existing.definition_text != jsonl_def:
             # Truncate long definitions for display
-            existing_def_short = existing.definition_text[:60] + "..." if len(existing.definition_text) > 60 else existing.definition_text
+            existing_def_short = (
+                existing.definition_text[:60] + "..."
+                if len(existing.definition_text) > 60
+                else existing.definition_text
+            )
             jsonl_def_short = jsonl_def[:60] + "..." if len(jsonl_def) > 60 else jsonl_def
             diffs.append(f"definition: '{existing_def_short}' → '{jsonl_def_short}'")
 
@@ -265,16 +263,13 @@ class JSONLImporter:
         jsonl_pos = jsonl_data.get("pos_type", "")
         jsonl_sub = jsonl_data.get("pos_subtype", "")
         if existing.pos_type != jsonl_pos or existing.pos_subtype != jsonl_sub:
-            diffs.append(f"category: {existing.pos_type}/{existing.pos_subtype} → {jsonl_pos}/{jsonl_sub}")
+            diffs.append(
+                f"category: {existing.pos_type}/{existing.pos_subtype} → {jsonl_pos}/{jsonl_sub}"
+            )
 
         return diffs
 
-    def should_prefer_jsonl(
-        self,
-        existing: Lemma,
-        jsonl_data: Dict,
-        guid: str
-    ) -> Tuple[bool, str]:
+    def should_prefer_jsonl(self, existing: Lemma, jsonl_data: Dict, guid: str) -> Tuple[bool, str]:
         """
         Determine whether to prefer JSONL data over existing DB entry.
 
@@ -408,15 +403,19 @@ class JSONLImporter:
                 return False, "Already exists"
             else:
                 # Same GUID but different lemma_text - collision error
-                error_msg = f"GUID collision: '{existing.lemma_text}' in DB vs '{lemma_text}' in JSONL"
+                error_msg = (
+                    f"GUID collision: '{existing.lemma_text}' in DB vs '{lemma_text}' in JSONL"
+                )
                 self.stats["errors"] += 1
                 self.stats["guid_collisions"] += 1
-                self.stats["error_details"].append({
-                    "guid": guid,
-                    "error": error_msg,
-                    "db_lemma": existing.lemma_text,
-                    "jsonl_lemma": lemma_text
-                })
+                self.stats["error_details"].append(
+                    {
+                        "guid": guid,
+                        "error": error_msg,
+                        "db_lemma": existing.lemma_text,
+                        "jsonl_lemma": lemma_text,
+                    }
+                )
                 logger.error(f"  ERROR: [{guid}] - {error_msg}")
                 return False, error_msg
 
@@ -458,11 +457,7 @@ class JSONLImporter:
             "records": len(records),
         }
 
-    def import_directory(
-        self,
-        directory: Path,
-        pattern: str = "**/*base.jsonl"
-    ) -> Dict[str, Any]:
+    def import_directory(self, directory: Path, pattern: str = "**/*base.jsonl") -> Dict[str, Any]:
         """
         Import all JSONL files from a directory.
 
@@ -487,10 +482,7 @@ class JSONLImporter:
             except Exception as e:
                 logger.error(f"Error importing {file_path}: {e}")
                 self.stats["errors"] += 1
-                self.stats["error_details"].append({
-                    "file": str(file_path),
-                    "error": str(e)
-                })
+                self.stats["error_details"].append({"file": str(file_path), "error": str(e)})
 
         return self.stats
 
@@ -510,10 +502,10 @@ class JSONLImporter:
         if self.stats["error_details"]:
             lines.append(f"\nErrors:")
             for detail in self.stats["error_details"][:10]:
-                if 'guid' in detail:
+                if "guid" in detail:
                     # GUID collision error
                     lines.append(f"  [{detail['guid']}]: {detail['error']}")
-                    if 'db_lemma' in detail and 'jsonl_lemma' in detail:
+                    if "db_lemma" in detail and "jsonl_lemma" in detail:
                         lines.append(f"    DB: '{detail['db_lemma']}'")
                         lines.append(f"    JSONL: '{detail['jsonl_lemma']}'")
                 else:

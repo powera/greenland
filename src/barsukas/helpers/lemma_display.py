@@ -56,7 +56,12 @@ def group_derivative_forms(derivative_forms) -> Tuple[Dict, Dict, Dict, List[str
         set(list(synonyms_by_language.keys()) + list(alternative_forms_by_language.keys()))
     )
 
-    return forms_by_language, synonyms_by_language, alternative_forms_by_language, all_synonym_languages
+    return (
+        forms_by_language,
+        synonyms_by_language,
+        alternative_forms_by_language,
+        all_synonym_languages,
+    )
 
 
 # Re-export for backwards compatibility and convenience

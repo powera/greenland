@@ -450,6 +450,7 @@ def serve_audio_file(language, voice, filename):
     # If not found, try legacy language name directory (e.g., 'lithuanian', 'chinese')
     if not file_path.exists():
         from wordfreq.storage.translation_helpers import LANGUAGE_NAMES
+
         legacy_name = LANGUAGE_NAMES.get(language, language).lower()
         file_path = Path(audio_base_dir) / legacy_name / voice / filename
 
@@ -579,6 +580,7 @@ def remove_file(review_id):
 # Audio Generation Routes
 # ============================================================================
 
+
 @bp.route("/generate", methods=["GET", "POST"])
 def generate():
     """Audio generation interface."""
@@ -587,7 +589,18 @@ def generate():
         supported_languages = ["lt", "zh", "ko", "fr", "de", "es", "pt", "sw", "vi"]
 
         # OpenAI voices
-        openai_voices = ["ash", "alloy", "nova", "ballad", "coral", "echo", "fable", "onyx", "sage", "shimmer"]
+        openai_voices = [
+            "ash",
+            "alloy",
+            "nova",
+            "ballad",
+            "coral",
+            "echo",
+            "fable",
+            "onyx",
+            "sage",
+            "shimmer",
+        ]
 
         # eSpeak-NG voices by language
         espeak_voices = {}
@@ -677,10 +690,12 @@ def generate():
             f"Generated audio using {engine_name} for {results['success_count']} lemmas "
             f"({results['error_count']} errors). "
             f"Files saved to {audio_base_dir}",
-            "success" if results['error_count'] == 0 else "warning"
+            "success" if results["error_count"] == 0 else "warning",
         )
 
-        return redirect(url_for("audio.list_files", language=language_code, status="pending_review"))
+        return redirect(
+            url_for("audio.list_files", language=language_code, status="pending_review")
+        )
 
     except Exception as e:
         flash(f"Error generating audio: {str(e)}", "error")
@@ -709,7 +724,10 @@ def _generate_audio_piper(session, lemma, language_code, voices, output_dir):
         # Get translation for the language
         translation = get_translation(session, lemma, language_code)
         if not translation:
-            return {"success": False, "error": f"No translation found for language: {language_code}"}
+            return {
+                "success": False,
+                "error": f"No translation found for language: {language_code}",
+            }
 
         # Create Piper client
         client = PiperClient()
@@ -790,7 +808,10 @@ def _generate_audio_coqui(session, lemma, language_code, voices, output_dir):
         # Get translation for the language
         translation = get_translation(session, lemma, language_code)
         if not translation:
-            return {"success": False, "error": f"No translation found for language: {language_code}"}
+            return {
+                "success": False,
+                "error": f"No translation found for language: {language_code}",
+            }
 
         # Create Coqui client
         client = CoquiClient()
@@ -922,14 +943,10 @@ def generate_single(guid):
             )
         elif tts_engine == "piper":
             # Generate audio directly using Piper (no agent yet)
-            result = _generate_audio_piper(
-                g.db, lemma, language_code, voice_enums, audio_base_dir
-            )
+            result = _generate_audio_piper(g.db, lemma, language_code, voice_enums, audio_base_dir)
         elif tts_engine == "coqui":
             # Generate audio directly using Coqui (no agent yet)
-            result = _generate_audio_coqui(
-                g.db, lemma, language_code, voice_enums, audio_base_dir
-            )
+            result = _generate_audio_coqui(g.db, lemma, language_code, voice_enums, audio_base_dir)
         else:
             agent = VieversysAgent(config=config, output_dir=audio_base_dir)
             result = agent.generate_audio_for_lemma(
@@ -938,21 +955,28 @@ def generate_single(guid):
 
         if request.is_json:
             if result["success"]:
-                return jsonify({
-                    "success": True,
-                    "guid": guid,
-                    "language": language_code,
-                    "voices": result["voices"],
-                    "output_dir": audio_base_dir,
-                })
+                return jsonify(
+                    {
+                        "success": True,
+                        "guid": guid,
+                        "language": language_code,
+                        "voices": result["voices"],
+                        "output_dir": audio_base_dir,
+                    }
+                )
             else:
-                return jsonify({
-                    "success": False,
-                    "error": result.get("error", "Unknown error"),
-                }), 500
+                return (
+                    jsonify(
+                        {
+                            "success": False,
+                            "error": result.get("error", "Unknown error"),
+                        }
+                    ),
+                    500,
+                )
         else:
             if result["success"]:
-                voice_count = len(result['voices'])
+                voice_count = len(result["voices"])
                 flash(f"Successfully generated audio for {voice_count} voice(s).", "success")
 
                 # Find the first review record we just created to redirect to it

@@ -15,7 +15,9 @@ from wordfreq.translation.constants import VALID_POS_TYPES
 logger = logging.getLogger(__name__)
 
 
-def query_definitions(client, word: str, get_session_func, model: str = None) -> Tuple[List[Dict[str, Any]], bool]:
+def query_definitions(
+    client, word: str, get_session_func, model: str = None
+) -> Tuple[List[Dict[str, Any]], bool]:
     """
     Query LLM for definitions, POS, and lemma information.
 
@@ -119,7 +121,7 @@ def query_definitions(client, word: str, get_session_func, model: str = None) ->
     prompt = prompt_template.format(word=word)
 
     # Get model name from parameter or client attribute
-    model_name = model or getattr(client, 'model', 'gpt-5-mini')
+    model_name = model or getattr(client, "model", "gpt-5-mini")
 
     try:
         # Make a single API call without retries

@@ -13,9 +13,7 @@ TASK_KEY = "lithuanian_adverbs"
 CONFIG = FORM_GENERATION_TASKS[TASK_KEY].config
 
 
-def get_lithuanian_adverb_lemmas(
-    config: DataSourceConfig, limit: Optional[int] = None
-):
+def get_lithuanian_adverb_lemmas(config: DataSourceConfig, limit: Optional[int] = None):
     return FORM_GENERATION_TASKS[TASK_KEY].lemma_fetcher(config, limit)
 
 

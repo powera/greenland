@@ -133,7 +133,9 @@ class LemmaTranslation(Base):
         String, nullable=False, index=True
     )  # e.g., "fr", "es", "de", "en"
     translation: Mapped[str] = mapped_column(String, nullable=False)  # Base form of the translation
-    definition_text: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # Definition in this language
+    definition_text: Mapped[Optional[str]] = mapped_column(
+        Text, nullable=True
+    )  # Definition in this language
 
     # Metadata
     verified: Mapped[bool] = mapped_column(Boolean, default=False)
@@ -274,7 +276,9 @@ class Sentence(Base):
 
     # Metadata
     verified: Mapped[bool] = mapped_column(Boolean, default=False)
-    rejected: Mapped[bool] = mapped_column(Boolean, default=False, index=True)  # Rejected sentences won't be regenerated
+    rejected: Mapped[bool] = mapped_column(
+        Boolean, default=False, index=True
+    )  # Rejected sentences won't be regenerated
     notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     added_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now())
     updated_at: Mapped[datetime.datetime] = mapped_column(

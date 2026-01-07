@@ -45,7 +45,9 @@ class UnifiedLLMClient:
         self.gemini = gemini_client.GeminiClient(timeout=timeout, debug=False)
 
     @classmethod
-    def from_config(cls, config: "DataSourceConfig", timeout: int = DEFAULT_TIMEOUT) -> "UnifiedLLMClient":
+    def from_config(
+        cls, config: "DataSourceConfig", timeout: int = DEFAULT_TIMEOUT
+    ) -> "UnifiedLLMClient":
         """
         Create a UnifiedLLMClient from a DataSourceConfig.
 
@@ -65,7 +67,7 @@ class UnifiedLLMClient:
             # Client now has config.model and config.debug settings
         """
         # Use debug setting from config
-        debug = config.debug if hasattr(config, 'debug') else False
+        debug = config.debug if hasattr(config, "debug") else False
         client = cls(timeout=timeout, debug=debug)
         # Store the model from config for use in requests
         # This allows agents to just call client methods without passing model each time
@@ -189,7 +191,7 @@ class UnifiedLLMClient:
         """
         # Use default model if not provided
         if model is None:
-            if not hasattr(self, 'default_model') or self.default_model is None:
+            if not hasattr(self, "default_model") or self.default_model is None:
                 raise ValueError("No model specified and no default_model configured")
             model = self.default_model
 

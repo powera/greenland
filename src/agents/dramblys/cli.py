@@ -222,7 +222,11 @@ def main():
     if args.stage:
         if not confirm_operation(
             message=f"Model: {args.model}\nTarget language: {args.target_language}\n\nWords will be added to pending_imports for review",
-            estimated_calls=agent.check_high_frequency_missing_words(top_n=args.top_n).get("missing_count", 0) if not args.yes and not args.dry_run else None,
+            estimated_calls=(
+                agent.check_high_frequency_missing_words(top_n=args.top_n).get("missing_count", 0)
+                if not args.yes and not args.dry_run
+                else None
+            ),
             skip_confirmation=args.yes,
             dry_run=args.dry_run,
         ):
@@ -302,10 +306,15 @@ def main():
                     print(f"\nError: {preview['error']}")
                     return
 
-                sample_words = "\n".join([f"  - '{match['word']}': {match['definition'][:60]}..." for match in preview["matches"][:5]])
+                sample_words = "\n".join(
+                    [
+                        f"  - '{match['word']}': {match['definition'][:60]}..."
+                        for match in preview["matches"][:5]
+                    ]
+                )
                 if not confirm_operation(
                     message=f"Found {preview['matches_found']} {args.pos_type} words for subtype '{args.pos_subtype}'\nModel: {args.model}\n\nSample words:\n{sample_words}",
-                    estimated_calls=preview['matches_found'],
+                    estimated_calls=preview["matches_found"],
                     skip_confirmation=args.yes,
                     dry_run=args.dry_run,
                 ):
@@ -354,7 +363,11 @@ def main():
                 "  - Create multiple lemmas for words with multiple meanings\n"
                 "  - Correctly identify base forms vs. inflected forms"
             ),
-            estimated_calls=agent.check_high_frequency_missing_words(top_n=args.top_n).get("missing_count", 0) if not args.yes and not args.dry_run else None,
+            estimated_calls=(
+                agent.check_high_frequency_missing_words(top_n=args.top_n).get("missing_count", 0)
+                if not args.yes and not args.dry_run
+                else None
+            ),
             skip_confirmation=args.yes,
             dry_run=args.dry_run,
         ):
@@ -393,11 +406,18 @@ def main():
         elif source_path.is_dir():
             file_list = sorted(source_path.glob(args.pattern))
         else:
-            print(f"Error: Source path does not exist or is not a file/directory: {args.import_jsonl}")
+            print(
+                f"Error: Source path does not exist or is not a file/directory: {args.import_jsonl}"
+            )
             return
 
         # Build confirmation message with file list
-        file_list_str = "\n".join([f"  - {f.relative_to(source_path.parent) if source_path.is_dir() else f.name}" for f in file_list])
+        file_list_str = "\n".join(
+            [
+                f"  - {f.relative_to(source_path.parent) if source_path.is_dir() else f.name}"
+                for f in file_list
+            ]
+        )
         confirmation_msg = (
             f"Import JSONL files from: {args.import_jsonl}\n"
             f"Pattern: {args.pattern}\n"
@@ -438,10 +458,10 @@ def main():
             if results.get("error_details"):
                 print(f"\nErrors:")
                 for detail in results["error_details"][:10]:
-                    if 'guid' in detail:
+                    if "guid" in detail:
                         # GUID collision error
                         print(f"  [{detail['guid']}]: {detail['error']}")
-                        if 'db_lemma' in detail and 'jsonl_lemma' in detail:
+                        if "db_lemma" in detail and "jsonl_lemma" in detail:
                             print(f"    DB: '{detail['db_lemma']}'")
                             print(f"    JSONL: '{detail['jsonl_lemma']}'")
                     else:

@@ -106,18 +106,26 @@ def create_app(config_class=Config):
 
         Returns None if no case found.
         """
-        if not grammatical_form or '/' not in grammatical_form:
+        if not grammatical_form or "/" not in grammatical_form:
             return None
 
         # Split to get the details part (e.g., "lt_nominative_singular")
-        parts = grammatical_form.split('/')
+        parts = grammatical_form.split("/")
         if len(parts) < 2:
             return None
 
         details = parts[1]  # e.g., "lt_nominative_singular"
 
         # Known grammatical cases
-        cases = ['nominative', 'accusative', 'genitive', 'dative', 'instrumental', 'locative', 'vocative']
+        cases = [
+            "nominative",
+            "accusative",
+            "genitive",
+            "dative",
+            "instrumental",
+            "locative",
+            "vocative",
+        ]
 
         for case in cases:
             if case in details:

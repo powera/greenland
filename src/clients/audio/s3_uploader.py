@@ -140,9 +140,7 @@ class S3AudioUploader:
                 "CacheControl": "public, max-age=31536000, immutable",  # Cache for 1 year
             }
 
-            self.s3.upload_file(
-                str(local_path), self.bucket_name, s3_key, ExtraArgs=extra_args
-            )
+            self.s3.upload_file(str(local_path), self.bucket_name, s3_key, ExtraArgs=extra_args)
 
             logger.info(f"Uploaded to S3: {s3_key}")
             return True, s3_key, md5_hash

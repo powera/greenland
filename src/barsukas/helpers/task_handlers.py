@@ -1,4 +1,5 @@
 """Handlers that execute Barsukas background tasks."""
+
 from __future__ import annotations
 
 from typing import Dict
@@ -48,7 +49,9 @@ def handle_add_missing_translations(session, payload: Dict) -> str:
         session, lemma, exclude_languages=missing_languages
     )
 
-    client = LinguisticClient(model=agent.config.model, db_path=config.sqlite_path, debug=Config.DEBUG)
+    client = LinguisticClient(
+        model=agent.config.model, db_path=config.sqlite_path, debug=Config.DEBUG
+    )
     lang_code_to_name = {
         "zh": "chinese",
         "ko": "korean",
@@ -118,7 +121,12 @@ def handle_generate_pronunciations(session, payload: Dict) -> str:
     lemma_id = payload["lemma_id"]
     lang_code = payload.get("lang_code", "en")
 
-    from wordfreq.storage.models.schema import DerivativeForm, Sentence, SentenceTranslation, SentenceWord
+    from wordfreq.storage.models.schema import (
+        DerivativeForm,
+        Sentence,
+        SentenceTranslation,
+        SentenceWord,
+    )
 
     lemma = session.get(Lemma, lemma_id)
     if not lemma:

@@ -40,7 +40,9 @@ def display_synonym_results(result: Dict[str, Any], dry_run: bool = False) -> No
         print(f"  Alternate spellings: {', '.join(result['alternate_spellings'])}")
 
 
-def display_batch_results(results: Dict[str, Any], language_code: str, dry_run: bool = False) -> None:
+def display_batch_results(
+    results: Dict[str, Any], language_code: str, dry_run: bool = False
+) -> None:
     """Display results from batch processing operations.
 
     Args:

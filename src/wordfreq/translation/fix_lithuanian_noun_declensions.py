@@ -4,6 +4,7 @@ Helpers to fix Lithuanian noun declensions moved out from agent.
 Functions here mirror the behavior previously implemented inside
 `src/agents/vilkas/agent.py::_fix_lithuanian_noun_declensions`.
 """
+
 import logging
 import time
 from typing import Optional, Dict
@@ -66,14 +67,17 @@ def fix_lithuanian_noun_declensions(
                     "guid_filter": guid,
                 }
 
-            nouns_needing_declensions = [{
-                "guid": lemma.guid,
-                "english": lemma.lemma_text,
-                "lithuanian": get_translation(session, lemma, "lt") or "(from LemmaTranslation)",
-                "pos_subtype": lemma.pos_subtype,
-                "difficulty_level": lemma.difficulty_level,
-                "current_form_count": 0,
-            }]
+            nouns_needing_declensions = [
+                {
+                    "guid": lemma.guid,
+                    "english": lemma.lemma_text,
+                    "lithuanian": get_translation(session, lemma, "lt")
+                    or "(from LemmaTranslation)",
+                    "pos_subtype": lemma.pos_subtype,
+                    "difficulty_level": lemma.difficulty_level,
+                    "current_form_count": 0,
+                }
+            ]
             total_needs_fix = 1
         finally:
             session.close()

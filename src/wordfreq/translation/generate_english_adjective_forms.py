@@ -13,9 +13,7 @@ TASK_KEY = "english_adjectives"
 CONFIG = FORM_GENERATION_TASKS[TASK_KEY].config
 
 
-def get_english_adjective_lemmas(
-    config: DataSourceConfig, limit: Optional[int] = None
-):
+def get_english_adjective_lemmas(config: DataSourceConfig, limit: Optional[int] = None):
     return FORM_GENERATION_TASKS[TASK_KEY].lemma_fetcher(config, limit)
 
 

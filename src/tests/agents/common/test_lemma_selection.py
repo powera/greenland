@@ -8,6 +8,7 @@ requiring a full database. Uses mocking to test query building logic.
 
 import sys
 from pathlib import Path
+
 if str(Path(__file__).parent.parent.parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
@@ -66,8 +67,8 @@ class TestFindLemmaByGuid(unittest.TestCase):
 
         self.assertIsNone(result)
 
-    @patch('sys.exit')
-    @patch('builtins.print')
+    @patch("sys.exit")
+    @patch("builtins.print")
     def test_find_missing_guid_with_error(self, mock_print, mock_exit):
         """Test that missing GUID exits when error_on_missing=True."""
         self.mock_query.filter.return_value.first.return_value = None
@@ -150,35 +151,29 @@ class TestLemmaQueryBuilder(unittest.TestCase):
         """Test that methods can be chained."""
         builder = LemmaQueryBuilder(self.session)
 
-        result = (
-            builder
-            .curated_only()
-            .by_difficulty_level(3)
-            .order_by_id()
-            .build()
-        )
+        result = builder.curated_only().by_difficulty_level(3).order_by_id().build()
 
         # All methods should have been called
         self.assertTrue(self.mock_query.filter.called)
         self.assertTrue(self.mock_query.order_by.called)
         self.assertEqual(result, self.mock_query)
 
-    @patch('agents.lemma_selection.LANG_CODE_TO_LLM_FIELD', {'fr': 'french_translation'})
+    @patch("agents.lemma_selection.LANG_CODE_TO_LLM_FIELD", {"fr": "french_translation"})
     def test_has_translation_in_valid_language(self):
         """Test has_translation_in with valid language code."""
         builder = LemmaQueryBuilder(self.session)
-        builder.has_translation_in('fr')
+        builder.has_translation_in("fr")
 
         # Should add filter
         self.assertTrue(self.mock_query.filter.called)
 
-    @patch('agents.lemma_selection.LANG_CODE_TO_LLM_FIELD', {'fr': 'french_translation'})
+    @patch("agents.lemma_selection.LANG_CODE_TO_LLM_FIELD", {"fr": "french_translation"})
     def test_has_translation_in_invalid_language(self):
         """Test has_translation_in with invalid language code raises error."""
         builder = LemmaQueryBuilder(self.session)
 
         with self.assertRaises(ValueError) as context:
-            builder.has_translation_in('invalid')
+            builder.has_translation_in("invalid")
 
         self.assertIn("not recognized", str(context.exception))
 
@@ -225,7 +220,7 @@ class TestApplyLimitAndSampleRate(unittest.TestCase):
         self.mock_query.limit.assert_called_once_with(5)
         self.assertEqual(len(result), 5)
 
-    @patch('random.sample')
+    @patch("random.sample")
     def test_with_sample_rate(self, mock_random_sample):
         """Test with sample rate."""
         lemmas = [MockLemma(id=i) for i in range(10)]
@@ -239,7 +234,7 @@ class TestApplyLimitAndSampleRate(unittest.TestCase):
         mock_random_sample.assert_called_once_with(lemmas, 3)
         self.assertEqual(len(result), 3)
 
-    @patch('random.sample')
+    @patch("random.sample")
     def test_with_limit_and_sample_rate(self, mock_random_sample):
         """Test with both limit and sample rate."""
         lemmas = [MockLemma(id=i) for i in range(5)]
@@ -256,7 +251,7 @@ class TestApplyLimitAndSampleRate(unittest.TestCase):
         mock_random_sample.assert_called_once_with(lemmas, 2)
         self.assertEqual(len(result), 2)
 
-    @patch('random.sample')
+    @patch("random.sample")
     def test_sample_rate_always_returns_at_least_one(self, mock_random_sample):
         """Test that sampling always returns at least 1 item."""
         lemmas = [MockLemma(id=1)]
@@ -330,7 +325,7 @@ class TestCountForConfirmation(unittest.TestCase):
 class TestGetLemmasForProcessing(unittest.TestCase):
     """Test the high-level get_lemmas_for_processing function."""
 
-    @patch('agents.lemma_selection.find_lemma_by_guid')
+    @patch("agents.lemma_selection.find_lemma_by_guid")
     def test_single_lemma_by_guid(self, mock_find):
         """Test getting a single lemma by GUID."""
         session = Mock()
@@ -388,7 +383,7 @@ class TestGetLemmasForProcessing(unittest.TestCase):
         self.assertTrue(mock_query.filter.called)
         self.assertEqual(len(result), 1)
 
-    @patch('agents.lemma_selection.LANG_CODE_TO_LLM_FIELD', {'fr': 'french_translation'})
+    @patch("agents.lemma_selection.LANG_CODE_TO_LLM_FIELD", {"fr": "french_translation"})
     def test_batch_mode_with_language_filter(self):
         """Test batch mode with language filter."""
         session = Mock()
@@ -404,14 +399,14 @@ class TestGetLemmasForProcessing(unittest.TestCase):
         result = get_lemmas_for_processing(
             session,
             curated_only=True,
-            language_code='fr',
+            language_code="fr",
         )
 
         # Should apply language filter
         self.assertTrue(mock_query.filter.called)
         self.assertEqual(len(result), 1)
 
-    @patch('random.sample')
+    @patch("random.sample")
     def test_batch_mode_with_limit_and_sample_rate(self, mock_random_sample):
         """Test batch mode with limit and sample rate."""
         session = Mock()
@@ -438,5 +433,5 @@ class TestGetLemmasForProcessing(unittest.TestCase):
         self.assertEqual(len(result), 5)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -78,7 +78,7 @@ class VilkasAgent:
             self.cache_client = BarsukasCacheClient(
                 base_url=self.config.barsukas_url,
                 cache_only=self.config.cache_only,
-                debug=self.debug
+                debug=self.debug,
             )
         return self.cache_client
 
@@ -90,7 +90,9 @@ class VilkasAgent:
             Dictionary with check results
         """
         # Delegate to translation helpers
-        from wordfreq.translation.check_lithuanian import check_missing_lithuanian_base_forms as _check
+        from wordfreq.translation.check_lithuanian import (
+            check_missing_lithuanian_base_forms as _check,
+        )
 
         return _check(self)
 
@@ -343,11 +345,20 @@ class VilkasAgent:
         # Call the appropriate handler
         if handler_key == "lt_noun":
             return self._fix_lithuanian_noun_declensions(
-                lemmas=lemmas, limit=limit, model=effective_model, throttle=throttle, dry_run=dry_run, source=source
+                lemmas=lemmas,
+                limit=limit,
+                model=effective_model,
+                throttle=throttle,
+                dry_run=dry_run,
+                source=source,
             )
         elif handler_key == "fr_verb":
             return self._fix_french_verb_conjugations(
-                lemmas=lemmas, limit=limit, model=effective_model, throttle=throttle, dry_run=dry_run
+                lemmas=lemmas,
+                limit=limit,
+                model=effective_model,
+                throttle=throttle,
+                dry_run=dry_run,
             )
         elif use_generic:
             return self._fix_generic_forms(
@@ -484,15 +495,21 @@ class VilkasAgent:
 
             items_needing_forms = []
             for lemma in filtered_lemmas:
-                translation = get_translation(self.get_session(), lemma, language_code) if language_code != "en" else lemma.lemma_text
-                items_needing_forms.append({
-                    "guid": lemma.guid,
-                    "english": lemma.lemma_text,
-                    "translation": translation or f"({language_code})",
-                    "pos_subtype": lemma.pos_subtype,
-                    "difficulty_level": lemma.difficulty_level,
-                    "current_form_count": 0,
-                })
+                translation = (
+                    get_translation(self.get_session(), lemma, language_code)
+                    if language_code != "en"
+                    else lemma.lemma_text
+                )
+                items_needing_forms.append(
+                    {
+                        "guid": lemma.guid,
+                        "english": lemma.lemma_text,
+                        "translation": translation or f"({language_code})",
+                        "pos_subtype": lemma.pos_subtype,
+                        "difficulty_level": lemma.difficulty_level,
+                        "current_form_count": 0,
+                    }
+                )
             total_needs_fix = len(items_needing_forms)
         else:
             # Get form coverage check results

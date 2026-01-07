@@ -101,7 +101,9 @@ def is_likely_base_form(word_text: str, lemma_text: str, pos_type: str) -> bool:
     return word_text == lemma_text
 
 
-def process_word(client, word: str, get_session_func, refresh: bool = False, definitions_list: list = None) -> bool:
+def process_word(
+    client, word: str, get_session_func, refresh: bool = False, definitions_list: list = None
+) -> bool:
     """
     Process a word to get linguistic information and store in database using new schema.
 
@@ -139,7 +141,9 @@ def process_word(client, word: str, get_session_func, refresh: bool = False, def
 
         # Query for definitions, POS, lemmas, and examples (unless already provided)
         if definitions_list is None:
-            definitions_list, success = definitions.query_definitions(client, word, get_session_func)
+            definitions_list, success = definitions.query_definitions(
+                client, word, get_session_func
+            )
 
             if not success:
                 logger.warning(f"Failed to process word '{word}'")

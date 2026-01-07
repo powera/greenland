@@ -6,15 +6,15 @@ from typing import Optional
 
 # Mapping of our language codes to Coqui language codes
 COQUI_LANGUAGE_CODES = {
-    "zh": "zh-cn",    # Chinese (Mandarin)
-    "ko": "ko",       # Korean
-    "lt": "lt",       # Lithuanian
-    "vi": "vi",       # Vietnamese
-    "sw": "sw",       # Swahili
-    "fr": "fr",       # French
-    "de": "de",       # German
-    "es": "es",       # Spanish
-    "pt": "pt",       # Portuguese
+    "zh": "zh-cn",  # Chinese (Mandarin)
+    "ko": "ko",  # Korean
+    "lt": "lt",  # Lithuanian
+    "vi": "vi",  # Vietnamese
+    "sw": "sw",  # Swahili
+    "fr": "fr",  # French
+    "de": "de",  # German
+    "es": "es",  # Spanish
+    "pt": "pt",  # Portuguese
 }
 
 

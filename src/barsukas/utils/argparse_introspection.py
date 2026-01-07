@@ -62,27 +62,44 @@ class ArgumentInfo:
         dest = self.dest.lower()
 
         # Operation Mode - what operation to perform
-        if dest in ['mode', 'check_type', 'check', 'fix', 'stage', 'import_jsonl', 'form_type', 'task']:
+        if dest in [
+            "mode",
+            "check_type",
+            "check",
+            "fix",
+            "stage",
+            "import_jsonl",
+            "form_type",
+            "task",
+        ]:
             return "operation_mode"
 
         # Data Source / Scope - what data to process
-        if dest in ['guid', 'limit', 'sample_rate', 'batch', 'batch_submit', 'batch_status', 'batch_retrieve']:
+        if dest in [
+            "guid",
+            "limit",
+            "sample_rate",
+            "batch",
+            "batch_submit",
+            "batch_status",
+            "batch_retrieve",
+        ]:
             return "data_source"
 
         # Language Selection
-        if dest in ['language', 'languages', 'target_language']:
+        if dest in ["language", "languages", "target_language"]:
             return "language_selection"
 
         # LLM Configuration
-        if dest in ['model', 'throttle', 'barsukas_url', 'cache_only']:
+        if dest in ["model", "throttle", "barsukas_url", "cache_only"]:
             return "llm_config"
 
         # Backend Configuration
-        if dest in ['backend', 'data_dir']:
+        if dest in ["backend", "data_dir"]:
             return "backend_config"
 
         # Processing Options
-        if dest in ['dry_run', 'debug']:
+        if dest in ["dry_run", "debug"]:
             return "processing_options"
 
         # Advanced Options - everything else (thresholds, specific settings, etc.)
@@ -237,7 +254,11 @@ def group_arguments_by_category(arguments: List[Dict[str, Any]]) -> Dict[str, Li
             groups["advanced_options"].append(arg)
 
     # Remove empty groups and return in order
-    return {cat: groups[cat] for cat in sorted(groups.keys(), key=lambda x: category_info.get(x, {}).get("order", 99)) if groups[cat]}
+    return {
+        cat: groups[cat]
+        for cat in sorted(groups.keys(), key=lambda x: category_info.get(x, {}).get("order", 99))
+        if groups[cat]
+    }
 
 
 def get_category_label(category: str) -> str:

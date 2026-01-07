@@ -4,6 +4,7 @@ This module centralizes language/part-of-speech configuration so callers
 can invoke a single entry point instead of a proliferation of thin
 scripts.
 """
+
 from dataclasses import dataclass
 from typing import Callable, Dict, List, Optional
 
@@ -315,10 +316,7 @@ def get_task_key(language_code: str, pos_type: str) -> str:
     """Resolve a task key for a language/POS combination."""
 
     for key, task in FORM_GENERATION_TASKS.items():
-        if (
-            task.config.language_code == language_code
-            and task.config.pos_type == pos_type
-        ):
+        if task.config.language_code == language_code and task.config.pos_type == pos_type:
             return key
 
     raise KeyError(f"No task registered for {language_code} {pos_type}")

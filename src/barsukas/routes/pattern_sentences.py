@@ -33,9 +33,7 @@ def index():
     for pattern in SIMPLE_PATTERNS:
         pattern_id = pattern["pattern_id"]
         count = (
-            g.db.query(Sentence)
-            .filter(Sentence.source_filename == f"pattern:{pattern_id}")
-            .count()
+            g.db.query(Sentence).filter(Sentence.source_filename == f"pattern:{pattern_id}").count()
         )
         stats[pattern_id] = count
 
@@ -232,7 +230,15 @@ def check_batch(batch_id):
         return jsonify({"success": False, "error": f"Buivolas agent not found"}), 404
 
     # First check the status
-    args = ["python3", str(script_path), "--db-path", Config.DB_PATH, "check-batch", "--batch-id", batch_id]
+    args = [
+        "python3",
+        str(script_path),
+        "--db-path",
+        Config.DB_PATH,
+        "check-batch",
+        "--batch-id",
+        batch_id,
+    ]
 
     try:
         process = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
@@ -254,9 +260,21 @@ def check_batch(batch_id):
 
         # If completed, automatically retrieve results
         if is_completed:
-            retrieve_args = ["python3", str(script_path), "--db-path", Config.DB_PATH, "retrieve-batch", "--batch-id", batch_id]
-            retrieve_process = subprocess.Popen(retrieve_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-            retrieve_stdout, retrieve_stderr = retrieve_process.communicate(timeout=300)  # 5 min timeout
+            retrieve_args = [
+                "python3",
+                str(script_path),
+                "--db-path",
+                Config.DB_PATH,
+                "retrieve-batch",
+                "--batch-id",
+                batch_id,
+            ]
+            retrieve_process = subprocess.Popen(
+                retrieve_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+            )
+            retrieve_stdout, retrieve_stderr = retrieve_process.communicate(
+                timeout=300
+            )  # 5 min timeout
 
             response_data["retrieve_success"] = retrieve_process.returncode == 0
             response_data["retrieve_stdout"] = retrieve_stdout
@@ -276,7 +294,15 @@ def retrieve_batch(batch_id):
     if not script_path.exists():
         return jsonify({"success": False, "error": f"Buivolas agent not found"}), 404
 
-    args = ["python3", str(script_path), "--db-path", Config.DB_PATH, "retrieve-batch", "--batch-id", batch_id]
+    args = [
+        "python3",
+        str(script_path),
+        "--db-path",
+        Config.DB_PATH,
+        "retrieve-batch",
+        "--batch-id",
+        batch_id,
+    ]
 
     try:
         process = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
@@ -351,7 +377,10 @@ def accept_sentence(sentence_id):
         for sw in sentence_words:
             lemma = g.db.query(Lemma).get(sw.lemma_id)
             if lemma and lemma.difficulty_level == -1:
-                flash(f"Cannot accept: word '{lemma.guid or lemma.lemma_text}' has difficulty level -1", "error")
+                flash(
+                    f"Cannot accept: word '{lemma.guid or lemma.lemma_text}' has difficulty level -1",
+                    "error",
+                )
                 return redirect(request.referrer or url_for("pattern_sentences.view"))
 
         # Check if sentence already has translations for all languages
@@ -362,6 +391,7 @@ def accept_sentence(sentence_id):
         # Generate missing translations
         if not has_all_translations:
             from wordfreq.translation.sentence import translate_sentence
+
             translate_sentence(sentence_id, target_languages, g.db, model="gpt-5-mini")
 
         # Auto-populate the level if not set
@@ -379,9 +409,15 @@ def accept_sentence(sentence_id):
         g.db.commit()
 
         if sentence.minimum_level is not None:
-            flash(f"Sentence #{sentence_id} accepted with level {sentence.minimum_level}. Click Verify when ready.", "success")
+            flash(
+                f"Sentence #{sentence_id} accepted with level {sentence.minimum_level}. Click Verify when ready.",
+                "success",
+            )
         else:
-            flash(f"Sentence #{sentence_id} accepted (no level set - no words with difficulty levels). Click Verify when ready.", "warning")
+            flash(
+                f"Sentence #{sentence_id} accepted (no level set - no words with difficulty levels). Click Verify when ready.",
+                "warning",
+            )
 
     except Exception as e:
         flash(f"Error accepting sentence: {e}", "error")
@@ -472,7 +508,9 @@ def view():
     total = query.count()
 
     # Paginate
-    sentences = query.order_by(Sentence.id.desc()).limit(per_page).offset((page - 1) * per_page).all()
+    sentences = (
+        query.order_by(Sentence.id.desc()).limit(per_page).offset((page - 1) * per_page).all()
+    )
 
     # Calculate pagination info
     total_pages = (total + per_page - 1) // per_page

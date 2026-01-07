@@ -31,10 +31,7 @@ class PiperClient:
     """Client for generating audio using Piper TTS."""
 
     def __init__(
-        self,
-        piper_command: str = "piper",
-        models_dir: Optional[Path] = None,
-        debug: bool = False
+        self, piper_command: str = "piper", models_dir: Optional[Path] = None, debug: bool = False
     ):
         """
         Initialize Piper TTS client.
@@ -75,9 +72,7 @@ class PiperClient:
                 logger.warning("Piper may not be properly installed")
         except FileNotFoundError:
             logger.error(f"Piper not found at: {self.piper_command}")
-            raise RuntimeError(
-                f"Piper not found. Please install it or specify the correct path."
-            )
+            raise RuntimeError(f"Piper not found. Please install it or specify the correct path.")
         except Exception as e:
             logger.warning(f"Could not verify Piper installation: {e}")
 
@@ -138,7 +133,9 @@ class PiperClient:
 
         # Validate audio format
         if audio_format not in [AudioFormat.MP3, AudioFormat.WAV]:
-            error_msg = f"Unsupported audio format: {audio_format.value}. Only MP3 and WAV are supported."
+            error_msg = (
+                f"Unsupported audio format: {audio_format.value}. Only MP3 and WAV are supported."
+            )
             logger.error(error_msg)
             return AudioGenerationResult(
                 audio_data=b"",
@@ -155,7 +152,9 @@ class PiperClient:
             # Find model file
             model_path = self._find_model_file(voice)
             if model_path is None:
-                error_msg = f"Model file not found for voice: {voice.ui_name} ({voice.piper_identifier})"
+                error_msg = (
+                    f"Model file not found for voice: {voice.ui_name} ({voice.piper_identifier})"
+                )
                 logger.error(error_msg)
                 return AudioGenerationResult(
                     audio_data=b"",
@@ -176,8 +175,10 @@ class PiperClient:
             # Piper reads text from stdin and writes WAV to stdout or file
             cmd = [
                 self.piper_command,
-                "--model", str(model_path),
-                "--output_file", str(wav_path),
+                "--model",
+                str(model_path),
+                "--output_file",
+                str(wav_path),
             ]
 
             # Add length scale (inverse of speed)
@@ -201,7 +202,9 @@ class PiperClient:
             if result.returncode != 0:
                 error_msg = f"Piper failed with code {result.returncode}: {result.stderr}"
                 logger.error(error_msg)
-                logger.error(f"Voice identifier used: '{voice.piper_identifier}' (name: {voice.ui_name})")
+                logger.error(
+                    f"Voice identifier used: '{voice.piper_identifier}' (name: {voice.ui_name})"
+                )
                 logger.error(f"Model path: {model_path}")
                 wav_path.unlink(missing_ok=True)
                 return AudioGenerationResult(
@@ -242,9 +245,12 @@ class PiperClient:
                     # Use ffmpeg to convert WAV to MP3
                     ffmpeg_cmd = [
                         "ffmpeg",
-                        "-i", str(wav_path),
-                        "-codec:a", "libmp3lame",
-                        "-qscale:a", "2",  # High quality
+                        "-i",
+                        str(wav_path),
+                        "-codec:a",
+                        "libmp3lame",
+                        "-qscale:a",
+                        "2",  # High quality
                         "-y",  # Overwrite output file
                         str(mp3_path),
                     ]

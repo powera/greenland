@@ -54,6 +54,7 @@ def get_subtype_values_for_pos(pos_type: str) -> List[str]:
 
     # For POS types without enum classes, check GUID prefixes mapping
     from wordfreq.storage.models.guid_prefixes import SUBTYPE_GUID_PREFIXES
+
     if pos_type in SUBTYPE_GUID_PREFIXES:
         return list(SUBTYPE_GUID_PREFIXES[pos_type].keys())
 

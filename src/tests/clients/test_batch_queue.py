@@ -38,9 +38,7 @@ class BatchQueueManagerTestCase(unittest.TestCase):
 
         # Create manager with mock client
         self.manager = BatchQueueManager(
-            db_session=self.session,
-            batch_client=self.mock_batch_client,
-            debug=False
+            db_session=self.session, batch_client=self.mock_batch_client, debug=False
         )
 
     def tearDown(self):
@@ -57,19 +55,16 @@ class BatchQueueManagerTestCase(unittest.TestCase):
             operation_type="validate_translation",
             entity_id=123,
             entity_type="lemma",
-            language_code="lt"
+            language_code="lt",
         )
 
-        request_body = {
-            "model": "gpt-4o-mini",
-            "messages": [{"role": "user", "content": "Test"}]
-        }
+        request_body = {"model": "gpt-4o-mini", "messages": [{"role": "user", "content": "Test"}]}
 
         record = self.manager.queue_request(
             custom_id="test_request_1",
             request_body=request_body,
             metadata=metadata,
-            endpoint="/v1/chat/completions"
+            endpoint="/v1/chat/completions",
         )
 
         # Verify record was created
@@ -87,26 +82,20 @@ class BatchQueueManagerTestCase(unittest.TestCase):
     def test_queue_request_duplicate_custom_id(self):
         """Test that duplicate custom_id raises an error."""
         metadata = BatchRequestMetadata(
-            custom_id="test_request_1",
-            agent_name="voras",
-            operation_type="validate_translation"
+            custom_id="test_request_1", agent_name="voras", operation_type="validate_translation"
         )
 
         request_body = {"model": "gpt-4o-mini"}
 
         # Queue first request
         self.manager.queue_request(
-            custom_id="test_request_1",
-            request_body=request_body,
-            metadata=metadata
+            custom_id="test_request_1", request_body=request_body, metadata=metadata
         )
 
         # Try to queue duplicate - should raise ValueError
         with self.assertRaises(ValueError) as context:
             self.manager.queue_request(
-                custom_id="test_request_1",
-                request_body=request_body,
-                metadata=metadata
+                custom_id="test_request_1", request_body=request_body, metadata=metadata
             )
 
         self.assertIn("already exists", str(context.exception))
@@ -118,12 +107,12 @@ class BatchQueueManagerTestCase(unittest.TestCase):
             metadata = BatchRequestMetadata(
                 custom_id=f"test_request_{i}",
                 agent_name="voras",
-                operation_type="validate_translation"
+                operation_type="validate_translation",
             )
             self.manager.queue_request(
                 custom_id=f"test_request_{i}",
                 request_body={"model": "gpt-4o-mini"},
-                metadata=metadata
+                metadata=metadata,
             )
 
         # Get all pending requests
@@ -145,12 +134,12 @@ class BatchQueueManagerTestCase(unittest.TestCase):
             metadata = BatchRequestMetadata(
                 custom_id=f"test_request_{i}",
                 agent_name="voras",
-                operation_type="validate_translation"
+                operation_type="validate_translation",
             )
             record = self.manager.queue_request(
                 custom_id=f"test_request_{i}",
                 request_body={"model": "gpt-4o-mini"},
-                metadata=metadata
+                metadata=metadata,
             )
             requests.append(record)
 
@@ -158,14 +147,11 @@ class BatchQueueManagerTestCase(unittest.TestCase):
         self.mock_batch_client.upload_batch_file.return_value = "file_123"
         self.mock_batch_client.create_batch.return_value = {
             "id": "batch_abc",
-            "status": "validating"
+            "status": "validating",
         }
 
         # Submit batch
-        batch_id, file_id = self.manager.submit_batch(
-            requests,
-            batch_metadata={"agent": "voras"}
-        )
+        batch_id, file_id = self.manager.submit_batch(requests, batch_metadata={"agent": "voras"})
 
         # Verify batch was submitted
         self.assertEqual(batch_id, "batch_abc")
@@ -187,14 +173,10 @@ class BatchQueueManagerTestCase(unittest.TestCase):
         """Test checking batch status when in progress."""
         # Queue and submit a request
         metadata = BatchRequestMetadata(
-            custom_id="test_request_1",
-            agent_name="voras",
-            operation_type="validate_translation"
+            custom_id="test_request_1", agent_name="voras", operation_type="validate_translation"
         )
         record = self.manager.queue_request(
-            custom_id="test_request_1",
-            request_body={"model": "gpt-4o-mini"},
-            metadata=metadata
+            custom_id="test_request_1", request_body={"model": "gpt-4o-mini"}, metadata=metadata
         )
 
         # Manually set to submitted
@@ -206,7 +188,7 @@ class BatchQueueManagerTestCase(unittest.TestCase):
         self.mock_batch_client.get_batch_status.return_value = {
             "id": "batch_abc",
             "status": BatchStatus.IN_PROGRESS.value,
-            "request_counts": {"total": 1, "completed": 0, "failed": 0}
+            "request_counts": {"total": 1, "completed": 0, "failed": 0},
         }
 
         # Check status
@@ -223,14 +205,10 @@ class BatchQueueManagerTestCase(unittest.TestCase):
         """Test checking batch status when completed."""
         # Queue and submit a request
         metadata = BatchRequestMetadata(
-            custom_id="test_request_1",
-            agent_name="voras",
-            operation_type="validate_translation"
+            custom_id="test_request_1", agent_name="voras", operation_type="validate_translation"
         )
         record = self.manager.queue_request(
-            custom_id="test_request_1",
-            request_body={"model": "gpt-4o-mini"},
-            metadata=metadata
+            custom_id="test_request_1", request_body={"model": "gpt-4o-mini"}, metadata=metadata
         )
 
         # Manually set to submitted
@@ -243,7 +221,7 @@ class BatchQueueManagerTestCase(unittest.TestCase):
             "id": "batch_abc",
             "status": BatchStatus.COMPLETED.value,
             "request_counts": {"total": 1, "completed": 1, "failed": 0},
-            "output_file_id": "file_output_123"
+            "output_file_id": "file_output_123",
         }
 
         # Check status
@@ -260,14 +238,10 @@ class BatchQueueManagerTestCase(unittest.TestCase):
         """Test checking batch status when failed."""
         # Queue and submit a request
         metadata = BatchRequestMetadata(
-            custom_id="test_request_1",
-            agent_name="voras",
-            operation_type="validate_translation"
+            custom_id="test_request_1", agent_name="voras", operation_type="validate_translation"
         )
         record = self.manager.queue_request(
-            custom_id="test_request_1",
-            request_body={"model": "gpt-4o-mini"},
-            metadata=metadata
+            custom_id="test_request_1", request_body={"model": "gpt-4o-mini"}, metadata=metadata
         )
 
         # Manually set to submitted
@@ -279,7 +253,7 @@ class BatchQueueManagerTestCase(unittest.TestCase):
         self.mock_batch_client.get_batch_status.return_value = {
             "id": "batch_abc",
             "status": BatchStatus.FAILED.value,
-            "request_counts": {"total": 1, "completed": 0, "failed": 1}
+            "request_counts": {"total": 1, "completed": 0, "failed": 1},
         }
 
         # Check status
@@ -299,12 +273,10 @@ class BatchQueueManagerTestCase(unittest.TestCase):
             custom_id="test_request_1",
             agent_name="voras",
             operation_type="validate_translation",
-            entity_id=123
+            entity_id=123,
         )
         record = self.manager.queue_request(
-            custom_id="test_request_1",
-            request_body={"model": "gpt-4o-mini"},
-            metadata=metadata
+            custom_id="test_request_1", request_body={"model": "gpt-4o-mini"}, metadata=metadata
         )
 
         # Manually set to processing
@@ -316,7 +288,7 @@ class BatchQueueManagerTestCase(unittest.TestCase):
         self.mock_batch_client.get_batch_status.return_value = {
             "id": "batch_abc",
             "status": BatchStatus.COMPLETED.value,
-            "output_file_id": "file_output_123"
+            "output_file_id": "file_output_123",
         }
 
         self.mock_batch_client.download_batch_results.return_value = [
@@ -325,15 +297,9 @@ class BatchQueueManagerTestCase(unittest.TestCase):
                 "response": {
                     "status_code": 200,
                     "body": {
-                        "choices": [
-                            {
-                                "message": {
-                                    "content": json.dumps({"result": "success"})
-                                }
-                            }
-                        ]
-                    }
-                }
+                        "choices": [{"message": {"content": json.dumps({"result": "success"})}}]
+                    },
+                },
             }
         ]
 
@@ -353,14 +319,10 @@ class BatchQueueManagerTestCase(unittest.TestCase):
         """Test retrieving batch results with errors."""
         # Queue and submit a request
         metadata = BatchRequestMetadata(
-            custom_id="test_request_1",
-            agent_name="voras",
-            operation_type="validate_translation"
+            custom_id="test_request_1", agent_name="voras", operation_type="validate_translation"
         )
         record = self.manager.queue_request(
-            custom_id="test_request_1",
-            request_body={"model": "gpt-4o-mini"},
-            metadata=metadata
+            custom_id="test_request_1", request_body={"model": "gpt-4o-mini"}, metadata=metadata
         )
 
         # Manually set to processing
@@ -372,16 +334,13 @@ class BatchQueueManagerTestCase(unittest.TestCase):
         self.mock_batch_client.get_batch_status.return_value = {
             "id": "batch_abc",
             "status": BatchStatus.COMPLETED.value,
-            "output_file_id": "file_output_123"
+            "output_file_id": "file_output_123",
         }
 
         self.mock_batch_client.download_batch_results.return_value = [
             {
                 "custom_id": "test_request_1",
-                "error": {
-                    "message": "Rate limit exceeded",
-                    "type": "rate_limit_error"
-                }
+                "error": {"message": "Rate limit exceeded", "type": "rate_limit_error"},
             }
         ]
 
@@ -399,21 +358,23 @@ class BatchQueueManagerTestCase(unittest.TestCase):
     def test_get_completed_requests(self):
         """Test retrieving completed requests."""
         # Create multiple requests with different statuses
-        for i, status in enumerate([
-            BatchRequestStatus.COMPLETED,
-            BatchRequestStatus.COMPLETED,
-            BatchRequestStatus.FAILED,
-            BatchRequestStatus.PROCESSING
-        ]):
+        for i, status in enumerate(
+            [
+                BatchRequestStatus.COMPLETED,
+                BatchRequestStatus.COMPLETED,
+                BatchRequestStatus.FAILED,
+                BatchRequestStatus.PROCESSING,
+            ]
+        ):
             metadata = BatchRequestMetadata(
                 custom_id=f"test_request_{i}",
                 agent_name="voras",
-                operation_type="validate_translation"
+                operation_type="validate_translation",
             )
             record = self.manager.queue_request(
                 custom_id=f"test_request_{i}",
                 request_body={"model": "gpt-4o-mini"},
-                metadata=metadata
+                metadata=metadata,
             )
             record.status = status.value
             record.batch_id = "batch_abc"
@@ -439,19 +400,19 @@ class BatchQueueManagerTestCase(unittest.TestCase):
             BatchRequestStatus.PROCESSING,
             BatchRequestStatus.COMPLETED,
             BatchRequestStatus.COMPLETED,
-            BatchRequestStatus.FAILED
+            BatchRequestStatus.FAILED,
         ]
 
         for i, status in enumerate(statuses):
             metadata = BatchRequestMetadata(
                 custom_id=f"test_request_{i}",
                 agent_name="voras",
-                operation_type="validate_translation"
+                operation_type="validate_translation",
             )
             record = self.manager.queue_request(
                 custom_id=f"test_request_{i}",
                 request_body={"model": "gpt-4o-mini"},
-                metadata=metadata
+                metadata=metadata,
             )
             record.status = status.value
             record.batch_id = "batch_abc"
@@ -479,12 +440,12 @@ class BatchQueueManagerTestCase(unittest.TestCase):
                 metadata = BatchRequestMetadata(
                     custom_id=f"batch{batch_num}_req{req_num}",
                     agent_name="voras",
-                    operation_type="validate_translation"
+                    operation_type="validate_translation",
                 )
                 record = self.manager.queue_request(
                     custom_id=f"batch{batch_num}_req{req_num}",
                     request_body={"model": "gpt-4o-mini"},
-                    metadata=metadata
+                    metadata=metadata,
                 )
                 record.batch_id = f"batch_{batch_num}"
 
@@ -517,7 +478,7 @@ class BatchRequestMetadataTestCase(unittest.TestCase):
             operation_type="validate",
             entity_id=123,
             entity_type="lemma",
-            language_code="lt"
+            language_code="lt",
         )
 
         data = metadata.to_dict()
@@ -533,7 +494,7 @@ class BatchRequestMetadataTestCase(unittest.TestCase):
             "agent_name": "voras",
             "operation_type": "validate",
             "entity_id": 123,
-            "extra_field": "ignored"
+            "extra_field": "ignored",
         }
 
         metadata = BatchRequestMetadata.from_dict(data)

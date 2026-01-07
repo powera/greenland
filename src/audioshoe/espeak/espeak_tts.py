@@ -95,7 +95,9 @@ class EspeakNGClient:
         # Validate audio format (eSpeak-NG directly supports WAV)
         # For MP3, we'll generate WAV first then convert
         if audio_format not in [AudioFormat.MP3, AudioFormat.WAV]:
-            error_msg = f"Unsupported audio format: {audio_format.value}. Only MP3 and WAV are supported."
+            error_msg = (
+                f"Unsupported audio format: {audio_format.value}. Only MP3 and WAV are supported."
+            )
             logger.error(error_msg)
             return AudioGenerationResult(
                 audio_data=b"",
@@ -117,10 +119,14 @@ class EspeakNGClient:
             # Use the voice's espeak_identifier (e.g., "lt+f1" for Lithuanian female variant 1)
             cmd = [
                 self.espeak_command,
-                "-v", voice.espeak_identifier,
-                "-s", str(speed),
-                "-p", str(pitch),
-                "-w", str(wav_path),
+                "-v",
+                voice.espeak_identifier,
+                "-s",
+                str(speed),
+                "-p",
+                str(pitch),
+                "-w",
+                str(wav_path),
             ]
 
             # Add IPA flag if needed
@@ -144,7 +150,9 @@ class EspeakNGClient:
             if result.returncode != 0:
                 error_msg = f"eSpeak-NG failed with code {result.returncode}: {result.stderr}"
                 logger.error(error_msg)
-                logger.error(f"Voice identifier used: '{voice.espeak_identifier}' (name: {voice.name}, language: {voice.language_code})")
+                logger.error(
+                    f"Voice identifier used: '{voice.espeak_identifier}' (name: {voice.name}, language: {voice.language_code})"
+                )
                 logger.error(f"Command attempted: {' '.join(cmd)}")
                 wav_path.unlink(missing_ok=True)
                 return AudioGenerationResult(
@@ -185,9 +193,12 @@ class EspeakNGClient:
                     # Use ffmpeg to convert WAV to MP3
                     ffmpeg_cmd = [
                         "ffmpeg",
-                        "-i", str(wav_path),
-                        "-codec:a", "libmp3lame",
-                        "-qscale:a", "2",  # High quality
+                        "-i",
+                        str(wav_path),
+                        "-codec:a",
+                        "libmp3lame",
+                        "-qscale:a",
+                        "2",  # High quality
                         "-y",  # Overwrite output file
                         str(mp3_path),
                     ]
@@ -299,6 +310,4 @@ def generate_audio(
     Returns:
         AudioGenerationResult with audio data and metadata
     """
-    return get_client().generate_audio(
-        text, voice, audio_format, speed, pitch, ipa_input
-    )
+    return get_client().generate_audio(text, voice, audio_format, speed, pitch, ipa_input)

@@ -48,7 +48,7 @@ class JSONLSession(BaseSession):
             logger.info("Creating temporary in-memory SQLite database for JSONL backend queries")
 
             # Create in-memory SQLite database
-            engine = create_engine('sqlite:///:memory:', echo=False)
+            engine = create_engine("sqlite:///:memory:", echo=False)
             Base.metadata.create_all(engine)
 
             Session = sessionmaker(bind=engine)
@@ -137,72 +137,80 @@ class JSONLSession(BaseSession):
         for jsonl_lemma in self._storage.lemmas.values():
             # Only add fields that exist in both models
             lemma_dict = {
-                'id': jsonl_lemma.id,
-                'guid': jsonl_lemma.guid,
-                'lemma_text': jsonl_lemma.lemma_text,
-                'definition_text': jsonl_lemma.definition_text,
-                'pos_type': jsonl_lemma.pos_type,
-                'pos_subtype': jsonl_lemma.pos_subtype,
-                'difficulty_level': jsonl_lemma.difficulty_level,
-                'frequency_rank': jsonl_lemma.frequency_rank,
-                'tags': jsonl_lemma.tags,
-                'added_at': jsonl_lemma.added_at,
-                'updated_at': jsonl_lemma.updated_at,
+                "id": jsonl_lemma.id,
+                "guid": jsonl_lemma.guid,
+                "lemma_text": jsonl_lemma.lemma_text,
+                "definition_text": jsonl_lemma.definition_text,
+                "pos_type": jsonl_lemma.pos_type,
+                "pos_subtype": jsonl_lemma.pos_subtype,
+                "difficulty_level": jsonl_lemma.difficulty_level,
+                "frequency_rank": jsonl_lemma.frequency_rank,
+                "tags": jsonl_lemma.tags,
+                "added_at": jsonl_lemma.added_at,
+                "updated_at": jsonl_lemma.updated_at,
             }
             lemmas.append(lemma_dict)
 
             # Add translations
             for lang_code, translation in jsonl_lemma.translations.items():
-                translations.append({
-                    'lemma_id': jsonl_lemma.id,
-                    'language_code': lang_code,
-                    'translation': translation,
-                })
+                translations.append(
+                    {
+                        "lemma_id": jsonl_lemma.id,
+                        "language_code": lang_code,
+                        "translation": translation,
+                    }
+                )
 
             # Add grammar facts
             for fact_data in jsonl_lemma.grammar_facts:
-                grammar_facts.append({
-                    'lemma_id': jsonl_lemma.id,
-                    'language_code': fact_data.get('language_code', ''),
-                    'fact_type': fact_data.get('fact_type', ''),
-                    'fact_value': fact_data.get('fact_value'),
-                    'notes': fact_data.get('notes'),
-                    'verified': fact_data.get('verified', False),
-                })
+                grammar_facts.append(
+                    {
+                        "lemma_id": jsonl_lemma.id,
+                        "language_code": fact_data.get("language_code", ""),
+                        "fact_type": fact_data.get("fact_type", ""),
+                        "fact_value": fact_data.get("fact_value"),
+                        "notes": fact_data.get("notes"),
+                        "verified": fact_data.get("verified", False),
+                    }
+                )
 
         # Prepare sentences and their translations/words
         for jsonl_sentence in self._storage.sentences.values():
             sentence_dict = {
-                'id': jsonl_sentence.id,
-                'guid': jsonl_sentence.guid,
-                'sentence_text': jsonl_sentence.sentence_text,
-                'language_code': jsonl_sentence.language_code,
-                'difficulty_level': jsonl_sentence.difficulty_level,
-                'audio_url': jsonl_sentence.audio_url,
-                'added_at': jsonl_sentence.added_at,
-                'updated_at': jsonl_sentence.updated_at,
+                "id": jsonl_sentence.id,
+                "guid": jsonl_sentence.guid,
+                "sentence_text": jsonl_sentence.sentence_text,
+                "language_code": jsonl_sentence.language_code,
+                "difficulty_level": jsonl_sentence.difficulty_level,
+                "audio_url": jsonl_sentence.audio_url,
+                "added_at": jsonl_sentence.added_at,
+                "updated_at": jsonl_sentence.updated_at,
             }
             sentences.append(sentence_dict)
 
             # Add translations
             for lang_code, translation_text in jsonl_sentence.translations.items():
-                sentence_translations.append({
-                    'sentence_id': jsonl_sentence.id,
-                    'language_code': lang_code,
-                    'translation_text': translation_text,
-                })
+                sentence_translations.append(
+                    {
+                        "sentence_id": jsonl_sentence.id,
+                        "language_code": lang_code,
+                        "translation_text": translation_text,
+                    }
+                )
 
             # Add words
             for word_data in jsonl_sentence.words:
-                sentence_words.append({
-                    'sentence_id': jsonl_sentence.id,
-                    'lemma_id': word_data.get("lemma_id"),
-                    'language_code': word_data.get("language_code", ""),
-                    'position': word_data.get("position", 0),
-                    'word_role': word_data.get("word_role"),
-                    'grammatical_form': word_data.get("grammatical_form"),
-                    'is_required_vocab': word_data.get("is_required_vocab", True),
-                })
+                sentence_words.append(
+                    {
+                        "sentence_id": jsonl_sentence.id,
+                        "lemma_id": word_data.get("lemma_id"),
+                        "language_code": word_data.get("language_code", ""),
+                        "position": word_data.get("position", 0),
+                        "word_role": word_data.get("word_role"),
+                        "grammatical_form": word_data.get("grammatical_form"),
+                        "is_required_vocab": word_data.get("is_required_vocab", True),
+                    }
+                )
 
         # Bulk insert
         if lemmas:

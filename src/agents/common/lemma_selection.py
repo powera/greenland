@@ -41,6 +41,7 @@ from wordfreq.storage.models.schema import Lemma
 
 class LemmaNotFoundError(Exception):
     """Raised when a lemma lookup fails."""
+
     pass
 
 
@@ -104,7 +105,7 @@ class LemmaQueryBuilder:
         self.session = session
         self.query = session.query(Lemma)
 
-    def curated_only(self) -> 'LemmaQueryBuilder':
+    def curated_only(self) -> "LemmaQueryBuilder":
         """Filter to only curated lemmas (those with GUIDs assigned).
 
         This is the most common filter - agents typically only process
@@ -116,7 +117,7 @@ class LemmaQueryBuilder:
         self.query = self.query.filter(Lemma.guid.isnot(None))
         return self
 
-    def by_difficulty_level(self, level: Optional[int]) -> 'LemmaQueryBuilder':
+    def by_difficulty_level(self, level: Optional[int]) -> "LemmaQueryBuilder":
         """Filter by difficulty level.
 
         Args:
@@ -129,7 +130,7 @@ class LemmaQueryBuilder:
             self.query = self.query.filter(Lemma.difficulty_level == level)
         return self
 
-    def has_translation_in(self, language_code: str) -> 'LemmaQueryBuilder':
+    def has_translation_in(self, language_code: str) -> "LemmaQueryBuilder":
         """Filter to lemmas that have a translation in the specified language.
 
         This checks the language-specific translation columns on the Lemma model
@@ -157,7 +158,7 @@ class LemmaQueryBuilder:
         self.query = self.query.filter(column.isnot(None))
         return self
 
-    def order_by_id(self, ascending: bool = True) -> 'LemmaQueryBuilder':
+    def order_by_id(self, ascending: bool = True) -> "LemmaQueryBuilder":
         """Order results by lemma ID for consistent, reproducible ordering.
 
         Args:
@@ -172,7 +173,7 @@ class LemmaQueryBuilder:
             self.query = self.query.order_by(Lemma.id.desc())
         return self
 
-    def filter_custom(self, filter_func: Callable) -> 'LemmaQueryBuilder':
+    def filter_custom(self, filter_func: Callable) -> "LemmaQueryBuilder":
         """Apply a custom filter function to the query.
 
         This allows agents to add specialized filters while still using
@@ -367,11 +368,11 @@ def get_lemmas_for_agent(session: "BaseSession", args) -> List[Lemma]:
     """
     return get_lemmas_for_processing(
         session=session,
-        guid=getattr(args, 'guid', None),
+        guid=getattr(args, "guid", None),
         curated_only=True,
-        difficulty_level=getattr(args, 'difficulty_level', None),
-        language_code=getattr(args, 'language', None),
-        limit=getattr(args, 'limit', None),
-        sample_rate=getattr(args, 'sample_rate', 1.0),
+        difficulty_level=getattr(args, "difficulty_level", None),
+        language_code=getattr(args, "language", None),
+        limit=getattr(args, "limit", None),
+        sample_rate=getattr(args, "sample_rate", 1.0),
         order_by_id=True,
     )

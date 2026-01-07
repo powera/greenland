@@ -70,6 +70,7 @@ class PradziaAgent:
         # Log the database path being used (convert to absolute for clarity)
         if self.db_path:
             import os
+
             abs_path = os.path.abspath(self.db_path)
             logger.info(f"Using SQLite database: {abs_path}")
 
@@ -561,7 +562,9 @@ class PradziaAgent:
                 )
 
                 if existing:
-                    logger.debug(f"Skipping {lemma.lemma_text} (GUID: {lemma.guid}) - already exists")
+                    logger.debug(
+                        f"Skipping {lemma.lemma_text} (GUID: {lemma.guid}) - already exists"
+                    )
                     skipped_count += 1
                     continue
 
@@ -575,7 +578,9 @@ class PradziaAgent:
                     difficulty_level=lemma.difficulty_level,
                     frequency_rank=lemma.frequency_rank,
                     tags=lemma.tags,
-                    disambiguation=lemma.disambiguation if hasattr(lemma, "disambiguation") else None,
+                    disambiguation=(
+                        lemma.disambiguation if hasattr(lemma, "disambiguation") else None
+                    ),
                     confidence=lemma.confidence if hasattr(lemma, "confidence") else 0.0,
                     verified=lemma.verified if hasattr(lemma, "verified") else False,
                     notes=lemma.notes if hasattr(lemma, "notes") else None,

@@ -303,24 +303,22 @@ class BatchQueueManager:
         elif status == BatchStatus.COMPLETED.value:
             # Update all non-completed requests to indicate batch is ready for retrieval
             # Note: Individual request statuses will be updated when retrieve_batch_results is called
-            self.db.query(BatchQueue).filter_by(
-                batch_id=batch_id
-            ).filter(
-                BatchQueue.status.in_([
-                    BatchRequestStatus.SUBMITTED.value,
-                    BatchRequestStatus.PROCESSING.value
-                ])
+            self.db.query(BatchQueue).filter_by(batch_id=batch_id).filter(
+                BatchQueue.status.in_(
+                    [BatchRequestStatus.SUBMITTED.value, BatchRequestStatus.PROCESSING.value]
+                )
             ).update({"status": BatchRequestStatus.PROCESSING.value})
             self.db.commit()
-        elif status in [BatchStatus.FAILED.value, BatchStatus.EXPIRED.value, BatchStatus.CANCELLED.value]:
+        elif status in [
+            BatchStatus.FAILED.value,
+            BatchStatus.EXPIRED.value,
+            BatchStatus.CANCELLED.value,
+        ]:
             # Update all pending requests to failed/cancelled
-            self.db.query(BatchQueue).filter_by(
-                batch_id=batch_id
-            ).filter(
-                BatchQueue.status.in_([
-                    BatchRequestStatus.SUBMITTED.value,
-                    BatchRequestStatus.PROCESSING.value
-                ])
+            self.db.query(BatchQueue).filter_by(batch_id=batch_id).filter(
+                BatchQueue.status.in_(
+                    [BatchRequestStatus.SUBMITTED.value, BatchRequestStatus.PROCESSING.value]
+                )
             ).update({"status": BatchRequestStatus.FAILED.value})
             self.db.commit()
 

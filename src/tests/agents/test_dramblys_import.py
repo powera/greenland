@@ -7,6 +7,7 @@ Tests the field difference detection algorithm without requiring database access
 
 import sys
 from pathlib import Path
+
 if str(Path(__file__).parent.parent.parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
@@ -18,12 +19,12 @@ class MockLemma:
     """Mock Lemma object for testing without database."""
 
     def __init__(self, **kwargs):
-        self.guid = kwargs.get('guid')
-        self.lemma_text = kwargs.get('lemma_text', '')
-        self.definition_text = kwargs.get('definition_text', '')
-        self.pos_type = kwargs.get('pos_type', '')
-        self.pos_subtype = kwargs.get('pos_subtype', '')
-        self.difficulty_level = kwargs.get('difficulty_level')
+        self.guid = kwargs.get("guid")
+        self.lemma_text = kwargs.get("lemma_text", "")
+        self.definition_text = kwargs.get("definition_text", "")
+        self.pos_type = kwargs.get("pos_type", "")
+        self.pos_subtype = kwargs.get("pos_subtype", "")
+        self.difficulty_level = kwargs.get("difficulty_level")
 
 
 class TestJSONLImportDiff(unittest.TestCase):
@@ -42,7 +43,7 @@ class TestJSONLImportDiff(unittest.TestCase):
             definition_text="The color of blood",
             pos_type="adjective",
             pos_subtype="color",
-            difficulty_level=1
+            difficulty_level=1,
         )
 
         jsonl_data = {
@@ -51,7 +52,7 @@ class TestJSONLImportDiff(unittest.TestCase):
             "concept_definition": "The color of blood",
             "pos_type": "adjective",
             "pos_subtype": "color",
-            "difficulty_level": 1
+            "difficulty_level": 1,
         }
 
         diffs = self.importer.get_field_differences(existing, jsonl_data)
@@ -65,7 +66,7 @@ class TestJSONLImportDiff(unittest.TestCase):
             definition_text="The color of blood",
             pos_type="adjective",
             pos_subtype="color",
-            difficulty_level=1
+            difficulty_level=1,
         )
 
         jsonl_data = {
@@ -74,7 +75,7 @@ class TestJSONLImportDiff(unittest.TestCase):
             "concept_definition": "The color of blood",
             "pos_type": "adjective",
             "pos_subtype": "color",
-            "difficulty_level": 1
+            "difficulty_level": 1,
         }
 
         diffs = self.importer.get_field_differences(existing, jsonl_data)
@@ -91,7 +92,7 @@ class TestJSONLImportDiff(unittest.TestCase):
             definition_text="The color of blood",
             pos_type="adjective",
             pos_subtype="color",
-            difficulty_level=1
+            difficulty_level=1,
         )
 
         jsonl_data = {
@@ -100,7 +101,7 @@ class TestJSONLImportDiff(unittest.TestCase):
             "concept_definition": "A primary color between orange and violet in the visible spectrum",
             "pos_type": "adjective",
             "pos_subtype": "color",
-            "difficulty_level": 1
+            "difficulty_level": 1,
         }
 
         diffs = self.importer.get_field_differences(existing, jsonl_data)
@@ -115,7 +116,7 @@ class TestJSONLImportDiff(unittest.TestCase):
             definition_text="A very long definition that exceeds sixty characters and should be truncated for display purposes",
             pos_type="adjective",
             pos_subtype="color",
-            difficulty_level=1
+            difficulty_level=1,
         )
 
         jsonl_data = {
@@ -124,7 +125,7 @@ class TestJSONLImportDiff(unittest.TestCase):
             "concept_definition": "Another very long definition that also exceeds sixty characters and will be truncated",
             "pos_type": "adjective",
             "pos_subtype": "color",
-            "difficulty_level": 1
+            "difficulty_level": 1,
         }
 
         diffs = self.importer.get_field_differences(existing, jsonl_data)
@@ -140,7 +141,7 @@ class TestJSONLImportDiff(unittest.TestCase):
             definition_text="The color of blood",
             pos_type="adjective",
             pos_subtype="color",
-            difficulty_level=1
+            difficulty_level=1,
         )
 
         jsonl_data = {
@@ -149,7 +150,7 @@ class TestJSONLImportDiff(unittest.TestCase):
             "concept_definition": "The color of blood",
             "pos_type": "adjective",
             "pos_subtype": "color",
-            "difficulty_level": 2
+            "difficulty_level": 2,
         }
 
         diffs = self.importer.get_field_differences(existing, jsonl_data)
@@ -166,7 +167,7 @@ class TestJSONLImportDiff(unittest.TestCase):
             definition_text="The color of blood",
             pos_type="adjective",
             pos_subtype="color",
-            difficulty_level=1
+            difficulty_level=1,
         )
 
         jsonl_data = {
@@ -175,7 +176,7 @@ class TestJSONLImportDiff(unittest.TestCase):
             "concept_definition": "The color of blood",
             "pos_type": "noun",
             "pos_subtype": "color",
-            "difficulty_level": 1
+            "difficulty_level": 1,
         }
 
         diffs = self.importer.get_field_differences(existing, jsonl_data)
@@ -192,7 +193,7 @@ class TestJSONLImportDiff(unittest.TestCase):
             definition_text="The color of blood",
             pos_type="adjective",
             pos_subtype="color",
-            difficulty_level=1
+            difficulty_level=1,
         )
 
         jsonl_data = {
@@ -201,7 +202,7 @@ class TestJSONLImportDiff(unittest.TestCase):
             "concept_definition": "A deep red color",
             "pos_type": "adjective",
             "pos_subtype": "color",
-            "difficulty_level": 2
+            "difficulty_level": 2,
         }
 
         diffs = self.importer.get_field_differences(existing, jsonl_data)
@@ -221,7 +222,7 @@ class TestJSONLImportDiff(unittest.TestCase):
             definition_text="The color of blood",
             pos_type="adjective",
             pos_subtype=None,
-            difficulty_level=1
+            difficulty_level=1,
         )
 
         jsonl_data = {
@@ -230,7 +231,7 @@ class TestJSONLImportDiff(unittest.TestCase):
             "concept_definition": "The color of blood",
             "pos_type": "adjective",
             "pos_subtype": "",
-            "difficulty_level": 1
+            "difficulty_level": 1,
         }
 
         diffs = self.importer.get_field_differences(existing, jsonl_data)
@@ -239,5 +240,5 @@ class TestJSONLImportDiff(unittest.TestCase):
         self.assertIn("category", diffs[0])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

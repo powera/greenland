@@ -161,9 +161,7 @@ def _handle_single_lemma_populate(agent, lemma, session, args):
 
                 # Build list of missing language names for query_translations
                 missing_lang_names = [
-                    LANGUAGE_NAMES[lc].lower()
-                    for lc in missing_langs
-                    if lc in LANGUAGE_NAMES
+                    LANGUAGE_NAMES[lc].lower() for lc in missing_langs if lc in LANGUAGE_NAMES
                 ]
 
                 # Query translations
@@ -252,9 +250,13 @@ def main():
                 print(f"This will:")
                 print(f"  1. Delete all non-Lithuanian translations")
                 if args.batch:
-                    print(f"  2. Queue {word_count} batch requests (1 per word) for later submission")
+                    print(
+                        f"  2. Queue {word_count} batch requests (1 per word) for later submission"
+                    )
                 else:
-                    print(f"  2. Regenerate them fresh using {word_count} LLM API calls (1 per word)")
+                    print(
+                        f"  2. Regenerate them fresh using {word_count} LLM API calls (1 per word)"
+                    )
                 print(f"\nModel: {args.model}")
                 print(f"Words to process: {word_count}")
 
@@ -355,7 +357,9 @@ def main():
             language_code=args.languages, limit=args.limit, dry_run=args.dry_run
         )
 
-        cli_display.display_combined_summary(validation_results, population_results, languages_to_process)
+        cli_display.display_combined_summary(
+            validation_results, population_results, languages_to_process
+        )
 
 
 if __name__ == "__main__":

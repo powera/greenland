@@ -40,11 +40,7 @@ class TestOpenAITTSClient(unittest.TestCase):
         mock_post.return_value = mock_response
 
         client = OpenAITTSClient()
-        result = client.generate_audio(
-            text="labas",
-            voice=Voice.ASH,
-            language_code="lt"
-        )
+        result = client.generate_audio(text="labas", voice=Voice.ASH, language_code="lt")
 
         # Verify result
         self.assertTrue(result.success)
@@ -77,11 +73,7 @@ class TestOpenAITTSClient(unittest.TestCase):
         mock_post.return_value = mock_response
 
         client = OpenAITTSClient()
-        result = client.generate_audio(
-            text="labas",
-            voice=Voice.ASH,
-            language_code="lt"
-        )
+        result = client.generate_audio(text="labas", voice=Voice.ASH, language_code="lt")
 
         # Verify error handling
         self.assertFalse(result.success)
@@ -102,10 +94,7 @@ class TestOpenAITTSClient(unittest.TestCase):
 
         client = OpenAITTSClient()
         result = client.generate_audio(
-            text="labas",
-            voice=Voice.NOVA,
-            language_code="lt",
-            speed=0.75
+            text="labas", voice=Voice.NOVA, language_code="lt", speed=0.75
         )
 
         # Verify speed parameter was included
@@ -192,7 +181,7 @@ class TestAudioGenerationResult(unittest.TestCase):
             model="gpt-4o-mini-tts",
             duration_ms=1500.0,
             success=True,
-            error=None
+            error=None,
         )
 
         self.assertTrue(result.success)
@@ -211,7 +200,7 @@ class TestAudioGenerationResult(unittest.TestCase):
             model="gpt-4o-mini-tts",
             duration_ms=0,
             success=False,
-            error="API error"
+            error="API error",
         )
 
         self.assertFalse(result.success)

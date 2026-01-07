@@ -270,7 +270,14 @@ def query_lithuanian_verb_conjugations(
     pos_subtype = lemma.pos_subtype
 
     # All 18 forms (6 persons × 3 tenses)
-    present_fields = ["1s_present", "2s_present", "3s_present", "1p_present", "2p_present", "3p_present"]
+    present_fields = [
+        "1s_present",
+        "2s_present",
+        "3s_present",
+        "1p_present",
+        "2p_present",
+        "3p_present",
+    ]
     past_fields = ["1s_past", "2s_past", "3s_past", "1p_past", "2p_past", "3p_past"]
     future_fields = ["1s_future", "2s_future", "3s_future", "1p_future", "2p_future", "3p_future"]
 

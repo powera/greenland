@@ -33,7 +33,7 @@ def check_column_exists(session, table_name: str, column_name: str) -> bool:
         True if column exists, False otherwise
     """
     inspector = inspect(session.bind)
-    columns = [col['name'] for col in inspector.get_columns(table_name)]
+    columns = [col["name"] for col in inspector.get_columns(table_name)]
     return column_name in columns
 
 
@@ -43,14 +43,12 @@ def add_definition_column(session):
     Args:
         session: Database session
     """
-    if check_column_exists(session, 'lemma_translations', 'definition_text'):
+    if check_column_exists(session, "lemma_translations", "definition_text"):
         print("Column 'definition_text' already exists in lemma_translations table")
         return False
 
     print("Adding 'definition_text' column to lemma_translations table...")
-    session.execute(text(
-        "ALTER TABLE lemma_translations ADD COLUMN definition_text TEXT"
-    ))
+    session.execute(text("ALTER TABLE lemma_translations ADD COLUMN definition_text TEXT"))
     session.commit()
     print("Column added successfully")
     return True
@@ -77,10 +75,7 @@ def migrate_english_translations(session, dry_run: bool = False):
         # Check if English translation already exists
         existing_en = (
             session.query(LemmaTranslation)
-            .filter(
-                LemmaTranslation.lemma_id == lemma.id,
-                LemmaTranslation.language_code == 'en'
-            )
+            .filter(LemmaTranslation.lemma_id == lemma.id, LemmaTranslation.language_code == "en")
             .first()
         )
 
@@ -97,10 +92,10 @@ def migrate_english_translations(session, dry_run: bool = False):
             # Create new English translation row
             en_translation = LemmaTranslation(
                 lemma_id=lemma.id,
-                language_code='en',
+                language_code="en",
                 translation=lemma.lemma_text,
                 definition_text=lemma.definition_text,
-                verified=lemma.verified
+                verified=lemma.verified,
             )
             session.add(en_translation)
             created += 1
@@ -129,14 +124,12 @@ def main():
 
     parser = argparse.ArgumentParser(description="Add definition_text to LemmaTranslation")
     parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="Show what would be done without making changes"
+        "--dry-run", action="store_true", help="Show what would be done without making changes"
     )
     parser.add_argument(
         "--db-path",
         default=WORDFREQ_DB_PATH,
-        help=f"Path to SQLite database (default: {WORDFREQ_DB_PATH})"
+        help=f"Path to SQLite database (default: {WORDFREQ_DB_PATH})",
     )
 
     args = parser.parse_args()
@@ -153,7 +146,7 @@ def main():
         if not args.dry_run:
             column_added = add_definition_column(session)
         else:
-            if check_column_exists(session, 'lemma_translations', 'definition_text'):
+            if check_column_exists(session, "lemma_translations", "definition_text"):
                 print("Column 'definition_text' already exists")
                 column_added = False
             else:
@@ -171,6 +164,7 @@ def main():
     except Exception as e:
         print(f"\nError during migration: {e}")
         import traceback
+
         traceback.print_exc()
         session.rollback()
         return 1

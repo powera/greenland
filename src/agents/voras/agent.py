@@ -106,7 +106,7 @@ class VorasAgent:
             self.cache_client = BarsukasCacheClient(
                 base_url=self.config.barsukas_url,
                 cache_only=self.config.cache_only,
-                debug=self.debug
+                debug=self.debug,
             )
         return self.cache_client
 
@@ -456,12 +456,7 @@ class VorasAgent:
 
         try:
             # Get all lemmas with GUIDs (curated words)
-            query = (
-                LemmaQueryBuilder(session)
-                .curated_only()
-                .order_by_id()
-                .build()
-            )
+            query = LemmaQueryBuilder(session).curated_only().order_by_id().build()
 
             words_to_process = apply_limit_and_sample_rate(query, limit, sample_rate=1.0)
             total_words = len(words_to_process)
@@ -516,7 +511,10 @@ class VorasAgent:
                         # Use Lithuanian as reference translation
                         translations, success = client.query_translations(
                             english_word=lemma.lemma_text,
-                            reference_translation=("lt", get_translation(session, lemma, "lt") or ""),
+                            reference_translation=(
+                                "lt",
+                                get_translation(session, lemma, "lt") or "",
+                            ),
                             definition=lemma.definition_text,
                             pos_type=lemma.pos_type,
                             pos_subtype=lemma.pos_subtype,
@@ -684,12 +682,16 @@ class VorasAgent:
                         try:
                             translations_by_lang_code = cache_client.get_translations(lemma.guid)
                             if translations_by_lang_code:
-                                logger.info(f"Using cached translations for '{lemma.lemma_text}' (GUID: {lemma.guid})")
+                                logger.info(
+                                    f"Using cached translations for '{lemma.lemma_text}' (GUID: {lemma.guid})"
+                                )
                                 translation_source = "barsukas-proxy"
                         except Exception as cache_error:
                             # If cache_only mode, this will raise an exception that propagates
                             # Otherwise, we'll fall through to LLM query
-                            logger.debug(f"Cache lookup failed for '{lemma.lemma_text}': {cache_error}")
+                            logger.debug(
+                                f"Cache lookup failed for '{lemma.lemma_text}': {cache_error}"
+                            )
                             if self.config.cache_only:
                                 raise
 
@@ -737,7 +739,9 @@ class VorasAgent:
                             continue
 
                         # Convert LLM response format (field_name -> translation) to lang_code format
-                        translations_by_lang_code = convert_llm_response_to_lang_codes(llm_translations)
+                        translations_by_lang_code = convert_llm_response_to_lang_codes(
+                            llm_translations
+                        )
                         translation_source = f"voras-agent/{self.config.model}"
 
                     # Apply translations to lemma (translations_by_lang_code now always uses lang_code keys)
@@ -769,8 +773,7 @@ class VorasAgent:
                         [
                             lc
                             for lc, _ in missing_languages
-                            if lc != "lt"
-                            and translations_by_lang_code.get(lc, "").strip()
+                            if lc != "lt" and translations_by_lang_code.get(lc, "").strip()
                         ]
                     )
                     logger.info(

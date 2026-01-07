@@ -116,34 +116,22 @@ class LinguisticReviewer:
                 # Translations are now in the lemma
                 chinese = get_translation(self.session, derivative_form.lemma, "zh")
                 if chinese:
-                    print(
-                        f"    {self.c.BLUE}Chinese:{self.c.ENDC} {chinese}"
-                    )
+                    print(f"    {self.c.BLUE}Chinese:{self.c.ENDC} {chinese}")
                 french = get_translation(self.session, derivative_form.lemma, "fr")
                 if french:
-                    print(
-                        f"    {self.c.BLUE}French:{self.c.ENDC} {french}"
-                    )
+                    print(f"    {self.c.BLUE}French:{self.c.ENDC} {french}")
                 korean = get_translation(self.session, derivative_form.lemma, "ko")
                 if korean:
-                    print(
-                        f"    {self.c.BLUE}Korean:{self.c.ENDC} {korean}"
-                    )
+                    print(f"    {self.c.BLUE}Korean:{self.c.ENDC} {korean}")
                 swahili = get_translation(self.session, derivative_form.lemma, "sw")
                 if swahili:
-                    print(
-                        f"    {self.c.BLUE}Swahili:{self.c.ENDC} {swahili}"
-                    )
+                    print(f"    {self.c.BLUE}Swahili:{self.c.ENDC} {swahili}")
                 lithuanian = get_translation(self.session, derivative_form.lemma, "lt")
                 if lithuanian:
-                    print(
-                        f"    {self.c.BLUE}Lithuanian:{self.c.ENDC} {lithuanian}"
-                    )
+                    print(f"    {self.c.BLUE}Lithuanian:{self.c.ENDC} {lithuanian}")
                 vietnamese = get_translation(self.session, derivative_form.lemma, "vi")
                 if vietnamese:
-                    print(
-                        f"    {self.c.BLUE}Vietnamese:{self.c.ENDC} {vietnamese}"
-                    )
+                    print(f"    {self.c.BLUE}Vietnamese:{self.c.ENDC} {vietnamese}")
 
                 if derivative_form.notes:
                     print(f"    {self.c.BLUE}Notes:{self.c.ENDC} {derivative_form.notes}")

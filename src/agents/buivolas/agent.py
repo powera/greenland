@@ -24,9 +24,7 @@ class BuivolasAgent:
         if self.debug:
             logger.setLevel(logging.DEBUG)
 
-        self.pattern_generator = PatternSentenceGenerator(
-            config=config, dry_run=dry_run
-        )
+        self.pattern_generator = PatternSentenceGenerator(config=config, dry_run=dry_run)
         self.llm_generator = LlmSentenceGenerator(config=config, dry_run=dry_run)
 
     def get_session(self):

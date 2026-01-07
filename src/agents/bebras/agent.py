@@ -71,9 +71,7 @@ class BebrasAgent:
         schema = self._build_analysis_schema()
 
         try:
-            response = self.llm_client.generate_chat(
-                prompt=prompt, json_schema=schema, timeout=60
-            )
+            response = self.llm_client.generate_chat(prompt=prompt, json_schema=schema, timeout=60)
 
             if response.structured_data:
                 result = response.structured_data

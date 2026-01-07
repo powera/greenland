@@ -2,7 +2,17 @@
 
 """Routes for listing and launching autonomous agents."""
 
-from flask import Blueprint, render_template, request, jsonify, flash, redirect, url_for, g, Response
+from flask import (
+    Blueprint,
+    render_template,
+    request,
+    jsonify,
+    flash,
+    redirect,
+    url_for,
+    g,
+    Response,
+)
 import subprocess
 import os
 import time
@@ -295,10 +305,7 @@ def list_agents():
                 visible_agents.append(agent)
 
     return render_template(
-        "agents_launcher/list.html",
-        agents=visible_agents,
-        pipeline=PIPELINE,
-        db_empty=db_empty
+        "agents_launcher/list.html", agents=visible_agents, pipeline=PIPELINE, db_empty=db_empty
     )
 
 
@@ -424,7 +431,7 @@ def execute_agent(agent_name):
             stderr=subprocess.STDOUT,  # Combine stderr into stdout for unified streaming
             text=True,
             bufsize=1,  # Line buffered
-            universal_newlines=True
+            universal_newlines=True,
         )
 
         # Store task info
@@ -488,6 +495,7 @@ def stream_output(task_id):
     def generate():
         """Generator function to stream output line by line."""
         import json
+
         task = running_tasks[task_id]
         last_line_sent = 0
 

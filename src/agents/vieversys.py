@@ -35,7 +35,11 @@ from agents.common.common_args import (
     confirm_operation,
     get_data_source_config,
 )
-from agents.common.lemma_selection import get_lemmas_for_agent, LemmaQueryBuilder, apply_limit_and_sample_rate
+from agents.common.lemma_selection import (
+    get_lemmas_for_agent,
+    LemmaQueryBuilder,
+    apply_limit_and_sample_rate,
+)
 from wordfreq.storage.backend import create_session as create_backend_session
 from wordfreq.storage.backend.config import DataSourceConfig, BackendType
 from wordfreq.storage.models.schema import Lemma, AudioQualityReview
@@ -79,7 +83,9 @@ class VieversysAgent:
         """
         self.config = config
         self.debug = config.debug
-        self.output_dir = Path(output_dir) if output_dir else Path(tempfile.mkdtemp(prefix="vieversys_"))
+        self.output_dir = (
+            Path(output_dir) if output_dir else Path(tempfile.mkdtemp(prefix="vieversys_"))
+        )
 
         if self.debug:
             logger.setLevel(logging.DEBUG)
@@ -392,13 +398,22 @@ def get_argument_parser():
         choices=["lt", "zh", "ko", "fr", "de", "es", "pt", "sw", "vi"],
         help="Target language code (required for populate-only and regenerate modes)",
     )
-    parser.add_argument(
-        "--difficulty-level", type=int, help="Filter by difficulty level (1-20)"
-    )
+    parser.add_argument("--difficulty-level", type=int, help="Filter by difficulty level (1-20)")
     parser.add_argument(
         "--voices",
         nargs="+",
-        choices=["ash", "alloy", "nova", "ballad", "coral", "echo", "fable", "onyx", "sage", "shimmer"],
+        choices=[
+            "ash",
+            "alloy",
+            "nova",
+            "ballad",
+            "coral",
+            "echo",
+            "fable",
+            "onyx",
+            "sage",
+            "shimmer",
+        ],
         help="Voices to use (defaults to ash, alloy, nova)",
     )
     parser.add_argument(
@@ -474,11 +489,10 @@ def main():
 
             # Get counts by language and voice
             if args.language:
-                query = session.query(
-                    AudioQualityReview.voice_name,
-                    func.count(AudioQualityReview.id)
-                ).filter(AudioQualityReview.language_code == args.language).group_by(
-                    AudioQualityReview.voice_name
+                query = (
+                    session.query(AudioQualityReview.voice_name, func.count(AudioQualityReview.id))
+                    .filter(AudioQualityReview.language_code == args.language)
+                    .group_by(AudioQualityReview.voice_name)
                 )
                 results = query.all()
                 print(f"\nLanguage: {args.language}")
@@ -488,11 +502,8 @@ def main():
                 query = session.query(
                     AudioQualityReview.language_code,
                     AudioQualityReview.voice_name,
-                    func.count(AudioQualityReview.id)
-                ).group_by(
-                    AudioQualityReview.language_code,
-                    AudioQualityReview.voice_name
-                )
+                    func.count(AudioQualityReview.id),
+                ).group_by(AudioQualityReview.language_code, AudioQualityReview.voice_name)
                 results = query.all()
                 current_lang = None
                 for lang_code, voice_name, count in results:
@@ -522,7 +533,9 @@ def main():
             audio_files = query.all()
 
             for audio in audio_files:
-                print(f"{audio.guid} | {audio.language_code}/{audio.voice_name} | {audio.filename} | {audio.status}")
+                print(
+                    f"{audio.guid} | {audio.language_code}/{audio.voice_name} | {audio.filename} | {audio.status}"
+                )
 
             print(f"\nTotal: {len(audio_files)} audio files")
         finally:

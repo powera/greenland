@@ -251,9 +251,7 @@ class LapeAgent:
         # Query LLM
         try:
             client = self.get_llm_client()
-            response = client.generate_chat(
-                prompt=prompt_text, json_schema=schema, context=context
-            )
+            response = client.generate_chat(prompt=prompt_text, json_schema=schema, context=context)
 
             # Extract structured data
             if response.structured_data:
@@ -354,9 +352,7 @@ class LapeAgent:
         # Query LLM
         try:
             client = self.get_llm_client()
-            response = client.generate_chat(
-                prompt=prompt_text, json_schema=schema, context=context
-            )
+            response = client.generate_chat(prompt=prompt_text, json_schema=schema, context=context)
 
             # Extract structured data
             if response.structured_data:
