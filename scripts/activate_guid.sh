@@ -90,7 +90,7 @@ run_step "Grammatical forms" \
 run_step "Synonyms" \
   python -m agents.sernas.cli --guid "$GUID" --mode populate-only --languages ${LANGUAGES} --yes
 
-# Grammatical facts (Lape) - run per language
+# Grammatical facts (Lape) - run once across languages and supported tasks
 LAPE_LANGUAGES=("${LANGUAGE_LIST[@]}")
 NEEDS_EN=true
 for lang in "${LAPE_LANGUAGES[@]}"; do
@@ -103,17 +103,15 @@ if [[ "$NEEDS_EN" == true ]]; then
   LAPE_LANGUAGES+=("en")
 fi
 
-for lang in "${LAPE_LANGUAGES[@]}"; do
-  if [[ ${#GRAMMAR_FACT_TYPE_LIST[@]} -gt 0 ]]; then
-    for fact_type in "${GRAMMAR_FACT_TYPE_LIST[@]}"; do
-      run_step "Grammatical facts (${lang} - ${fact_type})" \
-        python -m agents.lape --guid "$GUID" --fact-type "$fact_type" --language "$lang"
-    done
-  else
-    run_step "Grammatical facts (${lang} - task: ${GRAMMAR_FACT_TASK})" \
-      python -m agents.lape --guid "$GUID" --task "$GRAMMAR_FACT_TASK" --language "$lang"
-  fi
-done
+if [[ ${#GRAMMAR_FACT_TYPE_LIST[@]} -gt 0 ]]; then
+  for fact_type in "${GRAMMAR_FACT_TYPE_LIST[@]}"; do
+    run_step "Grammatical facts (languages: ${LAPE_LANGUAGES[*]} - ${fact_type})" \
+      python -m agents.lape --guid "$GUID" --fact-type "$fact_type" --languages ${LAPE_LANGUAGES[*]}
+  done
+else
+  run_step "Grammatical facts (languages: ${LAPE_LANGUAGES[*]} - task: ${GRAMMAR_FACT_TASK})" \
+    python -m agents.lape --guid "$GUID" --task "$GRAMMAR_FACT_TASK" --languages ${LAPE_LANGUAGES[*]}
+fi
 
 # TODO: Sentence generation once --guid is supported for the sentence agents
 # run_step "Sentences" python -m agents.zvirblis --guid "$GUID" --num-sentences 3

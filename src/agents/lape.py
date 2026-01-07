@@ -46,6 +46,7 @@ from agents.common.common_args import (
     add_llm_args,
     add_backend_args,
     add_guid_arg,
+    add_language_args,
     get_data_source_config,
 )
 from agents.common.lemma_selection import (
@@ -575,29 +576,29 @@ def get_argument_parser():
         epilog="""
 Examples:
   # Generate Chinese measure words for nouns
-  python lape.py --fact-type measure_words --language zh --limit 10
+  python lape.py --fact-type measure_words --languages zh --limit 10
 
   # Generate French grammatical gender for nouns
-  python lape.py --fact-type grammatical_gender --language fr --limit 10
+  python lape.py --fact-type grammatical_gender --languages fr --limit 10
 
   # Generate Lithuanian grammatical gender for nouns
-  python lape.py --fact-type grammatical_gender --language lt --limit 10
+  python lape.py --fact-type grammatical_gender --languages lt --limit 10
 
   # Generate for a single lemma by GUID
-  python lape.py --fact-type grammatical_gender --language fr --guid N14_001
+  python lape.py --fact-type grammatical_gender --languages fr --guid N14_001
 
   # Dry run to see what would be generated
-  python lape.py --fact-type grammatical_gender --language fr --limit 5 --dry-run
+  python lape.py --fact-type grammatical_gender --languages fr --limit 5 --dry-run
 
   # Generate for all lemmas without existing facts
-  python lape.py --fact-type grammatical_gender --language fr
+  python lape.py --fact-type grammatical_gender --languages fr
 
   # Use a different model
-  python lape.py --fact-type grammatical_gender --language de --model gpt-5 --limit 10
+  python lape.py --fact-type grammatical_gender --languages de --model gpt-5 --limit 10
 
   # Use grouped tasks to process multiple fact types
-  python lape.py --task all --language fr --limit 10
-  python lape.py --task gender --language lt --guid N14_001
+  python lape.py --task all --languages fr es --limit 10
+  python lape.py --task gender --languages lt --guid N14_001
 
 Supported fact types:
   - measure_words: Chinese measure words/classifiers for nouns (languages: zh)
@@ -616,6 +617,7 @@ Future fact types (see code comments):
     add_common_args(parser)
     add_llm_args(parser, default_model="gpt-5-mini")
     add_backend_args(parser)
+    add_language_args(parser, multiple=True)
 
     # Lape-specific arguments
     add_guid_arg(parser, help_text="Process only the lemma with this GUID")
@@ -630,7 +632,6 @@ Future fact types (see code comments):
         choices=LapeAgent.TASK_PRESETS.keys(),
         help="Run a grouped task preset that maps to multiple fact types",
     )
-    parser.add_argument("--language", required=True, help="Language code (e.g., zh, fr, es)")
     parser.add_argument("--limit", type=int, help="Maximum number of lemmas to process")
     parser.add_argument(
         "--skip-existing",
@@ -659,14 +660,22 @@ def main():
     parser = get_argument_parser()
     args = parser.parse_args()
 
+    if not args.languages:
+        parser.error("At least one --language/--languages value is required")
+
+    # Normalize language list while preserving order
+    languages = list(dict.fromkeys(args.languages))
+
     # Create configuration from args (always returns a valid config with defaults)
     config = get_data_source_config(args)
 
     # Create agent
     agent = LapeAgent(config=config)
 
+    explicit_fact_type = args.fact_type is not None
+
     # Determine which fact types to run (either explicit type or grouped task)
-    if args.fact_type:
+    if explicit_fact_type:
         fact_types_to_run = [args.fact_type]
     else:
         fact_types_to_run = LapeAgent.TASK_PRESETS[args.task]
@@ -688,42 +697,60 @@ def main():
     else:
         logger.info(f"Processing {len(lemmas)} lemmas")
 
-    # Generate facts for each requested fact type
+    # Generate facts for each requested fact type and language
     try:
-        for fact_type in fact_types_to_run:
-            results = agent.generate_grammar_facts(
-                fact_type=fact_type,
-                language_code=args.language,
-                lemmas=lemmas,
-                limit=args.limit,
-                skip_existing=args.skip_existing,
-                min_confidence=args.min_confidence,
-                dry_run=args.dry_run,
-            )
+        for language_code in languages:
+            applicable_fact_types = [
+                fact_type
+                for fact_type in fact_types_to_run
+                if language_code in LapeAgent.SUPPORTED_FACT_TYPES[fact_type]["languages"]
+            ]
 
-            # Print summary
-            print("\n" + "=" * 60)
-            print("GRAMMAR FACTS GENERATION SUMMARY")
-            print("=" * 60)
-            print(f"Fact Type: {results['fact_type']}")
-            print(f"Language: {results['language_code']}")
-            print(f"Processed: {results['processed']}")
-            print(f"Success: {results['success']}")
-            print(f"Failed: {results['failed']}")
-            print(f"Skipped: {results['skipped']}")
-            if results["dry_run"]:
-                print("\n⚠️  DRY RUN - No changes saved to database")
-            print("=" * 60)
+            if explicit_fact_type and not applicable_fact_types:
+                parser.error(
+                    f"Fact type '{args.fact_type}' does not support language '{language_code}'."
+                )
 
-            # Print some examples
-            if results["results"]:
-                print("\nSample results:")
-                for i, result in enumerate(results["results"][:5], 1):
-                    print(f"{i}. {result['lemma_text']} ({result['translation']})")
-                    print(f"   → {result['fact_value']}")
-                    print(f"   Confidence: {result['confidence']:.2f}")
-                    if result["notes"]:
-                        print(f"   Notes: {result['notes']}")
+            if not applicable_fact_types:
+                logger.info(
+                    f"Skipping language '{language_code}' - no supported fact types for the selected task(s)"
+                )
+                continue
+
+            for fact_type in applicable_fact_types:
+                results = agent.generate_grammar_facts(
+                    fact_type=fact_type,
+                    language_code=language_code,
+                    lemmas=lemmas,
+                    limit=args.limit,
+                    skip_existing=args.skip_existing,
+                    min_confidence=args.min_confidence,
+                    dry_run=args.dry_run,
+                )
+
+                # Print summary
+                print("\n" + "=" * 60)
+                print("GRAMMAR FACTS GENERATION SUMMARY")
+                print("=" * 60)
+                print(f"Fact Type: {results['fact_type']}")
+                print(f"Language: {results['language_code']}")
+                print(f"Processed: {results['processed']}")
+                print(f"Success: {results['success']}")
+                print(f"Failed: {results['failed']}")
+                print(f"Skipped: {results['skipped']}")
+                if results["dry_run"]:
+                    print("\n⚠️  DRY RUN - No changes saved to database")
+                print("=" * 60)
+
+                # Print some examples
+                if results["results"]:
+                    print("\nSample results:")
+                    for i, result in enumerate(results["results"][:5], 1):
+                        print(f"{i}. {result['lemma_text']} ({result['translation']})")
+                        print(f"   → {result['fact_value']}")
+                        print(f"   Confidence: {result['confidence']:.2f}")
+                        if result["notes"]:
+                            print(f"   Notes: {result['notes']}")
 
     except Exception as e:
         logger.error(f"Failed to generate grammar facts: {e}")
