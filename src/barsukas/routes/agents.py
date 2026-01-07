@@ -20,7 +20,7 @@ bp = Blueprint("agents", __name__, url_prefix="/agents")
 logger = logging.getLogger(__name__)
 
 
-def flash_and_log(e: Exception, context: str) -> None:
+def log_and_flash_error(e: Exception, context: str):
     """
     Helper to log error with file/line info and flash to user.
 
@@ -120,7 +120,7 @@ def check_translations(lemma_id):
             )
 
     except Exception as e:
-        flash_and_log(e, "checking translations")
+        log_and_flash_error(e, "checking translations")
 
     return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
@@ -150,7 +150,7 @@ def add_missing_translations(lemma_id):
         else:
             flash("Translation generation already in progress for this lemma.", "warning")
     except Exception as e:
-        flash_and_log(e, "adding missing translations")
+        log_and_flash_error(e, "adding missing translations")
 
     return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
@@ -243,7 +243,7 @@ def check_pronunciations(lemma_id):
             )
 
     except Exception as e:
-        flash_and_log(e, "checking pronunciations")
+        log_and_flash_error(e, "checking pronunciations")
 
     return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
@@ -276,7 +276,7 @@ def generate_pronunciations(lemma_id):
         else:
             flash("Pronunciation generation already in progress for this lemma/language.", "warning")
     except Exception as e:
-        flash_and_log(e, "generating pronunciations")
+        log_and_flash_error(e, "generating pronunciations")
 
     return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
@@ -314,7 +314,7 @@ def generate_forms(lemma_id):
         else:
             flash("Form generation already queued for this lemma/language.", "warning")
     except Exception as e:
-        flash_and_log(e, "generating forms")
+        log_and_flash_error(e, "generating forms")
 
     return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
@@ -347,7 +347,7 @@ def generate_synonyms(lemma_id):
         else:
             flash("Synonym generation already queued for this lemma/language.", "warning")
     except Exception as e:
-        flash_and_log(e, "generating synonyms")
+        log_and_flash_error(e, "generating synonyms")
 
     return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
@@ -382,7 +382,7 @@ def check_definition(lemma_id):
             )
 
     except Exception as e:
-        flash_and_log(e, "checking definition")
+        log_and_flash_error(e, "checking definition")
 
     return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
@@ -424,7 +424,7 @@ def apply_definition(lemma_id):
         flash("Definition updated successfully!", "success")
     except Exception as e:
         g.db.rollback()
-        flash_and_log(e, "updating definition")
+        log_and_flash_error(e, "updating definition")
 
     return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
@@ -490,7 +490,7 @@ def check_disambiguation(lemma_id):
             )
 
     except Exception as e:
-        flash_and_log(e, "checking disambiguation")
+        log_and_flash_error(e, "checking disambiguation")
 
     return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
@@ -533,7 +533,7 @@ def apply_disambiguation(lemma_id):
         flash(f'✓ Updated GUID {lemma.guid}: "{old_lemma_text}" → "{new_lemma_text}"', "success")
     except Exception as e:
         g.db.rollback()
-        flash_and_log(e, "applying disambiguation")
+        log_and_flash_error(e, "applying disambiguation")
 
     # Stay on suggestions page if requested, otherwise go to the updated lemma
     if return_to_suggestions and original_lemma_id:
@@ -624,7 +624,7 @@ def generate_sentences(lemma_id):
                     flash(f"Error: {error}", "error")
 
     except Exception as e:
-        flash_and_log(e, "generating sentences")
+        log_and_flash_error(e, "generating sentences")
 
     return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
@@ -753,7 +753,7 @@ def generate_grammar_fact(lemma_id):
 
     except Exception as e:
         g.db.rollback()
-        flash_and_log(e, "generating grammar fact")
+        log_and_flash_error(e, "generating grammar fact")
 
     return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
@@ -783,5 +783,5 @@ def view_sentences(lemma_id):
         return render_template("agents/view_sentences.html", lemma=lemma, sentences=sentences)
 
     except Exception as e:
-        flash_and_log(e, "viewing sentences")
+        log_and_flash_error(e, "viewing sentences")
         return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
