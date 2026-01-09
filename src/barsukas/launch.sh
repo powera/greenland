@@ -7,6 +7,8 @@
 STORAGE_FORMAT="sqlite"
 # Default to all interfaces
 HOST_ARGS="--host 0.0.0.0"
+# Default port
+PORT="5555"
 # Optional database path
 DB_PATH=""
 
@@ -20,6 +22,10 @@ while [[ $# -gt 0 ]]; do
         -a|--all-interfaces)
             HOST_ARGS="--host 0.0.0.0"
             shift
+            ;;
+        -p|--port)
+            PORT="$2"
+            shift 2
             ;;
         --db-path)
             DB_PATH="$2"
@@ -35,7 +41,7 @@ done
 # Validate storage format
 if [[ "$STORAGE_FORMAT" != "jsonl" && "$STORAGE_FORMAT" != "sqlite" ]]; then
     echo "Error: Invalid storage format '$STORAGE_FORMAT'"
-    echo "Usage: $0 [-f|--format jsonl|sqlite] [-a|--all-interfaces] [--db-path PATH]"
+    echo "Usage: $0 [-f|--format jsonl|sqlite] [-a|--all-interfaces] [-p|--port PORT] [--db-path PATH]"
     exit 1
 fi
 
@@ -107,6 +113,17 @@ stop_worker() {
 }
 
 cleanup() {
+    echo ""
+    echo "Shutting down Barsukas..."
+
+    # Stop the Flask server if it's running
+    if [[ -n "$SERVER_PID" ]] && kill -0 "$SERVER_PID" 2>/dev/null; then
+        echo "Stopping Flask server (pid $SERVER_PID)"
+        kill -TERM "$SERVER_PID" 2>/dev/null
+        wait "$SERVER_PID" 2>/dev/null
+    fi
+
+    # Stop the worker
     stop_worker 15
 }
 
@@ -117,7 +134,7 @@ trap cleanup EXIT INT TERM
 # Exit code 42 = restart requested, restart immediately
 RESTART_WORKER=0
 while true; do
-    python app.py $HOST_ARGS "$@" &
+    python app.py $HOST_ARGS --port "$PORT" "$@" &
     SERVER_PID=$!
     if [[ $RESTART_WORKER -eq 1 ]]; then
         stop_worker 60
@@ -129,7 +146,10 @@ while true; do
     wait "$SERVER_PID"
     EXIT_CODE=$?
 
-    if [ $EXIT_CODE -eq 42 ]; then
+    # If wait was interrupted by signal (exit code > 128), cleanup will handle it
+    if [ $EXIT_CODE -gt 128 ]; then
+        exit $EXIT_CODE
+    elif [ $EXIT_CODE -eq 42 ]; then
         echo ""
         echo "=========================================="
         echo "Restarting Barsukas (exit code 42)..."
