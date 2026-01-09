@@ -220,20 +220,19 @@ class ZvirblisAgent:
 
             requests_queued = 0
             for sentence in sentences:
-                sentence_words = (
+                # Determine if we should include English in this translation
+                # If English word breakdown doesn't exist yet, include it (tier 1 pass)
+                # If English word breakdown already exists, skip it (tier 2 pass)
+                english_words = (
                     session.query(SentenceWord)
                     .filter_by(sentence_id=sentence.id, language_code="en")
                     .all()
                 )
-
-                # Determine if we should include English in this translation
-                # If English word breakdown doesn't exist yet, include it (tier 1 pass)
-                # If English word breakdown already exists, skip it (tier 2 pass)
-                include_english = len(sentence_words) == 0
+                include_english = len(english_words) == 0
 
                 try:
                     context, prompt = build_translation_prompt(
-                        sentence, sentence_words, target_languages, session, include_english
+                        sentence, target_languages, session, include_english
                     )
                 except ValueError:
                     continue

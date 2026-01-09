@@ -7,7 +7,7 @@ from typing import Dict, List, Optional, Tuple
 from wordfreq.patterns.simple_patterns import SIMPLE_PATTERNS
 from wordfreq.storage.backend import create_session as create_backend_session
 from wordfreq.storage.backend.config import DataSourceConfig
-from wordfreq.storage.models.schema import Lemma, Sentence, SentenceTranslation, SentenceWord
+from wordfreq.storage.models.schema import Lemma, Sentence, SentenceTranslation, SentenceWord, SentencePatternWord
 
 logger = logging.getLogger(__name__)
 
@@ -261,11 +261,10 @@ class PatternSentenceGenerator:
 
             for existing_sentence in existing_sentences:
                 existing_lemma_ids = {
-                    sw.lemma_id
-                    for sw in session.query(SentenceWord)
-                    .filter_by(sentence_id=existing_sentence.id, language_code="en")
+                    pw.lemma_id
+                    for pw in session.query(SentencePatternWord)
+                    .filter_by(sentence_id=existing_sentence.id)
                     .all()
-                    if sw.lemma_id is not None
                 }
 
                 if combination_lemma_ids == existing_lemma_ids:
@@ -295,34 +294,32 @@ class PatternSentenceGenerator:
             )
             session.add(translation)
 
+            # Store pattern definition in SentencePatternWord (permanent record)
             position = 0
             for slot_name, (lemma, guid) in combination["lemmas"].items():
                 lemma_text = strip_disambiguation(lemma.lemma_text)
 
-                sentence_word = SentenceWord(
+                pattern_word = SentencePatternWord(
                     sentence_id=sentence.id,
                     lemma_id=lemma.id,
-                    language_code="en",
                     position=position,
-                    word_role=slot_name,
+                    slot_name=slot_name,
                     english_text=lemma_text,
-                    target_language_text=lemma_text,
                 )
-                session.add(sentence_word)
+                session.add(pattern_word)
                 position += 1
 
+            # Add fixed words to pattern definition
             fixed_lemmas = self.lookup_fixed_words(session, pattern)
             for lemma, guid in fixed_lemmas:
-                sentence_word = SentenceWord(
+                pattern_word = SentencePatternWord(
                     sentence_id=sentence.id,
                     lemma_id=lemma.id,
-                    language_code="en",
                     position=position,
-                    word_role="fixed",
+                    slot_name="fixed",
                     english_text=lemma.lemma_text,
-                    target_language_text=lemma.lemma_text,
                 )
-                session.add(sentence_word)
+                session.add(pattern_word)
                 position += 1
 
             session.commit()

@@ -19,6 +19,7 @@ from wordfreq.storage.models.schema import (
     Sentence,
     SentenceTranslation,
     SentenceWord,
+    SentencePatternWord,
 )
 from wordfreq.storage.translation_helpers import LANGUAGE_NAMES, get_translation
 
@@ -26,14 +27,13 @@ logger = logging.getLogger(__name__)
 
 
 def build_translation_prompt(
-    sentence: Sentence, sentence_words: List[SentenceWord], target_languages: List[str], session, include_english: bool = True
+    sentence: Sentence, target_languages: List[str], session, include_english: bool = True
 ) -> Tuple[str, str]:
     """
     Build LLM prompt for translating a sentence.
 
     Args:
         sentence: Sentence object with English translation
-        sentence_words: List of SentenceWord objects (English words with lemma links)
         target_languages: List of language codes to translate to
         session: Database session for lemma lookups
         include_english: Whether to request English translation with POS info (True for tier 1, False for tier 2)
@@ -53,21 +53,25 @@ def build_translation_prompt(
 
     template_text = en_translation.translation_text
 
-    # Build word translations reference with GUIDs
-    word_translations = {}
-    for word in sentence_words:
-        if not word.lemma_id:
-            continue
+    # Build word translations reference from pattern definition (permanent record)
+    pattern_words = (
+        session.query(SentencePatternWord)
+        .filter_by(sentence_id=sentence.id)
+        .order_by(SentencePatternWord.position)
+        .all()
+    )
 
-        lemma = session.query(Lemma).filter_by(id=word.lemma_id).first()
+    word_translations = {}
+    for pattern_word in pattern_words:
+        lemma = session.query(Lemma).filter_by(id=pattern_word.lemma_id).first()
         if not lemma:
             continue
 
         # Use English lemma text as the key (e.g., "fork", "apartment")
-        english_text = lemma.lemma_text
+        english_text = pattern_word.english_text
         word_translations[english_text] = {
             "guid": lemma.guid if lemma.guid else "",
-            "role": word.word_role,  # Keep role for reference
+            "role": pattern_word.slot_name,  # Use slot_name from pattern
         }
 
         for lang in target_languages:
@@ -224,18 +228,16 @@ def translate_sentence(
     if not sentence:
         raise ValueError(f"Sentence {sentence_id} not found")
 
-    # Get English words with lemma links
-    sentence_words = (
-        session.query(SentenceWord).filter_by(sentence_id=sentence_id, language_code="en").all()
-    )
-
     # Determine if we should include English in this translation
     # If English word breakdown doesn't exist yet, include it (tier 1 pass)
     # If English word breakdown already exists, skip it (tier 2 pass)
-    include_english = len(sentence_words) == 0
+    english_words = (
+        session.query(SentenceWord).filter_by(sentence_id=sentence_id, language_code="en").all()
+    )
+    include_english = len(english_words) == 0
 
     # Build context, prompt and schema
-    context, prompt = build_translation_prompt(sentence, sentence_words, target_languages, session, include_english)
+    context, prompt = build_translation_prompt(sentence, target_languages, session, include_english)
     schema = build_response_schema(target_languages, include_english)
 
     # Call LLM
