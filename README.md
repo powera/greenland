@@ -27,7 +27,7 @@ This document provides comprehensive guidance for AI assistants (including Claud
 
 **Greenland** is a sophisticated multi-faceted Python project focused on:
 
-1. **Linguistic Database System (WordFreq)** - Multi-language word frequency and translation database with LLM-powered analysis supporting 10 languages
+1. **Linguistic Database System (WordFreq)** - Multi-language word frequency and translation database with LLM-powered analysis supporting 14 languages
 2. **LLM Query Interface (Verbalator)** - HTML server for running canned LLM queries on text samples
 3. **LLM Benchmarking Suite** - Framework for testing and comparing language model capabilities
 4. **Web-based Database Editor (Barsukas)** - Flask interface for managing the linguistics database
@@ -35,7 +35,7 @@ This document provides comprehensive guidance for AI assistants (including Claud
 ### Key Statistics
 
 - **~57,000 lines** of Python code
-- **10 languages** supported: English, Lithuanian, Chinese, French, German, Spanish, Portuguese, Korean, Swahili, Vietnamese
+- **14 languages** supported: English, Lithuanian, Chinese, French, German, Spanish, Portuguese, Korean, Swahili, Vietnamese, Scottish Gaelic, Italian, Dutch, Swedish
 - **14 autonomous agents** for database maintenance and quality assurance
 - **SQLite-based** persistent storage with comprehensive ORM models
 

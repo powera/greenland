@@ -41,7 +41,7 @@ def query_translations(
         get_session_func: Function to get database session
         pos_subtype: Optional part of speech subtype
         languages: List of language names to translate to (e.g., ['french', 'spanish', 'german']).
-                  If None, uses default set: ['chinese', 'korean', 'french', 'spanish', 'german', 'swahili', 'vietnamese']
+                  If None, uses default set: ['chinese', 'korean', 'french', 'spanish', 'german', 'portuguese', 'swahili', 'vietnamese']
 
     Returns:
         Tuple of (translations dict, success flag)
@@ -112,8 +112,12 @@ def query_translations(
         "fr": "French",
         "es": "Spanish",
         "de": "German",
+        "gd": "Scottish Gaelic",
+        "it": "Italian",
+        "nl": "Dutch",
         "pt": "Portuguese",
         "sw": "Swahili",
+        "sv": "Swedish",
         "vi": "Vietnamese",
     }
     reference_language_name = lang_code_to_name_map.get(ref_lang_code, ref_lang_code.capitalize())

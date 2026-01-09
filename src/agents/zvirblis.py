@@ -325,13 +325,13 @@ def get_argument_parser():
         "--languages",
         nargs="+",
         required=True,
-        choices=["lt", "zh", "ko", "fr", "de", "es", "pt", "sw", "vi"],
+        choices=["lt", "zh", "ko", "fr", "de", "es", "pt", "sw", "vi", "gd", "it", "nl", "sv"],
         help="Target languages to translate to",
     )
     submit_parser.add_argument("--limit", type=int, help="Max sentences to translate")
     submit_parser.add_argument("--pattern-id", help="Only translate sentences from this pattern")
 
-    parser.set_defaults(languages=["en", "lt", "zh", "ko", "fr", "es", "de", "pt", "sw", "vi"])
+    parser.set_defaults(languages=["lt", "zh", "fr", "es"])
 
     return parser
 

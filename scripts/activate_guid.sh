@@ -6,7 +6,7 @@
 #   -y, --assume-yes       - Run without interactive confirmation between steps.
 #
 # Environment overrides:
-#   LANGUAGES              - Space-separated list of languages for all applicable steps (default: "lt zh ko fr es de pt sw vi")
+#   LANGUAGES              - Space-separated list of languages for all applicable steps (default: "lt zh fr es")
 #   SENTENCE_COUNT         - Number of sentences to generate per lemma (default: 3)
 #   SENTENCE_TRANSLATION_LIMIT - Target count of fully translated sentences per lemma (optional)
 #   GRAMMAR_FACT_TYPES     - Space-separated fact types for Lape (optional; overrides grouped tasks)
@@ -50,7 +50,7 @@ cd "$REPO_ROOT"
 # Set PYTHONPATH to include src/ directory
 export PYTHONPATH="${REPO_ROOT}/src"
 
-LANGUAGES=${LANGUAGES:-"lt zh ko fr es de pt sw vi"}
+LANGUAGES=${LANGUAGES:-"lt zh fr es"}
 SENTENCE_COUNT=${SENTENCE_COUNT:-3}
 SENTENCE_TRANSLATION_LIMIT=${SENTENCE_TRANSLATION_LIMIT:-""}
 GRAMMAR_FACT_TYPES=${GRAMMAR_FACT_TYPES:-""}

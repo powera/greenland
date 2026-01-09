@@ -27,8 +27,12 @@ LANGUAGE_FIELDS = {
     "fr": ("fr", "French", True),
     "es": ("es", "Spanish", True),
     "de": ("de", "German", True),
+    "gd": ("gd", "Scottish Gaelic", True),
+    "it": ("it", "Italian", True),
+    "nl": ("nl", "Dutch", True),
     "pt": ("pt", "Portuguese", True),
     "sw": ("sw", "Swahili", True),
+    "sv": ("sv", "Swedish", True),
     "vi": ("vi", "Vietnamese", True),
 }
 
@@ -45,8 +49,12 @@ LLM_FIELD_TO_LANG_CODE = {
     "french_translation": "fr",
     "spanish_translation": "es",
     "german_translation": "de",
+    "scottish_gaelic_translation": "gd",
+    "italian_translation": "it",
+    "dutch_translation": "nl",
     "portuguese_translation": "pt",
     "swahili_translation": "sw",
+    "swedish_translation": "sv",
     "vietnamese_translation": "vi",
 }
 
