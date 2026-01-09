@@ -220,22 +220,25 @@ class ZvirblisAgent:
 
             requests_queued = 0
             for sentence in sentences:
-                sentence_words = (
+                # Check if English word breakdown already exists
+                # If not, include English in the translation request
+                english_words = (
                     session.query(SentenceWord)
                     .filter_by(sentence_id=sentence.id, language_code="en")
                     .all()
                 )
+                include_english = len(english_words) == 0
 
                 try:
                     context, prompt = build_translation_prompt(
-                        sentence, sentence_words, target_languages, session
+                        sentence, target_languages, session, include_english
                     )
                 except ValueError:
                     continue
 
                 custom_id = f"sentence_{sentence.id}"
                 full_prompt = f"{context}\n\n{prompt}"
-                inner_schema = build_response_schema(target_languages)
+                inner_schema = build_response_schema(target_languages, include_english)
 
                 response_format = {
                     "type": "json_schema",

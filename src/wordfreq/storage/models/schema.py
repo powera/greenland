@@ -291,6 +291,9 @@ class Sentence(Base):
         "SentenceTranslation", back_populates="sentence", cascade="all, delete-orphan"
     )
     words = relationship("SentenceWord", back_populates="sentence", cascade="all, delete-orphan")
+    pattern_words = relationship(
+        "SentencePatternWord", cascade="all, delete-orphan"
+    )
 
 
 class SentenceTranslation(Base):
@@ -378,6 +381,50 @@ class SentenceWord(Base):
 
     # Relationships
     sentence = relationship("Sentence", back_populates="words")
+    lemma = relationship("Lemma")
+
+
+class SentencePatternWord(Base):
+    """Model for storing the pattern definition of a sentence.
+
+    This table records which lemmas/GUIDs are intended to be used in each slot
+    of a sentence pattern (e.g., which noun goes in the 'object' slot). This is
+    the "template" or "pattern" information that defines what the sentence is about.
+
+    Unlike SentenceWord (which stores actual translation word breakdowns with POS info),
+    this table stores the original pattern definition and never gets overwritten.
+
+    This enables:
+    1. Permanent record of which lemmas were selected for the pattern
+    2. Clear distinction between pattern definition vs. translation POS data
+    3. Ability to detect when English word breakdown hasn't been generated yet
+    """
+
+    __tablename__ = "sentence_pattern_words"
+    __table_args__ = (
+        UniqueConstraint("sentence_id", "position", name="uq_sentence_pattern_position"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    sentence_id: Mapped[int] = mapped_column(ForeignKey("sentences.id"), nullable=False)
+    lemma_id: Mapped[int] = mapped_column(
+        ForeignKey("lemmas.id"), nullable=False
+    )  # Pattern always has lemma
+
+    # Position in the pattern (0-indexed)
+    position: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    # Slot name in the pattern (e.g., "subject", "verb", "object", "adjective", "fixed")
+    slot_name: Mapped[str] = mapped_column(String, nullable=False)
+
+    # English text of the lemma (for reference)
+    english_text: Mapped[str] = mapped_column(String, nullable=False)
+
+    # Metadata
+    added_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now())
+
+    # Relationships
+    sentence = relationship("Sentence")
     lemma = relationship("Lemma")
 
 
