@@ -7,6 +7,7 @@ from flask import Blueprint, flash, g, redirect, render_template, request, url_f
 from sqlalchemy import case, func, or_
 
 from barsukas.helpers.flash_helpers import flash_and_log
+from barsukas.utils.task_queue import TaskType, enqueue_task
 from wordfreq.storage.models.schema import (
     Lemma,
     Sentence,
@@ -299,17 +300,32 @@ def translate_sentence(sentence_id):
         return redirect(url_for("sentences.view_sentence", sentence_id=sentence_id))
 
     try:
-        # Use the shared translation logic
-        from wordfreq.translation.sentence import translate_sentence as do_translation
+        # Enqueue translation task to work queue
+        result = enqueue_task(
+            g.db,
+            task_type=TaskType.TRANSLATE_SENTENCE,
+            target_type="sentence",
+            target_id=sentence_id,
+            payload={"sentence_id": sentence_id, "selected_languages": selected_languages},
+            dedup_key=f"{TaskType.TRANSLATE_SENTENCE}:{sentence_id}:{':'.join(sorted(selected_languages))}",
+        )
 
-        # Translate the sentence
-        do_translation(sentence_id, selected_languages, g.db, model="gpt-5-mini")
+        if result.created:
+            lang_names = [get_supported_languages().get(lang, lang) for lang in selected_languages]
+            flash(
+                f"Queued translation to: {', '.join(lang_names)}. Results will appear soon.",
+                "success",
+            )
+        else:
+            flash(
+                "A translation task for these languages is already in progress for this sentence.",
+                "info",
+            )
 
-        lang_names = [get_supported_languages().get(lang, lang) for lang in selected_languages]
-        flash(f"Successfully translated sentence to: {', '.join(lang_names)}", "success")
+        g.db.commit()
 
     except Exception as e:
-        flash(f"Error translating sentence: {e}", "error")
+        flash(f"Error queueing translation task: {e}", "error")
         g.db.rollback()
 
     return redirect(url_for("sentences.view_sentence", sentence_id=sentence_id))

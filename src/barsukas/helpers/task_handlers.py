@@ -278,9 +278,42 @@ def handle_generate_synonyms(session, payload: Dict) -> str:
     return f"Stored {synonyms_count} synonym(s) and {alternatives_count} alternative form(s)"
 
 
+def handle_translate_sentence(session, payload: Dict) -> str:
+    sentence_id = payload["sentence_id"]
+    selected_languages = payload["selected_languages"]
+
+    from wordfreq.storage.models.schema import Sentence, SentenceTranslation
+
+    sentence = session.get(Sentence, sentence_id)
+    if not sentence:
+        raise ValueError(f"Sentence {sentence_id} not found")
+
+    # Check if sentence has English translation
+    en_translation = (
+        session.query(SentenceTranslation)
+        .filter_by(sentence_id=sentence_id, language_code="en")
+        .first()
+    )
+
+    if not en_translation:
+        raise ValueError("Sentence must have an English translation before translating to other languages")
+
+    # Use the shared translation logic
+    from wordfreq.translation.sentence import translate_sentence as do_translation
+
+    # Translate the sentence
+    do_translation(sentence_id, selected_languages, session, model=constants.DEFAULT_MODEL)
+
+    from wordfreq.storage.translation_helpers import get_supported_languages
+
+    lang_names = [get_supported_languages().get(lang, lang) for lang in selected_languages]
+    return f"Successfully translated sentence to: {', '.join(lang_names)}"
+
+
 TASK_HANDLERS = {
     "add_missing_translations": handle_add_missing_translations,
     "generate_pronunciations": handle_generate_pronunciations,
     "generate_forms": handle_generate_forms,
     "generate_synonyms": handle_generate_synonyms,
+    "translate_sentence": handle_translate_sentence,
 }
