@@ -16,9 +16,19 @@ from sqlalchemy.orm import Session
 from wordfreq.storage.models.schema import Lemma, LemmaTranslation
 
 # Language hierarchy: ordered from most reliable/primary to experimental
-# Tier 1: English (where applicable), then primary languages
-# Tier 2: Secondary languages (alphabetical: DE IT NL PT SV VI)
+# Tier 1: Primary supported languages
+# Tier 2: Secondary supported languages (alphabetical: DE IT NL PT SV VI)
 # Tier 3: Experimental languages with accuracy/pedagogical issues (alphabetical: GD KO SW)
+
+# Tier 1: Primary supported languages
+TIER_1_LANGUAGES = ["lt", "zh", "fr", "es"]
+
+# Tier 2: Secondary supported languages
+TIER_2_LANGUAGES = ["de", "it", "nl", "pt", "sv", "vi"]
+
+# Tier 3: Experimental languages (lower quality/pedagogical issues)
+TIER_3_LANGUAGES = ["gd", "ko", "sw"]
+
 LANGUAGE_HIERARCHY = [
     "en",  # English (special case - source language)
     "lt",  # Lithuanian

@@ -23,7 +23,13 @@ sys.path.append(GREENLAND_SRC_PATH)
 import constants
 from wordfreq.storage.database import create_database_session
 from wordfreq.storage.models.schema import Lemma, WordToken
-from wordfreq.storage.translation_helpers import LANGUAGE_FIELDS, get_translation
+from wordfreq.storage.translation_helpers import (
+    LANG_CODE_TO_LLM_FIELD,
+    LANGUAGE_FIELDS,
+    TIER_1_LANGUAGES,
+    TIER_2_LANGUAGES,
+    get_translation,
+)
 from wordfreq.tools.chinese_converter import to_simplified
 from wordfreq.trakaido.dict_generator import generate_dictionary_file, generate_structure_file
 
@@ -37,15 +43,13 @@ logger = logging.getLogger(__name__)
 class TrakaidoExporter:
     """Main class for exporting trakaido data in various formats."""
 
-    # Language configuration mapping
+    # Language configuration mapping - generated from tier 1 and tier 2 languages
     LANGUAGE_CONFIG = {
-        "lt": {"name": "Lithuanian", "field": "lithuanian_translation"},
-        "zh": {"name": "Chinese", "field": "chinese_translation"},
-        "ko": {"name": "Korean", "field": "korean_translation"},
-        "fr": {"name": "French", "field": "french_translation"},
-        "es": {"name": "Spanish", "field": "spanish_translation"},
-        "de": {"name": "German", "field": "german_translation"},
-        "pt": {"name": "Portuguese", "field": "portuguese_translation"},
+        lang_code: {
+            "name": LANGUAGE_FIELDS[lang_code][1],  # Display name
+            "field": LANG_CODE_TO_LLM_FIELD[lang_code],  # LLM field name
+        }
+        for lang_code in TIER_1_LANGUAGES + TIER_2_LANGUAGES
     }
 
     def __init__(

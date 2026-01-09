@@ -24,11 +24,19 @@ if GREENLAND_SRC_PATH not in sys.path:
 import constants
 from agents.common.common_args import add_backend_args, add_common_args, get_data_source_config
 from wordfreq.storage.backend.config import BackendType, DataSourceConfig
+from wordfreq.storage.translation_helpers import (
+    LANGUAGE_NAMES,
+    TIER_1_LANGUAGES,
+    TIER_2_LANGUAGES,
+)
 from wordfreq.trakaido.utils.export_manager import TrakaidoExporter
 from wordfreq.trakaido.utils.export_wireword_sentences import WirewordSentenceExporter
 
-# Supported languages and their codes
-SUPPORTED_LANGUAGES = {"lt": "Lithuanian", "zh": "Chinese", "ko": "Korean", "fr": "French"}
+# Supported languages: Tier 1 and Tier 2 (excludes experimental tier 3)
+SUPPORTED_LANGUAGES = {
+    lang_code: LANGUAGE_NAMES[lang_code]
+    for lang_code in TIER_1_LANGUAGES + TIER_2_LANGUAGES
+}
 
 # Configure logging
 logging.basicConfig(
