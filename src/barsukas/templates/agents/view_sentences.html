@@ -56,7 +56,8 @@
             <div class="card-header">
                 <div class="d-flex justify-content-between align-items-center">
                     <span>
-                        <i class="bi bi-chat-left-quote"></i> Sentence #{{ sentence.id }}
+                        <i class="bi bi-chat-left-quote"></i>
+                        <a href="{{ url_for('sentences.view_sentence', sentence_id=sentence.id) }}">Sentence #{{ sentence.id }}</a>
                     </span>
                     <div>
                         {% if sentence.pattern_type %}

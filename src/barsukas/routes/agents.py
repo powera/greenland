@@ -765,6 +765,7 @@ def view_sentences(lemma_id):
             g.db.query(Sentence)
             .join(SentenceWord)
             .filter(SentenceWord.lemma_id == lemma_id)
+            .filter(Sentence.rejected == False)
             .options(joinedload(Sentence.translations), joinedload(Sentence.words))
             .order_by(Sentence.id.desc())
             .all()

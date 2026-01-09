@@ -288,10 +288,10 @@ def store_translation_results(sentence_id: int, translations: Dict, session):
         )
 
         if existing:
-            logger.info(f"  -> Updating existing translation")
+            logger.debug(f"  -> Updating existing translation")
             existing.translation_text = translation_text
         else:
-            logger.info(f"  -> Creating new translation")
+            logger.debug(f"  -> Creating new translation")
             new_translation = SentenceTranslation(
                 sentence_id=sentence_id,
                 language_code=lang_code,
@@ -306,7 +306,7 @@ def store_translation_results(sentence_id: int, translations: Dict, session):
             continue
 
         lang_code = key.replace("words_", "")
-        logger.info(f"Storing {len(words_data)} words for {lang_code}")
+        logger.debug(f"Storing {len(words_data)} words for {lang_code}")
 
         # Delete existing word links for this language
         session.query(SentenceWord).filter_by(
