@@ -36,7 +36,7 @@ def build_translation_prompt(
         sentence: Sentence object with English translation
         target_languages: List of language codes to translate to
         session: Database session for lemma lookups
-        include_english: Whether to request English translation with POS info (True for tier 1, False for tier 2)
+        include_english: Whether to request English translation with word-by-word POS info
 
     Returns:
         Tuple of (context, prompt) strings
@@ -178,7 +178,7 @@ def build_response_schema(target_languages: List[str], include_english: bool = T
     schema_properties = {}
     required_fields = []
 
-    # Include English only if requested (first pass with POS info)
+    # Include English word breakdown if requested
     if include_english:
         schema_properties["en"] = {"type": "string", "description": "Grammatically corrected English sentence"}
         schema_properties["words_en"] = {
@@ -228,9 +228,8 @@ def translate_sentence(
     if not sentence:
         raise ValueError(f"Sentence {sentence_id} not found")
 
-    # Determine if we should include English in this translation
-    # If English word breakdown doesn't exist yet, include it (tier 1 pass)
-    # If English word breakdown already exists, skip it (tier 2 pass)
+    # Check if English word breakdown already exists
+    # If not, include English in the translation request
     english_words = (
         session.query(SentenceWord).filter_by(sentence_id=sentence_id, language_code="en").all()
     )

@@ -220,9 +220,8 @@ class ZvirblisAgent:
 
             requests_queued = 0
             for sentence in sentences:
-                # Determine if we should include English in this translation
-                # If English word breakdown doesn't exist yet, include it (tier 1 pass)
-                # If English word breakdown already exists, skip it (tier 2 pass)
+                # Check if English word breakdown already exists
+                # If not, include English in the translation request
                 english_words = (
                     session.query(SentenceWord)
                     .filter_by(sentence_id=sentence.id, language_code="en")
