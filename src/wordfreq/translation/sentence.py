@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 
 
 def build_translation_prompt(
-    sentence: Sentence, sentence_words: List[SentenceWord], target_languages: List[str], session
+    sentence: Sentence, sentence_words: List[SentenceWord], target_languages: List[str], session, include_english: bool = True
 ) -> Tuple[str, str]:
     """
     Build LLM prompt for translating a sentence.
@@ -36,6 +36,7 @@ def build_translation_prompt(
         sentence_words: List of SentenceWord objects (English words with lemma links)
         target_languages: List of language codes to translate to
         session: Database session for lemma lookups
+        include_english: Whether to request English translation with POS info (True for tier 1, False for tier 2)
 
     Returns:
         Tuple of (context, prompt) strings
@@ -127,27 +128,29 @@ def build_translation_prompt(
         guid_str = f" (GUID: {guid})" if guid else ""
         prompt_lines.append(f"  {english_word}{role_str}{guid_str}: {trans_str}")
 
-    prompt_lines.extend(
-        [
-            "",
-            f"Translate this sentence naturally into: {', '.join([LANGUAGE_NAMES[lang] for lang in target_languages if lang in LANGUAGE_NAMES])}.",
-            "",
-            "IMPORTANT: Also provide a grammatically correct English version (fixing issues like singular/plural, articles, etc.).",
-            "Use the provided word translations where appropriate, but adjust grammar as needed for natural sentences.",
-        ]
-    )
+    prompt_lines.append("")
+    prompt_lines.append(f"Translate this sentence naturally into: {', '.join([LANGUAGE_NAMES[lang] for lang in target_languages if lang in LANGUAGE_NAMES])}.")
+    prompt_lines.append("")
+
+    if include_english:
+        prompt_lines.append("IMPORTANT: Also provide a grammatically correct English version (fixing issues like singular/plural, articles, etc.).")
+    else:
+        prompt_lines.append("IMPORTANT: The English translation with word-by-word breakdown is already complete. Do NOT include English in your response.")
+
+    prompt_lines.append("Use the provided word translations where appropriate, but adjust grammar as needed for natural sentences.")
 
     prompt = "\n".join(prompt_lines)
 
     return "\n".join(context_lines), prompt
 
 
-def build_response_schema(target_languages: List[str]) -> Dict:
+def build_response_schema(target_languages: List[str], include_english: bool = True) -> Dict:
     """
     Build JSON schema for LLM response.
 
     Args:
         target_languages: List of language codes to translate to
+        include_english: Whether to include English translation and word breakdown in schema
 
     Returns:
         Schema dict suitable for clients.lib.schema_from_dict()
@@ -168,16 +171,18 @@ def build_response_schema(target_languages: List[str]) -> Dict:
     }
 
     # Build properties for sentences and word arrays
-    schema_properties = {
-        "en": {"type": "string", "description": "Grammatically corrected English sentence"},
-        "words_en": {
+    schema_properties = {}
+    required_fields = []
+
+    # Include English only if requested (first pass with POS info)
+    if include_english:
+        schema_properties["en"] = {"type": "string", "description": "Grammatically corrected English sentence"}
+        schema_properties["words_en"] = {
             "type": "array",
             "description": "English word breakdown",
             "items": word_schema,
-        },
-    }
-
-    required_fields = ["en", "words_en"]
+        }
+        required_fields.extend(["en", "words_en"])
 
     # Add sentence and words array for each target language
     for lang in target_languages:
@@ -224,9 +229,14 @@ def translate_sentence(
         session.query(SentenceWord).filter_by(sentence_id=sentence_id, language_code="en").all()
     )
 
+    # Determine if we should include English in this translation
+    # If English word breakdown doesn't exist yet, include it (tier 1 pass)
+    # If English word breakdown already exists, skip it (tier 2 pass)
+    include_english = len(sentence_words) == 0
+
     # Build context, prompt and schema
-    context, prompt = build_translation_prompt(sentence, sentence_words, target_languages, session)
-    schema = build_response_schema(target_languages)
+    context, prompt = build_translation_prompt(sentence, sentence_words, target_languages, session, include_english)
+    schema = build_response_schema(target_languages, include_english)
 
     # Call LLM
     client = UnifiedLLMClient()
