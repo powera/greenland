@@ -26,10 +26,10 @@ bebras/
 
 ```bash
 # Process a single sentence
-python bebras.py --sentence "I eat a banana" --languages lt zh
+python bebras.py --sentence "I eat a banana" --languages lt zh fr es
 
 # Process sentences from a file
-python bebras.py --file sentences.txt --languages lt zh
+python bebras.py --file sentences.txt --languages lt zh fr es
 
 # Custom source language
 python bebras.py --sentence "La gato dormas" --source eo --languages en lt
@@ -56,14 +56,14 @@ agent = BebrasAgent(model="gpt-5-mini")
 result = agent.process_sentence(
     sentence_text="I eat a banana",
     source_language="en",
-    target_languages=["lt", "zh"]
+    target_languages=["lt", "zh", "fr", "es"]
 )
 
 # Batch processing
 batch_result = agent.process_sentence_batch(
     sentences=["The cat sleeps", "She reads a book"],
     source_language="en",
-    target_languages=["lt", "zh"]
+    target_languages=["lt", "zh", "fr", "es"]
 )
 ```
 
@@ -90,7 +90,7 @@ batch_result = agent.process_sentence_batch(
 | `--sentence` | Single sentence to process | Required* |
 | `--file` | File with sentences (one per line) | Required* |
 | `--source` | Source language code | `en` |
-| `--languages` | Target language codes | `lt zh` |
+| `--languages` | Target language codes | `lt zh fr es` |
 | `--model` | LLM model to use | `gpt-5-mini` |
 | `--verified` | Mark sentences as verified | `False` |
 | `--debug` | Enable debug logging | `False` |
@@ -100,9 +100,9 @@ batch_result = agent.process_sentence_batch(
 
 ## Supported Languages
 
-Default: Lithuanian (`lt`), Chinese (`zh`)
+Default: Lithuanian (`lt`), Chinese (`zh`), French (`fr`), Spanish (`es`)
 
-Also supported: English, French, Korean, Swahili, Vietnamese, German, Spanish, Japanese
+Also supported: English, German, Korean, Portuguese, Swahili, Vietnamese, Scottish Gaelic, Italian, Dutch, Swedish
 
 ## Disambiguation
 

@@ -65,8 +65,8 @@ Examples:
     parser.add_argument(
         "--languages",
         nargs="+",
-        default=["lt", "zh"],
-        help="Target language codes for translations (default: lt zh)",
+        default=["lt", "zh", "fr", "es"],
+        help="Target language codes for translations (default: lt zh fr es)",
     )
 
     # Processing options

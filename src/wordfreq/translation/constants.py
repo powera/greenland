@@ -67,6 +67,24 @@ DEFAULT_TRANSLATION_LANGUAGES = {
         "description": "German translation in lemma form",
         "instructions": "- German: Provide standard German in base form (infinitive for verbs, singular nominative for nouns without an article)",
     },
+    "scottish_gaelic": {
+        "field": "scottish_gaelic_translation",
+        "code": "gd",
+        "description": "Scottish Gaelic translation in lemma form",
+        "instructions": "- Scottish Gaelic: Provide standard Gaelic in base form (dictionary form, singular for nouns)",
+    },
+    "italian": {
+        "field": "italian_translation",
+        "code": "it",
+        "description": "Italian translation in lemma form",
+        "instructions": "- Italian: Provide standard Italian in base form (infinitive for verbs, singular for nouns)",
+    },
+    "dutch": {
+        "field": "dutch_translation",
+        "code": "nl",
+        "description": "Dutch translation in lemma form",
+        "instructions": "- Dutch: Provide standard Dutch in base form (infinitive for verbs, singular for nouns)",
+    },
     "portuguese": {
         "field": "portuguese_translation",
         "code": "pt",
@@ -78,6 +96,12 @@ DEFAULT_TRANSLATION_LANGUAGES = {
         "code": "sw",
         "description": "Swahili translation in lemma form",
         "instructions": "- Swahili: Provide standard Swahili in base form",
+    },
+    "swedish": {
+        "field": "swedish_translation",
+        "code": "sv",
+        "description": "Swedish translation in lemma form",
+        "instructions": "- Swedish: Provide standard Swedish in base form (infinitive for verbs, singular for nouns)",
     },
     "vietnamese": {
         "field": "vietnamese_translation",
