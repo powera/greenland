@@ -8,21 +8,9 @@ from sqlalchemy import case, func, or_
 
 from barsukas.helpers.flash_helpers import flash_and_log
 from wordfreq.storage.models.schema import Lemma, Sentence, SentenceTranslation, SentenceWord
-from wordfreq.storage.translation_helpers import get_supported_languages
+from wordfreq.storage.translation_helpers import get_languages_in_hierarchy, get_supported_languages
 
 bp = Blueprint("sentences", __name__, url_prefix="/sentences")
-
-# Supported languages for translation
-LANGUAGES = [
-    {"code": "en", "name": "English"},
-    {"code": "lt", "name": "Lithuanian"},
-    {"code": "zh", "name": "Chinese"},
-    {"code": "ko", "name": "Korean"},
-    {"code": "fr", "name": "French"},
-    {"code": "de", "name": "German"},
-    {"code": "es", "name": "Spanish"},
-    {"code": "pt", "name": "Portuguese"},
-]
 
 
 @bp.route("/")
@@ -329,7 +317,7 @@ def accept_sentence(sentence_id):
 
         # Check if sentence already has translations for all languages
         existing_translations = {t.language_code for t in sentence.translations}
-        target_languages = [lang["code"] for lang in LANGUAGES if lang["code"] != "en"]
+        target_languages = [lang["code"] for lang in get_languages_in_hierarchy() if lang["code"] != "en"]
         has_all_translations = all(lang in existing_translations for lang in target_languages)
 
         # Check that all per-word lemma translations exist BEFORE generating sentence translations
@@ -413,7 +401,7 @@ def verify_sentence(sentence_id):
     try:
         # Check that sentence has translations and level
         existing_translations = {t.language_code for t in sentence.translations}
-        target_languages = [lang["code"] for lang in LANGUAGES if lang["code"] != "en"]
+        target_languages = [lang["code"] for lang in get_languages_in_hierarchy() if lang["code"] != "en"]
         has_all_translations = all(lang in existing_translations for lang in target_languages)
 
         if not has_all_translations:

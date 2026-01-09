@@ -15,25 +15,47 @@ from sqlalchemy.orm import Session
 
 from wordfreq.storage.models.schema import Lemma, LemmaTranslation
 
+# Language hierarchy: ordered from most reliable/primary to experimental
+# Tier 1: English (where applicable), then primary languages
+# Tier 2: Secondary languages (alphabetical: DE IT NL PT SV VI)
+# Tier 3: Experimental languages with accuracy/pedagogical issues (alphabetical: GD KO SW)
+LANGUAGE_HIERARCHY = [
+    "en",  # English (special case - source language)
+    "lt",  # Lithuanian
+    "zh",  # Chinese
+    "fr",  # French
+    "es",  # Spanish
+    "de",  # German
+    "it",  # Italian
+    "nl",  # Dutch
+    "pt",  # Portuguese
+    "sv",  # Swedish
+    "vi",  # Vietnamese
+    "gd",  # Scottish Gaelic (experimental)
+    "ko",  # Korean (experimental)
+    "sw",  # Swahili (experimental)
+]
+
 # Language mappings
 # Format: 'code': (field_name_or_code, display_name, use_lemma_translation_table)
 # If use_lemma_translation_table is True, field_name_or_code is the language_code for LemmaTranslation table
 # If False, field_name_or_code is the column name in Lemma table (only used for English)
+# Order follows LANGUAGE_HIERARCHY for consistent display across the application
 LANGUAGE_FIELDS = {
     "en": ("lemma_text", "English", False),  # English uses lemma_text field
     "lt": ("lt", "Lithuanian", True),
     "zh": ("zh", "Chinese", True),
-    "ko": ("ko", "Korean", True),
     "fr": ("fr", "French", True),
     "es": ("es", "Spanish", True),
     "de": ("de", "German", True),
-    "gd": ("gd", "Scottish Gaelic", True),
     "it": ("it", "Italian", True),
     "nl": ("nl", "Dutch", True),
     "pt": ("pt", "Portuguese", True),
-    "sw": ("sw", "Swahili", True),
     "sv": ("sv", "Swedish", True),
     "vi": ("vi", "Vietnamese", True),
+    "gd": ("gd", "Scottish Gaelic", True),
+    "ko": ("ko", "Korean", True),
+    "sw": ("sw", "Swahili", True),
 }
 
 # Language display names (for use in prompts, UIs, etc.)
@@ -339,6 +361,20 @@ def get_supported_languages() -> Dict[str, str]:
     return {code: name for code, (_, name, _) in LANGUAGE_FIELDS.items()}
 
 
+def get_languages_in_hierarchy() -> list:
+    """
+    Get all supported languages in hierarchy order.
+
+    Returns:
+        List of dicts with 'code' and 'name' keys, ordered by LANGUAGE_HIERARCHY.
+        Example: [{'code': 'en', 'name': 'English'}, {'code': 'lt', 'name': 'Lithuanian'}, ...]
+    """
+    return [
+        {"code": code, "name": LANGUAGE_FIELDS[code][1]}
+        for code in LANGUAGE_HIERARCHY
+    ]
+
+
 def llm_field_to_lang_code(field_name: str) -> Optional[str]:
     """
     Convert LLM field name to language code.
@@ -424,9 +460,10 @@ def get_reference_translation(
         exclude_languages = []
 
     if prefer_languages is None:
-        # Default preference: Lithuanian first (most reliable for this project),
-        # then other languages, with English as fallback
-        prefer_languages = ["lt", "zh", "ko", "fr", "es", "de", "pt", "sw", "vi", "en"]
+        # Default preference follows LANGUAGE_HIERARCHY (excluding English where applicable)
+        # LT, ZH, FR, ES are primary, then tier 2 (DE IT NL PT SV VI), then experimental (GD KO SW)
+        # English is last as a fallback
+        prefer_languages = ["lt", "zh", "fr", "es", "de", "it", "nl", "pt", "sv", "vi", "gd", "ko", "sw", "en"]
 
     # Search through languages in preference order
     for lang_code in prefer_languages:
