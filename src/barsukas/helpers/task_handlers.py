@@ -13,7 +13,11 @@ from agents.vilkas.agent import VilkasAgent
 from agents.voras.agent import VorasAgent
 from wordfreq.storage.backend.config import BackendType, DataSourceConfig
 from wordfreq.storage.models.schema import Lemma
-from wordfreq.storage.translation_helpers import LANGUAGE_FIELDS, get_reference_translation
+from wordfreq.storage.translation_helpers import (
+    LANGUAGE_FIELDS,
+    get_reference_translation,
+    lang_code_to_llm_field,
+)
 from wordfreq.translation.client import LinguisticClient
 
 
@@ -51,22 +55,19 @@ def handle_add_missing_translations(session, payload: Dict) -> str:
     client = LinguisticClient(
         model=agent.config.model, db_path=config.sqlite_path, debug=Config.DEBUG
     )
-    lang_code_to_name = {
-        "zh": "chinese",
-        "ko": "korean",
-        "fr": "french",
-        "es": "spanish",
-        "de": "german",
-        "pt": "portuguese",
-        "sw": "swahili",
-        "vi": "vietnamese",
-        "lt": "lithuanian",
-    }
-    missing_lang_names = [
-        lang_code_to_name[lang_code]
-        for lang_code in missing_languages
-        if lang_code in lang_code_to_name
-    ]
+    # Build the list of language names for LLM query
+    # Extract the language name from LLM field (e.g., "chinese_translation" -> "chinese")
+    missing_lang_names = []
+    for lang_code in missing_languages:
+        if lang_code == "en":
+            # Skip English - we can't generate English translations
+            continue
+        llm_field = lang_code_to_llm_field(lang_code)
+        if llm_field and llm_field.endswith("_translation"):
+            # Extract the language name (e.g., "chinese" from "chinese_translation")
+            lang_name = llm_field[: -len("_translation")]
+            missing_lang_names.append(lang_name)
+
     if not missing_lang_names:
         return "No supported languages to generate"
 
@@ -92,25 +93,18 @@ def handle_add_missing_translations(session, payload: Dict) -> str:
     if not success or not translations:
         raise RuntimeError("LLM could not generate translations")
 
-    translation_field_map = {
-        "zh": "chinese_translation",
-        "ko": "korean_translation",
-        "fr": "french_translation",
-        "es": "spanish_translation",
-        "de": "german_translation",
-        "pt": "portuguese_translation",
-        "sw": "swahili_translation",
-        "vi": "vietnamese_translation",
-        "lt": "lithuanian_translation",
-    }
-
+    # Map the LLM response fields to language codes and save translations
     added_count = 0
     for lang_code in missing_languages:
-        llm_field = translation_field_map.get(lang_code)
-        translation = translations.get(llm_field, "").strip()
-        if translation:
-            agent.set_translation(session, lemma, lang_code, translation)
-            added_count += 1
+        if lang_code == "en":
+            # Skip English
+            continue
+        llm_field = lang_code_to_llm_field(lang_code)
+        if llm_field:
+            translation = translations.get(llm_field, "").strip()
+            if translation:
+                agent.set_translation(session, lemma, lang_code, translation)
+                added_count += 1
 
     session.commit()
     return f"Added {added_count} translation(s)"
