@@ -7,7 +7,13 @@ from flask import Blueprint, flash, g, redirect, render_template, request, url_f
 from sqlalchemy import case, func, or_
 
 from barsukas.helpers.flash_helpers import flash_and_log
-from wordfreq.storage.models.schema import Lemma, Sentence, SentenceTranslation, SentenceWord
+from wordfreq.storage.models.schema import (
+    Lemma,
+    Sentence,
+    SentencePatternWord,
+    SentenceTranslation,
+    SentenceWord,
+)
 from wordfreq.storage.translation_helpers import get_languages_in_hierarchy, get_supported_languages
 
 bp = Blueprint("sentences", __name__, url_prefix="/sentences")
@@ -157,12 +163,35 @@ def view_sentence(sentence_id):
             }
         )
 
+    # Get pattern words (the original sentence pattern definition)
+    pattern_words = (
+        g.db.query(SentencePatternWord)
+        .filter(SentencePatternWord.sentence_id == sentence_id)
+        .order_by(SentencePatternWord.position)
+        .all()
+    )
+
+    # Enrich pattern words with lemma details
+    pattern_words_data = []
+    for pw in pattern_words:
+        lemma = g.db.query(Lemma).get(pw.lemma_id) if pw.lemma_id else None
+        pattern_words_data.append(
+            {
+                "position": pw.position,
+                "slot_name": pw.slot_name,
+                "english_text": pw.english_text,
+                "lemma": lemma,
+                "lemma_id": pw.lemma_id,
+            }
+        )
+
     return render_template(
         "sentences/view.html",
         sentence=sentence,
         translations=translations,
         language_names=language_names,
         words_by_language=words_by_language,
+        pattern_words=pattern_words_data,
     )
 
 

@@ -766,7 +766,11 @@ def view_sentences(lemma_id):
             .join(SentenceWord)
             .filter(SentenceWord.lemma_id == lemma_id)
             .filter(Sentence.rejected == False)
-            .options(joinedload(Sentence.translations), joinedload(Sentence.words))
+            .options(
+                joinedload(Sentence.translations),
+                joinedload(Sentence.words),
+                joinedload(Sentence.pattern_words),
+            )
             .order_by(Sentence.id.desc())
             .all()
         )

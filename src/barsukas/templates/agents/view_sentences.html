@@ -78,6 +78,55 @@
                 </div>
             </div>
             <div class="card-body">
+                <!-- Sentence Pattern -->
+                {% if sentence.pattern_words %}
+                <details class="mb-3">
+                    <summary class="text-muted" style="cursor: pointer;">
+                        <i class="bi bi-diagram-3"></i> Sentence Pattern:
+                    </summary>
+                    <div class="mt-2 pt-2 border-top">
+                        <table class="table table-sm table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Pos</th>
+                                    <th>Slot</th>
+                                    <th>English</th>
+                                    <th>Lemma</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for word in sentence.pattern_words|sort(attribute='position') %}
+                                <tr>
+                                    <td><span class="badge bg-light text-dark">{{ word.position }}</span></td>
+                                    <td><code>{{ word.slot_name }}</code></td>
+                                    <td>{{ word.english_text }}</td>
+                                    <td>
+                                        {% if word.lemma %}
+                                            {% if word.lemma.id == lemma.id %}
+                                                <strong class="text-success">{{ word.lemma.lemma_text }}</strong>
+                                                {% if word.lemma.guid %}
+                                                    <code class="small">{{ word.lemma.guid }}</code>
+                                                {% endif %}
+                                            {% else %}
+                                                <a href="{{ url_for('lemmas.view_lemma', lemma_id=word.lemma.id) }}">
+                                                    {{ word.lemma.lemma_text }}
+                                                </a>
+                                                {% if word.lemma.guid %}
+                                                    <code class="small">{{ word.lemma.guid }}</code>
+                                                {% endif %}
+                                            {% endif %}
+                                        {% else %}
+                                            <em class="text-muted">No lemma</em>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </details>
+                {% endif %}
+
                 <!-- Translations -->
                 <div class="mb-3">
                     {% for translation in sentence.translations|sort(attribute='language_code') %}

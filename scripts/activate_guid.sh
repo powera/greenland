@@ -108,8 +108,21 @@ run_step "Translations" \
   python -m agents.voras.cli --guid "$GUID" --mode populate-only --languages ${LANGUAGES} --yes
 
 # Grammatical forms (Vilkas) - generate/repair forms for all supported languages
+# Always include English for vilkas to generate English forms
+VILKAS_LANGUAGES=("${LANGUAGE_LIST[@]}")
+NEEDS_VILKAS_EN=true
+for lang in "${VILKAS_LANGUAGES[@]}"; do
+  if [[ "$lang" == "en" ]]; then
+    NEEDS_VILKAS_EN=false
+    break
+  fi
+done
+if [[ "$NEEDS_VILKAS_EN" == true ]]; then
+  VILKAS_LANGUAGES+=("en")
+fi
+
 run_step "Grammatical forms" \
-  python -m agents.vilkas.cli --guid "$GUID" --task all --fix --languages ${LANGUAGES} --yes
+  python -m agents.vilkas.cli --guid "$GUID" --task all --fix --languages ${VILKAS_LANGUAGES[*]} --yes
 
 # Synonyms and alternative forms (Šernas)
 run_step "Synonyms" \

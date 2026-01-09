@@ -292,7 +292,7 @@ class Sentence(Base):
     )
     words = relationship("SentenceWord", back_populates="sentence", cascade="all, delete-orphan")
     pattern_words = relationship(
-        "SentencePatternWord", cascade="all, delete-orphan"
+        "SentencePatternWord", back_populates="sentence", cascade="all, delete-orphan"
     )
 
 
@@ -424,7 +424,7 @@ class SentencePatternWord(Base):
     added_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now())
 
     # Relationships
-    sentence = relationship("Sentence")
+    sentence = relationship("Sentence", back_populates="pattern_words")
     lemma = relationship("Lemma")
 
 

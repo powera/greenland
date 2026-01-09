@@ -90,6 +90,55 @@
     </div>
 </div>
 
+<!-- Sentence Pattern -->
+{% if pattern_words %}
+<div class="row mb-4">
+    <div class="col">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-diagram-3"></i> Sentence Pattern
+            </div>
+            <div class="card-body">
+                <table class="table table-sm table-hover">
+                    <thead>
+                        <tr>
+                            <th>Position</th>
+                            <th>Slot Name</th>
+                            <th>English Text</th>
+                            <th>Lemma</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for word in pattern_words %}
+                            <tr>
+                                <td>{{ word.position }}</td>
+                                <td><code>{{ word.slot_name }}</code></td>
+                                <td>{{ word.english_text }}</td>
+                                <td>
+                                    {% if word.lemma %}
+                                        <a href="{{ url_for('lemmas.view_lemma', lemma_id=word.lemma_id) }}">
+                                            {{ word.lemma.lemma_text }}
+                                        </a>
+                                        {% if word.lemma.guid %}
+                                            <small class="text-muted">({{ word.lemma.guid }})</small>
+                                        {% endif %}
+                                        {% if word.lemma.difficulty_level is not none %}
+                                            <span class="badge bg-info" style="font-size: 0.7rem;">L{{ word.lemma.difficulty_level }}</span>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="text-muted fst-italic">No lemma</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 <!-- Translations -->
 <div class="row mb-4">
     <div class="col">
