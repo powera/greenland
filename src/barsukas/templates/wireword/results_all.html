@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}WireWord Export Results - All Languages{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2><i class="bi bi-check-circle"></i> WireWord Export Results - All Languages</h2>
+        <p class="text-muted">Export completed for all supported languages</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="bi bi-info-circle"></i> Export Summary
+            </div>
+            <div class="card-body">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Language</th>
+                            <th>Status</th>
+                            <th>Files Created</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for lang_name, result in all_results.items() %}
+                        <tr>
+                            <td><strong>{{ lang_name }}</strong></td>
+                            <td>
+                                {% if result.success %}
+                                    <span class="badge bg-success">
+                                        <i class="bi bi-check-circle"></i> Success
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-danger">
+                                        <i class="bi bi-x-circle"></i> Failed
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if result.success and result.results %}
+                                    {{ result.results.files_created|length }} files
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if result.success and result.results %}
+                                    <small class="text-muted">
+                                        Levels: {{ result.results.levels_exported|length }},
+                                        {% if result.results.sentences_exported %}
+                                            Sentences: {{ result.results.sentences_exported }}
+                                        {% endif %}
+                                    </small>
+                                {% elif result.error %}
+                                    <small class="text-danger">{{ result.error }}</small>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                {% if errors %}
+                <div class="alert alert-warning mt-3">
+                    <strong><i class="bi bi-exclamation-triangle"></i> Some exports failed:</strong>
+                    <ul class="mb-0 mt-2">
+                        {% for error in errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-folder"></i> Output Locations
+            </div>
+            <div class="card-body">
+                <p>Files are exported to language-specific directories:</p>
+                <ul>
+                    <li><code>data/trakaido_wordlists/lang_lt/generated/wireword/</code> - Lithuanian</li>
+                    <li><code>data/trakaido_wordlists/lang_zh/generated/wireword/</code> - Chinese (Simplified)</li>
+                    <li><code>data/trakaido_wordlists/lang_zh_Hant/generated/wireword/</code> - Chinese (Traditional)</li>
+                    <li><code>data/trakaido_wordlists/lang_ko/generated/wireword/</code> - Korean</li>
+                    <li><code>data/trakaido_wordlists/lang_fr/generated/wireword/</code> - French</li>
+                </ul>
+                <p class="mb-0">Each directory contains:</p>
+                <ul class="mb-0">
+                    <li><code>wireword_verbs.json</code> - All verb conjugations</li>
+                    <li><code>wireword_nouns.json</code> - All non-verbs (nouns, adjectives, etc.)</li>
+                    <li><code>wireword_sentences.json</code> - All sentences with translations</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <a href="{{ url_for('wireword.export_page') }}" class="btn btn-primary">
+                <i class="bi bi-arrow-left"></i> Back to Export
+            </a>
+            <a href="{{ url_for('index') }}" class="btn btn-secondary">
+                <i class="bi bi-house"></i> Home
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -14,6 +14,91 @@ from wordfreq.storage.backend.config import BackendType, DataSourceConfig
 bp = Blueprint("wireword", __name__, url_prefix="/wireword")
 
 
+def export_all_languages():
+    """Export WireWord files for all supported languages (directory mode only)."""
+    try:
+        # Create DataSourceConfig
+        config = DataSourceConfig(
+            backend_type=BackendType.SQLITE,
+            sqlite_path=Config.DB_PATH,
+            debug=Config.DEBUG,
+        )
+
+        all_results = {}
+        errors = []
+
+        # Export for each supported language
+        for lang_code, lang_name in SUPPORTED_LANGUAGES.items():
+            try:
+                # Handle Chinese: export both Simplified and Traditional
+                if lang_code == "zh":
+                    # Export Simplified Chinese
+                    agent_simplified = UngurysAgent(
+                        config=config,
+                        language=lang_code,
+                        simplified_chinese=True,
+                    )
+                    success_simp, results_simp = agent_simplified.export_wireword_directory()
+                    all_results[f"{lang_name} (Simplified)"] = {
+                        "success": success_simp,
+                        "results": results_simp,
+                    }
+                    if not success_simp:
+                        errors.append(f"{lang_name} (Simplified)")
+
+                    # Export Traditional Chinese
+                    agent_traditional = UngurysAgent(
+                        config=config,
+                        language=lang_code,
+                        simplified_chinese=False,
+                    )
+                    success_trad, results_trad = agent_traditional.export_wireword_directory()
+                    all_results[f"{lang_name} (Traditional)"] = {
+                        "success": success_trad,
+                        "results": results_trad,
+                    }
+                    if not success_trad:
+                        errors.append(f"{lang_name} (Traditional)")
+                else:
+                    # Export other languages
+                    agent = UngurysAgent(
+                        config=config,
+                        language=lang_code,
+                    )
+                    success, results = agent.export_wireword_directory()
+                    all_results[lang_name] = {"success": success, "results": results}
+                    if not success:
+                        errors.append(lang_name)
+
+            except Exception as e:
+                errors.append(f"{lang_name}: {str(e)}")
+                all_results[lang_name] = {"success": False, "error": str(e)}
+
+        # Show results
+        if errors:
+            flash(
+                f"Export completed with errors for: {', '.join(errors)}",
+                "warning",
+            )
+        else:
+            flash("Successfully exported WireWord files for all languages!", "success")
+
+        # Count successes
+        successes = sum(1 for r in all_results.values() if r.get("success", False))
+        total = len(all_results)
+        flash(f"Exported {successes}/{total} language variants", "info")
+
+        return render_template(
+            "wireword/results_all.html",
+            all_results=all_results,
+            errors=errors,
+        )
+
+    except Exception as e:
+        flash(f"Error during export: {str(e)}", "error")
+        return redirect(url_for("wireword.export_page"))
+
+
 @bp.route("/")
 def export_page():
     """Display the WireWord export page."""
@@ -27,6 +112,10 @@ def export_wireword():
     export_type = request.form.get("export_type", "directory")
     difficulty_level = request.form.get("difficulty_level", "").strip()
     pos_type = request.form.get("pos_type", "").strip()
+
+    # Handle "All Languages" option
+    if language == "all":
+        return export_all_languages()
 
     # Validate language
     if language not in SUPPORTED_LANGUAGES:

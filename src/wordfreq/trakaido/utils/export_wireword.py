@@ -1344,6 +1344,10 @@ class WirewordExporter:
                 base_english = self.get_english_word_from_lemma(session, lemma)
                 base_target = get_translation(session, lemma, self.language)
 
+                # Skip verbs without target language translation
+                if not base_target or not base_target.strip():
+                    continue
+
                 # For Chinese, optionally convert to simplified
                 if self.language == "zh" and self.simplified_chinese and base_target:
                     base_target = to_simplified(base_target)
