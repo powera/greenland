@@ -568,144 +568,56 @@ class GrammaticalForm(enum.Enum):
     ADVERB_KO_BASE = "adverb/ko_base"
     ADVERB_ZH_BASE = "adverb/zh_base"
 
-    # Pronoun forms - English, French, Spanish, Portuguese (function-based)
+    # Pronoun forms - English, French, Spanish, Portuguese (function-based, simplified)
+    # Word itself indicates person/number/gender; tag indicates grammatical function
     PRONOUN_EN_SUBJECTIVE = "pronoun/en_subjective"  # I, you, he, she, we, they
     PRONOUN_EN_OBJECTIVE = "pronoun/en_objective"  # me, you, him, her, us, them
-    PRONOUN_EN_POSSESSIVE = "pronoun/en_possessive"  # my, your, his, her, our, their
+    PRONOUN_EN_POSSESSIVE = "pronoun/en_possessive"  # mine, yours, his, hers, ours, theirs (standalone)
     PRONOUN_EN_REFLEXIVE = "pronoun/en_reflexive"  # myself, yourself, himself, herself, ourselves, themselves
 
     PRONOUN_FR_SUBJECTIVE = "pronoun/fr_subjective"  # je, tu, il, elle, nous, vous, ils, elles
     PRONOUN_FR_OBJECTIVE = "pronoun/fr_objective"  # me, te, le, la, nous, vous, les
-    PRONOUN_FR_POSSESSIVE = "pronoun/fr_possessive"  # mon, ton, son, notre, votre, leur
+    PRONOUN_FR_POSSESSIVE = "pronoun/fr_possessive"  # le mien, le tien, le sien (standalone possessives)
     PRONOUN_FR_REFLEXIVE = "pronoun/fr_reflexive"  # me, te, se, nous, vous, se
 
     PRONOUN_ES_SUBJECTIVE = "pronoun/es_subjective"  # yo, tú, él, ella, nosotros, vosotros, ellos, ellas
     PRONOUN_ES_OBJECTIVE = "pronoun/es_objective"  # me, te, lo, la, nos, os, los, las
-    PRONOUN_ES_POSSESSIVE = "pronoun/es_possessive"  # mi, tu, su, nuestro, vuestro, su
+    PRONOUN_ES_POSSESSIVE = "pronoun/es_possessive"  # mío, tuyo, suyo (standalone possessives)
     PRONOUN_ES_REFLEXIVE = "pronoun/es_reflexive"  # me, te, se, nos, os, se
 
     PRONOUN_PT_SUBJECTIVE = "pronoun/pt_subjective"  # eu, tu, ele, ela, nós, vós, eles, elas
     PRONOUN_PT_OBJECTIVE = "pronoun/pt_objective"  # me, te, o, a, nos, vos, os, as
-    PRONOUN_PT_POSSESSIVE = "pronoun/pt_possessive"  # meu, teu, seu, nosso, vosso, seu
+    PRONOUN_PT_POSSESSIVE = "pronoun/pt_possessive"  # meu, teu, seu (standalone possessives)
     PRONOUN_PT_REFLEXIVE = "pronoun/pt_reflexive"  # me, te, se, nos, vos, se
 
-    # Pronoun forms - Lithuanian (case-based)
-    # Nominative (subject)
-    PRONOUN_LT_NOMINATIVE_1S = "pronoun/lt_nominative_1s"  # aš (I)
-    PRONOUN_LT_NOMINATIVE_2S = "pronoun/lt_nominative_2s"  # tu (you)
-    PRONOUN_LT_NOMINATIVE_3S_M = "pronoun/lt_nominative_3s_m"  # jis (he)
-    PRONOUN_LT_NOMINATIVE_3S_F = "pronoun/lt_nominative_3s_f"  # ji (she)
-    PRONOUN_LT_NOMINATIVE_1P = "pronoun/lt_nominative_1p"  # mes (we)
-    PRONOUN_LT_NOMINATIVE_2P = "pronoun/lt_nominative_2p"  # jūs (you plural)
-    PRONOUN_LT_NOMINATIVE_3P_M = "pronoun/lt_nominative_3p_m"  # jie (they masculine)
-    PRONOUN_LT_NOMINATIVE_3P_F = "pronoun/lt_nominative_3p_f"  # jos (they feminine)
-
-    # Genitive (possession, "of")
-    PRONOUN_LT_GENITIVE_1S = "pronoun/lt_genitive_1s"  # manęs/mano (of me/my)
-    PRONOUN_LT_GENITIVE_2S = "pronoun/lt_genitive_2s"  # tavęs/tavo (of you/your)
-    PRONOUN_LT_GENITIVE_3S_M = "pronoun/lt_genitive_3s_m"  # jo (of him/his)
-    PRONOUN_LT_GENITIVE_3S_F = "pronoun/lt_genitive_3s_f"  # jos (of her/her)
-    PRONOUN_LT_GENITIVE_1P = "pronoun/lt_genitive_1p"  # mūsų (of us/our)
-    PRONOUN_LT_GENITIVE_2P = "pronoun/lt_genitive_2p"  # jūsų (of you plural/your)
-    PRONOUN_LT_GENITIVE_3P = "pronoun/lt_genitive_3p"  # jų (of them/their)
-
-    # Dative (indirect object, "to")
-    PRONOUN_LT_DATIVE_1S = "pronoun/lt_dative_1s"  # man (to me)
-    PRONOUN_LT_DATIVE_2S = "pronoun/lt_dative_2s"  # tau (to you)
-    PRONOUN_LT_DATIVE_3S_M = "pronoun/lt_dative_3s_m"  # jam (to him)
-    PRONOUN_LT_DATIVE_3S_F = "pronoun/lt_dative_3s_f"  # jai (to her)
-    PRONOUN_LT_DATIVE_1P = "pronoun/lt_dative_1p"  # mums (to us)
-    PRONOUN_LT_DATIVE_2P = "pronoun/lt_dative_2p"  # jums (to you plural)
-    PRONOUN_LT_DATIVE_3P = "pronoun/lt_dative_3p"  # jiems/joms (to them)
-
-    # Accusative (direct object)
-    PRONOUN_LT_ACCUSATIVE_1S = "pronoun/lt_accusative_1s"  # mane (me)
-    PRONOUN_LT_ACCUSATIVE_2S = "pronoun/lt_accusative_2s"  # tave (you)
-    PRONOUN_LT_ACCUSATIVE_3S_M = "pronoun/lt_accusative_3s_m"  # jį (him)
-    PRONOUN_LT_ACCUSATIVE_3S_F = "pronoun/lt_accusative_3s_f"  # ją (her)
-    PRONOUN_LT_ACCUSATIVE_1P = "pronoun/lt_accusative_1p"  # mus (us)
-    PRONOUN_LT_ACCUSATIVE_2P = "pronoun/lt_accusative_2p"  # jus (you plural)
-    PRONOUN_LT_ACCUSATIVE_3P_M = "pronoun/lt_accusative_3p_m"  # juos (them masculine)
-    PRONOUN_LT_ACCUSATIVE_3P_F = "pronoun/lt_accusative_3p_f"  # jas (them feminine)
-
-    # Instrumental (by means of)
-    PRONOUN_LT_INSTRUMENTAL_1S = "pronoun/lt_instrumental_1s"  # manimi (by me)
-    PRONOUN_LT_INSTRUMENTAL_2S = "pronoun/lt_instrumental_2s"  # tavimi (by you)
-    PRONOUN_LT_INSTRUMENTAL_3S_M = "pronoun/lt_instrumental_3s_m"  # juo (by him)
-    PRONOUN_LT_INSTRUMENTAL_3S_F = "pronoun/lt_instrumental_3s_f"  # ja (by her)
-    PRONOUN_LT_INSTRUMENTAL_1P = "pronoun/lt_instrumental_1p"  # mumis (by us)
-    PRONOUN_LT_INSTRUMENTAL_2P = "pronoun/lt_instrumental_2p"  # jumis (by you plural)
-    PRONOUN_LT_INSTRUMENTAL_3P = "pronoun/lt_instrumental_3p"  # jais/jomis (by them)
-
-    # Locative (location)
-    PRONOUN_LT_LOCATIVE_1S = "pronoun/lt_locative_1s"  # manyje (in me)
-    PRONOUN_LT_LOCATIVE_2S = "pronoun/lt_locative_2s"  # tavyje (in you)
-    PRONOUN_LT_LOCATIVE_3S_M = "pronoun/lt_locative_3s_m"  # jame (in him)
-    PRONOUN_LT_LOCATIVE_3S_F = "pronoun/lt_locative_3s_f"  # joje (in her)
-    PRONOUN_LT_LOCATIVE_1P = "pronoun/lt_locative_1p"  # mumyse (in us)
-    PRONOUN_LT_LOCATIVE_2P = "pronoun/lt_locative_2p"  # jumyse (in you plural)
-    PRONOUN_LT_LOCATIVE_3P = "pronoun/lt_locative_3p"  # juose/jose (in them)
+    # Pronoun forms - Lithuanian (case-based, simplified)
+    # Word itself indicates person/number/gender; tag indicates grammatical case
+    PRONOUN_LT_NOMINATIVE = "pronoun/lt_nominative"  # aš, tu, jis, ji, mes, jūs, jie, jos
+    PRONOUN_LT_GENITIVE = "pronoun/lt_genitive"  # manęs, tavęs, jo, jos, mūsų, jūsų, jų
+    PRONOUN_LT_DATIVE = "pronoun/lt_dative"  # man, tau, jam, jai, mums, jums, jiems, joms
+    PRONOUN_LT_ACCUSATIVE = "pronoun/lt_accusative"  # mane, tave, jį, ją, mus, jus, juos, jas
+    PRONOUN_LT_INSTRUMENTAL = "pronoun/lt_instrumental"  # manimi, tavimi, juo, ja, mumis, jumis, jais, jomis
+    PRONOUN_LT_LOCATIVE = "pronoun/lt_locative"  # manyje, tavyje, jame, joje, mumyse, jumyse, juose, jose
+    PRONOUN_LT_POSSESSIVE = "pronoun/lt_possessive"  # mano, tavo, etc. (standalone possessive forms)
 
     # Pronoun forms - German (case-based, simplified)
-    # Nominative
-    PRONOUN_DE_NOMINATIVE_1S = "pronoun/de_nominative_1s"  # ich (I)
-    PRONOUN_DE_NOMINATIVE_2S = "pronoun/de_nominative_2s"  # du (you)
-    PRONOUN_DE_NOMINATIVE_3S_M = "pronoun/de_nominative_3s_m"  # er (he)
-    PRONOUN_DE_NOMINATIVE_3S_F = "pronoun/de_nominative_3s_f"  # sie (she)
-    PRONOUN_DE_NOMINATIVE_3S_N = "pronoun/de_nominative_3s_n"  # es (it)
-    PRONOUN_DE_NOMINATIVE_1P = "pronoun/de_nominative_1p"  # wir (we)
-    PRONOUN_DE_NOMINATIVE_2P = "pronoun/de_nominative_2p"  # ihr (you plural)
-    PRONOUN_DE_NOMINATIVE_3P = "pronoun/de_nominative_3p"  # sie (they)
+    # Word itself indicates person/number/gender; tag indicates grammatical case
+    PRONOUN_DE_NOMINATIVE = "pronoun/de_nominative"  # ich, du, er, sie, es, wir, ihr, sie
+    PRONOUN_DE_ACCUSATIVE = "pronoun/de_accusative"  # mich, dich, ihn, sie, es, uns, euch, sie
+    PRONOUN_DE_DATIVE = "pronoun/de_dative"  # mir, dir, ihm, ihr, ihm, uns, euch, ihnen
+    PRONOUN_DE_GENITIVE = "pronoun/de_genitive"  # meiner, deiner, seiner, ihrer (rare)
+    PRONOUN_DE_POSSESSIVE = "pronoun/de_possessive"  # meiner/meine, deiner/deine (standalone possessives)
+    PRONOUN_DE_REFLEXIVE = "pronoun/de_reflexive"  # sich (reflexive pronoun)
 
-    # Accusative
-    PRONOUN_DE_ACCUSATIVE_1S = "pronoun/de_accusative_1s"  # mich (me)
-    PRONOUN_DE_ACCUSATIVE_2S = "pronoun/de_accusative_2s"  # dich (you)
-    PRONOUN_DE_ACCUSATIVE_3S_M = "pronoun/de_accusative_3s_m"  # ihn (him)
-    PRONOUN_DE_ACCUSATIVE_3S_F = "pronoun/de_accusative_3s_f"  # sie (her)
-    PRONOUN_DE_ACCUSATIVE_3S_N = "pronoun/de_accusative_3s_n"  # es (it)
-    PRONOUN_DE_ACCUSATIVE_1P = "pronoun/de_accusative_1p"  # uns (us)
-    PRONOUN_DE_ACCUSATIVE_2P = "pronoun/de_accusative_2p"  # euch (you plural)
-    PRONOUN_DE_ACCUSATIVE_3P = "pronoun/de_accusative_3p"  # sie (them)
+    # Pronoun forms - Chinese (simplified)
+    # Word itself indicates person/number/gender; tag indicates function
+    PRONOUN_ZH_SUBJECTIVE = "pronoun/zh_subjective"  # 我, 你, 他, 她, 它, 我们, 你们, 他们, 她们, 它们
+    PRONOUN_ZH_POSSESSIVE = "pronoun/zh_possessive"  # 我的, 你的, 他的, 她的, 它的 (with 的)
 
-    # Dative
-    PRONOUN_DE_DATIVE_1S = "pronoun/de_dative_1s"  # mir (to me)
-    PRONOUN_DE_DATIVE_2S = "pronoun/de_dative_2s"  # dir (to you)
-    PRONOUN_DE_DATIVE_3S_M = "pronoun/de_dative_3s_m"  # ihm (to him)
-    PRONOUN_DE_DATIVE_3S_F = "pronoun/de_dative_3s_f"  # ihr (to her)
-    PRONOUN_DE_DATIVE_3S_N = "pronoun/de_dative_3s_n"  # ihm (to it)
-    PRONOUN_DE_DATIVE_1P = "pronoun/de_dative_1p"  # uns (to us)
-    PRONOUN_DE_DATIVE_2P = "pronoun/de_dative_2p"  # euch (to you plural)
-    PRONOUN_DE_DATIVE_3P = "pronoun/de_dative_3p"  # ihnen (to them)
-
-    # Genitive (less common for pronouns)
-    PRONOUN_DE_GENITIVE_1S = "pronoun/de_genitive_1s"  # meiner (of me)
-    PRONOUN_DE_GENITIVE_2S = "pronoun/de_genitive_2s"  # deiner (of you)
-    PRONOUN_DE_GENITIVE_3S_M = "pronoun/de_genitive_3s_m"  # seiner (of him)
-    PRONOUN_DE_GENITIVE_3S_F = "pronoun/de_genitive_3s_f"  # ihrer (of her)
-    PRONOUN_DE_GENITIVE_3S_N = "pronoun/de_genitive_3s_n"  # seiner (of it)
-    PRONOUN_DE_GENITIVE_1P = "pronoun/de_genitive_1p"  # unser (of us)
-    PRONOUN_DE_GENITIVE_2P = "pronoun/de_genitive_2p"  # euer (of you plural)
-    PRONOUN_DE_GENITIVE_3P = "pronoun/de_genitive_3p"  # ihrer (of them)
-
-    # Pronoun forms - Chinese (person/number/gender, no case)
-    PRONOUN_ZH_1S = "pronoun/zh_1s"  # 我 (I/me)
-    PRONOUN_ZH_2S = "pronoun/zh_2s"  # 你 (you)
-    PRONOUN_ZH_3S_M = "pronoun/zh_3s_m"  # 他 (he/him)
-    PRONOUN_ZH_3S_F = "pronoun/zh_3s_f"  # 她 (she/her)
-    PRONOUN_ZH_3S_N = "pronoun/zh_3s_n"  # 它 (it)
-    PRONOUN_ZH_1P = "pronoun/zh_1p"  # 我们 (we/us)
-    PRONOUN_ZH_2P = "pronoun/zh_2p"  # 你们 (you plural)
-    PRONOUN_ZH_3P_M = "pronoun/zh_3p_m"  # 他们 (they masculine)
-    PRONOUN_ZH_3P_F = "pronoun/zh_3p_f"  # 她们 (they feminine)
-    PRONOUN_ZH_3P_N = "pronoun/zh_3p_n"  # 它们 (they neuter/things)
-
-    # Pronoun forms - Korean (person/number, no case)
-    PRONOUN_KO_1S = "pronoun/ko_1s"  # 나/저 (I/me)
-    PRONOUN_KO_2S = "pronoun/ko_2s"  # 너/당신 (you)
-    PRONOUN_KO_3S = "pronoun/ko_3s"  # 그/그녀 (he/she)
-    PRONOUN_KO_1P = "pronoun/ko_1p"  # 우리 (we/us)
-    PRONOUN_KO_2P = "pronoun/ko_2p"  # 너희/당신들 (you plural)
-    PRONOUN_KO_3P = "pronoun/ko_3p"  # 그들 (they)
+    # Pronoun forms - Korean (simplified)
+    # Word itself indicates person/number/formality; tag indicates function
+    PRONOUN_KO_SUBJECTIVE = "pronoun/ko_subjective"  # 나, 저, 너, 그, 그녀, 우리, 너희, 그들
+    PRONOUN_KO_POSSESSIVE = "pronoun/ko_possessive"  # 나의/내, 저의/제, 우리의/우리
 
     # Legacy forms (deprecated - use language-specific forms above)
     PRONOUN_SUBJECTIVE = "pronoun/subjective"  # Deprecated: use pronoun/en_subjective
