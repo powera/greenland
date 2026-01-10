@@ -43,16 +43,16 @@ def get_argument_parser():
         epilog="""
 Examples:
   # Generate candidate sentences for specific patterns
-  python -m agents.buivolas.cli generate-candidates --patterns where_is_noun my_noun_is_color --limit 100
+  python -m agents.buivolas --task generate-candidates --patterns where_is_noun my_noun_is_color --limit 100
 
   # Generate candidates for all patterns
-  python -m agents.buivolas.cli generate-candidates --all-patterns --limit 1000
+  python -m agents.buivolas --task generate-candidates --all-patterns --limit 1000
 
   # Generate pattern sentences for a GUID
-  python -m agents.buivolas.cli generate-sentences --mode pattern --guid N06_001 --pattern-limit 10
+  python -m agents.buivolas --task generate-sentences --mode pattern --guid N06_001 --pattern-limit 10
 
   # Generate LLM sentences for a GUID
-  python -m agents.buivolas.cli generate-sentences --mode llm --guid N06_001 --num-sentences 3
+  python -m agents.buivolas --task generate-sentences --mode llm --guid N06_001 --num-sentences 3 --language lt zh fr es en
         """,
     )
 
@@ -61,48 +61,51 @@ Examples:
     add_guid_arg(parser, help_text="Target this lemma GUID")
     add_backend_args(parser)
 
-    subparsers = parser.add_subparsers(dest="command", help="Command to execute", required=True)
-
-    gen_parser = subparsers.add_parser(
-        "generate-candidates",
-        help="Generate candidate pattern sentences without translations",
+    # Task selection
+    parser.add_argument(
+        "--task",
+        choices=["generate-candidates", "generate-sentences"],
+        required=True,
+        help="Task to execute",
     )
-    gen_group = gen_parser.add_mutually_exclusive_group(required=True)
-    gen_group.add_argument("--patterns", nargs="+", help="Specific pattern IDs to generate")
-    gen_group.add_argument("--all-patterns", action="store_true", help="Generate for all patterns")
-    gen_parser.add_argument("--limit", type=int, help="Max combinations per pattern")
 
-    sentence_parser = subparsers.add_parser(
-        "generate-sentences",
-        help="Generate sentences for a GUID using pattern or LLM mode",
-    )
-    sentence_parser.add_argument(
+    # Arguments for generate-candidates task
+    parser.add_argument("--patterns", nargs="+", help="Specific pattern IDs to generate (for generate-candidates)")
+    parser.add_argument("--all-patterns", action="store_true", help="Generate for all patterns (for generate-candidates)")
+
+    # Arguments for generate-sentences task
+    parser.add_argument(
         "--mode",
         choices=["pattern", "llm"],
-        required=True,
-        help="Sentence generation mode",
+        help="Sentence generation mode (for generate-sentences)",
     )
-    sentence_parser.add_argument(
+    parser.add_argument(
         "--pattern-limit",
         type=int,
-        help="Max combinations per compatible pattern (pattern mode)",
+        help="Max combinations per compatible pattern (for pattern mode)",
     )
-    sentence_parser.add_argument(
+    parser.add_argument(
         "--num-sentences",
         type=int,
         default=3,
-        help="Number of LLM sentences to generate per noun (llm mode)",
+        help="Number of LLM sentences to generate per noun (for llm mode)",
     )
-    sentence_parser.add_argument(
+    parser.add_argument(
         "--level",
         type=int,
-        help="Generate LLM sentences for nouns at a specific difficulty level (1-20)",
+        help="Generate LLM sentences for nouns at a specific difficulty level (1-20, for llm mode)",
     )
-    sentence_parser.add_argument(
+    parser.add_argument(
         "--limit",
         type=int,
-        help="Limit number of lemmas to process (llm mode)",
+        help="Limit number of lemmas to process (for llm mode) or max combinations per pattern (for generate-candidates)",
     )
+    parser.add_argument(
+        "--language",
+        nargs="+",
+        help="Target languages for translations (e.g., lt zh fr es en)",
+    )
+
     return parser
 
 
@@ -136,10 +139,18 @@ def main() -> int:
     parser = get_argument_parser()
     args = parser.parse_args()
 
+    # Validate arguments based on task
+    if args.task == "generate-candidates":
+        if not args.patterns and not args.all_patterns:
+            parser.error("generate-candidates requires either --patterns or --all-patterns")
+    elif args.task == "generate-sentences":
+        if not args.mode:
+            parser.error("generate-sentences requires --mode (pattern or llm)")
+
     config = get_data_source_config(args)
     agent = BuivolasAgent(config=config, dry_run=args.dry_run)
 
-    if args.command == "generate-candidates":
+    if args.task == "generate-candidates":
         pattern_dict = {p["pattern_id"]: p for p in SIMPLE_PATTERNS}
 
         if args.all_patterns:
@@ -196,7 +207,7 @@ def main() -> int:
                 logger.info("DRY RUN - No database changes made")
             logger.info("=" * 80)
 
-    elif args.command == "generate-sentences":
+    elif args.task == "generate-sentences":
         if args.mode == "pattern":
             if not args.guid:
                 logger.error("--guid is required for pattern sentence generation")

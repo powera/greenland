@@ -244,7 +244,7 @@ PIPELINE = [
         "display_name": "Generate Example Sentences",
         "description": "Generate example sentences for vocabulary words",
         "icon": "bi-grid-3x3",
-        "typical_args": "generate-sentences --mode llm",
+        "typical_args": "--task generate-sentences --mode llm",
     },
     {
         "step": 8,

@@ -129,7 +129,7 @@ run_step "Synonyms" \
   python -m agents.sernas.cli --guid "$GUID" --mode populate-only --languages ${LANGUAGES} --yes
 
 run_step "Pattern sentences" \
-  python -m agents.buivolas --guid "$GUID" generate-sentences --mode pattern
+  python -m agents.buivolas --guid "$GUID" --task generate-sentences --mode pattern
 
 # Grammatical facts (Lape) - run once across languages and supported tasks
 LAPE_LANGUAGES=("${LANGUAGE_LIST[@]}")
@@ -155,7 +155,7 @@ else
 fi
 
 run_step "Sentences" \
-  python -m agents.buivolas --guid "$GUID" generate-sentences --mode llm --num-sentences "$SENTENCE_COUNT" --language ${SENTENCE_LANGUAGE_LIST[*]}
+  python -m agents.buivolas --guid "$GUID" --task generate-sentences --mode llm --num-sentences "$SENTENCE_COUNT" --language ${SENTENCE_LANGUAGE_LIST[*]}
 
 run_step "Sentence translations" \
   python -m agents.zvirblis --guid "$GUID" --languages ${SENTENCE_LANGUAGE_LIST[*]} ${SENTENCE_TRANSLATION_ARGS[@]+"${SENTENCE_TRANSLATION_ARGS[@]}"}
