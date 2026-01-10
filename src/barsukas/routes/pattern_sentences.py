@@ -53,18 +53,18 @@ def generate_candidates():
     if not script_path.exists():
         return jsonify({"success": False, "error": f"Buivolas agent not found"}), 404
 
-    # Global args before subcommand
+    # Build command with --task flag
     args = ["python3", str(script_path)]
 
-    # Add database path (before subcommand)
+    # Add database path
     args.extend(["--db-path", Config.DB_PATH])
 
-    # Add dry-run if requested (before subcommand)
+    # Add dry-run if requested
     if dry_run:
         args.append("--dry-run")
 
-    # Add subcommand
-    args.append("generate-candidates")
+    # Add task flag
+    args.extend(["--task", "generate-candidates"])
 
     # Add pattern selection
     if selected_patterns and "all" not in selected_patterns:
@@ -114,7 +114,11 @@ def generate_candidates():
 
 @bp.route("/submit-batch", methods=["POST"])
 def submit_batch():
-    """Submit a batch translation job for untranslated sentences."""
+    """Submit a batch translation job for untranslated sentences.
+
+    NOTE: This function references a 'submit-batch' subcommand that does not exist
+    in the current buivolas CLI implementation. This route may be outdated.
+    """
     # Get form parameters
     selected_languages = request.form.getlist("languages")
     limit = request.form.get("limit", "")
@@ -186,7 +190,11 @@ def submit_batch():
 
 @bp.route("/batch-status")
 def batch_status():
-    """Get status of all active batches."""
+    """Get status of all active batches.
+
+    NOTE: This function references a 'list-batches' subcommand that does not exist
+    in the current buivolas CLI implementation. This route may be outdated.
+    """
     script_path = Path(constants.AGENTS_DIR) / "buivolas/cli.py"
 
     if not script_path.exists():
@@ -214,7 +222,11 @@ def batch_status():
 
 @bp.route("/check-batch/<batch_id>")
 def check_batch(batch_id):
-    """Check status of a specific batch and retrieve results if completed."""
+    """Check status of a specific batch and retrieve results if completed.
+
+    NOTE: This function references 'check-batch' and 'retrieve-batch' subcommands that do not exist
+    in the current buivolas CLI implementation. This route may be outdated.
+    """
     script_path = Path(constants.AGENTS_DIR) / "buivolas/cli.py"
 
     if not script_path.exists():
@@ -279,7 +291,11 @@ def check_batch(batch_id):
 
 @bp.route("/retrieve-batch/<batch_id>", methods=["POST"])
 def retrieve_batch(batch_id):
-    """Retrieve and apply results from a completed batch."""
+    """Retrieve and apply results from a completed batch.
+
+    NOTE: This function references a 'retrieve-batch' subcommand that does not exist
+    in the current buivolas CLI implementation. This route may be outdated.
+    """
     script_path = Path(constants.AGENTS_DIR) / "buivolas/cli.py"
 
     if not script_path.exists():
