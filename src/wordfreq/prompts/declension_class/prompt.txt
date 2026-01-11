@@ -1,0 +1,12 @@
+Identify the declension class for the following Lithuanian noun:
+
+English word: {english_word}
+Lithuanian translation: {target_translation}
+Part of speech: {pos_type}
+Definition: {definition}
+
+Provide:
+1. Declension class: 1, 2, 3, 4, or 5
+2. Brief explanation: Note the ending pattern that determined this (e.g., "-as masculine", "-ė feminine"). Include any irregularities if present.
+
+Return the declension class based on the Lithuanian noun's ending and gender pattern.

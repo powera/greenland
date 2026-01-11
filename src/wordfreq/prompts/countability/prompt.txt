@@ -1,0 +1,11 @@
+Identify the countability for the following noun:
+
+English word: {english_word}
+Part of speech: {pos_type}
+Definition: {definition}
+
+Provide:
+1. Countability: countable, uncountable, or both
+2. Brief explanation: Only include if there's something notable (e.g., "uncountable when referring to material, countable when referring to instances"). Otherwise leave blank.
+
+Return the countability classification based on how the noun is primarily used in English.

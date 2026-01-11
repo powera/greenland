@@ -1,0 +1,14 @@
+Identify the auxiliary verb used in compound tenses for the following {language_name} verb:
+
+English word: {english_word}
+{language_name} translation: {target_translation}
+Part of speech: {pos_type}
+Definition: {definition}
+
+Language: {language_name} ({language_code})
+
+Provide:
+1. Auxiliary verb: {valid_auxiliaries}
+2. Brief explanation: Only include if there's something notable (e.g., "motion verb" or "reflexive"). Otherwise leave blank.
+
+Return the auxiliary verb used to form compound tenses (like passé composé or Perfekt) for this specific verb.
