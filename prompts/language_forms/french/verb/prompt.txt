@@ -1,0 +1,12 @@
+Generate all French verb conjugation forms for the French verb "{verb}".
+
+English verb: {english_verb}
+Definition: {definition}{subtype_context}
+
+Please provide:
+- 6 persons × 3 tenses (present, imperfect, future) = 18 forms
+- 2 past participle forms (masculine, feminine) for passé composé
+- Total: 20 forms
+
+Provide only the conjugated verb without any pronouns.
+For passé composé, provide only the masculine and feminine past participles.

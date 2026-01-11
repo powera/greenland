@@ -85,8 +85,8 @@ def query_french_noun_forms(client, lemma_id: int, get_session_func) -> Tuple[Di
     )
 
     try:
-        context = util.prompt_loader.get_context("wordfreq", "french_noun_forms")
-        prompt = util.prompt_loader.get_prompt("wordfreq", "french_noun_forms").format(
+        context = util.prompt_loader.get_context("language_forms", "french/noun")
+        prompt = util.prompt_loader.get_prompt("language_forms", "french/noun").format(
             noun=noun,
             english_noun=english_noun,
             definition=definition,
@@ -148,8 +148,8 @@ def query_french_verb_conjugations(
     )
 
     try:
-        context = util.prompt_loader.get_context("wordfreq", "french_verb_conjugations")
-        prompt = util.prompt_loader.get_prompt("wordfreq", "french_verb_conjugations").format(
+        context = util.prompt_loader.get_context("language_forms", "french/verb")
+        prompt = util.prompt_loader.get_prompt("language_forms", "french/verb").format(
             verb=verb,
             english_verb=english_verb,
             definition=definition,

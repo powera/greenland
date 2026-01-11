@@ -13,11 +13,34 @@ logger = logging.getLogger(__name__)
 
 import constants
 
-# Prompts are now stored within the wordfreq module
-PROMPTS_DIR = Path(constants.SRC_DIR) / "wordfreq" / "prompts"
+# Legacy prompts are stored within the wordfreq module
+LEGACY_PROMPTS_DIR = Path(constants.SRC_DIR) / "wordfreq" / "prompts"
+
+# New prompts are stored at the repo root
+NEW_PROMPTS_DIR = Path(constants.SRC_DIR).parent / "prompts"
 
 # Cache for loaded prompts to avoid redundant file reads
 _prompt_cache: Dict[str, str] = {}
+
+
+def _resolve_prompt_path(category: str, prompt_type: str, filename: str) -> Path:
+    """
+    Resolve the path to a prompt file, checking both new and legacy locations.
+
+    Args:
+        category: If "wordfreq", use legacy location. Otherwise use new location.
+        prompt_type: Type of prompt (e.g., 'french_noun_forms' or 'language_forms/french/noun')
+        filename: Name of the file (e.g., 'prompt.txt', 'context.txt', or subtype like 'noun.txt')
+
+    Returns:
+        Path to the prompt file
+    """
+    if category == "wordfreq":
+        # Legacy location: src/wordfreq/prompts/{prompt_type}/{filename}
+        return LEGACY_PROMPTS_DIR / prompt_type / filename
+    else:
+        # New location: prompts/{category}/{prompt_type}/{filename}
+        return NEW_PROMPTS_DIR / category / prompt_type / filename
 
 
 def get_context(category: str, prompt_type: str, subtype: Optional[str] = None) -> str:
@@ -25,8 +48,9 @@ def get_context(category: str, prompt_type: str, subtype: Optional[str] = None) 
     Load a context prompt from a text file.
 
     Args:
-        category: Main category (currently only 'wordfreq' is supported)
-        prompt_type: Type of prompt (e.g., 'antonym', 'definitions')
+        category: Category for prompts. 'wordfreq' uses legacy location (src/wordfreq/prompts/),
+                  other categories use new location (prompts/{category}/)
+        prompt_type: Type of prompt (e.g., 'definitions', 'french/noun')
         subtype: Optional subtype for further categorization (e.g., 'noun' for POS subtypes)
 
     Returns:
@@ -35,14 +59,11 @@ def get_context(category: str, prompt_type: str, subtype: Optional[str] = None) 
     Raises:
         FileNotFoundError: If the prompt file doesn't exist
     """
-    # Only wordfreq category is supported
-    assert category == "wordfreq", f"Only 'wordfreq' category is supported, got '{category}'"
+    # Determine the filename
+    filename = f"{subtype}.txt" if subtype else "context.txt"
 
-    # Determine the file path
-    if subtype:
-        file_path = PROMPTS_DIR / prompt_type / f"{subtype}.txt"
-    else:
-        file_path = PROMPTS_DIR / prompt_type / "context.txt"
+    # Resolve the file path based on category
+    file_path = _resolve_prompt_path(category, prompt_type, filename)
 
     # Convert to string for cache key
     cache_key = str(file_path)
@@ -76,8 +97,9 @@ def get_prompt(category: str, prompt_type: str, subtype: Optional[str] = None) -
     Load a user prompt template from a text file.
 
     Args:
-        category: Main category (currently only 'wordfreq' is supported)
-        prompt_type: Type of prompt (e.g., 'definitions', 'chinese_translation')
+        category: Category for prompts. 'wordfreq' uses legacy location (src/wordfreq/prompts/),
+                  other categories use new location (prompts/{category}/)
+        prompt_type: Type of prompt (e.g., 'definitions', 'french/noun')
         subtype: Optional subtype for further categorization (e.g., 'noun' for POS subtypes)
 
     Returns:
@@ -86,14 +108,11 @@ def get_prompt(category: str, prompt_type: str, subtype: Optional[str] = None) -
     Raises:
         FileNotFoundError: If the prompt file doesn't exist
     """
-    # Only wordfreq category is supported
-    assert category == "wordfreq", f"Only 'wordfreq' category is supported, got '{category}'"
+    # Determine the filename
+    filename = f"{subtype}.txt" if subtype else "prompt.txt"
 
-    # Determine the file path
-    if subtype:
-        file_path = PROMPTS_DIR / prompt_type / f"{subtype}.txt"
-    else:
-        file_path = PROMPTS_DIR / prompt_type / "prompt.txt"
+    # Resolve the file path based on category
+    file_path = _resolve_prompt_path(category, prompt_type, filename)
 
     # Convert to string for cache key
     cache_key = str(file_path)
