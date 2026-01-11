@@ -1,0 +1,11 @@
+Identify the grammatical animacy for the following noun:
+
+English word: {english_word}
+Part of speech: {pos_type}
+Definition: {definition}
+
+Provide:
+1. Animacy: animate or inanimate
+2. Brief explanation: Only include if there's something non-obvious (e.g., "personified entity" or "grammatically animate despite being non-living"). Otherwise leave blank.
+
+Return the grammatical animacy classification (not biological - plants are grammatically inanimate).

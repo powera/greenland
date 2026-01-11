@@ -10,18 +10,21 @@ Lape - Grammar Facts Generator Agent
 This agent generates language-specific grammatical facts for lemmas using LLM queries.
 It supports various types of grammar facts that can be specified via command line parameters.
 
-Currently supported fact types:
-- measure_words (Chinese): Generate appropriate measure words/classifiers for nouns
+Supported fact types:
 
-Future expansions (commented examples):
+Noun facts:
+- measure_words (Chinese): Generate appropriate measure words/classifiers for nouns
 - grammatical_gender (French, Spanish, German, etc.): Determine noun gender (masculine, feminine, neuter)
-- number_type (English, etc.): Identify plurale tantum (scissors, pants) or singulare tantum (furniture, information)
-- declension_class (Lithuanian, Latin, etc.): Determine which declension pattern a noun follows
-- verb_aspect (Russian, Polish, etc.): Identify perfective vs imperfective verb pairs
-- honorific_level (Japanese, Korean): Determine appropriate honorific/politeness level
-- tone_pattern (Vietnamese, Thai): Identify tone patterns for words
-- definiteness (Arabic, Hebrew): Whether nouns are definite or indefinite by default
-- animacy (Russian, Czech): Whether nouns are animate or inanimate (affects grammar)
+- countability (English): Classify nouns as countable, uncountable, or both
+- declension_class (Lithuanian): Determine which declension class (1-5) a noun follows
+- animacy (English): Classify nouns as animate or inanimate (affects grammar in some languages)
+
+Verb facts:
+- verb_transitivity (English): Classify as transitive, intransitive, ditransitive, or ambitransitive
+- verb_reflexivity (French, Spanish, German, Lithuanian, Italian): Identify reflexive verbs
+- auxiliary_verb (French, German, Italian): Which auxiliary verb is used in compound tenses
+
+Note: number_type (plurale_tantum/singulare_tantum) is auto-detected during form generation by Vilkas.
 
 "Lape" means "fox" in Lithuanian - clever and precise in analyzing grammar!
 """
@@ -117,6 +120,54 @@ class LapeAgent:
         },
     }
 
+    # Language-specific auxiliary verb systems
+    AUXILIARY_SYSTEMS = {
+        "fr": {
+            "name": "French",
+            "auxiliaries": ["avoir", "être"],
+            "description": "avoir (most verbs) or être (motion/reflexive verbs)",
+        },
+        "de": {
+            "name": "German",
+            "auxiliaries": ["haben", "sein"],
+            "description": "haben (most verbs) or sein (motion/state change verbs)",
+        },
+        "it": {
+            "name": "Italian",
+            "auxiliaries": ["avere", "essere"],
+            "description": "avere (most verbs) or essere (motion/reflexive verbs)",
+        },
+    }
+
+    # Language-specific reflexivity systems
+    REFLEXIVITY_SYSTEMS = {
+        "fr": {
+            "name": "French",
+            "values": ["inherently_reflexive", "optionally_reflexive", "non_reflexive"],
+            "description": "se + verb for reflexive forms",
+        },
+        "es": {
+            "name": "Spanish",
+            "values": ["inherently_reflexive", "optionally_reflexive", "non_reflexive"],
+            "description": "se + verb for reflexive forms",
+        },
+        "de": {
+            "name": "German",
+            "values": ["inherently_reflexive", "optionally_reflexive", "non_reflexive"],
+            "description": "sich + verb for reflexive forms",
+        },
+        "lt": {
+            "name": "Lithuanian",
+            "values": ["inherently_reflexive", "optionally_reflexive", "non_reflexive"],
+            "description": "-si/-tis suffix for reflexive forms",
+        },
+        "it": {
+            "name": "Italian",
+            "values": ["inherently_reflexive", "optionally_reflexive", "non_reflexive"],
+            "description": "si + verb for reflexive forms",
+        },
+    }
+
     # Supported fact types and their required parameters
     SUPPORTED_FACT_TYPES = {
         "measure_words": {
@@ -129,16 +180,36 @@ class LapeAgent:
             "required_pos": ["noun"],
             "description": "Determine grammatical gender (masculine, feminine, neuter)",
         },
-        # 'number_type': {
-        #     'languages': ['en', 'lt', 'fr', 'es'],
-        #     'required_pos': ['noun'],
-        #     'description': 'Identify plurale tantum or singulare tantum nouns'
-        # },
-        # 'declension_class': {
-        #     'languages': ['lt', 'la', 'ru', 'de'],
-        #     'required_pos': ['noun', 'adjective'],
-        #     'description': 'Determine declension class/pattern'
-        # },
+        "verb_transitivity": {
+            "languages": ["en"],  # English-based, applies to base concept
+            "required_pos": ["verb"],
+            "description": "Classify verbs as transitive, intransitive, ditransitive, or ambitransitive",
+        },
+        "verb_reflexivity": {
+            "languages": ["fr", "es", "de", "lt", "it"],
+            "required_pos": ["verb"],
+            "description": "Identify inherently reflexive, optionally reflexive, or non-reflexive verbs",
+        },
+        "countability": {
+            "languages": ["en"],  # English-based, applies to base concept
+            "required_pos": ["noun"],
+            "description": "Classify nouns as countable, uncountable, or both",
+        },
+        "declension_class": {
+            "languages": ["lt"],  # Lithuanian for now
+            "required_pos": ["noun"],
+            "description": "Determine declension class (1-5 for Lithuanian nouns)",
+        },
+        "auxiliary_verb": {
+            "languages": ["fr", "de", "it"],
+            "required_pos": ["verb"],
+            "description": "Identify auxiliary verb used in compound tenses (avoir/être, haben/sein, etc.)",
+        },
+        "animacy": {
+            "languages": ["en"],  # English-based, applies to base concept
+            "required_pos": ["noun"],
+            "description": "Classify nouns as animate or inanimate (affects case in some languages)",
+        },
     }
 
     # Grouped task presets mapping to multiple fact types
@@ -146,6 +217,8 @@ class LapeAgent:
         "all": list(SUPPORTED_FACT_TYPES.keys()),
         "gender": ["grammatical_gender"],
         "measure-words": ["measure_words"],
+        "nouns": ["grammatical_gender", "countability", "animacy", "declension_class"],
+        "verbs": ["verb_transitivity", "verb_reflexivity", "auxiliary_verb"],
     }
 
     def __init__(self, config: DataSourceConfig):
@@ -376,6 +449,501 @@ class LapeAgent:
             logger.error(f"Failed to generate gender for '{lemma.lemma_text}': {e}")
             return None, None, 0.0
 
+    def generate_verb_transitivity(
+        self, lemma: Lemma, session=None
+    ) -> Tuple[Optional[str], Optional[str], float]:
+        """
+        Generate verb transitivity classification using LLM.
+
+        Args:
+            lemma: The Lemma object
+            session: Database session (optional)
+
+        Returns:
+            Tuple of (transitivity, explanation, confidence)
+        """
+        if lemma.pos_type != "verb":
+            logger.warning(f"Lemma '{lemma.lemma_text}' is not a verb, skipping transitivity")
+            return None, None, 0.0
+
+        # Load prompts
+        try:
+            context = util.prompt_loader.get_context("wordfreq", "verb_transitivity")
+            prompt_template = util.prompt_loader.get_prompt("wordfreq", "verb_transitivity")
+        except Exception as e:
+            logger.error(f"Failed to load verb_transitivity prompts: {e}")
+            return None, None, 0.0
+
+        # Format prompt
+        prompt_text = prompt_template.format(
+            english_word=lemma.lemma_text,
+            pos_type=lemma.pos_type,
+            definition=lemma.definition_text or "N/A",
+        )
+
+        # Define JSON schema for response
+        schema = Schema(
+            name="VerbTransitivityClassification",
+            description="Classify verb transitivity",
+            properties={
+                "transitivity": SchemaProperty(
+                    "string",
+                    "The transitivity classification",
+                    enum=["transitive", "intransitive", "ditransitive", "ambitransitive"],
+                ),
+                "explanation": SchemaProperty(
+                    "string", "Brief explanation if notable"
+                ),
+                "confidence": SchemaProperty(
+                    "number", "Confidence score 0.0-1.0", minimum=0.0, maximum=1.0
+                ),
+            },
+        )
+
+        # Query LLM
+        try:
+            client = self.get_llm_client()
+            response = client.generate_chat(prompt=prompt_text, json_schema=schema, context=context)
+
+            if response.structured_data:
+                result = response.structured_data
+            else:
+                logger.error(f"No structured data received for '{lemma.lemma_text}'")
+                return None, None, 0.0
+
+            transitivity = result.get("transitivity", None)
+            explanation = result.get("explanation", "")
+            confidence = float(result.get("confidence", 0.5))
+
+            logger.info(
+                f"Generated transitivity for '{lemma.lemma_text}': {transitivity} "
+                f"(confidence: {confidence:.2f})"
+            )
+
+            return transitivity, explanation, confidence
+
+        except Exception as e:
+            logger.error(f"Failed to generate transitivity for '{lemma.lemma_text}': {e}")
+            return None, None, 0.0
+
+    def generate_verb_reflexivity(
+        self, lemma: Lemma, target_translation: str, language_code: str, session=None
+    ) -> Tuple[Optional[str], Optional[str], float]:
+        """
+        Generate verb reflexivity classification using LLM.
+
+        Args:
+            lemma: The Lemma object
+            target_translation: The translation in the target language
+            language_code: Target language code
+            session: Database session (optional)
+
+        Returns:
+            Tuple of (reflexivity, explanation, confidence)
+        """
+        if lemma.pos_type != "verb":
+            logger.warning(f"Lemma '{lemma.lemma_text}' is not a verb, skipping reflexivity")
+            return None, None, 0.0
+
+        if language_code not in self.REFLEXIVITY_SYSTEMS:
+            logger.error(f"Language '{language_code}' does not have reflexivity configuration")
+            return None, None, 0.0
+
+        reflex_config = self.REFLEXIVITY_SYSTEMS[language_code]
+        language_name = reflex_config["name"]
+
+        # Load prompts
+        try:
+            context = util.prompt_loader.get_context("wordfreq", "verb_reflexivity")
+            prompt_template = util.prompt_loader.get_prompt("wordfreq", "verb_reflexivity")
+        except Exception as e:
+            logger.error(f"Failed to load verb_reflexivity prompts: {e}")
+            return None, None, 0.0
+
+        # Format prompt
+        prompt_text = prompt_template.format(
+            english_word=lemma.lemma_text,
+            target_translation=target_translation,
+            pos_type=lemma.pos_type,
+            definition=lemma.definition_text or "N/A",
+            language_name=language_name,
+            language_code=language_code,
+        )
+
+        # Define JSON schema for response
+        schema = Schema(
+            name="VerbReflexivityClassification",
+            description=f"Classify verb reflexivity for {language_name}",
+            properties={
+                "reflexivity": SchemaProperty(
+                    "string",
+                    "The reflexivity classification",
+                    enum=reflex_config["values"],
+                ),
+                "explanation": SchemaProperty(
+                    "string", "Brief explanation with reflexive form if applicable"
+                ),
+                "confidence": SchemaProperty(
+                    "number", "Confidence score 0.0-1.0", minimum=0.0, maximum=1.0
+                ),
+            },
+        )
+
+        # Query LLM
+        try:
+            client = self.get_llm_client()
+            response = client.generate_chat(prompt=prompt_text, json_schema=schema, context=context)
+
+            if response.structured_data:
+                result = response.structured_data
+            else:
+                logger.error(f"No structured data received for '{lemma.lemma_text}'")
+                return None, None, 0.0
+
+            reflexivity = result.get("reflexivity", None)
+            explanation = result.get("explanation", "")
+            confidence = float(result.get("confidence", 0.5))
+
+            logger.info(
+                f"Generated reflexivity for '{lemma.lemma_text}' ({target_translation}): "
+                f"{reflexivity} (confidence: {confidence:.2f})"
+            )
+
+            return reflexivity, explanation, confidence
+
+        except Exception as e:
+            logger.error(f"Failed to generate reflexivity for '{lemma.lemma_text}': {e}")
+            return None, None, 0.0
+
+    def generate_countability(
+        self, lemma: Lemma, session=None
+    ) -> Tuple[Optional[str], Optional[str], float]:
+        """
+        Generate noun countability classification using LLM.
+
+        Args:
+            lemma: The Lemma object
+            session: Database session (optional)
+
+        Returns:
+            Tuple of (countability, explanation, confidence)
+        """
+        if lemma.pos_type != "noun":
+            logger.warning(f"Lemma '{lemma.lemma_text}' is not a noun, skipping countability")
+            return None, None, 0.0
+
+        # Load prompts
+        try:
+            context = util.prompt_loader.get_context("wordfreq", "countability")
+            prompt_template = util.prompt_loader.get_prompt("wordfreq", "countability")
+        except Exception as e:
+            logger.error(f"Failed to load countability prompts: {e}")
+            return None, None, 0.0
+
+        # Format prompt
+        prompt_text = prompt_template.format(
+            english_word=lemma.lemma_text,
+            pos_type=lemma.pos_type,
+            definition=lemma.definition_text or "N/A",
+        )
+
+        # Define JSON schema for response
+        schema = Schema(
+            name="NounCountabilityClassification",
+            description="Classify noun countability",
+            properties={
+                "countability": SchemaProperty(
+                    "string",
+                    "The countability classification",
+                    enum=["countable", "uncountable", "both"],
+                ),
+                "explanation": SchemaProperty(
+                    "string", "Brief explanation if notable"
+                ),
+                "confidence": SchemaProperty(
+                    "number", "Confidence score 0.0-1.0", minimum=0.0, maximum=1.0
+                ),
+            },
+        )
+
+        # Query LLM
+        try:
+            client = self.get_llm_client()
+            response = client.generate_chat(prompt=prompt_text, json_schema=schema, context=context)
+
+            if response.structured_data:
+                result = response.structured_data
+            else:
+                logger.error(f"No structured data received for '{lemma.lemma_text}'")
+                return None, None, 0.0
+
+            countability = result.get("countability", None)
+            explanation = result.get("explanation", "")
+            confidence = float(result.get("confidence", 0.5))
+
+            logger.info(
+                f"Generated countability for '{lemma.lemma_text}': {countability} "
+                f"(confidence: {confidence:.2f})"
+            )
+
+            return countability, explanation, confidence
+
+        except Exception as e:
+            logger.error(f"Failed to generate countability for '{lemma.lemma_text}': {e}")
+            return None, None, 0.0
+
+    def generate_declension_class(
+        self, lemma: Lemma, target_translation: str, language_code: str, session=None
+    ) -> Tuple[Optional[str], Optional[str], float]:
+        """
+        Generate noun declension class using LLM.
+
+        Args:
+            lemma: The Lemma object
+            target_translation: The translation in the target language
+            language_code: Target language code (currently only 'lt' for Lithuanian)
+            session: Database session (optional)
+
+        Returns:
+            Tuple of (declension_class, explanation, confidence)
+        """
+        if lemma.pos_type != "noun":
+            logger.warning(f"Lemma '{lemma.lemma_text}' is not a noun, skipping declension class")
+            return None, None, 0.0
+
+        if language_code != "lt":
+            logger.error(f"Declension class only supported for Lithuanian, got '{language_code}'")
+            return None, None, 0.0
+
+        # Load prompts
+        try:
+            context = util.prompt_loader.get_context("wordfreq", "declension_class")
+            prompt_template = util.prompt_loader.get_prompt("wordfreq", "declension_class")
+        except Exception as e:
+            logger.error(f"Failed to load declension_class prompts: {e}")
+            return None, None, 0.0
+
+        # Format prompt
+        prompt_text = prompt_template.format(
+            english_word=lemma.lemma_text,
+            target_translation=target_translation,
+            pos_type=lemma.pos_type,
+            definition=lemma.definition_text or "N/A",
+        )
+
+        # Define JSON schema for response
+        schema = Schema(
+            name="LithuanianDeclensionClassification",
+            description="Classify Lithuanian noun declension class",
+            properties={
+                "declension_class": SchemaProperty(
+                    "string",
+                    "The declension class (1-5)",
+                    enum=["1", "2", "3", "4", "5"],
+                ),
+                "explanation": SchemaProperty(
+                    "string", "Brief explanation with ending pattern"
+                ),
+                "confidence": SchemaProperty(
+                    "number", "Confidence score 0.0-1.0", minimum=0.0, maximum=1.0
+                ),
+            },
+        )
+
+        # Query LLM
+        try:
+            client = self.get_llm_client()
+            response = client.generate_chat(prompt=prompt_text, json_schema=schema, context=context)
+
+            if response.structured_data:
+                result = response.structured_data
+            else:
+                logger.error(f"No structured data received for '{lemma.lemma_text}'")
+                return None, None, 0.0
+
+            declension_class = result.get("declension_class", None)
+            explanation = result.get("explanation", "")
+            confidence = float(result.get("confidence", 0.5))
+
+            logger.info(
+                f"Generated declension class for '{lemma.lemma_text}' ({target_translation}): "
+                f"class {declension_class} (confidence: {confidence:.2f})"
+            )
+
+            return declension_class, explanation, confidence
+
+        except Exception as e:
+            logger.error(f"Failed to generate declension class for '{lemma.lemma_text}': {e}")
+            return None, None, 0.0
+
+    def generate_auxiliary_verb(
+        self, lemma: Lemma, target_translation: str, language_code: str, session=None
+    ) -> Tuple[Optional[str], Optional[str], float]:
+        """
+        Generate auxiliary verb classification for compound tenses using LLM.
+
+        Args:
+            lemma: The Lemma object
+            target_translation: The translation in the target language
+            language_code: Target language code (fr, de, it)
+            session: Database session (optional)
+
+        Returns:
+            Tuple of (auxiliary_verb, explanation, confidence)
+        """
+        if lemma.pos_type != "verb":
+            logger.warning(f"Lemma '{lemma.lemma_text}' is not a verb, skipping auxiliary")
+            return None, None, 0.0
+
+        if language_code not in self.AUXILIARY_SYSTEMS:
+            logger.error(f"Language '{language_code}' does not have auxiliary verb configuration")
+            return None, None, 0.0
+
+        aux_config = self.AUXILIARY_SYSTEMS[language_code]
+        language_name = aux_config["name"]
+        valid_auxiliaries = ", ".join(aux_config["auxiliaries"])
+
+        # Load prompts
+        try:
+            context = util.prompt_loader.get_context("wordfreq", "auxiliary_verb")
+            prompt_template = util.prompt_loader.get_prompt("wordfreq", "auxiliary_verb")
+        except Exception as e:
+            logger.error(f"Failed to load auxiliary_verb prompts: {e}")
+            return None, None, 0.0
+
+        # Format prompt
+        prompt_text = prompt_template.format(
+            english_word=lemma.lemma_text,
+            target_translation=target_translation,
+            pos_type=lemma.pos_type,
+            definition=lemma.definition_text or "N/A",
+            language_name=language_name,
+            language_code=language_code,
+            valid_auxiliaries=valid_auxiliaries,
+        )
+
+        # Define JSON schema for response
+        schema = Schema(
+            name="AuxiliaryVerbClassification",
+            description=f"Classify auxiliary verb for {language_name} compound tenses",
+            properties={
+                "auxiliary_verb": SchemaProperty(
+                    "string",
+                    f"The auxiliary verb: {valid_auxiliaries}",
+                    enum=aux_config["auxiliaries"],
+                ),
+                "explanation": SchemaProperty(
+                    "string", "Brief explanation if notable"
+                ),
+                "confidence": SchemaProperty(
+                    "number", "Confidence score 0.0-1.0", minimum=0.0, maximum=1.0
+                ),
+            },
+        )
+
+        # Query LLM
+        try:
+            client = self.get_llm_client()
+            response = client.generate_chat(prompt=prompt_text, json_schema=schema, context=context)
+
+            if response.structured_data:
+                result = response.structured_data
+            else:
+                logger.error(f"No structured data received for '{lemma.lemma_text}'")
+                return None, None, 0.0
+
+            auxiliary = result.get("auxiliary_verb", None)
+            explanation = result.get("explanation", "")
+            confidence = float(result.get("confidence", 0.5))
+
+            logger.info(
+                f"Generated auxiliary for '{lemma.lemma_text}' ({target_translation}): "
+                f"{auxiliary} (confidence: {confidence:.2f})"
+            )
+
+            return auxiliary, explanation, confidence
+
+        except Exception as e:
+            logger.error(f"Failed to generate auxiliary for '{lemma.lemma_text}': {e}")
+            return None, None, 0.0
+
+    def generate_animacy(
+        self, lemma: Lemma, session=None
+    ) -> Tuple[Optional[str], Optional[str], float]:
+        """
+        Generate noun animacy classification using LLM.
+
+        Args:
+            lemma: The Lemma object
+            session: Database session (optional)
+
+        Returns:
+            Tuple of (animacy, explanation, confidence)
+        """
+        if lemma.pos_type != "noun":
+            logger.warning(f"Lemma '{lemma.lemma_text}' is not a noun, skipping animacy")
+            return None, None, 0.0
+
+        # Load prompts
+        try:
+            context = util.prompt_loader.get_context("wordfreq", "animacy")
+            prompt_template = util.prompt_loader.get_prompt("wordfreq", "animacy")
+        except Exception as e:
+            logger.error(f"Failed to load animacy prompts: {e}")
+            return None, None, 0.0
+
+        # Format prompt
+        prompt_text = prompt_template.format(
+            english_word=lemma.lemma_text,
+            pos_type=lemma.pos_type,
+            definition=lemma.definition_text or "N/A",
+        )
+
+        # Define JSON schema for response
+        schema = Schema(
+            name="NounAnimacyClassification",
+            description="Classify noun animacy",
+            properties={
+                "animacy": SchemaProperty(
+                    "string",
+                    "The animacy classification",
+                    enum=["animate", "inanimate"],
+                ),
+                "explanation": SchemaProperty(
+                    "string", "Brief explanation if notable"
+                ),
+                "confidence": SchemaProperty(
+                    "number", "Confidence score 0.0-1.0", minimum=0.0, maximum=1.0
+                ),
+            },
+        )
+
+        # Query LLM
+        try:
+            client = self.get_llm_client()
+            response = client.generate_chat(prompt=prompt_text, json_schema=schema, context=context)
+
+            if response.structured_data:
+                result = response.structured_data
+            else:
+                logger.error(f"No structured data received for '{lemma.lemma_text}'")
+                return None, None, 0.0
+
+            animacy = result.get("animacy", None)
+            explanation = result.get("explanation", "")
+            confidence = float(result.get("confidence", 0.5))
+
+            logger.info(
+                f"Generated animacy for '{lemma.lemma_text}': {animacy} "
+                f"(confidence: {confidence:.2f})"
+            )
+
+            return animacy, explanation, confidence
+
+        except Exception as e:
+            logger.error(f"Failed to generate animacy for '{lemma.lemma_text}': {e}")
+            return None, None, 0.0
+
     def generate_grammar_facts(
         self,
         fact_type: str,
@@ -483,6 +1051,33 @@ class LapeAgent:
                     fact_value, notes, confidence = self.generate_grammatical_gender(
                         lemma, translation, language_code, session
                     )
+                elif fact_type == "verb_transitivity":
+                    # English-based fact, no translation needed
+                    fact_value, notes, confidence = self.generate_verb_transitivity(
+                        lemma, session
+                    )
+                elif fact_type == "verb_reflexivity":
+                    fact_value, notes, confidence = self.generate_verb_reflexivity(
+                        lemma, translation, language_code, session
+                    )
+                elif fact_type == "countability":
+                    # English-based fact, no translation needed
+                    fact_value, notes, confidence = self.generate_countability(
+                        lemma, session
+                    )
+                elif fact_type == "declension_class":
+                    fact_value, notes, confidence = self.generate_declension_class(
+                        lemma, translation, language_code, session
+                    )
+                elif fact_type == "auxiliary_verb":
+                    fact_value, notes, confidence = self.generate_auxiliary_verb(
+                        lemma, translation, language_code, session
+                    )
+                elif fact_type == "animacy":
+                    # English-based fact, no translation needed
+                    fact_value, notes, confidence = self.generate_animacy(
+                        lemma, session
+                    )
                 else:
                     # Placeholder for future fact types
                     logger.error(f"Fact type {fact_type} not yet implemented")
@@ -577,8 +1172,14 @@ Examples:
   # Generate French grammatical gender for nouns
   python lape.py --fact-type grammatical_gender --languages fr --limit 10
 
-  # Generate Lithuanian grammatical gender for nouns
-  python lape.py --fact-type grammatical_gender --languages lt --limit 10
+  # Generate verb transitivity (English-based, applies to all languages)
+  python lape.py --fact-type verb_transitivity --languages en --limit 10
+
+  # Generate French auxiliary verb classification (avoir/être)
+  python lape.py --fact-type auxiliary_verb --languages fr --limit 10
+
+  # Generate Lithuanian declension classes
+  python lape.py --fact-type declension_class --languages lt --limit 10
 
   # Generate for a single lemma by GUID
   python lape.py --fact-type grammatical_gender --languages fr --guid N14_001
@@ -586,26 +1187,33 @@ Examples:
   # Dry run to see what would be generated
   python lape.py --fact-type grammatical_gender --languages fr --limit 5 --dry-run
 
-  # Generate for all lemmas without existing facts
-  python lape.py --fact-type grammatical_gender --languages fr
-
-  # Use a different model
-  python lape.py --fact-type grammatical_gender --languages de --model gpt-5 --limit 10
-
   # Use grouped tasks to process multiple fact types
   python lape.py --task all --languages fr es --limit 10
-  python lape.py --task gender --languages lt --guid N14_001
+  python lape.py --task nouns --languages lt en --limit 10
+  python lape.py --task verbs --languages fr en --limit 10
 
 Supported fact types:
-  - measure_words: Chinese measure words/classifiers for nouns (languages: zh)
-  - grammatical_gender: Noun gender (languages: fr, lt, es, de, pt, ru, it)
 
-Future fact types (see code comments):
-  - number_type: Plurale tantum or singulare tantum identification
-  - declension_class: Declension pattern classification
-  - verb_aspect: Perfective vs imperfective verbs
-  - honorific_level: Politeness/honorific level
-  - And more...
+  Noun facts:
+    - measure_words: Chinese measure words/classifiers (languages: zh)
+    - grammatical_gender: Noun gender (languages: fr, lt, es, de, pt, ru, it)
+    - countability: Countable/uncountable/both (languages: en - base concept)
+    - declension_class: Declension class 1-5 (languages: lt)
+    - animacy: Animate/inanimate (languages: en - base concept)
+
+  Verb facts:
+    - verb_transitivity: Transitive/intransitive/ditransitive/ambitransitive (languages: en - base concept)
+    - verb_reflexivity: Inherently/optionally/non-reflexive (languages: fr, es, de, lt, it)
+    - auxiliary_verb: Compound tense auxiliary (languages: fr, de, it)
+
+  Note: number_type (plurale_tantum/singulare_tantum) is auto-detected during form generation by Vilkas.
+
+Task presets:
+  - all: All fact types
+  - gender: grammatical_gender only
+  - measure-words: measure_words only
+  - nouns: grammatical_gender, countability, animacy, declension_class
+  - verbs: verb_transitivity, verb_reflexivity, auxiliary_verb
         """,
     )
 

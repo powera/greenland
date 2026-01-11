@@ -1,0 +1,14 @@
+Identify the reflexivity for the following {language_name} verb:
+
+English word: {english_word}
+{language_name} translation: {target_translation}
+Part of speech: {pos_type}
+Definition: {definition}
+
+Language: {language_name} ({language_code})
+
+Provide:
+1. Reflexivity: inherently_reflexive, optionally_reflexive, or non_reflexive
+2. Brief explanation: Include the reflexive form if applicable (e.g., "se laver" or "sich waschen"). Otherwise leave blank.
+
+Return the reflexivity classification specific to the {language_name} translation provided.

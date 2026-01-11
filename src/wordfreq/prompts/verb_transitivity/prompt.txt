@@ -1,0 +1,11 @@
+Identify the transitivity for the following verb:
+
+English word: {english_word}
+Part of speech: {pos_type}
+Definition: {definition}
+
+Provide:
+1. Transitivity: transitive, intransitive, ditransitive, or ambitransitive
+2. Brief explanation: Only include if there's something notable (e.g., "ditransitive with recipient and theme"). Otherwise leave blank.
+
+Return the transitivity classification based on how the verb is primarily used.
