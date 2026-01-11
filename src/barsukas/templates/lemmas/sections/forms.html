@@ -1,15 +1,14 @@
 <!-- Grammatical Forms and Pronunciations -->
-{% if forms_by_language %}
 <div class="row mb-4">
     <div class="col">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span><i class="bi bi-file-text"></i> Grammatical Forms & Pronunciations</span>
                 <div>
-                    <button type="button" class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#generateFormsModal">
+                    <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#generateFormsModal">
                         <i class="bi bi-plus-circle"></i> Generate Forms
                     </button>
-                    {% if forms_by_language.get('en') %}
+                    {% if forms_by_language and forms_by_language.get('en') %}
                         <form method="post" action="{{ url_for('agents.check_pronunciations', lemma_id=lemma.id) }}" style="display: inline;">
                             <button type="submit" class="btn btn-sm btn-light" title="Check pronunciations using AI">
                                 <i class="bi bi-robot"></i> Check Pronunciations
@@ -25,7 +24,8 @@
                 </div>
             </div>
             <div class="card-body">
-                {% for lang_code, forms in forms_by_language.items() %}
+                {% if forms_by_language %}
+                    {% for lang_code, forms in forms_by_language.items() %}
                     <h5 class="mt-3">
                         {{ language_names.get(lang_code, lang_code) }}
                         <span class="badge bg-secondary">{{ forms|length }} form(s)</span>
@@ -56,7 +56,13 @@
                             {% endfor %}
                         </tbody>
                     </table>
-                {% endfor %}
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted">
+                        <i class="bi bi-info-circle"></i> No grammatical forms have been generated yet.
+                        Use the <strong>Generate Forms</strong> button above to create them automatically.
+                    </p>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -148,4 +154,3 @@ document.addEventListener('DOMContentLoaded', function() {
     updateLanguageOptions();
 });
 </script>
-{% endif %}

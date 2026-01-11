@@ -111,10 +111,13 @@
                             {% endif %}
                         {% endif %}
                     {% endfor %}
-                {% else %}
+                {% endif %}
+
+                {# Always show message if no forms exist #}
+                {% if not (synonyms_by_language or alternative_forms_by_language) %}
                     <p class="text-muted">
                         <i class="bi bi-info-circle"></i> No synonyms or alternative forms have been generated yet.
-                        Use the <strong>ŠERNAS agent</strong> to generate them automatically.
+                        Use the <strong>Generate Synonyms</strong> button above to create them automatically.
                     </p>
                 {% endif %}
             </div>
