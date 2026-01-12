@@ -109,8 +109,8 @@ def translate_sentence(
     target_lang_names = [LANGUAGE_NAMES.get(lang, lang) for lang in target_languages]
 
     # Load prompt templates
-    prompt_context = util.prompt_loader.get_context("wordfreq", "sentence_translation")
-    prompt_template = util.prompt_loader.get_prompt("wordfreq", "sentence_translation")
+    prompt_context = util.prompt_loader.get_context("translation", "sentence")
+    prompt_template = util.prompt_loader.get_prompt("translation", "sentence")
 
     # Format the prompt with parameters
     formatted_prompt = prompt_template.format(

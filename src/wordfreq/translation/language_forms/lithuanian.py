@@ -176,8 +176,8 @@ def query_lithuanian_noun_declensions(
     subtype_context = f" (category: {pos_subtype})" if pos_subtype else ""
 
     try:
-        context = util.prompt_loader.get_context("wordfreq", "lithuanian_noun_declensions")
-        prompt_template = util.prompt_loader.get_prompt("wordfreq", "lithuanian_noun_declensions")
+        context = util.prompt_loader.get_context("language_forms", "lithuanian/noun")
+        prompt_template = util.prompt_loader.get_prompt("language_forms", "lithuanian/noun")
         prompt = prompt_template.format(
             noun=noun,
             english_word=english_word,
@@ -295,8 +295,8 @@ def query_lithuanian_verb_conjugations(
     subtype_context = f" (category: {pos_subtype})" if pos_subtype else ""
 
     try:
-        context = util.prompt_loader.get_context("wordfreq", "lithuanian_verb_conjugations")
-        prompt_template = util.prompt_loader.get_prompt("wordfreq", "lithuanian_verb_conjugations")
+        context = util.prompt_loader.get_context("language_forms", "lithuanian/verb")
+        prompt_template = util.prompt_loader.get_prompt("language_forms", "lithuanian/verb")
         prompt = prompt_template.format(
             verb=verb,
             english_verb=english_verb,
@@ -444,9 +444,9 @@ def query_lithuanian_adjective_declensions(
     subtype_context = f" (category: {pos_subtype})" if pos_subtype else ""
 
     try:
-        context = util.prompt_loader.get_context("wordfreq", "lithuanian_adjective_declensions")
+        context = util.prompt_loader.get_context("language_forms", "lithuanian/adjective")
         prompt_template = util.prompt_loader.get_prompt(
-            "wordfreq", "lithuanian_adjective_declensions"
+            "language_forms", "lithuanian/adjective"
         )
         prompt = prompt_template.format(
             adjective=adjective,
@@ -557,8 +557,8 @@ def query_lithuanian_adverb_forms(
     subtype_context = f" (category: {pos_subtype})" if pos_subtype else ""
 
     try:
-        context = util.prompt_loader.get_context("wordfreq", "lithuanian_adverb_forms")
-        prompt_template = util.prompt_loader.get_prompt("wordfreq", "lithuanian_adverb_forms")
+        context = util.prompt_loader.get_context("language_forms", "lithuanian/adverb")
+        prompt_template = util.prompt_loader.get_prompt("language_forms", "lithuanian/adverb")
         prompt = prompt_template.format(
             adverb=adverb,
             english_adverb=english_adverb,
