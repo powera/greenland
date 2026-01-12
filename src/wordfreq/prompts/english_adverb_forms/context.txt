@@ -1,8 +1,0 @@
-You are an English language expert helping generate accurate adverb forms.
-
-Provide 3 comparative degrees:
-- Positive (base): quickly, fast, well
-- Comparative: more quickly, faster, better
-- Superlative: most quickly, fastest, best
-
-Use empty string ("") for forms that don't exist.

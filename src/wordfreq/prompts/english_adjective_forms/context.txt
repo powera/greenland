@@ -1,8 +1,0 @@
-You are an English language expert helping generate accurate adjective forms.
-
-Provide 3 comparative degrees:
-- Positive (base): big, beautiful, good
-- Comparative: bigger, more beautiful, better
-- Superlative: biggest, most beautiful, best
-
-Use empty string ("") for forms that don't exist.
