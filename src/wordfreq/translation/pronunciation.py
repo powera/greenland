@@ -77,8 +77,8 @@ def query_pronunciation(
         },
     )
 
-    context = util.prompt_loader.get_context("wordfreq", "pronunciation")
-    prompt_template = util.prompt_loader.get_prompt("wordfreq", "pronunciation")
+    context = util.prompt_loader.get_context("pronunciation", "single")
+    prompt_template = util.prompt_loader.get_prompt("pronunciation", "single")
     prompt = prompt_template.format(word=word, sentence=sentence)
 
     try:

@@ -142,8 +142,8 @@ def validate_translation(
     )
 
     # Load prompt from files
-    context = util.prompt_loader.get_context("wordfreq", "translation_validation")
-    prompt_template = util.prompt_loader.get_prompt("wordfreq", "translation_validation")
+    context = util.prompt_loader.get_context("translation", "translation_validation")
+    prompt_template = util.prompt_loader.get_prompt("translation", "translation_validation")
 
     prompt = prompt_template.format(
         english_word=english_word,
@@ -616,8 +616,8 @@ def validate_pronunciation(
     # Build language-appropriate context
     if language_code == "en":
         # Load English-specific context from file
-        context = util.prompt_loader.get_context("wordfreq", "pronunciation")
-        prompt_template = util.prompt_loader.get_prompt("wordfreq", "pronunciation")
+        context = util.prompt_loader.get_context("pronunciation", "single")
+        prompt_template = util.prompt_loader.get_prompt("pronunciation", "single")
     else:
         # Build streamlined multilingual context
         context = f"""You are a pronunciation expert for {language_name}.
@@ -907,8 +907,8 @@ def batch_generate_pronunciations(
     forms_list = "\n".join(forms_list_items)
 
     # Load prompt from files
-    context = util.prompt_loader.get_context("wordfreq", "pronunciation_batch")
-    prompt_template = util.prompt_loader.get_prompt("wordfreq", "pronunciation_batch")
+    context = util.prompt_loader.get_context("pronunciation", "batch")
+    prompt_template = util.prompt_loader.get_prompt("pronunciation", "batch")
 
     # Build additional context for non-English
     if language_code != "en" and english_translation:

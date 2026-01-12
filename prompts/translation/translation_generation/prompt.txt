@@ -1,0 +1,11 @@
+Generate translations for the following word:
+
+English: "{english_word}" (lemma form)
+{reference_info}Definition: {definition}
+Part of Speech: {pos_type}
+{subtype_info}
+
+Provide translations in lemma/base form for:
+{languages_list}
+
+{disambiguation_instruction}
