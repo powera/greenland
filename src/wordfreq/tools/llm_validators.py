@@ -142,8 +142,8 @@ def validate_translation(
     )
 
     # Load prompt from files
-    context = util.prompt_loader.get_context("translation", "translation_validation")
-    prompt_template = util.prompt_loader.get_prompt("translation", "translation_validation")
+    context = util.prompt_loader.get_context("validation", "translation")
+    prompt_template = util.prompt_loader.get_prompt("validation", "translation")
 
     prompt = prompt_template.format(
         english_word=english_word,

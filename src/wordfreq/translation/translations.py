@@ -97,8 +97,8 @@ def query_translations(
         properties=schema_properties,
     )
 
-    context_template = util.prompt_loader.get_context("translation", "translation_generation")
-    prompt_template = util.prompt_loader.get_prompt("translation", "translation_generation")
+    context_template = util.prompt_loader.get_context("translation", "word")
+    prompt_template = util.prompt_loader.get_prompt("translation", "word")
 
     subtype_info = f"Subtype: {pos_subtype}" if pos_subtype else ""
     languages_list = "\n".join(languages_list_lines)

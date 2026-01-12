@@ -1,0 +1,11 @@
+Translate the following {source_lang_name} sentence to {target_lang_names}.
+
+Source sentence ({source_lang_name}): "{source_text}"
+
+Requirements:
+1. Provide natural, idiomatic translations (not word-for-word)
+2. Ensure grammatical correctness in each target language
+3. Maintain the same meaning and tone as the original
+4. Use simple, clear language appropriate for language learners
+
+Provide translations for each target language using the language codes: {target_lang_codes}
