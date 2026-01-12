@@ -18,7 +18,7 @@ class Config:
     DEBUG = os.environ.get("BENCH_SERVER_DEBUG", "False").lower() == "true"
 
     # Database settings
-    BASE_DIR = Path(__file__).parent.parent.parent  # repo root
+    BASE_DIR = Path(__file__).parent.parent.parent.parent  # repo root
     DEFAULT_DB_PATH = BASE_DIR / "src" / "benchmarks" / "schema" / "benchmarks.db"
     DB_PATH = os.environ.get("BENCH_SERVER_DB_PATH", str(DEFAULT_DB_PATH))
 

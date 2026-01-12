@@ -20,10 +20,10 @@ devserver.spec
 # local input data
 input/
 
-# local datastores
-src/schema/benchmarks.db
-src/wordfreq/data/linguistics.sqlite
-src/clients/data/batch_tracking.sqlite
+# local datastores, including tmp files
+src/benchmarks/schema/benchmarks.db*
+src/wordfreq/data/linguistics.sqlite*
+src/clients/data/batch_tracking.sqlite*
 
 # for claude staging
 claude/staging

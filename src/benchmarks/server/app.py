@@ -44,7 +44,7 @@ def create_app(config_class=Config):
 
     # Create a session factory function that returns new sessions
     def session_factory():
-        return create_database_and_session(str(app.db_path))[1]
+        return create_database_and_session(str(app.db_path))
 
     app.db_session_factory = session_factory
 
