@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+
+{% block title %}Run #{{ run_data.run_id }}{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('dashboard.index') }}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('benchmarks.view_benchmark', benchmark_name=run_data.benchmark_name) }}">{{ run_data.benchmark_name }}</a></li>
+                <li class="breadcrumb-item active">Run #{{ run_data.run_id }}</li>
+            </ol>
+        </nav>
+        <h1><i class="bi bi-file-earmark-bar-graph"></i> Run Details #{{ run_data.run_id }}</h1>
+    </div>
+</div>
+
+<!-- Summary Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="card-body">
+                <h6 class="text-muted">Model</h6>
+                <h4><a href="{{ url_for('models.view_model', model_name=model.codename) }}">{{ model.displayname }}</a></h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card stat-card">
+            <div class="card-body">
+                <h6 class="text-muted">Score</h6>
+                <h3>
+                    <div class="score-badge"
+                         style="background-color:
+                         {% if run_data.normed_score >= 90 %}#1b5e20
+                         {% elif run_data.normed_score >= 75 %}#4caf50
+                         {% elif run_data.normed_score >= 50 %}#ff9800
+                         {% elif run_data.normed_score >= 25 %}#f44336
+                         {% else %}#b71c1c{% endif %};">
+                        {{ run_data.normed_score }}
+                    </div>
+                </h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card stat-card">
+            <div class="card-body">
+                <h6 class="text-muted">Correct</h6>
+                <h4 class="text-success">{{ correct_count }}/{{ total_questions }}</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card stat-card">
+            <div class="card-body">
+                <h6 class="text-muted">Incorrect</h6>
+                <h4 class="text-danger">{{ incorrect_count }}</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="card-body">
+                <h6 class="text-muted">Avg Response Time</h6>
+                <h4>{{ '%.1f'|format(avg_time) }}ms</h4>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Run Info -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <strong>Benchmark:</strong>
+                        <a href="{{ url_for('benchmarks.view_benchmark', benchmark_name=run_data.benchmark_name) }}">
+                            {{ run_data.benchmark_name }}
+                        </a>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <strong>Run Date:</strong> {{ run_data.run_ts.strftime('%Y-%m-%d %H:%M:%S') }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Incorrect Answers -->
+{% if incorrect_questions %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-x-circle"></i> Incorrect Answers ({{ incorrect_count }})
+                </h5>
+            </div>
+            <div class="card-body">
+                {% for detail in incorrect_questions %}
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2 text-muted">Question: {{ detail.question_id }}</h6>
+
+                        {% if detail.question_info_json %}
+                        <div class="mb-2">
+                            <strong>Question:</strong> {{ detail.question_info_json.question }}
+                        </div>
+                        <div class="mb-2">
+                            <strong>Expected:</strong>
+                            <code class="bg-light p-1">{{ detail.question_info_json.correct_answer }}</code>
+                        </div>
+                        {% endif %}
+
+                        {% if detail.debug_json %}
+                        <div class="mb-2">
+                            <strong>Got:</strong>
+                            <code class="bg-danger-subtle p-1">{{ detail.debug_json.response }}</code>
+                        </div>
+                        {% endif %}
+
+                        {% if detail.thought_process %}
+                        <div class="mt-2">
+                            <details>
+                                <summary class="text-muted">Thought Process</summary>
+                                <pre class="bg-light p-2 mt-2">{{ detail.thought_process }}</pre>
+                            </details>
+                        </div>
+                        {% endif %}
+
+                        {% if detail.eval_msec %}
+                        <div class="text-muted small mt-2">
+                            <i class="bi bi-clock"></i> {{ detail.eval_msec }}ms
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Correct Answers (Collapsed) -->
+{% if correct_questions %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-success">
+            <div class="card-header bg-success text-white">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-check-circle"></i> Correct Answers ({{ correct_count }})
+                    <button class="btn btn-sm btn-light float-end" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#correctAnswers">
+                        Show/Hide
+                    </button>
+                </h5>
+            </div>
+            <div class="collapse" id="correctAnswers">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Question ID</th>
+                                    <th>Question</th>
+                                    <th>Answer</th>
+                                    <th>Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for detail in correct_questions %}
+                                <tr>
+                                    <td><small>{{ detail.question_id }}</small></td>
+                                    <td>
+                                        {% if detail.question_info_json %}
+                                        {{ detail.question_info_json.question }}
+                                        {% else %}
+                                        -
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if detail.debug_json %}
+                                        <code class="bg-light p-1">{{ detail.debug_json.response }}</code>
+                                        {% endif %}
+                                    </td>
+                                    <td><small>{{ detail.eval_msec or 0 }}ms</small></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}

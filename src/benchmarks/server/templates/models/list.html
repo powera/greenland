@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Models{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h1><i class="bi bi-cpu"></i> Models</h1>
+        <p class="lead">Available language models</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Name</th>
+                                <th>Size</th>
+                                <th class="text-center">Runs</th>
+                                <th class="text-center">Avg Score</th>
+                                <th class="text-center">Last Run</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for data in models_data %}
+                            <tr>
+                                <td>
+                                    <strong>{{ data.model.displayname }}</strong>
+                                    <br><small class="text-muted font-monospace">{{ data.model.codename }}</small>
+                                    {% if 'gpt-' in data.model.codename or 'claude-' in data.model.codename or 'gemini-' in data.model.codename %}
+                                    <span class="badge bg-success ms-2">Remote</span>
+                                    {% else %}
+                                    <span class="badge bg-info ms-2">Local</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if data.model.filesize_mb %}
+                                    {{ data.model.filesize_mb }} MB
+                                    {% else %}
+                                    <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">{{ data.run_count }}</td>
+                                <td class="text-center">
+                                    {% if data.avg_score %}
+                                    <strong>{{ data.avg_score }}</strong>/100
+                                    {% else %}
+                                    <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    {% if data.last_run %}
+                                    <small>{{ data.last_run.strftime('%Y-%m-%d %H:%M') }}</small>
+                                    {% else %}
+                                    <span class="text-muted">Never</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('models.view_model', model_name=data.model.codename) }}"
+                                       class="btn btn-sm btn-primary">
+                                        <i class="bi bi-eye"></i> View
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

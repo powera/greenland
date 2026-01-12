@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Compare Runs{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h1><i class="bi bi-bar-chart"></i> Compare Runs</h1>
+        <p class="lead">Compare multiple benchmark runs side-by-side</p>
+    </div>
+</div>
+
+{% if runs %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Metric</th>
+                                {% for run_info in runs %}
+                                <th class="text-center">
+                                    Run #{{ run_info.run_id }}
+                                    <br><small class="text-muted">{{ run_info.model.displayname }}</small>
+                                </th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Benchmark</strong></td>
+                                {% for run_info in runs %}
+                                <td class="text-center">{{ run_info.run_data.benchmark_name }}</td>
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                <td><strong>Score</strong></td>
+                                {% for run_info in runs %}
+                                <td class="text-center">
+                                    <div class="score-badge mx-auto"
+                                         style="background-color:
+                                         {% if run_info.run_data.normed_score >= 90 %}#1b5e20
+                                         {% elif run_info.run_data.normed_score >= 75 %}#4caf50
+                                         {% elif run_info.run_data.normed_score >= 50 %}#ff9800
+                                         {% elif run_info.run_data.normed_score >= 25 %}#f44336
+                                         {% else %}#b71c1c{% endif %};">
+                                        {{ run_info.run_data.normed_score }}
+                                    </div>
+                                </td>
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                <td><strong>Correct / Total</strong></td>
+                                {% for run_info in runs %}
+                                <td class="text-center">{{ run_info.correct_count }} / {{ run_info.total_questions }}</td>
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                <td><strong>Avg Response Time</strong></td>
+                                {% for run_info in runs %}
+                                <td class="text-center">{{ '%.1f'|format(run_info.avg_time) }}ms</td>
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                <td><strong>Run Date</strong></td>
+                                {% for run_info in runs %}
+                                <td class="text-center">
+                                    <small>{{ run_info.run_data.run_ts.strftime('%Y-%m-%d %H:%M') }}</small>
+                                </td>
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                <td><strong>Actions</strong></td>
+                                {% for run_info in runs %}
+                                <td class="text-center">
+                                    <a href="{{ url_for('runs.view_run', run_id=run_info.run_id) }}"
+                                       class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-eye"></i> View
+                                    </a>
+                                </td>
+                                {% endfor %}
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="alert alert-info">
+    <i class="bi bi-info-circle"></i> Add run IDs to the URL to compare them.
+    <br>Example: <code>/runs/compare?run_id=1&run_id=2&run_id=3</code>
+</div>
+{% endif %}
+{% endblock %}

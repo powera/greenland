@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h1><i class="bi bi-speedometer2"></i> Benchmark Dashboard</h1>
+        <p class="text-muted">Last updated: {{ current_time }}</p>
+    </div>
+</div>
+
+<!-- Filter Controls -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="bi bi-funnel"></i> Filters
+                </h5>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Model Type</label>
+                        <div class="btn-group w-100" role="group">
+                            <input type="radio" class="btn-check" name="modelType" id="typeAll" value="all" checked>
+                            <label class="btn btn-outline-primary" for="typeAll">All</label>
+
+                            <input type="radio" class="btn-check" name="modelType" id="typeLocal" value="local">
+                            <label class="btn btn-outline-primary" for="typeLocal">Local</label>
+
+                            <input type="radio" class="btn-check" name="modelType" id="typeRemote" value="remote">
+                            <label class="btn btn-outline-primary" for="typeRemote">Remote</label>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <label class="form-label">Search</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-search"></i></span>
+                            <input type="text" class="form-control" id="searchBox" placeholder="Search models or benchmarks...">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Results Table -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover" id="resultsTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Benchmark</th>
+                                {% for model in models %}
+                                <th class="text-center model-col"
+                                    data-model-type="{{ 'remote' if 'gpt-' in model.codename or 'claude-' in model.codename or 'gemini-' in model.codename else 'local' }}">
+                                    <div class="small">{{ model.displayname }}</div>
+                                    <div class="text-muted" style="font-size: 0.75rem;">
+                                        {% if model.filesize_mb %}{{ model.filesize_mb }} MB{% endif %}
+                                    </div>
+                                </th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for benchmark in benchmarks %}
+                            <tr class="benchmark-row">
+                                <td>
+                                    <a href="{{ url_for('benchmarks.view_benchmark', benchmark_name=benchmark.codename) }}"
+                                       class="text-decoration-none">
+                                        <strong>{{ benchmark.displayname }}</strong>
+                                    </a>
+                                    {% if benchmark.description %}
+                                    <br><small class="text-muted">{{ benchmark.description[:80] }}...</small>
+                                    {% endif %}
+                                </td>
+                                {% for model in models %}
+                                <td class="text-center model-col"
+                                    data-model-type="{{ 'remote' if 'gpt-' in model.codename or 'claude-' in model.codename or 'gemini-' in model.codename else 'local' }}">
+                                    {% if (benchmark.codename, model.codename) in scores %}
+                                    {% set score_data = scores[(benchmark.codename, model.codename)] %}
+                                    <a href="{{ url_for('runs.view_run', run_id=score_data.run_id) }}"
+                                       class="text-decoration-none">
+                                        <div class="score-badge mx-auto"
+                                             style="background-color: {{ score_data.color }};"
+                                             title="Score: {{ score_data.value }}/100, Avg time: {{ '%.1f'|format(score_data.avg_eval_time) }}ms">
+                                            {{ score_data.value }}
+                                        </div>
+                                        <div class="small text-muted mt-1">
+                                            {{ '%.1f'|format(score_data.avg_eval_time) }}ms
+                                        </div>
+                                    </a>
+                                    {% else %}
+                                    <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="noResults" class="alert alert-info mt-4" style="display: none;">
+    No results found matching your filters.
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const modelTypeRadios = document.querySelectorAll('input[name="modelType"]');
+    const searchBox = document.getElementById('searchBox');
+    const resultsTable = document.getElementById('resultsTable');
+    const noResults = document.getElementById('noResults');
+
+    function filterTable() {
+        const modelType = document.querySelector('input[name="modelType"]:checked').value;
+        const searchTerm = searchBox.value.toLowerCase();
+
+        // Filter columns (models)
+        const modelCols = resultsTable.querySelectorAll('.model-col');
+        modelCols.forEach(col => {
+            const colModelType = col.dataset.modelType;
+            const showCol = (modelType === 'all' || modelType === colModelType);
+            col.style.display = showCol ? '' : 'none';
+        });
+
+        // Filter rows (benchmarks)
+        const rows = resultsTable.querySelectorAll('tbody .benchmark-row');
+        let visibleCount = 0;
+        rows.forEach(row => {
+            const benchmarkText = row.textContent.toLowerCase();
+            const showRow = benchmarkText.includes(searchTerm);
+            row.style.display = showRow ? '' : 'none';
+            if (showRow) visibleCount++;
+        });
+
+        // Show/hide no results message
+        noResults.style.display = visibleCount === 0 ? 'block' : 'none';
+    }
+
+    modelTypeRadios.forEach(radio => {
+        radio.addEventListener('change', filterTable);
+    });
+
+    searchBox.addEventListener('input', filterTable);
+});
+</script>
+{% endblock %}

@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %}{{ model.displayname }}{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('models.list_models') }}">Models</a></li>
+                <li class="breadcrumb-item active">{{ model.displayname }}</li>
+            </ol>
+        </nav>
+        <h1><i class="bi bi-cpu"></i> {{ model.displayname }}</h1>
+        <p class="text-muted font-monospace">{{ model.codename }}</p>
+    </div>
+</div>
+
+<!-- Model Info Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="text-muted">Model Size</h6>
+                <h4>{{ model.filesize_mb or 'N/A' }} {% if model.filesize_mb %}MB{% endif %}</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="text-muted">Total Runs</h6>
+                <h4>{{ runs|length }}</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="text-muted">Launch Date</h6>
+                <h4>{{ model.launch_date or 'Unknown' }}</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="text-muted">License</h6>
+                <h4>{{ model.license_name or 'Unknown' }}</h4>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Benchmark Performance -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0"><i class="bi bi-graph-up"></i> Benchmark Performance</h5>
+            </div>
+            <div class="card-body">
+                {% if runs %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Benchmark</th>
+                                <th class="text-center">Score</th>
+                                <th class="text-center">Best Score</th>
+                                <th>Run Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for run in runs %}
+                            <tr>
+                                <td>
+                                    <a href="{{ url_for('benchmarks.view_benchmark', benchmark_name=run.benchmark_name) }}"
+                                       class="text-decoration-none">
+                                        {{ run.benchmark_name }}
+                                    </a>
+                                </td>
+                                <td class="text-center">
+                                    <div class="score-badge mx-auto"
+                                         style="background-color:
+                                         {% if run.normed_score >= 90 %}#1b5e20
+                                         {% elif run.normed_score >= 75 %}#4caf50
+                                         {% elif run.normed_score >= 50 %}#ff9800
+                                         {% elif run.normed_score >= 25 %}#f44336
+                                         {% else %}#b71c1c{% endif %};">
+                                        {{ run.normed_score }}
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    {% if run.benchmark_name in best_scores %}
+                                    <strong>{{ best_scores[run.benchmark_name] }}</strong>
+                                    {% if run.normed_score == best_scores[run.benchmark_name] %}
+                                    <i class="bi bi-star-fill text-warning" title="Personal best"></i>
+                                    {% endif %}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <small>{{ run.run_ts.strftime('%Y-%m-%d %H:%M:%S') }}</small>
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('runs.view_run', run_id=run.run_id) }}"
+                                       class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-eye"></i> Details
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> No benchmark runs found for this model.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
