@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Run {{ benchmark.displayname }}{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('benchmarks.list_benchmarks') }}">Benchmarks</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('benchmarks.view_benchmark', benchmark_name=benchmark.codename) }}">{{ benchmark.displayname }}</a></li>
+                <li class="breadcrumb-item active">Run</li>
+            </ol>
+        </nav>
+        <h1><i class="bi bi-play-fill"></i> Run Benchmark</h1>
+        <p class="lead">{{ benchmark.displayname }}</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Select Model</h5>
+                <form method="post">
+                    <div class="mb-3">
+                        <label for="model_name" class="form-label">Model</label>
+                        <select class="form-select" id="model_name" name="model_name" required>
+                            <option value="">-- Select a model --</option>
+                            {% for model in models %}
+                            <option value="{{ model.codename }}">
+                                {{ model.displayname }}
+                                {% if model.filesize_mb %}- {{ model.filesize_mb }} MB{% endif %}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text">
+                            Select the model to run this benchmark against.
+                        </div>
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle"></i> <strong>Note:</strong> Benchmark execution is not yet implemented in the UI.
+                        Use the CLI tool <code>PYTHONPATH=src python src/lib/run_benchmark.py</code> to run benchmarks.
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-success" disabled>
+                            <i class="bi bi-play-fill"></i> Start Benchmark Run
+                        </button>
+                        <a href="{{ url_for('benchmarks.view_benchmark', benchmark_name=benchmark.codename) }}"
+                           class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0"><i class="bi bi-info-circle"></i> Benchmark Info</h5>
+            </div>
+            <div class="card-body">
+                {% if benchmark.description %}
+                <p>{{ benchmark.description }}</p>
+                {% endif %}
+                {% if benchmark.license_name %}
+                <p class="mb-0">
+                    <strong>License:</strong> {{ benchmark.license_name }}
+                </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

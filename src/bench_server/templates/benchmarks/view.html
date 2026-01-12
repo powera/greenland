@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}{{ benchmark.displayname }}{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('benchmarks.list_benchmarks') }}">Benchmarks</a></li>
+                <li class="breadcrumb-item active">{{ benchmark.displayname }}</li>
+            </ol>
+        </nav>
+        <h1><i class="bi bi-award"></i> {{ benchmark.displayname }}</h1>
+        {% if benchmark.description %}
+        <p class="lead">{{ benchmark.description }}</p>
+        {% endif %}
+    </div>
+    <div class="col-auto">
+        <a href="{{ url_for('benchmarks.run_benchmark', benchmark_name=benchmark.codename) }}"
+           class="btn btn-success btn-lg">
+            <i class="bi bi-play-fill"></i> Run Benchmark
+        </a>
+    </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card stat-card">
+            <div class="card-body">
+                <h5 class="card-title text-muted">Questions</h5>
+                <h2 class="card-text">{{ question_count }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stat-card">
+            <div class="card-body">
+                <h5 class="card-title text-muted">Total Runs</h5>
+                <h2 class="card-text text-info">{{ leaderboard|length }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stat-card">
+            <div class="card-body">
+                <h5 class="card-title text-muted">Best Score</h5>
+                <h2 class="card-text text-success">
+                    {% if leaderboard %}
+                    {{ leaderboard[0][0].normed_score }}/100
+                    {% else %}
+                    -
+                    {% endif %}
+                </h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Leaderboard -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0"><i class="bi bi-trophy"></i> Leaderboard</h5>
+            </div>
+            <div class="card-body">
+                {% if leaderboard %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Rank</th>
+                                <th>Model</th>
+                                <th class="text-center">Score</th>
+                                <th>Run Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for run, model in leaderboard %}
+                            <tr>
+                                <td>
+                                    {% if loop.index == 1 %}
+                                    <i class="bi bi-trophy-fill text-warning"></i>
+                                    {% else %}
+                                    {{ loop.index }}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('models.view_model', model_name=model.codename) }}"
+                                       class="text-decoration-none">
+                                        <strong>{{ model.displayname }}</strong>
+                                    </a>
+                                    {% if model.filesize_mb %}
+                                    <br><small class="text-muted">{{ model.filesize_mb }} MB</small>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    <div class="score-badge mx-auto"
+                                         style="background-color:
+                                         {% if run.normed_score >= 90 %}#1b5e20
+                                         {% elif run.normed_score >= 75 %}#4caf50
+                                         {% elif run.normed_score >= 50 %}#ff9800
+                                         {% elif run.normed_score >= 25 %}#f44336
+                                         {% else %}#b71c1c{% endif %};">
+                                        {{ run.normed_score }}
+                                    </div>
+                                </td>
+                                <td>
+                                    <small>{{ run.run_ts.strftime('%Y-%m-%d %H:%M:%S') }}</small>
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('runs.view_run', run_id=run.run_id) }}"
+                                       class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-eye"></i> View Details
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> No runs yet for this benchmark.
+                    <a href="{{ url_for('benchmarks.run_benchmark', benchmark_name=benchmark.codename) }}"
+                       class="alert-link">Run it now</a>!
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
