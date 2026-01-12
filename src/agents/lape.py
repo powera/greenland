@@ -57,13 +57,12 @@ from agents.common.lemma_selection import (
     apply_limit_and_sample_rate,
     get_lemmas_for_agent,
 )
-from agents.common.workqueue import (
-    WorkStatus,
-    claim_next_work,
-    enqueue_work,
-    get_work_stats,
-    mark_work_completed,
-    mark_work_failed,
+from barsukas.utils.task_queue import (
+    TaskStatus,
+    claim_next_task,
+    enqueue_task,
+    mark_task_complete,
+    mark_task_failed,
 )
 from clients.types import Schema, SchemaProperty
 from clients.unified_client import UnifiedLLMClient
@@ -1322,20 +1321,21 @@ def enqueue_grammar_fact_work(agent, session, lemmas, fact_types_by_language, dr
                     skipped_count += 1
                     continue
 
-                # Enqueue work item
+                # Enqueue work item using barsukas task queue
                 if not dry_run:
-                    result = enqueue_work(
+                    dedup_key = f"lape_{fact_type}_{lemma.id}_{language_code}"
+                    result = enqueue_task(
                         session,
-                        agent_name="lape",
-                        operation_type=f"generate_{fact_type}",
-                        lemma_id=lemma.id,
-                        language_code=language_code,
-                        metadata={
+                        task_type="lape_generate_grammar_fact",
+                        target_type="lemma",
+                        target_id=lemma.id,
+                        payload={
                             "fact_type": fact_type,
-                            "lemma_text": lemma.lemma_text,
+                            "language_code": language_code,
                             "lemma_guid": lemma.guid,
+                            "lemma_text": lemma.lemma_text,
                         },
-                        skip_duplicates=True,
+                        dedup_key=dedup_key,
                     )
                     if result.created:
                         enqueued_count += 1
@@ -1355,6 +1355,31 @@ def enqueue_grammar_fact_work(agent, session, lemmas, fact_types_by_language, dr
     }
 
 
+def get_lape_queue_stats(session):
+    """Get statistics for lape tasks in the queue."""
+    from wordfreq.storage.models.schema import BarsukasTask
+
+    task_type = "lape_generate_grammar_fact"
+    return {
+        "pending": session.query(BarsukasTask).filter(
+            BarsukasTask.task_type == task_type,
+            BarsukasTask.status == TaskStatus.PENDING
+        ).count(),
+        "running": session.query(BarsukasTask).filter(
+            BarsukasTask.task_type == task_type,
+            BarsukasTask.status == TaskStatus.RUNNING
+        ).count(),
+        "completed": session.query(BarsukasTask).filter(
+            BarsukasTask.task_type == task_type,
+            BarsukasTask.status == TaskStatus.COMPLETED
+        ).count(),
+        "failed": session.query(BarsukasTask).filter(
+            BarsukasTask.task_type == task_type,
+            BarsukasTask.status == TaskStatus.FAILED
+        ).count(),
+    }
+
+
 def process_grammar_fact_work_queue(agent, session, limit=None, dry_run=False):
     """Process grammar fact work items from the queue.
 
@@ -1367,6 +1392,8 @@ def process_grammar_fact_work_queue(agent, session, limit=None, dry_run=False):
     Returns:
         Dictionary with processing statistics
     """
+    from wordfreq.storage.models.schema import BarsukasTask, Lemma
+
     processed_count = 0
     success_count = 0
     failed_count = 0
@@ -1377,8 +1404,8 @@ def process_grammar_fact_work_queue(agent, session, limit=None, dry_run=False):
         logger.info("DRY RUN MODE - No work will be processed")
 
     # Get statistics
-    stats = get_work_stats(session, agent_name="lape")
-    logger.info(f"Queue stats: {stats['pending']} pending, {stats['processing']} processing, "
+    stats = get_lape_queue_stats(session)
+    logger.info(f"Queue stats: {stats['pending']} pending, {stats['running']} running, "
                 f"{stats['completed']} completed, {stats['failed']} failed")
 
     if stats['pending'] == 0:
@@ -1396,42 +1423,46 @@ def process_grammar_fact_work_queue(agent, session, limit=None, dry_run=False):
             logger.info(f"Reached limit of {limit} work items")
             break
 
-        # Claim next work item
-        work_item = claim_next_work(session, agent_name="lape")
-        if not work_item:
-            logger.info("No more work items in queue")
+        # Claim next lape task
+        task = claim_next_task(session)
+        if not task or task.task_type != "lape_generate_grammar_fact":
+            # Put it back if it's not ours
+            if task and task.task_type != "lape_generate_grammar_fact":
+                task.status = TaskStatus.PENDING
+                task.started_at = None
+                session.commit()
+            logger.info("No more lape work items in queue")
             break
 
         processed_count += 1
-        logger.info(f"[{processed_count}/{limit or '∞'}] Processing work item {work_item.id}: "
-                   f"lemma_id={work_item.lemma_id}, operation={work_item.operation_type}, "
-                   f"language={work_item.language_code}")
+
+        # Extract payload
+        payload = json.loads(task.payload) if task.payload else {}
+        fact_type = payload.get("fact_type")
+        language_code = payload.get("language_code")
+        lemma_guid = payload.get("lemma_guid", "unknown")
+
+        logger.info(f"[{processed_count}/{limit or '∞'}] Processing task {task.id}: "
+                   f"lemma_id={task.target_id}, fact_type={fact_type}, language={language_code}")
 
         if dry_run:
-            mark_work_completed(session, work_item, "Dry run - not processed")
+            mark_task_complete(session, task, "Dry run - not processed")
             session.commit()
             continue
 
         try:
             # Get lemma
-            from wordfreq.storage.models.schema import Lemma
-            lemma = session.query(Lemma).filter(Lemma.id == work_item.lemma_id).first()
+            lemma = session.query(Lemma).filter(Lemma.id == task.target_id).first()
             if not lemma:
-                logger.error(f"Lemma {work_item.lemma_id} not found")
-                mark_work_failed(session, work_item, "Lemma not found")
+                logger.error(f"Lemma {task.target_id} not found")
+                mark_task_failed(session, task, "Lemma not found")
                 session.commit()
                 failed_count += 1
                 continue
 
-            # Extract metadata
-            import json
-            metadata = json.loads(work_item.metadata) if work_item.metadata else {}
-            fact_type = metadata.get("fact_type")
-            language_code = work_item.language_code
-
             if not fact_type:
-                logger.error(f"No fact_type in metadata for work item {work_item.id}")
-                mark_work_failed(session, work_item, "No fact_type in metadata")
+                logger.error(f"No fact_type in payload for task {task.id}")
+                mark_task_failed(session, task, "No fact_type in payload")
                 session.commit()
                 failed_count += 1
                 continue
@@ -1440,7 +1471,7 @@ def process_grammar_fact_work_queue(agent, session, limit=None, dry_run=False):
             existing_fact = get_grammar_fact_value(session, lemma.id, language_code, fact_type)
             if existing_fact is not None:
                 logger.info(f"Fact already exists for {lemma.lemma_text}, skipping")
-                mark_work_completed(session, work_item, "Fact already exists")
+                mark_task_complete(session, task, "Fact already exists")
                 session.commit()
                 continue
 
@@ -1450,7 +1481,7 @@ def process_grammar_fact_work_queue(agent, session, limit=None, dry_run=False):
                 translation = get_translation(session, lemma, language_code)
                 if not translation:
                     logger.warning(f"No {language_code} translation for '{lemma.lemma_text}', skipping")
-                    mark_work_completed(session, work_item, "No translation available")
+                    mark_task_complete(session, task, "No translation available")
                     session.commit()
                     continue
 
@@ -1482,7 +1513,7 @@ def process_grammar_fact_work_queue(agent, session, limit=None, dry_run=False):
                 fact_value, notes, confidence = agent.generate_animacy(lemma, session)
             else:
                 logger.error(f"Unsupported fact type: {fact_type}")
-                mark_work_failed(session, work_item, f"Unsupported fact type: {fact_type}")
+                mark_task_failed(session, task, f"Unsupported fact type: {fact_type}")
                 session.commit()
                 failed_count += 1
                 continue
@@ -1514,31 +1545,28 @@ def process_grammar_fact_work_queue(agent, session, limit=None, dry_run=False):
                         "via_workqueue": True,
                     },
                 )
-                mark_work_completed(
-                    session, work_item,
+                mark_task_complete(
+                    session, task,
                     f"Generated {fact_type}={fact_value} (confidence: {confidence:.2f})"
                 )
                 session.commit()
                 success_count += 1
                 logger.info(f"  ✓ Generated: {fact_value} (confidence: {confidence:.2f})")
             else:
-                mark_work_failed(
-                    session, work_item,
-                    f"Low confidence or no value (confidence: {confidence:.2f})",
-                    allow_retry=False
+                mark_task_failed(
+                    session, task,
+                    f"Low confidence or no value (confidence: {confidence:.2f})"
                 )
                 session.commit()
                 failed_count += 1
                 logger.warning(f"  ✗ Failed or low confidence: {fact_value} (confidence: {confidence:.2f})")
 
         except Exception as e:
-            logger.error(f"Error processing work item {work_item.id}: {e}")
-            mark_work_failed(
-                session, work_item,
+            logger.error(f"Error processing task {task.id}: {e}")
+            mark_task_failed(
+                session, task,
                 f"Error: {str(e)}",
-                error_detail=str(e),
-                allow_retry=True,
-                max_retries=3
+                error_detail=str(e)
             )
             session.commit()
             failed_count += 1
@@ -1597,10 +1625,10 @@ def main():
             print("=" * 80)
 
             # Show current queue stats
-            stats = get_work_stats(session, agent_name="lape")
+            stats = get_lape_queue_stats(session)
             print("\nCurrent queue status:")
             print(f"  Pending: {stats['pending']}")
-            print(f"  Processing: {stats['processing']}")
+            print(f"  Running: {stats['running']}")
             print(f"  Completed: {stats['completed']}")
             print(f"  Failed: {stats['failed']}")
             print("=" * 80)
@@ -1694,10 +1722,10 @@ def main():
 
             # Show queue stats
             if not args.dry_run:
-                stats = get_work_stats(session, agent_name="lape")
+                stats = get_lape_queue_stats(session)
                 print("\nCurrent queue status:")
                 print(f"  Pending: {stats['pending']}")
-                print(f"  Processing: {stats['processing']}")
+                print(f"  Running: {stats['running']}")
                 print(f"  Completed: {stats['completed']}")
                 print(f"  Failed: {stats['failed']}")
                 print("=" * 80)
