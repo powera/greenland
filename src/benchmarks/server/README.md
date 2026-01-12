@@ -18,13 +18,19 @@ This application uses the same benchmark database (`benchmarks.db`) as the CLI t
 
 ```bash
 # From the project root
-PYTHONPATH=src python src/bench_server/app.py
+src/benchmarks/launch_server.sh
 ```
 
 Or with custom options:
 
 ```bash
-PYTHONPATH=src python src/bench_server/app.py --port 5556 --debug
+src/benchmarks/launch_server.sh --port 5556 --debug
+```
+
+Or run directly:
+
+```bash
+PYTHONPATH=src python src/benchmarks/server/app.py --port 5556 --debug
 ```
 
 The server will be available at http://127.0.0.1:5556
@@ -73,21 +79,23 @@ The server will be available at http://127.0.0.1:5556
 ## Architecture
 
 ```
-bench_server/
-├── app.py                  # Main Flask application
-├── config.py              # Configuration settings
-├── routes/                # Blueprint modules
-│   ├── dashboard.py       # Main scoreboard
-│   ├── benchmarks.py      # Benchmark management
-│   ├── models.py          # Model listing/viewing
-│   └── runs.py            # Run details and comparison
-├── templates/             # Jinja2 templates
-│   ├── base.html          # Base template
-│   ├── dashboard/
-│   ├── benchmarks/
-│   ├── models/
-│   └── runs/
-└── static/                # Static assets (CSS, JS)
+src/benchmarks/
+├── launch_server.sh       # Launch script
+└── server/                # Flask application
+    ├── app.py             # Main Flask application
+    ├── config.py          # Configuration settings
+    ├── routes/            # Blueprint modules
+    │   ├── dashboard.py   # Main scoreboard
+    │   ├── benchmarks.py  # Benchmark management
+    │   ├── models.py      # Model listing/viewing
+    │   └── runs.py        # Run details and comparison
+    ├── templates/         # Jinja2 templates
+    │   ├── base.html      # Base template
+    │   ├── dashboard/
+    │   ├── benchmarks/
+    │   ├── models/
+    │   └── runs/
+    └── static/            # Static assets (CSS, JS)
 ```
 
 ## Database

@@ -13,10 +13,10 @@ import sys
 from pathlib import Path
 
 # Add src to path if not already present
-if str(Path(__file__).parent.parent) not in sys.path:
-    sys.path.insert(0, str(Path(__file__).parent.parent))
+if str(Path(__file__).parent.parent.parent) not in sys.path:
+    sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from bench_server.config import Config
+from benchmarks.server.config import Config
 from flask import Flask, g, redirect, render_template, url_for
 
 from benchmarks.datastore.common import create_database_and_session
@@ -62,7 +62,7 @@ def create_app(config_class=Config):
             db.close()
 
     # Register blueprints
-    from bench_server.routes import benchmarks, dashboard, models, runs
+    from benchmarks.server.routes import benchmarks, dashboard, models, runs
 
     app.register_blueprint(dashboard.bp)
     app.register_blueprint(benchmarks.bp)
