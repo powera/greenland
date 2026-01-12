@@ -7,15 +7,19 @@ from typing import Dict
 from config import Config
 
 import constants
+from agents.lape import LapeAgent
 from agents.papuga import PapugaAgent
 from agents.sernas.agent import SernasAgent
 from agents.vilkas.agent import VilkasAgent
 from agents.voras.agent import VorasAgent
 from wordfreq.storage.backend.config import BackendType, DataSourceConfig
+from wordfreq.storage.crud.grammar_fact import add_grammar_fact, get_grammar_fact_value
+from wordfreq.storage.crud.operation_log import log_operation
 from wordfreq.storage.models.schema import Lemma
 from wordfreq.storage.translation_helpers import (
     LANGUAGE_FIELDS,
     get_reference_translation,
+    get_translation,
     lang_code_to_llm_field,
 )
 from wordfreq.translation.client import LinguisticClient
@@ -310,10 +314,96 @@ def handle_translate_sentence(session, payload: Dict) -> str:
     return f"Successfully translated sentence to: {', '.join(lang_names)}"
 
 
+def handle_lape_generate_grammar_fact(session, payload: Dict) -> str:
+    """Handle grammar fact generation task for lape agent."""
+    lemma_id = payload.get("lemma_id")
+    if not lemma_id:
+        # Try target_id as fallback (standard barsukas field)
+        lemma_id = payload.get("target_id")
+
+    fact_type = payload.get("fact_type")
+    language_code = payload.get("language_code")
+
+    if not lemma_id:
+        raise ValueError("Missing lemma_id or target_id in payload")
+    if not fact_type:
+        raise ValueError("Missing fact_type in payload")
+    if not language_code:
+        raise ValueError("Missing language_code in payload")
+
+    lemma = session.get(Lemma, lemma_id)
+    if not lemma:
+        raise ValueError(f"Lemma {lemma_id} not found")
+
+    # Check if fact already exists
+    existing_fact = get_grammar_fact_value(session, lemma.id, language_code, fact_type)
+    if existing_fact is not None:
+        return f"Fact already exists: {fact_type}={existing_fact}"
+
+    # Create agent
+    config = _build_config()
+    agent = LapeAgent(config=config)
+
+    # Get translation if needed for this fact type
+    translation = None
+    if fact_type not in ["verb_transitivity", "countability", "animacy"]:
+        translation = get_translation(session, lemma, language_code)
+        if not translation:
+            raise ValueError(f"No {language_code} translation found for lemma {lemma.lemma_text}")
+
+    # Generate the fact
+    fact_value, notes, confidence = agent.generate_fact(
+        fact_type=fact_type,
+        lemma=lemma,
+        language_code=language_code,
+        translation=translation,
+        session=session,
+    )
+
+    # Check confidence threshold
+    min_confidence = 0.7
+    if not fact_value or confidence < min_confidence:
+        raise RuntimeError(
+            f"Low confidence or no value: {fact_value} (confidence: {confidence:.2f})"
+        )
+
+    # Save the fact
+    add_grammar_fact(
+        session,
+        lemma_id=lemma.id,
+        language_code=language_code,
+        fact_type=fact_type,
+        fact_value=fact_value,
+        notes=notes,
+        verified=False,
+    )
+
+    # Log the operation
+    log_operation(
+        session,
+        operation_type="grammar_fact_generated",
+        entity_type="grammar_fact",
+        entity_id=lemma.id,
+        details={
+            "fact_type": fact_type,
+            "language_code": language_code,
+            "fact_value": fact_value,
+            "confidence": confidence,
+            "agent": "lape",
+            "model": config.model,
+            "via_worker": True,
+        },
+    )
+
+    session.commit()
+    return f"Generated {fact_type}={fact_value} (confidence: {confidence:.2f})"
+
+
 TASK_HANDLERS = {
     "add_missing_translations": handle_add_missing_translations,
     "generate_pronunciations": handle_generate_pronunciations,
     "generate_forms": handle_generate_forms,
     "generate_synonyms": handle_generate_synonyms,
     "translate_sentence": handle_translate_sentence,
+    "lape_generate_grammar_fact": handle_lape_generate_grammar_fact,
 }
