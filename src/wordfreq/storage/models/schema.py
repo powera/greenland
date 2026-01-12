@@ -586,3 +586,48 @@ class BarsukasTask(Base):
     )
     started_at: Mapped[Optional[datetime.datetime]] = mapped_column(TIMESTAMP, nullable=True)
     finished_at: Mapped[Optional[datetime.datetime]] = mapped_column(TIMESTAMP, nullable=True)
+
+
+class AgentWorkQueue(Base):
+    """Work queue for agent batch processing.
+
+    This queue allows agents to enqueue work items (e.g., LLM calls for lemmas)
+    and process them either immediately or in a separate pass. This enables:
+    - Better visibility into pending work
+    - Ability to pause/resume large batch jobs
+    - Prioritization of work items
+    - Retry logic for failed items
+    """
+
+    __tablename__ = "agent_work_queue"
+    __table_args__ = (
+        UniqueConstraint("agent_name", "operation_type", "lemma_id", "language_code",
+                        name="uq_agent_work_item"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    agent_name: Mapped[str] = mapped_column(String, nullable=False, index=True)  # e.g., "lape"
+    operation_type: Mapped[str] = mapped_column(String, nullable=False, index=True)  # e.g., "generate_measure_words"
+    lemma_id: Mapped[int] = mapped_column(ForeignKey("lemmas.id"), nullable=False, index=True)
+    language_code: Mapped[Optional[str]] = mapped_column(String, nullable=True, index=True)  # Target language if applicable
+    status: Mapped[str] = mapped_column(String, default="pending", nullable=False, index=True)  # pending, processing, completed, failed
+    priority: Mapped[int] = mapped_column(Integer, default=0, nullable=False, index=True)  # Higher = more urgent
+
+    # Additional metadata as JSON (fact_type, etc.)
+    metadata: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
+    # Result tracking
+    result_message: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    error_detail: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    retry_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+
+    # Timestamps
+    created_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now())
+    updated_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP, server_default=func.now(), onupdate=func.now()
+    )
+    started_at: Mapped[Optional[datetime.datetime]] = mapped_column(TIMESTAMP, nullable=True)
+    finished_at: Mapped[Optional[datetime.datetime]] = mapped_column(TIMESTAMP, nullable=True)
+
+    # Relationships
+    lemma = relationship("Lemma")

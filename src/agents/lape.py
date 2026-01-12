@@ -57,6 +57,14 @@ from agents.common.lemma_selection import (
     apply_limit_and_sample_rate,
     get_lemmas_for_agent,
 )
+from agents.common.workqueue import (
+    WorkStatus,
+    claim_next_work,
+    enqueue_work,
+    get_work_stats,
+    mark_work_completed,
+    mark_work_failed,
+)
 from clients.types import Schema, SchemaProperty
 from clients.unified_client import UnifiedLLMClient
 from wordfreq.storage.backend import create_session as create_backend_session
@@ -1256,7 +1264,292 @@ Task presets:
         help="Minimum confidence score to save fact (default: 0.7)",
     )
 
+    # Workqueue arguments
+    parser.add_argument(
+        "--use-workqueue",
+        action="store_true",
+        default=False,
+        help="Use work queue for batch processing instead of immediate processing",
+    )
+    parser.add_argument(
+        "--workqueue-mode",
+        choices=["enqueue", "process", "immediate"],
+        default="immediate",
+        help=(
+            "Work queue mode: "
+            "'enqueue' to add work items to queue, "
+            "'process' to process queued items, "
+            "'immediate' to process directly (default)"
+        ),
+    )
+    parser.add_argument(
+        "--workqueue-limit",
+        type=int,
+        help="Maximum number of work items to process from queue (only applies to 'process' mode)",
+    )
+
     return parser
+
+
+def enqueue_grammar_fact_work(agent, session, lemmas, fact_types_by_language, dry_run=False):
+    """Enqueue grammar fact generation work items to the queue.
+
+    Args:
+        agent: LapeAgent instance
+        session: Database session
+        lemmas: List of lemmas to process
+        fact_types_by_language: Dict mapping language_code to list of fact_types
+        dry_run: If True, don't actually enqueue
+
+    Returns:
+        Dictionary with enqueue statistics
+    """
+    enqueued_count = 0
+    skipped_count = 0
+
+    logger.info(f"Enqueuing work for {len(lemmas)} lemmas...")
+    if dry_run:
+        logger.info("DRY RUN MODE - No work items will be enqueued")
+
+    for language_code, fact_types in fact_types_by_language.items():
+        for fact_type in fact_types:
+            fact_config = LapeAgent.SUPPORTED_FACT_TYPES[fact_type]
+            required_pos = fact_config["required_pos"]
+
+            for lemma in lemmas:
+                # Skip if wrong POS type
+                if lemma.pos_type not in required_pos:
+                    skipped_count += 1
+                    continue
+
+                # Enqueue work item
+                if not dry_run:
+                    result = enqueue_work(
+                        session,
+                        agent_name="lape",
+                        operation_type=f"generate_{fact_type}",
+                        lemma_id=lemma.id,
+                        language_code=language_code,
+                        metadata={
+                            "fact_type": fact_type,
+                            "lemma_text": lemma.lemma_text,
+                            "lemma_guid": lemma.guid,
+                        },
+                        skip_duplicates=True,
+                    )
+                    if result.created:
+                        enqueued_count += 1
+                    else:
+                        skipped_count += 1
+                        logger.debug(f"Skipped duplicate: {lemma.lemma_text} ({fact_type}, {language_code})")
+                else:
+                    enqueued_count += 1
+
+    if not dry_run:
+        session.commit()
+
+    return {
+        "enqueued": enqueued_count,
+        "skipped": skipped_count,
+        "dry_run": dry_run,
+    }
+
+
+def process_grammar_fact_work_queue(agent, session, limit=None, dry_run=False):
+    """Process grammar fact work items from the queue.
+
+    Args:
+        agent: LapeAgent instance
+        session: Database session
+        limit: Maximum number of work items to process
+        dry_run: If True, don't actually process
+
+    Returns:
+        Dictionary with processing statistics
+    """
+    processed_count = 0
+    success_count = 0
+    failed_count = 0
+    results = []
+
+    logger.info("Processing work items from queue...")
+    if dry_run:
+        logger.info("DRY RUN MODE - No work will be processed")
+
+    # Get statistics
+    stats = get_work_stats(session, agent_name="lape")
+    logger.info(f"Queue stats: {stats['pending']} pending, {stats['processing']} processing, "
+                f"{stats['completed']} completed, {stats['failed']} failed")
+
+    if stats['pending'] == 0:
+        logger.info("No pending work items in queue")
+        return {
+            "processed": 0,
+            "success": 0,
+            "failed": 0,
+            "results": [],
+            "dry_run": dry_run,
+        }
+
+    while True:
+        if limit and processed_count >= limit:
+            logger.info(f"Reached limit of {limit} work items")
+            break
+
+        # Claim next work item
+        work_item = claim_next_work(session, agent_name="lape")
+        if not work_item:
+            logger.info("No more work items in queue")
+            break
+
+        processed_count += 1
+        logger.info(f"[{processed_count}/{limit or '∞'}] Processing work item {work_item.id}: "
+                   f"lemma_id={work_item.lemma_id}, operation={work_item.operation_type}, "
+                   f"language={work_item.language_code}")
+
+        if dry_run:
+            mark_work_completed(session, work_item, "Dry run - not processed")
+            session.commit()
+            continue
+
+        try:
+            # Get lemma
+            from wordfreq.storage.models.schema import Lemma
+            lemma = session.query(Lemma).filter(Lemma.id == work_item.lemma_id).first()
+            if not lemma:
+                logger.error(f"Lemma {work_item.lemma_id} not found")
+                mark_work_failed(session, work_item, "Lemma not found")
+                session.commit()
+                failed_count += 1
+                continue
+
+            # Extract metadata
+            import json
+            metadata = json.loads(work_item.metadata) if work_item.metadata else {}
+            fact_type = metadata.get("fact_type")
+            language_code = work_item.language_code
+
+            if not fact_type:
+                logger.error(f"No fact_type in metadata for work item {work_item.id}")
+                mark_work_failed(session, work_item, "No fact_type in metadata")
+                session.commit()
+                failed_count += 1
+                continue
+
+            # Check if fact already exists
+            existing_fact = get_grammar_fact_value(session, lemma.id, language_code, fact_type)
+            if existing_fact is not None:
+                logger.info(f"Fact already exists for {lemma.lemma_text}, skipping")
+                mark_work_completed(session, work_item, "Fact already exists")
+                session.commit()
+                continue
+
+            # Get translation if needed
+            translation = None
+            if fact_type not in ["verb_transitivity", "countability", "animacy"]:
+                translation = get_translation(session, lemma, language_code)
+                if not translation:
+                    logger.warning(f"No {language_code} translation for '{lemma.lemma_text}', skipping")
+                    mark_work_completed(session, work_item, "No translation available")
+                    session.commit()
+                    continue
+
+            # Generate fact based on type
+            fact_value, notes, confidence = None, None, 0.0
+            if fact_type == "measure_words":
+                fact_value, notes, confidence = agent.generate_measure_words(lemma, translation, session)
+            elif fact_type == "grammatical_gender":
+                fact_value, notes, confidence = agent.generate_grammatical_gender(
+                    lemma, translation, language_code, session
+                )
+            elif fact_type == "verb_transitivity":
+                fact_value, notes, confidence = agent.generate_verb_transitivity(lemma, session)
+            elif fact_type == "verb_reflexivity":
+                fact_value, notes, confidence = agent.generate_verb_reflexivity(
+                    lemma, translation, language_code, session
+                )
+            elif fact_type == "countability":
+                fact_value, notes, confidence = agent.generate_countability(lemma, session)
+            elif fact_type == "declension_class":
+                fact_value, notes, confidence = agent.generate_declension_class(
+                    lemma, translation, language_code, session
+                )
+            elif fact_type == "auxiliary_verb":
+                fact_value, notes, confidence = agent.generate_auxiliary_verb(
+                    lemma, translation, language_code, session
+                )
+            elif fact_type == "animacy":
+                fact_value, notes, confidence = agent.generate_animacy(lemma, session)
+            else:
+                logger.error(f"Unsupported fact type: {fact_type}")
+                mark_work_failed(session, work_item, f"Unsupported fact type: {fact_type}")
+                session.commit()
+                failed_count += 1
+                continue
+
+            # Save result
+            min_confidence = 0.7
+            if fact_value and confidence >= min_confidence:
+                add_grammar_fact(
+                    session,
+                    lemma_id=lemma.id,
+                    language_code=language_code,
+                    fact_type=fact_type,
+                    fact_value=fact_value,
+                    notes=notes,
+                    verified=False,
+                )
+                log_operation(
+                    session,
+                    operation_type="grammar_fact_generated",
+                    entity_type="grammar_fact",
+                    entity_id=lemma.id,
+                    details={
+                        "fact_type": fact_type,
+                        "language_code": language_code,
+                        "fact_value": fact_value,
+                        "confidence": confidence,
+                        "agent": "lape",
+                        "model": agent.config.model,
+                        "via_workqueue": True,
+                    },
+                )
+                mark_work_completed(
+                    session, work_item,
+                    f"Generated {fact_type}={fact_value} (confidence: {confidence:.2f})"
+                )
+                session.commit()
+                success_count += 1
+                logger.info(f"  ✓ Generated: {fact_value} (confidence: {confidence:.2f})")
+            else:
+                mark_work_failed(
+                    session, work_item,
+                    f"Low confidence or no value (confidence: {confidence:.2f})",
+                    allow_retry=False
+                )
+                session.commit()
+                failed_count += 1
+                logger.warning(f"  ✗ Failed or low confidence: {fact_value} (confidence: {confidence:.2f})")
+
+        except Exception as e:
+            logger.error(f"Error processing work item {work_item.id}: {e}")
+            mark_work_failed(
+                session, work_item,
+                f"Error: {str(e)}",
+                error_detail=str(e),
+                allow_retry=True,
+                max_retries=3
+            )
+            session.commit()
+            failed_count += 1
+
+    return {
+        "processed": processed_count,
+        "success": success_count,
+        "failed": failed_count,
+        "results": results,
+        "dry_run": dry_run,
+    }
 
 
 def main():
@@ -1264,17 +1557,68 @@ def main():
     parser = get_argument_parser()
     args = parser.parse_args()
 
+    # Determine workqueue mode (handle both --use-workqueue flag and --workqueue-mode)
+    if args.use_workqueue and args.workqueue_mode == "immediate":
+        # User specified --use-workqueue without explicit mode, default to enqueue
+        workqueue_mode = "enqueue"
+    else:
+        workqueue_mode = args.workqueue_mode
+
+    # Create configuration from args
+    config = get_data_source_config(args)
+
+    # Create agent
+    agent = LapeAgent(config=config)
+
+    # WORKQUEUE MODE: Process work items from queue
+    if workqueue_mode == "process":
+        logger.info("=" * 80)
+        logger.info("LAPE AGENT - PROCESSING WORK QUEUE")
+        logger.info("=" * 80)
+
+        session = agent.get_session()
+        try:
+            results = process_grammar_fact_work_queue(
+                agent=agent,
+                session=session,
+                limit=args.workqueue_limit,
+                dry_run=args.dry_run,
+            )
+
+            # Print summary
+            print("\n" + "=" * 80)
+            print("WORK QUEUE PROCESSING SUMMARY")
+            print("=" * 80)
+            print(f"Processed: {results['processed']}")
+            print(f"Success: {results['success']}")
+            print(f"Failed: {results['failed']}")
+            if results["dry_run"]:
+                print("\n⚠️  DRY RUN - No work was actually processed")
+            print("=" * 80)
+
+            # Show current queue stats
+            stats = get_work_stats(session, agent_name="lape")
+            print("\nCurrent queue status:")
+            print(f"  Pending: {stats['pending']}")
+            print(f"  Processing: {stats['processing']}")
+            print(f"  Completed: {stats['completed']}")
+            print(f"  Failed: {stats['failed']}")
+            print("=" * 80)
+
+        except Exception as e:
+            logger.error(f"Failed to process work queue: {e}")
+            sys.exit(1)
+        finally:
+            session.close()
+
+        return
+
+    # For enqueue and immediate modes, we need lemmas and languages
     if not args.languages:
         parser.error("At least one --language/--languages value is required")
 
     # Normalize language list while preserving order
     languages = list(dict.fromkeys(args.languages))
-
-    # Create configuration from args (always returns a valid config with defaults)
-    config = get_data_source_config(args)
-
-    # Create agent
-    agent = LapeAgent(config=config)
 
     explicit_fact_type = args.fact_type is not None
 
@@ -1283,6 +1627,27 @@ def main():
         fact_types_to_run = [args.fact_type]
     else:
         fact_types_to_run = LapeAgent.TASK_PRESETS[args.task]
+
+    # Build fact_types_by_language map
+    fact_types_by_language = {}
+    for language_code in languages:
+        applicable_fact_types = [
+            fact_type
+            for fact_type in fact_types_to_run
+            if language_code in LapeAgent.SUPPORTED_FACT_TYPES[fact_type]["languages"]
+        ]
+
+        if explicit_fact_type and not applicable_fact_types:
+            parser.error(
+                f"Fact type '{args.fact_type}' does not support language '{language_code}'."
+            )
+
+        if applicable_fact_types:
+            fact_types_by_language[language_code] = applicable_fact_types
+
+    if not fact_types_by_language:
+        logger.error("No applicable fact types for the selected languages")
+        sys.exit(1)
 
     # Get lemmas to process (either single lemma from --guid or batch)
     session = agent.get_session()
@@ -1301,26 +1666,57 @@ def main():
     else:
         logger.info(f"Processing {len(lemmas)} lemmas")
 
-    # Generate facts for each requested fact type and language
+    # WORKQUEUE MODE: Enqueue work items
+    if workqueue_mode == "enqueue":
+        logger.info("=" * 80)
+        logger.info("LAPE AGENT - ENQUEUING WORK")
+        logger.info("=" * 80)
+
+        session = agent.get_session()
+        try:
+            results = enqueue_grammar_fact_work(
+                agent=agent,
+                session=session,
+                lemmas=lemmas,
+                fact_types_by_language=fact_types_by_language,
+                dry_run=args.dry_run,
+            )
+
+            # Print summary
+            print("\n" + "=" * 80)
+            print("WORK ENQUEUE SUMMARY")
+            print("=" * 80)
+            print(f"Enqueued: {results['enqueued']}")
+            print(f"Skipped: {results['skipped']}")
+            if results["dry_run"]:
+                print("\n⚠️  DRY RUN - No work items were actually enqueued")
+            print("=" * 80)
+
+            # Show queue stats
+            if not args.dry_run:
+                stats = get_work_stats(session, agent_name="lape")
+                print("\nCurrent queue status:")
+                print(f"  Pending: {stats['pending']}")
+                print(f"  Processing: {stats['processing']}")
+                print(f"  Completed: {stats['completed']}")
+                print(f"  Failed: {stats['failed']}")
+                print("=" * 80)
+
+        except Exception as e:
+            logger.error(f"Failed to enqueue work: {e}")
+            sys.exit(1)
+        finally:
+            session.close()
+
+        return
+
+    # IMMEDIATE MODE: Process directly (default behavior)
+    logger.info("=" * 80)
+    logger.info("LAPE AGENT - IMMEDIATE PROCESSING")
+    logger.info("=" * 80)
+
     try:
-        for language_code in languages:
-            applicable_fact_types = [
-                fact_type
-                for fact_type in fact_types_to_run
-                if language_code in LapeAgent.SUPPORTED_FACT_TYPES[fact_type]["languages"]
-            ]
-
-            if explicit_fact_type and not applicable_fact_types:
-                parser.error(
-                    f"Fact type '{args.fact_type}' does not support language '{language_code}'."
-                )
-
-            if not applicable_fact_types:
-                logger.info(
-                    f"Skipping language '{language_code}' - no supported fact types for the selected task(s)"
-                )
-                continue
-
+        for language_code, applicable_fact_types in fact_types_by_language.items():
             for fact_type in applicable_fact_types:
                 results = agent.generate_grammar_facts(
                     fact_type=fact_type,
