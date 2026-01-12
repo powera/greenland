@@ -1,0 +1,6 @@
+Generate all English verb conjugation forms for the English verb "{verb}".
+
+Definition: {definition}{subtype_context}
+
+Please provide all forms (6 persons × 3 tenses + 2 imperatives = 20 forms), using empty strings for forms that don't exist or aren't standard.
+Provide only the conjugated verb without any pronouns.

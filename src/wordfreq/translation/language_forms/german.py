@@ -111,8 +111,8 @@ def query_german_noun_forms(client, lemma_id: int, get_session_func) -> Tuple[Di
     )
 
     try:
-        context = util.prompt_loader.get_context("wordfreq", "german_noun_forms")
-        prompt = util.prompt_loader.get_prompt("wordfreq", "german_noun_forms").format(
+        context = util.prompt_loader.get_context("language_forms", "german/noun")
+        prompt = util.prompt_loader.get_prompt("language_forms", "german/noun").format(
             noun=noun,
             english_noun=english_noun,
             definition=definition,
@@ -172,8 +172,8 @@ def query_german_verb_conjugations(
     )
 
     try:
-        context = util.prompt_loader.get_context("wordfreq", "german_verb_conjugations")
-        prompt = util.prompt_loader.get_prompt("wordfreq", "german_verb_conjugations").format(
+        context = util.prompt_loader.get_context("language_forms", "german/verb")
+        prompt = util.prompt_loader.get_prompt("language_forms", "german/verb").format(
             verb=verb,
             english_verb=english_verb,
             definition=definition,

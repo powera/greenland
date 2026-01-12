@@ -1,0 +1,6 @@
+Generate all Lithuanian noun declension forms for the Lithuanian word "{noun}".
+
+English word: {english_word}
+Definition: {definition}{subtype_context}
+
+Please specify the number_type and provide all 14 forms (7 cases × 2 numbers), using empty strings for forms that don't exist.

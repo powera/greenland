@@ -88,8 +88,8 @@ def query_spanish_noun_forms(
     )
 
     try:
-        context = util.prompt_loader.get_context("wordfreq", "spanish_noun_forms")
-        prompt = util.prompt_loader.get_prompt("wordfreq", "spanish_noun_forms").format(
+        context = util.prompt_loader.get_context("language_forms", "spanish/noun")
+        prompt = util.prompt_loader.get_prompt("language_forms", "spanish/noun").format(
             noun=noun,
             english_noun=english_noun,
             definition=definition,
@@ -151,8 +151,8 @@ def query_spanish_verb_conjugations(
     )
 
     try:
-        context = util.prompt_loader.get_context("wordfreq", "spanish_verb_conjugations")
-        prompt = util.prompt_loader.get_prompt("wordfreq", "spanish_verb_conjugations").format(
+        context = util.prompt_loader.get_context("language_forms", "spanish/verb")
+        prompt = util.prompt_loader.get_prompt("language_forms", "spanish/verb").format(
             verb=verb,
             english_verb=english_verb,
             definition=definition,

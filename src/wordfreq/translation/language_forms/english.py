@@ -127,8 +127,8 @@ def query_english_verb_conjugations(
     subtype_context = f" (category: {pos_subtype})" if pos_subtype else ""
 
     try:
-        context = util.prompt_loader.get_context("wordfreq", "english_verb_conjugations")
-        prompt_template = util.prompt_loader.get_prompt("wordfreq", "english_verb_conjugations")
+        context = util.prompt_loader.get_context("language_forms", "english/verb")
+        prompt_template = util.prompt_loader.get_prompt("language_forms", "english/verb")
         prompt = prompt_template.format(
             verb=verb, definition=definition, subtype_context=subtype_context
         )
@@ -227,8 +227,8 @@ def query_english_noun_forms(
     subtype_context = f" (category: {pos_subtype})" if pos_subtype else ""
 
     try:
-        context = util.prompt_loader.get_context("wordfreq", "english_noun_forms")
-        prompt_template = util.prompt_loader.get_prompt("wordfreq", "english_noun_forms")
+        context = util.prompt_loader.get_context("language_forms", "english/noun")
+        prompt_template = util.prompt_loader.get_prompt("language_forms", "english/noun")
         prompt = prompt_template.format(
             noun=noun, definition=definition, subtype_context=subtype_context
         )
@@ -327,8 +327,8 @@ def query_english_adjective_forms(
     subtype_context = f" (category: {pos_subtype})" if pos_subtype else ""
 
     try:
-        context = util.prompt_loader.get_context("wordfreq", "english_adjective_forms")
-        prompt_template = util.prompt_loader.get_prompt("wordfreq", "english_adjective_forms")
+        context = util.prompt_loader.get_context("language_forms", "english/adjective")
+        prompt_template = util.prompt_loader.get_prompt("language_forms", "english/adjective")
         prompt = prompt_template.format(
             adjective=adjective, definition=definition, subtype_context=subtype_context
         )
@@ -429,8 +429,8 @@ def query_english_adverb_forms(
     subtype_context = f" (category: {pos_subtype})" if pos_subtype else ""
 
     try:
-        context = util.prompt_loader.get_context("wordfreq", "english_adverb_forms")
-        prompt_template = util.prompt_loader.get_prompt("wordfreq", "english_adverb_forms")
+        context = util.prompt_loader.get_context("language_forms", "english/adverb")
+        prompt_template = util.prompt_loader.get_prompt("language_forms", "english/adverb")
         prompt = prompt_template.format(
             adverb=adverb, definition=definition, subtype_context=subtype_context
         )

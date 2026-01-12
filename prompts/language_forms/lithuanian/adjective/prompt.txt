@@ -1,0 +1,6 @@
+Generate all Lithuanian adjective declension forms for the Lithuanian adjective "{adjective}".
+
+English adjective: {english_adjective}
+Definition: {definition}{subtype_context}
+
+Please provide all 28 forms (7 cases × 2 numbers × 2 genders), using empty strings for forms that don't exist.
