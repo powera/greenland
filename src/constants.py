@@ -11,10 +11,12 @@ PROJECT_ROOT = os.path.dirname(SRC_DIR)
 # Agents directory
 AGENTS_DIR = os.path.join(SRC_DIR, "agents")
 
-# Define common paths relative to project root
-BENCHMARK_DATA_DIR = os.path.join(SRC_DIR, "benchmarks")  # TODO: split/move?
+# Benchmark paths - DEPRECATED: Use benchmarks.benchmark_constants instead
+# These are kept for backwards compatibility but new code should import from
+# benchmarks.benchmark_constants.py
+BENCHMARK_DATA_DIR = os.path.join(SRC_DIR, "benchmarks")
 SCHEMA_DIR = os.path.join(SRC_DIR, "benchmarks", "schema")
-SQLITE_DB_PATH = os.path.join(SCHEMA_DIR, "benchmarks.db")  # TODO: fix?
+SQLITE_DB_PATH = os.path.join(SCHEMA_DIR, "benchmarks.db")  # Deprecated: Use BENCHMARKS_DB_PATH
 KEY_DIR = os.path.join(PROJECT_ROOT, "keys")
 TEMPLATES_DIR = os.path.join(PROJECT_ROOT, "templates")
 OUTPUT_DIR = os.path.join(os.path.dirname(PROJECT_ROOT), "greenland_output")

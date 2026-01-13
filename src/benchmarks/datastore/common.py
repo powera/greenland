@@ -11,7 +11,7 @@ from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, sessionmaker
 from sqlalchemy.sql import func
 
-import constants
+from benchmarks.benchmark_constants import BENCHMARKS_DB_PATH
 
 
 class Base(DeclarativeBase):
@@ -45,8 +45,11 @@ def _configure_sqlite_connection(dbapi_conn, connection_record):
 
 
 def create_dev_session():
-    """Create a database session for development."""
-    db_path = constants.SQLITE_DB_PATH
+    """Create a database session for development.
+
+    Uses the default benchmarks database path from benchmark_constants.
+    """
+    db_path = BENCHMARKS_DB_PATH
     engine = create_engine(
         f"sqlite:///{db_path}",
         echo=False,
@@ -59,8 +62,18 @@ def create_dev_session():
     return Session()
 
 
-def create_database_and_session(db_path="benchmarks.sqlite"):
-    """Create a SQLite database engine and session."""
+def create_database_and_session(db_path=None):
+    """Create a SQLite database engine and session.
+
+    Args:
+        db_path: Path to database file (default: benchmark_constants.BENCHMARKS_DB_PATH)
+
+    Returns:
+        SQLAlchemy session
+    """
+    if db_path is None:
+        db_path = str(BENCHMARKS_DB_PATH)
+
     engine = create_engine(
         f"sqlite:///{db_path}",
         echo=False,
@@ -72,6 +85,18 @@ def create_database_and_session(db_path="benchmarks.sqlite"):
     Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
     return Session()
+
+
+def create_session_from_config(config):
+    """Create a database session from a BenchmarkConfig object.
+
+    Args:
+        config: BenchmarkConfig instance
+
+    Returns:
+        SQLAlchemy session
+    """
+    return create_database_and_session(config.db_path)
 
 
 def insert_model(
