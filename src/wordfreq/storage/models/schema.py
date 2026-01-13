@@ -552,12 +552,12 @@ class AudioQualityReview(Base):
     lemma = relationship("Lemma")
 
     @hybrid_property
-    def display_voice(self):
+    def display_voice(self) -> str:
         """Display voice as 'language/voice' format for UX."""
         return f"{self.language_code}/{self.voice_name}"
 
-    @display_voice.expression
-    def display_voice(cls):
+    @display_voice.expression  # type: ignore[no-redef]
+    def display_voice(cls) -> str:
         """SQL expression for display_voice."""
         return cls.language_code + literal_column("'/'") + cls.voice_name
 

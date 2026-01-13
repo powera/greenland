@@ -8,7 +8,7 @@ import time
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
-import requests
+import requests  # type: ignore[import-untyped]
 
 import constants
 from clients.keys import load_key
@@ -119,8 +119,8 @@ class OpenAIBatchClient:
             logger.error(error_msg)
             raise Exception(error_msg)
 
-        file_info = response.json()
-        file_id = file_info["id"]
+        file_info: Dict[str, Any] = response.json()
+        file_id: str = file_info["id"]
 
         if self.debug:
             logger.debug(f"Uploaded batch file: {file_id}")
@@ -148,7 +148,7 @@ class OpenAIBatchClient:
         """
         url = f"{API_BASE}/batches"
 
-        payload = {
+        payload: Dict[str, Any] = {
             "input_file_id": input_file_id,
             "endpoint": endpoint,
             "completion_window": completion_window,
@@ -168,7 +168,7 @@ class OpenAIBatchClient:
             logger.error(error_msg)
             raise Exception(error_msg)
 
-        batch_info = response.json()
+        batch_info: Dict[str, Any] = response.json()
 
         if self.debug:
             logger.debug(f"Created batch: {batch_info['id']}")
@@ -194,7 +194,7 @@ class OpenAIBatchClient:
             logger.error(error_msg)
             raise Exception(error_msg)
 
-        batch_info = response.json()
+        batch_info: Dict[str, Any] = response.json()
 
         if self.debug:
             logger.debug(f"Batch {batch_id} status: {batch_info.get('status')}")
@@ -221,8 +221,9 @@ class OpenAIBatchClient:
             logger.error(error_msg)
             raise Exception(error_msg)
 
-        batches_data = response.json()
-        return batches_data.get("data", [])
+        batches_data: Dict[str, Any] = response.json()
+        result: List[Dict[str, Any]] = batches_data.get("data", [])
+        return result
 
     def cancel_batch(self, batch_id: str) -> Dict[str, Any]:
         """Cancel a batch job that is in progress.
@@ -242,7 +243,7 @@ class OpenAIBatchClient:
             logger.error(error_msg)
             raise Exception(error_msg)
 
-        batch_info = response.json()
+        batch_info: Dict[str, Any] = response.json()
         logger.info(f"Cancelled batch: {batch_id}")
 
         return batch_info

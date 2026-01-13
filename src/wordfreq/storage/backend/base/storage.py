@@ -1,7 +1,10 @@
 """Base storage interface for storage backends."""
 
 from abc import ABC, abstractmethod
-from typing import Any, Optional
+from typing import TYPE_CHECKING, Any, Optional
+
+if TYPE_CHECKING:
+    from wordfreq.storage.backend.base.session import BaseSession
 
 
 class BaseStorage(ABC):
@@ -34,11 +37,11 @@ class BaseStorage(ABC):
         """Close the storage backend and release resources."""
         pass
 
-    def __enter__(self):
+    def __enter__(self) -> "BaseStorage":
         """Context manager entry."""
         self.ensure_initialized()
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
         """Context manager exit."""
         self.close()

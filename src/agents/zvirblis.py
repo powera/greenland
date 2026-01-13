@@ -165,7 +165,7 @@ class ZvirblisAgent:
                     source_text=en_translation,
                     source_language="en",
                     target_languages=target_languages,
-                    model=self.config.model,
+                    model=self.config.model or "gpt-5-mini",
                     verified=False,
                 )
 
@@ -200,7 +200,10 @@ class ZvirblisAgent:
             session.close()
 
     def submit_batch_translation(
-        self, target_languages: List[str], limit: Optional[int] = None, pattern_id: Optional[str] = None
+        self,
+        target_languages: List[str],
+        limit: Optional[int] = None,
+        pattern_id: Optional[str] = None,
     ) -> tuple[Optional[str], int]:
         session = self.get_session()
         try:

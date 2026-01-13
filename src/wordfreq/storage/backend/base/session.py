@@ -20,7 +20,7 @@ class BaseSession(ABC):
     """
 
     @abstractmethod
-    def query(self, *entities, **kwargs) -> "SQLAlchemyQuery":
+    def query(self, *entities: Any, **kwargs: Any) -> "SQLAlchemyQuery":
         """Create a query for the given model class or entities.
 
         Args:
@@ -115,11 +115,11 @@ class BaseSession(ABC):
         """
         pass
 
-    def __enter__(self):
+    def __enter__(self) -> "BaseSession":
         """Context manager entry."""
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
         """Context manager exit."""
         if exc_type is not None:
             self.rollback()

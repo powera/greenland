@@ -7,7 +7,9 @@ in multiple target languages using LLM-based translation.
 """
 
 import logging
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
+
+from sqlalchemy.orm import Session
 
 import util.prompt_loader
 from clients.types import Schema, SchemaProperty
@@ -19,14 +21,14 @@ logger = logging.getLogger(__name__)
 
 
 def ensure_translations(
-    session,
+    session: Session,
     sentence: Sentence,
     source_text: str,
     source_language: str,
     target_languages: List[str],
     model: str = "gpt-5-mini",
     verified: bool = False,
-) -> Dict[str, any]:
+) -> Dict[str, Any]:
     """
     Ensure translations exist for a sentence in all target languages.
 
@@ -90,7 +92,7 @@ def ensure_translations(
 
 def translate_sentence(
     source_text: str, source_language: str, target_languages: List[str], model: str = "gpt-5-mini"
-) -> Dict[str, any]:
+) -> Dict[str, Any]:
     """
     Translate a sentence to multiple target languages using LLM.
 

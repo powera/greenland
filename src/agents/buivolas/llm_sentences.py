@@ -377,7 +377,7 @@ Focus on variety and natural language usage."""
 
         if lemma:
             logger.debug("Found lemma for '%s': %s", word_text, lemma.guid)
-            return lemma
+            return cast(Lemma, lemma)
 
         query = session.query(Lemma).filter(Lemma.lemma_text.ilike(word_text))
 
@@ -392,7 +392,7 @@ Focus on variety and natural language usage."""
                 word_text,
                 lemma.guid,
             )
-            return lemma
+            return cast(Lemma, lemma)
 
         logger.debug("No lemma found for word '%s' (role: %s)", word_text, word_role)
         return None

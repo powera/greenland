@@ -2,11 +2,11 @@
 """Unified client for routing requests to appropriate LLM backends."""
 
 import logging
-from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union
 
 import benchmarks.datastore.common  # Assuming datastore.common is available
 from clients import anthropic_client, gemini_client, lmstudio_client, ollama_client, openai_client
-from clients.types import Response
+from clients.types import Response, Schema
 from telemetry import LLMUsage
 
 if TYPE_CHECKING:
@@ -33,6 +33,7 @@ class UnifiedLLMClient:
         """
         self.timeout = timeout
         self.debug = debug
+        self.default_model: Optional[str] = None
         if debug:
             logger.setLevel(logging.DEBUG)
             logger.debug("Initialized UnifiedLLMClient (timeout=%ds)", timeout)
@@ -74,7 +75,16 @@ class UnifiedLLMClient:
         client.default_model = config.model
         return client
 
-    def _get_client(self, model: str) -> Tuple[Any, str]:
+    def _get_client(self, model: str) -> Tuple[
+        Union[
+            ollama_client.OllamaClient,
+            lmstudio_client.LMStudioClient,
+            openai_client.OpenAIClient,
+            anthropic_client.AnthropicClient,
+            gemini_client.GeminiClient,
+        ],
+        str,
+    ]:
         """
         Get appropriate client for model and normalize model name.
 
@@ -84,8 +94,15 @@ class UnifiedLLMClient:
         Returns:
             Tuple of (client, normalized_model_name)
         """
-        client = None
-        client_name = None
+        client: Union[
+            ollama_client.OllamaClient,
+            lmstudio_client.LMStudioClient,
+            openai_client.OpenAIClient,
+            anthropic_client.AnthropicClient,
+            gemini_client.GeminiClient,
+            None,
+        ] = None
+        client_name: Optional[str] = None
         normalized_model = model
 
         # Check if this is a commercial API model first (skip database lookup)
@@ -105,8 +122,8 @@ class UnifiedLLMClient:
             normalized_model = model
         else:
             # For all other models, get the actual model path from database
-            session = datastore.common.create_dev_session()
-            model_info = datastore.common.get_model_by_codename(session, model)
+            session = benchmarks.datastore.common.create_dev_session()
+            model_info = benchmarks.datastore.common.get_model_by_codename(session, model)
             if not model_info:
                 raise ValueError(f"Model '{model}' not found in database")
 
@@ -137,6 +154,9 @@ class UnifiedLLMClient:
                     if len(parts) > 1:  # Has quantization suffix or other params
                         normalized_model = ":".join(parts[:-1])
 
+        if client is None:
+            raise ValueError(f"Could not determine client for model: {model}")
+
         if self.debug:
             if normalized_model != model:
                 logger.debug(
@@ -163,7 +183,7 @@ class UnifiedLLMClient:
         prompt: str,
         model: Optional[str] = None,
         brief: bool = False,
-        json_schema: Optional[Any] = None,
+        json_schema: Optional[Union[Dict[str, Any], Schema]] = None,
         context: Optional[str] = None,
         timeout: Optional[float] = None,
     ) -> Response:
@@ -253,7 +273,7 @@ def generate_chat(
     prompt: str,
     model: str,
     brief: bool = False,
-    json_schema: Optional[Dict] = None,
+    json_schema: Optional[Union[Dict[str, Any], Schema]] = None,
     context: Optional[str] = None,
     timeout: Optional[float] = None,
 ) -> Response:

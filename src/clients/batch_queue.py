@@ -290,7 +290,7 @@ class BatchQueueManager:
         Returns:
             Batch status information from OpenAI
         """
-        batch_info = self.batch_client.get_batch_status(batch_id)
+        batch_info: Dict[str, Any] = self.batch_client.get_batch_status(batch_id)
         status = batch_info["status"]
 
         # Update request statuses based on batch status
@@ -436,7 +436,7 @@ class BatchQueueManager:
             Batch cancellation information
         """
         # Cancel with OpenAI
-        batch_info = self.batch_client.cancel_batch(batch_id)
+        batch_info: Dict[str, Any] = self.batch_client.cancel_batch(batch_id)
 
         # Update request records
         self.db.query(BatchQueue).filter_by(batch_id=batch_id).update(
@@ -458,7 +458,7 @@ class BatchQueueManager:
         """
         requests = self.db.query(BatchQueue).filter_by(batch_id=batch_id).all()
 
-        status_counts = {}
+        status_counts: Dict[str, int] = {}
         for req in requests:
             status = req.status
             status_counts[status] = status_counts.get(status, 0) + 1
@@ -518,7 +518,7 @@ def create_batch_database_session(db_path: str = BATCH_DB_PATH) -> Session:
 
     # Enable WAL mode for better concurrency
     @event.listens_for(engine, "connect")
-    def set_sqlite_pragma(dbapi_conn, connection_record):
+    def set_sqlite_pragma(dbapi_conn: Any, connection_record: Any) -> None:
         cursor = dbapi_conn.cursor()
         cursor.execute("PRAGMA journal_mode=WAL")
         cursor.execute("PRAGMA busy_timeout=30000")

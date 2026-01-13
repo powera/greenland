@@ -1,6 +1,6 @@
 """Factory for creating storage backend sessions."""
 
-from typing import Optional
+from typing import Callable, Optional
 
 from wordfreq.storage.backend.base import BaseSession, BaseStorage
 from wordfreq.storage.backend.config import BackendType, DataSourceConfig
@@ -59,10 +59,16 @@ def get_storage() -> BaseStorage:
         if _global_config.backend_type == BackendType.SQLITE:
             from wordfreq.storage.backend.sqlite import SQLiteStorage
 
+            assert (
+                _global_config.sqlite_path is not None
+            ), "sqlite_path must be set for SQLITE backend"
             _global_storage = SQLiteStorage(_global_config.sqlite_path)
         else:  # JSONL
             from wordfreq.storage.backend.jsonl import JSONLStorage
 
+            assert (
+                _global_config.jsonl_data_dir is not None
+            ), "jsonl_data_dir must be set for JSONL backend"
             _global_storage = JSONLStorage(_global_config.jsonl_data_dir)
 
         _global_storage.ensure_initialized()
@@ -81,13 +87,16 @@ def create_session(config: Optional[DataSourceConfig] = None) -> BaseSession:
     """
     if config is not None:
         # Create a one-off session with specific config
+        storage: BaseStorage
         if config.backend_type == BackendType.SQLITE:
             from wordfreq.storage.backend.sqlite import SQLiteStorage
 
+            assert config.sqlite_path is not None, "sqlite_path must be set for SQLITE backend"
             storage = SQLiteStorage(config.sqlite_path)
         else:  # JSONL
             from wordfreq.storage.backend.jsonl import JSONLStorage
 
+            assert config.jsonl_data_dir is not None, "jsonl_data_dir must be set for JSONL backend"
             storage = JSONLStorage(config.jsonl_data_dir)
 
         storage.ensure_initialized()
@@ -98,7 +107,9 @@ def create_session(config: Optional[DataSourceConfig] = None) -> BaseSession:
         return storage.create_session()
 
 
-def create_scoped_session_factory(config: Optional[DataSourceConfig] = None):
+def create_scoped_session_factory(
+    config: Optional[DataSourceConfig] = None,
+) -> Callable[[], BaseSession]:
     """Create a scoped session factory compatible with Flask.
 
     Args:
@@ -111,10 +122,10 @@ def create_scoped_session_factory(config: Optional[DataSourceConfig] = None):
     class SessionFactory:
         """Session factory that creates sessions on demand."""
 
-        def __init__(self, config: Optional[DataSourceConfig] = None):
+        def __init__(self, config: Optional[DataSourceConfig] = None) -> None:
             self.config = config
 
-        def __call__(self):
+        def __call__(self) -> BaseSession:
             """Create a new session."""
             return create_session(self.config)
 

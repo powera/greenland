@@ -23,6 +23,14 @@ class DataSourceConfig:
     - LLM model (which model to use for generation)
     """
 
+    backend_type: BackendType
+    sqlite_path: Optional[str]
+    jsonl_data_dir: Optional[str]
+    barsukas_url: Optional[str]
+    cache_only: bool
+    model: Optional[str]
+    debug: bool
+
     def __init__(
         self,
         backend_type: Optional[BackendType] = None,

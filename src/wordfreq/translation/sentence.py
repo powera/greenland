@@ -10,7 +10,9 @@ This module provides reusable translation functionality that can be used by:
 
 import json
 import logging
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
+
+from sqlalchemy.orm import Session
 
 from clients.unified_client import UnifiedLLMClient
 from wordfreq.storage.models.schema import (
@@ -27,7 +29,7 @@ logger = logging.getLogger(__name__)
 
 
 def build_translation_prompt(
-    sentence: Sentence, target_languages: List[str], session, include_english: bool = True
+    sentence: Sentence, target_languages: List[str], session: Session, include_english: bool = True
 ) -> Tuple[str, str]:
     """
     Build LLM prompt for translating a sentence.
@@ -133,22 +135,32 @@ def build_translation_prompt(
         prompt_lines.append(f"  {english_word}{role_str}{guid_str}: {trans_str}")
 
     prompt_lines.append("")
-    prompt_lines.append(f"Translate this sentence naturally into: {', '.join([LANGUAGE_NAMES[lang] for lang in target_languages if lang in LANGUAGE_NAMES])}.")
+    prompt_lines.append(
+        f"Translate this sentence naturally into: {', '.join([LANGUAGE_NAMES[lang] for lang in target_languages if lang in LANGUAGE_NAMES])}."
+    )
     prompt_lines.append("")
 
     if include_english:
-        prompt_lines.append("IMPORTANT: Also provide a grammatically correct English version (fixing issues like singular/plural, articles, etc.).")
+        prompt_lines.append(
+            "IMPORTANT: Also provide a grammatically correct English version (fixing issues like singular/plural, articles, etc.)."
+        )
     else:
-        prompt_lines.append("IMPORTANT: The English translation with word-by-word breakdown is already complete. Do NOT include English in your response.")
+        prompt_lines.append(
+            "IMPORTANT: The English translation with word-by-word breakdown is already complete. Do NOT include English in your response."
+        )
 
-    prompt_lines.append("Use the provided word translations where appropriate, but adjust grammar as needed for natural sentences.")
+    prompt_lines.append(
+        "Use the provided word translations where appropriate, but adjust grammar as needed for natural sentences."
+    )
 
     prompt = "\n".join(prompt_lines)
 
     return "\n".join(context_lines), prompt
 
 
-def build_response_schema(target_languages: List[str], include_english: bool = True) -> Dict:
+def build_response_schema(
+    target_languages: List[str], include_english: bool = True
+) -> Dict[str, Any]:
     """
     Build JSON schema for LLM response.
 
@@ -161,7 +173,7 @@ def build_response_schema(target_languages: List[str], include_english: bool = T
     """
     # Schema for individual word details - no descriptions to reduce token usage
     # (detailed field explanations are in the prompt context)
-    word_schema = {
+    word_schema: Dict[str, Any] = {
         "type": "object",
         "properties": {
             "word": {"type": "string"},
@@ -175,12 +187,15 @@ def build_response_schema(target_languages: List[str], include_english: bool = T
     }
 
     # Build properties for sentences and word arrays
-    schema_properties = {}
-    required_fields = []
+    schema_properties: Dict[str, Any] = {}
+    required_fields: List[str] = []
 
     # Include English word breakdown if requested
     if include_english:
-        schema_properties["en"] = {"type": "string", "description": "Grammatically corrected English sentence"}
+        schema_properties["en"] = {
+            "type": "string",
+            "description": "Grammatically corrected English sentence",
+        }
         schema_properties["words_en"] = {
             "type": "array",
             "description": "English word breakdown",
@@ -209,8 +224,8 @@ def build_response_schema(target_languages: List[str], include_english: bool = T
 
 
 def translate_sentence(
-    sentence_id: int, target_languages: List[str], session, model: str = "gpt-5-mini"
-) -> Dict:
+    sentence_id: int, target_languages: List[str], session: Session, model: str = "gpt-5-mini"
+) -> Dict[str, Any]:
     """
     Translate a single sentence to target languages using LLM.
 
@@ -258,7 +273,9 @@ def translate_sentence(
     return translations
 
 
-def store_translation_results(sentence_id: int, translations: Dict, session):
+def store_translation_results(
+    sentence_id: int, translations: Dict[str, Any], session: Session
+) -> None:
     """
     Store translation results in database.
 

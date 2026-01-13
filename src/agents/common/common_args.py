@@ -7,10 +7,13 @@ to standardize command-line interfaces across all agents.
 import argparse
 import sys
 from pathlib import Path
-from typing import Any, Callable, Optional
+from typing import TYPE_CHECKING, Any, Callable, Optional
 
 import constants
 from constants import DEFAULT_MODEL
+
+if TYPE_CHECKING:
+    from wordfreq.storage.backend.config import DataSourceConfig
 
 
 def add_common_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
@@ -294,7 +297,7 @@ def count_items_for_confirmation(
         if hasattr(args, "limit") and args.limit:
             query = query.limit(args.limit)
 
-        count = query.count()
+        count: int = query.count()
 
         if hasattr(args, "sample_rate") and args.sample_rate < 1.0:
             count = int(count * args.sample_rate)
@@ -326,7 +329,7 @@ def get_standard_db_path(args_db_path: Optional[str] = None) -> str:
     return str(Path(__file__).parent.parent.parent / "data" / "greenland.db")
 
 
-def get_data_source_config(args: Any, default_model: Optional[str] = None):
+def get_data_source_config(args: Any, default_model: Optional[str] = None) -> "DataSourceConfig":
     """Create DataSourceConfig from parsed arguments.
 
     Args:
