@@ -17,6 +17,8 @@ SRC_DIR = BENCHMARKS_DIR.parent
 PROJECT_ROOT = SRC_DIR.parent
 
 # Benchmark data directories
+# Note: These are kept as Path objects internally, but str() versions are used
+# for backwards compatibility with code that expects strings
 BENCHMARK_DATA_DIR = BENCHMARKS_DIR
 BENCHMARK_SCHEMA_DIR = BENCHMARKS_DIR / "schema"
 
