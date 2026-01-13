@@ -42,8 +42,9 @@ For agent CLI scripts that should be runnable directly, add this at the top
       sys.path.insert(0, str(Path(__file__).parent.parent))
 
 Tests are in src/tests ; any changes to src/clients require tests.  Changes to
-barsukas generally do not require tests.  Do not run any tests other than a
-pycompile to check for code mistakes; ask the developer to test the change in
+barsukas generally do not require tests.  Before creating a Git commit, always
+run black and mypy on modified Python files to ensure code quality and type
+correctness.  For barsukas changes, ask the developer to test the change in
 their local browser.
 
 When writing HTML files, always use ordinary form submits for POST data - do
