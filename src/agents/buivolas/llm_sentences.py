@@ -14,6 +14,7 @@ from wordfreq.storage.database import (
     add_sentence_word,
     calculate_minimum_level,
 )
+from wordfreq.storage.models.schema import SentencePatternWord
 
 logger = logging.getLogger(__name__)
 
@@ -220,6 +221,16 @@ Focus on variety and natural language usage."""
                         )
                     ),
                 )
+
+                # Link the sentence to the source lemma via SentencePatternWord
+                # This allows zvirblis to find LLM-generated sentences for the lemma
+                pattern_word = SentencePatternWord(
+                    sentence_id=sentence.id,
+                    lemma_id=source_lemma.id,
+                    position=0,
+                    slot_name="llm_generated",
+                )
+                session.add(pattern_word)
 
                 translations = sentence_data.get("translations", {})
                 for lang_code, text in translations.items():

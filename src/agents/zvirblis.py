@@ -36,7 +36,13 @@ from agents.common.common_args import (
 )
 from wordfreq.storage.backend import create_session as create_backend_session
 from wordfreq.storage.backend.config import DataSourceConfig
-from wordfreq.storage.models.schema import Lemma, Sentence, SentenceTranslation, SentenceWord
+from wordfreq.storage.models.schema import (
+    Lemma,
+    Sentence,
+    SentenceTranslation,
+    SentenceWord,
+    SentencePatternWord,
+)
 from wordfreq.translation.sentence import build_response_schema, build_translation_prompt
 
 logging.basicConfig(
@@ -81,12 +87,22 @@ class ZvirblisAgent:
             if "en" not in required_languages:
                 required_languages.add("en")
 
+            # Find sentences linked via SentenceWord OR SentencePatternWord
+            sentence_word_ids = (
+                session.query(SentenceWord.sentence_id)
+                .filter(SentenceWord.lemma_id == lemma.id)
+                .distinct()
+            )
+            pattern_word_ids = (
+                session.query(SentencePatternWord.sentence_id)
+                .filter(SentencePatternWord.lemma_id == lemma.id)
+                .distinct()
+            )
+
             sentence_query = (
                 session.query(Sentence)
-                .join(SentenceWord)
-                .filter(SentenceWord.lemma_id == lemma.id)
+                .filter((Sentence.id.in_(sentence_word_ids)) | (Sentence.id.in_(pattern_word_ids)))
                 .order_by(Sentence.id)
-                .distinct()
             )
 
             sentences = sentence_query.all()
@@ -298,6 +314,7 @@ class ZvirblisAgent:
 
         finally:
             session.close()
+
 
 def get_argument_parser():
     """Return the argument parser for introspection."""
