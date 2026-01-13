@@ -12,7 +12,7 @@ import argparse
 import logging
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 # Add src directory to path
 GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent)
@@ -67,10 +67,10 @@ class ZvirblisAgent:
             self.batch_session, self.batch_client, debug=self.debug
         )
 
-    def get_session(self):
+    def get_session(self) -> Any:
         return create_backend_session(self.config)
 
-    def _get_sentence_languages(self, session, sentence_id: int) -> set[str]:
+    def _get_sentence_languages(self, session: Any, sentence_id: int) -> set[str]:
         rows = (
             session.query(SentenceTranslation.language_code)
             .filter(SentenceTranslation.sentence_id == sentence_id)
@@ -80,7 +80,7 @@ class ZvirblisAgent:
 
     def translate_sentences_for_lemma(
         self, lemma: Lemma, target_languages: List[str], limit: Optional[int] = None
-    ) -> Dict[str, any]:
+    ) -> Dict[str, Any]:
         session = self.get_session()
         try:
             required_languages = set(target_languages)
@@ -200,7 +200,7 @@ class ZvirblisAgent:
             session.close()
 
     def submit_batch_translation(
-        self, target_languages: List[str], limit: Optional[int] = None, pattern_id: str = None
+        self, target_languages: List[str], limit: Optional[int] = None, pattern_id: Optional[str] = None
     ) -> tuple[Optional[str], int]:
         session = self.get_session()
         try:
@@ -316,7 +316,7 @@ class ZvirblisAgent:
             session.close()
 
 
-def get_argument_parser():
+def get_argument_parser() -> argparse.ArgumentParser:
     """Return the argument parser for introspection."""
     parser = argparse.ArgumentParser(description="Translate sentences for a lemma GUID")
 
@@ -356,7 +356,7 @@ def get_argument_parser():
     return parser
 
 
-def main():
+def main() -> int:
     parser = get_argument_parser()
     args = parser.parse_args()
 

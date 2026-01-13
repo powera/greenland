@@ -1,7 +1,7 @@
 """LLM-driven sentence generation for Buivolas."""
 
 import logging
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional, cast
 
 from clients.types import Schema, SchemaProperty
 from clients.unified_client import UnifiedLLMClient
@@ -31,7 +31,7 @@ class LlmSentenceGenerator:
         if self.debug:
             logger.setLevel(logging.DEBUG)
 
-    def get_session(self):
+    def get_session(self) -> Any:
         return create_backend_session(self.config)
 
     def generate_sentences_for_noun(
@@ -39,7 +39,7 @@ class LlmSentenceGenerator:
         lemma: Lemma,
         num_sentences: int = 3,
         difficulty_context: Optional[int] = None,
-    ) -> Dict[str, any]:
+    ) -> Dict[str, Any]:
         if lemma.pos_type != "noun":
             logger.warning("Lemma %s is not a noun (got %s)", lemma.guid, lemma.pos_type)
             return {"success": False, "error": f"Expected noun, got {lemma.pos_type}"}
@@ -54,8 +54,8 @@ class LlmSentenceGenerator:
         try:
             context = self._build_sentence_context(lemma, difficulty_context)
 
-            generated_sentences = []
-            previous_sentences = []
+            generated_sentences: List[Dict[str, Any]] = []
+            previous_sentences: List[str] = []
 
             for i in range(num_sentences):
                 logger.info(
@@ -127,7 +127,7 @@ class LlmSentenceGenerator:
         lemma: Lemma,
         context: str,
         previous_sentences: Optional[List[str]] = None,
-    ) -> Optional[Dict]:
+    ) -> Optional[Dict[Any, Any]]:
         previous_context = ""
         if previous_sentences:
             previous_context = (
@@ -188,7 +188,7 @@ Focus on variety and natural language usage."""
             )
 
             if response.structured_data:
-                return response.structured_data
+                return cast(Dict[Any, Any], response.structured_data)
 
             logger.error("No structured data received from LLM")
             return None
@@ -198,8 +198,8 @@ Focus on variety and natural language usage."""
             return None
 
     def store_sentences(
-        self, sentences_data: List[Dict], source_lemma: Lemma, session
-    ) -> Dict[str, any]:
+        self, sentences_data: List[Dict[str, Any]], source_lemma: Lemma, session: Any
+    ) -> Dict[str, Any]:
         stored_count = 0
         failed_count = 0
         errors = []
@@ -278,11 +278,12 @@ Focus on variety and natural language usage."""
 
                         english_lemma = word_data.get("english_lemma")
                         word_lemma = None
-                        if english_lemma:
+                        role_value = word_data.get("role")
+                        if english_lemma and isinstance(role_value, str):
                             word_lemma = self._find_lemma_for_word(
                                 session,
                                 english_lemma,
-                                word_data.get("role"),
+                                role_value,
                                 source_lemma=source_lemma,
                             )
 
@@ -333,7 +334,7 @@ Focus on variety and natural language usage."""
 
     def _find_lemma_for_word(
         self,
-        session,
+        session: Any,
         word_text: str,
         word_role: str,
         source_lemma: Optional[Lemma] = None,
