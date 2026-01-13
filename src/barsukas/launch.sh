@@ -71,7 +71,7 @@ fi
 cd "$SCRIPT_DIR"
 
 echo "=========================================="
-echo "Starting Barsukas Web Interface"
+echo "Starting Barsukas Web Interface (Unified Mode)"
 echo "=========================================="
 echo "Storage backend: $STORAGE_BACKEND"
 echo "PYTHONPATH: $PYTHONPATH"
@@ -82,67 +82,30 @@ elif [[ "$STORAGE_FORMAT" == "sqlite" && -n "$BARSUKAS_DB_PATH" ]]; then
     echo "SQLite database: $BARSUKAS_DB_PATH"
 fi
 echo ""
-
-# Start/stop task worker helpers
-WORKER_PID=""
-
-start_worker() {
-    echo "Starting Barsukas task worker"
-    python -m barsukas.workers.task_worker &
-    WORKER_PID=$!
-}
-
-stop_worker() {
-    local timeout_seconds=${1:-15}
-    if [[ -n "$WORKER_PID" ]] && kill -0 "$WORKER_PID" 2>/dev/null; then
-        echo "Stopping Barsukas task worker (pid $WORKER_PID)"
-        kill -TERM "$WORKER_PID"
-        local deadline=$((SECONDS + timeout_seconds))
-        while (( SECONDS < deadline )); do
-            if ! kill -0 "$WORKER_PID" 2>/dev/null; then
-                WORKER_PID=""
-                return
-            fi
-            sleep 0.5
-        done
-        echo "Worker did not stop quickly; forcing shutdown"
-        kill -KILL "$WORKER_PID" 2>/dev/null
-        wait "$WORKER_PID" 2>/dev/null
-    fi
-    WORKER_PID=""
-}
+echo "NOTE: Using unified launcher (Flask + Worker in same process)"
+echo "      This avoids SQLite concurrency issues."
+echo ""
 
 cleanup() {
     echo ""
     echo "Shutting down Barsukas..."
 
-    # Stop the Flask server if it's running
+    # Stop the unified server if it's running
     if [[ -n "$SERVER_PID" ]] && kill -0 "$SERVER_PID" 2>/dev/null; then
-        echo "Stopping Flask server (pid $SERVER_PID)"
+        echo "Stopping Barsukas server (pid $SERVER_PID)"
         kill -TERM "$SERVER_PID" 2>/dev/null
         wait "$SERVER_PID" 2>/dev/null
     fi
-
-    # Stop the worker
-    stop_worker 15
 }
 
 trap cleanup EXIT INT TERM
 
-# Run the Flask app with remaining arguments in a loop for auto-restart
+# Run the unified app (Flask + Worker in same process) in a loop for auto-restart
 # Exit code 0 = normal shutdown, don't restart
 # Exit code 42 = restart requested, restart immediately
-RESTART_WORKER=0
 while true; do
-    python app.py $HOST_ARGS --port "$PORT" "$@" &
+    python unified_app.py $HOST_ARGS --port "$PORT" "$@" &
     SERVER_PID=$!
-    if [[ $RESTART_WORKER -eq 1 ]]; then
-        stop_worker 60
-        start_worker
-        RESTART_WORKER=0
-    elif [[ -z "$WORKER_PID" ]]; then
-        start_worker
-    fi
     wait "$SERVER_PID"
     EXIT_CODE=$?
 
@@ -155,12 +118,10 @@ while true; do
         echo "Restarting Barsukas (exit code 42)..."
         echo "=========================================="
         echo ""
-        RESTART_WORKER=1
         sleep 0.5  # Brief pause to ensure port is released
     else
         echo ""
         echo "Barsukas exited with code $EXIT_CODE"
-        stop_worker 15
         exit $EXIT_CODE
     fi
 done
