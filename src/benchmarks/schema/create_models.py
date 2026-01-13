@@ -1,23 +1,34 @@
 #!/usr/bin/python3
+"""Populate the benchmark database with model definitions.
 
-import os
+This script adds model entries to the benchmarks database for various
+local and remote LLM models.
+"""
 
-import benchmarks.datastore.common
+import sys
+from pathlib import Path
+
+# Add src to path if not already present
+if str(Path(__file__).parent.parent.parent) not in sys.path:
+    sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+from benchmarks.benchmark_constants import BENCHMARKS_DB_PATH
+from benchmarks.datastore import common as datastore_common
 
 
 def create_models():
+    """Create all model definitions."""
     # create_ollama_models()
     create_lmstudio_models()
     create_remote_models()
 
 
 def create_ollama_models():
-    dir = os.path.dirname(os.path.realpath(__file__))
-
-    s = datastore.common.create_database_and_session(os.path.join(dir, "benchmarks.db"))
+    """Create Ollama model definitions."""
+    s = datastore_common.create_database_and_session(str(BENCHMARKS_DB_PATH))
 
     # Use clean codenames, store actual ollama model names in model_path
-    datastore.common.insert_model(
+    datastore_common.insert_model(
         s,
         "smollm2-1.7b",
         "SmolLM 2 1.7B",
@@ -27,7 +38,7 @@ def create_ollama_models():
         "smollm2:1.7b:Q8_0",
         "local",
     )
-    datastore.common.insert_model(
+    datastore_common.insert_model(
         s,
         "llama3.2-3b",
         "Llama 3.2 3B",
@@ -37,7 +48,7 @@ def create_ollama_models():
         "llama3.2:3b:Q4_K_M",
         "local",
     )
-    datastore.common.insert_model(
+    datastore_common.insert_model(
         s,
         "qwen2.5-7b",
         "QWEN 2.5 7B",
@@ -47,10 +58,10 @@ def create_ollama_models():
         "qwen2.5:7b:Q4_K_M",
         "local",
     )
-    datastore.common.insert_model(
+    datastore_common.insert_model(
         s, "phi4-14b", "Phi 4 14B", "2025-01-08", 9100, "MIT License", "phi4:14b:Q4_K_M", "local"
     )
-    datastore.common.insert_model(
+    datastore_common.insert_model(
         s,
         "gemma3-4b",
         "Gemma 3 4B",
@@ -62,7 +73,7 @@ def create_ollama_models():
     )
 
     # Small models
-    datastore.common.insert_model(
+    datastore_common.insert_model(
         s,
         "gemma3-1b",
         "Gemma 3 1B",
@@ -72,20 +83,20 @@ def create_ollama_models():
         "gemma3:1b:Q4_K_M",
         "local",
     )
-    datastore.common.insert_model(
+    datastore_common.insert_model(
         s, "gemma2-2b", "Gemma2 2B", "2024-06-07", 1600, "Gemma License", "gemma2:2b:Q4_0", "local"
     )
-    datastore.common.insert_model(
+    datastore_common.insert_model(
         s, "qwen3-4b", "QWEN3 4B", "2025-04-28", 2600, "Apache License", "qwen3:4b:Q4_K_M", "local"
     )
 
 
 def create_remote_models():
-    dir = os.path.dirname(os.path.realpath(__file__))
-    s = datastore.common.create_database_and_session(os.path.join(dir, "benchmarks.db"))
+    """Create remote API model definitions."""
+    s = datastore_common.create_database_and_session(str(BENCHMARKS_DB_PATH))
 
     # ChatGPT - use API model names as both codename and model_path
-    datastore.common.insert_model(
+    datastore_common.insert_model(
         s,
         "gpt-4o-mini",
         "GPT-4o-mini",
@@ -95,7 +106,7 @@ def create_remote_models():
         "gpt-4o-mini-2024-07-18",
         "remote",
     )
-    datastore.common.insert_model(
+    datastore_common.insert_model(
         s,
         "gpt-4.1-nano",
         "GPT-4.1 nano",
@@ -105,7 +116,7 @@ def create_remote_models():
         "gpt-4.1-nano-2025-04-14",
         "remote",
     )
-    datastore.common.insert_model(
+    datastore_common.insert_model(
         s,
         "gpt-4.1-mini",
         "GPT-4.1 mini",
@@ -117,7 +128,7 @@ def create_remote_models():
     )
 
     # Claude
-    datastore.common.insert_model(
+    datastore_common.insert_model(
         s,
         "claude-3-haiku",
         "Claude 3 Haiku",
@@ -127,7 +138,7 @@ def create_remote_models():
         "claude-3-haiku-20240307",
         "remote",
     )
-    datastore.common.insert_model(
+    datastore_common.insert_model(
         s,
         "claude-3.5-haiku",
         "Claude 3.5 Haiku",
@@ -137,7 +148,7 @@ def create_remote_models():
         "claude-3-5-haiku-20241022",
         "remote",
     )
-    datastore.common.insert_model(
+    datastore_common.insert_model(
         s,
         "claude-3.7-sonnet",
         "Claude 3.7 Sonnet",
@@ -149,7 +160,7 @@ def create_remote_models():
     )
 
     # Gemini
-    datastore.common.insert_model(
+    datastore_common.insert_model(
         s,
         "gemini-2.5-flash",
         "Gemini 2.5 Flash",
@@ -159,7 +170,7 @@ def create_remote_models():
         "gemini-2.5-flash-preview-04-17",
         "remote",
     )
-    datastore.common.insert_model(
+    datastore_common.insert_model(
         s,
         "gemini-2.0-flash",
         "Gemini 2.0 Flash",
@@ -169,7 +180,7 @@ def create_remote_models():
         "gemini-2.0-flash-lite",
         "remote",
     )
-    datastore.common.insert_model(
+    datastore_common.insert_model(
         s,
         "gemini-1.5-flash",
         "Gemini 1.5 Flash",
@@ -182,11 +193,11 @@ def create_remote_models():
 
 
 def create_lmstudio_models():
-    dir = os.path.dirname(os.path.realpath(__file__))
-    s = datastore.common.create_database_and_session(os.path.join(dir, "benchmarks.db"))
+    """Create LMStudio model definitions."""
+    s = datastore_common.create_database_and_session(str(BENCHMARKS_DB_PATH))
 
     # Use clean codenames, store full LMStudio paths in model_path
-    datastore.common.insert_model(
+    datastore_common.insert_model(
         s,
         "yi-1.5-6b",
         "Yi-1.5 6B",
@@ -196,7 +207,7 @@ def create_lmstudio_models():
         "lmstudio/lmstudio-community/yi-1.5-6b-chat-gguf/yi-1.5-6b-chat-q4_k_m.gguf",
         "local",
     )
-    datastore.common.insert_model(
+    datastore_common.insert_model(
         s,
         "granite-3.3-8b",
         "Granite 3.3 8B",
@@ -208,7 +219,7 @@ def create_lmstudio_models():
     )
 
     # QWEN2 models
-    datastore.common.insert_model(
+    datastore_common.insert_model(
         s,
         "qwen2-7b-lms",
         "QWEN2 7B (LMStudio)",
@@ -218,7 +229,7 @@ def create_lmstudio_models():
         "lmstudio/qwen2-7b-instruct",
         "local",
     )
-    datastore.common.insert_model(
+    datastore_common.insert_model(
         s,
         "qwen2.5-7b-lms",
         "QWEN2.5 7B (LMStudio)",
@@ -230,7 +241,7 @@ def create_lmstudio_models():
     )
 
     # QWEN3 Models
-    datastore.common.insert_model(
+    datastore_common.insert_model(
         s,
         "qwen3-1.7b-lms",
         "QWEN3 1.7B (LMStudio)",
@@ -240,7 +251,7 @@ def create_lmstudio_models():
         "lmstudio/lmstudio-community/qwen3-1.7b-gguf/qwen3-1.7b-q6_k.gguf",
         "local",
     )
-    datastore.common.insert_model(
+    datastore_common.insert_model(
         s,
         "qwen3-4b-lms",
         "QWEN3 4B (LMStudio)",
@@ -250,7 +261,7 @@ def create_lmstudio_models():
         "lmstudio/lmstudio-community/qwen3-4b-gguf/qwen3-4b-q4_k_m.gguf",
         "local",
     )
-    datastore.common.insert_model(
+    datastore_common.insert_model(
         s,
         "qwen3-8b-lms",
         "QWEN3 8B (LMStudio)",
@@ -262,7 +273,7 @@ def create_lmstudio_models():
     )
 
     # Llama 3 Models
-    datastore.common.insert_model(
+    datastore_common.insert_model(
         s,
         "llama3.2-1b-lms",
         "Llama 3.2 1B (LMStudio)",
@@ -272,7 +283,7 @@ def create_lmstudio_models():
         "lmstudio/mlx-community/llama-3.2-1b-instruct",
         "local",
     )
-    datastore.common.insert_model(
+    datastore_common.insert_model(
         s,
         "llama3.2-3b-lms",
         "Llama 3.2 3B (LMStudio)",
@@ -284,7 +295,7 @@ def create_lmstudio_models():
     )
 
     # Gemma2 Models
-    datastore.common.insert_model(
+    datastore_common.insert_model(
         s,
         "gemma2-2b-lms",
         "Gemma2 2B (LMStudio)",
@@ -294,7 +305,7 @@ def create_lmstudio_models():
         "lmstudio/lmstudio-community/gemma-2-2b-it-gguf/gemma-2-2b-it-q8_0.gguf",
         "local",
     )
-    datastore.common.insert_model(
+    datastore_common.insert_model(
         s,
         "gemma2-9b-lms",
         "Gemma2 9B (LMStudio)",
@@ -306,7 +317,7 @@ def create_lmstudio_models():
     )
 
     # Gemma3 Models
-    datastore.common.insert_model(
+    datastore_common.insert_model(
         s,
         "gemma3-4b-lms",
         "Gemma3 4B (LMStudio)",
@@ -316,7 +327,7 @@ def create_lmstudio_models():
         "lmstudio/lmstudio-community/gemma-3-4b-it-gguf/gemma-3-4b-it-q4_k_m.gguf",
         "local",
     )
-    datastore.common.insert_model(
+    datastore_common.insert_model(
         s,
         "gemma3-12b-lms",
         "Gemma3 12B QAT (LMStudio)",
@@ -327,7 +338,7 @@ def create_lmstudio_models():
         "local",
     )
 
-    datastore.common.insert_model(
+    datastore_common.insert_model(
         s,
         "smollm2-1.7b-lms",
         "SmolLM2 1.7B (LMStudio)",

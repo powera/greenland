@@ -1,26 +1,36 @@
 #!/usr/bin/python3
+"""Create benchmark database schema using SQLAlchemy.
 
-import os.path
-import sqlite3
+This script creates all tables defined in the SQLAlchemy models.
+The old SQL schema file is no longer used.
+"""
 
-import constants
+import sys
+from pathlib import Path
+
+# Add src to path if not already present
+if str(Path(__file__).parent.parent.parent) not in sys.path:
+    sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+from benchmarks.benchmark_constants import BENCHMARKS_DB_PATH
+from benchmarks.datastore.common import create_database_and_session
 
 
 def create_tables():
-    # Define the database file
-    db_file = os.path.join(constants.SCHEMA_DIR, "benchmarks.db")
+    """Create all benchmark tables using SQLAlchemy.
 
-    # Define the schema file
-    schema_file = os.path.join(constants.SCHEMA_DIR, "benchmarks.sql")
+    This uses Base.metadata.create_all() which is called automatically
+    by create_database_and_session().
+    """
+    db_path = BENCHMARKS_DB_PATH
+    print(f"Creating database schema at: {db_path}")
 
-    # Connect to the database
-    with sqlite3.connect(db_file) as conn:
-        # Read the schema file
-        with open(schema_file, "r") as f:
-            schema = f.read()
-        # Execute the schema
-        conn.executescript(schema)
-        print("Database and schema created successfully.")
+    # This creates all tables defined in SQLAlchemy models
+    session = create_database_and_session(str(db_path))
+    session.close()
+
+    print("Database and schema created successfully.")
+    print(f"Database file: {db_path}")
 
 
 if __name__ == "__main__":

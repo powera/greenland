@@ -51,7 +51,7 @@ class WikiLoader:
         self.index_file = os.path.join(
             self.corpus_base, f"{self.corpus_prefix}-pages-articles-multistream-index.txt"
         )
-        self.schema_file = os.path.join(constants.SCHEMA_DIR, "wiki_index.schema")
+        self.schema_file = constants.WIKI_INDEX_SCHEMA_PATH
 
     @staticmethod
     def _shard_for_title(title: str) -> str:
