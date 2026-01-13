@@ -14,7 +14,6 @@
 #   AUDIO_VOICES           - Optional voice names for Strazdas (space-separated)
 
 set -euo pipefail
-set -x
 
 ASSUME_YES=false
 
@@ -86,6 +85,7 @@ run_step() {
   shift
   echo ""
   echo "=== ${title} ==="
+  echo "Command: $*"
   if [[ "$ASSUME_YES" == true ]]; then
     "$@"
     return
@@ -125,8 +125,21 @@ run_step "Grammatical forms" \
   python -m agents.vilkas.cli --guid "$GUID" --task all --fix --languages ${VILKAS_LANGUAGES[*]} --yes
 
 # Synonyms and alternative forms (Šernas)
+# Always include English for sernas to generate English synonyms
+SERNAS_LANGUAGES=("${LANGUAGE_LIST[@]}")
+NEEDS_SERNAS_EN=true
+for lang in "${SERNAS_LANGUAGES[@]}"; do
+  if [[ "$lang" == "en" ]]; then
+    NEEDS_SERNAS_EN=false
+    break
+  fi
+done
+if [[ "$NEEDS_SERNAS_EN" == true ]]; then
+  SERNAS_LANGUAGES+=("en")
+fi
+
 run_step "Synonyms" \
-  python -m agents.sernas.cli --guid "$GUID" --mode populate-only --languages ${LANGUAGES} --yes
+  python -m agents.sernas.cli --guid "$GUID" --mode populate-only --languages ${SERNAS_LANGUAGES[*]} --yes
 
 run_step "Pattern sentences" \
   python -m agents.buivolas --guid "$GUID" --task generate-sentences --mode pattern
