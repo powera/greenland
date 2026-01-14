@@ -12,7 +12,6 @@ from typing import Any, Dict, Iterator, List, Optional, Set, Tuple, Union
 
 import benchmarks.datastore.benchmarks as datastore_benchmarks
 import benchmarks.benchmark_constants as benchmark_constants
-import lib.score_table
 import lib.validation
 from clients import ollama_client, unified_client
 from clients.ollama_client import OllamaTimeoutError

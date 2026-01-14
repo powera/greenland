@@ -5,7 +5,6 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import benchmarks.datastore.benchmarks as datastore_benchmarks
 import benchmarks.benchmark_constants as benchmark_constants
-import lib.score_table
 import lib.validation
 from clients import unified_client
 from clients.ollama_client import OllamaTimeoutError
@@ -167,14 +166,7 @@ class BenchmarkRunner:
             logger.error("Error saving results: %s", run_id)
             return -1
 
-        # Update score tables
-        self._update_scoretable(run_id)
         return run_id
-
-    def _update_scoretable(self, run_id: int) -> None:
-        """Update score table with new results."""
-        lib.score_table.generate_run_detail_by_id(run_id, self.session)
-        lib.score_table.generate_dashboard(self.session)
 
     def handle_timeout(self, question_id: str, error: OllamaTimeoutError) -> BenchmarkResult:
         """Handle timeout error and return appropriate benchmark result."""
