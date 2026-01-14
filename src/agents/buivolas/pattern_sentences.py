@@ -1,11 +1,16 @@
 """Pattern-based sentence generation for Buivolas."""
 
+import importlib
 import itertools
 import logging
+import pkgutil
 import re
-from typing import Dict, List, Optional, Tuple
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple, Union
+
 from wordfreq.patterns.simple_patterns import SIMPLE_PATTERNS
 from wordfreq.storage.backend import create_session as create_backend_session
+from wordfreq.storage.backend.base.session import BaseSession
 from wordfreq.storage.backend.config import DataSourceConfig
 from wordfreq.storage.models.schema import (
     Lemma,
@@ -16,6 +21,63 @@ from wordfreq.storage.models.schema import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+def load_subtype_patterns() -> List[Dict]:
+    """Load patterns from the subtypes/ directory and convert to standard format.
+
+    Each subtype module contains METADATA and PATTERNS. This function converts
+    them to the format used by SIMPLE_PATTERNS.
+    """
+    import wordfreq.patterns.subtypes as subtypes_pkg
+
+    patterns = []
+    subtypes_path = Path(subtypes_pkg.__file__).parent
+
+    for module_info in pkgutil.iter_modules([str(subtypes_path)]):
+        module_name = module_info.name
+        try:
+            module = importlib.import_module(f"wordfreq.patterns.subtypes.{module_name}")
+        except ImportError as e:
+            logger.warning("Failed to import subtype module %s: %s", module_name, e)
+            continue
+
+        if not hasattr(module, "METADATA") or not hasattr(module, "PATTERNS"):
+            continue
+
+        metadata = module.METADATA
+        for i, pattern in enumerate(module.PATTERNS):
+            # Generate pattern_id from subtype and index
+            pattern_id = f"{metadata['pos_subtype']}_{i + 1:02d}"
+
+            # Get template (support both "template" and "en_template")
+            template = pattern.get("template") or pattern.get("en_template", "")
+
+            # Build the slot from metadata
+            slot = {
+                "name": metadata["pos_subtype"],
+                "pos_type": metadata["pos_type"],
+                "pos_subtype": metadata["pos_subtype"],
+                "min_level": metadata.get("min_level", 1),
+                "max_level": metadata.get("max_level", 10),
+            }
+
+            converted = {
+                "pattern_id": pattern_id,
+                "en_template": template,
+                "slots": [slot],
+                "fixed_words": pattern.get("fixed_words", []),
+                "pattern_type": pattern.get("pattern_type", "SVO"),
+                "notes": pattern.get("notes", ""),
+            }
+            patterns.append(converted)
+
+    logger.info("Loaded %d patterns from subtypes/ directory", len(patterns))
+    return patterns
+
+
+# Load all patterns: SIMPLE_PATTERNS + subtype patterns
+ALL_PATTERNS = SIMPLE_PATTERNS + load_subtype_patterns()
 
 
 def strip_disambiguation(text: str) -> str:
@@ -44,10 +106,12 @@ class PatternSentenceGenerator:
         if self.debug:
             logger.setLevel(logging.DEBUG)
 
-    def get_session(self):
+    def get_session(self) -> BaseSession:
         return create_backend_session(self.config)
 
-    def get_lemmas_for_slot(self, session, slot: Dict) -> List[Tuple[Lemma, str]]:
+    def get_lemmas_for_slot(
+        self, session: BaseSession, slot: Dict[str, Any]
+    ) -> List[Tuple[Lemma, str]]:
         query = session.query(Lemma).filter(
             Lemma.guid.isnot(None),
             Lemma.pos_type == slot["pos_type"],
@@ -66,7 +130,7 @@ class PatternSentenceGenerator:
         lemmas = query.all()
         return [(lemma, lemma.guid) for lemma in lemmas]
 
-    def _slot_matches_lemma(self, slot: Dict, lemma: Lemma) -> bool:
+    def _slot_matches_lemma(self, slot: Dict[str, Any], lemma: Lemma) -> bool:
         if slot["pos_type"] != lemma.pos_type:
             return False
 
@@ -74,15 +138,15 @@ class PatternSentenceGenerator:
         if slot_subtype is None:
             return True
 
-        return lemma.pos_subtype == slot_subtype
+        return bool(lemma.pos_subtype == slot_subtype)
 
     def generate_combinations_for_lemma(
         self,
-        session,
-        pattern: Dict,
+        session: BaseSession,
+        pattern: Dict[str, Any],
         target_lemma: Lemma,
         max_combinations: Optional[int] = None,
-    ) -> List[Dict]:
+    ) -> List[Dict[str, Any]]:
         target_slot_name = None
         for slot in pattern["slots"]:
             if self._slot_matches_lemma(slot, target_lemma):
@@ -156,8 +220,11 @@ class PatternSentenceGenerator:
         return combinations
 
     def generate_all_combinations(
-        self, session, pattern: Dict, max_combinations: Optional[int] = None
-    ) -> List[Dict]:
+        self,
+        session: BaseSession,
+        pattern: Dict[str, Any],
+        max_combinations: Optional[int] = None,
+    ) -> List[Dict[str, Any]]:
         slot_lemmas = {}
         slot_names = []
 
@@ -215,14 +282,18 @@ class PatternSentenceGenerator:
         )
         return combinations
 
-    def build_template_text(self, pattern: Dict, filled_slots: Dict[str, Tuple[Lemma, str]]) -> str:
-        en_sentence = pattern["en_template"]
+    def build_template_text(
+        self, pattern: Dict[str, Any], filled_slots: Dict[str, Tuple[Lemma, str]]
+    ) -> str:
+        en_sentence: str = pattern["en_template"]
         for slot_name, (lemma, guid) in filled_slots.items():
             lemma_text = strip_disambiguation(lemma.lemma_text)
             en_sentence = en_sentence.replace(f"[{slot_name}]", lemma_text)
         return en_sentence
 
-    def lookup_fixed_words(self, session, pattern: Dict) -> List[Tuple[Lemma, str]]:
+    def lookup_fixed_words(
+        self, session: BaseSession, pattern: Dict[str, Any]
+    ) -> List[Tuple[Lemma, str]]:
         fixed_lemmas = []
         for fixed_word in pattern.get("fixed_words", []):
             if fixed_word.get("guid"):
@@ -242,17 +313,23 @@ class PatternSentenceGenerator:
             if lemma:
                 fixed_lemmas.append((lemma, lemma.guid))
             else:
+                # Log with GUID or lemma_text depending on what's available
+                word_identifier = fixed_word.get("guid") or fixed_word.get("lemma_text")
                 logger.warning(
                     "Could not find fixed word '%s' (pos_type=%s) for pattern %s",
-                    fixed_word["lemma_text"],
-                    fixed_word["pos_type"],
+                    word_identifier,
+                    fixed_word.get("pos_type"),
                     pattern["pattern_id"],
                 )
         return fixed_lemmas
 
     def save_candidate_sentence(
-        self, session, pattern: Dict, combination: Dict, template_text: str
-    ):
+        self,
+        session: BaseSession,
+        pattern: Dict[str, Any],
+        combination: Dict[str, Any],
+        template_text: str,
+    ) -> Optional[Union[str, Sentence]]:
         if self.dry_run:
             logger.debug("[DRY RUN] Would save candidate: %s", template_text)
             return None
@@ -402,7 +479,7 @@ class PatternSentenceGenerator:
             )
 
             eligible_patterns = []
-            for pattern in SIMPLE_PATTERNS:
+            for pattern in ALL_PATTERNS:
                 if self.generate_combinations_for_lemma(
                     session, pattern, lemma, max_combinations=1
                 ):
@@ -457,10 +534,12 @@ class PatternSentenceGenerator:
         finally:
             session.close()
 
-    def generate_candidates_all_patterns(self, max_per_pattern: Optional[int] = None) -> Dict:
-        logger.info("Generating candidates for %s patterns", len(SIMPLE_PATTERNS))
+    def generate_candidates_all_patterns(
+        self, max_per_pattern: Optional[int] = None
+    ) -> Dict[str, Any]:
+        logger.info("Generating candidates for %s patterns", len(ALL_PATTERNS))
 
-        overall_results = {
+        overall_results: Dict[str, Any] = {
             "patterns_processed": 0,
             "total_candidates": 0,
             "total_success": 0,
@@ -469,7 +548,7 @@ class PatternSentenceGenerator:
             "pattern_results": [],
         }
 
-        for pattern in SIMPLE_PATTERNS:
+        for pattern in ALL_PATTERNS:
             result = self.generate_candidates_for_pattern(pattern, max_combinations=max_per_pattern)
             overall_results["patterns_processed"] += 1
             overall_results["total_candidates"] += result.get("total", 0)

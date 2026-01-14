@@ -15,6 +15,7 @@ from wordfreq.storage.database import (
     calculate_minimum_level,
 )
 from wordfreq.storage.models.schema import SentencePatternWord
+from agents.buivolas.pattern_sentences import strip_disambiguation
 
 logger = logging.getLogger(__name__)
 
@@ -224,11 +225,13 @@ Focus on variety and natural language usage."""
 
                 # Link the sentence to the source lemma via SentencePatternWord
                 # This allows zvirblis to find LLM-generated sentences for the lemma
+                lemma_text = strip_disambiguation(source_lemma.lemma_text)
                 pattern_word = SentencePatternWord(
                     sentence_id=sentence.id,
                     lemma_id=source_lemma.id,
                     position=0,
                     slot_name="llm_generated",
+                    english_text=lemma_text,
                 )
                 session.add(pattern_word)
 

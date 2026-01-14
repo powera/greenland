@@ -441,20 +441,4 @@ SIMPLE_PATTERNS = [
         "pattern_type": "SVO",
         "notes": "Describing a vehicle",
     },
-    {
-        "pattern_id": "i_order_food_drink",
-        "en_template": "I order [food drink].",
-        "slots": [
-            {
-                "name": "food drink",
-                "pos_type": "noun",
-                "pos_subtype": "food_drink",
-                "min_level": 1,
-                "max_level": 10,
-            }
-        ],
-        "fixed_words": [{"lemma_text": "order", "pos_type": "verb"}],
-        "pattern_type": "SVO",
-        "notes": "Ordering a meal or drink",
-    },
 ]
