@@ -62,12 +62,13 @@ def create_app(config_class=Config):
             db.close()
 
     # Register blueprints
-    from benchmarks.server.routes import benchmarks, dashboard, models, runs
+    from benchmarks.server.routes import benchmarks, dashboard, models, runs, verbalator
 
     app.register_blueprint(dashboard.bp)
     app.register_blueprint(benchmarks.bp)
     app.register_blueprint(models.bp)
     app.register_blueprint(runs.bp)
+    app.register_blueprint(verbalator.bp)
 
     # Register Jinja2 filters
     import json

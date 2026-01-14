@@ -15,9 +15,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import constants
 import util.flesch_kincaid as fk
-import verbalator.common
-import verbalator.prompt_builder
-import verbalator.samples
+from benchmarks.verbalator import common, prompt_builder, samples
 from clients import anthropic_client, ollama_client, openai_client
 
 PORT = 9871
@@ -64,7 +62,7 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
         """Lazy loading of Jinja environment."""
         if not self.jinja_env:
             self.jinja_env = Environment(
-                loader=PackageLoader("verbalator"), autoescape=select_autoescape()
+                loader=PackageLoader("benchmarks.verbalator"), autoescape=select_autoescape()
             )
         return self.jinja_env
 
@@ -134,9 +132,7 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
     def _serve_template(self) -> None:
         """Serve template-rendered pages."""
         template = self.template_env.get_template("index.html")
-        html = template.render(
-            prompts=verbalator.common.PROMPTS, samples=verbalator.samples.ALL_SAMPLES
-        )
+        html = template.render(prompts=common.PROMPTS, samples=samples.ALL_SAMPLES)
         self._send_response(bytes(html, "utf-8"), "text/html; charset=utf-8")
 
     def _handle_generation_request(self) -> None:
@@ -148,7 +144,7 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
             data = json.loads(post_data.decode("utf-8"))
 
             # Extract parameters
-            prompt = verbalator.prompt_builder.build(data.get("prompt"), data)
+            prompt = prompt_builder.build(data.get("prompt"), data)
             if not prompt:
                 raise ValueError("No prompt provided")
 
