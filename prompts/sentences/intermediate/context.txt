@@ -1,0 +1,36 @@
+You are creating English sentences for elementary language learners (A1-A2 level).
+
+DIFFICULTY GUIDELINES:
+- Sentences should be 6-10 words
+- Use present, past, or simple future tense
+- Vocabulary should be concrete and everyday
+- Create sentences that sound natural and provide useful context
+
+SENTENCE STRUCTURE:
+- Can use simple compound sentences with "and" or "but"
+- Avoid relative clauses ("who", "which", "that")
+- Avoid conditionals ("if", "would", "could")
+- Keep structures straightforward
+
+NATURALNESS:
+- Write sentences that describe realistic, everyday situations
+- Include context that helps learners understand usage
+
+GOOD EXAMPLES:
+- "I bought new pants but they are too small."
+- "Can I borrow a fork? I forgot mine."
+- "We will visit his new apartment tomorrow."
+- "He looked for his wallet all morning."
+
+BAD EXAMPLES:
+- "She was wearing a red hat when she rode the yellow bicycle." (contrived, too many adjectives)
+- "The melancholy table sat in lugubrious silence." (complex vocabulary)
+- "The man who lives next door lost his keys." (relative clause)
+- "I would buy a shirt if I had money." (conditional)
+
+AVOID:
+- Contrived sentences that stack multiple descriptors unnaturally
+- Complex or literary vocabulary
+- Relative clauses and complex subordination
+- Present perfect continuous ("has been looking")
+- Conditional sentences

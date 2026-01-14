@@ -3,6 +3,7 @@
 import logging
 from typing import Any, Dict, List, Optional, cast
 
+import util.prompt_loader
 from clients.types import Schema, SchemaProperty
 from clients.unified_client import UnifiedLLMClient
 from wordfreq.storage.backend import create_session as create_backend_session
@@ -53,8 +54,6 @@ class LlmSentenceGenerator:
         )
 
         try:
-            context = self._build_sentence_context(lemma, difficulty_context)
-
             generated_sentences: List[Dict[str, Any]] = []
             previous_sentences: List[str] = []
 
@@ -68,7 +67,7 @@ class LlmSentenceGenerator:
 
                 result = self._call_llm_for_sentence(
                     lemma=lemma,
-                    context=context,
+                    difficulty_level=difficulty_context,
                     previous_sentences=previous_sentences,
                 )
 
@@ -108,50 +107,48 @@ class LlmSentenceGenerator:
             )
             return {"success": False, "error": str(e)}
 
-    def _build_sentence_context(self, lemma: Lemma, difficulty_level: Optional[int]) -> str:
-        context_parts = [
-            f"Word: {lemma.lemma_text}",
-            f"Definition: {lemma.definition_text}",
-            f"Part of Speech: {lemma.pos_type}",
-        ]
-
-        if difficulty_level:
-            context_parts.append(f"Difficulty Level: {difficulty_level} (Trakaido level 1-20)")
-
-        if lemma.disambiguation:
-            context_parts.append(f"Disambiguation: {lemma.disambiguation}")
-
-        return "\n".join(context_parts)
-
     def _call_llm_for_sentence(
         self,
         lemma: Lemma,
-        context: str,
+        difficulty_level: Optional[int] = None,
         previous_sentences: Optional[List[str]] = None,
     ) -> Optional[Dict[Any, Any]]:
+        # Select prompt based on difficulty level
+        # Levels 1-10: beginner, Levels 11-20: intermediate
+        if difficulty_level is not None and difficulty_level > 10:
+            prompt_type = "intermediate"
+        else:
+            prompt_type = "beginner"
+
+        # Load context and prompt template from files
+        context = util.prompt_loader.get_context("sentences", prompt_type)
+        prompt_template = util.prompt_loader.get_prompt("sentences", prompt_type)
+
+        # Build extra context
+        extra_parts = []
+        if lemma.disambiguation:
+            extra_parts.append(f"Disambiguation: {lemma.disambiguation}")
+        extra_context = "\n".join(extra_parts) if extra_parts else ""
+
+        # Build previous sentences context
         previous_context = ""
         if previous_sentences:
             previous_context = (
-                "\n\nPreviously generated sentences (make sure this new sentence is different):\n"
+                "Previously generated sentences (make this one different):\n"
                 + "\n".join(f"- {s}" for s in previous_sentences)
             )
 
-        prompt = f"""Generate 1 English example sentence for language learning that features the following word.
+        # Format the prompt
+        prompt = prompt_template.format(
+            word=lemma.lemma_text,
+            definition=lemma.definition_text,
+            pos_type=lemma.pos_type,
+            extra_context=extra_context,
+            previous_sentences=previous_context,
+        )
 
-{context}
-{previous_context}
-
-Requirements:
-1. Create 1 ENGLISH sentence using the word "{lemma.lemma_text}"
-2. Use varied contexts and sentence structures
-3. Keep sentences simple and natural (appropriate for language learners)
-4. Use common, everyday vocabulary for other words in the sentence
-
-For the sentence, provide:
-- Tense used (present, past, future, or N/A if not applicable)
-- English translation (key 'en')
-
-Focus on variety and natural language usage."""
+        # Combine context and prompt
+        full_prompt = f"{context}\n\n{prompt}"
 
         translations_schema = Schema(
             name="Translations",
@@ -171,7 +168,7 @@ Focus on variety and natural language usage."""
                 object_schema=translations_schema,
             ),
             "tense": SchemaProperty(
-                type="string", description="Verb tense (present, past, future, or N/A)"
+                type="string", description="Verb tense (present, past, future, etc.)"
             ),
         }
 
@@ -183,7 +180,7 @@ Focus on variety and natural language usage."""
 
         try:
             response = self.llm_client.generate_chat(
-                prompt=prompt,
+                prompt=full_prompt,
                 json_schema=schema,
                 timeout=60,
             )

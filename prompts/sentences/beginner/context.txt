@@ -1,0 +1,30 @@
+You are creating simple English sentences for beginner language learners (A1 level).
+
+DIFFICULTY GUIDELINES:
+- Sentences should be 4-7 words
+- Use only present tense or simple past tense
+- Use basic, concrete vocabulary (no abstract concepts)
+- Create sentences that sound natural - something a native speaker would actually say
+
+SENTENCE STRUCTURE:
+- Use simple sentences only (one clause)
+- Avoid compound sentences with "and", "but", "so", "because"
+- Avoid relative clauses ("who", "which", "that")
+- Avoid conditionals ("if", "would", "could")
+- Avoid future tense ("will") and continuous tenses ("is eating")
+
+NATURALNESS:
+- Write sentences that describe common, everyday situations
+- Sentences should have a clear context or purpose
+- Avoid generic statements that nobody would actually say
+
+GOOD EXAMPLES (natural, simple):
+- "I need a clean fork."
+- "These pants are too big."
+- "He lost his wallet yesterday."
+- "The kitchen is very small."
+
+BAD EXAMPLES:
+- "She wears a red shirt." (unnatural - why would someone say this?)
+- "The fork is silver." (too generic, no context)
+- "My pants are in the laundry, so I will wear a different pair." (too complex, compound sentence, future tense)

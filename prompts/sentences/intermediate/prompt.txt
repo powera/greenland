@@ -1,0 +1,18 @@
+Generate 1 natural English sentence for elementary language learners using the word "{word}".
+
+Word: {word}
+Definition: {definition}
+Part of speech: {pos_type}
+{extra_context}
+{previous_sentences}
+
+Requirements:
+1. Use the word "{word}" in the sentence
+2. Sentence length: 6-10 words
+3. Use simple, natural sentence structures
+4. Can use "and" or "but" to join clauses
+5. Describe a realistic, everyday situation
+
+Provide:
+- The English sentence (key 'en')
+- The tense used (key 'tense'): "present", "past", or "future"
