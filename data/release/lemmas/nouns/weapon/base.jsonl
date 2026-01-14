@@ -1,0 +1,6 @@
+{"guid": "N44_001", "pos_type": "noun", "pos_subtype": "weapon", "concept_label": "sword", "concept_definition": "a weapon with a long blade", "difficulty_level": -1}
+{"guid": "N44_002", "pos_type": "noun", "pos_subtype": "weapon", "concept_label": "shield", "concept_definition": "a broad piece of armor carried for protection", "difficulty_level": -1}
+{"guid": "N44_003", "pos_type": "noun", "pos_subtype": "weapon", "concept_label": "weapon", "concept_definition": "a thing designed to inflict harm", "difficulty_level": -1}
+{"guid": "N44_004", "pos_type": "noun", "pos_subtype": "weapon", "concept_label": "gun", "concept_definition": "a weapon that fires bullets", "difficulty_level": -1}
+{"guid": "N44_005", "pos_type": "noun", "pos_subtype": "weapon", "concept_label": "staff", "concept_definition": "a long stick used as support or weapon; employees of an organization", "difficulty_level": -1}
+# Next GUID: N44_006

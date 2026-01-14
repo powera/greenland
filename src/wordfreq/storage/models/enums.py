@@ -30,7 +30,10 @@ class NounSubtype(enum.Enum):
     CLOTHING_ACCESSORY = "clothing_accessory"
     ARTWORK_ARTIFACT = "artwork_artifact"
     NATURAL_FEATURE = "natural_feature"
-    TOOL_MACHINE = "tool_machine"
+    TOOL = "tool"  # Hand tools and generic tools (hammer, saw, wrench, screwdriver)
+    ELECTRONIC_DEVICE = "electronic_device"  # Computers, phones, TVs, radios, cameras
+    APPLIANCE = "appliance"  # Kitchen and household appliances (blender, microwave, toaster)
+    WEAPON = "weapon"  # Weapons and arms (sword, gun, bow, shield)
     VEHICLE = "vehicle"  # Transportation (car, truck, bicycle, boat, airplane)
     PATH_INFRASTRUCTURE = "path_infrastructure"
 
@@ -41,6 +44,7 @@ class NounSubtype(enum.Enum):
 
     # Abstract Concepts and Ideas
     CONCEPT_IDEA = "concept_idea"
+    ACTIVITY = "activity"  # Activities and hobbies (reading, cooking, sports, dancing, hiking)
     SYMBOLIC_ELEMENT = "symbolic_element"
     QUALITY_ATTRIBUTE = "quality_attribute"
     MENTAL_CONSTRUCT = "mental_construct"
