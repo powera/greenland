@@ -45,7 +45,13 @@ from clients.audio.manifest import generate_manifest
 from clients.audio.s3_uploader import S3AudioUploader
 from wordfreq.storage.backend import create_session as create_backend_session
 from wordfreq.storage.backend.config import BackendType, DataSourceConfig
-from wordfreq.storage.models.schema import AudioQualityReview, Lemma
+from wordfreq.storage.models.schema import (
+    AudioQualityReview,
+    Lemma,
+    Sentence,
+    SentenceTranslation,
+    SentenceWord,
+)
 from wordfreq.storage.translation_helpers import get_translation
 
 # Configure logging
@@ -326,6 +332,195 @@ class VieversysAgent:
 
         session.commit()
 
+    def generate_audio_for_sentence(
+        self,
+        session,
+        sentence: Sentence,
+        sentence_translation: SentenceTranslation,
+        voices: List[Voice],
+        create_review_record: bool = True,
+    ) -> Dict:
+        """
+        Generate audio files for a sentence in a specific language with multiple voices.
+
+        Args:
+            session: Database session
+            sentence: Sentence to generate audio for
+            sentence_translation: SentenceTranslation with the text to speak
+            voices: List of voices to use
+            create_review_record: Whether to create AudioQualityReview records
+
+        Returns:
+            Dict with generation results
+        """
+        text = sentence_translation.translation_text
+        language_code = sentence_translation.language_code
+
+        results = {
+            "success": True,
+            "sentence_id": sentence.id,
+            "language": language_code,
+            "text": text,
+            "voices": [],
+        }
+
+        for voice in voices:
+            logger.info(f"Generating audio: {text} ({language_code}/{voice.value})")
+
+            # Generate audio
+            result = generate_audio(text=text, voice=voice, language_code=language_code)
+
+            if not result.success:
+                logger.error(f"Failed to generate audio: {result.error}")
+                results["voices"].append(
+                    {
+                        "voice": voice.value,
+                        "success": False,
+                        "error": result.error,
+                    }
+                )
+                continue
+
+            # Create filename and save
+            # Use sanitized text for filename (simple version - just lowercase and replace spaces)
+            safe_text = text.lower().replace(" ", "_")[:50]  # Limit length
+            filename = f"sent_{sentence.id}_{safe_text}.mp3"
+
+            # Create language/voice subdirectories
+            voice_dir = self.output_dir / language_code / voice.value
+            voice_dir.mkdir(parents=True, exist_ok=True)
+
+            file_path = voice_dir / filename
+
+            # Write audio data
+            file_path.write_bytes(result.audio_data)
+
+            # Calculate MD5
+            md5_hash = hashlib.md5(result.audio_data).hexdigest()
+
+            logger.info(f"Saved audio: {file_path} (MD5: {md5_hash})")
+
+            # Upload to S3 staging if enabled
+            s3_staging_url = None
+            s3_staging_manifest_url = None
+            if self.upload_s3 and self.s3_uploader:
+                # Generate manifest
+                manifest_data = generate_manifest(
+                    audio_file_path=file_path,
+                    agent="vieversys",
+                    voice_name=voice.value,
+                    language_code=language_code,
+                    expected_text=text,
+                    guid=None,  # Sentences don't have GUIDs
+                    sentence_id=sentence.id,
+                    grammatical_form=None,
+                    generation_params={
+                        "model": result.model,
+                    },
+                )
+
+                # Upload to staging
+                success, audio_url, manifest_url, _ = self.s3_uploader.upload_to_staging(
+                    audio_path=file_path,
+                    manifest_data=manifest_data,
+                    agent="vieversys",
+                    check_existing=True,
+                )
+
+                if success:
+                    s3_staging_url = audio_url
+                    s3_staging_manifest_url = manifest_url
+                    logger.info(f"Uploaded to S3 staging: {audio_url}")
+                else:
+                    logger.error(f"Failed to upload to S3 staging: {file_path}")
+
+            # Create review record if requested
+            if create_review_record:
+                self._create_sentence_review_record(
+                    session,
+                    sentence,
+                    language_code,
+                    voice.value,
+                    filename,
+                    text,
+                    md5_hash,
+                    s3_staging_url=s3_staging_url,
+                    s3_staging_manifest_url=s3_staging_manifest_url,
+                )
+
+            results["voices"].append(
+                {
+                    "voice": voice.value,
+                    "success": True,
+                    "filename": filename,
+                    "file_path": str(file_path),
+                    "md5": md5_hash,
+                    "duration_ms": result.duration_ms,
+                }
+            )
+
+        return results
+
+    def _create_sentence_review_record(
+        self,
+        session,
+        sentence: Sentence,
+        language_code: str,
+        voice_name: str,
+        filename: str,
+        text: str,
+        md5_hash: str,
+        s3_staging_url: Optional[str] = None,
+        s3_staging_manifest_url: Optional[str] = None,
+    ):
+        """Create AudioQualityReview record for generated sentence audio."""
+        # Check if record already exists
+        existing = (
+            session.query(AudioQualityReview)
+            .filter_by(
+                sentence_id=sentence.id,
+                language_code=language_code,
+                voice_name=voice_name,
+            )
+            .first()
+        )
+
+        if existing:
+            # Update existing record
+            existing.filename = filename
+            existing.expected_text = text
+            existing.manifest_md5 = md5_hash
+            existing.status = "pending_review"
+            existing.s3_staging_url = s3_staging_url
+            existing.s3_staging_manifest_url = s3_staging_manifest_url
+            existing.staging_agent = "vieversys" if s3_staging_url else None
+            existing.s3_prod_url = None  # Clear prod URL when regenerating
+            existing.accepted_at = None
+            existing.accepted_by = None
+            logger.debug(f"Updated existing review record for sentence {sentence.id}")
+        else:
+            # Create new record
+            review = AudioQualityReview(
+                guid=None,  # Sentences don't have GUIDs
+                sentence_id=sentence.id,
+                language_code=language_code,
+                voice_name=voice_name,
+                grammatical_form=None,
+                filename=filename,
+                expected_text=text,
+                manifest_md5=md5_hash,
+                s3_staging_url=s3_staging_url,
+                s3_staging_manifest_url=s3_staging_manifest_url,
+                s3_prod_url=None,
+                staging_agent="vieversys" if s3_staging_url else None,
+                lemma_id=None,
+                status="pending_review",
+            )
+            session.add(review)
+            logger.debug(f"Created review record for sentence {sentence.id}")
+
+        session.commit()
+
     def generate_batch(
         self,
         language_code: str,
@@ -387,6 +582,100 @@ class VieversysAgent:
                 )
 
                 results["lemmas"].append(result)
+                if result["success"]:
+                    results["success_count"] += 1
+                else:
+                    results["error_count"] += 1
+
+            return results
+
+        finally:
+            session.close()
+
+    def generate_sentences_batch(
+        self,
+        language_code: str,
+        guid: Optional[str] = None,
+        limit: int = 10,
+        voices: Optional[List[Voice]] = None,
+    ) -> Dict:
+        """
+        Generate audio for sentences.
+
+        Args:
+            language_code: Target language code
+            guid: Optional GUID to filter sentences by (sentences that use this lemma)
+            limit: Maximum number of sentences to process per language (default: 10)
+            voices: Voices to use (defaults to language's default voices)
+
+        Returns:
+            Dict with batch generation results
+        """
+        session = self.get_session()
+        voices = voices or DEFAULT_VOICES.get(language_code, [Voice.ASH, Voice.ALLOY, Voice.NOVA])
+
+        try:
+            # Build query for sentences
+            query = (
+                session.query(Sentence, SentenceTranslation)
+                .join(SentenceTranslation, Sentence.id == SentenceTranslation.sentence_id)
+                .filter(
+                    SentenceTranslation.language_code == language_code,
+                    Sentence.rejected == False,  # noqa: E712
+                )
+            )
+
+            # Filter by GUID if specified (sentences that use this lemma)
+            if guid:
+                # Use a subquery to find distinct sentence IDs that contain this lemma
+                # This prevents duplicates when a sentence uses the same lemma multiple times
+                sentence_ids_subquery = (
+                    session.query(SentenceWord.sentence_id)
+                    .join(Lemma, SentenceWord.lemma_id == Lemma.id)
+                    .filter(Lemma.guid == guid)
+                    .distinct()
+                    .subquery()
+                )
+                query = query.filter(Sentence.id.in_(sentence_ids_subquery))
+
+            # Order by sentence ID and limit
+            query = query.order_by(Sentence.id).limit(limit)
+
+            sentence_pairs = query.all()
+
+            if not sentence_pairs:
+                return {
+                    "language_code": language_code,
+                    "guid": guid,
+                    "total_sentences": 0,
+                    "voices": [v.value for v in voices],
+                    "output_dir": str(self.output_dir),
+                    "sentences": [],
+                    "success_count": 0,
+                    "error_count": 0,
+                }
+
+            logger.info(f"Generating audio for {len(sentence_pairs)} sentences in {language_code}")
+
+            results = {
+                "language_code": language_code,
+                "guid": guid,
+                "total_sentences": len(sentence_pairs),
+                "voices": [v.value for v in voices],
+                "output_dir": str(self.output_dir),
+                "sentences": [],
+                "success_count": 0,
+                "error_count": 0,
+            }
+
+            for i, (sentence, translation) in enumerate(sentence_pairs, 1):
+                logger.info(f"[{i}/{len(sentence_pairs)}] Processing sentence {sentence.id}")
+
+                result = self.generate_audio_for_sentence(
+                    session, sentence, translation, voices, create_review_record=True
+                )
+
+                results["sentences"].append(result)
                 if result["success"]:
                     results["success_count"] += 1
                 else:
@@ -494,6 +783,17 @@ def get_argument_parser():
         "--upload-s3",
         action="store_true",
         help="Upload generated audio and manifests to S3 staging bucket",
+    )
+    parser.add_argument(
+        "--generate-sentences",
+        action="store_true",
+        help="Generate audio for sentences (instead of lemmas)",
+    )
+    parser.add_argument(
+        "--sentence-limit",
+        type=int,
+        default=10,
+        help="Maximum number of sentences to process per language (default: 10)",
     )
 
     return parser
@@ -622,6 +922,50 @@ def main():
         if not args.language:
             print(f"Error: --language is required for --mode {args.mode}")
             sys.exit(1)
+
+        # Check if we're generating sentences or lemmas
+        if args.generate_sentences:
+            # Generate audio for sentences
+            voice_count = len(voices) if voices else 3
+            estimated_calls = args.sentence_limit * voice_count
+
+            # Confirm before running (unless --yes was provided)
+            if not args.yes and not args.dry_run:
+                guid_msg = f" for lemma {args.guid}" if args.guid else ""
+                if not confirm_operation(
+                    message=f"This will generate audio for up to {args.sentence_limit} sentences{guid_msg} with {voice_count} voices each.\nTotal API calls: ~{estimated_calls}\nThis will use OpenAI TTS API and may incur costs.",
+                    estimated_calls=estimated_calls,
+                    skip_confirmation=args.yes,
+                    dry_run=args.dry_run,
+                ):
+                    print("Aborted.")
+                    sys.exit(0)
+
+            # Run sentence batch generation
+            start_time = datetime.now()
+            results = agent.generate_sentences_batch(
+                language_code=args.language,
+                guid=args.guid,
+                limit=args.sentence_limit,
+                voices=voices,
+            )
+            duration = (datetime.now() - start_time).total_seconds()
+
+            # Print summary
+            logger.info("=" * 80)
+            logger.info("VIEVERSYS AGENT REPORT - Sentence Audio Generation")
+            logger.info("=" * 80)
+            logger.info(f"Language: {results['language_code']}")
+            if results.get("guid"):
+                logger.info(f"GUID: {results['guid']}")
+            logger.info(f"Total sentences: {results['total_sentences']}")
+            logger.info(f"Voices: {', '.join(results['voices'])}")
+            logger.info(f"Successful: {results['success_count']}")
+            logger.info(f"Errors: {results['error_count']}")
+            logger.info(f"Duration: {duration:.2f} seconds")
+            logger.info(f"Output directory: {results['output_dir']}")
+            logger.info("=" * 80)
+            return
 
         # Confirm before running (unless --yes was provided)
         if not args.yes and not args.dry_run:

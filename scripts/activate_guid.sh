@@ -183,3 +183,14 @@ for lang in "${LANGUAGE_LIST[@]}"; do
       python -m agents.vieversys --guid "$GUID" --mode populate-only --language "$lang" --upload-s3 --yes
   fi
 done
+
+# Sentence audio generation (Vieversys - max 10 sentences per language)
+for lang in "${LANGUAGE_LIST[@]}"; do
+  if [[ -n "$AUDIO_VOICES" ]]; then
+    run_step "Sentence Audio (Vieversys - ${lang})" \
+      python -m agents.vieversys --guid "$GUID" --mode populate-only --language "$lang" --voices ${AUDIO_VOICES} --upload-s3 --yes --generate-sentences --sentence-limit 10
+  else
+    run_step "Sentence Audio (Vieversys - ${lang})" \
+      python -m agents.vieversys --guid "$GUID" --mode populate-only --language "$lang" --upload-s3 --yes --generate-sentences --sentence-limit 10
+  fi
+done
