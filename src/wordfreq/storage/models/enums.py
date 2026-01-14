@@ -6,7 +6,11 @@ import enum
 
 
 class NounSubtype(enum.Enum):
-    """Subtypes for nouns."""
+    """Subtypes for nouns.
+
+    NOTE: When adding/modifying subtypes, update SUBTYPE_GUID_PREFIXES
+    in guid_prefixes.py to keep GUID assignments in sync.
+    """
 
     # People and Living Things
     OCCUPATION = "occupation"  # Professions and roles (teacher, doctor, accountant)
@@ -30,7 +34,10 @@ class NounSubtype(enum.Enum):
     CLOTHING_ACCESSORY = "clothing_accessory"
     ARTWORK_ARTIFACT = "artwork_artifact"
     NATURAL_FEATURE = "natural_feature"
-    TOOL_MACHINE = "tool_machine"
+    TOOL = "tool"  # Hand tools and generic tools (hammer, saw, wrench, screwdriver)
+    ELECTRONIC_DEVICE = "electronic_device"  # Computers, phones, TVs, radios, cameras
+    APPLIANCE = "appliance"  # Kitchen and household appliances (blender, microwave, toaster)
+    WEAPON = "weapon"  # Weapons and arms (sword, gun, bow, shield)
     VEHICLE = "vehicle"  # Transportation (car, truck, bicycle, boat, airplane)
     PATH_INFRASTRUCTURE = "path_infrastructure"
 
@@ -41,6 +48,7 @@ class NounSubtype(enum.Enum):
 
     # Abstract Concepts and Ideas
     CONCEPT_IDEA = "concept_idea"
+    ACTIVITY = "activity"  # Activities and hobbies (reading, cooking, sports, dancing, hiking)
     SYMBOLIC_ELEMENT = "symbolic_element"
     QUALITY_ATTRIBUTE = "quality_attribute"
     MENTAL_CONSTRUCT = "mental_construct"
@@ -94,17 +102,22 @@ class VerbSubtype(enum.Enum):
 
 
 class AdjectiveSubtype(enum.Enum):
-    """Subtypes for adjectives."""
+    """Subtypes for adjectives.
+
+    NOTE: When adding/modifying subtypes, update SUBTYPE_GUID_PREFIXES
+    in guid_prefixes.py to keep GUID assignments in sync.
+    """
 
     SIZE = "size"  # Size descriptions (big, small, huge, tiny)
     COLOR = "color"  # Color descriptions (red, blue, green, yellow)
     SHAPE = "shape"  # Shape descriptions (round, square, triangular, oval)
     TEXTURE = "texture"  # Texture descriptions (soft, hard, smooth, rough)
     PERSONAL_QUALITY = "personal_quality"  # Character/personality traits (honest, kind, brave, lazy, clever, polite)
+    PHYSICAL_PROPERTY = "physical_property"  # Physical properties and states (dimensions, weight, temperature, condition: high, low, heavy, light, cold, hot, wet, dry, open, closed)
     CONDITION = (
         "condition"  # Physical/temporal state (hot, cold, wet, dry, clean, dirty, new, old, fresh)
     )
-    QUALITY = "quality"  # Evaluative and measurable properties (good, bad, excellent, fast, slow, strong, weak, easy, hard, loud, quiet)
+    QUALITY = "quality"  # Evaluative and abstract properties (good, bad, excellent, important, possible, necessary, real, clear, simple)
     AESTHETIC = "aesthetic"  # Beauty or appearance (beautiful, ugly, pretty, handsome)
     IMPORTANCE = "importance"  # Importance or priority (important, essential, trivial, critical)
     ORIGIN = "origin"  # Origin or source (American, Chinese, domestic, foreign)
