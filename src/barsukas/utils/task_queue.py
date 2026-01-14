@@ -3,6 +3,9 @@
 This module stores queue metadata in the shared SQLite database using the
 `BarsukasTask` model. It keeps the web UI responsive by deferring expensive LLM
 calls to a separate worker process while preventing duplicate in-flight tasks.
+
+Tasks for the same lemma are executed in pipeline order to ensure dependencies
+are satisfied (e.g., translations must complete before pronunciations).
 """
 
 from __future__ import annotations
@@ -11,9 +14,14 @@ import json
 import logging
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Dict, Optional
+from typing import TYPE_CHECKING, Dict, Optional
 
 from wordfreq.storage.models.schema import BarsukasTask
+
+from barsukas.utils.pipeline_order import get_pipeline_step
+
+if TYPE_CHECKING:
+    from sqlalchemy.orm import Session
 
 logger = logging.getLogger(__name__)
 
@@ -87,21 +95,72 @@ def enqueue_task(
     return EnqueueResult(task=task, created=True)
 
 
-def claim_next_task(session) -> Optional[BarsukasTask]:
-    """Atomically claim the next pending task."""
-    task = (
+def has_earlier_pending_task(session: "Session", task: BarsukasTask) -> bool:
+    """Check if there's an earlier pipeline task pending for the same lemma.
+
+    Returns True if this task should wait for an earlier task to complete.
+    Only applies to lemma-targeted tasks that are part of the pipeline.
+    """
+    # Only check lemma tasks that are in the pipeline
+    if task.target_type != "lemma" or task.target_id is None:
+        return False
+
+    current_step = get_pipeline_step(task.task_type)
+    if current_step is None:
+        return False
+
+    # Check for any pending tasks on the same lemma with earlier pipeline steps
+    earlier_tasks = (
+        session.query(BarsukasTask)
+        .filter(
+            BarsukasTask.target_type == "lemma",
+            BarsukasTask.target_id == task.target_id,
+            BarsukasTask.status == TaskStatus.PENDING,
+            BarsukasTask.id != task.id,  # Exclude current task
+        )
+        .all()
+    )
+
+    for earlier_task in earlier_tasks:
+        earlier_step = get_pipeline_step(earlier_task.task_type)
+        if earlier_step is not None and earlier_step < current_step:
+            logger.debug(
+                "Task %s (step %s) blocked by earlier task %s (step %s) for lemma %s",
+                task.id,
+                current_step,
+                earlier_task.id,
+                earlier_step,
+                task.target_id,
+            )
+            return True
+
+    return False
+
+
+def claim_next_task(session: "Session") -> Optional[BarsukasTask]:
+    """Atomically claim the next pending task, respecting pipeline order.
+
+    For lemma tasks, skips tasks that have earlier pipeline steps pending
+    to ensure proper execution order (e.g., translations before pronunciations).
+    """
+    # Get all pending tasks ordered by creation time
+    pending_tasks = (
         session.query(BarsukasTask)
         .filter(BarsukasTask.status == TaskStatus.PENDING)
         .order_by(BarsukasTask.created_at.asc())
-        .first()
+        .all()
     )
-    if not task:
-        return None
 
-    task.status = TaskStatus.RUNNING
-    task.started_at = datetime.utcnow()
-    session.flush()
-    return task
+    # Find the first task that doesn't have earlier pending dependencies
+    for task in pending_tasks:
+        if not has_earlier_pending_task(session, task):
+            task.status = TaskStatus.RUNNING
+            task.started_at = datetime.utcnow()
+            session.flush()
+            return task
+
+    # All pending tasks are blocked by earlier dependencies
+    return None
 
 
 def mark_task_complete(session, task: BarsukasTask, message: str) -> None:
