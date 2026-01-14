@@ -1,0 +1,9 @@
+import benchmarks.lib.exemplars.tasks.firefighter_dialogue_exemplar
+import benchmarks.lib.exemplars.tasks.granite_definition_exemplar
+import benchmarks.lib.exemplars.tasks.granite_structured_def_exemplar
+import benchmarks.lib.exemplars.tasks.lithuanian_sentence_exemplar
+import benchmarks.lib.exemplars.tasks.poetry_exemplar
+import benchmarks.lib.exemplars.tasks.poker_scorer_exemplar
+import benchmarks.lib.exemplars.tasks.wars_of_roses_exemplar
+import benchmarks.lib.exemplars.tasks.wordfreq_translation_exemplar
+import benchmarks.lib.exemplars.tasks.zebra_puzzle_exemplar

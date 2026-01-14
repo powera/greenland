@@ -34,3 +34,6 @@ DEFAULT_BENCHMARK_MODEL = "gpt-4o-mini"
 # Server defaults
 DEFAULT_SERVER_PORT = 5556
 DEFAULT_SERVER_HOST = "127.0.0.1"
+
+# Output directory for benchmark and exemplar results
+OUTPUT_DIR = Path(PROJECT_ROOT.parent) / "greenland_output"
