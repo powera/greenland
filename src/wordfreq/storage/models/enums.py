@@ -6,7 +6,11 @@ import enum
 
 
 class NounSubtype(enum.Enum):
-    """Subtypes for nouns."""
+    """Subtypes for nouns.
+
+    NOTE: When adding/modifying subtypes, update SUBTYPE_GUID_PREFIXES
+    in guid_prefixes.py to keep GUID assignments in sync.
+    """
 
     # People and Living Things
     OCCUPATION = "occupation"  # Professions and roles (teacher, doctor, accountant)
