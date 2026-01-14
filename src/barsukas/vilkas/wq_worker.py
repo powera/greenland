@@ -9,7 +9,7 @@ from __future__ import annotations
 import logging
 from typing import Dict, List, Optional, Tuple
 
-from agents.common.wq_tools import build_default_config, get_lemma_or_raise, lemma_handler
+from agents.common.wq_tools import build_default_config, get_lemma_or_raise
 from wordfreq.storage.backend.config import DataSourceConfig
 from wordfreq.storage.models.schema import Lemma, LemmaTranslation
 from wordfreq.storage.translation_helpers import LANGUAGE_FIELDS, get_translation
@@ -116,8 +116,7 @@ def generate_forms_for_lemma(
     return False, f"Could not generate {lang_code} {pos_type} forms"
 
 
-@lemma_handler
-def handle_generate_forms(session, lemma, payload: Dict) -> str:
+def handle_generate_forms(session, payload: Dict) -> str:
     """
     Handle grammatical forms generation task (workqueue entry point).
 
@@ -128,9 +127,14 @@ def handle_generate_forms(session, lemma, payload: Dict) -> str:
     Returns:
         str: Result message describing what was generated
     """
+    lemma_id = payload["lemma_id"]
     lang_code = payload.get("lang_code", "lt")
 
+    lemma = get_lemma_or_raise(session, lemma_id)
+
     success, error = generate_forms_for_lemma(session, lemma, lang_code)
+
+    session.commit()
 
     if success:
         return f"Generated {lang_code} {lemma.pos_type} forms"
