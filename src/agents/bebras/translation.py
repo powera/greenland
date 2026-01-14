@@ -3,19 +3,24 @@
 Translation management for sentences.
 
 This module handles the generation and storage of sentence translations
-in multiple target languages using LLM-based translation.
+in multiple target languages using LLM-based translation, including
+word-by-word breakdown with part-of-speech and lemma links.
 """
 
+import json
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 from sqlalchemy.orm import Session
 
-import util.prompt_loader
-from clients.types import Schema, SchemaProperty
 from clients.unified_client import UnifiedLLMClient
-from wordfreq.storage.database import Sentence, add_sentence_translation
-from wordfreq.storage.translation_helpers import LANGUAGE_NAMES
+from wordfreq.storage.database import Sentence
+from wordfreq.storage.models.schema import SentenceWord
+from wordfreq.translation.sentence import (
+    build_response_schema,
+    build_translation_prompt,
+    store_translation_results,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -32,14 +37,17 @@ def ensure_translations(
     """
     Ensure translations exist for a sentence in all target languages.
 
+    This function generates translations with full word-by-word breakdown,
+    including part-of-speech tagging and lemma links.
+
     Args:
         session: Database session
         sentence: Sentence object
-        source_text: Source sentence text
+        source_text: Source sentence text (unused, kept for API compatibility)
         source_language: Source language code
         target_languages: List of target language codes
         model: LLM model to use for translation
-        verified: Whether translations are verified
+        verified: Whether translations are verified (unused, kept for API compatibility)
 
     Returns:
         Dictionary with translation results
@@ -60,133 +68,57 @@ def ensure_translations(
         logger.info("All translations already exist")
         return {"success": True, "added": 0, "skipped": len(target_languages)}
 
-    # Generate translations via LLM
-    translations = translate_sentence(
-        source_text=source_text,
-        source_language=source_language,
-        target_languages=needed_languages,
-        model=model,
+    # Check if English word breakdown already exists
+    english_words = (
+        session.query(SentenceWord).filter_by(sentence_id=sentence.id, language_code="en").all()
     )
-
-    if not translations.get("success"):
-        return translations
-
-    # Add translations to database
-    added_count = 0
-    for lang_code, translation_text in translations.get("translations", {}).items():
-        try:
-            add_sentence_translation(
-                session=session,
-                sentence=sentence,
-                language_code=lang_code,
-                translation_text=translation_text,
-                verified=verified,
-            )
-            added_count += 1
-            logger.info(f"Added {lang_code} translation: {translation_text}")
-        except Exception as e:
-            logger.error(f"Failed to add {lang_code} translation: {e}")
-
-    return {"success": True, "added": added_count, "skipped": len(existing_translations)}
-
-
-def translate_sentence(
-    source_text: str, source_language: str, target_languages: List[str], model: str = "gpt-5-mini"
-) -> Dict[str, Any]:
-    """
-    Translate a sentence to multiple target languages using LLM.
-
-    Args:
-        source_text: Source sentence text
-        source_language: Source language code
-        target_languages: List of target language codes
-        model: LLM model to use
-
-    Returns:
-        Dictionary with translation results
-    """
-    logger.info(f"Translating '{source_text}' to {target_languages}")
-
-    source_lang_name = LANGUAGE_NAMES.get(source_language, source_language)
-    target_lang_names = [LANGUAGE_NAMES.get(lang, lang) for lang in target_languages]
-
-    # Load prompt templates
-    prompt_context = util.prompt_loader.get_context("translation", "sentence")
-    prompt_template = util.prompt_loader.get_prompt("translation", "sentence")
-
-    # Format the prompt with parameters
-    formatted_prompt = prompt_template.format(
-        source_lang_name=source_lang_name,
-        target_lang_names=", ".join(target_lang_names),
-        source_text=source_text,
-        target_lang_codes=", ".join(target_languages),
-    )
-
-    # Combine context and prompt
-    prompt = f"{prompt_context}\n\n{formatted_prompt}"
-
-    # Build schema with properties for each target language
-    properties = {}
-    for lang_code in target_languages:
-        lang_name = LANGUAGE_NAMES.get(lang_code, lang_code)
-        properties[lang_code] = SchemaProperty(
-            type="string", description=f"Translation in {lang_name}"
-        )
-
-    schema = Schema(
-        name="Translations",
-        description="Sentence translations in multiple languages",
-        properties=properties,
-    )
+    include_english = len(english_words) == 0
 
     try:
-        llm_client = UnifiedLLMClient()
-        response = llm_client.generate_chat(
-            prompt=prompt, model=model, json_schema=schema, timeout=60
+        # Build comprehensive prompt with word reference data
+        context, prompt = build_translation_prompt(
+            sentence, needed_languages, session, include_english
         )
-
-        if response.structured_data:
-            translations = response.structured_data
-            logger.info(f"Generated {len(translations)} translations")
-            return {"success": True, "translations": translations}
-        else:
-            logger.error("No structured data received from LLM")
-            return {"success": False, "error": "LLM did not return structured data"}
-
-    except Exception as e:
-        logger.error(f"Error translating sentence: {e}", exc_info=True)
+    except ValueError as e:
+        logger.error(f"Failed to build translation prompt: {e}")
         return {"success": False, "error": str(e)}
 
+    # Build schema that includes word-by-word breakdown
+    schema = build_response_schema(needed_languages, include_english)
 
-def get_language_name(language_code: str) -> str:
-    """
-    Get the full name for a language code.
+    logger.info(f"Translating sentence {sentence.id} to {needed_languages}")
 
-    Args:
-        language_code: ISO 639-1 language code
+    try:
+        # Call LLM with comprehensive schema
+        client = UnifiedLLMClient()
+        result = client.generate_chat(
+            prompt=prompt,
+            model=model,
+            json_schema=schema,
+            context=context,
+            timeout=120,
+        )
 
-    Returns:
-        Language name
-    """
-    return LANGUAGE_NAMES.get(language_code, language_code.upper())
-
-
-def validate_language_codes(language_codes: List[str]) -> List[str]:
-    """
-    Validate and normalize language codes.
-
-    Args:
-        language_codes: List of language codes to validate
-
-    Returns:
-        List of valid, normalized language codes
-    """
-    valid_codes = []
-    for code in language_codes:
-        normalized = code.lower().strip()
-        if len(normalized) == 2:  # ISO 639-1 codes are 2 letters
-            valid_codes.append(normalized)
+        # Parse response
+        if result.structured_data:
+            translations = result.structured_data
+        elif result.response_text:
+            translations = json.loads(result.response_text)
         else:
-            logger.warning(f"Invalid language code: {code}")
+            logger.error("No response data from LLM")
+            return {"success": False, "error": "LLM did not return data"}
 
-    return valid_codes
+        # Store translations AND word-by-word data
+        store_translation_results(sentence.id, translations, session)
+
+        # Count how many translations were added
+        added_count = len(needed_languages)
+        if include_english:
+            added_count += 1  # English was also regenerated
+
+        logger.info(f"Successfully translated sentence {sentence.id}")
+        return {"success": True, "added": added_count, "skipped": len(existing_translations)}
+
+    except Exception as e:
+        logger.error(f"Error translating sentence {sentence.id}: {e}", exc_info=True)
+        return {"success": False, "error": str(e)}
