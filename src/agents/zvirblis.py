@@ -43,6 +43,7 @@ from wordfreq.storage.models.schema import (
     SentenceWord,
     SentencePatternWord,
 )
+from wordfreq.tools.sentence_analysis import discover_and_store_lemmas
 from wordfreq.translation.sentence import build_response_schema, build_translation_prompt
 
 logging.basicConfig(
@@ -184,6 +185,24 @@ class ZvirblisAgent:
 
             if translations_added:
                 session.commit()
+
+                # After committing translations, discover and link lemmas
+                # This runs after commit so it doesn't slow down the translation
+                for sentence in sentences:
+                    try:
+                        result = discover_and_store_lemmas(session, sentence.id)
+                        if result["added"] > 0:
+                            logger.debug(
+                                "Discovered %s lemmas for sentence %s",
+                                result["added"],
+                                sentence.id,
+                            )
+                    except Exception as e:
+                        logger.warning(
+                            "Failed to discover lemmas for sentence %s: %s",
+                            sentence.id,
+                            e,
+                        )
 
             return {
                 "success": True,
