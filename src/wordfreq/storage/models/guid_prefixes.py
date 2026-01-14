@@ -72,6 +72,7 @@ SUBTYPE_GUID_PREFIXES = {
         "shape": "A03",
         "texture": "A04",
         "personal_quality": "A16",
+        "physical_property": "A18",
         "condition": "A17",
         "quality": "A05",
         "aesthetic": "A06",
