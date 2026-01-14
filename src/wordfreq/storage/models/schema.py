@@ -479,24 +479,35 @@ class WordFrequency(Base):
 class AudioQualityReview(Base):
     """Model for tracking audio file quality reviews.
 
-    Audio files are generated for lemmas in various languages and voices.
+    Audio files are generated for lemmas and sentences in various languages and voices.
     This table tracks the review status and quality issues for each audio file.
-    Supports both base forms and derivative forms (conjugations, declensions).
+
+    For lemmas: guid is set, sentence_id is null. Supports derivative forms via grammatical_form.
+    For sentences: sentence_id is set, guid is null, grammatical_form is null.
+
+    NOTE: Derivative form audio (grammatical_form != null) is not currently generated,
+    though the schema supports it for future use.
     """
 
     __tablename__ = "audio_quality_reviews"
     __table_args__ = (
         UniqueConstraint(
-            "guid", "language_code", "voice_name", "grammatical_form", name="uq_audio_review"
+            "guid", "language_code", "voice_name", "grammatical_form", name="uq_audio_review_lemma"
+        ),
+        UniqueConstraint(
+            "sentence_id", "language_code", "voice_name", name="uq_audio_review_sentence"
         ),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
 
-    # Audio file identification
-    guid: Mapped[str] = mapped_column(
-        String, nullable=False, index=True
-    )  # e.g., "N01_001" or "gyventi"
+    # Audio file identification - either guid (for lemmas) or sentence_id (for sentences)
+    guid: Mapped[Optional[str]] = mapped_column(
+        String, nullable=True, index=True
+    )  # e.g., "N01_001" - set for lemma audio, null for sentence audio
+    sentence_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("sentences.id"), nullable=True, index=True
+    )  # Set for sentence audio, null for lemma audio
     language_code: Mapped[str] = mapped_column(
         String, nullable=False, index=True
     )  # e.g., "zh", "ko", "fr"
@@ -505,7 +516,7 @@ class AudioQualityReview(Base):
     )  # e.g., "ash", "alloy", "echo"
     grammatical_form: Mapped[Optional[str]] = mapped_column(
         String, nullable=True, index=True
-    )  # e.g., "1s_present", null for base forms
+    )  # e.g., "1s_present", null for base forms (not currently generated)
     filename: Mapped[str] = mapped_column(
         String, nullable=False, index=True
     )  # e.g., "N01_001.mp3" or "aš_gyvenu.mp3"
@@ -513,11 +524,22 @@ class AudioQualityReview(Base):
     # Audio content
     expected_text: Mapped[str] = mapped_column(
         String, nullable=False
-    )  # Word/phrase that should be spoken
+    )  # Word/phrase/sentence that should be spoken
     manifest_md5: Mapped[str] = mapped_column(String, nullable=False)  # MD5 hash from manifest
-    s3_url: Mapped[Optional[str]] = mapped_column(
+
+    # S3 Storage - staging and production URLs
+    s3_staging_url: Mapped[Optional[str]] = mapped_column(
         String, nullable=True
-    )  # CDN URL for S3-hosted audio
+    )  # URL in staging/{agent}/ bucket - set when audio is first generated
+    s3_staging_manifest_url: Mapped[Optional[str]] = mapped_column(
+        String, nullable=True
+    )  # URL of manifest file in staging/{agent}/
+    s3_prod_url: Mapped[Optional[str]] = mapped_column(
+        String, nullable=True, index=True
+    )  # URL in prod/ bucket - set when audio is accepted for production
+    staging_agent: Mapped[Optional[str]] = mapped_column(
+        String, nullable=True, index=True
+    )  # Agent that generated the audio: "vieversys", "strazdas", etc.
 
     # Optional link to lemma (hybrid approach: try GUID match, fallback to text matching)
     lemma_id: Mapped[Optional[int]] = mapped_column(
@@ -542,6 +564,14 @@ class AudioQualityReview(Base):
         String, nullable=True
     )  # Username or identifier
 
+    # Acceptance metadata (when audio is moved from staging to production)
+    accepted_at: Mapped[Optional[datetime.datetime]] = mapped_column(
+        TIMESTAMP, nullable=True, index=True
+    )
+    accepted_by: Mapped[Optional[str]] = mapped_column(
+        String, nullable=True
+    )  # Username or identifier who accepted the audio
+
     # Timestamps
     added_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now())
     updated_at: Mapped[datetime.datetime] = mapped_column(
@@ -550,6 +580,7 @@ class AudioQualityReview(Base):
 
     # Relationships
     lemma = relationship("Lemma")
+    sentence = relationship("Sentence")
 
     @hybrid_property
     def display_voice(self) -> str:

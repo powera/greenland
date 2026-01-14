@@ -437,9 +437,15 @@ def serve_audio_file(
         .first()
     )
 
-    # If we have an S3 URL, redirect to CDN
-    if review and review.s3_url:
-        return redirect(review.s3_url)
+    # Priority order: prod URL > staging URL > local file
+    if review:
+        # First check for production URL (highest priority)
+        if review.s3_prod_url:
+            return redirect(review.s3_prod_url)
+
+        # Then check for staging URL (for review purposes)
+        if review.s3_staging_url:
+            return redirect(review.s3_staging_url)
 
     # Fallback to local file serving
     audio_base_dir = current_app.config.get("AUDIO_BASE_DIR")
@@ -577,6 +583,84 @@ def remove_file(review_id: int) -> Response:
         g.db.rollback()
         flash(f"Error removing audio file: {str(e)}", "error")
         return redirect(url_for("audio.review_file", review_id=review_id))
+
+
+@bp.route("/accept/<int:review_id>", methods=["POST"])
+def accept_for_production(review_id: int) -> Response:
+    """Accept an audio file for production by moving it from staging to prod."""
+    from clients.audio.audio_acceptance import accept_audio_for_production
+
+    review = g.db.query(AudioQualityReview).filter_by(id=review_id).first()
+
+    if not review:
+        flash("Audio review not found", "error")
+        return redirect(url_for("audio.list_files"))
+
+    # Check if already in production
+    if review.s3_prod_url:
+        flash("Audio is already in production", "info")
+        return redirect(url_for("audio.review_file", review_id=review_id))
+
+    # Check if in staging
+    if not review.s3_staging_url:
+        flash("Audio must be in staging before it can be accepted for production", "error")
+        return redirect(url_for("audio.review_file", review_id=review_id))
+
+    try:
+        # Accept audio for production
+        success, message = accept_audio_for_production(
+            session=g.db,
+            audio_review_id=review_id,
+            accepted_by=session.get(
+                "username", "unknown"
+            ),  # Get username from session if available
+        )
+
+        if success:
+            flash(f"Audio accepted for production: {message}", "success")
+        else:
+            flash(f"Failed to accept audio: {message}", "error")
+
+        return redirect(url_for("audio.review_file", review_id=review_id))
+    except Exception as e:
+        logger.error(f"Error accepting audio: {e}")
+        flash(f"Error accepting audio: {str(e)}", "error")
+        return redirect(url_for("audio.review_file", review_id=review_id))
+
+
+@bp.route("/accept-bulk", methods=["POST"])
+def accept_bulk_production() -> Response:
+    """Accept multiple audio files for production."""
+    from clients.audio.audio_acceptance import accept_multiple_audio
+
+    # Get list of IDs from form
+    review_ids = request.form.getlist("review_ids", type=int)
+
+    if not review_ids:
+        flash("No audio files selected", "error")
+        return redirect(url_for("audio.list_files"))
+
+    try:
+        success_count, failure_count, error_messages = accept_multiple_audio(
+            session=g.db,
+            audio_review_ids=review_ids,
+            accepted_by=session.get("username", "unknown"),
+        )
+
+        if success_count > 0:
+            flash(f"Successfully accepted {success_count} audio file(s) for production", "success")
+
+        if failure_count > 0:
+            flash(
+                f"Failed to accept {failure_count} audio file(s). Errors: {'; '.join(error_messages[:5])}",
+                "error",
+            )
+
+        return redirect(url_for("audio.list_files"))
+    except Exception as e:
+        logger.error(f"Error bulk accepting audio: {e}")
+        flash(f"Error bulk accepting audio: {str(e)}", "error")
+        return redirect(url_for("audio.list_files"))
 
 
 # ============================================================================
