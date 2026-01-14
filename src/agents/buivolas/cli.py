@@ -35,7 +35,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def get_argument_parser():
+def get_argument_parser() -> argparse.ArgumentParser:
     """Return the argument parser for introspection."""
     parser = argparse.ArgumentParser(
         description="Buivolas - Sentence Creation Agent",
@@ -94,12 +94,12 @@ Examples:
         "--num-sentences",
         type=int,
         default=3,
-        help="Number of LLM sentences to generate per noun (for llm mode)",
+        help="Number of LLM sentences to generate per lemma (for llm mode)",
     )
     parser.add_argument(
         "--level",
         type=int,
-        help="Generate LLM sentences for nouns at a specific difficulty level (1-20, for llm mode)",
+        help="Generate LLM sentences for lemmas at a specific difficulty level (1-20, for llm mode)",
     )
     parser.add_argument(
         "--limit",
@@ -115,7 +115,11 @@ Examples:
     return parser
 
 
-def _get_llm_lemmas(agent: BuivolasAgent, args) -> list[Lemma]:
+def _get_llm_lemmas(agent: BuivolasAgent, args: argparse.Namespace) -> list[Lemma]:
+    """Get lemmas for LLM sentence generation.
+
+    Supports nouns, verbs, and adjectives. Other POS types will be filtered out.
+    """
     session = agent.get_session()
     try:
         if args.level:
@@ -125,7 +129,9 @@ def _get_llm_lemmas(agent: BuivolasAgent, args) -> list[Lemma]:
                 LemmaQueryBuilder(session)
                 .curated_only()
                 .by_difficulty_level(args.level)
-                .filter_custom(lambda q: q.filter(Lemma.pos_type == "noun"))
+                .filter_custom(
+                    lambda q: q.filter(Lemma.pos_type.in_(["noun", "verb", "adjective"]))
+                )
                 .order_by_id()
                 .build()
             )
@@ -134,7 +140,8 @@ def _get_llm_lemmas(agent: BuivolasAgent, args) -> list[Lemma]:
             )
         else:
             lemmas = get_lemmas_for_agent(session, args)
-            lemmas = [lemma for lemma in lemmas if lemma.pos_type == "noun"]
+            # Support nouns, verbs, and adjectives
+            lemmas = [lemma for lemma in lemmas if lemma.pos_type in ("noun", "verb", "adjective")]
     finally:
         session.close()
 
@@ -183,7 +190,7 @@ def main() -> int:
                     patterns_to_generate.append(pattern_dict[pattern_id])
                 else:
                     logger.error("Unknown pattern: %s", pattern_id)
-                    available = ", ".join(pattern_dict.keys())
+                    available = ", ".join(sorted(pattern_dict.keys()))  # type: ignore[arg-type]
                     logger.error("Available patterns: %s", available)
                     return 1
 
@@ -242,9 +249,29 @@ def main() -> int:
 
             if not lemmas:
                 if args.guid:
-                    logger.error("Lemma %s is not a noun or does not exist", args.guid)
+                    # Check if the lemma exists but is unsupported POS type
+                    session = agent.get_session()
+                    try:
+                        from agents.common.lemma_selection import get_lemmas_for_agent
+
+                        all_lemmas = get_lemmas_for_agent(session, args)
+                        if all_lemmas:
+                            unsupported = all_lemmas[0]
+                            logger.info(
+                                "Lemma %s has POS type '%s' - sentence generation only supports nouns, verbs, and adjectives. Skipping.",
+                                args.guid,
+                                unsupported.pos_type,
+                            )
+                            return 0  # Exit gracefully, not an error
+                        else:
+                            logger.error("Lemma %s does not exist", args.guid)
+                            return 1
+                    finally:
+                        session.close()
                 elif args.level:
-                    logger.error("No nouns found at difficulty level %s", args.level)
+                    logger.error(
+                        "No nouns, verbs, or adjectives found at difficulty level %s", args.level
+                    )
                 else:
                     logger.error("No lemmas to process. Specify --guid or --level")
                     parser.print_help()
@@ -254,13 +281,14 @@ def main() -> int:
                 lemma = lemmas[0]
                 logger.info("Processing: %s (GUID: %s)", lemma.lemma_text, lemma.guid)
             else:
-                logger.info("Processing %s nouns", len(lemmas))
+                logger.info("Processing %s lemmas (nouns, verbs, adjectives)", len(lemmas))
                 if args.level:
                     logger.info("Difficulty level: %s", args.level)
 
             total_generated = 0
             total_stored = 0
             total_failed = 0
+            total_skipped = 0
 
             for i, lemma in enumerate(lemmas, 1):
                 if len(lemmas) > 1:
@@ -277,6 +305,11 @@ def main() -> int:
                     num_sentences=args.num_sentences,
                     difficulty_context=args.level if args.level else None,
                 )
+
+                if result.get("skipped"):
+                    logger.info("Skipped %s: %s", lemma.lemma_text, result.get("reason"))
+                    total_skipped += 1
+                    continue
 
                 if result.get("success") and result.get("sentences"):
                     sentences = result["sentences"]
@@ -313,7 +346,9 @@ def main() -> int:
             if len(lemmas) > 1:
                 logger.info("\n%s", "=" * 60)
                 logger.info("Generation complete!")
-                logger.info("Nouns processed: %s", len(lemmas))
+                logger.info("Lemmas processed: %s", len(lemmas))
+                if total_skipped > 0:
+                    logger.info("Lemmas skipped: %s", total_skipped)
                 logger.info("Sentences generated: %s", total_generated)
                 if not args.dry_run:
                     logger.info("Sentences stored: %s", total_stored)
