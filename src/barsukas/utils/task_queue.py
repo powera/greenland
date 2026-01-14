@@ -33,6 +33,8 @@ class TaskType:
     GENERATE_FORMS = "generate_forms"
     GENERATE_SYNONYMS = "generate_synonyms"
     TRANSLATE_SENTENCE = "translate_sentence"
+    GENERATE_AUDIO = "generate_audio"
+    GENERATE_GRAMMAR_FACT = "generate_grammar_fact"
 
 
 @dataclass

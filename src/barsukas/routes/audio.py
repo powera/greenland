@@ -875,7 +875,9 @@ def _generate_audio_coqui(session, lemma, language_code, voices, output_dir):
 
 @bp.route("/generate-single/<guid>", methods=["POST"])
 def generate_single(guid):
-    """Generate audio for a single lemma."""
+    """Generate audio for a single lemma (queued via task worker)."""
+    from barsukas.utils.task_queue import TaskType, enqueue_task
+
     # Support both JSON and form data
     if request.is_json:
         data = request.get_json()
@@ -908,100 +910,60 @@ def generate_single(guid):
             return redirect(url_for("lemmas.view_lemma", lemma_id=lemma.id))
 
     try:
-        # Convert voice names to appropriate enums based on TTS engine
-        if tts_engine == "espeak-ng":
-            # Convert to EspeakVoice enums
-            voice_enums = [EspeakVoice[v.upper()] for v in voices]
-        elif tts_engine == "piper":
-            # Convert to PiperVoice enums
-            voice_enums = [PiperVoice[v.upper()] for v in voices]
-        elif tts_engine == "coqui":
-            # Convert to CoquiVoice enums
-            voice_enums = [CoquiVoice[v.upper()] for v in voices]
-        else:
-            # Convert to OpenAI Voice enums
-            voice_enums = [Voice(v) for v in voices]
-
-        # Use AUDIO_BASE_DIR for persistent storage
-        audio_base_dir = current_app.config.get("AUDIO_BASE_DIR")
-        if not audio_base_dir:
-            raise ValueError("AUDIO_BASE_DIR not configured")
-
-        # Create DataSourceConfig for agents
-        from config import Config
-
-        from wordfreq.storage.backend.config import BackendType, DataSourceConfig
-
-        config = DataSourceConfig(
-            backend_type=BackendType.SQLITE,
-            sqlite_path=Config.DB_PATH,
-            model=constants.DEFAULT_MODEL,
-            debug=Config.DEBUG,
+        # Enqueue audio generation task
+        result = enqueue_task(
+            g.db,
+            task_type=TaskType.GENERATE_AUDIO,
+            target_type="lemma",
+            target_id=lemma.id,
+            payload={
+                "lemma_id": lemma.id,
+                "language_code": language_code,
+                "voices": voices,
+                "tts_engine": tts_engine,
+                "use_ipa": use_ipa,
+            },
+            dedup_key=f"{TaskType.GENERATE_AUDIO}:{lemma.id}:{language_code}:{tts_engine}",
         )
 
-        # Run the appropriate agent based on TTS engine
-        if tts_engine == "espeak-ng":
-            agent = StrazdasAgent(config=config, output_dir=audio_base_dir)
-            result = agent.generate_audio_for_lemma(
-                g.db, lemma, language_code, voice_enums, create_review_record=True, use_ipa=use_ipa
-            )
-        elif tts_engine == "piper":
-            # Generate audio directly using Piper (no agent yet)
-            result = _generate_audio_piper(g.db, lemma, language_code, voice_enums, audio_base_dir)
-        elif tts_engine == "coqui":
-            # Generate audio directly using Coqui (no agent yet)
-            result = _generate_audio_coqui(g.db, lemma, language_code, voice_enums, audio_base_dir)
-        else:
-            agent = VieversysAgent(config=config, output_dir=audio_base_dir)
-            result = agent.generate_audio_for_lemma(
-                g.db, lemma, language_code, voice_enums, create_review_record=True
-            )
-
         if request.is_json:
-            if result["success"]:
+            if result.created:
                 return jsonify(
                     {
                         "success": True,
+                        "queued": True,
+                        "task_id": result.task.id,
                         "guid": guid,
                         "language": language_code,
-                        "voices": result["voices"],
-                        "output_dir": audio_base_dir,
+                        "message": "Audio generation queued. A worker will process it shortly.",
                     }
                 )
             else:
-                return (
-                    jsonify(
-                        {
-                            "success": False,
-                            "error": result.get("error", "Unknown error"),
-                        }
-                    ),
-                    500,
+                return jsonify(
+                    {
+                        "success": True,
+                        "queued": False,
+                        "task_id": result.task.id,
+                        "message": "Audio generation already in progress for this lemma/language.",
+                    }
                 )
         else:
-            if result["success"]:
-                voice_count = len(result["voices"])
-                flash(f"Successfully generated audio for {voice_count} voice(s).", "success")
-
-                # Find the first review record we just created to redirect to it
-                first_review = (
-                    g.db.query(AudioQualityReview)
-                    .filter_by(guid=guid, language_code=language_code, status="pending_review")
-                    .order_by(AudioQualityReview.id.desc())
-                    .first()
+            if result.created:
+                flash(
+                    f"Queued audio generation for {language_code}. A worker will process it shortly.",
+                    "info",
                 )
-
-                if first_review:
-                    return redirect(url_for("audio.review_file", review_id=first_review.id))
-                else:
-                    return redirect(url_for("lemmas.view_lemma", lemma_id=lemma.id))
             else:
-                flash(f"Error generating audio: {result.get('error', 'Unknown error')}", "error")
-                return redirect(url_for("lemmas.view_lemma", lemma_id=lemma.id))
+                flash(
+                    "Audio generation already in progress for this lemma/language.",
+                    "warning",
+                )
+            return redirect(url_for("lemmas.view_lemma", lemma_id=lemma.id))
 
     except Exception as e:
+        logger.exception("Error enqueueing audio generation task")
         if request.is_json:
             return jsonify({"error": str(e)}), 500
         else:
-            flash(f"Error generating audio: {str(e)}", "error")
+            flash(f"Error queuing audio generation: {str(e)}", "error")
             return redirect(url_for("lemmas.view_lemma", lemma_id=lemma.id))
