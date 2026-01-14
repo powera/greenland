@@ -572,15 +572,23 @@ class GrammaticalForm(enum.Enum):
     # Word itself indicates person/number/gender; tag indicates grammatical function
     PRONOUN_EN_SUBJECTIVE = "pronoun/en_subjective"  # I, you, he, she, we, they
     PRONOUN_EN_OBJECTIVE = "pronoun/en_objective"  # me, you, him, her, us, them
-    PRONOUN_EN_POSSESSIVE = "pronoun/en_possessive"  # mine, yours, his, hers, ours, theirs (standalone)
-    PRONOUN_EN_REFLEXIVE = "pronoun/en_reflexive"  # myself, yourself, himself, herself, ourselves, themselves
+    PRONOUN_EN_POSSESSIVE = (
+        "pronoun/en_possessive"  # mine, yours, his, hers, ours, theirs (standalone)
+    )
+    PRONOUN_EN_REFLEXIVE = (
+        "pronoun/en_reflexive"  # myself, yourself, himself, herself, ourselves, themselves
+    )
 
     PRONOUN_FR_SUBJECTIVE = "pronoun/fr_subjective"  # je, tu, il, elle, nous, vous, ils, elles
     PRONOUN_FR_OBJECTIVE = "pronoun/fr_objective"  # me, te, le, la, nous, vous, les
-    PRONOUN_FR_POSSESSIVE = "pronoun/fr_possessive"  # le mien, le tien, le sien (standalone possessives)
+    PRONOUN_FR_POSSESSIVE = (
+        "pronoun/fr_possessive"  # le mien, le tien, le sien (standalone possessives)
+    )
     PRONOUN_FR_REFLEXIVE = "pronoun/fr_reflexive"  # me, te, se, nous, vous, se
 
-    PRONOUN_ES_SUBJECTIVE = "pronoun/es_subjective"  # yo, tú, él, ella, nosotros, vosotros, ellos, ellas
+    PRONOUN_ES_SUBJECTIVE = (
+        "pronoun/es_subjective"  # yo, tú, él, ella, nosotros, vosotros, ellos, ellas
+    )
     PRONOUN_ES_OBJECTIVE = "pronoun/es_objective"  # me, te, lo, la, nos, os, los, las
     PRONOUN_ES_POSSESSIVE = "pronoun/es_possessive"  # mío, tuyo, suyo (standalone possessives)
     PRONOUN_ES_REFLEXIVE = "pronoun/es_reflexive"  # me, te, se, nos, os, se
@@ -596,9 +604,15 @@ class GrammaticalForm(enum.Enum):
     PRONOUN_LT_GENITIVE = "pronoun/lt_genitive"  # manęs, tavęs, jo, jos, mūsų, jūsų, jų
     PRONOUN_LT_DATIVE = "pronoun/lt_dative"  # man, tau, jam, jai, mums, jums, jiems, joms
     PRONOUN_LT_ACCUSATIVE = "pronoun/lt_accusative"  # mane, tave, jį, ją, mus, jus, juos, jas
-    PRONOUN_LT_INSTRUMENTAL = "pronoun/lt_instrumental"  # manimi, tavimi, juo, ja, mumis, jumis, jais, jomis
-    PRONOUN_LT_LOCATIVE = "pronoun/lt_locative"  # manyje, tavyje, jame, joje, mumyse, jumyse, juose, jose
-    PRONOUN_LT_POSSESSIVE = "pronoun/lt_possessive"  # mano, tavo, etc. (standalone possessive forms)
+    PRONOUN_LT_INSTRUMENTAL = (
+        "pronoun/lt_instrumental"  # manimi, tavimi, juo, ja, mumis, jumis, jais, jomis
+    )
+    PRONOUN_LT_LOCATIVE = (
+        "pronoun/lt_locative"  # manyje, tavyje, jame, joje, mumyse, jumyse, juose, jose
+    )
+    PRONOUN_LT_POSSESSIVE = (
+        "pronoun/lt_possessive"  # mano, tavo, etc. (standalone possessive forms)
+    )
 
     # Pronoun forms - German (case-based, simplified)
     # Word itself indicates person/number/gender; tag indicates grammatical case
@@ -606,12 +620,16 @@ class GrammaticalForm(enum.Enum):
     PRONOUN_DE_ACCUSATIVE = "pronoun/de_accusative"  # mich, dich, ihn, sie, es, uns, euch, sie
     PRONOUN_DE_DATIVE = "pronoun/de_dative"  # mir, dir, ihm, ihr, ihm, uns, euch, ihnen
     PRONOUN_DE_GENITIVE = "pronoun/de_genitive"  # meiner, deiner, seiner, ihrer (rare)
-    PRONOUN_DE_POSSESSIVE = "pronoun/de_possessive"  # meiner/meine, deiner/deine (standalone possessives)
+    PRONOUN_DE_POSSESSIVE = (
+        "pronoun/de_possessive"  # meiner/meine, deiner/deine (standalone possessives)
+    )
     PRONOUN_DE_REFLEXIVE = "pronoun/de_reflexive"  # sich (reflexive pronoun)
 
     # Pronoun forms - Chinese (simplified)
     # Word itself indicates person/number/gender; tag indicates function
-    PRONOUN_ZH_SUBJECTIVE = "pronoun/zh_subjective"  # 我, 你, 他, 她, 它, 我们, 你们, 他们, 她们, 它们
+    PRONOUN_ZH_SUBJECTIVE = (
+        "pronoun/zh_subjective"  # 我, 你, 他, 她, 它, 我们, 你们, 他们, 她们, 它们
+    )
     PRONOUN_ZH_POSSESSIVE = "pronoun/zh_possessive"  # 我的, 你的, 他的, 她的, 它的 (with 的)
 
     # Pronoun forms - Korean (simplified)
