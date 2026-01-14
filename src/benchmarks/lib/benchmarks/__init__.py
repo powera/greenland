@@ -27,10 +27,10 @@ from benchmarks.lib.benchmarks.factory import (
 )
 
 # Import all generators
-from benchmarks.lib.benchmarks.generators import *
+from benchmarks.lib.generators import *
 
 # Import all runners
-from benchmarks.lib.benchmarks.runners import *
+from benchmarks.lib.runners import *
 
 # Version info
 __version__ = "1.0.0"

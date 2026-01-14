@@ -15,8 +15,8 @@ logger = logging.getLogger(__name__)
 
 # Register benchmark metadata
 
-from benchmarks.lib.benchmarks.generators.word_length_generator import WordLengthGenerator
-from benchmarks.lib.benchmarks.runners.word_length_runner import WordLengthRunner
+from benchmarks.lib.generators.word_length_generator import WordLengthGenerator
+from benchmarks.lib.runners.word_length_runner import WordLengthRunner
 
 
 @benchmark(
@@ -32,8 +32,8 @@ class WordLengthBenchmark:
     pass
 
 
-from benchmarks.lib.benchmarks.generators.letter_count_generator import LetterCountGenerator
-from benchmarks.lib.benchmarks.runners.letter_count_runner import LetterCountRunner
+from benchmarks.lib.generators.letter_count_generator import LetterCountGenerator
+from benchmarks.lib.runners.letter_count_runner import LetterCountRunner
 
 
 @benchmark(
@@ -49,8 +49,8 @@ class LetterCountBenchmark:
     pass
 
 
-from benchmarks.lib.benchmarks.generators.spell_check_generator import SpellCheckGenerator
-from benchmarks.lib.benchmarks.runners.spell_check_runner import SpellCheckRunner
+from benchmarks.lib.generators.spell_check_generator import SpellCheckGenerator
+from benchmarks.lib.runners.spell_check_runner import SpellCheckRunner
 
 
 @benchmark(
@@ -66,8 +66,8 @@ class SpellCheckBenchmark:
     pass
 
 
-from benchmarks.lib.benchmarks.generators.antonym_generator import AntonymGenerator
-from benchmarks.lib.benchmarks.runners.antonym_runner import AntonymRunner
+from benchmarks.lib.generators.antonym_generator import AntonymGenerator
+from benchmarks.lib.runners.antonym_runner import AntonymRunner
 
 
 @benchmark(
@@ -83,8 +83,8 @@ class AntonymBenchmark:
     pass
 
 
-from benchmarks.lib.benchmarks.generators.definitions_generator import DefinitionsGenerator
-from benchmarks.lib.benchmarks.runners.definitions_runner import DefinitionsRunner
+from benchmarks.lib.generators.definitions_generator import DefinitionsGenerator
+from benchmarks.lib.runners.definitions_runner import DefinitionsRunner
 
 
 @benchmark(
@@ -98,8 +98,8 @@ class DefinitionsBenchmark:
     """Module container for spell check benchmark."""
 
 
-from benchmarks.lib.benchmarks.generators.unit_conversion_generator import UnitConversionGenerator
-from benchmarks.lib.benchmarks.runners.unit_conversion_runner import UnitConversionRunner
+from benchmarks.lib.generators.unit_conversion_generator import UnitConversionGenerator
+from benchmarks.lib.runners.unit_conversion_runner import UnitConversionRunner
 
 
 @benchmark(
@@ -115,8 +115,8 @@ class UnitConversionBenchmark:
     pass
 
 
-from benchmarks.lib.benchmarks.generators.part_of_speech_generator import PartOfSpeechGenerator
-from benchmarks.lib.benchmarks.runners.part_of_speech_runner import PartOfSpeechRunner
+from benchmarks.lib.generators.part_of_speech_generator import PartOfSpeechGenerator
+from benchmarks.lib.runners.part_of_speech_runner import PartOfSpeechRunner
 
 
 @benchmark(
@@ -132,8 +132,8 @@ class PartOfSpeechBenchmark:
     pass
 
 
-from benchmarks.lib.benchmarks.generators.lemma_generator import LemmaGenerator
-from benchmarks.lib.benchmarks.runners.lemma_runner import LemmaRunner
+from benchmarks.lib.generators.lemma_generator import LemmaGenerator
+from benchmarks.lib.runners.lemma_runner import LemmaRunner
 
 
 @benchmark(
@@ -157,8 +157,8 @@ class LemmaBenchmark:
 register_generator("0033_lemma", LemmaGenerator)
 register_runner("0033_lemma", LemmaRunner)
 
-from benchmarks.lib.benchmarks.generators.translations_generator import TranslationGenerator
-from benchmarks.lib.benchmarks.runners.translations_runner import TranslationRunner
+from benchmarks.lib.generators.translations_generator import TranslationGenerator
+from benchmarks.lib.runners.translations_runner import TranslationRunner
 
 for codepair in ["en_fr", "en_zh", "sw_ko"]:
     benchmark_code = f"0050_translation_{codepair}"
@@ -178,10 +178,10 @@ for codepair in ["en_fr", "en_zh", "sw_ko"]:
     register_generator(benchmark_code, TranslationGenerator)
     register_runner(benchmark_code, TranslationRunner)
 
-from benchmarks.lib.benchmarks.generators.pinyin_letter_count_generator import (
+from benchmarks.lib.generators.pinyin_letter_count_generator import (
     PinyinLetterCountGenerator,
 )
-from benchmarks.lib.benchmarks.runners.pinyin_letter_count_runner import PinyinLetterCountRunner
+from benchmarks.lib.runners.pinyin_letter_count_runner import PinyinLetterCountRunner
 
 
 @benchmark(
@@ -197,8 +197,8 @@ class PinyinLetterCountBenchmark:
     pass
 
 
-from benchmarks.lib.benchmarks.generators.english_to_ipa_generator import EnglishToIPAGenerator
-from benchmarks.lib.benchmarks.runners.english_to_ipa_runner import EnglishToIPARunner
+from benchmarks.lib.generators.english_to_ipa_generator import EnglishToIPAGenerator
+from benchmarks.lib.runners.english_to_ipa_runner import EnglishToIPARunner
 
 
 @benchmark(
@@ -219,8 +219,8 @@ register_generator("0061_english_to_ipa", EnglishToIPAGenerator)
 register_runner("0061_english_to_ipa", EnglishToIPARunner)
 
 # Register the geography benchmark
-from benchmarks.lib.benchmarks.generators.geography_generator import GeographyGenerator
-from benchmarks.lib.benchmarks.runners.geography_runner import GeographyRunner
+from benchmarks.lib.generators.geography_generator import GeographyGenerator
+from benchmarks.lib.runners.geography_runner import GeographyRunner
 
 
 @benchmark(

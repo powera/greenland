@@ -13,9 +13,9 @@ from unittest.mock import ANY, MagicMock, patch
 
 from benchmarks.lib.benchmarks.base_generator import BenchmarkGenerator
 from benchmarks.lib.benchmarks.data_models import BenchmarkMetadata
-from benchmarks.lib.benchmarks.generators.definitions_generator import DefinitionsGenerator
-from benchmarks.lib.benchmarks.generators.letter_count_generator import LetterCountGenerator
-from benchmarks.lib.benchmarks.generators.spell_check_generator import SpellCheckGenerator
+from benchmarks.lib.generators.definitions_generator import DefinitionsGenerator
+from benchmarks.lib.generators.letter_count_generator import LetterCountGenerator
+from benchmarks.lib.generators.spell_check_generator import SpellCheckGenerator
 
 
 class TestBenchmarkGenerators(unittest.TestCase):

@@ -11,7 +11,7 @@ from clients.ollama_client import OllamaTimeoutError
 from benchmarks.lib.benchmarks.base import BenchmarkRunner
 from benchmarks.lib.benchmarks.data_models import AnswerType, BenchmarkMetadata, BenchmarkResult
 from benchmarks.lib.benchmarks.factory import benchmark, get_benchmark_metadata, runner
-from benchmarks.lib.benchmarks.generators.translations_generator import (
+from benchmarks.lib.generators.translations_generator import (
     VALID_LANGS,
     get_translation_metadata,
 )
