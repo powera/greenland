@@ -694,15 +694,26 @@ def view_sentences(lemma_id: int) -> Union[Response, str]:
         return redirect(url_for("lemmas.list_lemmas"))
 
     try:
-        # Query sentences that use this lemma
+        # Query sentences that use this lemma (from either sentence_words or sentence_pattern_words)
+        from sqlalchemy import or_
         from sqlalchemy.orm import joinedload
 
-        from wordfreq.storage.models.schema import Sentence, SentenceWord
+        from wordfreq.storage.models.schema import (
+            Sentence,
+            SentencePatternWord,
+            SentenceWord,
+        )
 
         sentences = (
             g.db.query(Sentence)
-            .join(SentenceWord)
-            .filter(SentenceWord.lemma_id == lemma_id)
+            .outerjoin(SentenceWord)
+            .outerjoin(SentencePatternWord)
+            .filter(
+                or_(
+                    SentenceWord.lemma_id == lemma_id,
+                    SentencePatternWord.lemma_id == lemma_id,
+                )
+            )
             .filter(Sentence.rejected == False)
             .options(
                 joinedload(Sentence.translations),
