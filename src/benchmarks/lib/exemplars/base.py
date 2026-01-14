@@ -15,7 +15,7 @@ from dataclasses import asdict, dataclass, field
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-import benchmarks.datastore.common
+import benchmarks.datastore.common as datastore_common
 import benchmarks.benchmark_constants as benchmark_constants
 from clients import unified_client
 from clients.types import Response
@@ -114,7 +114,7 @@ class ExemplarRunner:
             registry: ExemplarRegistry instance
         """
         self.registry = registry
-        self.session = datastore.common.create_dev_session()
+        self.session = datastore_common.create_dev_session()
         self._available_models = None  # Cache of available models
 
     def get_available_models(self) -> List[Dict]:
@@ -125,7 +125,7 @@ class ExemplarRunner:
             List of model dictionaries with 'codename' and 'displayname'
         """
         if self._available_models is None:
-            self._available_models = datastore.common.list_all_models(self.session)
+            self._available_models = datastore_common.list_all_models(self.session)
         return self._available_models
 
     def get_model_names(self) -> List[str]:
@@ -360,7 +360,7 @@ class ExemplarReportGenerator:
         self.storage = storage
         self.output_dir = os.path.join(benchmark_constants.OUTPUT_DIR, "exemplar_reports")
         os.makedirs(self.output_dir, exist_ok=True)
-        self.session = datastore.common.create_dev_session()
+        self.session = datastore_common.create_dev_session()
 
     def get_model_sizes(self) -> Dict[str, int]:
         """
@@ -369,7 +369,7 @@ class ExemplarReportGenerator:
         Returns:
             Dictionary mapping model names (in filename-safe format) to sizes
         """
-        models = datastore.common.list_all_models(self.session)
+        models = datastore_common.list_all_models(self.session)
         model_sizes = {}
 
         for model in models:

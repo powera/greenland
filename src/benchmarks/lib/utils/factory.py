@@ -5,8 +5,8 @@
 import logging
 from typing import Any, Dict, Optional, Type
 
-from benchmarks.lib.benchmarks.base import BenchmarkGenerator, BenchmarkRunner
-from benchmarks.lib.benchmarks.data_models import BenchmarkMetadata
+from benchmarks.lib.utils.base import BenchmarkGenerator, BenchmarkRunner
+from benchmarks.lib.utils.data_models import BenchmarkMetadata
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")

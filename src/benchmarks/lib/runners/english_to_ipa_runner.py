@@ -7,9 +7,9 @@ import logging
 import re
 from typing import Any, Dict, List, Optional, Tuple
 
-from benchmarks.lib.benchmarks.base_runner import BenchmarkRunner
-from benchmarks.lib.benchmarks.data_models import BenchmarkMetadata, BenchmarkResult
-from benchmarks.lib.benchmarks.factory import runner
+from benchmarks.lib.utils.base_runner import BenchmarkRunner
+from benchmarks.lib.utils.data_models import BenchmarkMetadata, BenchmarkResult
+from benchmarks.lib.utils.factory import runner
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")

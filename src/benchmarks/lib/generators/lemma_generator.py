@@ -8,8 +8,8 @@ import random
 from typing import Any, Dict, Iterator, List, Optional
 
 import benchmarks.benchmark_constants as benchmark_constants
-from benchmarks.lib.benchmarks.base_generator import BenchmarkGenerator
-from benchmarks.lib.benchmarks.data_models import (
+from benchmarks.lib.utils.base_generator import BenchmarkGenerator
+from benchmarks.lib.utils.data_models import (
     AnswerType,
     BenchmarkMetadata,
     BenchmarkQuestion,

@@ -2,7 +2,7 @@
 
 from sqlalchemy.exc import SQLAlchemyError
 
-import benchmarks.datastore.benchmarks
+import benchmarks.datastore.benchmarks as datastore_benchmarks
 from benchmarks.datastore.benchmarks import Run, RunDetail
 
 
@@ -20,7 +20,7 @@ def delete_run(run_id: int, session=None) -> tuple[bool, str]:
 
     # Create session if not provided
     if session is None:
-        session = datastore.benchmarks.create_dev_session()
+        session = datastore_benchmarks.create_dev_session()
 
     try:
         # First delete associated run details due to foreign key constraint

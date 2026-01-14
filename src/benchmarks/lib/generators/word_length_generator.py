@@ -7,15 +7,15 @@ import os
 import random
 from typing import Iterator
 
-from benchmarks.lib.benchmarks.base import *
-from benchmarks.lib.benchmarks.data_models import (
+from benchmarks.lib.utils.base import *
+from benchmarks.lib.utils.data_models import (
     AnswerType,
     BenchmarkMetadata,
     BenchmarkQuestion,
     Difficulty,
     EvaluationCriteria,
 )
-from benchmarks.lib.benchmarks.factory import generator
+from benchmarks.lib.utils.factory import generator
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")

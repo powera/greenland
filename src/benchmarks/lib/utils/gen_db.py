@@ -7,7 +7,7 @@ import benchmarks.schema.create_models
 
 benchmarks.schema.create_models.create_models()
 
-import benchmarks.datastore.common
-from benchmarks.lib.benchmarks.factory import get_generator
+import benchmarks.datastore.common as datastore_common
+from benchmarks.lib.utils.factory import get_generator
 
-session = benchmarks.datastore.common.create_dev_session()
+session = datastore_common.create_dev_session()

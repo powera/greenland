@@ -8,9 +8,9 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from clients import unified_client
 from clients.ollama_client import OllamaTimeoutError
-from benchmarks.lib.benchmarks.base import BenchmarkRunner
-from benchmarks.lib.benchmarks.data_models import AnswerType, BenchmarkMetadata, BenchmarkResult
-from benchmarks.lib.benchmarks.factory import benchmark, get_benchmark_metadata, runner
+from benchmarks.lib.utils.base import BenchmarkRunner
+from benchmarks.lib.utils.data_models import AnswerType, BenchmarkMetadata, BenchmarkResult
+from benchmarks.lib.utils.factory import benchmark, get_benchmark_metadata, runner
 from benchmarks.lib.generators.translations_generator import (
     VALID_LANGS,
     get_translation_metadata,

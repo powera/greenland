@@ -3,13 +3,13 @@ import logging
 import random
 from typing import Any, Dict, List, Optional, Tuple
 
-import benchmarks.datastore.benchmarks
+import benchmarks.datastore.benchmarks as datastore_benchmarks
 import benchmarks.benchmark_constants as benchmark_constants
 import lib.score_table
 import lib.validation
 from clients import unified_client
 from clients.ollama_client import OllamaTimeoutError
-from benchmarks.lib.benchmarks.data_models import (
+from benchmarks.lib.utils.data_models import (
     AnswerType,
     BenchmarkMetadata,
     BenchmarkQuestion,
@@ -50,11 +50,11 @@ class BenchmarkRunner:
             # Strip quantization suffix if present (e.g., ":Q4_0")
             self.remote_model = ":".join(model.split(":")[:-1])
 
-        self.session = datastore.benchmarks.create_dev_session()
+        self.session = datastore_benchmarks.create_dev_session()
 
     def load_questions(self) -> List[Dict]:
         """Load benchmark questions from database."""
-        return datastore.benchmarks.load_all_questions_for_benchmark(
+        return datastore_benchmarks.load_all_questions_for_benchmark(
             self.session, self.metadata.code
         )
 
@@ -155,7 +155,7 @@ class BenchmarkRunner:
         Returns:
             Run ID of the saved results
         """
-        success, run_id = datastore.benchmarks.insert_run(
+        success, run_id = datastore_benchmarks.insert_run(
             self.session,
             self.model,
             self.metadata.code,

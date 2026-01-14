@@ -6,15 +6,15 @@ import os
 import random
 from typing import Iterator, List
 
-from benchmarks.lib.benchmarks.base import *
-from benchmarks.lib.benchmarks.data_models import (
+from benchmarks.lib.utils.base import *
+from benchmarks.lib.utils.data_models import (
     AnswerType,
     BenchmarkMetadata,
     BenchmarkQuestion,
     Difficulty,
     EvaluationCriteria,
 )
-from benchmarks.lib.benchmarks.factory import benchmark, generator
+from benchmarks.lib.utils.factory import benchmark, generator
 
 # Define benchmark metadata
 BENCHMARK_CODE = "0020_definitions"

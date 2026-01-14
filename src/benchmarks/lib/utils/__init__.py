@@ -3,10 +3,10 @@
 """Benchmark system for evaluating language models."""
 
 # Import base classes
-from benchmarks.lib.benchmarks.base import BenchmarkGenerator, BenchmarkRunner
+from benchmarks.lib.utils.base import BenchmarkGenerator, BenchmarkRunner
 
 # Import data models
-from benchmarks.lib.benchmarks.data_models import (
+from benchmarks.lib.utils.data_models import (
     AnswerType,
     BenchmarkMetadata,
     BenchmarkQuestion,
@@ -16,7 +16,7 @@ from benchmarks.lib.benchmarks.data_models import (
 )
 
 # Import factory functions
-from benchmarks.lib.benchmarks.factory import (
+from benchmarks.lib.utils.factory import (
     benchmark,
     generator,
     get_all_benchmark_codes,

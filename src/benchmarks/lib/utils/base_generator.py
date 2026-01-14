@@ -10,13 +10,13 @@ import random
 import uuid
 from typing import Any, Dict, Iterator, List, Optional, Set, Tuple, Union
 
-import benchmarks.datastore.benchmarks
+import benchmarks.datastore.benchmarks as datastore_benchmarks
 import benchmarks.benchmark_constants as benchmark_constants
 import lib.score_table
 import lib.validation
 from clients import ollama_client, unified_client
 from clients.ollama_client import OllamaTimeoutError
-from benchmarks.lib.benchmarks.data_models import (
+from benchmarks.lib.utils.data_models import (
     AnswerType,
     BenchmarkMetadata,
     BenchmarkQuestion,
@@ -59,7 +59,7 @@ class BenchmarkGenerator:
             session: Optional database session
         """
         self.metadata = metadata
-        self.session = session or datastore.benchmarks.create_dev_session()
+        self.session = session or datastore_benchmarks.create_dev_session()
         self.auto_validate = auto_validate
         self.validation_model = DEFAULT_VALIDATION_MODEL
 
@@ -85,7 +85,7 @@ class BenchmarkGenerator:
         self._combined_generator = None
 
         # Ensure benchmark exists in database
-        success, msg = datastore.benchmarks.insert_benchmark(
+        success, msg = datastore_benchmarks.insert_benchmark(
             self.session,
             codename=self.metadata.code,
             displayname=self.metadata.name,
@@ -531,7 +531,7 @@ class BenchmarkGenerator:
 
         # Convert question to dictionary and save
         question_dict = question.to_dict()
-        datastore.benchmarks.insert_question(
+        datastore_benchmarks.insert_question(
             self.session, question_id, self.metadata.code, json.dumps(question_dict)
         )
 
@@ -569,7 +569,7 @@ class BenchmarkGenerator:
         Returns:
             List of question dictionaries
         """
-        return datastore.benchmarks.load_all_questions_for_benchmark(
+        return datastore_benchmarks.load_all_questions_for_benchmark(
             self.session, self.metadata.code
         )
 

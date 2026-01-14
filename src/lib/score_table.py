@@ -204,8 +204,8 @@ class ScoreTableGenerator:
         """
         try:
             # Import here to avoid circular imports
-            import benchmarks.lib.benchmarks.registry
-            from benchmarks.lib.benchmarks.factory import get_runner
+            import benchmarks.lib.utils.registry
+            from benchmarks.lib.utils.factory import get_runner
 
             # Create a dummy question to pass to prepare_prompt
             dummy_question = {

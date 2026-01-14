@@ -6,8 +6,8 @@ import logging
 import random
 from typing import Any, Dict, Iterator, List, Optional, Tuple
 
-from benchmarks.lib.benchmarks.base import CITIES, COUNTRIES, MOUNTAINS, RIVERS, BenchmarkGenerator
-from benchmarks.lib.benchmarks.data_models import (
+from benchmarks.lib.utils.base import CITIES, COUNTRIES, MOUNTAINS, RIVERS, BenchmarkGenerator
+from benchmarks.lib.utils.data_models import (
     AnswerType,
     BenchmarkMetadata,
     BenchmarkQuestion,

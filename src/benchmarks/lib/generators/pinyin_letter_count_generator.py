@@ -10,15 +10,15 @@ from typing import Any, Dict, Iterator, List, Optional
 import jieba
 from pypinyin import Style, pinyin
 
-from benchmarks.lib.benchmarks.base import BenchmarkGenerator
-from benchmarks.lib.benchmarks.data_models import (
+from benchmarks.lib.utils.base import BenchmarkGenerator
+from benchmarks.lib.utils.data_models import (
     AnswerType,
     BenchmarkMetadata,
     BenchmarkQuestion,
     Difficulty,
     EvaluationCriteria,
 )
-from benchmarks.lib.benchmarks.factory import generator, register_benchmark_metadata
+from benchmarks.lib.utils.factory import generator, register_benchmark_metadata
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")

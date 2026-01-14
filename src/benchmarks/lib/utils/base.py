@@ -2,10 +2,10 @@
 
 """Base classes for implementing language model benchmarks."""
 
-from benchmarks.lib.benchmarks.base_generator import BenchmarkGenerator
+from benchmarks.lib.utils.base_generator import BenchmarkGenerator
 
 # BenchmarkRunner formerly in this file; imported for imports but not used locally
-from benchmarks.lib.benchmarks.base_runner import BenchmarkRunner
+from benchmarks.lib.utils.base_runner import BenchmarkRunner
 
 COMMON_SHORT_WORDS = [
     "chair",

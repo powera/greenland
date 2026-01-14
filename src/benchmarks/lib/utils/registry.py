@@ -6,8 +6,8 @@ Registry for various benchmarks.
 
 import logging
 
-from benchmarks.lib.benchmarks.data_models import BenchmarkMetadata
-from benchmarks.lib.benchmarks.factory import benchmark, register_generator, register_runner
+from benchmarks.lib.utils.data_models import BenchmarkMetadata
+from benchmarks.lib.utils.factory import benchmark, register_generator, register_runner
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")

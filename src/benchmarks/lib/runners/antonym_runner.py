@@ -6,8 +6,8 @@ import json
 import logging
 from typing import Any, Dict, Optional, Tuple
 
-from benchmarks.lib.benchmarks.base import BenchmarkRunner
-from benchmarks.lib.benchmarks.factory import runner
+from benchmarks.lib.utils.base import BenchmarkRunner
+from benchmarks.lib.utils.factory import runner
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")

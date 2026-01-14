@@ -8,15 +8,15 @@ import random
 from typing import Dict, Iterator, List, Optional
 
 from benchmarks.data.wordlist_extended import TRANSLATIONS, TranslationEntry
-from benchmarks.lib.benchmarks.base_generator import BenchmarkGenerator
-from benchmarks.lib.benchmarks.data_models import (
+from benchmarks.lib.utils.base_generator import BenchmarkGenerator
+from benchmarks.lib.utils.data_models import (
     AnswerType,
     BenchmarkMetadata,
     BenchmarkQuestion,
     Difficulty,
     EvaluationCriteria,
 )
-from benchmarks.lib.benchmarks.factory import benchmark, generator, register_benchmark_metadata
+from benchmarks.lib.utils.factory import benchmark, generator, register_benchmark_metadata
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
