@@ -6,15 +6,13 @@ in barsukas/*/wq_worker.py modules to eliminate repetitive code.
 
 from __future__ import annotations
 
-from typing import Any, Dict, Optional, TYPE_CHECKING
+from typing import Any, Dict, Optional
 
 from barsukas.config import Config
 import constants
+from sqlalchemy.orm import Session
 from wordfreq.storage.backend.config import BackendType, DataSourceConfig
-
-if TYPE_CHECKING:
-    from sqlalchemy.orm import Session
-    from wordfreq.storage.models.schema import Lemma
+from wordfreq.storage.models.schema import Lemma
 
 
 def build_default_config() -> DataSourceConfig:
