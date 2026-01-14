@@ -8,15 +8,22 @@ Context:
 Generate:
 1. **Abbreviations**: Shortened forms of the word
 2. **Expanded forms**: Longer/fuller forms of the word
-3. **Alternate spellings**: Spelling variants of the SAME word (each variant as a separate item)
-4. **Synonyms**: Words that can replace the original in MOST contexts (include regional variants!)
+3. **Alternate spellings**: ONLY valid, accepted spelling variants in THIS language
+   - MUST be recognized as correct spellings, NOT misspellings
+   - Do NOT include spellings from other languages
+   - Example for English "color": "colour" ✓ | "coulor" ✗ (misspelling) | "couleur" ✗ (French)
+4. **Synonyms**: Words that can replace the original in MOST contexts
+   - Do NOT include specific types/shades/varieties (hyponyms)
+   - For "blue": do NOT include "navy", "cerulean", "sapphire", "cobalt", etc. (these are shades)
+   - TRUE synonyms are rare - empty array is often correct
 
 REMEMBER:
 - Return EACH variant as a separate array item - no slashes or parentheticals
-- Include regional/dialect variants that learners might encounter
-- Empty arrays are fine when no valid forms exist
+- Include regional/dialect variants that learners might encounter (for synonyms/spellings)
+- Empty arrays are GOOD when no valid forms exist - don't force results
 - Do NOT include the original word itself
 - Do NOT include pure numerals (e.g., "1000", "42")
 - Prefer common, useful forms over rare or archaic ones
+- When uncertain if something qualifies, leave it out
 
 {{language_note}}

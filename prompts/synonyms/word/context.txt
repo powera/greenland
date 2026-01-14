@@ -20,10 +20,18 @@ REGIONAL VARIANTS ARE IMPORTANT:
 GUIDELINES FOR EACH CATEGORY:
 - Abbreviations: Shortened forms of the word (e.g., "television" -> "TV", "Doctor" -> "Dr.")
 - Expanded forms: Longer/fuller forms of the word (e.g., "TV" -> "television", "Dr." -> "Doctor")
-- Alternate spellings: Spelling variants of the SAME word (e.g., "gray" and "grey" as separate items)
+- Alternate spellings: VALID, accepted spelling variants of the SAME word in the SAME language
+  * MUST be recognized as correct spellings (e.g., "gray"/"grey", "color"/"colour")
+  * Do NOT include misspellings, typos, or common errors (e.g., NOT "blau" for English "blue")
+  * Do NOT include spellings from OTHER languages (French "bleu" is NOT an English alternate spelling)
+  * When in doubt, leave the array empty - only include variants you're certain are valid
 - Synonyms: Words that can be used INTERCHANGEABLY in most contexts
-  * Do NOT include hyponyms (specific types): "cheddar" is NOT a synonym of "cheese"
-  * Do NOT include hypernyms (categories): "dairy product" is NOT a synonym of "cheese"
-  * TRUE synonyms are rare - most words will have ZERO synonyms
+  * Do NOT include hyponyms (specific types/shades/varieties)
+    - For "blue": NOT "navy", "cerulean", "sapphire", "cobalt", "indigo", "teal" (these are SHADES)
+    - For "cheese": NOT "cheddar", "brie", "gouda" (these are TYPES)
+    - For "dog": NOT "poodle", "beagle", "terrier" (these are BREEDS)
+  * Do NOT include hypernyms (broader categories): "dairy product" is NOT a synonym of "cheese"
+  * TRUE synonyms are VERY rare - most words will have ZERO synonyms
+  * When in doubt, leave the array empty
 
 RETURN EMPTY ARRAYS when no valid forms exist - this is completely normal and expected.
