@@ -4,7 +4,7 @@
 from dataclasses import dataclass
 from typing import Dict, List, Optional
 
-import verbalator.common
+from benchmarks.verbalator import common
 
 
 @dataclass
@@ -120,7 +120,7 @@ def parse_style_parameters(data: Dict) -> StyleParameters:
     )
 
 
-def build(short_prompt: str, data: Dict) -> str:
+def build(short_prompt: str, data: Dict) -> Optional[str]:
     """
     Build a complete prompt with style instructions.
 
@@ -141,7 +141,7 @@ def build(short_prompt: str, data: Dict) -> str:
     params = parse_style_parameters(data)
 
     # Get base prompt template
-    base_prompt = verbalator.common.PROMPTS[short_prompt]
+    base_prompt = common.PROMPTS[short_prompt]
 
     # Build topic preference instructions
     topic_instructions = []
