@@ -9,13 +9,12 @@ from __future__ import annotations
 import logging
 from typing import Any, Dict, Optional, Tuple
 
-from config import Config
-
+from agents.common.wq_tools import build_default_config, get_lemma_or_raise
 import constants
 import util.prompt_loader
 from clients.types import Schema, SchemaProperty
 from clients.unified_client import UnifiedLLMClient
-from wordfreq.storage.backend.config import BackendType, DataSourceConfig
+from wordfreq.storage.backend.config import DataSourceConfig
 from wordfreq.storage.crud.grammar_fact import add_grammar_fact, get_grammar_fact_value
 from wordfreq.storage.crud.operation_log import log_operation
 from wordfreq.storage.models.schema import Lemma
@@ -90,15 +89,6 @@ SUPPORTED_FACT_TYPES = {
         "description": "Classify nouns as animate or inanimate",
     },
 }
-
-
-def _build_config() -> DataSourceConfig:
-    return DataSourceConfig(
-        backend_type=BackendType.SQLITE,
-        sqlite_path=Config.DB_PATH,
-        model=constants.DEFAULT_MODEL,
-        debug=Config.DEBUG,
-    )
 
 
 def _get_llm_client(config: DataSourceConfig) -> UnifiedLLMClient:
@@ -318,7 +308,7 @@ def generate_grammar_fact_for_lemma(
         Dictionary with generation results
     """
     if config is None:
-        config = _build_config()
+        config = build_default_config()
 
     # Check if fact already exists
     if skip_existing:
@@ -424,9 +414,7 @@ def handle_generate_grammar_fact(session, payload: Dict) -> str:
     fact_type = payload["fact_type"]
     language_code = payload["language_code"]
 
-    lemma = session.get(Lemma, lemma_id)
-    if not lemma:
-        raise ValueError(f"Lemma {lemma_id} not found")
+    lemma = get_lemma_or_raise(session, lemma_id)
 
     result = generate_grammar_fact_for_lemma(
         session, lemma, fact_type, language_code

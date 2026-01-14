@@ -8,8 +8,7 @@ from __future__ import annotations
 
 from typing import Dict
 
-from config import Config
-
+from agents.common.wq_tools import get_lemma_or_raise
 import constants
 from wordfreq.storage.models.schema import Sentence, SentenceTranslation
 from wordfreq.storage.translation_helpers import get_supported_languages
