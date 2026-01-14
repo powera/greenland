@@ -10,7 +10,7 @@ from typing import Dict, List, Optional, Tuple
 import pydantic
 
 from clients import ollama_client, openai_client, unified_client
-from lib.benchmarks.data_models import BenchmarkQuestion
+from benchmarks.lib.benchmarks.data_models import BenchmarkQuestion
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")

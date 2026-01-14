@@ -27,9 +27,9 @@ import unittest
 from typing import Any, Dict, List, Optional, Tuple, Type
 from unittest.mock import MagicMock, patch
 
-from lib.benchmarks.base import BenchmarkGenerator
-from lib.benchmarks.data_models import BenchmarkMetadata, BenchmarkQuestion
-from lib.benchmarks.factory import get_all_benchmark_codes, get_generator
+from benchmarks.lib.benchmarks.base import BenchmarkGenerator
+from benchmarks.lib.benchmarks.data_models import BenchmarkMetadata, BenchmarkQuestion
+from benchmarks.lib.benchmarks.factory import get_all_benchmark_codes, get_generator
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")

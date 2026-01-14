@@ -8,7 +8,7 @@ from typing import Dict, List, Optional, Set, Tuple
 
 import benchmarks.datastore.benchmarks
 import benchmarks.datastore.common
-from lib.benchmarks.factory import (
+from benchmarks.lib.benchmarks.factory import (
     get_all_benchmark_codes,
     get_benchmark_metadata,
     get_generator,
