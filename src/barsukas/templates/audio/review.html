@@ -129,9 +129,32 @@
                             {% if review.accepted_by %} by {{ review.accepted_by }}{% endif %}</small>
                         </dd>
                         {% endif %}
+
+                        {% if review.sentence_id %}
+                        <dt class="col-sm-4">Sentence:</dt>
+                        <dd class="col-sm-8">
+                            <a href="{{ url_for('sentences.view_sentence', sentence_id=review.sentence_id) }}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-chat-left-quote"></i> View Sentence #{{ review.sentence_id }}
+                            </a>
+                        </dd>
+                        {% endif %}
                     </dl>
                 </div>
             </div>
+
+            <!-- Raw Manifest Display -->
+            {% if raw_manifest %}
+            <div class="mt-3 p-3 border-top">
+                <details>
+                    <summary class="text-muted" style="cursor: pointer; font-weight: 500;">
+                        <i class="bi bi-file-earmark-text"></i> View Raw Manifest
+                    </summary>
+                    <div class="mt-2 p-3 bg-light border rounded">
+                        <pre class="mb-0" style="font-size: 0.85rem; max-height: 400px; overflow-y: auto;">{{ raw_manifest|tojson(indent=2) }}</pre>
+                    </div>
+                </details>
+            </div>
+            {% endif %}
         </div>
     </div>
 

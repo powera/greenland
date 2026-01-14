@@ -12,6 +12,7 @@ from werkzeug.wrappers import Response
 from barsukas.helpers.flash_helpers import flash_and_log
 from barsukas.utils.task_queue import TaskType, enqueue_task
 from wordfreq.storage.models.schema import (
+    AudioQualityReview,
     Lemma,
     Sentence,
     SentencePatternWord,
@@ -189,6 +190,18 @@ def view_sentence(sentence_id: int) -> Union[str, Response]:
             }
         )
 
+    # Get audio files for this sentence
+    audio_files = (
+        g.db.query(AudioQualityReview).filter(AudioQualityReview.sentence_id == sentence_id).all()
+    )
+
+    # Group audio by language and voice
+    audio_by_language: dict[str, list[AudioQualityReview]] = {}
+    for audio in audio_files:
+        if audio.language_code not in audio_by_language:
+            audio_by_language[audio.language_code] = []
+        audio_by_language[audio.language_code].append(audio)
+
     return render_template(
         "sentences/view.html",
         sentence=sentence,
@@ -196,6 +209,7 @@ def view_sentence(sentence_id: int) -> Union[str, Response]:
         language_names=language_names,
         words_by_language=words_by_language,
         pattern_words=pattern_words_data,
+        audio_by_language=audio_by_language,
     )
 
 

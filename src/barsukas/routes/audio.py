@@ -482,7 +482,23 @@ def review_file(review_id: int) -> Union[str, Response, Tuple[Response, int]]:
         if review.lemma_id:
             lemma = g.db.query(Lemma).filter_by(id=review.lemma_id).first()
 
-        return render_template("audio/review.html", review=review, lemma=lemma)
+        # Fetch raw manifest if available
+        raw_manifest = None
+        if review.s3_staging_manifest_url:
+            try:
+                import requests
+
+                response = requests.get(review.s3_staging_manifest_url, timeout=5)
+                if response.status_code == 200:
+                    raw_manifest = response.json()
+            except Exception as e:
+                logger.warning(
+                    f"Failed to fetch manifest from {review.s3_staging_manifest_url}: {e}"
+                )
+
+        return render_template(
+            "audio/review.html", review=review, lemma=lemma, raw_manifest=raw_manifest
+        )
 
     # Handle POST - update review
     status = request.form.get("status")
