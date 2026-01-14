@@ -8,8 +8,8 @@ Context:
 Generate:
 1. **Abbreviations**: Shortened forms (e.g., "TV" for "television")
 2. **Expanded forms**: Longer/fuller forms (e.g., "television" for "TV")
-3. **Alternate spellings**: Valid spelling variants in THIS language only (not misspellings, not other languages)
-4. **Synonyms**: Words usable interchangeably in most contexts (not specific types/shades/varieties)
+3. **Alternate spellings**: Valid spelling variants in THIS language only (not misspellings, not other languages) - include regional/dialect variants
+4. **Synonyms**: Words usable interchangeably in most contexts (not specific types/shades/varieties) - include regional/dialect variants
 
 Remember: Empty arrays are expected and correct when no valid forms exist. Return each variant as a separate array item.
 
