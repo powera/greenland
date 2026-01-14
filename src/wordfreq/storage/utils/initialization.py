@@ -1,11 +1,12 @@
 """Corpus initialization utilities."""
 
 import logging
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
-def initialize_corpora(session):
+def initialize_corpora(session: Any) -> None:
     """Initialize corpus configurations from the config file."""
     import wordfreq.frequency.corpus
 

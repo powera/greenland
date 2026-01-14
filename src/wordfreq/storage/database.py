@@ -163,7 +163,7 @@ def log_query(
     query_type: str,
     prompt: str,
     response: str,
-    model: str,
+    model: Optional[str],
     success: bool = True,
     error: Optional[str] = None,
 ) -> QueryLog:

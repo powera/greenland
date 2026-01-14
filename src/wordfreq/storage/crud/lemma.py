@@ -1,7 +1,9 @@
 """CRUD operations for Lemma model."""
 
 import json
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
+
+from sqlalchemy.orm import Session
 
 from wordfreq.storage.crud.operation_log import log_translation_change
 from wordfreq.storage.models.schema import DerivativeForm, Lemma, LemmaTranslation
@@ -9,7 +11,7 @@ from wordfreq.storage.utils.guid import generate_guid
 
 
 def add_lemma(
-    session,
+    session: Session,
     lemma_text: str,
     definition_text: str,
     pos_type: str,
@@ -102,7 +104,7 @@ def add_lemma(
 
 
 def update_lemma(
-    session,
+    session: Session,
     lemma_id: int,
     lemma_text: Optional[str] = None,
     definition_text: Optional[str] = None,
@@ -197,7 +199,7 @@ def update_lemma(
     return True
 
 
-def get_lemma_by_guid(session, guid: str) -> Optional[Lemma]:
+def get_lemma_by_guid(session: Session, guid: str) -> Optional[Lemma]:
     """
     Get a lemma by its GUID.
 
@@ -211,7 +213,7 @@ def get_lemma_by_guid(session, guid: str) -> Optional[Lemma]:
     return session.query(Lemma).filter(Lemma.guid == guid).first()
 
 
-def get_lemmas_without_subtypes(session, limit: int = 100) -> List[Lemma]:
+def get_lemmas_without_subtypes(session: Session, limit: int = 100) -> List[Lemma]:
     """Get lemmas that need POS subtypes."""
     return (
         session.query(Lemma)
@@ -222,7 +224,7 @@ def get_lemmas_without_subtypes(session, limit: int = 100) -> List[Lemma]:
     )
 
 
-def get_all_subtypes(session, lang=None) -> List[str]:
+def get_all_subtypes(session: Session, lang: Optional[str] = None) -> List[str]:
     """Get all pos_subtypes that have lemmas with GUIDs."""
     query = (
         session.query(Lemma.pos_subtype)
@@ -237,7 +239,9 @@ def get_all_subtypes(session, lang=None) -> List[str]:
     return [subtype[0] for subtype in subtypes if subtype[0]]
 
 
-def get_lemmas_by_subtype(session, pos_subtype: str, lang=None) -> List[Lemma]:
+def get_lemmas_by_subtype(
+    session: Session, pos_subtype: str, lang: Optional[str] = None
+) -> List[Lemma]:
     """Get all lemmas for a specific subtype, ordered by GUID."""
     query = session.query(Lemma).filter(Lemma.pos_subtype == pos_subtype).filter(Lemma.guid != None)
     if lang == "chinese":
@@ -247,11 +251,11 @@ def get_lemmas_by_subtype(session, pos_subtype: str, lang=None) -> List[Lemma]:
 
 
 def get_lemmas_by_subtype_and_level(
-    session,
-    pos_subtype: str = None,
-    difficulty_level: int = None,
-    limit: int = None,
-    lang: str = None,
+    session: Session,
+    pos_subtype: Optional[str] = None,
+    difficulty_level: Optional[int] = None,
+    limit: Optional[int] = None,
+    lang: Optional[str] = None,
 ) -> List[Lemma]:
     """
     Get lemmas filtered by POS subtype and/or difficulty level.
@@ -343,13 +347,13 @@ def get_lemmas_by_subtype_and_level(
 
 
 def handle_lemma_type_subtype_change(
-    session,
+    session: Session,
     lemma: Lemma,
     new_pos_type: str,
     new_pos_subtype: Optional[str],
     source: str = "barsukas",
     notes: Optional[str] = None,
-) -> Dict[str, any]:
+) -> Dict[str, Any]:
     """
     Handle type/subtype changes for a lemma.
 

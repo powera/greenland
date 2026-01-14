@@ -10,19 +10,21 @@ This migration:
 
 import sys
 from pathlib import Path
+from typing import Tuple
 
 # Add src to path
 if str(Path(__file__).parent.parent.parent.parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
-from sqlalchemy import inspect, text
+from sqlalchemy import inspect, text  # type: ignore[import-not-found]
+from wordfreq.storage.backend.base import BaseSession
 
 from constants import WORDFREQ_DB_PATH
 from wordfreq.storage.database import create_database_session
 from wordfreq.storage.models.schema import Lemma, LemmaTranslation
 
 
-def check_column_exists(session, table_name: str, column_name: str) -> bool:
+def check_column_exists(session: BaseSession, table_name: str, column_name: str) -> bool:
     """Check if a column exists in a table.
 
     Args:
@@ -33,12 +35,12 @@ def check_column_exists(session, table_name: str, column_name: str) -> bool:
     Returns:
         True if column exists, False otherwise
     """
-    inspector = inspect(session.bind)
+    inspector = inspect(session.bind)  # type: ignore[attr-defined]
     columns = [col["name"] for col in inspector.get_columns(table_name)]
     return column_name in columns
 
 
-def add_definition_column(session):
+def add_definition_column(session: BaseSession) -> bool:
     """Add definition_text column to lemma_translations table if it doesn't exist.
 
     Args:
@@ -49,13 +51,15 @@ def add_definition_column(session):
         return False
 
     print("Adding 'definition_text' column to lemma_translations table...")
-    session.execute(text("ALTER TABLE lemma_translations ADD COLUMN definition_text TEXT"))
+    session.execute(text("ALTER TABLE lemma_translations ADD COLUMN definition_text TEXT"))  # type: ignore[attr-defined]
     session.commit()
     print("Column added successfully")
     return True
 
 
-def migrate_english_translations(session, dry_run: bool = False):
+def migrate_english_translations(
+    session: BaseSession, dry_run: bool = False
+) -> Tuple[int, int, int]:
     """Create English translation rows for all lemmas.
 
     Args:
@@ -119,7 +123,7 @@ def migrate_english_translations(session, dry_run: bool = False):
     return created, updated, skipped
 
 
-def main():
+def main() -> int:
     """Run the migration."""
     import argparse
 

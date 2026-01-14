@@ -10,6 +10,8 @@ import json
 import logging
 from typing import Any, Dict, List, Optional, Tuple
 
+from sqlalchemy.orm import Session
+
 from agents.common.wq_tools import build_default_config, get_lemma_or_raise
 import constants
 import util.prompt_loader
@@ -118,7 +120,7 @@ def query_synonyms_from_llm(
 
 
 def store_synonym_forms(
-    session,
+    session: Session,
     lemma: Lemma,
     language_code: str,
     synonyms: List[str],
@@ -216,7 +218,7 @@ def store_synonym_forms(
 
 
 def record_synonym_grammar_facts(
-    session,
+    session: Session,
     lemma_id: int,
     language_code: str,
     stored_counts: Dict[str, int],
@@ -265,7 +267,7 @@ def record_synonym_grammar_facts(
 
 
 def generate_synonyms_for_lemma(
-    session,
+    session: Session,
     lemma: Lemma,
     language_code: str = "en",
     config: Optional[DataSourceConfig] = None,
@@ -385,7 +387,7 @@ def generate_synonyms_for_lemma(
     }
 
 
-def handle_generate_synonyms(session, payload: Dict) -> str:
+def handle_generate_synonyms(session: Session, payload: Dict) -> str:
     """
     Handle synonym generation task (workqueue entry point).
 

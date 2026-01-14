@@ -41,7 +41,9 @@ Expected JSON format:
 import json
 import logging
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
+
+from wordfreq.storage.backend.base import BaseSession
 
 from wordfreq.storage.crud.sentence import add_sentence, calculate_minimum_level
 from wordfreq.storage.crud.sentence_translation import add_sentence_translation
@@ -53,7 +55,7 @@ logger = logging.getLogger(__name__)
 
 
 def import_sentence_from_dict(
-    session, sentence_data: dict, source_file: Optional[str] = None
+    session: BaseSession, sentence_data: Dict[str, Any], source_file: Optional[str] = None
 ) -> int:
     """
     Import a single sentence from a dictionary.
@@ -179,10 +181,10 @@ def import_sentence_from_dict(
             f"{len(words_used)} words, no difficulty level (missing word data)"
         )
 
-    return sentence.id
+    return int(sentence.id)
 
 
-def import_sentences_from_json(session, json_path: str) -> Dict[str, int]:
+def import_sentences_from_json(session: BaseSession, json_path: str) -> Dict[str, int]:
     """
     Import sentences from a JSON file.
 
@@ -233,7 +235,7 @@ def import_sentences_from_json(session, json_path: str) -> Dict[str, int]:
 
 
 def import_sentences_from_directory(
-    session, directory_path: str, pattern: str = "*.json"
+    session: BaseSession, directory_path: str, pattern: str = "*.json"
 ) -> Dict[str, int]:
     """
     Import all sentence JSON files from a directory.
@@ -286,7 +288,7 @@ def import_sentences_from_directory(
     return {"files": len(json_files), "imported": total_imported, "failed": total_failed}
 
 
-def main():
+def main() -> int:
     """Main entry point for sentence import script."""
     import argparse
 

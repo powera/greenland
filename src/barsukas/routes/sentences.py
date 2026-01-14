@@ -2,9 +2,12 @@
 
 """Routes for sentence management."""
 
+from typing import Any, Union
+
 from config import Config
 from flask import Blueprint, flash, g, redirect, render_template, request, url_for
 from sqlalchemy import case, func, or_
+from werkzeug.wrappers import Response
 
 from barsukas.helpers.flash_helpers import flash_and_log
 from barsukas.utils.task_queue import TaskType, enqueue_task
@@ -21,7 +24,7 @@ bp = Blueprint("sentences", __name__, url_prefix="/sentences")
 
 
 @bp.route("/")
-def list_sentences():
+def list_sentences() -> str:
     """List all sentences with pagination and filtering."""
     page = request.args.get("page", 1, type=int)
     search = request.args.get("search", "").strip()
@@ -114,7 +117,7 @@ def list_sentences():
 
 
 @bp.route("/<int:sentence_id>")
-def view_sentence(sentence_id):
+def view_sentence(sentence_id: int) -> Union[str, Response]:
     """View a single sentence with all translations."""
     sentence = g.db.query(Sentence).get(sentence_id)
     if not sentence:
@@ -142,7 +145,7 @@ def view_sentence(sentence_id):
     )
 
     # Group by language
-    words_by_language = {}
+    words_by_language: dict[str, list[dict[str, Any]]] = {}
     for sw in sentence_words:
         if sw.language_code not in words_by_language:
             words_by_language[sw.language_code] = []
@@ -197,7 +200,7 @@ def view_sentence(sentence_id):
 
 
 @bp.route("/<int:sentence_id>/update_level", methods=["POST"])
-def update_level(sentence_id):
+def update_level(sentence_id: int) -> Response:
     """Update the minimum level for a sentence."""
     sentence = g.db.query(Sentence).get(sentence_id)
     if not sentence:
@@ -225,7 +228,7 @@ def update_level(sentence_id):
 
 
 @bp.route("/<int:sentence_id>/auto_populate_level", methods=["POST"])
-def auto_populate_level(sentence_id):
+def auto_populate_level(sentence_id: int) -> Response:
     """Auto-populate the minimum level based on max difficulty_level of words in the sentence."""
     sentence = g.db.query(Sentence).get(sentence_id)
     if not sentence:
@@ -271,7 +274,7 @@ def auto_populate_level(sentence_id):
 
 
 @bp.route("/<int:sentence_id>/translate", methods=["POST"])
-def translate_sentence(sentence_id):
+def translate_sentence(sentence_id: int) -> Response:
     """Translate a sentence to selected languages."""
     sentence = g.db.query(Sentence).get(sentence_id)
     if not sentence:
@@ -332,7 +335,7 @@ def translate_sentence(sentence_id):
 
 
 @bp.route("/<int:sentence_id>/accept", methods=["POST"])
-def accept_sentence(sentence_id):
+def accept_sentence(sentence_id: int) -> Response:
     """Accept a sentence: generate translations for all languages and auto-populate level.
 
     This does NOT verify the sentence - that requires a separate Verify action.
@@ -383,7 +386,7 @@ def accept_sentence(sentence_id):
 
         if missing_translations:
             # Group by word for cleaner error messages
-            by_word = {}
+            by_word: dict[str, list[str]] = {}
             for item in missing_translations:
                 word = item["word"]
                 lang = item["language"]
@@ -438,7 +441,7 @@ def accept_sentence(sentence_id):
 
 
 @bp.route("/<int:sentence_id>/verify", methods=["POST"])
-def verify_sentence(sentence_id):
+def verify_sentence(sentence_id: int) -> Response:
     """Mark a sentence as verified. Requires translations and level to be set."""
     sentence = g.db.query(Sentence).get(sentence_id)
     if not sentence:
@@ -474,7 +477,7 @@ def verify_sentence(sentence_id):
 
 
 @bp.route("/<int:sentence_id>/reject", methods=["POST"])
-def reject_sentence(sentence_id):
+def reject_sentence(sentence_id: int) -> Response:
     """Mark a sentence as rejected so it won't be regenerated."""
     sentence = g.db.query(Sentence).get(sentence_id)
     if not sentence:

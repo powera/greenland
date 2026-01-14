@@ -12,7 +12,7 @@ import sys
 import tempfile
 from collections import defaultdict
 from pathlib import Path
-from typing import Dict, Set
+from typing import Any, Dict, List, Set, Tuple
 
 # Add src to path if running as script
 if __name__ == "__main__":
@@ -25,7 +25,7 @@ from wordfreq.storage.backend.config import BackendType, DataSourceConfig
 from wordfreq.storage.backend.factory import create_session
 
 
-def export_sqlite_to_jsonl(sqlite_path: str, jsonl_dir: str):
+def export_sqlite_to_jsonl(sqlite_path: str, jsonl_dir: str) -> None:
     """Export all data from SQLite to JSONL format.
 
     Args:
@@ -39,7 +39,7 @@ def export_sqlite_to_jsonl(sqlite_path: str, jsonl_dir: str):
     source_session_wrapper = create_session(source_config)
 
     # Get the underlying SQLAlchemy session for compatibility
-    source_session = source_session_wrapper._sqlalchemy_session
+    source_session = source_session_wrapper._sqlalchemy_session  # type: ignore[attr-defined]
 
     # Create target session (JSONL)
     target_config = DataSourceConfig(backend_type=BackendType.JSONL, jsonl_data_dir=jsonl_dir)
@@ -111,19 +111,15 @@ def export_sqlite_to_jsonl(sqlite_path: str, jsonl_dir: str):
         target_session.close()
 
 
-def convert_sqlalchemy_lemma_to_jsonl(lemma, session):
+def convert_sqlalchemy_lemma_to_jsonl(lemma: Any, session: Any) -> Any:
     """Convert SQLAlchemy Lemma to JSONL dataclass."""
     from wordfreq.storage import translation_helpers
     from wordfreq.storage.backend.jsonl import models as jsonl_models
 
     # Get translations from the new translation table
     all_translations = translation_helpers.get_all_translations(session, lemma)
-    # Remove None values
-    all_translations = {k: v for k, v in all_translations.items() if v is not None}
-
-    # Separate English from other translations
-    # English now goes into translations dict like all other languages
-    translations = all_translations.copy()
+    # Remove None values - cast to str after filtering
+    translations: Dict[str, str] = {k: v for k, v in all_translations.items() if v is not None}
 
     # Get difficulty overrides
     difficulty_overrides = {}
@@ -131,7 +127,7 @@ def convert_sqlalchemy_lemma_to_jsonl(lemma, session):
         difficulty_overrides[override.language_code] = override.difficulty_level
 
     # Get derivative forms
-    derivative_forms = {}
+    derivative_forms: Dict[str, Dict[str, Dict[str, Any]]] = {}
     for form in lemma.derivative_forms:
         lang_code = form.language_code
         if lang_code not in derivative_forms:
@@ -196,7 +192,7 @@ def convert_sqlalchemy_lemma_to_jsonl(lemma, session):
     )
 
 
-def convert_sqlalchemy_sentence_to_jsonl(sentence):
+def convert_sqlalchemy_sentence_to_jsonl(sentence: Any) -> Any:
     """Convert SQLAlchemy Sentence to JSONL dataclass.
 
     Sentences are split into different locations based on their source:
@@ -244,7 +240,7 @@ def convert_sqlalchemy_sentence_to_jsonl(sentence):
     )
 
 
-def convert_sqlalchemy_audio_review_to_jsonl(review):
+def convert_sqlalchemy_audio_review_to_jsonl(review: Any) -> Any:
     """Convert SQLAlchemy AudioQualityReview to JSONL dataclass."""
     from wordfreq.storage.backend.jsonl import models as jsonl_models
 
@@ -274,7 +270,7 @@ def convert_sqlalchemy_audio_review_to_jsonl(review):
     )
 
 
-def convert_sqlalchemy_operation_log_to_jsonl(log):
+def convert_sqlalchemy_operation_log_to_jsonl(log: Any) -> Any:
     """Convert SQLAlchemy OperationLog to JSONL dataclass."""
     from wordfreq.storage.backend.jsonl import models as jsonl_models
 
@@ -290,7 +286,7 @@ def convert_sqlalchemy_operation_log_to_jsonl(log):
     )
 
 
-def convert_sqlalchemy_tombstone_to_jsonl(tombstone):
+def convert_sqlalchemy_tombstone_to_jsonl(tombstone: Any) -> Any:
     """Convert SQLAlchemy GuidTombstone to JSONL dataclass."""
     from wordfreq.storage.backend.jsonl import models as jsonl_models
 
@@ -309,7 +305,7 @@ def convert_sqlalchemy_tombstone_to_jsonl(tombstone):
     )
 
 
-def export_sqlite_to_release(sqlite_path: str, release_dir: str):
+def export_sqlite_to_release(sqlite_path: str, release_dir: str) -> None:
     """Export SQLite to data/release format with separate language files.
 
     This creates:
@@ -414,7 +410,7 @@ def export_sqlite_to_release(sqlite_path: str, release_dir: str):
         session.close()
 
 
-def _write_jsonl_atomic(file_path: Path, records: list):
+def _write_jsonl_atomic(file_path: Path, records: List[Dict[str, Any]]) -> None:
     """Write JSONL file atomically.
 
     Args:
@@ -434,7 +430,7 @@ def _write_jsonl_atomic(file_path: Path, records: list):
     os.replace(tmp_file.name, file_path)
 
 
-def main():
+def main() -> None:
     """Main entry point."""
     parser = argparse.ArgumentParser(description="Migrate data between storage backends")
     parser.add_argument(

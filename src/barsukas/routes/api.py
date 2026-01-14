@@ -2,11 +2,12 @@
 
 """API routes for AJAX requests and REST API endpoints."""
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from config import Config
 from flask import Blueprint, g, jsonify, request
 from sqlalchemy import func, or_
+from werkzeug.wrappers import Response
 
 from wordfreq.storage.crud.grammar_fact import get_grammar_facts
 from wordfreq.storage.crud.lemma import get_lemma_by_guid
@@ -26,7 +27,7 @@ bp = Blueprint("api", __name__, url_prefix="/api")
 
 
 @bp.route("/check_lemma_exists")
-def check_lemma_exists():
+def check_lemma_exists() -> Response:
     """Check if a lemma exists or find similar lemmas."""
     search = request.args.get("search", "").strip()
     pos_type = request.args.get("pos_type", "").strip()
@@ -76,7 +77,7 @@ def check_lemma_exists():
 
 
 @bp.route("/auto_populate_lemma")
-def auto_populate_lemma():
+def auto_populate_lemma() -> Response:
     """Auto-populate lemma fields using LLM based on word and optional translation."""
     word = request.args.get("word", "").strip()
     translation = request.args.get("translation", "").strip()
@@ -175,7 +176,7 @@ The definition should be suitable for language learners."""
 
 
 @bp.route("/v1")
-def api_info():
+def api_info() -> Response:
     """
     Get information about the API and available endpoints.
 
@@ -304,7 +305,7 @@ def api_info():
 
 
 @bp.route("/v1/search")
-def search_lemmas():
+def search_lemmas() -> Response:
     """
     Search for lemmas by keyword across multiple fields.
 
@@ -470,23 +471,23 @@ def _serialize_value(value: Any, field_name: str = "") -> Any:
     return str(value)
 
 
-def _build_error_response(message: str, status_code: int = 400) -> tuple:
+def _build_error_response(message: str, status_code: int = 400) -> Tuple[Response, int]:
     """Build a standardized error response."""
     return jsonify({"error": message}), status_code
 
 
 def _build_success_response(
-    data: Dict[str, Any], metadata: Optional[Dict[str, Any]] = None
-) -> Dict[str, Any]:
+    data: Union[Dict[str, Any], List[Dict[str, Any]]], metadata: Optional[Dict[str, Any]] = None
+) -> Response:
     """Build a standardized success response with optional metadata."""
-    response = {"data": data}
+    response: Dict[str, Any] = {"data": data}
     if metadata:
         response["metadata"] = metadata
     return jsonify(response)
 
 
 @bp.route("/v1/lemma/<guid>")
-def get_lemma_info(guid: str):
+def get_lemma_info(guid: str) -> Union[Response, Tuple[Response, int]]:
     """
     Get basic information about a lemma by GUID.
 
@@ -525,7 +526,7 @@ def get_lemma_info(guid: str):
 
 
 @bp.route("/v1/lemma/<guid>/translations")
-def get_lemma_translations(guid: str):
+def get_lemma_translations(guid: str) -> Union[Response, Tuple[Response, int]]:
     """
     Get translations of a lemma in various languages.
 
@@ -554,6 +555,7 @@ def get_lemma_translations(guid: str):
     }
 
     # Filter by language if requested
+    translations: Dict[str, str]
     if language_filter:
         if language_filter in all_translations:
             translations = {language_filter: all_translations[language_filter]}
@@ -563,7 +565,7 @@ def get_lemma_translations(guid: str):
         translations = all_translations
 
     # Add metadata about available vs requested
-    metadata = {
+    metadata: Dict[str, Any] = {
         "guid": guid,
         "available_languages": list(all_translations.keys()),
     }
@@ -576,7 +578,7 @@ def get_lemma_translations(guid: str):
 
 
 @bp.route("/v1/lemma/<guid>/forms")
-def get_lemma_forms(guid: str):
+def get_lemma_forms(guid: str) -> Union[Response, Tuple[Response, int]]:
     """
     Get derivative/declined forms of a lemma (conjugations, declensions, etc.).
 
@@ -647,7 +649,7 @@ def get_lemma_forms(guid: str):
 
 
 @bp.route("/v1/lemma/<guid>/grammar")
-def get_lemma_grammar(guid: str):
+def get_lemma_grammar(guid: str) -> Union[Response, Tuple[Response, int]]:
     """
     Get grammar facts about a lemma (e.g., gender, plurale tantum, declension class).
 
@@ -710,7 +712,7 @@ def get_lemma_grammar(guid: str):
 
 
 @bp.route("/v1/lemma/<guid>/pronunciations")
-def get_lemma_pronunciations(guid: str):
+def get_lemma_pronunciations(guid: str) -> Union[Response, Tuple[Response, int]]:
     """
     Get pronunciations for the base forms of a lemma.
 
@@ -747,8 +749,8 @@ def get_lemma_pronunciations(guid: str):
     base_forms = query.all()
 
     # Build pronunciations dictionary (only include if at least one pronunciation exists)
-    pronunciations = {}
-    languages_present = set()
+    pronunciations: Dict[str, Dict[str, Any]] = {}
+    languages_present: set = set()
 
     for form in base_forms:
         ipa = form.ipa_pronunciation
@@ -762,7 +764,7 @@ def get_lemma_pronunciations(guid: str):
                 "phonetic": _serialize_value(phonetic),
             }
 
-    metadata = {
+    metadata: Dict[str, Any] = {
         "guid": guid,
         "languages_with_pronunciations": sorted(list(languages_present)),
     }
@@ -775,7 +777,7 @@ def get_lemma_pronunciations(guid: str):
 
 
 @bp.route("/v1/lemma/<guid>/sentences")
-def get_lemma_sentences(guid: str):
+def get_lemma_sentences(guid: str) -> Union[Response, Tuple[Response, int]]:
     """
     Get example sentences that use this lemma.
 

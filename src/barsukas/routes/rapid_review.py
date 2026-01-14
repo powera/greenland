@@ -8,8 +8,19 @@ Provides streamlined keyboard-driven audio quality review interface.
 
 import json
 from datetime import datetime
+from typing import Union
 
-from flask import Blueprint, flash, g, jsonify, redirect, render_template, request, url_for
+from flask import (
+    Blueprint,
+    Response,
+    flash,
+    g,
+    jsonify,
+    redirect,
+    render_template,
+    request,
+    url_for,
+)
 from sqlalchemy import and_, or_
 from sqlalchemy.orm import joinedload
 
@@ -21,7 +32,7 @@ bp = Blueprint("rapid_review", __name__, url_prefix="/audio/rapid-review")
 
 
 @bp.route("/")
-def index():
+def index() -> Union[str, Response]:
     """Streamlined rapid review interface with keyboard shortcuts."""
     # Get filter parameters - default to pending_review
     # Language is REQUIRED - redirect to list if not provided
@@ -131,7 +142,7 @@ def index():
 
 
 @bp.route("/submit/<int:review_id>", methods=["POST"])
-def submit(review_id):
+def submit(review_id: int) -> Response:
     """Submit rapid review and get next file (AJAX endpoint)."""
     review = g.db.query(AudioQualityReview).filter_by(id=review_id).first()
 
@@ -251,7 +262,7 @@ def submit(review_id):
 
 
 @bp.route("/skip/<int:review_id>", methods=["POST"])
-def skip(review_id):
+def skip(review_id: int) -> Response:
     """Skip current review and get next file without changing status (AJAX endpoint)."""
     review = g.db.query(AudioQualityReview).filter_by(id=review_id).first()
 
@@ -358,7 +369,7 @@ def skip(review_id):
 
 
 @bp.route("/bad-translation/<int:review_id>", methods=["POST"])
-def bad_translation(review_id):
+def bad_translation(review_id: int) -> Response:
     """Mark translation as bad and get next file (AJAX endpoint)."""
     review = g.db.query(AudioQualityReview).filter_by(id=review_id).first()
 

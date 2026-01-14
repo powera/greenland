@@ -7,6 +7,7 @@ import sys
 import threading
 import time
 from pathlib import Path
+from typing import Tuple, Union
 
 from flask import (
     Blueprint,
@@ -18,6 +19,7 @@ from flask import (
     request,
     url_for,
 )
+from werkzeug.wrappers import Response
 
 from wordfreq.storage.backend import get_backend_type
 from wordfreq.storage.backend.config import BackendType
@@ -31,7 +33,7 @@ _shutdown_requested = False
 
 
 @bp.route("/")
-def index():
+def index() -> str:
     """Settings page."""
     backend_type = get_backend_type()
     backend_config = current_app.backend_config
@@ -52,11 +54,11 @@ def index():
 
 
 @bp.route("/migrate-form", methods=["POST"])
-def migrate_form():
+def migrate_form() -> Response:
     """Trigger migration from SQLite to JSONL (form submission)."""
     direction = "sqlite-to-jsonl"
-    sqlite_path = request.form.get("sqlite_path", current_app.config.get("DB_PATH"))
-    jsonl_dir = request.form.get("jsonl_dir", "data/working")
+    sqlite_path: str = request.form.get("sqlite_path", current_app.config.get("DB_PATH", ""))
+    jsonl_dir: str = request.form.get("jsonl_dir", "data/working")
 
     # Validate paths
     if not Path(sqlite_path).exists():
@@ -91,17 +93,19 @@ def migrate_form():
 
 
 @bp.route("/migrate", methods=["POST"])
-def migrate():
+def migrate() -> Union[Response, Tuple[Response, int]]:
     """Trigger migration from SQLite to JSONL (JSON API)."""
     data = request.get_json()
-    direction = data.get("direction", "sqlite-to-jsonl")
+    direction: str = data.get("direction", "sqlite-to-jsonl") if data else "sqlite-to-jsonl"
 
     if direction != "sqlite-to-jsonl":
         return jsonify({"error": "Only sqlite-to-jsonl migration is supported currently"}), 400
 
     # Get paths
-    sqlite_path = data.get("sqlite_path", current_app.config.get("DB_PATH"))
-    jsonl_dir = data.get("jsonl_dir", "data/working")
+    sqlite_path: str = (
+        data.get("sqlite_path", current_app.config.get("DB_PATH", "")) if data else ""
+    )
+    jsonl_dir: str = data.get("jsonl_dir", "data/working") if data else "data/working"
 
     # Validate paths
     if not Path(sqlite_path).exists():
@@ -110,7 +114,7 @@ def migrate():
     try:
         # Build command
         script_path = Path(__file__).parent.parent.parent.parent / "scripts" / "migrate_backend.py"
-        cmd = [
+        cmd: list = [
             sys.executable,
             str(script_path),
             direction,
@@ -147,7 +151,7 @@ def migrate():
 
 
 @bp.route("/backend/switch", methods=["POST"])
-def switch_backend():
+def switch_backend() -> Tuple[Response, int]:
     """Switch to a different backend.
 
     Note: This doesn't actually switch the backend in the current process.
@@ -177,12 +181,14 @@ def switch_backend():
 
 
 @bp.route("/backend/info", methods=["GET"])
-def backend_info():
+def backend_info() -> Response:
     """Get information about the current backend."""
+    from typing import Any
+
     backend_type = get_backend_type()
     backend_config = current_app.backend_config
 
-    info = {
+    info: dict = {
         "backend_type": backend_type.value,
         "config": str(backend_config),
     }
@@ -200,7 +206,7 @@ def backend_info():
 
 
 @bp.route("/restart", methods=["POST"])
-def restart():
+def restart() -> Response:
     """Initiate a graceful restart of the Barsukas process.
 
     This endpoint:
@@ -216,7 +222,7 @@ def restart():
     _shutdown_requested = True
 
     # Start restart in background thread
-    def do_restart():
+    def do_restart() -> None:
         # Wait a moment for this response to be sent
         time.sleep(0.5)
 
@@ -257,7 +263,7 @@ def restart():
 
 
 @bp.route("/restart/status", methods=["GET"])
-def restart_status():
+def restart_status() -> Response:
     """Check the status of an ongoing restart.
 
     Note: This endpoint is exempt from request tracking to avoid
@@ -276,7 +282,7 @@ def restart_status():
 
 
 @bp.before_request
-def track_request_start():
+def track_request_start() -> None:
     """Track when a request starts.
 
     Exempt the restart/status endpoint from tracking so polling
@@ -293,7 +299,7 @@ def track_request_start():
 
 
 @bp.after_request
-def track_request_end(response):
+def track_request_end(response: Response) -> Response:
     """Track when a request ends."""
     global _active_requests
 

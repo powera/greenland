@@ -192,7 +192,7 @@ def fetch_wiktionary_page(word: str, language_code: str = "lt") -> Optional[str]
 
             revisions = page_data.get("revisions", [])
             if revisions:
-                content = revisions[0].get("slots", {}).get("main", {}).get("*", "")
+                content: str = revisions[0].get("slots", {}).get("main", {}).get("*", "")
                 return content
 
         return None
@@ -318,7 +318,7 @@ def expand_wikitext_template(wikitext: str) -> Optional[str]:
             logger.warning(f"Error expanding templates: {data['error']}")
             return None
 
-        expanded = data.get("expandtemplates", {}).get("wikitext", "")
+        expanded: str = data.get("expandtemplates", {}).get("wikitext", "")
         return expanded
 
     except requests.RequestException as e:
@@ -356,7 +356,7 @@ def parse_wikitext_to_html(wikitext: str) -> Optional[str]:
             logger.warning(f"Error parsing wikitext: {data['error']}")
             return None
 
-        html = data.get("parse", {}).get("text", {}).get("*", "")
+        html: str = data.get("parse", {}).get("text", {}).get("*", "")
         return html
 
     except requests.RequestException as e:
@@ -450,7 +450,7 @@ def extract_declension_from_html(html: str) -> Dict[str, str]:
                 declensions[f"{matched_case}_singular"] = cleaned_singular[0]
                 # Store alternatives if present
                 if len(cleaned_singular) > 1:
-                    declensions[f"{matched_case}_singular_alt"] = cleaned_singular[1:]
+                    declensions[f"{matched_case}_singular_alt"] = "/".join(cleaned_singular[1:])
 
             # Third cell is plural form
             plural_form = cells[2].get_text(strip=True)
@@ -460,7 +460,7 @@ def extract_declension_from_html(html: str) -> Dict[str, str]:
                 declensions[f"{matched_case}_plural"] = cleaned_plural[0]
                 # Store alternatives if present
                 if len(cleaned_plural) > 1:
-                    declensions[f"{matched_case}_plural_alt"] = cleaned_plural[1:]
+                    declensions[f"{matched_case}_plural_alt"] = "/".join(cleaned_plural[1:])
 
         elif len(cells) == 2:
             # Plurale tantum (plural-only) table
@@ -471,7 +471,7 @@ def extract_declension_from_html(html: str) -> Dict[str, str]:
                 declensions[f"{matched_case}_plural"] = cleaned_plural[0]
                 # Store alternatives if present
                 if len(cleaned_plural) > 1:
-                    declensions[f"{matched_case}_plural_alt"] = cleaned_plural[1:]
+                    declensions[f"{matched_case}_plural_alt"] = "/".join(cleaned_plural[1:])
 
     logger.info(f"Extracted {len(declensions)} declension forms from HTML table")
     return declensions
@@ -543,7 +543,7 @@ def get_lithuanian_noun_forms(word: str) -> Tuple[Dict[str, str], bool]:
     return get_lithuanian_declensions(word)
 
 
-def test_wiktionary_fetch():
+def test_wiktionary_fetch() -> None:
     """
     Test function to verify Wiktionary API access and parsing.
 
@@ -589,7 +589,7 @@ def test_wiktionary_fetch():
         logger.error(f"\n✗ Failed to extract declensions for '{test_word}'")
 
 
-def test_stress_mark_removal():
+def test_stress_mark_removal() -> bool:
     """
     Test that stress marks are removed but Lithuanian letters are preserved.
     """
@@ -659,7 +659,7 @@ def test_stress_mark_removal():
     return all_passed
 
 
-def test_clean_declension_form():
+def test_clean_declension_form() -> bool:
     """
     Test the full cleaning function with alternatives.
     """

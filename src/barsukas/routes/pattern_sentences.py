@@ -4,9 +4,11 @@
 
 import subprocess
 from pathlib import Path
+from typing import Any, cast, Tuple, Union
 
 from config import Config
 from flask import Blueprint, flash, g, jsonify, redirect, render_template, request, url_for
+from werkzeug.wrappers import Response
 
 import constants
 from wordfreq.patterns.simple_patterns import SIMPLE_PATTERNS
@@ -17,12 +19,13 @@ bp = Blueprint("pattern_sentences", __name__, url_prefix="/pattern-sentences")
 
 
 @bp.route("/")
-def index():
+def index() -> str:
     """Display the pattern sentence generation interface."""
     # Get statistics on existing pattern sentences
-    stats = {}
+    stats: dict[str, int] = {}
     for pattern in SIMPLE_PATTERNS:
-        pattern_id = pattern["pattern_id"]
+        pattern_dict = cast(dict[str, Any], pattern)
+        pattern_id = pattern_dict["pattern_id"]
         count = (
             g.db.query(Sentence).filter(Sentence.source_filename == f"pattern:{pattern_id}").count()
         )
@@ -40,7 +43,7 @@ def index():
 
 
 @bp.route("/generate-candidates", methods=["POST"])
-def generate_candidates():
+def generate_candidates() -> Tuple[Response, int]:
     """Execute the buivolas agent to generate candidate sentences (without translations)."""
     # Get form parameters
     selected_patterns = request.form.getlist("patterns")
@@ -113,7 +116,7 @@ def generate_candidates():
 
 
 @bp.route("/submit-batch", methods=["POST"])
-def submit_batch():
+def submit_batch() -> Tuple[Response, int]:
     """Submit a batch translation job for untranslated sentences.
 
     NOTE: This function references a 'submit-batch' subcommand that does not exist
@@ -189,7 +192,7 @@ def submit_batch():
 
 
 @bp.route("/batch-status")
-def batch_status():
+def batch_status() -> Response:
     """Get status of all active batches.
 
     NOTE: This function references a 'list-batches' subcommand that does not exist
@@ -221,7 +224,7 @@ def batch_status():
 
 
 @bp.route("/check-batch/<batch_id>")
-def check_batch(batch_id):
+def check_batch(batch_id: str) -> Response:
     """Check status of a specific batch and retrieve results if completed.
 
     NOTE: This function references 'check-batch' and 'retrieve-batch' subcommands that do not exist
@@ -290,7 +293,7 @@ def check_batch(batch_id):
 
 
 @bp.route("/retrieve-batch/<batch_id>", methods=["POST"])
-def retrieve_batch(batch_id):
+def retrieve_batch(batch_id: str) -> Tuple[Response, int]:
     """Retrieve and apply results from a completed batch.
 
     NOTE: This function references a 'retrieve-batch' subcommand that does not exist
@@ -342,7 +345,7 @@ def retrieve_batch(batch_id):
 
 
 @bp.route("/<int:sentence_id>/reject", methods=["POST"])
-def reject_sentence(sentence_id):
+def reject_sentence(sentence_id: int) -> Response:
     """Mark a sentence as rejected so it won't be regenerated."""
     sentence = g.db.query(Sentence).get(sentence_id)
     if not sentence:
@@ -362,7 +365,7 @@ def reject_sentence(sentence_id):
 
 
 @bp.route("/<int:sentence_id>/accept", methods=["POST"])
-def accept_sentence(sentence_id):
+def accept_sentence(sentence_id: int) -> Response:
     """Accept a sentence: generate translations for all languages and auto-populate level.
 
     This does NOT verify the sentence - that requires a separate Verify action.
@@ -437,7 +440,7 @@ def accept_sentence(sentence_id):
 
 
 @bp.route("/<int:sentence_id>/verify", methods=["POST"])
-def verify_sentence(sentence_id):
+def verify_sentence(sentence_id: int) -> Response:
     """Mark a sentence as verified. Requires translations and level to be set."""
     sentence = g.db.query(Sentence).get(sentence_id)
     if not sentence:
@@ -473,7 +476,7 @@ def verify_sentence(sentence_id):
 
 
 @bp.route("/view")
-def view():
+def view() -> str:
     """View generated pattern sentences with pagination."""
     page = request.args.get("page", 1, type=int)
     pattern_id = request.args.get("pattern_id", None)

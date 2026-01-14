@@ -1,12 +1,12 @@
 """Audio-specific helper functions for the Barsukas UI."""
 
-from typing import Optional
+from typing import Any, Optional, cast
 
 from wordfreq.storage.models.schema import Lemma
 
 
 def link_audio_to_lemma(
-    session, guid: str, expected_text: str, language_code: str
+    session: Any, guid: str, expected_text: str, language_code: str
 ) -> Optional[int]:
     """
     Hybrid approach to link audio file to lemma.
@@ -26,7 +26,7 @@ def link_audio_to_lemma(
     # Try GUID match first
     lemma = session.query(Lemma).filter_by(guid=guid).first()
     if lemma:
-        return lemma.id
+        return cast(int, lemma.id)
 
     # Fallback to text matching based on language
     # Map language codes to column names
@@ -49,19 +49,21 @@ def link_audio_to_lemma(
             .first()
         )
         if translation:
-            return translation.lemma_id
+            return cast(int, translation.lemma_id)
 
     # For column-based translations
     elif language_code in language_column_map:
         column_name = language_column_map[language_code]
         lemma = session.query(Lemma).filter(getattr(Lemma, column_name) == expected_text).first()
         if lemma:
-            return lemma.id
+            return cast(int, lemma.id)
 
     return None
 
 
-def validate_audio_translation(session, guid: str, expected_text: str, language_code: str) -> dict:
+def validate_audio_translation(
+    session: Any, guid: str, expected_text: str, language_code: str
+) -> dict:
     """
     Validate that audio file's expected text matches the current translation in the database.
 

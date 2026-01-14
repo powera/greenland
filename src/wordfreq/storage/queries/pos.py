@@ -1,15 +1,17 @@
 """POS-based query functions."""
 
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
+
+from sqlalchemy.orm import Session
 
 from wordfreq.storage.models.schema import Corpus, DerivativeForm, Lemma, WordFrequency, WordToken
 
 
 def get_common_words_by_pos(
-    session,
+    session: Session,
     pos_type: str,
     language_code: str = "en",
-    pos_subtype: str = None,
+    pos_subtype: Optional[str] = None,
     corpus_name: str = "wiki_vital",
     limit: int = 50,
 ) -> List[Dict[str, Any]]:
@@ -66,10 +68,10 @@ def get_common_words_by_pos(
 
 
 def get_common_base_forms_by_pos(
-    session,
+    session: Session,
     pos_type: str,
     language_code: str = "en",
-    pos_subtype: str = None,
+    pos_subtype: Optional[str] = None,
     corpus_name: str = "wiki_vital",
     limit: int = 50,
 ) -> List[Dict[str, Any]]:

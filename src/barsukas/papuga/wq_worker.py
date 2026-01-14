@@ -9,6 +9,8 @@ from __future__ import annotations
 import logging
 from typing import Dict, List, Optional, Tuple
 
+from sqlalchemy.orm import Session
+
 from agents.common.wq_tools import build_default_config, get_lemma_or_raise
 import constants
 from wordfreq.storage.backend.config import DataSourceConfig
@@ -24,7 +26,7 @@ from wordfreq.tools.llm_validators import generate_pronunciation
 logger = logging.getLogger(__name__)
 
 
-def get_example_sentence_for_lemma(session, lemma_id: int) -> Optional[str]:
+def get_example_sentence_for_lemma(session: Session, lemma_id: int) -> Optional[str]:
     """
     Get an example English sentence containing the lemma.
 
@@ -87,7 +89,7 @@ def generate_pronunciation_for_form(
 
 
 def generate_pronunciations_for_lemma(
-    session,
+    session: Session,
     lemma: Lemma,
     lang_code: str = "en",
     config: Optional[DataSourceConfig] = None,
@@ -153,7 +155,7 @@ def generate_pronunciations_for_lemma(
     return generated_count, errors
 
 
-def handle_generate_pronunciations(session, payload: Dict) -> str:
+def handle_generate_pronunciations(session: Session, payload: Dict) -> str:
     """
     Handle pronunciation generation task (workqueue entry point).
 

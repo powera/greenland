@@ -14,7 +14,7 @@ import json
 import logging
 from dataclasses import dataclass
 from datetime import datetime
-from typing import TYPE_CHECKING, Dict, Optional
+from typing import TYPE_CHECKING, Dict, List, Optional
 
 from wordfreq.storage.models.schema import BarsukasTask
 
@@ -58,7 +58,7 @@ def _serialize_payload(payload: Optional[Dict]) -> Optional[str]:
 
 
 def enqueue_task(
-    session,
+    session: "Session",
     *,
     task_type: str,
     target_type: Optional[str],
@@ -157,13 +157,13 @@ def claim_next_task(session: "Session") -> Optional[BarsukasTask]:
             task.status = TaskStatus.RUNNING
             task.started_at = datetime.utcnow()
             session.flush()
-            return task
+            return task  # type: ignore[no-any-return]
 
     # All pending tasks are blocked by earlier dependencies
     return None
 
 
-def mark_task_complete(session, task: BarsukasTask, message: str) -> None:
+def mark_task_complete(session: "Session", task: BarsukasTask, message: str) -> None:
     task.status = TaskStatus.COMPLETED
     task.result_message = message
     task.finished_at = datetime.utcnow()
@@ -171,7 +171,7 @@ def mark_task_complete(session, task: BarsukasTask, message: str) -> None:
 
 
 def mark_task_failed(
-    session, task: BarsukasTask, message: str, error_detail: Optional[str] = None
+    session: "Session", task: BarsukasTask, message: str, error_detail: Optional[str] = None
 ) -> None:
     task.status = TaskStatus.FAILED
     task.result_message = message
@@ -180,8 +180,10 @@ def mark_task_failed(
     session.flush()
 
 
-def get_tasks_for_target(session, target_type: str, target_id: int, limit: int = 10):
-    return (
+def get_tasks_for_target(
+    session: "Session", target_type: str, target_id: int, limit: int = 10
+) -> List[BarsukasTask]:
+    return (  # type: ignore[no-any-return]
         session.query(BarsukasTask)
         .filter(
             BarsukasTask.target_type == target_type,
@@ -196,8 +198,8 @@ def get_tasks_for_target(session, target_type: str, target_id: int, limit: int =
     )
 
 
-def get_active_task(session, dedup_key: str) -> Optional[BarsukasTask]:
-    return (
+def get_active_task(session: "Session", dedup_key: str) -> Optional[BarsukasTask]:
+    return (  # type: ignore[no-any-return]
         session.query(BarsukasTask)
         .filter(
             BarsukasTask.dedup_key == dedup_key,

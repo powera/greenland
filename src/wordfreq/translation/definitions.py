@@ -4,7 +4,7 @@
 
 import json
 import logging
-from typing import Any, Dict, List, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple, cast
 
 import util.prompt_loader
 from clients.types import Schema, SchemaProperty
@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 def query_definitions(
-    client, word: str, get_session_func, model: str = None
+    client: Any, word: str, get_session_func: Callable, model: Optional[str] = None
 ) -> Tuple[List[Dict[str, Any]], bool]:
     """
     Query LLM for definitions, POS, and lemma information.
@@ -121,7 +121,7 @@ def query_definitions(
     prompt = prompt_template.format(word=word)
 
     # Get model name from parameter or client attribute
-    model_name = model or getattr(client, "model", "gpt-5-mini")
+    model_name: str = cast(str, model or getattr(client, "model", "gpt-5-mini"))
 
     try:
         # Make a single API call without retries

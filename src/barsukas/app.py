@@ -8,9 +8,11 @@ and difficulty levels in the linguistics database.
 """
 
 import argparse
+import json
 import logging
 import sys
 from pathlib import Path
+from typing import Any, Callable, Dict, Optional
 
 from config import Config
 from flask import Flask, g, render_template
@@ -36,7 +38,7 @@ from wordfreq.storage.backend import create_session, get_backend_type
 from wordfreq.storage.backend.config import BackendType, DataSourceConfig
 
 
-def create_app(config_class=Config):
+def create_app(config_class: type[Config] = Config) -> Flask:
     """Create and configure the Flask application."""
     logging.basicConfig(
         level=logging.DEBUG if config_class.DEBUG else logging.INFO,
@@ -65,7 +67,7 @@ def create_app(config_class=Config):
     app.backend_config = backend_config
 
     # Create a session factory function that returns new sessions
-    def session_factory():
+    def session_factory() -> Any:
         return create_session(backend_config)
 
     app.db_session_factory = session_factory
@@ -92,12 +94,10 @@ def create_app(config_class=Config):
     app.jinja_env.filters["is_chinese"] = is_chinese
 
     # Register JSON filter for parsing JSON strings in templates
-    import json
-
     app.jinja_env.filters["fromjson"] = json.loads
 
     # Register filter to extract grammatical case from grammatical_form
-    def extract_case(grammatical_form):
+    def extract_case(grammatical_form: Optional[str]) -> Optional[str]:
         """Extract case from grammatical_form string.
 
         For Lithuanian/German, grammatical_form includes case like:
@@ -136,12 +136,12 @@ def create_app(config_class=Config):
     app.jinja_env.filters["extract_case"] = extract_case
 
     @app.before_request
-    def before_request():
+    def before_request() -> None:
         """Set up database session for each request."""
         g.db = app.db_session_factory()
 
     @app.teardown_appcontext
-    def shutdown_session(exception=None):
+    def shutdown_session(exception: Optional[Exception] = None) -> None:
         """Clean up database session after request."""
         db = g.pop("db", None)
         if db is not None:
@@ -152,7 +152,7 @@ def create_app(config_class=Config):
             db.close()
 
     @app.route("/")
-    def index():
+    def index() -> Any:
         """Home page with search and quick stats."""
         from wordfreq.storage.backend.models import get_lemma_model, get_sentence_model
 
@@ -174,14 +174,14 @@ def create_app(config_class=Config):
         )
 
     @app.context_processor
-    def utility_processor():
+    def utility_processor() -> Dict[str, Any]:
         """Add utility functions to Jinja templates."""
         return {"config": app.config}
 
     return app
 
 
-def main():
+def main() -> None:
     """Run the Flask development server."""
     parser = argparse.ArgumentParser(description="Barsukas Web Interface")
     parser.add_argument(

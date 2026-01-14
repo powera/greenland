@@ -3,13 +3,15 @@
 """CRUD operations for OperationLog model."""
 
 import json
-from typing import Optional
+from typing import Any, Optional
+
+from sqlalchemy.orm import Session
 
 from wordfreq.storage.models.operation_log import OperationLog
 
 
 def log_operation(
-    session,
+    session: Session,
     operation_type: str,
     source: Optional[str] = None,
     entity_type: Optional[str] = None,
@@ -19,7 +21,7 @@ def log_operation(
     lemma_id: Optional[int] = None,
     word_token_id: Optional[int] = None,
     derivative_form_id: Optional[int] = None,
-    **extra_data,
+    **extra_data: Any,
 ) -> OperationLog:
     """
     Log a general operation to the operation log.
@@ -84,7 +86,7 @@ def log_operation(
 
 
 def log_translation_change(
-    session,
+    session: Session,
     source: str,
     operation_type: str,
     lemma_id: Optional[int] = None,
@@ -93,7 +95,7 @@ def log_translation_change(
     new_translation: Optional[str] = None,
     word_token_id: Optional[int] = None,
     derivative_form_id: Optional[int] = None,
-    **extra_data,
+    **extra_data: Any,
 ) -> OperationLog:
     """
     Log a translation change operation.

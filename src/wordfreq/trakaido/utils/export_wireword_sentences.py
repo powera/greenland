@@ -38,7 +38,7 @@ class WirewordSentenceExporter:
 
     def __init__(
         self,
-        db_path: str = None,
+        db_path: Optional[str] = None,
         debug: bool = False,
         language: str = "lt",
         simplified_chinese: bool = True,
@@ -60,12 +60,12 @@ class WirewordSentenceExporter:
         if debug:
             logger.setLevel(logging.DEBUG)
 
-    def get_session(self):
+    def get_session(self) -> Any:
         """Get database session."""
         return create_database_session(self.db_path)
 
     def get_audio_for_sentence(
-        self, session, sentence: Sentence, language_code: str
+        self, session: Any, sentence: Sentence, language_code: str
     ) -> Dict[str, str]:
         """
         Get audio MD5 hashes for a sentence in a specific language.
@@ -233,8 +233,7 @@ class WirewordSentenceExporter:
         output_path: str,
         include_all_languages: bool = False,
     ) -> int:
-        """
-        Export sentences to a JSON file.
+        """Export sentences to a JSON file.
 
         Args:
             output_path: Path to output JSON file
@@ -264,15 +263,14 @@ class WirewordSentenceExporter:
         GrammaticalForm enum value used by wireword nouns/verbs exports. Falls
         back to None if no compatible form is available.
         """
-
-        grammatical_form = sentence_word.grammatical_form
+        grammatical_form: Optional[str] = sentence_word.grammatical_form
         if grammatical_form and grammatical_form in GrammaticalForm._value2member_map_:
             return grammatical_form
 
         return None
 
 
-def main():
+def main() -> None:
     """CLI entry point for wireword sentence export."""
     import argparse
 

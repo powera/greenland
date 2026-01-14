@@ -2,8 +2,10 @@
 
 """Routes for difficulty override management."""
 
+from typing import Union
+
 from config import Config
-from flask import Blueprint, flash, g, redirect, request, url_for
+from flask import Blueprint, Response, flash, g, redirect, request, url_for
 
 from barsukas.helpers.flash_helpers import flash_and_log
 from wordfreq.storage.crud.difficulty_override import (
@@ -19,7 +21,7 @@ bp = Blueprint("overrides", __name__, url_prefix="/overrides")
 
 
 @bp.route("/<int:lemma_id>/add", methods=["POST"])
-def add_override(lemma_id):
+def add_override(lemma_id: int) -> Response:
     """Add or update a difficulty override."""
     from flask import current_app
 
@@ -93,7 +95,7 @@ def add_override(lemma_id):
 
 
 @bp.route("/<int:lemma_id>/<lang_code>/delete", methods=["POST"])
-def delete_override(lemma_id, lang_code):
+def delete_override(lemma_id: int, lang_code: str) -> Response:
     """Delete a difficulty override."""
     from flask import current_app
 

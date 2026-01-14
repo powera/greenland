@@ -4,6 +4,7 @@ import logging
 from typing import Dict, List, Optional
 
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
 
 from wordfreq.storage.models.grammar_fact import GrammarFact
 
@@ -11,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 def add_grammar_fact(
-    session,
+    session: Session,
     lemma_id: int,
     language_code: str,
     fact_type: str,
@@ -73,7 +74,10 @@ def add_grammar_fact(
 
 
 def get_grammar_facts(
-    session, lemma_id: int, language_code: Optional[str] = None, fact_type: Optional[str] = None
+    session: Session,
+    lemma_id: int,
+    language_code: Optional[str] = None,
+    fact_type: Optional[str] = None,
 ) -> List[GrammarFact]:
     """
     Get grammar facts for a lemma.
@@ -109,7 +113,7 @@ def get_grammar_facts(
 
 
 def get_grammar_fact_value(
-    session, lemma_id: int, language_code: str, fact_type: str
+    session: Session, lemma_id: int, language_code: str, fact_type: str
 ) -> Optional[str]:
     """
     Get a specific grammar fact value for a lemma.
@@ -148,7 +152,7 @@ def get_grammar_fact_value(
     return fact.fact_value if fact else None
 
 
-def is_plurale_tantum(session, lemma_id: int, language_code: str) -> bool:
+def is_plurale_tantum(session: Session, lemma_id: int, language_code: str) -> bool:
     """
     Check if a lemma is plurale tantum (plural-only) in a given language.
 
@@ -168,7 +172,9 @@ def is_plurale_tantum(session, lemma_id: int, language_code: str) -> bool:
     return number_type == "plurale_tantum"
 
 
-def delete_grammar_fact(session, lemma_id: int, language_code: str, fact_type: str) -> bool:
+def delete_grammar_fact(
+    session: Session, lemma_id: int, language_code: str, fact_type: str
+) -> bool:
     """
     Delete a specific grammar fact.
 
@@ -201,7 +207,7 @@ def delete_grammar_fact(session, lemma_id: int, language_code: str, fact_type: s
 
 
 def get_alternate_forms_facts(
-    session, lemma_id: int, language_code: str
+    session: Session, lemma_id: int, language_code: str
 ) -> Optional[Dict[str, bool]]:
     """
     Get the alternate forms grammar facts for a lemma in a specific language.
@@ -268,7 +274,7 @@ def get_alternate_forms_facts(
     return results
 
 
-def get_measure_word(session, lemma_id: int, language_code: str = "zh") -> Optional[str]:
+def get_measure_word(session: Session, lemma_id: int, language_code: str = "zh") -> Optional[str]:
     """
     Get the measure word (classifier) for a Chinese noun.
 
@@ -288,7 +294,7 @@ def get_measure_word(session, lemma_id: int, language_code: str = "zh") -> Optio
     return get_grammar_fact_value(session, lemma_id, language_code, "measure_words")
 
 
-def get_grammatical_gender(session, lemma_id: int, language_code: str) -> Optional[str]:
+def get_grammatical_gender(session: Session, lemma_id: int, language_code: str) -> Optional[str]:
     """
     Get the grammatical gender for a noun in gendered languages.
 
@@ -310,7 +316,7 @@ def get_grammatical_gender(session, lemma_id: int, language_code: str) -> Option
     return get_grammar_fact_value(session, lemma_id, language_code, "gender")
 
 
-def get_declension_class(session, lemma_id: int, language_code: str) -> Optional[str]:
+def get_declension_class(session: Session, lemma_id: int, language_code: str) -> Optional[str]:
     """
     Get the declension class for a noun in languages with declensions.
 
@@ -331,7 +337,7 @@ def get_declension_class(session, lemma_id: int, language_code: str) -> Optional
 
 
 def update_alternate_forms_facts_after_deletion(
-    session, lemma_id: int, language_code: str, deleted_form_type: Optional[str] = None
+    session: Session, lemma_id: int, language_code: str, deleted_form_type: Optional[str] = None
 ) -> Dict[str, bool]:
     """
     Update grammar facts for alternate forms after a derivative form is deleted.
@@ -384,8 +390,8 @@ def update_alternate_forms_facts_after_deletion(
 
     # Determine which fact types to update
     if deleted_form_type:
-        fact_types_to_update = [form_to_fact_map.get(deleted_form_type)]
-        fact_types_to_update = [ft for ft in fact_types_to_update if ft]  # Remove None
+        fact_type_to_update = form_to_fact_map.get(deleted_form_type)
+        fact_types_to_update: List[str] = [fact_type_to_update] if fact_type_to_update else []
     else:
         # Update all fact types
         fact_types_to_update = list(set(form_to_fact_map.values()))

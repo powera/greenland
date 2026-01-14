@@ -7,7 +7,7 @@ This module provides a thread-safe connection pool for SQLite databases.
 
 import logging
 import threading
-from typing import Dict, Optional
+from typing import Any, Dict, Optional
 
 from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
@@ -23,10 +23,11 @@ logger = logging.getLogger(__name__)
 class ConnectionPool:
     """Thread-safe connection pool for SQLite databases."""
 
-    _instance = None
+    _instance: Optional["ConnectionPool"] = None
     _lock = threading.Lock()
+    _initialized: bool = False
 
-    def __new__(cls):
+    def __new__(cls) -> "ConnectionPool":
         """Singleton pattern implementation with thread safety."""
         with cls._lock:
             if cls._instance is None:
@@ -34,7 +35,7 @@ class ConnectionPool:
                 cls._instance._initialized = False
             return cls._instance
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the connection pool."""
         # Skip initialization if already done
         if self._initialized:
@@ -103,7 +104,7 @@ class ConnectionPool:
 
         return self._thread_local.sessions[db_path]
 
-    def close_thread_sessions(self):
+    def close_thread_sessions(self) -> None:
         """Close all sessions for the current thread."""
         if hasattr(self._thread_local, "sessions"):
             for db_path, session in self._thread_local.sessions.items():
@@ -136,10 +137,11 @@ def get_session(config: DataSourceConfig, echo: bool = False) -> Session:
             f"Unsupported backend type: {config.backend_type}. Only SQLite is supported."
         )
 
+    assert config.sqlite_path is not None
     return pool.get_session(config.sqlite_path, echo)
 
 
-def close_thread_sessions():
+def close_thread_sessions() -> None:
     """
     Close all sessions for the current thread.
 

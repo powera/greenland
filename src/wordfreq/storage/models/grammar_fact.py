@@ -83,5 +83,5 @@ class GrammarFact(Base):
     # Relationship to parent lemma
     lemma = relationship("Lemma", back_populates="grammar_facts")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<GrammarFact(lemma_id={self.lemma_id}, lang={self.language_code}, {self.fact_type}={self.fact_value})>"

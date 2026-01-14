@@ -373,16 +373,20 @@ class LinguisticReviewer:
                     if word:
                         self.display_word_info(word)
                 elif choice == 5:
-                    limit = input(f"{self.c.BOLD}Enter limit (default: 10): {self.c.ENDC}").strip()
+                    limit_str = input(
+                        f"{self.c.BOLD}Enter limit (default: 10): {self.c.ENDC}"
+                    ).strip()
                     try:
-                        limit = int(limit) if limit else 10
+                        limit = int(limit_str) if limit_str else 10
                     except ValueError:
                         limit = 10
                     self.list_problematic_words(limit)
                 elif choice == 6:
-                    limit = input(f"{self.c.BOLD}Enter limit (default: 10): {self.c.ENDC}").strip()
+                    limit_str = input(
+                        f"{self.c.BOLD}Enter limit (default: 10): {self.c.ENDC}"
+                    ).strip()
                     try:
-                        limit = int(limit) if limit else 10
+                        limit = int(limit_str) if limit_str else 10
                     except ValueError:
                         limit = 10
                     self.find_missing_data(limit)
@@ -413,9 +417,11 @@ class LinguisticReviewer:
                         print(f"{self.c.RED}Part of speech cannot be empty.{self.c.ENDC}")
                         continue
 
-                    limit = input(f"{self.c.BOLD}Enter limit (default: 20): {self.c.ENDC}").strip()
+                    limit_str = input(
+                        f"{self.c.BOLD}Enter limit (default: 20): {self.c.ENDC}"
+                    ).strip()
                     try:
-                        limit = int(limit) if limit else 20
+                        limit = int(limit_str) if limit_str else 20
                     except ValueError:
                         limit = 20
 
@@ -426,7 +432,7 @@ class LinguisticReviewer:
                 logger.error(f"Error: {e}")
 
 
-def main():
+def main() -> None:
     """Main function to run the reviewer."""
     reviewer = LinguisticReviewer()
     reviewer.interactive_menu()

@@ -11,6 +11,7 @@ from sqlalchemy import case, func, or_
 import constants
 import wordfreq.frequency.corpus
 from wordfreq.storage import database
+from wordfreq.storage.backend.config import DataSourceConfig
 from wordfreq.storage.connection_pool import get_session
 from wordfreq.storage.models.schema import Corpus, WordFrequency, WordToken
 
@@ -96,7 +97,7 @@ def calculate_combined_ranks(
     )
 
     # Organize frequency data by word_token_id and corpus_id
-    freq_by_word_token = {}
+    freq_by_word_token: Dict[int, Dict[int, int]] = {}
     for freq in all_frequencies:
         if freq.word_token_id not in freq_by_word_token:
             freq_by_word_token[freq.word_token_id] = {}
@@ -230,7 +231,8 @@ def export_ranked_word_list(
     logger.info(f"Exporting ranked word list to {output_path}")
 
     # Calculate combined ranks
-    word_list = calculate_combined_ranks(db_path=db_path, update_db=False)
+    config = DataSourceConfig(sqlite_path=db_path) if db_path else DataSourceConfig()
+    word_list = calculate_combined_ranks(config=config, update_db=False)
 
     # Filter out outliers if requested
     if not include_outliers:
@@ -273,7 +275,8 @@ def export_frequency_data(
     logger.info(f"Exporting detailed frequency data to {output_path}")
 
     # Get combined ranks and corpus information
-    word_list = calculate_combined_ranks(db_path=db_path, update_db=False)
+    config = DataSourceConfig(sqlite_path=db_path) if db_path else DataSourceConfig()
+    word_list = calculate_combined_ranks(config=config, update_db=False)
 
     # Sort by combined rank
     word_list.sort(key=lambda x: x["combined_rank"])
@@ -283,7 +286,8 @@ def export_frequency_data(
         word_list = word_list[:limit]
 
     # Get session
-    session = get_session(db_path) if db_path else get_session()
+    config = DataSourceConfig(sqlite_path=db_path) if db_path else DataSourceConfig()
+    session = get_session(config)
 
     # Get corpus names for headers
     corpora = session.query(Corpus).all()
@@ -376,10 +380,11 @@ def analyze_corpus_correlations() -> Dict[str, Any]:
     logger.info("Analyzing corpus correlations")
 
     # Calculate combined ranks
-    word_list = calculate_combined_ranks(db_path=constants.WORDFREQ_DB_PATH, update_db=False)
+    config = DataSourceConfig()
+    word_list = calculate_combined_ranks(config=config, update_db=False)
 
     # Get session
-    session = get_session(constants.WORDFREQ_DB_PATH)
+    session = get_session(config)
 
     # Get corpus information (only enabled corpora)
     corpora = wordfreq.frequency.corpus.get_corpus_configs_from_db(session, enabled_only=True)
@@ -391,7 +396,7 @@ def analyze_corpus_correlations() -> Dict[str, Any]:
         return {}
 
     # Calculate correlations between each pair of corpora
-    correlations = {}
+    correlations: Dict[str, Dict[str, Dict[str, Any]]] = {}
 
     for i, corpus1_id in enumerate(corpus_ids):
         corpus1_name = corpus_names[corpus1_id]

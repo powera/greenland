@@ -5,7 +5,7 @@ import os
 import tempfile
 from collections import defaultdict
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Type
+from typing import Any, Dict, List, Optional, Set, Type
 
 from wordfreq.storage.backend.base import BaseSession, BaseStorage
 from wordfreq.storage.backend.jsonl import models
@@ -378,12 +378,16 @@ class JSONLStorage(BaseStorage):
                         if not line:
                             continue
                         data = json.loads(line)
-                        verification = models.SentenceVerification.from_dict(data)
-                        self.sentence_verifications[verification.guid] = verification
+                        sentence_verification = models.SentenceVerification.from_dict(data)
+                        self.sentence_verifications[sentence_verification.guid] = (
+                            sentence_verification
+                        )
 
                         # Apply verification status to sentence if loaded
-                        if verification.guid in self.sentences:
-                            self.sentences[verification.guid].verified = verification.verified
+                        if sentence_verification.guid in self.sentences:
+                            self.sentences[sentence_verification.guid].verified = (
+                                sentence_verification.verified
+                            )
 
             except Exception as e:
                 print(f"Error loading sentence verifications: {e}")
@@ -408,7 +412,7 @@ class JSONLStorage(BaseStorage):
         self._rewrite_base_file(lemma)
 
         # Determine which languages are present in this lemma
-        languages_to_save = set()
+        languages_to_save: Set[str] = set()
         languages_to_save.update(lemma.translations.keys())
         languages_to_save.update(lemma.derivative_forms.keys())
         languages_to_save.update(lemma.audio_hashes.keys())
@@ -507,7 +511,7 @@ class JSONLStorage(BaseStorage):
         # Atomic rename
         os.replace(tmp_file.name, file_path)
 
-    def _extract_base_data(self, lemma: models.Lemma) -> dict:
+    def _extract_base_data(self, lemma: models.Lemma) -> Dict[str, Any]:
         """Extract base concept data from a lemma for base.jsonl.
 
         Args:
@@ -516,7 +520,7 @@ class JSONLStorage(BaseStorage):
         Returns:
             Dictionary with base concept data
         """
-        data = {
+        data: Dict[str, Any] = {
             "guid": lemma.guid,
             "pos_type": lemma.pos_type,
             "pos_subtype": lemma.pos_subtype,
@@ -576,7 +580,9 @@ class JSONLStorage(BaseStorage):
         # Atomic rename
         os.replace(tmp_file.name, file_path)
 
-    def _extract_language_data(self, lemma: models.Lemma, lang_code: str) -> Optional[dict]:
+    def _extract_language_data(
+        self, lemma: models.Lemma, lang_code: str
+    ) -> Optional[Dict[str, Any]]:
         """Extract language-specific data from a lemma.
 
         Args:
@@ -587,7 +593,7 @@ class JSONLStorage(BaseStorage):
             Dictionary with language-specific data, or None if no data for this language
         """
         # All languages now use the same structure (including English)
-        data = {"guid": lemma.guid}
+        data: Dict[str, Any] = {"guid": lemma.guid}
         has_data = False
 
         # Translation field (now used for all languages including English)

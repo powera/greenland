@@ -9,6 +9,8 @@ from __future__ import annotations
 import logging
 from typing import Dict, List, Optional, Tuple
 
+from sqlalchemy.orm import Session
+
 from agents.common.wq_tools import build_default_config, get_lemma_or_raise
 from wordfreq.storage.backend.config import DataSourceConfig
 from wordfreq.storage.models.schema import Lemma, LemmaTranslation
@@ -32,7 +34,7 @@ SUPPORTED_FORMS = {
 def validate_form_generation_request(
     lemma: Lemma,
     lang_code: str,
-    session,
+    session: Session,
 ) -> Tuple[bool, Optional[str]]:
     """
     Validate that form generation can proceed for a lemma.
@@ -66,7 +68,7 @@ def validate_form_generation_request(
 
 
 def generate_forms_for_lemma(
-    session,
+    session: Session,
     lemma: Lemma,
     lang_code: str,
     config: Optional[DataSourceConfig] = None,
@@ -116,7 +118,7 @@ def generate_forms_for_lemma(
     return False, f"Could not generate {lang_code} {pos_type} forms"
 
 
-def handle_generate_forms(session, payload: Dict) -> str:
+def handle_generate_forms(session: Session, payload: Dict) -> str:
     """
     Handle grammatical forms generation task (workqueue entry point).
 

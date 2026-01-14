@@ -8,7 +8,7 @@ and this utility converts them to Simplified when needed for export/display.
 """
 
 import logging
-from typing import Optional
+from typing import Any, Optional
 
 from wordfreq.storage.translation_helpers import get_translation
 
@@ -87,7 +87,7 @@ def to_simplified(text: str) -> str:
         return text
 
     try:
-        return converter.convert(text)
+        return str(converter.convert(text))
     except Exception as e:
         logger.error(f"Failed to convert to simplified: {text} - {e}")
         return text
@@ -112,13 +112,13 @@ def to_traditional(text: str) -> str:
         return text
 
     try:
-        return converter.convert(text)
+        return str(converter.convert(text))
     except Exception as e:
         logger.error(f"Failed to convert to traditional: {text} - {e}")
         return text
 
 
-def get_chinese_translation(session, lemma, simplified: bool = False) -> Optional[str]:
+def get_chinese_translation(session: Any, lemma: Any, simplified: bool = False) -> Optional[str]:
     """
     Get Chinese translation from a lemma object.
 

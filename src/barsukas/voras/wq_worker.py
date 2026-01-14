@@ -9,6 +9,8 @@ from __future__ import annotations
 import logging
 from typing import Dict, List, Optional, Tuple
 
+from sqlalchemy.orm import Session
+
 from agents.common.wq_tools import build_default_config, get_lemma_or_raise
 from wordfreq.storage.backend.config import DataSourceConfig
 from wordfreq.storage.models.schema import Lemma
@@ -27,7 +29,7 @@ logger = logging.getLogger(__name__)
 
 
 def generate_missing_translations_for_lemma(
-    session,
+    session: Session,
     lemma: Lemma,
     config: Optional[DataSourceConfig] = None,
     source: Optional[str] = None,
@@ -125,7 +127,7 @@ def generate_missing_translations_for_lemma(
     return added_count, errors
 
 
-def handle_add_missing_translations(session, payload: Dict) -> str:
+def handle_add_missing_translations(session: Session, payload: Dict) -> str:
     """
     Handle missing translations task (workqueue entry point).
 

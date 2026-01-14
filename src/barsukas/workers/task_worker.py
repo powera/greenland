@@ -8,6 +8,7 @@ import logging
 import signal
 import time
 from threading import Event
+from typing import Any
 
 from config import Config
 
@@ -21,12 +22,12 @@ logger = logging.getLogger(__name__)
 STOP_EVENT = Event()
 
 
-def _handle_shutdown(signum, frame):  # pragma: no cover - signal hook
+def _handle_shutdown(signum: int, frame: Any) -> None:  # pragma: no cover - signal hook
     logger.info("Shutdown signal received (%s). Finishing current task before exit.", signum)
     STOP_EVENT.set()
 
 
-def _build_session():
+def _build_session() -> Any:
     backend_config = DataSourceConfig(
         backend_type=BackendType.SQLITE,
         sqlite_path=Config.DB_PATH,
@@ -36,7 +37,7 @@ def _build_session():
     return create_session(backend_config)
 
 
-def process_task(task, session):
+def process_task(task: Any, session: Any) -> str:
     handler = TASK_HANDLERS.get(task.task_type)
     if not handler:
         raise ValueError(f"No handler registered for task type {task.task_type}")
@@ -77,7 +78,7 @@ def run_worker(poll_interval: float) -> None:
         time.sleep(poll_interval)
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description="Run the Barsukas background task worker")
     parser.add_argument(
         "--poll-interval", type=float, default=2.0, help="Seconds to wait when queue is empty"

@@ -2,12 +2,13 @@
 
 from typing import Any, Dict, List
 
+from sqlalchemy.orm import Session
 from sqlalchemy.sql import func
 
 from wordfreq.storage.models.schema import Corpus, DerivativeForm, Lemma, WordFrequency, WordToken
 
 
-def get_processing_stats(session) -> Dict[str, Any]:
+def get_processing_stats(session: Session) -> Dict[str, Any]:
     """Get statistics about the current processing state."""
     total_word_tokens = session.query(func.count(WordToken.id)).scalar()
     tokens_with_derivative_forms = (
@@ -29,7 +30,7 @@ def get_processing_stats(session) -> Dict[str, Any]:
     }
 
 
-def list_problematic_words(session, limit: int = 10) -> List[Dict[str, Any]]:
+def list_problematic_words(session: Session, limit: int = 10) -> List[Dict[str, Any]]:
     """
     Get words that need review (unverified derivative forms).
     Returns data in format expected by reviewer.py.
@@ -47,7 +48,7 @@ def list_problematic_words(session, limit: int = 10) -> List[Dict[str, Any]]:
         .limit(limit)
     )
 
-    results = []
+    results: List[Dict[str, Any]] = []
     word_groups = {}
 
     # Group by word token

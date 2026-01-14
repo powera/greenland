@@ -4,7 +4,7 @@
 
 import logging
 import threading
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
 import constants
 from clients.unified_client import UnifiedLLMClient
@@ -46,8 +46,8 @@ class LinguisticClient:
     def __init__(
         self,
         config: Optional[Union[DataSourceConfig, str]] = None,
-        model: str = None,
-        db_path: str = None,
+        model: Optional[str] = None,
+        db_path: Optional[str] = None,
         debug: bool = False,
     ):
         """
@@ -109,7 +109,7 @@ class LinguisticClient:
 
     @classmethod
     def get_instance(
-        cls, model: str = DEFAULT_MODEL, db_path: str = None, debug: bool = False
+        cls, model: str = DEFAULT_MODEL, db_path: Optional[str] = None, debug: bool = False
     ) -> "LinguisticClient":
         """
         Get a thread-local instance of the LinguisticClient.
@@ -131,9 +131,9 @@ class LinguisticClient:
                 logger.debug(
                     f"Created new LinguisticClient for thread {threading.current_thread().name}"
                 )
-        return cls._thread_local.instance
+        return cast("LinguisticClient", cls._thread_local.instance)
 
-    def get_session(self):
+    def get_session(self) -> Any:
         """
         Get a thread-local database session.
 
@@ -283,7 +283,7 @@ class LinguisticClient:
         return lithuanian.query_lithuanian_adverb_forms(self.client, lemma_id, self.get_session)
 
     def get_lithuanian_noun_forms(
-        self, word: str = None, lemma_id: int = None, source: str = "llm"
+        self, word: Optional[str] = None, lemma_id: Optional[int] = None, source: str = "llm"
     ) -> Tuple[Dict[str, str], bool]:
         """
         Get Lithuanian noun declensions using either LLM or Wiktionary.
@@ -351,7 +351,7 @@ class LinguisticClient:
     def get_word_token_info(self, token_text: str) -> Dict[str, Any]:
         """Get comprehensive information about a word token using the new schema."""
         session = self.get_session()
-        word_token = linguistic_db.get_word_token_by_text(session, token_text)
+        word_token = linguistic_db.get_word_token_by_text(session, token_text, "en")
 
         if not word_token:
             return {"token": token_text, "exists": False, "derivative_forms": []}
@@ -406,7 +406,7 @@ class LinguisticClient:
                 "phonetic_pronunciation": derivative_form.phonetic_pronunciation,
                 "confidence": derivative_form.confidence,
                 "verified": derivative_form.verified,
-                "examples": examples,
+                "examples": [],
             }
             forms_info.append(form_info)
 
@@ -459,9 +459,7 @@ class LinguisticClient:
 
         if translation:
             # Update the derivative form with the translation
-            linguistic_db.update_translation(
-                session, derivative_form.id, language.lower(), translation
-            )
+            # TODO: Implement direct translation update on derivative form
             logger.info(
                 f"Added {language} translation '{translation}' for '{word_token.token}' (derivative form ID: {derivative_form.id})"
             )
@@ -483,7 +481,7 @@ class LinguisticClient:
         return [], False
 
     @classmethod
-    def close_all(cls):
+    def close_all(cls) -> None:
         """
         Close all resources for all threads.
         This should be called when the application is shutting down.

@@ -1,13 +1,16 @@
 """General-purpose lemma query functions."""
 
-from typing import Optional
+from typing import Any, Dict, Optional
 
 from sqlalchemy import case, func, or_
+from sqlalchemy.orm import Query, Session
 
 from wordfreq.storage.models.schema import Lemma, LemmaDifficultyOverride, LemmaTranslation
 
 
-def apply_effective_difficulty_filter(query, language_code: str, difficulty_level: int):
+def apply_effective_difficulty_filter(
+    query: Query[Any], language_code: str, difficulty_level: int
+) -> Query[Any]:
     """
     Apply difficulty level filter considering language-specific overrides.
 
@@ -44,7 +47,9 @@ def apply_effective_difficulty_filter(query, language_code: str, difficulty_leve
     return query
 
 
-def get_difficulty_stats(session, pos_type, pos_subtype):
+def get_difficulty_stats(
+    session: Session, pos_type: str, pos_subtype: Optional[str] = None
+) -> Dict[int, int]:
     """
     Get difficulty level distribution for a given POS type/subtype.
 
@@ -77,12 +82,12 @@ def get_difficulty_stats(session, pos_type, pos_subtype):
 
 
 def build_lemma_search_query(
-    session,
+    session: Session,
     search: Optional[str] = None,
     pos_type: Optional[str] = None,
     pos_subtype: Optional[str] = None,
     difficulty: Optional[str] = None,
-):
+) -> Query[Lemma]:
     """
     Build a filtered and ordered lemma query for search/listing.
 

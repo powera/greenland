@@ -12,7 +12,8 @@ from sqlalchemy.orm import Session
 import constants
 import wordfreq.frequency.analysis
 import wordfreq.frequency.importer
-import wordfreq.storage.connection_pool
+from wordfreq.storage.backend.config import DataSourceConfig
+from wordfreq.storage.connection_pool import get_session
 import wordfreq.storage.database
 import wordfreq.storage.models.schema
 
@@ -216,11 +217,12 @@ def sync_corpus_configs_to_db(
 
     # Get session
     if session is None:
-        session = (
-            wordfreq.storage.connection_pool.get_session(db_path)
-            if db_path
-            else wordfreq.storage.connection_pool.get_session()
-        )
+        if db_path:
+            session_config = DataSourceConfig(sqlite_path=db_path)
+            session = wordfreq.storage.connection_pool.get_session(session_config)
+        else:
+            session_config = DataSourceConfig()
+            session = wordfreq.storage.connection_pool.get_session(session_config)
         should_close = True
     else:
         should_close = False
@@ -322,11 +324,12 @@ def get_corpus_size(
         Number of words in the corpus
     """
     if session is None:
-        session = (
-            wordfreq.storage.connection_pool.get_session(db_path)
-            if db_path
-            else wordfreq.storage.connection_pool.get_session()
-        )
+        if db_path:
+            session_config = DataSourceConfig(sqlite_path=db_path)
+            session = wordfreq.storage.connection_pool.get_session(session_config)
+        else:
+            session_config = DataSourceConfig()
+            session = wordfreq.storage.connection_pool.get_session(session_config)
         should_close = True
     else:
         should_close = False
@@ -371,11 +374,12 @@ def get_effective_unknown_rank(
         Effective unknown rank for the corpus
     """
     if session is None:
-        session = (
-            wordfreq.storage.connection_pool.get_session(db_path)
-            if db_path
-            else wordfreq.storage.connection_pool.get_session()
-        )
+        if db_path:
+            session_config = DataSourceConfig(sqlite_path=db_path)
+            session = wordfreq.storage.connection_pool.get_session(session_config)
+        else:
+            session_config = DataSourceConfig()
+            session = wordfreq.storage.connection_pool.get_session(session_config)
         should_close = True
     else:
         should_close = False
@@ -419,11 +423,12 @@ def get_corpus_configs_from_db(
         List of Corpus objects from database
     """
     if session is None:
-        session = (
-            wordfreq.storage.connection_pool.get_session(db_path)
-            if db_path
-            else wordfreq.storage.connection_pool.get_session()
-        )
+        if db_path:
+            session_config = DataSourceConfig(sqlite_path=db_path)
+            session = wordfreq.storage.connection_pool.get_session(session_config)
+        else:
+            session_config = DataSourceConfig()
+            session = wordfreq.storage.connection_pool.get_session(session_config)
         should_close = True
     else:
         should_close = False
@@ -546,7 +551,8 @@ def load_all_corpora() -> Dict[str, tuple[int, int]]:
     # Calculate combined mean ranks (from original script)
     logger.info("Calculating combined ranks...")
     try:
-        wordfreq.frequency.analysis.calculate_combined_ranks(db_path=constants.WORDFREQ_DB_PATH)
+        analysis_config = DataSourceConfig()
+        wordfreq.frequency.analysis.calculate_combined_ranks(config=analysis_config)
         logger.info("Harmonic mean ranks calculation completed!")
     except Exception as e:
         logger.error(f"Failed to calculate combined ranks: {e}")

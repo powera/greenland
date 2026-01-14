@@ -5,7 +5,7 @@
 import json
 import logging
 import time
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Callable, Dict, Optional, Tuple
 
 import util.prompt_loader
 from clients.types import Schema, SchemaProperty
@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 def query_pronunciation(
-    client, word: str, sentence: str, get_session_func
+    client: Any, word: str, sentence: str, get_session_func: Callable
 ) -> Tuple[Dict[str, Any], bool]:
     """
     Query LLM for IPA and phonetic pronunciation of a word.
@@ -119,7 +119,7 @@ def query_pronunciation(
 
 
 def update_pronunciation_for_definition(
-    client, definition_id: int, get_session_func, sentence: Optional[str] = None
+    client: Any, definition_id: int, get_session_func: Callable, sentence: Optional[str] = None
 ) -> bool:
     """
     Update the pronunciation information for a specific definition.
@@ -187,7 +187,7 @@ def update_pronunciation_for_definition(
 
 
 def update_missing_pronunciations_for_word(
-    client, word_text: str, get_session_func, throttle: float = 1.0
+    client: Any, word_text: str, get_session_func: Callable, throttle: float = 1.0
 ) -> Dict[str, Any]:
     """
     Add missing pronunciations for all definitions of a word.
@@ -271,7 +271,7 @@ def update_missing_pronunciations_for_word(
 
 
 def update_pronunciations_for_batch(
-    client, get_session_func, limit: int = 100, throttle: float = 1.0
+    client: Any, get_session_func: Callable, limit: int = 100, throttle: float = 1.0
 ) -> Dict[str, Any]:
     """
     Add missing pronunciations for a batch of definitions.

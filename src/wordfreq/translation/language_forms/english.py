@@ -4,7 +4,7 @@
 
 import json
 import logging
-from typing import Dict, Tuple
+from typing import Any, Dict, Tuple
 
 import util.prompt_loader
 from clients.types import Schema, SchemaProperty
@@ -59,7 +59,7 @@ VERB_FORM_MAPPING = {
 
 
 def query_english_verb_conjugations(
-    client, lemma_id: int, get_session_func
+    client: Any, lemma_id: int, get_session_func: Any
 ) -> Tuple[Dict[str, str], bool]:
     """
     Query LLM for all English verb conjugations (6 persons × 3 tenses + 2 imperatives = 20 forms).
@@ -169,7 +169,7 @@ def query_english_verb_conjugations(
 
 
 def query_english_noun_forms(
-    client, lemma_id: int, get_session_func
+    client: Any, lemma_id: int, get_session_func: Any
 ) -> Tuple[Dict[str, str], bool]:
     """
     Query LLM for English noun forms (singular and plural).
@@ -269,7 +269,7 @@ def query_english_noun_forms(
 
 
 def query_english_adjective_forms(
-    client, lemma_id: int, get_session_func
+    client: Any, lemma_id: int, get_session_func: Any
 ) -> Tuple[Dict[str, str], bool]:
     """
     Query LLM for English adjective forms (positive, comparative, superlative).
@@ -371,7 +371,7 @@ def query_english_adjective_forms(
 
 
 def query_english_adverb_forms(
-    client, lemma_id: int, get_session_func
+    client: Any, lemma_id: int, get_session_func: Any
 ) -> Tuple[Dict[str, str], bool]:
     """
     Query LLM for English adverb forms (positive, comparative, superlative).

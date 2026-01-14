@@ -12,7 +12,9 @@ import logging
 import signal
 import sys
 import threading
+import types
 from pathlib import Path
+from typing import Optional
 
 from config import Config
 from app import create_app
@@ -21,7 +23,7 @@ from workers.task_worker import run_worker, STOP_EVENT
 logger = logging.getLogger(__name__)
 
 
-def run_flask_server(host, port, debug, readonly):
+def run_flask_server(host: str, port: int, debug: bool, readonly: bool) -> None:
     """Run the Flask server in the current thread."""
     app = create_app()
 
@@ -40,7 +42,7 @@ def run_flask_server(host, port, debug, readonly):
     app.run(host=host, port=port, debug=False, use_reloader=False, threaded=True)
 
 
-def main():
+def main() -> None:
     """Run both Flask server and task worker in the same process."""
     parser = argparse.ArgumentParser(
         description="Barsukas Unified Launcher - Flask server + Task worker"
@@ -91,7 +93,7 @@ def main():
     logger.info("=" * 80)
 
     # Set up signal handlers for graceful shutdown
-    def handle_shutdown(signum, frame):
+    def handle_shutdown(signum: int, frame: Optional[types.FrameType]) -> None:
         logger.info(f"Received signal {signum}, shutting down...")
         STOP_EVENT.set()
         sys.exit(0)

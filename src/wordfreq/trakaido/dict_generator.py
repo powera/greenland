@@ -42,7 +42,7 @@ from wordfreq.storage.translation_helpers import get_translation
 from wordfreq.tools.chinese_converter import to_simplified
 
 
-def get_english_word_for_lemma(session, lemma: Lemma) -> str:
+def get_english_word_for_lemma(session: Any, lemma: Lemma) -> Optional[str]:
     """Get the primary English word for a lemma."""
     # Use lemma text
     if lemma.lemma_text:
@@ -56,7 +56,7 @@ def get_english_word_for_lemma(session, lemma: Lemma) -> str:
     return None  # Should not happen if data is correct
 
 
-def get_lithuanian_word_for_lemma(session, lemma: Lemma) -> str:
+def get_lithuanian_word_for_lemma(session: Any, lemma: Lemma) -> str:
     """Get the primary Lithuanian translation for a lemma."""
     # First try to get from the translation table
     lithuanian_translation = get_translation(session, lemma, "lt")
@@ -77,7 +77,9 @@ def get_lithuanian_word_for_lemma(session, lemma: Lemma) -> str:
     return lemma.lemma_text
 
 
-def get_chinese_word_for_lemma(session, lemma: Lemma, simplified: bool = True) -> str:
+def get_chinese_word_for_lemma(
+    session: Any, lemma: Lemma, simplified: bool = True
+) -> Optional[str]:
     """
     Get the primary Chinese translation for a lemma.
 
@@ -100,9 +102,9 @@ def get_chinese_word_for_lemma(session, lemma: Lemma, simplified: bool = True) -
     return None
 
 
-def get_alternatives_for_lemma(session, lemma: Lemma) -> Dict[str, List[str]]:
+def get_alternatives_for_lemma(session: Any, lemma: Lemma) -> Dict[str, List[str]]:
     """Get alternative forms for a lemma, organized by language."""
-    alternatives = {"english": [], "lithuanian": [], "chinese": []}
+    alternatives: Dict[str, List[str]] = {"english": [], "lithuanian": [], "chinese": []}
 
     # Get alternative forms from DerivativeForm table
     # Alternative forms have grammatical_form starting with "alternative_"
@@ -125,7 +127,7 @@ def get_alternatives_for_lemma(session, lemma: Lemma) -> Dict[str, List[str]]:
     return alternatives
 
 
-def get_frequency_rank_for_lemma(session, lemma: Lemma) -> Optional[int]:
+def get_frequency_rank_for_lemma(session: Any, lemma: Lemma) -> Optional[int]:
     """Get the frequency rank for a lemma."""
     if lemma.frequency_rank:
         return lemma.frequency_rank
@@ -138,11 +140,11 @@ def get_frequency_rank_for_lemma(session, lemma: Lemma) -> Optional[int]:
     return None
 
 
-def lemma_to_word_dict(session, lemma: Lemma, lang: str = "lithuanian") -> Dict[str, Any]:
+def lemma_to_word_dict(session: Any, lemma: Lemma, lang: str = "lithuanian") -> Dict[str, Any]:
     """Convert a lemma to the word dictionary format used by trakaido."""
-    english_word = get_english_word_for_lemma(session, lemma)
+    english_word: Optional[str] = get_english_word_for_lemma(session, lemma)
     if lang == "lithuanian":
-        foreign_word = get_lithuanian_word_for_lemma(session, lemma)
+        foreign_word: Optional[str] = get_lithuanian_word_for_lemma(session, lemma)
     elif lang == "chinese":
         foreign_word = get_chinese_word_for_lemma(session, lemma)
     else:
@@ -189,7 +191,7 @@ def validate_guid_as_variable_name(guid: str) -> bool:
     return is_valid_python_identifier(guid)
 
 
-def format_python_dict(data, indent=0):
+def format_python_dict(data: Any, indent: int = 0) -> str:
     """Format a dictionary as proper Python code."""
     if data is None:
         return "None"
@@ -228,7 +230,7 @@ def format_python_dict(data, indent=0):
 
 
 def generate_structure_data(
-    session, difficulty_level: int, lang: str = "lithuanian"
+    session: Any, difficulty_level: int, lang: str = "lithuanian"
 ) -> Dict[str, List[str]]:
     """
     Generate structure data for a specific difficulty level, organized by subtype.
@@ -273,7 +275,7 @@ def generate_structure_data(
 
 
 def generate_structure_file(
-    session, difficulty_level: int, output_dir: str, lang: str = "lithuanian"
+    session: Any, difficulty_level: int, output_dir: str, lang: str = "lithuanian"
 ) -> str:
     """
     Generate a structure file for a specific difficulty level.
@@ -393,7 +395,7 @@ Format: "Category": {{
     return filepath
 
 
-def generate_dictionary_file_content(session, subtype: str, lang="lithuanian") -> str:
+def generate_dictionary_file_content(session: Any, subtype: str, lang: str = "lithuanian") -> str:
     """Generate the complete content for a dictionary file.
 
     Needs to specify the language."""
@@ -463,7 +465,7 @@ Entry structure:
 
 
 def generate_dictionary_file(
-    session, subtype: str, output_dir: str, lang: str = "lithuanian"
+    session: Any, subtype: str, output_dir: str, lang: str = "lithuanian"
 ) -> str:
     """Generate a dictionary file for a specific subtype."""
     content = generate_dictionary_file_content(session, subtype, lang=lang)
@@ -479,7 +481,7 @@ def generate_dictionary_file(
     return filepath
 
 
-def get_difficulty_levels_with_data(session) -> List[int]:
+def get_difficulty_levels_with_data(session: Any) -> List[int]:
     """Get all difficulty levels that actually have data in the database."""
     from sqlalchemy import func
 
@@ -493,7 +495,7 @@ def get_difficulty_levels_with_data(session) -> List[int]:
     return [level[0] for level in levels if level[0] is not None]
 
 
-def generate_all_structure_files(session, output_dir: str, lang: str) -> List[str]:
+def generate_all_structure_files(session: Any, output_dir: str, lang: str) -> List[str]:
     """Generate structure files for all difficulty levels 1-20."""
     generated_files = []
 
@@ -512,7 +514,7 @@ def generate_all_structure_files(session, output_dir: str, lang: str) -> List[st
     return generated_files
 
 
-def generate_all_dictionary_files(session, output_dir: str, lang: str) -> List[str]:
+def generate_all_dictionary_files(session: Any, output_dir: str, lang: str) -> List[str]:
     """Generate dictionary files for all subtypes that have lemmas."""
     subtypes = get_all_subtypes(session, lang)
     generated_files = []
@@ -526,7 +528,7 @@ def generate_all_dictionary_files(session, output_dir: str, lang: str) -> List[s
     return generated_files
 
 
-def generate_all_files(session, output_dir: str, lang: str) -> List[str]:
+def generate_all_files(session: Any, output_dir: str, lang: str) -> List[str]:
     """Generate all structure and dictionary files."""
     generated_files = []
 
@@ -541,7 +543,7 @@ def generate_all_files(session, output_dir: str, lang: str) -> List[str]:
     return generated_files
 
 
-def main():
+def main() -> None:
     """Main function for command-line usage."""
     parser = argparse.ArgumentParser(
         description="Generate trakaido structure and dictionary files from wordfreq database"

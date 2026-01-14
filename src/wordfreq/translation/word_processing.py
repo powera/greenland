@@ -4,7 +4,7 @@
 
 import logging
 import time
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from wordfreq.storage import database as linguistic_db
 from wordfreq.storage.models.enums import GrammaticalForm
@@ -51,9 +51,9 @@ def determine_default_grammatical_form(word_text: str, pos_type: str, lemma_text
         if word_text.endswith("ing"):
             return GrammaticalForm.VERB_PRESENT_PARTICIPLE.value  # Default to participle
         elif word_text.endswith("ed"):
-            return GrammaticalForm.VERB_PAST_TENSE.value
+            return GrammaticalForm.VERB_PAST_PARTICIPLE.value
         elif word_text.endswith("s"):
-            return GrammaticalForm.VERB_PRESENT_TENSE.value
+            return GrammaticalForm.VERB_EN_3S_PRESENT.value
 
     elif pos_lower == "noun":
         if word_text.endswith("s") and not lemma_text.endswith("s"):
@@ -102,7 +102,11 @@ def is_likely_base_form(word_text: str, lemma_text: str, pos_type: str) -> bool:
 
 
 def process_word(
-    client, word: str, get_session_func, refresh: bool = False, definitions_list: list = None
+    client: Any,
+    word: str,
+    get_session_func: Any,
+    refresh: bool = False,
+    definitions_list: Optional[List[Any]] = None,
 ) -> bool:
     """
     Process a word to get linguistic information and store in database using new schema.
@@ -184,28 +188,34 @@ def process_word(
 
             # Create Translation objects for each language
             chinese_trans = None
-            if def_data.get("chinese_translation"):
-                chinese_trans = Translation(text=def_data.get("chinese_translation"))
+            chinese_text = def_data.get("chinese_translation")
+            if chinese_text and isinstance(chinese_text, str):
+                chinese_trans = Translation(text=chinese_text)
 
             korean_trans = None
-            if def_data.get("korean_translation"):
-                korean_trans = Translation(text=def_data.get("korean_translation"))
+            korean_text = def_data.get("korean_translation")
+            if korean_text and isinstance(korean_text, str):
+                korean_trans = Translation(text=korean_text)
 
             french_trans = None
-            if def_data.get("french_translation"):
-                french_trans = Translation(text=def_data.get("french_translation"))
+            french_text = def_data.get("french_translation")
+            if french_text and isinstance(french_text, str):
+                french_trans = Translation(text=french_text)
 
             swahili_trans = None
-            if def_data.get("swahili_translation"):
-                swahili_trans = Translation(text=def_data.get("swahili_translation"))
+            swahili_text = def_data.get("swahili_translation")
+            if swahili_text and isinstance(swahili_text, str):
+                swahili_trans = Translation(text=swahili_text)
 
             vietnamese_trans = None
-            if def_data.get("vietnamese_translation"):
-                vietnamese_trans = Translation(text=def_data.get("vietnamese_translation"))
+            vietnamese_text = def_data.get("vietnamese_translation")
+            if vietnamese_text and isinstance(vietnamese_text, str):
+                vietnamese_trans = Translation(text=vietnamese_text)
 
             lithuanian_trans = None
-            if def_data.get("lithuanian_translation"):
-                lithuanian_trans = Translation(text=def_data.get("lithuanian_translation"))
+            lithuanian_text = def_data.get("lithuanian_translation")
+            if lithuanian_text and isinstance(lithuanian_text, str):
+                lithuanian_trans = Translation(text=lithuanian_text)
 
             # Create TranslationSet with Translation objects
             translations_set = TranslationSet(
@@ -252,7 +262,11 @@ def process_word(
 
 
 def process_words_batch(
-    client, word_list: List[str], get_session_func, refresh: bool = False, throttle: float = 1.0
+    client: Any,
+    word_list: List[str],
+    get_session_func: Any,
+    refresh: bool = False,
+    throttle: float = 1.0,
 ) -> Dict[str, Any]:
     """
     Process a batch of words using the new schema.

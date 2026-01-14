@@ -4,10 +4,12 @@
 
 import json
 import logging
-from typing import Dict, Tuple
+from typing import Callable, Dict, Tuple
 
 import util.prompt_loader
 from clients.types import Schema, SchemaProperty
+from clients.unified_client import UnifiedLLMClient
+from sqlalchemy.orm import Session
 from wordfreq.storage import database as linguistic_db
 from wordfreq.storage.models.enums import GrammaticalForm
 from wordfreq.storage.translation_helpers import get_translation
@@ -49,7 +51,9 @@ VERB_FORM_MAPPING = {
 }
 
 
-def query_french_noun_forms(client, lemma_id: int, get_session_func) -> Tuple[Dict[str, str], bool]:
+def query_french_noun_forms(
+    client: UnifiedLLMClient, lemma_id: int, get_session_func: Callable[[], Session]
+) -> Tuple[Dict[str, str], bool]:
     """Query LLM for French noun forms (singular and plural for the noun's gender)."""
     session = get_session_func()
     lemma = session.query(linguistic_db.Lemma).filter(linguistic_db.Lemma.id == lemma_id).first()
@@ -112,7 +116,7 @@ def query_french_noun_forms(client, lemma_id: int, get_session_func) -> Tuple[Di
 
 
 def query_french_verb_conjugations(
-    client, lemma_id: int, get_session_func
+    client: UnifiedLLMClient, lemma_id: int, get_session_func: Callable[[], Session]
 ) -> Tuple[Dict[str, str], bool]:
     """Query LLM for French verb conjugations (6 persons × 3 tenses + 2 past participles = 20 forms)."""
     session = get_session_func()

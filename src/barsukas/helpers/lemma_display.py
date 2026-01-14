@@ -1,11 +1,11 @@
 """Lemma display and UI helper functions for Barsukas."""
 
-from typing import Dict, List, Tuple
+from typing import Any, Dict, List, Tuple
 
 from wordfreq.storage.queries.lemma import get_difficulty_stats
 
 
-def group_derivative_forms(derivative_forms) -> Tuple[Dict, Dict, Dict, List[str]]:
+def group_derivative_forms(derivative_forms: Any) -> Tuple[Dict, Dict, Dict, List[str]]:
     """
     Group derivative forms by language and type for UI display.
 
@@ -21,9 +21,9 @@ def group_derivative_forms(derivative_forms) -> Tuple[Dict, Dict, Dict, List[str
         Tuple of (forms_by_language, synonyms_by_language,
                   alternative_forms_by_language, all_synonym_languages)
     """
-    forms_by_language = {}
-    synonyms_by_language = {}
-    alternative_forms_by_language = {}
+    forms_by_language: Dict = {}
+    synonyms_by_language: Dict = {}
+    alternative_forms_by_language: Dict = {}
 
     for form in derivative_forms:
         lang_code = form.language_code

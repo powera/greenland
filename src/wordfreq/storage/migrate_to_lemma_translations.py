@@ -18,7 +18,9 @@ to provide context for what the lemma represents.
 """
 
 import logging
+from typing import Dict
 
+from wordfreq.storage.backend.base import BaseSession
 from wordfreq.storage.database import Lemma, LemmaTranslation, create_database_session
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -37,7 +39,7 @@ TRANSLATION_COLUMNS = {
 }
 
 
-def migrate_translations(session, dry_run=False):
+def migrate_translations(session: BaseSession, dry_run: bool = False) -> Dict[str, int]:
     """
     Migrate translations from individual columns to lemma_translations table.
 
@@ -112,7 +114,7 @@ def migrate_translations(session, dry_run=False):
     return {"migrated": total_migrated, "skipped": total_skipped}
 
 
-def main():
+def main() -> None:
     """Main entry point for migration script."""
     import argparse
 

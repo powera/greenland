@@ -2,8 +2,10 @@
 
 """Routes for translation management."""
 
+from typing import Union
+
 from config import Config
-from flask import Blueprint, flash, g, jsonify, redirect, request, url_for
+from flask import Blueprint, Response, flash, g, jsonify, redirect, request, url_for
 
 from wordfreq.storage.crud.operation_log import log_translation_change
 from wordfreq.storage.models.schema import Lemma
@@ -17,7 +19,7 @@ bp = Blueprint("translations", __name__, url_prefix="/translations")
 
 
 @bp.route("/<int:lemma_id>/<lang_code>", methods=["POST"])
-def update_translation(lemma_id, lang_code):
+def update_translation(lemma_id: int, lang_code: str) -> Response:
     """Update a translation for a lemma."""
     from flask import current_app
 
@@ -83,7 +85,7 @@ def update_translation(lemma_id, lang_code):
 
 
 @bp.route("/<int:lemma_id>/<lang_code>/check", methods=["GET"])
-def check_translation(lemma_id, lang_code):
+def check_translation(lemma_id: int, lang_code: str) -> Response:
     """Check if a translation has a slash (for AJAX validation)."""
     translation = request.args.get("translation", "")
     has_slash = "/" in translation

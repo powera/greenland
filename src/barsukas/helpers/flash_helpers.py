@@ -4,13 +4,14 @@ import inspect
 import logging
 import traceback
 from pathlib import Path
+from typing import Optional
 
 from flask import flash
 
 logger = logging.getLogger(__name__)
 
 
-def flash_and_log(message: str, category: str = "info", log_level: str = None):
+def flash_and_log(message: str, category: str = "info", log_level: Optional[str] = None) -> None:
     """Flash a message to the user and log it with caller location.
 
     Args:
@@ -27,7 +28,11 @@ def flash_and_log(message: str, category: str = "info", log_level: str = None):
 
     # Get caller information
     frame = inspect.currentframe()
+    if frame is None:
+        return
     caller_frame = frame.f_back
+    if caller_frame is None:
+        return
     caller_filename = caller_frame.f_code.co_filename
     caller_lineno = caller_frame.f_lineno
 
@@ -44,7 +49,7 @@ def flash_and_log(message: str, category: str = "info", log_level: str = None):
     log_func(f"[{category.upper()}] {location}: {message}")
 
 
-def log_and_flash_error(e: Exception, context: str):
+def log_and_flash_error(e: Exception, context: str) -> None:
     """Flash an error message and log exception with traceback.
 
     Args:

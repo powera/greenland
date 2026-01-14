@@ -6,7 +6,7 @@ in src/barsukas/{agent}/wq_worker.py and registers them in TASK_HANDLERS.
 
 from __future__ import annotations
 
-from typing import Dict
+from typing import Any, Dict, Optional, Tuple
 
 from config import Config
 
@@ -45,7 +45,7 @@ def _build_config() -> DataSourceConfig:
     )
 
 
-def handle_voras_populate_translations(session, payload: Dict) -> str:
+def handle_voras_populate_translations(session: Any, payload: Dict) -> str:
     """Handle translation population task for voras agent."""
     lemma_id = payload.get("lemma_id")
     if not lemma_id:
@@ -66,7 +66,9 @@ def handle_voras_populate_translations(session, payload: Dict) -> str:
     # Create agent and client
     config = _build_config()
     agent = VorasAgent(config=config)
-    client = LinguisticClient(model=config.model, db_path=config.sqlite_path, debug=Config.DEBUG)
+    client = LinguisticClient(
+        model=config.model or "", db_path=config.sqlite_path or "", debug=Config.DEBUG
+    )
 
     # Find which languages are missing for this lemma
     missing_languages = []
@@ -96,7 +98,10 @@ def handle_voras_populate_translations(session, payload: Dict) -> str:
     # Query translations
     translations, success = client.query_translations(
         english_word=lemma.lemma_text,
-        reference_translation=(reference_lang_code, reference_translation),
+        reference_translation=(
+            reference_lang_code or "en",
+            reference_translation or lemma.lemma_text,
+        ),
         definition=lemma.definition_text,
         pos_type=lemma.pos_type,
         pos_subtype=lemma.pos_subtype,
@@ -134,7 +139,7 @@ def handle_voras_populate_translations(session, payload: Dict) -> str:
     return f"Added {added_count} translation(s) for {', '.join(missing_languages)}"
 
 
-def handle_voras_regenerate_translations(session, payload: Dict) -> str:
+def handle_voras_regenerate_translations(session: Any, payload: Dict) -> str:
     """Handle translation regeneration task for voras agent."""
     lemma_id = payload.get("lemma_id")
     if not lemma_id:
@@ -151,7 +156,9 @@ def handle_voras_regenerate_translations(session, payload: Dict) -> str:
     # Create agent and client
     config = _build_config()
     agent = VorasAgent(config=config)
-    client = LinguisticClient(model=config.model, db_path=config.sqlite_path, debug=Config.DEBUG)
+    client = LinguisticClient(
+        model=config.model or "", db_path=config.sqlite_path or "", debug=Config.DEBUG
+    )
 
     # All languages except Lithuanian
     languages_to_regenerate = [lc for lc in LANGUAGE_FIELDS.keys() if lc != "lt"]
@@ -183,7 +190,7 @@ def handle_voras_regenerate_translations(session, payload: Dict) -> str:
     for lang_code in languages_to_regenerate:
         field_name, _, _ = LANGUAGE_FIELDS[lang_code]
         llm_field = LANG_CODE_TO_LLM_FIELD.get(lang_code)
-        translation = translations.get(llm_field, "").strip()
+        translation = translations.get(llm_field or "", "").strip()
 
         if translation:
             setattr(lemma, field_name, translation)
@@ -207,7 +214,7 @@ def handle_voras_regenerate_translations(session, payload: Dict) -> str:
     return f"Regenerated {added_count} translation(s) for {lemma.lemma_text}"
 
 
-def handle_lape_generate_grammar_fact(session, payload: Dict) -> str:
+def handle_lape_generate_grammar_fact(session: Any, payload: Dict) -> str:
     """Handle grammar fact generation task for lape agent."""
     lemma_id = payload.get("lemma_id")
     if not lemma_id:
