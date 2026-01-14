@@ -627,11 +627,16 @@ class VieversysAgent:
 
             # Filter by GUID if specified (sentences that use this lemma)
             if guid:
-                query = (
-                    query.join(SentenceWord, Sentence.id == SentenceWord.sentence_id)
+                # Use a subquery to find distinct sentence IDs that contain this lemma
+                # This prevents duplicates when a sentence uses the same lemma multiple times
+                sentence_ids_subquery = (
+                    session.query(SentenceWord.sentence_id)
                     .join(Lemma, SentenceWord.lemma_id == Lemma.id)
                     .filter(Lemma.guid == guid)
+                    .distinct()
+                    .subquery()
                 )
+                query = query.filter(Sentence.id.in_(sentence_ids_subquery))
 
             # Order by sentence ID and limit
             query = query.order_by(Sentence.id).limit(limit)
