@@ -23,28 +23,6 @@ SIMPLE_PATTERNS = [
         "notes": "Basic question about location of an object",
     },
     {
-        "pattern_id": "my_object_is_color",
-        "en_template": "My [small object] is [color].",
-        "slots": [
-            {
-                "name": "small object",
-                "pos_type": "noun",
-                "pos_subtype": "small_movable_object",
-                "min_level": 1,
-                "max_level": 10,
-            },
-            {
-                "name": "color",
-                "pos_type": "adjective",
-                "pos_subtype": "color",
-                "min_level": 1,
-                "max_level": 10,
-            },
-        ],
-        "pattern_type": "SVO",
-        "notes": "Describing color of a possessed object",
-    },
-    {
         "pattern_id": "i_eat_food",
         "en_template": "I eat [food].",
         "slots": [
@@ -61,51 +39,6 @@ SIMPLE_PATTERNS = [
         "notes": "Eating specific food",
     },
     {
-        "pattern_id": "the_animal_is_quality",
-        "en_template": "The [animal] is [quality].",
-        "slots": [
-            {
-                "name": "animal",
-                "pos_type": "noun",
-                "pos_subtype": "animal",
-                "min_level": 1,
-                "max_level": 10,
-            },
-            {
-                "name": "quality",
-                "pos_type": "adjective",
-                "pos_subtype": "quality",
-                "min_level": 1,
-                "max_level": 10,
-            },
-        ],
-        "pattern_type": "SVO",
-        "notes": "Describing quality/characteristic of an animal",
-    },
-    {
-        "pattern_id": "i_have_number_objects",
-        "en_template": "I have [number] [small object].",
-        "slots": [
-            {
-                "name": "number",
-                "pos_type": "numeral",
-                "pos_subtype": None,
-                "min_level": 1,
-                "max_level": 5,
-            },
-            {
-                "name": "small object",
-                "pos_type": "noun",
-                "pos_subtype": "small_movable_object",
-                "min_level": 1,
-                "max_level": 10,
-            },
-        ],
-        "fixed_words": [{"lemma_text": "have", "pos_type": "verb"}],
-        "pattern_type": "SVO",
-        "notes": "Expressing quantity of possessed items",
-    },
-    {
         "pattern_id": "what_is_this_object",
         "en_template": "What is this [small object]?",
         "slots": [
@@ -119,29 +52,6 @@ SIMPLE_PATTERNS = [
         ],
         "pattern_type": "question",
         "notes": "Asking to identify an object",
-    },
-    {
-        "pattern_id": "object_is_in_place",
-        "en_template": "The [small object] is in the [place].",
-        "slots": [
-            {
-                "name": "small object",
-                "pos_type": "noun",
-                "pos_subtype": "small_movable_object",
-                "min_level": 1,
-                "max_level": 10,
-            },
-            {
-                "name": "place",
-                "pos_type": "noun",
-                "pos_subtype": "building_structure",
-                "min_level": 1,
-                "max_level": 10,
-            },
-        ],
-        "fixed_words": [{"lemma_text": "in", "pos_type": "preposition"}],
-        "pattern_type": "SVO",
-        "notes": "Expressing location of an object in a building",
     },
     {
         "pattern_id": "i_want_to_verb",
@@ -243,28 +153,6 @@ SIMPLE_PATTERNS = [
         "fixed_words": [{"lemma_text": "need", "pos_type": "verb"}],
         "pattern_type": "SVO",
         "notes": "Expressing necessity for a tool",
-    },
-    {
-        "pattern_id": "object_is_color",
-        "en_template": "The [small object] is [color].",
-        "slots": [
-            {
-                "name": "small object",
-                "pos_type": "noun",
-                "pos_subtype": "small_movable_object",
-                "min_level": 1,
-                "max_level": 10,
-            },
-            {
-                "name": "color",
-                "pos_type": "adjective",
-                "pos_subtype": "color",
-                "min_level": 1,
-                "max_level": 10,
-            },
-        ],
-        "pattern_type": "SVO",
-        "notes": "Describing the color of an object",
     },
     {
         "pattern_id": "i_see_animal",
@@ -440,28 +328,6 @@ SIMPLE_PATTERNS = [
         "fixed_words": [{"lemma_text": "drink", "pos_type": "verb"}],
         "pattern_type": "SVO",
         "notes": "Drinking beverages",
-    },
-    {
-        "pattern_id": "the_object_is_size",
-        "en_template": "The [small object] is [size].",
-        "slots": [
-            {
-                "name": "small object",
-                "pos_type": "noun",
-                "pos_subtype": "small_movable_object",
-                "min_level": 1,
-                "max_level": 10,
-            },
-            {
-                "name": "size",
-                "pos_type": "adjective",
-                "pos_subtype": "size",
-                "min_level": 1,
-                "max_level": 10,
-            },
-        ],
-        "pattern_type": "SVO",
-        "notes": "Describing size of an object",
     },
     {
         "pattern_id": "i_go_to_place",
