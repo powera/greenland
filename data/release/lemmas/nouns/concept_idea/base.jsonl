@@ -195,4 +195,3 @@
 {"guid": "N17_215", "pos_type": "noun", "pos_subtype": "concept_idea", "concept_label": "network", "concept_definition": "A system of interconnected people or things designed to exchange information, resources, or goods (e.g., a computer network connecting devices, a social network of contacts).", "difficulty_level": 9}
 {"guid": "N17_216", "pos_type": "noun", "pos_subtype": "concept_idea", "concept_label": "server", "concept_definition": "A computer or program that provides data, resources, or services to other computers or clients over a network.", "difficulty_level": -1}
 {"guid": "N17_217", "pos_type": "noun", "pos_subtype": "concept_idea", "concept_label": "video game", "concept_definition": "an electronic game played on a computer, console, or mobile device in which players interact with visual feedback on a screen", "difficulty_level": 9}
-# Next GUID: N17_218

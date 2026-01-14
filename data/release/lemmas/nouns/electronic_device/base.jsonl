@@ -15,4 +15,3 @@
 {"guid": "N42_015", "pos_type": "noun", "pos_subtype": "electronic_device", "concept_label": "battery", "concept_definition": "a device that stores chemical energy and provides electrical power to a circuit; a group of one or more electrochemical cells (e.g., AA batteries)", "difficulty_level": 9}
 {"guid": "N42_016", "pos_type": "noun", "pos_subtype": "electronic_device", "concept_label": "calculator", "concept_definition": "A device used to perform mathematical calculations, usually electronic and portable.", "difficulty_level": 9}
 {"guid": "N42_017", "pos_type": "noun", "pos_subtype": "electronic_device", "concept_label": "screen", "concept_definition": "a flat surface on which images are displayed", "difficulty_level": -1}
-# Next GUID: N42_018

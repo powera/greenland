@@ -1,4 +1,3 @@
 {"guid": "N12_038", "pos_type": "noun", "pos_subtype": "tool", "concept_label": "saw", "concept_definition": "A hand or power tool with a serrated metal blade used for cutting wood, metal, or other materials.", "difficulty_level": -1}
 {"guid": "N12_042", "pos_type": "noun", "pos_subtype": "tool", "concept_label": "machine", "concept_definition": "a mechanical apparatus using energy to perform tasks", "difficulty_level": -1}
 {"guid": "N12_046", "pos_type": "noun", "pos_subtype": "tool", "concept_label": "lock", "concept_definition": "a mechanism for securing a door or container", "difficulty_level": -1}
-# Next GUID: N12_047
