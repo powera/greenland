@@ -6,17 +6,11 @@ Context:
 - This is for language learning, so focus on common, useful forms that learners might encounter
 
 Generate:
-1. **Abbreviations**: Shortened forms of the word
-2. **Expanded forms**: Longer/fuller forms of the word
-3. **Alternate spellings**: Spelling variants of the SAME word (each variant as a separate item)
-4. **Synonyms**: Words that can replace the original in MOST contexts (include regional variants!)
+1. **Abbreviations**: Shortened forms (e.g., "TV" for "television")
+2. **Expanded forms**: Longer/fuller forms (e.g., "television" for "TV")
+3. **Alternate spellings**: Valid spelling variants in THIS language only (not misspellings, not other languages) - include regional/dialect variants
+4. **Synonyms**: Words usable interchangeably in most contexts (not specific types/shades/varieties) - include regional/dialect variants
 
-REMEMBER:
-- Return EACH variant as a separate array item - no slashes or parentheticals
-- Include regional/dialect variants that learners might encounter
-- Empty arrays are fine when no valid forms exist
-- Do NOT include the original word itself
-- Do NOT include pure numerals (e.g., "1000", "42")
-- Prefer common, useful forms over rare or archaic ones
+Remember: Empty arrays are expected and correct when no valid forms exist. Return each variant as a separate array item.
 
 {{language_note}}
