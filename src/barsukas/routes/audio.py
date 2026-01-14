@@ -26,6 +26,7 @@ from flask import (
     render_template,
     request,
     send_file,
+    session,
     url_for,
 )
 from sqlalchemy import func
@@ -175,13 +176,8 @@ def import_manifest() -> Union[str, Response]:
                     existing.manifest_md5 = md5
                     existing.expected_text = text
                     existing.filename = filename
-                    # Update S3 URL if MD5 changed
-                    s3_cdn_base = current_app.config.get("S3_CDN_BASE_URL")
-                    existing.s3_url = (
-                        f"{s3_cdn_base}/{language_code}/{voice_name}/{md5}.mp3"
-                        if s3_cdn_base
-                        else None
-                    )
+                    # Note: Not setting S3 URLs from manifest imports.
+                    # Use audio generation agents with --upload-s3 flag instead.
                     updated_count += 1
                 else:
                     unchanged_count += 1
@@ -190,22 +186,22 @@ def import_manifest() -> Union[str, Response]:
             # Try to link to lemma
             lemma_id = link_audio_to_lemma(g.db, guid, text, language_code)
 
-            # Calculate S3 URL from MD5 hash
-            s3_cdn_base = current_app.config.get("S3_CDN_BASE_URL")
-            s3_url = (
-                f"{s3_cdn_base}/{language_code}/{voice_name}/{md5}.mp3" if s3_cdn_base else None
-            )
-
             # Create new review record
+            # Note: S3 URLs are not set from manifest imports.
+            # Use audio generation agents with --upload-s3 flag to populate S3 fields.
             review = AudioQualityReview(
                 guid=guid,
+                sentence_id=None,
                 language_code=language_code,
                 voice_name=voice_name,
                 grammatical_form=grammatical_form,
                 filename=filename,
                 expected_text=text,
                 manifest_md5=md5,
-                s3_url=s3_url,
+                s3_staging_url=None,
+                s3_staging_manifest_url=None,
+                s3_prod_url=None,
+                staging_agent=None,
                 lemma_id=lemma_id,
                 status="pending_review",
             )
