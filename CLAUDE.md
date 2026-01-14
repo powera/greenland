@@ -47,5 +47,8 @@ run black and mypy on modified Python files to ensure code quality and type
 correctness.  For barsukas changes, ask the developer to test the change in
 their local browser.
 
+After cloning, enable pre-commit hooks to automatically check black formatting:
+  git config core.hooksPath hooks
+
 When writing HTML files, always use ordinary form submits for POST data - do
 not do an AJAX-based submission.  Avoid using disappearing UX elements.
