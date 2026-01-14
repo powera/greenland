@@ -158,7 +158,7 @@ def handle_voras_regenerate_translations(session, payload: Dict) -> str:
 
     # Delete existing non-Lithuanian translations
     for lang_code in languages_to_regenerate:
-        field_name, _ = LANGUAGE_FIELDS[lang_code]
+        field_name, _, _ = LANGUAGE_FIELDS[lang_code]
         existing = getattr(lemma, field_name, None)
         if existing and existing.strip():
             setattr(lemma, field_name, None)
@@ -181,7 +181,7 @@ def handle_voras_regenerate_translations(session, payload: Dict) -> str:
     # Add all non-Lithuanian translations
     added_count = 0
     for lang_code in languages_to_regenerate:
-        field_name, _ = LANGUAGE_FIELDS[lang_code]
+        field_name, _, _ = LANGUAGE_FIELDS[lang_code]
         llm_field = LANG_CODE_TO_LLM_FIELD.get(lang_code)
         translation = translations.get(llm_field, "").strip()
 
