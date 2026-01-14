@@ -2,6 +2,7 @@
 """Type definitions for eSpeak-NG audio generation."""
 
 from enum import Enum
+from typing import Optional, cast
 
 # Mapping of our language codes to eSpeak-NG primary language codes
 # Some languages need the primary code (not alias) for variant notation to work
@@ -107,12 +108,12 @@ class EspeakVoice(Enum):
     @property
     def language_code(self) -> str:
         """Get the language code for this voice."""
-        return self.value[0]
+        return self.value[0]  # type: ignore[no-any-return]
 
     @property
     def gender(self) -> str:
         """Get the gender for this voice ('m' or 'f')."""
-        return self.value[1]
+        return self.value[1]  # type: ignore[no-any-return]
 
     @property
     def is_mbrola(self) -> bool:
@@ -124,13 +125,13 @@ class EspeakVoice(Enum):
         """Get the variant number for this voice (regular eSpeak only)."""
         if self.is_mbrola:
             return 0  # MBROLA voices don't have variants
-        return self.value[2]
+        return self.value[2]  # type: ignore[no-any-return]
 
     @property
-    def mbrola_code(self) -> str:
+    def mbrola_code(self) -> Optional[str]:
         """Get the MBROLA voice code (MBROLA voices only)."""
         if self.is_mbrola:
-            return self.value[2]
+            return self.value[2]  # type: ignore[no-any-return]
         return None
 
     @property
@@ -152,28 +153,28 @@ class EspeakVoice(Enum):
         because variants only work with primary codes, not aliases.
         """
         if self.is_mbrola:
-            return self.mbrola_code
+            return cast(str, self.mbrola_code)
 
         espeak_lang = ESPEAK_LANGUAGE_CODES.get(self.language_code, self.language_code)
         return f"{espeak_lang}+{self.gender}{self.variant}"
 
     @classmethod
-    def get_voices_for_language(cls, language_code: str):
+    def get_voices_for_language(cls, language_code: str) -> list["EspeakVoice"]:
         """Get all available voices for a specific language."""
         return [voice for voice in cls if voice.language_code == language_code]
 
     @classmethod
-    def get_default_voices_for_language(cls, language_code: str):
+    def get_default_voices_for_language(cls, language_code: str) -> list["EspeakVoice"]:
         """Get default voices for a language (all voices including MBROLA)."""
         return cls.get_voices_for_language(language_code)
 
     @classmethod
-    def get_mbrola_voices_for_language(cls, language_code: str):
+    def get_mbrola_voices_for_language(cls, language_code: str) -> list["EspeakVoice"]:
         """Get only MBROLA voices for a specific language."""
         return [voice for voice in cls if voice.language_code == language_code and voice.is_mbrola]
 
     @classmethod
-    def get_regular_voices_for_language(cls, language_code: str):
+    def get_regular_voices_for_language(cls, language_code: str) -> list["EspeakVoice"]:
         """Get only regular eSpeak voices (non-MBROLA) for a specific language."""
         return [
             voice for voice in cls if voice.language_code == language_code and not voice.is_mbrola

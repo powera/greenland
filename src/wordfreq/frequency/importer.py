@@ -33,7 +33,9 @@ def import_frequency_data(
     max_words: int = 5000,
     value_type: str = "auto",  # Parameter to specify what the numeric values represent: "rank", "frequency", or "auto"
     corpus_description: Optional[str] = None,  # Optional description for new corpus
-    config: Optional['DataSourceConfig'] = None,  # DataSourceConfig with backend settings (uses default if None)
+    config: Optional[
+        "DataSourceConfig"
+    ] = None,  # DataSourceConfig with backend settings (uses default if None)
 ) -> Tuple[int, int]:
     """
     Import word frequency data from a file into the database.

@@ -379,7 +379,21 @@ def search_lemmas():
 
         # Pick up to 3 translations to show (follows LANGUAGE_HIERARCHY from translation_helpers)
         # Priority: LT, ZH, FR, ES (primary), then tier 2, then experimental (GD, KO, SW)
-        priority_langs = ["lt", "zh", "fr", "es", "de", "it", "nl", "pt", "sv", "vi", "gd", "ko", "sw"]
+        priority_langs = [
+            "lt",
+            "zh",
+            "fr",
+            "es",
+            "de",
+            "it",
+            "nl",
+            "pt",
+            "sv",
+            "vi",
+            "gd",
+            "ko",
+            "sw",
+        ]
         sample_translations = {}
         for lang in priority_langs:
             if lang in all_translations:

@@ -131,14 +131,20 @@ def generate_measure_words(
         name="MeasureWordGeneration",
         description="Generate Chinese measure words/classifiers for nouns",
         properties={
-            "primary_measure_word": SchemaProperty("string", "The primary/most common measure word"),
+            "primary_measure_word": SchemaProperty(
+                "string", "The primary/most common measure word"
+            ),
             "alternative_measure_words": SchemaProperty(
                 "array",
                 "List of alternative measure words that can also be used",
                 items={"type": "string"},
             ),
-            "explanation": SchemaProperty("string", "Brief explanation of why this measure word is appropriate"),
-            "confidence": SchemaProperty("number", "Confidence score 0.0-1.0", minimum=0.0, maximum=1.0),
+            "explanation": SchemaProperty(
+                "string", "Brief explanation of why this measure word is appropriate"
+            ),
+            "confidence": SchemaProperty(
+                "number", "Confidence score 0.0-1.0", minimum=0.0, maximum=1.0
+            ),
         },
     )
 
@@ -215,8 +221,12 @@ def generate_grammatical_gender(
                 f"The grammatical gender: {valid_genders}",
                 enum=gender_config["genders"],
             ),
-            "explanation": SchemaProperty("string", "Brief explanation of why this gender is correct"),
-            "confidence": SchemaProperty("number", "Confidence score 0.0-1.0", minimum=0.0, maximum=1.0),
+            "explanation": SchemaProperty(
+                "string", "Brief explanation of why this gender is correct"
+            ),
+            "confidence": SchemaProperty(
+                "number", "Confidence score 0.0-1.0", minimum=0.0, maximum=1.0
+            ),
         },
     )
 
@@ -416,9 +426,7 @@ def handle_generate_grammar_fact(session, payload: Dict) -> str:
 
     lemma = get_lemma_or_raise(session, lemma_id)
 
-    result = generate_grammar_fact_for_lemma(
-        session, lemma, fact_type, language_code
-    )
+    result = generate_grammar_fact_for_lemma(session, lemma, fact_type, language_code)
 
     session.commit()
 

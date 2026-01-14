@@ -2,6 +2,7 @@
 """Type definitions for Piper TTS audio generation."""
 
 from enum import Enum
+from typing import Optional
 
 # Mapping of our language codes to Piper language/region codes
 PIPER_LANGUAGE_CODES = {
@@ -110,17 +111,17 @@ class PiperVoice(Enum):
         return self.name.lower().replace("_", "-")
 
     @classmethod
-    def get_voices_for_language(cls, language_code: str):
+    def get_voices_for_language(cls, language_code: str) -> list["PiperVoice"]:
         """Get all available voices for a specific language."""
         return [voice for voice in cls if voice.language_code == language_code]
 
     @classmethod
-    def get_default_voices_for_language(cls, language_code: str):
+    def get_default_voices_for_language(cls, language_code: str) -> list["PiperVoice"]:
         """Get default voices for a language."""
         return cls.get_voices_for_language(language_code)
 
     @classmethod
-    def from_ui_name(cls, ui_name: str):
+    def from_ui_name(cls, ui_name: str) -> Optional["PiperVoice"]:
         """
         Get a PiperVoice from its UI name.
 

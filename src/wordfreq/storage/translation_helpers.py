@@ -379,10 +379,7 @@ def get_languages_in_hierarchy() -> list:
         List of dicts with 'code' and 'name' keys, ordered by LANGUAGE_HIERARCHY.
         Example: [{'code': 'en', 'name': 'English'}, {'code': 'lt', 'name': 'Lithuanian'}, ...]
     """
-    return [
-        {"code": code, "name": LANGUAGE_FIELDS[code][1]}
-        for code in LANGUAGE_HIERARCHY
-    ]
+    return [{"code": code, "name": LANGUAGE_FIELDS[code][1]} for code in LANGUAGE_HIERARCHY]
 
 
 def llm_field_to_lang_code(field_name: str) -> Optional[str]:
@@ -473,7 +470,22 @@ def get_reference_translation(
         # Default preference follows LANGUAGE_HIERARCHY (excluding English where applicable)
         # LT, ZH, FR, ES are primary, then tier 2 (DE IT NL PT SV VI), then experimental (GD KO SW)
         # English is last as a fallback
-        prefer_languages = ["lt", "zh", "fr", "es", "de", "it", "nl", "pt", "sv", "vi", "gd", "ko", "sw", "en"]
+        prefer_languages = [
+            "lt",
+            "zh",
+            "fr",
+            "es",
+            "de",
+            "it",
+            "nl",
+            "pt",
+            "sv",
+            "vi",
+            "gd",
+            "ko",
+            "sw",
+            "en",
+        ]
 
     # Search through languages in preference order
     for lang_code in prefer_languages:

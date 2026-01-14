@@ -445,9 +445,7 @@ def query_lithuanian_adjective_declensions(
 
     try:
         context = util.prompt_loader.get_context("language_forms", "lithuanian/adjective")
-        prompt_template = util.prompt_loader.get_prompt(
-            "language_forms", "lithuanian/adjective"
-        )
+        prompt_template = util.prompt_loader.get_prompt("language_forms", "lithuanian/adjective")
         prompt = prompt_template.format(
             adjective=adjective,
             english_adjective=english_adjective,

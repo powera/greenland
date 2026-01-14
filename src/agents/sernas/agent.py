@@ -447,7 +447,9 @@ class SernasAgent:
         # Load prompt templates from files
         system_prompt = util.prompt_loader.get_prompt("wordfreq", "synonyms", subtype="system")
         context_prompt = util.prompt_loader.get_context("wordfreq", "synonyms", subtype="context")
-        output_format = util.prompt_loader.get_prompt("wordfreq", "synonyms", subtype="output_format")
+        output_format = util.prompt_loader.get_prompt(
+            "wordfreq", "synonyms", subtype="output_format"
+        )
 
         # Build context with variables
         context = context_prompt.replace("{{language_name}}", language_name)

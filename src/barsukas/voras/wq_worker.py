@@ -84,9 +84,7 @@ def generate_missing_translations_for_lemma(
     ]
 
     # Query LLM for translations
-    client = LinguisticClient(
-        model=config.model, db_path=config.sqlite_path, debug=config.debug
-    )
+    client = LinguisticClient(model=config.model, db_path=config.sqlite_path, debug=config.debug)
     llm_response, success = client.query_translations(
         english_word=lemma.lemma_text,
         reference_translation=(reference_lang_code, reference_translation),

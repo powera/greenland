@@ -51,17 +51,15 @@ def view_model(model_name):
         return "Model not found", 404
 
     # Get all runs for this model with benchmark info
-    runs = (
-        g.db.query(Run)
-        .filter(Run.model_name == model_name)
-        .order_by(Run.run_ts.desc())
-        .all()
-    )
+    runs = g.db.query(Run).filter(Run.model_name == model_name).order_by(Run.run_ts.desc()).all()
 
     # Calculate best score per benchmark
     best_scores = {}
     for run in runs:
-        if run.benchmark_name not in best_scores or run.normed_score > best_scores[run.benchmark_name]:
+        if (
+            run.benchmark_name not in best_scores
+            or run.normed_score > best_scores[run.benchmark_name]
+        ):
             best_scores[run.benchmark_name] = run.normed_score
 
     return render_template(

@@ -7,7 +7,13 @@ from typing import Dict, List, Optional, Tuple
 from wordfreq.patterns.simple_patterns import SIMPLE_PATTERNS
 from wordfreq.storage.backend import create_session as create_backend_session
 from wordfreq.storage.backend.config import DataSourceConfig
-from wordfreq.storage.models.schema import Lemma, Sentence, SentenceTranslation, SentenceWord, SentencePatternWord
+from wordfreq.storage.models.schema import (
+    Lemma,
+    Sentence,
+    SentenceTranslation,
+    SentenceWord,
+    SentencePatternWord,
+)
 
 logger = logging.getLogger(__name__)
 

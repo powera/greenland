@@ -344,7 +344,10 @@ def generate_synonyms_for_lemma(
             "abbreviations": abbreviations,
             "expanded_forms": expanded_forms,
             "alternate_spellings": alternate_spellings,
-            "total_count": len(synonyms) + len(abbreviations) + len(expanded_forms) + len(alternate_spellings),
+            "total_count": len(synonyms)
+            + len(abbreviations)
+            + len(expanded_forms)
+            + len(alternate_spellings),
         }
 
     # Store the forms in the database

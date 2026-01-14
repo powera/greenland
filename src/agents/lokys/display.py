@@ -5,8 +5,10 @@ This module contains all display/output formatting functions for the Lokys agent
 separated from the main logic to follow the pattern established in other refactored agents.
 """
 
+from typing import Any, Optional, Tuple
 
-def display_lemma_validation_result(result: dict, lemma_text: str):
+
+def display_lemma_validation_result(result: dict[str, Any], lemma_text: str) -> None:
     """
     Display lemma form validation results.
 
@@ -23,8 +25,8 @@ def display_lemma_validation_result(result: dict, lemma_text: str):
 
 
 def display_definition_validation_result(
-    result: dict, lemma_text: str, definition_text: str, dry_run: bool = False
-):
+    result: dict[str, Any], lemma_text: str, definition_text: str, dry_run: bool = False
+) -> Tuple[bool, Optional[str]]:
     """
     Display definition validation results.
 
@@ -59,7 +61,7 @@ def display_definition_validation_result(
     return False, None
 
 
-def display_disambiguation_validation_result(result: dict, lemma_text: str):
+def display_disambiguation_validation_result(result: dict[str, Any], lemma_text: str) -> None:
     """
     Display disambiguation validation results.
 
@@ -86,7 +88,7 @@ def display_disambiguation_validation_result(result: dict, lemma_text: str):
         print(f"  Confidence: {confidence:.2f}")
 
 
-def display_single_lemma_header(lemma, guid: str):
+def display_single_lemma_header(lemma: Any, guid: str) -> None:
     """
     Display header for single lemma validation.
 
@@ -97,7 +99,7 @@ def display_single_lemma_header(lemma, guid: str):
     print(f"\nValidating lemma: {lemma.lemma_text} (GUID: {guid})")
 
 
-def display_fix_applied(old_value: str, new_value: str):
+def display_fix_applied(old_value: str, new_value: str) -> None:
     """
     Display message when a fix is applied.
 

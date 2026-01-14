@@ -70,9 +70,7 @@ def index():
     avg_times = {}
     for run_id, bench_name, model_name, score, run_ts in runs_data:
         avg_time = (
-            g.db.query(func.avg(RunDetail.eval_msec))
-            .filter(RunDetail.run_id == run_id)
-            .scalar()
+            g.db.query(func.avg(RunDetail.eval_msec)).filter(RunDetail.run_id == run_id).scalar()
         )
         avg_times[run_id] = avg_time or 0
 

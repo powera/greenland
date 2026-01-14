@@ -392,7 +392,9 @@ def accept_sentence(sentence_id):
 
         # Check if sentence already has translations for all languages
         existing_translations = {t.language_code for t in sentence.translations}
-        target_languages = [lang["code"] for lang in get_languages_in_hierarchy() if lang["code"] != "en"]
+        target_languages = [
+            lang["code"] for lang in get_languages_in_hierarchy() if lang["code"] != "en"
+        ]
         has_all_translations = all(lang in existing_translations for lang in target_languages)
 
         # Generate missing translations
@@ -445,7 +447,9 @@ def verify_sentence(sentence_id):
     try:
         # Check that sentence has translations and level
         existing_translations = {t.language_code for t in sentence.translations}
-        target_languages = [lang["code"] for lang in get_languages_in_hierarchy() if lang["code"] != "en"]
+        target_languages = [
+            lang["code"] for lang in get_languages_in_hierarchy() if lang["code"] != "en"
+        ]
         has_all_translations = all(lang in existing_translations for lang in target_languages)
 
         if not has_all_translations:

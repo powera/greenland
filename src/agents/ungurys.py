@@ -34,8 +34,7 @@ from wordfreq.trakaido.utils.export_wireword_sentences import WirewordSentenceEx
 
 # Supported languages: Tier 1 and Tier 2 (excludes experimental tier 3)
 SUPPORTED_LANGUAGES = {
-    lang_code: LANGUAGE_NAMES[lang_code]
-    for lang_code in TIER_1_LANGUAGES + TIER_2_LANGUAGES
+    lang_code: LANGUAGE_NAMES[lang_code] for lang_code in TIER_1_LANGUAGES + TIER_2_LANGUAGES
 }
 
 # Configure logging

@@ -316,8 +316,14 @@ class PradziaAgent:
                 try:
                     logger.info(f"Loading corpus: {corpus_config.name}")
                     imported, total = corpus.load_corpus(corpus_config.name, config=self.config)
-                    results[corpus_config.name] = {"imported": imported, "total": total, "success": True}
-                    logger.info(f"Successfully loaded {corpus_config.name}: {imported}/{total} words")
+                    results[corpus_config.name] = {
+                        "imported": imported,
+                        "total": total,
+                        "success": True,
+                    }
+                    logger.info(
+                        f"Successfully loaded {corpus_config.name}: {imported}/{total} words"
+                    )
                 except Exception as e:
                     error_msg = f"Failed to load corpus {corpus_config.name}: {e}"
                     logger.error(error_msg)
