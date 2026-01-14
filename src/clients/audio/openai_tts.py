@@ -23,6 +23,14 @@ DEFAULT_MODEL = "gpt-4o-mini-tts"
 API_BASE = "https://api.openai.com/v1"
 DEFAULT_TIMEOUT = 60
 
+# Pricing estimates (as of Jan 2025)
+# gpt-4o-mini-tts: $0.60/1M input tokens, $12/1M output audio tokens
+# Empirically ~300 bytes per audio token, ~4 chars per input token
+BYTES_PER_AUDIO_TOKEN = 300
+CHARS_PER_INPUT_TOKEN = 4
+PRICE_PER_1M_INPUT_TOKENS = 0.60
+PRICE_PER_1M_OUTPUT_TOKENS = 12.00
+
 # Language-specific TTS instructions
 LANGUAGE_INSTRUCTIONS = {
     "lt": """Pronounce this Lithuanian word or phrase with clear, accurate pronunciation:
@@ -168,6 +176,18 @@ class OpenAITTSClient:
 
             duration_ms = (time.time() - start_time) * 1000
             audio_data = response.content
+
+            # Log input/output sizes and estimated cost
+            input_chars = len(text) + len(instructions)
+            input_tokens_est = input_chars / CHARS_PER_INPUT_TOKEN
+            output_tokens_est = len(audio_data) / BYTES_PER_AUDIO_TOKEN
+            cost_est = (
+                input_tokens_est * PRICE_PER_1M_INPUT_TOKENS
+                + output_tokens_est * PRICE_PER_1M_OUTPUT_TOKENS
+            ) / 1_000_000
+            logger.info(
+                f"TTS Complete - In: ~{input_tokens_est:.0f} tokens, Out: ~{output_tokens_est:.0f} tokens, Cost: ~${cost_est:.6f}, Time: {duration_ms:.0f}ms"
+            )
 
             if self.debug:
                 logger.debug(f"Generated {len(audio_data)} bytes in {duration_ms:.0f}ms")

@@ -11,7 +11,7 @@
 #   SENTENCE_TRANSLATION_LIMIT - Target count of fully translated sentences per lemma (optional)
 #   GRAMMAR_FACT_TYPES     - Space-separated fact types for Lape (optional; overrides grouped tasks)
 #   GRAMMAR_FACT_TASK      - Lape grouped task preset (default: "all")
-#   AUDIO_VOICES           - Optional voice names for Strazdas (space-separated)
+#   AUDIO_VOICES           - Optional voice names for Vieversys (space-separated, e.g., "ash alloy nova")
 
 set -euo pipefail
 
@@ -173,13 +173,13 @@ run_step "Sentences" \
 run_step "Sentence translations" \
   python -m agents.zvirblis --guid "$GUID" --languages ${SENTENCE_LANGUAGE_LIST[*]} ${SENTENCE_TRANSLATION_ARGS[@]+"${SENTENCE_TRANSLATION_ARGS[@]}"}
 
-# Audio generation (Strazdas - eSpeak-NG)
+# Audio generation (Vieversys - OpenAI TTS with S3 upload)
 for lang in "${LANGUAGE_LIST[@]}"; do
   if [[ -n "$AUDIO_VOICES" ]]; then
-    run_step "Audio (Strazdas - ${lang})" \
-      python -m agents.strazdas --guid "$GUID" --mode populate-only --language "$lang" --voices ${AUDIO_VOICES} --yes
+    run_step "Audio (Vieversys - ${lang})" \
+      python -m agents.vieversys --guid "$GUID" --mode populate-only --language "$lang" --voices ${AUDIO_VOICES} --upload-s3 --yes
   else
-    run_step "Audio (Strazdas - ${lang})" \
-      python -m agents.strazdas --guid "$GUID" --mode populate-only --language "$lang" --yes
+    run_step "Audio (Vieversys - ${lang})" \
+      python -m agents.vieversys --guid "$GUID" --mode populate-only --language "$lang" --upload-s3 --yes
   fi
 done
