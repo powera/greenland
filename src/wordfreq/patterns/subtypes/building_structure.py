@@ -16,13 +16,13 @@ METADATA = {
 PATTERNS = [
     {
         "template": "where is the [building_structure]",
-        "fixed_words": [],
+        "fixed_words": [{"guid": "P99_003"}],  # where
         "notes": "Asking about location of a building",
     },
     {
-        "template": "i go to the [building_structure]",
-        "fixed_words": [{"guid": "V12_007"}, {"guid": "R99_006"}],  # go, to
-        "notes": "Going to a building",
+        "template": "i work at the [building_structure]",
+        "fixed_words": [{"guid": "V01_003"}, {"guid": "R99_003"}],  # work, at
+        "notes": "Working at a building",
     },
     # Room for 8+ more patterns...
 ]
