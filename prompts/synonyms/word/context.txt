@@ -34,4 +34,8 @@ GUIDELINES FOR EACH CATEGORY:
   * TRUE synonyms are VERY rare - most words will have ZERO synonyms
   * When in doubt, leave the array empty
 
+ADDITIONAL RESTRICTIONS:
+- Do NOT include pure numerals (e.g., "1000", "42", "3rd") in any category
+- Do NOT include the original word itself
+
 RETURN EMPTY ARRAYS when no valid forms exist - this is completely normal and expected.
