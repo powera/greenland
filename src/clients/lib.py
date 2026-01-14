@@ -72,7 +72,7 @@ def to_openai_schema(schema: Schema) -> Dict[str, Any]:
     OpenAI doesn't support the "optional" concept directly in its schema.
     Instead, it uses the "required" field at the schema level listing all required properties.
     """
-    result = {
+    result: Dict[str, Any] = {
         "type": "object",
         "properties": {},
         "required": schema.all_properties(),
@@ -80,7 +80,7 @@ def to_openai_schema(schema: Schema) -> Dict[str, Any]:
     }
 
     for name, prop in schema.properties.items():
-        property_schema = {
+        property_schema: Dict[str, Any] = {
             "type": prop.type,
         }
 
@@ -114,7 +114,7 @@ def to_openai_schema(schema: Schema) -> Dict[str, Any]:
             required_props = []
 
             for sub_name, sub_prop in prop.properties.items():
-                sub_schema = {"type": sub_prop.type}
+                sub_schema: Dict[str, Any] = {"type": sub_prop.type}
 
                 if sub_prop.description:
                     sub_schema["description"] = sub_prop.description
@@ -176,10 +176,14 @@ def to_anthropic_schema(schema: Schema) -> Dict[str, Any]:
 
     Anthropic's schema is similar to JSON Schema with a few differences.
     """
-    result = {"type": "object", "properties": {}, "required": schema.required_properties()}
+    result: Dict[str, Any] = {
+        "type": "object",
+        "properties": {},
+        "required": schema.required_properties(),
+    }
 
     for name, prop in schema.properties.items():
-        property_schema = {
+        property_schema: Dict[str, Any] = {
             "type": prop.type,
         }
 
@@ -213,7 +217,7 @@ def to_anthropic_schema(schema: Schema) -> Dict[str, Any]:
             required_props = []
 
             for sub_name, sub_prop in prop.properties.items():
-                sub_schema = {"type": sub_prop.type}
+                sub_schema: Dict[str, Any] = {"type": sub_prop.type}
 
                 if sub_prop.description:
                     sub_schema["description"] = sub_prop.description
@@ -264,14 +268,14 @@ def to_gemini_schema(schema: Schema) -> Dict[str, Any]:
     Gemini uses a slightly different approach where the schema is an items schema
     for an array with a single item, and requires propertyOrdering.
     """
-    result = {
+    result: Dict[str, Any] = {
         "type": "object",
         "properties": {},
         "required": schema.required_properties(),
     }
 
     for name, prop in schema.properties.items():
-        property_schema = {
+        property_schema: Dict[str, Any] = {
             "type": prop.type,
         }
 
@@ -308,7 +312,7 @@ def to_gemini_schema(schema: Schema) -> Dict[str, Any]:
             sub_property_names = []
 
             for sub_name, sub_prop in prop.properties.items():
-                sub_schema = {"type": sub_prop.type}
+                sub_schema: Dict[str, Any] = {"type": sub_prop.type}
                 sub_property_names.append(sub_name)
 
                 if sub_prop.description:
@@ -364,7 +368,7 @@ def to_ollama_schema(schema: Schema) -> Dict[str, Any]:
 
     Ollama follows standard JSON Schema conventions.
     """
-    result = {
+    result: Dict[str, Any] = {
         "type": "object",
         "properties": {},
         "required": schema.required_properties(),
@@ -372,7 +376,7 @@ def to_ollama_schema(schema: Schema) -> Dict[str, Any]:
     }
 
     for name, prop in schema.properties.items():
-        property_schema = {
+        property_schema: Dict[str, Any] = {
             "type": prop.type,
         }
 
@@ -406,7 +410,7 @@ def to_ollama_schema(schema: Schema) -> Dict[str, Any]:
             required_props = []
 
             for sub_name, sub_prop in prop.properties.items():
-                sub_schema = {"type": sub_prop.type}
+                sub_schema: Dict[str, Any] = {"type": sub_prop.type}
 
                 if sub_prop.description:
                     sub_schema["description"] = sub_prop.description

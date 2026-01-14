@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 def generate_measure_words(
-    agent: "LapeAgent", lemma: Lemma, chinese_translation: str, session=None
+    agent: "LapeAgent", lemma: Lemma, chinese_translation: Optional[str], session=None
 ) -> Tuple[Optional[str], Optional[str], float]:
     """
     Generate Chinese measure word(s) for a noun using LLM.

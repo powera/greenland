@@ -16,7 +16,11 @@ logger = logging.getLogger(__name__)
 
 
 def generate_grammatical_gender(
-    agent: "LapeAgent", lemma: Lemma, target_translation: str, language_code: str, session=None
+    agent: "LapeAgent",
+    lemma: Lemma,
+    target_translation: Optional[str],
+    language_code: str,
+    session=None,
 ) -> Tuple[Optional[str], Optional[str], float]:
     """
     Generate grammatical gender for a noun using LLM.

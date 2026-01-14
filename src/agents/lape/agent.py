@@ -6,7 +6,7 @@ The actual generation logic for each fact type is in the tasks/ subdirectory.
 """
 
 import logging
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from agents.lape.tasks import (
     animacy,
@@ -335,7 +335,7 @@ class LapeAgent:
         skip_existing: bool = True,
         min_confidence: float = 0.7,
         dry_run: bool = False,
-    ) -> Dict[str, any]:
+    ) -> Dict[str, Any]:
         """
         Generate grammar facts for lemmas.
 

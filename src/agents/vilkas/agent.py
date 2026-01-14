@@ -24,7 +24,7 @@ Supported languages and forms:
 import logging
 import time
 from datetime import datetime
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import constants
 from agents.common.lemma_selection import find_lemma_by_guid
@@ -79,7 +79,7 @@ class VilkasAgent:
             )
         return self.cache_client
 
-    def check_missing_lithuanian_base_forms(self) -> Dict[str, any]:
+    def check_missing_lithuanian_base_forms(self) -> Dict[str, Any]:
         """
         Check for lemmas with Lithuanian translations but no Lithuanian derivative forms.
 
@@ -93,7 +93,7 @@ class VilkasAgent:
 
         return _check(self)
 
-    def check_noun_declension_coverage(self) -> Dict[str, any]:
+    def check_noun_declension_coverage(self) -> Dict[str, Any]:
         """
         Check for Lithuanian nouns that have base forms but missing declensions.
 
@@ -145,7 +145,7 @@ class VilkasAgent:
         finally:
             session.close()
 
-    def check_verb_conjugation_coverage(self, language_code: str = "lt") -> Dict[str, any]:
+    def check_verb_conjugation_coverage(self, language_code: str = "lt") -> Dict[str, Any]:
         """
         Check for verbs that have base forms but missing conjugations.
 
@@ -246,7 +246,7 @@ class VilkasAgent:
         model: Optional[str] = None,
         throttle: float = 1.0,
         dry_run: bool = False,
-    ) -> Dict[str, any]:
+    ) -> Dict[str, Any]:
         """
         Generate and store missing word forms for a specific language.
 
@@ -365,7 +365,7 @@ class VilkasAgent:
         model: Optional[str] = None,
         throttle: float = 1.0,
         dry_run: bool = False,
-    ) -> Dict[str, any]:
+    ) -> Dict[str, Any]:
         """
         Generic handler for generating missing word forms across languages.
 
@@ -543,7 +543,7 @@ class VilkasAgent:
             "dry_run": dry_run,
         }
 
-    def run_full_check(self, output_file: Optional[str] = None) -> Dict[str, any]:
+    def run_full_check(self, output_file: Optional[str] = None) -> Dict[str, Any]:
         """
         Run all checks and generate a comprehensive report.
 

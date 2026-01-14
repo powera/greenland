@@ -82,7 +82,11 @@ class CostConfig:
 
     @classmethod
     def estimate_cost(
-        cls, tokens_in: int = 0, tokens_out: int = 0, compute_ms: float = 0, model: str = None
+        cls,
+        tokens_in: int = 0,
+        tokens_out: int = 0,
+        compute_ms: float = 0,
+        model: Optional[str] = None,
     ) -> float:
         """
         Estimate cost based on usage and model tier.
@@ -147,7 +151,7 @@ class LLMUsage:
 
     @classmethod
     def from_api_response(
-        cls, response_data: Dict[str, Any], model: str = None, **kwargs
+        cls, response_data: Dict[str, Any], model: Optional[str] = None, **kwargs: Any
     ) -> "LLMUsage":
         """Create LLMUsage from API response data.
 

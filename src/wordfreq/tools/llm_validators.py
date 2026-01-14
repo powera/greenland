@@ -23,7 +23,9 @@ from clients.unified_client import UnifiedLLMClient
 logger = logging.getLogger(__name__)
 
 
-def validate_lemma_form(word: str, pos_type: str, model: str = "gpt-5-mini") -> Dict[str, Any]:
+def validate_lemma_form(
+    word: str, pos_type: str, model: Optional[str] = "gpt-5-mini"
+) -> Dict[str, Any]:
     """
     Validate that a word is in its correct lemma (base) form.
 
@@ -190,7 +192,7 @@ def validate_definition(
     word: str,
     definition: str,
     pos_type: str,
-    model: str = "gpt-5-mini",
+    model: Optional[str] = "gpt-5-mini",
     translation_language: Optional[str] = None,
     translation_text: Optional[str] = None,
 ) -> Dict[str, Any]:
@@ -307,7 +309,10 @@ def batch_validate_lemmas(
 
 
 def validate_all_translations_for_word(
-    english_word: str, translations: Dict[str, str], pos_type: str, model: str = "gpt-5-mini"
+    english_word: str,
+    translations: Dict[str, str],
+    pos_type: str,
+    model: Optional[str] = "gpt-5-mini",
 ) -> Dict[str, Any]:
     """
     Validate all translations for a single word in one LLM call.
@@ -987,7 +992,7 @@ def batch_generate_pronunciations(
 
 
 def suggest_disambiguation(
-    word: str, definitions: List[Dict[str, Any]], model: str = "gpt-5-mini"
+    word: str, definitions: List[Dict[str, Any]], model: Optional[str] = "gpt-5-mini"
 ) -> Dict[str, Any]:
     """
     Suggest short disambiguation terms for multiple meanings of the same word.
@@ -1071,7 +1076,7 @@ def validate_disambiguation_need(
     definition: str,
     translations: Optional[Dict[str, str]] = None,
     has_parenthetical: bool = False,
-    model: str = "gpt-5-mini",
+    model: Optional[str] = "gpt-5-mini",
 ) -> Dict[str, Any]:
     """
     Validate whether a lemma needs parenthetical disambiguation.

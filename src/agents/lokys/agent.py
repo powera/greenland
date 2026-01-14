@@ -24,7 +24,7 @@ text and definition when they are missing or need correction.
 
 import logging
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from wordfreq.storage.backend import create_session as create_backend_session
 from wordfreq.storage.backend.config import DataSourceConfig
@@ -68,7 +68,7 @@ class LokysAgent:
         limit: Optional[int] = None,
         sample_rate: float = 1.0,
         confidence_threshold: float = 0.7,
-    ) -> Dict[str, any]:
+    ) -> Dict[str, Any]:
         """
         Check that English lemma_text values are in proper lemma form.
 
@@ -155,7 +155,7 @@ class LokysAgent:
         limit: Optional[int] = None,
         sample_rate: float = 1.0,
         confidence_threshold: float = 0.7,
-    ) -> Dict[str, any]:
+    ) -> Dict[str, Any]:
         """
         Check that definition_text values are well-formed and appropriate.
 
@@ -256,7 +256,7 @@ class LokysAgent:
         finally:
             session.close()
 
-    def check_disambiguation(self, limit: Optional[int] = None) -> Dict[str, any]:
+    def check_disambiguation(self, limit: Optional[int] = None) -> Dict[str, Any]:
         """
         Check for lemmas that need disambiguation (parentheticals).
 
@@ -398,7 +398,7 @@ class LokysAgent:
         sample_rate: float = 1.0,
         confidence_threshold: float = 0.7,
         check_type: str = "both",
-    ) -> Dict[str, any]:
+    ) -> Dict[str, Any]:
         """
         Run English lemma validation and generate a comprehensive report.
 
@@ -464,7 +464,7 @@ class LokysAgent:
     # === Barsukas Web Interface Helper Methods ===
     # These methods provide a simplified, single-lemma interface for the web UI
 
-    def check_single_definition(self, lemma, session=None) -> Dict[str, any]:
+    def check_single_definition(self, lemma, session=None) -> Dict[str, Any]:
         """
         Check the definition of a single lemma using LLM validation.
 
@@ -486,7 +486,7 @@ class LokysAgent:
         )
         return result
 
-    def check_single_disambiguation(self, lemma, session) -> Dict[str, any]:
+    def check_single_disambiguation(self, lemma, session) -> Dict[str, Any]:
         """
         Check if a lemma needs disambiguation (parentheticals in lemma_text).
 
@@ -604,7 +604,7 @@ class LokysAgent:
         duplicates: Optional[List[Lemma]] = None,
         translations_by_guid: Optional[Dict[str, Dict[str, str]]] = None,
         reason: str = "no_duplicates",
-    ) -> Dict[str, any]:
+    ) -> Dict[str, Any]:
         """Check for disambiguation needs when duplicates aren't sufficient."""
         from wordfreq.storage.translation_helpers import get_supported_languages
 

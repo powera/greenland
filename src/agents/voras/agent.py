@@ -22,7 +22,7 @@ import random
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 # Add src directory to path
 GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent.parent)
@@ -153,7 +153,7 @@ class VorasAgent:
         limit: Optional[int] = None,
         sample_rate: float = 1.0,
         confidence_threshold: float = 0.7,
-    ) -> Dict[str, any]:
+    ) -> Dict[str, Any]:
         """
         Validate translations for a specific language using efficient single-call-per-word approach.
 
@@ -169,7 +169,7 @@ class VorasAgent:
         if language_code not in LANGUAGE_FIELDS:
             raise ValueError(f"Unsupported language code: {language_code}")
 
-        field_name, language_name = LANGUAGE_FIELDS[language_code]
+        field_name, language_name, _ = LANGUAGE_FIELDS[language_code]
         logger.info(
             f"Validating {language_name} translations (efficient mode: 1 LLM call per word)..."
         )
@@ -276,7 +276,7 @@ class VorasAgent:
         limit: Optional[int] = None,
         sample_rate: float = 1.0,
         confidence_threshold: float = 0.7,
-    ) -> Dict[str, any]:
+    ) -> Dict[str, Any]:
         """
         Validate all multi-lingual translations using efficient single-call-per-word approach.
 
@@ -327,7 +327,7 @@ class VorasAgent:
             results_by_language = {
                 lang_code: {
                     "language_code": lang_code,
-                    "language_name": language_name,
+                    "language_name": LANGUAGE_FIELDS[lang_code][1],
                     "total_checked": 0,
                     "issues_found": 0,
                     "issue_rate": 0.0,
@@ -412,7 +412,7 @@ class VorasAgent:
 
     def regenerate_all_translations(
         self, limit: Optional[int] = None, dry_run: bool = False, batch_mode: bool = False
-    ) -> Dict[str, any]:
+    ) -> Dict[str, Any]:
         """
         Delete all non-Lithuanian translations and regenerate them fresh.
 
@@ -566,10 +566,10 @@ class VorasAgent:
 
     def fix_missing_translations(
         self,
-        language_code: Optional[str | List[str]] = None,
+        language_code: Optional[Union[str, List[str]]] = None,
         limit: Optional[int] = None,
         dry_run: bool = False,
-    ) -> Dict[str, any]:
+    ) -> Dict[str, Any]:
         """
         Generate missing translations using LLM and update the database.
 

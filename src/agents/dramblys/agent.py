@@ -14,7 +14,7 @@ import sys
 import time
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Set
+from typing import Any, Dict, List, Optional, Set
 
 # Add src directory to path
 GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent.parent)
@@ -66,7 +66,7 @@ class DramblysAgent:
 
     def check_high_frequency_missing_words(
         self, top_n: int = 5000, min_rank: int = 1
-    ) -> Dict[str, any]:
+    ) -> Dict[str, Any]:
         """
         Check for high-frequency words in corpora that are missing from lemmas.
 
@@ -176,7 +176,7 @@ class DramblysAgent:
         finally:
             session.close()
 
-    def check_orphaned_derivative_forms(self) -> Dict[str, any]:
+    def check_orphaned_derivative_forms(self) -> Dict[str, Any]:
         """
         Find derivative forms that exist in the database but have no lemma entry.
 
@@ -232,7 +232,7 @@ class DramblysAgent:
         finally:
             session.close()
 
-    def check_subtype_coverage(self, min_expected: int = 10) -> Dict[str, any]:
+    def check_subtype_coverage(self, min_expected: int = 10) -> Dict[str, Any]:
         """
         Check coverage of different POS subtypes and identify underrepresented ones.
 
@@ -302,7 +302,7 @@ class DramblysAgent:
 
     def find_words_for_subtype(
         self, pos_type: str, pos_subtype: str, top_n: int = 250
-    ) -> Dict[str, any]:
+    ) -> Dict[str, Any]:
         """
         Use LLM to identify which high-frequency words have meanings in a specific POS subtype.
 
@@ -436,7 +436,7 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
         dry_run: bool = False,
         stage_only: bool = False,
         target_language: str = "lt",
-    ) -> Dict[str, any]:
+    ) -> Dict[str, Any]:
         """
         Find and add words for a specific POS subtype.
 
@@ -621,7 +621,7 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
 
         return result
 
-    def check_difficulty_level_distribution(self) -> Dict[str, any]:
+    def check_difficulty_level_distribution(self) -> Dict[str, Any]:
         """
         Check distribution of words across difficulty levels.
 
@@ -699,7 +699,7 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
         throttle: float = 1.0,
         dry_run: bool = False,
         target_language: str = "lt",
-    ) -> Dict[str, any]:
+    ) -> Dict[str, Any]:
         """
         Stage high-frequency missing words to the pending_imports table.
 
@@ -747,7 +747,7 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
         model: str = "gpt-5-mini",
         throttle: float = 1.0,
         dry_run: bool = False,
-    ) -> Dict[str, any]:
+    ) -> Dict[str, Any]:
         """
         Process high-frequency missing words using LLM to add them to the database.
 
@@ -856,7 +856,7 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
         pos_type: Optional[str] = None,
         pos_subtype: Optional[str] = None,
         limit: Optional[int] = None,
-    ) -> Dict[str, any]:
+    ) -> Dict[str, Any]:
         """Delegate to staging module."""
         session = self.get_session()
         try:
@@ -866,7 +866,7 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
 
     def approve_pending_import(
         self, pending_import_id: int, model: str = "gpt-5-mini"
-    ) -> Dict[str, any]:
+    ) -> Dict[str, Any]:
         """Delegate to staging module."""
         session = self.get_session()
         try:
@@ -881,7 +881,7 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
         pending_import_id: int,
         reason: str = "manual_rejection",
         add_to_exclusions: bool = True,
-    ) -> Dict[str, any]:
+    ) -> Dict[str, Any]:
         """Delegate to staging module."""
         session = self.get_session()
         try:
@@ -896,7 +896,7 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
         output_file: Optional[str] = None,
         top_n_frequency: int = 5000,
         min_subtype_count: int = 10,
-    ) -> Dict[str, any]:
+    ) -> Dict[str, Any]:
         """
         Run all missing words checks and generate a comprehensive report.
 
@@ -1040,7 +1040,7 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
         pattern: str = "**/base.jsonl",
         dry_run: bool = False,
         import_level: Optional[int] = None,
-    ) -> Dict[str, any]:
+    ) -> Dict[str, Any]:
         """
         Import lemmas from JSONL files.
 

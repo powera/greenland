@@ -16,7 +16,11 @@ logger = logging.getLogger(__name__)
 
 
 def generate_declension_class(
-    agent: "LapeAgent", lemma: Lemma, target_translation: str, language_code: str, session=None
+    agent: "LapeAgent",
+    lemma: Lemma,
+    target_translation: Optional[str],
+    language_code: str,
+    session=None,
 ) -> Tuple[Optional[str], Optional[str], float]:
     """
     Generate noun declension class using LLM.
