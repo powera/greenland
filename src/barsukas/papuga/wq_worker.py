@@ -9,10 +9,9 @@ from __future__ import annotations
 import logging
 from typing import Dict, List, Optional, Tuple
 
-from config import Config
-
+from agents.common.wq_tools import build_default_config, get_lemma_or_raise
 import constants
-from wordfreq.storage.backend.config import BackendType, DataSourceConfig
+from wordfreq.storage.backend.config import DataSourceConfig
 from wordfreq.storage.models.schema import (
     DerivativeForm,
     Lemma,
@@ -23,15 +22,6 @@ from wordfreq.storage.models.schema import (
 from wordfreq.tools.llm_validators import generate_pronunciation
 
 logger = logging.getLogger(__name__)
-
-
-def _build_config() -> DataSourceConfig:
-    return DataSourceConfig(
-        backend_type=BackendType.SQLITE,
-        sqlite_path=Config.DB_PATH,
-        model=constants.DEFAULT_MODEL,
-        debug=Config.DEBUG,
-    )
 
 
 def get_example_sentence_for_lemma(session, lemma_id: int) -> Optional[str]:
@@ -118,7 +108,7 @@ def generate_pronunciations_for_lemma(
         Tuple of (generated_count, list of error messages)
     """
     if config is None:
-        config = _build_config()
+        config = build_default_config()
 
     # Find forms missing pronunciations
     forms_missing_pronunciations = (
@@ -177,9 +167,7 @@ def handle_generate_pronunciations(session, payload: Dict) -> str:
     lemma_id = payload["lemma_id"]
     lang_code = payload.get("lang_code", "en")
 
-    lemma = session.get(Lemma, lemma_id)
-    if not lemma:
-        raise ValueError(f"Lemma {lemma_id} not found")
+    lemma = get_lemma_or_raise(session, lemma_id)
 
     generated_count, errors = generate_pronunciations_for_lemma(
         session, lemma, lang_code

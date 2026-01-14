@@ -13,26 +13,17 @@ from typing import Dict, List, Optional
 
 from flask import current_app
 
+from agents.common.wq_tools import build_default_config, get_lemma_or_raise
 from config import Config
-
 import constants
 from agents.strazdas import StrazdasAgent
 from agents.vieversys import VieversysAgent
 from audioshoe.espeak import EspeakVoice
 from clients.audio import Voice
-from wordfreq.storage.backend.config import BackendType, DataSourceConfig
+from wordfreq.storage.backend.config import DataSourceConfig
 from wordfreq.storage.models.schema import Lemma
 
 logger = logging.getLogger(__name__)
-
-
-def _build_config() -> DataSourceConfig:
-    return DataSourceConfig(
-        backend_type=BackendType.SQLITE,
-        sqlite_path=Config.DB_PATH,
-        model=constants.DEFAULT_MODEL,
-        debug=Config.DEBUG,
-    )
 
 
 def _get_audio_output_dir() -> str:
@@ -75,11 +66,9 @@ def handle_generate_audio(session, payload: Dict) -> str:
     tts_engine = payload.get("tts_engine", "openai")
     use_ipa = payload.get("use_ipa", False)
 
-    lemma = session.get(Lemma, lemma_id)
-    if not lemma:
-        raise ValueError(f"Lemma {lemma_id} not found")
+    lemma = get_lemma_or_raise(session, lemma_id)
 
-    config = _build_config()
+    config = build_default_config()
     audio_output_dir = _get_audio_output_dir()
 
     # Convert voice names to appropriate enums based on TTS engine

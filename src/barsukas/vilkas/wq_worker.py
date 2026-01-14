@@ -9,10 +9,8 @@ from __future__ import annotations
 import logging
 from typing import Dict, List, Optional, Tuple
 
-from config import Config
-
-import constants
-from wordfreq.storage.backend.config import BackendType, DataSourceConfig
+from agents.common.wq_tools import build_default_config, get_lemma_or_raise
+from wordfreq.storage.backend.config import DataSourceConfig
 from wordfreq.storage.models.schema import Lemma, LemmaTranslation
 from wordfreq.storage.translation_helpers import LANGUAGE_FIELDS, get_translation
 from wordfreq.translation.client import LinguisticClient
@@ -29,15 +27,6 @@ SUPPORTED_FORMS = {
     "pt": ["noun", "verb"],
     "en": ["noun", "verb", "adjective", "adverb"],
 }
-
-
-def _build_config() -> DataSourceConfig:
-    return DataSourceConfig(
-        backend_type=BackendType.SQLITE,
-        sqlite_path=Config.DB_PATH,
-        model=constants.DEFAULT_MODEL,
-        debug=Config.DEBUG,
-    )
 
 
 def validate_form_generation_request(
@@ -100,7 +89,7 @@ def generate_forms_for_lemma(
         Tuple of (success, error_message)
     """
     if config is None:
-        config = _build_config()
+        config = build_default_config()
 
     # Validate request
     is_valid, error = validate_form_generation_request(lemma, lang_code, session)
@@ -141,9 +130,7 @@ def handle_generate_forms(session, payload: Dict) -> str:
     lemma_id = payload["lemma_id"]
     lang_code = payload.get("lang_code", "lt")
 
-    lemma = session.get(Lemma, lemma_id)
-    if not lemma:
-        raise ValueError(f"Lemma {lemma_id} not found")
+    lemma = get_lemma_or_raise(session, lemma_id)
 
     success, error = generate_forms_for_lemma(session, lemma, lang_code)
 

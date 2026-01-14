@@ -9,10 +9,8 @@ from __future__ import annotations
 import logging
 from typing import Dict, List, Optional, Tuple
 
-from config import Config
-
-import constants
-from wordfreq.storage.backend.config import BackendType, DataSourceConfig
+from agents.common.wq_tools import build_default_config, get_lemma_or_raise
+from wordfreq.storage.backend.config import DataSourceConfig
 from wordfreq.storage.models.schema import Lemma
 from wordfreq.storage.translation_helpers import (
     LANGUAGE_FIELDS,
@@ -26,15 +24,6 @@ from wordfreq.storage.crud.operation_log import log_translation_change
 from wordfreq.translation.client import LinguisticClient
 
 logger = logging.getLogger(__name__)
-
-
-def _build_config() -> DataSourceConfig:
-    return DataSourceConfig(
-        backend_type=BackendType.SQLITE,
-        sqlite_path=Config.DB_PATH,
-        model=constants.DEFAULT_MODEL,
-        debug=Config.DEBUG,
-    )
 
 
 def generate_missing_translations_for_lemma(
@@ -59,7 +48,7 @@ def generate_missing_translations_for_lemma(
         Tuple of (added_count, list of error messages)
     """
     if config is None:
-        config = _build_config()
+        config = build_default_config()
 
     if source is None:
         source = f"voras-agent/{config.model}"
@@ -149,9 +138,7 @@ def handle_add_missing_translations(session, payload: Dict) -> str:
         str: Result message describing what was generated
     """
     lemma_id = payload["lemma_id"]
-    lemma = session.get(Lemma, lemma_id)
-    if not lemma:
-        raise ValueError(f"Lemma {lemma_id} not found")
+    lemma = get_lemma_or_raise(session, lemma_id)
 
     added_count, errors = generate_missing_translations_for_lemma(session, lemma)
 

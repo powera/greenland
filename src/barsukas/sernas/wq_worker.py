@@ -10,11 +10,10 @@ import json
 import logging
 from typing import Any, Dict, List, Optional, Tuple
 
-from config import Config
-
+from agents.common.wq_tools import build_default_config, get_lemma_or_raise
 import constants
 import util.prompt_loader
-from wordfreq.storage.backend.config import BackendType, DataSourceConfig
+from wordfreq.storage.backend.config import DataSourceConfig
 from wordfreq.storage.crud.derivative_form import add_derivative_form
 from wordfreq.storage.crud.grammar_fact import add_grammar_fact
 from wordfreq.storage.crud.word_token import add_word_token
@@ -24,15 +23,6 @@ from wordfreq.tools.text_utils import is_numeral
 from wordfreq.translation.client import LinguisticClient
 
 logger = logging.getLogger(__name__)
-
-
-def _build_config() -> DataSourceConfig:
-    return DataSourceConfig(
-        backend_type=BackendType.SQLITE,
-        sqlite_path=Config.DB_PATH,
-        model=constants.DEFAULT_MODEL,
-        debug=Config.DEBUG,
-    )
 
 
 def query_synonyms_from_llm(
@@ -300,7 +290,7 @@ def generate_synonyms_for_lemma(
         Dictionary with generation results including stored counts
     """
     if config is None:
-        config = _build_config()
+        config = build_default_config()
 
     # Get the word to find synonyms for
     if language_code == "en":
@@ -406,9 +396,7 @@ def handle_generate_synonyms(session, payload: Dict) -> str:
     lemma_id = payload["lemma_id"]
     lang_code = payload.get("lang_code", "en")
 
-    lemma = session.get(Lemma, lemma_id)
-    if not lemma:
-        raise ValueError(f"Lemma {lemma_id} not found")
+    lemma = get_lemma_or_raise(session, lemma_id)
 
     if lang_code != "en":
         translation = get_translation(session, lemma, lang_code)
