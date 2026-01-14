@@ -445,28 +445,26 @@ class SernasAgent:
             language_name = language_names.get(language_code, language_code)
 
         # Load prompt templates from files
-        system_prompt = util.prompt_loader.get_prompt("wordfreq", "synonyms", subtype="system")
-        context_prompt = util.prompt_loader.get_context("wordfreq", "synonyms", subtype="context")
-        output_format = util.prompt_loader.get_prompt(
-            "wordfreq", "synonyms", subtype="output_format"
-        )
-
-        # Build context with variables
-        context = context_prompt.replace("{{language_name}}", language_name)
-        context = context.replace("{{word}}", word)
-        context = context.replace("{{pos_type}}", pos_type)
-        context = context.replace("{{english_word}}", english_word)
-        context = context.replace("{{definition}}", definition or "")
+        context = util.prompt_loader.get_context("synonyms", "word")
+        prompt_template = util.prompt_loader.get_prompt("synonyms", "word")
 
         # Add language-specific notes
         language_note = ""
         if language_code == "zh":
-            language_note = "\n- For Chinese, provide Traditional Chinese characters (繁體字) (e.g., 街道, 馬路 for 'street')"
+            language_note = "- For Chinese, provide Traditional Chinese characters (繁體字)\n- Include BOTH formal terms AND common colloquial terms (e.g., both 馬鈴薯 and 土豆 for 'potato')"
         elif language_code == "ko":
-            language_note = "\n- For Korean, provide words in Hangul (e.g., 거리, 길 for 'street')"
+            language_note = "- For Korean, provide words in Hangul (e.g., 거리, 길 for 'street')"
 
-        # Combine prompt parts
-        prompt = f"{system_prompt}\n\n{context}{language_note}\n\n{output_format}"
+        # Build prompt with variables
+        prompt_body = prompt_template.replace("{{language_name}}", language_name)
+        prompt_body = prompt_body.replace("{{word}}", word)
+        prompt_body = prompt_body.replace("{{pos_type}}", pos_type)
+        prompt_body = prompt_body.replace("{{english_word}}", english_word)
+        prompt_body = prompt_body.replace("{{definition}}", definition or "")
+        prompt_body = prompt_body.replace("{{language_note}}", language_note)
+
+        # Combine context and prompt
+        prompt = f"{context}\n\n{prompt_body}"
 
         try:
             # Query the LLM using generate_chat with JSON schema
