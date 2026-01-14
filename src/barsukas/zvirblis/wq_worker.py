@@ -41,7 +41,9 @@ def handle_translate_sentence(session, payload: Dict) -> str:
     )
 
     if not en_translation:
-        raise ValueError("Sentence must have an English translation before translating to other languages")
+        raise ValueError(
+            "Sentence must have an English translation before translating to other languages"
+        )
 
     # Use the shared translation logic
     do_translation(sentence_id, selected_languages, session, model=constants.DEFAULT_MODEL)

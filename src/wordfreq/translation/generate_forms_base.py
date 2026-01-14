@@ -373,9 +373,7 @@ def process_lemma_forms(
             # Check if this specific form already exists (using the set we built earlier)
             grammatical_form_enum = form_config.form_mapping[form_name].value
             if grammatical_form_enum in existing_grammatical_forms:
-                logger.debug(
-                    f"Form {form_name} already exists for lemma ID {lemma_id}, skipping"
-                )
+                logger.debug(f"Form {form_name} already exists for lemma ID {lemma_id}, skipping")
                 skipped += 1
                 continue
 

@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-""" Runs a "transformers" LLM model locally."""
+"""Runs a "transformers" LLM model locally."""
 
 import asyncio
 import gc

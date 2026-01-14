@@ -304,22 +304,20 @@ def get_voras_queue_stats(session):
     stats = {}
     for task_type in ["voras_populate_translations", "voras_regenerate_translations"]:
         stats[task_type] = {
-            "pending": session.query(BarsukasTask).filter(
-                BarsukasTask.task_type == task_type,
-                BarsukasTask.status == TaskStatus.PENDING
-            ).count(),
-            "running": session.query(BarsukasTask).filter(
-                BarsukasTask.task_type == task_type,
-                BarsukasTask.status == TaskStatus.RUNNING
-            ).count(),
-            "completed": session.query(BarsukasTask).filter(
-                BarsukasTask.task_type == task_type,
-                BarsukasTask.status == TaskStatus.COMPLETED
-            ).count(),
-            "failed": session.query(BarsukasTask).filter(
-                BarsukasTask.task_type == task_type,
-                BarsukasTask.status == TaskStatus.FAILED
-            ).count(),
+            "pending": session.query(BarsukasTask)
+            .filter(BarsukasTask.task_type == task_type, BarsukasTask.status == TaskStatus.PENDING)
+            .count(),
+            "running": session.query(BarsukasTask)
+            .filter(BarsukasTask.task_type == task_type, BarsukasTask.status == TaskStatus.RUNNING)
+            .count(),
+            "completed": session.query(BarsukasTask)
+            .filter(
+                BarsukasTask.task_type == task_type, BarsukasTask.status == TaskStatus.COMPLETED
+            )
+            .count(),
+            "failed": session.query(BarsukasTask)
+            .filter(BarsukasTask.task_type == task_type, BarsukasTask.status == TaskStatus.FAILED)
+            .count(),
         }
     return stats
 
@@ -368,9 +366,7 @@ def main():
                 print(f"This will:")
                 print(f"  1. Delete all non-Lithuanian translations")
                 if args.use_workqueue:
-                    print(
-                        f"  2. Enqueue {word_count} regeneration tasks for barsukas worker"
-                    )
+                    print(f"  2. Enqueue {word_count} regeneration tasks for barsukas worker")
                 elif args.batch:
                     print(
                         f"  2. Queue {word_count} batch requests (1 per word) for later submission"
@@ -425,7 +421,13 @@ def main():
                     stats = get_voras_queue_stats(session)
                     print("\nCurrent queue status:")
                     for task_type, task_stats in stats.items():
-                        if task_stats['pending'] + task_stats['running'] + task_stats['completed'] + task_stats['failed'] > 0:
+                        if (
+                            task_stats["pending"]
+                            + task_stats["running"]
+                            + task_stats["completed"]
+                            + task_stats["failed"]
+                            > 0
+                        ):
                             print(f"\n  {task_type}:")
                             print(f"    Pending: {task_stats['pending']}")
                             print(f"    Running: {task_stats['running']}")
@@ -511,7 +513,9 @@ def main():
 
             session = agent.get_session()
             try:
-                languages_to_fix = args.languages if args.languages else list(LANGUAGE_FIELDS.keys())
+                languages_to_fix = (
+                    args.languages if args.languages else list(LANGUAGE_FIELDS.keys())
+                )
                 results = enqueue_voras_populate_work(
                     agent=agent,
                     session=session,
@@ -535,7 +539,13 @@ def main():
                     stats = get_voras_queue_stats(session)
                     print("\nCurrent queue status:")
                     for task_type, task_stats in stats.items():
-                        if task_stats['pending'] + task_stats['running'] + task_stats['completed'] + task_stats['failed'] > 0:
+                        if (
+                            task_stats["pending"]
+                            + task_stats["running"]
+                            + task_stats["completed"]
+                            + task_stats["failed"]
+                            > 0
+                        ):
                             print(f"\n  {task_type}:")
                             print(f"    Pending: {task_stats['pending']}")
                             print(f"    Running: {task_stats['running']}")

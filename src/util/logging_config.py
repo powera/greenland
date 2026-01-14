@@ -8,7 +8,7 @@ Import and call configure_logging() at the start of your script.
 import logging
 
 
-def configure_logging(level=logging.INFO, debug=False):
+def configure_logging(level: int = logging.INFO, debug: bool = False) -> None:
     """
     Configure logging with a standardized format.
 
@@ -26,7 +26,7 @@ def configure_logging(level=logging.INFO, debug=False):
     )
 
 
-def get_logger(name):
+def get_logger(name: str) -> logging.Logger:
     """
     Get a logger with the given name.
 

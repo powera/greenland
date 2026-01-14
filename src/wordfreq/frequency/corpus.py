@@ -457,7 +457,7 @@ def initialize_corpus_configs(
     return sync_corpus_configs_to_db(session, db_path)
 
 
-def load_corpus(corpus_name: str, config: Optional['DataSourceConfig'] = None) -> tuple[int, int]:
+def load_corpus(corpus_name: str, config: Optional["DataSourceConfig"] = None) -> tuple[int, int]:
     """
     Load a corpus by name using its configuration.
 

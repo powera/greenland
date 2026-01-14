@@ -54,9 +54,11 @@ def view_benchmark(benchmark_name):
         return "Benchmark not found", 404
 
     # Get question count
-    question_count = g.db.query(func.count(Question.question_id)).filter(
-        Question.benchmark_name == benchmark_name
-    ).scalar()
+    question_count = (
+        g.db.query(func.count(Question.question_id))
+        .filter(Question.benchmark_name == benchmark_name)
+        .scalar()
+    )
 
     # Get best run for each model on this benchmark
     subquery = (
@@ -75,8 +77,7 @@ def view_benchmark(benchmark_name):
         .join(Model, Run.model_name == Model.codename)
         .join(
             subquery,
-            (Run.model_name == subquery.c.model_name)
-            & (Run.normed_score == subquery.c.max_score),
+            (Run.model_name == subquery.c.model_name) & (Run.normed_score == subquery.c.max_score),
         )
         .filter(Run.benchmark_name == benchmark_name)
         .order_by(Run.normed_score.desc(), Run.run_ts.asc())

@@ -412,7 +412,9 @@ class VilkasAgent:
                         .all()
                     )
                     existing_grammatical_forms = {f.grammatical_form for f in existing_forms}
-                    current_form_count = len(existing_grammatical_forms & expected_grammatical_forms)
+                    current_form_count = len(
+                        existing_grammatical_forms & expected_grammatical_forms
+                    )
 
                     # Only add to list if it needs forms
                     if current_form_count < task_config.min_forms_threshold:

@@ -4,8 +4,10 @@ Vilkas Agent - Display and Output Formatting
 This module handles all console output and display formatting.
 """
 
+from typing import Any
 
-def print_fix_confirmation(lang_name, form_type, needs_fix, args):
+
+def print_fix_confirmation(lang_name: str, form_type: str, needs_fix: int, args: Any) -> bool:
     """
     Print confirmation prompt for fix operations.
 
@@ -26,7 +28,7 @@ def print_fix_confirmation(lang_name, form_type, needs_fix, args):
     return response.lower() in ["y", "yes"]
 
 
-def print_fix_results(results, dry_run=False):
+def print_fix_results(results: dict[str, Any], dry_run: bool = False) -> None:
     """Print results of fix operation."""
     if "error" in results:
         print(f"\nError: {results['error']}")
@@ -47,7 +49,7 @@ def print_fix_results(results, dry_run=False):
             print(f"  Failed: {results['failed']}")
 
 
-def print_base_forms_check(results):
+def print_base_forms_check(results: dict[str, Any]) -> None:
     """Print base forms check results."""
     print(
         f"\nMissing base forms: {results['missing_count']} out of {results['total_with_translation']}"
@@ -55,7 +57,7 @@ def print_base_forms_check(results):
     print(f"Coverage: {results['coverage_percentage']:.1f}%")
 
 
-def print_noun_declensions_check(results):
+def print_noun_declensions_check(results: dict[str, Any]) -> None:
     """Print noun declensions check results."""
     print(
         f"\nNouns needing declensions: {results['needs_declensions']} out of {results['total_nouns']}"
@@ -63,7 +65,7 @@ def print_noun_declensions_check(results):
     print(f"Coverage: {results['declension_coverage_percentage']:.1f}%")
 
 
-def print_verb_conjugations_check(results, language_code):
+def print_verb_conjugations_check(results: dict[str, Any], language_code: str) -> None:
     """Print verb conjugations check results."""
     lang_name = results.get("language_name", language_code.upper())
     print(

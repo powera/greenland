@@ -15,6 +15,7 @@ AGENTS_DIR = os.path.join(SRC_DIR, "agents")
 # These are kept for backwards compatibility with old benchmark generators in src/lib/benchmarks/
 try:
     from benchmarks import benchmark_constants as _bc
+
     # Convert Path objects to strings for backwards compatibility
     BENCHMARK_DATA_DIR = str(_bc.BENCHMARK_DATA_DIR)
     SCHEMA_DIR = str(_bc.BENCHMARK_SCHEMA_DIR)

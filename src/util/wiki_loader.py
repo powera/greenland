@@ -4,13 +4,13 @@
 WikiLoader - A utility for accessing and indexing Wikimedia dump files.
 
 This module provides tools to build and query SQLite indexes for Wikimedia
-"multistream.xml.bz2" dump files. The dumps are quite large and stored in 
-compressed form, but they are seekable. This allows us to read a ~2MB section 
+"multistream.xml.bz2" dump files. The dumps are quite large and stored in
+compressed form, but they are seekable. This allows us to read a ~2MB section
 of the file, decompress it, and access the XML for a specific page.
 
 The location of each page is provided in a multistream-index.txt.bz2 file.
-We use this to create an index in SQLite files. For performance, we hash the 
-page names and shard the tables based on that hash. This optimizes for direct 
+We use this to create an index in SQLite files. For performance, we hash the
+page names and shard the tables based on that hash. This optimizes for direct
 page lookups rather than title range queries.
 """
 
@@ -78,7 +78,7 @@ class WikiLoader:
         """
         return os.path.join(self.offset_dir, f"{self.corpus_prefix}-{shard}.sqlite")
 
-    def build_offset_index(self, batch_size: int = 500000):
+    def build_offset_index(self, batch_size: int = 500000) -> None:
         """Build SQLite indexes using the flat-file approach for 20M entries."""
         # Ensure directories exist
         os.makedirs(self.offset_dir, exist_ok=True)
@@ -99,7 +99,7 @@ class WikiLoader:
             # Parse the index file
             page_count = 0
             current_offset = -1
-            current_titles = []
+            current_titles: list[tuple[str, str]] = []
 
             with open(self.index_file, "r", buffering=8 * 1024 * 1024) as f:
                 for line in f:
@@ -187,8 +187,8 @@ class WikiLoader:
                     if len(parts) != 4:
                         continue
 
-                    title, offset, read_size, page_id = parts
-                    entries.append((title, int(offset), int(read_size), int(page_id)))
+                    title, offset_str, read_size_str, page_id_str = parts
+                    entries.append((title, int(offset_str), int(read_size_str), int(page_id_str)))
 
                     if len(entries) >= batch_size:
                         conn.executemany(
@@ -321,7 +321,8 @@ class WikiLoader:
             if not text_nodes or not text_nodes[0].childNodes:
                 return ""
 
-            return text_nodes[0].childNodes[0].nodeValue
+            node_value = text_nodes[0].childNodes[0].nodeValue
+            return node_value if node_value is not None else ""
 
         except Exception as e:
             if isinstance(e, ValueError):
@@ -347,7 +348,13 @@ class WikiLoader:
         titles = xmldoc.getElementsByTagName("title")
 
         for tag in titles:
-            if tag.firstChild and tag.firstChild.wholeText == page_name:
-                return tag.parentNode
+            if (
+                tag.firstChild
+                and hasattr(tag.firstChild, "wholeText")
+                and tag.firstChild.wholeText == page_name
+            ):
+                parent = tag.parentNode
+                if isinstance(parent, xml.dom.minidom.Element):
+                    return parent
 
         raise ValueError(f"Page {page_name} not found in XML document")

@@ -17,7 +17,7 @@ Expected JSON format:
 [
     {
         "English": "word",
-        "Lithuanian": "žodis", 
+        "Lithuanian": "žodis",
         "trakaido_level": 1,
         "POS": "noun",
         "subtype": "food",
@@ -28,7 +28,7 @@ Expected JSON format:
 
 Usage:
     python json_to_database.py [path_to_nouns.json] [--no-update-difficulty]
-    
+
     Options:
         path_to_nouns.json: Path to JSON file (optional, defaults to nouns.json in same directory)
         --no-update-difficulty: Don't update difficulty levels on existing lemmas (default: update them)

@@ -72,9 +72,7 @@ def generate_auxiliary_verb(
                 f"The auxiliary verb: {valid_auxiliaries}",
                 enum=aux_config["auxiliaries"],
             ),
-            "explanation": SchemaProperty(
-                "string", "Brief explanation if notable"
-            ),
+            "explanation": SchemaProperty("string", "Brief explanation if notable"),
             "confidence": SchemaProperty(
                 "number", "Confidence score 0.0-1.0", minimum=0.0, maximum=1.0
             ),

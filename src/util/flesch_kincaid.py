@@ -1,7 +1,7 @@
 import re
 
 
-def count_syllables(word):
+def count_syllables(word: str) -> int:
     """Count the number of syllables in a word."""
     word = word.lower()
     count = 0
@@ -20,7 +20,7 @@ def count_syllables(word):
     return count
 
 
-def flesch_kincaid_grade(text):
+def flesch_kincaid_grade(text: str) -> float:
     """Calculate the Flesch-Kincaid Grade Level for the given text."""
     sentences = re.findall(r"\w+[.!?]", text)
     words = re.findall(r"\b\w+\b", text.lower())

@@ -169,9 +169,7 @@ def handle_generate_pronunciations(session, payload: Dict) -> str:
 
     lemma = get_lemma_or_raise(session, lemma_id)
 
-    generated_count, errors = generate_pronunciations_for_lemma(
-        session, lemma, lang_code
-    )
+    generated_count, errors = generate_pronunciations_for_lemma(session, lemma, lang_code)
 
     session.commit()
 

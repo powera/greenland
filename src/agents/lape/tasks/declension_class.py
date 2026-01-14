@@ -65,9 +65,7 @@ def generate_declension_class(
                 "The declension class (1-5)",
                 enum=["1", "2", "3", "4", "5"],
             ),
-            "explanation": SchemaProperty(
-                "string", "Brief explanation with ending pattern"
-            ),
+            "explanation": SchemaProperty("string", "Brief explanation with ending pattern"),
             "confidence": SchemaProperty(
                 "number", "Confidence score 0.0-1.0", minimum=0.0, maximum=1.0
             ),

@@ -186,7 +186,9 @@ def enqueue_grammar_fact_work(agent, session, lemmas, fact_types_by_language, dr
                         enqueued_count += 1
                     else:
                         skipped_count += 1
-                        logger.debug(f"Skipped duplicate: {lemma.lemma_text} ({fact_type}, {language_code})")
+                        logger.debug(
+                            f"Skipped duplicate: {lemma.lemma_text} ({fact_type}, {language_code})"
+                        )
                 else:
                     enqueued_count += 1
 
@@ -204,22 +206,18 @@ def get_lape_queue_stats(session):
     """Get statistics for lape tasks in the queue."""
     task_type = "lape_generate_grammar_fact"
     return {
-        "pending": session.query(BarsukasTask).filter(
-            BarsukasTask.task_type == task_type,
-            BarsukasTask.status == TaskStatus.PENDING
-        ).count(),
-        "running": session.query(BarsukasTask).filter(
-            BarsukasTask.task_type == task_type,
-            BarsukasTask.status == TaskStatus.RUNNING
-        ).count(),
-        "completed": session.query(BarsukasTask).filter(
-            BarsukasTask.task_type == task_type,
-            BarsukasTask.status == TaskStatus.COMPLETED
-        ).count(),
-        "failed": session.query(BarsukasTask).filter(
-            BarsukasTask.task_type == task_type,
-            BarsukasTask.status == TaskStatus.FAILED
-        ).count(),
+        "pending": session.query(BarsukasTask)
+        .filter(BarsukasTask.task_type == task_type, BarsukasTask.status == TaskStatus.PENDING)
+        .count(),
+        "running": session.query(BarsukasTask)
+        .filter(BarsukasTask.task_type == task_type, BarsukasTask.status == TaskStatus.RUNNING)
+        .count(),
+        "completed": session.query(BarsukasTask)
+        .filter(BarsukasTask.task_type == task_type, BarsukasTask.status == TaskStatus.COMPLETED)
+        .count(),
+        "failed": session.query(BarsukasTask)
+        .filter(BarsukasTask.task_type == task_type, BarsukasTask.status == TaskStatus.FAILED)
+        .count(),
     }
 
 

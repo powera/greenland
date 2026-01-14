@@ -70,8 +70,14 @@ Examples:
     )
 
     # Arguments for generate-candidates task
-    parser.add_argument("--patterns", nargs="+", help="Specific pattern IDs to generate (for generate-candidates)")
-    parser.add_argument("--all-patterns", action="store_true", help="Generate for all patterns (for generate-candidates)")
+    parser.add_argument(
+        "--patterns", nargs="+", help="Specific pattern IDs to generate (for generate-candidates)"
+    )
+    parser.add_argument(
+        "--all-patterns",
+        action="store_true",
+        help="Generate for all patterns (for generate-candidates)",
+    )
 
     # Arguments for generate-sentences task
     parser.add_argument(

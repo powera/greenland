@@ -4,8 +4,10 @@ Dramblys Agent - Display and Output Formatting
 This module handles all console output and display formatting.
 """
 
+from typing import Any
 
-def print_pending_imports_list(results):
+
+def print_pending_imports_list(results: dict[str, Any]) -> None:
     """Print list of pending imports."""
     if "error" in results:
         print(f"\nError: {results['error']}")
@@ -27,7 +29,7 @@ def print_pending_imports_list(results):
         print()
 
 
-def print_approval_result(results):
+def print_approval_result(results: dict[str, Any]) -> None:
     """Print approval/rejection result."""
     if results["success"]:
         print(f"\nSuccess: {results['message']}")
@@ -37,7 +39,7 @@ def print_approval_result(results):
         print(f"\nError: {results.get('error', 'Unknown error')}")
 
 
-def print_staging_summary(results, dry_run=False):
+def print_staging_summary(results: dict[str, Any], dry_run: bool = False) -> None:
     """Print staging operation summary."""
     if "error" in results:
         print(f"\nError: {results['error']}")
@@ -57,7 +59,7 @@ def print_staging_summary(results, dry_run=False):
         print(f"\nUse --list-pending to review staged words")
 
 
-def print_subtype_find_results(results, pos_type, pos_subtype):
+def print_subtype_find_results(results: dict[str, Any], pos_type: str, pos_subtype: str) -> None:
     """Print results of finding words for a subtype."""
     if "error" in results:
         print(f"\nError: {results['error']}")
@@ -73,7 +75,9 @@ def print_subtype_find_results(results, pos_type, pos_subtype):
         print(f"   Confidence: {match.get('confidence', 'N/A')}\n")
 
 
-def print_subtype_add_results(results, dry_run=False, stage_only=False):
+def print_subtype_add_results(
+    results: dict[str, Any], dry_run: bool = False, stage_only: bool = False
+) -> None:
     """Print results of adding words for a subtype."""
     if "error" in results:
         print(f"\nError: {results['error']}")
@@ -97,7 +101,7 @@ def print_subtype_add_results(results, dry_run=False, stage_only=False):
         print(f"  Skipped (already exist): {results['skipped']}")
 
 
-def print_fix_missing_summary(results, dry_run=False):
+def print_fix_missing_summary(results: dict[str, Any], dry_run: bool = False) -> None:
     """Print summary of fix missing words operation."""
     if "error" in results:
         print(f"\nError: {results['error']}")
@@ -115,7 +119,7 @@ def print_fix_missing_summary(results, dry_run=False):
         print(f"  Failed: {results['failed']}")
 
 
-def print_check_summary(check_type, results):
+def print_check_summary(check_type: str, results: dict[str, Any]) -> None:
     """Print summary of check operations."""
     if check_type == "orphaned":
         print(
@@ -130,7 +134,7 @@ def print_check_summary(check_type, results):
         print(f"Imbalanced levels: {len(results['imbalanced'])}")
 
 
-def print_confirmation_prompt(prompt_type, **kwargs):
+def print_confirmation_prompt(prompt_type: str, **kwargs: Any) -> bool:
     """Print confirmation prompts for various operations.
 
     Returns:

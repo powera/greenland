@@ -23,7 +23,7 @@ DEFAULT_UNKNOWN_RANK = 12500  # Default rank for words not in a corpus
 
 
 def calculate_combined_ranks(
-    config: Optional['DataSourceConfig'] = None,
+    config: Optional["DataSourceConfig"] = None,
     corpus_names: Optional[List[str]] = None,
     outlier_threshold: float = 2.0,
     unknown_rank: int = DEFAULT_UNKNOWN_RANK,

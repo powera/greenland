@@ -3,7 +3,7 @@
 Trakaido Dictionary Generator
 
 This script generates both structure files and dictionary files for the trakaido system
-from the wordfreq database. It replaces both generate_wordlists_from_db.py and 
+from the wordfreq database. It replaces both generate_wordlists_from_db.py and
 dictionary/generator.py with a unified approach.
 
 Structure files: Organize words by difficulty level and subtype (e.g., nouns_one_structure.py)
