@@ -368,8 +368,9 @@ class WirewordExporter:
         # Build dict of voice -> MD5 hash
         audio_hashes = {}
         for audio in audio_records:
-            # Only include approved or pending audio (not rejected/needs_replacement)
-            if audio.status in ("approved", "pending_review", "approved_with_issues"):
+            # Only include audio that is in production (has s3_prod_url)
+            # This ensures we only export production-ready audio, not staging-only
+            if audio.s3_prod_url:
                 audio_hashes[audio.voice_name] = audio.manifest_md5
 
         return audio_hashes if audio_hashes else None

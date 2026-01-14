@@ -110,11 +110,55 @@
 
                         <dt class="col-sm-4">MD5 Hash:</dt>
                         <dd class="col-sm-8"><small><code>{{ review.manifest_md5[:12] }}...</code></small></dd>
+
+                        <dt class="col-sm-4">S3 Status:</dt>
+                        <dd class="col-sm-8">
+                            {% if review.s3_prod_url %}
+                            <span class="badge bg-success"><i class="bi bi-check-circle"></i> In Production</span>
+                            {% elif review.s3_staging_url %}
+                            <span class="badge bg-warning text-dark"><i class="bi bi-cloud-upload"></i> In Staging ({{ review.staging_agent }})</span>
+                            {% else %}
+                            <span class="badge bg-secondary"><i class="bi bi-x-circle"></i> Local Only</span>
+                            {% endif %}
+                        </dd>
+
+                        {% if review.accepted_at %}
+                        <dt class="col-sm-4">Accepted:</dt>
+                        <dd class="col-sm-8">
+                            <small>{{ review.accepted_at.strftime('%Y-%m-%d %H:%M') }}
+                            {% if review.accepted_by %} by {{ review.accepted_by }}{% endif %}</small>
+                        </dd>
+                        {% endif %}
                     </dl>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Accept for Production Card (if in staging and approved) -->
+    {% if review.s3_staging_url and not review.s3_prod_url %}
+    <div class="card mt-4 border-warning">
+        <div class="card-header bg-warning text-dark">
+            <h5 class="mb-0"><i class="bi bi-cloud-upload"></i> Accept for Production</h5>
+        </div>
+        <div class="card-body">
+            <p>This audio is currently in the <strong>staging</strong> bucket. Once you approve it, you can move it to production for use in the app.</p>
+
+            {% if review.status == 'approved' %}
+            <form action="{{ url_for('audio.accept_for_production', review_id=review.id) }}" method="POST" style="display: inline;">
+                <button type="submit" class="btn btn-success btn-lg">
+                    <i class="bi bi-check-circle"></i> Accept for Production
+                </button>
+            </form>
+            <small class="text-muted d-block mt-2">This will copy the audio from staging to the production bucket.</small>
+            {% else %}
+            <div class="alert alert-info mb-0">
+                <i class="bi bi-info-circle"></i> Set the status to <strong>"Approved"</strong> before accepting for production.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
 
     <!-- Review Form -->
     <div class="card mt-4">

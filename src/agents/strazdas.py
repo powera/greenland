@@ -39,6 +39,8 @@ from agents.common.common_args import (
 from agents.common.lemma_selection import get_lemmas_for_agent
 from audioshoe.espeak import DEFAULT_ESPEAK_VOICES, EspeakVoice, generate_audio
 from clients.audio import AudioFormat
+from clients.audio.manifest import generate_manifest
+from clients.audio.s3_uploader import S3AudioUploader
 from wordfreq.storage.backend import create_session as create_backend_session
 from wordfreq.storage.backend.config import BackendType, DataSourceConfig
 from wordfreq.storage.models.schema import AudioQualityReview, Lemma, LemmaTranslation
@@ -58,6 +60,7 @@ class StrazdasAgent:
         self,
         config: DataSourceConfig,
         output_dir: str = None,
+        upload_s3: bool = False,
     ):
         """
         Initialize the Strazdas agent.
@@ -65,15 +68,28 @@ class StrazdasAgent:
         Args:
             config: DataSourceConfig with model, debug, and backend settings (required)
             output_dir: Output directory for generated audio (uses temp dir if None)
+            upload_s3: Whether to upload generated audio to S3 staging
         """
         self.config = config
         self.debug = config.debug
+        self.upload_s3 = upload_s3
         self.output_dir = (
             Path(output_dir) if output_dir else Path(tempfile.mkdtemp(prefix="strazdas_"))
         )
 
         if self.debug:
             logger.setLevel(logging.DEBUG)
+
+        # Initialize S3 uploader if needed
+        self.s3_uploader = None
+        if self.upload_s3:
+            try:
+                self.s3_uploader = S3AudioUploader()
+                logger.info("S3 uploader initialized")
+            except Exception as e:
+                logger.error(f"Failed to initialize S3 uploader: {e}")
+                logger.warning("S3 upload will be disabled")
+                self.upload_s3 = False
 
         # Ensure output directory exists
         self.output_dir.mkdir(parents=True, exist_ok=True)
@@ -190,10 +206,53 @@ class StrazdasAgent:
 
             logger.info(f"Saved audio: {file_path} (MD5: {md5_hash})")
 
+            # Upload to S3 staging if enabled
+            s3_staging_url = None
+            s3_staging_manifest_url = None
+            if self.upload_s3 and self.s3_uploader:
+                # Generate manifest
+                manifest_data = generate_manifest(
+                    audio_file_path=file_path,
+                    agent="strazdas",
+                    voice_name=voice_name,
+                    language_code=language_code,
+                    expected_text=text,
+                    guid=lemma.guid,
+                    sentence_id=None,
+                    grammatical_form=None,
+                    generation_params={
+                        "voice": voice.espeak_voice_id,
+                        "ipa_input": bool(ipa_text),
+                    },
+                )
+
+                # Upload to staging
+                success, audio_url, manifest_url, _ = self.s3_uploader.upload_to_staging(
+                    audio_path=file_path,
+                    manifest_data=manifest_data,
+                    agent="strazdas",
+                    check_existing=True,
+                )
+
+                if success:
+                    s3_staging_url = audio_url
+                    s3_staging_manifest_url = manifest_url
+                    logger.info(f"Uploaded to S3 staging: {audio_url}")
+                else:
+                    logger.error(f"Failed to upload to S3 staging: {file_path}")
+
             # Create review record if requested
             if create_review_record:
                 self._create_review_record(
-                    session, lemma, language_code, voice_name, filename, text, md5_hash
+                    session,
+                    lemma,
+                    language_code,
+                    voice_name,
+                    filename,
+                    text,
+                    md5_hash,
+                    s3_staging_url=s3_staging_url,
+                    s3_staging_manifest_url=s3_staging_manifest_url,
                 )
 
             results["voices"].append(
@@ -218,6 +277,8 @@ class StrazdasAgent:
         filename: str,
         text: str,
         md5_hash: str,
+        s3_staging_url: Optional[str] = None,
+        s3_staging_manifest_url: Optional[str] = None,
     ):
         """Create AudioQualityReview record for generated audio."""
         # Check if record already exists
@@ -238,19 +299,28 @@ class StrazdasAgent:
             existing.expected_text = text
             existing.manifest_md5 = md5_hash
             existing.status = "pending_review"
-            existing.s3_url = None  # Will be set after upload
+            existing.s3_staging_url = s3_staging_url
+            existing.s3_staging_manifest_url = s3_staging_manifest_url
+            existing.staging_agent = "strazdas" if s3_staging_url else None
+            existing.s3_prod_url = None  # Clear prod URL when regenerating
+            existing.accepted_at = None
+            existing.accepted_by = None
             logger.debug(f"Updated existing review record for {lemma.guid}")
         else:
             # Create new record
             review = AudioQualityReview(
                 guid=lemma.guid,
+                sentence_id=None,  # This is lemma audio, not sentence audio
                 language_code=language_code,
                 voice_name=voice_name,
-                grammatical_form=None,  # Base form
+                grammatical_form=None,  # Base form (not generating derivative forms)
                 filename=filename,
                 expected_text=text,
                 manifest_md5=md5_hash,
-                s3_url=None,  # Will be set after S3 upload
+                s3_staging_url=s3_staging_url,
+                s3_staging_manifest_url=s3_staging_manifest_url,
+                s3_prod_url=None,
+                staging_agent="strazdas" if s3_staging_url else None,
                 lemma_id=lemma.id,
                 status="pending_review",
             )
@@ -380,6 +450,11 @@ def get_argument_parser():
         action="store_true",
         help="Use IPA phonetic notation for generation when available",
     )
+    parser.add_argument(
+        "--upload-s3",
+        action="store_true",
+        help="Upload generated audio and manifests to S3 staging bucket",
+    )
 
     return parser
 
@@ -414,6 +489,7 @@ def main():
     agent = StrazdasAgent(
         config=config,
         output_dir=args.output_dir,
+        upload_s3=args.upload_s3,
     )
 
     # Convert voice names to EspeakVoice enums
