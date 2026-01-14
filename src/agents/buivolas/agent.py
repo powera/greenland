@@ -1,7 +1,7 @@
 """Shared Buivolas agent wrapper for sentence creation."""
 
 import logging
-from typing import Dict, Optional
+from typing import Any, Dict, Optional
 
 from agents.buivolas.llm_sentences import LlmSentenceGenerator
 from agents.buivolas.pattern_sentences import PatternSentenceGenerator
@@ -26,12 +26,12 @@ class BuivolasAgent:
         self.pattern_generator = PatternSentenceGenerator(config=config, dry_run=dry_run)
         self.llm_generator = LlmSentenceGenerator(config=config, dry_run=dry_run)
 
-    def get_session(self):
+    def get_session(self) -> Any:
         return create_backend_session(self.config)
 
     def generate_pattern_sentences_for_guid(
         self, guid: str, max_combinations: Optional[int] = None
-    ) -> Dict:
+    ) -> Dict[str, Any]:
         return self.pattern_generator.generate_candidates_for_guid(
             guid=guid, max_combinations=max_combinations
         )
@@ -41,14 +41,16 @@ class BuivolasAgent:
         lemma: Lemma,
         num_sentences: int = 3,
         difficulty_context: Optional[int] = None,
-    ) -> Dict[str, any]:
-        return self.llm_generator.generate_sentences_for_noun(
+    ) -> Dict[str, Any]:
+        return self.llm_generator.generate_sentences_for_lemma(
             lemma=lemma,
             num_sentences=num_sentences,
             difficulty_context=difficulty_context,
         )
 
-    def store_llm_sentences(self, sentences_data, source_lemma: Lemma, session) -> Dict:
+    def store_llm_sentences(
+        self, sentences_data: Any, source_lemma: Lemma, session: Any
+    ) -> Dict[str, Any]:
         return self.llm_generator.store_sentences(
             sentences_data=sentences_data, source_lemma=source_lemma, session=session
         )

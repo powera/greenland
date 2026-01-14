@@ -36,19 +36,45 @@ class LlmSentenceGenerator:
     def get_session(self) -> Any:
         return create_backend_session(self.config)
 
-    def generate_sentences_for_noun(
+    def has_existing_sentences(self, lemma: Lemma, session: Any) -> bool:
+        """Check if a lemma already has sentences generated for it."""
+        from sqlalchemy import func
+
+        count = (
+            session.query(func.count(SentencePatternWord.id))
+            .filter(SentencePatternWord.lemma_id == lemma.id)
+            .scalar()
+        )
+        return bool(count and count > 0)
+
+    def generate_sentences_for_lemma(
         self,
         lemma: Lemma,
         num_sentences: int = 3,
         difficulty_context: Optional[int] = None,
     ) -> Dict[str, Any]:
-        if lemma.pos_type != "noun":
-            logger.warning("Lemma %s is not a noun (got %s)", lemma.guid, lemma.pos_type)
-            return {"success": False, "error": f"Expected noun, got {lemma.pos_type}"}
+        """Generate sentences for a lemma (noun, verb, or adjective).
+
+        For non-nouns, only LLM-generated sentences are created (no pattern-based sentences).
+        """
+        # Support nouns, verbs, and adjectives
+        if lemma.pos_type not in ("noun", "verb", "adjective"):
+            logger.info(
+                "Skipping lemma %s: POS type '%s' not supported for sentence generation",
+                lemma.guid,
+                lemma.pos_type,
+            )
+            return {
+                "success": True,
+                "skipped": True,
+                "reason": f"POS type '{lemma.pos_type}' not supported",
+                "sentences": [],
+            }
 
         logger.info(
-            "Generating %s sentences for noun: %s (GUID: %s)",
+            "Generating %s sentences for %s: %s (GUID: %s)",
             num_sentences,
+            lemma.pos_type,
             lemma.lemma_text,
             lemma.guid,
         )
