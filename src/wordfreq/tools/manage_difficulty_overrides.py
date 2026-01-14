@@ -23,6 +23,7 @@ if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
 import constants
+from wordfreq.storage.backend.base import BaseSession
 from wordfreq.storage.crud.difficulty_override import (
     add_difficulty_override,
     delete_difficulty_override,
@@ -36,8 +37,12 @@ from wordfreq.storage.models.schema import Lemma, LemmaDifficultyOverride
 
 
 def set_override(
-    session, guid: str, language_code: str, difficulty_level: int, notes: Optional[str] = None
-):
+    session: BaseSession,
+    guid: str,
+    language_code: str,
+    difficulty_level: int,
+    notes: Optional[str] = None,
+) -> bool:
     """Set a difficulty override for a lemma by GUID."""
     # Find lemma by GUID
     lemma = session.query(Lemma).filter(Lemma.guid == guid).first()
@@ -67,7 +72,7 @@ def set_override(
     return True
 
 
-def view_override(session, guid: str):
+def view_override(session: BaseSession, guid: str) -> None:
     """View all overrides for a specific lemma."""
     lemma = session.query(Lemma).filter(Lemma.guid == guid).first()
     if not lemma:
@@ -94,7 +99,7 @@ def view_override(session, guid: str):
             print(f"     Notes: {override.notes}")
 
 
-def view_language_overrides(session, language_code: str, limit: int = 50):
+def view_language_overrides(session: BaseSession, language_code: str, limit: int = 50) -> None:
     """View all overrides for a specific language."""
     overrides = get_all_overrides_for_language(session, language_code)
 
@@ -126,7 +131,7 @@ def view_language_overrides(session, language_code: str, limit: int = 50):
             )
 
 
-def remove_override(session, guid: str, language_code: str):
+def remove_override(session: BaseSession, guid: str, language_code: str) -> bool:
     """Remove a difficulty override."""
     lemma = session.query(Lemma).filter(Lemma.guid == guid).first()
     if not lemma:
@@ -145,7 +150,7 @@ def remove_override(session, guid: str, language_code: str):
     return deleted
 
 
-def bulk_import_csv(session, csv_path: str):
+def bulk_import_csv(session: BaseSession, csv_path: str) -> None:
     """
     Bulk import overrides from CSV file.
 
@@ -205,7 +210,7 @@ def bulk_import_csv(session, csv_path: str):
     print(f"   Errors: {error_count}")
 
 
-def export_to_csv(session, language_code: Optional[str], output_path: str):
+def export_to_csv(session: BaseSession, language_code: Optional[str], output_path: str) -> None:
     """Export overrides to CSV file."""
     if language_code:
         overrides = get_all_overrides_for_language(session, language_code)
@@ -235,7 +240,7 @@ def export_to_csv(session, language_code: Optional[str], output_path: str):
     print(f"✅ Exported {len(overrides)} overrides to {output_path}")
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Manage per-language difficulty level overrides",
         formatter_class=argparse.RawDescriptionHelpFormatter,

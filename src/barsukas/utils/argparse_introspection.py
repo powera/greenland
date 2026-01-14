@@ -9,13 +9,13 @@ to dynamically generate web forms without duplicating flag definitions.
 import argparse
 import importlib
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, cast
 
 
 class ArgumentInfo:
     """Structured information about a single command-line argument."""
 
-    def __init__(self, action):
+    def __init__(self, action: argparse.Action) -> None:
         """Initialize from an argparse Action object."""
         self.names = action.option_strings  # e.g., ['--limit'] or ['--yes', '-y']
         self.dest = action.dest  # e.g., 'limit'
@@ -30,7 +30,7 @@ class ArgumentInfo:
         # Detect mode/group from help text patterns
         self.mode_hint = self._extract_mode_hint(self.help)
 
-    def _infer_type(self, action) -> str:
+    def _infer_type(self, action: argparse.Action) -> str:
         """Infer the input type from the action."""
         if isinstance(action, argparse._StoreTrueAction):
             return "boolean"
@@ -151,6 +151,8 @@ def introspect_agent_parser(agent_module_path: str) -> Dict[str, Any]:
 
         # Load the module directly from the file
         spec = importlib.util.spec_from_file_location(agent_module_path, file_path)
+        if spec is None or spec.loader is None:
+            raise ImportError(f"Could not load module spec from {file_path}")
         module = importlib.util.module_from_spec(spec)
 
         # Temporarily add to sys.modules to handle any internal imports
@@ -208,7 +210,7 @@ def group_arguments_by_mode(arguments: List[Dict[str, Any]]) -> Dict[str, List[D
         Dictionary mapping mode names to lists of arguments.
         Arguments with no mode hint are in the 'common' group.
     """
-    groups = {"common": []}
+    groups: Dict[str, List[Dict[str, Any]]] = {"common": []}
 
     for arg in arguments:
         mode_hint = arg.get("mode_hint")
@@ -244,7 +246,7 @@ def group_arguments_by_category(arguments: List[Dict[str, Any]]) -> Dict[str, Li
         "advanced_options": {"label": "Advanced Options", "order": 7},
     }
 
-    groups = {cat: [] for cat in category_info.keys()}
+    groups: Dict[str, List[Dict[str, Any]]] = {cat: [] for cat in category_info.keys()}
 
     for arg in arguments:
         category = arg.get("semantic_category", "advanced_options")
@@ -256,7 +258,9 @@ def group_arguments_by_category(arguments: List[Dict[str, Any]]) -> Dict[str, Li
     # Remove empty groups and return in order
     return {
         cat: groups[cat]
-        for cat in sorted(groups.keys(), key=lambda x: category_info.get(x, {}).get("order", 99))
+        for cat in sorted(
+            groups.keys(), key=lambda x: cast(int, category_info.get(x, {}).get("order", 99))
+        )
         if groups[cat]
     }
 

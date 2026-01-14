@@ -4,10 +4,12 @@
 
 import json
 import logging
-from typing import Dict, Tuple
+from typing import Callable, Dict, Tuple
 
 import util.prompt_loader
 from clients.types import Schema, SchemaProperty
+from clients.unified_client import UnifiedLLMClient
+from sqlalchemy.orm import Session
 from wordfreq.storage import database as linguistic_db
 from wordfreq.storage.models.enums import GrammaticalForm
 from wordfreq.storage.translation_helpers import get_translation
@@ -92,7 +94,7 @@ ADVERB_FORM_MAPPING = {
 
 
 def query_lithuanian_noun_declensions(
-    client, lemma_id: int, get_session_func
+    client: UnifiedLLMClient, lemma_id: int, get_session_func: Callable[[], Session]
 ) -> Tuple[Dict[str, str], bool]:
     """
     Query LLM for all Lithuanian noun declensions (7 cases × 2 numbers).
@@ -223,7 +225,7 @@ def query_lithuanian_noun_declensions(
 
 
 def query_lithuanian_verb_conjugations(
-    client, lemma_id: int, get_session_func
+    client: UnifiedLLMClient, lemma_id: int, get_session_func: Callable[[], Session]
 ) -> Tuple[Dict[str, str], bool]:
     """
     Query LLM for all Lithuanian verb conjugations (6 persons × 3 tenses = 18 forms).
@@ -342,7 +344,7 @@ def query_lithuanian_verb_conjugations(
 
 
 def query_lithuanian_adjective_declensions(
-    client, lemma_id: int, get_session_func
+    client: UnifiedLLMClient, lemma_id: int, get_session_func: Callable[[], Session]
 ) -> Tuple[Dict[str, str], bool]:
     """
     Query LLM for all Lithuanian adjective declensions (7 cases × 2 numbers × 2 genders = 28 forms).
@@ -491,7 +493,7 @@ def query_lithuanian_adjective_declensions(
 
 
 def query_lithuanian_adverb_forms(
-    client, lemma_id: int, get_session_func
+    client: UnifiedLLMClient, lemma_id: int, get_session_func: Callable[[], Session]
 ) -> Tuple[Dict[str, str], bool]:
     """
     Query LLM for Lithuanian adverb forms (positive, comparative, superlative).

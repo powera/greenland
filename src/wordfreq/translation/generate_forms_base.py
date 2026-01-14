@@ -11,7 +11,7 @@ import argparse
 import logging
 import time
 from dataclasses import dataclass
-from typing import Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 
 import constants
 from agents.common.common_args import get_data_source_config
@@ -46,7 +46,7 @@ class FormGenerationConfig:
 
 def get_lemmas_with_translation(
     config: DataSourceConfig, form_config: FormGenerationConfig, limit: Optional[int] = None
-) -> List[Dict]:
+) -> List[Dict[str, Any]]:
     """
     Get lemmas with translations for a specific language and POS type.
 
@@ -65,7 +65,7 @@ def get_lemmas_with_translation(
 
     if form_config.use_legacy_translation:
         # Old schema: direct translation column on Lemma table
-        translation_column = getattr(linguistic_db.Lemma, form_config.translation_field_name)
+        translation_column = getattr(linguistic_db.Lemma, form_config.translation_field_name or "")
         query = (
             session.query(linguistic_db.Lemma)
             .filter(
@@ -81,7 +81,7 @@ def get_lemmas_with_translation(
 
         results = []
         for lemma in query.all():
-            translation = getattr(lemma, form_config.translation_field_name)
+            translation = getattr(lemma, form_config.translation_field_name or "")
             results.append(
                 {
                     "id": lemma.id,
@@ -133,7 +133,7 @@ def get_lemmas_with_translation(
 
 def get_lemmas_without_translation(
     config: DataSourceConfig, pos_type: str, limit: Optional[int] = None
-) -> List[Dict]:
+) -> List[Dict[str, Any]]:
     """
     Get lemmas without requiring translations (e.g., for English forms).
 
@@ -169,7 +169,7 @@ def get_lemmas_without_translation(
 
 def get_lemmas_needing_forms(
     config: DataSourceConfig, form_config: FormGenerationConfig, limit: Optional[int] = None
-) -> List[Dict]:
+) -> List[Dict[str, Any]]:
     """
     Get lemmas that need forms generated (those with insufficient derivative forms).
 
@@ -241,8 +241,12 @@ def detect_number_type_from_forms(forms_dict: Dict[str, str], config: FormGenera
     plural_forms = [name for name in forms_dict.keys() if "plural" in name.lower()]
 
     # Check if we have non-empty forms
-    has_singular = any(forms_dict.get(f) and forms_dict.get(f).strip() for f in singular_forms)
-    has_plural = any(forms_dict.get(f) and forms_dict.get(f).strip() for f in plural_forms)
+    def has_non_empty_form(form_name: str) -> bool:
+        form_text = forms_dict.get(form_name)
+        return bool(form_text and isinstance(form_text, str) and form_text.strip())
+
+    has_singular = any(has_non_empty_form(f) for f in singular_forms)
+    has_plural = any(has_non_empty_form(f) for f in plural_forms)
 
     if has_plural and not has_singular:
         return "plurale_tantum"
@@ -278,9 +282,13 @@ def extract_gender_from_forms(
     neuter_forms = [name for name in forms_dict.keys() if "_n" in name.lower()]
 
     # Count non-empty forms for each gender
-    has_masculine = any(forms_dict.get(f) and forms_dict.get(f).strip() for f in masculine_forms)
-    has_feminine = any(forms_dict.get(f) and forms_dict.get(f).strip() for f in feminine_forms)
-    has_neuter = any(forms_dict.get(f) and forms_dict.get(f).strip() for f in neuter_forms)
+    def has_non_empty_form(form_name: str) -> bool:
+        form_text = forms_dict.get(form_name)
+        return bool(form_text and isinstance(form_text, str) and form_text.strip())
+
+    has_masculine = any(has_non_empty_form(f) for f in masculine_forms)
+    has_feminine = any(has_non_empty_form(f) for f in feminine_forms)
+    has_neuter = any(has_non_empty_form(f) for f in neuter_forms)
 
     # If only one gender has forms, that's the word's gender
     gender_count = sum([has_masculine, has_feminine, has_neuter])
@@ -447,7 +455,10 @@ def process_lemma_forms(
         return False
 
 
-def run_form_generation(form_config: FormGenerationConfig, get_lemmas_func: Callable):
+def run_form_generation(
+    form_config: FormGenerationConfig,
+    get_lemmas_func: Callable[[DataSourceConfig, Optional[int]], List[Dict[str, Any]]],
+) -> None:
     """
     Main entry point for form generation scripts.
 

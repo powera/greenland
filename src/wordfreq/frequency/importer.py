@@ -8,11 +8,12 @@ import logging
 import os
 import re
 import time
-from typing import Any, Dict, List, Literal, Optional, Tuple
+from typing import Any, Dict, List, Literal, Optional, Tuple, Union
 
 import constants
 import wordfreq.frequency.corpus
 from wordfreq.storage import database
+from wordfreq.storage.backend.config import DataSourceConfig
 from wordfreq.storage.connection_pool import get_session
 from wordfreq.storage.models.schema import Corpus, WordFrequency, WordToken
 from wordfreq.translation.client import LinguisticClient
@@ -167,7 +168,7 @@ def import_frequency_data(
             logger.info(f"Using detected value type: {value_type}")
 
         # Process words: lowercase, filter out numerals, and merge duplicate entries
-        words_data = {}
+        words_data: Dict[str, Dict[str, Optional[Union[int, float]]]] = {}
         skipped_numeral_count = 0
         merged_count = 0
 
@@ -306,7 +307,7 @@ def import_frequency_data(
 # Use wordfreq.frequency.corpus.load_all_corpora() instead.
 
 
-def process_stopwords(refresh: bool = False, model: str = None) -> Dict[str, bool]:
+def process_stopwords(refresh: bool = False, model: Optional[str] = None) -> Dict[str, bool]:
     """
     Process all stop words from util/stopwords.py using linguistic_client.process_word.
 

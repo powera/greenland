@@ -2,11 +2,13 @@
 
 from typing import Optional
 
+from sqlalchemy.orm import Session
+
 from wordfreq.storage.models.schema import Corpus, WordFrequency, WordToken
 
 
 def add_word_frequency(
-    session,
+    session: Session,
     word_token: WordToken,
     corpus_name: str,
     rank: Optional[int] = None,

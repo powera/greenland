@@ -1,10 +1,12 @@
 """GUID generation utilities for lemmas."""
 
+from sqlalchemy.orm import Session
+
 from wordfreq.storage.models.guid_prefixes import SUBTYPE_GUID_PREFIXES
 from wordfreq.storage.models.schema import Lemma
 
 
-def generate_guid(session, pos_type: str, subtype: str) -> str:
+def generate_guid(session: Session, pos_type: str, subtype: str) -> str:
     """
     Generate a unique GUID for a lemma in a specific POS type and subtype.
 

@@ -1,6 +1,6 @@
 """SQLite session wrapper."""
 
-from typing import Any, Optional, Type, TypeVar
+from typing import Any, Optional, Type, TypeVar, cast
 
 from sqlalchemy.orm import Query as SQLAlchemyQuery
 from sqlalchemy.orm import Session as SQLAlchemySession
@@ -24,7 +24,7 @@ class SQLiteSession(BaseSession):
         """
         self._sqlalchemy_session = sqlalchemy_session
 
-    def query(self, *entities, **kwargs) -> SQLAlchemyQuery:
+    def query(self, *entities: Any, **kwargs: Any) -> SQLAlchemyQuery:
         """Create a query for the given model class or column expressions.
 
         Args:
@@ -46,7 +46,7 @@ class SQLiteSession(BaseSession):
         Returns:
             The instance or None if not found
         """
-        return self._sqlalchemy_session.get(model_class, id)
+        return cast(Optional[T], self._sqlalchemy_session.get(model_class, id))
 
     def add(self, instance: Any) -> None:
         """Add an instance to the session.

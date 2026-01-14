@@ -2,10 +2,12 @@
 
 from typing import List, Optional
 
+from sqlalchemy.orm import Session
+
 from wordfreq.storage.models.schema import Corpus, DerivativeForm, WordFrequency, WordToken
 
 
-def add_word_token(session, token: str, language_code: str) -> WordToken:
+def add_word_token(session: Session, token: str, language_code: str) -> WordToken:
     """Add a word token to the database if it doesn't exist, or return existing one."""
     existing = (
         session.query(WordToken)
@@ -21,7 +23,9 @@ def add_word_token(session, token: str, language_code: str) -> WordToken:
     return new_token
 
 
-def get_word_token_by_text(session, token_text: str, language_code: str) -> Optional[WordToken]:
+def get_word_token_by_text(
+    session: Session, token_text: str, language_code: str
+) -> Optional[WordToken]:
     """Get a word token from the database by its text and language."""
     return (
         session.query(WordToken)
@@ -30,7 +34,7 @@ def get_word_token_by_text(session, token_text: str, language_code: str) -> Opti
     )
 
 
-def get_word_tokens_needing_analysis(session, limit: int = 100) -> List[WordToken]:
+def get_word_tokens_needing_analysis(session: Session, limit: int = 100) -> List[WordToken]:
     """Get word tokens that need linguistic analysis (no derivative forms)."""
     return (
         session.query(WordToken)
@@ -42,7 +46,7 @@ def get_word_tokens_needing_analysis(session, limit: int = 100) -> List[WordToke
 
 
 def get_word_tokens_by_frequency_rank(
-    session, corpus_name: str, limit: int = 100
+    session: Session, corpus_name: str, limit: int = 100
 ) -> List[WordToken]:
     """Get word tokens ordered by frequency rank in a specific corpus."""
     return (
@@ -57,7 +61,9 @@ def get_word_tokens_by_frequency_rank(
     )
 
 
-def get_word_tokens_by_combined_frequency_rank(session, limit: int = 1000) -> List[WordToken]:
+def get_word_tokens_by_combined_frequency_rank(
+    session: Session, limit: int = 1000
+) -> List[WordToken]:
     """
     Get word tokens ordered by their combined frequency rank.
 

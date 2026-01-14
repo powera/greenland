@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """Generate Portuguese noun forms using the shared task registry."""
-from typing import Optional
+from typing import Any, Dict, List, Optional
 
 from wordfreq.storage.backend.config import DataSourceConfig
 from wordfreq.translation.generate_forms_tasks import (
@@ -13,11 +13,13 @@ TASK_KEY = "portuguese_nouns"
 CONFIG = FORM_GENERATION_TASKS[TASK_KEY].config
 
 
-def get_portuguese_noun_lemmas(config: DataSourceConfig, limit: Optional[int] = None):
+def get_portuguese_noun_lemmas(
+    config: DataSourceConfig, limit: Optional[int] = None
+) -> List[Dict[str, Any]]:
     return FORM_GENERATION_TASKS[TASK_KEY].lemma_fetcher(config, limit)
 
 
-def main():
+def main() -> None:
     run_form_generation_task(TASK_KEY)
 
 

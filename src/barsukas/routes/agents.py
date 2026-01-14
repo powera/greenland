@@ -4,9 +4,11 @@
 
 import logging
 import traceback
+from typing import Union
 
 from config import Config
 from flask import Blueprint, flash, g, jsonify, redirect, render_template, request, url_for
+from werkzeug.wrappers import Response
 
 import constants
 from agents.lokys import LokysAgent
@@ -23,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 
 @bp.route("/check-translations/<int:lemma_id>", methods=["POST"])
-def check_translations(lemma_id):
+def check_translations(lemma_id: int) -> Union[Response, str]:
     """Check translations for a lemma using the voras agent."""
     lemma = g.db.query(Lemma).get(lemma_id)
     if not lemma:
@@ -104,7 +106,7 @@ def check_translations(lemma_id):
 
 
 @bp.route("/add-missing-translations/<int:lemma_id>", methods=["POST"])
-def add_missing_translations(lemma_id):
+def add_missing_translations(lemma_id: int) -> Response:
     """Add missing translations for a lemma using the voras agent."""
     lemma = g.db.query(Lemma).get(lemma_id)
     if not lemma:
@@ -134,7 +136,7 @@ def add_missing_translations(lemma_id):
 
 
 @bp.route("/check-pronunciations/<int:lemma_id>", methods=["POST"])
-def check_pronunciations(lemma_id):
+def check_pronunciations(lemma_id: int) -> Union[Response, str]:
     """Check pronunciations for a lemma's derivative forms using the PAPUGA agent."""
     lemma = g.db.query(Lemma).get(lemma_id)
     if not lemma:
@@ -227,7 +229,7 @@ def check_pronunciations(lemma_id):
 
 
 @bp.route("/generate-pronunciations/<int:lemma_id>", methods=["POST"])
-def generate_pronunciations(lemma_id):
+def generate_pronunciations(lemma_id: int) -> Response:
     """Generate missing pronunciations for a lemma's derivative forms using the PAPUGA agent."""
     lemma = g.db.query(Lemma).get(lemma_id)
     if not lemma:
@@ -262,7 +264,7 @@ def generate_pronunciations(lemma_id):
 
 
 @bp.route("/generate-forms/<int:lemma_id>", methods=["POST"])
-def generate_forms(lemma_id):
+def generate_forms(lemma_id: int) -> Response:
     """Generate missing grammatical forms for a lemma using the VILKAS agent."""
     lemma = g.db.query(Lemma).get(lemma_id)
     if not lemma:
@@ -300,7 +302,7 @@ def generate_forms(lemma_id):
 
 
 @bp.route("/generate-synonyms/<int:lemma_id>", methods=["POST"])
-def generate_synonyms(lemma_id):
+def generate_synonyms(lemma_id: int) -> Response:
     """Generate synonyms and alternative forms for a lemma using the ŠERNAS agent."""
     lemma = g.db.query(Lemma).get(lemma_id)
     if not lemma:
@@ -333,7 +335,7 @@ def generate_synonyms(lemma_id):
 
 
 @bp.route("/check-definition/<int:lemma_id>", methods=["POST"])
-def check_definition(lemma_id):
+def check_definition(lemma_id: int) -> Union[Response, str]:
     """Check/improve the definition of a lemma using the LOKYS agent."""
     lemma = g.db.query(Lemma).get(lemma_id)
     if not lemma:
@@ -368,7 +370,7 @@ def check_definition(lemma_id):
 
 
 @bp.route("/apply-definition/<int:lemma_id>", methods=["POST"])
-def apply_definition(lemma_id):
+def apply_definition(lemma_id: int) -> Response:
     """Apply a suggested definition improvement."""
     lemma = g.db.query(Lemma).get(lemma_id)
     if not lemma:
@@ -410,7 +412,7 @@ def apply_definition(lemma_id):
 
 
 @bp.route("/check-disambiguation/<int:lemma_id>", methods=["POST"])
-def check_disambiguation(lemma_id):
+def check_disambiguation(lemma_id: int) -> Response:
     """Check if a lemma needs disambiguation (parentheticals) using the LOKYS agent."""
     lemma = g.db.query(Lemma).get(lemma_id)
     if not lemma:
@@ -492,7 +494,7 @@ def check_disambiguation(lemma_id):
 
 
 @bp.route("/apply-disambiguation/<int:lemma_id>", methods=["POST"])
-def apply_disambiguation(lemma_id):
+def apply_disambiguation(lemma_id: int) -> Response:
     """Apply an AI-suggested disambiguation to a lemma."""
     lemma = g.db.query(Lemma).get(lemma_id)
     if not lemma:
@@ -540,7 +542,7 @@ def apply_disambiguation(lemma_id):
 
 
 @bp.route("/generate-sentences/<int:lemma_id>", methods=["POST"])
-def generate_sentences(lemma_id):
+def generate_sentences(lemma_id: int) -> Response:
     """Generate example sentences for a lemma using the Buivolas agent."""
     lemma = g.db.query(Lemma).get(lemma_id)
     if not lemma:
@@ -619,7 +621,7 @@ def generate_sentences(lemma_id):
 
 
 @bp.route("/generate-grammar-fact/<int:lemma_id>", methods=["POST"])
-def generate_grammar_fact(lemma_id):
+def generate_grammar_fact(lemma_id: int) -> Response:
     """Generate a grammar fact for a lemma using the LAPE agent (queued via task worker)."""
     from barsukas.lape.wq_worker import SUPPORTED_FACT_TYPES, validate_grammar_fact_request
     from wordfreq.storage.crud.grammar_fact import get_grammar_fact_value
@@ -684,7 +686,7 @@ def generate_grammar_fact(lemma_id):
 
 
 @bp.route("/view-sentences/<int:lemma_id>")
-def view_sentences(lemma_id):
+def view_sentences(lemma_id: int) -> Union[Response, str]:
     """View all sentences that use a specific lemma."""
     lemma = g.db.query(Lemma).get(lemma_id)
     if not lemma:

@@ -4,14 +4,14 @@ import heapq
 import json
 import statistics
 from pathlib import Path
-from typing import Any, Dict, List, Set, Tuple
+from typing import Any, Dict, List, Set, Tuple, cast
 
 
 def load_frequency_data(file_path: str) -> Dict[str, int]:
     """Load word frequency data from a JSON file."""
     with open(file_path, "r", encoding="utf-8") as f:
         data = json.load(f)
-    return data["global_word_frequency"]
+    return cast(Dict[str, int], data["global_word_frequency"])
 
 
 def create_rank_dictionary(frequency_dict: Dict[str, int]) -> Dict[str, int]:
@@ -46,7 +46,7 @@ def harmonic_mean(values: List[float]) -> float:
 
 def compare_multiple_ranks(
     rank_dicts: List[Dict[str, int]], file_names: List[str], default_rank: int = 6000
-) -> List[Tuple[str, List[int], float, float]]:
+) -> List[Tuple[str, List[int], float, int]]:
     """Compare multiple rank dictionaries and find words with significant rank changes.
 
     Args:
@@ -58,7 +58,7 @@ def compare_multiple_ranks(
         List of tuples containing (word, [ranks], harmonic_mean, max_diff)
     """
     # Get the set of all words across all dictionaries
-    all_words = set()
+    all_words: Set[str] = set()
     for rank_dict in rank_dicts:
         all_words.update(rank_dict.keys())
 
@@ -69,7 +69,7 @@ def compare_multiple_ranks(
         ranks = [rank_dict.get(word, default_rank) for rank_dict in rank_dicts]
 
         # Calculate harmonic mean of ranks
-        harm_mean = harmonic_mean(ranks)
+        harm_mean = harmonic_mean([float(r) for r in ranks])
 
         # Calculate maximum rank difference
         max_diff = max(ranks) - min(ranks)
@@ -79,7 +79,7 @@ def compare_multiple_ranks(
     return word_stats
 
 
-def main():
+def main() -> None:
     # Set up argument parser
     parser = argparse.ArgumentParser(
         description="Compare word frequency rankings across multiple files"
@@ -190,9 +190,9 @@ def main():
                     if rank == args.default_rank:
                         row.append("N/A")
                     else:
-                        row.append(rank)
+                        row.append(str(rank))
                 row.append(f"{harm_mean:.2f}")
-                row.append(max_diff)
+                row.append(str(max_diff))
                 writer.writerow(row)
 
         # Write max difference sorted CSV
@@ -206,9 +206,9 @@ def main():
                     if rank == args.default_rank:
                         row.append("N/A")
                     else:
-                        row.append(rank)
+                        row.append(str(rank))
                 row.append(f"{harm_mean:.2f}")
-                row.append(max_diff)
+                row.append(str(max_diff))
                 writer.writerow(row)
 
         print(f"\nResults saved to CSV files:")

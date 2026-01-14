@@ -13,7 +13,7 @@ import os
 import tempfile
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
+from typing import Any, Dict, Optional, Tuple, Union
 
 from flask import (
     Blueprint,
@@ -38,6 +38,7 @@ from audioshoe.espeak import EspeakVoice
 from audioshoe.piper import PiperClient, PiperVoice
 from barsukas.helpers.audio_helpers import link_audio_to_lemma, validate_audio_translation
 from clients.audio import Voice
+import constants
 from wordfreq.storage.models.schema import AudioQualityReview, Lemma, LemmaDifficultyOverride
 from wordfreq.storage.queries.lemma import apply_effective_difficulty_filter
 
@@ -46,7 +47,7 @@ logger = logging.getLogger(__name__)
 
 
 @bp.route("/")
-def index():
+def index() -> str:
     """Audio quality review dashboard."""
     # Get summary statistics
     total_files = g.db.query(AudioQualityReview).count()
@@ -80,7 +81,7 @@ def index():
 
 
 @bp.route("/import", methods=["GET", "POST"])
-def import_manifest():
+def import_manifest() -> Union[str, Response]:
     """Import audio manifest file."""
     if request.method == "GET":
         # Scan for available manifests
@@ -232,7 +233,7 @@ def import_manifest():
 
 
 @bp.route("/list")
-def list_files():
+def list_files() -> str:
     """List audio files with filters and search."""
     # Get filter parameters
     language_filter = request.args.get("language", "")
@@ -332,7 +333,7 @@ def list_files():
 
 
 @bp.route("/download-filelist")
-def download_filelist():
+def download_filelist() -> Union[Response, Tuple[Response, int]]:
     """Download a text file containing paths to audio files matching current filters."""
     # Get filter parameters
     language_filter = request.args.get("language", "")
@@ -418,7 +419,9 @@ def download_filelist():
 
 
 @bp.route("/files/<language>/<voice>/<filename>")
-def serve_audio_file(language, voice, filename):
+def serve_audio_file(
+    language: str, voice: str, filename: str
+) -> Union[Response, Tuple[Response, int]]:
     """
     Serve audio file - redirects to S3 CDN if available, otherwise serves from local directory.
 
@@ -463,7 +466,7 @@ def serve_audio_file(language, voice, filename):
 
 
 @bp.route("/review/<int:review_id>", methods=["GET", "POST"])
-def review_file(review_id):
+def review_file(review_id: int) -> Union[str, Response, Tuple[Response, int]]:
     """Review a single audio file."""
     review = g.db.query(AudioQualityReview).filter_by(id=review_id).first()
 
@@ -532,7 +535,7 @@ def review_file(review_id):
 
 
 @bp.route("/update/<int:review_id>", methods=["POST"])
-def quick_update(review_id):
+def quick_update(review_id: int) -> Tuple[Response, int]:
     """Quick update for inline actions (AJAX endpoint)."""
     review = g.db.query(AudioQualityReview).filter_by(id=review_id).first()
 
@@ -557,7 +560,7 @@ def quick_update(review_id):
 
 
 @bp.route("/remove/<int:review_id>", methods=["POST"])
-def remove_file(review_id):
+def remove_file(review_id: int) -> Response:
     """Remove an audio file review record."""
     review = g.db.query(AudioQualityReview).filter_by(id=review_id).first()
 
@@ -582,7 +585,7 @@ def remove_file(review_id):
 
 
 @bp.route("/generate", methods=["GET", "POST"])
-def generate():
+def generate() -> Union[str, Response]:
     """Audio generation interface."""
     if request.method == "GET":
         # Show generation form
@@ -638,10 +641,10 @@ def generate():
     try:
         if tts_engine == "espeak-ng":
             # Convert to EspeakVoice enums
-            voice_enums = [EspeakVoice[v.upper()] for v in voices]
+            espeak_voice_enums = [EspeakVoice[v.upper()] for v in voices]
         else:
             # Convert to OpenAI Voice enums
-            voice_enums = [Voice(v) for v in voices]
+            openai_voice_enums = [Voice(v) for v in voices]
     except (ValueError, KeyError) as e:
         flash(f"Invalid voice: {e}", "error")
         return redirect(url_for("audio.generate"))
@@ -668,22 +671,18 @@ def generate():
         )
 
         if tts_engine == "espeak-ng":
-            agent = StrazdasAgent(config=config, output_dir=str(audio_base_dir))
-            results = agent.generate_batch(
+            strazdas_agent = StrazdasAgent(config=config, output_dir=str(audio_base_dir))
+            results = strazdas_agent.generate_batch(
                 language_code=language_code,
-                limit=limit,
-                difficulty_level=difficulty_level,
-                voices=voice_enums,
+                voices=espeak_voice_enums,
                 use_ipa=use_ipa,
             )
             engine_name = "eSpeak-NG"
         else:
-            agent = VieversysAgent(config=config, output_dir=str(audio_base_dir))
-            results = agent.generate_batch(
+            vieversys_agent = VieversysAgent(config=config, output_dir=str(audio_base_dir))
+            results = vieversys_agent.generate_batch(
                 language_code=language_code,
-                limit=limit,
-                difficulty_level=difficulty_level,
-                voices=voice_enums,
+                voices=openai_voice_enums,
             )
             engine_name = "OpenAI"
 
@@ -703,7 +702,9 @@ def generate():
         return redirect(url_for("audio.generate"))
 
 
-def _generate_audio_piper(session, lemma, language_code, voices, output_dir):
+def _generate_audio_piper(
+    session: Any, lemma: Lemma, language_code: str, voices: list, output_dir: str
+) -> Dict[str, Any]:
     """
     Generate audio for a lemma using Piper TTS.
 
@@ -788,7 +789,9 @@ def _generate_audio_piper(session, lemma, language_code, voices, output_dir):
         return {"success": False, "error": str(e)}
 
 
-def _generate_audio_coqui(session, lemma, language_code, voices, output_dir):
+def _generate_audio_coqui(
+    session: Any, lemma: Lemma, language_code: str, voices: list, output_dir: str
+) -> Dict[str, Any]:
     """
     Generate audio for a lemma using Coqui TTS.
 
@@ -874,7 +877,7 @@ def _generate_audio_coqui(session, lemma, language_code, voices, output_dir):
 
 
 @bp.route("/generate-single/<guid>", methods=["POST"])
-def generate_single(guid):
+def generate_single(guid: str) -> Union[str, Response, Tuple[Response, int]]:
     """Generate audio for a single lemma (queued via task worker)."""
     from barsukas.utils.task_queue import TaskType, enqueue_task
 

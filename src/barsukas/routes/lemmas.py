@@ -2,8 +2,10 @@
 
 """Routes for lemma management."""
 
+from typing import Union
+
 from config import Config
-from flask import Blueprint, flash, g, redirect, render_template, request, url_for
+from flask import Blueprint, Response, flash, g, redirect, render_template, request, url_for
 
 from audioshoe.coqui.types import CoquiVoice
 from audioshoe.espeak.types import EspeakVoice
@@ -25,7 +27,7 @@ bp = Blueprint("lemmas", __name__, url_prefix="/lemmas")
 
 
 @bp.route("/add", methods=["GET", "POST"])
-def add_lemma():
+def add_lemma() -> Union[str, Response]:
     """Add a new lemma."""
     import json
 
@@ -176,7 +178,7 @@ def add_lemma():
 
 
 @bp.route("/")
-def list_lemmas():
+def list_lemmas() -> str:
     """List all lemmas with pagination and filtering."""
     page = request.args.get("page", 1, type=int)
     search = request.args.get("search", "").strip()
@@ -229,7 +231,7 @@ def list_lemmas():
 
 
 @bp.route("/<int:lemma_id>")
-def view_lemma(lemma_id):
+def view_lemma(lemma_id: int) -> Union[str, Response]:
     """View a single lemma with all details."""
     from wordfreq.storage.models.schema import DerivativeForm, SentenceWord
 
@@ -332,23 +334,23 @@ def view_lemma(lemma_id):
     # eSpeak-NG voices by language
     espeak_voices = {}
     for lang_code in language_names.keys():
-        voices = EspeakVoice.get_voices_for_language(lang_code)
-        espeak_voices[lang_code] = [{"name": v.name, "gender": v.gender} for v in voices]
+        espeak_voice_list = EspeakVoice.get_voices_for_language(lang_code)
+        espeak_voices[lang_code] = [{"name": v.name, "gender": v.gender} for v in espeak_voice_list]
 
     # Piper voices by language
     piper_voices = {}
     for lang_code in language_names.keys():
-        voices = PiperVoice.get_voices_for_language(lang_code)
+        piper_voice_list = PiperVoice.get_voices_for_language(lang_code)
         piper_voices[lang_code] = [
-            {"name": v.name, "ui_name": v.ui_name, "gender": v.gender} for v in voices
+            {"name": v.name, "ui_name": v.ui_name, "gender": v.gender} for v in piper_voice_list
         ]
 
     # Coqui voices by language
     coqui_voices = {}
     for lang_code in language_names.keys():
-        voices = CoquiVoice.get_voices_for_language(lang_code)
+        coqui_voice_list = CoquiVoice.get_voices_for_language(lang_code)
         coqui_voices[lang_code] = [
-            {"name": v.name, "ui_name": v.ui_name, "gender": v.gender} for v in voices
+            {"name": v.name, "ui_name": v.ui_name, "gender": v.gender} for v in coqui_voice_list
         ]
 
     queued_tasks = get_tasks_for_target(g.db, "lemma", lemma_id, limit=8)
@@ -380,7 +382,7 @@ def view_lemma(lemma_id):
 
 
 @bp.route("/<int:lemma_id>/edit", methods=["GET", "POST"])
-def edit_lemma(lemma_id):
+def edit_lemma(lemma_id: int) -> Union[str, Response]:
     """Edit a lemma."""
     from flask import current_app
 
@@ -564,7 +566,7 @@ def edit_lemma(lemma_id):
 
 
 @bp.route("/<int:lemma_id>/delete-synonym/<int:form_id>", methods=["POST"])
-def delete_synonym(lemma_id, form_id):
+def delete_synonym(lemma_id: int, form_id: int) -> Response:
     """Delete a single synonym or alternative form."""
     from flask import current_app
 
@@ -619,7 +621,7 @@ def delete_synonym(lemma_id, form_id):
 
 
 @bp.route("/<int:lemma_id>/delete-all-synonyms", methods=["POST"])
-def delete_all_synonyms(lemma_id):
+def delete_all_synonyms(lemma_id: int) -> Response:
     """Delete all synonyms and/or alternative forms for a lemma."""
     from flask import current_app
 

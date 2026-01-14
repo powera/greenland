@@ -24,7 +24,9 @@ def datetime_deserializer(data: dict, field_name: str) -> Optional[datetime.date
         return None
     if isinstance(value, str):
         return datetime.datetime.fromisoformat(value)
-    return value
+    if isinstance(value, datetime.datetime):
+        return value
+    return None
 
 
 @dataclass

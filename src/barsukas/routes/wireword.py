@@ -4,9 +4,11 @@
 
 import tempfile
 from datetime import datetime
+from typing import Tuple, Union
 
 from config import Config
 from flask import Blueprint, flash, redirect, render_template, request, send_file, url_for
+from werkzeug.wrappers import Response
 
 from agents.ungurys import SUPPORTED_LANGUAGES, UngurysAgent
 from wordfreq.storage.backend.config import BackendType, DataSourceConfig
@@ -14,7 +16,7 @@ from wordfreq.storage.backend.config import BackendType, DataSourceConfig
 bp = Blueprint("wireword", __name__, url_prefix="/wireword")
 
 
-def export_all_languages():
+def export_all_languages() -> str:
     """Export WireWord files for all supported languages (directory mode only)."""
     try:
         # Create DataSourceConfig
@@ -100,13 +102,13 @@ def export_all_languages():
 
 
 @bp.route("/")
-def export_page():
+def export_page() -> str:
     """Display the WireWord export page."""
     return render_template("wireword/export.html", languages=SUPPORTED_LANGUAGES)
 
 
 @bp.route("/export", methods=["POST"])
-def export_wireword():
+def export_wireword() -> Union[str, Response]:
     """Export WireWord files for a specific language."""
     language = request.form.get("language", "").strip()
     export_type = request.form.get("export_type", "directory")

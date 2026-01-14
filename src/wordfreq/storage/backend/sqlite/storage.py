@@ -1,5 +1,7 @@
 """SQLite storage backend."""
 
+from typing import Any
+
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker
 
@@ -32,14 +34,14 @@ class SQLiteStorage(BaseStorage):
 
         # Enable WAL mode for better concurrency (allows concurrent reads during writes)
         @event.listens_for(self.engine, "connect")
-        def set_sqlite_pragma(dbapi_conn, connection_record):
+        def set_sqlite_pragma(dbapi_conn: Any, connection_record: Any) -> None:
             cursor = dbapi_conn.cursor()
             cursor.execute("PRAGMA journal_mode=WAL")
             cursor.execute("PRAGMA busy_timeout=30000")  # 30 second timeout
             cursor.execute("PRAGMA synchronous=NORMAL")  # Faster, still safe with WAL
             cursor.close()
 
-        self.SessionFactory = sessionmaker(bind=self.engine)
+        self.SessionFactory: Any = sessionmaker(bind=self.engine)
 
     def create_session(self) -> BaseSession:
         """Create a new SQLite session.
@@ -60,7 +62,12 @@ class SQLiteStorage(BaseStorage):
 
         # Add missing columns to existing tables
         with self.create_session() as session:
-            ensure_tables_exist(session._sqlalchemy_session)
+            # session is guaranteed to be SQLiteSession, which has _sqlalchemy_session
+            if isinstance(session, SQLiteSession):
+                ensure_tables_exist(session._sqlalchemy_session)  # type: ignore
+            else:
+                # Fallback for other session types
+                pass
 
     def close(self) -> None:
         """Close the storage backend."""

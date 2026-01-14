@@ -1,7 +1,7 @@
 """Helper functions for working with POS enums."""
 
 import enum
-from typing import List, Optional
+from typing import Iterable, List, Optional, cast
 
 from wordfreq.storage.models.enums import AdjectiveSubtype, AdverbSubtype, NounSubtype, VerbSubtype
 
@@ -49,7 +49,7 @@ def get_subtype_values_for_pos(pos_type: str) -> List[str]:
     """
     enum_class = get_subtype_enum(pos_type)
     if enum_class:
-        return [e.value for e in enum_class]
+        return [e.value for e in cast(Iterable[enum.Enum], enum_class)]
 
     # For POS types without enum classes, check GUID prefixes mapping
     from wordfreq.storage.models.guid_prefixes import SUBTYPE_GUID_PREFIXES

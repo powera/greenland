@@ -9,7 +9,7 @@ word data quality, including lemma forms and translations.
 import logging
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 # Add src directory to path
 GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent)
@@ -23,7 +23,7 @@ from clients.unified_client import UnifiedLLMClient
 logger = logging.getLogger(__name__)
 
 
-def validate_lemma_form(word: str, pos_type: str, model: str = "gpt-5-mini") -> Dict[str, any]:
+def validate_lemma_form(word: str, pos_type: str, model: str = "gpt-5-mini") -> Dict[str, Any]:
     """
     Validate that a word is in its correct lemma (base) form.
 
@@ -98,7 +98,7 @@ def validate_translation(
     target_language: str,
     pos_type: str,
     model: str = "gpt-5-mini",
-) -> Dict[str, any]:
+) -> Dict[str, Any]:
     """
     Validate that a translation is correct and in lemma form.
 
@@ -193,7 +193,7 @@ def validate_definition(
     model: str = "gpt-5-mini",
     translation_language: Optional[str] = None,
     translation_text: Optional[str] = None,
-) -> Dict[str, any]:
+) -> Dict[str, Any]:
     """
     Validate that a definition is well-formed and appropriate.
 
@@ -280,7 +280,7 @@ def validate_definition(
 
 def batch_validate_lemmas(
     words: List[Dict[str, str]], model: str = "gpt-5-mini", confidence_threshold: float = 0.7
-) -> List[Dict[str, any]]:
+) -> List[Dict[str, Any]]:
     """
     Validate multiple words for lemma form.
 
@@ -292,7 +292,7 @@ def batch_validate_lemmas(
     Returns:
         List of validation results for words that have issues
     """
-    issues = []
+    issues: List[Dict[str, Any]] = []
 
     for word_info in words:
         word = word_info["word"]
@@ -308,7 +308,7 @@ def batch_validate_lemmas(
 
 def validate_all_translations_for_word(
     english_word: str, translations: Dict[str, str], pos_type: str, model: str = "gpt-5-mini"
-) -> Dict[str, any]:
+) -> Dict[str, Any]:
     """
     Validate all translations for a single word in one LLM call.
 
@@ -451,7 +451,7 @@ Language guidance: Validate for {language_list}.
 
 def batch_validate_translations(
     translations: List[Dict[str, str]], model: str = "gpt-5-mini", confidence_threshold: float = 0.7
-) -> List[Dict[str, any]]:
+) -> List[Dict[str, Any]]:
     """
     Validate multiple translations.
 
@@ -504,7 +504,7 @@ def validate_pronunciation(
     language_code: str = "en",
     grammatical_form: Optional[str] = None,
     english_translation: Optional[str] = None,
-) -> Dict[str, any]:
+) -> Dict[str, Any]:
     """
     Validate or generate pronunciations (both IPA and simplified phonetic).
 
@@ -727,14 +727,18 @@ especially for words with multiple pronunciations depending on usage (e.g., "rea
 Return the IPA and simplified phonetic pronunciation, along with any alternative pronunciations."""
             else:
                 # Fallback to template if no additional context
-                prompt = prompt_template.format(
-                    word=word,
-                    sentence=(
-                        context_info
-                        if "sentence" in context_info.lower()
-                        else f"Context: {context_info}"
-                    ),
-                )
+                if prompt_template is not None:
+                    prompt = prompt_template.format(
+                        word=word,
+                        sentence=(
+                            context_info
+                            if "sentence" in context_info.lower()
+                            else f"Context: {context_info}"
+                        ),
+                    )
+                else:
+                    # Fallback prompt if template is unavailable
+                    prompt = f"Provide the pronunciation for the word '{word}':\n\n{context_info}"
 
     logger.debug(f"Validating/generating pronunciation for word: '{word}' (POS: {pos_type})")
 
@@ -784,7 +788,7 @@ def generate_pronunciation(
     language_code: str = "en",
     grammatical_form: Optional[str] = None,
     english_translation: Optional[str] = None,
-) -> Dict[str, any]:
+) -> Dict[str, Any]:
     """
     Generate both IPA and simplified phonetic pronunciations for a word.
 
@@ -839,7 +843,7 @@ def batch_generate_pronunciations(
     model: str = "gpt-5-mini",
     language_code: str = "en",
     english_translation: Optional[str] = None,
-) -> Dict[str, Dict[str, any]]:
+) -> Dict[str, Dict[str, Any]]:
     """
     Generate pronunciations for multiple word forms in a single LLM call.
 
@@ -983,8 +987,8 @@ def batch_generate_pronunciations(
 
 
 def suggest_disambiguation(
-    word: str, definitions: List[Dict[str, str]], model: str = "gpt-5-mini"
-) -> Dict[str, any]:
+    word: str, definitions: List[Dict[str, Any]], model: str = "gpt-5-mini"
+) -> Dict[str, Any]:
     """
     Suggest short disambiguation terms for multiple meanings of the same word.
 
@@ -1068,7 +1072,7 @@ def validate_disambiguation_need(
     translations: Optional[Dict[str, str]] = None,
     has_parenthetical: bool = False,
     model: str = "gpt-5-mini",
-) -> Dict[str, any]:
+) -> Dict[str, Any]:
     """
     Validate whether a lemma needs parenthetical disambiguation.
 

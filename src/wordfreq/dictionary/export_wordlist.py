@@ -86,7 +86,7 @@ def export_wordlist_to_file(
         session.close()
 
 
-def main():
+def main() -> None:
     """Main function for command-line usage."""
     parser = argparse.ArgumentParser(
         description="Export words from wordfreq database to a flat file in frequency order",

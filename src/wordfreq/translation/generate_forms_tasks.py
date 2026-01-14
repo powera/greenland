@@ -6,7 +6,7 @@ scripts.
 """
 
 from dataclasses import dataclass
-from typing import Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 
 from wordfreq.storage.backend.config import DataSourceConfig
 from wordfreq.translation.client import LinguisticClient
@@ -48,29 +48,25 @@ class FormGenerationTask:
     """Describe a form generation workflow."""
 
     config: FormGenerationConfig
-    lemma_fetcher: Callable[[DataSourceConfig, Optional[int]], List[Dict]]
+    lemma_fetcher: Callable[[DataSourceConfig, Optional[int]], List[Dict[str, Any]]]
 
 
 def _translation_task(
     config: FormGenerationConfig,
 ) -> FormGenerationTask:
-    return FormGenerationTask(
-        config=config,
-        lemma_fetcher=lambda data_config, limit=None: get_lemmas_with_translation(
-            data_config, config, limit
-        ),
-    )
+    def fetcher(data_config: DataSourceConfig, limit: Optional[int] = None) -> List[Dict[str, Any]]:
+        return get_lemmas_with_translation(data_config, config, limit)
+
+    return FormGenerationTask(config=config, lemma_fetcher=fetcher)
 
 
 def _needs_forms_task(
     config: FormGenerationConfig,
 ) -> FormGenerationTask:
-    return FormGenerationTask(
-        config=config,
-        lemma_fetcher=lambda data_config, limit=None: get_lemmas_needing_forms(
-            data_config, config, limit
-        ),
-    )
+    def fetcher(data_config: DataSourceConfig, limit: Optional[int] = None) -> List[Dict[str, Any]]:
+        return get_lemmas_needing_forms(data_config, config, limit)
+
+    return FormGenerationTask(config=config, lemma_fetcher=fetcher)
 
 
 FORM_GENERATION_TASKS: Dict[str, FormGenerationTask] = {
@@ -319,7 +315,10 @@ def get_task_key(language_code: str, pos_type: str) -> str:
 
 
 def process_lemma_for_task(
-    task_key: str, lemma_id: int, data_config: DataSourceConfig, client: LinguisticClient = None
+    task_key: str,
+    lemma_id: int,
+    data_config: DataSourceConfig,
+    client: Optional[LinguisticClient] = None,
 ) -> bool:
     """Process a single lemma for a registered task."""
 

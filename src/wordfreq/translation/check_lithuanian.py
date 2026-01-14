@@ -7,7 +7,7 @@ can be reused elsewhere.
 """
 
 import logging
-from typing import Dict
+from typing import Any, Dict
 
 from wordfreq.storage.models.schema import DerivativeForm, Lemma
 from wordfreq.storage.translation_helpers import get_translation
@@ -15,7 +15,7 @@ from wordfreq.storage.translation_helpers import get_translation
 logger = logging.getLogger(__name__)
 
 
-def check_missing_lithuanian_base_forms(agent) -> Dict[str, any]:
+def check_missing_lithuanian_base_forms(agent: Any) -> Dict[str, Any]:
     """Check for lemmas with Lithuanian translations but no Lithuanian derivative forms.
 
     `agent` must provide `get_session()`.
@@ -79,7 +79,7 @@ def check_missing_lithuanian_base_forms(agent) -> Dict[str, any]:
         session.close()
 
 
-def check_noun_declension_coverage(agent) -> Dict[str, any]:
+def check_noun_declension_coverage(agent: Any) -> Dict[str, Any]:
     """Check Lithuanian noun declension coverage.
 
     `agent` must provide `get_session()`.

@@ -256,7 +256,7 @@ class WordCategorizer:
         logger.info(f"Results saved to {filename}")
 
 
-def main():
+def main() -> int:
     """Command-line interface for the word categorizer."""
     import argparse
 

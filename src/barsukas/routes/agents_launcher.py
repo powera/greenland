@@ -8,6 +8,7 @@ import threading
 import time
 import uuid
 from pathlib import Path
+from typing import Any, Dict, IO, Iterator, List, Optional, Union
 
 from config import Config
 from flask import (
@@ -273,7 +274,7 @@ PIPELINE = [
 ]
 
 
-def check_database_empty():
+def check_database_empty() -> bool:
     """Check if the database is empty or if key tables are empty."""
     from wordfreq.storage.models.schema import Lemma, WordToken
 
@@ -289,7 +290,7 @@ def check_database_empty():
 
 
 @bp.route("/")
-def list_agents():
+def list_agents() -> str:
     """Display the list of available agents."""
     # Check if database is empty to determine PRADZIA visibility
     db_empty = check_database_empty()
@@ -312,7 +313,7 @@ def list_agents():
 
 
 @bp.route("/launch/<agent_name>", methods=["GET"])
-def launch_form(agent_name):
+def launch_form(agent_name: str) -> Union[str, Response]:
     """Display the launch form for a specific agent."""
     # Find the agent
     agent = next((a for a in AGENTS if a["name"] == agent_name), None)
@@ -329,7 +330,9 @@ def launch_form(agent_name):
     argument_groups = None
     if agent.get("use_dynamic_form"):
         try:
-            module_path = get_agent_cli_module_path(agent["script"])
+            # Type narrowing: agent["script"] is guaranteed to be a string from AGENTS definitions
+            script: str = agent["script"]  # type: ignore[assignment]
+            module_path = get_agent_cli_module_path(script)
             parser_info = introspect_agent_parser(module_path)
             # Use semantic category grouping instead of mode-based grouping
             argument_groups = group_arguments_by_category(parser_info["arguments"])
@@ -349,7 +352,7 @@ def launch_form(agent_name):
 
 
 @bp.route("/execute/<agent_name>", methods=["POST"])
-def execute_agent(agent_name):
+def execute_agent(agent_name: str) -> Response:
     """Execute an agent with specified parameters (async)."""
     # Find the agent
     agent = next((a for a in AGENTS if a["name"] == agent_name), None)
@@ -358,7 +361,9 @@ def execute_agent(agent_name):
         return redirect(url_for("agents_launcher.list_agents"))
 
     # Build command
-    script_path = Path(constants.AGENTS_DIR) / agent["script"]
+    # Type narrowing: agent["script"] is guaranteed to be a string from AGENTS definitions
+    agent_script: str = agent["script"]  # type: ignore[assignment]
+    script_path = Path(constants.AGENTS_DIR) / agent_script
 
     if not script_path.exists():
         flash_and_log(f"Script not found: {script_path}", "error")
@@ -404,8 +409,10 @@ def execute_agent(agent_name):
         # Add mode arguments if provided
         if mode:
             # Find the mode in agent config
-            mode_config = next((m for m in agent.get("modes", []) if m["label"] == mode), None)
-            if mode_config and mode_config["args"]:
+            # Type narrowing: agent.get("modes", []) returns a list from AGENTS definitions
+            modes: List[Any] = agent.get("modes", [])  # type: ignore[assignment]
+            mode_config = next((m for m in modes if m["label"] == mode), None)
+            if mode_config and mode_config.get("args"):
                 args.extend(mode_config["args"].split())
 
         # Add custom arguments
@@ -448,15 +455,21 @@ def execute_agent(agent_name):
         }
 
         # Start background thread to read output
-        def read_output():
+        def read_output() -> None:
             try:
+                # Type narrowing: process.stdout is guaranteed to be non-None from subprocess.PIPE
+                assert process.stdout is not None, "process.stdout should not be None"
                 for line in process.stdout:
-                    running_tasks[task_id]["output"].append(line)
+                    # Type narrowing: running_tasks[task_id]["output"] is guaranteed to be a list
+                    output_list: List[str] = running_tasks[task_id]["output"]  # type: ignore[assignment]
+                    output_list.append(line)
                 process.wait()
                 running_tasks[task_id]["complete"] = True
                 running_tasks[task_id]["returncode"] = process.returncode
             except Exception as e:
-                running_tasks[task_id]["output"].append(f"Error reading output: {str(e)}\n")
+                # Type narrowing: running_tasks[task_id]["output"] is guaranteed to be a list
+                output_list_err: List[str] = running_tasks[task_id]["output"]  # type: ignore[assignment]
+                output_list_err.append(f"Error reading output: {str(e)}\n")
                 running_tasks[task_id]["complete"] = True
                 running_tasks[task_id]["returncode"] = -1
 
@@ -472,7 +485,7 @@ def execute_agent(agent_name):
 
 
 @bp.route("/output/<task_id>")
-def view_output(task_id):
+def view_output(task_id: str) -> Union[str, Response]:
     """Display the output page for a running/completed agent task."""
     if task_id not in running_tasks:
         flash_and_log("Task not found or expired", "error")
@@ -489,12 +502,12 @@ def view_output(task_id):
 
 
 @bp.route("/stream/<task_id>")
-def stream_output(task_id):
+def stream_output(task_id: str) -> Response:
     """Stream the output of a running agent task using Server-Sent Events."""
     if task_id not in running_tasks:
         return jsonify({"success": False, "error": "Task not found"}), 404
 
-    def generate():
+    def generate() -> Iterator[str]:
         """Generator function to stream output line by line."""
         import json
 
@@ -503,10 +516,12 @@ def stream_output(task_id):
 
         while True:
             # Send any new output lines
-            current_output_length = len(task["output"])
+            # Type narrowing: task["output"] is guaranteed to be a list
+            output_lines: List[str] = task["output"]  # type: ignore[assignment]
+            current_output_length = len(output_lines)
             if current_output_length > last_line_sent:
                 for i in range(last_line_sent, current_output_length):
-                    line_data = json.dumps({"type": "output", "line": task["output"][i]})
+                    line_data = json.dumps({"type": "output", "line": output_lines[i]})
                     yield f"data: {line_data}\n\n"
                 last_line_sent = current_output_length
 

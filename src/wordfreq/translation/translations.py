@@ -4,7 +4,7 @@
 
 import json
 import logging
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import util.prompt_loader
 from clients.types import Schema, SchemaProperty
@@ -15,15 +15,15 @@ logger = logging.getLogger(__name__)
 
 
 def query_translations(
-    client,
+    client: Any,
     english_word: str,
     reference_translation: Tuple[str, str],
     definition: str,
     pos_type: str,
-    get_session_func,
+    get_session_func: Callable,
     pos_subtype: Optional[str] = None,
     languages: Optional[List[str]] = None,
-    model: str = None,
+    model: Optional[str] = None,
 ) -> Tuple[Dict[str, str], bool]:
     """
     Query LLM to generate translations for a word with known English, reference translation, and definition.
@@ -159,7 +159,7 @@ def query_translations(
                 query_type="translation_generation",
                 prompt=prompt,
                 response=json.dumps(response.structured_data),
-                model=model,
+                model=model or "unknown",
             )
         except Exception as log_err:
             logger.error(f"Failed to log successful query: {log_err}")

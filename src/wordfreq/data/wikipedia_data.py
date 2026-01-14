@@ -173,7 +173,7 @@ def process_article(wiki_loader: WikiLoader, article_name: str) -> Counter:
         return Counter()
 
 
-def main():
+def main() -> None:
     """Main function to process articles and generate word frequencies."""
     # Initialize the WikiLoader
     wiki_loader = WikiLoader()
@@ -193,7 +193,7 @@ def main():
     print(f"Found {len(article_names)} articles to process")
 
     # Process all articles and aggregate word counts
-    total_word_counts = Counter()
+    total_word_counts: Counter = Counter()
     total_articles_processed = 0
 
     start_time = time.time()

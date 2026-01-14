@@ -39,7 +39,7 @@ import json
 import os
 import re
 import sys
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 # Configuration - Update these paths as needed
 GREENLAND_SRC_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
@@ -81,7 +81,7 @@ english_alternative_map = {
 }
 
 
-def clean_english_word(english_word: str) -> tuple[str, bool]:
+def clean_english_word(english_word: str) -> Tuple[str, bool]:
     """
     Normalize English word while preserving parenthetical disambiguation.
 
@@ -131,7 +131,7 @@ def load_trakaido_json(json_path: str) -> List[Dict[str, Any]]:
         with open(json_path, "r", encoding="utf-8") as f:
             data = json.load(f)
     except json.JSONDecodeError as e:
-        raise json.JSONDecodeError(f"Invalid JSON in {json_path}: {e}")
+        raise json.JSONDecodeError(f"Invalid JSON in {json_path}: {e}", "", 0) from e
 
     if not isinstance(data, list):
         raise ValueError(f"Expected JSON to contain a list, got {type(data)}")
@@ -174,7 +174,7 @@ def load_trakaido_json(json_path: str) -> List[Dict[str, Any]]:
     return data
 
 
-def get_pos_and_subtype_for_category(display_category_name: str) -> tuple[str, Optional[str]]:
+def get_pos_and_subtype_for_category(display_category_name: str) -> Tuple[str, Optional[str]]:
     """
     Determine the part of speech and subtype for a given display category.
 
@@ -257,7 +257,7 @@ def get_pos_and_subtype_for_category(display_category_name: str) -> tuple[str, O
 
 
 def find_or_create_lemma(
-    session,
+    session: Any,
     english_word: str,
     lithuanian_word: str,
     difficulty_level: int,
@@ -285,6 +285,16 @@ def find_or_create_lemma(
     # Normalize the English word (preserves parentheticals for disambiguation)
     # DO NOT lowercase - proper nouns like "Christmas" and "North America" need capitalization
     clean_english, has_parentheses = clean_english_word(english_word)
+
+    # Extract notes from parenthetical information if present
+    notes = None
+    if has_parentheses:
+        # Extract text from parentheses for notes
+        import re
+
+        match = re.search(r"\(([^)]+)\)", english_word)
+        if match:
+            notes = match.group(1)
 
     # Use provided POS or default to noun
     if not pos_type:
@@ -367,7 +377,7 @@ def find_or_create_lemma(
         return None
 
 
-def create_alternatives_for_lemma(session, lemma: Lemma, english_word: str) -> int:
+def create_alternatives_for_lemma(session: Any, lemma: Lemma, english_word: str) -> int:
     """
     Create alternative forms for a lemma based on the english_alternative_map.
 
@@ -429,11 +439,11 @@ def create_alternatives_for_lemma(session, lemma: Lemma, english_word: str) -> i
 
 
 def migrate_json_data(
-    session,
+    session: Any,
     trakaido_data: List[Dict[str, Any]],
     update_difficulty: bool = True,
     verbose: bool = True,
-):
+) -> Tuple[int, int]:
     """
     Migrate data from JSON export to the database.
 
@@ -503,7 +513,7 @@ def migrate_json_data(
     return successful_migrations, total_words
 
 
-def main():
+def main() -> None:
     """Main migration function."""
     parser = argparse.ArgumentParser(
         description="Migrate trakaido data from JSON export to wordfreq database",

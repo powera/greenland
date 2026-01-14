@@ -1,9 +1,11 @@
 """Database session management utilities."""
 
 import logging
+from typing import Any
 
 from sqlalchemy import create_engine, event, inspect, text
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.engine import Engine
+from sqlalchemy.orm import Session, sessionmaker
 
 import constants
 from wordfreq.storage.models.schema import Base
@@ -11,7 +13,7 @@ from wordfreq.storage.models.schema import Base
 logger = logging.getLogger(__name__)
 
 
-def _configure_sqlite_connection(dbapi_conn, connection_record):
+def _configure_sqlite_connection(dbapi_conn: Any, connection_record: Any) -> None:
     """Configure SQLite connection for better concurrency."""
     cursor = dbapi_conn.cursor()
     cursor.execute("PRAGMA journal_mode=WAL")
@@ -20,7 +22,7 @@ def _configure_sqlite_connection(dbapi_conn, connection_record):
     cursor.close()
 
 
-def create_database_session(db_path: str = constants.WORDFREQ_DB_PATH):
+def create_database_session(db_path: str = constants.WORDFREQ_DB_PATH) -> Session:
     """Create a new database session."""
     engine = create_engine(
         f"sqlite:///{db_path}",
@@ -37,7 +39,7 @@ def create_database_session(db_path: str = constants.WORDFREQ_DB_PATH):
     return Session()
 
 
-def ensure_tables_exist(session):
+def ensure_tables_exist(session: Session) -> None:
     """
     Ensure tables exist in the database and add any missing columns.
 
@@ -53,7 +55,7 @@ def ensure_tables_exist(session):
     _add_missing_columns(engine)
 
 
-def _add_missing_columns(engine):
+def _add_missing_columns(engine: Engine) -> None:
     """
     Add any missing columns to existing tables based on the current schema.
 

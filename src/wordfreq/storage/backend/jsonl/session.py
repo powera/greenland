@@ -1,12 +1,15 @@
 """JSONL session implementation."""
 
 import datetime
-from typing import Any, Dict, List, Optional, Type, TypeVar
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, TypeVar
 
 from sqlalchemy.orm import Query as SQLAlchemyQuery
 
 from wordfreq.storage.backend.base import BaseSession
 from wordfreq.storage.backend.jsonl import models
+
+if TYPE_CHECKING:
+    from wordfreq.storage.backend.jsonl.storage import JSONLStorage
 
 T = TypeVar("T")
 
@@ -32,7 +35,7 @@ class JSONLSession(BaseSession):
         self._is_closed = False
         self._sqlite_session = None
 
-    def _get_sqlite_session(self):
+    def _get_sqlite_session(self) -> Any:
         """Get or create a SQLite session for complex queries.
 
         Returns:
@@ -55,6 +58,7 @@ class JSONLSession(BaseSession):
 
             Session = sessionmaker(bind=engine)
             self._sqlite_session = Session()
+            assert self._sqlite_session is not None  # For type checking
 
             # Populate with data from JSONL storage
             self._populate_sqlite()
@@ -66,6 +70,7 @@ class JSONLSession(BaseSession):
             from wordfreq.storage.models.schema import Sentence as SQLSentence
             from wordfreq.storage.models.schema import SentenceTranslation, SentenceWord
 
+            assert self._sqlite_session is not None  # For type checking
             lemma_count = self._sqlite_session.query(SQLLemma).count()
             translation_count = self._sqlite_session.query(LemmaTranslation).count()
             grammar_fact_count = self._sqlite_session.query(SQLGrammarFact).count()
@@ -85,7 +90,7 @@ class JSONLSession(BaseSession):
 
         return self._sqlite_session
 
-    def _get_model_map(self):
+    def _get_model_map(self) -> Dict[Type[Any], Type[Any]]:
         """Get mapping from JSONL model classes to SQLAlchemy model classes.
 
         Returns:
@@ -113,8 +118,9 @@ class JSONLSession(BaseSession):
             models.SentenceWord: SQLSentenceWord,
         }
 
-    def _populate_sqlite(self):
+    def _populate_sqlite(self) -> None:
         """Populate the temporary SQLite database with data from JSONL storage."""
+        assert self._sqlite_session is not None  # For type checking
         from wordfreq.storage.models.grammar_fact import GrammarFact as SQLGrammarFact
         from wordfreq.storage.models.schema import Lemma as SQLLemma
         from wordfreq.storage.models.schema import LemmaTranslation
@@ -175,10 +181,11 @@ class JSONLSession(BaseSession):
             sentence_dict = {
                 "id": jsonl_sentence.id,
                 "guid": jsonl_sentence.guid,
-                "sentence_text": jsonl_sentence.sentence_text,
-                "language_code": jsonl_sentence.language_code,
-                "difficulty_level": jsonl_sentence.difficulty_level,
-                "audio_url": jsonl_sentence.audio_url,
+                "pattern_type": jsonl_sentence.pattern_type,
+                "tense": jsonl_sentence.tense,
+                "minimum_level": jsonl_sentence.minimum_level,
+                "source_filename": jsonl_sentence.source_filename,
+                "verified": jsonl_sentence.verified,
                 "added_at": jsonl_sentence.added_at,
                 "updated_at": jsonl_sentence.updated_at,
             }
@@ -204,7 +211,6 @@ class JSONLSession(BaseSession):
                         "position": word_data.get("position", 0),
                         "word_role": word_data.get("word_role"),
                         "grammatical_form": word_data.get("grammatical_form"),
-                        "is_required_vocab": word_data.get("is_required_vocab", True),
                     }
                 )
 
@@ -224,7 +230,7 @@ class JSONLSession(BaseSession):
 
         self._sqlite_session.commit()
 
-    def query(self, *entities, **kwargs) -> SQLAlchemyQuery:
+    def query(self, *entities: Any, **kwargs: Any) -> SQLAlchemyQuery:
         """Create a query for the given model class or columns.
 
         Loads JSONL data into ephemeral SQLite and returns a raw SQLAlchemy query.
@@ -257,7 +263,7 @@ class JSONLSession(BaseSession):
         sqlite_session = self._get_sqlite_session()
         return sqlite_session.query(*mapped_entities, **kwargs)
 
-    def _extract_lemma_translations(self):
+    def _extract_lemma_translations(self) -> List[models.LemmaTranslation]:
         """Extract LemmaTranslation objects from nested Lemma data."""
         translations = []
         for lemma in self._storage.lemmas.values():
@@ -271,7 +277,7 @@ class JSONLSession(BaseSession):
                 translations.append(trans)
         return translations
 
-    def _extract_difficulty_overrides(self):
+    def _extract_difficulty_overrides(self) -> List[models.LemmaDifficultyOverride]:
         """Extract LemmaDifficultyOverride objects from nested Lemma data."""
         overrides = []
         for lemma in self._storage.lemmas.values():
@@ -285,7 +291,7 @@ class JSONLSession(BaseSession):
                 overrides.append(override)
         return overrides
 
-    def _extract_derivative_forms(self):
+    def _extract_derivative_forms(self) -> List[models.DerivativeForm]:
         """Extract DerivativeForm objects from nested Lemma data."""
         forms = []
         for lemma in self._storage.lemmas.values():
@@ -304,7 +310,7 @@ class JSONLSession(BaseSession):
                     forms.append(form)
         return forms
 
-    def _extract_grammar_facts(self):
+    def _extract_grammar_facts(self) -> List[models.GrammarFact]:
         """Extract GrammarFact objects from nested Lemma data."""
         facts = []
         for lemma in self._storage.lemmas.values():
@@ -321,7 +327,7 @@ class JSONLSession(BaseSession):
                 facts.append(fact)
         return facts
 
-    def _extract_sentence_translations(self):
+    def _extract_sentence_translations(self) -> List[models.SentenceTranslation]:
         """Extract SentenceTranslation objects from nested Sentence data."""
         translations = []
         for sentence in self._storage.sentences.values():
@@ -335,7 +341,7 @@ class JSONLSession(BaseSession):
                 translations.append(trans)
         return translations
 
-    def _extract_sentence_words(self):
+    def _extract_sentence_words(self) -> List[models.SentenceWord]:
         """Extract SentenceWord objects from nested Sentence data."""
         words = []
         for sentence in self._storage.sentences.values():
@@ -345,9 +351,8 @@ class JSONLSession(BaseSession):
                     lemma_id=word_data.get("lemma_id"),
                     language_code=word_data.get("language_code", ""),
                     position=word_data.get("position", 0),
-                    word_role=word_data.get("word_role"),
+                    word_role=word_data.get("word_role", ""),
                     grammatical_form=word_data.get("grammatical_form"),
-                    is_required_vocab=word_data.get("is_required_vocab", True),
                     sentence=sentence,
                 )
                 words.append(word)
@@ -371,7 +376,8 @@ class JSONLSession(BaseSession):
 
         # Use SQLite for consistent querying
         sqlite_session = self._get_sqlite_session()
-        return sqlite_session.get(mapped_model_class, id)
+        result: Optional[T] = sqlite_session.get(mapped_model_class, id)
+        return result
 
     def add(self, instance: Any) -> None:
         """Add an instance to the session (mark for saving).
@@ -463,6 +469,7 @@ class JSONLSession(BaseSession):
             instance: The derivative form
         """
         lemma = instance.lemma
+        assert lemma is not None, "lemma must not be None"
         lang_code = instance.language_code
         form_name = instance.grammatical_form
 
@@ -485,6 +492,7 @@ class JSONLSession(BaseSession):
             instance: The grammar fact
         """
         lemma = instance.lemma
+        assert lemma is not None, "lemma must not be None"
 
         # Check if fact already exists
         existing_fact = None
@@ -538,7 +546,6 @@ class JSONLSession(BaseSession):
                 "position": instance.position,
                 "word_role": instance.word_role,
                 "grammatical_form": instance.grammatical_form,
-                "is_required_vocab": instance.is_required_vocab,
             }
 
             if existing_word is not None:

@@ -1,7 +1,9 @@
 """Noun form query functions."""
 
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, cast
+
+from sqlalchemy.orm import Session
 
 from wordfreq.storage.crud.lemma import get_lemma_by_guid
 from wordfreq.storage.models.schema import DerivativeForm
@@ -9,7 +11,7 @@ from wordfreq.storage.models.schema import DerivativeForm
 logger = logging.getLogger(__name__)
 
 
-def get_noun_form(session, guid: str, grammatical_form: str) -> Optional[str]:
+def get_noun_form(session: Session, guid: str, grammatical_form: str) -> Optional[str]:
     """
     Get a specific declined form of a noun from the database.
 
@@ -45,10 +47,10 @@ def get_noun_form(session, guid: str, grammatical_form: str) -> Optional[str]:
         logger.warning(f"No {grammatical_form} form found for {lemma.lemma_text} (GUID: {guid})")
         return None
 
-    return form.derivative_form_text
+    return cast(str, form.derivative_form_text)
 
 
-def get_all_noun_forms(session, guid: str) -> Dict[str, str]:
+def get_all_noun_forms(session: Session, guid: str) -> Dict[str, str]:
     """
     Get all declined forms of a noun from the database.
 
@@ -86,7 +88,7 @@ def get_all_noun_forms(session, guid: str) -> Dict[str, str]:
     return result
 
 
-def check_noun_forms_coverage(session, guid: str) -> Dict[str, Any]:
+def check_noun_forms_coverage(session: Session, guid: str) -> Dict[str, Any]:
     """
     Check which noun forms are available in the database for a given GUID.
 

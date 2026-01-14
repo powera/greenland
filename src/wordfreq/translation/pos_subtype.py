@@ -5,7 +5,7 @@
 import json
 import logging
 import time
-from typing import Any, Dict, Tuple
+from typing import Any, Callable, Dict, Tuple
 
 import util.prompt_loader
 from clients.types import Schema, SchemaProperty
@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 def query_pos_subtype(
-    client, word: str, definition_text: str, pos_type: str, get_session_func
+    client: Any, word: str, definition_text: str, pos_type: str, get_session_func: Callable
 ) -> Tuple[str, bool]:
     """
     Query LLM for POS subtype for a definition.
@@ -110,7 +110,7 @@ def query_pos_subtype(
 
 
 def update_missing_subtypes_for_word(
-    client, word_text: str, get_session_func, throttle: float = 1.0
+    client: Any, word_text: str, get_session_func: Callable, throttle: float = 1.0
 ) -> Dict[str, Any]:
     """
     Add missing POS subtypes for all definitions of a word.
@@ -204,7 +204,7 @@ def update_missing_subtypes_for_word(
 
 
 def update_subtypes_for_batch(
-    client, get_session_func, limit: int = 100, throttle: float = 1.0
+    client: Any, get_session_func: Callable, limit: int = 100, throttle: float = 1.0
 ) -> Dict[str, Any]:
     """
     Add missing POS subtypes for a batch of definitions.

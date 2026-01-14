@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 from flask import current_app
+from sqlalchemy.orm import Session
 
 from agents.common.wq_tools import build_default_config, get_lemma_or_raise
 from config import Config
@@ -46,7 +47,7 @@ def _get_audio_output_dir() -> str:
     return tempfile.mkdtemp(prefix="audio_gen_")
 
 
-def handle_generate_audio(session, payload: Dict) -> str:
+def handle_generate_audio(session: Session, payload: Dict) -> str:
     """
     Handle audio generation task.
 
@@ -73,25 +74,25 @@ def handle_generate_audio(session, payload: Dict) -> str:
 
     # Convert voice names to appropriate enums based on TTS engine
     if tts_engine == "espeak-ng":
-        voice_enums = [EspeakVoice[v.upper()] for v in voice_names]
-        agent = StrazdasAgent(config=config, output_dir=audio_output_dir)
-        result = agent.generate_audio_for_lemma(
+        espeak_voice_enums = [EspeakVoice[v.upper()] for v in voice_names]
+        strazdas_agent = StrazdasAgent(config=config, output_dir=audio_output_dir)
+        result = strazdas_agent.generate_audio_for_lemma(
             session,
             lemma,
             language_code,
-            voice_enums,
+            espeak_voice_enums,
             create_review_record=True,
             use_ipa=use_ipa,
         )
     else:
         # Default to OpenAI
-        voice_enums = [Voice(v) for v in voice_names]
-        agent = VieversysAgent(config=config, output_dir=audio_output_dir)
-        result = agent.generate_audio_for_lemma(
+        openai_voice_enums = [Voice(v) for v in voice_names]
+        vieversys_agent = VieversysAgent(config=config, output_dir=audio_output_dir)
+        result = vieversys_agent.generate_audio_for_lemma(
             session,
             lemma,
             language_code,
-            voice_enums,
+            openai_voice_enums,
             create_review_record=True,
         )
 

@@ -9,7 +9,7 @@ import os
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple, cast
 
 import constants
 from wordfreq.storage import database as linguistic_db
@@ -66,14 +66,30 @@ class WordProcessor:
             logger.setLevel(logging.DEBUG)
 
         # Initialize the database if needed
-        session = get_session(db_path, echo=debug)
+        from wordfreq.storage.backend.config import BackendType, DataSourceConfig
+
+        config = DataSourceConfig(
+            backend_type=BackendType.SQLITE,
+            sqlite_path=db_path,
+            model=model,
+            debug=debug,
+        )
+        session = get_session(config, echo=debug)
         linguistic_db.ensure_tables_exist(session)
 
         logger.info(f"Initialized WordProcessor with model {model}")
 
-    def get_session(self):
+    def get_session(self) -> Any:
         """Get a thread-local database session."""
-        return get_session(self.db_path, echo=self.debug)
+        from wordfreq.storage.backend.config import BackendType, DataSourceConfig
+
+        config = DataSourceConfig(
+            backend_type=BackendType.SQLITE,
+            sqlite_path=self.db_path,
+            model=self.model,
+            debug=self.debug,
+        )
+        return get_session(config, echo=self.debug)
 
     def process_single_word(self, word: str) -> bool:
         """
@@ -204,7 +220,7 @@ class WordProcessor:
             "batches": batch_count,
         }
 
-    def close(self):
+    def close(self) -> None:
         """Close database sessions and other resources."""
         close_thread_sessions()
         LinguisticClient.close_all()

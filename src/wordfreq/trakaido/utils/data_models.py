@@ -128,8 +128,8 @@ def create_export_stats(data: List[Dict[str, Any]]) -> ExportStats:
     Returns:
         ExportStats object with calculated statistics
     """
-    pos_counts = {}
-    level_counts = {}
+    pos_counts: Dict[str, int] = {}
+    level_counts: Dict[str, int] = {}
     guid_count = 0
 
     for entry in data:
@@ -152,7 +152,7 @@ def create_export_stats(data: List[Dict[str, Any]]) -> ExportStats:
 
 
 def create_bulk_operation_result(
-    total: int, successful: int, failed: int, errors: List[str] = None
+    total: int, successful: int, failed: int, errors: Optional[List[str]] = None
 ) -> BulkOperationResult:
     """
     Create BulkOperationResult with calculated values.

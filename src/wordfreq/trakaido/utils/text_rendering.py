@@ -7,7 +7,7 @@ text-based output in a consistent format.
 """
 
 from dataclasses import dataclass
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from wordfreq.storage.translation_helpers import get_translation
 
@@ -105,7 +105,7 @@ def format_subtype_display_name(subtype: str) -> str:
     return formatted.title()
 
 
-def display_word_data(word_data) -> None:
+def display_word_data(word_data: Any) -> None:
     """
     Display word data in a formatted table for user review.
 
@@ -150,7 +150,7 @@ def display_word_data(word_data) -> None:
     print("=" * 60)
 
 
-def display_current_lemma_entry(session, lemma) -> None:
+def display_current_lemma_entry(session: Any, lemma: Any) -> None:
     """
     Display current lemma entry information in a formatted table.
 
@@ -216,7 +216,9 @@ def display_subtype_list(subtypes: List[Dict[str, Any]]) -> None:
         print("No subtypes found.")
 
 
-def display_export_summary(export_type: str, success: bool, stats=None, **kwargs) -> None:
+def display_export_summary(
+    export_type: str, success: bool, stats: Optional[Any] = None, **kwargs: Any
+) -> None:
     """
     Display a summary of export operation results.
 

@@ -3,9 +3,10 @@
 """Routes for viewing operation logs."""
 
 import json
+from typing import Union
 
 from config import Config
-from flask import Blueprint, flash, g, redirect, render_template, request, url_for
+from flask import Blueprint, Response, flash, g, redirect, render_template, request, url_for
 
 from barsukas.helpers.flash_helpers import flash_and_log
 from wordfreq.storage.models.operation_log import OperationLog
@@ -15,7 +16,7 @@ bp = Blueprint("operation_logs", __name__, url_prefix="/logs")
 
 
 @bp.route("/")
-def list_logs():
+def list_logs() -> str:
     """List operation logs with pagination and filtering."""
     page = request.args.get("page", 1, type=int)
     source_filter = request.args.get("source", "").strip()
@@ -90,7 +91,7 @@ def list_logs():
 
 
 @bp.route("/<int:log_id>")
-def view_log(log_id):
+def view_log(log_id: int) -> Union[str, Response]:
     """View a single operation log entry."""
     log = g.db.query(OperationLog).get(log_id)
     if not log:

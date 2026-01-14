@@ -14,6 +14,7 @@ import constants
 import util.prompt_loader
 from clients.types import Schema, SchemaProperty
 from clients.unified_client import UnifiedLLMClient
+from wordfreq.storage.backend.base import BaseSession
 from wordfreq.storage.backend.config import DataSourceConfig
 from wordfreq.storage.crud.grammar_fact import add_grammar_fact, get_grammar_fact_value
 from wordfreq.storage.crud.operation_log import log_operation
@@ -219,7 +220,7 @@ def generate_grammatical_gender(
             "gender": SchemaProperty(
                 "string",
                 f"The grammatical gender: {valid_genders}",
-                enum=gender_config["genders"],
+                enum=list(gender_config["genders"]),
             ),
             "explanation": SchemaProperty(
                 "string", "Brief explanation of why this gender is correct"
@@ -253,7 +254,7 @@ def validate_grammar_fact_request(
     lemma: Lemma,
     fact_type: str,
     language_code: str,
-    session,
+    session: BaseSession,
 ) -> Tuple[bool, Optional[str], Optional[str]]:
     """
     Validate that grammar fact generation can proceed.
@@ -291,7 +292,7 @@ def validate_grammar_fact_request(
 
 
 def generate_grammar_fact_for_lemma(
-    session,
+    session: BaseSession,
     lemma: Lemma,
     fact_type: str,
     language_code: str,
@@ -346,6 +347,8 @@ def generate_grammar_fact_for_lemma(
         }
 
     # Generate fact based on type
+    # translation is guaranteed to be non-None here due to validation check above
+    assert translation is not None
     if fact_type == "measure_words":
         fact_value, notes, confidence = generate_measure_words(lemma, translation, config)
     elif fact_type == "grammatical_gender":
@@ -408,7 +411,7 @@ def generate_grammar_fact_for_lemma(
     }
 
 
-def handle_generate_grammar_fact(session, payload: Dict) -> str:
+def handle_generate_grammar_fact(session: BaseSession, payload: Dict) -> str:
     """
     Handle grammar fact generation task (workqueue entry point).
 

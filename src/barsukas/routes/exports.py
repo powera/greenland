@@ -6,9 +6,20 @@ import os
 import re
 import subprocess
 from pathlib import Path
+from typing import Union, Tuple
 
 from config import Config
-from flask import Blueprint, flash, jsonify, redirect, render_template, request, send_file, url_for
+from flask import (
+    Blueprint,
+    flash,
+    jsonify,
+    redirect,
+    render_template,
+    request,
+    send_file,
+    url_for,
+    Response,
+)
 
 import constants
 
@@ -16,19 +27,19 @@ bp = Blueprint("exports", __name__, url_prefix="/exports")
 
 
 @bp.route("/")
-def exports_page():
+def exports_page() -> str:
     """Display the exports landing page with POVAS and UNGURYS options."""
     return render_template("exports/index.html")
 
 
 @bp.route("/povas")
-def povas_form():
+def povas_form() -> str:
     """Display the POVAS HTML generation form."""
     return render_template("exports/povas.html")
 
 
 @bp.route("/povas/generate", methods=["POST"])
-def povas_generate():
+def povas_generate() -> Union[Response, Tuple[Response, int]]:
     """Execute POVAS to generate HTML files."""
     generation_mode = request.form.get("generation_mode", "all")  # 'all' or 'index-only'
     dry_run = request.form.get("dry_run") == "true"
@@ -81,13 +92,13 @@ def povas_generate():
 
 
 @bp.route("/elnias")
-def elnias_form():
+def elnias_form() -> str:
     """Display the ELNIAS bootstrap export form."""
     return render_template("exports/elnias.html")
 
 
 @bp.route("/elnias/generate", methods=["POST"])
-def elnias_generate():
+def elnias_generate() -> Union[Response, Tuple[Response, int]]:
     """Execute ELNIAS to generate bootstrap JSON file."""
     language = request.form.get("language", "lt")
     include_unverified = request.form.get("include_unverified") == "true"
@@ -152,7 +163,7 @@ def elnias_generate():
 
 
 @bp.route("/elnias/download")
-def elnias_download():
+def elnias_download() -> Response:
     """Download the generated ELNIAS bootstrap file."""
     file_path = request.args.get("path")
 

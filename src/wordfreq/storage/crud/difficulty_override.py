@@ -1,14 +1,19 @@
 """CRUD operations for LemmaDifficultyOverride model."""
 
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from sqlalchemy import and_
+from sqlalchemy.orm import Session
 
 from wordfreq.storage.models.schema import Lemma, LemmaDifficultyOverride
 
 
 def add_difficulty_override(
-    session, lemma_id: int, language_code: str, difficulty_level: int, notes: Optional[str] = None
+    session: Session,
+    lemma_id: int,
+    language_code: str,
+    difficulty_level: int,
+    notes: Optional[str] = None,
 ) -> LemmaDifficultyOverride:
     """
     Add or update a difficulty level override for a lemma in a specific language.
@@ -56,7 +61,7 @@ def add_difficulty_override(
 
 
 def get_difficulty_override(
-    session, lemma_id: int, language_code: str
+    session: Session, lemma_id: int, language_code: str
 ) -> Optional[LemmaDifficultyOverride]:
     """
     Get a difficulty override for a specific lemma and language.
@@ -81,7 +86,7 @@ def get_difficulty_override(
     )
 
 
-def get_all_overrides_for_lemma(session, lemma_id: int) -> List[LemmaDifficultyOverride]:
+def get_all_overrides_for_lemma(session: Session, lemma_id: int) -> List[LemmaDifficultyOverride]:
     """
     Get all difficulty overrides for a specific lemma across all languages.
 
@@ -99,7 +104,9 @@ def get_all_overrides_for_lemma(session, lemma_id: int) -> List[LemmaDifficultyO
     )
 
 
-def get_all_overrides_for_language(session, language_code: str) -> List[LemmaDifficultyOverride]:
+def get_all_overrides_for_language(
+    session: Session, language_code: str
+) -> List[LemmaDifficultyOverride]:
     """
     Get all difficulty overrides for a specific language.
 
@@ -117,7 +124,7 @@ def get_all_overrides_for_language(session, language_code: str) -> List[LemmaDif
     )
 
 
-def delete_difficulty_override(session, lemma_id: int, language_code: str) -> bool:
+def delete_difficulty_override(session: Session, lemma_id: int, language_code: str) -> bool:
     """
     Delete a difficulty override.
 
@@ -137,7 +144,9 @@ def delete_difficulty_override(session, lemma_id: int, language_code: str) -> bo
     return False
 
 
-def get_effective_difficulty_level(session, lemma: Lemma, language_code: str) -> Optional[int]:
+def get_effective_difficulty_level(
+    session: Session, lemma: Lemma, language_code: str
+) -> Optional[int]:
     """
     Get the effective difficulty level for a lemma in a specific language.
 
@@ -165,7 +174,7 @@ def get_effective_difficulty_level(session, lemma: Lemma, language_code: str) ->
 
 
 def get_lemmas_by_effective_level(
-    session,
+    session: Session,
     language_code: str,
     difficulty_level: int,
     pos_type: Optional[str] = None,
@@ -209,7 +218,7 @@ def get_lemmas_by_effective_level(
     return result
 
 
-def bulk_add_overrides(session, overrides: List[Dict[str, any]]) -> int:
+def bulk_add_overrides(session: Session, overrides: List[Dict[str, Any]]) -> int:
     """
     Bulk add or update difficulty overrides.
 
