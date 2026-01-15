@@ -26,6 +26,7 @@ import logging
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
+from sqlalchemy.orm import Session
 from wordfreq.storage.backend import create_session as create_backend_session
 from wordfreq.storage.backend.config import DataSourceConfig
 from wordfreq.storage.models.schema import Lemma
@@ -59,7 +60,7 @@ class LokysAgent:
         if self.debug:
             logger.setLevel(logging.DEBUG)
 
-    def get_session(self):
+    def get_session(self) -> Session:
         """Get database session using backend abstraction."""
         return create_backend_session(self.config)
 
@@ -415,7 +416,7 @@ class LokysAgent:
         logger.info("Starting English lemma validation check...")
         start_time = datetime.now()
 
-        results = {
+        results: Dict[str, Any] = {
             "timestamp": start_time.isoformat(),
             "backend_type": str(self.config.backend_type),
             "model": self.config.model,
@@ -464,7 +465,9 @@ class LokysAgent:
     # === Barsukas Web Interface Helper Methods ===
     # These methods provide a simplified, single-lemma interface for the web UI
 
-    def check_single_definition(self, lemma, session=None) -> Dict[str, Any]:
+    def check_single_definition(
+        self, lemma: Lemma, session: Optional[Session] = None
+    ) -> Dict[str, Any]:
         """
         Check the definition of a single lemma using LLM validation.
 
@@ -486,7 +489,7 @@ class LokysAgent:
         )
         return result
 
-    def check_single_disambiguation(self, lemma, session) -> Dict[str, Any]:
+    def check_single_disambiguation(self, lemma: Lemma, session: Session) -> Dict[str, Any]:
         """
         Check if a lemma needs disambiguation (parentheticals in lemma_text).
 
@@ -525,10 +528,12 @@ class LokysAgent:
 
         # Get translations for all duplicates
         supported_languages = get_supported_languages()
-        translations_by_guid = {}
+        translations_by_guid: Dict[str, Dict[str, str]] = {}
 
         for dup in duplicates:
-            translations = {}
+            if dup.guid is None:
+                continue
+            translations: Dict[str, str] = {}
             for lang_code in supported_languages.keys():
                 try:
                     translation = get_translation(session, dup, lang_code)
@@ -567,9 +572,9 @@ class LokysAgent:
         has_parenthetical = "(" in lemma.lemma_text and ")" in lemma.lemma_text
 
         # Get LLM suggestions
-        definitions_data = []
+        definitions_data: List[Dict[str, Any]] = []
         for dup in duplicates:
-            item = {
+            item: Dict[str, Any] = {
                 "guid": dup.guid,
                 "definition": dup.definition_text or "No definition",
                 "translations": {},
@@ -599,7 +604,7 @@ class LokysAgent:
     def _check_polysemy_disambiguation(
         self,
         lemma: Lemma,
-        session,
+        session: Session,
         duplicate_count: int,
         duplicates: Optional[List[Lemma]] = None,
         translations_by_guid: Optional[Dict[str, Dict[str, str]]] = None,
@@ -653,7 +658,9 @@ class LokysAgent:
             "llm_suggestions": llm_result,
         }
 
-    def _print_summary(self, results: Dict, start_time: datetime, duration: float):
+    def _print_summary(
+        self, results: Dict[str, Any], start_time: datetime, duration: float
+    ) -> None:
         """Print a summary of the check results."""
         logger.info("=" * 80)
         logger.info("LOKYS AGENT REPORT - English Lemma Validation")

@@ -35,7 +35,7 @@ from wordfreq.tools.llm_validators import validate_definition, validate_lemma_fo
 logger = logging.getLogger(__name__)
 
 
-def get_argument_parser():
+def get_argument_parser() -> argparse.ArgumentParser:
     """Return the argument parser for introspection.
 
     This function allows external tools to introspect the available
@@ -68,7 +68,7 @@ def get_argument_parser():
     return parser
 
 
-def main():
+def main() -> None:
     """Main entry point for the lokys agent."""
     parser = get_argument_parser()
     args = parser.parse_args()
@@ -89,7 +89,7 @@ def main():
     # Show what we're processing
     if len(lemmas) == 1:
         lemma = lemmas[0]
-        display_single_lemma_header(lemma, lemma.guid)
+        display_single_lemma_header(lemma, lemma.guid or "")
 
         # Validate lemma form
         if args.check_type in ["lemma", "both"]:

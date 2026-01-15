@@ -42,7 +42,7 @@ LANGUAGE_NAMES = {
 }
 
 
-def get_argument_parser():
+def get_argument_parser() -> argparse.ArgumentParser:
     """Return the argument parser for introspection.
 
     This function allows external tools to introspect the available
@@ -102,7 +102,7 @@ def get_argument_parser():
     return parser
 
 
-def main():
+def main() -> None:
     """Main entry point for the vilkas agent."""
     # Import here to avoid circular imports
     from agents.common.cli_display import display_language_header
@@ -296,7 +296,8 @@ def main():
 
             print("\n=== All forms processed ===")
         else:
-            # Single task
+            # Single task - language_code should be set by task parsing
+            assert language_code is not None, "language_code must be set for single task"
             results = agent.fix_missing_forms(
                 lemmas=lemmas,
                 language_code=language_code,

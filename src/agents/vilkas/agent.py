@@ -24,11 +24,12 @@ Supported languages and forms:
 import logging
 import time
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 import constants
 from agents.common.lemma_selection import find_lemma_by_guid
 from clients.barsukas_cache import BarsukasCacheClient
+from sqlalchemy.orm import Session
 from wordfreq.storage.backend import create_session as create_backend_session
 from wordfreq.storage.backend.config import BackendType, DataSourceConfig
 from wordfreq.storage.models.schema import DerivativeForm, Lemma
@@ -60,16 +61,16 @@ class VilkasAgent:
             self.db_path = None
 
         # Lazy initialization
-        self.cache_client = None
+        self.cache_client: Optional[BarsukasCacheClient] = None
 
         if self.debug:
             logger.setLevel(logging.DEBUG)
 
-    def get_session(self):
+    def get_session(self) -> Session:
         """Get database session using backend abstraction."""
         return create_backend_session(self.config)
 
-    def get_cache_client(self):
+    def get_cache_client(self) -> Optional[BarsukasCacheClient]:
         """Get or create cache client for BARSUKAS queries."""
         if self.cache_client is None and self.config.barsukas_url:
             self.cache_client = BarsukasCacheClient(
@@ -503,15 +504,16 @@ class VilkasAgent:
                 )
 
                 # Get the full lemma object
-                lemma = find_lemma_by_guid(session, item_info["guid"], error_on_missing=False)
+                guid = str(item_info["guid"])
+                found_lemma = find_lemma_by_guid(session, guid, error_on_missing=False)
 
-                if not lemma:
+                if not found_lemma:
                     logger.error(f"Could not find lemma with GUID {item_info['guid']}")
                     failed += 1
                     continue
 
                 # Call the process function
-                success = process_lemma_for_task(task_key, lemma.id, self.config, client)
+                success = process_lemma_for_task(task_key, found_lemma.id, self.config, client)
 
                 if success:
                     successful += 1
@@ -556,7 +558,7 @@ class VilkasAgent:
         logger.info("Starting full Lithuanian word forms check...")
         start_time = datetime.now()
 
-        results = {
+        results: Dict[str, Any] = {
             "timestamp": start_time.isoformat(),
             "database_path": self.db_path,
             "checks": {
