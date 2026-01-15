@@ -34,11 +34,8 @@
 {"guid": "N08_035", "pos_type": "noun", "pos_subtype": "small_movable_object", "concept_label": "doll", "concept_definition": "A small model of a human, used as a toy for children.", "difficulty_level": 15}
 {"guid": "N08_036", "pos_type": "noun", "pos_subtype": "small_movable_object", "concept_label": "toy", "concept_definition": "A small object designed for children to play with for amusement or learning.", "difficulty_level": 15}
 {"guid": "N08_037", "pos_type": "noun", "pos_subtype": "small_movable_object", "concept_label": "chopsticks", "concept_definition": "A pair of thin wooden, bamboo, or metal sticks used as eating utensils to pick up and hold food, commonly used in East Asian cuisines.", "difficulty_level": -1}
-{"guid": "N08_038", "pos_type": "noun", "pos_subtype": "small_movable_object", "concept_label": "bed", "concept_definition": "a piece of furniture for sleeping", "difficulty_level": 9}
-{"guid": "N08_039", "pos_type": "noun", "pos_subtype": "small_movable_object", "concept_label": "table", "concept_definition": "a piece of furniture with a flat top", "difficulty_level": -1}
 {"guid": "N08_040", "pos_type": "noun", "pos_subtype": "small_movable_object", "concept_label": "pack", "concept_definition": "a group or collection of things", "difficulty_level": -1}
 {"guid": "N08_041", "pos_type": "noun", "pos_subtype": "small_movable_object", "concept_label": "seat", "concept_definition": "a thing made for sitting on", "difficulty_level": -1}
-{"guid": "N08_043", "pos_type": "noun", "pos_subtype": "small_movable_object", "concept_label": "throne", "concept_definition": "a ceremonial chair for a sovereign", "difficulty_level": -1}
 {"guid": "N08_044", "pos_type": "noun", "pos_subtype": "small_movable_object", "concept_label": "match", "concept_definition": "a short stick for producing fire; a contest", "difficulty_level": -1}
 {"guid": "N08_046", "pos_type": "noun", "pos_subtype": "small_movable_object", "concept_label": "blade", "concept_definition": "the flat cutting edge of a knife, saw, or other tool or weapon; a thin flat part of something.", "difficulty_level": -1}
 {"guid": "N08_049", "pos_type": "noun", "pos_subtype": "small_movable_object", "concept_label": "lamp", "concept_definition": "a device for giving light, either electric or using oil or gas.", "difficulty_level": -1}
