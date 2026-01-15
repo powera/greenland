@@ -145,6 +145,7 @@ class PapugaAgent:
         only_english: bool = True,
         dry_run: bool = False,
         lemma_id: Optional[int] = None,
+        lemmas: Optional[List[Lemma]] = None,
     ) -> Dict[str, any]:
         """
         Check existing pronunciations for correctness.
@@ -156,6 +157,7 @@ class PapugaAgent:
             only_english: Only check English forms (language_code='en')
             dry_run: If True, don't make LLM API calls, just count what would be checked
             lemma_id: Optional lemma ID to filter to a specific lemma
+            lemmas: Optional pre-filtered list of lemmas to check
 
         Returns:
             Dictionary with check results
@@ -170,7 +172,11 @@ class PapugaAgent:
                 | (DerivativeForm.phonetic_pronunciation.isnot(None))
             )
 
-            if lemma_id:
+            # Filter by lemmas list if provided
+            if lemmas is not None:
+                lemma_ids = [l.id for l in lemmas]
+                query = query.filter(DerivativeForm.lemma_id.in_(lemma_ids))
+            elif lemma_id:
                 query = query.filter(DerivativeForm.lemma_id == lemma_id)
 
             if only_english:
@@ -277,6 +283,7 @@ class PapugaAgent:
         only_english: bool = True,
         only_base_forms: bool = False,
         lemma_id: Optional[int] = None,
+        lemmas: Optional[List[Lemma]] = None,
     ) -> Dict[str, any]:
         """
         Find derivative forms that are missing pronunciations.
@@ -286,6 +293,7 @@ class PapugaAgent:
             only_english: Only check English forms (language_code='en')
             only_base_forms: Only check base forms (is_base_form=True)
             lemma_id: Optional lemma ID to filter to a specific lemma
+            lemmas: Optional pre-filtered list of lemmas to check
 
         Returns:
             Dictionary with missing pronunciation counts
@@ -300,7 +308,11 @@ class PapugaAgent:
                 DerivativeForm.phonetic_pronunciation.is_(None),
             )
 
-            if lemma_id:
+            # Filter by lemmas list if provided
+            if lemmas is not None:
+                lemma_ids = [l.id for l in lemmas]
+                query = query.filter(DerivativeForm.lemma_id.in_(lemma_ids))
+            elif lemma_id:
                 query = query.filter(DerivativeForm.lemma_id == lemma_id)
 
             if only_english:
@@ -353,6 +365,7 @@ class PapugaAgent:
         only_base_forms: bool = False,
         dry_run: bool = False,
         lemma_id: Optional[int] = None,
+        lemmas: Optional[List[Lemma]] = None,
     ) -> Dict[str, any]:
         """
         Generate pronunciations for forms that are missing them.
@@ -366,6 +379,7 @@ class PapugaAgent:
             only_base_forms: Only process base forms
             dry_run: If True, don't actually update the database
             lemma_id: Optional lemma ID to filter to a specific lemma
+            lemmas: Optional pre-filtered list of lemmas to process
 
         Returns:
             Dictionary with population results
@@ -380,7 +394,11 @@ class PapugaAgent:
                 DerivativeForm.phonetic_pronunciation.is_(None),
             )
 
-            if lemma_id:
+            # Filter by lemmas list if provided
+            if lemmas is not None:
+                lemma_ids = [l.id for l in lemmas]
+                query = query.filter(DerivativeForm.lemma_id.in_(lemma_ids))
+            elif lemma_id:
                 query = query.filter(DerivativeForm.lemma_id == lemma_id)
 
             if only_english:
@@ -596,6 +614,7 @@ class PapugaAgent:
         only_english: bool = True,
         dry_run: bool = False,
         lemma_id: Optional[int] = None,
+        lemmas: Optional[List[Lemma]] = None,
     ) -> Dict[str, any]:
         """
         Run full pronunciation validation and generate a comprehensive report.
@@ -608,6 +627,7 @@ class PapugaAgent:
             only_english: Only check English forms
             dry_run: If True, don't make LLM API calls, just count what would be checked
             lemma_id: Optional lemma ID to filter to a specific lemma
+            lemmas: Optional pre-filtered list of lemmas to check
 
         Returns:
             Dictionary with all check results
@@ -634,11 +654,16 @@ class PapugaAgent:
             only_english=only_english,
             dry_run=dry_run,
             lemma_id=lemma_id,
+            lemmas=lemmas,
         )
 
         # Check for missing pronunciations
         results["checks"]["missing_pronunciations"] = self.check_missing_pronunciations(
-            limit=limit, only_english=only_english, only_base_forms=False, lemma_id=lemma_id
+            limit=limit,
+            only_english=only_english,
+            only_base_forms=False,
+            lemma_id=lemma_id,
+            lemmas=lemmas,
         )
 
         end_time = datetime.now()
@@ -842,6 +867,7 @@ def main():
             only_english=only_english,
             dry_run=args.dry_run,
             lemma_id=lemma_id,
+            lemmas=lemmas,
         )
     elif mode == "populate":
         result = agent.populate_missing_pronunciations(
@@ -850,6 +876,7 @@ def main():
             only_base_forms=args.base_forms_only,
             dry_run=args.dry_run,
             lemma_id=lemma_id,
+            lemmas=lemmas,
         )
         logger.info(
             f"\nPopulation complete: {result['populated']} populated, {result['failed']} failed "
@@ -866,6 +893,7 @@ def main():
             only_english=only_english,
             dry_run=args.dry_run,
             lemma_id=lemma_id,
+            lemmas=lemmas,
         )
         # Then populate
         result = agent.populate_missing_pronunciations(
@@ -874,6 +902,7 @@ def main():
             only_base_forms=args.base_forms_only,
             dry_run=args.dry_run,
             lemma_id=lemma_id,
+            lemmas=lemmas,
         )
         logger.info(
             f"\nPopulation complete: {result['populated']} populated, {result['failed']} failed "

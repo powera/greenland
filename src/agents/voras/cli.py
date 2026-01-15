@@ -449,7 +449,7 @@ def main():
 
         # Execute regeneration (immediate or batch mode)
         results = agent.regenerate_all_translations(
-            limit=args.limit, dry_run=args.dry_run, batch_mode=args.batch
+            limit=args.limit, dry_run=args.dry_run, batch_mode=args.batch, lemmas=None
         )
         cli_display.display_batch_summary(results, batch_mode=args.batch)
         return
@@ -496,12 +496,14 @@ def main():
                 limit=args.limit,
                 sample_rate=args.sample_rate,
                 confidence_threshold=args.confidence_threshold,
+                lemmas=lemmas,
             )
         else:
             results = agent.validate_all_translations(
                 limit=args.limit,
                 sample_rate=args.sample_rate,
                 confidence_threshold=args.confidence_threshold,
+                lemmas=lemmas,
             )
 
         cli_display.display_validation_summary(results, languages_to_validate)
@@ -567,7 +569,7 @@ def main():
 
         # IMMEDIATE MODE: Process directly (default behavior)
         results = agent.fix_missing_translations(
-            language_code=args.languages, limit=args.limit, dry_run=args.dry_run
+            language_code=args.languages, limit=args.limit, dry_run=args.dry_run, lemmas=lemmas
         )
         cli_display.display_population_summary(results)
 
@@ -582,17 +584,19 @@ def main():
                 limit=args.limit,
                 sample_rate=args.sample_rate,
                 confidence_threshold=args.confidence_threshold,
+                lemmas=lemmas,
             )
         else:
             validation_results = agent.validate_all_translations(
                 limit=args.limit,
                 sample_rate=args.sample_rate,
                 confidence_threshold=args.confidence_threshold,
+                lemmas=lemmas,
             )
 
         print("\n=== STEP 2: Populating Missing Translations ===\n")
         population_results = agent.fix_missing_translations(
-            language_code=args.languages, limit=args.limit, dry_run=args.dry_run
+            language_code=args.languages, limit=args.limit, dry_run=args.dry_run, lemmas=lemmas
         )
 
         cli_display.display_combined_summary(
