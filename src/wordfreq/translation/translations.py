@@ -9,6 +9,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 import util.prompt_loader
 from clients.types import Schema, SchemaProperty
 from wordfreq.storage import database as linguistic_db
+from wordfreq.storage.translation_helpers import LANGUAGE_NAMES
 from wordfreq.translation.constants import DEFAULT_TRANSLATION_LANGUAGES
 
 logger = logging.getLogger(__name__)
@@ -104,23 +105,8 @@ def query_translations(
     languages_list = "\n".join(languages_list_lines)
     language_instructions = "\n".join(language_instructions_lines)
 
-    # Map language code to full language name
-    lang_code_to_name_map = {
-        "lt": "Lithuanian",
-        "zh": "Chinese",
-        "ko": "Korean",
-        "fr": "French",
-        "es": "Spanish",
-        "de": "German",
-        "gd": "Scottish Gaelic",
-        "it": "Italian",
-        "nl": "Dutch",
-        "pt": "Portuguese",
-        "sw": "Swahili",
-        "sv": "Swedish",
-        "vi": "Vietnamese",
-    }
-    reference_language_name = lang_code_to_name_map.get(ref_lang_code, ref_lang_code.capitalize())
+    # Map language code to full language name (imported from translation_helpers)
+    reference_language_name = LANGUAGE_NAMES.get(ref_lang_code, ref_lang_code.capitalize())
 
     # Format context with language instructions
     context = context_template.format(language_instructions=language_instructions)

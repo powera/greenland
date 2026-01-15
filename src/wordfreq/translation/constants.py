@@ -67,11 +67,11 @@ DEFAULT_TRANSLATION_LANGUAGES = {
         "description": "German translation in lemma form",
         "instructions": "- German: Provide standard German in base form (infinitive for verbs, singular nominative for nouns without an article)",
     },
-    "scottish_gaelic": {
-        "field": "scottish_gaelic_translation",
-        "code": "gd",
-        "description": "Scottish Gaelic translation in lemma form",
-        "instructions": "- Scottish Gaelic: Provide standard Gaelic in base form (dictionary form, singular for nouns)",
+    "japanese": {
+        "field": "japanese_translation",
+        "code": "ja",
+        "description": "Japanese translation in lemma form",
+        "instructions": "- Japanese: Provide standard Japanese in base form (dictionary form, singular for nouns)",
     },
     "italian": {
         "field": "italian_translation",

@@ -35,7 +35,7 @@ This document provides comprehensive guidance for AI assistants (including Claud
 ### Key Statistics
 
 - **~57,000 lines** of Python code
-- **14 languages** supported: English, Lithuanian, Chinese, French, German, Spanish, Portuguese, Korean, Swahili, Vietnamese, Scottish Gaelic, Italian, Dutch, Swedish
+- **14 languages** supported: English, Lithuanian, Chinese, French, German, Spanish, Portuguese, Korean, Swahili, Vietnamese, Japanese, Italian, Dutch, Swedish
 - **14 autonomous agents** for database maintenance and quality assurance
 - **SQLite-based** persistent storage with comprehensive ORM models
 

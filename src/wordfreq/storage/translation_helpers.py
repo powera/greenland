@@ -27,7 +27,7 @@ TIER_1_LANGUAGES = ["lt", "zh", "fr", "es"]
 TIER_2_LANGUAGES = ["de", "it", "nl", "pt", "sv", "vi"]
 
 # Tier 3: Experimental languages (lower quality/pedagogical issues)
-TIER_3_LANGUAGES = ["gd", "ko", "sw"]
+TIER_3_LANGUAGES = ["ja", "ko", "sw"]
 
 LANGUAGE_HIERARCHY = [
     "en",  # English (special case - source language)
@@ -41,7 +41,7 @@ LANGUAGE_HIERARCHY = [
     "pt",  # Portuguese
     "sv",  # Swedish
     "vi",  # Vietnamese
-    "gd",  # Scottish Gaelic (experimental)
+    "ja",  # Japanese (experimental)
     "ko",  # Korean (experimental)
     "sw",  # Swahili (experimental)
 ]
@@ -63,7 +63,7 @@ LANGUAGE_FIELDS = {
     "pt": ("pt", "Portuguese", True),
     "sv": ("sv", "Swedish", True),
     "vi": ("vi", "Vietnamese", True),
-    "gd": ("gd", "Scottish Gaelic", True),
+    "ja": ("ja", "Japanese", True),
     "ko": ("ko", "Korean", True),
     "sw": ("sw", "Swahili", True),
 }
@@ -81,7 +81,7 @@ LLM_FIELD_TO_LANG_CODE = {
     "french_translation": "fr",
     "spanish_translation": "es",
     "german_translation": "de",
-    "scottish_gaelic_translation": "gd",
+    "japanese_translation": "ja",
     "italian_translation": "it",
     "dutch_translation": "nl",
     "portuguese_translation": "pt",
@@ -481,7 +481,7 @@ def get_reference_translation(
             "pt",
             "sv",
             "vi",
-            "gd",
+            "ja",
             "ko",
             "sw",
             "en",
