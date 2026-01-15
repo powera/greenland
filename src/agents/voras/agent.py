@@ -184,9 +184,14 @@ class VorasAgent:
                 lemmas_to_process = [
                     l for l in lemmas if self.get_translation(session, l, language_code)
                 ]
-                lemmas_to_process = apply_limit_and_sample_rate(
-                    lemmas_to_process, limit, sample_rate
-                )
+                # Apply limit and sample_rate directly to list
+                if limit is not None:
+                    lemmas_to_process = lemmas_to_process[:limit]
+                if 0.0 < sample_rate < 1.0:
+                    import random
+
+                    sample_size = max(1, int(len(lemmas_to_process) * sample_rate))
+                    lemmas_to_process = random.sample(lemmas_to_process, sample_size)
             else:
                 # Get lemmas with this language translation
                 query = (

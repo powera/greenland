@@ -129,7 +129,7 @@ def enqueue_papuga_work(session, lemmas, only_english=True, base_forms_only=Fals
                 target_id=form.id,
                 payload={
                     "form_id": form.id,
-                    "form_text": form.form_text,
+                    "form_text": form.derivative_form_text,
                     "language_code": form.language_code,
                     "lemma_id": form.lemma_id,
                 },
