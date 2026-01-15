@@ -21,7 +21,7 @@ from wordfreq.storage.models import (
     SentenceWord,
 )
 from wordfreq.storage.queries.lemma import build_lemma_search_query
-from wordfreq.storage.translation_helpers import get_all_translations
+from wordfreq.storage.translation_helpers import LANGUAGE_HIERARCHY, get_all_translations
 
 bp = Blueprint("api", __name__, url_prefix="/api")
 
@@ -379,22 +379,8 @@ def search_lemmas() -> Response:
         }
 
         # Pick up to 3 translations to show (follows LANGUAGE_HIERARCHY from translation_helpers)
-        # Priority: LT, ZH, FR, ES (primary), then tier 2, then experimental (GD, KO, SW)
-        priority_langs = [
-            "lt",
-            "zh",
-            "fr",
-            "es",
-            "de",
-            "it",
-            "nl",
-            "pt",
-            "sv",
-            "vi",
-            "ja",
-            "ko",
-            "sw",
-        ]
+        # Exclude 'en' since it's the source language (stored in lemma_text, not as a translation)
+        priority_langs = [lang for lang in LANGUAGE_HIERARCHY if lang != "en"]
         sample_translations = {}
         for lang in priority_langs:
             if lang in all_translations:
