@@ -1,12 +1,75 @@
-"""Factory for creating storage backend sessions."""
+"""Factory for creating SQLAlchemy database sessions."""
 
-from typing import Callable, Optional
+from typing import Any, Callable, Optional
 
-from wordfreq.storage.backend.base import BaseSession, BaseStorage
+from sqlalchemy import create_engine, event
+from sqlalchemy.engine import Engine
+from sqlalchemy.orm import Session, sessionmaker
+
 from wordfreq.storage.backend.config import BackendType, DataSourceConfig
+from wordfreq.storage.models.schema import Base
 
 _global_config: Optional[DataSourceConfig] = None
-_global_storage: Optional[BaseStorage] = None
+_global_engine: Optional[Engine] = None
+_global_session_factory: Optional[sessionmaker] = None
+
+
+def _create_engine(db_path: str) -> Engine:
+    """Create a SQLAlchemy engine with appropriate settings.
+
+    Args:
+        db_path: Path to the database file (for SQLite) or connection string
+
+    Returns:
+        Configured SQLAlchemy engine
+    """
+    # Determine if this is SQLite or another database
+    if db_path.startswith("postgresql://") or db_path.startswith("mysql://"):
+        # For other databases, use the path as-is
+        connection_string = db_path
+        engine = create_engine(
+            connection_string,
+            pool_pre_ping=True,
+            pool_recycle=3600,
+        )
+    else:
+        # SQLite - use file path
+        connection_string = f"sqlite:///{db_path}"
+        engine = create_engine(
+            connection_string,
+            connect_args={
+                "timeout": 30,
+                "check_same_thread": False,
+            },
+            pool_pre_ping=True,
+            pool_recycle=3600,
+        )
+
+        # Enable WAL mode for SQLite for better concurrency
+        @event.listens_for(engine, "connect")
+        def set_sqlite_pragma(dbapi_conn: Any, connection_record: Any) -> None:
+            cursor = dbapi_conn.cursor()
+            cursor.execute("PRAGMA journal_mode=WAL")
+            cursor.execute("PRAGMA busy_timeout=30000")
+            cursor.execute("PRAGMA synchronous=NORMAL")
+            cursor.close()
+
+    return engine
+
+
+def _ensure_tables_exist(engine: Engine) -> None:
+    """Ensure database tables exist.
+
+    Args:
+        engine: SQLAlchemy engine
+    """
+    Base.metadata.create_all(engine)
+
+    # Add missing columns to existing tables
+    from wordfreq.storage.utils.session import ensure_tables_exist
+
+    with Session(engine) as session:
+        ensure_tables_exist(session)
 
 
 def configure_backend(config: DataSourceConfig) -> None:
@@ -15,21 +78,10 @@ def configure_backend(config: DataSourceConfig) -> None:
     Args:
         config: Data source configuration
     """
-    global _global_config, _global_storage
+    global _global_config, _global_engine, _global_session_factory
     _global_config = config
-    _global_storage = None  # Reset storage to force recreation
-
-
-def get_backend_type() -> BackendType:
-    """Get the configured backend type.
-
-    Returns:
-        The backend type
-    """
-    global _global_config
-    if _global_config is None:
-        _global_config = DataSourceConfig.from_env()
-    return _global_config.backend_type
+    _global_engine = None
+    _global_session_factory = None
 
 
 def get_data_source_config() -> DataSourceConfig:
@@ -44,79 +96,81 @@ def get_data_source_config() -> DataSourceConfig:
     return _global_config
 
 
-def get_storage() -> BaseStorage:
-    """Get or create the global storage backend.
+def get_backend_type() -> "BackendType":
+    """Get the configured backend type.
 
     Returns:
-        The storage backend
+        The backend type (for display/logging purposes)
     """
-    global _global_storage, _global_config
+    return get_data_source_config().backend_type
 
-    if _global_storage is None:
+
+def _get_engine() -> Engine:
+    """Get or create the global database engine.
+
+    Returns:
+        SQLAlchemy engine
+    """
+    global _global_engine, _global_config
+
+    if _global_engine is None:
         if _global_config is None:
             _global_config = DataSourceConfig.from_env()
 
-        if _global_config.backend_type == BackendType.SQLITE:
-            from wordfreq.storage.backend.sqlite import SQLiteStorage
+        assert _global_config.sqlite_path is not None, "sqlite_path must be set"
+        _global_engine = _create_engine(_global_config.sqlite_path)
+        _ensure_tables_exist(_global_engine)
 
-            assert (
-                _global_config.sqlite_path is not None
-            ), "sqlite_path must be set for SQLITE backend"
-            _global_storage = SQLiteStorage(_global_config.sqlite_path)
-        else:  # JSONL
-            from wordfreq.storage.backend.jsonl import JSONLStorage
-
-            assert (
-                _global_config.jsonl_data_dir is not None
-            ), "jsonl_data_dir must be set for JSONL backend"
-            _global_storage = JSONLStorage(_global_config.jsonl_data_dir)
-
-        _global_storage.ensure_initialized()
-
-    return _global_storage
+    return _global_engine
 
 
-def create_session(config: Optional[DataSourceConfig] = None) -> BaseSession:
-    """Create a new storage session.
+def _get_session_factory() -> sessionmaker:
+    """Get or create the global session factory.
+
+    Returns:
+        SQLAlchemy sessionmaker
+    """
+    global _global_session_factory
+
+    if _global_session_factory is None:
+        engine = _get_engine()
+        _global_session_factory = sessionmaker(bind=engine)
+
+    return _global_session_factory
+
+
+def create_session(config: Optional[DataSourceConfig] = None) -> Session:
+    """Create a new database session.
 
     Args:
         config: Optional data source configuration. If not provided, uses global config.
 
     Returns:
-        A new session instance
+        A new SQLAlchemy Session instance
     """
     if config is not None:
         # Create a one-off session with specific config
-        storage: BaseStorage
-        if config.backend_type == BackendType.SQLITE:
-            from wordfreq.storage.backend.sqlite import SQLiteStorage
-
-            assert config.sqlite_path is not None, "sqlite_path must be set for SQLITE backend"
-            storage = SQLiteStorage(config.sqlite_path)
-        else:  # JSONL
-            from wordfreq.storage.backend.jsonl import JSONLStorage
-
-            assert config.jsonl_data_dir is not None, "jsonl_data_dir must be set for JSONL backend"
-            storage = JSONLStorage(config.jsonl_data_dir)
-
-        storage.ensure_initialized()
-        return storage.create_session()
+        assert config.sqlite_path is not None, "sqlite_path must be set"
+        engine = _create_engine(config.sqlite_path)
+        _ensure_tables_exist(engine)
+        factory = sessionmaker(bind=engine)
+        return factory()
     else:
-        # Use global storage
-        storage = get_storage()
-        return storage.create_session()
+        # Use global session factory
+        factory = _get_session_factory()
+        return factory()
 
 
 def create_scoped_session_factory(
     config: Optional[DataSourceConfig] = None,
-) -> Callable[[], BaseSession]:
+) -> Callable[[], Session]:
     """Create a scoped session factory compatible with Flask.
 
     Args:
         config: Optional data source configuration
 
     Returns:
-        A callable that returns sessions (compatible with Flask's scoped_session pattern)
+        A callable that returns sessions
     """
 
     class SessionFactory:
@@ -125,7 +179,7 @@ def create_scoped_session_factory(
         def __init__(self, config: Optional[DataSourceConfig] = None) -> None:
             self.config = config
 
-        def __call__(self) -> BaseSession:
+        def __call__(self) -> Session:
             """Create a new session."""
             return create_session(self.config)
 

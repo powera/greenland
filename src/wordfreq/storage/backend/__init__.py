@@ -1,14 +1,22 @@
-"""Storage backend abstraction layer.
+"""Storage backend for database sessions.
 
-This module provides a unified interface for different storage backends
-(SQLite, JSONL) allowing the application to work with either backend
-transparently.
+This module provides session creation for SQLAlchemy-based storage.
 """
 
-from typing import Optional
+from sqlalchemy.orm import Session
 
-from wordfreq.storage.backend.base import BaseSession
 from wordfreq.storage.backend.config import BackendType, DataSourceConfig
-from wordfreq.storage.backend.factory import create_session, get_backend_type
+from wordfreq.storage.backend.factory import (
+    create_session,
+    get_backend_type,
+    get_data_source_config,
+)
 
-__all__ = ["create_session", "get_backend_type", "BaseSession", "BackendType", "DataSourceConfig"]
+__all__ = [
+    "create_session",
+    "get_backend_type",
+    "get_data_source_config",
+    "BackendType",
+    "DataSourceConfig",
+    "Session",
+]
