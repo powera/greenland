@@ -81,17 +81,17 @@ class VorasAgent:
             self.db_path = None
 
         # Lazy initialization
-        self.linguistic_client = None
-        self.cache_client = None
+        self.linguistic_client: Optional[LinguisticClient] = None
+        self.cache_client: Optional[BarsukasCacheClient] = None
 
         if self.debug:
             logger.setLevel(logging.DEBUG)
 
-    def get_session(self):
+    def get_session(self) -> Any:
         """Get database session using backend abstraction."""
         return create_backend_session(self.config)
 
-    def get_linguistic_client(self):
+    def get_linguistic_client(self) -> LinguisticClient:
         """Get or create linguistic client for LLM queries."""
         if self.linguistic_client is None:
             self.linguistic_client = LinguisticClient(
@@ -99,7 +99,7 @@ class VorasAgent:
             )
         return self.linguistic_client
 
-    def get_cache_client(self):
+    def get_cache_client(self) -> Optional[BarsukasCacheClient]:
         """Get or create cache client for BARSUKAS queries."""
         if self.cache_client is None and self.config.barsukas_url:
             self.cache_client = BarsukasCacheClient(
@@ -109,7 +109,7 @@ class VorasAgent:
             )
         return self.cache_client
 
-    def get_translation(self, session, lemma: Lemma, lang_code: str) -> Optional[str]:
+    def get_translation(self, session: Any, lemma: Lemma, lang_code: str) -> Optional[str]:
         """
         Get translation for a lemma in the specified language.
 
@@ -119,12 +119,12 @@ class VorasAgent:
 
     def set_translation(
         self,
-        session,
+        session: Any,
         lemma: Lemma,
         lang_code: str,
         translation: str,
         source: Optional[str] = None,
-    ):
+    ) -> None:
         """
         Set translation for a lemma in the specified language.
 
@@ -324,7 +324,7 @@ class VorasAgent:
                 logger.info(f"Sampling {len(lemmas)} lemmas ({sample_rate*100:.0f}%)")
 
             # Initialize results structure
-            results_by_language = {
+            results_by_language: Dict[str, Dict[str, Any]] = {
                 lang_code: {
                     "language_code": lang_code,
                     "language_name": LANGUAGE_FIELDS[lang_code][1],
@@ -437,7 +437,7 @@ class VorasAgent:
         languages_to_regenerate = [lc for lc in LANGUAGE_FIELDS.keys() if lc != "lt"]
 
         # Initialize results structure
-        results = {
+        results: Dict[str, Any] = {
             "total_words_processed": 0,
             "total_translations_added": 0,
             "total_failed": 0,
@@ -466,7 +466,7 @@ class VorasAgent:
             logger.info("Deleting existing non-Lithuanian translations...")
             for lemma in words_to_process:
                 for lang_code in languages_to_regenerate:
-                    field_name, _ = LANGUAGE_FIELDS[lang_code]
+                    field_name, _, _ = LANGUAGE_FIELDS[lang_code]
                     existing = getattr(lemma, field_name)
                     if existing and existing.strip():
                         if not dry_run:
@@ -529,8 +529,8 @@ class VorasAgent:
                         # Add all non-Lithuanian translations
                         added_this_word = 0
                         for lang_code in languages_to_regenerate:
-                            field_name, language_name = LANGUAGE_FIELDS[lang_code]
-                            llm_field = LANG_CODE_TO_LLM_FIELD.get(lang_code)
+                            field_name, language_name, _ = LANGUAGE_FIELDS[lang_code]
+                            llm_field = LANG_CODE_TO_LLM_FIELD.get(lang_code, "")
                             translation = translations.get(llm_field, "").strip()
 
                             if translation:
@@ -596,7 +596,7 @@ class VorasAgent:
             languages_to_fix = language_code
 
         # Initialize results structure
-        results = {
+        results: Dict[str, Any] = {
             "total_fixed": 0,
             "total_failed": 0,
             "by_language": {
@@ -674,8 +674,8 @@ class VorasAgent:
                         continue
 
                     # Try to get translations from cache first (cache returns lang_code -> translation)
-                    translations_by_lang_code = None
-                    translation_source = None
+                    translations_by_lang_code: Optional[Dict[str, str]] = None
+                    translation_source: Optional[str] = None
                     cache_client = self.get_cache_client()
                     if cache_client:
                         try:
@@ -702,7 +702,7 @@ class VorasAgent:
                             session, lemma, exclude_languages=missing_lang_codes
                         )
 
-                        if not reference_translation:
+                        if not reference_translation or not reference_lang_code:
                             logger.warning(
                                 f"No reference translation available for '{lemma.lemma_text}', skipping"
                             )
@@ -712,7 +712,11 @@ class VorasAgent:
                             continue
 
                     # If no cache hit, query LLM for translations
-                    if not translations_by_lang_code:
+                    if (
+                        not translations_by_lang_code
+                        and reference_lang_code
+                        and reference_translation
+                    ):
                         # Build list of language names (lowercase) for only the missing languages
                         missing_lang_names = [
                             LANGUAGE_NAMES[lang_code].lower()
@@ -744,40 +748,43 @@ class VorasAgent:
                         translation_source = f"voras-agent/{self.config.model}"
 
                     # Apply translations to lemma (translations_by_lang_code now always uses lang_code keys)
-                    for lang_code, language_name in missing_languages:
-                        translation = translations_by_lang_code.get(lang_code, "").strip()
+                    if translations_by_lang_code:
+                        for lang_code, language_name in missing_languages:
+                            translation = translations_by_lang_code.get(lang_code, "").strip()
 
-                        if translation:
-                            # Update the translation using helper method
-                            self.set_translation(
-                                session,
-                                lemma,
-                                lang_code,
-                                translation,
-                                source=translation_source,
-                            )
-                            logger.debug(f"  Added {language_name} translation: '{translation}'")
-                            results["by_language"][lang_code]["fixed"] += 1
-                            results["total_fixed"] += 1
-                        else:
-                            logger.warning(
-                                f"  LLM returned empty {language_name} translation for '{lemma.lemma_text}'"
-                            )
-                            results["by_language"][lang_code]["failed"] += 1
-                            results["total_failed"] += 1
+                            if translation:
+                                # Update the translation using helper method
+                                self.set_translation(
+                                    session,
+                                    lemma,
+                                    lang_code,
+                                    translation,
+                                    source=translation_source,
+                                )
+                                logger.debug(
+                                    f"  Added {language_name} translation: '{translation}'"
+                                )
+                                results["by_language"][lang_code]["fixed"] += 1
+                                results["total_fixed"] += 1
+                            else:
+                                logger.warning(
+                                    f"  LLM returned empty {language_name} translation for '{lemma.lemma_text}'"
+                                )
+                                results["by_language"][lang_code]["failed"] += 1
+                                results["total_failed"] += 1
 
-                    # Commit all updates for this word at once
-                    session.commit()
-                    added_count = len(
-                        [
-                            lc
-                            for lc, _ in missing_languages
-                            if lc != "lt" and translations_by_lang_code.get(lc, "").strip()
-                        ]
-                    )
-                    logger.info(
-                        f"Added {added_count} translations for '{lemma.lemma_text}' (GUID: {lemma.guid})"
-                    )
+                        # Commit all updates for this word at once
+                        session.commit()
+                        added_count = len(
+                            [
+                                lc
+                                for lc, _ in missing_languages
+                                if lc != "lt" and translations_by_lang_code.get(lc, "").strip()
+                            ]
+                        )
+                        logger.info(
+                            f"Added {added_count} translations for '{lemma.lemma_text}' (GUID: {lemma.guid})"
+                        )
 
                 except Exception as e:
                     logger.error(f"Error processing '{lemma.lemma_text}': {e}")
@@ -800,7 +807,9 @@ class VorasAgent:
 
         return results
 
-    def submit_batch(self, agent_name: str = "voras", metadata: Optional[Dict[str, str]] = None):
+    def submit_batch(
+        self, agent_name: str = "voras", metadata: Optional[Dict[str, str]] = None
+    ) -> Dict[str, Any]:
         """Submit pending batch requests to OpenAI."""
         batch_manager = get_batch_manager(debug=self.debug)
         pending = batch_manager.get_pending_requests(agent_name=agent_name)
@@ -819,7 +828,7 @@ class VorasAgent:
         return {"batch_id": batch_id, "file_id": file_id, "count": len(pending)}
 
     # Delegate coverage operations to coverage module
-    def check_overall_coverage(self):
+    def check_overall_coverage(self) -> Dict[str, Any]:
         """Check overall coverage. Delegates to coverage module."""
         session = self.get_session()
         try:
@@ -827,7 +836,7 @@ class VorasAgent:
         finally:
             session.close()
 
-    def check_language_coverage(self, language_code: str):
+    def check_language_coverage(self, language_code: str) -> Dict[str, Any]:
         """Check language coverage. Delegates to coverage module."""
         session = self.get_session()
         try:
@@ -835,7 +844,7 @@ class VorasAgent:
         finally:
             session.close()
 
-    def check_difficulty_level_coverage(self):
+    def check_difficulty_level_coverage(self) -> Dict[str, Any]:
         """Check difficulty level coverage. Delegates to coverage module."""
         session = self.get_session()
         try:
@@ -843,12 +852,12 @@ class VorasAgent:
         finally:
             session.close()
 
-    def run_full_check(self, output_file: Optional[str] = None):
+    def run_full_check(self, output_file: Optional[str] = None) -> Dict[str, Any]:
         """Run all coverage checks and generate a comprehensive report."""
         logger.info("Starting full multi-lingual translation coverage check...")
         start_time = datetime.now()
 
-        results = {
+        results: Dict[str, Any] = {
             "timestamp": start_time.isoformat(),
             "database_path": self.db_path,
             "checks": {
@@ -875,6 +884,8 @@ class VorasAgent:
 
         return results
 
-    def _print_summary(self, results, start_time, duration):
+    def _print_summary(
+        self, results: Dict[str, Any], start_time: datetime, duration: float
+    ) -> None:
         """Delegate to coverage module."""
         coverage.print_summary(results, start_time, duration)

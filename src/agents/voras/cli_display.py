@@ -9,7 +9,7 @@ from typing import Any, Dict, List
 from wordfreq.storage.translation_helpers import LANGUAGE_FIELDS
 
 
-def display_lemma_translations(lemma, agent, session) -> List[str]:
+def display_lemma_translations(lemma: Any, agent: Any, session: Any) -> List[str]:
     """Display current translations for a lemma and return list of missing languages.
 
     Args:

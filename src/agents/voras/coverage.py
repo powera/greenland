@@ -21,7 +21,7 @@ from wordfreq.storage.translation_helpers import LANGUAGE_FIELDS, get_language_n
 logger = logging.getLogger(__name__)
 
 
-def check_overall_coverage(session) -> Dict[str, any]:
+def check_overall_coverage(session: Any) -> Dict[str, Any]:
     """
     Check overall translation coverage across all languages.
 
@@ -140,7 +140,7 @@ def check_overall_coverage(session) -> Dict[str, any]:
         }
 
 
-def check_language_coverage(session, language_code: str) -> Dict[str, any]:
+def check_language_coverage(session: Any, language_code: str) -> Dict[str, Any]:
     """
     Check translation coverage for a specific language.
 
@@ -164,8 +164,8 @@ def check_language_coverage(session, language_code: str) -> Dict[str, any]:
         total_lemmas = len(all_lemmas)
 
         # Categorize by POS type
-        coverage_by_pos = {}
-        missing_by_pos = {}
+        coverage_by_pos: Dict[str, Dict[str, int]] = {}
+        missing_by_pos: Dict[str, list] = {}
 
         for lemma in all_lemmas:
             pos_type = lemma.pos_type or "unknown"
@@ -231,7 +231,7 @@ def check_language_coverage(session, language_code: str) -> Dict[str, any]:
         }
 
 
-def check_difficulty_level_coverage(session) -> Dict[str, any]:
+def check_difficulty_level_coverage(session: Any) -> Dict[str, Any]:
     """
     Check translation coverage across difficulty levels.
 
@@ -254,7 +254,7 @@ def check_difficulty_level_coverage(session) -> Dict[str, any]:
         logger.info(f"Found {len(all_lemmas)} lemmas with difficulty levels")
 
         # Organize by difficulty level
-        coverage_by_level = {}
+        coverage_by_level: Dict[Any, Dict[str, Any]] = {}
 
         for lemma in all_lemmas:
             level = lemma.difficulty_level
@@ -295,7 +295,7 @@ def check_difficulty_level_coverage(session) -> Dict[str, any]:
         return {"error": str(e), "total_levels": 0, "coverage_by_level": {}}
 
 
-def print_summary(results: Dict, start_time: datetime, duration: float):
+def print_summary(results: Dict[str, Any], start_time: datetime, duration: float) -> None:
     """Print a summary of the check results."""
     logger.info("=" * 80)
     logger.info("VORAS AGENT REPORT - Multi-lingual Translation Coverage")

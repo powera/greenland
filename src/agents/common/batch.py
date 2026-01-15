@@ -11,7 +11,7 @@ import logging
 import sys
 from collections import defaultdict
 from pathlib import Path
-from typing import Dict, Iterable, Optional
+from typing import Any, Dict, Iterable, Optional
 
 # Add src directory to path
 GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent)
@@ -35,7 +35,7 @@ def _group_completed_by_agent(requests: Iterable[BatchQueue]) -> Dict[str, list[
 
 
 def _apply_sentence_translations(
-    requests: Iterable[BatchQueue], session, batch_id: str
+    requests: Iterable[BatchQueue], session: Any, batch_id: str
 ) -> Dict[str, int]:
     sentences_updated = 0
     failed = 0
@@ -46,6 +46,8 @@ def _apply_sentence_translations(
             continue
 
         try:
+            if not req.response_body:
+                continue
             response = json.loads(req.response_body)
             content = response["body"]["choices"][0]["message"]["content"]
             translations = json.loads(content)
@@ -67,7 +69,7 @@ def _apply_sentence_translations(
 
 
 def _apply_voras_translations(
-    requests: Iterable[BatchQueue], session, batch_id: str
+    requests: Iterable[BatchQueue], session: Any, batch_id: str
 ) -> Dict[str, int]:
     from wordfreq.storage.crud.operation_log import log_translation_change
     from wordfreq.storage.models.schema import Lemma
@@ -87,6 +89,8 @@ def _apply_voras_translations(
         results["processed"] += 1
 
         try:
+            if not req.response_body:
+                continue
             response_data = json.loads(req.response_body)
             translations = {}
             if response_data.get("output"):

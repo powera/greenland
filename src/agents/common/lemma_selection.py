@@ -31,7 +31,7 @@ Usage:
 
 import random
 import sys
-from typing import Callable, List, Optional
+from typing import Any, Callable, List, Optional
 
 from sqlalchemy.orm import Query
 
@@ -345,7 +345,7 @@ def get_lemmas_for_processing(
     return apply_limit_and_sample_rate(query, limit, sample_rate)
 
 
-def get_lemmas_for_agent(session: Session, args) -> List[Lemma]:
+def get_lemmas_for_agent(session: Session, args: Any) -> List[Lemma]:
     """Get lemmas for processing based on command-line arguments.
 
     This is the standard entry point for agents that need to process lemmas.

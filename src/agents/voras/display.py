@@ -6,6 +6,7 @@ This module handles all console output and display formatting.
 
 import sys
 from pathlib import Path
+from typing import Any, Dict, Optional
 
 # Add src directory to path
 GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent.parent)
@@ -15,7 +16,7 @@ if GREENLAND_SRC_PATH not in sys.path:
 from wordfreq.storage.translation_helpers import LANGUAGE_FIELDS, get_language_name
 
 
-def print_regeneration_summary(results, batch_mode=False):
+def print_regeneration_summary(results: Dict[str, Any], batch_mode: bool = False) -> None:
     """Print summary of regeneration results."""
     print("\n" + "=" * 80)
     if batch_mode:
@@ -43,7 +44,7 @@ def print_regeneration_summary(results, batch_mode=False):
     print("=" * 80)
 
 
-def print_validation_summary(results, language_code=None):
+def print_validation_summary(results: Dict[str, Any], language_code: Optional[str] = None) -> None:
     """Print validation results summary."""
     if language_code:
         print(f"\n{results['language_name']} validation results:")
@@ -55,7 +56,7 @@ def print_validation_summary(results, language_code=None):
         )
 
 
-def print_population_summary(results):
+def print_population_summary(results: Dict[str, Any]) -> None:
     """Print population/fixing results summary."""
     print("\n" + "=" * 80)
     print("TRANSLATION POPULATION SUMMARY")
@@ -70,7 +71,11 @@ def print_population_summary(results):
     print("=" * 80)
 
 
-def print_combined_summary(validation_results, population_results, language_code=None):
+def print_combined_summary(
+    validation_results: Dict[str, Any],
+    population_results: Dict[str, Any],
+    language_code: Optional[str] = None,
+) -> None:
     """Print combined validation and population summary."""
     print("\n" + "=" * 80)
     print("COMBINED VALIDATION + POPULATION SUMMARY")
