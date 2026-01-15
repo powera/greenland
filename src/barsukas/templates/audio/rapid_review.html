@@ -229,7 +229,11 @@
         </div>
         {% if review.language_code == 'zh' %}
         <div class="text-center text-muted" style="font-size: 1.2rem; margin-top: -1rem; margin-bottom: 1rem;">
-            <span id="pinyin-display">{{ review.expected_text|pinyin }}</span>
+            <span id="romanization-display">{{ review.expected_text|pinyin }}</span>
+        </div>
+        {% elif review.language_code == 'ja' %}
+        <div class="text-center text-muted" style="font-size: 1.2rem; margin-top: -1rem; margin-bottom: 1rem;">
+            <span id="romanization-display">{{ review.expected_text|romaji }}</span>
         </div>
         {% endif %}
 
@@ -568,7 +572,7 @@ function submitReview(status) {
         expected_text: document.getElementById('expected-text').textContent,
         language_code: document.getElementById('language').textContent,
         voice_name: document.getElementById('voice').textContent,
-        pinyin: document.getElementById('pinyin-display')?.textContent || null,
+        pinyin: document.getElementById('romanization-display')?.textContent || null,
         audio_url: document.getElementById('audio-source').src,
         previous_status: 'pending_review', // Assume it was pending before
         new_status: status,
@@ -628,7 +632,7 @@ function loadNextReview(review) {
     document.getElementById('voice').textContent = review.display_voice;
 
     // Update pinyin if present (for Chinese)
-    const pinyinDisplay = document.getElementById('pinyin-display');
+    const pinyinDisplay = document.getElementById('romanization-display');
     if (pinyinDisplay && review.pinyin) {
         pinyinDisplay.textContent = review.pinyin;
     }
@@ -743,7 +747,7 @@ function loadPreviousReview(review) {
     document.getElementById('voice').textContent = review.display_voice;
 
     // Update pinyin if present
-    const pinyinDisplay = document.getElementById('pinyin-display');
+    const pinyinDisplay = document.getElementById('romanization-display');
     if (pinyinDisplay && review.pinyin) {
         pinyinDisplay.textContent = review.pinyin;
     }
