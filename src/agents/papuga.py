@@ -34,8 +34,10 @@ from agents.common.common_args import (
     add_backend_args,
     add_common_args,
     add_guid_arg,
+    add_level_args,
     add_llm_args,
     add_output_args,
+    add_pos_type_args,
     add_processing_args,
     confirm_operation,
     get_data_source_config,
@@ -707,6 +709,8 @@ def get_argument_parser():
     add_output_args(parser)
     add_processing_args(parser)
     add_guid_arg(parser, help_text="Validate/generate pronunciation for the lemma with this GUID")
+    add_level_args(parser)
+    add_pos_type_args(parser)
     add_backend_args(parser)
 
     # Papuga-specific arguments

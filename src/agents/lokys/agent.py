@@ -69,6 +69,7 @@ class LokysAgent:
         limit: Optional[int] = None,
         sample_rate: float = 1.0,
         confidence_threshold: float = 0.7,
+        lemmas: Optional[List[Lemma]] = None,
     ) -> Dict[str, Any]:
         """
         Check that English lemma_text values are in proper lemma form.
@@ -77,6 +78,7 @@ class LokysAgent:
             limit: Maximum number of lemmas to check
             sample_rate: Fraction of lemmas to sample (0.0-1.0)
             confidence_threshold: Minimum confidence to flag issues
+            lemmas: Optional pre-filtered list of lemmas to check (if None, queries all curated)
 
         Returns:
             Dictionary with check results
@@ -85,13 +87,18 @@ class LokysAgent:
 
         session = self.get_session()
         try:
-            # Get lemmas with GUIDs (these are the curated ones)
-            query = session.query(Lemma).filter(Lemma.guid.isnot(None)).order_by(Lemma.id)
+            # Use provided lemmas or query all curated ones
+            if lemmas is None:
+                query = session.query(Lemma).filter(Lemma.guid.isnot(None)).order_by(Lemma.id)
 
-            if limit:
-                query = query.limit(limit)
+                if limit:
+                    query = query.limit(limit)
 
-            lemmas = query.all()
+                lemmas = query.all()
+            else:
+                # Apply limit to provided lemmas
+                if limit:
+                    lemmas = lemmas[:limit]
             logger.info(f"Found {len(lemmas)} lemmas to check")
 
             # Sample if needed
@@ -156,6 +163,7 @@ class LokysAgent:
         limit: Optional[int] = None,
         sample_rate: float = 1.0,
         confidence_threshold: float = 0.7,
+        lemmas: Optional[List[Lemma]] = None,
     ) -> Dict[str, Any]:
         """
         Check that definition_text values are well-formed and appropriate.
@@ -164,6 +172,7 @@ class LokysAgent:
             limit: Maximum number of definitions to check
             sample_rate: Fraction of definitions to sample (0.0-1.0)
             confidence_threshold: Minimum confidence to flag issues
+            lemmas: Optional pre-filtered list of lemmas to check (if None, queries all curated)
 
         Returns:
             Dictionary with check results
@@ -172,13 +181,18 @@ class LokysAgent:
 
         session = self.get_session()
         try:
-            # Get lemmas with GUIDs (these are the curated ones)
-            query = session.query(Lemma).filter(Lemma.guid.isnot(None)).order_by(Lemma.id)
+            # Use provided lemmas or query all curated ones
+            if lemmas is None:
+                query = session.query(Lemma).filter(Lemma.guid.isnot(None)).order_by(Lemma.id)
 
-            if limit:
-                query = query.limit(limit)
+                if limit:
+                    query = query.limit(limit)
 
-            lemmas = query.all()
+                lemmas = query.all()
+            else:
+                # Apply limit to provided lemmas
+                if limit:
+                    lemmas = lemmas[:limit]
             logger.info(f"Found {len(lemmas)} lemmas to check")
 
             # Sample if needed
@@ -399,6 +413,7 @@ class LokysAgent:
         sample_rate: float = 1.0,
         confidence_threshold: float = 0.7,
         check_type: str = "both",
+        lemmas: Optional[List[Lemma]] = None,
     ) -> Dict[str, Any]:
         """
         Run English lemma validation and generate a comprehensive report.
@@ -409,6 +424,7 @@ class LokysAgent:
             sample_rate: Fraction to sample (0.0-1.0)
             confidence_threshold: Minimum confidence to flag issues
             check_type: Type of check to run ("lemma", "definitions", "disambiguation", or "both")
+            lemmas: Optional pre-filtered list of lemmas to check (if None, queries all curated)
 
         Returns:
             Dictionary with all check results
@@ -429,13 +445,19 @@ class LokysAgent:
         # Check English lemma forms
         if check_type in ["lemma", "both"]:
             results["checks"]["lemma_forms"] = self.check_lemma_forms(
-                limit=limit, sample_rate=sample_rate, confidence_threshold=confidence_threshold
+                limit=limit,
+                sample_rate=sample_rate,
+                confidence_threshold=confidence_threshold,
+                lemmas=lemmas,
             )
 
         # Check English definitions
         if check_type in ["definitions", "both"]:
             results["checks"]["definitions"] = self.check_definitions(
-                limit=limit, sample_rate=sample_rate, confidence_threshold=confidence_threshold
+                limit=limit,
+                sample_rate=sample_rate,
+                confidence_threshold=confidence_threshold,
+                lemmas=lemmas,
             )
 
         # Check disambiguation

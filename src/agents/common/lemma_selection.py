@@ -130,6 +130,37 @@ class LemmaQueryBuilder:
             self.query = self.query.filter(Lemma.difficulty_level == level)
         return self
 
+    def by_level_range(
+        self, min_level: Optional[int], max_level: Optional[int]
+    ) -> "LemmaQueryBuilder":
+        """Filter by difficulty level range.
+
+        Args:
+            min_level: Minimum difficulty level (inclusive), or None for no lower bound
+            max_level: Maximum difficulty level (inclusive), or None for no upper bound
+
+        Returns:
+            Self for method chaining
+        """
+        if min_level is not None:
+            self.query = self.query.filter(Lemma.difficulty_level >= min_level)
+        if max_level is not None:
+            self.query = self.query.filter(Lemma.difficulty_level <= max_level)
+        return self
+
+    def by_pos_type(self, pos_type: Optional[str]) -> "LemmaQueryBuilder":
+        """Filter by part of speech type.
+
+        Args:
+            pos_type: Part of speech (e.g., 'noun', 'verb', 'adjective'), or None to skip filter
+
+        Returns:
+            Self for method chaining
+        """
+        if pos_type is not None:
+            self.query = self.query.filter(Lemma.pos_type == pos_type)
+        return self
+
     def has_translation_in(self, language_code: str) -> "LemmaQueryBuilder":
         """Filter to lemmas that have a translation in the specified language.
 
@@ -280,6 +311,9 @@ def get_lemmas_for_processing(
     guid: Optional[str] = None,
     curated_only: bool = True,
     difficulty_level: Optional[int] = None,
+    min_level: Optional[int] = None,
+    max_level: Optional[int] = None,
+    pos_type: Optional[str] = None,
     language_code: Optional[str] = None,
     limit: Optional[int] = None,
     sample_rate: float = 1.0,
@@ -295,7 +329,10 @@ def get_lemmas_for_processing(
         session: Database session
         guid: If provided, return only this lemma (ignoring other filters)
         curated_only: If True, only include lemmas with GUIDs
-        difficulty_level: Filter by difficulty level (or None)
+        difficulty_level: Filter by exact difficulty level (or None)
+        min_level: Minimum difficulty level for range filter (or None)
+        max_level: Maximum difficulty level for range filter (or None)
+        pos_type: Filter by part of speech type (e.g., 'noun', 'verb')
         language_code: Filter to lemmas with translation in this language (or None)
         limit: Maximum number of lemmas to process
         sample_rate: Fraction of lemmas to sample (0.0-1.0)
@@ -316,6 +353,14 @@ def get_lemmas_for_processing(
             limit=args.limit,
             sample_rate=args.sample_rate,
         )
+
+        # Range mode with POS filter
+        lemmas = get_lemmas_for_processing(
+            session,
+            min_level=1,
+            max_level=9,
+            pos_type='noun',
+        )
     """
     # Single lemma mode
     if guid:
@@ -333,6 +378,12 @@ def get_lemmas_for_processing(
 
     if difficulty_level is not None:
         builder = builder.by_difficulty_level(difficulty_level)
+
+    if min_level is not None or max_level is not None:
+        builder = builder.by_level_range(min_level, max_level)
+
+    if pos_type is not None:
+        builder = builder.by_pos_type(pos_type)
 
     if language_code:
         builder = builder.has_translation_in(language_code)
@@ -354,7 +405,9 @@ def get_lemmas_for_agent(session: Session, args: Any) -> List[Lemma]:
     Args:
         session: Database session
         args: Parsed command-line arguments (argparse Namespace)
-              Expected attributes: guid, limit, sample_rate, difficulty_level (optional)
+              Expected attributes: guid, limit, sample_rate
+              Optional attributes: level (str, supports ranges like "1-9"),
+                                   pos_type (str), language (str)
 
     Returns:
         List of Lemma objects to process
@@ -366,11 +419,19 @@ def get_lemmas_for_agent(session: Session, args: Any) -> List[Lemma]:
         for lemma in lemmas:
             process(lemma)
     """
+    from agents.common.common_args import parse_level_arg
+
+    # Parse level argument (supports ranges like "1-9")
+    level_str = getattr(args, "level", None)
+    min_level, max_level = parse_level_arg(level_str)
+
     return get_lemmas_for_processing(
         session=session,
         guid=getattr(args, "guid", None),
         curated_only=True,
-        difficulty_level=getattr(args, "difficulty_level", None),
+        min_level=min_level,
+        max_level=max_level,
+        pos_type=getattr(args, "pos_type", None),
         language_code=getattr(args, "language", None),
         limit=getattr(args, "limit", None),
         sample_rate=getattr(args, "sample_rate", 1.0),

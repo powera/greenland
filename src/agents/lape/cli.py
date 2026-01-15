@@ -16,7 +16,9 @@ from agents.common.common_args import (
     add_common_args,
     add_guid_arg,
     add_language_args,
+    add_level_args,
     add_llm_args,
+    add_pos_type_args,
     get_data_source_config,
 )
 from agents.common.lemma_selection import get_lemmas_for_agent
@@ -93,6 +95,8 @@ Task presets:
 
     # Lape-specific arguments
     add_guid_arg(parser, help_text="Process only the lemma with this GUID")
+    add_level_args(parser)
+    add_pos_type_args(parser)
     task_group = parser.add_mutually_exclusive_group(required=True)
     task_group.add_argument(
         "--fact-type",

@@ -218,6 +218,82 @@ def add_language_args(
     return parser
 
 
+def add_level_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
+    """Add difficulty level filtering arguments.
+
+    Supports both single levels (--level 5) and ranges (--level 1-9).
+
+    Args:
+        parser: The argument parser to add arguments to
+
+    Returns:
+        The same parser with level arguments added
+    """
+    parser.add_argument(
+        "--level",
+        type=str,
+        default=None,
+        help="Difficulty level to filter by. Single level (e.g., '5') or range (e.g., '1-9')",
+    )
+
+    return parser
+
+
+def parse_level_arg(level_str: Optional[str]) -> tuple[Optional[int], Optional[int]]:
+    """Parse level argument into min/max values.
+
+    Args:
+        level_str: Level argument string (e.g., "5" or "1-9")
+
+    Returns:
+        Tuple of (min_level, max_level). For single level, both are the same.
+        Returns (None, None) if level_str is None.
+
+    Raises:
+        ValueError: If level string is invalid
+    """
+    if level_str is None:
+        return None, None
+
+    if "-" in level_str:
+        parts = level_str.split("-")
+        if len(parts) != 2:
+            raise ValueError(f"Invalid level range: {level_str}. Use format like '1-9'")
+        try:
+            min_level = int(parts[0])
+            max_level = int(parts[1])
+        except ValueError:
+            raise ValueError(f"Invalid level range: {level_str}. Levels must be integers.")
+        if min_level > max_level:
+            raise ValueError(f"Invalid level range: {level_str}. Min level must be <= max level.")
+        return min_level, max_level
+    else:
+        try:
+            level = int(level_str)
+        except ValueError:
+            raise ValueError(f"Invalid level: {level_str}. Must be an integer or range.")
+        return level, level
+
+
+def add_pos_type_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
+    """Add part-of-speech type filtering arguments.
+
+    Args:
+        parser: The argument parser to add arguments to
+
+    Returns:
+        The same parser with POS type arguments added
+    """
+    parser.add_argument(
+        "--pos-type",
+        type=str,
+        default=None,
+        help="Part of speech type to filter by (e.g., 'noun', 'verb', 'adjective')",
+    )
+
+    return parser
+
+
 def validate_cache_args(args: Any) -> None:
     """Validate cache-related arguments.
 
