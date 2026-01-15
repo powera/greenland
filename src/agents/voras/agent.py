@@ -153,6 +153,7 @@ class VorasAgent:
         limit: Optional[int] = None,
         sample_rate: float = 1.0,
         confidence_threshold: float = 0.7,
+        lemmas: Optional[List[Lemma]] = None,
     ) -> Dict[str, Any]:
         """
         Validate translations for a specific language using efficient single-call-per-word approach.
@@ -162,6 +163,7 @@ class VorasAgent:
             limit: Maximum number of words to check
             sample_rate: Fraction of words to sample (0.0-1.0)
             confidence_threshold: Minimum confidence to flag issues
+            lemmas: Optional pre-filtered list of lemmas to check (if None, queries all curated)
 
         Returns:
             Dictionary with validation results for the specified language
@@ -176,26 +178,40 @@ class VorasAgent:
 
         session = self.get_session()
         try:
-            # Get lemmas with this language translation
-            query = (
-                LemmaQueryBuilder(session)
-                .curated_only()
-                .has_translation_in(language_code)
-                .order_by_id()
-                .build()
-            )
+            # Use provided lemmas or query for them
+            if lemmas is not None:
+                # Filter to lemmas with translation in this language
+                lemmas_to_process = [
+                    l for l in lemmas if self.get_translation(session, l, language_code)
+                ]
+                # Apply limit and sample_rate directly to list
+                if limit is not None:
+                    lemmas_to_process = lemmas_to_process[:limit]
+                if 0.0 < sample_rate < 1.0:
+                    import random
 
-            lemmas = apply_limit_and_sample_rate(query, limit, sample_rate)
-            logger.info(f"Found {len(lemmas)} lemmas with {language_name} translations")
+                    sample_size = max(1, int(len(lemmas_to_process) * sample_rate))
+                    lemmas_to_process = random.sample(lemmas_to_process, sample_size)
+            else:
+                # Get lemmas with this language translation
+                query = (
+                    LemmaQueryBuilder(session)
+                    .curated_only()
+                    .has_translation_in(language_code)
+                    .order_by_id()
+                    .build()
+                )
+                lemmas_to_process = apply_limit_and_sample_rate(query, limit, sample_rate)
+            logger.info(f"Found {len(lemmas_to_process)} lemmas with {language_name} translations")
 
             # Validate translations
             issues_found = []
             checked_count = 0
 
-            for lemma in lemmas:
+            for lemma in lemmas_to_process:
                 checked_count += 1
                 if checked_count % 10 == 0:
-                    logger.info(f"Validated {checked_count}/{len(lemmas)} words...")
+                    logger.info(f"Validated {checked_count}/{len(lemmas_to_process)} words...")
 
                 # Gather all translations for this lemma
                 translations = {}
@@ -276,6 +292,7 @@ class VorasAgent:
         limit: Optional[int] = None,
         sample_rate: float = 1.0,
         confidence_threshold: float = 0.7,
+        lemmas: Optional[List[Lemma]] = None,
     ) -> Dict[str, Any]:
         """
         Validate all multi-lingual translations using efficient single-call-per-word approach.
@@ -284,6 +301,7 @@ class VorasAgent:
             limit: Maximum number of lemmas to check
             sample_rate: Fraction of lemmas to sample
             confidence_threshold: Minimum confidence to flag issues
+            lemmas: Optional pre-filtered list of lemmas to check (if None, queries all curated)
 
         Returns:
             Dictionary with results for all languages
@@ -294,34 +312,49 @@ class VorasAgent:
 
         session = self.get_session()
         try:
-            # Get all lemmas with GUIDs
-            query = session.query(Lemma).filter(Lemma.guid.isnot(None)).order_by(Lemma.id)
-
-            if limit:
-                query = query.limit(limit * 2)  # Get extra to account for filtering
-
-            all_lemmas = query.all()
-
-            # Filter to lemmas with at least one translation (handles both column and table storage)
-            lemmas = []
-            for lemma in all_lemmas:
-                has_translation = False
-                for lang_code in LANGUAGE_FIELDS.keys():
-                    if self.get_translation(session, lemma, lang_code):
-                        has_translation = True
+            # Use provided lemmas or query for them
+            if lemmas is not None:
+                # Filter to lemmas with at least one translation
+                lemmas_to_process = []
+                for lemma in lemmas:
+                    has_translation = False
+                    for lang_code in LANGUAGE_FIELDS.keys():
+                        if self.get_translation(session, lemma, lang_code):
+                            has_translation = True
+                            break
+                    if has_translation:
+                        lemmas_to_process.append(lemma)
+                    if limit and len(lemmas_to_process) >= limit:
                         break
-                if has_translation:
-                    lemmas.append(lemma)
-                if limit and len(lemmas) >= limit:
-                    break
+            else:
+                # Get all lemmas with GUIDs
+                query = session.query(Lemma).filter(Lemma.guid.isnot(None)).order_by(Lemma.id)
 
-            logger.info(f"Found {len(lemmas)} lemmas with translations")
+                if limit:
+                    query = query.limit(limit * 2)  # Get extra to account for filtering
+
+                all_lemmas = query.all()
+
+                # Filter to lemmas with at least one translation (handles both column and table storage)
+                lemmas_to_process = []
+                for lemma in all_lemmas:
+                    has_translation = False
+                    for lang_code in LANGUAGE_FIELDS.keys():
+                        if self.get_translation(session, lemma, lang_code):
+                            has_translation = True
+                            break
+                    if has_translation:
+                        lemmas_to_process.append(lemma)
+                    if limit and len(lemmas_to_process) >= limit:
+                        break
+
+            logger.info(f"Found {len(lemmas_to_process)} lemmas with translations")
 
             # Sample if needed
             if sample_rate < 1.0:
-                sample_size = int(len(lemmas) * sample_rate)
-                lemmas = random.sample(lemmas, sample_size)
-                logger.info(f"Sampling {len(lemmas)} lemmas ({sample_rate*100:.0f}%)")
+                sample_size = int(len(lemmas_to_process) * sample_rate)
+                lemmas_to_process = random.sample(lemmas_to_process, sample_size)
+                logger.info(f"Sampling {len(lemmas_to_process)} lemmas ({sample_rate*100:.0f}%)")
 
             # Initialize results structure
             results_by_language: Dict[str, Dict[str, Any]] = {
@@ -339,10 +372,10 @@ class VorasAgent:
 
             # Validate all translations for each lemma in one LLM call
             checked_count = 0
-            for lemma in lemmas:
+            for lemma in lemmas_to_process:
                 checked_count += 1
                 if checked_count % 10 == 0:
-                    logger.info(f"Validated {checked_count}/{len(lemmas)} lemmas...")
+                    logger.info(f"Validated {checked_count}/{len(lemmas_to_process)} lemmas...")
 
                 # Gather all translations for this lemma
                 translations = {}
@@ -411,7 +444,11 @@ class VorasAgent:
             session.close()
 
     def regenerate_all_translations(
-        self, limit: Optional[int] = None, dry_run: bool = False, batch_mode: bool = False
+        self,
+        limit: Optional[int] = None,
+        dry_run: bool = False,
+        batch_mode: bool = False,
+        lemmas: Optional[List[Lemma]] = None,
     ) -> Dict[str, Any]:
         """
         Delete all non-Lithuanian translations and regenerate them fresh.
@@ -420,6 +457,7 @@ class VorasAgent:
             limit: Maximum number of words to process
             dry_run: If True, only report what would be done without making changes
             batch_mode: If True, queue batch requests instead of making synchronous calls
+            lemmas: Optional pre-filtered list of lemmas to process (if None, queries all curated)
 
         Returns:
             Dictionary with regeneration results
@@ -454,10 +492,13 @@ class VorasAgent:
         }
 
         try:
-            # Get all lemmas with GUIDs (curated words)
-            query = LemmaQueryBuilder(session).curated_only().order_by_id().build()
-
-            words_to_process = apply_limit_and_sample_rate(query, limit, sample_rate=1.0)
+            # Use provided lemmas or query for them
+            if lemmas is not None:
+                words_to_process = lemmas[:limit] if limit else lemmas
+            else:
+                # Get all lemmas with GUIDs (curated words)
+                query = LemmaQueryBuilder(session).curated_only().order_by_id().build()
+                words_to_process = apply_limit_and_sample_rate(query, limit, sample_rate=1.0)
             total_words = len(words_to_process)
 
             logger.info(f"Found {total_words} curated words to process")
@@ -569,6 +610,7 @@ class VorasAgent:
         language_code: Optional[Union[str, List[str]]] = None,
         limit: Optional[int] = None,
         dry_run: bool = False,
+        lemmas: Optional[List[Lemma]] = None,
     ) -> Dict[str, Any]:
         """
         Generate missing translations using LLM and update the database.
@@ -578,6 +620,7 @@ class VorasAgent:
                           a list of codes, or None (all languages)
             limit: Maximum number of words to process
             dry_run: If True, only report what would be fixed without making changes
+            lemmas: Optional pre-filtered list of lemmas to process (if None, queries all curated)
 
         Returns:
             Dictionary with fix results
@@ -611,15 +654,19 @@ class VorasAgent:
         }
 
         try:
-            # Build query to find words missing ANY of the target translations
-            # For simplicity, we'll get all lemmas and check missing translations using helper method
-            # This is less efficient but handles both storage types uniformly
-            query = session.query(Lemma).filter(Lemma.guid.isnot(None)).order_by(Lemma.id)
+            # Use provided lemmas or query for them
+            if lemmas is not None:
+                all_lemmas = lemmas[:limit] if limit else lemmas
+            else:
+                # Build query to find words missing ANY of the target translations
+                # For simplicity, we'll get all lemmas and check missing translations using helper method
+                # This is less efficient but handles both storage types uniformly
+                query = session.query(Lemma).filter(Lemma.guid.isnot(None)).order_by(Lemma.id)
 
-            if limit:
-                query = query.limit(limit)
+                if limit:
+                    query = query.limit(limit)
 
-            all_lemmas = query.all()
+                all_lemmas = query.all()
 
             # Filter to lemmas missing at least one target translation
             words_to_process = []

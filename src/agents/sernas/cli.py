@@ -41,12 +41,22 @@ def get_argument_parser():
     add_language_args(parser, multiple=True)
     add_backend_args(parser)
 
-    # Mode selection
-    parser.add_argument(
-        "--mode",
-        choices=["coverage", "populate-only", "regenerate"],
-        default="coverage",
-        help="Operation mode: coverage (report missing, default), populate-only (add missing only), regenerate (delete and regenerate all)",
+    # Mode selection - mutually exclusive flags
+    mode_group = parser.add_mutually_exclusive_group()
+    mode_group.add_argument(
+        "--coverage",
+        action="store_true",
+        help="Report missing synonyms/alternatives coverage (default mode)",
+    )
+    mode_group.add_argument(
+        "--populate",
+        action="store_true",
+        help="Populate missing synonyms/alternatives",
+    )
+    mode_group.add_argument(
+        "--regenerate",
+        action="store_true",
+        help="Delete and regenerate all synonyms/alternatives (destructive)",
     )
     parser.add_argument(
         "--type",
@@ -64,7 +74,67 @@ def get_argument_parser():
     # Override default languages to ['en']
     parser.set_defaults(languages=["en"])
 
+    # Workqueue arguments
+    parser.add_argument(
+        "--use-workqueue",
+        action="store_true",
+        default=False,
+        help="Enqueue work items for background processing by barsukas worker",
+    )
+
     return parser
+
+
+def enqueue_sernas_work(session, lemmas, languages, form_type=None, dry_run=False):
+    """Enqueue synonym generation work items to the queue.
+
+    Args:
+        session: Database session
+        lemmas: List of lemmas to process
+        languages: List of language codes to process
+        form_type: Specific form type or None for all
+        dry_run: If True, don't actually enqueue
+
+    Returns:
+        Dictionary with enqueue statistics
+    """
+    from barsukas.utils.task_queue import enqueue_task
+
+    enqueued_count = 0
+    skipped_count = 0
+
+    for lemma in lemmas:
+        for language_code in languages:
+            if not dry_run:
+                dedup_key = f"sernas_{lemma.id}_{language_code}_{form_type or 'all'}"
+                result = enqueue_task(
+                    session,
+                    task_type="sernas_generate_synonyms",
+                    target_type="lemma",
+                    target_id=lemma.id,
+                    payload={
+                        "language_code": language_code,
+                        "form_type": form_type,
+                        "lemma_guid": lemma.guid,
+                        "lemma_text": lemma.lemma_text,
+                    },
+                    dedup_key=dedup_key,
+                )
+                if result.created:
+                    enqueued_count += 1
+                else:
+                    skipped_count += 1
+            else:
+                enqueued_count += 1
+
+    if not dry_run:
+        session.commit()
+
+    return {
+        "enqueued": enqueued_count,
+        "skipped": skipped_count,
+        "dry_run": dry_run,
+    }
 
 
 def main():
@@ -101,8 +171,16 @@ def main():
     if "all" in languages_to_process:
         languages_to_process = ["en"] + list(get_supported_languages().keys())
 
+    # Determine mode from flags (default to coverage if none specified)
+    if args.populate:
+        mode = "populate"
+    elif args.regenerate:
+        mode = "regenerate"
+    else:
+        mode = "coverage"  # default
+
     # Handle coverage mode (report missing synonyms)
-    if args.mode == "coverage":
+    if mode == "coverage":
         # Check specific languages or all languages
         if len(languages_to_process) == 1 or "all" in args.languages:
             # Single language or all languages - use simpler report
@@ -183,8 +261,34 @@ def main():
                 print(f"{'='*60}")
         return
 
-    # Handle populate-only mode
-    if args.mode == "populate-only":
+    # WORKQUEUE MODE: Enqueue work items for barsukas worker
+    if args.use_workqueue and mode in ["populate", "regenerate"]:
+        print("\n" + "=" * 80)
+        print("ŠERNAS AGENT - ENQUEUING WORK")
+        print("=" * 80)
+
+        session = agent.get_session()
+        try:
+            results = enqueue_sernas_work(
+                session=session,
+                lemmas=lemmas,
+                languages=languages_to_process,
+                form_type=form_type,
+                dry_run=args.dry_run,
+            )
+
+            print(f"\nEnqueued: {results['enqueued']}")
+            print(f"Skipped: {results['skipped']}")
+            if results["dry_run"]:
+                print("\n⚠️  DRY RUN - No work items were actually enqueued")
+            print("=" * 80)
+        finally:
+            session.close()
+
+        return
+
+    # Handle populate mode
+    if mode == "populate":
         # Process each language
         for lang_idx, language_code in enumerate(languages_to_process):
             display_language_header(language_code, lang_idx + 1, len(languages_to_process))
@@ -229,8 +333,8 @@ def main():
             display_batch_results(results, language_code, dry_run=args.dry_run)
         return
 
-    # Handle regenerate mode (similar to populate-only but forces regeneration)
-    if args.mode == "regenerate":
+    # Handle regenerate mode (similar to populate but forces regeneration)
+    if mode == "regenerate":
         from wordfreq.storage.crud.grammar_fact import delete_grammar_fact
 
         # Process each language
