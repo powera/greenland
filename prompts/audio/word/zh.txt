@@ -1,4 +1,5 @@
 Pronounce this Chinese word or phrase with clear, accurate pronunciation:
+- Use Mainland Mandarin Chinese dialect, as spoken in mainland China
 - Use proper Mandarin tones and pronunciation
 - Articulate each syllable clearly
 - Maintain natural Chinese intonation

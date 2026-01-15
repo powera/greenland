@@ -1,4 +1,5 @@
 Speak this Chinese sentence at a natural conversational pace:
+- Use Mainland Mandarin Chinese dialect, as spoken in mainland China
 - Use the rhythm and speed of everyday Mandarin speech
 - Maintain natural sentence-level intonation and prosody
 - Apply proper tones smoothly within the sentence flow

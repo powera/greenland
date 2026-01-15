@@ -1,4 +1,5 @@
 Speak this French sentence at a natural conversational pace:
+- Use European French dialect, as spoken in France
 - Use the rhythm and speed of everyday French speech
 - Maintain natural sentence-level intonation and prosody
 - Apply proper liaison and enchaînement between words

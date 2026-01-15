@@ -1,0 +1,5 @@
+Speak this Dutch sentence at a natural conversational pace:
+- Use Standard Dutch (Netherlands) dialect, as spoken in the Netherlands
+- Use the rhythm and speed of everyday Dutch speech
+- Maintain natural sentence-level intonation and prosody
+- Connect words smoothly as a native speaker would

@@ -1,0 +1,5 @@
+Speak this Swedish sentence at a natural conversational pace:
+- Use Standard Swedish dialect, as spoken in Sweden
+- Use the rhythm and speed of everyday Swedish speech
+- Maintain natural sentence-level intonation and prosody
+- Connect words smoothly as a native speaker would
