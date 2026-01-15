@@ -10,7 +10,7 @@ import re
 from typing import Dict, List
 
 import constants
-import lib.validation
+import benchmarks.validation
 from clients import ollama_client, openai_client
 
 # Directory aliases for easy updating if paths change in constants.py
@@ -103,7 +103,9 @@ def add_critique(slug: str) -> Dict:
 
     for result in doc["results"]:
         if "critique" not in result:
-            evaluation, _ = lib.validation.evaluate_response(doc["prompt"], result["response"])
+            evaluation, _ = benchmarks.validation.evaluate_response(
+                doc["prompt"], result["response"]
+            )
             result["critique"] = evaluation.dict()
             result["critique"]["overall_quality"] = str(result["critique"]["overall_quality"])
 

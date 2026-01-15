@@ -8,8 +8,8 @@ from typing import Dict, List, Optional
 
 from jinja2 import Environment, FileSystemLoader
 
-import benchmarks.datastore.benchmarks
-import benchmarks.datastore.common
+import benchmarks.datastore_benchmarks as datastore_benchmarks
+import benchmarks.datastore_common as datastore_common
 import constants
 
 
@@ -28,7 +28,7 @@ class ScoreTableGenerator:
 
     def __init__(self, session: Optional[object] = None):
         """Initialize generator with optional database session."""
-        self.session = session or datastore.common.create_dev_session()
+        self.session = session or datastore_common.create_dev_session()
         self.template_env = Environment(loader=FileSystemLoader(constants.TEMPLATES_DIR))
 
     def _get_color(self, score: int) -> str:
@@ -72,7 +72,7 @@ class ScoreTableGenerator:
         Returns:
             float: Average evaluation time in milliseconds
         """
-        run_data = datastore.benchmarks.get_run_by_run_id(run_id, self.session)
+        run_data = datastore_benchmarks.get_run_by_run_id(run_id, self.session)
         if not run_data or not run_data["details"]:
             return 0.0
 
@@ -92,14 +92,14 @@ class ScoreTableGenerator:
             dict: Dictionary containing models, benchmarks, and scores data
         """
         # Get model data sorted by size and name
-        llms = datastore.common.list_all_models(self.session)
+        llms = datastore_common.list_all_models(self.session)
         llms.sort(key=lambda x: (x["filesize_mb"], x["displayname"]))
 
         # Get benchmark information
-        benchmarks_list = datastore.benchmarks.list_all_benchmarks(self.session)
+        benchmarks_list = datastore_benchmarks.list_all_benchmarks(self.session)
 
         # Get scores and add color and timing information
-        scores = datastore.benchmarks.get_highest_benchmark_scores(self.session)
+        scores = datastore_benchmarks.get_highest_benchmark_scores(self.session)
 
         # Filter out models with zero benchmark results
         models_with_results = set()
@@ -169,11 +169,11 @@ class ScoreTableGenerator:
         Parameters:
             run_id (int): ID of the run to generate details for
         """
-        run = self.session.query(datastore.benchmarks.Run).get(run_id)
+        run = self.session.query(datastore_benchmarks.Run).get(run_id)
         if not run:
             return
 
-        data = datastore.benchmarks.get_run_by_run_id(run_id, self.session)
+        data = datastore_benchmarks.get_run_by_run_id(run_id, self.session)
         self._write_run_detail(data)
 
     def generate_run_detail(self, model_name: str, benchmark_name: str) -> None:
@@ -184,12 +184,12 @@ class ScoreTableGenerator:
             model_name (str): Name of the model
             benchmark_name (str): Name of the benchmark
         """
-        highest_scores = datastore.benchmarks.get_highest_benchmark_scores(self.session)
+        highest_scores = datastore_benchmarks.get_highest_benchmark_scores(self.session)
         key = (benchmark_name, model_name)
 
         if key in highest_scores:
             run_id = highest_scores[key]["run_id"]
-            data = datastore.benchmarks.get_run_by_run_id(run_id, self.session)
+            data = datastore_benchmarks.get_run_by_run_id(run_id, self.session)
             self._write_run_detail(data)
 
     def _get_context_from_benchmark(self, benchmark_name: str) -> Optional[str]:

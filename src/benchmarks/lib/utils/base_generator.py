@@ -12,7 +12,7 @@ from typing import Any, Dict, Iterator, List, Optional, Set, Tuple, Union
 
 import benchmarks.datastore.benchmarks as datastore_benchmarks
 import benchmarks.benchmark_constants as benchmark_constants
-import lib.validation
+import benchmarks.validation
 from clients import ollama_client, unified_client
 from clients.ollama_client import OllamaTimeoutError
 from benchmarks.lib.utils.data_models import (
@@ -69,7 +69,9 @@ class BenchmarkGenerator:
 
         # File paths for file-based generation (subclasses should set if applicable)
         self.questions_file_path: Optional[str] = None  # Path to JSON file with questions
-        self.questions_directory: Optional[str] = None  # Directory containing multiple question files
+        self.questions_directory: Optional[str] = (
+            None  # Directory containing multiple question files
+        )
 
         # Default context for LLM-based generation
         self.context = "You are a helpful assistant creating benchmark questions."
@@ -468,7 +470,7 @@ class BenchmarkGenerator:
                 question = self.generate_question(strategy, **kwargs)
 
                 # Validate the question
-                is_valid, reason = lib.validation.validate_question(
+                is_valid, reason = benchmarks.validation.validate_question(
                     question, model=validation_model
                 )
 
