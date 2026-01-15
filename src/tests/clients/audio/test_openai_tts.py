@@ -8,6 +8,7 @@ These tests verify the audio generation client works correctly.
 import sys
 import unittest
 from pathlib import Path
+from typing import Any
 from unittest.mock import MagicMock, Mock, patch
 
 # Add src directory to path
@@ -22,14 +23,14 @@ from clients.audio.types import AudioFormat, AudioGenerationResult, Voice
 class TestOpenAITTSClient(unittest.TestCase):
     """Test OpenAI TTS client functionality."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test fixtures."""
         # Mock the API key loading
         self.mock_api_key = "sk-test-key-123"
 
     @patch("clients.audio.openai_tts.requests.post")
     @patch.object(OpenAITTSClient, "_load_key")
-    def test_generate_audio_success(self, mock_load_key, mock_post):
+    def test_generate_audio_success(self, mock_load_key: MagicMock, mock_post: MagicMock) -> None:
         """Test successful audio generation."""
         mock_load_key.return_value = self.mock_api_key
 
@@ -62,7 +63,7 @@ class TestOpenAITTSClient(unittest.TestCase):
 
     @patch("clients.audio.openai_tts.requests.post")
     @patch.object(OpenAITTSClient, "_load_key")
-    def test_generate_audio_api_error(self, mock_load_key, mock_post):
+    def test_generate_audio_api_error(self, mock_load_key: MagicMock, mock_post: MagicMock) -> None:
         """Test handling of API errors."""
         mock_load_key.return_value = self.mock_api_key
 
@@ -79,11 +80,14 @@ class TestOpenAITTSClient(unittest.TestCase):
         self.assertFalse(result.success)
         self.assertEqual(result.audio_data, b"")
         self.assertIsNotNone(result.error)
+        assert result.error is not None
         self.assertIn("429", result.error)
 
     @patch("clients.audio.openai_tts.requests.post")
     @patch.object(OpenAITTSClient, "_load_key")
-    def test_generate_audio_with_speed(self, mock_load_key, mock_post):
+    def test_generate_audio_with_speed(
+        self, mock_load_key: MagicMock, mock_post: MagicMock
+    ) -> None:
         """Test audio generation with custom speed."""
         mock_load_key.return_value = self.mock_api_key
 
@@ -104,7 +108,9 @@ class TestOpenAITTSClient(unittest.TestCase):
 
     @patch("clients.audio.openai_tts.requests.post")
     @patch.object(OpenAITTSClient, "_load_key")
-    def test_language_specific_instructions(self, mock_load_key, mock_post):
+    def test_language_specific_instructions(
+        self, mock_load_key: MagicMock, mock_post: MagicMock
+    ) -> None:
         """Test that language-specific instructions are used."""
         mock_load_key.return_value = self.mock_api_key
 
@@ -130,7 +136,7 @@ class TestOpenAITTSClient(unittest.TestCase):
 
     @patch("clients.audio.openai_tts.requests.post")
     @patch.object(OpenAITTSClient, "_load_key")
-    def test_audio_format_parameter(self, mock_load_key, mock_post):
+    def test_audio_format_parameter(self, mock_load_key: MagicMock, mock_post: MagicMock) -> None:
         """Test different audio format options."""
         mock_load_key.return_value = self.mock_api_key
 
@@ -154,14 +160,14 @@ class TestOpenAITTSClient(unittest.TestCase):
         payload = call_args.kwargs["json"]
         self.assertEqual(payload["response_format"], "wav")
 
-    def test_voice_enum_values(self):
+    def test_voice_enum_values(self) -> None:
         """Test that Voice enum has correct values."""
         self.assertEqual(Voice.ASH.value, "ash")
         self.assertEqual(Voice.ALLOY.value, "alloy")
         self.assertEqual(Voice.NOVA.value, "nova")
         self.assertEqual(Voice.ONYX.value, "onyx")
 
-    def test_audio_format_enum_values(self):
+    def test_audio_format_enum_values(self) -> None:
         """Test that AudioFormat enum has correct values."""
         self.assertEqual(AudioFormat.MP3.value, "mp3")
         self.assertEqual(AudioFormat.WAV.value, "wav")
@@ -171,7 +177,7 @@ class TestOpenAITTSClient(unittest.TestCase):
 class TestAudioGenerationResult(unittest.TestCase):
     """Test AudioGenerationResult dataclass."""
 
-    def test_successful_result(self):
+    def test_successful_result(self) -> None:
         """Test creating a successful result."""
         result = AudioGenerationResult(
             audio_data=b"test data",
@@ -190,7 +196,7 @@ class TestAudioGenerationResult(unittest.TestCase):
         self.assertEqual(result.voice, Voice.ASH)
         self.assertIsNone(result.error)
 
-    def test_error_result(self):
+    def test_error_result(self) -> None:
         """Test creating an error result."""
         result = AudioGenerationResult(
             audio_data=b"",

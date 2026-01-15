@@ -23,7 +23,7 @@ from clients.openai_batch_client import BatchStatus
 class BatchQueueManagerTestCase(unittest.TestCase):
     """Tests for BatchQueueManager."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test fixtures."""
         # Create a temporary database for testing
         self.temp_db = tempfile.NamedTemporaryFile(delete=False, suffix=".sqlite")
@@ -41,13 +41,13 @@ class BatchQueueManagerTestCase(unittest.TestCase):
             db_session=self.session, batch_client=self.mock_batch_client, debug=False
         )
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         """Clean up test fixtures."""
         self.session.close()
         if os.path.exists(self.db_path):
             os.unlink(self.db_path)
 
-    def test_queue_request(self):
+    def test_queue_request(self) -> None:
         """Test queueing a batch request."""
         metadata = BatchRequestMetadata(
             custom_id="test_request_1",
@@ -79,7 +79,7 @@ class BatchQueueManagerTestCase(unittest.TestCase):
         stored_body = json.loads(record.request_body)
         self.assertEqual(stored_body["model"], "gpt-4o-mini")
 
-    def test_queue_request_duplicate_custom_id(self):
+    def test_queue_request_duplicate_custom_id(self) -> None:
         """Test that duplicate custom_id raises an error."""
         metadata = BatchRequestMetadata(
             custom_id="test_request_1", agent_name="voras", operation_type="validate_translation"
@@ -100,7 +100,7 @@ class BatchQueueManagerTestCase(unittest.TestCase):
 
         self.assertIn("already exists", str(context.exception))
 
-    def test_get_pending_requests(self):
+    def test_get_pending_requests(self) -> None:
         """Test retrieving pending requests."""
         # Queue multiple requests
         for i in range(3):
@@ -126,7 +126,7 @@ class BatchQueueManagerTestCase(unittest.TestCase):
         pending_lokys = self.manager.get_pending_requests(agent_name="lokys")
         self.assertEqual(len(pending_lokys), 0)
 
-    def test_submit_batch(self):
+    def test_submit_batch(self) -> None:
         """Test submitting a batch."""
         # Queue some requests
         requests = []
@@ -169,7 +169,7 @@ class BatchQueueManagerTestCase(unittest.TestCase):
             self.assertEqual(req.batch_file_id, "file_123")
             self.assertIsNotNone(req.submitted_at)
 
-    def test_check_batch_status_in_progress(self):
+    def test_check_batch_status_in_progress(self) -> None:
         """Test checking batch status when in progress."""
         # Queue and submit a request
         metadata = BatchRequestMetadata(
@@ -201,7 +201,7 @@ class BatchQueueManagerTestCase(unittest.TestCase):
         self.session.refresh(record)
         self.assertEqual(record.status, BatchRequestStatus.PROCESSING.value)
 
-    def test_check_batch_status_completed(self):
+    def test_check_batch_status_completed(self) -> None:
         """Test checking batch status when completed."""
         # Queue and submit a request
         metadata = BatchRequestMetadata(
@@ -234,7 +234,7 @@ class BatchQueueManagerTestCase(unittest.TestCase):
         self.session.refresh(record)
         self.assertEqual(record.status, BatchRequestStatus.PROCESSING.value)
 
-    def test_check_batch_status_failed(self):
+    def test_check_batch_status_failed(self) -> None:
         """Test checking batch status when failed."""
         # Queue and submit a request
         metadata = BatchRequestMetadata(
@@ -266,7 +266,7 @@ class BatchQueueManagerTestCase(unittest.TestCase):
         self.session.refresh(record)
         self.assertEqual(record.status, BatchRequestStatus.FAILED.value)
 
-    def test_retrieve_batch_results(self):
+    def test_retrieve_batch_results(self) -> None:
         """Test retrieving batch results."""
         # Queue and submit a request
         metadata = BatchRequestMetadata(
@@ -315,7 +315,7 @@ class BatchQueueManagerTestCase(unittest.TestCase):
         self.assertIsNotNone(record.response_body)
         self.assertIsNotNone(record.completed_at)
 
-    def test_retrieve_batch_results_with_error(self):
+    def test_retrieve_batch_results_with_error(self) -> None:
         """Test retrieving batch results with errors."""
         # Queue and submit a request
         metadata = BatchRequestMetadata(
@@ -355,7 +355,7 @@ class BatchQueueManagerTestCase(unittest.TestCase):
         self.assertEqual(record.status, BatchRequestStatus.FAILED.value)
         self.assertIsNotNone(record.error_message)
 
-    def test_get_completed_requests(self):
+    def test_get_completed_requests(self) -> None:
         """Test retrieving completed requests."""
         # Create multiple requests with different statuses
         for i, status in enumerate(
@@ -392,7 +392,7 @@ class BatchQueueManagerTestCase(unittest.TestCase):
             self.assertEqual(req.status, BatchRequestStatus.COMPLETED.value)
             self.assertIsNotNone(req.response_body)
 
-    def test_get_batch_summary(self):
+    def test_get_batch_summary(self) -> None:
         """Test getting batch summary."""
         # Create requests with different statuses
         statuses = [
@@ -432,7 +432,7 @@ class BatchQueueManagerTestCase(unittest.TestCase):
         self.assertEqual(summary["status_counts"][BatchRequestStatus.PROCESSING.value], 1)
         self.assertEqual(summary["status_counts"][BatchRequestStatus.FAILED.value], 1)
 
-    def test_list_active_batches(self):
+    def test_list_active_batches(self) -> None:
         """Test listing active batches."""
         # Create requests for different batches
         for batch_num in range(3):
@@ -470,7 +470,7 @@ class BatchQueueManagerTestCase(unittest.TestCase):
 class BatchRequestMetadataTestCase(unittest.TestCase):
     """Tests for BatchRequestMetadata dataclass."""
 
-    def test_to_dict(self):
+    def test_to_dict(self) -> None:
         """Test converting metadata to dictionary."""
         metadata = BatchRequestMetadata(
             custom_id="test_1",
@@ -487,7 +487,7 @@ class BatchRequestMetadataTestCase(unittest.TestCase):
         self.assertEqual(data["agent_name"], "voras")
         self.assertEqual(data["entity_id"], 123)
 
-    def test_from_dict(self):
+    def test_from_dict(self) -> None:
         """Test creating metadata from dictionary."""
         data = {
             "custom_id": "test_1",
