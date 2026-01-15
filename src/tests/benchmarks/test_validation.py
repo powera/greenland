@@ -6,7 +6,7 @@ import re
 import unittest
 from unittest.mock import MagicMock, patch
 
-from lib.validation import ResponseValidator, ValidationResult
+from benchmarks.validation import ResponseValidator, ValidationResult
 
 
 class MockOllamaClient:

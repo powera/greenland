@@ -6,8 +6,8 @@ import logging
 import traceback
 from typing import Dict, List, Optional, Set, Tuple
 
-import benchmarks.datastore.benchmarks
-import benchmarks.datastore.common
+import benchmarks.datastore.benchmarks as datastore_benchmarks
+import benchmarks.datastore.common as datastore_common
 from benchmarks.lib.utils.factory import (
     get_all_benchmark_codes,
     get_benchmark_metadata,
@@ -27,8 +27,8 @@ def get_all_model_codenames() -> List[str]:
     Returns:
         List of model codenames
     """
-    session = datastore.common.create_dev_session()
-    models = datastore.common.list_all_models(session)
+    session = datastore_common.create_dev_session()
+    models = datastore_common.list_all_models(session)
     return [model["codename"] for model in models]
 
 
@@ -140,7 +140,7 @@ def run_missing_benchmarks(
         List of (model, benchmark) pairs that were run
     """
     if not session:
-        session = datastore.common.create_dev_session()
+        session = datastore_common.create_dev_session()
 
     blacklist_models = blacklist_models or set()
     blacklist_benchmarks = blacklist_benchmarks or set()
@@ -150,7 +150,7 @@ def run_missing_benchmarks(
     benchmarks = [b for b in get_all_benchmarks() if b not in blacklist_benchmarks]
 
     # Get existing scores
-    scores = datastore.benchmarks.get_highest_benchmark_scores(session)
+    scores = datastore_benchmarks.get_highest_benchmark_scores(session)
 
     # Find missing benchmark/model combinations
     missing = []

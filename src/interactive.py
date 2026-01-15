@@ -21,4 +21,4 @@ prcs = wordfreq.translation.processor.WordProcessor(model=MODEL)
 import benchmarks.lib.utils.registry
 
 # imports for benchmarks
-import lib.run_benchmark
+import benchmarks.run_benchmark

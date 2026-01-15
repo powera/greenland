@@ -103,10 +103,10 @@ def insert_model(
     session,
     codename: str,
     displayname: str,
-    launch_date: str = None,
-    filesize_mb: int = None,
-    license_name: str = None,
-    model_path: str = None,
+    launch_date: Optional[str] = None,
+    filesize_mb: Optional[int] = None,
+    license_name: Optional[str] = None,
+    model_path: Optional[str] = None,
     model_type: str = "local",
 ):
     """Insert a new model into the database."""
@@ -186,12 +186,14 @@ def get_default_model_codename(session):
     return model.codename if model else None
 
 
-def decode_json(text: Optional[str]) -> Dict:
+def decode_json(text: Optional[str]) -> Dict[str, Any]:
     """Safely decode JSON text with proper Unicode handling."""
     if text is None:
         return {}
     try:
         result = json.loads(text)
-        return json.dumps(result, ensure_ascii=False, indent=2)
+        if isinstance(result, dict):
+            return result
+        return {"result": result}
     except json.JSONDecodeError:
         return {"result": text}

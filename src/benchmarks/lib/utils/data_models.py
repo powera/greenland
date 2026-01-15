@@ -68,9 +68,9 @@ class BenchmarkQuestion:
     schema: Optional[Dict] = None  # For JSON answer type
     evaluation_criteria: EvaluationCriteria = field(default_factory=EvaluationCriteria)
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary, removing None values."""
-        result = {}
+        result: Dict[str, Any] = {}
         for k, v in asdict(self).items():
             if k == "answer_type" and isinstance(v, AnswerType):
                 result[k] = v.value

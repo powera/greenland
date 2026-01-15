@@ -82,7 +82,7 @@ def list_models():
 
 
 def run_single_exemplar(
-    exemplar_id: str, model_names: List[str] = None, generate_html: bool = True
+    exemplar_id: str, model_names: Optional[List[str]] = None, generate_html: bool = True
 ):
     """
     Run a single exemplar with specified models.
@@ -122,7 +122,7 @@ def run_single_exemplar(
         print(f"\nReport generated: {report_path}")
 
 
-def run_all_exemplars(model_name: str = None, generate_html: bool = True):
+def run_all_exemplars(model_name: Optional[str] = None, generate_html: bool = True):
     """
     Run all exemplars with a specific model.
 

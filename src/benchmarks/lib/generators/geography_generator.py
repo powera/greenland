@@ -59,10 +59,10 @@ class GeographyGenerator(BenchmarkGenerator):
         self.validation_model = "gpt-4o-mini-2024-07-18"
 
         # Track which types of questions we've used
-        self._used_countries = set()
-        self._used_cities = set()
-        self._used_mountains = set()
-        self._used_rivers = set()
+        self._used_countries: set[str] = set()
+        self._used_cities: set[str] = set()
+        self._used_mountains: set[str] = set()
+        self._used_rivers: set[str] = set()
 
     def _generate_with_llm(self, **kwargs) -> Iterator[BenchmarkQuestion]:
         """
@@ -84,7 +84,7 @@ class GeographyGenerator(BenchmarkGenerator):
 
         # First, generate questions using all specialized generators until they're exhausted
         # We'll use round-robin approach but track if each category is exhausted
-        exhausted_categories = set()
+        exhausted_categories: set[str] = set()
 
         while len(exhausted_categories) < len(category_generators):
             for category_name, generator_func, max_items in category_generators:

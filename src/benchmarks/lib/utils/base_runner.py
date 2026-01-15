@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import benchmarks.datastore.benchmarks as datastore_benchmarks
 import benchmarks.benchmark_constants as benchmark_constants
-import lib.validation
+import benchmarks.validation
 from clients import unified_client
 from clients.ollama_client import OllamaTimeoutError
 from benchmarks.lib.utils.data_models import (

@@ -167,12 +167,12 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
             self.send_error(500, str(e))
 
     def _send_response(
-        self, content: bytes, content_type: str, extra_headers: Dict[str, str] = None
+        self, content: bytes, content_type: str, extra_headers: Optional[Dict[str, str]] = None
     ) -> None:
         """Send HTTP response with headers."""
         self.send_response(200)
         self.send_header("Content-type", content_type)
-        self.send_header("Content-length", len(content))
+        self.send_header("Content-length", str(len(content)))
 
         if extra_headers:
             for key, value in extra_headers.items():
@@ -187,7 +187,7 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header("Content-type", "application/json")
         self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Content-length", len(response))
+        self.send_header("Content-length", str(len(response)))
         self.end_headers()
         self.wfile.write(response)
 
