@@ -7,7 +7,7 @@ import sys
 import threading
 import time
 from pathlib import Path
-from typing import Tuple, Union
+from typing import TYPE_CHECKING
 
 from flask import (
     Blueprint,
@@ -19,10 +19,14 @@ from flask import (
     request,
     url_for,
 )
+from flask.typing import ResponseReturnValue
 from werkzeug.wrappers import Response
 
 from wordfreq.storage.backend import get_backend_type
-from wordfreq.storage.backend.config import BackendType
+from wordfreq.storage.backend.config import BackendType, DataSourceConfig
+
+if TYPE_CHECKING:
+    from barsukas.app import BarsukasFlask
 
 bp = Blueprint("settings", __name__, url_prefix="/settings")
 
@@ -32,11 +36,16 @@ _active_requests_lock = threading.Lock()
 _shutdown_requested = False
 
 
+def _get_backend_config() -> DataSourceConfig:
+    """Get the backend config from the current app, with proper typing."""
+    return current_app.backend_config  # type: ignore[attr-defined, no-any-return]
+
+
 @bp.route("/")
 def index() -> str:
     """Settings page."""
     backend_type = get_backend_type()
-    backend_config = current_app.backend_config
+    backend_config = _get_backend_config()
 
     # Get environment variables
     env_backend = os.environ.get("STORAGE_BACKEND", "sqlite")
@@ -54,7 +63,7 @@ def index() -> str:
 
 
 @bp.route("/migrate-form", methods=["POST"])
-def migrate_form() -> Response:
+def migrate_form() -> ResponseReturnValue:
     """Trigger migration from SQLite to JSONL (form submission)."""
     direction = "sqlite-to-jsonl"
     sqlite_path: str = request.form.get("sqlite_path", current_app.config.get("DB_PATH", ""))
@@ -93,7 +102,7 @@ def migrate_form() -> Response:
 
 
 @bp.route("/migrate", methods=["POST"])
-def migrate() -> Union[Response, Tuple[Response, int]]:
+def migrate() -> ResponseReturnValue:
     """Trigger migration from SQLite to JSONL (JSON API)."""
     data = request.get_json()
     direction: str = data.get("direction", "sqlite-to-jsonl") if data else "sqlite-to-jsonl"
@@ -151,7 +160,7 @@ def migrate() -> Union[Response, Tuple[Response, int]]:
 
 
 @bp.route("/backend/switch", methods=["POST"])
-def switch_backend() -> Tuple[Response, int]:
+def switch_backend() -> ResponseReturnValue:
     """Switch to a different backend.
 
     Note: This doesn't actually switch the backend in the current process.
@@ -177,16 +186,14 @@ def switch_backend() -> Tuple[Response, int]:
     if target_backend == "jsonl":
         instructions["note"] = "Make sure to run the migration first if you haven't already"
 
-    return jsonify(instructions)
+    return jsonify(instructions), 200
 
 
 @bp.route("/backend/info", methods=["GET"])
-def backend_info() -> Response:
+def backend_info() -> ResponseReturnValue:
     """Get information about the current backend."""
-    from typing import Any
-
     backend_type = get_backend_type()
-    backend_config = current_app.backend_config
+    backend_config = _get_backend_config()
 
     info: dict = {
         "backend_type": backend_type.value,
@@ -194,19 +201,23 @@ def backend_info() -> Response:
     }
 
     if backend_type == BackendType.SQLITE:
-        info["sqlite_path"] = backend_config.sqlite_path
-        info["sqlite_exists"] = Path(backend_config.sqlite_path).exists()
+        sqlite_path = backend_config.sqlite_path
+        assert sqlite_path is not None
+        info["sqlite_path"] = sqlite_path
+        info["sqlite_exists"] = Path(sqlite_path).exists()
         if info["sqlite_exists"]:
-            info["sqlite_size"] = Path(backend_config.sqlite_path).stat().st_size
+            info["sqlite_size"] = Path(sqlite_path).stat().st_size
     else:
-        info["jsonl_dir"] = backend_config.jsonl_data_dir
-        info["jsonl_exists"] = Path(backend_config.jsonl_data_dir).exists()
+        jsonl_dir = backend_config.jsonl_data_dir
+        assert jsonl_dir is not None
+        info["jsonl_dir"] = jsonl_dir
+        info["jsonl_exists"] = Path(jsonl_dir).exists()
 
     return jsonify(info)
 
 
 @bp.route("/restart", methods=["POST"])
-def restart() -> Response:
+def restart() -> ResponseReturnValue:
     """Initiate a graceful restart of the Barsukas process.
 
     This endpoint:
@@ -263,7 +274,7 @@ def restart() -> Response:
 
 
 @bp.route("/restart/status", methods=["GET"])
-def restart_status() -> Response:
+def restart_status() -> ResponseReturnValue:
     """Check the status of an ongoing restart.
 
     Note: This endpoint is exempt from request tracking to avoid

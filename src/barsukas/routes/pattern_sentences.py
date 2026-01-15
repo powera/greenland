@@ -4,11 +4,11 @@
 
 import subprocess
 from pathlib import Path
-from typing import Any, cast, Tuple, Union
+from typing import Any, cast
 
 from config import Config
 from flask import Blueprint, flash, g, jsonify, redirect, render_template, request, url_for
-from werkzeug.wrappers import Response
+from flask.typing import ResponseReturnValue
 
 import constants
 from wordfreq.patterns.simple_patterns import SIMPLE_PATTERNS
@@ -43,7 +43,7 @@ def index() -> str:
 
 
 @bp.route("/generate-candidates", methods=["POST"])
-def generate_candidates() -> Tuple[Response, int]:
+def generate_candidates() -> ResponseReturnValue:
     """Execute the buivolas agent to generate candidate sentences (without translations)."""
     # Get form parameters
     selected_patterns = request.form.getlist("patterns")
@@ -116,7 +116,7 @@ def generate_candidates() -> Tuple[Response, int]:
 
 
 @bp.route("/submit-batch", methods=["POST"])
-def submit_batch() -> Tuple[Response, int]:
+def submit_batch() -> ResponseReturnValue:
     """Submit a batch translation job for untranslated sentences.
 
     NOTE: This function references a 'submit-batch' subcommand that does not exist
@@ -192,7 +192,7 @@ def submit_batch() -> Tuple[Response, int]:
 
 
 @bp.route("/batch-status")
-def batch_status() -> Response:
+def batch_status() -> ResponseReturnValue:
     """Get status of all active batches.
 
     NOTE: This function references a 'list-batches' subcommand that does not exist
@@ -224,7 +224,7 @@ def batch_status() -> Response:
 
 
 @bp.route("/check-batch/<batch_id>")
-def check_batch(batch_id: str) -> Response:
+def check_batch(batch_id: str) -> ResponseReturnValue:
     """Check status of a specific batch and retrieve results if completed.
 
     NOTE: This function references 'check-batch' and 'retrieve-batch' subcommands that do not exist
@@ -293,7 +293,7 @@ def check_batch(batch_id: str) -> Response:
 
 
 @bp.route("/retrieve-batch/<batch_id>", methods=["POST"])
-def retrieve_batch(batch_id: str) -> Tuple[Response, int]:
+def retrieve_batch(batch_id: str) -> ResponseReturnValue:
     """Retrieve and apply results from a completed batch.
 
     NOTE: This function references a 'retrieve-batch' subcommand that does not exist
@@ -345,7 +345,7 @@ def retrieve_batch(batch_id: str) -> Tuple[Response, int]:
 
 
 @bp.route("/<int:sentence_id>/reject", methods=["POST"])
-def reject_sentence(sentence_id: int) -> Response:
+def reject_sentence(sentence_id: int) -> ResponseReturnValue:
     """Mark a sentence as rejected so it won't be regenerated."""
     sentence = g.db.query(Sentence).get(sentence_id)
     if not sentence:
@@ -365,7 +365,7 @@ def reject_sentence(sentence_id: int) -> Response:
 
 
 @bp.route("/<int:sentence_id>/accept", methods=["POST"])
-def accept_sentence(sentence_id: int) -> Response:
+def accept_sentence(sentence_id: int) -> ResponseReturnValue:
     """Accept a sentence: generate translations for all languages and auto-populate level.
 
     This does NOT verify the sentence - that requires a separate Verify action.
@@ -440,7 +440,7 @@ def accept_sentence(sentence_id: int) -> Response:
 
 
 @bp.route("/<int:sentence_id>/verify", methods=["POST"])
-def verify_sentence(sentence_id: int) -> Response:
+def verify_sentence(sentence_id: int) -> ResponseReturnValue:
     """Mark a sentence as verified. Requires translations and level to be set."""
     sentence = g.db.query(Sentence).get(sentence_id)
     if not sentence:

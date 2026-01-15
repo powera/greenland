@@ -8,7 +8,7 @@ import threading
 import time
 import uuid
 from pathlib import Path
-from typing import Any, Dict, IO, Iterator, List, Optional, Union
+from typing import Any, Dict, IO, Iterator, List, Optional
 
 from config import Config
 from flask import (
@@ -22,6 +22,7 @@ from flask import (
     request,
     url_for,
 )
+from flask.typing import ResponseReturnValue
 
 import constants
 from barsukas.helpers.flash_helpers import flash_and_log
@@ -280,11 +281,11 @@ def check_database_empty() -> bool:
 
     try:
         # Check if we have any lemmas or word tokens
-        lemma_count = g.db.query(Lemma).count()
-        token_count = g.db.query(WordToken).count()
+        lemma_count: int = g.db.query(Lemma).count()
+        token_count: int = g.db.query(WordToken).count()
 
         return lemma_count == 0 or token_count == 0
-    except Exception as e:
+    except Exception:
         # If we can't query, assume database needs initialization
         return True
 
@@ -313,7 +314,7 @@ def list_agents() -> str:
 
 
 @bp.route("/launch/<agent_name>", methods=["GET"])
-def launch_form(agent_name: str) -> Union[str, Response]:
+def launch_form(agent_name: str) -> ResponseReturnValue:
     """Display the launch form for a specific agent."""
     # Find the agent
     agent = next((a for a in AGENTS if a["name"] == agent_name), None)
@@ -323,7 +324,8 @@ def launch_form(agent_name: str) -> Union[str, Response]:
 
     # If agent has redirect_to, redirect there
     if "redirect_to" in agent:
-        return redirect(url_for(agent["redirect_to"]))
+        redirect_to: str = agent["redirect_to"]  # type: ignore[assignment]
+        return redirect(url_for(redirect_to))
 
     # If agent uses dynamic form, introspect its argparse
     parser_info = None
@@ -352,7 +354,7 @@ def launch_form(agent_name: str) -> Union[str, Response]:
 
 
 @bp.route("/execute/<agent_name>", methods=["POST"])
-def execute_agent(agent_name: str) -> Response:
+def execute_agent(agent_name: str) -> ResponseReturnValue:
     """Execute an agent with specified parameters (async)."""
     # Find the agent
     agent = next((a for a in AGENTS if a["name"] == agent_name), None)
@@ -485,7 +487,7 @@ def execute_agent(agent_name: str) -> Response:
 
 
 @bp.route("/output/<task_id>")
-def view_output(task_id: str) -> Union[str, Response]:
+def view_output(task_id: str) -> ResponseReturnValue:
     """Display the output page for a running/completed agent task."""
     if task_id not in running_tasks:
         flash_and_log("Task not found or expired", "error")
@@ -502,7 +504,7 @@ def view_output(task_id: str) -> Union[str, Response]:
 
 
 @bp.route("/stream/<task_id>")
-def stream_output(task_id: str) -> Response:
+def stream_output(task_id: str) -> ResponseReturnValue:
     """Stream the output of a running agent task using Server-Sent Events."""
     if task_id not in running_tasks:
         return jsonify({"success": False, "error": "Task not found"}), 404

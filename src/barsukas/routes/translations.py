@@ -5,7 +5,8 @@
 from typing import Union
 
 from config import Config
-from flask import Blueprint, Response, flash, g, jsonify, redirect, request, url_for
+from flask import Blueprint, flash, g, jsonify, redirect, request, url_for
+from werkzeug.wrappers import Response
 
 from wordfreq.storage.crud.operation_log import log_translation_change
 from wordfreq.storage.models.schema import Lemma

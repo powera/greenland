@@ -18,8 +18,8 @@ from flask import (
     request,
     send_file,
     url_for,
-    Response,
 )
+from werkzeug.wrappers import Response
 
 import constants
 

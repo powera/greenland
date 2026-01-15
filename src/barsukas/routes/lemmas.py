@@ -2,10 +2,11 @@
 
 """Routes for lemma management."""
 
-from typing import Union
+from typing import Any, List, Optional, Tuple, Union
 
 from config import Config
-from flask import Blueprint, Response, flash, g, redirect, render_template, request, url_for
+from flask import Blueprint, flash, g, redirect, render_template, request, url_for
+from flask.typing import ResponseReturnValue
 
 from audioshoe.coqui.types import CoquiVoice
 from audioshoe.espeak.types import EspeakVoice
@@ -27,7 +28,7 @@ bp = Blueprint("lemmas", __name__, url_prefix="/lemmas")
 
 
 @bp.route("/add", methods=["GET", "POST"])
-def add_lemma() -> Union[str, Response]:
+def add_lemma() -> ResponseReturnValue:
     """Add a new lemma."""
     import json
 
@@ -231,7 +232,7 @@ def list_lemmas() -> str:
 
 
 @bp.route("/<int:lemma_id>")
-def view_lemma(lemma_id: int) -> Union[str, Response]:
+def view_lemma(lemma_id: int) -> ResponseReturnValue:
     """View a single lemma with all details."""
     from wordfreq.storage.models.schema import DerivativeForm, SentenceWord
 
@@ -382,7 +383,7 @@ def view_lemma(lemma_id: int) -> Union[str, Response]:
 
 
 @bp.route("/<int:lemma_id>/edit", methods=["GET", "POST"])
-def edit_lemma(lemma_id: int) -> Union[str, Response]:
+def edit_lemma(lemma_id: int) -> ResponseReturnValue:
     """Edit a lemma."""
     from flask import current_app
 
@@ -396,7 +397,7 @@ def edit_lemma(lemma_id: int) -> Union[str, Response]:
             flash("Cannot update: running in read-only mode", "error")
             return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
         # Track changes for logging
-        changes = []
+        changes: List[Tuple[str, Any, Any]] = []
 
         # Update basic fields
         new_lemma_text = request.form.get("lemma_text", "").strip()
@@ -566,7 +567,7 @@ def edit_lemma(lemma_id: int) -> Union[str, Response]:
 
 
 @bp.route("/<int:lemma_id>/delete-synonym/<int:form_id>", methods=["POST"])
-def delete_synonym(lemma_id: int, form_id: int) -> Response:
+def delete_synonym(lemma_id: int, form_id: int) -> ResponseReturnValue:
     """Delete a single synonym or alternative form."""
     from flask import current_app
 
@@ -621,7 +622,7 @@ def delete_synonym(lemma_id: int, form_id: int) -> Response:
 
 
 @bp.route("/<int:lemma_id>/delete-all-synonyms", methods=["POST"])
-def delete_all_synonyms(lemma_id: int) -> Response:
+def delete_all_synonyms(lemma_id: int) -> ResponseReturnValue:
     """Delete all synonyms and/or alternative forms for a lemma."""
     from flask import current_app
 

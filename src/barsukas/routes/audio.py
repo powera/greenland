@@ -13,7 +13,7 @@ import os
 import tempfile
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional
 
 from flask import (
     Blueprint,
@@ -29,6 +29,7 @@ from flask import (
     session,
     url_for,
 )
+from flask.typing import ResponseReturnValue
 from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 
@@ -82,7 +83,7 @@ def index() -> str:
 
 
 @bp.route("/import", methods=["GET", "POST"])
-def import_manifest() -> Union[str, Response]:
+def import_manifest() -> ResponseReturnValue:
     """Import audio manifest file."""
     if request.method == "GET":
         # Scan for available manifests
@@ -329,7 +330,7 @@ def list_files() -> str:
 
 
 @bp.route("/download-filelist")
-def download_filelist() -> Union[Response, Tuple[Response, int]]:
+def download_filelist() -> ResponseReturnValue:
     """Download a text file containing paths to audio files matching current filters."""
     # Get filter parameters
     language_filter = request.args.get("language", "")
@@ -415,9 +416,7 @@ def download_filelist() -> Union[Response, Tuple[Response, int]]:
 
 
 @bp.route("/files/<language>/<voice>/<filename>")
-def serve_audio_file(
-    language: str, voice: str, filename: str
-) -> Union[Response, Tuple[Response, int]]:
+def serve_audio_file(language: str, voice: str, filename: str) -> ResponseReturnValue:
     """
     Serve audio file - redirects to S3 CDN if available, otherwise serves from local directory.
 
@@ -468,7 +467,7 @@ def serve_audio_file(
 
 
 @bp.route("/review/<int:review_id>", methods=["GET", "POST"])
-def review_file(review_id: int) -> Union[str, Response, Tuple[Response, int]]:
+def review_file(review_id: int) -> ResponseReturnValue:
     """Review a single audio file."""
     review = g.db.query(AudioQualityReview).filter_by(id=review_id).first()
 
@@ -553,7 +552,7 @@ def review_file(review_id: int) -> Union[str, Response, Tuple[Response, int]]:
 
 
 @bp.route("/update/<int:review_id>", methods=["POST"])
-def quick_update(review_id: int) -> Tuple[Response, int]:
+def quick_update(review_id: int) -> ResponseReturnValue:
     """Quick update for inline actions (AJAX endpoint)."""
     review = g.db.query(AudioQualityReview).filter_by(id=review_id).first()
 
@@ -578,7 +577,7 @@ def quick_update(review_id: int) -> Tuple[Response, int]:
 
 
 @bp.route("/remove/<int:review_id>", methods=["POST"])
-def remove_file(review_id: int) -> Response:
+def remove_file(review_id: int) -> ResponseReturnValue:
     """Remove an audio file review record."""
     review = g.db.query(AudioQualityReview).filter_by(id=review_id).first()
 
@@ -598,7 +597,7 @@ def remove_file(review_id: int) -> Response:
 
 
 @bp.route("/accept/<int:review_id>", methods=["POST"])
-def accept_for_production(review_id: int) -> Response:
+def accept_for_production(review_id: int) -> ResponseReturnValue:
     """Accept an audio file for production by moving it from staging to prod."""
     from clients.audio.audio_acceptance import accept_audio_for_production
 
@@ -641,7 +640,7 @@ def accept_for_production(review_id: int) -> Response:
 
 
 @bp.route("/accept-bulk", methods=["POST"])
-def accept_bulk_production() -> Response:
+def accept_bulk_production() -> ResponseReturnValue:
     """Accept multiple audio files for production."""
     from clients.audio.audio_acceptance import accept_multiple_audio
 
@@ -681,7 +680,7 @@ def accept_bulk_production() -> Response:
 
 
 @bp.route("/generate", methods=["GET", "POST"])
-def generate() -> Union[str, Response]:
+def generate() -> ResponseReturnValue:
     """Audio generation interface."""
     if request.method == "GET":
         # Show generation form
@@ -721,7 +720,7 @@ def generate() -> Union[str, Response]:
     language_code = request.form.get("language")
     limit = request.form.get("limit", type=int)
     difficulty_level = request.form.get("difficulty_level", type=int)
-    voices = request.form.getlist("voices")
+    voice_names: List[str] = request.form.getlist("voices")
     tts_engine = request.form.get("tts_engine", "openai")
     use_ipa = request.form.get("use_ipa") == "on"
 
@@ -729,7 +728,7 @@ def generate() -> Union[str, Response]:
         flash("Language is required", "error")
         return redirect(url_for("audio.generate"))
 
-    if not voices:
+    if not voice_names:
         flash("At least one voice must be selected", "error")
         return redirect(url_for("audio.generate"))
 
@@ -737,10 +736,10 @@ def generate() -> Union[str, Response]:
     try:
         if tts_engine == "espeak-ng":
             # Convert to EspeakVoice enums
-            espeak_voice_enums = [EspeakVoice[v.upper()] for v in voices]
+            espeak_voice_enums = [EspeakVoice[v.upper()] for v in voice_names]
         else:
             # Convert to OpenAI Voice enums
-            openai_voice_enums = [Voice(v) for v in voices]
+            openai_voice_enums = [Voice(v) for v in voice_names]
     except (ValueError, KeyError) as e:
         flash(f"Invalid voice: {e}", "error")
         return redirect(url_for("audio.generate"))
@@ -973,7 +972,7 @@ def _generate_audio_coqui(
 
 
 @bp.route("/generate-single/<guid>", methods=["POST"])
-def generate_single(guid: str) -> Union[str, Response, Tuple[Response, int]]:
+def generate_single(guid: str) -> ResponseReturnValue:
     """Generate audio for a single lemma (queued via task worker)."""
     from barsukas.utils.task_queue import TaskType, enqueue_task
 

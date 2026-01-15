@@ -6,7 +6,8 @@ import json
 from typing import Union
 
 from config import Config
-from flask import Blueprint, Response, flash, g, redirect, render_template, request, url_for
+from flask import Blueprint, flash, g, redirect, render_template, request, url_for
+from werkzeug.wrappers import Response
 
 from barsukas.helpers.flash_helpers import flash_and_log
 from wordfreq.storage.models.operation_log import OperationLog

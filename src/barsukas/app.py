@@ -16,6 +16,8 @@ from typing import Any, Callable, Dict, Optional
 
 from config import Config
 from flask import Flask, g, render_template
+from sqlalchemy.orm import Session
+
 from pinyin_helper import generate_pinyin, generate_pinyin_ruby_html, is_chinese
 from routes import (
     agents,
@@ -33,12 +35,18 @@ from routes import (
     translations,
     wireword,
 )
-
 from wordfreq.storage.backend import create_session, get_backend_type
 from wordfreq.storage.backend.config import BackendType, DataSourceConfig
 
 
-def create_app(config_class: type[Config] = Config) -> Flask:
+class BarsukasFlask(Flask):
+    """Custom Flask subclass with typed custom attributes."""
+
+    backend_config: DataSourceConfig
+    db_session_factory: Callable[[], Session]
+
+
+def create_app(config_class: type[Config] = Config) -> BarsukasFlask:
     """Create and configure the Flask application."""
     logging.basicConfig(
         level=logging.DEBUG if config_class.DEBUG else logging.INFO,
@@ -46,7 +54,7 @@ def create_app(config_class: type[Config] = Config) -> Flask:
         force=True,
     )
 
-    app = Flask(__name__)
+    app = BarsukasFlask(__name__)
     app.config.from_object(config_class)
 
     # Set up storage backend
@@ -67,7 +75,7 @@ def create_app(config_class: type[Config] = Config) -> Flask:
     app.backend_config = backend_config
 
     # Create a session factory function that returns new sessions
-    def session_factory() -> Any:
+    def session_factory() -> Session:
         return create_session(backend_config)
 
     app.db_session_factory = session_factory
@@ -141,7 +149,7 @@ def create_app(config_class: type[Config] = Config) -> Flask:
         g.db = app.db_session_factory()
 
     @app.teardown_appcontext
-    def shutdown_session(exception: Optional[Exception] = None) -> None:
+    def shutdown_session(exception: Optional[BaseException]) -> None:
         """Clean up database session after request."""
         db = g.pop("db", None)
         if db is not None:
