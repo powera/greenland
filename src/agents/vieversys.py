@@ -501,7 +501,7 @@ class VieversysAgent:
         else:
             # Create new record
             review = AudioQualityReview(
-                guid=None,  # Sentences don't have GUIDs
+                guid=f"S_{sentence.id:05d}",  # Synthetic GUID for sentences
                 sentence_id=sentence.id,
                 language_code=language_code,
                 voice_name=voice_name,
