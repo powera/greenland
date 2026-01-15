@@ -128,6 +128,19 @@ Task presets:
         help="Minimum confidence score to save fact (default: 0.7)",
     )
 
+    # Mode selection - mutually exclusive flags
+    mode_group = parser.add_mutually_exclusive_group()
+    mode_group.add_argument(
+        "--coverage",
+        action="store_true",
+        help="Report grammar facts coverage statistics (default mode)",
+    )
+    mode_group.add_argument(
+        "--populate",
+        action="store_true",
+        help="Populate missing grammar facts",
+    )
+
     # Workqueue arguments
     parser.add_argument(
         "--use-workqueue",
@@ -288,6 +301,47 @@ def main():
         sys.exit(1)
     else:
         logger.info(f"Processing {len(lemmas)} lemmas")
+
+    # Determine mode from flags (default to coverage if none specified)
+    if args.populate:
+        mode = "populate"
+    else:
+        mode = "coverage"  # default
+
+    # COVERAGE MODE: Report what grammar facts are missing
+    if mode == "coverage":
+        from wordfreq.storage.crud.grammar_fact import get_grammar_fact_value
+
+        logger.info("=" * 80)
+        logger.info("LAPE AGENT - COVERAGE REPORT")
+        logger.info("=" * 80)
+
+        session = agent.get_session()
+        try:
+            for language_code, applicable_fact_types in fact_types_by_language.items():
+                for fact_type in applicable_fact_types:
+                    fact_config = LapeAgent.SUPPORTED_FACT_TYPES[fact_type]
+                    required_pos = fact_config["required_pos"]
+
+                    # Filter lemmas by POS type
+                    matching_lemmas = [l for l in lemmas if l.pos_type in required_pos]
+
+                    # Count missing
+                    missing_count = 0
+                    for lemma in matching_lemmas:
+                        existing = get_grammar_fact_value(
+                            session, lemma.id, language_code, fact_type
+                        )
+                        if existing is None:
+                            missing_count += 1
+
+                    print(
+                        f"{fact_type} ({language_code}): {missing_count}/{len(matching_lemmas)} missing"
+                    )
+        finally:
+            session.close()
+
+        return
 
     # WORKQUEUE MODE: Enqueue work items for barsukas worker to process
     if args.use_workqueue:

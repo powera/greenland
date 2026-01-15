@@ -41,12 +41,22 @@ def get_argument_parser():
     add_language_args(parser, multiple=True)
     add_backend_args(parser)
 
-    # Mode selection
-    parser.add_argument(
-        "--mode",
-        choices=["coverage", "populate-only", "regenerate"],
-        default="coverage",
-        help="Operation mode: coverage (report missing, default), populate-only (add missing only), regenerate (delete and regenerate all)",
+    # Mode selection - mutually exclusive flags
+    mode_group = parser.add_mutually_exclusive_group()
+    mode_group.add_argument(
+        "--coverage",
+        action="store_true",
+        help="Report missing synonyms/alternatives coverage (default mode)",
+    )
+    mode_group.add_argument(
+        "--populate",
+        action="store_true",
+        help="Populate missing synonyms/alternatives",
+    )
+    mode_group.add_argument(
+        "--regenerate",
+        action="store_true",
+        help="Delete and regenerate all synonyms/alternatives (destructive)",
     )
     parser.add_argument(
         "--type",
@@ -101,8 +111,16 @@ def main():
     if "all" in languages_to_process:
         languages_to_process = ["en"] + list(get_supported_languages().keys())
 
+    # Determine mode from flags (default to coverage if none specified)
+    if args.populate:
+        mode = "populate"
+    elif args.regenerate:
+        mode = "regenerate"
+    else:
+        mode = "coverage"  # default
+
     # Handle coverage mode (report missing synonyms)
-    if args.mode == "coverage":
+    if mode == "coverage":
         # Check specific languages or all languages
         if len(languages_to_process) == 1 or "all" in args.languages:
             # Single language or all languages - use simpler report
@@ -183,8 +201,8 @@ def main():
                 print(f"{'='*60}")
         return
 
-    # Handle populate-only mode
-    if args.mode == "populate-only":
+    # Handle populate mode
+    if mode == "populate":
         # Process each language
         for lang_idx, language_code in enumerate(languages_to_process):
             display_language_header(language_code, lang_idx + 1, len(languages_to_process))
@@ -229,8 +247,8 @@ def main():
             display_batch_results(results, language_code, dry_run=args.dry_run)
         return
 
-    # Handle regenerate mode (similar to populate-only but forces regeneration)
-    if args.mode == "regenerate":
+    # Handle regenerate mode (similar to populate but forces regeneration)
+    if mode == "regenerate":
         from wordfreq.storage.crud.grammar_fact import delete_grammar_fact
 
         # Process each language

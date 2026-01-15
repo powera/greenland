@@ -96,11 +96,17 @@ def get_argument_parser() -> argparse.ArgumentParser:
         ),
     )
 
-    # Fix mode options (generate missing forms)
-    parser.add_argument(
-        "--fix",
+    # Mode selection - mutually exclusive flags
+    mode_group = parser.add_mutually_exclusive_group()
+    mode_group.add_argument(
+        "--coverage",
         action="store_true",
-        help="Fix mode: Generate missing word forms. Use --task to specify which forms to fix.",
+        help="Report word forms coverage statistics (default mode)",
+    )
+    mode_group.add_argument(
+        "--populate",
+        action="store_true",
+        help="Populate missing word forms",
     )
 
     return parser
@@ -176,8 +182,14 @@ def main() -> None:
         print(f"\nNo lemmas found to process")
         sys.exit(1)
 
-    # Handle bulk processing (no --guid filter)
-    if args.fix:
+    # Determine mode from flags (default to coverage if none specified)
+    if args.populate:
+        mode = "populate"
+    else:
+        mode = "coverage"  # default
+
+    # Handle populate mode
+    if mode == "populate":
         # Parse --task parameter to get language and form type
         language_code = None
         inferred_pos_type = None
@@ -315,12 +327,13 @@ def main() -> None:
 
         return
 
-    # If we get here, user wants to check/report (not fix)
-    # This is the equivalent of the old --check mode
-    print("\nCheck/Report mode (use --fix to actually generate forms)")
-    print("This functionality is not yet implemented in the new CLI.")
-    print("Use --guid to check a specific lemma, or --fix to generate forms.")
-    sys.exit(1)
+    # Coverage mode - report what needs work
+    if mode == "coverage":
+        print("\n=== Coverage Report ===\n")
+
+        # Run full check which reports all coverage stats
+        results = agent.run_full_check(output_file=args.output)
+        return
 
 
 if __name__ == "__main__":
