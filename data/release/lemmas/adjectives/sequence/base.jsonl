@@ -8,5 +8,5 @@
 {"guid": "A15_008", "pos_type": "adjective", "pos_subtype": "sequence", "concept_label": "eighth", "concept_definition": "An ordinal number meaning 'number eight in a sequence' or 'in the eighth position'. (Used to indicate order: 1st, 2nd, 3rd, ... 8th.)", "difficulty_level": 9}
 {"guid": "A15_009", "pos_type": "adjective", "pos_subtype": "sequence", "concept_label": "ninth", "concept_definition": "An ordinal adjective meaning in position number nine in a sequence (one after eighth and before tenth).", "difficulty_level": 9}
 {"guid": "A15_010", "pos_type": "adjective", "pos_subtype": "sequence", "concept_label": "tenth", "concept_definition": "The ordinal form of the number ten; indicates the position number ten in an ordered sequence (e.g., the tenth item).", "difficulty_level": 9}
-{"guid": "A15_011", "pos_type": "adjective", "pos_subtype": "sequence", "concept_label": "last", "concept_definition": "coming after all others in time or order", "difficulty_level": 6}
-{"guid": "A15_012", "pos_type": "adjective", "pos_subtype": "sequence", "concept_label": "final", "concept_definition": "coming at the end; last", "difficulty_level": 6}
+{"guid": "A15_011", "pos_type": "adjective", "pos_subtype": "sequence", "concept_label": "last", "concept_definition": "coming after all others in time or order", "difficulty_level": -1}
+{"guid": "A15_012", "pos_type": "adjective", "pos_subtype": "sequence", "concept_label": "final", "concept_definition": "coming at the end; last", "difficulty_level": -1}

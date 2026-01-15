@@ -1,5 +1,3 @@
-{"guid": "N01_047", "pos_type": "noun", "pos_subtype": "human", "concept_label": "cousin (male)", "concept_definition": "a male child of one's uncle or aunt; a relative who shares a common grandparent", "difficulty_level": 8}
-{"guid": "N01_048", "pos_type": "noun", "pos_subtype": "human", "concept_label": "cousin (female)", "concept_definition": "The female child of one's aunt or uncle; a person who shares a common grandparent with another person.", "difficulty_level": 8}
 {"guid": "N01_055", "pos_type": "noun", "pos_subtype": "human", "concept_label": "man", "concept_definition": "an adult human male", "difficulty_level": 5}
 {"guid": "N01_056", "pos_type": "noun", "pos_subtype": "human", "concept_label": "woman", "concept_definition": "An adult human female.", "difficulty_level": 5}
 {"guid": "N01_057", "pos_type": "noun", "pos_subtype": "human", "concept_label": "boy", "concept_definition": "a male child or young male person; a son or young male under the age of adulthood (often used to contrast with 'girl')", "difficulty_level": 5}

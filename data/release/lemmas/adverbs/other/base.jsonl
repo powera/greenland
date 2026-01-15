@@ -1,4 +1,3 @@
-{"guid": "N99_006", "pos_type": "adverb", "pos_subtype": "other", "concept_label": "maybe", "concept_definition": "Used to indicate that something is possible or uncertain; expressing a tentative or noncommittal possibility.", "difficulty_level": 5}
-{"guid": "N99_007", "pos_type": "adverb", "pos_subtype": "other", "concept_label": "least", "concept_definition": "to the smallest extent or degree; at the minimum.", "difficulty_level": -1}
-{"guid": "N99_008", "pos_type": "adverb", "pos_subtype": "other", "concept_label": "less", "concept_definition": "to a smaller extent or degree; not as much.", "difficulty_level": -1}
-{"guid": "N99_009", "pos_type": "adverb", "pos_subtype": "other", "concept_label": "twice", "concept_definition": "two times; on two occasions; doubly.", "difficulty_level": -1}
+{"guid": "D99_001", "pos_type": "adverb", "pos_subtype": "other", "concept_label": "least", "concept_definition": "to the smallest extent or degree; at the minimum.", "difficulty_level": -1}
+{"guid": "D99_002", "pos_type": "adverb", "pos_subtype": "other", "concept_label": "less", "concept_definition": "to a smaller extent or degree; not as much.", "difficulty_level": -1}
+{"guid": "D99_003", "pos_type": "adverb", "pos_subtype": "other", "concept_label": "twice", "concept_definition": "two times; on two occasions; doubly.", "difficulty_level": -1}

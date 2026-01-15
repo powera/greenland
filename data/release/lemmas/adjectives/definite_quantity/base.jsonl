@@ -26,3 +26,5 @@
 {"guid": "A11_026", "pos_type": "adjective", "pos_subtype": "definite_quantity", "concept_label": "seventy", "concept_definition": "The cardinal number equal to 70; the quantity or amount of seventy.", "difficulty_level": 4}
 {"guid": "A11_027", "pos_type": "adjective", "pos_subtype": "definite_quantity", "concept_label": "eighty", "concept_definition": "(number) equal to 80; the cardinal number after seventy-nine and before eighty-one.", "difficulty_level": 4}
 {"guid": "A11_028", "pos_type": "adjective", "pos_subtype": "definite_quantity", "concept_label": "ninety", "concept_definition": "The number equal to 90; ten times nine.", "difficulty_level": 4}
+{"guid": "A11_029", "pos_type": "adjective", "pos_subtype": "definite_quantity", "concept_label": "one hundred", "concept_definition": "A cardinal number representing the quantity 100; used to count objects or indicate a quantity.", "difficulty_level": 4}
+{"guid": "A11_030", "pos_type": "adjective", "pos_subtype": "definite_quantity", "concept_label": "one thousand", "concept_definition": "The number 1,000; a quantity consisting of one thousand units.", "difficulty_level": 4}

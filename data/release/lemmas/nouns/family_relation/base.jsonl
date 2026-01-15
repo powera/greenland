@@ -22,3 +22,5 @@
 {"guid": "N35_054", "pos_type": "noun", "pos_subtype": "family_relation", "concept_label": "girlfriend", "concept_definition": "a female with whom someone is in a romantic or dating relationship; a woman who is a person's romantic partner", "difficulty_level": -1}
 {"guid": "N35_071", "pos_type": "noun", "pos_subtype": "family_relation", "concept_label": "wife", "concept_definition": "a married woman", "difficulty_level": -1}
 {"guid": "N35_075", "pos_type": "noun", "pos_subtype": "family_relation", "concept_label": "husband", "concept_definition": "a married man in relation to his spouse.", "difficulty_level": -1}
+{"guid": "N35_047", "pos_type": "noun", "pos_subtype": "family_relation", "concept_label": "cousin (male)", "concept_definition": "a male child of one's uncle or aunt; a relative who shares a common grandparent", "difficulty_level": -1}
+{"guid": "N35_048", "pos_type": "noun", "pos_subtype": "family_relation", "concept_label": "cousin (female)", "concept_definition": "The female child of one's aunt or uncle; a person who shares a common grandparent with another person.", "difficulty_level": -1}
