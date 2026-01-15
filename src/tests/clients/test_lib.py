@@ -23,7 +23,7 @@ from clients.lib import (
 class SchemaConversionTestCase(unittest.TestCase):
     """Tests for schema conversion utilities."""
 
-    def test_simple_schema_conversion(self):
+    def test_simple_schema_conversion(self) -> None:
         """Test basic schema conversion with simple properties."""
         schema = Schema(
             name="UserProfile",
@@ -76,7 +76,7 @@ class SchemaConversionTestCase(unittest.TestCase):
         self.assertEqual(len(ollama_schema["properties"]), 4)
         self.assertEqual(len(ollama_schema["required"]), 3)
 
-    def test_nested_object_schema(self):
+    def test_nested_object_schema(self) -> None:
         """Test schema conversion with nested objects."""
         address_properties = {
             "street": SchemaProperty("string", "Street address"),
@@ -127,7 +127,7 @@ class SchemaConversionTestCase(unittest.TestCase):
         self.assertIn("propertyOrdering", gemini_schema["properties"]["address"])
         self.assertEqual(len(gemini_schema["properties"]["address"]["propertyOrdering"]), 3)
 
-    def test_array_of_objects_schema(self):
+    def test_array_of_objects_schema(self) -> None:
         """Test schema conversion with arrays of objects."""
         item_properties = {
             "id": SchemaProperty("string", "Item identifier"),
@@ -164,7 +164,7 @@ class SchemaConversionTestCase(unittest.TestCase):
         # Verify propertyOrdering in array items for Gemini
         self.assertIn("propertyOrdering", gemini_schema["properties"]["items"]["items"])
 
-    def test_realistic_schema_conversion(self):
+    def test_realistic_schema_conversion(self) -> None:
         """Test conversion with a realistic schema from linguistic_client."""
         # This is inspired by query_definitions schema in linguistic_client.py
         definition_prop = SchemaProperty(
@@ -215,7 +215,7 @@ class SchemaConversionTestCase(unittest.TestCase):
                     array_items_schema=Schema(
                         name="Definition",
                         description="A single definition of the word",
-                        properties=definition_prop.properties,
+                        properties=definition_prop.properties or {},
                     ),
                 )
             },
@@ -247,7 +247,7 @@ class SchemaConversionTestCase(unittest.TestCase):
         self.assertIn("propertyOrdering", gemini_schema)
         self.assertIn("propertyOrdering", gemini_schema["properties"]["definitions"]["items"])
 
-    def test_schema_with_enums(self):
+    def test_schema_with_enums(self) -> None:
         """Test schema conversion with enum constraints."""
         schema = Schema(
             name="OrderStatus",
@@ -282,7 +282,7 @@ class SchemaConversionTestCase(unittest.TestCase):
         self.assertIn("enum", anthropic_schema["properties"]["status"])
         self.assertEqual(len(anthropic_schema["properties"]["status"]["enum"]), 5)
 
-    def test_cleaning_for_openai(self):
+    def test_cleaning_for_openai(self) -> None:
         """Test cleaning schema for OpenAI requirements."""
         schema = Schema(
             name="ProductInfo",
@@ -336,7 +336,7 @@ class SchemaConversionTestCase(unittest.TestCase):
             "maximum", openai_schema["properties"]["ratings"]["items"]["properties"]["score"]
         )
 
-    def test_schema_from_dict(self):
+    def test_schema_from_dict(self) -> None:
         """Test converting dictionary schema to Schema object."""
         schema_dict = {
             "type": "object",
@@ -379,10 +379,12 @@ class SchemaConversionTestCase(unittest.TestCase):
         self.assertFalse(schema.properties["include_examples"].required)
 
         # Check enum values
-        self.assertEqual(len(schema.properties["source_language"].enum), 5)
-        self.assertIn("en", schema.properties["source_language"].enum)
+        source_lang_enum = schema.properties["source_language"].enum
+        assert source_lang_enum is not None
+        self.assertEqual(len(source_lang_enum), 5)
+        self.assertIn("en", source_lang_enum)
 
-    def test_realistic_linguistic_client_schema(self):
+    def test_realistic_linguistic_client_schema(self) -> None:
         """Test with a full realistic schema from linguistic_client."""
         # This is based on query_pronunciation schema from linguistic_client.py
         schema_dict = {

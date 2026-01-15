@@ -12,6 +12,7 @@ import json
 import sys
 import unittest
 from pathlib import Path
+from typing import Any
 
 # Add src directory to path
 GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent)
@@ -25,7 +26,9 @@ from clients.types import Schema, SchemaProperty
 class TestOpenAISchemaStrictMode(unittest.TestCase):
     """Test OpenAI schema conversion meets strict mode requirements."""
 
-    def validate_openai_strict_schema(self, schema_dict, path="root"):
+    def validate_openai_strict_schema(
+        self, schema_dict: dict[str, Any], path: str = "root"
+    ) -> None:
         """
         Recursively validate that a schema meets OpenAI's strict requirements.
 
@@ -98,7 +101,7 @@ class TestOpenAISchemaStrictMode(unittest.TestCase):
             ]:
                 self.validate_openai_strict_schema(value, f"{path}.{key}")
 
-    def test_simple_schema(self):
+    def test_simple_schema(self) -> None:
         """Test simple schema with basic types."""
         schema = Schema(
             name="Simple",
@@ -119,7 +122,7 @@ class TestOpenAISchemaStrictMode(unittest.TestCase):
         self.assertEqual(openai_schema["additionalProperties"], False)
         self.assertEqual(set(openai_schema["required"]), {"name", "age"})
 
-    def test_nested_object_schema(self):
+    def test_nested_object_schema(self) -> None:
         """Test schema with nested objects."""
         schema = Schema(
             name="User",
@@ -140,7 +143,7 @@ class TestOpenAISchemaStrictMode(unittest.TestCase):
         openai_schema = to_openai_schema(schema)
         self.validate_openai_strict_schema(openai_schema)
 
-    def test_array_of_strings(self):
+    def test_array_of_strings(self) -> None:
         """Test schema with array of simple types."""
         schema = Schema(
             name="TagList",
@@ -151,7 +154,7 @@ class TestOpenAISchemaStrictMode(unittest.TestCase):
         openai_schema = to_openai_schema(schema)
         self.validate_openai_strict_schema(openai_schema)
 
-    def test_array_of_objects_inline(self):
+    def test_array_of_objects_inline(self) -> None:
         """Test schema with array of objects using inline definition."""
         schema = Schema(
             name="UserList",
@@ -174,7 +177,7 @@ class TestOpenAISchemaStrictMode(unittest.TestCase):
         openai_schema = to_openai_schema(schema)
         self.validate_openai_strict_schema(openai_schema)
 
-    def test_deeply_nested_array_of_objects(self):
+    def test_deeply_nested_array_of_objects(self) -> None:
         """Test deeply nested arrays of objects (like zvirblis schema)."""
         schema = Schema(
             name="SentenceGeneration",
@@ -213,7 +216,7 @@ class TestOpenAISchemaStrictMode(unittest.TestCase):
         openai_schema = to_openai_schema(schema)
         self.validate_openai_strict_schema(openai_schema)
 
-    def test_zvirblis_exact_schema(self):
+    def test_zvirblis_exact_schema(self) -> None:
         """Test the exact schema used in zvirblis.py."""
         schema = Schema(
             name="SentenceGeneration",
@@ -284,7 +287,7 @@ class TestOpenAISchemaStrictMode(unittest.TestCase):
         print("\n=== Generated OpenAI Schema ===")
         print(json.dumps(openai_schema, indent=2))
 
-    def test_object_with_additional_properties_string(self):
+    def test_object_with_additional_properties_string(self) -> None:
         """Test object with additionalProperties: {type: string}."""
         schema = Schema(
             name="Translations",
