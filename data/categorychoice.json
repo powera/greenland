@@ -3,571 +3,182 @@
     {
       "id": "human",
       "label": "Humans",
-      "groupMatchers": ["^People & Relationships$"],
-      "tagMatchers": ["human", "humans"]
+      "groups": ["Humans"],
+      "avoidDecoys": ["occupation", "family-relation"]
     },
     {
       "id": "family-relation",
       "label": "Family Relations",
-      "groupMatchers": ["^Family & Relationships$"],
-      "tagMatchers": ["family_relation"]
+      "groups": ["Family Relation"],
+      "avoidDecoys": ["human", "occupation"]
     },
     {
       "id": "occupation",
       "label": "Occupations",
-      "groupMatchers": ["^Occupations$"],
-      "tagMatchers": ["occupation"]
+      "groups": ["Occupation"],
+      "avoidDecoys": ["human", "family-relation"]
     },
     {
       "id": "animal",
       "label": "Animals",
-      "groupMatchers": ["^Animals$"],
-      "tagMatchers": ["animal", "animals"]
+      "groups": ["Animals"],
+      "avoidDecoys": ["plant"]
     },
     {
       "id": "body-part",
       "label": "Body Parts",
-      "groupMatchers": ["^Body Parts$"],
-      "tagMatchers": ["body_part"]
+      "groups": ["Body Part"],
+      "avoidDecoys": []
     },
     {
       "id": "disease-condition",
       "label": "Diseases & Conditions",
-      "groupMatchers": [],
-      "tagMatchers": ["disease_condition"]
+      "groups": ["Disease/Condition"],
+      "avoidDecoys": []
     },
     {
       "id": "plant",
       "label": "Plants",
-      "groupMatchers": ["^Plants$"],
-      "tagMatchers": ["plant"]
-    },
-    {
-      "id": "plant-part",
-      "label": "Plant Parts",
-      "groupMatchers": [],
-      "tagMatchers": ["plant_part"]
+      "groups": ["Plants"],
+      "avoidDecoys": ["animal"]
     },
     {
       "id": "food",
       "label": "Food",
-      "groupMatchers": ["^Food \+ Drink$", "^Additional Foods$"],
-      "tagMatchers": ["food", "food_drink"]
+      "groups": ["Food"],
+      "avoidDecoys": ["beverage"]
     },
     {
       "id": "beverage",
       "label": "Beverages",
-      "groupMatchers": [],
-      "tagMatchers": ["beverage", "food_drink"]
+      "groups": ["Beverage"],
+      "avoidDecoys": ["food"]
     },
     {
       "id": "building-structure",
       "label": "Buildings & Structures",
-      "groupMatchers": ["^Buildings$"],
-      "tagMatchers": ["building_structure"]
-    },
-    {
-      "id": "furniture",
-      "label": "Furniture",
-      "groupMatchers": [],
-      "tagMatchers": ["furniture"]
+      "groups": ["Building/Structure"],
+      "avoidDecoys": ["furniture"]
     },
     {
       "id": "small-movable-object",
       "label": "Small Movable Objects",
-      "groupMatchers": ["^Small Physical Objects$"],
-      "tagMatchers": ["small_movable_object", "small_physical_object"]
+      "groups": ["Small Movable Object"],
+      "avoidDecoys": ["tool-machine"]
     },
     {
       "id": "clothing-accessory",
       "label": "Clothing & Accessories",
-      "groupMatchers": ["^Clothing$"],
-      "tagMatchers": ["clothing_accessory"]
-    },
-    {
-      "id": "artwork-artifact",
-      "label": "Artwork & Artifacts",
-      "groupMatchers": [],
-      "tagMatchers": ["artwork_artifact"]
+      "groups": ["Clothing/Accessory"],
+      "avoidDecoys": []
     },
     {
       "id": "natural-feature",
       "label": "Natural Features",
-      "groupMatchers": ["^Geographic Features$", "^Weather$"],
-      "tagMatchers": ["natural_feature"]
+      "groups": ["Natural Feature"],
+      "avoidDecoys": []
     },
     {
       "id": "tool-machine",
       "label": "Tools & Machines",
-      "groupMatchers": ["^Technology$"],
-      "tagMatchers": ["tool_machine", "tool"]
-    },
-    {
-      "id": "vehicle",
-      "label": "Vehicles",
-      "groupMatchers": ["^Transportation$"],
-      "tagMatchers": ["vehicle"]
-    },
-    {
-      "id": "path-infrastructure",
-      "label": "Paths & Infrastructure",
-      "groupMatchers": [],
-      "tagMatchers": ["path_infrastructure"]
+      "groups": ["Tool/Machine"],
+      "avoidDecoys": ["vehicle", "small-movable-object"]
     },
     {
       "id": "material-substance",
       "label": "Materials & Substances",
-      "groupMatchers": ["^Materials$"],
-      "tagMatchers": ["material_substance"]
-    },
-    {
-      "id": "chemical-compound",
-      "label": "Chemical Compounds",
-      "groupMatchers": [],
-      "tagMatchers": ["chemical_compound"]
-    },
-    {
-      "id": "medication-remedy",
-      "label": "Medications & Remedies",
-      "groupMatchers": [],
-      "tagMatchers": ["medication_remedy"]
+      "groups": ["Material/Substance"],
+      "avoidDecoys": []
     },
     {
       "id": "concept-idea",
       "label": "Concepts & Ideas",
-      "groupMatchers": [
-        "^Abstract Concepts$",
-        "^Hobbies$",
-        "^Social & Political$",
-        "^Thinking & Communication$"
-      ],
-      "tagMatchers": ["concept_idea"]
-    },
-    {
-      "id": "symbolic-element",
-      "label": "Symbolic Elements",
-      "groupMatchers": [],
-      "tagMatchers": ["symbolic_element"]
-    },
-    {
-      "id": "quality-attribute",
-      "label": "Qualities & Attributes",
-      "groupMatchers": [],
-      "tagMatchers": ["quality_attribute"]
-    },
-    {
-      "id": "mental-construct",
-      "label": "Mental Constructs",
-      "groupMatchers": [],
-      "tagMatchers": ["mental_construct"]
-    },
-    {
-      "id": "knowledge-domain",
-      "label": "Knowledge Domains",
-      "groupMatchers": [],
-      "tagMatchers": ["knowledge_domain"]
-    },
-    {
-      "id": "quantitative-concept",
-      "label": "Quantitative Concepts",
-      "groupMatchers": [],
-      "tagMatchers": ["quantitative_concept"]
+      "groups": ["Concept/Idea"],
+      "avoidDecoys": ["emotion-feeling"]
     },
     {
       "id": "emotion-feeling",
       "label": "Emotions & Feelings",
-      "groupMatchers": ["^Emotions$"],
-      "tagMatchers": ["emotion_feeling"]
+      "groups": ["Emotion/Feeling"],
+      "avoidDecoys": ["concept-idea"]
     },
     {
       "id": "shape",
       "label": "Shapes",
-      "groupMatchers": ["^Shapes$"],
-      "tagMatchers": ["shape"]
-    },
-    {
-      "id": "process-event",
-      "label": "Processes & Events",
-      "groupMatchers": [],
-      "tagMatchers": ["process_event"]
+      "groups": ["Shape"],
+      "avoidDecoys": ["color"]
     },
     {
       "id": "time-period",
       "label": "Time Periods",
-      "groupMatchers": ["^Time & Life$"],
-      "tagMatchers": ["time_period"]
-    },
-    {
-      "id": "group-people",
-      "label": "Groups of People",
-      "groupMatchers": [],
-      "tagMatchers": ["group_people"]
-    },
-    {
-      "id": "animal-grouping-term",
-      "label": "Animal Grouping Terms",
-      "groupMatchers": [],
-      "tagMatchers": ["animal_grouping_term"]
-    },
-    {
-      "id": "collection-things",
-      "label": "Collections of Things",
-      "groupMatchers": [],
-      "tagMatchers": ["collection_things"]
+      "groups": ["Time Period"],
+      "avoidDecoys": ["temporal-name"]
     },
     {
       "id": "personal-name",
       "label": "Personal Names",
-      "groupMatchers": ["^Common Proper Nouns$"],
-      "tagMatchers": ["personal_name"]
-    },
-    {
-      "id": "place-name",
-      "label": "Place Names",
-      "groupMatchers": ["^Countries$", "^Cities$", "^Places & Direction$"],
-      "tagMatchers": ["place_name"]
-    },
-    {
-      "id": "organization-name",
-      "label": "Organization Names",
-      "groupMatchers": [],
-      "tagMatchers": ["organization_name"]
+      "groups": ["Personal Name"],
+      "avoidDecoys": []
     },
     {
       "id": "temporal-name",
-      "label": "Temporal Names",
-      "groupMatchers": ["^Days of the Week$", "^Months of the Year$"],
-      "tagMatchers": ["temporal_name"]
+      "label": "Days & Months",
+      "groups": ["Temporal Name"],
+      "avoidDecoys": ["time-period"]
+    },
+    {
+      "id": "country",
+      "label": "Countries",
+      "groups": ["Country"],
+      "avoidDecoys": ["city", "nationality"]
+    },
+    {
+      "id": "city",
+      "label": "Cities",
+      "groups": ["City"],
+      "avoidDecoys": ["country", "nationality"]
     },
     {
       "id": "nationality",
       "label": "Nationalities",
-      "groupMatchers": ["^Nationalities$"],
-      "tagMatchers": ["nationality"]
-    },
-    {
-      "id": "unit-of-measurement",
-      "label": "Units of Measurement",
-      "groupMatchers": ["^Units of Measurement$"],
-      "tagMatchers": ["unit_of_measurement"]
-    },
-    {
-      "id": "noun-other",
-      "label": "Other Nouns",
-      "groupMatchers": [],
-      "tagMatchers": ["noun_other"]
-    },
-    {
-      "id": "physical-action",
-      "label": "Physical Actions",
-      "groupMatchers": [],
-      "tagMatchers": ["physical_action"]
-    },
-    {
-      "id": "creation-action",
-      "label": "Creation Actions",
-      "groupMatchers": [],
-      "tagMatchers": ["creation_action"]
-    },
-    {
-      "id": "destruction-action",
-      "label": "Destruction Actions",
-      "groupMatchers": [],
-      "tagMatchers": ["destruction_action"]
-    },
-    {
-      "id": "mental-state",
-      "label": "Mental States",
-      "groupMatchers": [],
-      "tagMatchers": ["mental_state"]
-    },
-    {
-      "id": "emotional-state",
-      "label": "Emotional States",
-      "groupMatchers": [],
-      "tagMatchers": ["emotional_state"]
-    },
-    {
-      "id": "perception",
-      "label": "Perception",
-      "groupMatchers": [],
-      "tagMatchers": ["perception"]
-    },
-    {
-      "id": "communication",
-      "label": "Communication",
-      "groupMatchers": [],
-      "tagMatchers": ["communication"]
-    },
-    {
-      "id": "possession",
-      "label": "Possession",
-      "groupMatchers": [],
-      "tagMatchers": ["possession"]
-    },
-    {
-      "id": "existence",
-      "label": "Existence",
-      "groupMatchers": [],
-      "tagMatchers": ["existence"]
-    },
-    {
-      "id": "development",
-      "label": "Development",
-      "groupMatchers": [],
-      "tagMatchers": ["development"]
-    },
-    {
-      "id": "change",
-      "label": "Change",
-      "groupMatchers": [],
-      "tagMatchers": ["change"]
-    },
-    {
-      "id": "directional-movement",
-      "label": "Directional Movement",
-      "groupMatchers": [],
-      "tagMatchers": ["directional_movement"]
-    },
-    {
-      "id": "manner-movement",
-      "label": "Manner of Movement",
-      "groupMatchers": [],
-      "tagMatchers": ["manner_movement"]
-    },
-    {
-      "id": "verb-other",
-      "label": "Other Verbs",
-      "groupMatchers": [],
-      "tagMatchers": ["verb_other"]
-    },
-    {
-      "id": "size",
-      "label": "Size",
-      "groupMatchers": [],
-      "tagMatchers": ["size", "quality"]
+      "groups": ["Nationality"],
+      "avoidDecoys": ["country", "city"]
     },
     {
       "id": "color",
-      "label": "Color",
-      "groupMatchers": ["^Colors$"],
-      "tagMatchers": ["color"]
-    },
-    {
-      "id": "shape-adjective",
-      "label": "Shape",
-      "groupMatchers": [],
-      "tagMatchers": ["shape"]
-    },
-    {
-      "id": "texture",
-      "label": "Texture",
-      "groupMatchers": [],
-      "tagMatchers": ["texture"]
-    },
-    {
-      "id": "personal-quality",
-      "label": "Personal Qualities",
-      "groupMatchers": [],
-      "tagMatchers": ["personal_quality"]
-    },
-    {
-      "id": "condition",
-      "label": "Condition",
-      "groupMatchers": [],
-      "tagMatchers": ["condition"]
+      "label": "Colors",
+      "groups": ["Color"],
+      "avoidDecoys": ["shape"]
     },
     {
       "id": "quality",
-      "label": "Quality",
-      "groupMatchers": ["^Qualitative Adjectives$", "^Descriptive Words$", "^Personality$"],
-      "tagMatchers": ["quality"]
-    },
-    {
-      "id": "aesthetic",
-      "label": "Aesthetic",
-      "groupMatchers": [],
-      "tagMatchers": ["aesthetic"]
-    },
-    {
-      "id": "importance",
-      "label": "Importance",
-      "groupMatchers": [],
-      "tagMatchers": ["importance"]
-    },
-    {
-      "id": "origin",
-      "label": "Origin",
-      "groupMatchers": [],
-      "tagMatchers": ["origin"]
-    },
-    {
-      "id": "purpose",
-      "label": "Purpose",
-      "groupMatchers": [],
-      "tagMatchers": ["purpose"]
-    },
-    {
-      "id": "material-adjective",
-      "label": "Material",
-      "groupMatchers": [],
-      "tagMatchers": ["material"]
+      "label": "Qualities",
+      "groups": ["Quality"],
+      "avoidDecoys": []
     },
     {
       "id": "definite-quantity",
-      "label": "Definite Quantity",
-      "groupMatchers": ["^Numbers$"],
-      "tagMatchers": ["definite_quantity"]
-    },
-    {
-      "id": "indefinite-quantity",
-      "label": "Indefinite Quantity",
-      "groupMatchers": [],
-      "tagMatchers": ["indefinite_quantity"]
-    },
-    {
-      "id": "duration",
-      "label": "Duration",
-      "groupMatchers": [],
-      "tagMatchers": ["duration"]
-    },
-    {
-      "id": "frequency",
-      "label": "Frequency",
-      "groupMatchers": [],
-      "tagMatchers": ["frequency"]
+      "label": "Numbers",
+      "groups": ["Definite Quantity"],
+      "avoidDecoys": ["sequence"]
     },
     {
       "id": "sequence",
-      "label": "Sequence",
-      "groupMatchers": [],
-      "tagMatchers": ["sequence"]
-    },
-    {
-      "id": "adjective-other",
-      "label": "Other Adjectives",
-      "groupMatchers": [],
-      "tagMatchers": ["adjective_other"]
+      "label": "Ordinals",
+      "groups": ["Sequence"],
+      "avoidDecoys": ["definite-quantity"]
     },
     {
       "id": "style",
-      "label": "Style",
-      "groupMatchers": ["^Grammar - Adverbs of Manner$"],
-      "tagMatchers": ["style"]
-    },
-    {
-      "id": "attitude",
-      "label": "Attitude",
-      "groupMatchers": [],
-      "tagMatchers": ["attitude"]
-    },
-    {
-      "id": "specific-time",
-      "label": "Specific Time",
-      "groupMatchers": [],
-      "tagMatchers": ["specific_time"]
-    },
-    {
-      "id": "relative-time",
-      "label": "Relative Time",
-      "groupMatchers": [],
-      "tagMatchers": ["relative_time"]
-    },
-    {
-      "id": "adverb-duration",
-      "label": "Duration",
-      "groupMatchers": [],
-      "tagMatchers": ["adverb_duration"]
-    },
-    {
-      "id": "direction",
-      "label": "Direction",
-      "groupMatchers": [],
-      "tagMatchers": ["direction"]
+      "label": "Manner Adverbs",
+      "groups": ["Style"],
+      "avoidDecoys": []
     },
     {
       "id": "location",
-      "label": "Location",
-      "groupMatchers": ["^Grammar - Adverbs of Time and Place$"],
-      "tagMatchers": ["location"]
-    },
-    {
-      "id": "distance",
-      "label": "Distance",
-      "groupMatchers": [],
-      "tagMatchers": ["distance"]
-    },
-    {
-      "id": "intensity",
-      "label": "Intensity",
-      "groupMatchers": [],
-      "tagMatchers": ["intensity"]
-    },
-    {
-      "id": "completeness",
-      "label": "Completeness",
-      "groupMatchers": [],
-      "tagMatchers": ["completeness"]
-    },
-    {
-      "id": "approximation",
-      "label": "Approximation",
-      "groupMatchers": [],
-      "tagMatchers": ["approximation"]
-    },
-    {
-      "id": "definite-frequency",
-      "label": "Definite Frequency",
-      "groupMatchers": [],
-      "tagMatchers": ["definite_frequency"]
-    },
-    {
-      "id": "indefinite-frequency",
-      "label": "Indefinite Frequency",
-      "groupMatchers": [],
-      "tagMatchers": ["indefinite_frequency"]
-    },
-    {
-      "id": "adverb-other",
-      "label": "Other Adverbs",
-      "groupMatchers": [],
-      "tagMatchers": ["adverb_other"]
-    },
-    {
-      "id": "conjunction-other",
-      "label": "Other Conjunctions",
-      "groupMatchers": ["^Grammar - Connectors$"],
-      "tagMatchers": ["conjunction_other"]
-    },
-    {
-      "id": "pronoun-other",
-      "label": "Other Pronouns",
-      "groupMatchers": ["^Question Words$"],
-      "tagMatchers": ["pronoun_other"]
-    },
-    {
-      "id": "preposition-other",
-      "label": "Other Prepositions",
-      "groupMatchers": [],
-      "tagMatchers": ["preposition_other"]
-    },
-    {
-      "id": "interjection-other",
-      "label": "Other Interjections",
-      "groupMatchers": [],
-      "tagMatchers": ["interjection_other"]
-    },
-    {
-      "id": "determiner-other",
-      "label": "Other Determiners",
-      "groupMatchers": [],
-      "tagMatchers": ["determiner_other"]
-    },
-    {
-      "id": "article-other",
-      "label": "Other Articles",
-      "groupMatchers": [],
-      "tagMatchers": ["article_other"]
+      "label": "Location Adverbs",
+      "groups": ["Location"],
+      "avoidDecoys": []
     }
   ]
 }

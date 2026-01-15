@@ -44,6 +44,8 @@ SUBTYPE_GUID_PREFIXES = {
         "collection_things": "N28",
         "personal_name": "N29",
         "place_name": "N30",
+        "country": "N45",
+        "city": "N46",
         "organization_name": "N31",
         "temporal_name": "N32",
         "nationality": "N33",
