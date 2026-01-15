@@ -41,7 +41,7 @@ DEFAULT_TRANSLATION_LANGUAGES = {
         "field": "chinese_translation",
         "code": "zh",
         "description": "Chinese translation in lemma form (Traditional characters)",
-        "instructions": "- Chinese: Provide Traditional Chinese characters (繁體字) in base form\n  - Prefer two-character terms for clarity and naturalness\n  - Use single-character terms for common basic vocabulary (e.g., 酒 for wine, 牛 for cow, 茶 for tea, 水 for water)\n  - Match the generality level of the English word (avoid overly specific translations like 葡萄酒 for wine)\n  - Use standard Mandarin Chinese (not regional variants)\n  - Do not include pinyin, just the characters",
+        "instructions": "- Chinese: Provide Traditional Chinese characters (繁體字) in base form\n  - Use natural spoken Mainland Mandarin forms (e.g., 鞋子 not bare 鞋, but 水 not 水份)\n  - Match the generality level of the English word (avoid overly specific translations like 葡萄酒 for wine)\n  - Do not include pinyin, just the characters",
     },
     "korean": {
         "field": "korean_translation",
@@ -53,19 +53,19 @@ DEFAULT_TRANSLATION_LANGUAGES = {
         "field": "french_translation",
         "code": "fr",
         "description": "French translation in lemma form",
-        "instructions": "- French: Provide standard French in base form (infinitive for verbs, singular for nouns)",
+        "instructions": "- French: Provide Metropolitan French (France) in base form (infinitive for verbs, singular for nouns)",
     },
     "spanish": {
         "field": "spanish_translation",
         "code": "es",
         "description": "Spanish translation in lemma form",
-        "instructions": "- Spanish: Provide standard Spanish in base form (infinitive for verbs, singular for nouns)",
+        "instructions": "- Spanish: Provide Peninsular Spanish (Spain) in base form (infinitive for verbs, singular for nouns)",
     },
     "german": {
         "field": "german_translation",
         "code": "de",
         "description": "German translation in lemma form",
-        "instructions": "- German: Provide standard German in base form (infinitive for verbs, singular nominative for nouns without an article)",
+        "instructions": "- German: Provide Standard German (Germany) in base form (infinitive for verbs, singular nominative for nouns without an article)",
     },
     "japanese": {
         "field": "japanese_translation",
@@ -89,7 +89,7 @@ DEFAULT_TRANSLATION_LANGUAGES = {
         "field": "portuguese_translation",
         "code": "pt",
         "description": "Portuguese translation in lemma form",
-        "instructions": "- Portuguese: Provide standard Portuguese in base form (infinitive for verbs, singular for nouns)",
+        "instructions": "- Portuguese: Provide European Portuguese (Portugal) in base form (infinitive for verbs, singular for nouns)",
     },
     "swahili": {
         "field": "swahili_translation",
