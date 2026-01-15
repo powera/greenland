@@ -207,7 +207,7 @@ Include stress markers and all appropriate IPA symbols.
 
         # Count match points
         total_points = max(len(model_answer), len(correct_answer))
-        match_points = 0
+        match_points: float = 0
 
         # Dynamic programming approach for alignment and scoring
         m, n = len(model_answer), len(correct_answer)

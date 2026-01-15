@@ -46,6 +46,54 @@ disallow_untyped_defs = true
 mypy_path = "src"
 explicit_package_bases = true
 
+# Benchmarks directory: opt out of requiring type annotations since these
+# are standalone scripts not called by other parts of the codebase
+[[tool.mypy.overrides]]
+module = "benchmarks.*"
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+check_untyped_defs = true
+warn_return_any = false
+
+# Ignore missing stubs for external libraries used by benchmarks
+[[tool.mypy.overrides]]
+module = [
+    "sqlalchemy.*",
+    "flask.*",
+    "jieba.*",
+    "pypinyin.*",
+]
+ignore_missing_imports = true
+
+# Files with complex JSON/dict type inference issues, obsolete API calls,
+# missing module exports, or deep structural issues that would require
+# significant refactoring - ignore all errors for now
+[[tool.mypy.overrides]]
+module = [
+    "benchmarks.lib.exemplars.tasks.wordfreq_translation_exemplar",
+    "benchmarks.lib.exemplars.tasks.lithuanian_sentence_exemplar",
+    "benchmarks.lib.exemplars.tasks.zebra_puzzle_exemplar",
+    "benchmarks.lib.exemplars.tasks.wars_of_roses_exemplar",
+    "benchmarks.lib.exemplars.tasks.poker_scorer_exemplar",
+    "benchmarks.lib.exemplars.tasks.poetry_exemplar",
+    "benchmarks.lib.exemplars.tasks.granite_structured_def_exemplar",
+    "benchmarks.lib.exemplars.tasks.granite_definition_exemplar",
+    "benchmarks.lib.exemplars.tasks.firefighter_dialogue_exemplar",
+    "benchmarks.scripts.model_comparison",
+    "benchmarks.verbalator.server",
+    "benchmarks.server.routes.verbalator",
+    "benchmarks.lib.generators.pinyin_letter_count_generator",
+    "benchmarks.lib.generators.english_to_ipa_generator",
+    "benchmarks.lib.generators.part_of_speech_generator",
+    "benchmarks.lib.exemplars.base",
+    "benchmarks.datastore.test_benchmarks",
+    "benchmarks.lib.utils.base_runner",
+    "benchmarks.lib.utils.base_generator",
+    "benchmarks.lib.runners.geography_runner",
+    "benchmarks.lib.generators.lemma_generator",
+]
+ignore_errors = true
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]

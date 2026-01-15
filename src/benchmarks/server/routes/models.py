@@ -54,7 +54,7 @@ def view_model(model_name):
     runs = g.db.query(Run).filter(Run.model_name == model_name).order_by(Run.run_ts.desc()).all()
 
     # Calculate best score per benchmark
-    best_scores = {}
+    best_scores: dict[str, int] = {}
     for run in runs:
         if (
             run.benchmark_name not in best_scores

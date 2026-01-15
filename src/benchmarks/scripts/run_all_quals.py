@@ -27,7 +27,7 @@ def get_completed_quals(session) -> Set[str]:
 
 
 def run_missing_quals(
-    blacklist_models: Set[str] = None, target_model: Optional[str] = None
+    blacklist_models: Optional[Set[str]] = None, target_model: Optional[str] = None
 ) -> None:
     """
     Run qualification tests for all model/test combinations not in database.

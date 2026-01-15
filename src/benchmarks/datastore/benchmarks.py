@@ -89,7 +89,11 @@ class RunDetail(Base):
 
 
 def insert_benchmark(
-    session, codename: str, displayname: str, description: str = None, license_name: str = None
+    session,
+    codename: str,
+    displayname: str,
+    description: Optional[str] = None,
+    license_name: Optional[str] = None,
 ) -> tuple[bool, str]:
     """Insert a new benchmark into the database.
 
@@ -120,7 +124,10 @@ def insert_benchmark(
 
 
 def insert_question(
-    session, question_id: str, benchmark_name: str, question_info_json: str = None
+    session,
+    question_id: str,
+    benchmark_name: str,
+    question_info_json: Optional[str] = None,
 ) -> tuple[bool, str]:
     """Insert a new question into the database.
 

@@ -84,7 +84,7 @@ class QualRunDetail(Base):
 
 
 def insert_qual_test(
-    session, codename: str, displayname: str, description: str = None
+    session, codename: str, displayname: str, description: Optional[str] = None
 ) -> tuple[bool, str]:
     """Insert a new qualification test into the database."""
     try:

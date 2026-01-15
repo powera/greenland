@@ -88,7 +88,7 @@ class DefinitionsGenerator(BenchmarkGenerator):
         words = self._load_word_list()
 
         # Track used words to avoid duplicates in a single generation session
-        used_words = set()
+        used_words: set[str] = set()
 
         # Keep generating until we run out of unused correct words
         while len(used_words) < len(words):  # Stop when all words have been used as correct answers

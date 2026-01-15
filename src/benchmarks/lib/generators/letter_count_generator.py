@@ -63,7 +63,7 @@ class LetterCountGenerator(BenchmarkGenerator):
             word = random.choice(self.word_list)
 
             # Select a random letter from the word
-            letter_counts = {}
+            letter_counts: dict[str, int] = {}
             for char in word:
                 if char.isalpha():
                     letter_counts[char.lower()] = letter_counts.get(char.lower(), 0) + 1
