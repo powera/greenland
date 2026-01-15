@@ -18,7 +18,14 @@ from config import Config
 from flask import Flask, g, render_template
 from sqlalchemy.orm import Session
 
-from pinyin_helper import generate_pinyin, generate_pinyin_ruby_html, is_chinese
+from pinyin_helper import (
+    generate_pinyin,
+    generate_pinyin_ruby_html,
+    generate_romaji,
+    generate_romaji_ruby_html,
+    is_chinese,
+    is_japanese,
+)
 from routes import (
     agents,
     agents_launcher,
@@ -96,10 +103,13 @@ def create_app(config_class: type[Config] = Config) -> BarsukasFlask:
     app.register_blueprint(settings.bp)
     app.register_blueprint(pattern_sentences.bp)
 
-    # Register Jinja2 filters for Pinyin
+    # Register Jinja2 filters for Pinyin (Chinese) and Romaji (Japanese)
     app.jinja_env.filters["pinyin"] = generate_pinyin
     app.jinja_env.filters["pinyin_ruby"] = generate_pinyin_ruby_html
     app.jinja_env.filters["is_chinese"] = is_chinese
+    app.jinja_env.filters["romaji"] = generate_romaji
+    app.jinja_env.filters["romaji_ruby"] = generate_romaji_ruby_html
+    app.jinja_env.filters["is_japanese"] = is_japanese
 
     # Register JSON filter for parsing JSON strings in templates
     app.jinja_env.filters["fromjson"] = json.loads

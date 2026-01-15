@@ -154,6 +154,8 @@
                         <strong>{{ file.expected_text }}</strong>
                         {% if file.language_code == 'zh' %}
                         <br><small class="text-muted">{{ file.expected_text|pinyin }}</small>
+                        {% elif file.language_code == 'ja' %}
+                        <br><small class="text-muted">{{ file.expected_text|romaji }}</small>
                         {% endif %}
                     </td>
                     <td>
