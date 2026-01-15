@@ -173,7 +173,8 @@ def get_all_derivative_forms_for_token(
     word_token = get_word_token_by_text(session, token_text, language_code)
     if not word_token:
         return []
-    return word_token.derivative_forms
+    result: list[DerivativeForm] = word_token.derivative_forms
+    return result
 
 
 def get_all_derivative_forms_for_lemma(

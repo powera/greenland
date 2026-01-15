@@ -118,5 +118,5 @@ class Response:
 
     response_text: str
     structured_data: Dict[str, Any]
-    usage: LLMUsage
+    usage: Optional[LLMUsage]
     additional_thought: Optional[str] = None

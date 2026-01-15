@@ -10,7 +10,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 from wordfreq.patterns.simple_patterns import SIMPLE_PATTERNS
 from wordfreq.storage.backend import create_session as create_backend_session
-from wordfreq.storage.backend.base.session import BaseSession
+from sqlalchemy.orm import Session
 from wordfreq.storage.backend.config import DataSourceConfig
 from wordfreq.storage.models.schema import (
     Lemma,
@@ -106,11 +106,11 @@ class PatternSentenceGenerator:
         if self.debug:
             logger.setLevel(logging.DEBUG)
 
-    def get_session(self) -> BaseSession:
+    def get_session(self) -> Session:
         return create_backend_session(self.config)
 
     def get_lemmas_for_slot(
-        self, session: BaseSession, slot: Dict[str, Any]
+        self, session: Session, slot: Dict[str, Any]
     ) -> List[Tuple[Lemma, str]]:
         query = session.query(Lemma).filter(
             Lemma.guid.isnot(None),
@@ -142,7 +142,7 @@ class PatternSentenceGenerator:
 
     def generate_combinations_for_lemma(
         self,
-        session: BaseSession,
+        session: Session,
         pattern: Dict[str, Any],
         target_lemma: Lemma,
         max_combinations: Optional[int] = None,
@@ -221,7 +221,7 @@ class PatternSentenceGenerator:
 
     def generate_all_combinations(
         self,
-        session: BaseSession,
+        session: Session,
         pattern: Dict[str, Any],
         max_combinations: Optional[int] = None,
     ) -> List[Dict[str, Any]]:
@@ -292,7 +292,7 @@ class PatternSentenceGenerator:
         return en_sentence
 
     def lookup_fixed_words(
-        self, session: BaseSession, pattern: Dict[str, Any]
+        self, session: Session, pattern: Dict[str, Any]
     ) -> List[Tuple[Lemma, str]]:
         fixed_lemmas = []
         for fixed_word in pattern.get("fixed_words", []):
@@ -325,7 +325,7 @@ class PatternSentenceGenerator:
 
     def save_candidate_sentence(
         self,
-        session: BaseSession,
+        session: Session,
         pattern: Dict[str, Any],
         combination: Dict[str, Any],
         template_text: str,

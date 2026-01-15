@@ -35,7 +35,7 @@ from typing import Callable, List, Optional
 
 from sqlalchemy.orm import Query
 
-from wordfreq.storage.backend.base import BaseSession
+from sqlalchemy.orm import Session
 from wordfreq.storage.models.schema import Lemma
 
 
@@ -46,7 +46,7 @@ class LemmaNotFoundError(Exception):
 
 
 def find_lemma_by_guid(
-    session: "BaseSession",
+    session: Session,
     guid: str,
     error_on_missing: bool = True,
 ) -> Optional[Lemma]:
@@ -96,7 +96,7 @@ class LemmaQueryBuilder:
         lemmas = query.all()
     """
 
-    def __init__(self, session: "BaseSession"):
+    def __init__(self, session: Session):
         """Initialize query builder.
 
         Args:
@@ -276,7 +276,7 @@ def count_for_confirmation(
 
 
 def get_lemmas_for_processing(
-    session: "BaseSession",
+    session: Session,
     guid: Optional[str] = None,
     curated_only: bool = True,
     difficulty_level: Optional[int] = None,
@@ -345,7 +345,7 @@ def get_lemmas_for_processing(
     return apply_limit_and_sample_rate(query, limit, sample_rate)
 
 
-def get_lemmas_for_agent(session: "BaseSession", args) -> List[Lemma]:
+def get_lemmas_for_agent(session: Session, args) -> List[Lemma]:
     """Get lemmas for processing based on command-line arguments.
 
     This is the standard entry point for agents that need to process lemmas.

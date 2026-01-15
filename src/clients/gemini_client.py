@@ -5,7 +5,8 @@ import json
 import logging
 import os
 import time
-from typing import Any, Dict, Optional
+from functools import wraps
+from typing import Any, Callable, Dict, Optional, TypeVar
 
 import requests
 import tiktoken
@@ -26,10 +27,14 @@ DEFAULT_TIMEOUT = 50
 API_BASE = "https://generativelanguage.googleapis.com/v1beta/models"
 
 
-def measure_completion(func):
+F = TypeVar("F", bound=Callable[..., Any])
+
+
+def measure_completion(func: F) -> Callable[..., tuple[Any, float]]:
     """Decorator to measure completion API call duration."""
 
-    def wrapper(*args, **kwargs):
+    @wraps(func)
+    def wrapper(*args: Any, **kwargs: Any) -> tuple[Any, float]:
         start_time = time.time()
         result = func(*args, **kwargs)
         duration_ms = (time.time() - start_time) * 1000
@@ -54,7 +59,7 @@ class GeminiClient:
         self.encoder = tiktoken.get_encoding("cl100k_base")
 
     @measure_completion
-    def _create_completion(self, model: str, **kwargs) -> Dict:
+    def _create_completion(self, model: str, **kwargs: Any) -> Dict[str, Any]:
         """Make direct HTTP request to Gemini chat completions endpoint."""
         url = f"{API_BASE}/{model}:generateContent?key={self.api_key}"
 
@@ -69,7 +74,8 @@ class GeminiClient:
             logger.error(error_msg)
             raise Exception(error_msg)
 
-        return response.json()
+        result: Dict[str, Any] = response.json()
+        return result
 
     def warm_model(self, model: str) -> bool:
         """Simulate model warmup (not needed for Gemini but kept for API compatibility)."""
@@ -114,12 +120,13 @@ class GeminiClient:
             logger.debug("Context: %s", context)
             logger.debug("JSON schema: %s", json_schema)
 
-        kwargs = {
+        generation_config: Dict[str, Any] = {"maxOutputTokens": 256 if brief else 1536}
+        request_kwargs: Dict[str, Any] = {
             "contents": [{"role": "user", "parts": [{"text": prompt}]}],
-            "generationConfig": {"maxOutputTokens": 256 if brief else 1536},
+            "generationConfig": generation_config,
         }
         if context:
-            kwargs["system_instruction"] = {"parts": [{"text": context}]}
+            request_kwargs["system_instruction"] = {"parts": [{"text": context}]}
 
         # If JSON schema provided, configure for structured response
         if json_schema:
@@ -129,13 +136,13 @@ class GeminiClient:
                 schema_obj = clients.lib.schema_from_dict(json_schema)
 
             processed_schema = clients.lib.to_gemini_schema(schema_obj)
-            kwargs["generationConfig"]["response_mime_type"] = "application/json"
-            kwargs["generationConfig"]["response_schema"] = {
+            generation_config["response_mime_type"] = "application/json"
+            generation_config["response_schema"] = {
                 "type": "ARRAY",
                 "items": processed_schema,
             }
 
-        completion_data, duration_ms = self._create_completion(model=model, **kwargs)
+        completion_data, duration_ms = self._create_completion(model=model, **request_kwargs)
 
         response_content = completion_data["candidates"][0]["content"]["parts"][0]["text"]
         usage = LLMUsage.from_api_response(

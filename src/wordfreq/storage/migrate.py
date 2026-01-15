@@ -371,7 +371,7 @@ def export_sqlite_to_release(sqlite_path: str, release_dir: str) -> None:
 
             for lemma in category_lemmas:
                 # Base concept data
-                base_data = {
+                base_data: Dict[str, Any] = {
                     "guid": lemma.guid,
                     "pos_type": lemma.pos_type,
                     "pos_subtype": lemma.pos_subtype,

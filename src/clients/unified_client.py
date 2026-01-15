@@ -234,22 +234,30 @@ class UnifiedLLMClient:
 
             # Always log token usage for all LLM queries
             response_type = "JSON" if json_schema else "text"
-            logger.info(
-                "LLM Query Complete [%s] - Model: %s, Type: %s, In: %d, Out: %d, Total: %d, Cost: $%.6f",
-                normalized_model,
-                model,
-                response_type,
-                result.usage.tokens_in,
-                result.usage.tokens_out,
-                result.usage.total_tokens,
-                result.usage.cost,
-            )
-
-            if self.debug:
-                logger.debug(
-                    "Chat complete: %s response, %d tokens",
+            if result.usage:
+                logger.info(
+                    "LLM Query Complete [%s] - Model: %s, Type: %s, In: %d, Out: %d, Total: %d, Cost: $%.6f",
+                    normalized_model,
+                    model,
                     response_type,
+                    result.usage.tokens_in,
+                    result.usage.tokens_out,
                     result.usage.total_tokens,
+                    result.usage.cost,
+                )
+
+                if self.debug:
+                    logger.debug(
+                        "Chat complete: %s response, %d tokens",
+                        response_type,
+                        result.usage.total_tokens,
+                    )
+            else:
+                logger.info(
+                    "LLM Query Complete [%s] - Model: %s, Type: %s (no usage info)",
+                    normalized_model,
+                    model,
+                    response_type,
                 )
 
             return result

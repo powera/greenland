@@ -102,7 +102,8 @@ class ConnectionPool:
                 f"Created new session for {db_path} in thread {threading.current_thread().name}"
             )
 
-        return self._thread_local.sessions[db_path]
+        result: Session = self._thread_local.sessions[db_path]
+        return result
 
     def close_thread_sessions(self) -> None:
         """Close all sessions for the current thread."""

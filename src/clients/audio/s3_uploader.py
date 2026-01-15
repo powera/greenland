@@ -8,11 +8,21 @@ import os
 from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
 
+from types import ModuleType
+from typing import Optional as OptionalType, Type
+
+boto3: OptionalType[ModuleType]
+ClientError: Type[BaseException]
+
 try:
-    import boto3
-    from botocore.exceptions import ClientError
+    import boto3 as _boto3  # type: ignore[no-redef]
+    from botocore.exceptions import ClientError as _ClientError
+
+    boto3 = _boto3
+    ClientError = _ClientError
 except ImportError:
     boto3 = None
+    ClientError = Exception
 
 import constants
 
@@ -128,7 +138,7 @@ class S3AudioUploader:
                 else:
                     logger.warning(f"MD5 mismatch for existing file, re-uploading: {s3_key}")
             except ClientError as e:
-                if e.response["Error"]["Code"] != "404":
+                if hasattr(e, "response") and e.response["Error"]["Code"] != "404":
                     logger.error(f"Error checking existing file: {e}")
                     return False, s3_key, md5_hash
                 # File doesn't exist, proceed with upload
@@ -207,7 +217,7 @@ class S3AudioUploader:
                     manifest_url = self.get_cdn_url(manifest_key)
                     return True, audio_url, manifest_url, md5_hash
             except ClientError as e:
-                if e.response["Error"]["Code"] != "404":
+                if hasattr(e, "response") and e.response["Error"]["Code"] != "404":
                     logger.error(f"Error checking existing file: {e}")
                     return False, "", "", md5_hash
 
@@ -281,7 +291,7 @@ class S3AudioUploader:
             return True, prod_url
 
         except ClientError as e:
-            if e.response["Error"]["Code"] == "NoSuchKey":
+            if hasattr(e, "response") and e.response["Error"]["Code"] == "NoSuchKey":
                 logger.error(f"Staging file not found: {staging_key}")
             else:
                 logger.error(f"Error moving to production: {e}")
@@ -320,7 +330,7 @@ class S3AudioUploader:
                     prod_url = self.get_cdn_url(prod_key)
                     return True, prod_url
             except ClientError as e:
-                if e.response["Error"]["Code"] != "404":
+                if hasattr(e, "response") and e.response["Error"]["Code"] != "404":
                     logger.error(f"Error checking existing file: {e}")
                     return False, ""
 

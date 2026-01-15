@@ -193,7 +193,8 @@ class BarsukasCacheClient:
 
             logger.info(f"Cache hit for {guid} pronunciations ({language})")
             logger.debug(f"Cached pronunciations for {guid}: {pronunciation_data}")
-            return pronunciation_data
+            result: Dict[str, str] = pronunciation_data
+            return result
 
         except requests.RequestException as e:
             error_msg = f"Network error fetching pronunciations from cache for {guid}: {e}"

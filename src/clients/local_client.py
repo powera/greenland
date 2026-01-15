@@ -5,12 +5,13 @@
 import asyncio
 import gc
 import os
+from typing import cast
 
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
 
 
-async def text_completion(prompt, model_dir):
+async def text_completion(prompt: str, model_dir: str) -> str:
     """
     Run text completion with a local LLM model.
 
@@ -40,11 +41,11 @@ async def text_completion(prompt, model_dir):
                 num_beams=4,
             ),
         )
-    response = tokenizer.decode(output[0], skip_special_tokens=True)
+    response: str = tokenizer.decode(output[0], skip_special_tokens=True)
     return response
 
 
-async def text_chat(prompt, model_dir):
+async def text_chat(prompt: str, model_dir: str) -> str:
     """
     Run text chat with a local instruction-tuned LLM model.
 
@@ -76,11 +77,11 @@ async def text_chat(prompt, model_dir):
                 do_sample=True,
             ),
         )
-    response = tokenizer.decode(output[0], skip_special_tokens=True)
+    response: str = tokenizer.decode(output[0], skip_special_tokens=True)
     return response
 
 
-def text_completion_interactive(prompt, model_dir):
+def text_completion_interactive(prompt: str, model_dir: str) -> str:
     """
     Run interactive text completion with a local LLM model (token-by-token generation).
 
@@ -129,11 +130,11 @@ def text_completion_interactive(prompt, model_dir):
             if next_token_id.item() == tokenizer.eos_token_id:
                 break
 
-    response = tokenizer.decode(generated_ids[0], skip_special_tokens=True)
+    response: str = tokenizer.decode(generated_ids[0], skip_special_tokens=True)
     return response
 
 
-def text_chat_interactive(prompt, model_dir):
+def text_chat_interactive(prompt: str, model_dir: str) -> str:
     """
     Run interactive text chat with a local instruction-tuned LLM model (token-by-token generation).
 
@@ -187,5 +188,5 @@ def text_chat_interactive(prompt, model_dir):
             if next_token_id.item() == tokenizer.eos_token_id:
                 break
 
-    response = tokenizer.decode(generated_ids[0], skip_special_tokens=True)
+    response: str = tokenizer.decode(generated_ids[0], skip_special_tokens=True)
     return response

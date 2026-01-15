@@ -43,7 +43,7 @@ import logging
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from wordfreq.storage.backend.base import BaseSession
+from sqlalchemy.orm import Session
 
 from wordfreq.storage.crud.sentence import add_sentence, calculate_minimum_level
 from wordfreq.storage.crud.sentence_translation import add_sentence_translation
@@ -55,7 +55,7 @@ logger = logging.getLogger(__name__)
 
 
 def import_sentence_from_dict(
-    session: BaseSession, sentence_data: Dict[str, Any], source_file: Optional[str] = None
+    session: Session, sentence_data: Dict[str, Any], source_file: Optional[str] = None
 ) -> int:
     """
     Import a single sentence from a dictionary.
@@ -184,7 +184,7 @@ def import_sentence_from_dict(
     return int(sentence.id)
 
 
-def import_sentences_from_json(session: BaseSession, json_path: str) -> Dict[str, int]:
+def import_sentences_from_json(session: Session, json_path: str) -> Dict[str, int]:
     """
     Import sentences from a JSON file.
 
@@ -235,7 +235,7 @@ def import_sentences_from_json(session: BaseSession, json_path: str) -> Dict[str
 
 
 def import_sentences_from_directory(
-    session: BaseSession, directory_path: str, pattern: str = "*.json"
+    session: Session, directory_path: str, pattern: str = "*.json"
 ) -> Dict[str, int]:
     """
     Import all sentence JSON files from a directory.

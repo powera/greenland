@@ -86,10 +86,10 @@ class LMStudioClient:
 
     def _process_chat_response(
         self, response: requests.Response, model: str
-    ) -> tuple[str, LLMUsage, Optional[str]]:
+    ) -> tuple[str, Optional[LLMUsage], Optional[str]]:
         """Process chat response and extract content, usage info, and additional thoughts."""
         result = ""
-        usage = None
+        usage: Optional[LLMUsage] = None
         additional_thought = None
 
         # Pattern to extract content within <think> tags

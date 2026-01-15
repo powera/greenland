@@ -8,10 +8,9 @@ It now serves as a backward-compatible convenience import module.
 """
 
 import logging
-from typing import TYPE_CHECKING, Optional
+from typing import Optional
 
-if TYPE_CHECKING:
-    from wordfreq.storage.backend.base import BaseSession
+from sqlalchemy.orm import Session
 
 from wordfreq.storage.models.enums import (
     AdjectiveSubtype,
@@ -158,7 +157,7 @@ from wordfreq.storage.utils.session import create_database_session, ensure_table
 
 # Query logging function
 def log_query(
-    session: "BaseSession",
+    session: Session,
     word: str,
     query_type: str,
     prompt: str,

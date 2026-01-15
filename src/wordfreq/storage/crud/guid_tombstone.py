@@ -114,7 +114,7 @@ def get_replacement_chain(session: Session, guid: str) -> List[GuidTombstone]:
         List of GuidTombstone objects showing the replacement chain
     """
     chain = []
-    current_guid = guid
+    current_guid: Optional[str] = guid
 
     # Prevent infinite loops with a maximum depth
     max_depth = 100

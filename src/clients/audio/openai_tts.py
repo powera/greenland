@@ -4,7 +4,7 @@
 import logging
 import time
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 import requests
 
@@ -147,7 +147,7 @@ class OpenAITTSClient:
         instructions = get_instructions(language_code, is_sentence=is_sentence)
 
         # Prepare request payload
-        payload = {
+        payload: dict[str, Any] = {
             "model": model,
             "input": text,
             "voice": voice.value,

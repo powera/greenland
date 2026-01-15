@@ -383,7 +383,7 @@ def handle_lemma_type_subtype_change(
     """
     from wordfreq.storage.crud.guid_tombstone import create_tombstone
 
-    result = {
+    result: dict[str, Any] = {
         "old_guid": lemma.guid,
         "new_guid": None,
         "tombstone_created": False,

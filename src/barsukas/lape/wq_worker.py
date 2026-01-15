@@ -14,7 +14,7 @@ import constants
 import util.prompt_loader
 from clients.types import Schema, SchemaProperty
 from clients.unified_client import UnifiedLLMClient
-from wordfreq.storage.backend.base import BaseSession
+from sqlalchemy.orm import Session
 from wordfreq.storage.backend.config import DataSourceConfig
 from wordfreq.storage.crud.grammar_fact import add_grammar_fact, get_grammar_fact_value
 from wordfreq.storage.crud.operation_log import log_operation
@@ -254,7 +254,7 @@ def validate_grammar_fact_request(
     lemma: Lemma,
     fact_type: str,
     language_code: str,
-    session: BaseSession,
+    session: Session,
 ) -> Tuple[bool, Optional[str], Optional[str]]:
     """
     Validate that grammar fact generation can proceed.
@@ -292,7 +292,7 @@ def validate_grammar_fact_request(
 
 
 def generate_grammar_fact_for_lemma(
-    session: BaseSession,
+    session: Session,
     lemma: Lemma,
     fact_type: str,
     language_code: str,
@@ -411,7 +411,7 @@ def generate_grammar_fact_for_lemma(
     }
 
 
-def handle_generate_grammar_fact(session: BaseSession, payload: Dict) -> str:
+def handle_generate_grammar_fact(session: Session, payload: Dict) -> str:
     """
     Handle grammar fact generation task (workqueue entry point).
 

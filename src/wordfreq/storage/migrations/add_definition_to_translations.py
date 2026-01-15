@@ -17,14 +17,14 @@ if str(Path(__file__).parent.parent.parent.parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
 from sqlalchemy import inspect, text  # type: ignore[import-not-found]
-from wordfreq.storage.backend.base import BaseSession
+from sqlalchemy.orm import Session
 
 from constants import WORDFREQ_DB_PATH
 from wordfreq.storage.database import create_database_session
 from wordfreq.storage.models.schema import Lemma, LemmaTranslation
 
 
-def check_column_exists(session: BaseSession, table_name: str, column_name: str) -> bool:
+def check_column_exists(session: Session, table_name: str, column_name: str) -> bool:
     """Check if a column exists in a table.
 
     Args:
@@ -35,12 +35,12 @@ def check_column_exists(session: BaseSession, table_name: str, column_name: str)
     Returns:
         True if column exists, False otherwise
     """
-    inspector = inspect(session.bind)  # type: ignore[attr-defined]
-    columns = [col["name"] for col in inspector.get_columns(table_name)]
+    inspector = inspect(session.bind)
+    columns = [col["name"] for col in inspector.get_columns(table_name)]  # type: ignore[union-attr]
     return column_name in columns
 
 
-def add_definition_column(session: BaseSession) -> bool:
+def add_definition_column(session: Session) -> bool:
     """Add definition_text column to lemma_translations table if it doesn't exist.
 
     Args:
@@ -57,9 +57,7 @@ def add_definition_column(session: BaseSession) -> bool:
     return True
 
 
-def migrate_english_translations(
-    session: BaseSession, dry_run: bool = False
-) -> Tuple[int, int, int]:
+def migrate_english_translations(session: Session, dry_run: bool = False) -> Tuple[int, int, int]:
     """Create English translation rows for all lemmas.
 
     Args:

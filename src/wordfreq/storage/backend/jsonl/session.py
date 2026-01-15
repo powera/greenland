@@ -33,7 +33,7 @@ class JSONLSession(BaseSession):
         self._pending_adds: list = []
         self._pending_deletes: list = []
         self._is_closed = False
-        self._sqlite_session = None
+        self._sqlite_session: Optional[Any] = None
 
     def _get_sqlite_session(self) -> Any:
         """Get or create a SQLite session for complex queries.
@@ -261,7 +261,8 @@ class JSONLSession(BaseSession):
 
         # Delegate all queries to SQLite
         sqlite_session = self._get_sqlite_session()
-        return sqlite_session.query(*mapped_entities, **kwargs)
+        result: SQLAlchemyQuery[Any] = sqlite_session.query(*mapped_entities, **kwargs)
+        return result
 
     def _extract_lemma_translations(self) -> List[models.LemmaTranslation]:
         """Extract LemmaTranslation objects from nested Lemma data."""

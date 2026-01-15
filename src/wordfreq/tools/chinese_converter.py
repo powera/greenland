@@ -13,7 +13,7 @@ from typing import Any, Optional
 from wordfreq.storage.translation_helpers import get_translation
 
 try:
-    from opencc import OpenCC
+    from opencc import OpenCC  # type: ignore[import-untyped]
 
     OPENCC_AVAILABLE = True
 except ImportError:

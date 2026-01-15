@@ -3,7 +3,10 @@
 
 import logging
 from datetime import datetime
-from typing import Any, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, List, Optional, Tuple
+
+if TYPE_CHECKING:
+    from wordfreq.storage.models.schema import AudioQualityReview
 
 from clients.audio.s3_uploader import S3AudioUploader
 
@@ -168,4 +171,5 @@ def get_pending_staging_audio(
     if limit:
         query = query.limit(limit)
 
-    return query.all()
+    result: List["AudioQualityReview"] = query.all()
+    return result

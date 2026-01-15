@@ -34,7 +34,8 @@ class SQLiteSession(BaseSession):
         Returns:
             A raw SQLAlchemy Query object
         """
-        return self._sqlalchemy_session.query(*entities, **kwargs)
+        result: SQLAlchemyQuery[Any] = self._sqlalchemy_session.query(*entities, **kwargs)
+        return result
 
     def get(self, model_class: Type[T], id: Any) -> Optional[T]:
         """Get a single instance by primary key.

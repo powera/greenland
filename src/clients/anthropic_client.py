@@ -5,7 +5,8 @@ import json
 import logging
 import os
 import time
-from typing import Any, Dict, Optional
+from functools import wraps
+from typing import Any, Callable, Dict, Optional, TypeVar
 
 import requests
 
@@ -27,10 +28,14 @@ DEFAULT_TIMEOUT = 50
 API_BASE = "https://api.anthropic.com/v1"
 
 
-def measure_completion(func):
+F = TypeVar("F", bound=Callable[..., Any])
+
+
+def measure_completion(func: F) -> Callable[..., tuple[Any, float]]:
     """Decorator to measure completion API call duration."""
 
-    def wrapper(*args, **kwargs):
+    @wraps(func)
+    def wrapper(*args: Any, **kwargs: Any) -> tuple[Any, float]:
         start_time = time.time()
         result = func(*args, **kwargs)
         duration_ms = (time.time() - start_time) * 1000
@@ -71,7 +76,7 @@ class AnthropicClient:
             self.headers = {}
 
     @measure_completion
-    def _create_message(self, **kwargs) -> Dict:
+    def _create_message(self, **kwargs: Any) -> Dict[str, Any]:
         """Make direct HTTP request to Anthropic messages endpoint."""
         url = f"{API_BASE}/messages"
 
@@ -86,7 +91,8 @@ class AnthropicClient:
             logger.error(error_msg)
             raise Exception(error_msg)
 
-        return response.json()
+        result: Dict[str, Any] = response.json()
+        return result
 
     def warm_model(self, model: str) -> bool:
         """Simulate model warmup (not needed for Anthropic but kept for API compatibility)."""
@@ -135,13 +141,13 @@ class AnthropicClient:
             if context:
                 logger.debug("Using provided context: %s", context)
 
-        kwargs = {
+        request_kwargs: Dict[str, Any] = {
             "model": model,
             "max_tokens": 512 if brief else 3192,
             "messages": [],
         }
 
-        system_content = []
+        system_content: list[Dict[str, Any]] = []
         if context:
             system_content.append({"type": "text", "text": context})
 
@@ -157,7 +163,7 @@ class AnthropicClient:
                 raise ValueError(f"Unexpected json_schema type: {type(json_schema)}")
 
             # Set up tools parameter for structured output
-            kwargs["tools"] = [
+            request_kwargs["tools"] = [
                 {
                     "type": "custom",
                     "name": (
@@ -175,7 +181,7 @@ class AnthropicClient:
             ]
 
             # Force the model to use the tool
-            kwargs["tool_choice"] = {
+            request_kwargs["tool_choice"] = {
                 "type": "tool",
                 "name": (
                     json_schema.name if isinstance(json_schema, Schema) else "structured_response"
@@ -206,12 +212,12 @@ Your response must be valid JSON that follows the above schema."""
 
         # Add system content if we have any
         if system_content:
-            kwargs["system"] = system_content
+            request_kwargs["system"] = system_content
 
         # Add the user message
-        kwargs["messages"] = [{"role": "user", "content": prompt}]
+        request_kwargs["messages"] = [{"role": "user", "content": prompt}]
 
-        completion_data, duration_ms = self._create_message(**kwargs)
+        completion_data, duration_ms = self._create_message(**request_kwargs)
 
         # Extract text or tool output from response
         structured_data = {}
@@ -313,13 +319,3 @@ def generate_chat(
         For JSON responses, response_text will be empty string
     """
     return client.generate_chat(prompt, model, brief, json_schema, context)
-
-
-def set_system_prompt(system_prompt: str) -> None:
-    """
-    Set a new default system prompt for the default client.
-
-    Args:
-        system_prompt: New default system prompt to use
-    """
-    client.set_system_prompt(system_prompt)

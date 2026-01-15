@@ -5,7 +5,8 @@ import json
 import logging
 import os
 import time
-from typing import Any, Dict, Optional, Tuple
+from functools import wraps
+from typing import Any, Callable, Dict, Optional, Tuple, TypeVar
 
 import requests
 import tiktoken
@@ -28,10 +29,14 @@ DEFAULT_TIMEOUT = 50
 API_BASE = "https://api.openai.com/v1"
 
 
-def measure_completion(func):
+F = TypeVar("F", bound=Callable[..., Any])
+
+
+def measure_completion(func: F) -> Callable[..., tuple[Any, float]]:
     """Decorator to measure completion API call duration."""
 
-    def wrapper(*args, **kwargs):
+    @wraps(func)
+    def wrapper(*args: Any, **kwargs: Any) -> tuple[Any, float]:
         start_time = time.time()
         result = func(*args, **kwargs)
         duration_ms = (time.time() - start_time) * 1000
@@ -62,7 +67,7 @@ class OpenAIClient:
         self.encoder = tiktoken.get_encoding("cl100k_base")
 
     @measure_completion
-    def _create_response(self, **kwargs) -> Dict:
+    def _create_response(self, **kwargs: Any) -> Dict[str, Any]:
         """Make direct HTTP request to OpenAI responses endpoint."""
         url = f"{API_BASE}/responses"
 
@@ -77,7 +82,8 @@ class OpenAIClient:
             logger.error(error_msg)
             raise Exception(error_msg)
 
-        return response.json()
+        result: Dict[str, Any] = response.json()
+        return result
 
     def warm_model(self, model: str) -> bool:
         """Simulate model warmup (not needed for OpenAI but kept for API compatibility)."""
@@ -132,32 +138,32 @@ class OpenAIClient:
         is_gpt5_nano_or_mini = model.startswith("gpt-5-nano") or model.startswith("gpt-5-mini")
 
         token_limit = 512 if brief else 4096
-        kwargs = {
+        request_kwargs: Dict[str, Any] = {
             "model": model,
             "input": prompt,
         }
 
         # Add instructions (system message) if context provided
         if context:
-            kwargs["instructions"] = context
+            request_kwargs["instructions"] = context
 
         # Only set temperature for models that support it
         if not is_gpt5_model:
-            kwargs["temperature"] = 0.35
+            request_kwargs["temperature"] = 0.35
 
         # Set token limit parameter
         if uses_output_tokens:
-            kwargs["max_output_tokens"] = token_limit
+            request_kwargs["max_output_tokens"] = token_limit
         else:
             # For non-reasoning models, we still use max_output_tokens in Responses API
-            kwargs["max_output_tokens"] = token_limit
+            request_kwargs["max_output_tokens"] = token_limit
 
         # Set reasoning and text parameters for gpt-5-nano and gpt-5-mini
         if is_gpt5_nano_or_mini:
-            kwargs["reasoning"] = {"effort": "minimal"}
+            request_kwargs["reasoning"] = {"effort": "minimal"}
             # Only set text verbosity if not overridden by JSON schema below
             if not json_schema:
-                kwargs["text"] = {"verbosity": "low"}
+                request_kwargs["text"] = {"verbosity": "low"}
 
         # If JSON schema provided, configure for structured response
         if json_schema:
@@ -170,10 +176,10 @@ class OpenAIClient:
 
             # Lower temperature for structured output (only for models that support it)
             if not is_gpt5_model:
-                kwargs["temperature"] = 0.15
+                request_kwargs["temperature"] = 0.15
 
             # Use text.format for structured outputs in Responses API
-            text_config = {
+            text_config: Dict[str, Any] = {
                 "format": {
                     "type": "json_schema",
                     "name": "Details",
@@ -187,9 +193,9 @@ class OpenAIClient:
             if is_gpt5_nano_or_mini:
                 text_config["verbosity"] = "low"
 
-            kwargs["text"] = text_config
+            request_kwargs["text"] = text_config
 
-        response_data, duration_ms = self._create_response(**kwargs)
+        response_data, duration_ms = self._create_response(**request_kwargs)
 
         # Extract response content from Responses API structure
         response_content = ""

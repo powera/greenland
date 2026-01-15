@@ -20,7 +20,7 @@ to provide context for what the lemma represents.
 import logging
 from typing import Dict
 
-from wordfreq.storage.backend.base import BaseSession
+from sqlalchemy.orm import Session
 from wordfreq.storage.database import Lemma, LemmaTranslation, create_database_session
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -39,7 +39,7 @@ TRANSLATION_COLUMNS = {
 }
 
 
-def migrate_translations(session: BaseSession, dry_run: bool = False) -> Dict[str, int]:
+def migrate_translations(session: Session, dry_run: bool = False) -> Dict[str, int]:
     """
     Migrate translations from individual columns to lemma_translations table.
 
