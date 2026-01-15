@@ -102,7 +102,7 @@ batch_result = agent.process_sentence_batch(
 
 Default: Lithuanian (`lt`), Chinese (`zh`), French (`fr`), Spanish (`es`)
 
-Also supported: English, German, Korean, Portuguese, Swahili, Vietnamese, Scottish Gaelic, Italian, Dutch, Swedish
+Also supported: English, German, Korean, Portuguese, Swahili, Vietnamese, Japanese, Italian, Dutch, Swedish
 
 ## Disambiguation
 

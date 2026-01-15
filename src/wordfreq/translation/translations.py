@@ -112,7 +112,7 @@ def query_translations(
         "fr": "French",
         "es": "Spanish",
         "de": "German",
-        "gd": "Scottish Gaelic",
+        "ja": "Japanese",
         "it": "Italian",
         "nl": "Dutch",
         "pt": "Portuguese",

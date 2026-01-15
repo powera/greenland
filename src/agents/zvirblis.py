@@ -367,7 +367,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
         "--languages",
         nargs="+",
         required=True,
-        choices=["lt", "zh", "ko", "fr", "de", "es", "pt", "sw", "vi", "gd", "it", "nl", "sv"],
+        choices=["lt", "zh", "ko", "fr", "de", "es", "pt", "sw", "vi", "ja", "it", "nl", "sv"],
         help="Target languages to translate to",
     )
     submit_parser.add_argument("--limit", type=int, help="Max sentences to translate")

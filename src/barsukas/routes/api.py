@@ -391,7 +391,7 @@ def search_lemmas() -> Response:
             "pt",
             "sv",
             "vi",
-            "gd",
+            "ja",
             "ko",
             "sw",
         ]
