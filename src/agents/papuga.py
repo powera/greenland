@@ -740,21 +740,20 @@ def get_argument_parser():
 
     # Papuga-specific arguments
     parser.add_argument(
-        "--confidence-threshold",
-        type=float,
-        default=0.7,
-        help="Minimum confidence to flag issues (0.0-1.0, default: 0.7)",
-    )
-    parser.add_argument(
-        "--all-languages", action="store_true", help="Check all languages (default: English only)"
+        "--all-languages", action="store_true", help="Process all languages (default: English only)"
     )
 
-    # Mode selection
-    parser.add_argument(
-        "--mode",
-        choices=["check", "populate", "both"],
-        default="check",
-        help="Operation mode: check existing pronunciations, populate missing ones, or both (default: check)",
+    # Mode selection - mutually exclusive flags
+    mode_group = parser.add_mutually_exclusive_group()
+    mode_group.add_argument(
+        "--coverage",
+        action="store_true",
+        help="Report pronunciation coverage statistics (default mode)",
+    )
+    mode_group.add_argument(
+        "--populate",
+        action="store_true",
+        help="Populate missing pronunciations",
     )
 
     parser.add_argument(
@@ -777,8 +776,11 @@ def main():
     # Create data source configuration (includes backend, cache, and LLM model)
     config = get_data_source_config(args, default_model="gpt-5-mini")
 
-    # Get mode from args
-    mode = args.mode
+    # Determine mode from flags (default to coverage if none specified)
+    if args.populate:
+        mode = "populate"
+    else:
+        mode = "coverage"  # default
 
     only_english = not args.all_languages
 
@@ -801,47 +803,26 @@ def main():
         sys.exit(1)
 
     # Confirm before running LLM queries (unless --yes or --dry-run was provided)
-    if not args.yes and not args.dry_run:
+    if not args.yes and not args.dry_run and mode == "populate":
         agent_temp = PapugaAgent(config=config)
         session = agent_temp.get_session()
         try:
-            if mode in ["check", "both"]:
-                # Count forms with pronunciations
-                query = session.query(DerivativeForm).filter(
-                    (DerivativeForm.ipa_pronunciation.isnot(None))
-                    | (DerivativeForm.phonetic_pronunciation.isnot(None))
-                )
-                if lemma_id:
-                    query = query.filter(DerivativeForm.lemma_id == lemma_id)
-                if only_english:
-                    query = query.filter(DerivativeForm.language_code == "en")
-                if args.limit:
-                    query = query.limit(args.limit)
-                check_count = query.count()
-                if args.sample_rate < 1.0:
-                    check_count = int(check_count * args.sample_rate)
-            else:
-                check_count = 0
+            # Count forms without pronunciations
+            query = session.query(DerivativeForm).filter(
+                DerivativeForm.ipa_pronunciation.is_(None),
+                DerivativeForm.phonetic_pronunciation.is_(None),
+            )
+            if lemma_id:
+                query = query.filter(DerivativeForm.lemma_id == lemma_id)
+            if only_english:
+                query = query.filter(DerivativeForm.language_code == "en")
+            if args.base_forms_only:
+                query = query.filter(DerivativeForm.is_base_form == True)
+            if args.limit:
+                query = query.limit(args.limit)
+            populate_count = query.count()
 
-            if mode in ["populate", "both"]:
-                # Count forms without pronunciations
-                query = session.query(DerivativeForm).filter(
-                    DerivativeForm.ipa_pronunciation.is_(None),
-                    DerivativeForm.phonetic_pronunciation.is_(None),
-                )
-                if lemma_id:
-                    query = query.filter(DerivativeForm.lemma_id == lemma_id)
-                if only_english:
-                    query = query.filter(DerivativeForm.language_code == "en")
-                if args.base_forms_only:
-                    query = query.filter(DerivativeForm.is_base_form == True)
-                if args.limit:
-                    query = query.limit(args.limit)
-                populate_count = query.count()
-            else:
-                populate_count = 0
-
-            estimated_calls = check_count + populate_count
+            estimated_calls = populate_count
         finally:
             session.close()
 
@@ -858,44 +839,19 @@ def main():
     agent = PapugaAgent(config=config)
 
     # Work phase: execute the requested mode with all filters applied
-    if mode == "check":
-        agent.run_full_check(
-            output_file=args.output,
-            limit=args.limit,
-            sample_rate=args.sample_rate,
-            confidence_threshold=args.confidence_threshold,
-            only_english=only_english,
-            dry_run=args.dry_run,
-            lemma_id=lemma_id,
-            lemmas=lemmas,
-        )
-    elif mode == "populate":
-        result = agent.populate_missing_pronunciations(
+    if mode == "coverage":
+        # Coverage mode - report missing pronunciations (no LLM calls)
+        result = agent.check_missing_pronunciations(
             limit=args.limit,
             only_english=only_english,
             only_base_forms=args.base_forms_only,
-            dry_run=args.dry_run,
             lemma_id=lemma_id,
             lemmas=lemmas,
         )
         logger.info(
-            f"\nPopulation complete: {result['populated']} populated, {result['failed']} failed "
-            f"({result.get('lemma_lang_pairs', 0)} lemma/language pairs: "
-            f"{result.get('batch_calls', 0)} batch, {result.get('single_calls', 0)} single)"
+            f"\nCoverage check complete: {result['total_missing']} forms missing pronunciations"
         )
-    elif mode == "both":
-        # First check
-        agent.run_full_check(
-            output_file=args.output,
-            limit=args.limit,
-            sample_rate=args.sample_rate,
-            confidence_threshold=args.confidence_threshold,
-            only_english=only_english,
-            dry_run=args.dry_run,
-            lemma_id=lemma_id,
-            lemmas=lemmas,
-        )
-        # Then populate
+    elif mode == "populate":
         result = agent.populate_missing_pronunciations(
             limit=args.limit,
             only_english=only_english,

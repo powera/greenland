@@ -54,12 +54,22 @@ def get_argument_parser():
     add_pos_type_args(parser)
     add_backend_args(parser)
 
-    # Mode selection
-    parser.add_argument(
-        "--mode",
-        choices=["check-only", "populate-only", "both", "coverage", "regenerate"],
-        default="coverage",
-        help="Operation mode: check-only (validate existing), populate-only (add missing), both (validate + populate), coverage (report only, default), regenerate (delete and regenerate, supports --batch)",
+    # Mode selection - mutually exclusive flags
+    mode_group = parser.add_mutually_exclusive_group()
+    mode_group.add_argument(
+        "--coverage",
+        action="store_true",
+        help="Report translation coverage statistics (default mode)",
+    )
+    mode_group.add_argument(
+        "--populate",
+        action="store_true",
+        help="Populate missing translations",
+    )
+    mode_group.add_argument(
+        "--regenerate",
+        action="store_true",
+        help="Delete and regenerate all non-Lithuanian translations (destructive)",
     )
 
     # Language selection (multiple)
@@ -73,12 +83,6 @@ def get_argument_parser():
     )
 
     # Additional parameters
-    parser.add_argument(
-        "--confidence-threshold",
-        type=float,
-        default=0.7,
-        help="Minimum confidence to flag issues (0.0-1.0, default: 0.7)",
-    )
     parser.add_argument(
         "--batch",
         action="store_true",
@@ -345,18 +349,26 @@ def main():
     # Create agent with unified configuration
     agent = VorasAgent(config=config)
 
+    # Determine mode from flags (default to coverage if none specified)
+    if args.populate:
+        mode = "populate"
+    elif args.regenerate:
+        mode = "regenerate"
+    else:
+        mode = "coverage"  # default
+
     # Handle batch submit first (no lemmas needed)
     if args.batch_submit:
         agent.submit_batch()
         return
 
     # Handle coverage mode (no lemmas needed)
-    if args.mode == "coverage":
+    if mode == "coverage":
         agent.run_full_check(output_file=args.output)
         return
 
     # Handle regenerate mode (operates on all curated lemmas, not --guid)
-    if args.mode == "regenerate":
+    if mode == "regenerate":
         # Confirmation for regenerate mode
         if not args.yes and not args.dry_run:
             session = agent.get_session()
@@ -467,7 +479,7 @@ def main():
         sys.exit(1)
 
     # Handle single lemma mode (from --guid) - provide detailed interactive experience
-    if len(lemmas) == 1 and args.mode in ["populate-only", "both"]:
+    if len(lemmas) == 1 and mode == "populate":
         lemma = lemmas[0]
         session = agent.get_session()
         try:
@@ -477,7 +489,7 @@ def main():
         return
 
     # Batch processing mode - get confirmation before running
-    if not args.yes and not args.dry_run and args.mode in ["check-only", "populate-only", "both"]:
+    if not args.yes and not args.dry_run and mode == "populate":
         print(f"\nThis will process {len(lemmas)} lemmas using model '{args.model}'")
         print("This may incur costs and take some time to complete.")
         response = input("Do you want to proceed? [y/N]: ").strip().lower()
@@ -485,30 +497,8 @@ def main():
             print("Aborted.")
             sys.exit(0)
 
-    # Execute the requested mode
-    if args.mode == "check-only":
-        # Validate existing translations
-        languages_to_validate = args.languages if args.languages else list(LANGUAGE_FIELDS.keys())
-
-        if len(languages_to_validate) == 1:
-            results = agent.validate_translations(
-                languages_to_validate[0],
-                limit=args.limit,
-                sample_rate=args.sample_rate,
-                confidence_threshold=args.confidence_threshold,
-                lemmas=lemmas,
-            )
-        else:
-            results = agent.validate_all_translations(
-                limit=args.limit,
-                sample_rate=args.sample_rate,
-                confidence_threshold=args.confidence_threshold,
-                lemmas=lemmas,
-            )
-
-        cli_display.display_validation_summary(results, languages_to_validate)
-
-    elif args.mode == "populate-only":
+    # Execute populate mode
+    if mode == "populate":
         # Generate missing translations only
 
         # WORKQUEUE MODE: Enqueue work items for barsukas worker to process
@@ -572,36 +562,6 @@ def main():
             language_code=args.languages, limit=args.limit, dry_run=args.dry_run, lemmas=lemmas
         )
         cli_display.display_population_summary(results)
-
-    elif args.mode == "both":
-        # First validate, then populate
-        languages_to_process = args.languages if args.languages else list(LANGUAGE_FIELDS.keys())
-
-        print("\n=== STEP 1: Validating Existing Translations ===\n")
-        if len(languages_to_process) == 1:
-            validation_results = agent.validate_translations(
-                languages_to_process[0],
-                limit=args.limit,
-                sample_rate=args.sample_rate,
-                confidence_threshold=args.confidence_threshold,
-                lemmas=lemmas,
-            )
-        else:
-            validation_results = agent.validate_all_translations(
-                limit=args.limit,
-                sample_rate=args.sample_rate,
-                confidence_threshold=args.confidence_threshold,
-                lemmas=lemmas,
-            )
-
-        print("\n=== STEP 2: Populating Missing Translations ===\n")
-        population_results = agent.fix_missing_translations(
-            language_code=args.languages, limit=args.limit, dry_run=args.dry_run, lemmas=lemmas
-        )
-
-        cli_display.display_combined_summary(
-            validation_results, population_results, languages_to_process
-        )
 
 
 if __name__ == "__main__":
