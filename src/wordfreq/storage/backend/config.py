@@ -12,6 +12,7 @@ class BackendType(Enum):
 
     SQLITE = "sqlite"
     JSONL = "jsonl"
+    POSTGRES = "postgres"
 
 
 class DataSourceConfig:
@@ -26,6 +27,7 @@ class DataSourceConfig:
     backend_type: BackendType
     sqlite_path: Optional[str]
     jsonl_data_dir: Optional[str]
+    postgres_url: Optional[str]
     barsukas_url: Optional[str]
     cache_only: bool
     model: Optional[str]
@@ -36,6 +38,7 @@ class DataSourceConfig:
         backend_type: Optional[BackendType] = None,
         sqlite_path: Optional[str] = None,
         jsonl_data_dir: Optional[str] = None,
+        postgres_url: Optional[str] = None,
         barsukas_url: Optional[str] = None,
         cache_only: bool = False,
         model: Optional[str] = None,
@@ -47,6 +50,7 @@ class DataSourceConfig:
             backend_type: The type of backend to use (defaults to env var or SQLITE)
             sqlite_path: Path to SQLite database file (defaults to constants.WORDFREQ_DB_PATH)
             jsonl_data_dir: Path to JSONL data directory (defaults to data/working)
+            postgres_url: PostgreSQL connection URL (e.g., postgresql://user:pass@host:5432/db)
             barsukas_url: URL of BARSUKAS server for cached translations (e.g., http://server:5000)
             cache_only: If True, only use cached translations and fail if not in cache
             model: LLM model to use (e.g., "gpt-4o-mini", "claude-sonnet-4")
@@ -69,11 +73,19 @@ class DataSourceConfig:
         if self.backend_type == BackendType.SQLITE:
             self.sqlite_path = sqlite_path or constants.WORDFREQ_DB_PATH
             self.jsonl_data_dir = None
+            self.postgres_url = None
+        elif self.backend_type == BackendType.POSTGRES:
+            if not postgres_url:
+                raise ValueError("postgres_url is required for POSTGRES backend")
+            self.postgres_url = postgres_url
+            self.sqlite_path = None
+            self.jsonl_data_dir = None
         else:  # JSONL
             self.sqlite_path = None
             self.jsonl_data_dir = jsonl_data_dir or os.path.join(
                 os.path.dirname(constants.WORDFREQ_DB_PATH), "..", "data", "working"
             )
+            self.postgres_url = None
 
         # Cache configuration
         self.barsukas_url = barsukas_url.rstrip("/") if barsukas_url else None
@@ -131,6 +143,15 @@ class DataSourceConfig:
 
         if self.backend_type == BackendType.SQLITE:
             parts.append(f"sqlite_path={self.sqlite_path}")
+        elif self.backend_type == BackendType.POSTGRES:
+            # Mask password in URL for repr
+            url = self.postgres_url or ""
+            if "@" in url:
+                # Show host but mask credentials
+                prefix, rest = url.split("@", 1)
+                parts.append(f"postgres_url=postgresql://***@{rest}")
+            else:
+                parts.append(f"postgres_url={url}")
         else:
             parts.append(f"jsonl_data_dir={self.jsonl_data_dir}")
 

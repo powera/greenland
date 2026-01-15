@@ -53,8 +53,13 @@ class BarsukasFlask(Flask):
     db_session_factory: Callable[[], Session]
 
 
-def create_app(config_class: type[Config] = Config) -> BarsukasFlask:
-    """Create and configure the Flask application."""
+def create_app(config_class: type[Config] = Config, db_url: Optional[str] = None) -> BarsukasFlask:
+    """Create and configure the Flask application.
+
+    Args:
+        config_class: Configuration class to use
+        db_url: Optional database URL (for PostgreSQL: postgresql://user:pass@host:5432/db)
+    """
     logging.basicConfig(
         level=logging.DEBUG if config_class.DEBUG else logging.INFO,
         format="%(asctime)s - %(levelname)s - %(name)s - %(filename)s:%(lineno)d - %(message)s",
@@ -65,18 +70,24 @@ def create_app(config_class: type[Config] = Config) -> BarsukasFlask:
     app.config.from_object(config_class)
 
     # Set up storage backend
-    backend_type = get_backend_type()
-    print(f"Using storage backend: {backend_type.value}")
-
-    if backend_type == BackendType.SQLITE:
-        db_path = app.config["DB_PATH"]
-        if not Path(db_path).exists():
-            print(f"Error: Database not found at {db_path}", file=sys.stderr)
-            sys.exit(1)
-        backend_config = DataSourceConfig(backend_type=BackendType.SQLITE, sqlite_path=db_path)
+    if db_url and db_url.startswith("postgresql://"):
+        # PostgreSQL backend via --db-url flag
+        print(f"Using storage backend: postgres")
+        backend_config = DataSourceConfig(backend_type=BackendType.POSTGRES, postgres_url=db_url)
+        app.config["DB_PATH"] = db_url  # Store for display purposes
     else:
-        # JSONL backend
-        backend_config = DataSourceConfig.from_env()
+        backend_type = get_backend_type()
+        print(f"Using storage backend: {backend_type.value}")
+
+        if backend_type == BackendType.SQLITE:
+            db_path = app.config["DB_PATH"]
+            if not Path(db_path).exists():
+                print(f"Error: Database not found at {db_path}", file=sys.stderr)
+                sys.exit(1)
+            backend_config = DataSourceConfig(backend_type=BackendType.SQLITE, sqlite_path=db_path)
+        else:
+            # JSONL backend
+            backend_config = DataSourceConfig.from_env()
 
     # Store backend config in app
     app.backend_config = backend_config
@@ -212,9 +223,14 @@ def main() -> None:
     parser.add_argument(
         "--readonly", action="store_true", help="Run in read-only mode (no edits allowed)"
     )
+    parser.add_argument(
+        "--db-url",
+        type=str,
+        help="PostgreSQL connection URL (e.g., postgresql://user:pass@host:5432/dbname)",
+    )
     args = parser.parse_args()
 
-    app = create_app()
+    app = create_app(db_url=args.db_url)
 
     if args.debug:
         app.config["DEBUG"] = True
