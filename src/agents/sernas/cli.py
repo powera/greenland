@@ -74,7 +74,67 @@ def get_argument_parser():
     # Override default languages to ['en']
     parser.set_defaults(languages=["en"])
 
+    # Workqueue arguments
+    parser.add_argument(
+        "--use-workqueue",
+        action="store_true",
+        default=False,
+        help="Enqueue work items for background processing by barsukas worker",
+    )
+
     return parser
+
+
+def enqueue_sernas_work(session, lemmas, languages, form_type=None, dry_run=False):
+    """Enqueue synonym generation work items to the queue.
+
+    Args:
+        session: Database session
+        lemmas: List of lemmas to process
+        languages: List of language codes to process
+        form_type: Specific form type or None for all
+        dry_run: If True, don't actually enqueue
+
+    Returns:
+        Dictionary with enqueue statistics
+    """
+    from barsukas.utils.task_queue import enqueue_task
+
+    enqueued_count = 0
+    skipped_count = 0
+
+    for lemma in lemmas:
+        for language_code in languages:
+            if not dry_run:
+                dedup_key = f"sernas_{lemma.id}_{language_code}_{form_type or 'all'}"
+                result = enqueue_task(
+                    session,
+                    task_type="sernas_generate_synonyms",
+                    target_type="lemma",
+                    target_id=lemma.id,
+                    payload={
+                        "language_code": language_code,
+                        "form_type": form_type,
+                        "lemma_guid": lemma.guid,
+                        "lemma_text": lemma.lemma_text,
+                    },
+                    dedup_key=dedup_key,
+                )
+                if result.created:
+                    enqueued_count += 1
+                else:
+                    skipped_count += 1
+            else:
+                enqueued_count += 1
+
+    if not dry_run:
+        session.commit()
+
+    return {
+        "enqueued": enqueued_count,
+        "skipped": skipped_count,
+        "dry_run": dry_run,
+    }
 
 
 def main():
@@ -199,6 +259,32 @@ def main():
                         print(f"  ... and {len(missing) - 10} more")
 
                 print(f"{'='*60}")
+        return
+
+    # WORKQUEUE MODE: Enqueue work items for barsukas worker
+    if args.use_workqueue and mode in ["populate", "regenerate"]:
+        print("\n" + "=" * 80)
+        print("ŠERNAS AGENT - ENQUEUING WORK")
+        print("=" * 80)
+
+        session = agent.get_session()
+        try:
+            results = enqueue_sernas_work(
+                session=session,
+                lemmas=lemmas,
+                languages=languages_to_process,
+                form_type=form_type,
+                dry_run=args.dry_run,
+            )
+
+            print(f"\nEnqueued: {results['enqueued']}")
+            print(f"Skipped: {results['skipped']}")
+            if results["dry_run"]:
+                print("\n⚠️  DRY RUN - No work items were actually enqueued")
+            print("=" * 80)
+        finally:
+            session.close()
+
         return
 
     # Handle populate mode

@@ -344,7 +344,7 @@ def main():
         return
 
     # WORKQUEUE MODE: Enqueue work items for barsukas worker to process
-    if args.use_workqueue:
+    if args.use_workqueue and mode == "populate":
         logger.info("=" * 80)
         logger.info("LAPE AGENT - ENQUEUING WORK")
         logger.info("=" * 80)

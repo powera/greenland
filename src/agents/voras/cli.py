@@ -343,6 +343,13 @@ def main():
     # Validate cache arguments
     validate_cache_args(args)
 
+    # Validate that --batch and --use-workqueue aren't both set
+    if args.batch and args.use_workqueue:
+        print("Error: --batch and --use-workqueue cannot be used together")
+        print("  --batch: Queue requests for OpenAI batch API")
+        print("  --use-workqueue: Queue tasks for barsukas background worker")
+        sys.exit(1)
+
     # Create configuration from args (always returns a valid config with defaults)
     config = get_data_source_config(args)
 

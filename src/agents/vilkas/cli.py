@@ -109,7 +109,84 @@ def get_argument_parser() -> argparse.ArgumentParser:
         help="Populate missing word forms",
     )
 
+    # Workqueue arguments
+    parser.add_argument(
+        "--use-workqueue",
+        action="store_true",
+        default=False,
+        help="Enqueue work items for background processing by barsukas worker",
+    )
+
     return parser
+
+
+def enqueue_vilkas_work(session, lemmas, task, dry_run=False):
+    """Enqueue word form generation work items to the queue.
+
+    Args:
+        session: Database session
+        lemmas: List of lemmas to process
+        task: Task string (e.g., 'lt-noun-declensions') or 'all'
+        dry_run: If True, don't actually enqueue
+
+    Returns:
+        Dictionary with enqueue statistics
+    """
+    from barsukas.utils.task_queue import enqueue_task
+
+    enqueued_count = 0
+    skipped_count = 0
+
+    # Build list of (language, pos) tuples to process
+    if task == "all":
+        tasks_to_run = []
+        for lang, pos_types in SUPPORTED_TASKS.items():
+            for pos in pos_types:
+                tasks_to_run.append((lang, pos))
+    else:
+        # Parse task string
+        parts = task.split("-")
+        lang = parts[0]
+        pos = parts[1]  # noun, verb, adjective, adverb
+        tasks_to_run = [(lang, pos)]
+
+    for lemma in lemmas:
+        for lang, pos in tasks_to_run:
+            # Skip if POS doesn't match
+            if lemma.pos_type != pos:
+                skipped_count += 1
+                continue
+
+            if not dry_run:
+                dedup_key = f"vilkas_{lang}_{pos}_{lemma.id}"
+                result = enqueue_task(
+                    session,
+                    task_type="vilkas_generate_forms",
+                    target_type="lemma",
+                    target_id=lemma.id,
+                    payload={
+                        "language_code": lang,
+                        "pos_type": pos,
+                        "lemma_guid": lemma.guid,
+                        "lemma_text": lemma.lemma_text,
+                    },
+                    dedup_key=dedup_key,
+                )
+                if result.created:
+                    enqueued_count += 1
+                else:
+                    skipped_count += 1
+            else:
+                enqueued_count += 1
+
+    if not dry_run:
+        session.commit()
+
+    return {
+        "enqueued": enqueued_count,
+        "skipped": skipped_count,
+        "dry_run": dry_run,
+    }
 
 
 def main() -> None:
@@ -243,6 +320,31 @@ def main() -> None:
                 f"{', '.join(selected_languages)}"
             )
             sys.exit(1)
+
+        # WORKQUEUE MODE: Enqueue work items for barsukas worker
+        if args.use_workqueue:
+            print("\n" + "=" * 80)
+            print("VILKAS AGENT - ENQUEUING WORK")
+            print("=" * 80)
+
+            session = agent.get_session()
+            try:
+                results = enqueue_vilkas_work(
+                    session=session,
+                    lemmas=lemmas,
+                    task=args.task,
+                    dry_run=args.dry_run,
+                )
+
+                print(f"\nEnqueued: {results['enqueued']}")
+                print(f"Skipped: {results['skipped']}")
+                if results["dry_run"]:
+                    print("\n⚠️  DRY RUN - No work items were actually enqueued")
+                print("=" * 80)
+            finally:
+                session.close()
+
+            return
 
         # Confirmation prompt (unless --yes or --dry-run)
         if not args.yes and not args.dry_run:

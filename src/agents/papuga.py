@@ -762,7 +762,80 @@ def get_argument_parser():
         help="Only process base forms (populate mode only)",
     )
 
+    # Workqueue arguments
+    parser.add_argument(
+        "--use-workqueue",
+        action="store_true",
+        default=False,
+        help="Enqueue work items for background processing by barsukas worker",
+    )
+
     return parser
+
+
+def enqueue_papuga_work(session, lemmas, only_english=True, base_forms_only=False, dry_run=False):
+    """Enqueue pronunciation generation work items to the queue.
+
+    Args:
+        session: Database session
+        lemmas: List of lemmas to process
+        only_english: Only process English forms
+        base_forms_only: Only process base forms
+        dry_run: If True, don't actually enqueue
+
+    Returns:
+        Dictionary with enqueue statistics
+    """
+    from barsukas.utils.task_queue import enqueue_task
+
+    enqueued_count = 0
+    skipped_count = 0
+
+    # Get derivative forms that need pronunciations
+    lemma_ids = [l.id for l in lemmas]
+    query = session.query(DerivativeForm).filter(
+        DerivativeForm.lemma_id.in_(lemma_ids),
+        DerivativeForm.ipa_pronunciation.is_(None),
+        DerivativeForm.phonetic_pronunciation.is_(None),
+    )
+    if only_english:
+        query = query.filter(DerivativeForm.language_code == "en")
+    if base_forms_only:
+        query = query.filter(DerivativeForm.is_base_form == True)
+
+    forms = query.all()
+
+    for form in forms:
+        if not dry_run:
+            dedup_key = f"papuga_{form.id}"
+            result = enqueue_task(
+                session,
+                task_type="papuga_generate_pronunciation",
+                target_type="derivative_form",
+                target_id=form.id,
+                payload={
+                    "form_id": form.id,
+                    "form_text": form.form_text,
+                    "language_code": form.language_code,
+                    "lemma_id": form.lemma_id,
+                },
+                dedup_key=dedup_key,
+            )
+            if result.created:
+                enqueued_count += 1
+            else:
+                skipped_count += 1
+        else:
+            enqueued_count += 1
+
+    if not dry_run:
+        session.commit()
+
+    return {
+        "enqueued": enqueued_count,
+        "skipped": skipped_count,
+        "dry_run": dry_run,
+    }
 
 
 def main():
@@ -801,6 +874,32 @@ def main():
     elif len(lemmas) == 0:
         logger.error("No lemmas found to process")
         sys.exit(1)
+
+    # WORKQUEUE MODE: Enqueue work items for barsukas worker
+    if args.use_workqueue and mode == "populate":
+        print("\n" + "=" * 80)
+        print("PAPUGA AGENT - ENQUEUING WORK")
+        print("=" * 80)
+
+        session = PapugaAgent(config=config).get_session()
+        try:
+            results = enqueue_papuga_work(
+                session=session,
+                lemmas=lemmas,
+                only_english=only_english,
+                base_forms_only=args.base_forms_only,
+                dry_run=args.dry_run,
+            )
+
+            print(f"\nEnqueued: {results['enqueued']}")
+            print(f"Skipped: {results['skipped']}")
+            if results["dry_run"]:
+                print("\n⚠️  DRY RUN - No work items were actually enqueued")
+            print("=" * 80)
+        finally:
+            session.close()
+
+        return
 
     # Confirm before running LLM queries (unless --yes or --dry-run was provided)
     if not args.yes and not args.dry_run and mode == "populate":
