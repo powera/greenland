@@ -367,8 +367,10 @@ class VieversysAgent:
         for voice in voices:
             logger.info(f"Generating audio: {text} ({language_code}/{voice.value})")
 
-            # Generate audio
-            result = generate_audio(text=text, voice=voice, language_code=language_code)
+            # Generate audio (with is_sentence=True for natural sentence pacing)
+            result = generate_audio(
+                text=text, voice=voice, language_code=language_code, is_sentence=True
+            )
 
             if not result.success:
                 logger.error(f"Failed to generate audio: {result.error}")

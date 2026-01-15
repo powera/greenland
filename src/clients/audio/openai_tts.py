@@ -2,7 +2,6 @@
 """OpenAI TTS client for audio generation."""
 
 import logging
-import os
 import time
 from pathlib import Path
 from typing import Optional
@@ -31,41 +30,53 @@ CHARS_PER_INPUT_TOKEN = 4
 PRICE_PER_1M_INPUT_TOKENS = 0.60
 PRICE_PER_1M_OUTPUT_TOKENS = 12.00
 
-# Language-specific TTS instructions
-LANGUAGE_INSTRUCTIONS = {
-    "lt": """Pronounce this Lithuanian word or phrase with clear, accurate pronunciation:
-- Emphasize proper Lithuanian vowel length and stress patterns
-- Maintain proper Lithuanian intonation with a natural rise and fall
-- Articulate each syllable distinctly without rushing
-- Use standard Lithuanian pronunciation, not dialectal variants
-- Pronounce every phoneme fully - do not drop consonant clusters or reduce unstressed vowels
-- For phrases, maintain proper spacing and natural flow between words""",
-    "zh": """Pronounce this Chinese word or phrase with clear, accurate pronunciation:
-- Use proper Mandarin tones and pronunciation
-- Articulate each syllable clearly
-- Maintain natural Chinese intonation""",
-    "ko": """Pronounce this Korean word or phrase with clear, accurate pronunciation:
-- Use proper Korean pronunciation and intonation
-- Articulate each syllable clearly""",
-    "fr": """Pronounce this French word or phrase with clear, accurate pronunciation:
-- Use proper French pronunciation and intonation
-- Maintain proper French vowel sounds""",
-    "de": """Pronounce this German word or phrase with clear, accurate pronunciation:
-- Use proper German pronunciation and intonation
-- Maintain proper German vowel and consonant sounds""",
-    "es": """Pronounce this Spanish word or phrase with clear, accurate pronunciation:
-- Use proper Spanish pronunciation and intonation
-- Maintain proper Spanish vowel sounds""",
-    "pt": """Pronounce this Portuguese word or phrase with clear, accurate pronunciation:
-- Use proper Portuguese pronunciation and intonation
-- Maintain proper Portuguese vowel sounds""",
-    "sw": """Pronounce this Swahili word or phrase with clear, accurate pronunciation:
-- Use proper Swahili pronunciation and intonation
-- Articulate each syllable clearly""",
-    "vi": """Pronounce this Vietnamese word or phrase with clear, accurate pronunciation:
-- Use proper Vietnamese tones and pronunciation
-- Articulate each syllable clearly""",
-}
+# Path to prompts directory (ROOT/prompts/audio/)
+PROMPTS_DIR = Path(__file__).parent.parent.parent.parent / "prompts" / "audio"
+
+# Cache for loaded prompts
+_prompt_cache: dict[tuple[str, str], str] = {}
+
+
+def _load_prompt(prompt_type: str, language_code: str) -> str:
+    """
+    Load a prompt from file.
+
+    Args:
+        prompt_type: Either "word" or "sentence"
+        language_code: Language code (e.g., "lt", "zh")
+
+    Returns:
+        The prompt text, or a default fallback if file not found
+    """
+    cache_key = (prompt_type, language_code)
+    if cache_key in _prompt_cache:
+        return _prompt_cache[cache_key]
+
+    prompt_file = PROMPTS_DIR / prompt_type / f"{language_code}.txt"
+    if prompt_file.exists():
+        prompt_text = prompt_file.read_text().strip()
+        _prompt_cache[cache_key] = prompt_text
+        return prompt_text
+
+    # Fallback to default
+    default_prompt = "Speak clearly and naturally."
+    _prompt_cache[cache_key] = default_prompt
+    return default_prompt
+
+
+def get_instructions(language_code: str, is_sentence: bool = False) -> str:
+    """
+    Get TTS instructions for a language.
+
+    Args:
+        language_code: Language code (e.g., "lt", "zh")
+        is_sentence: If True, use sentence-level prompt; otherwise use word-level
+
+    Returns:
+        The instruction text for TTS
+    """
+    prompt_type = "sentence" if is_sentence else "word"
+    return _load_prompt(prompt_type, language_code)
 
 
 class OpenAITTSClient:
@@ -102,6 +113,7 @@ class OpenAITTSClient:
         model: str = DEFAULT_MODEL,
         audio_format: AudioFormat = AudioFormat.MP3,
         speed: float = 1.0,
+        is_sentence: bool = False,
     ) -> AudioGenerationResult:
         """
         Generate audio from text using OpenAI TTS.
@@ -113,6 +125,7 @@ class OpenAITTSClient:
             model: TTS model to use
             audio_format: Output audio format
             speed: Speed of speech (0.25 to 4.0)
+            is_sentence: If True, use sentence-level prompt for natural pacing
 
         Returns:
             AudioGenerationResult with audio data and metadata
@@ -131,7 +144,7 @@ class OpenAITTSClient:
             logger.debug(f"Voice: {voice.value}, Language: {language_code}")
 
         # Get language-specific instructions
-        instructions = LANGUAGE_INSTRUCTIONS.get(language_code, "Speak clearly and naturally.")
+        instructions = get_instructions(language_code, is_sentence=is_sentence)
 
         # Prepare request payload
         payload = {
@@ -229,6 +242,7 @@ def generate_audio(
     model: str = DEFAULT_MODEL,
     audio_format: AudioFormat = AudioFormat.MP3,
     speed: float = 1.0,
+    is_sentence: bool = False,
 ) -> AudioGenerationResult:
     """
     Generate audio from text using OpenAI TTS.
@@ -242,8 +256,11 @@ def generate_audio(
         model: TTS model to use
         audio_format: Output audio format
         speed: Speed of speech (0.25 to 4.0)
+        is_sentence: If True, use sentence-level prompt for natural pacing
 
     Returns:
         AudioGenerationResult with audio data and metadata
     """
-    return client.generate_audio(text, voice, language_code, model, audio_format, speed)
+    return client.generate_audio(
+        text, voice, language_code, model, audio_format, speed, is_sentence
+    )
