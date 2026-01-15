@@ -18,9 +18,51 @@ Environment overrides:
 
 import argparse
 import os
+import re
 import subprocess
 import sys
+from dataclasses import dataclass, field
 from pathlib import Path
+
+
+@dataclass
+class StepResult:
+    """Result of running a single step."""
+
+    title: str
+    ran: bool
+    stdout: str = ""
+    stderr: str = ""
+    cost: float = 0.0
+
+
+@dataclass
+class CostSummary:
+    """Tracks costs across all steps."""
+
+    steps: list[StepResult] = field(default_factory=list)
+
+    def add(self, result: StepResult) -> None:
+        self.steps.append(result)
+
+    def total_cost(self) -> float:
+        return sum(s.cost for s in self.steps)
+
+    def print_summary(self) -> None:
+        print()
+        print("=" * 60)
+        print("LLM COST SUMMARY")
+        print("=" * 60)
+        for step in self.steps:
+            if not step.ran:
+                print(f"  {step.title}: SKIPPED")
+            elif step.cost > 0:
+                print(f"  {step.title}: ${step.cost:.6f}")
+            else:
+                print(f"  {step.title}: $0.000000 (no LLM calls)")
+        print("-" * 60)
+        print(f"  TOTAL: ${self.total_cost():.6f}")
+        print("=" * 60)
 
 
 def get_repo_root() -> Path:
@@ -28,7 +70,24 @@ def get_repo_root() -> Path:
     return Path(__file__).parent.parent.resolve()
 
 
-def run_step(title: str, cmd: list[str], assume_yes: bool, env: dict) -> bool:
+def extract_costs_from_output(output: str) -> float:
+    """Extract LLM/TTS costs from command output.
+
+    Looks for patterns like:
+    - "Cost: $0.001234"
+    - "Cost: ~$0.001234"
+    """
+    total = 0.0
+    # Match "Cost: $X.XXXXXX" or "Cost: ~$X.XXXXXX"
+    pattern = r"Cost:\s*~?\$([0-9]+\.[0-9]+)"
+    for match in re.finditer(pattern, output):
+        total += float(match.group(1))
+    return total
+
+
+def run_step(
+    title: str, cmd: list[str], assume_yes: bool, env: dict, cost_summary: CostSummary
+) -> bool:
     """Run a single step, optionally prompting for confirmation.
 
     Args:
@@ -36,6 +95,7 @@ def run_step(title: str, cmd: list[str], assume_yes: bool, env: dict) -> bool:
         cmd: Command to run as a list of strings.
         assume_yes: If True, skip confirmation prompt.
         env: Environment variables for the subprocess.
+        cost_summary: Cost tracker to record results.
 
     Returns:
         True if the step was run, False if skipped.
@@ -48,9 +108,34 @@ def run_step(title: str, cmd: list[str], assume_yes: bool, env: dict) -> bool:
         reply = input("Run this step? [y/N] ").strip().lower()
         if reply not in ("y", "yes"):
             print(f"Skipped {title}")
+            cost_summary.add(StepResult(title=title, ran=False))
             return False
 
-    subprocess.run(cmd, env=env, check=True)
+    # Capture stdout and stderr while also printing them
+    process = subprocess.Popen(
+        cmd,
+        env=env,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+        bufsize=1,
+    )
+
+    output_lines = []
+    assert process.stdout is not None
+    for line in process.stdout:
+        print(line, end="")
+        output_lines.append(line)
+
+    process.wait()
+    combined_output = "".join(output_lines)
+
+    if process.returncode != 0:
+        raise subprocess.CalledProcessError(process.returncode, cmd)
+
+    cost = extract_costs_from_output(combined_output)
+    cost_summary.add(StepResult(title=title, ran=True, stdout=combined_output, cost=cost))
+
     return True
 
 
@@ -77,6 +162,7 @@ def main() -> int:
     guid = args.guid
     assume_yes = args.assume_yes
     repo_root = get_repo_root()
+    cost_summary = CostSummary()
 
     # Set up environment with PYTHONPATH
     env = os.environ.copy()
@@ -112,9 +198,18 @@ def main() -> int:
     # Step 1: Definitions (Lokys)
     run_step(
         "Definitions",
-        ["python", "-m", "agents.lokys.cli", "--guid", guid, "--check-type", "definitions"],
+        [
+            "python",
+            "-m",
+            "agents.lokys.cli",
+            "--guid",
+            guid,
+            "--check-type",
+            "definitions",
+        ],
         assume_yes,
         env,
+        cost_summary,
     )
 
     # Step 2: Translations (Voras)
@@ -134,6 +229,7 @@ def main() -> int:
         + ["--yes"],
         assume_yes,
         env,
+        cost_summary,
     )
 
     # Step 3: Grammatical forms (Vilkas)
@@ -154,6 +250,7 @@ def main() -> int:
         + ["--yes"],
         assume_yes,
         env,
+        cost_summary,
     )
 
     # Step 4: Synonyms (Šernas)
@@ -173,6 +270,7 @@ def main() -> int:
         + ["--yes"],
         assume_yes,
         env,
+        cost_summary,
     )
 
     # Step 5: Pattern sentences (Buivolas)
@@ -191,6 +289,7 @@ def main() -> int:
         ],
         assume_yes,
         env,
+        cost_summary,
     )
 
     # Step 6: Grammatical facts (Lape)
@@ -211,6 +310,7 @@ def main() -> int:
                 + lape_languages,
                 assume_yes,
                 env,
+                cost_summary,
             )
     else:
         run_step(
@@ -228,6 +328,7 @@ def main() -> int:
             + lape_languages,
             assume_yes,
             env,
+            cost_summary,
         )
 
     # Step 7: Sentences (Buivolas LLM mode)
@@ -250,6 +351,7 @@ def main() -> int:
         + sentence_languages,
         assume_yes,
         env,
+        cost_summary,
     )
 
     # Step 8: Sentence translations (Zvirblis)
@@ -258,7 +360,7 @@ def main() -> int:
         + sentence_languages
         + sentence_translation_args
     )
-    run_step("Sentence translations", zvirblis_cmd, assume_yes, env)
+    run_step("Sentence translations", zvirblis_cmd, assume_yes, env, cost_summary)
 
     # Step 9: Audio generation (Vieversys) - per language
     for lang in languages:
@@ -277,7 +379,8 @@ def main() -> int:
         ]
         if audio_voices:
             vieversys_cmd.extend(["--voices"] + audio_voices)
-        run_step(f"Audio (Vieversys - {lang})", vieversys_cmd, assume_yes, env)
+        # TODO: Remove False to respect assume_yes for vieversys audio steps
+        run_step(f"Audio (Vieversys - {lang})", vieversys_cmd, False, env, cost_summary)
 
     # Step 10: Sentence audio generation (Vieversys) - per language
     for lang in languages:
@@ -299,7 +402,17 @@ def main() -> int:
         ]
         if audio_voices:
             vieversys_cmd.extend(["--voices"] + audio_voices)
-        run_step(f"Sentence Audio (Vieversys - {lang})", vieversys_cmd, assume_yes, env)
+        # TODO: Remove False to respect assume_yes for vieversys sentence audio steps
+        run_step(
+            f"Sentence Audio (Vieversys - {lang})",
+            vieversys_cmd,
+            False,
+            env,
+            cost_summary,
+        )
+
+    # Print cost summary at the end
+    cost_summary.print_summary()
 
     return 0
 
