@@ -6,6 +6,7 @@ from typing import Any, Union
 
 from config import Config
 from flask import Blueprint, flash, g, redirect, render_template, request, url_for
+from flask.typing import ResponseReturnValue
 from sqlalchemy import case, func, or_
 from werkzeug.wrappers import Response
 
@@ -25,7 +26,7 @@ bp = Blueprint("sentences", __name__, url_prefix="/sentences")
 
 
 @bp.route("/")
-def list_sentences() -> str:
+def list_sentences() -> ResponseReturnValue:
     """List all sentences with pagination and filtering."""
     page = request.args.get("page", 1, type=int)
     search = request.args.get("search", "").strip()

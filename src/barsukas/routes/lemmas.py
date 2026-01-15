@@ -179,7 +179,7 @@ def add_lemma() -> ResponseReturnValue:
 
 
 @bp.route("/")
-def list_lemmas() -> str:
+def list_lemmas() -> ResponseReturnValue:
     """List all lemmas with pagination and filtering."""
     page = request.args.get("page", 1, type=int)
     search = request.args.get("search", "").strip()

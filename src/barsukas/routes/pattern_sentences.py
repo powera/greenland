@@ -19,7 +19,7 @@ bp = Blueprint("pattern_sentences", __name__, url_prefix="/pattern-sentences")
 
 
 @bp.route("/")
-def index() -> str:
+def index() -> ResponseReturnValue:
     """Display the pattern sentence generation interface."""
     # Get statistics on existing pattern sentences
     stats: dict[str, int] = {}
@@ -476,7 +476,7 @@ def verify_sentence(sentence_id: int) -> ResponseReturnValue:
 
 
 @bp.route("/view")
-def view() -> str:
+def view() -> ResponseReturnValue:
     """View generated pattern sentences with pagination."""
     page = request.args.get("page", 1, type=int)
     pattern_id = request.args.get("pattern_id", None)

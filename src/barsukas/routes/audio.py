@@ -49,7 +49,7 @@ logger = logging.getLogger(__name__)
 
 
 @bp.route("/")
-def index() -> str:
+def index() -> ResponseReturnValue:
     """Audio quality review dashboard."""
     # Get summary statistics
     total_files = g.db.query(AudioQualityReview).count()
@@ -230,7 +230,7 @@ def import_manifest() -> ResponseReturnValue:
 
 
 @bp.route("/list")
-def list_files() -> str:
+def list_files() -> ResponseReturnValue:
     """List audio files with filters and search."""
     # Get filter parameters
     language_filter = request.args.get("language", "")

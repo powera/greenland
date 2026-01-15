@@ -7,6 +7,7 @@ from typing import Union
 
 from config import Config
 from flask import Blueprint, flash, g, redirect, render_template, request, url_for
+from flask.typing import ResponseReturnValue
 from werkzeug.wrappers import Response
 
 from barsukas.helpers.flash_helpers import flash_and_log
@@ -17,7 +18,7 @@ bp = Blueprint("operation_logs", __name__, url_prefix="/logs")
 
 
 @bp.route("/")
-def list_logs() -> str:
+def list_logs() -> ResponseReturnValue:
     """List operation logs with pagination and filtering."""
     page = request.args.get("page", 1, type=int)
     source_filter = request.args.get("source", "").strip()

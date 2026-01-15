@@ -321,8 +321,10 @@ class WikiLoader:
             if not text_nodes or not text_nodes[0].childNodes:
                 return ""
 
-            node_value = text_nodes[0].childNodes[0].nodeValue
-            return node_value if node_value is not None else ""
+            first_child = text_nodes[0].childNodes[0]
+            if first_child.nodeValue is None:
+                return ""
+            return first_child.nodeValue  # type: ignore[no-any-return]
 
         except Exception as e:
             if isinstance(e, ValueError):

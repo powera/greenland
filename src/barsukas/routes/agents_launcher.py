@@ -291,7 +291,7 @@ def check_database_empty() -> bool:
 
 
 @bp.route("/")
-def list_agents() -> str:
+def list_agents() -> ResponseReturnValue:
     """Display the list of available agents."""
     # Check if database is empty to determine PRADZIA visibility
     db_empty = check_database_empty()

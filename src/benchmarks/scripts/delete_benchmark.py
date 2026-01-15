@@ -1,6 +1,6 @@
 from sqlalchemy import delete
 
-import benchmarks.datastore.benchmarks
+from benchmarks.datastore import benchmarks as datastore_benchmarks
 from benchmarks.datastore.common import create_dev_session
 
 
@@ -21,34 +21,34 @@ def delete_benchmark_completely(session, benchmark_code: str) -> bool:
     try:
         # 1. Find all run IDs associated with this benchmark
         run_ids_query = (
-            session.query(datastore.benchmarks.Run.run_id)
-            .filter(datastore.benchmarks.Run.benchmark_name == benchmark_code)
+            session.query(datastore_benchmarks.Run.run_id)
+            .filter(datastore_benchmarks.Run.benchmark_name == benchmark_code)
             .all()
         )
         run_ids = [row[0] for row in run_ids_query]
 
         # 2. Delete run details for these runs
         for run_id in run_ids:
-            detail_delete = delete(datastore.benchmarks.RunDetail).where(
-                datastore.benchmarks.RunDetail.run_id == run_id
+            detail_delete = delete(datastore_benchmarks.RunDetail).where(
+                datastore_benchmarks.RunDetail.run_id == run_id
             )
             session.execute(detail_delete)
 
         # 3. Delete the runs themselves
-        run_delete = delete(datastore.benchmarks.Run).where(
-            datastore.benchmarks.Run.benchmark_name == benchmark_code
+        run_delete = delete(datastore_benchmarks.Run).where(
+            datastore_benchmarks.Run.benchmark_name == benchmark_code
         )
         session.execute(run_delete)
 
         # 4. Delete all questions associated with this benchmark
-        question_delete = delete(datastore.benchmarks.Question).where(
-            datastore.benchmarks.Question.benchmark_name == benchmark_code
+        question_delete = delete(datastore_benchmarks.Question).where(
+            datastore_benchmarks.Question.benchmark_name == benchmark_code
         )
         session.execute(question_delete)
 
         # 5. Delete the benchmark itself
-        benchmark_delete = delete(datastore.benchmarks.Benchmark).where(
-            datastore.benchmarks.Benchmark.codename == benchmark_code
+        benchmark_delete = delete(datastore_benchmarks.Benchmark).where(
+            datastore_benchmarks.Benchmark.codename == benchmark_code
         )
         session.execute(benchmark_delete)
 

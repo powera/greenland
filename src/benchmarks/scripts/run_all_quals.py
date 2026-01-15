@@ -6,9 +6,9 @@ import argparse
 import logging
 from typing import List, Optional, Set
 
-import benchmarks.datastore.common
-import benchmarks.datastore.quals
-import lib.run_quals
+from benchmarks.datastore import common as datastore_common
+from benchmarks.datastore import quals as datastore_quals
+from lib import run_quals
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -17,12 +17,12 @@ logger = logging.getLogger(__name__)
 
 def get_all_model_codenames(session) -> List[str]:
     """Get list of all model codenames from database."""
-    return [x["codename"] for x in datastore.common.list_all_models(session)]
+    return [x["codename"] for x in datastore_common.list_all_models(session)]
 
 
 def get_completed_quals(session) -> Set[str]:
     """Get set of already completed model/test pairs."""
-    results = datastore.quals.get_highest_qual_scores(session)
+    results = datastore_quals.get_highest_qual_scores(session)
     return {f"{test}:{model}" for test, model in results.keys()}
 
 
@@ -36,7 +36,7 @@ def run_missing_quals(
         blacklist_models: Set of model codenames to never run
         target_model: Optional specific model to run tests for
     """
-    session = datastore.quals.create_dev_session()
+    session = datastore_quals.create_dev_session()
 
     # Initialize blacklist if not provided
     blacklist_models = blacklist_models or set()
@@ -58,7 +58,7 @@ def run_missing_quals(
 
     # Try each combination
     for model in sorted(all_models):
-        for test_type in lib.run_quals.QUAL_TEST_CLASSES:
+        for test_type in run_quals.QUAL_TEST_CLASSES:
             # Skip if already has a score
             if f"{test_type}:{model}" in completed:
                 continue
@@ -66,7 +66,7 @@ def run_missing_quals(
             logger.info(f"Running {test_type} qualification test for model {model}")
 
             try:
-                lib.run_quals.run_qual_test(test_type, model, save_to_db=True, session=session)
+                run_quals.run_qual_test(test_type, model, save_to_db=True, session=session)
             except Exception as e:
                 logger.error(f"Error running {test_type} for {model}: {str(e)}")
                 continue

@@ -44,8 +44,9 @@ class RelPathFormatter(logging.Formatter):
 
         # If there's exception info, compute where the exception was raised
         try:
-            if getattr(record, "exc_info", None) and record.exc_info[2] is not None:
-                tb = record.exc_info[2]
+            exc_info = getattr(record, "exc_info", None)
+            if exc_info is not None and exc_info[2] is not None:
+                tb = exc_info[2]
                 while tb.tb_next is not None:
                     tb = tb.tb_next
                 origin_path = Path(tb.tb_frame.f_code.co_filename).resolve()

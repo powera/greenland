@@ -33,7 +33,7 @@ def _get_audio_output_dir() -> str:
     try:
         audio_base_dir = current_app.config.get("AUDIO_BASE_DIR")
         if audio_base_dir:
-            return audio_base_dir
+            return audio_base_dir  # type: ignore[no-any-return]
     except RuntimeError:
         # Not in Flask app context (running from task worker)
         pass
@@ -41,7 +41,7 @@ def _get_audio_output_dir() -> str:
     # Fall back to Config or environment variable
     audio_base_dir = getattr(Config, "AUDIO_BASE_DIR", None)
     if audio_base_dir:
-        return audio_base_dir
+        return audio_base_dir  # type: ignore[no-any-return]
 
     # Last resort: temp directory
     return tempfile.mkdtemp(prefix="audio_gen_")

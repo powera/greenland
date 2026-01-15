@@ -42,7 +42,7 @@ def _get_backend_config() -> DataSourceConfig:
 
 
 @bp.route("/")
-def index() -> str:
+def index() -> ResponseReturnValue:
     """Settings page."""
     backend_type = get_backend_type()
     backend_config = _get_backend_config()

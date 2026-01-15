@@ -19,6 +19,7 @@ from flask import (
     send_file,
     url_for,
 )
+from flask.typing import ResponseReturnValue
 from werkzeug.wrappers import Response
 
 import constants
@@ -27,13 +28,13 @@ bp = Blueprint("exports", __name__, url_prefix="/exports")
 
 
 @bp.route("/")
-def exports_page() -> str:
+def exports_page() -> ResponseReturnValue:
     """Display the exports landing page with POVAS and UNGURYS options."""
     return render_template("exports/index.html")
 
 
 @bp.route("/povas")
-def povas_form() -> str:
+def povas_form() -> ResponseReturnValue:
     """Display the POVAS HTML generation form."""
     return render_template("exports/povas.html")
 
@@ -92,7 +93,7 @@ def povas_generate() -> Union[Response, Tuple[Response, int]]:
 
 
 @bp.route("/elnias")
-def elnias_form() -> str:
+def elnias_form() -> ResponseReturnValue:
     """Display the ELNIAS bootstrap export form."""
     return render_template("exports/elnias.html")
 

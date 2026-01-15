@@ -100,7 +100,7 @@ def export_all_languages() -> ResponseReturnValue:
 
 
 @bp.route("/")
-def export_page() -> str:
+def export_page() -> ResponseReturnValue:
     """Display the WireWord export page."""
     return render_template("wireword/export.html", languages=SUPPORTED_LANGUAGES)
 
