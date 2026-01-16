@@ -2,6 +2,7 @@
 
 """Routes for WireWord export functionality."""
 
+import os
 import tempfile
 from datetime import datetime
 from config import Config
@@ -14,15 +15,30 @@ from wordfreq.storage.backend.config import BackendType, DataSourceConfig
 bp = Blueprint("wireword", __name__, url_prefix="/wireword")
 
 
-def export_all_languages() -> ResponseReturnValue:
-    """Export WireWord files for all supported languages (directory mode only)."""
-    try:
-        # Create DataSourceConfig
-        config = DataSourceConfig(
+def _get_config() -> DataSourceConfig:
+    """Get DataSourceConfig based on environment (PostgreSQL or SQLite)."""
+    if os.environ.get("STORAGE_BACKEND") == "postgres":
+        postgres_url = os.environ.get("POSTGRES_URL")
+        if not postgres_url:
+            postgres_url = DataSourceConfig.build_postgres_url()
+        return DataSourceConfig(
+            backend_type=BackendType.POSTGRES,
+            postgres_url=postgres_url,
+            debug=Config.DEBUG,
+        )
+    else:
+        return DataSourceConfig(
             backend_type=BackendType.SQLITE,
             sqlite_path=Config.DB_PATH,
             debug=Config.DEBUG,
         )
+
+
+def export_all_languages() -> ResponseReturnValue:
+    """Export WireWord files for all supported languages (directory mode only)."""
+    try:
+        # Create DataSourceConfig
+        config = _get_config()
 
         all_results = {}
         errors = []
@@ -138,11 +154,7 @@ def export_wireword() -> ResponseReturnValue:
 
     try:
         # Create DataSourceConfig
-        config = DataSourceConfig(
-            backend_type=BackendType.SQLITE,
-            sqlite_path=Config.DB_PATH,
-            debug=Config.DEBUG,
-        )
+        config = _get_config()
 
         # Initialize agent
         agent = UngurysAgent(
