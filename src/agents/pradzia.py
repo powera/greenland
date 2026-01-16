@@ -513,6 +513,8 @@ class PradziaAgent:
         """
         Import lemmas from JSONL files to SQLite database.
 
+        Uses bulk operations to minimize round-trips for remote databases.
+
         Args:
             jsonl_dir: Path to JSONL data directory (e.g., data/release)
             dry_run: If True, only report what would be imported without writing
@@ -528,7 +530,7 @@ class PradziaAgent:
         from wordfreq.storage.models.schema import Lemma as SQLLemma
         from wordfreq.storage.models.schema import LemmaTranslation
 
-        result = {
+        result: Dict[str, Any] = {
             "dry_run": dry_run,
             "jsonl_dir": jsonl_dir,
             "sqlite_db": self.db_path,
@@ -542,8 +544,8 @@ class PradziaAgent:
         sqlite_session = self.get_session()
 
         try:
-            # Query all lemmas from JSONL
-            logger.info("Reading lemmas from JSONL files...")
+            # Stage 1: Read all lemmas from JSONL (in-memory, no DB round-trips)
+            logger.info("Stage 1: Reading lemmas from JSONL files...")
             jsonl_lemmas = jsonl_session.query(SQLLemma).all()
             logger.info(f"Found {len(jsonl_lemmas)} lemmas in JSONL files")
 
@@ -554,81 +556,124 @@ class PradziaAgent:
                 logger.info(f"DRY RUN: Would import {len(jsonl_lemmas)} lemmas")
                 return result
 
-            # Import each lemma to SQLite
-            logger.info("Importing lemmas to SQLite database...")
-            imported_count = 0
-            skipped_count = 0
-            translation_count = 0
-
-            for lemma in jsonl_lemmas:
-                # Check if lemma already exists in SQLite
-                existing = (
-                    sqlite_session.query(SQLLemma).filter(SQLLemma.guid == lemma.guid).first()
-                    if lemma.guid
-                    else None
-                )
-
-                if existing:
-                    logger.debug(
-                        f"Skipping {lemma.lemma_text} (GUID: {lemma.guid}) - already exists"
-                    )
-                    skipped_count += 1
-                    continue
-
-                # Create new lemma in SQLite
-                new_lemma = SQLLemma(
-                    guid=lemma.guid,
-                    lemma_text=lemma.lemma_text,
-                    definition_text=lemma.definition_text,
-                    pos_type=lemma.pos_type,
-                    pos_subtype=lemma.pos_subtype,
-                    difficulty_level=lemma.difficulty_level,
-                    frequency_rank=lemma.frequency_rank,
-                    tags=lemma.tags,
-                    disambiguation=(
-                        lemma.disambiguation if hasattr(lemma, "disambiguation") else None
-                    ),
-                    confidence=lemma.confidence if hasattr(lemma, "confidence") else 0.0,
-                    verified=lemma.verified if hasattr(lemma, "verified") else False,
-                    notes=lemma.notes if hasattr(lemma, "notes") else None,
-                )
-
-                sqlite_session.add(new_lemma)
-                sqlite_session.flush()  # Get the ID
-
-                # Import translations
-                jsonl_translations = (
-                    jsonl_session.query(LemmaTranslation)
-                    .filter(LemmaTranslation.lemma_id == lemma.id)
-                    .all()
-                )
-
-                for trans in jsonl_translations:
-                    new_trans = LemmaTranslation(
-                        lemma_id=new_lemma.id,
-                        language_code=trans.language_code,
-                        translation=trans.translation,
-                        verified=trans.verified if hasattr(trans, "verified") else False,
-                    )
-                    sqlite_session.add(new_trans)
-                    translation_count += 1
-
-                imported_count += 1
-
-                if imported_count % 100 == 0:
-                    logger.info(f"Imported {imported_count}/{len(jsonl_lemmas)} lemmas...")
-                    sqlite_session.commit()
-
-            # Final commit
+            # Stage 2: Fetch existing GUIDs in one query
+            logger.info("Stage 2: Fetching existing GUIDs from destination database...")
+            existing_guids = set(
+                guid for (guid,) in sqlite_session.query(SQLLemma.guid).all() if guid
+            )
+            logger.info(f"Found {len(existing_guids)} existing lemmas in destination")
             sqlite_session.commit()
 
-            result["lemmas_imported"] = imported_count
+            # Stage 3: Prepare lemmas for bulk insert (filter out existing)
+            logger.info("Stage 3: Preparing lemmas for bulk insert...")
+            lemmas_to_insert = []
+            guid_to_jsonl_lemma = {}  # Map GUID to original lemma for translations
+
+            for lemma in jsonl_lemmas:
+                if lemma.guid and lemma.guid in existing_guids:
+                    continue  # Skip existing
+
+                guid_to_jsonl_lemma[lemma.guid] = lemma
+                lemmas_to_insert.append(
+                    {
+                        "guid": lemma.guid,
+                        "lemma_text": lemma.lemma_text,
+                        "definition_text": lemma.definition_text,
+                        "pos_type": lemma.pos_type,
+                        "pos_subtype": lemma.pos_subtype,
+                        "difficulty_level": lemma.difficulty_level,
+                        "frequency_rank": lemma.frequency_rank,
+                        "tags": lemma.tags,
+                        "disambiguation": (
+                            lemma.disambiguation if hasattr(lemma, "disambiguation") else None
+                        ),
+                        "confidence": lemma.confidence if hasattr(lemma, "confidence") else 0.0,
+                        "verified": lemma.verified if hasattr(lemma, "verified") else False,
+                        "notes": lemma.notes if hasattr(lemma, "notes") else None,
+                    }
+                )
+
+            skipped_count = len(jsonl_lemmas) - len(lemmas_to_insert)
+            logger.info(
+                f"Prepared {len(lemmas_to_insert)} lemmas for insert, skipping {skipped_count} existing"
+            )
+
+            # Stage 4: Bulk insert lemmas
+            if lemmas_to_insert:
+                logger.info("Stage 4: Bulk inserting lemmas...")
+                sqlite_session.bulk_insert_mappings(SQLLemma, lemmas_to_insert)
+                sqlite_session.commit()
+                logger.info(f"Inserted {len(lemmas_to_insert)} lemmas")
+
+            # Stage 5: Fetch back the inserted lemma IDs by GUID
+            logger.info("Stage 5: Fetching inserted lemma IDs...")
+            inserted_guids = list(guid_to_jsonl_lemma.keys())
+            guid_to_new_id = {}
+
+            if inserted_guids:
+                # Query in batches to avoid overly large IN clauses
+                batch_size = 500
+                for i in range(0, len(inserted_guids), batch_size):
+                    batch_guids = inserted_guids[i : i + batch_size]
+                    rows = (
+                        sqlite_session.query(SQLLemma.guid, SQLLemma.id)
+                        .filter(SQLLemma.guid.in_(batch_guids))
+                        .all()
+                    )
+                    for guid, lemma_id in rows:
+                        guid_to_new_id[guid] = lemma_id
+
+            sqlite_session.commit()
+            logger.info(f"Mapped {len(guid_to_new_id)} GUIDs to new IDs")
+
+            # Stage 6: Prepare translations for bulk insert
+            logger.info("Stage 6: Preparing translations for bulk insert...")
+            translations_to_insert = []
+
+            # Get all translations from JSONL in one query
+            all_jsonl_translations = jsonl_session.query(LemmaTranslation).all()
+
+            # Build a map from jsonl lemma_id to translations
+            jsonl_lemma_id_to_translations: Dict[int, List[Any]] = {}
+            for trans in all_jsonl_translations:
+                if trans.lemma_id not in jsonl_lemma_id_to_translations:
+                    jsonl_lemma_id_to_translations[trans.lemma_id] = []
+                jsonl_lemma_id_to_translations[trans.lemma_id].append(trans)
+
+            # Map translations to new lemma IDs
+            for guid, jsonl_lemma in guid_to_jsonl_lemma.items():
+                new_lemma_id = guid_to_new_id.get(guid)
+                if not new_lemma_id:
+                    continue
+
+                jsonl_translations = jsonl_lemma_id_to_translations.get(jsonl_lemma.id, [])
+                for trans in jsonl_translations:
+                    translations_to_insert.append(
+                        {
+                            "lemma_id": new_lemma_id,
+                            "language_code": trans.language_code,
+                            "translation": trans.translation,
+                            "verified": trans.verified if hasattr(trans, "verified") else False,
+                        }
+                    )
+
+            logger.info(f"Prepared {len(translations_to_insert)} translations for insert")
+
+            # Stage 7: Bulk insert translations
+            if translations_to_insert:
+                logger.info("Stage 7: Bulk inserting translations...")
+                sqlite_session.bulk_insert_mappings(LemmaTranslation, translations_to_insert)
+                sqlite_session.commit()
+                logger.info(f"Inserted {len(translations_to_insert)} translations")
+
+            result["lemmas_imported"] = len(lemmas_to_insert)
             result["lemmas_skipped"] = skipped_count
-            result["translations_imported"] = translation_count
+            result["translations_imported"] = len(translations_to_insert)
             result["success"] = True
 
             logger.info(
-                f"Import complete: {imported_count} lemmas, {translation_count} translations imported"
+                f"Import complete: {len(lemmas_to_insert)} lemmas, "
+                f"{len(translations_to_insert)} translations imported"
             )
 
         except Exception as e:
