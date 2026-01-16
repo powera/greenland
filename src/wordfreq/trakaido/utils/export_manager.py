@@ -5,7 +5,7 @@ Export manager for trakaido data.
 Provides the TrakaidoExporter class for exporting trakaido data
 in various formats (JSON, text, lang_lt, etc.).
 
-For WireWord format exports, see export_wireword.py
+For WireWord format exports, see wireword/export_wireword.py
 """
 
 import json
@@ -653,8 +653,8 @@ class TrakaidoExporter:
     def export_to_wireword_format(
         self, output_path: str, **kwargs
     ) -> Tuple[bool, Optional[ExportStats]]:
-        """Delegate to WirewordExporter. See export_wireword.py for details."""
-        from .export_wireword import WirewordExporter
+        """Delegate to WirewordExporter. See wireword/export_wireword.py for details."""
+        from wireword.export_wireword import WirewordExporter
 
         exporter = WirewordExporter(
             self.db_path, self.debug, self.language, self.simplified_chinese
@@ -662,8 +662,8 @@ class TrakaidoExporter:
         return exporter.export_to_wireword_format(output_path, **kwargs)
 
     def export_wireword_directory(self, output_dir: str) -> Tuple[bool, Dict[str, Any]]:
-        """Delegate to WirewordExporter. See export_wireword.py for details."""
-        from .export_wireword import WirewordExporter
+        """Delegate to WirewordExporter. See wireword/export_wireword.py for details."""
+        from wireword.export_wireword import WirewordExporter
 
         exporter = WirewordExporter(
             self.db_path, self.debug, self.language, self.simplified_chinese
@@ -673,8 +673,8 @@ class TrakaidoExporter:
     def export_verbs_to_wireword_format(
         self, output_path: str, **kwargs
     ) -> Tuple[bool, Optional[ExportStats]]:
-        """Delegate to WirewordExporter. See export_wireword.py for details."""
-        from .export_wireword import WirewordExporter
+        """Delegate to WirewordExporter. See wireword/export_wireword.py for details."""
+        from wireword.export_wireword import WirewordExporter
 
         exporter = WirewordExporter(
             self.db_path, self.debug, self.language, self.simplified_chinese

@@ -30,8 +30,8 @@ from wordfreq.storage.translation_helpers import (
     TIER_2_LANGUAGES,
 )
 from wordfreq.trakaido.utils.export_manager import TrakaidoExporter
-from wordfreq.trakaido.utils.export_wireword_conversations import WirewordConversationExporter
-from wordfreq.trakaido.utils.export_wireword_sentences import WirewordSentenceExporter
+from wireword.export_wireword_conversations import WirewordConversationExporter
+from wireword.export_wireword_sentences import WirewordSentenceExporter
 
 # Supported languages: Tier 1 and Tier 2 (excludes experimental tier 3)
 SUPPORTED_LANGUAGES = {
