@@ -114,10 +114,13 @@ def main() -> None:
     logger.info("=" * 80)
 
     # Set up signal handlers for graceful shutdown
+    # NOTE: Signal handlers must avoid I/O (including logging) because they can
+    # interrupt the main thread mid-write, causing "reentrant call" errors.
     def handle_shutdown(signum: int, frame: Optional[types.FrameType]) -> None:
-        logger.info(f"Received signal {signum}, shutting down...")
         STOP_EVENT.set()
-        sys.exit(0)
+        # Raise KeyboardInterrupt to break out of Flask's serve_forever loop
+        # This will be caught by the try/except below
+        raise KeyboardInterrupt
 
     signal.signal(signal.SIGTERM, handle_shutdown)
     signal.signal(signal.SIGINT, handle_shutdown)
