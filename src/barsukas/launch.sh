@@ -13,6 +13,8 @@ PORT="5555"
 DB_PATH=""
 # PostgreSQL mode
 USE_POSTGRES=""
+# Python venv path (optional)
+VENV_PATH=""
 
 # Parse command-line arguments
 while [[ $# -gt 0 ]]; do
@@ -37,6 +39,10 @@ while [[ $# -gt 0 ]]; do
             USE_POSTGRES="true"
             shift
             ;;
+        --venv)
+            VENV_PATH="$2"
+            shift 2
+            ;;
         *)
             # Pass through any other arguments to the Flask app
             break
@@ -47,8 +53,18 @@ done
 # Validate storage format (only if not using postgres)
 if [[ -z "$USE_POSTGRES" && "$STORAGE_FORMAT" != "jsonl" && "$STORAGE_FORMAT" != "sqlite" ]]; then
     echo "Error: Invalid storage format '$STORAGE_FORMAT'"
-    echo "Usage: $0 [-f|--format jsonl|sqlite] [--postgres] [-a|--all-interfaces] [-p|--port PORT] [--db-path PATH]"
+    echo "Usage: $0 [-f|--format jsonl|sqlite] [--postgres] [-a|--all-interfaces] [-p|--port PORT] [--db-path PATH] [--venv PATH]"
     exit 1
+fi
+
+# Activate venv if specified
+if [[ -n "$VENV_PATH" ]]; then
+    if [[ -f "$VENV_PATH/bin/activate" ]]; then
+        source "$VENV_PATH/bin/activate"
+    else
+        echo "Error: Cannot find venv at '$VENV_PATH' (no bin/activate found)"
+        exit 1
+    fi
 fi
 
 # Get the directory where this script is located
@@ -84,6 +100,9 @@ cd "$SCRIPT_DIR"
 echo "=========================================="
 echo "Starting Barsukas Web Interface (Unified Mode)"
 echo "=========================================="
+if [[ -n "$VENV_PATH" ]]; then
+    echo "Python venv: $VENV_PATH"
+fi
 echo "Storage backend: $STORAGE_BACKEND"
 echo "PYTHONPATH: $PYTHONPATH"
 echo "Working directory: $(pwd)"
