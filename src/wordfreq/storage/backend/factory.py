@@ -156,11 +156,19 @@ def create_session(config: Optional[DataSourceConfig] = None) -> Session:
         config: Optional data source configuration. If not provided, uses global config.
 
     Returns:
-        A new SQLAlchemy Session instance
+        A new SQLAlchemy Session instance (or JSONLSession for JSONL backend)
     """
     if config is not None:
         # Create a one-off session with specific config
-        if config.backend_type == BackendType.POSTGRES:
+        if config.backend_type == BackendType.JSONL:
+            # JSONL backend uses its own session implementation
+            from wordfreq.storage.backend.jsonl import JSONLSession, JSONLStorage
+
+            assert config.jsonl_data_dir is not None, "jsonl_data_dir must be set for JSONL backend"
+            storage = JSONLStorage(config.jsonl_data_dir)
+            storage.ensure_initialized()
+            return storage.create_session()  # type: ignore[return-value]
+        elif config.backend_type == BackendType.POSTGRES:
             assert config.postgres_url is not None, "postgres_url must be set for POSTGRES backend"
             db_path = config.postgres_url
         else:
