@@ -2,36 +2,35 @@
 
 """Routes for WireWord export functionality."""
 
-import os
 import tempfile
 from datetime import datetime
-from config import Config
-from flask import Blueprint, flash, redirect, render_template, request, send_file, url_for
+from typing import TYPE_CHECKING
+
+from flask import (
+    Blueprint,
+    current_app,
+    flash,
+    redirect,
+    render_template,
+    request,
+    send_file,
+    url_for,
+)
 from flask.typing import ResponseReturnValue
 
 from agents.ungurys import SUPPORTED_LANGUAGES, UngurysAgent
-from wordfreq.storage.backend.config import BackendType, DataSourceConfig
+from wordfreq.storage.backend.config import DataSourceConfig
+
+if TYPE_CHECKING:
+    from app import BarsukasFlask
 
 bp = Blueprint("wireword", __name__, url_prefix="/wireword")
 
 
 def _get_config() -> DataSourceConfig:
-    """Get DataSourceConfig based on environment (PostgreSQL or SQLite)."""
-    if os.environ.get("STORAGE_BACKEND") == "postgres":
-        postgres_url = os.environ.get("POSTGRES_URL")
-        if not postgres_url:
-            postgres_url = DataSourceConfig.build_postgres_url()
-        return DataSourceConfig(
-            backend_type=BackendType.POSTGRES,
-            postgres_url=postgres_url,
-            debug=Config.DEBUG,
-        )
-    else:
-        return DataSourceConfig(
-            backend_type=BackendType.SQLITE,
-            sqlite_path=Config.DB_PATH,
-            debug=Config.DEBUG,
-        )
+    """Get DataSourceConfig from the Flask app's backend_config."""
+    app: "BarsukasFlask" = current_app  # type: ignore[assignment]
+    return app.backend_config
 
 
 def export_all_languages() -> ResponseReturnValue:
