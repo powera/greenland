@@ -30,6 +30,7 @@ from wordfreq.storage.translation_helpers import (
     TIER_2_LANGUAGES,
 )
 from wordfreq.trakaido.utils.export_manager import TrakaidoExporter
+from wordfreq.trakaido.utils.export_wireword_conversations import WirewordConversationExporter
 from wordfreq.trakaido.utils.export_wireword_sentences import WirewordSentenceExporter
 
 # Supported languages: Tier 1 and Tier 2 (excludes experimental tier 3)
@@ -99,6 +100,14 @@ class UngurysAgent:
 
         # Initialize sentence exporter with Chinese variant support
         self.sentence_exporter = WirewordSentenceExporter(
+            db_path=db_path,
+            debug=self.debug,
+            language=self.language,
+            simplified_chinese=self.simplified_chinese if self.language == "zh" else True,
+        )
+
+        # Initialize conversation exporter with Chinese variant support
+        self.conversation_exporter = WirewordConversationExporter(
             db_path=db_path,
             debug=self.debug,
             language=self.language,
@@ -234,6 +243,20 @@ class UngurysAgent:
             else:
                 logger.warning("  Sentence export failed")
                 results["sentences_exported"] = 0
+
+            # Also export conversations
+            logger.info("Exporting conversations to wireword_conversations.jsonl...")
+            conversations_path = os.path.join(wireword_dir, "wireword_conversations.jsonl")
+            conv_success, conv_count = self.export_wireword_conversations(
+                output_path=conversations_path,
+            )
+            if conv_success:
+                logger.info(f"  Exported {conv_count} conversations")
+                results["conversations_exported"] = conv_count
+                results["files_created"].append(conversations_path)
+            else:
+                logger.warning("  Conversation export failed")
+                results["conversations_exported"] = 0
         else:
             logger.error(f"Failed to export to {output_dir}")
 
@@ -293,6 +316,9 @@ class UngurysAgent:
         """
         Export sentences to a single WireWord format JSON file.
 
+        Excludes sentences that are part of conversations (those are exported
+        separately in wireword_conversations.jsonl).
+
         Args:
             output_path: Path to write the JSON file (if None, uses default)
 
@@ -310,11 +336,43 @@ class UngurysAgent:
             count = self.sentence_exporter.export_to_file(
                 output_path=output_path,
                 include_all_languages=False,
+                exclude_conversation_sentences=True,
             )
             logger.info(f"Successfully exported {count} sentences to {output_path}")
             return True, count
         except Exception as e:
             logger.error(f"Failed to export sentences: {e}")
+            return False, None
+
+    def export_wireword_conversations(
+        self,
+        output_path: Optional[str] = None,
+    ) -> Tuple[bool, Optional[int]]:
+        """
+        Export conversations to a WireWord format JSONL file.
+
+        Args:
+            output_path: Path to write the JSONL file (if None, uses default)
+
+        Returns:
+            Tuple of (success flag, conversation count)
+        """
+        # Use default path if not provided
+        if output_path is None:
+            lang_dir = self.get_language_output_dir()
+            output_path = os.path.join(lang_dir, "wireword", "wireword_conversations.jsonl")
+
+        logger.info("Starting WireWord conversations export...")
+
+        try:
+            count = self.conversation_exporter.export_to_file(
+                output_path=output_path,
+                include_all_languages=False,
+            )
+            logger.info(f"Successfully exported {count} conversations to {output_path}")
+            return True, count
+        except Exception as e:
+            logger.error(f"Failed to export conversations: {e}")
             return False, None
 
     def run_export(
@@ -417,6 +475,17 @@ class UngurysAgent:
             "note": "Sentences are always exported to wireword_sentences.json file",
         }
 
+        # Always export conversations to separate file (regardless of export mode)
+        logger.info("Exporting conversations to wireword_conversations.jsonl file...")
+        conv_success, conv_count = self.export_wireword_conversations(
+            output_path=None,  # Use default path
+        )
+        results["exports"]["conversations"] = {
+            "success": conv_success,
+            "count": conv_count,
+            "note": "Conversations are always exported to wireword_conversations.jsonl file",
+        }
+
         end_time = datetime.now()
         duration = (end_time - start_time).total_seconds()
         results["duration_seconds"] = duration
@@ -501,6 +570,18 @@ class UngurysAgent:
                 logger.info(f"  Status: SUCCESS")
                 logger.info(f"  Total sentences: {sentences.get('count', 0)}")
                 logger.info(f"  File: wireword_sentences.json")
+            else:
+                logger.info(f"  Status: FAILED")
+            logger.info("")
+
+        # Conversation export (separate file)
+        if "conversations" in results["exports"]:
+            conversations = results["exports"]["conversations"]
+            logger.info(f"CONVERSATION EXPORT (separate file):")
+            if conversations["success"]:
+                logger.info(f"  Status: SUCCESS")
+                logger.info(f"  Total conversations: {conversations.get('count', 0)}")
+                logger.info(f"  File: wireword_conversations.jsonl")
             else:
                 logger.info(f"  Status: FAILED")
             logger.info("")
