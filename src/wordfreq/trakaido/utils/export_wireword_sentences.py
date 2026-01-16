@@ -23,6 +23,7 @@ from wordfreq.storage.database import create_database_session
 from wordfreq.storage.models.enums import GrammaticalForm
 from wordfreq.storage.models.schema import (
     AudioQualityReview,
+    ConversationSentence,
     Sentence,
     SentenceTranslation,
     SentenceWord,
@@ -108,18 +109,25 @@ class WirewordSentenceExporter:
 
         return audio_dict
 
-    def export_sentences(self, include_all_languages: bool = False) -> Dict[str, Any]:
+    def export_sentences(
+        self,
+        include_all_languages: bool = False,
+        exclude_conversation_sentences: bool = True,
+    ) -> Dict[str, Any]:
         """
         Export sentences to wireword format.
 
         Exports all sentences where:
         - minimum_level is not -1 (i.e., not excluded; NULL/None is OK)
         - A translation exists for the target language
+        - Not part of a conversation (if exclude_conversation_sentences=True)
 
         Optimized for remote databases: uses bulk queries to minimize round trips.
 
         Args:
             include_all_languages: Include all translations (default: False, only target + English)
+            exclude_conversation_sentences: Exclude sentences that are part of conversations
+                (default: True). These are exported separately in wireword_conversations.jsonl.
 
         Returns:
             Dictionary with exported sentence data
@@ -139,6 +147,20 @@ class WirewordSentenceExporter:
 
             all_sentences = query.all()
             logger.info(f"Found {len(all_sentences)} sentences (excluding level = -1)")
+
+            # Optionally exclude sentences that are part of conversations
+            if exclude_conversation_sentences:
+                conversation_sentence_ids = set(
+                    row[0]
+                    for row in session.query(ConversationSentence.sentence_id).distinct().all()
+                )
+                original_count = len(all_sentences)
+                all_sentences = [s for s in all_sentences if s.id not in conversation_sentence_ids]
+                excluded_count = original_count - len(all_sentences)
+                if excluded_count > 0:
+                    logger.info(
+                        f"Excluded {excluded_count} sentences that are part of conversations"
+                    )
 
             # Filter to only sentences that have a translation in the target language
             sentences = []
@@ -283,17 +305,23 @@ class WirewordSentenceExporter:
         self,
         output_path: str,
         include_all_languages: bool = False,
+        exclude_conversation_sentences: bool = True,
     ) -> int:
         """Export sentences to a JSON file.
 
         Args:
             output_path: Path to output JSON file
             include_all_languages: Include all translations
+            exclude_conversation_sentences: Exclude sentences that are part of conversations
+                (default: True). These are exported separately in wireword_conversations.jsonl.
 
         Returns:
             Number of sentences exported
         """
-        data = self.export_sentences(include_all_languages=include_all_languages)
+        data = self.export_sentences(
+            include_all_languages=include_all_languages,
+            exclude_conversation_sentences=exclude_conversation_sentences,
+        )
 
         # Create output directory if needed
         Path(output_path).parent.mkdir(parents=True, exist_ok=True)
