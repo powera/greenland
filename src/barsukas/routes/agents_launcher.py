@@ -425,8 +425,12 @@ def execute_agent(agent_name: str) -> ResponseReturnValue:
         if dry_run:
             args.append("--dry-run")
 
-    # Add database path (always)
-    args.extend(["--db-path", Config.DB_PATH])
+    # Add database configuration
+    if Config.is_postgres_mode():
+        # Pass PostgreSQL configuration to agent
+        args.append("--postgres")
+    else:
+        args.extend(["--db-path", Config.DB_PATH])
 
     # Add --yes flag for background execution (skip confirmation prompts)
     args.append("--yes")
