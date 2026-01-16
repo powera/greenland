@@ -12,6 +12,11 @@ from sqlalchemy import case
 from werkzeug.wrappers import Response
 
 from barsukas.helpers.flash_helpers import flash_and_log
+from wordfreq.storage.crud.sentence import (
+    find_duplicate_sentences,
+    get_sentence_conversation_count,
+    merge_duplicate_sentences,
+)
 from wordfreq.storage.models.schema import (
     Conversation,
     ConversationSentence,
@@ -227,3 +232,88 @@ def reject_conversation(conversation_id: int) -> Response:
         g.db.rollback()
 
     return redirect(request.referrer or url_for("conversations.list_conversations"))
+
+
+@bp.route("/dedupe")
+def dedupe_sentences() -> ResponseReturnValue:
+    """Show duplicate sentences that can be merged."""
+    duplicates = find_duplicate_sentences(g.db, language_code="en")
+
+    # Enrich with conversation counts for each sentence
+    duplicates_data = []
+    for text, sentences in duplicates:
+        sentences_info = []
+        for sentence in sentences:
+            conv_count = get_sentence_conversation_count(g.db, sentence.id)
+            # Get translation count
+            trans_count = len(sentence.translations) if sentence.translations else 0
+            sentences_info.append(
+                {
+                    "sentence": sentence,
+                    "conversation_count": conv_count,
+                    "translation_count": trans_count,
+                }
+            )
+        # Sort by most translations first (prefer to keep the most complete one)
+        sentences_info.sort(
+            key=lambda x: (-x["translation_count"], -x["conversation_count"])  # type: ignore[operator]
+        )
+        duplicates_data.append(
+            {
+                "text": text,
+                "sentences": sentences_info,
+                "total_sentences": len(sentences_info),
+            }
+        )
+
+    # Sort by number of duplicates (most duplicates first)
+    duplicates_data.sort(key=lambda x: -x["total_sentences"])  # type: ignore[operator]
+
+    return render_template(
+        "conversations/dedupe.html",
+        duplicates=duplicates_data,
+        total_groups=len(duplicates_data),
+    )
+
+
+@bp.route("/dedupe/merge", methods=["POST"])
+def merge_sentences() -> Response:
+    """Merge duplicate sentences into one."""
+    keep_id = request.form.get("keep_id", type=int)
+    duplicate_ids_str = request.form.get("duplicate_ids", "")
+
+    if not keep_id:
+        flash("No sentence selected to keep", "error")
+        return redirect(url_for("conversations.dedupe_sentences"))
+
+    # Parse duplicate IDs
+    duplicate_ids = []
+    if duplicate_ids_str:
+        try:
+            duplicate_ids = [int(x.strip()) for x in duplicate_ids_str.split(",") if x.strip()]
+        except ValueError:
+            flash("Invalid duplicate IDs format", "error")
+            return redirect(url_for("conversations.dedupe_sentences"))
+
+    if not duplicate_ids:
+        flash("No duplicates selected to merge", "error")
+        return redirect(url_for("conversations.dedupe_sentences"))
+
+    try:
+        stats = merge_duplicate_sentences(g.db, keep_id, duplicate_ids)
+        g.db.commit()
+
+        flash(
+            f"Merged {stats['sentences_deleted']} duplicate(s) into sentence #{keep_id}. "
+            f"Updated {stats['conversations_updated']} conversation link(s), "
+            f"merged {stats['translations_merged']} translation(s).",
+            "success",
+        )
+    except ValueError as e:
+        flash(f"Error: {e}", "error")
+        g.db.rollback()
+    except Exception as e:
+        flash(f"Error merging sentences: {e}", "error")
+        g.db.rollback()
+
+    return redirect(url_for("conversations.dedupe_sentences"))

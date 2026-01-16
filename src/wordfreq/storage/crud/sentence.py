@@ -1,10 +1,17 @@
 """CRUD operations for Sentence model."""
 
-from typing import List, Optional
+from typing import Dict, List, Optional, Tuple
 
+from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload
 
-from wordfreq.storage.models.schema import Lemma, Sentence, SentenceTranslation, SentenceWord
+from wordfreq.storage.models.schema import (
+    ConversationSentence,
+    Lemma,
+    Sentence,
+    SentenceTranslation,
+    SentenceWord,
+)
 
 
 def add_sentence(
@@ -177,3 +184,175 @@ def delete_sentence(session: Session, sentence: Sentence) -> None:
         sentence: Sentence object to delete
     """
     session.delete(sentence)
+
+
+def find_sentence_by_text(
+    session: Session, text: str, language_code: str = "en"
+) -> Optional[Sentence]:
+    """Find an existing sentence with the exact text in the specified language.
+
+    Args:
+        session: Database session
+        text: The sentence text to search for
+        language_code: Language to match (default: "en")
+
+    Returns:
+        Sentence object if found, None otherwise
+    """
+    translation = (
+        session.query(SentenceTranslation)
+        .filter(
+            SentenceTranslation.language_code == language_code,
+            SentenceTranslation.translation_text == text,
+        )
+        .first()
+    )
+
+    if translation:
+        return (
+            session.query(Sentence)
+            .options(joinedload(Sentence.translations))
+            .get(translation.sentence_id)
+        )
+
+    return None
+
+
+def find_duplicate_sentences(
+    session: Session, language_code: str = "en"
+) -> List[Tuple[str, List[Sentence]]]:
+    """Find groups of sentences with identical text in the specified language.
+
+    Args:
+        session: Database session
+        language_code: Language to check for duplicates (default: "en")
+
+    Returns:
+        List of tuples (text, [sentences]) for texts that have multiple sentences
+    """
+    # Find texts that appear in multiple sentences
+    duplicate_texts = (
+        session.query(SentenceTranslation.translation_text)
+        .filter(SentenceTranslation.language_code == language_code)
+        .group_by(SentenceTranslation.translation_text)
+        .having(func.count(SentenceTranslation.sentence_id) > 1)
+        .all()
+    )
+
+    results = []
+    for (text,) in duplicate_texts:
+        # Get all sentences with this text
+        sentence_ids = (
+            session.query(SentenceTranslation.sentence_id)
+            .filter(
+                SentenceTranslation.language_code == language_code,
+                SentenceTranslation.translation_text == text,
+            )
+            .all()
+        )
+        sentence_ids = [sid for (sid,) in sentence_ids]
+
+        sentences = (
+            session.query(Sentence)
+            .filter(Sentence.id.in_(sentence_ids))
+            .options(joinedload(Sentence.translations))
+            .all()
+        )
+
+        results.append((text, sentences))
+
+    return results
+
+
+def get_sentence_conversation_count(session: Session, sentence_id: int) -> int:
+    """Get the number of conversations a sentence appears in.
+
+    Args:
+        session: Database session
+        sentence_id: Sentence ID to check
+
+    Returns:
+        Number of conversations containing this sentence
+    """
+    return (
+        session.query(ConversationSentence)
+        .filter(ConversationSentence.sentence_id == sentence_id)
+        .count()
+    )
+
+
+def merge_duplicate_sentences(
+    session: Session, keep_id: int, duplicate_ids: List[int]
+) -> Dict[str, int]:
+    """Merge duplicate sentences into one, updating all conversation references.
+
+    The sentence with keep_id is preserved. All ConversationSentence records
+    pointing to duplicate_ids are updated to point to keep_id. Duplicate
+    sentences are then deleted.
+
+    Args:
+        session: Database session
+        keep_id: ID of the sentence to keep
+        duplicate_ids: List of sentence IDs to merge into keep_id
+
+    Returns:
+        Dict with merge statistics:
+        - conversations_updated: number of conversation links updated
+        - sentences_deleted: number of duplicate sentences deleted
+        - translations_merged: number of translations copied to kept sentence
+    """
+    if not duplicate_ids:
+        return {"conversations_updated": 0, "sentences_deleted": 0, "translations_merged": 0}
+
+    # Remove keep_id from duplicate_ids if accidentally included
+    duplicate_ids = [did for did in duplicate_ids if did != keep_id]
+
+    if not duplicate_ids:
+        return {"conversations_updated": 0, "sentences_deleted": 0, "translations_merged": 0}
+
+    keep_sentence = session.query(Sentence).get(keep_id)
+    if not keep_sentence:
+        raise ValueError(f"Sentence {keep_id} not found")
+
+    # Get existing translation languages for keep_sentence
+    keep_languages = {t.language_code for t in keep_sentence.translations}
+
+    stats = {"conversations_updated": 0, "sentences_deleted": 0, "translations_merged": 0}
+
+    for dup_id in duplicate_ids:
+        dup_sentence = (
+            session.query(Sentence).options(joinedload(Sentence.translations)).get(dup_id)
+        )
+        if not dup_sentence:
+            continue
+
+        # Update all ConversationSentence records to point to keep_id
+        updated = (
+            session.query(ConversationSentence)
+            .filter(ConversationSentence.sentence_id == dup_id)
+            .update({ConversationSentence.sentence_id: keep_id}, synchronize_session="fetch")
+        )
+        stats["conversations_updated"] += updated
+
+        # Copy any translations that keep_sentence doesn't have
+        for trans in dup_sentence.translations:
+            if trans.language_code not in keep_languages:
+                # Create new translation for keep_sentence
+                new_trans = SentenceTranslation(
+                    sentence_id=keep_id,
+                    language_code=trans.language_code,
+                    translation_text=trans.translation_text,
+                    verified=trans.verified,
+                )
+                session.add(new_trans)
+                keep_languages.add(trans.language_code)
+                stats["translations_merged"] += 1
+
+        # Delete the duplicate sentence (cascades to its translations, words, etc.)
+        session.delete(dup_sentence)
+        stats["sentences_deleted"] += 1
+
+    # Recalculate minimum_level for kept sentence if needed
+    calculate_minimum_level(session, keep_sentence)
+
+    return stats

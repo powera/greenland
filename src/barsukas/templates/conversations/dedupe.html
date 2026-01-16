@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}Deduplicate Sentences{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('conversations.list_conversations') }}">Conversations</a></li>
+                <li class="breadcrumb-item active">Deduplicate Sentences</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+        <h1><i class="bi bi-subtract"></i> Deduplicate Sentences</h1>
+        <p class="text-muted">
+            Found {{ total_groups }} group{{ 's' if total_groups != 1 else '' }} of duplicate sentences.
+            For each group, select which sentence to keep (the others will be merged into it).
+        </p>
+    </div>
+</div>
+
+{% if duplicates %}
+    {% for group in duplicates %}
+        {% set group_index = loop.index %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <strong>{{ group.total_sentences }} duplicates:</strong>
+                "{{ group.text[:100] }}{% if group.text|length > 100 %}...{% endif %}"
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('conversations.merge_sentences') }}">
+                    <table class="table table-sm table-hover">
+                        <thead>
+                            <tr>
+                                <th style="width: 60px;">Keep</th>
+                                <th>Sentence ID</th>
+                                <th>Translations</th>
+                                <th>In Conversations</th>
+                                <th>Level</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in group.sentences %}
+                                <tr>
+                                    <td>
+                                        <input type="radio" name="keep_id" value="{{ item.sentence.id }}"
+                                               class="form-check-input keep-radio"
+                                               data-group="{{ group_index }}"
+                                               {% if loop.first %}checked{% endif %}>
+                                    </td>
+                                    <td>
+                                        <a href="{{ url_for('sentences.view_sentence', sentence_id=item.sentence.id) }}" target="_blank">
+                                            #{{ item.sentence.id }}
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">{{ item.translation_count }} lang{{ 's' if item.translation_count != 1 else '' }}</span>
+                                    </td>
+                                    <td>
+                                        {% if item.conversation_count > 0 %}
+                                            <span class="badge bg-primary">{{ item.conversation_count }} conv{{ 's' if item.conversation_count != 1 else '' }}</span>
+                                        {% else %}
+                                            <span class="text-muted">none</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if item.sentence.minimum_level is not none %}
+                                            <span class="badge bg-secondary">L{{ item.sentence.minimum_level }}</span>
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if item.sentence.verified %}
+                                            <i class="bi bi-check-circle-fill text-success" title="Verified"></i>
+                                        {% elif item.sentence.rejected %}
+                                            <i class="bi bi-x-circle-fill text-danger" title="Rejected"></i>
+                                        {% else %}
+                                            <i class="bi bi-clock text-muted" title="Pending"></i>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                    <!-- Hidden field with all duplicate IDs except the selected one -->
+                    <input type="hidden" name="duplicate_ids" id="duplicate_ids_{{ loop.index }}"
+                           value="{% for item in group.sentences %}{% if not loop.first %}{{ item.sentence.id }}{% if not loop.last %},{% endif %}{% endif %}{% endfor %}">
+
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn btn-warning"
+                                onclick="return confirm('Merge {{ group.total_sentences - 1 }} duplicate(s) into the selected sentence? This cannot be undone.')">
+                            <i class="bi bi-subtract"></i> Merge {{ group.total_sentences - 1 }} duplicate{{ 's' if group.total_sentences > 2 else '' }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    {% endfor %}
+{% else %}
+    <div class="alert alert-success">
+        <i class="bi bi-check-circle"></i> No duplicate sentences found. All sentences are unique.
+    </div>
+{% endif %}
+
+<script>
+// Update hidden duplicate_ids field when radio selection changes
+document.querySelectorAll('.keep-radio').forEach(radio => {
+    radio.addEventListener('change', function() {
+        const groupIndex = this.dataset.group;
+        const form = this.closest('form');
+        const allRadios = form.querySelectorAll('.keep-radio');
+        const keepId = parseInt(this.value);
+
+        // Collect all IDs except the kept one
+        const duplicateIds = [];
+        allRadios.forEach(r => {
+            const id = parseInt(r.value);
+            if (id !== keepId) {
+                duplicateIds.push(id);
+            }
+        });
+
+        // Update the hidden field
+        form.querySelector('input[name="duplicate_ids"]').value = duplicateIds.join(',');
+    });
+});
+</script>
+{% endblock %}
