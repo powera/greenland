@@ -88,39 +88,16 @@ def index() -> ResponseReturnValue:
     # Get first file
     current_review = query.first()
 
-    # Get available filter options
-    languages = g.db.query(AudioQualityReview.language_code).distinct().all()
-    languages = sorted([lang[0] for lang in languages])
+    # Get all filter options in optimized queries (replaces 4 separate DISTINCT queries with 2)
+    from barsukas.helpers.db_optimization import get_rapid_review_filter_options
 
-    voices = (
-        g.db.query(AudioQualityReview.display_voice)
-        .distinct()
-        .order_by(AudioQualityReview.display_voice)
-        .all()
-    )
-    voices = [voice[0] for voice in voices]
+    filter_options = get_rapid_review_filter_options(g.db)
+    languages = filter_options["languages"]
+    voices = filter_options["voices"]
+    subtypes = filter_options["subtypes"]
+    levels = filter_options["levels"]
 
     statuses = ["pending_review", "approved", "approved_with_issues", "needs_replacement"]
-
-    # Get available subtypes from lemmas that have audio
-    subtypes = (
-        g.db.query(Lemma.pos_subtype)
-        .join(AudioQualityReview, AudioQualityReview.lemma_id == Lemma.id)
-        .filter(Lemma.pos_subtype.isnot(None))
-        .distinct()
-        .all()
-    )
-    subtypes = sorted([st[0] for st in subtypes if st[0]])
-
-    # Get available levels from lemmas that have audio
-    levels = (
-        g.db.query(Lemma.difficulty_level)
-        .join(AudioQualityReview, AudioQualityReview.lemma_id == Lemma.id)
-        .filter(Lemma.difficulty_level.isnot(None))
-        .distinct()
-        .all()
-    )
-    levels = sorted([lvl[0] for lvl in levels if lvl[0] is not None])
 
     return render_template(
         "audio/rapid_review.html",

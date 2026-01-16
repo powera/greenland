@@ -206,23 +206,17 @@ def create_app(config_class: type[Config] = Config, db_url: Optional[str] = None
     @app.route("/")
     def index() -> Any:
         """Home page with search and quick stats."""
-        from wordfreq.storage.backend.models import get_lemma_model, get_sentence_model
+        from barsukas.helpers.db_optimization import get_home_page_stats
 
-        Lemma = get_lemma_model()
-        Sentence = get_sentence_model()
-
-        # Get some basic stats
-        total_lemmas = g.db.query(Lemma).count()
-        verified_lemmas = g.db.query(Lemma).filter_by(verified=True).count()
-        with_difficulty = g.db.query(Lemma).filter(Lemma.difficulty_level != None).count()
-        total_sentences = g.db.query(Sentence).count()
+        # Get stats in a single optimized query (replaces 4 separate COUNT queries)
+        stats = get_home_page_stats(g.db)
 
         return render_template(
             "index.html",
-            total_lemmas=total_lemmas,
-            verified_lemmas=verified_lemmas,
-            with_difficulty=with_difficulty,
-            total_sentences=total_sentences,
+            total_lemmas=stats["total_lemmas"],
+            verified_lemmas=stats["verified_lemmas"],
+            with_difficulty=stats["with_difficulty"],
+            total_sentences=stats["total_sentences"],
         )
 
     @app.context_processor
