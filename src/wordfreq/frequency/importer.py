@@ -223,46 +223,108 @@ def import_frequency_data(
         logger.info(f"Filtered out {skipped_numeral_count} words containing numerals")
         logger.info(f"Merged {merged_count} duplicate words with different capitalization")
 
-        # Import the processed words
-        imported_count = 0
-        total_count = len(words_data)
+        # Apply max_words limit before import
+        words_to_import = list(words_data.items())[:max_words]
+        total_count = len(words_to_import)
+        logger.info(f"Will import {total_count} words (max_words={max_words})")
 
-        for word_text, data in words_data.items():
-            # Get or create the word token
-            word_obj = database.add_word_token(session, word_text, language_code)
+        # BATCH OPTIMIZATION: Fetch or create word tokens in bulk
+        word_texts = [w[0] for w in words_to_import]
+
+        # Batch fetch existing tokens
+        logger.info(f"Batch fetching existing word tokens...")
+        existing_tokens = (
+            session.query(WordToken)
+            .filter(WordToken.token.in_(word_texts), WordToken.language_code == language_code)
+            .all()
+        )
+        token_map = {t.token: t for t in existing_tokens}
+        logger.info(f"Found {len(token_map)} existing word tokens")
+
+        # Identify and batch create new tokens
+        new_token_texts = [t for t in word_texts if t not in token_map]
+        if new_token_texts:
+            logger.info(f"Creating {len(new_token_texts)} new word tokens in batch...")
+            new_tokens = [WordToken(token=t, language_code=language_code) for t in new_token_texts]
+            session.bulk_save_objects(new_tokens, return_defaults=True)
+            session.commit()
+
+            # Re-fetch the newly created tokens to get their IDs
+            newly_created = (
+                session.query(WordToken)
+                .filter(
+                    WordToken.token.in_(new_token_texts),
+                    WordToken.language_code == language_code,
+                )
+                .all()
+            )
+            for t in newly_created:
+                token_map[t.token] = t
+            logger.info(f"Created {len(newly_created)} new word tokens")
+
+        # BATCH OPTIMIZATION: Fetch existing frequency records for this corpus
+        token_ids = [token_map[w[0]].id for w in words_to_import if w[0] in token_map]
+        logger.info(f"Batch fetching existing frequency records...")
+        existing_freqs = (
+            session.query(WordFrequency)
+            .filter(
+                WordFrequency.word_token_id.in_(token_ids),
+                WordFrequency.corpus_id == corpus.id,
+            )
+            .all()
+        )
+        freq_map = {f.word_token_id: f for f in existing_freqs}
+        logger.info(f"Found {len(freq_map)} existing frequency records")
+
+        # Process words: update existing or prepare new frequency records
+        new_freq_records = []
+        update_count = 0
+        imported_count = 0
+
+        for word_text, data in words_to_import:
+            word_obj = token_map.get(word_text)
+            if not word_obj:
+                logger.warning(f"Token not found after batch create: {word_text}")
+                continue
 
             rank = data.get("rank")
             frequency = data.get("frequency")
 
-            # Add or update the frequency record
-            existing = (
-                session.query(WordFrequency)
-                .filter(
-                    WordFrequency.word_token_id == word_obj.id, WordFrequency.corpus_id == corpus.id
-                )
-                .first()
-            )
-
-            if existing:
+            existing_freq = freq_map.get(word_obj.id)
+            if existing_freq:
+                # Update existing record
                 if rank is not None:
-                    existing.rank = rank
+                    existing_freq.rank = rank
                 if frequency is not None:
-                    existing.frequency = frequency
+                    existing_freq.frequency = frequency
+                update_count += 1
             else:
-                new_freq = WordFrequency(
-                    word_token_id=word_obj.id, corpus_id=corpus.id, rank=rank, frequency=frequency
+                # Prepare new frequency record for bulk insert
+                new_freq_records.append(
+                    WordFrequency(
+                        word_token_id=word_obj.id,
+                        corpus_id=corpus.id,
+                        rank=rank,
+                        frequency=frequency,
+                    )
                 )
-                session.add(new_freq)
 
             imported_count += 1
 
-            # Commit in batches to avoid memory issues
-            if imported_count % 500 == 0:
-                session.commit()
-                logger.info(f"Imported {imported_count}/{total_count} words")
-            if imported_count >= max_words:
-                logger.info(f"Reached max words limit of {max_words}")
-                break
+            # Log progress
+            if imported_count % 1000 == 0:
+                logger.info(f"Processed {imported_count}/{total_count} words")
+
+        # Batch insert new frequency records
+        if new_freq_records:
+            logger.info(f"Batch inserting {len(new_freq_records)} new frequency records...")
+            session.bulk_save_objects(new_freq_records)
+
+        # Commit all changes
+        session.commit()
+        logger.info(
+            f"Batch import complete: {update_count} updated, {len(new_freq_records)} created"
+        )
 
         # If we only have frequencies but no ranks, calculate ranks now
         if value_type == "frequency":
