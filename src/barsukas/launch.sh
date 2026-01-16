@@ -11,6 +11,8 @@ HOST_ARGS="--host 0.0.0.0"
 PORT="5555"
 # Optional database path
 DB_PATH=""
+# PostgreSQL mode
+USE_POSTGRES=""
 
 # Parse command-line arguments
 while [[ $# -gt 0 ]]; do
@@ -31,6 +33,10 @@ while [[ $# -gt 0 ]]; do
             DB_PATH="$2"
             shift 2
             ;;
+        --postgres)
+            USE_POSTGRES="true"
+            shift
+            ;;
         *)
             # Pass through any other arguments to the Flask app
             break
@@ -38,10 +44,10 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# Validate storage format
-if [[ "$STORAGE_FORMAT" != "jsonl" && "$STORAGE_FORMAT" != "sqlite" ]]; then
+# Validate storage format (only if not using postgres)
+if [[ -z "$USE_POSTGRES" && "$STORAGE_FORMAT" != "jsonl" && "$STORAGE_FORMAT" != "sqlite" ]]; then
     echo "Error: Invalid storage format '$STORAGE_FORMAT'"
-    echo "Usage: $0 [-f|--format jsonl|sqlite] [-a|--all-interfaces] [-p|--port PORT] [--db-path PATH]"
+    echo "Usage: $0 [-f|--format jsonl|sqlite] [--postgres] [-a|--all-interfaces] [-p|--port PORT] [--db-path PATH]"
     exit 1
 fi
 
@@ -55,15 +61,20 @@ REPO_ROOT="$( cd "$SCRIPT_DIR/../.." && pwd )"
 export PYTHONPATH="$REPO_ROOT/src:$PYTHONPATH"
 
 # Configure storage backend based on format
-export STORAGE_BACKEND="$STORAGE_FORMAT"
-if [[ "$STORAGE_FORMAT" == "jsonl" ]]; then
-    export JSONL_DATA_DIR="$REPO_ROOT/data/release"
-elif [[ "$STORAGE_FORMAT" == "sqlite" && -n "$DB_PATH" ]]; then
-    # Make path absolute if it's relative
-    if [[ "$DB_PATH" = /* ]]; then
-        export BARSUKAS_DB_PATH="$DB_PATH"
-    else
-        export BARSUKAS_DB_PATH="$REPO_ROOT/$DB_PATH"
+if [[ -n "$USE_POSTGRES" ]]; then
+    export STORAGE_BACKEND="postgres"
+    export USE_POSTGRES_BACKEND="true"
+else
+    export STORAGE_BACKEND="$STORAGE_FORMAT"
+    if [[ "$STORAGE_FORMAT" == "jsonl" ]]; then
+        export JSONL_DATA_DIR="$REPO_ROOT/data/release"
+    elif [[ "$STORAGE_FORMAT" == "sqlite" && -n "$DB_PATH" ]]; then
+        # Make path absolute if it's relative
+        if [[ "$DB_PATH" = /* ]]; then
+            export BARSUKAS_DB_PATH="$DB_PATH"
+        else
+            export BARSUKAS_DB_PATH="$REPO_ROOT/$DB_PATH"
+        fi
     fi
 fi
 
@@ -76,14 +87,18 @@ echo "=========================================="
 echo "Storage backend: $STORAGE_BACKEND"
 echo "PYTHONPATH: $PYTHONPATH"
 echo "Working directory: $(pwd)"
-if [[ "$STORAGE_FORMAT" == "jsonl" ]]; then
+if [[ -n "$USE_POSTGRES" ]]; then
+    echo "PostgreSQL mode: enabled (using postgres_ul + keys/postgres.key)"
+elif [[ "$STORAGE_FORMAT" == "jsonl" ]]; then
     echo "JSONL data directory: $JSONL_DATA_DIR"
 elif [[ "$STORAGE_FORMAT" == "sqlite" && -n "$BARSUKAS_DB_PATH" ]]; then
     echo "SQLite database: $BARSUKAS_DB_PATH"
 fi
 echo ""
 echo "NOTE: Using unified launcher (Flask + Worker in same process)"
-echo "      This avoids SQLite concurrency issues."
+if [[ -z "$USE_POSTGRES" ]]; then
+    echo "      This avoids SQLite concurrency issues."
+fi
 echo ""
 
 cleanup() {

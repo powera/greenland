@@ -35,6 +35,17 @@ DEFAULT_ENDPOINT = "https://sfo3.digitaloceanspaces.com"
 DEFAULT_BUCKET = "trakaido-audio"
 
 
+def get_staging_prefix() -> str:
+    """Get the staging directory prefix based on current backend.
+
+    Returns:
+        "staging-postgres" if using PostgreSQL backend, "staging" otherwise
+    """
+    if os.environ.get("STORAGE_BACKEND") == "postgres":
+        return "staging-postgres"
+    return "staging"
+
+
 class S3AudioUploader:
     """Upload audio files to Digital Ocean Spaces with MD5-based filenames."""
 
@@ -202,9 +213,10 @@ class S3AudioUploader:
         # Calculate MD5 hash
         md5_hash = hashlib.md5(audio_path.read_bytes()).hexdigest()
 
-        # S3 keys for staging
-        audio_key = f"staging/{agent}/{md5_hash}.mp3"
-        manifest_key = f"staging/{agent}/{md5_hash}.manifest"
+        # S3 keys for staging (use staging-postgres prefix when in postgres mode)
+        staging_prefix = get_staging_prefix()
+        audio_key = f"{staging_prefix}/{agent}/{md5_hash}.mp3"
+        manifest_key = f"{staging_prefix}/{agent}/{md5_hash}.manifest"
 
         # Check if audio file already exists
         if check_existing:
@@ -269,7 +281,8 @@ class S3AudioUploader:
         Returns:
             Tuple of (success: bool, prod_url: str)
         """
-        staging_key = f"staging/{agent}/{md5_hash}.mp3"
+        staging_prefix = get_staging_prefix()
+        staging_key = f"{staging_prefix}/{agent}/{md5_hash}.mp3"
         prod_key = f"prod/{md5_hash}.mp3"
 
         try:

@@ -10,6 +10,7 @@ and difficulty levels in the linguistics database.
 import argparse
 import json
 import logging
+import os
 import sys
 from pathlib import Path
 from typing import Any, Callable, Dict, Optional
@@ -70,11 +71,27 @@ def create_app(config_class: type[Config] = Config, db_url: Optional[str] = None
     app.config.from_object(config_class)
 
     # Set up storage backend
-    if db_url and db_url.startswith("postgresql://"):
-        # PostgreSQL backend via --db-url flag
-        print(f"Using storage backend: postgres")
-        backend_config = DataSourceConfig(backend_type=BackendType.POSTGRES, postgres_url=db_url)
-        app.config["DB_PATH"] = db_url  # Store for display purposes
+    postgres_url = db_url if db_url and db_url.startswith("postgresql://") else None
+
+    # Check for env-based postgres configuration
+    if not postgres_url and os.environ.get("STORAGE_BACKEND") == "postgres":
+        postgres_url = os.environ.get("POSTGRES_URL")
+        if not postgres_url:
+            # Build from template + key
+            try:
+                postgres_url = DataSourceConfig.build_postgres_url()
+            except Exception as e:
+                print(f"Error building PostgreSQL URL: {e}", file=sys.stderr)
+                sys.exit(1)
+
+    if postgres_url:
+        # PostgreSQL backend
+        print("Using storage backend: postgres")
+        backend_config = DataSourceConfig(
+            backend_type=BackendType.POSTGRES, postgres_url=postgres_url
+        )
+        app.config["DB_PATH"] = "PostgreSQL (Supabase)"  # For display
+        app.config["USING_POSTGRES"] = True
     else:
         backend_type = get_backend_type()
         print(f"Using storage backend: {backend_type.value}")
@@ -88,6 +105,8 @@ def create_app(config_class: type[Config] = Config, db_url: Optional[str] = None
         else:
             # JSONL backend
             backend_config = DataSourceConfig.from_env()
+
+        app.config["USING_POSTGRES"] = False
 
     # Store backend config in app
     app.backend_config = backend_config

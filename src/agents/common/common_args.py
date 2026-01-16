@@ -175,12 +175,17 @@ def add_backend_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser
     """
     parser.add_argument(
         "--backend",
-        choices=["sqlite", "jsonl"],
+        choices=["sqlite", "jsonl", "postgres"],
         help="Storage backend type (default: sqlite, or use STORAGE_BACKEND env var)",
     )
     parser.add_argument(
         "--data-dir",
         help="Data directory for JSONL backend (e.g., data/release/lemmas). Only used with --backend jsonl",
+    )
+    parser.add_argument(
+        "--postgres",
+        action="store_true",
+        help="Use PostgreSQL backend (shorthand for --backend postgres, uses postgres_ul + keys/postgres.key)",
     )
 
     return parser
@@ -421,8 +426,13 @@ def get_data_source_config(args: Any, default_model: Optional[str] = None) -> "D
     backend_type = None
     sqlite_path = None
     jsonl_data_dir = None
+    postgres_url = None
 
-    if hasattr(args, "backend") and args.backend:
+    # Check for --postgres flag first (shorthand)
+    if hasattr(args, "postgres") and args.postgres:
+        backend_type = BackendType.POSTGRES
+        postgres_url = DataSourceConfig.build_postgres_url()
+    elif hasattr(args, "backend") and args.backend:
         if args.backend == "sqlite":
             backend_type = BackendType.SQLITE
             sqlite_path = (
@@ -436,6 +446,9 @@ def get_data_source_config(args: Any, default_model: Optional[str] = None) -> "D
                 sys.exit(1)
             backend_type = BackendType.JSONL
             jsonl_data_dir = getattr(args, "data_dir", None)
+        elif args.backend == "postgres":
+            backend_type = BackendType.POSTGRES
+            postgres_url = DataSourceConfig.build_postgres_url()
     elif hasattr(args, "db_path") and args.db_path:
         # Backward compatibility: db_path implies SQLite backend
         backend_type = BackendType.SQLITE
@@ -462,6 +475,7 @@ def get_data_source_config(args: Any, default_model: Optional[str] = None) -> "D
         backend_type=backend_type,
         sqlite_path=sqlite_path,
         jsonl_data_dir=jsonl_data_dir,
+        postgres_url=postgres_url,
         barsukas_url=barsukas_url,
         cache_only=cache_only,
         model=model,

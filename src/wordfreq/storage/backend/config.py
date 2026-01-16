@@ -5,6 +5,7 @@ from enum import Enum
 from typing import Optional
 
 import constants
+from clients.keys import load_key
 
 
 class BackendType(Enum):
@@ -106,9 +107,10 @@ class DataSourceConfig:
         """Create configuration from environment variables.
 
         Environment variables:
-            STORAGE_BACKEND: "sqlite" or "jsonl" (default: "sqlite")
+            STORAGE_BACKEND: "sqlite", "jsonl", or "postgres" (default: "sqlite")
             SQLITE_DB_PATH: Path to SQLite database (optional)
             JSONL_DATA_DIR: Path to JSONL data directory (optional)
+            POSTGRES_URL: PostgreSQL connection URL (optional, built from template if not set)
             BARSUKAS_CACHE_URL: URL of BARSUKAS cache server (optional)
             CACHE_ONLY: "true" or "false" (default: "false")
             LLM_MODEL: Default LLM model to use (optional)
@@ -127,15 +129,58 @@ class DataSourceConfig:
         model = os.environ.get("LLM_MODEL")
         debug = os.environ.get("DEBUG", "false").lower() == "true"
 
+        # Handle PostgreSQL URL
+        postgres_url = None
+        if backend_type == BackendType.POSTGRES:
+            postgres_url = os.environ.get("POSTGRES_URL")
+            if not postgres_url:
+                # Build from template + key file
+                postgres_url = cls.build_postgres_url()
+
         return cls(
             backend_type=backend_type,
             sqlite_path=sqlite_path,
             jsonl_data_dir=jsonl_data_dir,
+            postgres_url=postgres_url,
             barsukas_url=barsukas_url,
             cache_only=cache_only,
             model=model,
             debug=debug,
         )
+
+    @classmethod
+    def build_postgres_url(cls, template_path: Optional[str] = None) -> str:
+        """Build PostgreSQL URL by combining template with password from key file.
+
+        Args:
+            template_path: Path to URL template file (default: PROJECT_ROOT/postgres_ul)
+
+        Returns:
+            Complete PostgreSQL connection URL
+
+        Raises:
+            ValueError: If template or password file not found
+        """
+        # Default template path
+        if template_path is None:
+            template_path = os.path.join(constants.PROJECT_ROOT, "postgres_ul")
+
+        # Load URL template
+        if not os.path.exists(template_path):
+            raise ValueError(f"PostgreSQL URL template not found at {template_path}")
+
+        with open(template_path) as f:
+            url_template = f.read().strip()
+
+        # Load password (required=True raises RuntimeError if not found)
+        password = load_key("postgres", required=True)
+        assert password is not None  # satisfied by required=True
+
+        # Replace placeholder with actual password
+        if "[YOUR-PASSWORD]" not in url_template:
+            raise ValueError("PostgreSQL URL template must contain [YOUR-PASSWORD] placeholder")
+
+        return url_template.replace("[YOUR-PASSWORD]", password)
 
     def __repr__(self) -> str:
         """String representation of config."""

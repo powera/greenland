@@ -117,8 +117,18 @@ def _get_engine() -> Engine:
         if _global_config is None:
             _global_config = DataSourceConfig.from_env()
 
-        assert _global_config.sqlite_path is not None, "sqlite_path must be set"
-        _global_engine = _create_engine(_global_config.sqlite_path)
+        # Choose the correct path based on backend type
+        if _global_config.backend_type == BackendType.POSTGRES:
+            assert (
+                _global_config.postgres_url is not None
+            ), "postgres_url must be set for POSTGRES backend"
+            _global_engine = _create_engine(_global_config.postgres_url)
+        else:
+            assert (
+                _global_config.sqlite_path is not None
+            ), "sqlite_path must be set for SQLITE backend"
+            _global_engine = _create_engine(_global_config.sqlite_path)
+
         _ensure_tables_exist(_global_engine)
 
     return _global_engine
@@ -150,8 +160,14 @@ def create_session(config: Optional[DataSourceConfig] = None) -> Session:
     """
     if config is not None:
         # Create a one-off session with specific config
-        assert config.sqlite_path is not None, "sqlite_path must be set"
-        engine = _create_engine(config.sqlite_path)
+        if config.backend_type == BackendType.POSTGRES:
+            assert config.postgres_url is not None, "postgres_url must be set for POSTGRES backend"
+            db_path = config.postgres_url
+        else:
+            assert config.sqlite_path is not None, "sqlite_path must be set for SQLITE backend"
+            db_path = config.sqlite_path
+
+        engine = _create_engine(db_path)
         _ensure_tables_exist(engine)
         factory = sessionmaker(bind=engine)
         return factory()

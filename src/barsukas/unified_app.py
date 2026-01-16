@@ -9,6 +9,7 @@ This avoids SQLite concurrency issues by using a single process.
 
 import argparse
 import logging
+import os
 import signal
 import sys
 import threading
@@ -19,6 +20,7 @@ from typing import Optional
 from config import Config
 from app import create_app
 from workers.task_worker import run_worker, STOP_EVENT
+from wordfreq.storage.backend.config import DataSourceConfig
 
 logger = logging.getLogger(__name__)
 
@@ -66,6 +68,11 @@ def main() -> None:
     parser.add_argument(
         "--no-worker", action="store_true", help="Don't start the background worker (Flask only)"
     )
+    parser.add_argument(
+        "--postgres",
+        action="store_true",
+        help="Use PostgreSQL backend (builds URL from postgres_ul + keys/postgres.key)",
+    )
     args = parser.parse_args()
 
     # Set up logging
@@ -76,15 +83,29 @@ def main() -> None:
         force=True,
     )
 
-    # Validate database exists
-    if not Path(Config.DB_PATH).exists():
-        logger.error(f"Database not found at {Config.DB_PATH}")
-        sys.exit(1)
+    # Determine backend type
+    if args.postgres or os.environ.get("USE_POSTGRES_BACKEND") == "true":
+        # PostgreSQL mode - build URL from template + key
+        try:
+            postgres_url = DataSourceConfig.build_postgres_url()
+            os.environ["POSTGRES_URL"] = postgres_url
+            os.environ["STORAGE_BACKEND"] = "postgres"
+            logger.info("PostgreSQL mode: connecting to Supabase")
+            db_display = "PostgreSQL (Supabase)"
+        except Exception as e:
+            logger.error(f"Failed to build PostgreSQL URL: {e}")
+            sys.exit(1)
+    else:
+        # SQLite mode - validate database exists
+        if not Path(Config.DB_PATH).exists():
+            logger.error(f"Database not found at {Config.DB_PATH}")
+            sys.exit(1)
+        db_display = Config.DB_PATH
 
     logger.info("=" * 80)
     logger.info("BARSUKAS UNIFIED LAUNCHER")
     logger.info("=" * 80)
-    logger.info(f"Database: {Config.DB_PATH}")
+    logger.info(f"Database: {db_display}")
     logger.info(f"Flask server will run on http://{args.host}:{args.port}")
     if not args.no_worker:
         logger.info(f"Task worker will poll every {args.poll_interval}s")

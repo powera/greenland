@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import os
 import signal
 import time
 from threading import Event
@@ -28,12 +29,29 @@ def _handle_shutdown(signum: int, frame: Any) -> None:  # pragma: no cover - sig
 
 
 def _build_session() -> Any:
-    backend_config = DataSourceConfig(
-        backend_type=BackendType.SQLITE,
-        sqlite_path=Config.DB_PATH,
-        model=constants.DEFAULT_MODEL,
-        debug=Config.DEBUG,
-    )
+    """Build a database session based on current backend configuration."""
+    # Check for PostgreSQL mode
+    if os.environ.get("STORAGE_BACKEND") == "postgres":
+        postgres_url = os.environ.get("POSTGRES_URL")
+        if not postgres_url:
+            # Build from template + key
+            postgres_url = DataSourceConfig.build_postgres_url()
+
+        backend_config = DataSourceConfig(
+            backend_type=BackendType.POSTGRES,
+            postgres_url=postgres_url,
+            model=constants.DEFAULT_MODEL,
+            debug=Config.DEBUG,
+        )
+    else:
+        # SQLite mode (default)
+        backend_config = DataSourceConfig(
+            backend_type=BackendType.SQLITE,
+            sqlite_path=Config.DB_PATH,
+            model=constants.DEFAULT_MODEL,
+            debug=Config.DEBUG,
+        )
+
     return create_session(backend_config)
 
 
@@ -47,7 +65,10 @@ def process_task(task: Any, session: Any) -> str:
 
 
 def run_worker(poll_interval: float) -> None:
-    logger.info("Starting Barsukas task worker (DB: %s)", Config.DB_PATH)
+    if os.environ.get("STORAGE_BACKEND") == "postgres":
+        logger.info("Starting Barsukas task worker (DB: PostgreSQL)")
+    else:
+        logger.info("Starting Barsukas task worker (DB: %s)", Config.DB_PATH)
     while True:
         with _build_session() as session:
             task = claim_next_task(session)
