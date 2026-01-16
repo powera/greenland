@@ -15,7 +15,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 # Add the src directory to the path for imports
-GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent.parent)
+GREENLAND_SRC_PATH = str(Path(__file__).parent.parent)
 if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
@@ -39,8 +39,8 @@ try:
 except ImportError:
     PYPINYIN_AVAILABLE = False
 
-from .data_models import ExportStats, create_export_stats
-from .text_rendering import format_subtype_display_name
+from wordfreq.trakaido.utils.data_models import ExportStats, create_export_stats
+from wordfreq.trakaido.utils.text_rendering import format_subtype_display_name
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -1675,7 +1675,7 @@ class WirewordExporter:
                 wireword_data.append(wireword)
 
             # Calculate basic stats
-            from .data_models import ExportStats
+            # ExportStats is already imported at module level
 
             # Calculate level distribution
             level_dist = {}
