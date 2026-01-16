@@ -16,11 +16,12 @@ from config import Config
 import constants
 from barsukas.helpers.task_handlers import TASK_HANDLERS
 from barsukas.utils.task_queue import claim_next_task, mark_task_complete, mark_task_failed
-from wordfreq.storage.backend import create_session
+from wordfreq.storage.backend import configure_backend, create_session
 from wordfreq.storage.backend.config import BackendType, DataSourceConfig
 
 logger = logging.getLogger(__name__)
 STOP_EVENT = Event()
+_backend_configured = False
 
 
 def _handle_shutdown(signum: int, frame: Any) -> None:  # pragma: no cover - signal hook
@@ -28,8 +29,12 @@ def _handle_shutdown(signum: int, frame: Any) -> None:  # pragma: no cover - sig
     STOP_EVENT.set()
 
 
-def _build_session() -> Any:
-    """Build a database session based on current backend configuration."""
+def _configure_backend_once() -> None:
+    """Configure the backend once at worker startup."""
+    global _backend_configured
+    if _backend_configured:
+        return
+
     # Check for PostgreSQL mode
     if os.environ.get("STORAGE_BACKEND") == "postgres":
         postgres_url = os.environ.get("POSTGRES_URL")
@@ -52,7 +57,14 @@ def _build_session() -> Any:
             debug=Config.DEBUG,
         )
 
-    return create_session(backend_config)
+    configure_backend(backend_config)
+    _backend_configured = True
+
+
+def _build_session() -> Any:
+    """Build a database session using the globally configured backend."""
+    _configure_backend_once()
+    return create_session()
 
 
 def process_task(task: Any, session: Any) -> str:
