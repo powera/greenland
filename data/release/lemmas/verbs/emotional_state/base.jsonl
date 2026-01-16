@@ -3,8 +3,8 @@
 {"guid": "V05_003", "pos_type": "verb", "pos_subtype": "emotional_state", "concept_label": "be able/can", "concept_definition": "to have the ability, opportunity, or permission to do something", "difficulty_level": 6}
 {"guid": "V05_004", "pos_type": "verb", "pos_subtype": "emotional_state", "concept_label": "want", "concept_definition": "to desire or wish for something.", "difficulty_level": 6}
 {"guid": "V05_005", "pos_type": "verb", "pos_subtype": "emotional_state", "concept_label": "feel", "concept_definition": "to experience a feeling or emotion.", "difficulty_level": -1}
-{"guid": "V05_006", "pos_type": "verb", "pos_subtype": "emotional_state", "concept_label": "cry", "concept_definition": "to shed tears; to weep.", "difficulty_level": -1}
-{"guid": "V05_007", "pos_type": "verb", "pos_subtype": "emotional_state", "concept_label": "smile", "concept_definition": "to form an expression of pleasure or amusement.", "difficulty_level": -1}
+{"guid": "V05_006", "pos_type": "verb", "pos_subtype": "emotional_state", "concept_label": "cry", "concept_definition": "to shed tears; to weep.", "difficulty_level": 19}
+{"guid": "V05_007", "pos_type": "verb", "pos_subtype": "emotional_state", "concept_label": "smile", "concept_definition": "to form an expression of pleasure or amusement.", "difficulty_level": 19}
 {"guid": "V05_008", "pos_type": "verb", "pos_subtype": "emotional_state", "concept_label": "miss (long for)", "concept_definition": "to feel the absence of someone or something; to long for.", "difficulty_level": -1}
 {"guid": "V05_009", "pos_type": "verb", "pos_subtype": "emotional_state", "concept_label": "worry", "concept_definition": "to feel anxious or troubled about something.", "difficulty_level": -1}
-{"guid": "V05_010", "pos_type": "verb", "pos_subtype": "emotional_state", "concept_label": "laugh", "concept_definition": "to express amusement with laughter.", "difficulty_level": -1}
+{"guid": "V05_010", "pos_type": "verb", "pos_subtype": "emotional_state", "concept_label": "laugh", "concept_definition": "to express amusement with laughter.", "difficulty_level": 19}

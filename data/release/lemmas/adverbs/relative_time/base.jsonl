@@ -1,6 +1,6 @@
 {"guid": "D04_001", "pos_type": "adverb", "pos_subtype": "relative_time", "concept_label": "later (after now)", "concept_definition": "At a time in the future; after the time of speaking or after a specified time.", "difficulty_level": -1}
 {"guid": "D04_002", "pos_type": "adverb", "pos_subtype": "relative_time", "concept_label": "later (comparative)", "concept_definition": "At a more advanced point in time; comparative form meaning 'more late' used when contrasting times.", "difficulty_level": -1}
-{"guid": "D04_003", "pos_type": "adverb", "pos_subtype": "relative_time", "concept_label": "still", "concept_definition": "up to now; continuing; not yet finished.", "difficulty_level": -1}
+{"guid": "D04_003", "pos_type": "adverb", "pos_subtype": "relative_time", "concept_label": "still", "concept_definition": "up to now; continuing; not yet finished.", "difficulty_level": 19}
 {"guid": "D04_004", "pos_type": "adverb", "pos_subtype": "relative_time", "concept_label": "ago", "concept_definition": "before the present time; in the past.", "difficulty_level": -1}
 {"guid": "D04_005", "pos_type": "adverb", "pos_subtype": "relative_time", "concept_label": "finally", "concept_definition": "after a long time; at the end.", "difficulty_level": -1}
 {"guid": "D04_006", "pos_type": "adverb", "pos_subtype": "relative_time", "concept_label": "immediately", "concept_definition": "at once; without delay.", "difficulty_level": -1}

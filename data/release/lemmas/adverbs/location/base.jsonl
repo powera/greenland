@@ -10,7 +10,7 @@
 {"guid": "D07_010", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "already", "concept_definition": "before now; by this time; earlier than expected (used to indicate that something has happened prior to a specified time)", "difficulty_level": 9}
 {"guid": "D07_011", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "soon", "concept_definition": "In a short time; shortly; before long.", "difficulty_level": 9}
 {"guid": "D07_012", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "recently", "concept_definition": "At a time not long before now; a short time ago.", "difficulty_level": 9}
-{"guid": "D07_013", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "away", "concept_definition": "to or at a distance; not here.", "difficulty_level": -1}
+{"guid": "D07_013", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "away", "concept_definition": "to or at a distance; not here.", "difficulty_level": 19}
 {"guid": "D07_014", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "far", "concept_definition": "at or to a great distance.", "difficulty_level": -1}
 {"guid": "D07_015", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "near", "concept_definition": "close by; at a short distance.", "difficulty_level": -1}
 {"guid": "D07_016", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "round", "concept_definition": "around; in a circular route.", "difficulty_level": -1}
@@ -23,9 +23,9 @@
 {"guid": "D07_023", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "forth", "concept_definition": "forward; outward.", "difficulty_level": -1}
 {"guid": "D07_024", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "apart", "concept_definition": "separated; at a distance from each other.", "difficulty_level": -1}
 {"guid": "D07_025", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "out", "concept_definition": "away from the inside; not at home; outside (e.g., \"go out\", \"look out\", \"out of town\").", "difficulty_level": -1}
-{"guid": "D07_026", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "up", "concept_definition": "toward or in a higher place or position; upward (e.g., \"climb up\", \"look up\", \"stand up\").", "difficulty_level": -1}
-{"guid": "D07_027", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "down", "concept_definition": "toward or in a lower place or position; downward (e.g., \"sit down\", \"fall down\", \"go down\").", "difficulty_level": -1}
-{"guid": "D07_028", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "around", "concept_definition": "on all sides; in the vicinity; approximately (e.g., \"look around\", \"walk around\", \"around ten people\").", "difficulty_level": -1}
+{"guid": "D07_026", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "up", "concept_definition": "toward or in a higher place or position; upward (e.g., \"climb up\", \"look up\", \"stand up\").", "difficulty_level": 19}
+{"guid": "D07_027", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "down", "concept_definition": "toward or in a lower place or position; downward (e.g., \"sit down\", \"fall down\", \"go down\").", "difficulty_level": 19}
+{"guid": "D07_028", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "around", "concept_definition": "on all sides; in the vicinity; approximately (e.g., \"look around\", \"walk around\", \"around ten people\").", "difficulty_level": 19}
 {"guid": "D07_029", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "along", "concept_definition": "moving in a constant direction on; in a line; onward (e.g., \"walk along\", \"come along\", \"all along\").", "difficulty_level": -1}
 {"guid": "D07_030", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "below", "concept_definition": "at a lower level or layer; beneath; downstairs (e.g., \"see below\", \"down below\").", "difficulty_level": -1}
 {"guid": "D07_031", "pos_type": "adverb", "pos_subtype": "location", "concept_label": "inside", "concept_definition": "on or to the interior; indoors; within (e.g., \"come inside\", \"look inside\", \"inside the box\").", "difficulty_level": -1}
