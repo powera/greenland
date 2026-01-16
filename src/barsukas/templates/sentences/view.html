@@ -90,6 +90,65 @@
     </div>
 </div>
 
+<!-- Conversations containing this sentence -->
+{% if conversations_data %}
+<div class="row mb-4">
+    <div class="col">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-chat-dots"></i> In Conversations
+            </div>
+            <div class="card-body">
+                <table class="table table-sm table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Conversation</th>
+                            <th>Position</th>
+                            <th>Speaker</th>
+                            <th>Level</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in conversations_data %}
+                            <tr>
+                                <td>
+                                    <a href="{{ url_for('conversations.view_conversation', conversation_id=item.conversation.id) }}">
+                                        {% if item.conversation.title %}
+                                            {{ item.conversation.title }}
+                                        {% else %}
+                                            Conversation #{{ item.conversation.id }}
+                                        {% endif %}
+                                    </a>
+                                </td>
+                                <td>{{ item.position + 1 }}</td>
+                                <td><span class="badge {% if item.speaker == 'A' %}bg-primary{% else %}bg-secondary{% endif %}">{{ item.speaker }}</span></td>
+                                <td>
+                                    {% if item.conversation.minimum_level is not none %}
+                                        <span class="badge bg-info">L{{ item.conversation.minimum_level }}</span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if item.conversation.verified %}
+                                        <i class="bi bi-check-circle-fill text-success" title="Verified"></i>
+                                    {% elif item.conversation.rejected %}
+                                        <i class="bi bi-x-circle-fill text-danger" title="Rejected"></i>
+                                    {% else %}
+                                        <i class="bi bi-clock text-muted" title="Pending"></i>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 <!-- Sentence Pattern -->
 {% if pattern_words %}
 <div class="row mb-4">

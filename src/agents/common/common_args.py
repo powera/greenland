@@ -185,7 +185,7 @@ def add_backend_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser
     parser.add_argument(
         "--postgres",
         action="store_true",
-        help="Use PostgreSQL backend (shorthand for --backend postgres, uses postgres_ul + keys/postgres.key)",
+        help="Use PostgreSQL backend instead of SQLite",
     )
 
     return parser

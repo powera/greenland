@@ -293,7 +293,7 @@ def get_agent_cli_module_path(agent_script: str) -> str:
     agent_name = module_stub.split(".")[0]
 
     # Check if it's a multi-file agent (has a directory)
-    multi_file_agents = ["voras", "vilkas", "dramblys", "sernas", "bebras", "buivolas"]
+    multi_file_agents = ["voras", "vilkas", "dramblys", "sernas", "bebras", "buivolas", "sarka"]
 
     if agent_name in multi_file_agents and module_stub == agent_name:
         return f"agents.{agent_name}.cli"

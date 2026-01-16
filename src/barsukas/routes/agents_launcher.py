@@ -126,6 +126,15 @@ AGENTS = [
         "use_dynamic_form": True,
     },
     {
+        "name": "SARKA",
+        "display_name": "Šarka",
+        "subtitle": "Conversation Generator",
+        "description": "Generates simple conversations and dialogs using curated keywords for language learning.",
+        "script": "sarka.py",
+        "icon": "bi-chat-dots",
+        "use_dynamic_form": True,
+    },
+    {
         "name": "BUIVOLAS",
         "display_name": "Buivolas",
         "subtitle": "Pattern Sentence Generator",

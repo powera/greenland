@@ -32,6 +32,7 @@ from routes import (
     agents_launcher,
     api,
     audio,
+    conversations,
     exports,
     lemmas,
     operation_logs,
@@ -121,6 +122,7 @@ def create_app(config_class: type[Config] = Config, db_url: Optional[str] = None
     # Register blueprints
     app.register_blueprint(lemmas.bp)
     app.register_blueprint(sentences.bp)
+    app.register_blueprint(conversations.bp)
     app.register_blueprint(translations.bp)
     app.register_blueprint(overrides.bp)
     app.register_blueprint(agents.bp)

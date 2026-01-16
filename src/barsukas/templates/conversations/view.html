@@ -1,0 +1,243 @@
+{% extends "base.html" %}
+
+{% block title %}{{ conversation.title or ('Conversation #' ~ conversation.id) }}{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('conversations.list_conversations') }}">Conversations</a></li>
+                <li class="breadcrumb-item active">{{ conversation.title or ('Conversation #' ~ conversation.id) }}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<!-- Conversation Metadata -->
+<div class="row mb-4">
+    <div class="col">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-info-circle"></i> Conversation Details</span>
+                <div>
+                    {% if not conversation.verified and not conversation.rejected %}
+                    <form method="POST" action="{{ url_for('conversations.verify_conversation', conversation_id=conversation.id) }}" class="d-inline">
+                        <button type="submit" class="btn btn-sm btn-success" title="Mark as verified"
+                                onclick="return confirm('Verify this conversation?')">
+                            <i class="bi bi-check-circle"></i> Verify
+                        </button>
+                    </form>
+                    <form method="POST" action="{{ url_for('conversations.reject_conversation', conversation_id=conversation.id) }}" class="d-inline">
+                        <button type="submit" class="btn btn-sm btn-danger" title="Mark as rejected"
+                                onclick="return confirm('Reject this conversation?')">
+                            <i class="bi bi-x-circle"></i> Reject
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <dl class="row">
+                            <dt class="col-sm-4">ID:</dt>
+                            <dd class="col-sm-8"><code>#{{ conversation.id }}</code></dd>
+
+                            <dt class="col-sm-4">Title:</dt>
+                            <dd class="col-sm-8">{{ conversation.title or '(No title)' }}</dd>
+
+                            {% if conversation.theme %}
+                                <dt class="col-sm-4">Theme:</dt>
+                                <dd class="col-sm-8"><span class="badge bg-secondary">{{ conversation.theme }}</span></dd>
+                            {% endif %}
+                        </dl>
+                    </div>
+                    <div class="col-md-6">
+                        <dl class="row">
+                            <dt class="col-sm-4">Level:</dt>
+                            <dd class="col-sm-8">
+                                {% if conversation.minimum_level is not none %}
+                                    <span class="badge bg-info difficulty-badge">Level {{ conversation.minimum_level }}</span>
+                                {% else %}
+                                    <span class="text-muted">Not set</span>
+                                {% endif %}
+                            </dd>
+
+                            <dt class="col-sm-4">Status:</dt>
+                            <dd class="col-sm-8">
+                                {% if conversation.verified %}
+                                    <i class="bi bi-check-circle-fill text-success"></i> Verified
+                                {% elif conversation.rejected %}
+                                    <i class="bi bi-x-circle-fill text-danger"></i> Rejected
+                                {% else %}
+                                    <i class="bi bi-clock text-muted"></i> Pending review
+                                {% endif %}
+                            </dd>
+
+                            <dt class="col-sm-4">Sentences:</dt>
+                            <dd class="col-sm-8">{{ sentences_data|length }}</dd>
+                        </dl>
+                    </div>
+                </div>
+
+                {% if keywords %}
+                <div class="row mt-3">
+                    <div class="col">
+                        <strong>Keywords:</strong>
+                        {% for kw in keywords %}
+                            <span class="badge bg-light text-dark me-1">{{ kw }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if conversation.notes %}
+                <div class="row mt-3">
+                    <div class="col">
+                        <strong>Notes:</strong> {{ conversation.notes }}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Conversation Dialog -->
+<div class="row mb-4">
+    <div class="col">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-chat-left-quote"></i> Conversation
+            </div>
+            <div class="card-body">
+                {% if sentences_data %}
+                    <div class="conversation-dialog">
+                        {% for item in sentences_data %}
+                            <div class="dialog-line mb-3 p-3 rounded {% if item.speaker == 'A' %}bg-light{% else %}bg-white border{% endif %}">
+                                <div class="d-flex align-items-start">
+                                    <div class="speaker-badge me-3">
+                                        <span class="badge {% if item.speaker == 'A' %}bg-primary{% else %}bg-secondary{% endif %} rounded-pill" style="min-width: 30px;">
+                                            {{ item.speaker }}
+                                        </span>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <!-- English (primary) -->
+                                        {% if item.translations.get('en') %}
+                                            <div class="dialog-text mb-2">
+                                                <strong>{{ item.translations['en'] }}</strong>
+                                            </div>
+                                        {% endif %}
+
+                                        <!-- Other translations -->
+                                        <div class="translations-list small">
+                                            {% for lang_code, translation in item.translations.items() %}
+                                                {% if lang_code != 'en' %}
+                                                    <div class="translation-item text-muted">
+                                                        <span class="badge bg-light text-dark" style="font-size: 0.7rem;">{{ lang_code }}</span>
+                                                        {% if lang_code == 'zh' %}
+                                                            <span class="chinese-with-pinyin">{{ translation|pinyin_ruby|safe }}</span>
+                                                        {% elif lang_code == 'ja' %}
+                                                            <span class="japanese-with-romaji">{{ translation|romaji_ruby|safe }}</span>
+                                                        {% else %}
+                                                            {{ translation }}
+                                                        {% endif %}
+                                                    </div>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
+
+                                        <!-- Link to sentence -->
+                                        <div class="mt-2">
+                                            <a href="{{ url_for('sentences.view_sentence', sentence_id=item.sentence_id) }}"
+                                               class="btn btn-sm btn-outline-secondary" title="View sentence details">
+                                                <i class="bi bi-box-arrow-up-right"></i> Sentence #{{ item.sentence_id }}
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="alert alert-info mb-0">
+                        <i class="bi bi-info-circle"></i> This conversation has no sentences.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Translations Summary Table -->
+{% if sentences_data %}
+<div class="row mb-4">
+    <div class="col">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-translate"></i> All Translations
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                        <thead>
+                            <tr>
+                                <th style="width: 40px;">#</th>
+                                <th style="width: 50px;">Speaker</th>
+                                {% for lang_code, lang_name in language_names.items() %}
+                                    <th>{{ lang_name }}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in sentences_data %}
+                                <tr>
+                                    <td>{{ item.position + 1 }}</td>
+                                    <td>
+                                        <span class="badge {% if item.speaker == 'A' %}bg-primary{% else %}bg-secondary{% endif %}">
+                                            {{ item.speaker }}
+                                        </span>
+                                    </td>
+                                    {% for lang_code, lang_name in language_names.items() %}
+                                        <td>
+                                            {% if item.translations.get(lang_code) %}
+                                                {% if lang_code == 'zh' %}
+                                                    <span class="chinese-with-pinyin">{{ item.translations[lang_code]|pinyin_ruby|safe }}</span>
+                                                {% elif lang_code == 'ja' %}
+                                                    <span class="japanese-with-romaji">{{ item.translations[lang_code]|romaji_ruby|safe }}</span>
+                                                {% else %}
+                                                    {{ item.translations[lang_code] }}
+                                                {% endif %}
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                    {% endfor %}
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<style>
+.conversation-dialog .dialog-line {
+    border-left: 3px solid transparent;
+}
+.conversation-dialog .dialog-line.bg-light {
+    border-left-color: var(--bs-primary);
+}
+.conversation-dialog .dialog-line.border {
+    border-left-color: var(--bs-secondary);
+}
+.translation-item {
+    margin-bottom: 0.25rem;
+}
+</style>
+{% endblock %}

@@ -14,6 +14,8 @@ from barsukas.helpers.flash_helpers import flash_and_log
 from barsukas.utils.task_queue import TaskType, enqueue_task
 from wordfreq.storage.models.schema import (
     AudioQualityReview,
+    Conversation,
+    ConversationSentence,
     Lemma,
     Sentence,
     SentencePatternWord,
@@ -217,6 +219,22 @@ def view_sentence(sentence_id: int) -> Union[str, Response]:
             audio_by_language[audio.language_code] = []
         audio_by_language[audio.language_code].append(audio)
 
+    # Get conversations that include this sentence
+    conversation_links = (
+        g.db.query(ConversationSentence, Conversation)
+        .join(Conversation, ConversationSentence.conversation_id == Conversation.id)
+        .filter(ConversationSentence.sentence_id == sentence_id)
+        .all()
+    )
+    conversations_data = [
+        {
+            "conversation": conv,
+            "position": cs.position,
+            "speaker": cs.speaker,
+        }
+        for cs, conv in conversation_links
+    ]
+
     return render_template(
         "sentences/view.html",
         sentence=sentence,
@@ -225,6 +243,7 @@ def view_sentence(sentence_id: int) -> Union[str, Response]:
         words_by_language=words_by_language,
         pattern_words=pattern_words_data,
         audio_by_language=audio_by_language,
+        conversations_data=conversations_data,
     )
 
 
