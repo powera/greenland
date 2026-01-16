@@ -46,7 +46,7 @@
 {"guid": "N07_046", "pos_type": "noun", "pos_subtype": "building_structure", "concept_label": "tower", "concept_definition": "a tall narrow structure", "difficulty_level": -1}
 {"guid": "N07_047", "pos_type": "noun", "pos_subtype": "building_structure", "concept_label": "farm", "concept_definition": "an area of land used for growing crops or keeping animals", "difficulty_level": -1}
 {"guid": "N07_048", "pos_type": "noun", "pos_subtype": "building_structure", "concept_label": "passage", "concept_definition": "a way through or along something; a section of text", "difficulty_level": -1}
-{"guid": "N07_049", "pos_type": "noun", "pos_subtype": "building_structure", "concept_label": "building", "concept_definition": "a structure with walls and a roof", "difficulty_level": -1}
+{"guid": "N07_049", "pos_type": "noun", "pos_subtype": "building_structure", "concept_label": "building", "concept_definition": "a structure with walls and a roof", "difficulty_level": 8}
 {"guid": "N07_050", "pos_type": "noun", "pos_subtype": "building_structure", "concept_label": "roof", "concept_definition": "the covering of the top of a building", "difficulty_level": -1}
 {"guid": "N07_051", "pos_type": "noun", "pos_subtype": "building_structure", "concept_label": "corridor", "concept_definition": "a passageway in a building", "difficulty_level": -1}
 {"guid": "N07_052", "pos_type": "noun", "pos_subtype": "building_structure", "concept_label": "chamber", "concept_definition": "a large room used for meetings", "difficulty_level": -1}

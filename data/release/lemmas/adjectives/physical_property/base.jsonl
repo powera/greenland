@@ -11,11 +11,11 @@
 {"guid": "A18_011", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "wet", "concept_definition": "Covered or saturated with water or another liquid; slightly or moderately damp to the touch.", "difficulty_level": 9}
 {"guid": "A18_012", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "dry", "concept_definition": "Not wet; lacking moisture or free liquid (e.g., a dry towel).", "difficulty_level": 9}
 {"guid": "A18_013", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "silent", "concept_definition": "making no sound", "difficulty_level": -1}
-{"guid": "A18_014", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "heavy", "concept_definition": "of great weight", "difficulty_level": -1}
-{"guid": "A18_015", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "tall", "concept_definition": "of great height", "difficulty_level": -1}
-{"guid": "A18_016", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "fast", "concept_definition": "moving or capable of moving quickly", "difficulty_level": -1}
+{"guid": "A18_014", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "heavy", "concept_definition": "of great weight", "difficulty_level": 14}
+{"guid": "A18_015", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "tall", "concept_definition": "of great height", "difficulty_level": 14}
+{"guid": "A18_016", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "fast", "concept_definition": "moving or capable of moving quickly", "difficulty_level": 14}
 {"guid": "A18_017", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "safe", "concept_definition": "protected from danger or harm", "difficulty_level": -1}
-{"guid": "A18_018", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "bright", "concept_definition": "giving out or reflecting much light", "difficulty_level": -1}
+{"guid": "A18_018", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "bright", "concept_definition": "giving out or reflecting much light", "difficulty_level": 14}
 {"guid": "A18_019", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "alive", "concept_definition": "living; not dead", "difficulty_level": -1}
 {"guid": "A18_020", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "sudden", "concept_definition": "occurring quickly and unexpectedly", "difficulty_level": -1}
 {"guid": "A18_021", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "thick", "concept_definition": "having a large distance between opposite sides", "difficulty_level": -1}
@@ -24,16 +24,16 @@
 {"guid": "A18_024", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "broad", "concept_definition": "wide or extensive", "difficulty_level": -1}
 {"guid": "A18_025", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "cool (temperature)", "concept_definition": "fairly cold; not warm", "difficulty_level": -1}
 {"guid": "A18_026", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "bare", "concept_definition": "not clothed or covered", "difficulty_level": -1}
-{"guid": "A18_027", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "clean", "concept_definition": "free from dirt or contamination", "difficulty_level": -1}
+{"guid": "A18_027", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "clean", "concept_definition": "free from dirt or contamination", "difficulty_level": 14}
 {"guid": "A18_028", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "usual", "concept_definition": "habitually or typically occurring", "difficulty_level": -1}
-{"guid": "A18_029", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "loud", "concept_definition": "producing much noise", "difficulty_level": -1}
+{"guid": "A18_029", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "loud", "concept_definition": "producing much noise", "difficulty_level": 14}
 {"guid": "A18_030", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "dim", "concept_definition": "not bright or well lit", "difficulty_level": -1}
 {"guid": "A18_031", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "hungry", "concept_definition": "feeling a need for food", "difficulty_level": -1}
 {"guid": "A18_032", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "ill", "concept_definition": "suffering from disease or poor health", "difficulty_level": -1}
 {"guid": "A18_033", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "shining", "concept_definition": "giving out or reflecting bright light", "difficulty_level": -1}
 {"guid": "A18_034", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "familiar", "concept_definition": "well known through long association", "difficulty_level": -1}
 {"guid": "A18_035", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "rich", "concept_definition": "having a lot of money or resources", "difficulty_level": -1}
-{"guid": "A18_036", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "smooth", "concept_definition": "having an even surface", "difficulty_level": -1}
+{"guid": "A18_036", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "smooth", "concept_definition": "having an even surface", "difficulty_level": 14}
 {"guid": "A18_037", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "outer", "concept_definition": "outside or external", "difficulty_level": -1}
 {"guid": "A18_038", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "floating", "concept_definition": "buoyant or suspended in air or water", "difficulty_level": -1}
 {"guid": "A18_039", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "blind", "concept_definition": "unable to see", "difficulty_level": -1}
@@ -43,7 +43,7 @@
 {"guid": "A18_043", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "frozen", "concept_definition": "turned into ice; very cold", "difficulty_level": -1}
 {"guid": "A18_044", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "eyed", "concept_definition": "having eyes of a specified kind", "difficulty_level": -1}
 {"guid": "A18_045", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "named", "concept_definition": "having a specified name", "difficulty_level": -1}
-{"guid": "A18_046", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "light (weight)", "concept_definition": "having little weight; not heavy", "difficulty_level": -1}
+{"guid": "A18_046", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "light (weight)", "concept_definition": "having little weight; not heavy", "difficulty_level": 14}
 {"guid": "A18_047", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "dead", "concept_definition": "no longer alive; not living; lacking power or effect (e.g., \"dead battery\").", "difficulty_level": -1}
 {"guid": "A18_048", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "open (not closed)", "concept_definition": "not closed, fastened, or restricted; accessible", "difficulty_level": -1}
 {"guid": "A18_049", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "strange", "concept_definition": "unusual or surprising; unfamiliar or foreign; odd or peculiar.", "difficulty_level": -1}
@@ -57,10 +57,15 @@
 {"guid": "A18_057", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "pale", "concept_definition": "light in color or shade; having little color; faint or weak (e.g., \"pale skin\", \"pale imitation\").", "difficulty_level": -1}
 {"guid": "A18_058", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "faint", "concept_definition": "barely perceptible; weak or dizzy; lacking courage or spirit.", "difficulty_level": -1}
 {"guid": "A18_059", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "hidden", "concept_definition": "concealed; kept out of sight; not known or revealed; secret.", "difficulty_level": -1}
-{"guid": "A18_060", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "sharp", "concept_definition": "having a thin cutting edge or point; intense or severe; keen or acute; sudden or abrupt.", "difficulty_level": -1}
-{"guid": "A18_061", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "warm", "concept_definition": "having or giving off moderate heat; friendly or affectionate; enthusiastic.", "difficulty_level": -1}
-{"guid": "A18_062", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "thin", "concept_definition": "having little thickness or width; lean or slender; not dense; weak or unconvincing.", "difficulty_level": -1}
-{"guid": "A18_063", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "soft", "concept_definition": "easy to mold or compress; smooth and pleasant to touch; gentle or quiet; not harsh.", "difficulty_level": -1}
+{"guid": "A18_060", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "sharp", "concept_definition": "having a thin cutting edge or point; intense or severe; keen or acute; sudden or abrupt.", "difficulty_level": 14}
+{"guid": "A18_061", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "warm", "concept_definition": "having or giving off moderate heat; friendly or affectionate; enthusiastic.", "difficulty_level": 14}
+{"guid": "A18_062", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "thin", "concept_definition": "having little thickness or width; lean or slender; not dense; weak or unconvincing.", "difficulty_level": 14}
+{"guid": "A18_063", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "soft", "concept_definition": "easy to mold or compress; smooth and pleasant to touch; gentle or quiet; not harsh.", "difficulty_level": 14}
 {"guid": "A18_064", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "worse", "concept_definition": "of poorer quality or lower standard; more serious or severe; less well or healthy.", "difficulty_level": -1}
 {"guid": "A18_065", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "bent", "concept_definition": "curved or crooked; determined or set on; inclined or disposed.", "difficulty_level": -1}
 {"guid": "A18_066", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "present", "concept_definition": "existing or occurring now; being in a particular place; attentive or focused.", "difficulty_level": -1}
+{"guid": "A18_067", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "slow", "concept_definition": "moving or capable of moving only at a low speed; taking a long time to perform an action", "difficulty_level": 14}
+{"guid": "A18_068", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "quiet", "concept_definition": "making little or no noise; calm and peaceful", "difficulty_level": 14}
+{"guid": "A18_069", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "hard", "concept_definition": "solid, firm, and rigid; not easily broken or bent; requiring great effort", "difficulty_level": 14}
+{"guid": "A18_070", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "dirty", "concept_definition": "covered or marked with an unclean substance; not clean", "difficulty_level": 14}
+{"guid": "A18_071", "pos_type": "adjective", "pos_subtype": "physical_property", "concept_label": "rough", "concept_definition": "having an uneven or irregular surface; not smooth or level", "difficulty_level": 14}
