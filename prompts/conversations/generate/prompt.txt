@@ -1,0 +1,28 @@
+Create a simple conversation between two speakers (A and B) for a language learning app.
+
+The conversation should naturally incorporate these keywords:
+- Colors: {colors}
+- Body part: {body_part}
+- Emotion: {emotion}
+- Occupation: {occupation}
+
+Theme/Setting: {theme}
+
+Requirements:
+1. Generate exactly {num_sentences} sentences total (alternating between speakers A and B)
+2. Start with speaker A
+3. Each sentence should be short and simple (5-15 words)
+4. Incorporate the keywords naturally - don't force them if they don't fit
+5. The conversation should have a clear beginning, middle, and logical ending
+6. Use present tense primarily, with simple past when appropriate
+7. Keep vocabulary at an A2-B1 level (pre-intermediate)
+
+Example format of a good conversation:
+A: Good morning! How are you feeling today?
+B: I'm a bit tired. My head hurts.
+A: Oh no! You should see a doctor.
+B: Yes, I will go this afternoon. The doctor's office has a red door.
+A: I hope you feel better soon!
+B: Thank you, that's very kind of you.
+
+Now generate a conversation with the specified keywords and theme.

@@ -294,6 +294,7 @@ class Sentence(Base):
     pattern_words = relationship(
         "SentencePatternWord", back_populates="sentence", cascade="all, delete-orphan"
     )
+    conversation_sentences = relationship("ConversationSentence", back_populates="sentence")
 
 
 class SentenceTranslation(Base):
@@ -617,3 +618,87 @@ class BarsukasTask(Base):
     )
     started_at: Mapped[Optional[datetime.datetime]] = mapped_column(TIMESTAMP, nullable=True)
     finished_at: Mapped[Optional[datetime.datetime]] = mapped_column(TIMESTAMP, nullable=True)
+
+
+class Conversation(Base):
+    """Model for storing conversation metadata.
+
+    A conversation is a collection of related sentences that form a dialog
+    or exchange between speakers. Each conversation contains multiple
+    sentences in a specific order, with speaker attribution.
+
+    Used by the Trakaido app for conversation-based language learning exercises.
+    """
+
+    __tablename__ = "conversations"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+
+    # Conversation metadata
+    title: Mapped[Optional[str]] = mapped_column(
+        String, nullable=True
+    )  # e.g., "At the doctor's office"
+    theme: Mapped[Optional[str]] = mapped_column(
+        String, nullable=True, index=True
+    )  # e.g., "medical", "shopping", "restaurant"
+
+    # Keywords that were used to generate this conversation
+    keywords: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # JSON array of keywords
+
+    # Difficulty level - calculated as the maximum difficulty of all sentences
+    minimum_level: Mapped[Optional[int]] = mapped_column(Integer, nullable=True, index=True)
+
+    # Source tracking
+    source_filename: Mapped[Optional[str]] = mapped_column(
+        String, nullable=True
+    )  # e.g., "conversation_level3_001"
+
+    # Metadata
+    verified: Mapped[bool] = mapped_column(Boolean, default=False)
+    rejected: Mapped[bool] = mapped_column(
+        Boolean, default=False, index=True
+    )  # Rejected conversations won't be regenerated
+    notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    added_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now())
+    updated_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP, server_default=func.now(), onupdate=func.now()
+    )
+
+    # Relationships
+    conversation_sentences = relationship(
+        "ConversationSentence", back_populates="conversation", cascade="all, delete-orphan"
+    )
+
+
+class ConversationSentence(Base):
+    """Model for linking sentences to conversations with ordering and speaker info.
+
+    This junction table connects sentences to conversations, tracking:
+    - Position in the conversation (0-indexed)
+    - Speaker identifier (e.g., "A", "B", or character names)
+
+    The same sentence could theoretically appear in multiple conversations,
+    though this is uncommon. Each conversation has its own ordering.
+    """
+
+    __tablename__ = "conversation_sentences"
+    __table_args__ = (
+        UniqueConstraint("conversation_id", "position", name="uq_conv_sentence_position"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    conversation_id: Mapped[int] = mapped_column(ForeignKey("conversations.id"), nullable=False)
+    sentence_id: Mapped[int] = mapped_column(ForeignKey("sentences.id"), nullable=False)
+
+    # Position in the conversation (0-indexed)
+    position: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    # Speaker identifier (e.g., "A", "B", or character names like "Maria", "Doctor")
+    speaker: Mapped[str] = mapped_column(String, nullable=False)
+
+    # Metadata
+    added_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now())
+
+    # Relationships
+    conversation = relationship("Conversation", back_populates="conversation_sentences")
+    sentence = relationship("Sentence")
