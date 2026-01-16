@@ -49,6 +49,13 @@ def list_logs() -> ResponseReturnValue:
     total = query.count()
     logs = query.limit(Config.ITEMS_PER_PAGE).offset((page - 1) * Config.ITEMS_PER_PAGE).all()
 
+    # Batch load all lemmas in ONE query instead of N queries
+    lemma_ids = [log.lemma_id for log in logs if log.lemma_id]
+    lemmas_by_id = {}
+    if lemma_ids:
+        lemmas = g.db.query(Lemma).filter(Lemma.id.in_(lemma_ids)).all()
+        lemmas_by_id = {lemma.id: lemma for lemma in lemmas}
+
     # Parse JSON facts and enrich with lemma info
     enriched_logs = []
     for log in logs:
@@ -57,9 +64,7 @@ def list_logs() -> ResponseReturnValue:
         except json.JSONDecodeError:
             fact_data = {"error": "Invalid JSON"}
 
-        lemma = None
-        if log.lemma_id:
-            lemma = g.db.query(Lemma).get(log.lemma_id)
+        lemma = lemmas_by_id.get(log.lemma_id) if log.lemma_id else None
 
         enriched_logs.append({"log": log, "fact_data": fact_data, "lemma": lemma})
 

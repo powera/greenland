@@ -133,7 +133,9 @@ class LemmaTranslation(Base):
     language_code: Mapped[str] = mapped_column(
         String, nullable=False, index=True
     )  # e.g., "fr", "es", "de", "en"
-    translation: Mapped[str] = mapped_column(String, nullable=False)  # Base form of the translation
+    translation: Mapped[str] = mapped_column(
+        String, nullable=False, index=True
+    )  # Base form of the translation (indexed for search)
     definition_text: Mapped[Optional[str]] = mapped_column(
         Text, nullable=True
     )  # Definition in this language

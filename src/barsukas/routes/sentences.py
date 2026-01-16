@@ -75,30 +75,33 @@ def list_sentences() -> ResponseReturnValue:
     )
     pattern_types = [p[0] for p in pattern_types if p[0]]
 
-    # For each sentence, get a preview of the English translation (if available)
+    # Batch load ALL translations for sentences in ONE query instead of 2N queries
+    sentence_ids = [s.id for s in sentences]
     sentence_previews = {}
-    for sentence in sentences:
-        # Get English translation for preview
-        en_translation = (
+    if sentence_ids:
+        all_translations = (
             g.db.query(SentenceTranslation)
-            .filter(
-                SentenceTranslation.sentence_id == sentence.id,
-                SentenceTranslation.language_code == "en",
-            )
-            .first()
+            .filter(SentenceTranslation.sentence_id.in_(sentence_ids))
+            .all()
         )
-        if en_translation:
-            sentence_previews[sentence.id] = en_translation.translation_text
-        else:
-            # Fall back to any translation
-            any_translation = (
-                g.db.query(SentenceTranslation)
-                .filter(SentenceTranslation.sentence_id == sentence.id)
-                .first()
-            )
-            sentence_previews[sentence.id] = (
-                any_translation.translation_text if any_translation else "(No translation)"
-            )
+
+        # Group translations by sentence_id
+        translations_by_sentence: dict[int, dict[str, str]] = {}
+        for t in all_translations:
+            if t.sentence_id not in translations_by_sentence:
+                translations_by_sentence[t.sentence_id] = {}
+            translations_by_sentence[t.sentence_id][t.language_code] = t.translation_text
+
+        # Build previews: prefer English, fall back to any
+        for sentence in sentences:
+            trans = translations_by_sentence.get(sentence.id, {})
+            if "en" in trans:
+                sentence_previews[sentence.id] = trans["en"]
+            elif trans:
+                # Get first available translation
+                sentence_previews[sentence.id] = next(iter(trans.values()))
+            else:
+                sentence_previews[sentence.id] = "(No translation)"
 
     # Calculate pagination
     total_pages = (total + Config.ITEMS_PER_PAGE - 1) // Config.ITEMS_PER_PAGE
@@ -146,16 +149,35 @@ def view_sentence(sentence_id: int) -> Union[str, Response]:
         .all()
     )
 
-    # Group by language
+    # Get pattern words (the original sentence pattern definition)
+    pattern_words = (
+        g.db.query(SentencePatternWord)
+        .filter(SentencePatternWord.sentence_id == sentence_id)
+        .order_by(SentencePatternWord.position)
+        .all()
+    )
+
+    # Batch load ALL lemmas for sentence words and pattern words in ONE query
+    all_lemma_ids = set()
+    for sw in sentence_words:
+        if sw.lemma_id:
+            all_lemma_ids.add(sw.lemma_id)
+    for pw in pattern_words:
+        if pw.lemma_id:
+            all_lemma_ids.add(pw.lemma_id)
+
+    lemmas_by_id = {}
+    if all_lemma_ids:
+        lemmas = g.db.query(Lemma).filter(Lemma.id.in_(all_lemma_ids)).all()
+        lemmas_by_id = {lemma.id: lemma for lemma in lemmas}
+
+    # Group sentence words by language
     words_by_language: dict[str, list[dict[str, Any]]] = {}
     for sw in sentence_words:
         if sw.language_code not in words_by_language:
             words_by_language[sw.language_code] = []
 
-        # Get lemma details if available
-        lemma = None
-        if sw.lemma_id:
-            lemma = g.db.query(Lemma).get(sw.lemma_id)
+        lemma = lemmas_by_id.get(sw.lemma_id) if sw.lemma_id else None
 
         words_by_language[sw.language_code].append(
             {
@@ -169,18 +191,10 @@ def view_sentence(sentence_id: int) -> Union[str, Response]:
             }
         )
 
-    # Get pattern words (the original sentence pattern definition)
-    pattern_words = (
-        g.db.query(SentencePatternWord)
-        .filter(SentencePatternWord.sentence_id == sentence_id)
-        .order_by(SentencePatternWord.position)
-        .all()
-    )
-
     # Enrich pattern words with lemma details
     pattern_words_data = []
     for pw in pattern_words:
-        lemma = g.db.query(Lemma).get(pw.lemma_id) if pw.lemma_id else None
+        lemma = lemmas_by_id.get(pw.lemma_id) if pw.lemma_id else None
         pattern_words_data.append(
             {
                 "position": pw.position,
@@ -263,10 +277,17 @@ def auto_populate_level(sentence_id: int) -> Response:
             flash("No words with lemmas found in this sentence", "warning")
             return redirect(url_for("sentences.view_sentence", sentence_id=sentence_id))
 
+        # Batch load ALL lemmas in ONE query instead of N queries
+        lemma_ids = [sw.lemma_id for sw in sentence_words]
+        lemmas_by_id = {}
+        if lemma_ids:
+            lemmas = g.db.query(Lemma).filter(Lemma.id.in_(lemma_ids)).all()
+            lemmas_by_id = {lemma.id: lemma for lemma in lemmas}
+
         # Get the max difficulty_level from all lemmas
         max_level = None
         for sw in sentence_words:
-            lemma = g.db.query(Lemma).get(sw.lemma_id)
+            lemma = lemmas_by_id.get(sw.lemma_id)
             if lemma and lemma.difficulty_level is not None:
                 if max_level is None or lemma.difficulty_level > max_level:
                     max_level = lemma.difficulty_level
@@ -361,7 +382,7 @@ def accept_sentence(sentence_id: int) -> Response:
         return redirect(url_for("sentences.list_sentences"))
 
     try:
-        # Check if any word has level -1
+        # Get all sentence words with lemma_id
         sentence_words = (
             g.db.query(SentenceWord)
             .filter(SentenceWord.sentence_id == sentence_id)
@@ -369,8 +390,16 @@ def accept_sentence(sentence_id: int) -> Response:
             .all()
         )
 
+        # Batch load ALL lemmas in ONE query instead of 3N queries
+        lemma_ids = [sw.lemma_id for sw in sentence_words]
+        lemmas_by_id = {}
+        if lemma_ids:
+            lemmas = g.db.query(Lemma).filter(Lemma.id.in_(lemma_ids)).all()
+            lemmas_by_id = {lemma.id: lemma for lemma in lemmas}
+
+        # Check if any word has level -1
         for sw in sentence_words:
-            lemma = g.db.query(Lemma).get(sw.lemma_id)
+            lemma = lemmas_by_id.get(sw.lemma_id)
             if lemma and lemma.difficulty_level == -1:
                 flash(
                     f"Cannot accept: word '{lemma.guid or lemma.lemma_text}' has difficulty level -1",
@@ -385,16 +414,28 @@ def accept_sentence(sentence_id: int) -> Response:
         ]
         has_all_translations = all(lang in existing_translations for lang in target_languages)
 
-        # Check that all per-word lemma translations exist BEFORE generating sentence translations
-        from wordfreq.storage.translation_helpers import get_translation
+        # Batch load ALL lemma translations in ONE query for the missing translations check
+        from wordfreq.storage.models.schema import LemmaTranslation
 
+        all_lemma_translations: dict[int, set[str]] = {}
+        if lemma_ids:
+            translations = (
+                g.db.query(LemmaTranslation).filter(LemmaTranslation.lemma_id.in_(lemma_ids)).all()
+            )
+            for t in translations:
+                if t.lemma_id not in all_lemma_translations:
+                    all_lemma_translations[t.lemma_id] = set()
+                all_lemma_translations[t.lemma_id].add(t.language_code)
+
+        # Check that all per-word lemma translations exist BEFORE generating sentence translations
         missing_translations = []
 
         for sw in sentence_words:
-            lemma = g.db.query(Lemma).get(sw.lemma_id)
+            lemma = lemmas_by_id.get(sw.lemma_id)
             if lemma:
+                existing_langs = all_lemma_translations.get(lemma.id, set())
                 for lang_code in target_languages:
-                    if not get_translation(g.db, lemma, lang_code):
+                    if lang_code not in existing_langs:
                         missing_translations.append(
                             {"word": lemma.lemma_text, "language": lang_code}
                         )
@@ -422,11 +463,11 @@ def accept_sentence(sentence_id: int) -> Response:
 
             translate_sentence(sentence_id, target_languages, g.db, model="gpt-5-mini")
 
-        # Auto-populate the level if not set
+        # Auto-populate the level if not set (reuse already-loaded lemmas)
         if sentence.minimum_level is None:
             max_level = None
             for sw in sentence_words:
-                lemma = g.db.query(Lemma).get(sw.lemma_id)
+                lemma = lemmas_by_id.get(sw.lemma_id)
                 if lemma and lemma.difficulty_level is not None:
                     if max_level is None or lemma.difficulty_level > max_level:
                         max_level = lemma.difficulty_level

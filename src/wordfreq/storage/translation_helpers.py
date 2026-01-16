@@ -176,9 +176,23 @@ def get_all_translations(session: Session, lemma: Lemma) -> Dict[str, Optional[s
         Dictionary mapping language codes to translation strings.
         Example: {'es': 'comer', 'fr': 'manger', 'zh': '吃', ...}
     """
-    translations = {}
+    # Start with English from lemma_text (doesn't need DB query)
+    translations: Dict[str, Optional[str]] = {"en": lemma.lemma_text}
+
+    # Batch fetch all translations from LemmaTranslation table in ONE query
+    translation_rows = (
+        session.query(LemmaTranslation).filter(LemmaTranslation.lemma_id == lemma.id).all()
+    )
+
+    # Build lookup dict from results
+    translation_by_lang = {t.language_code: t.translation for t in translation_rows}
+
+    # Populate all language codes
     for lang_code in LANGUAGE_FIELDS.keys():
-        translations[lang_code] = get_translation(session, lemma, lang_code)
+        if lang_code == "en":
+            continue  # Already set above
+        translations[lang_code] = translation_by_lang.get(lang_code)
+
     return translations
 
 
@@ -194,9 +208,23 @@ def get_all_definitions(session: Session, lemma: Lemma) -> Dict[str, Optional[st
         Dictionary mapping language codes to definition strings.
         Example: {'en': 'to eat', 'es': 'comer algo', ...}
     """
-    definitions = {}
+    # Start with English from lemma's definition_text
+    definitions: Dict[str, Optional[str]] = {"en": lemma.definition_text if lemma else None}
+
+    # Batch fetch all definitions from LemmaTranslation table in ONE query
+    translation_rows = (
+        session.query(LemmaTranslation).filter(LemmaTranslation.lemma_id == lemma.id).all()
+    )
+
+    # Build lookup dict from results
+    definition_by_lang = {t.language_code: t.definition_text for t in translation_rows}
+
+    # Populate all language codes
     for lang_code in LANGUAGE_FIELDS.keys():
-        definitions[lang_code] = get_definition(session, lemma, lang_code)
+        if lang_code == "en":
+            continue  # Already set above
+        definitions[lang_code] = definition_by_lang.get(lang_code)
+
     return definitions
 
 
