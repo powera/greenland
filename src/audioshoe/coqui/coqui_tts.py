@@ -12,7 +12,7 @@ import sys
 import tempfile
 import time
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 # Add src directory to path for imports
 GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent)
@@ -70,7 +70,7 @@ class CoquiClient:
                 "Coqui TTS library not found. Please install it with: pip install TTS"
             )
 
-    def _get_tts(self, model_name: str):
+    def _get_tts(self, model_name: str) -> Any:
         """
         Get or create TTS instance for the specified model.
 
