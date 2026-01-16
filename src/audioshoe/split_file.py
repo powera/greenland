@@ -1,12 +1,24 @@
 # from Claude
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, cast
 
 import librosa
 import numpy as np
+import torch
 from pydub import AudioSegment
 from pydub.silence import split_on_silence
 
+if TYPE_CHECKING:
+    from transformers import WhisperForConditionalGeneration, WhisperProcessor
 
-def segment_audio(file_path, min_silence_len=500, silence_thresh=-40, keep_silence=100):
+
+def segment_audio(
+    file_path: str,
+    min_silence_len: int = 500,
+    silence_thresh: int = -40,
+    keep_silence: int = 100,
+) -> list[AudioSegment]:
     """
     Segment an audio file into phrases based on silence.
 
@@ -27,10 +39,14 @@ def segment_audio(file_path, min_silence_len=500, silence_thresh=-40, keep_silen
         keep_silence=keep_silence,
     )
 
-    return chunks
+    return cast(list[AudioSegment], chunks)
 
 
-def transcribe_chunks(chunks, processor, model):
+def transcribe_chunks(
+    chunks: list[AudioSegment],
+    processor: "WhisperProcessor",
+    model: "WhisperForConditionalGeneration",
+) -> list[str]:
     """
     Transcribe each audio chunk using the Whisper model.
 

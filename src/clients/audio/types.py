@@ -38,7 +38,7 @@ class AudioGenerationResult:
 
     audio_data: bytes
     text: str
-    voice: Voice
+    voice: Optional[Voice]
     language_code: str
     model: str
     duration_ms: float
