@@ -875,11 +875,15 @@ class VorasAgent:
         return {"batch_id": batch_id, "file_id": file_id, "count": len(pending)}
 
     # Delegate coverage operations to coverage module
-    def check_overall_coverage(self) -> Dict[str, Any]:
+    def check_overall_coverage(
+        self,
+        min_level: Optional[int] = None,
+        max_level: Optional[int] = None,
+    ) -> Dict[str, Any]:
         """Check overall coverage. Delegates to coverage module."""
         session = self.get_session()
         try:
-            return coverage.check_overall_coverage(session)
+            return coverage.check_overall_coverage(session, min_level, max_level)
         finally:
             session.close()
 
@@ -891,15 +895,24 @@ class VorasAgent:
         finally:
             session.close()
 
-    def check_difficulty_level_coverage(self) -> Dict[str, Any]:
+    def check_difficulty_level_coverage(
+        self,
+        min_level: Optional[int] = None,
+        max_level: Optional[int] = None,
+    ) -> Dict[str, Any]:
         """Check difficulty level coverage. Delegates to coverage module."""
         session = self.get_session()
         try:
-            return coverage.check_difficulty_level_coverage(session)
+            return coverage.check_difficulty_level_coverage(session, min_level, max_level)
         finally:
             session.close()
 
-    def run_full_check(self, output_file: Optional[str] = None) -> Dict[str, Any]:
+    def run_full_check(
+        self,
+        output_file: Optional[str] = None,
+        min_level: Optional[int] = None,
+        max_level: Optional[int] = None,
+    ) -> Dict[str, Any]:
         """Run all coverage checks and generate a comprehensive report."""
         logger.info("Starting full multi-lingual translation coverage check...")
         start_time = datetime.now()
@@ -907,9 +920,12 @@ class VorasAgent:
         results: Dict[str, Any] = {
             "timestamp": start_time.isoformat(),
             "database_path": self.db_path,
+            "level_filter": {"min": min_level, "max": max_level},
             "checks": {
-                "overall_coverage": self.check_overall_coverage(),
-                "difficulty_level_coverage": self.check_difficulty_level_coverage(),
+                "overall_coverage": self.check_overall_coverage(min_level, max_level),
+                "difficulty_level_coverage": self.check_difficulty_level_coverage(
+                    min_level, max_level
+                ),
             },
         }
 

@@ -425,12 +425,15 @@ def execute_agent(agent_name: str) -> ResponseReturnValue:
         if dry_run:
             args.append("--dry-run")
 
-    # Add database configuration
-    if Config.is_postgres_mode():
-        # Pass PostgreSQL configuration to agent
-        args.append("--postgres")
-    else:
-        args.extend(["--db-path", Config.DB_PATH])
+    # Add database configuration only if user hasn't specified backend via form
+    # Check if any backend-related args were already added from the form
+    has_backend_arg = any(arg in ["--postgres", "--backend", "--db-path"] for arg in args)
+    if not has_backend_arg:
+        if Config.is_postgres_mode():
+            # Pass PostgreSQL configuration to agent
+            args.append("--postgres")
+        else:
+            args.extend(["--db-path", Config.DB_PATH])
 
     # Add --yes flag for background execution (skip confirmation prompts)
     args.append("--yes")

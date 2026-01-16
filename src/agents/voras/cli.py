@@ -24,6 +24,7 @@ from agents.common.common_args import (
     add_pos_type_args,
     add_processing_args,
     get_data_source_config,
+    parse_level_arg,
     validate_cache_args,
 )
 from agents.common.lemma_selection import get_lemmas_for_agent
@@ -371,7 +372,13 @@ def main():
 
     # Handle coverage mode (no lemmas needed)
     if mode == "coverage":
-        agent.run_full_check(output_file=args.output)
+        # Parse level argument for coverage mode
+        min_level, max_level = parse_level_arg(args.level)
+        agent.run_full_check(
+            output_file=args.output,
+            min_level=min_level,
+            max_level=max_level,
+        )
         return
 
     # Handle regenerate mode (operates on all curated lemmas, not --guid)

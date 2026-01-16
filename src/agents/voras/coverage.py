@@ -21,21 +21,38 @@ from wordfreq.storage.translation_helpers import LANGUAGE_FIELDS, get_language_n
 logger = logging.getLogger(__name__)
 
 
-def check_overall_coverage(session: Any) -> Dict[str, Any]:
+def check_overall_coverage(
+    session: Any,
+    min_level: Optional[int] = None,
+    max_level: Optional[int] = None,
+) -> Dict[str, Any]:
     """
     Check overall translation coverage across all languages.
 
     Args:
         session: Database session
+        min_level: Minimum difficulty level to include (inclusive), or None for no lower bound
+        max_level: Maximum difficulty level to include (inclusive), or None for no upper bound
 
     Returns:
         Dictionary with overall coverage statistics
     """
-    logger.info("Checking overall translation coverage...")
+    level_desc = ""
+    if min_level is not None or max_level is not None:
+        if min_level == max_level:
+            level_desc = f" for level {min_level}"
+        else:
+            level_desc = f" for levels {min_level or '?'}-{max_level or '?'}"
+    logger.info(f"Checking overall translation coverage{level_desc}...")
 
     try:
         # Get all lemmas with GUIDs (curated words)
-        all_lemmas = session.query(Lemma).filter(Lemma.guid.isnot(None)).all()
+        query = session.query(Lemma).filter(Lemma.guid.isnot(None))
+        if min_level is not None:
+            query = query.filter(Lemma.difficulty_level >= min_level)
+        if max_level is not None:
+            query = query.filter(Lemma.difficulty_level <= max_level)
+        all_lemmas = query.all()
 
         total_lemmas = len(all_lemmas)
         logger.info(f"Found {total_lemmas} curated lemmas")
@@ -231,12 +248,18 @@ def check_language_coverage(session: Any, language_code: str) -> Dict[str, Any]:
         }
 
 
-def check_difficulty_level_coverage(session: Any) -> Dict[str, Any]:
+def check_difficulty_level_coverage(
+    session: Any,
+    min_level: Optional[int] = None,
+    max_level: Optional[int] = None,
+) -> Dict[str, Any]:
     """
     Check translation coverage across difficulty levels.
 
     Args:
         session: Database session
+        min_level: Minimum difficulty level to include (inclusive), or None for no lower bound
+        max_level: Maximum difficulty level to include (inclusive), or None for no upper bound
 
     Returns:
         Dictionary with coverage by difficulty level
@@ -245,11 +268,14 @@ def check_difficulty_level_coverage(session: Any) -> Dict[str, Any]:
 
     try:
         # Get all lemmas with GUIDs and difficulty levels
-        all_lemmas = (
-            session.query(Lemma)
-            .filter(Lemma.guid.isnot(None), Lemma.difficulty_level.isnot(None))
-            .all()
+        query = session.query(Lemma).filter(
+            Lemma.guid.isnot(None), Lemma.difficulty_level.isnot(None)
         )
+        if min_level is not None:
+            query = query.filter(Lemma.difficulty_level >= min_level)
+        if max_level is not None:
+            query = query.filter(Lemma.difficulty_level <= max_level)
+        all_lemmas = query.all()
 
         logger.info(f"Found {len(all_lemmas)} lemmas with difficulty levels")
 
