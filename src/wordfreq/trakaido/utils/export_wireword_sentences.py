@@ -116,18 +116,25 @@ class WirewordSentenceExporter:
         - minimum_level is not -1 (i.e., not excluded; NULL/None is OK)
         - A translation exists for the target language
 
+        Optimized for remote databases: uses bulk queries to minimize round trips.
+
         Args:
             include_all_languages: Include all translations (default: False, only target + English)
 
         Returns:
             Dictionary with exported sentence data
         """
+        from sqlalchemy.orm import joinedload
+
         session = self.get_session()
         try:
             # Build query: get all sentences EXCEPT those with level = -1
             # This includes NULL/None levels
-            query = session.query(Sentence).filter(
-                (Sentence.minimum_level != -1) | (Sentence.minimum_level == None)
+            # OPTIMIZATION: Eager load translations to avoid N+1 queries
+            query = (
+                session.query(Sentence)
+                .options(joinedload(Sentence.translations))
+                .filter((Sentence.minimum_level != -1) | (Sentence.minimum_level == None))
             )
 
             all_sentences = query.all()
@@ -144,6 +151,54 @@ class WirewordSentenceExporter:
 
             logger.info(f"Exporting {len(sentences)} sentences with {self.language} translation")
 
+            # OPTIMIZATION: Bulk fetch all sentence words for all sentences in one query
+            sentence_ids = [s.id for s in sentences]
+            all_sentence_words = (
+                session.query(SentenceWord)
+                .options(joinedload(SentenceWord.lemma))
+                .filter(
+                    SentenceWord.sentence_id.in_(sentence_ids),
+                    SentenceWord.language_code == self.language,
+                    SentenceWord.lemma_id.isnot(None),
+                )
+                .all()
+            )
+            # Index by sentence_id for quick lookup
+            sentence_words_by_sentence: Dict[int, List[SentenceWord]] = {}
+            for sw in all_sentence_words:
+                if sw.sentence_id not in sentence_words_by_sentence:
+                    sentence_words_by_sentence[sw.sentence_id] = []
+                sentence_words_by_sentence[sw.sentence_id].append(sw)
+            logger.info(f"Bulk fetched {len(all_sentence_words)} sentence words")
+
+            # OPTIMIZATION: Bulk fetch audio records for all sentences
+            # Get translation texts for all sentences to match against audio
+            target_translations = {}
+            for sentence in sentences:
+                for trans in sentence.translations:
+                    if trans.language_code == self.language:
+                        target_translations[sentence.id] = trans.translation_text
+                        break
+
+            translation_texts = list(target_translations.values())
+            all_audio_records = (
+                session.query(AudioQualityReview)
+                .filter(
+                    AudioQualityReview.expected_text.in_(translation_texts),
+                    AudioQualityReview.language_code == self.language,
+                    AudioQualityReview.status.in_(["approved", "pending_review"]),
+                )
+                .all()
+            )
+            # Index by expected_text for quick lookup
+            audio_by_text: Dict[str, Dict[str, str]] = {}
+            for record in all_audio_records:
+                if record.voice_name and record.manifest_md5:
+                    if record.expected_text not in audio_by_text:
+                        audio_by_text[record.expected_text] = {}
+                    audio_by_text[record.expected_text][record.voice_name] = record.manifest_md5
+            logger.info(f"Bulk fetched {len(all_audio_records)} audio records")
+
             # Build output structure
             output = {
                 "language": self.language,
@@ -152,7 +207,7 @@ class WirewordSentenceExporter:
             }
 
             for sentence in sentences:
-                # Get all translations
+                # Get all translations (already loaded via joinedload)
                 translations = {}
                 for trans in sentence.translations:
                     translation_text = trans.translation_text
@@ -172,17 +227,13 @@ class WirewordSentenceExporter:
                         filtered_translations[self.language] = translations[self.language]
                     translations = filtered_translations
 
-                # Get audio for target language (optional)
-                audio_dict = self.get_audio_for_sentence(session, sentence, self.language)
+                # Get audio for target language from pre-fetched data
+                target_text = target_translations.get(sentence.id)
+                audio_dict = audio_by_text.get(target_text, {}) if target_text else {}
 
-                # Get linked words (GUIDs) for the target language only
+                # Get linked words from pre-fetched data
                 linked_words = []
-                sentence_words = (
-                    session.query(SentenceWord)
-                    .filter_by(sentence_id=sentence.id, language_code=self.language)
-                    .filter(SentenceWord.lemma_id.isnot(None))
-                    .all()
-                )
+                sentence_words = sentence_words_by_sentence.get(sentence.id, [])
 
                 # Deduplicate by lemma + grammatical form (same word may appear multiple times)
                 seen_forms: Set[Tuple[int, Optional[str]]] = set()

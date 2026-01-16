@@ -242,3 +242,50 @@ def bulk_add_overrides(session: Session, overrides: List[Dict[str, Any]]) -> int
 
     session.flush()
     return count
+
+
+def bulk_get_effective_difficulty_levels(
+    session: Session, lemmas: List[Lemma], language_code: str
+) -> Dict[int, Optional[int]]:
+    """
+    Get effective difficulty levels for multiple lemmas in a single query.
+
+    This is an optimized version of get_effective_difficulty_level for bulk operations,
+    reducing N+1 query problems when processing many lemmas.
+
+    Args:
+        session: Database session
+        lemmas: List of Lemma objects
+        language_code: Language code (e.g., 'zh', 'fr', 'de')
+
+    Returns:
+        Dictionary mapping lemma_id to effective difficulty level.
+        Level is -1 for excluded, None for no level set, or 1-20 for actual level.
+    """
+    if not lemmas:
+        return {}
+
+    lemma_ids = [lemma.id for lemma in lemmas]
+
+    # Fetch all overrides for this language in one query
+    overrides = (
+        session.query(LemmaDifficultyOverride)
+        .filter(
+            LemmaDifficultyOverride.lemma_id.in_(lemma_ids),
+            LemmaDifficultyOverride.language_code == language_code,
+        )
+        .all()
+    )
+
+    # Build override lookup
+    override_by_lemma = {o.lemma_id: o.difficulty_level for o in overrides}
+
+    # Build result: use override if exists, otherwise use lemma's default
+    result: Dict[int, Optional[int]] = {}
+    for lemma in lemmas:
+        if lemma.id in override_by_lemma:
+            result[lemma.id] = override_by_lemma[lemma.id]
+        else:
+            result[lemma.id] = lemma.difficulty_level
+
+    return result

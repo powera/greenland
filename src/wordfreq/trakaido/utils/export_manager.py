@@ -23,11 +23,13 @@ sys.path.append(GREENLAND_SRC_PATH)
 import constants
 from wordfreq.storage.database import create_database_session
 from wordfreq.storage.models.schema import Lemma, WordToken
+from wordfreq.storage.crud.difficulty_override import bulk_get_effective_difficulty_levels
 from wordfreq.storage.translation_helpers import (
     LANG_CODE_TO_LLM_FIELD,
     LANGUAGE_FIELDS,
     TIER_1_LANGUAGES,
     TIER_2_LANGUAGES,
+    bulk_get_translations,
     get_translation,
 )
 from wordfreq.tools.chinese_converter import to_simplified
@@ -123,6 +125,8 @@ class TrakaidoExporter:
         Uses language-specific difficulty level overrides when available.
         Excludes lemmas with effective difficulty level of -1 for this language.
 
+        Optimized for remote databases: uses bulk queries to minimize round trips.
+
         Args:
             session: Database session
             difficulty_level: Filter by specific difficulty level (optional)
@@ -138,7 +142,6 @@ class TrakaidoExporter:
         """
         from sqlalchemy import func
 
-        from wordfreq.storage.crud.difficulty_override import get_effective_difficulty_level
         from wordfreq.storage.models.schema import LemmaDifficultyOverride
 
         logger.info(f"Querying database for trakaido data (language: {self.language_name})...")
@@ -201,12 +204,20 @@ class TrakaidoExporter:
         all_lemmas = query.all()
         logger.info(f"Found {len(all_lemmas)} lemmas matching criteria")
 
+        # OPTIMIZATION: Bulk fetch difficulty levels and translations in two queries
+        # instead of N queries per lemma
+        difficulty_levels_by_id = bulk_get_effective_difficulty_levels(
+            session, all_lemmas, self.language
+        )
+        translations_by_id = bulk_get_translations(session, all_lemmas, self.language)
+        logger.info("Bulk fetched difficulty levels and translations")
+
         # Filter out lemmas with effective level -1 (excluded from this language)
         # This is important when difficulty_level is not specified
         if difficulty_level != -1:  # Unless we're explicitly querying for excluded items
             filtered_lemmas = []
             for lemma in all_lemmas:
-                effective = get_effective_difficulty_level(session, lemma, self.language)
+                effective = difficulty_levels_by_id.get(lemma.id)
                 if effective != -1:
                     filtered_lemmas.append(lemma)
             if len(filtered_lemmas) < len(all_lemmas):
@@ -215,11 +226,11 @@ class TrakaidoExporter:
                 )
             all_lemmas = filtered_lemmas
 
-        # For table-based translations, filter by translation availability
+        # For table-based translations, filter by translation availability using pre-fetched data
         if use_translation_table:
             lemmas = []
             for lemma in all_lemmas:
-                translation = get_translation(session, lemma, self.language)
+                translation = translations_by_id.get(lemma.id)
                 if translation and translation.strip():
                     lemmas.append(lemma)
                 if limit and len(lemmas) >= limit:
@@ -228,7 +239,7 @@ class TrakaidoExporter:
         else:
             lemmas = all_lemmas
 
-        # Convert to export format
+        # Convert to export format using pre-fetched data
         export_data = []
         skipped_count = 0
 
@@ -243,8 +254,8 @@ class TrakaidoExporter:
                 skipped_count += 1
                 continue
 
-            # Get the target language translation using translation_helpers
-            target_translation = get_translation(session, lemma, self.language)
+            # Get the target language translation from pre-fetched data
+            target_translation = translations_by_id.get(lemma.id)
 
             # For Chinese, optionally convert to simplified
             if self.language == "zh" and self.simplified_chinese and target_translation:

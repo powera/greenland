@@ -455,6 +455,51 @@ def convert_llm_response_to_lang_codes(llm_response: Dict[str, str]) -> Dict[str
     }
 
 
+def bulk_get_translations(
+    session: Session, lemmas: list, lang_code: str
+) -> Dict[int, Optional[str]]:
+    """
+    Get translations for multiple lemmas in a single query.
+
+    This is an optimized version of get_translation for bulk operations,
+    reducing N+1 query problems when processing many lemmas.
+
+    Args:
+        session: Database session
+        lemmas: List of Lemma objects
+        lang_code: Language code (e.g., 'es', 'fr', 'zh')
+
+    Returns:
+        Dictionary mapping lemma_id to translation string (or None if not found)
+
+    Raises:
+        ValueError: If lang_code is not supported
+    """
+    if lang_code not in LANGUAGE_FIELDS:
+        raise ValueError(f"Unsupported language code: {lang_code}")
+
+    if not lemmas:
+        return {}
+
+    field_name, _, use_translation_table = LANGUAGE_FIELDS[lang_code]
+
+    if use_translation_table:
+        # Batch query LemmaTranslation table
+        lemma_ids = [lemma.id for lemma in lemmas]
+        translation_rows = (
+            session.query(LemmaTranslation)
+            .filter(
+                LemmaTranslation.lemma_id.in_(lemma_ids),
+                LemmaTranslation.language_code == field_name,
+            )
+            .all()
+        )
+        return {t.lemma_id: t.translation for t in translation_rows}
+    else:
+        # Get from Lemma table column (English uses lemma_text)
+        return {lemma.id: getattr(lemma, field_name, None) for lemma in lemmas}
+
+
 def get_reference_translation(
     session: Session,
     lemma: Lemma,

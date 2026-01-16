@@ -20,10 +20,15 @@ if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
 import constants
+from wordfreq.storage.crud.difficulty_override import bulk_get_effective_difficulty_levels
 from wordfreq.storage.database import create_database_session
 from wordfreq.storage.models.grammar_fact import GrammarFact
 from wordfreq.storage.models.schema import AudioQualityReview, DerivativeForm, Lemma, WordToken
-from wordfreq.storage.translation_helpers import LANGUAGE_FIELDS, get_translation
+from wordfreq.storage.translation_helpers import (
+    LANGUAGE_FIELDS,
+    bulk_get_translations,
+    get_translation,
+)
 from wordfreq.tools.chinese_converter import to_simplified
 
 # Import pypinyin for Chinese pinyin generation
@@ -111,12 +116,10 @@ class WirewordExporter:
 
         Uses language-specific difficulty level overrides when available.
 
-        Note: This queries all lemmas then filters in Python, which is less efficient
-        than SQL filtering but works correctly with the LemmaTranslation table.
+        Optimized for remote databases: uses bulk queries to minimize round trips.
         """
         from sqlalchemy import func
 
-        from wordfreq.storage.crud.difficulty_override import get_effective_difficulty_level
         from wordfreq.storage.models.schema import LemmaDifficultyOverride
 
         logger.info(f"Querying database for trakaido data (language: {self.language_name})...")
@@ -160,11 +163,19 @@ class WirewordExporter:
             query = query.limit(limit * 2)
 
         all_lemmas = query.all()
+        logger.info(f"Fetched {len(all_lemmas)} lemmas from database")
 
-        # Filter by translation availability using translation_helpers
+        # OPTIMIZATION: Bulk fetch translations and difficulty levels in two queries
+        # instead of N queries per lemma
+        translations_by_id = bulk_get_translations(session, all_lemmas, self.language)
+        difficulty_levels_by_id = bulk_get_effective_difficulty_levels(
+            session, all_lemmas, self.language
+        )
+
+        # Filter by translation availability using pre-fetched data
         lemmas = []
         for lemma in all_lemmas:
-            translation = get_translation(session, lemma, self.language)
+            translation = translations_by_id.get(lemma.id)
             if translation and translation.strip():
                 lemmas.append(lemma)
                 if limit and len(lemmas) >= limit:
@@ -172,17 +183,17 @@ class WirewordExporter:
 
         logger.info(f"Found {len(lemmas)} lemmas with {self.language_name} translations")
 
-        # Build export data
+        # Build export data using pre-fetched translations and difficulty levels
         export_data = []
         for lemma in lemmas:
-            target_translation = get_translation(session, lemma, self.language)
+            target_translation = translations_by_id.get(lemma.id)
 
             # For Chinese, optionally convert to simplified
             if self.language == "zh" and self.simplified_chinese and target_translation:
                 target_translation = to_simplified(target_translation)
 
-            # Get effective difficulty level for this language
-            effective_level = get_effective_difficulty_level(session, lemma, self.language)
+            # Get effective difficulty level from pre-fetched data
+            effective_level = difficulty_levels_by_id.get(lemma.id)
             if effective_level is None:
                 effective_level = 0
 
@@ -201,6 +212,7 @@ class WirewordExporter:
                 "trakaido_level": effective_level,
                 "verified": lemma.verified,
                 "confidence": lemma.confidence,
+                "_lemma_id": lemma.id,  # Keep for bulk lookups later
             }
             export_data.append(entry)
 
@@ -389,6 +401,8 @@ class WirewordExporter:
         """
         Export trakaido data to new WireWord API format.
 
+        Optimized for remote databases: uses bulk queries to minimize round trips.
+
         Args:
             output_path: Path to write the JSON file
             difficulty_level: Filter by specific difficulty level (optional)
@@ -422,17 +436,81 @@ class WirewordExporter:
             # Calculate corpus assignments based on levels and groups
             corpus_assignments = self._calculate_corpus_assignments(export_data)
 
-            # Transform to WireWord format
+            # OPTIMIZATION: Bulk fetch all related data in a few queries instead of N per entry
+            lemma_ids = [entry["_lemma_id"] for entry in export_data]
+            guids = [entry["GUID"] for entry in export_data if entry["GUID"]]
+
+            # Bulk fetch lemmas (we need full Lemma objects for some operations)
+            lemmas_list = session.query(Lemma).filter(Lemma.id.in_(lemma_ids)).all()
+            lemmas_by_id = {lemma.id: lemma for lemma in lemmas_list}
+            logger.info(f"Bulk fetched {len(lemmas_by_id)} lemmas")
+
+            # Bulk fetch all derivative forms for all lemmas
+            all_derivative_forms = (
+                session.query(DerivativeForm).filter(DerivativeForm.lemma_id.in_(lemma_ids)).all()
+            )
+            derivative_forms_by_lemma: Dict[int, List[DerivativeForm]] = {}
+            for form in all_derivative_forms:
+                if form.lemma_id not in derivative_forms_by_lemma:
+                    derivative_forms_by_lemma[form.lemma_id] = []
+                derivative_forms_by_lemma[form.lemma_id].append(form)
+            logger.info(f"Bulk fetched {len(all_derivative_forms)} derivative forms")
+
+            # Bulk fetch all audio records for all GUIDs (base forms only)
+            all_audio_records = (
+                session.query(AudioQualityReview)
+                .filter(
+                    AudioQualityReview.guid.in_(guids),
+                    AudioQualityReview.language_code == self.language,
+                )
+                .all()
+            )
+            # Index by (guid, grammatical_form) for quick lookup
+            audio_by_guid_form: Dict[Tuple[str, Optional[str]], Dict[str, str]] = {}
+            for audio in all_audio_records:
+                if audio.s3_prod_url:  # Only include production audio
+                    key = (audio.guid, audio.grammatical_form)
+                    if key not in audio_by_guid_form:
+                        audio_by_guid_form[key] = {}
+                    audio_by_guid_form[key][audio.voice_name] = audio.manifest_md5
+            logger.info(f"Bulk fetched {len(all_audio_records)} audio records")
+
+            # Bulk fetch all grammar facts for all lemmas
+            all_grammar_facts = (
+                session.query(GrammarFact)
+                .filter(
+                    GrammarFact.lemma_id.in_(lemma_ids),
+                    GrammarFact.language_code == self.language,
+                )
+                .all()
+            )
+            grammar_facts_by_lemma: Dict[int, List[GrammarFact]] = {}
+            for fact in all_grammar_facts:
+                if fact.lemma_id not in grammar_facts_by_lemma:
+                    grammar_facts_by_lemma[fact.lemma_id] = []
+                grammar_facts_by_lemma[fact.lemma_id].append(fact)
+            logger.info(f"Bulk fetched {len(all_grammar_facts)} grammar facts")
+
+            # Build English translation lookup for derivative forms
+            # (used for _get_english_translation_from_db)
+            english_forms_by_lemma: Dict[int, Dict[str, str]] = {}
+            for form in all_derivative_forms:
+                if form.language_code == "en":
+                    if form.lemma_id not in english_forms_by_lemma:
+                        english_forms_by_lemma[form.lemma_id] = {}
+                    english_forms_by_lemma[form.lemma_id][
+                        form.grammatical_form
+                    ] = form.derivative_form_text
+
+            # Transform to WireWord format using pre-fetched data
             wireword_data = []
             for entry in export_data:
-                # Get all derivative forms for this lemma
-                lemma = session.query(Lemma).filter(Lemma.guid == entry["GUID"]).first()
+                lemma_id = entry["_lemma_id"]
+                lemma = lemmas_by_id.get(lemma_id)
                 if not lemma:
                     continue
 
-                derivative_forms = (
-                    session.query(DerivativeForm).filter(DerivativeForm.lemma_id == lemma.id).all()
-                )
+                derivative_forms = derivative_forms_by_lemma.get(lemma_id, [])
 
                 # Build alternatives, synonyms, and grammatical forms
                 english_alternatives = []
@@ -494,12 +572,9 @@ class WirewordExporter:
                                 if pinyin:
                                     gram_form["target_pinyin"] = pinyin
 
-                            # Add audio MD5 hashes for this grammatical form
-                            form_audio = self._get_audio_hashes(
-                                session,
-                                entry["GUID"],
-                                self.language,
-                                grammatical_form=form.grammatical_form,
+                            # Add audio MD5 hashes for this grammatical form (from pre-fetched data)
+                            form_audio = audio_by_guid_form.get(
+                                (entry["GUID"], form.grammatical_form)
                             )
                             if form_audio:
                                 gram_form["audio"] = form_audio
@@ -527,12 +602,9 @@ class WirewordExporter:
                                 if pinyin:
                                     gram_form["target_pinyin"] = pinyin
 
-                            # Add audio MD5 hashes for this grammatical form
-                            form_audio = self._get_audio_hashes(
-                                session,
-                                entry["GUID"],
-                                self.language,
-                                grammatical_form=form.grammatical_form,
+                            # Add audio MD5 hashes for this grammatical form (from pre-fetched data)
+                            form_audio = audio_by_guid_form.get(
+                                (entry["GUID"], form.grammatical_form)
                             )
                             if form_audio:
                                 gram_form["audio"] = form_audio
@@ -547,9 +619,9 @@ class WirewordExporter:
                             if form.grammatical_form not in ["alternative_form", "synonym"]:
                                 form_level = max(entry["trakaido_level"], 4)
 
-                                # Try to look up English translation from database first
-                                english_label = self._get_english_translation_from_db(
-                                    session, lemma.id, form.grammatical_form
+                                # Try to look up English translation from pre-fetched data
+                                english_label = self._get_english_translation_from_prefetched(
+                                    english_forms_by_lemma, lemma.id, form.grammatical_form
                                 )
 
                                 # If not found in database, generate it
@@ -569,12 +641,9 @@ class WirewordExporter:
                                     if pinyin:
                                         gram_form["target_pinyin"] = pinyin
 
-                                # Add audio MD5 hashes for this grammatical form
-                                form_audio = self._get_audio_hashes(
-                                    session,
-                                    entry["GUID"],
-                                    self.language,
-                                    grammatical_form=form.grammatical_form,
+                                # Add audio MD5 hashes for this grammatical form (from pre-fetched data)
+                                form_audio = audio_by_guid_form.get(
+                                    (entry["GUID"], form.grammatical_form)
                                 )
                                 if form_audio:
                                     gram_form["audio"] = form_audio
@@ -602,9 +671,9 @@ class WirewordExporter:
                     "word_type": self._normalize_pos_type(entry["pos_type"]),
                 }
 
-                # Add audio MD5 hashes for all available voices
+                # Add audio MD5 hashes for all available voices (from pre-fetched data)
                 if entry["GUID"]:
-                    audio_hashes = self._get_audio_hashes(session, entry["GUID"], self.language)
+                    audio_hashes = audio_by_guid_form.get((entry["GUID"], None))
                     if audio_hashes:
                         wireword["audio"] = audio_hashes
 
@@ -634,14 +703,8 @@ class WirewordExporter:
                 if grammatical_forms:
                     wireword["grammatical_forms"] = grammatical_forms
 
-                # Add grammar facts (gender, declension, etc.) as metadata
-                grammar_facts = (
-                    session.query(GrammarFact)
-                    .filter(
-                        GrammarFact.lemma_id == lemma.id, GrammarFact.language_code == self.language
-                    )
-                    .all()
-                )
+                # Add grammar facts (gender, declension, etc.) as metadata (from pre-fetched data)
+                grammar_facts = grammar_facts_by_lemma.get(lemma_id, [])
 
                 if grammar_facts:
                     grammar_metadata = {}
@@ -704,6 +767,72 @@ class WirewordExporter:
             return False, None
         finally:
             session.close()
+
+    def _get_english_translation_from_prefetched(
+        self,
+        english_forms_by_lemma: Dict[int, Dict[str, str]],
+        lemma_id: int,
+        grammatical_form: str,
+    ) -> Optional[str]:
+        """
+        Look up the English translation for a grammatical form from pre-fetched data.
+        Maps language-specific grammatical forms to their English equivalents.
+
+        This is an optimized version of _get_english_translation_from_db that uses
+        pre-fetched data instead of making individual database queries.
+
+        Args:
+            english_forms_by_lemma: Pre-fetched dict mapping lemma_id -> grammatical_form -> text
+            lemma_id: The lemma ID
+            grammatical_form: The grammatical form (e.g., "verb/lt_1s_present", "verb/fr_1p_impf")
+
+        Returns:
+            English translation string, or None if not found
+        """
+        # For Lithuanian forms, convert verb/lt_* to verb/en_*
+        if grammatical_form.startswith("verb/lt_"):
+            english_form_key = grammatical_form.replace("verb/lt_", "verb/en_")
+        # Map French verb forms to English verb forms
+        elif grammatical_form.startswith("verb/fr_"):
+            fr_to_en_mapping = {
+                # Present tense
+                "verb/fr_1s_present": "verb/en_1s_present",
+                "verb/fr_2s_present": "verb/en_2s_present",
+                "verb/fr_3s_present": "verb/en_3s_m_present",
+                "verb/fr_1p_present": "verb/en_1p_present",
+                "verb/fr_2p_present": "verb/en_2p_present",
+                "verb/fr_3p_present": "verb/en_3p_m_present",
+                # Imperfect → Past tense
+                "verb/fr_1s_impf": "verb/en_1s_past",
+                "verb/fr_2s_impf": "verb/en_2s_past",
+                "verb/fr_3s_impf": "verb/en_3s_m_past",
+                "verb/fr_1p_impf": "verb/en_1p_past",
+                "verb/fr_2p_impf": "verb/en_2p_past",
+                "verb/fr_3p_impf": "verb/en_3p_m_past",
+                # Future tense
+                "verb/fr_1s_future": "verb/en_1s_future",
+                "verb/fr_2s_future": "verb/en_2s_future",
+                "verb/fr_3s_future": "verb/en_3s_m_future",
+                "verb/fr_1p_future": "verb/en_1p_future",
+                "verb/fr_2p_future": "verb/en_2p_future",
+                "verb/fr_3p_future": "verb/en_3p_m_future",
+                # Passé composé → Past tense
+                "verb/fr_1s_pc": "verb/en_1s_past",
+                "verb/fr_2s_pc": "verb/en_2s_past",
+                "verb/fr_3s_pc": "verb/en_3s_m_past",
+                "verb/fr_1p_pc": "verb/en_1p_past",
+                "verb/fr_2p_pc": "verb/en_2p_past",
+                "verb/fr_3p_pc": "verb/en_3p_m_past",
+            }
+            english_form_key = fr_to_en_mapping.get(grammatical_form)
+            if not english_form_key:
+                return None
+        else:
+            return None
+
+        # Look up from pre-fetched data
+        lemma_forms = english_forms_by_lemma.get(lemma_id, {})
+        return lemma_forms.get(english_form_key)
 
     def _calculate_corpus_assignments(
         self, export_data: List[Dict[str, Any]]
@@ -1254,6 +1383,7 @@ class WirewordExporter:
         Export verbs from database to WireWord API format.
 
         Uses language-specific difficulty level overrides when available.
+        Optimized for remote databases: uses bulk queries to minimize round trips.
 
         Args:
             output_path: Path to write the JSON file
@@ -1269,14 +1399,10 @@ class WirewordExporter:
         """
         from sqlalchemy import func
 
-        from wordfreq.storage.crud.difficulty_override import get_effective_difficulty_level
         from wordfreq.storage.models.schema import LemmaDifficultyOverride
 
         session = self.get_session()
         try:
-            # NOTE: For languages in LemmaTranslation table (es, de, pt), we need special handling
-            # TODO: Add proper join for LemmaTranslation table or filter in Python
-
             # Build the query for verbs
             query = session.query(Lemma).filter(Lemma.pos_type == "verb")
 
@@ -1322,13 +1448,62 @@ class WirewordExporter:
                 logger.warning("No verbs found matching the specified criteria")
                 return False, None
 
-            # Transform to WireWord format
+            # OPTIMIZATION: Bulk fetch all related data in a few queries instead of N per lemma
+            lemma_ids = [lemma.id for lemma in lemmas]
+            guids = [lemma.guid for lemma in lemmas if lemma.guid]
+
+            # Bulk fetch translations and difficulty levels
+            translations_by_id = bulk_get_translations(session, lemmas, self.language)
+            difficulty_levels_by_id = bulk_get_effective_difficulty_levels(
+                session, lemmas, self.language
+            )
+            logger.info(f"Bulk fetched translations and difficulty levels")
+
+            # Bulk fetch all derivative forms for all verbs
+            all_derivative_forms = (
+                session.query(DerivativeForm).filter(DerivativeForm.lemma_id.in_(lemma_ids)).all()
+            )
+            derivative_forms_by_lemma: Dict[int, List[DerivativeForm]] = {}
+            for form in all_derivative_forms:
+                if form.lemma_id not in derivative_forms_by_lemma:
+                    derivative_forms_by_lemma[form.lemma_id] = []
+                derivative_forms_by_lemma[form.lemma_id].append(form)
+            logger.info(f"Bulk fetched {len(all_derivative_forms)} derivative forms")
+
+            # Build English translation lookup for derivative forms
+            english_forms_by_lemma: Dict[int, Dict[str, str]] = {}
+            for form in all_derivative_forms:
+                if form.language_code == "en":
+                    if form.lemma_id not in english_forms_by_lemma:
+                        english_forms_by_lemma[form.lemma_id] = {}
+                    english_forms_by_lemma[form.lemma_id][
+                        form.grammatical_form
+                    ] = form.derivative_form_text
+
+            # Bulk fetch all audio records for all GUIDs
+            all_audio_records = (
+                session.query(AudioQualityReview)
+                .filter(
+                    AudioQualityReview.guid.in_(guids),
+                    AudioQualityReview.language_code == self.language,
+                )
+                .all()
+            )
+            # Index by (guid, grammatical_form) for quick lookup
+            audio_by_guid_form: Dict[Tuple[str, Optional[str]], Dict[str, str]] = {}
+            for audio in all_audio_records:
+                if audio.s3_prod_url:  # Only include production audio
+                    key = (audio.guid, audio.grammatical_form)
+                    if key not in audio_by_guid_form:
+                        audio_by_guid_form[key] = {}
+                    audio_by_guid_form[key][audio.voice_name] = audio.manifest_md5
+            logger.info(f"Bulk fetched {len(all_audio_records)} audio records")
+
+            # Transform to WireWord format using pre-fetched data
             wireword_data = []
             for lemma in lemmas:
-                # Get effective difficulty level for this language
-                effective_lemma_level = get_effective_difficulty_level(
-                    session, lemma, self.language
-                )
+                # Get effective difficulty level from pre-fetched data
+                effective_lemma_level = difficulty_levels_by_id.get(lemma.id)
                 if effective_lemma_level is None:
                     effective_lemma_level = 1  # Default to level 1 if not set
 
@@ -1336,14 +1511,12 @@ class WirewordExporter:
                 if effective_lemma_level == -1:
                     continue
 
-                # Get all derivative forms for this verb
-                derivative_forms = (
-                    session.query(DerivativeForm).filter(DerivativeForm.lemma_id == lemma.id).all()
-                )
+                # Get derivative forms from pre-fetched data
+                derivative_forms = derivative_forms_by_lemma.get(lemma.id, [])
 
-                # Get base English and target language forms
+                # Get base English and target language forms from pre-fetched data
                 base_english = self.get_english_word_from_lemma(session, lemma)
-                base_target = get_translation(session, lemma, self.language)
+                base_target = translations_by_id.get(lemma.id)
 
                 # Skip verbs without target language translation
                 if not base_target or not base_target.strip():
@@ -1410,9 +1583,9 @@ class WirewordExporter:
                                         # Future tense minimum level is 12
                                         form_level = max(form_level, 12)
 
-                            # Try to look up English translation from database first
-                            english_label = self._get_english_translation_from_db(
-                                session, lemma.id, form.grammatical_form
+                            # Try to look up English translation from pre-fetched data
+                            english_label = self._get_english_translation_from_prefetched(
+                                english_forms_by_lemma, lemma.id, form.grammatical_form
                             )
 
                             # If not found in database, fail hard for Lithuanian
@@ -1447,11 +1620,8 @@ class WirewordExporter:
                                 form.grammatical_form
                             )
 
-                            # Add audio MD5 hashes for this grammatical form
-                            # Use wireword_key since audio_quality_reviews stores forms in WireWord format
-                            form_audio = self._get_audio_hashes(
-                                session, lemma.guid, self.language, grammatical_form=wireword_key
-                            )
+                            # Add audio MD5 hashes for this grammatical form (from pre-fetched data)
+                            form_audio = audio_by_guid_form.get((lemma.guid, wireword_key))
                             if form_audio:
                                 gram_form["audio"] = form_audio
 
@@ -1468,9 +1638,9 @@ class WirewordExporter:
                     "word_type": "verb",
                 }
 
-                # Add audio MD5 hashes for all available voices
+                # Add audio MD5 hashes for all available voices (from pre-fetched data)
                 if lemma.guid:
-                    audio_hashes = self._get_audio_hashes(session, lemma.guid, self.language)
+                    audio_hashes = audio_by_guid_form.get((lemma.guid, None))
                     if audio_hashes:
                         wireword["audio"] = audio_hashes
 
