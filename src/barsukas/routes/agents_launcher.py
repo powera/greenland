@@ -51,6 +51,7 @@ AGENTS = [
         "icon": "bi-play-circle",
         "use_dynamic_form": True,
         "show_if_empty": True,  # Only show if database is empty
+        "redirect_to": "pradzia.index",
     },
     {
         "name": "LOKYS",

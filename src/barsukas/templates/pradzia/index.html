@@ -1,0 +1,571 @@
+{% extends "base.html" %}
+
+{% block title %}PRADZIA - Database Initialization{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('agents_launcher.list_agents') }}">Agents</a></li>
+            <li class="breadcrumb-item active">Pradzia</li>
+        </ol>
+    </nav>
+
+    <h1>
+        <i class="bi bi-play-circle"></i> PRADZIA - Database Initialization
+    </h1>
+    <p class="lead">
+        Initialize and maintain the wordfreq database, including corpus configuration synchronization,
+        data loading, and rank calculation.
+    </p>
+
+    <!-- Database Status Card -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card {% if stats.is_initialized %}bg-success bg-opacity-10{% else %}bg-warning bg-opacity-10{% endif %}">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-database"></i> Database Status
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if stats.error %}
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-triangle"></i> Error reading database: {{ stats.error }}
+                    </div>
+                    {% else %}
+                    <table class="table table-sm mb-0">
+                        <tr>
+                            <td><strong>Status:</strong></td>
+                            <td>
+                                {% if stats.is_initialized %}
+                                <span class="badge bg-success">Initialized</span>
+                                {% else %}
+                                <span class="badge bg-warning text-dark">Empty / Not Initialized</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Lemmas:</strong></td>
+                            <td>{{ "{:,}".format(stats.lemma_count) }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Word Tokens:</strong></td>
+                            <td>{{ "{:,}".format(stats.token_count) }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Frequency Records:</strong></td>
+                            <td>{{ "{:,}".format(stats.freq_count) }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Corpora:</strong></td>
+                            <td>{{ stats.enabled_corpus_count }} enabled / {{ stats.corpus_count }} total</td>
+                        </tr>
+                    </table>
+                    {% endif %}
+                    <button type="button" class="btn btn-sm btn-outline-primary mt-2" id="refreshStatsBtn">
+                        <i class="bi bi-arrow-clockwise"></i> Refresh
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Configured Corpora -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-collection"></i> Configured Corpora
+                    </h5>
+                </div>
+                <div class="card-body" style="max-height: 200px; overflow-y: auto;">
+                    {% if stats.corpus_details %}
+                    <ul class="list-group list-group-flush">
+                        {% for corpus in stats.corpus_details %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center py-1">
+                            <span>
+                                {{ corpus.name }}
+                                <small class="text-muted">- {{ corpus.description }}</small>
+                            </span>
+                            {% if corpus.enabled %}
+                            <span class="badge bg-success">Enabled</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Disabled</span>
+                            {% endif %}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="text-muted mb-0">No corpora in database yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions for Empty Database -->
+    {% if not stats.is_initialized %}
+    <div class="alert alert-info">
+        <h5><i class="bi bi-lightbulb"></i> Getting Started</h5>
+        <p>Your database appears to be empty. Here are your options:</p>
+        <ul class="mb-0">
+            <li><strong>Full Initialization:</strong> Use "Full Init" to set up corpora and load frequency data</li>
+            <li><strong>Bootstrap from JSON:</strong> If you have a trakaido JSON export, use "Bootstrap" to import existing data</li>
+            <li><strong>Import from JSONL:</strong> If you have JSONL data files, use "Import JSONL" to import lemmas</li>
+        </ul>
+    </div>
+    {% endif %}
+
+    <!-- Operation Cards -->
+    <div class="row">
+        <!-- Check Configuration -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-info bg-opacity-10">
+                    <h5 class="mb-0">
+                        <i class="bi bi-search"></i> Check Configuration
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">
+                        Validate corpus configurations without making any changes.
+                        Shows configuration status, file availability, and database state.
+                    </p>
+                    <p><code>--check</code></p>
+                    <button type="button" class="btn btn-info" id="checkBtn">
+                        <i class="bi bi-play-fill"></i> Run Check
+                    </button>
+                </div>
+                <div class="card-footer" id="checkOutputSection" style="display: none;">
+                    <div id="checkSpinner" class="text-center my-2">
+                        <div class="spinner-border spinner-border-sm text-info" role="status"></div>
+                        <span class="ms-2">Checking configuration...</span>
+                    </div>
+                    <pre id="checkOutput" class="bg-light p-2 border rounded small" style="max-height: 300px; overflow-y: auto; display: none;"></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sync Configuration -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-primary bg-opacity-10">
+                    <h5 class="mb-0">
+                        <i class="bi bi-arrow-repeat"></i> Sync Configuration
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">
+                        Synchronize corpus configurations from config file to database.
+                        Adds new corpora, updates existing ones, and disables removed ones.
+                    </p>
+                    <p><code>--sync-config</code></p>
+                    <form id="syncConfigForm">
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="syncDryRun" name="dry_run">
+                            <label class="form-check-label" for="syncDryRun">
+                                Dry run (preview changes without applying)
+                            </label>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-play-fill"></i> Sync Config
+                        </button>
+                    </form>
+                </div>
+                <div class="card-footer" id="syncOutputSection" style="display: none;">
+                    <div id="syncSpinner" class="text-center my-2">
+                        <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                        <span class="ms-2">Syncing configuration...</span>
+                    </div>
+                    <pre id="syncOutput" class="bg-light p-2 border rounded small" style="max-height: 300px; overflow-y: auto; display: none;"></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Load Corpora -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-success bg-opacity-10">
+                    <h5 class="mb-0">
+                        <i class="bi bi-download"></i> Load Corpora
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">
+                        Load word frequency data from corpus files into the database.
+                        Select specific corpora or load all enabled ones.
+                    </p>
+                    <p><code>--load [CORPUS ...]</code></p>
+                    <form id="loadCorporaForm">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Select Corpora (optional)</label>
+                            <div class="form-text mb-2">Leave unchecked to load all enabled corpora</div>
+                            {% for corpus in stats.corpus_details %}
+                            {% if corpus.enabled %}
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="corpora"
+                                       value="{{ corpus.name }}" id="corpus_{{ corpus.name }}">
+                                <label class="form-check-label" for="corpus_{{ corpus.name }}">
+                                    {{ corpus.name }} <small class="text-muted">- {{ corpus.description }}</small>
+                                </label>
+                            </div>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="loadDryRun" name="dry_run">
+                            <label class="form-check-label" for="loadDryRun">
+                                Dry run (preview without loading)
+                            </label>
+                        </div>
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-play-fill"></i> Load Corpora
+                        </button>
+                    </form>
+                </div>
+                <div class="card-footer" id="loadOutputSection" style="display: none;">
+                    <div id="loadSpinner" class="text-center my-2">
+                        <div class="spinner-border spinner-border-sm text-success" role="status"></div>
+                        <span class="ms-2">Loading corpora (this may take a while)...</span>
+                    </div>
+                    <pre id="loadOutput" class="bg-light p-2 border rounded small" style="max-height: 300px; overflow-y: auto; display: none;"></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Calculate Ranks -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-warning bg-opacity-10">
+                    <h5 class="mb-0">
+                        <i class="bi bi-sort-numeric-down"></i> Calculate Ranks
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">
+                        Calculate combined word frequency ranks across all enabled corpora
+                        using harmonic mean weighting.
+                    </p>
+                    <p><code>--calc-ranks</code></p>
+                    <form id="calcRanksForm">
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="calcDryRun" name="dry_run">
+                            <label class="form-check-label" for="calcDryRun">
+                                Dry run (preview without calculating)
+                            </label>
+                        </div>
+                        <button type="submit" class="btn btn-warning">
+                            <i class="bi bi-play-fill"></i> Calculate Ranks
+                        </button>
+                    </form>
+                </div>
+                <div class="card-footer" id="calcOutputSection" style="display: none;">
+                    <div id="calcSpinner" class="text-center my-2">
+                        <div class="spinner-border spinner-border-sm text-warning" role="status"></div>
+                        <span class="ms-2">Calculating ranks...</span>
+                    </div>
+                    <pre id="calcOutput" class="bg-light p-2 border rounded small" style="max-height: 300px; overflow-y: auto; display: none;"></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Full Initialization -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100 border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-lightning"></i> Full Initialization
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">
+                        Complete database initialization in one step:
+                    </p>
+                    <ol class="small text-muted">
+                        <li>Ensure database tables exist</li>
+                        <li>Sync corpus configurations</li>
+                        <li>Load all enabled corpora</li>
+                        <li>Calculate combined ranks</li>
+                    </ol>
+                    <p><code>--init-full</code></p>
+                    <form id="initFullForm">
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="initDryRun" name="dry_run">
+                            <label class="form-check-label" for="initDryRun">
+                                Dry run (preview all steps without executing)
+                            </label>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-play-fill"></i> Run Full Init
+                        </button>
+                    </form>
+                </div>
+                <div class="card-footer" id="initOutputSection" style="display: none;">
+                    <div id="initSpinner" class="text-center my-2">
+                        <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                        <span class="ms-2">Running full initialization (this may take a while)...</span>
+                    </div>
+                    <pre id="initOutput" class="bg-light p-2 border rounded small" style="max-height: 300px; overflow-y: auto; display: none;"></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bootstrap from JSON -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100 border-secondary">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-file-earmark-code"></i> Bootstrap from JSON
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">
+                        Bootstrap the database with trakaido data from a JSON export file.
+                        <strong>Only for initial setup</strong> - will abort if Lithuanian translations already exist.
+                    </p>
+                    <p><code>--bootstrap JSON_PATH</code></p>
+                    <form id="bootstrapForm">
+                        <div class="mb-3">
+                            <label for="jsonPath" class="form-label fw-bold">JSON File Path</label>
+                            <input type="text" class="form-control" id="jsonPath" name="json_path"
+                                   placeholder="/path/to/trakaido_export.json" required>
+                            <div class="form-text">Path to the trakaido JSON export file</div>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="bootstrapDryRun" name="dry_run">
+                            <label class="form-check-label" for="bootstrapDryRun">
+                                Dry run (preview without importing)
+                            </label>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="noUpdateDifficulty" name="no_update_difficulty">
+                            <label class="form-check-label" for="noUpdateDifficulty">
+                                Do not update difficulty levels on existing lemmas
+                            </label>
+                        </div>
+                        <button type="submit" class="btn btn-secondary">
+                            <i class="bi bi-play-fill"></i> Bootstrap
+                        </button>
+                    </form>
+                </div>
+                <div class="card-footer" id="bootstrapOutputSection" style="display: none;">
+                    <div id="bootstrapSpinner" class="text-center my-2">
+                        <div class="spinner-border spinner-border-sm text-secondary" role="status"></div>
+                        <span class="ms-2">Bootstrapping from JSON...</span>
+                    </div>
+                    <pre id="bootstrapOutput" class="bg-light p-2 border rounded small" style="max-height: 300px; overflow-y: auto; display: none;"></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Import from JSONL -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100 border-dark">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-file-earmark-text"></i> Import from JSONL
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">
+                        Import lemmas from JSONL files to the SQLite database.
+                        Useful for importing data from the JSONL backend format.
+                    </p>
+                    <p><code>--import-jsonl JSONL_DIR</code></p>
+                    <form id="importJsonlForm">
+                        <div class="mb-3">
+                            <label for="jsonlDir" class="form-label fw-bold">JSONL Directory Path</label>
+                            <input type="text" class="form-control" id="jsonlDir" name="jsonl_dir"
+                                   placeholder="data/release" required>
+                            <div class="form-text">Path to directory containing JSONL data files</div>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="importDryRun" name="dry_run">
+                            <label class="form-check-label" for="importDryRun">
+                                Dry run (preview without importing)
+                            </label>
+                        </div>
+                        <button type="submit" class="btn btn-dark">
+                            <i class="bi bi-play-fill"></i> Import JSONL
+                        </button>
+                    </form>
+                </div>
+                <div class="card-footer" id="importOutputSection" style="display: none;">
+                    <div id="importSpinner" class="text-center my-2">
+                        <div class="spinner-border spinner-border-sm text-dark" role="status"></div>
+                        <span class="ms-2">Importing from JSONL...</span>
+                    </div>
+                    <pre id="importOutput" class="bg-light p-2 border rounded small" style="max-height: 300px; overflow-y: auto; display: none;"></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Section -->
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="bi bi-question-circle"></i> About PRADZIA</h5>
+        </div>
+        <div class="card-body">
+            <p>
+                PRADZIA ("beginning" in Lithuanian) is the database initialization agent.
+                It manages the setup and maintenance of the wordfreq database.
+            </p>
+            <h6>Typical Workflow:</h6>
+            <ol>
+                <li><strong>Check Configuration</strong> - Verify corpus configs are valid</li>
+                <li><strong>Sync Configuration</strong> - Update database with corpus definitions</li>
+                <li><strong>Load Corpora</strong> - Import word frequency data from corpus files</li>
+                <li><strong>Calculate Ranks</strong> - Compute combined frequency rankings</li>
+            </ol>
+            <p>Or use <strong>Full Initialization</strong> to run all steps at once.</p>
+            <h6>Command Line Usage:</h6>
+            <pre class="bg-light p-2 border rounded">PYTHONPATH=src python src/agents/pradzia.py --help</pre>
+        </div>
+    </div>
+</div>
+
+<script>
+// Helper function to handle form submissions
+async function submitOperation(formId, endpoint, outputSectionId, spinnerId, outputId, btn) {
+    const form = document.getElementById(formId);
+    const outputSection = document.getElementById(outputSectionId);
+    const spinner = document.getElementById(spinnerId);
+    const output = document.getElementById(outputId);
+
+    // Show output section and spinner
+    outputSection.style.display = 'block';
+    spinner.style.display = 'block';
+    output.style.display = 'none';
+    output.textContent = '';
+
+    // Disable button
+    btn.disabled = true;
+
+    try {
+        const formData = new FormData(form);
+        const response = await fetch(endpoint, {
+            method: 'POST',
+            body: formData
+        });
+
+        const result = await response.json();
+
+        // Hide spinner, show output
+        spinner.style.display = 'none';
+        output.style.display = 'block';
+
+        if (result.success) {
+            // Combine stdout and stderr for display
+            let outputText = '';
+            if (result.stdout) outputText += result.stdout;
+            if (result.stderr) {
+                if (outputText) outputText += '\n\n--- LOG OUTPUT ---\n';
+                outputText += result.stderr;
+            }
+            output.textContent = outputText || 'Operation completed successfully.';
+            output.classList.remove('border-danger');
+            output.classList.add('border-success');
+        } else {
+            output.textContent = 'ERROR: ' + (result.error || 'Operation failed');
+            if (result.stdout) output.textContent += '\n\nSTDOUT:\n' + result.stdout;
+            if (result.stderr) output.textContent += '\n\nSTDERR:\n' + result.stderr;
+            output.classList.remove('border-success');
+            output.classList.add('border-danger');
+        }
+    } catch (error) {
+        spinner.style.display = 'none';
+        output.style.display = 'block';
+        output.textContent = 'ERROR: ' + error.message;
+        output.classList.remove('border-success');
+        output.classList.add('border-danger');
+    } finally {
+        btn.disabled = false;
+    }
+}
+
+// Check Configuration
+document.getElementById('checkBtn').addEventListener('click', async function() {
+    const btn = this;
+    const outputSection = document.getElementById('checkOutputSection');
+    const spinner = document.getElementById('checkSpinner');
+    const output = document.getElementById('checkOutput');
+
+    outputSection.style.display = 'block';
+    spinner.style.display = 'block';
+    output.style.display = 'none';
+    btn.disabled = true;
+
+    try {
+        const response = await fetch('{{ url_for("pradzia.check_configuration") }}', {
+            method: 'POST'
+        });
+        const result = await response.json();
+
+        spinner.style.display = 'none';
+        output.style.display = 'block';
+
+        let outputText = '';
+        if (result.stdout) outputText += result.stdout;
+        if (result.stderr) {
+            if (outputText) outputText += '\n\n--- LOG OUTPUT ---\n';
+            outputText += result.stderr;
+        }
+        output.textContent = outputText || 'Check completed.';
+    } catch (error) {
+        spinner.style.display = 'none';
+        output.style.display = 'block';
+        output.textContent = 'ERROR: ' + error.message;
+    } finally {
+        btn.disabled = false;
+    }
+});
+
+// Sync Configuration
+document.getElementById('syncConfigForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    await submitOperation('syncConfigForm', '{{ url_for("pradzia.sync_configuration") }}',
+                         'syncOutputSection', 'syncSpinner', 'syncOutput', this.querySelector('button[type="submit"]'));
+});
+
+// Load Corpora
+document.getElementById('loadCorporaForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    await submitOperation('loadCorporaForm', '{{ url_for("pradzia.load_corpora") }}',
+                         'loadOutputSection', 'loadSpinner', 'loadOutput', this.querySelector('button[type="submit"]'));
+});
+
+// Calculate Ranks
+document.getElementById('calcRanksForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    await submitOperation('calcRanksForm', '{{ url_for("pradzia.calculate_ranks") }}',
+                         'calcOutputSection', 'calcSpinner', 'calcOutput', this.querySelector('button[type="submit"]'));
+});
+
+// Full Initialization
+document.getElementById('initFullForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    await submitOperation('initFullForm', '{{ url_for("pradzia.full_initialization") }}',
+                         'initOutputSection', 'initSpinner', 'initOutput', this.querySelector('button[type="submit"]'));
+});
+
+// Bootstrap from JSON
+document.getElementById('bootstrapForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    await submitOperation('bootstrapForm', '{{ url_for("pradzia.bootstrap_from_json") }}',
+                         'bootstrapOutputSection', 'bootstrapSpinner', 'bootstrapOutput', this.querySelector('button[type="submit"]'));
+});
+
+// Import from JSONL
+document.getElementById('importJsonlForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    await submitOperation('importJsonlForm', '{{ url_for("pradzia.import_from_jsonl") }}',
+                         'importOutputSection', 'importSpinner', 'importOutput', this.querySelector('button[type="submit"]'));
+});
+
+// Refresh Stats
+document.getElementById('refreshStatsBtn').addEventListener('click', function() {
+    location.reload();
+});
+</script>
+{% endblock %}

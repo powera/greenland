@@ -37,6 +37,7 @@ from routes import (
     operation_logs,
     overrides,
     pattern_sentences,
+    pradzia,
     rapid_review,
     sentences,
     settings,
@@ -132,6 +133,7 @@ def create_app(config_class: type[Config] = Config, db_url: Optional[str] = None
     app.register_blueprint(rapid_review.bp)
     app.register_blueprint(settings.bp)
     app.register_blueprint(pattern_sentences.bp)
+    app.register_blueprint(pradzia.bp)
 
     # Register Jinja2 filters for Pinyin (Chinese) and Romaji (Japanese)
     app.jinja_env.filters["pinyin"] = generate_pinyin
