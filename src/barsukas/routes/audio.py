@@ -51,34 +51,19 @@ logger = logging.getLogger(__name__)
 @bp.route("/")
 def index() -> ResponseReturnValue:
     """Audio quality review dashboard."""
-    # Get summary statistics
-    total_files = g.db.query(AudioQualityReview).count()
-    pending_review = g.db.query(AudioQualityReview).filter_by(status="pending_review").count()
-    approved = g.db.query(AudioQualityReview).filter_by(status="approved").count()
-    needs_replacement = g.db.query(AudioQualityReview).filter_by(status="needs_replacement").count()
+    from barsukas.helpers.db_optimization import get_audio_dashboard_stats
 
-    # Get counts by language
-    language_counts = (
-        g.db.query(AudioQualityReview.language_code, func.count(AudioQualityReview.id))
-        .group_by(AudioQualityReview.language_code)
-        .all()
-    )
-
-    # Get counts by voice (grouped by language/voice combination)
-    voice_counts = (
-        g.db.query(AudioQualityReview.display_voice, func.count(AudioQualityReview.id))
-        .group_by(AudioQualityReview.language_code, AudioQualityReview.voice_name)
-        .all()
-    )
+    # Get all stats in optimized queries (replaces 6 separate queries with 2)
+    stats = get_audio_dashboard_stats(g.db)
 
     return render_template(
         "audio/index.html",
-        total_files=total_files,
-        pending_review=pending_review,
-        approved=approved,
-        needs_replacement=needs_replacement,
-        language_counts=dict(language_counts),
-        voice_counts=dict(voice_counts),
+        total_files=stats["total_files"],
+        pending_review=stats["pending_review"],
+        approved=stats["approved"],
+        needs_replacement=stats["needs_replacement"],
+        language_counts=stats["language_counts"],
+        voice_counts=stats["voice_counts"],
     )
 
 

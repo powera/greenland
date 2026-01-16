@@ -369,11 +369,16 @@ def search_lemmas() -> ResponseReturnValue:
     # Apply pagination
     results = query.limit(limit).offset(offset).all()
 
+    # Bulk fetch all translations for all results in ONE query (replaces N separate queries)
+    from barsukas.helpers.db_optimization import bulk_get_translations_for_lemmas
+
+    all_translations_by_lemma = bulk_get_translations_for_lemmas(g.db, results)
+
     # Serialize results with enough info to distinguish between them
     lemmas_data = []
     for lemma in results:
-        # Get a sample of translations (up to 3 languages)
-        all_translations_raw = get_all_translations(g.db, lemma)
+        # Get translations from bulk-fetched data
+        all_translations_raw = all_translations_by_lemma.get(lemma.id, {"en": lemma.lemma_text})
         all_translations = {
             k: v for k, v in all_translations_raw.items() if v is not None and v.strip()
         }

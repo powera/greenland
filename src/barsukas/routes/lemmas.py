@@ -14,10 +14,7 @@ from audioshoe.piper.types import PiperVoice
 from barsukas.helpers.lemma_display import get_difficulty_stats, group_derivative_forms
 from barsukas.utils.task_queue import get_tasks_for_target
 from wordfreq.storage.crud.derivative_form import delete_derivative_form
-from wordfreq.storage.crud.difficulty_override import (
-    get_all_overrides_for_lemma,
-    get_effective_difficulty_level,
-)
+from wordfreq.storage.crud.difficulty_override import get_all_overrides_for_lemma
 from wordfreq.storage.crud.lemma import handle_lemma_type_subtype_change
 from wordfreq.storage.crud.operation_log import log_translation_change
 from wordfreq.storage.models.schema import DerivativeForm, Lemma
@@ -200,18 +197,12 @@ def list_lemmas() -> ResponseReturnValue:
     total = query.count()
     lemmas = query.limit(Config.ITEMS_PER_PAGE).offset((page - 1) * Config.ITEMS_PER_PAGE).all()
 
-    # Get unique POS types for filter dropdown
-    pos_types = g.db.query(Lemma.pos_type).distinct().order_by(Lemma.pos_type).all()
-    pos_types = [p[0] for p in pos_types if p[0]]
+    # Get filter options in optimized queries (replaces 2 separate DISTINCT queries)
+    from barsukas.helpers.db_optimization import get_lemma_list_filter_options
 
-    # Get unique POS subtypes for filter dropdown (optionally filtered by POS type)
-    pos_subtypes_query = (
-        g.db.query(Lemma.pos_subtype).filter(Lemma.pos_subtype.isnot(None)).distinct()
-    )
-    if pos_type:
-        pos_subtypes_query = pos_subtypes_query.filter(Lemma.pos_type == pos_type)
-    pos_subtypes = pos_subtypes_query.order_by(Lemma.pos_subtype).all()
-    pos_subtypes = [p[0] for p in pos_subtypes if p[0]]
+    filter_options = get_lemma_list_filter_options(g.db, pos_type or None)
+    pos_types = filter_options["pos_types"]
+    pos_subtypes = filter_options["pos_subtypes"]
 
     # Calculate pagination
     total_pages = (total + Config.ITEMS_PER_PAGE - 1) // Config.ITEMS_PER_PAGE
@@ -234,42 +225,31 @@ def list_lemmas() -> ResponseReturnValue:
 @bp.route("/<int:lemma_id>")
 def view_lemma(lemma_id: int) -> ResponseReturnValue:
     """View a single lemma with all details."""
-    from wordfreq.storage.models.schema import DerivativeForm, SentenceWord
+    from barsukas.helpers.db_optimization import get_lemma_view_data
+    from wordfreq.storage.crud.guid_tombstone import get_tombstones_by_lemma_id
 
-    lemma = g.db.query(Lemma).get(lemma_id)
+    # Get all lemma data in optimized bulk queries (replaces 10+ separate queries)
+    data = get_lemma_view_data(g.db, lemma_id)
+
+    lemma = data["lemma"]
     if not lemma:
         flash("Lemma not found", "error")
         return redirect(url_for("lemmas.list_lemmas"))
 
-    # Get all translations and definitions
-    from wordfreq.storage.translation_helpers import get_all_definitions
-
-    translations = get_all_translations(g.db, lemma)
-    definitions = get_all_definitions(g.db, lemma)
+    # Extract pre-fetched data
+    translations = data["translations"]
+    definitions = data["definitions"]
     language_names = get_supported_languages()
-
-    # Get difficulty overrides
-    overrides = get_all_overrides_for_lemma(g.db, lemma_id)
-
-    # Calculate effective levels for each language
-    effective_levels = {}
-    for lang_code in language_names.keys():
-        effective_levels[lang_code] = get_effective_difficulty_level(g.db, lemma, lang_code)
+    overrides = data["overrides"]
+    effective_levels = data["effective_levels"]
+    derivative_forms = data["derivative_forms"]
+    grammar_facts = data["grammar_facts"]
+    audio_files = data["audio_files"]
+    sentence_count = data["sentence_count"]
+    needs_disambiguation_check = data["needs_disambiguation_check"]
 
     # Get difficulty level distribution for same POS type/subtype
     difficulty_stats = get_difficulty_stats(g.db, lemma.pos_type, lemma.pos_subtype)
-
-    # Get derivative forms grouped by language
-    derivative_forms = (
-        g.db.query(DerivativeForm)
-        .filter(DerivativeForm.lemma_id == lemma_id)
-        .order_by(
-            DerivativeForm.language_code,
-            DerivativeForm.is_base_form.desc(),
-            DerivativeForm.grammatical_form,
-        )
-        .all()
-    )
 
     # Group forms by language and type
     (
@@ -279,43 +259,7 @@ def view_lemma(lemma_id: int) -> ResponseReturnValue:
         all_synonym_languages,
     ) = group_derivative_forms(derivative_forms)
 
-    # Get count of sentences using this lemma (for nouns)
-    sentence_count = 0
-    if lemma.pos_type == "noun":
-        sentence_count = g.db.query(SentenceWord).filter(SentenceWord.lemma_id == lemma_id).count()
-
-    # Check if disambiguation check button should be shown
-    # Show if: (1) no parenthetical in current lemma_text AND (2) other lemmas exist with same base text
-    needs_disambiguation_check = False
-    if lemma.lemma_text and "(" not in lemma.lemma_text:
-        # Quick check: are there other lemmas with this exact lemma_text?
-        duplicate_count = (
-            g.db.query(Lemma)
-            .filter(
-                Lemma.lemma_text == lemma.lemma_text, Lemma.guid.isnot(None), Lemma.id != lemma_id
-            )
-            .count()
-        )
-        needs_disambiguation_check = duplicate_count > 0
-
-    # Get grammar facts for this lemma
-    from wordfreq.storage.crud.grammar_fact import get_grammar_facts
-
-    grammar_facts = get_grammar_facts(g.db, lemma_id)
-
-    # Get audio files for this lemma
-    from wordfreq.storage.models.schema import AudioQualityReview
-
-    audio_files = (
-        g.db.query(AudioQualityReview)
-        .filter(AudioQualityReview.lemma_id == lemma_id)
-        .order_by(AudioQualityReview.language_code, AudioQualityReview.voice_name)
-        .all()
-    )
-
     # Get tombstone entries for this lemma
-    from wordfreq.storage.crud.guid_tombstone import get_tombstones_by_lemma_id
-
     tombstones = get_tombstones_by_lemma_id(g.db, lemma_id)
 
     # Prepare voice options for audio generation
