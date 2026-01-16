@@ -2,8 +2,11 @@
 Sarka - Conversation Generator Agent
 
 This agent generates simple conversations for the Trakaido language-learning app.
-It creates dialogs using LLM prompts with curated keywords (colors, body parts,
-emotions, occupations) to generate natural-sounding exchanges between two speakers.
+It creates dialogs using LLM prompts with words from the database at specific
+difficulty levels to generate natural-sounding exchanges between two speakers.
+
+The agent plans conversations so that each word at a given level is used
+approximately twice across 12 conversations per level.
 
 "Sarka" means "magpie" in Lithuanian - known for being talkative and social.
 
@@ -14,10 +17,13 @@ Supported languages:
 
 import json
 import logging
+import math
 import random
+from collections import defaultdict
 from typing import Any, Dict, List, Optional, Tuple
 
 import util.prompt_loader
+from agents.common.lemma_selection import LemmaQueryBuilder
 from clients.types import Schema, SchemaProperty
 from clients.unified_client import UnifiedLLMClient
 from wordfreq.storage.backend import create_session as create_backend_session
@@ -31,89 +37,19 @@ from wordfreq.storage.crud.conversation import (
 from wordfreq.storage.crud.sentence import add_sentence
 from wordfreq.storage.crud.sentence_translation import add_sentence_translation
 from wordfreq.storage.crud.operation_log import log_operation
-from wordfreq.storage.models.schema import Conversation, Sentence
+from wordfreq.storage.models.schema import Conversation, Lemma, Sentence
 
 logger = logging.getLogger(__name__)
 
 
-# Keyword categories for generating conversation topics
-KEYWORD_CATEGORIES = {
-    "colors": [
-        "red",
-        "blue",
-        "green",
-        "yellow",
-        "orange",
-        "purple",
-        "pink",
-        "brown",
-        "black",
-        "white",
-        "gray",
-        "gold",
-    ],
-    "body_parts": [
-        "head",
-        "hand",
-        "arm",
-        "leg",
-        "foot",
-        "eye",
-        "ear",
-        "nose",
-        "mouth",
-        "hair",
-        "back",
-        "shoulder",
-        "knee",
-        "finger",
-        "heart",
-    ],
-    "emotions": [
-        "happy",
-        "sad",
-        "angry",
-        "scared",
-        "surprised",
-        "tired",
-        "excited",
-        "nervous",
-        "calm",
-        "proud",
-        "confused",
-        "bored",
-    ],
-    "occupations": [
-        "doctor",
-        "teacher",
-        "cook",
-        "driver",
-        "farmer",
-        "artist",
-        "musician",
-        "nurse",
-        "builder",
-        "student",
-        "shop assistant",
-        "waiter",
-    ],
-}
+# Target number of conversations per level
+CONVERSATIONS_PER_LEVEL = 12
 
-# Common themes that conversations can fall into
-CONVERSATION_THEMES = [
-    "greeting",
-    "shopping",
-    "restaurant",
-    "directions",
-    "medical",
-    "school",
-    "work",
-    "family",
-    "hobbies",
-    "travel",
-    "weather",
-    "daily_routine",
-]
+# Target number of times each word should appear across all conversations at a level
+WORD_USAGE_TARGET = 2
+
+# Target words per conversation
+WORDS_PER_CONVERSATION = 5
 
 
 class SarkaAgent:
@@ -146,42 +82,177 @@ class SarkaAgent:
                 self._llm_client.warm_model(self.config.model)
         return self._llm_client
 
-    def select_keywords(self, num_colors: int = 2, seed: Optional[int] = None) -> Dict[str, Any]:
-        """Select random keywords for conversation generation.
+    def get_words_at_level(
+        self, level: int, session=None
+    ) -> Dict[str, Dict[str, List[Dict[str, Any]]]]:
+        """Get all curated words at a specific difficulty level.
 
         Args:
-            num_colors: Number of colors to select (default 2)
-            seed: Random seed for reproducibility (optional)
+            level: Difficulty level to query
+            session: Optional database session (creates one if not provided)
 
         Returns:
-            Dictionary with selected keywords by category
+            Dictionary organized by pos_type -> pos_subtype -> list of word info dicts
         """
-        if seed is not None:
-            random.seed(seed)
+        close_session = session is None
+        if session is None:
+            session = self.get_session()
 
-        keywords = {
-            "colors": random.sample(KEYWORD_CATEGORIES["colors"], min(num_colors, 2)),
-            "body_part": random.choice(KEYWORD_CATEGORIES["body_parts"]),
-            "emotion": random.choice(KEYWORD_CATEGORIES["emotions"]),
-            "occupation": random.choice(KEYWORD_CATEGORIES["occupations"]),
+        try:
+            # Query lemmas at this level
+            query = (
+                LemmaQueryBuilder(session)
+                .curated_only()
+                .by_difficulty_level(level)
+                .order_by_id()
+                .build()
+            )
+            lemmas = query.all()
+
+            # Organize by pos_type and pos_subtype
+            words_by_type: Dict[str, Dict[str, List[Dict[str, Any]]]] = defaultdict(
+                lambda: defaultdict(list)
+            )
+
+            for lemma in lemmas:
+                word_info = {
+                    "lemma_id": lemma.id,
+                    "lemma_text": lemma.lemma_text,
+                    "guid": lemma.guid,
+                    "pos_type": lemma.pos_type,
+                    "pos_subtype": lemma.pos_subtype,
+                    "definition": lemma.definition_text,
+                }
+                pos_type = lemma.pos_type or "unknown"
+                pos_subtype = lemma.pos_subtype or "other"
+                words_by_type[pos_type][pos_subtype].append(word_info)
+
+            return dict(words_by_type)
+
+        finally:
+            if close_session:
+                session.close()
+
+    def get_level_summary(self, level: int, session=None) -> Dict[str, Any]:
+        """Get a summary of words available at a level.
+
+        Args:
+            level: Difficulty level to query
+            session: Optional database session
+
+        Returns:
+            Dictionary with level summary statistics
+        """
+        words_by_type = self.get_words_at_level(level, session)
+
+        summary = {
+            "level": level,
+            "total_words": 0,
+            "by_pos_type": {},
         }
 
-        # Also select a theme
-        keywords["theme"] = random.choice(CONVERSATION_THEMES)
+        for pos_type, subtypes in words_by_type.items():
+            pos_total = sum(len(words) for words in subtypes.values())
+            summary["total_words"] += pos_total
+            summary["by_pos_type"][pos_type] = {
+                "total": pos_total,
+                "subtypes": {subtype: len(words) for subtype, words in subtypes.items()},
+            }
 
-        return keywords
+        return summary
+
+    def plan_conversations_for_level(
+        self, level: int, num_conversations: int = CONVERSATIONS_PER_LEVEL
+    ) -> List[List[Dict[str, Any]]]:
+        """Plan word assignments for conversations at a given level.
+
+        Each word should appear approximately twice across all conversations.
+
+        Args:
+            level: Difficulty level to plan for
+            num_conversations: Number of conversations to generate (default 12)
+
+        Returns:
+            List of word lists, one per planned conversation
+        """
+        session = self.get_session()
+        try:
+            words_by_type = self.get_words_at_level(level, session)
+
+            # Flatten all words into a single list
+            all_words = []
+            for pos_type, subtypes in words_by_type.items():
+                for subtype, words in subtypes.items():
+                    all_words.extend(words)
+
+            if not all_words:
+                logger.warning(f"No words found at level {level}")
+                return []
+
+            # Calculate how many times each word should appear
+            total_word_slots = num_conversations * WORDS_PER_CONVERSATION
+            total_words = len(all_words)
+
+            # Each word should appear approximately:
+            # total_word_slots / total_words times
+            # But we target WORD_USAGE_TARGET (2) times per word
+            target_per_word = WORD_USAGE_TARGET
+
+            # Create a pool of words where each word appears target_per_word times
+            word_pool = all_words * target_per_word
+            random.shuffle(word_pool)
+
+            # Distribute words across conversations
+            conversations_plan = []
+            word_idx = 0
+
+            for conv_num in range(num_conversations):
+                conv_words = []
+                words_needed = WORDS_PER_CONVERSATION
+
+                # Try to get diverse words for this conversation
+                attempts = 0
+                while len(conv_words) < words_needed and attempts < 100:
+                    if word_idx >= len(word_pool):
+                        # Reshuffle and start over if we run out
+                        random.shuffle(word_pool)
+                        word_idx = 0
+
+                    candidate = word_pool[word_idx]
+                    word_idx += 1
+
+                    # Avoid duplicates in the same conversation
+                    if candidate["lemma_id"] not in [w["lemma_id"] for w in conv_words]:
+                        conv_words.append(candidate)
+                    attempts += 1
+
+                # If we still don't have enough, just add what we have
+                if conv_words:
+                    conversations_plan.append(conv_words)
+
+            logger.info(
+                f"Planned {len(conversations_plan)} conversations for level {level} "
+                f"with {total_words} unique words"
+            )
+
+            return conversations_plan
+
+        finally:
+            session.close()
 
     def generate_conversation(
         self,
-        keywords: Optional[Dict[str, Any]] = None,
-        num_sentences: int = 6,
+        words: List[Dict[str, Any]],
+        level: int,
+        num_sentences: int = 8,
         dry_run: bool = False,
     ) -> Dict[str, Any]:
-        """Generate a conversation using the specified keywords.
+        """Generate a conversation using the specified words.
 
         Args:
-            keywords: Dictionary of keywords to use, or None to auto-select
-            num_sentences: Target number of sentences in conversation (default 6)
+            words: List of word info dictionaries to use
+            level: Difficulty level (for metadata)
+            num_sentences: Target number of sentences in conversation (default 8)
             dry_run: If True, don't save to database
 
         Returns:
@@ -190,50 +261,48 @@ class SarkaAgent:
         session = self.get_session()
 
         try:
-            # Select keywords if not provided
-            if keywords is None:
-                keywords = self.select_keywords()
+            if not words:
+                return {"error": "No words provided for conversation"}
 
-            logger.info(f"Generating conversation with keywords: {keywords}")
+            # Extract word texts for the prompt
+            word_texts = [w["lemma_text"] for w in words]
+            word_list_str = ", ".join(word_texts)
+
+            logger.info(f"Generating conversation with words: {word_list_str}")
 
             # Generate the conversation using LLM
-            result = self._query_conversation(keywords, num_sentences)
+            result = self._query_conversation(word_texts, num_sentences)
 
             if not result.get("success"):
                 return {
                     "error": result.get("error", "Failed to generate conversation"),
-                    "keywords": keywords,
+                    "words": word_texts,
                 }
 
             conversation_data = result["conversation"]
             title = result.get("title", "Untitled Conversation")
-            theme = keywords.get("theme", "general")
 
             if dry_run:
                 return {
                     "dry_run": True,
-                    "keywords": keywords,
+                    "words": word_texts,
+                    "level": level,
                     "title": title,
-                    "theme": theme,
                     "sentences": conversation_data,
                     "num_sentences": len(conversation_data),
                 }
 
             # Create the conversation in the database
-            all_keywords = []
-            for key, val in keywords.items():
-                if isinstance(val, list):
-                    all_keywords.extend(val)
-                else:
-                    all_keywords.append(val)
-
             conversation = add_conversation(
                 session,
                 title=title,
-                theme=theme,
-                keywords=all_keywords,
+                theme=f"level_{level}",
+                keywords=word_texts,
                 verified=False,
             )
+
+            # Set minimum level
+            conversation.minimum_level = level
 
             # Create sentences and link them to the conversation
             created_sentences = []
@@ -248,6 +317,9 @@ class SarkaAgent:
                     verified=False,
                     notes=f"Generated by Sarka agent for conversation {conversation.id}",
                 )
+
+                # Set minimum level on sentence too
+                sentence.minimum_level = level
 
                 # Add English translation
                 add_sentence_translation(
@@ -283,8 +355,8 @@ class SarkaAgent:
                 entity_id=conversation.id,
                 details={
                     "title": title,
-                    "theme": theme,
-                    "keywords": all_keywords,
+                    "level": level,
+                    "words": word_texts,
                     "num_sentences": len(created_sentences),
                     "agent": "sarka",
                     "model": self.config.model,
@@ -301,8 +373,8 @@ class SarkaAgent:
                 "success": True,
                 "conversation_id": conversation.id,
                 "title": title,
-                "theme": theme,
-                "keywords": all_keywords,
+                "level": level,
+                "words": word_texts,
                 "sentences": created_sentences,
                 "num_sentences": len(created_sentences),
             }
@@ -310,15 +382,15 @@ class SarkaAgent:
         except Exception as e:
             session.rollback()
             logger.exception(f"Error generating conversation: {e}")
-            return {"error": str(e), "keywords": keywords}
+            return {"error": str(e), "words": [w["lemma_text"] for w in words] if words else []}
         finally:
             session.close()
 
-    def _query_conversation(self, keywords: Dict[str, Any], num_sentences: int) -> Dict[str, Any]:
+    def _query_conversation(self, word_list: List[str], num_sentences: int) -> Dict[str, Any]:
         """Query the LLM to generate a conversation.
 
         Args:
-            keywords: Dictionary of keywords to incorporate
+            word_list: List of words to incorporate
             num_sentences: Target number of sentences
 
         Returns:
@@ -332,19 +404,11 @@ class SarkaAgent:
             logger.error(f"Failed to load conversation prompts: {e}")
             return {"success": False, "error": f"Failed to load prompts: {e}"}
 
-        # Format keywords for prompt
-        colors_str = ", ".join(keywords.get("colors", []))
-        body_part = keywords.get("body_part", "hand")
-        emotion = keywords.get("emotion", "happy")
-        occupation = keywords.get("occupation", "teacher")
-        theme = keywords.get("theme", "general")
+        # Format word list for prompt
+        word_list_str = "\n".join(f"- {word}" for word in word_list)
 
         prompt_text = prompt_template.format(
-            colors=colors_str,
-            body_part=body_part,
-            emotion=emotion,
-            occupation=occupation,
-            theme=theme,
+            word_list=word_list_str,
             num_sentences=num_sentences,
         )
 
@@ -401,40 +465,79 @@ class SarkaAgent:
             logger.error(f"Error querying LLM for conversation: {e}")
             return {"success": False, "error": str(e)}
 
-    def generate_batch(
+    def generate_for_level(
         self,
-        count: int = 10,
+        level: int,
+        num_conversations: int = CONVERSATIONS_PER_LEVEL,
+        num_sentences: int = 8,
         dry_run: bool = False,
     ) -> Dict[str, Any]:
-        """Generate multiple conversations.
+        """Generate all conversations for a specific difficulty level.
+
+        Plans word assignments so each word is used approximately twice,
+        then generates the specified number of conversations.
 
         Args:
-            count: Number of conversations to generate
+            level: Difficulty level to generate for
+            num_conversations: Number of conversations to generate (default 12)
+            num_sentences: Target sentences per conversation (default 8)
             dry_run: If True, don't save to database
 
         Returns:
-            Dictionary with batch generation results
+            Dictionary with generation results
         """
+        logger.info(f"Generating {num_conversations} conversations for level {level}")
+
+        # Get level summary first
+        summary = self.get_level_summary(level)
+        logger.info(f"Level {level} has {summary['total_words']} words")
+
+        if summary["total_words"] == 0:
+            return {
+                "error": f"No words found at level {level}",
+                "level": level,
+                "level_summary": summary,
+            }
+
+        # Plan word assignments
+        conversation_plans = self.plan_conversations_for_level(level, num_conversations)
+
+        if not conversation_plans:
+            return {
+                "error": "Failed to plan conversations",
+                "level": level,
+                "level_summary": summary,
+            }
+
+        # Generate each conversation
         results = []
         successful = 0
         failed = 0
 
-        for i in range(count):
-            logger.info(f"Generating conversation {i + 1}/{count}")
+        for i, words in enumerate(conversation_plans):
+            logger.info(
+                f"Generating conversation {i + 1}/{len(conversation_plans)} "
+                f"with {len(words)} words"
+            )
 
-            # Use different seeds for variety
-            keywords = self.select_keywords(seed=None)  # Random each time
-            result = self.generate_conversation(keywords=keywords, dry_run=dry_run)
+            result = self.generate_conversation(
+                words=words,
+                level=level,
+                num_sentences=num_sentences,
+                dry_run=dry_run,
+            )
 
             if result.get("success") or result.get("dry_run"):
                 successful += 1
-                results.append(result)
             else:
                 failed += 1
-                results.append(result)
+
+            results.append(result)
 
         return {
-            "total": count,
+            "level": level,
+            "level_summary": summary,
+            "total": len(conversation_plans),
             "successful": successful,
             "failed": failed,
             "results": results,

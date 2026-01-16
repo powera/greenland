@@ -15,7 +15,12 @@ from agents.common.common_args import (
     add_llm_args,
     get_data_source_config,
 )
-from agents.sarka.agent import SarkaAgent, KEYWORD_CATEGORIES, CONVERSATION_THEMES
+from agents.sarka.agent import (
+    SarkaAgent,
+    CONVERSATIONS_PER_LEVEL,
+    WORDS_PER_CONVERSATION,
+    WORD_USAGE_TARGET,
+)
 from barsukas.utils.task_queue import TaskStatus, enqueue_task
 from wordfreq.storage.models.schema import BarsukasTask
 
@@ -29,35 +34,35 @@ def get_argument_parser():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  # Generate a single conversation with random keywords
-  python sarka.py --generate
+  # Show words available at level 3
+  python sarka.py --level 3 --show-words
 
-  # Generate 10 conversations
-  python sarka.py --generate --count 10
+  # Generate all 12 conversations for level 3
+  python sarka.py --level 3 --generate
 
-  # Generate with specific keywords
-  python sarka.py --generate --colors red blue --body-part hand --emotion happy --occupation doctor
+  # Generate conversations for levels 2-5
+  python sarka.py --level 2 --level-end 5 --generate
 
   # Dry run to see what would be generated
-  python sarka.py --generate --dry-run
+  python sarka.py --level 3 --generate --dry-run
 
   # Use workqueue for background processing
-  python sarka.py --generate --count 20 --use-workqueue
+  python sarka.py --level 3 --generate --use-workqueue
 
   # View a generated conversation
   python sarka.py --view 123
 
-Available keyword categories:
-  Colors: red, blue, green, yellow, orange, purple, pink, brown, black, white, gray, gold
-  Body parts: head, hand, arm, leg, foot, eye, ear, nose, mouth, hair, back, shoulder, knee, finger, heart
-  Emotions: happy, sad, angry, scared, surprised, tired, excited, nervous, calm, proud, confused, bored
-  Occupations: doctor, teacher, cook, driver, farmer, artist, musician, nurse, builder, student, shop assistant, waiter
-
-Available themes:
-  greeting, shopping, restaurant, directions, medical, school, work, family, hobbies, travel, weather, daily_routine
+Configuration:
+  - Generates {conversations} conversations per level
+  - Each conversation uses {words} words from the database
+  - Each word is used approximately {usage} times across all conversations
 
 "Sarka" means "magpie" in Lithuanian - known for being talkative and social.
-        """,
+        """.format(
+            conversations=CONVERSATIONS_PER_LEVEL,
+            words=WORDS_PER_CONVERSATION,
+            usage=WORD_USAGE_TARGET,
+        ),
     )
 
     # Common arguments
@@ -70,7 +75,12 @@ Available themes:
     mode_group.add_argument(
         "--generate",
         action="store_true",
-        help="Generate new conversations",
+        help="Generate conversations for the specified level(s)",
+    )
+    mode_group.add_argument(
+        "--show-words",
+        action="store_true",
+        help="Show words available at the specified level",
     )
     mode_group.add_argument(
         "--view",
@@ -84,46 +94,32 @@ Available themes:
         help="Show conversation generation statistics",
     )
 
+    # Level selection
+    level_group = parser.add_argument_group("Level selection")
+    level_group.add_argument(
+        "--level",
+        type=int,
+        help="Difficulty level to generate for (required for --generate and --show-words)",
+    )
+    level_group.add_argument(
+        "--level-end",
+        type=int,
+        help="End of level range (inclusive). If provided with --level, generates for all levels in range.",
+    )
+
     # Generation options
     gen_group = parser.add_argument_group("Generation options")
     gen_group.add_argument(
-        "--count",
+        "--num-conversations",
         type=int,
-        default=1,
-        help="Number of conversations to generate (default: 1)",
-    )
-    gen_group.add_argument(
-        "--colors",
-        nargs="+",
-        type=str,
-        help="Specific colors to use (max 2)",
-    )
-    gen_group.add_argument(
-        "--body-part",
-        type=str,
-        help="Specific body part to use",
-    )
-    gen_group.add_argument(
-        "--emotion",
-        type=str,
-        help="Specific emotion to use",
-    )
-    gen_group.add_argument(
-        "--occupation",
-        type=str,
-        help="Specific occupation to use",
-    )
-    gen_group.add_argument(
-        "--theme",
-        type=str,
-        choices=CONVERSATION_THEMES,
-        help="Specific theme to use",
+        default=CONVERSATIONS_PER_LEVEL,
+        help=f"Number of conversations per level (default: {CONVERSATIONS_PER_LEVEL})",
     )
     gen_group.add_argument(
         "--num-sentences",
         type=int,
-        default=6,
-        help="Target number of sentences per conversation (default: 6)",
+        default=8,
+        help="Target number of sentences per conversation (default: 8)",
     )
 
     # Workqueue arguments
@@ -137,80 +133,76 @@ Available themes:
     return parser
 
 
-def validate_keywords(args) -> Dict:
-    """Validate and build keywords dictionary from args.
+def show_level_words(agent: SarkaAgent, level: int):
+    """Display words available at a specific level."""
+    summary = agent.get_level_summary(level)
 
-    Args:
-        args: Parsed command-line arguments
+    print(f"\nLevel {level}: {summary['total_words']} words")
+    print("-" * 40)
 
-    Returns:
-        Dictionary of validated keywords, or empty dict for random selection
-    """
-    keywords = {}
+    for pos_type, data in sorted(summary["by_pos_type"].items()):
+        print(f"  {pos_type}: {data['total']}")
+        for subtype, count in sorted(data["subtypes"].items()):
+            print(f"    - {subtype}: {count}")
 
-    if args.colors:
-        # Validate colors
-        invalid = [c for c in args.colors if c not in KEYWORD_CATEGORIES["colors"]]
-        if invalid:
-            logger.warning(f"Invalid colors ignored: {invalid}")
-        valid_colors = [c for c in args.colors if c in KEYWORD_CATEGORIES["colors"]]
-        if valid_colors:
-            keywords["colors"] = valid_colors[:2]  # Max 2
-
-    if args.body_part:
-        if args.body_part in KEYWORD_CATEGORIES["body_parts"]:
-            keywords["body_part"] = args.body_part
-        else:
-            logger.warning(f"Invalid body part ignored: {args.body_part}")
-
-    if args.emotion:
-        if args.emotion in KEYWORD_CATEGORIES["emotions"]:
-            keywords["emotion"] = args.emotion
-        else:
-            logger.warning(f"Invalid emotion ignored: {args.emotion}")
-
-    if args.occupation:
-        if args.occupation in KEYWORD_CATEGORIES["occupations"]:
-            keywords["occupation"] = args.occupation
-        else:
-            logger.warning(f"Invalid occupation ignored: {args.occupation}")
-
-    if args.theme:
-        keywords["theme"] = args.theme
-
-    return keywords if keywords else None
+    # Also show the actual words
+    words_by_type = agent.get_words_at_level(level)
+    print("\nWords:")
+    for pos_type, subtypes in sorted(words_by_type.items()):
+        for subtype, words in sorted(subtypes.items()):
+            word_texts = [w["lemma_text"] for w in words]
+            print(f"  {pos_type}/{subtype}: {', '.join(word_texts)}")
 
 
-def enqueue_conversation_work(agent: SarkaAgent, session, count: int, dry_run: bool = False):
-    """Enqueue conversation generation work items to the queue.
+def enqueue_level_work(
+    agent: SarkaAgent,
+    session,
+    level: int,
+    num_conversations: int,
+    num_sentences: int,
+    dry_run: bool = False,
+):
+    """Enqueue conversation generation work items for a level.
 
     Args:
         agent: SarkaAgent instance
         session: Database session
-        count: Number of conversations to generate
+        level: Difficulty level to generate for
+        num_conversations: Number of conversations to generate
+        num_sentences: Target sentences per conversation
         dry_run: If True, don't actually enqueue
 
     Returns:
         Dictionary with enqueue statistics
     """
+    # Plan the conversations first
+    conversation_plans = agent.plan_conversations_for_level(level, num_conversations)
+
+    if not conversation_plans:
+        return {
+            "error": f"No words found at level {level}",
+            "enqueued": 0,
+            "requested": num_conversations,
+        }
+
     enqueued_count = 0
 
-    logger.info(f"Enqueuing {count} conversation generation tasks...")
+    logger.info(
+        f"Enqueuing {len(conversation_plans)} conversation generation tasks for level {level}..."
+    )
     if dry_run:
         logger.info("DRY RUN MODE - No work items will be enqueued")
 
-    for i in range(count):
-        # Select keywords for this task
-        keywords = agent.select_keywords()
+    for i, words in enumerate(conversation_plans):
+        word_texts = [w["lemma_text"] for w in words]
 
         if not dry_run:
-            # Create a unique dedup key based on keywords
-            import json
             import hashlib
 
-            keywords_str = json.dumps(keywords, sort_keys=True)
-            keywords_hash = hashlib.md5(keywords_str.encode()).hexdigest()[:8]
-            dedup_key = f"sarka_generate_{keywords_hash}_{i}"
+            # Create a unique dedup key based on words and level
+            words_str = ",".join(sorted(word_texts))
+            words_hash = hashlib.md5(words_str.encode()).hexdigest()[:8]
+            dedup_key = f"sarka_level{level}_{words_hash}_{i}"
 
             result = enqueue_task(
                 session,
@@ -218,8 +210,11 @@ def enqueue_conversation_work(agent: SarkaAgent, session, count: int, dry_run: b
                 target_type="conversation",
                 target_id=None,
                 payload={
-                    "keywords": keywords,
-                    "num_sentences": 6,
+                    "words": [
+                        {"lemma_text": w["lemma_text"], "lemma_id": w["lemma_id"]} for w in words
+                    ],
+                    "level": level,
+                    "num_sentences": num_sentences,
                 },
                 dedup_key=dedup_key,
             )
@@ -235,7 +230,8 @@ def enqueue_conversation_work(agent: SarkaAgent, session, count: int, dry_run: b
 
     return {
         "enqueued": enqueued_count,
-        "requested": count,
+        "requested": len(conversation_plans),
+        "level": level,
         "dry_run": dry_run,
     }
 
@@ -286,9 +282,8 @@ def main():
         print("\n" + "=" * 60)
         print(f"CONVERSATION {conversation['id']}: {conversation['title']}")
         print("=" * 60)
-        print(f"Theme: {conversation['theme']}")
+        print(f"Level: {conversation['minimum_level']}")
         print(f"Keywords: {', '.join(conversation['keywords'])}")
-        print(f"Level: {conversation['minimum_level'] or 'Not calculated'}")
         print(f"Verified: {conversation['verified']}")
         print("\n--- Sentences ---")
 
@@ -321,10 +316,29 @@ def main():
             session.close()
         return
 
+    # SHOW-WORDS MODE: Display words at a level
+    if args.show_words:
+        if args.level is None:
+            print("Error: --level is required for --show-words")
+            sys.exit(1)
+
+        if args.level_end:
+            for level in range(args.level, args.level_end + 1):
+                show_level_words(agent, level)
+                print()
+        else:
+            show_level_words(agent, args.level)
+        return
+
     # GENERATE MODE
     if args.generate:
-        # Validate and build keywords
-        keywords = validate_keywords(args)
+        if args.level is None:
+            print("Error: --level is required for --generate")
+            sys.exit(1)
+
+        levels = [args.level]
+        if args.level_end:
+            levels = list(range(args.level, args.level_end + 1))
 
         # WORKQUEUE MODE: Enqueue work for background processing
         if args.use_workqueue:
@@ -334,19 +348,31 @@ def main():
 
             session = agent.get_session()
             try:
-                results = enqueue_conversation_work(
-                    agent=agent,
-                    session=session,
-                    count=args.count,
-                    dry_run=args.dry_run,
-                )
+                total_enqueued = 0
+                for level in levels:
+                    results = enqueue_level_work(
+                        agent=agent,
+                        session=session,
+                        level=level,
+                        num_conversations=args.num_conversations,
+                        num_sentences=args.num_sentences,
+                        dry_run=args.dry_run,
+                    )
+
+                    print(f"\nLevel {level}:")
+                    print(f"  Requested: {results['requested']}")
+                    print(f"  Enqueued: {results['enqueued']}")
+                    if results.get("error"):
+                        print(f"  Error: {results['error']}")
+
+                    total_enqueued += results["enqueued"]
 
                 print("\n" + "=" * 60)
                 print("WORK ENQUEUE SUMMARY")
                 print("=" * 60)
-                print(f"Requested: {results['requested']}")
-                print(f"Enqueued: {results['enqueued']}")
-                if results["dry_run"]:
+                print(f"Levels: {levels}")
+                print(f"Total enqueued: {total_enqueued}")
+                if args.dry_run:
                     print("\n[DRY RUN] No work items were actually enqueued")
                 print("=" * 60)
 
@@ -372,66 +398,59 @@ def main():
         logger.info("SARKA AGENT - GENERATING CONVERSATIONS")
         logger.info("=" * 60)
 
-        if args.count == 1:
-            # Single conversation
-            result = agent.generate_conversation(
-                keywords=keywords,
+        all_results = []
+        total_successful = 0
+        total_failed = 0
+
+        for level in levels:
+            print(f"\n--- Level {level} ---")
+
+            result = agent.generate_for_level(
+                level=level,
+                num_conversations=args.num_conversations,
                 num_sentences=args.num_sentences,
                 dry_run=args.dry_run,
             )
 
-            print("\n" + "=" * 60)
-            print("CONVERSATION GENERATION RESULT")
-            print("=" * 60)
-
             if result.get("error"):
                 print(f"Error: {result['error']}")
-                sys.exit(1)
+                continue
 
-            if result.get("dry_run"):
-                print("[DRY RUN] Would generate:")
-            else:
-                print(f"Conversation ID: {result.get('conversation_id')}")
+            all_results.append(result)
+            total_successful += result["successful"]
+            total_failed += result["failed"]
 
-            print(f"Title: {result.get('title')}")
-            print(f"Theme: {result.get('theme')}")
-            print(f"Keywords: {result.get('keywords')}")
-            print(f"Sentences: {result.get('num_sentences')}")
+            # Show level summary
+            summary = result["level_summary"]
+            print(f"Words at level: {summary['total_words']}")
+            for pos_type, data in summary["by_pos_type"].items():
+                subtypes_str = ", ".join(f"{k}: {v}" for k, v in data["subtypes"].items())
+                print(f"  {pos_type}: {data['total']} ({subtypes_str})")
 
-            print("\n--- Generated Conversation ---")
-            for sent in result.get("sentences", []):
-                print(f"[{sent['speaker']}] {sent['text']}")
+            print(f"\nGenerated: {result['successful']}/{result['total']} conversations")
+            if result["failed"] > 0:
+                print(f"Failed: {result['failed']}")
 
-            print("=" * 60)
+            # Show sample results
+            if result["results"]:
+                print("\nSample conversations:")
+                for i, res in enumerate(result["results"][:3], 1):
+                    if res.get("success") or res.get("dry_run"):
+                        words_str = ", ".join(res.get("words", []))
+                        print(f"  {i}. {res.get('title')} ({res.get('num_sentences')} sentences)")
+                        print(f"     Words: {words_str}")
+                    else:
+                        print(f"  {i}. Error: {res.get('error')}")
 
-        else:
-            # Batch generation
-            results = agent.generate_batch(
-                count=args.count,
-                dry_run=args.dry_run,
-            )
-
-            print("\n" + "=" * 60)
-            print("BATCH GENERATION SUMMARY")
-            print("=" * 60)
-            print(f"Total requested: {results['total']}")
-            print(f"Successful: {results['successful']}")
-            print(f"Failed: {results['failed']}")
-            if results["dry_run"]:
-                print("\n[DRY RUN] No conversations were actually saved")
-            print("=" * 60)
-
-            # Show first few results
-            print("\nSample results:")
-            for i, res in enumerate(results["results"][:3], 1):
-                if res.get("success") or res.get("dry_run"):
-                    print(f"{i}. {res.get('title')} ({res.get('num_sentences')} sentences)")
-                else:
-                    print(f"{i}. Error: {res.get('error')}")
-
-            if len(results["results"]) > 3:
-                print(f"   ... and {len(results['results']) - 3} more")
-            print("=" * 60)
+        print("\n" + "=" * 60)
+        print("GENERATION SUMMARY")
+        print("=" * 60)
+        print(f"Levels: {levels}")
+        print(f"Total successful: {total_successful}")
+        print(f"Total failed: {total_failed}")
+        if args.dry_run:
+            print("\n[DRY RUN] No conversations were actually saved")
+        print("=" * 60)
 
 
 if __name__ == "__main__":

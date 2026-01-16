@@ -20,19 +20,19 @@ def handle_generate_conversation(session: Session, payload: Dict) -> str:
     """Handle conversation generation task (workqueue entry point).
 
     Payload schema:
-        keywords: dict - Keywords to use for generation (optional)
-            - colors: list[str] - Color keywords
-            - body_part: str - Body part keyword
-            - emotion: str - Emotion keyword
-            - occupation: str - Occupation keyword
-            - theme: str - Conversation theme
-        num_sentences: int - Target number of sentences (default: 6)
+        words: list[dict] - List of word info dicts with lemma_text and lemma_id
+        level: int - Difficulty level for the conversation
+        num_sentences: int - Target number of sentences (default: 8)
 
     Returns:
         str: Result message describing what was generated
     """
-    keywords = payload.get("keywords")
-    num_sentences = payload.get("num_sentences", 6)
+    words = payload.get("words", [])
+    level = payload.get("level", 1)
+    num_sentences = payload.get("num_sentences", 8)
+
+    if not words:
+        raise ValueError("No words provided in payload")
 
     # Create agent with default config
     config = build_default_config()
@@ -40,7 +40,8 @@ def handle_generate_conversation(session: Session, payload: Dict) -> str:
 
     # Generate the conversation
     result = agent.generate_conversation(
-        keywords=keywords,
+        words=words,
+        level=level,
         num_sentences=num_sentences,
         dry_run=False,
     )
@@ -51,5 +52,6 @@ def handle_generate_conversation(session: Session, payload: Dict) -> str:
     conversation_id = result.get("conversation_id")
     title = result.get("title", "Untitled")
     num_generated = result.get("num_sentences", 0)
+    word_list = ", ".join(result.get("words", []))
 
-    return f"Generated conversation {conversation_id}: '{title}' with {num_generated} sentences"
+    return f"Generated conversation {conversation_id}: '{title}' with {num_generated} sentences (words: {word_list})"
