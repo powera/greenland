@@ -29,6 +29,7 @@ from wordfreq.translation.client import LinguisticClient
 # Import workqueue handlers from agent-specific modules
 from barsukas.lape.wq_worker import handle_generate_grammar_fact
 from barsukas.papuga.wq_worker import handle_generate_pronunciations
+from barsukas.sarka.wq_worker import handle_generate_conversation
 from barsukas.sernas.wq_worker import handle_generate_synonyms
 from barsukas.vieversys.wq_worker import handle_generate_audio
 from barsukas.vilkas.wq_worker import handle_generate_forms
@@ -308,6 +309,7 @@ TASK_HANDLERS = {
     "generate_audio": handle_generate_audio,
     "generate_grammar_fact": handle_generate_grammar_fact,
     "lape_generate_grammar_fact": handle_lape_generate_grammar_fact,
+    "sarka_generate_conversation": handle_generate_conversation,
     "voras_populate_translations": handle_voras_populate_translations,
     "voras_regenerate_translations": handle_voras_regenerate_translations,
 }

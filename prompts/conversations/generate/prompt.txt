@@ -1,0 +1,39 @@
+Create a simple conversation between two speakers (A and B) for a language learning app.
+
+The conversation MUST naturally incorporate these specific words:
+{word_list}
+
+Requirements:
+1. MUST include polite phrases:
+   - Start with a greeting (e.g., "Hello!", "Good morning!", "Hi there!")
+   - Include at least one polite expression during the conversation (e.g., "Nice to see you", "How are you?", "Please", "Thank you")
+   - End with a farewell or closing phrase (e.g., "Goodbye!", "See you later!", "Take care!", "Have a nice day!")
+
+2. Use ALL the words listed above naturally in the conversation - each word should appear at least once
+
+3. Alternate between speakers A and B (A speaks first)
+
+4. Each sentence should be short and simple (5-15 words)
+
+5. The conversation should flow naturally with:
+   - A greeting/opening
+   - The main exchange using the required words
+   - A polite closing
+
+6. Use present tense primarily, with simple past when appropriate
+
+7. Keep vocabulary at an A2-B1 level (pre-intermediate) - simple and clear
+
+8. Generate approximately {num_sentences} sentences, but can be slightly more to include proper greetings and farewells
+
+Example format of a good conversation:
+A: Hello! Nice to see you today!
+B: Hi! Good to see you too. How are you?
+A: I'm good, thank you. I like your blue shirt.
+B: Thanks! Blue is my favorite color. Are you feeling happy today?
+A: Yes, I am happy. My arm feels better now.
+B: That's great news! The doctor helped you.
+A: Yes, she was very kind. Well, goodbye!
+B: Goodbye! Have a nice day!
+
+Now generate a conversation using ALL the specified words with proper greetings and farewells.
