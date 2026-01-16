@@ -3,9 +3,10 @@
 """Functions for calculating combined word frequency rankings."""
 
 import logging
+import math
+import statistics
 from typing import Any, Dict, List, Optional, Set, Tuple
 
-import numpy as np
 from sqlalchemy import case, func, or_
 
 import constants
@@ -136,8 +137,8 @@ def calculate_combined_ranks(
                 harmonic_mean = sum(weights) / weighted_sum_harmonic
 
                 # Weighted geometric mean: exp(sum(weight_i * log(rank_i)) / sum(weights))
-                weighted_log_sum = sum(w * np.log(r) for w, r in zip(weights, weighted_ranks))
-                geometric_mean = np.exp(weighted_log_sum / sum(weights))
+                weighted_log_sum = sum(w * math.log(r) for w, r in zip(weights, weighted_ranks))
+                geometric_mean = math.exp(weighted_log_sum / sum(weights))
 
                 # Combined rank: arithmetic mean of harmonic and geometric means
                 combined_rank = (harmonic_mean + geometric_mean) / 2
@@ -173,16 +174,16 @@ def calculate_combined_ranks(
     # Detect outliers
     if len(word_list) > 10:  # Need a minimum number for meaningful statistics
         # Get log of combined ranks to normalize the distribution
-        log_ranks = np.log([w["combined_rank_value"] for w in word_list])
+        log_ranks = [math.log(w["combined_rank_value"]) for w in word_list]
 
         # Calculate z-scores
-        mean = np.mean(log_ranks)
-        std = np.std(log_ranks)
+        mean_val = statistics.mean(log_ranks)
+        std_val = statistics.pstdev(log_ranks)  # population std dev
 
-        if std > 0:  # Avoid division by zero
+        if std_val > 0:  # Avoid division by zero
             for i, word_info in enumerate(word_list):
-                log_value = np.log(word_info["combined_rank_value"])
-                z_score = (log_value - mean) / std
+                log_value = math.log(word_info["combined_rank_value"])
+                z_score = (log_value - mean_val) / std_val
                 word_info["z_score"] = z_score
                 word_info["is_outlier"] = abs(z_score) > outlier_threshold
 
@@ -441,9 +442,15 @@ def analyze_corpus_correlations() -> Dict[str, Any]:
                         "sample_size": len(ranks1),
                     }
                 except ImportError:
-                    logger.warning("scipy not available, using numpy correlation")
-                    # Fallback to numpy correlation
-                    corr = np.corrcoef(ranks1, ranks2)[0, 1]
+                    logger.warning("scipy not available, using Pearson correlation")
+                    # Fallback to Pearson correlation using standard library
+                    mean1 = statistics.mean(ranks1)
+                    mean2 = statistics.mean(ranks2)
+                    numerator = sum((x - mean1) * (y - mean2) for x, y in zip(ranks1, ranks2))
+                    sum_sq1 = sum((x - mean1) ** 2 for x in ranks1)
+                    sum_sq2 = sum((y - mean2) ** 2 for y in ranks2)
+                    denominator = math.sqrt(sum_sq1 * sum_sq2)
+                    corr = numerator / denominator if denominator > 0 else 0.0
                     correlations[corpus1_name][corpus2_name] = {
                         "correlation": corr,
                         "p_value": None,
