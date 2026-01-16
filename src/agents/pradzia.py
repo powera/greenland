@@ -802,6 +802,7 @@ def get_argument_parser():
 
     # Common arguments
     add_common_args(parser)
+    add_backend_args(parser)
     add_output_args(parser)
 
     # Mode selection
