@@ -1,5 +1,6 @@
 """Settings and backend management routes."""
 
+import logging
 import os
 import signal
 import subprocess
@@ -8,6 +9,8 @@ import threading
 import time
 from pathlib import Path
 from typing import TYPE_CHECKING
+
+logger = logging.getLogger(__name__)
 
 from flask import (
     Blueprint,
@@ -88,6 +91,7 @@ def migrate_form() -> ResponseReturnValue:
         ]
 
         # Run migration
+        logger.info("Launching agent subprocess: %s", " ".join(cmd))
         result = subprocess.run(cmd, capture_output=True, text=True, check=True)
 
         flash(f"Migration completed successfully! Output: {result.stdout}", "success")
@@ -134,6 +138,7 @@ def migrate() -> ResponseReturnValue:
         ]
 
         # Run migration
+        logger.info("Launching agent subprocess: %s", " ".join(cmd))
         result = subprocess.run(cmd, capture_output=True, text=True, check=True)
 
         return jsonify(

@@ -2,11 +2,14 @@
 
 """Routes for data export functionality (POVAS HTML generation and UNGURYS WireWord exports)."""
 
+import logging
 import os
 import re
 import subprocess
 from pathlib import Path
 from typing import Union, Tuple
+
+logger = logging.getLogger(__name__)
 
 from config import Config
 from flask import (
@@ -68,6 +71,7 @@ def povas_generate() -> Union[Response, Tuple[Response, int]]:
 
     try:
         # Execute
+        logger.info("Launching agent subprocess: %s", " ".join(args))
         process = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
         stdout, stderr = process.communicate(timeout=300)  # 5 min timeout
@@ -131,6 +135,7 @@ def elnias_generate() -> Union[Response, Tuple[Response, int]]:
 
     try:
         # Execute
+        logger.info("Launching agent subprocess: %s", " ".join(args))
         process = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
         stdout, stderr = process.communicate(timeout=300)  # 5 min timeout

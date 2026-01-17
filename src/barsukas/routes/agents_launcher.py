@@ -2,6 +2,7 @@
 
 """Routes for listing and launching autonomous agents."""
 
+import logging
 import os
 import subprocess
 import threading
@@ -9,6 +10,8 @@ import time
 import uuid
 from pathlib import Path
 from typing import Any, Dict, IO, Iterator, List, Optional
+
+logger = logging.getLogger(__name__)
 
 from config import Config
 from flask import (
@@ -453,6 +456,7 @@ def execute_agent(agent_name: str) -> ResponseReturnValue:
         task_id = str(uuid.uuid4())
 
         # Start the process
+        logger.info("Launching agent subprocess: %s", " ".join(args))
         process = subprocess.Popen(
             args,
             stdout=subprocess.PIPE,
