@@ -1,0 +1,10 @@
+{"guid": "Z02_001", "pos_type": "numeral", "pos_subtype": "ordinal", "concept_label": "first", "concept_definition": "The ordinal number 1st.", "difficulty_level": 9}
+{"guid": "Z02_002", "pos_type": "numeral", "pos_subtype": "ordinal", "concept_label": "second", "concept_definition": "The ordinal number 2nd.", "difficulty_level": 9}
+{"guid": "Z02_003", "pos_type": "numeral", "pos_subtype": "ordinal", "concept_label": "third", "concept_definition": "The ordinal number 3rd.", "difficulty_level": 9}
+{"guid": "Z02_004", "pos_type": "numeral", "pos_subtype": "ordinal", "concept_label": "fourth", "concept_definition": "The ordinal number 4th.", "difficulty_level": 9}
+{"guid": "Z02_005", "pos_type": "numeral", "pos_subtype": "ordinal", "concept_label": "fifth", "concept_definition": "The ordinal number 5th.", "difficulty_level": 9}
+{"guid": "Z02_006", "pos_type": "numeral", "pos_subtype": "ordinal", "concept_label": "sixth", "concept_definition": "The ordinal number 6th.", "difficulty_level": 9}
+{"guid": "Z02_007", "pos_type": "numeral", "pos_subtype": "ordinal", "concept_label": "seventh", "concept_definition": "The ordinal number 7th.", "difficulty_level": 9}
+{"guid": "Z02_008", "pos_type": "numeral", "pos_subtype": "ordinal", "concept_label": "eighth", "concept_definition": "The ordinal number 8th.", "difficulty_level": 9}
+{"guid": "Z02_009", "pos_type": "numeral", "pos_subtype": "ordinal", "concept_label": "ninth", "concept_definition": "The ordinal number 9th.", "difficulty_level": 9}
+{"guid": "Z02_010", "pos_type": "numeral", "pos_subtype": "ordinal", "concept_label": "tenth", "concept_definition": "The ordinal number 10th.", "difficulty_level": 9}

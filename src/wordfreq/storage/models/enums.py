@@ -133,6 +133,17 @@ class AdjectiveSubtype(enum.Enum):
     OTHER = "other"
 
 
+class NumeralSubtype(enum.Enum):
+    """Subtypes for numerals.
+
+    NOTE: When adding/modifying subtypes, update SUBTYPE_GUID_PREFIXES
+    in guid_prefixes.py to keep GUID assignments in sync.
+    """
+
+    CARDINAL = "cardinal"  # Cardinal numbers (one, two, three, 100)
+    ORDINAL = "ordinal"  # Ordinal numbers (first, second, third, 100th)
+
+
 class AdverbSubtype(enum.Enum):
     """Subtypes for adverbs."""
 

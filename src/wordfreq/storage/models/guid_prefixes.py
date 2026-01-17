@@ -1,4 +1,8 @@
-"""GUID prefix mappings for different POS subtypes."""
+"""GUID prefix mappings for different POS subtypes.
+
+NOTE: When adding/modifying prefixes, update the corresponding Subtype enum
+in enums.py to keep GUID assignments in sync.
+"""
 
 # Subtype mapping for GUID generation, organized by POS type
 SUBTYPE_GUID_PREFIXES = {
@@ -123,5 +127,9 @@ SUBTYPE_GUID_PREFIXES = {
     },
     "article": {
         "article_other": "L99",
+    },
+    "numeral": {
+        "cardinal": "Z01",
+        "ordinal": "Z02",
     },
 }
