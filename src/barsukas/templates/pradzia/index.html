@@ -132,16 +132,11 @@
                         Shows configuration status, file availability, and database state.
                     </p>
                     <p><code>--check</code></p>
-                    <button type="button" class="btn btn-info" id="checkBtn">
-                        <i class="bi bi-play-fill"></i> Run Check
-                    </button>
-                </div>
-                <div class="card-footer" id="checkOutputSection" style="display: none;">
-                    <div id="checkSpinner" class="text-center my-2">
-                        <div class="spinner-border spinner-border-sm text-info" role="status"></div>
-                        <span class="ms-2">Checking configuration...</span>
-                    </div>
-                    <pre id="checkOutput" class="bg-light p-2 border rounded small" style="max-height: 300px; overflow-y: auto; display: none;"></pre>
+                    <form method="POST" action="{{ url_for('pradzia.execute_check') }}">
+                        <button type="submit" class="btn btn-info">
+                            <i class="bi bi-play-fill"></i> Run Check
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -160,7 +155,7 @@
                         Adds new corpora, updates existing ones, and disables removed ones.
                     </p>
                     <p><code>--sync-config</code></p>
-                    <form id="syncConfigForm">
+                    <form method="POST" action="{{ url_for('pradzia.execute_sync_config') }}">
                         <div class="form-check mb-3">
                             <input class="form-check-input" type="checkbox" id="syncDryRun" name="dry_run">
                             <label class="form-check-label" for="syncDryRun">
@@ -171,13 +166,6 @@
                             <i class="bi bi-play-fill"></i> Sync Config
                         </button>
                     </form>
-                </div>
-                <div class="card-footer" id="syncOutputSection" style="display: none;">
-                    <div id="syncSpinner" class="text-center my-2">
-                        <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-                        <span class="ms-2">Syncing configuration...</span>
-                    </div>
-                    <pre id="syncOutput" class="bg-light p-2 border rounded small" style="max-height: 300px; overflow-y: auto; display: none;"></pre>
                 </div>
             </div>
         </div>
@@ -196,7 +184,7 @@
                         Select specific corpora or load all enabled ones.
                     </p>
                     <p><code>--load [CORPUS ...]</code></p>
-                    <form id="loadCorporaForm">
+                    <form method="POST" action="{{ url_for('pradzia.execute_load_corpora') }}">
                         <div class="mb-3">
                             <label class="form-label fw-bold">Select Corpora (optional)</label>
                             <div class="form-text mb-2">Leave unchecked to load all enabled corpora</div>
@@ -223,13 +211,6 @@
                         </button>
                     </form>
                 </div>
-                <div class="card-footer" id="loadOutputSection" style="display: none;">
-                    <div id="loadSpinner" class="text-center my-2">
-                        <div class="spinner-border spinner-border-sm text-success" role="status"></div>
-                        <span class="ms-2">Loading corpora (this may take a while)...</span>
-                    </div>
-                    <pre id="loadOutput" class="bg-light p-2 border rounded small" style="max-height: 300px; overflow-y: auto; display: none;"></pre>
-                </div>
             </div>
         </div>
 
@@ -247,7 +228,7 @@
                         using harmonic mean weighting.
                     </p>
                     <p><code>--calc-ranks</code></p>
-                    <form id="calcRanksForm">
+                    <form method="POST" action="{{ url_for('pradzia.execute_calc_ranks') }}">
                         <div class="form-check mb-3">
                             <input class="form-check-input" type="checkbox" id="calcDryRun" name="dry_run">
                             <label class="form-check-label" for="calcDryRun">
@@ -258,13 +239,6 @@
                             <i class="bi bi-play-fill"></i> Calculate Ranks
                         </button>
                     </form>
-                </div>
-                <div class="card-footer" id="calcOutputSection" style="display: none;">
-                    <div id="calcSpinner" class="text-center my-2">
-                        <div class="spinner-border spinner-border-sm text-warning" role="status"></div>
-                        <span class="ms-2">Calculating ranks...</span>
-                    </div>
-                    <pre id="calcOutput" class="bg-light p-2 border rounded small" style="max-height: 300px; overflow-y: auto; display: none;"></pre>
                 </div>
             </div>
         </div>
@@ -288,7 +262,7 @@
                         <li>Calculate combined ranks</li>
                     </ol>
                     <p><code>--init-full</code></p>
-                    <form id="initFullForm">
+                    <form method="POST" action="{{ url_for('pradzia.execute_init_full') }}">
                         <div class="form-check mb-3">
                             <input class="form-check-input" type="checkbox" id="initDryRun" name="dry_run">
                             <label class="form-check-label" for="initDryRun">
@@ -299,13 +273,6 @@
                             <i class="bi bi-play-fill"></i> Run Full Init
                         </button>
                     </form>
-                </div>
-                <div class="card-footer" id="initOutputSection" style="display: none;">
-                    <div id="initSpinner" class="text-center my-2">
-                        <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-                        <span class="ms-2">Running full initialization (this may take a while)...</span>
-                    </div>
-                    <pre id="initOutput" class="bg-light p-2 border rounded small" style="max-height: 300px; overflow-y: auto; display: none;"></pre>
                 </div>
             </div>
         </div>
@@ -324,7 +291,7 @@
                         <strong>Only for initial setup</strong> - will abort if Lithuanian translations already exist.
                     </p>
                     <p><code>--bootstrap JSON_PATH</code></p>
-                    <form id="bootstrapForm">
+                    <form method="POST" action="{{ url_for('pradzia.execute_bootstrap') }}">
                         <div class="mb-3">
                             <label for="jsonPath" class="form-label fw-bold">JSON File Path</label>
                             <input type="text" class="form-control" id="jsonPath" name="json_path"
@@ -348,13 +315,6 @@
                         </button>
                     </form>
                 </div>
-                <div class="card-footer" id="bootstrapOutputSection" style="display: none;">
-                    <div id="bootstrapSpinner" class="text-center my-2">
-                        <div class="spinner-border spinner-border-sm text-secondary" role="status"></div>
-                        <span class="ms-2">Bootstrapping from JSON...</span>
-                    </div>
-                    <pre id="bootstrapOutput" class="bg-light p-2 border rounded small" style="max-height: 300px; overflow-y: auto; display: none;"></pre>
-                </div>
             </div>
         </div>
 
@@ -372,7 +332,7 @@
                         Useful for importing data from the JSONL backend format.
                     </p>
                     <p><code>--import-jsonl JSONL_DIR</code></p>
-                    <form id="importJsonlForm">
+                    <form method="POST" action="{{ url_for('pradzia.execute_import_jsonl') }}">
                         <div class="mb-3">
                             <label for="jsonlDir" class="form-label fw-bold">JSONL Directory Path</label>
                             <input type="text" class="form-control" id="jsonlDir" name="jsonl_dir"
@@ -389,13 +349,6 @@
                             <i class="bi bi-play-fill"></i> Import JSONL
                         </button>
                     </form>
-                </div>
-                <div class="card-footer" id="importOutputSection" style="display: none;">
-                    <div id="importSpinner" class="text-center my-2">
-                        <div class="spinner-border spinner-border-sm text-dark" role="status"></div>
-                        <span class="ms-2">Importing from JSONL...</span>
-                    </div>
-                    <pre id="importOutput" class="bg-light p-2 border rounded small" style="max-height: 300px; overflow-y: auto; display: none;"></pre>
                 </div>
             </div>
         </div>
@@ -426,144 +379,7 @@
 </div>
 
 <script>
-// Helper function to handle form submissions
-async function submitOperation(formId, endpoint, outputSectionId, spinnerId, outputId, btn) {
-    const form = document.getElementById(formId);
-    const outputSection = document.getElementById(outputSectionId);
-    const spinner = document.getElementById(spinnerId);
-    const output = document.getElementById(outputId);
-
-    // Show output section and spinner
-    outputSection.style.display = 'block';
-    spinner.style.display = 'block';
-    output.style.display = 'none';
-    output.textContent = '';
-
-    // Disable button
-    btn.disabled = true;
-
-    try {
-        const formData = new FormData(form);
-        const response = await fetch(endpoint, {
-            method: 'POST',
-            body: formData
-        });
-
-        const result = await response.json();
-
-        // Hide spinner, show output
-        spinner.style.display = 'none';
-        output.style.display = 'block';
-
-        if (result.success) {
-            // Combine stdout and stderr for display
-            let outputText = '';
-            if (result.stdout) outputText += result.stdout;
-            if (result.stderr) {
-                if (outputText) outputText += '\n\n--- LOG OUTPUT ---\n';
-                outputText += result.stderr;
-            }
-            output.textContent = outputText || 'Operation completed successfully.';
-            output.classList.remove('border-danger');
-            output.classList.add('border-success');
-        } else {
-            output.textContent = 'ERROR: ' + (result.error || 'Operation failed');
-            if (result.stdout) output.textContent += '\n\nSTDOUT:\n' + result.stdout;
-            if (result.stderr) output.textContent += '\n\nSTDERR:\n' + result.stderr;
-            output.classList.remove('border-success');
-            output.classList.add('border-danger');
-        }
-    } catch (error) {
-        spinner.style.display = 'none';
-        output.style.display = 'block';
-        output.textContent = 'ERROR: ' + error.message;
-        output.classList.remove('border-success');
-        output.classList.add('border-danger');
-    } finally {
-        btn.disabled = false;
-    }
-}
-
-// Check Configuration
-document.getElementById('checkBtn').addEventListener('click', async function() {
-    const btn = this;
-    const outputSection = document.getElementById('checkOutputSection');
-    const spinner = document.getElementById('checkSpinner');
-    const output = document.getElementById('checkOutput');
-
-    outputSection.style.display = 'block';
-    spinner.style.display = 'block';
-    output.style.display = 'none';
-    btn.disabled = true;
-
-    try {
-        const response = await fetch('{{ url_for("pradzia.check_configuration") }}', {
-            method: 'POST'
-        });
-        const result = await response.json();
-
-        spinner.style.display = 'none';
-        output.style.display = 'block';
-
-        let outputText = '';
-        if (result.stdout) outputText += result.stdout;
-        if (result.stderr) {
-            if (outputText) outputText += '\n\n--- LOG OUTPUT ---\n';
-            outputText += result.stderr;
-        }
-        output.textContent = outputText || 'Check completed.';
-    } catch (error) {
-        spinner.style.display = 'none';
-        output.style.display = 'block';
-        output.textContent = 'ERROR: ' + error.message;
-    } finally {
-        btn.disabled = false;
-    }
-});
-
-// Sync Configuration
-document.getElementById('syncConfigForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    await submitOperation('syncConfigForm', '{{ url_for("pradzia.sync_configuration") }}',
-                         'syncOutputSection', 'syncSpinner', 'syncOutput', this.querySelector('button[type="submit"]'));
-});
-
-// Load Corpora
-document.getElementById('loadCorporaForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    await submitOperation('loadCorporaForm', '{{ url_for("pradzia.load_corpora") }}',
-                         'loadOutputSection', 'loadSpinner', 'loadOutput', this.querySelector('button[type="submit"]'));
-});
-
-// Calculate Ranks
-document.getElementById('calcRanksForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    await submitOperation('calcRanksForm', '{{ url_for("pradzia.calculate_ranks") }}',
-                         'calcOutputSection', 'calcSpinner', 'calcOutput', this.querySelector('button[type="submit"]'));
-});
-
-// Full Initialization
-document.getElementById('initFullForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    await submitOperation('initFullForm', '{{ url_for("pradzia.full_initialization") }}',
-                         'initOutputSection', 'initSpinner', 'initOutput', this.querySelector('button[type="submit"]'));
-});
-
-// Bootstrap from JSON
-document.getElementById('bootstrapForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    await submitOperation('bootstrapForm', '{{ url_for("pradzia.bootstrap_from_json") }}',
-                         'bootstrapOutputSection', 'bootstrapSpinner', 'bootstrapOutput', this.querySelector('button[type="submit"]'));
-});
-
-// Import from JSONL
-document.getElementById('importJsonlForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    await submitOperation('importJsonlForm', '{{ url_for("pradzia.import_from_jsonl") }}',
-                         'importOutputSection', 'importSpinner', 'importOutput', this.querySelector('button[type="submit"]'));
-});
-
-// Refresh Stats
+// Refresh Stats button
 document.getElementById('refreshStatsBtn').addEventListener('click', function() {
     location.reload();
 });
