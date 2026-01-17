@@ -59,8 +59,11 @@ def generate_candidates() -> ResponseReturnValue:
     # Build command with --task flag
     args = ["python3", str(script_path)]
 
-    # Add database path
-    args.extend(["--db-path", Config.DB_PATH])
+    # Add database configuration
+    if Config.is_postgres_mode():
+        args.append("--postgres")
+    else:
+        args.extend(["--db-path", Config.DB_PATH])
 
     # Add dry-run if requested
     if dry_run:
@@ -140,8 +143,11 @@ def submit_batch() -> ResponseReturnValue:
     # Global args before subcommand
     args = ["python3", str(script_path)]
 
-    # Add database path (before subcommand)
-    args.extend(["--db-path", Config.DB_PATH])
+    # Add database configuration (before subcommand)
+    if Config.is_postgres_mode():
+        args.append("--postgres")
+    else:
+        args.extend(["--db-path", Config.DB_PATH])
 
     # Add subcommand
     args.extend(["submit-batch", "--languages"])
@@ -203,7 +209,12 @@ def batch_status() -> ResponseReturnValue:
     if not script_path.exists():
         return jsonify({"success": False, "error": f"Buivolas agent not found"}), 404
 
-    args = ["python3", str(script_path), "--db-path", Config.DB_PATH, "list-batches"]
+    args = ["python3", str(script_path)]
+    if Config.is_postgres_mode():
+        args.append("--postgres")
+    else:
+        args.extend(["--db-path", Config.DB_PATH])
+    args.append("list-batches")
 
     try:
         process = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
@@ -236,15 +247,12 @@ def check_batch(batch_id: str) -> ResponseReturnValue:
         return jsonify({"success": False, "error": f"Buivolas agent not found"}), 404
 
     # First check the status
-    args = [
-        "python3",
-        str(script_path),
-        "--db-path",
-        Config.DB_PATH,
-        "check-batch",
-        "--batch-id",
-        batch_id,
-    ]
+    args = ["python3", str(script_path)]
+    if Config.is_postgres_mode():
+        args.append("--postgres")
+    else:
+        args.extend(["--db-path", Config.DB_PATH])
+    args.extend(["check-batch", "--batch-id", batch_id])
 
     try:
         process = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
@@ -266,15 +274,12 @@ def check_batch(batch_id: str) -> ResponseReturnValue:
 
         # If completed, automatically retrieve results
         if is_completed:
-            retrieve_args = [
-                "python3",
-                str(script_path),
-                "--db-path",
-                Config.DB_PATH,
-                "retrieve-batch",
-                "--batch-id",
-                batch_id,
-            ]
+            retrieve_args = ["python3", str(script_path)]
+            if Config.is_postgres_mode():
+                retrieve_args.append("--postgres")
+            else:
+                retrieve_args.extend(["--db-path", Config.DB_PATH])
+            retrieve_args.extend(["retrieve-batch", "--batch-id", batch_id])
             retrieve_process = subprocess.Popen(
                 retrieve_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
             )
@@ -304,15 +309,12 @@ def retrieve_batch(batch_id: str) -> ResponseReturnValue:
     if not script_path.exists():
         return jsonify({"success": False, "error": f"Buivolas agent not found"}), 404
 
-    args = [
-        "python3",
-        str(script_path),
-        "--db-path",
-        Config.DB_PATH,
-        "retrieve-batch",
-        "--batch-id",
-        batch_id,
-    ]
+    args = ["python3", str(script_path)]
+    if Config.is_postgres_mode():
+        args.append("--postgres")
+    else:
+        args.extend(["--db-path", Config.DB_PATH])
+    args.extend(["retrieve-batch", "--batch-id", batch_id])
 
     try:
         process = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
