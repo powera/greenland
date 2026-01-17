@@ -292,10 +292,11 @@ def get_agent_cli_module_path(agent_script: str) -> str:
     module_stub = agent_script.replace(".py", "").replace("/", ".")
     agent_name = module_stub.split(".")[0]
 
-    # Check if it's a multi-file agent (has a directory)
-    multi_file_agents = ["voras", "vilkas", "dramblys", "sernas", "bebras", "buivolas", "sarka"]
+    # Auto-detect multi-file agents by checking if agents/{name}/cli.py exists
+    src_path = Path(__file__).parent.parent.parent  # barsukas/utils -> barsukas -> src
+    cli_path = src_path / "agents" / agent_name / "cli.py"
 
-    if agent_name in multi_file_agents and module_stub == agent_name:
+    if cli_path.exists() and module_stub == agent_name:
         return f"agents.{agent_name}.cli"
 
     return f"agents.{module_stub}"
