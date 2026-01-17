@@ -838,113 +838,6 @@ class WirewordExporter:
         lemma_forms = english_forms_by_lemma.get(lemma_id, {})
         return lemma_forms.get(english_form_key)
 
-    def _calculate_corpus_assignments(
-        self, export_data: List[Dict[str, Any]]
-    ) -> Dict[Tuple[int, str], str]:
-        """
-        Calculate corpus assignments based on levels and group overflow logic.
-
-        Args:
-            export_data: List of export entries
-
-        Returns:
-            Dictionary mapping (level, subtype) tuples to corpus names
-        """
-        # Group data by subtype to track when groups appear across levels
-        groups_by_level = {}
-        for entry in export_data:
-            level = entry["trakaido_level"]
-            subtype = entry["subtype"]
-
-            if level not in groups_by_level:
-                groups_by_level[level] = set()
-            groups_by_level[level].add(subtype)
-
-        # Track which groups have been assigned to which WORDS level
-        group_assignments = {}  # group_name -> WORDS level
-        corpus_assignments = {}  # (level, subtype) -> corpus name
-
-        # Define the level ranges for each WORDS corpus
-        words_ranges = {
-            "WORDS1": range(1, 4),  # Levels 1-3
-            "WORDS2": range(4, 7),  # Levels 4-6
-            "WORDS3": range(7, 11),  # Levels 7-10
-            "WORDS4": range(11, 15),  # Levels 11-14
-            "WORDS5": range(15, 21),  # Levels 15-20 (overflow)
-        }
-
-        # Process each level in order
-        for level in sorted(groups_by_level.keys()):
-            # Determine base WORDS level for this difficulty level
-            base_words_level = None
-            for words_name, level_range in words_ranges.items():
-                if level in level_range:
-                    base_words_level = words_name
-                    break
-
-            if base_words_level is None:
-                # Level is outside normal ranges, assign to Trakaido
-                for subtype in groups_by_level[level]:
-                    corpus_assignments[(level, subtype)] = "Trakaido"
-                continue
-
-            # Process each subtype in this level
-            for subtype in groups_by_level[level]:
-                if subtype in group_assignments:
-                    # Group has already been assigned, kick to next WORDS level
-                    current_words_level = group_assignments[subtype]
-                    words_levels = list(words_ranges.keys())
-                    current_index = words_levels.index(current_words_level)
-
-                    if current_index + 1 < len(words_levels):
-                        # Assign to next WORDS level
-                        next_words_level = words_levels[current_index + 1]
-                        group_assignments[subtype] = next_words_level
-                        corpus_assignments[(level, subtype)] = next_words_level
-                        logger.debug(
-                            f"Group '{subtype}' at level {level} kicked from {current_words_level} to {next_words_level}"
-                        )
-                    else:
-                        # No more WORDS levels available, assign to Trakaido
-                        corpus_assignments[(level, subtype)] = "Trakaido"
-                        logger.debug(
-                            f"Group '{subtype}' at level {level} assigned to Trakaido (overflow)"
-                        )
-                else:
-                    # First time seeing this group, assign to base WORDS level
-                    group_assignments[subtype] = base_words_level
-                    corpus_assignments[(level, subtype)] = base_words_level
-                    logger.debug(
-                        f"Group '{subtype}' at level {level} assigned to {base_words_level}"
-                    )
-
-        return corpus_assignments
-
-    def _normalize_pos_type(self, pos_type: str) -> str:
-        """
-        Normalize POS type to match WireWord PartOfSpeech enum.
-
-        Args:
-            pos_type: Original POS type
-
-        Returns:
-            Normalized POS type
-        """
-        pos_mappings = {
-            "noun": "noun",
-            "verb": "verb",
-            "adjective": "adjective",
-            "adverb": "adverb",
-            "pronoun": "pronoun",
-            "preposition": "preposition",
-            "conjunction": "conjunction",
-            "interjection": "interjection",
-            "numeral": "numeral",
-            "particle": "particle",
-        }
-
-        return pos_mappings.get(pos_type.lower(), pos_type)
-
     def _convert_to_wireword_grammatical_form_key(self, grammatical_form: str) -> str:
         """
         Convert database grammatical form key format to WireWord format.
@@ -1027,12 +920,16 @@ class WirewordExporter:
                 keys_order.append(key)
 
         # Write the non-grammatical-forms fields
-        for key in keys_order:
+        has_grammatical_forms = "grammatical_forms" in entry
+        for i, key in enumerate(keys_order):
             value_json = json.dumps(entry[key], ensure_ascii=False)
-            lines.append(f'    "{key}": {value_json},')
+            # Add comma unless this is the last key and there are no grammatical_forms
+            is_last_key = i == len(keys_order) - 1
+            comma = "," if has_grammatical_forms or not is_last_key else ""
+            lines.append(f'    "{key}": {value_json}{comma}')
 
         # Write grammatical_forms with each form on one line
-        if "grammatical_forms" in entry:
+        if has_grammatical_forms:
             lines.append('    "grammatical_forms": {')
 
             forms = entry["grammatical_forms"]
@@ -1051,27 +948,6 @@ class WirewordExporter:
         lines.append(f"  }}{comma}")
 
         return "\n".join(lines) + "\n"
-
-    def _generate_pinyin(self, chinese_text: str) -> Optional[str]:
-        """
-        Generate pinyin for Chinese text.
-
-        Args:
-            chinese_text: Chinese text to convert to pinyin
-
-        Returns:
-            Pinyin string with tone marks, or None if pypinyin is not available
-        """
-        if not PYPINYIN_AVAILABLE or not chinese_text:
-            return None
-
-        try:
-            # Use Style.TONE to get pinyin with tone marks (e.g., "nǐ hǎo")
-            pinyin_list = lazy_pinyin(chinese_text, style=Style.TONE)
-            return " ".join(pinyin_list)
-        except Exception as e:
-            logger.warning(f"Failed to generate pinyin for '{chinese_text}': {e}")
-            return None
 
     def _get_english_translation_from_db(
         self, session, lemma_id: int, grammatical_form: str
@@ -1229,9 +1105,7 @@ class WirewordExporter:
         }
 
         # Check for exact matches
-        if grammatical_form in lithuanian_verb_forms:
-            return lithuanian_verb_forms[grammatical_form]
-        elif grammatical_form in french_verb_forms:
+        if grammatical_form in french_verb_forms:
             return french_verb_forms[grammatical_form]
         elif grammatical_form in french_noun_forms:
             return french_noun_forms[grammatical_form]
@@ -1244,7 +1118,7 @@ class WirewordExporter:
 
     def _generate_derivative_noun_phrases(
         self, lemma: Lemma, base_english: str, base_target: str, entry_level: int
-    ) -> Dict[str, Dict[str, any]]:
+    ) -> Dict[str, Dict[str, Any]]:
         """
         Generate derivative noun phrases like "where is X" and "this is my X" for nouns.
         These are constructed phrases, not stored in the database.
@@ -1299,7 +1173,7 @@ class WirewordExporter:
                 this_is_my_level = max(entry_level, 19)
                 derivative_phrases["this_is_my"] = {
                     "level": this_is_my_level,
-                    "lithuanian": f"Tai mano {base_lithuanian}",
+                    "target": f"Tai mano {base_target}",
                     "english": f"This is my {base_english}",
                 }
 
