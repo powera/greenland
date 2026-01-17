@@ -76,6 +76,7 @@ SUBTYPE_GUID_PREFIXES = {
         "personal_quality": "A16",
         "physical_property": "A18",
         "condition": "A17",
+        "emotion": "A19",
         "quality": "A05",
         "aesthetic": "A06",
         "importance": "A07",
