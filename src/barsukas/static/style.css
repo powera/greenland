@@ -190,3 +190,10 @@ ruby.with-separator rt {
     padding-top: 0.1em;
     margin-top: 0.1em;
 }
+
+/* Japanese Romaji Styling - display below like Chinese pinyin */
+.japanese-with-romaji ruby {
+    display: inline-block;
+    margin-right: 0.65em;
+    text-align: center;
+}
