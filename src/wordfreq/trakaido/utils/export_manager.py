@@ -21,7 +21,8 @@ GREENLAND_SRC_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..
 sys.path.append(GREENLAND_SRC_PATH)
 
 import constants
-from wordfreq.storage.database import create_database_session
+from wordfreq.storage.backend.config import BackendType, DataSourceConfig
+from wordfreq.storage.backend.factory import create_session
 from wordfreq.storage.models.schema import Lemma, WordToken
 from wordfreq.storage.crud.difficulty_override import bulk_get_effective_difficulty_levels
 from wordfreq.storage.translation_helpers import (
@@ -56,7 +57,7 @@ class TrakaidoExporter:
 
     def __init__(
         self,
-        db_path: str = None,
+        config: Optional[DataSourceConfig] = None,
         debug: bool = False,
         language: str = "lt",
         simplified_chinese: bool = True,
@@ -65,12 +66,15 @@ class TrakaidoExporter:
         Initialize the TrakaidoExporter.
 
         Args:
-            db_path: Database path (uses default if None)
+            config: DataSourceConfig with backend settings (uses default SQLite if None)
             debug: Enable debug logging
             language: Target language code ('lt' for Lithuanian, 'zh' for Chinese)
             simplified_chinese: If True and language is 'zh', convert to Simplified Chinese (default: True)
         """
-        self.db_path = db_path or constants.WORDFREQ_DB_PATH
+        # Use provided config or create default SQLite config
+        if config is None:
+            config = DataSourceConfig(backend_type=BackendType.SQLITE)
+        self.config = config
         self.debug = debug
         self.language = language
         self.simplified_chinese = simplified_chinese
@@ -88,7 +92,7 @@ class TrakaidoExporter:
 
     def get_session(self):
         """Get database session."""
-        return create_database_session(self.db_path)
+        return create_session(self.config)
 
     def get_english_word_from_lemma(self, session, lemma: Lemma) -> Optional[str]:
         """
@@ -657,7 +661,10 @@ class TrakaidoExporter:
         from wireword.export_wireword import WirewordExporter
 
         exporter = WirewordExporter(
-            self.db_path, self.debug, self.language, self.simplified_chinese
+            config=self.config,
+            debug=self.debug,
+            language=self.language,
+            simplified_chinese=self.simplified_chinese,
         )
         return exporter.export_to_wireword_format(output_path, **kwargs)
 
@@ -666,7 +673,10 @@ class TrakaidoExporter:
         from wireword.export_wireword import WirewordExporter
 
         exporter = WirewordExporter(
-            self.db_path, self.debug, self.language, self.simplified_chinese
+            config=self.config,
+            debug=self.debug,
+            language=self.language,
+            simplified_chinese=self.simplified_chinese,
         )
         return exporter.export_wireword_directory(output_dir)
 
@@ -677,7 +687,10 @@ class TrakaidoExporter:
         from wireword.export_wireword import WirewordExporter
 
         exporter = WirewordExporter(
-            self.db_path, self.debug, self.language, self.simplified_chinese
+            config=self.config,
+            debug=self.debug,
+            language=self.language,
+            simplified_chinese=self.simplified_chinese,
         )
         return exporter.export_verbs_to_wireword_format(output_path, **kwargs)
 

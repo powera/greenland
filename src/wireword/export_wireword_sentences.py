@@ -19,7 +19,8 @@ if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
 import constants
-from wordfreq.storage.database import create_database_session
+from wordfreq.storage.backend.config import BackendType, DataSourceConfig
+from wordfreq.storage.backend.factory import create_session
 from wordfreq.storage.models.enums import GrammaticalForm
 from wordfreq.storage.models.schema import (
     AudioQualityReview,
@@ -39,7 +40,7 @@ class WirewordSentenceExporter:
 
     def __init__(
         self,
-        db_path: Optional[str] = None,
+        config: Optional[DataSourceConfig] = None,
         debug: bool = False,
         language: str = "lt",
         simplified_chinese: bool = True,
@@ -48,12 +49,15 @@ class WirewordSentenceExporter:
         Initialize the WirewordSentenceExporter.
 
         Args:
-            db_path: Database path (uses default if None)
+            config: DataSourceConfig with backend settings (uses default SQLite if None)
             debug: Enable debug logging
             language: Target language code ('lt', 'zh', etc.)
             simplified_chinese: If True and language is 'zh', convert to Simplified Chinese (default: True)
         """
-        self.db_path = db_path or constants.WORDFREQ_DB_PATH
+        # Use provided config or create default SQLite config
+        if config is None:
+            config = DataSourceConfig(backend_type=BackendType.SQLITE)
+        self.config = config
         self.debug = debug
         self.language = language
         self.simplified_chinese = simplified_chinese
@@ -63,7 +67,7 @@ class WirewordSentenceExporter:
 
     def get_session(self) -> Any:
         """Get database session."""
-        return create_database_session(self.db_path)
+        return create_session(self.config)
 
     def get_audio_for_sentence(
         self, session: Any, sentence: Sentence, language_code: str
@@ -353,9 +357,11 @@ def main() -> None:
     """CLI entry point for wireword sentence export."""
     import argparse
 
+    from agents.common.common_args import add_backend_args, add_common_args, get_data_source_config
+
     parser = argparse.ArgumentParser(description="Export sentences to wireword format")
-    parser.add_argument("--db-path", help="Database path (uses default if not specified)")
-    parser.add_argument("--debug", action="store_true", help="Enable debug logging")
+    add_common_args(parser)
+    add_backend_args(parser)
     parser.add_argument(
         "--language",
         default="lt",
@@ -372,10 +378,11 @@ def main() -> None:
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     )
 
+    # Create config from args
+    config = get_data_source_config(args)
+
     # Create exporter
-    exporter = WirewordSentenceExporter(
-        db_path=args.db_path, debug=args.debug, language=args.language
-    )
+    exporter = WirewordSentenceExporter(config=config, debug=args.debug, language=args.language)
 
     # Export
     count = exporter.export_to_file(output_path=args.output, include_all_languages=False)
