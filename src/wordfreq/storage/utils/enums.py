@@ -3,7 +3,13 @@
 import enum
 from typing import Iterable, List, Optional, cast
 
-from wordfreq.storage.models.enums import AdjectiveSubtype, AdverbSubtype, NounSubtype, VerbSubtype
+from wordfreq.storage.models.enums import (
+    AdjectiveSubtype,
+    AdverbSubtype,
+    NounSubtype,
+    NumeralSubtype,
+    VerbSubtype,
+)
 
 # TODO: de-dupe
 VALID_POS_TYPES = {
@@ -34,6 +40,8 @@ def get_subtype_enum(pos_type: str) -> Optional[enum.EnumMeta]:
         return AdjectiveSubtype
     elif pos_type == "adverb":
         return AdverbSubtype
+    elif pos_type == "numeral":
+        return NumeralSubtype
     return None
 
 
@@ -72,5 +80,6 @@ def get_all_pos_subtypes() -> List[str]:
     all_subtypes.update(get_subtype_values_for_pos("verb"))
     all_subtypes.update(get_subtype_values_for_pos("adjective"))
     all_subtypes.update(get_subtype_values_for_pos("adverb"))
+    all_subtypes.update(get_subtype_values_for_pos("numeral"))
     all_subtypes.update(VALID_POS_TYPES)
     return sorted(list(all_subtypes))
