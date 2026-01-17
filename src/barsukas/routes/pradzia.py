@@ -81,8 +81,13 @@ def run_pradzia_command(args: list[str], timeout: int = 600) -> Dict[str, Any]:
     if not script_path.exists():
         return {"success": False, "error": "PRADZIA agent script not found"}
 
-    # Build full command
-    full_args = ["python3", str(script_path), "--db-path", Config.DB_PATH] + args
+    # Build full command with appropriate backend configuration
+    full_args = ["python3", str(script_path)]
+    if Config.is_postgres_mode():
+        full_args.append("--postgres")
+    else:
+        full_args.extend(["--db-path", Config.DB_PATH])
+    full_args.extend(args)
 
     try:
         process = subprocess.Popen(

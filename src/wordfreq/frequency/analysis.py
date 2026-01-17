@@ -152,6 +152,7 @@ def calculate_combined_ranks(
 
         word_data[word_token.id] = {
             "word": word_token.token,
+            "word_token_id": word_token.id,
             "ranks": corpus_ranks,
             "harmonic_mean": harmonic_mean if "harmonic_mean" in locals() else combined_rank,
             "geometric_mean": geometric_mean if "geometric_mean" in locals() else combined_rank,
@@ -189,23 +190,39 @@ def calculate_combined_ranks(
 
     # Update database if requested
     if update_db:
-        updated_count = 0
+        # BATCH OPTIMIZATION: Build a map of id -> new_rank for batch update
+        updates_needed = {}
         for word_info in word_list:
-            word_token = (
-                session.query(WordToken).filter(WordToken.token == word_info["word"]).first()
-            )
-            if word_token and word_token.frequency_rank != word_info["combined_rank"]:
-                word_token.frequency_rank = word_info["combined_rank"]
-                updated_count += 1
+            word_token_id = word_info.get("word_token_id")
+            if word_token_id and word_info["current_rank"] != word_info["combined_rank"]:
+                updates_needed[word_token_id] = word_info["combined_rank"]
 
-                # Commit in batches
-                if updated_count % 500 == 0:
-                    session.commit()
-                    logger.info(f"Updated {updated_count} word ranks")
+        if updates_needed:
+            logger.info(f"Batch updating {len(updates_needed)} word ranks...")
 
-        # Final commit
-        session.commit()
-        logger.info(f"Updated {updated_count} word ranks in the database")
+            # Process in batches to avoid memory issues with large datasets
+            batch_size = 1000
+            token_ids = list(updates_needed.keys())
+            updated_count = 0
+
+            for i in range(0, len(token_ids), batch_size):
+                batch_ids = token_ids[i : i + batch_size]
+
+                # Fetch batch of word tokens
+                batch_tokens = session.query(WordToken).filter(WordToken.id.in_(batch_ids)).all()
+
+                # Update each token in the batch
+                for token in batch_tokens:
+                    token.frequency_rank = updates_needed[token.id]
+                    updated_count += 1
+
+                # Commit this batch
+                session.commit()
+                logger.info(f"Updated {updated_count}/{len(updates_needed)} word ranks")
+
+            logger.info(f"Batch update complete: {updated_count} word ranks updated")
+        else:
+            logger.info("No word rank updates needed")
 
     # Return the list of words with their ranks
     return word_list

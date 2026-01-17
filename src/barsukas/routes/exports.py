@@ -60,8 +60,11 @@ def povas_generate() -> Union[Response, Tuple[Response, int]]:
     if dry_run:
         args.append("--dry-run")
 
-    # Add database path
-    args.extend(["--db-path", Config.DB_PATH])
+    # Add database configuration
+    if Config.is_postgres_mode():
+        args.append("--postgres")
+    else:
+        args.extend(["--db-path", Config.DB_PATH])
 
     try:
         # Execute
@@ -120,8 +123,11 @@ def elnias_generate() -> Union[Response, Tuple[Response, int]]:
     if include_unverified:
         args.append("--include-unverified")
 
-    # Add database path
-    args.extend(["--db-path", Config.DB_PATH])
+    # Add database configuration
+    if Config.is_postgres_mode():
+        args.append("--postgres")
+    else:
+        args.extend(["--db-path", Config.DB_PATH])
 
     try:
         # Execute
