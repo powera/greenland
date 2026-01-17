@@ -13,6 +13,10 @@ _global_config: Optional[DataSourceConfig] = None
 _global_engine: Optional[Engine] = None
 _global_session_factory: Optional[sessionmaker] = None
 
+# Cache engines by connection string to avoid creating new connections per request
+_engine_cache: dict[str, Engine] = {}
+_engine_initialized: set[str] = set()  # Track which engines have had tables ensured
+
 
 def _create_engine(db_path: str) -> Engine:
     """Create a SQLAlchemy engine with appropriate settings.
@@ -31,6 +35,8 @@ def _create_engine(db_path: str) -> Engine:
             connection_string,
             pool_pre_ping=True,
             pool_recycle=3600,
+            pool_size=5,  # Keep 5 connections ready in the pool
+            max_overflow=10,  # Allow up to 15 total connections during bursts
         )
     else:
         # SQLite - use file path
@@ -149,6 +155,33 @@ def _get_session_factory() -> sessionmaker:
     return _global_session_factory
 
 
+def _get_cached_engine(db_path: str) -> Engine:
+    """Get or create a cached engine for the given connection string.
+
+    This avoids creating new database connections on every request, which is
+    especially important for PostgreSQL where connection setup is expensive.
+
+    Args:
+        db_path: Database connection string or file path
+
+    Returns:
+        Cached SQLAlchemy engine
+    """
+    global _engine_cache, _engine_initialized
+
+    if db_path not in _engine_cache:
+        _engine_cache[db_path] = _create_engine(db_path)
+
+    engine = _engine_cache[db_path]
+
+    # Only ensure tables exist once per engine
+    if db_path not in _engine_initialized:
+        _ensure_tables_exist(engine)
+        _engine_initialized.add(db_path)
+
+    return engine
+
+
 def create_session(config: Optional[DataSourceConfig] = None) -> Session:
     """Create a new database session.
 
@@ -159,7 +192,7 @@ def create_session(config: Optional[DataSourceConfig] = None) -> Session:
         A new SQLAlchemy Session instance (or JSONLSession for JSONL backend)
     """
     if config is not None:
-        # Create a one-off session with specific config
+        # Create a session with specific config, using cached engine
         if config.backend_type == BackendType.JSONL:
             # JSONL backend uses its own session implementation
             from wordfreq.storage.backend.jsonl import JSONLSession, JSONLStorage
@@ -175,8 +208,8 @@ def create_session(config: Optional[DataSourceConfig] = None) -> Session:
             assert config.sqlite_path is not None, "sqlite_path must be set for SQLITE backend"
             db_path = config.sqlite_path
 
-        engine = _create_engine(db_path)
-        _ensure_tables_exist(engine)
+        # Use cached engine to avoid connection overhead on every request
+        engine = _get_cached_engine(db_path)
         factory = sessionmaker(bind=engine)
         return factory()
     else:
