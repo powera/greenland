@@ -31,17 +31,15 @@ from wordfreq.storage.translation_helpers import (
     get_translation,
 )
 from wordfreq.tools.chinese_converter import to_simplified
-
-# Import pypinyin for Chinese pinyin generation
-try:
-    from pypinyin import Style, lazy_pinyin
-
-    PYPINYIN_AVAILABLE = True
-except ImportError:
-    PYPINYIN_AVAILABLE = False
-
 from wordfreq.trakaido.utils.data_models import ExportStats, create_export_stats
 from wordfreq.trakaido.utils.text_rendering import format_subtype_display_name
+from wireword.helpers import (
+    convert_to_wireword_grammatical_form_key,
+    format_verb_entry,
+    generate_pinyin,
+    generate_simple_grammatical_form_label,
+    normalize_pos_type,
+)
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -304,52 +302,6 @@ class WirewordExporter:
 
         return corpus_assignments
 
-    def _normalize_pos_type(self, pos_type: str) -> str:
-        """
-        Normalize POS type to match WireWord PartOfSpeech enum.
-
-        Args:
-            pos_type: Original POS type
-
-        Returns:
-            Normalized POS type
-        """
-        pos_mappings = {
-            "noun": "noun",
-            "verb": "verb",
-            "adjective": "adjective",
-            "adverb": "adverb",
-            "pronoun": "pronoun",
-            "preposition": "preposition",
-            "conjunction": "conjunction",
-            "interjection": "interjection",
-            "numeral": "numeral",
-            "particle": "particle",
-        }
-
-        return pos_mappings.get(pos_type.lower(), pos_type)
-
-    def _generate_pinyin(self, chinese_text: str) -> Optional[str]:
-        """
-        Generate pinyin for Chinese text.
-
-        Args:
-            chinese_text: Chinese text to convert to pinyin
-
-        Returns:
-            Pinyin string with tone marks, or None if pypinyin is not available
-        """
-        if not PYPINYIN_AVAILABLE or not chinese_text:
-            return None
-
-        try:
-            # Use Style.TONE to get pinyin with tone marks (e.g., "nǐ hǎo")
-            pinyin_list = lazy_pinyin(chinese_text, style=Style.TONE)
-            return " ".join(pinyin_list)
-        except Exception as e:
-            logger.warning(f"Failed to generate pinyin for '{chinese_text}': {e}")
-            return None
-
     def _get_audio_hashes(
         self, session, guid: str, language: str, grammatical_form: Optional[str] = None
     ) -> Optional[Dict[str, str]]:
@@ -551,13 +503,13 @@ class WirewordExporter:
                             target_alternatives.append(form.derivative_form_text)
                             # Generate pinyin for Chinese alternatives (keep arrays parallel)
                             if self.language == "zh":
-                                pinyin = self._generate_pinyin(form.derivative_form_text)
+                                pinyin = generate_pinyin(form.derivative_form_text)
                                 target_alternatives_pinyin.append(pinyin if pinyin else "")
                         elif is_synonym:
                             target_synonyms.append(form.derivative_form_text)
                             # Generate pinyin for Chinese synonyms (keep arrays parallel)
                             if self.language == "zh":
-                                pinyin = self._generate_pinyin(form.derivative_form_text)
+                                pinyin = generate_pinyin(form.derivative_form_text)
                                 target_synonyms_pinyin.append(pinyin if pinyin else "")
                         elif form.grammatical_form == "plural_nominative":
                             # Skip derivative forms for Lithuanian nouns (they're handled by special cases like "where is X")
@@ -572,7 +524,7 @@ class WirewordExporter:
                             }
                             # Add pinyin for Chinese grammatical forms
                             if self.language == "zh":
-                                pinyin = self._generate_pinyin(form.derivative_form_text)
+                                pinyin = generate_pinyin(form.derivative_form_text)
                                 if pinyin:
                                     gram_form["target_pinyin"] = pinyin
 
@@ -602,7 +554,7 @@ class WirewordExporter:
                             }
                             # Add pinyin for Chinese grammatical forms
                             if self.language == "zh":
-                                pinyin = self._generate_pinyin(form.derivative_form_text)
+                                pinyin = generate_pinyin(form.derivative_form_text)
                                 if pinyin:
                                     gram_form["target_pinyin"] = pinyin
 
@@ -628,10 +580,10 @@ class WirewordExporter:
                                     english_forms_by_lemma, lemma.id, form.grammatical_form
                                 )
 
-                                # If not found in database, generate it
+                                # If not found in database, use simple fallback
                                 if not english_label:
-                                    english_label = self._generate_grammatical_form_label(
-                                        form.grammatical_form, entry["english"], lemma.pos_type
+                                    english_label = generate_simple_grammatical_form_label(
+                                        form.grammatical_form, entry["english"]
                                     )
 
                                 gram_form = {
@@ -641,7 +593,7 @@ class WirewordExporter:
                                 }
                                 # Add pinyin for Chinese grammatical forms
                                 if self.language == "zh":
-                                    pinyin = self._generate_pinyin(form.derivative_form_text)
+                                    pinyin = generate_pinyin(form.derivative_form_text)
                                     if pinyin:
                                         gram_form["target_pinyin"] = pinyin
 
@@ -672,7 +624,7 @@ class WirewordExporter:
                     "corpus": assigned_corpus,
                     "group": format_subtype_display_name(entry["subtype"]),
                     "level": entry["trakaido_level"],
-                    "word_type": self._normalize_pos_type(entry["pos_type"]),
+                    "word_type": normalize_pos_type(entry["pos_type"]),
                 }
 
                 # Add audio MD5 hashes for all available voices (from pre-fetched data)
@@ -683,7 +635,7 @@ class WirewordExporter:
 
                 # Add pinyin for Chinese language exports
                 if self.language == "zh" and entry["target_language"]:
-                    pinyin = self._generate_pinyin(entry["target_language"])
+                    pinyin = generate_pinyin(entry["target_language"])
                     if pinyin:
                         wireword["target_pinyin"] = pinyin
 
@@ -780,15 +732,14 @@ class WirewordExporter:
     ) -> Optional[str]:
         """
         Look up the English translation for a grammatical form from pre-fetched data.
-        Maps language-specific grammatical forms to their English equivalents.
 
-        This is an optimized version of _get_english_translation_from_db that uses
-        pre-fetched data instead of making individual database queries.
+        Currently only supports Lithuanian verb forms. Other languages will need
+        their English translations stored directly in the database.
 
         Args:
             english_forms_by_lemma: Pre-fetched dict mapping lemma_id -> grammatical_form -> text
             lemma_id: The lemma ID
-            grammatical_form: The grammatical form (e.g., "verb/lt_1s_present", "verb/fr_1p_impf")
+            grammatical_form: The grammatical form (e.g., "verb/lt_1s_present")
 
         Returns:
             English translation string, or None if not found
@@ -796,455 +747,17 @@ class WirewordExporter:
         # For Lithuanian forms, convert verb/lt_* to verb/en_*
         if grammatical_form.startswith("verb/lt_"):
             english_form_key = grammatical_form.replace("verb/lt_", "verb/en_")
-        # Map French verb forms to English verb forms
-        elif grammatical_form.startswith("verb/fr_"):
-            fr_to_en_mapping = {
-                # Present tense
-                "verb/fr_1s_present": "verb/en_1s_present",
-                "verb/fr_2s_present": "verb/en_2s_present",
-                "verb/fr_3s_present": "verb/en_3s_m_present",
-                "verb/fr_1p_present": "verb/en_1p_present",
-                "verb/fr_2p_present": "verb/en_2p_present",
-                "verb/fr_3p_present": "verb/en_3p_m_present",
-                # Imperfect → Past tense
-                "verb/fr_1s_impf": "verb/en_1s_past",
-                "verb/fr_2s_impf": "verb/en_2s_past",
-                "verb/fr_3s_impf": "verb/en_3s_m_past",
-                "verb/fr_1p_impf": "verb/en_1p_past",
-                "verb/fr_2p_impf": "verb/en_2p_past",
-                "verb/fr_3p_impf": "verb/en_3p_m_past",
-                # Future tense
-                "verb/fr_1s_future": "verb/en_1s_future",
-                "verb/fr_2s_future": "verb/en_2s_future",
-                "verb/fr_3s_future": "verb/en_3s_m_future",
-                "verb/fr_1p_future": "verb/en_1p_future",
-                "verb/fr_2p_future": "verb/en_2p_future",
-                "verb/fr_3p_future": "verb/en_3p_m_future",
-                # Passé composé → Past tense
-                "verb/fr_1s_pc": "verb/en_1s_past",
-                "verb/fr_2s_pc": "verb/en_2s_past",
-                "verb/fr_3s_pc": "verb/en_3s_m_past",
-                "verb/fr_1p_pc": "verb/en_1p_past",
-                "verb/fr_2p_pc": "verb/en_2p_past",
-                "verb/fr_3p_pc": "verb/en_3p_m_past",
-            }
-            english_form_key = fr_to_en_mapping.get(grammatical_form)
-            if not english_form_key:
-                return None
         else:
+            # Other languages not yet supported - return None
             return None
 
         # Look up from pre-fetched data
         lemma_forms = english_forms_by_lemma.get(lemma_id, {})
         return lemma_forms.get(english_form_key)
 
-    def _calculate_corpus_assignments(
-        self, export_data: List[Dict[str, Any]]
-    ) -> Dict[Tuple[int, str], str]:
-        """
-        Calculate corpus assignments based on levels and group overflow logic.
-
-        Args:
-            export_data: List of export entries
-
-        Returns:
-            Dictionary mapping (level, subtype) tuples to corpus names
-        """
-        # Group data by subtype to track when groups appear across levels
-        groups_by_level = {}
-        for entry in export_data:
-            level = entry["trakaido_level"]
-            subtype = entry["subtype"]
-
-            if level not in groups_by_level:
-                groups_by_level[level] = set()
-            groups_by_level[level].add(subtype)
-
-        # Track which groups have been assigned to which WORDS level
-        group_assignments = {}  # group_name -> WORDS level
-        corpus_assignments = {}  # (level, subtype) -> corpus name
-
-        # Define the level ranges for each WORDS corpus
-        words_ranges = {
-            "WORDS1": range(1, 4),  # Levels 1-3
-            "WORDS2": range(4, 7),  # Levels 4-6
-            "WORDS3": range(7, 11),  # Levels 7-10
-            "WORDS4": range(11, 15),  # Levels 11-14
-            "WORDS5": range(15, 21),  # Levels 15-20 (overflow)
-        }
-
-        # Process each level in order
-        for level in sorted(groups_by_level.keys()):
-            # Determine base WORDS level for this difficulty level
-            base_words_level = None
-            for words_name, level_range in words_ranges.items():
-                if level in level_range:
-                    base_words_level = words_name
-                    break
-
-            if base_words_level is None:
-                # Level is outside normal ranges, assign to Trakaido
-                for subtype in groups_by_level[level]:
-                    corpus_assignments[(level, subtype)] = "Trakaido"
-                continue
-
-            # Process each subtype in this level
-            for subtype in groups_by_level[level]:
-                if subtype in group_assignments:
-                    # Group has already been assigned, kick to next WORDS level
-                    current_words_level = group_assignments[subtype]
-                    words_levels = list(words_ranges.keys())
-                    current_index = words_levels.index(current_words_level)
-
-                    if current_index + 1 < len(words_levels):
-                        # Assign to next WORDS level
-                        next_words_level = words_levels[current_index + 1]
-                        group_assignments[subtype] = next_words_level
-                        corpus_assignments[(level, subtype)] = next_words_level
-                        logger.debug(
-                            f"Group '{subtype}' at level {level} kicked from {current_words_level} to {next_words_level}"
-                        )
-                    else:
-                        # No more WORDS levels available, assign to Trakaido
-                        corpus_assignments[(level, subtype)] = "Trakaido"
-                        logger.debug(
-                            f"Group '{subtype}' at level {level} assigned to Trakaido (overflow)"
-                        )
-                else:
-                    # First time seeing this group, assign to base WORDS level
-                    group_assignments[subtype] = base_words_level
-                    corpus_assignments[(level, subtype)] = base_words_level
-                    logger.debug(
-                        f"Group '{subtype}' at level {level} assigned to {base_words_level}"
-                    )
-
-        return corpus_assignments
-
-    def _normalize_pos_type(self, pos_type: str) -> str:
-        """
-        Normalize POS type to match WireWord PartOfSpeech enum.
-
-        Args:
-            pos_type: Original POS type
-
-        Returns:
-            Normalized POS type
-        """
-        pos_mappings = {
-            "noun": "noun",
-            "verb": "verb",
-            "adjective": "adjective",
-            "adverb": "adverb",
-            "pronoun": "pronoun",
-            "preposition": "preposition",
-            "conjunction": "conjunction",
-            "interjection": "interjection",
-            "numeral": "numeral",
-            "particle": "particle",
-        }
-
-        return pos_mappings.get(pos_type.lower(), pos_type)
-
-    def _convert_to_wireword_grammatical_form_key(self, grammatical_form: str) -> str:
-        """
-        Convert database grammatical form key format to WireWord format.
-
-        Converts from database format like "verb/lt_3s_m_present" or "verb/fr_1s_present"
-        to WireWord format like "3s-m_present" or "1s_present".
-
-        The key transformations:
-        - Remove "verb/{lang}_" prefix
-        - Replace underscores between person/number components with hyphens (3s_m -> 3s-m)
-
-        Args:
-            grammatical_form: Database grammatical form key (e.g., "verb/lt_3s_m_present")
-
-        Returns:
-            WireWord format key (e.g., "3s-m_present")
-        """
-        # If already in WireWord format (no prefix), return as-is
-        if not grammatical_form.startswith("verb/"):
-            return grammatical_form
-
-        # Remove "verb/{lang}_" prefix
-        # Format: "verb/lt_1s_present" or "verb/fr_3p_future"
-        parts = grammatical_form.split("_", 1)  # Split on first underscore only
-        if len(parts) < 2:
-            return grammatical_form  # Return original if format unexpected
-
-        # parts[0] is "verb/lt" or "verb/fr"
-        # parts[1] is "1s_present" or "3s_m_present" or similar
-        key_without_prefix = parts[1]
-
-        # Now convert underscores to hyphens in person/number part
-        # e.g., "3s_m_present" -> "3s-m_present"
-        # The pattern is: {person}{number}_{gender}_{tense}
-        # We want hyphens between person/number/gender, but underscore before tense
-
-        # Split by underscore to find components
-        components = key_without_prefix.split("_")
-        if len(components) == 2:
-            # Simple case: "1s_present" or "1p_past"
-            return key_without_prefix
-        elif len(components) == 3:
-            # Has gender: "3s_m_present" -> "3s-m_present"
-            person_num = components[0]
-            gender = components[1]
-            tense = components[2]
-            return f"{person_num}-{gender}_{tense}"
-        else:
-            # Unexpected format, return as-is
-            return key_without_prefix
-
-    def _format_verb_entry(self, entry: Dict[str, Any], is_last: bool = False) -> str:
-        """
-        Format a single verb entry with custom JSON formatting.
-
-        Creates a format where:
-        - Top-level verb fields are on separate lines with proper indentation
-        - Each grammatical form entry is condensed to a single line
-        - More vertical spacing between verb entries (like the old format)
-
-        Args:
-            entry: Verb entry dictionary
-            is_last: Whether this is the last entry in the array
-
-        Returns:
-            Formatted string for this verb entry
-        """
-        lines = []
-        lines.append("  {")
-
-        # Determine the keys order - put grammatical_forms last
-        keys_order = []
-        for key in ["guid", "base_target", "base_english", "corpus", "group", "level", "word_type"]:
-            if key in entry:
-                keys_order.append(key)
-
-        # Add any other keys except grammatical_forms
-        for key in entry:
-            if key not in keys_order and key != "grammatical_forms":
-                keys_order.append(key)
-
-        # Write the non-grammatical-forms fields
-        for key in keys_order:
-            value_json = json.dumps(entry[key], ensure_ascii=False)
-            lines.append(f'    "{key}": {value_json},')
-
-        # Write grammatical_forms with each form on one line
-        if "grammatical_forms" in entry:
-            lines.append('    "grammatical_forms": {')
-
-            forms = entry["grammatical_forms"]
-            form_keys = list(forms.keys())
-            for j, form_key in enumerate(form_keys):
-                form_value_json = json.dumps(
-                    forms[form_key], ensure_ascii=False, separators=(", ", ": ")
-                )
-                comma = "" if j == len(form_keys) - 1 else ","
-                lines.append(f'      "{form_key}": {form_value_json}{comma}')
-
-            lines.append("    }")
-
-        # Close the verb entry object
-        comma = "" if is_last else ","
-        lines.append(f"  }}{comma}")
-
-        return "\n".join(lines) + "\n"
-
-    def _generate_pinyin(self, chinese_text: str) -> Optional[str]:
-        """
-        Generate pinyin for Chinese text.
-
-        Args:
-            chinese_text: Chinese text to convert to pinyin
-
-        Returns:
-            Pinyin string with tone marks, or None if pypinyin is not available
-        """
-        if not PYPINYIN_AVAILABLE or not chinese_text:
-            return None
-
-        try:
-            # Use Style.TONE to get pinyin with tone marks (e.g., "nǐ hǎo")
-            pinyin_list = lazy_pinyin(chinese_text, style=Style.TONE)
-            return " ".join(pinyin_list)
-        except Exception as e:
-            logger.warning(f"Failed to generate pinyin for '{chinese_text}': {e}")
-            return None
-
-    def _get_english_translation_from_db(
-        self, session, lemma_id: int, grammatical_form: str
-    ) -> Optional[str]:
-        """
-        Look up the English translation for a grammatical form from the database.
-        Maps language-specific grammatical forms to their English equivalents.
-
-        Args:
-            session: Database session
-            lemma_id: The lemma ID
-            grammatical_form: The grammatical form (e.g., "verb/lt_1s_present", "verb/fr_1p_impf")
-
-        Returns:
-            English translation string, or None if not found
-        """
-        # For Lithuanian forms, convert verb/lt_* to verb/en_*
-        # English translations are now stored with verb/en_* labels
-        if grammatical_form.startswith("verb/lt_"):
-            english_form_key = grammatical_form.replace("verb/lt_", "verb/en_")
-        # Map French verb forms to English verb forms
-        elif grammatical_form.startswith("verb/fr_"):
-            fr_to_en_mapping = {
-                # Present tense
-                "verb/fr_1s_present": "verb/en_1s_present",
-                "verb/fr_2s_present": "verb/en_2s_present",
-                "verb/fr_3s_present": "verb/en_3s_m_present",  # Use masculine for he/she
-                "verb/fr_1p_present": "verb/en_1p_present",
-                "verb/fr_2p_present": "verb/en_2p_present",
-                "verb/fr_3p_present": "verb/en_3p_m_present",  # Use masculine for they
-                # Imperfect → Past tense (closest equivalent)
-                "verb/fr_1s_impf": "verb/en_1s_past",
-                "verb/fr_2s_impf": "verb/en_2s_past",
-                "verb/fr_3s_impf": "verb/en_3s_m_past",
-                "verb/fr_1p_impf": "verb/en_1p_past",
-                "verb/fr_2p_impf": "verb/en_2p_past",
-                "verb/fr_3p_impf": "verb/en_3p_m_past",
-                # Future tense
-                "verb/fr_1s_future": "verb/en_1s_future",
-                "verb/fr_2s_future": "verb/en_2s_future",
-                "verb/fr_3s_future": "verb/en_3s_m_future",
-                "verb/fr_1p_future": "verb/en_1p_future",
-                "verb/fr_2p_future": "verb/en_2p_future",
-                "verb/fr_3p_future": "verb/en_3p_m_future",
-                # Passé composé → Past tense
-                "verb/fr_1s_pc": "verb/en_1s_past",
-                "verb/fr_2s_pc": "verb/en_2s_past",
-                "verb/fr_3s_pc": "verb/en_3s_m_past",
-                "verb/fr_1p_pc": "verb/en_1p_past",
-                "verb/fr_2p_pc": "verb/en_2p_past",
-                "verb/fr_3p_pc": "verb/en_3p_m_past",
-                # Conditional and subjunctive don't have direct English equivalents
-                # Leave those to fall through to generation
-            }
-            english_form_key = fr_to_en_mapping.get(grammatical_form)
-            if not english_form_key:
-                return None
-        else:
-            # For other languages or unrecognized patterns, no mapping available
-            return None
-
-        # Look up the English derivative form with the mapped grammatical form
-        english_form = (
-            session.query(DerivativeForm)
-            .filter(
-                DerivativeForm.lemma_id == lemma_id,
-                DerivativeForm.language_code == "en",
-                DerivativeForm.grammatical_form == english_form_key,
-            )
-            .first()
-        )
-
-        if english_form:
-            return english_form.derivative_form_text
-
-        return None
-
-    def _generate_grammatical_form_label(
-        self, grammatical_form: str, base_english: str, pos_type: str
-    ) -> str:
-        """
-        Generate a readable English label for a grammatical form.
-        Fallback for non-Lithuanian languages only.
-
-        Args:
-            grammatical_form: The grammatical form identifier (e.g., "verb/fr_1s_present", "noun/fr_plural")
-            base_english: The base English word
-            pos_type: Part of speech type
-
-        Returns:
-            Readable English label for the grammatical form
-        """
-        # Lithuanian forms should never reach here - they must be in the database
-        if grammatical_form.startswith("verb/lt_"):
-            raise ValueError(
-                f"Lithuanian verb form '{grammatical_form}' reached generation fallback. "
-                f"All Lithuanian verb conjugations must have English translations in the database."
-            )
-
-        # French verb tenses
-        french_verb_forms = {
-            "verb/fr_1s_present": f"{base_english} (I, present)",
-            "verb/fr_2s_present": f"{base_english} (you, present)",
-            "verb/fr_3s_present": f"{base_english} (he/she, present)",
-            "verb/fr_1p_present": f"{base_english} (we, present)",
-            "verb/fr_2p_present": f"{base_english} (you all, present)",
-            "verb/fr_3p_present": f"{base_english} (they, present)",
-            "verb/fr_1s_impf": f"{base_english} (I, imperfect)",
-            "verb/fr_2s_impf": f"{base_english} (you, imperfect)",
-            "verb/fr_3s_impf": f"{base_english} (he/she, imperfect)",
-            "verb/fr_1p_impf": f"{base_english} (we, imperfect)",
-            "verb/fr_2p_impf": f"{base_english} (you all, imperfect)",
-            "verb/fr_3p_impf": f"{base_english} (they, imperfect)",
-            "verb/fr_1s_future": f"{base_english} (I, future)",
-            "verb/fr_2s_future": f"{base_english} (you, future)",
-            "verb/fr_3s_future": f"{base_english} (he/she, future)",
-            "verb/fr_1p_future": f"{base_english} (we, future)",
-            "verb/fr_2p_future": f"{base_english} (you all, future)",
-            "verb/fr_3p_future": f"{base_english} (they, future)",
-            "verb/fr_1s_cond": f"{base_english} (I, conditional)",
-            "verb/fr_2s_cond": f"{base_english} (you, conditional)",
-            "verb/fr_3s_cond": f"{base_english} (he/she, conditional)",
-            "verb/fr_1p_cond": f"{base_english} (we, conditional)",
-            "verb/fr_2p_cond": f"{base_english} (you all, conditional)",
-            "verb/fr_3p_cond": f"{base_english} (they, conditional)",
-            "verb/fr_1s_subj": f"{base_english} (I, subjunctive)",
-            "verb/fr_2s_subj": f"{base_english} (you, subjunctive)",
-            "verb/fr_3s_subj": f"{base_english} (he/she, subjunctive)",
-            "verb/fr_1p_subj": f"{base_english} (we, subjunctive)",
-            "verb/fr_2p_subj": f"{base_english} (you all, subjunctive)",
-            "verb/fr_3p_subj": f"{base_english} (they, subjunctive)",
-            "verb/fr_1s_pc": f"{base_english} (I, perfect)",
-            "verb/fr_2s_pc": f"{base_english} (you, perfect)",
-            "verb/fr_3s_pc": f"{base_english} (he/she, perfect)",
-            "verb/fr_1p_pc": f"{base_english} (we, perfect)",
-            "verb/fr_2p_pc": f"{base_english} (you all, perfect)",
-            "verb/fr_3p_pc": f"{base_english} (they, perfect)",
-            "verb/fr_inf": f"{base_english} (infinitive)",
-            "verb/fr_pres_part": f"{base_english} (present participle)",
-            "verb/fr_past_part": f"{base_english} (past participle)",
-        }
-
-        # French noun forms (with gender from grammar_facts)
-        french_noun_forms = {
-            "noun/fr_singular": f"{base_english} (singular)",
-            "noun/fr_plural": f"{base_english} (plural)",
-        }
-
-        # French adjective forms (with gender)
-        french_adj_forms = {
-            "adjective/fr_singular_m": f"{base_english} (masculine singular)",
-            "adjective/fr_plural_m": f"{base_english} (masculine plural)",
-            "adjective/fr_singular_f": f"{base_english} (feminine singular)",
-            "adjective/fr_plural_f": f"{base_english} (feminine plural)",
-        }
-
-        # Check for exact matches
-        if grammatical_form in lithuanian_verb_forms:
-            return lithuanian_verb_forms[grammatical_form]
-        elif grammatical_form in french_verb_forms:
-            return french_verb_forms[grammatical_form]
-        elif grammatical_form in french_noun_forms:
-            return french_noun_forms[grammatical_form]
-        elif grammatical_form in french_adj_forms:
-            return french_adj_forms[grammatical_form]
-
-        # Generic fallback: convert underscores to spaces and add base word
-        readable_form = grammatical_form.replace("_", " ").replace("/", " ")
-        return f"{base_english} ({readable_form})"
-
     def _generate_derivative_noun_phrases(
         self, lemma: Lemma, base_english: str, base_target: str, entry_level: int
-    ) -> Dict[str, Dict[str, any]]:
+    ) -> Dict[str, Dict[str, Any]]:
         """
         Generate derivative noun phrases like "where is X" and "this is my X" for nouns.
         These are constructed phrases, not stored in the database.
@@ -1299,7 +812,7 @@ class WirewordExporter:
                 this_is_my_level = max(entry_level, 19)
                 derivative_phrases["this_is_my"] = {
                     "level": this_is_my_level,
-                    "lithuanian": f"Tai mano {base_lithuanian}",
+                    "target": f"Tai mano {base_target}",
                     "english": f"This is my {base_english}",
                 }
 
@@ -1552,7 +1065,7 @@ class WirewordExporter:
                             target_synonyms.append(form.derivative_form_text)
                             # Generate pinyin for Chinese synonyms
                             if self.language == "zh":
-                                pinyin = self._generate_pinyin(form.derivative_form_text)
+                                pinyin = generate_pinyin(form.derivative_form_text)
                                 target_synonyms_pinyin.append(pinyin if pinyin else "")
                         elif form.grammatical_form != "infinitive":
                             # This is a conjugated form
@@ -1601,9 +1114,9 @@ class WirewordExporter:
                                         f"grammatical_form='{form.grammatical_form}'. "
                                         f"All Lithuanian verb conjugations must have English translations in the database."
                                     )
-                                # For other languages, try to generate it
-                                english_label = self._generate_grammatical_form_label(
-                                    form.grammatical_form, base_english, "verb"
+                                # For other languages, use simple fallback
+                                english_label = generate_simple_grammatical_form_label(
+                                    form.grammatical_form, base_english or ""
                                 )
 
                             gram_form = {
@@ -1614,13 +1127,13 @@ class WirewordExporter:
 
                             # Add pinyin for Chinese grammatical forms
                             if self.language == "zh":
-                                pinyin = self._generate_pinyin(form.derivative_form_text)
+                                pinyin = generate_pinyin(form.derivative_form_text)
                                 if pinyin:
                                     gram_form["target_pinyin"] = pinyin
 
                             # Convert grammatical form key to WireWord format
                             # e.g., "verb/lt_3s_m_present" -> "3s-m_present"
-                            wireword_key = self._convert_to_wireword_grammatical_form_key(
+                            wireword_key = convert_to_wireword_grammatical_form_key(
                                 form.grammatical_form
                             )
 
@@ -1650,7 +1163,7 @@ class WirewordExporter:
 
                 # Add pinyin for Chinese language exports
                 if self.language == "zh" and base_target:
-                    pinyin = self._generate_pinyin(base_target)
+                    pinyin = generate_pinyin(base_target)
                     if pinyin:
                         wireword["target_pinyin"] = pinyin
 
@@ -1705,11 +1218,7 @@ class WirewordExporter:
                         # Each verb entry gets more vertical space, but grammatical forms are condensed to one line each
                         f.write("[\n")
                         for i, entry in enumerate(wireword_data):
-                            f.write(
-                                self._format_verb_entry(
-                                    entry, is_last=(i == len(wireword_data) - 1)
-                                )
-                            )
+                            f.write(format_verb_entry(entry, is_last=(i == len(wireword_data) - 1)))
                         f.write("]\n")
                     else:
                         # Compact format
