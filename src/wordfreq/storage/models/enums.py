@@ -119,6 +119,7 @@ class AdjectiveSubtype(enum.Enum):
     CONDITION = (
         "condition"  # Physical/temporal state (hot, cold, wet, dry, clean, dirty, new, old, fresh)
     )
+    EMOTION = "emotion"  # Emotional states (happy, sad, angry, excited, tired, scared)
     QUALITY = "quality"  # Evaluative and abstract properties (good, bad, excellent, important, possible, necessary, real, clear, simple)
     AESTHETIC = "aesthetic"  # Beauty or appearance (beautiful, ugly, pretty, handsome)
     IMPORTANCE = "importance"  # Importance or priority (important, essential, trivial, critical)
@@ -131,6 +132,17 @@ class AdjectiveSubtype(enum.Enum):
     FREQUENCY = "frequency"  # Frequency of occurrence (daily, occasional, rare, frequent)
     SEQUENCE = "sequence"  # Order or sequence (first, last, next, previous)
     OTHER = "other"
+
+
+class NumeralSubtype(enum.Enum):
+    """Subtypes for numerals.
+
+    NOTE: When adding/modifying subtypes, update SUBTYPE_GUID_PREFIXES
+    in guid_prefixes.py to keep GUID assignments in sync.
+    """
+
+    CARDINAL = "cardinal"  # Cardinal numbers (one, two, three, 100)
+    ORDINAL = "ordinal"  # Ordinal numbers (first, second, third, 100th)
 
 
 class AdverbSubtype(enum.Enum):
@@ -667,6 +679,59 @@ class GrammaticalForm(enum.Enum):
     ARTICLE_PT_MASCULINE_SINGULAR = "article/pt_masculine_singular"
     ARTICLE_PT_FEMININE_SINGULAR = "article/pt_feminine_singular"
     ARTICLE_PT_PLURAL = "article/pt_plural"
+
+    # Numeral forms
+    # For numerals, the lemma form is typically masculine singular where gender applies.
+    # Cardinal numerals answer "how many?" (one, two, three)
+    # Ordinal numerals answer "which position?" (first, second, third)
+
+    # English numerals (invariant - no gender/case)
+    NUMERAL_EN_CARDINAL = "numeral/en_cardinal"  # one, two, three
+    NUMERAL_EN_ORDINAL = "numeral/en_ordinal"  # first, second, third
+
+    # Lithuanian numerals (gender for 1-9, some case variation)
+    # Lemma form is masculine nominative
+    NUMERAL_LT_CARDINAL_M = "numeral/lt_cardinal_m"  # vienas, du, trys (masculine)
+    NUMERAL_LT_CARDINAL_F = "numeral/lt_cardinal_f"  # viena, dvi, trys (feminine)
+    NUMERAL_LT_ORDINAL_M = "numeral/lt_ordinal_m"  # pirmas, antras (masculine)
+    NUMERAL_LT_ORDINAL_F = "numeral/lt_ordinal_f"  # pirma, antra (feminine)
+
+    # German numerals (gender for ein/eine/ein only; others invariant)
+    # Lemma form is masculine nominative
+    NUMERAL_DE_CARDINAL_M = "numeral/de_cardinal_m"  # ein (masculine)
+    NUMERAL_DE_CARDINAL_F = "numeral/de_cardinal_f"  # eine (feminine)
+    NUMERAL_DE_CARDINAL_N = "numeral/de_cardinal_n"  # ein (neuter)
+    NUMERAL_DE_ORDINAL = "numeral/de_ordinal"  # erste, zweite, dritte
+
+    # French numerals (gender for un/une only; others invariant)
+    NUMERAL_FR_CARDINAL_M = "numeral/fr_cardinal_m"  # un (masculine)
+    NUMERAL_FR_CARDINAL_F = "numeral/fr_cardinal_f"  # une (feminine)
+    NUMERAL_FR_ORDINAL_M = "numeral/fr_ordinal_m"  # premier (masculine)
+    NUMERAL_FR_ORDINAL_F = "numeral/fr_ordinal_f"  # première (feminine)
+
+    # Spanish numerals (gender for uno/una and ordinals)
+    NUMERAL_ES_CARDINAL_M = "numeral/es_cardinal_m"  # un, uno (masculine)
+    NUMERAL_ES_CARDINAL_F = "numeral/es_cardinal_f"  # una (feminine)
+    NUMERAL_ES_ORDINAL_M = "numeral/es_ordinal_m"  # primero (masculine)
+    NUMERAL_ES_ORDINAL_F = "numeral/es_ordinal_f"  # primera (feminine)
+
+    # Portuguese numerals (gender for um/uma and ordinals)
+    NUMERAL_PT_CARDINAL_M = "numeral/pt_cardinal_m"  # um (masculine)
+    NUMERAL_PT_CARDINAL_F = "numeral/pt_cardinal_f"  # uma (feminine)
+    NUMERAL_PT_ORDINAL_M = "numeral/pt_ordinal_m"  # primeiro (masculine)
+    NUMERAL_PT_ORDINAL_F = "numeral/pt_ordinal_f"  # primeira (feminine)
+
+    # Chinese numerals
+    # Cardinal: 一, 二, 三 (standard counting form)
+    # Quantity: 一, 两, 三 (两 used before measure words for "two")
+    NUMERAL_ZH_CARDINAL = "numeral/zh_cardinal"  # 一, 二, 三, 四, 五...
+    NUMERAL_ZH_QUANTITY = "numeral/zh_quantity"  # 一, 两, 三... (两 replaces 二 before measure words)
+    NUMERAL_ZH_ORDINAL = "numeral/zh_ordinal"  # 第一, 第二, 第三...
+
+    # Korean numerals (native Korean vs Sino-Korean systems)
+    NUMERAL_KO_NATIVE = "numeral/ko_native"  # 하나, 둘, 셋 (native Korean, for counting)
+    NUMERAL_KO_SINO = "numeral/ko_sino"  # 일, 이, 삼 (Sino-Korean, for dates/numbers)
+    NUMERAL_KO_ORDINAL = "numeral/ko_ordinal"  # 첫째, 둘째, 셋째
 
     # Generic forms
     BASE_FORM = "base_form"

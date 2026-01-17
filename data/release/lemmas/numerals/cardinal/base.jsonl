@@ -1,0 +1,30 @@
+{"guid": "Z01_001", "pos_type": "numeral", "pos_subtype": "cardinal", "concept_label": "zero", "concept_definition": "The cardinal number 0.", "difficulty_level": 4}
+{"guid": "Z01_002", "pos_type": "numeral", "pos_subtype": "cardinal", "concept_label": "one", "concept_definition": "The cardinal number 1.", "difficulty_level": 4}
+{"guid": "Z01_003", "pos_type": "numeral", "pos_subtype": "cardinal", "concept_label": "two", "concept_definition": "The cardinal number 2.", "difficulty_level": 4}
+{"guid": "Z01_004", "pos_type": "numeral", "pos_subtype": "cardinal", "concept_label": "three", "concept_definition": "The cardinal number 3.", "difficulty_level": 4}
+{"guid": "Z01_005", "pos_type": "numeral", "pos_subtype": "cardinal", "concept_label": "four", "concept_definition": "The cardinal number 4.", "difficulty_level": 4}
+{"guid": "Z01_006", "pos_type": "numeral", "pos_subtype": "cardinal", "concept_label": "five", "concept_definition": "The cardinal number 5.", "difficulty_level": 4}
+{"guid": "Z01_007", "pos_type": "numeral", "pos_subtype": "cardinal", "concept_label": "six", "concept_definition": "The cardinal number 6.", "difficulty_level": 4}
+{"guid": "Z01_008", "pos_type": "numeral", "pos_subtype": "cardinal", "concept_label": "seven", "concept_definition": "The cardinal number 7.", "difficulty_level": 4}
+{"guid": "Z01_009", "pos_type": "numeral", "pos_subtype": "cardinal", "concept_label": "eight", "concept_definition": "The cardinal number 8.", "difficulty_level": 4}
+{"guid": "Z01_010", "pos_type": "numeral", "pos_subtype": "cardinal", "concept_label": "nine", "concept_definition": "The cardinal number 9.", "difficulty_level": 4}
+{"guid": "Z01_011", "pos_type": "numeral", "pos_subtype": "cardinal", "concept_label": "ten", "concept_definition": "The cardinal number 10.", "difficulty_level": 4}
+{"guid": "Z01_012", "pos_type": "numeral", "pos_subtype": "cardinal", "concept_label": "eleven", "concept_definition": "The cardinal number 11.", "difficulty_level": 4}
+{"guid": "Z01_013", "pos_type": "numeral", "pos_subtype": "cardinal", "concept_label": "twelve", "concept_definition": "The cardinal number 12.", "difficulty_level": 4}
+{"guid": "Z01_014", "pos_type": "numeral", "pos_subtype": "cardinal", "concept_label": "thirteen", "concept_definition": "The cardinal number 13.", "difficulty_level": 4}
+{"guid": "Z01_015", "pos_type": "numeral", "pos_subtype": "cardinal", "concept_label": "fourteen", "concept_definition": "The cardinal number 14.", "difficulty_level": 4}
+{"guid": "Z01_016", "pos_type": "numeral", "pos_subtype": "cardinal", "concept_label": "fifteen", "concept_definition": "The cardinal number 15.", "difficulty_level": 4}
+{"guid": "Z01_017", "pos_type": "numeral", "pos_subtype": "cardinal", "concept_label": "sixteen", "concept_definition": "The cardinal number 16.", "difficulty_level": 4}
+{"guid": "Z01_018", "pos_type": "numeral", "pos_subtype": "cardinal", "concept_label": "seventeen", "concept_definition": "The cardinal number 17.", "difficulty_level": 4}
+{"guid": "Z01_019", "pos_type": "numeral", "pos_subtype": "cardinal", "concept_label": "eighteen", "concept_definition": "The cardinal number 18.", "difficulty_level": 4}
+{"guid": "Z01_020", "pos_type": "numeral", "pos_subtype": "cardinal", "concept_label": "nineteen", "concept_definition": "The cardinal number 19.", "difficulty_level": 4}
+{"guid": "Z01_021", "pos_type": "numeral", "pos_subtype": "cardinal", "concept_label": "twenty", "concept_definition": "The cardinal number 20.", "difficulty_level": 4}
+{"guid": "Z01_022", "pos_type": "numeral", "pos_subtype": "cardinal", "concept_label": "thirty", "concept_definition": "The cardinal number 30.", "difficulty_level": 4}
+{"guid": "Z01_023", "pos_type": "numeral", "pos_subtype": "cardinal", "concept_label": "forty", "concept_definition": "The cardinal number 40.", "difficulty_level": 4}
+{"guid": "Z01_024", "pos_type": "numeral", "pos_subtype": "cardinal", "concept_label": "fifty", "concept_definition": "The cardinal number 50.", "difficulty_level": 4}
+{"guid": "Z01_025", "pos_type": "numeral", "pos_subtype": "cardinal", "concept_label": "sixty", "concept_definition": "The cardinal number 60.", "difficulty_level": 4}
+{"guid": "Z01_026", "pos_type": "numeral", "pos_subtype": "cardinal", "concept_label": "seventy", "concept_definition": "The cardinal number 70.", "difficulty_level": 4}
+{"guid": "Z01_027", "pos_type": "numeral", "pos_subtype": "cardinal", "concept_label": "eighty", "concept_definition": "The cardinal number 80.", "difficulty_level": 4}
+{"guid": "Z01_028", "pos_type": "numeral", "pos_subtype": "cardinal", "concept_label": "ninety", "concept_definition": "The cardinal number 90.", "difficulty_level": 4}
+{"guid": "Z01_029", "pos_type": "numeral", "pos_subtype": "cardinal", "concept_label": "one hundred", "concept_definition": "The cardinal number 100.", "difficulty_level": 4}
+{"guid": "Z01_030", "pos_type": "numeral", "pos_subtype": "cardinal", "concept_label": "one thousand", "concept_definition": "The cardinal number 1000.", "difficulty_level": 4}
