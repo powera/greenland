@@ -119,6 +119,7 @@ class AdjectiveSubtype(enum.Enum):
     CONDITION = (
         "condition"  # Physical/temporal state (hot, cold, wet, dry, clean, dirty, new, old, fresh)
     )
+    EMOTION = "emotion"  # Emotional states (happy, sad, angry, excited, tired, scared)
     QUALITY = "quality"  # Evaluative and abstract properties (good, bad, excellent, important, possible, necessary, real, clear, simple)
     AESTHETIC = "aesthetic"  # Beauty or appearance (beautiful, ugly, pretty, handsome)
     IMPORTANCE = "importance"  # Importance or priority (important, essential, trivial, critical)
