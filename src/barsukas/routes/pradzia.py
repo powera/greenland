@@ -4,23 +4,19 @@
 
 import subprocess
 import threading
-import time
 import uuid
 from pathlib import Path
-from typing import Any, Dict, Iterator, List
+from typing import Any, Dict, List
 
 from config import Config
-from flask import Blueprint, Response, g, jsonify, redirect, render_template, request, url_for
+from flask import Blueprint, g, jsonify, redirect, render_template, request, url_for
 from flask.typing import ResponseReturnValue
 
 import constants
+from barsukas.routes.agents_launcher import running_tasks
 from wordfreq.storage.models.schema import Corpus, Lemma, WordFrequency, WordToken
 
 bp = Blueprint("pradzia", __name__, url_prefix="/pradzia")
-
-# Global dictionary to track running PRADZIA tasks
-# Format: {task_id: {"process": Popen, "output": [], "complete": bool, "returncode": int, ...}}
-running_tasks: Dict[str, Dict[str, Any]] = {}
 
 
 def get_database_stats() -> Dict[str, Any]:
@@ -121,7 +117,11 @@ def run_pradzia_command(args: list[str], timeout: int = 600) -> Dict[str, Any]:
 
 
 def start_pradzia_task(args: list[str], operation_name: str) -> str:
-    """Start a PRADZIA command asynchronously and return the task ID."""
+    """Start a PRADZIA command asynchronously and return the task ID.
+
+    Uses the shared running_tasks dict from agents_launcher for task tracking
+    and SSE streaming.
+    """
     script_path = Path(constants.AGENTS_DIR) / "pradzia.py"
 
     # Build full command with appropriate backend configuration
@@ -145,13 +145,14 @@ def start_pradzia_task(args: list[str], operation_name: str) -> str:
         universal_newlines=True,
     )
 
-    # Store task info
+    # Store task info in shared running_tasks dict (from agents_launcher)
     running_tasks[task_id] = {
         "process": process,
         "output": [],
         "complete": False,
         "returncode": None,
-        "operation_name": operation_name,
+        "agent_name": "PRADZIA",
+        "agent_display_name": operation_name,
         "cmdline": " ".join(full_args),
     }
 
@@ -175,56 +176,6 @@ def start_pradzia_task(args: list[str], operation_name: str) -> str:
     thread.start()
 
     return task_id
-
-
-@bp.route("/output/<task_id>")
-def view_output(task_id: str) -> ResponseReturnValue:
-    """Display the output page for a running/completed PRADZIA task."""
-    if task_id not in running_tasks:
-        return redirect(url_for("pradzia.index"))
-
-    task = running_tasks[task_id]
-    return render_template(
-        "pradzia/output.html",
-        task_id=task_id,
-        operation_name=task.get("operation_name", "PRADZIA Operation"),
-        cmdline=task.get("cmdline", ""),
-    )
-
-
-@bp.route("/stream/<task_id>")
-def stream_output(task_id: str) -> ResponseReturnValue:
-    """Stream the output of a running PRADZIA task using Server-Sent Events."""
-    if task_id not in running_tasks:
-        return jsonify({"success": False, "error": "Task not found"}), 404
-
-    def generate() -> Iterator[str]:
-        """Generator function to stream output line by line."""
-        import json
-
-        task = running_tasks[task_id]
-        last_line_sent = 0
-
-        while True:
-            # Send any new output lines
-            output_lines: List[str] = task["output"]
-            current_output_length = len(output_lines)
-            if current_output_length > last_line_sent:
-                for i in range(last_line_sent, current_output_length):
-                    line_data = json.dumps({"type": "output", "line": output_lines[i]})
-                    yield f"data: {line_data}\n\n"
-                last_line_sent = current_output_length
-
-            # Check if process is complete
-            if task["complete"]:
-                complete_data = json.dumps({"type": "complete", "returncode": task["returncode"]})
-                yield f"data: {complete_data}\n\n"
-                break
-
-            # Brief sleep to avoid busy-waiting
-            time.sleep(0.1)
-
-    return Response(generate(), mimetype="text/event-stream")
 
 
 @bp.route("/check", methods=["POST"])
@@ -344,7 +295,7 @@ def get_stats() -> ResponseReturnValue:
 def execute_check() -> ResponseReturnValue:
     """Execute configuration check and redirect to status page."""
     task_id = start_pradzia_task(["--check"], "Check Configuration")
-    return redirect(url_for("pradzia.view_output", task_id=task_id))
+    return redirect(url_for("agents_launcher.view_output", task_id=task_id))
 
 
 @bp.route("/execute/sync-config", methods=["POST"])
@@ -358,7 +309,7 @@ def execute_sync_config() -> ResponseReturnValue:
 
     operation_name = "Sync Configuration" + (" (Dry Run)" if dry_run else "")
     task_id = start_pradzia_task(args, operation_name)
-    return redirect(url_for("pradzia.view_output", task_id=task_id))
+    return redirect(url_for("agents_launcher.view_output", task_id=task_id))
 
 
 @bp.route("/execute/load-corpora", methods=["POST"])
@@ -375,7 +326,7 @@ def execute_load_corpora() -> ResponseReturnValue:
 
     operation_name = "Load Corpora" + (" (Dry Run)" if dry_run else "")
     task_id = start_pradzia_task(args, operation_name)
-    return redirect(url_for("pradzia.view_output", task_id=task_id))
+    return redirect(url_for("agents_launcher.view_output", task_id=task_id))
 
 
 @bp.route("/execute/calc-ranks", methods=["POST"])
@@ -389,7 +340,7 @@ def execute_calc_ranks() -> ResponseReturnValue:
 
     operation_name = "Calculate Ranks" + (" (Dry Run)" if dry_run else "")
     task_id = start_pradzia_task(args, operation_name)
-    return redirect(url_for("pradzia.view_output", task_id=task_id))
+    return redirect(url_for("agents_launcher.view_output", task_id=task_id))
 
 
 @bp.route("/execute/init-full", methods=["POST"])
@@ -403,7 +354,7 @@ def execute_init_full() -> ResponseReturnValue:
 
     operation_name = "Full Initialization" + (" (Dry Run)" if dry_run else "")
     task_id = start_pradzia_task(args, operation_name)
-    return redirect(url_for("pradzia.view_output", task_id=task_id))
+    return redirect(url_for("agents_launcher.view_output", task_id=task_id))
 
 
 @bp.route("/execute/bootstrap", methods=["POST"])
@@ -424,7 +375,7 @@ def execute_bootstrap() -> ResponseReturnValue:
 
     operation_name = "Bootstrap from JSON" + (" (Dry Run)" if dry_run else "")
     task_id = start_pradzia_task(args, operation_name)
-    return redirect(url_for("pradzia.view_output", task_id=task_id))
+    return redirect(url_for("agents_launcher.view_output", task_id=task_id))
 
 
 @bp.route("/execute/import-jsonl", methods=["POST"])
@@ -442,4 +393,4 @@ def execute_import_jsonl() -> ResponseReturnValue:
 
     operation_name = "Import from JSONL" + (" (Dry Run)" if dry_run else "")
     task_id = start_pradzia_task(args, operation_name)
-    return redirect(url_for("pradzia.view_output", task_id=task_id))
+    return redirect(url_for("agents_launcher.view_output", task_id=task_id))
