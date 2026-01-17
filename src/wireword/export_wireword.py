@@ -20,8 +20,9 @@ if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
 import constants
+from wordfreq.storage.backend.config import BackendType, DataSourceConfig
+from wordfreq.storage.backend.factory import create_session
 from wordfreq.storage.crud.difficulty_override import bulk_get_effective_difficulty_levels
-from wordfreq.storage.database import create_database_session
 from wordfreq.storage.models.grammar_fact import GrammarFact
 from wordfreq.storage.models.schema import AudioQualityReview, DerivativeForm, Lemma, WordToken
 from wordfreq.storage.translation_helpers import (
@@ -51,7 +52,7 @@ class WirewordExporter:
 
     def __init__(
         self,
-        db_path: str = None,
+        config: Optional[DataSourceConfig] = None,
         debug: bool = False,
         language: str = "lt",
         simplified_chinese: bool = True,
@@ -60,12 +61,15 @@ class WirewordExporter:
         Initialize the WirewordExporter.
 
         Args:
-            db_path: Database path (uses default if None)
+            config: DataSourceConfig with backend settings (uses default SQLite if None)
             debug: Enable debug logging
             language: Target language code ('lt' for Lithuanian, 'zh' for Chinese, etc.)
             simplified_chinese: If True and language is 'zh', convert to Simplified Chinese (default: True)
         """
-        self.db_path = db_path or constants.WORDFREQ_DB_PATH
+        # Use provided config or create default SQLite config
+        if config is None:
+            config = DataSourceConfig(backend_type=BackendType.SQLITE)
+        self.config = config
         self.debug = debug
         self.language = language
         self.simplified_chinese = simplified_chinese
@@ -85,7 +89,7 @@ class WirewordExporter:
 
     def get_session(self):
         """Get database session."""
-        return create_database_session(self.db_path)
+        return create_session(self.config)
 
     def get_english_word_from_lemma(self, session, lemma: Lemma) -> Optional[str]:
         """

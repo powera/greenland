@@ -84,15 +84,10 @@ class UngurysAgent:
                 f"Unsupported language: {self.language}. Supported: {', '.join(SUPPORTED_LANGUAGES.keys())}"
             )
 
-        # Get db_path from config (exporters still use db_path)
-        if config.backend_type == BackendType.SQLITE:
-            db_path = config.sqlite_path
-        else:
-            db_path = constants.WORDFREQ_DB_PATH  # fallback
-
         # Initialize exporter with language parameter and Chinese variant
+        # Pass config directly so exporters use correct backend (SQLite or PostgreSQL)
         self.exporter = TrakaidoExporter(
-            db_path=db_path,
+            config=config,
             debug=self.debug,
             language=self.language,
             simplified_chinese=self.simplified_chinese if self.language == "zh" else True,
@@ -100,7 +95,7 @@ class UngurysAgent:
 
         # Initialize sentence exporter with Chinese variant support
         self.sentence_exporter = WirewordSentenceExporter(
-            db_path=db_path,
+            config=config,
             debug=self.debug,
             language=self.language,
             simplified_chinese=self.simplified_chinese if self.language == "zh" else True,
@@ -108,7 +103,7 @@ class UngurysAgent:
 
         # Initialize conversation exporter with Chinese variant support
         self.conversation_exporter = WirewordConversationExporter(
-            db_path=db_path,
+            config=config,
             debug=self.debug,
             language=self.language,
             simplified_chinese=self.simplified_chinese if self.language == "zh" else True,
