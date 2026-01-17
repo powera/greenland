@@ -2,9 +2,12 @@
 
 """Routes for pattern-based simple sentence generation."""
 
+import logging
 import subprocess
 from pathlib import Path
 from typing import Any, cast
+
+logger = logging.getLogger(__name__)
 
 from config import Config
 from flask import Blueprint, flash, g, jsonify, redirect, render_template, request, url_for
@@ -86,6 +89,7 @@ def generate_candidates() -> ResponseReturnValue:
 
     try:
         # Execute the agent
+        logger.info("Launching agent subprocess: %s", " ".join(args))
         process = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
         # Wait for completion with timeout
@@ -165,6 +169,7 @@ def submit_batch() -> ResponseReturnValue:
 
     try:
         # Execute the agent
+        logger.info("Launching agent subprocess: %s", " ".join(args))
         process = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
         # Wait for completion with timeout
@@ -217,6 +222,7 @@ def batch_status() -> ResponseReturnValue:
     args.append("list-batches")
 
     try:
+        logger.info("Launching agent subprocess: %s", " ".join(args))
         process = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         stdout, stderr = process.communicate(timeout=30)
 
@@ -255,6 +261,7 @@ def check_batch(batch_id: str) -> ResponseReturnValue:
     args.extend(["check-batch", "--batch-id", batch_id])
 
     try:
+        logger.info("Launching agent subprocess: %s", " ".join(args))
         process = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         stdout, stderr = process.communicate(timeout=30)
 
@@ -280,6 +287,7 @@ def check_batch(batch_id: str) -> ResponseReturnValue:
             else:
                 retrieve_args.extend(["--db-path", Config.DB_PATH])
             retrieve_args.extend(["retrieve-batch", "--batch-id", batch_id])
+            logger.info("Launching agent subprocess: %s", " ".join(retrieve_args))
             retrieve_process = subprocess.Popen(
                 retrieve_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
             )
@@ -317,6 +325,7 @@ def retrieve_batch(batch_id: str) -> ResponseReturnValue:
     args.extend(["retrieve-batch", "--batch-id", batch_id])
 
     try:
+        logger.info("Launching agent subprocess: %s", " ".join(args))
         process = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         stdout, stderr = process.communicate(timeout=300)  # 5 min timeout
 

@@ -2,11 +2,14 @@
 
 """Routes for PRADZIA database initialization agent bespoke page."""
 
+import logging
 import subprocess
 import threading
 import uuid
 from pathlib import Path
 from typing import Any, Dict, List
+
+logger = logging.getLogger(__name__)
 
 from config import Config
 from flask import Blueprint, g, jsonify, redirect, render_template, request, url_for
@@ -93,6 +96,7 @@ def run_pradzia_command(args: list[str], timeout: int = 600) -> Dict[str, Any]:
     full_args.extend(args)
 
     try:
+        logger.info("Launching agent subprocess: %s", " ".join(full_args))
         process = subprocess.Popen(
             full_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
         )
@@ -136,6 +140,7 @@ def start_pradzia_task(args: list[str], operation_name: str) -> str:
     task_id = str(uuid.uuid4())
 
     # Start the process
+    logger.info("Launching agent subprocess: %s", " ".join(full_args))
     process = subprocess.Popen(
         full_args,
         stdout=subprocess.PIPE,
