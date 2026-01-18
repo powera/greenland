@@ -18,7 +18,9 @@ import sys
 import tempfile
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
+
+from sqlalchemy.orm import Session
 
 # Add src directory to path
 GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent)
@@ -80,9 +82,9 @@ class VieversysAgent:
     def __init__(
         self,
         config: DataSourceConfig,
-        output_dir: str = None,
+        output_dir: Optional[str] = None,
         upload_s3: bool = False,
-    ):
+    ) -> None:
         """
         Initialize the Vieversys agent.
 
@@ -116,11 +118,13 @@ class VieversysAgent:
         self.output_dir.mkdir(parents=True, exist_ok=True)
         logger.info(f"Output directory: {self.output_dir}")
 
-    def get_session(self):
+    def get_session(self) -> Session:
         """Get database session using backend abstraction."""
         return create_backend_session(self.config)
 
-    def get_translation_text(self, session, lemma: Lemma, language_code: str) -> Optional[str]:
+    def get_translation_text(
+        self, session: Session, lemma: Lemma, language_code: str
+    ) -> Optional[str]:
         """
         Get translation text for a lemma in a specific language.
 
@@ -136,12 +140,12 @@ class VieversysAgent:
 
     def generate_audio_for_lemma(
         self,
-        session,
+        session: Session,
         lemma: Lemma,
         language_code: str,
         voices: List[Voice],
         create_review_record: bool = True,
-    ) -> Dict:
+    ) -> Dict[str, Any]:
         """
         Generate audio files for a lemma in a specific language with multiple voices.
 
@@ -273,7 +277,7 @@ class VieversysAgent:
 
     def _create_review_record(
         self,
-        session,
+        session: Session,
         lemma: Lemma,
         language_code: str,
         voice_name: str,
@@ -282,7 +286,7 @@ class VieversysAgent:
         md5_hash: str,
         s3_staging_url: Optional[str] = None,
         s3_staging_manifest_url: Optional[str] = None,
-    ):
+    ) -> None:
         """Create AudioQualityReview record for generated audio."""
         # Check if record already exists
         existing = (
@@ -334,12 +338,12 @@ class VieversysAgent:
 
     def generate_audio_for_sentence(
         self,
-        session,
+        session: Session,
         sentence: Sentence,
         sentence_translation: SentenceTranslation,
         voices: List[Voice],
         create_review_record: bool = True,
-    ) -> Dict:
+    ) -> Dict[str, Any]:
         """
         Generate audio files for a sentence in a specific language with multiple voices.
 
@@ -465,7 +469,7 @@ class VieversysAgent:
 
     def _create_sentence_review_record(
         self,
-        session,
+        session: Session,
         sentence: Sentence,
         language_code: str,
         voice_name: str,
@@ -474,7 +478,7 @@ class VieversysAgent:
         md5_hash: str,
         s3_staging_url: Optional[str] = None,
         s3_staging_manifest_url: Optional[str] = None,
-    ):
+    ) -> None:
         """Create AudioQualityReview record for generated sentence audio."""
         # Check if record already exists
         existing = (
@@ -528,7 +532,7 @@ class VieversysAgent:
         language_code: str,
         lemmas: Optional[List[Lemma]] = None,
         voices: Optional[List[Voice]] = None,
-    ) -> Dict:
+    ) -> Dict[str, Any]:
         """
         Generate audio for a batch of lemmas.
 
@@ -566,7 +570,7 @@ class VieversysAgent:
 
             logger.info(f"Generating audio for {len(lemmas)} lemmas in {language_code}")
 
-            results = {
+            results: Dict[str, Any] = {
                 "language_code": language_code,
                 "total_lemmas": len(lemmas),
                 "voices": [v.value for v in voices],
@@ -600,7 +604,7 @@ class VieversysAgent:
         guid: Optional[str] = None,
         limit: int = 10,
         voices: Optional[List[Voice]] = None,
-    ) -> Dict:
+    ) -> Dict[str, Any]:
         """
         Generate audio for sentences.
 
@@ -659,7 +663,7 @@ class VieversysAgent:
 
             logger.info(f"Generating audio for {len(sentence_pairs)} sentences in {language_code}")
 
-            results = {
+            results: Dict[str, Any] = {
                 "language_code": language_code,
                 "guid": guid,
                 "total_sentences": len(sentence_pairs),
@@ -703,7 +707,7 @@ class VieversysAgent:
         if not voice_dir.exists():
             raise ValueError(f"Voice directory not found: {voice_dir}")
 
-        manifest = {"language": language_code, "voice": voice_name, "files": {}}
+        manifest: Dict[str, Any] = {"language": language_code, "voice": voice_name, "files": {}}
 
         # Scan for MP3 files
         for mp3_file in voice_dir.glob("*.mp3"):
@@ -732,7 +736,7 @@ class VieversysAgent:
         return manifest_path
 
 
-def get_argument_parser():
+def get_argument_parser() -> argparse.ArgumentParser:
     """Return the argument parser for introspection."""
     parser = argparse.ArgumentParser(description="Vieversys - Audio Generation Agent")
 
@@ -801,7 +805,7 @@ def get_argument_parser():
     return parser
 
 
-def main():
+def main() -> None:
     """Main entry point for the vieversys agent."""
     parser = get_argument_parser()
     args = parser.parse_args()
@@ -975,9 +979,10 @@ def main():
             session = agent.get_session()
             try:
                 lemmas_with_translation = []
-                for lemma in lemmas:
-                    if agent.get_translation_text(session, lemma, args.language):
-                        lemmas_with_translation.append(lemma)
+                if lemmas:
+                    for lemma in lemmas:
+                        if agent.get_translation_text(session, lemma, args.language):
+                            lemmas_with_translation.append(lemma)
                 lemma_count = len(lemmas_with_translation)
             finally:
                 session.close()

@@ -12,7 +12,9 @@ This agent runs autonomously to validate and generate pronunciations:
 
 import logging
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
+
+from sqlalchemy.orm import Session
 
 from clients.barsukas_cache import BarsukasCacheClient
 from wordfreq.storage.backend import create_session as create_backend_session
@@ -47,16 +49,16 @@ class PapugaAgent:
         self.debug = config.debug
 
         # Lazy initialization
-        self.cache_client = None
+        self.cache_client: Optional[BarsukasCacheClient] = None
 
         if self.debug:
             logger.setLevel(logging.DEBUG)
 
-    def get_session(self):
+    def get_session(self) -> Session:
         """Get database session using backend abstraction."""
         return create_backend_session(self.config)
 
-    def get_cache_client(self):
+    def get_cache_client(self) -> Optional[BarsukasCacheClient]:
         """Get or create cache client for BARSUKAS queries."""
         if self.cache_client is None and self.config.barsukas_url:
             self.cache_client = BarsukasCacheClient(
@@ -66,7 +68,7 @@ class PapugaAgent:
             )
         return self.cache_client
 
-    def _get_example_sentence(self, session, lemma: Lemma) -> Optional[str]:
+    def _get_example_sentence(self, session: Session, lemma: Lemma) -> Optional[str]:
         """
         Get an example sentence featuring this lemma from the new sentences system.
 
@@ -99,7 +101,8 @@ class PapugaAgent:
         )
 
         if sentence_translation:
-            return sentence_translation.translation_text
+            text: Optional[str] = sentence_translation.translation_text
+            return text
 
         return None
 
@@ -112,7 +115,7 @@ class PapugaAgent:
         dry_run: bool = False,
         lemma_id: Optional[int] = None,
         lemmas: Optional[List[Lemma]] = None,
-    ) -> Dict[str, any]:
+    ) -> Dict[str, Any]:
         """
         Check existing pronunciations for correctness.
 
@@ -193,7 +196,7 @@ class PapugaAgent:
                         pos_type=lemma.pos_type,
                         example_sentence=example_text,
                         definition=lemma.definition_text,
-                        model=self.config.model,
+                        model=self.config.model or "gpt-4o",
                         language_code=form.language_code,
                         grammatical_form=form.grammatical_form,
                         english_translation=(
@@ -250,7 +253,7 @@ class PapugaAgent:
         only_base_forms: bool = False,
         lemma_id: Optional[int] = None,
         lemmas: Optional[List[Lemma]] = None,
-    ) -> Dict[str, any]:
+    ) -> Dict[str, Any]:
         """
         Find derivative forms that are missing pronunciations.
 
@@ -332,7 +335,7 @@ class PapugaAgent:
         dry_run: bool = False,
         lemma_id: Optional[int] = None,
         lemmas: Optional[List[Lemma]] = None,
-    ) -> Dict[str, any]:
+    ) -> Dict[str, Any]:
         """
         Generate pronunciations for forms that are missing them.
 
@@ -448,7 +451,7 @@ class PapugaAgent:
                                 pos_type=lemma.pos_type,
                                 example_sentence=example_text,
                                 definition=lemma.definition_text,
-                                model=self.config.model,
+                                model=self.config.model or "gpt-4o",
                                 language_code=lang_code,
                                 grammatical_form=form.grammatical_form,
                                 english_translation=lemma.lemma_text if lang_code != "en" else None,
@@ -498,7 +501,7 @@ class PapugaAgent:
                                 definition=lemma.definition_text,
                                 pos_type=lemma.pos_type,
                                 forms=forms_list,
-                                model=self.config.model,
+                                model=self.config.model or "gpt-4o",
                                 language_code=lang_code,
                                 english_translation=lemma.lemma_text if lang_code != "en" else None,
                             )
@@ -581,7 +584,7 @@ class PapugaAgent:
         dry_run: bool = False,
         lemma_id: Optional[int] = None,
         lemmas: Optional[List[Lemma]] = None,
-    ) -> Dict[str, any]:
+    ) -> Dict[str, Any]:
         """
         Run full pronunciation validation and generate a comprehensive report.
 
@@ -601,7 +604,7 @@ class PapugaAgent:
         logger.info(f"{'DRY RUN: ' if dry_run else ''}Starting pronunciation validation check...")
         start_time = datetime.now()
 
-        results = {
+        results: Dict[str, Any] = {
             "timestamp": start_time.isoformat(),
             "model": self.config.model,
             "sample_rate": sample_rate,
@@ -651,7 +654,9 @@ class PapugaAgent:
 
         return results
 
-    def _print_summary(self, results: Dict, start_time: datetime, duration: float):
+    def _print_summary(
+        self, results: Dict[str, Any], start_time: datetime, duration: float
+    ) -> None:
         """Print a summary of the check results."""
         logger.info("=" * 80)
         logger.info("PAPUGA AGENT REPORT - Pronunciation Validation")

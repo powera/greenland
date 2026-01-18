@@ -19,7 +19,9 @@ import sys
 import tempfile
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
+
+from sqlalchemy.orm import Session
 
 # Add src directory to path
 GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent)
@@ -59,9 +61,9 @@ class StrazdasAgent:
     def __init__(
         self,
         config: DataSourceConfig,
-        output_dir: str = None,
+        output_dir: Optional[str] = None,
         upload_s3: bool = False,
-    ):
+    ) -> None:
         """
         Initialize the Strazdas agent.
 
@@ -95,11 +97,13 @@ class StrazdasAgent:
         self.output_dir.mkdir(parents=True, exist_ok=True)
         logger.info(f"Output directory: {self.output_dir}")
 
-    def get_session(self):
+    def get_session(self) -> Session:
         """Get database session using backend abstraction."""
         return create_backend_session(self.config)
 
-    def get_translation_text(self, session, lemma: Lemma, language_code: str) -> Optional[str]:
+    def get_translation_text(
+        self, session: Session, lemma: Lemma, language_code: str
+    ) -> Optional[str]:
         """
         Get translation text for a lemma in a specific language.
 
@@ -115,13 +119,13 @@ class StrazdasAgent:
 
     def generate_audio_for_lemma(
         self,
-        session,
+        session: Session,
         lemma: Lemma,
         language_code: str,
         voices: List[EspeakVoice],
         create_review_record: bool = True,
         use_ipa: bool = False,
-    ) -> Dict:
+    ) -> Dict[str, Any]:
         """
         Generate audio files for a lemma in a specific language with multiple voices.
 
@@ -221,7 +225,7 @@ class StrazdasAgent:
                     sentence_id=None,
                     grammatical_form=None,
                     generation_params={
-                        "voice": voice.espeak_voice_id,
+                        "voice": voice.espeak_identifier,
                         "ipa_input": bool(ipa_text),
                     },
                 )
@@ -270,7 +274,7 @@ class StrazdasAgent:
 
     def _create_review_record(
         self,
-        session,
+        session: Session,
         lemma: Lemma,
         language_code: str,
         voice_name: str,
@@ -279,7 +283,7 @@ class StrazdasAgent:
         md5_hash: str,
         s3_staging_url: Optional[str] = None,
         s3_staging_manifest_url: Optional[str] = None,
-    ):
+    ) -> None:
         """Create AudioQualityReview record for generated audio."""
         # Check if record already exists
         existing = (
@@ -335,7 +339,7 @@ class StrazdasAgent:
         lemmas: Optional[List[Lemma]] = None,
         voices: Optional[List[EspeakVoice]] = None,
         use_ipa: bool = False,
-    ) -> Dict:
+    ) -> Dict[str, Any]:
         """
         Generate audio for a batch of lemmas.
 
@@ -374,7 +378,7 @@ class StrazdasAgent:
 
             logger.info(f"Generating audio for {len(lemmas)} lemmas in {language_code}")
 
-            results = {
+            results: Dict[str, Any] = {
                 "language_code": language_code,
                 "total_lemmas": len(lemmas),
                 "voices": [v.name for v in voices],
@@ -408,7 +412,7 @@ class StrazdasAgent:
             session.close()
 
 
-def get_argument_parser():
+def get_argument_parser() -> argparse.ArgumentParser:
     """Return the argument parser for introspection."""
     parser = argparse.ArgumentParser(description="Strazdas - eSpeak-NG Audio Generation Agent")
 
@@ -459,7 +463,7 @@ def get_argument_parser():
     return parser
 
 
-def main():
+def main() -> None:
     """Main entry point for the strazdas agent."""
     parser = get_argument_parser()
     args = parser.parse_args()
@@ -493,10 +497,10 @@ def main():
     )
 
     # Convert voice names to EspeakVoice enums
-    voices = None
+    selected_voices: Optional[List[EspeakVoice]] = None
     if args.voices:
         try:
-            voices = [EspeakVoice[v.upper()] for v in args.voices]
+            selected_voices = [EspeakVoice[v.upper()] for v in args.voices]
         except KeyError as e:
             print(f"Error: Unknown voice name: {e}")
             print(f"Use --list-voices to see available voices")
@@ -607,20 +611,21 @@ def main():
             session = agent.get_session()
             try:
                 lemmas_with_translation = []
-                for lemma in lemmas:
-                    if agent.get_translation_text(session, lemma, args.language):
-                        lemmas_with_translation.append(lemma)
+                if lemmas:
+                    for lemma in lemmas:
+                        if agent.get_translation_text(session, lemma, args.language):
+                            lemmas_with_translation.append(lemma)
                 lemma_count = len(lemmas_with_translation)
             finally:
                 session.close()
 
-            voice_list = voices or DEFAULT_ESPEAK_VOICES.get(args.language, [])
+            voice_list = selected_voices or DEFAULT_ESPEAK_VOICES.get(args.language, [])
             voice_count = len(voice_list)
             estimated_files = lemma_count * voice_count
 
             voices_str = (
-                ", ".join(v.name for v in voices)
-                if voices
+                ", ".join(v.name for v in selected_voices)
+                if selected_voices
                 else ", ".join(v.name for v in voice_list)
             )
             if not confirm_operation(
@@ -637,7 +642,7 @@ def main():
         results = agent.generate_batch(
             language_code=args.language,
             lemmas=lemmas,
-            voices=voices,
+            voices=selected_voices,
             use_ipa=args.use_ipa,
         )
         duration = (datetime.now() - start_time).total_seconds()
