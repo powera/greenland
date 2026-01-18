@@ -107,7 +107,7 @@ echo "Storage backend: $STORAGE_BACKEND"
 echo "PYTHONPATH: $PYTHONPATH"
 echo "Working directory: $(pwd)"
 if [[ -n "$USE_POSTGRES" ]]; then
-    echo "PostgreSQL mode: enabled (using postgres_ul + keys/postgres.key)"
+    echo "PostgreSQL mode: enabled (using constants + keys/postgres.key)"
 elif [[ "$STORAGE_FORMAT" == "jsonl" ]]; then
     echo "JSONL data directory: $JSONL_DATA_DIR"
 elif [[ "$STORAGE_FORMAT" == "sqlite" && -n "$BARSUKAS_DB_PATH" ]]; then

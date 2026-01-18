@@ -71,7 +71,7 @@ def main() -> None:
     parser.add_argument(
         "--postgres",
         action="store_true",
-        help="Use PostgreSQL backend (builds URL from postgres_ul + keys/postgres.key)",
+        help="Use PostgreSQL backend (builds URL from constants + keys/postgres.key)",
     )
     args = parser.parse_args()
 

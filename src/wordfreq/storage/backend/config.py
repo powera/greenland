@@ -149,28 +149,19 @@ class DataSourceConfig:
         )
 
     @classmethod
-    def build_postgres_url(cls, template_path: Optional[str] = None) -> str:
+    def build_postgres_url(cls) -> str:
         """Build PostgreSQL URL by combining template with password from key file.
 
-        Args:
-            template_path: Path to URL template file (default: PROJECT_ROOT/postgres_ul)
+        Uses the URL template from constants.POSTGRES_URL_TEMPLATE and sets the
+        schema to constants.POSTGRES_SCHEMA via the options parameter.
 
         Returns:
-            Complete PostgreSQL connection URL
+            Complete PostgreSQL connection URL with schema configured
 
         Raises:
-            ValueError: If template or password file not found
+            ValueError: If password file not found or template invalid
         """
-        # Default template path
-        if template_path is None:
-            template_path = os.path.join(constants.PROJECT_ROOT, "postgres_ul")
-
-        # Load URL template
-        if not os.path.exists(template_path):
-            raise ValueError(f"PostgreSQL URL template not found at {template_path}")
-
-        with open(template_path) as f:
-            url_template = f.read().strip()
+        url_template = constants.POSTGRES_URL_TEMPLATE
 
         # Load password (required=True raises RuntimeError if not found)
         password = load_key("postgres", required=True)
@@ -180,7 +171,16 @@ class DataSourceConfig:
         if "[YOUR-PASSWORD]" not in url_template:
             raise ValueError("PostgreSQL URL template must contain [YOUR-PASSWORD] placeholder")
 
-        return url_template.replace("[YOUR-PASSWORD]", password)
+        url = url_template.replace("[YOUR-PASSWORD]", password)
+
+        # Add schema via options parameter
+        schema = constants.POSTGRES_SCHEMA
+        if "?" in url:
+            url = f"{url}&options=-csearch_path%3D{schema}"
+        else:
+            url = f"{url}?options=-csearch_path%3D{schema}"
+
+        return url
 
     def __repr__(self) -> str:
         """String representation of config."""

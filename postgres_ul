@@ -1,1 +1,0 @@
-postgresql://postgres:[YOUR-PASSWORD]@db.srouvwdghrmwkxnzyzqz.supabase.co:5432/postgres?sslmode=require
