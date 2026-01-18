@@ -36,7 +36,8 @@ def add_word_frequency(
         if frequency is not None:
             existing.frequency = frequency
         session.commit()
-        return existing
+        result: WordFrequency = existing
+        return result
 
     # Create new frequency record
     word_freq = WordFrequency(

@@ -5,6 +5,8 @@ Countability Task - Classify nouns as countable, uncountable, or both.
 import logging
 from typing import Optional, Tuple, TYPE_CHECKING
 
+from sqlalchemy.orm import Session
+
 import util.prompt_loader
 from clients.types import Schema, SchemaProperty
 from wordfreq.storage.models.schema import Lemma
@@ -16,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 def generate_countability(
-    agent: "LapeAgent", lemma: Lemma, session=None
+    agent: "LapeAgent", lemma: Lemma, session: Optional[Session] = None
 ) -> Tuple[Optional[str], Optional[str], float]:
     """
     Generate noun countability classification using LLM.

@@ -68,7 +68,7 @@ def find_lemma_by_guid(
         lemma = find_lemma_by_guid(session, args.guid)
         print(f"Processing: {lemma.lemma_text}")
     """
-    lemma = session.query(Lemma).filter(Lemma.guid == guid).first()
+    lemma: Optional[Lemma] = session.query(Lemma).filter(Lemma.guid == guid).first()
 
     if not lemma and error_on_missing:
         print(f"\nError: No lemma found with GUID: {guid}")
@@ -260,7 +260,7 @@ def apply_limit_and_sample_rate(
     if limit is not None:
         query = query.limit(limit)
 
-    lemmas = query.all()
+    lemmas: list[Lemma] = query.all()
 
     # Apply sample rate
     if 0.0 < sample_rate < 1.0:
@@ -297,7 +297,7 @@ def count_for_confirmation(
     if limit is not None:
         query = query.limit(limit)
 
-    count = query.count()
+    count: int = query.count()
 
     # Apply sample rate
     if 0.0 < sample_rate < 1.0:

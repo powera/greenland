@@ -54,7 +54,7 @@ def get_sentence_translation(
     Returns:
         SentenceTranslation object or None if not found
     """
-    return (
+    result: Optional[SentenceTranslation] = (
         session.query(SentenceTranslation)
         .filter(
             SentenceTranslation.sentence_id == sentence_id,
@@ -62,6 +62,7 @@ def get_sentence_translation(
         )
         .first()
     )
+    return result
 
 
 def update_sentence_translation(

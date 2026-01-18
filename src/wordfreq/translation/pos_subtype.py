@@ -178,7 +178,7 @@ def update_missing_subtypes_for_word(
 
         if success and subtype:
             # Update the definition with the subtype
-            linguistic_db.update_definition(session, definition.id, pos_subtype=subtype)
+            linguistic_db.update_definition(session, definition.id, pos_subtype=subtype)  # type: ignore[attr-defined]
             successful += 1
             logger.info(f"Added subtype '{subtype}' for definition ID {definition.id}")
         else:
@@ -221,7 +221,7 @@ def update_subtypes_for_batch(
     logger.info(f"Processing batch of {limit} definitions for POS subtypes")
 
     session = get_session_func()
-    definitions = linguistic_db.get_definitions_without_subtypes(session, limit=limit)
+    definitions = linguistic_db.get_definitions_without_subtypes(session, limit=limit)  # type: ignore[attr-defined]
 
     total = len(definitions)
     successful = 0
@@ -243,7 +243,7 @@ def update_subtypes_for_batch(
 
         if success and subtype:
             # Update the definition with the subtype
-            linguistic_db.update_definition(session, definition.id, pos_subtype=subtype)
+            linguistic_db.update_definition(session, definition.id, pos_subtype=subtype)  # type: ignore[attr-defined]
             successful += 1
             logger.info(
                 f"Added subtype '{subtype}' for '{word.word}' definition ID {definition.id}"

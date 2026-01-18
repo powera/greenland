@@ -73,7 +73,8 @@ def get_sentence_words(
     if include_lemmas:
         query = query.options(joinedload(SentenceWord.lemma))
 
-    return query.order_by(SentenceWord.position).all()
+    result: list[SentenceWord] = query.order_by(SentenceWord.position).all()
+    return result
 
 
 def get_lemmas_for_sentence(session: Session, sentence_id: int) -> List[Lemma]:
@@ -163,4 +164,5 @@ def find_lemma_by_guid(session: Session, guid: str) -> Optional[Lemma]:
     Returns:
         Lemma object or None if not found
     """
-    return session.query(Lemma).filter(Lemma.guid == guid).first()
+    result: Optional[Lemma] = session.query(Lemma).filter(Lemma.guid == guid).first()
+    return result

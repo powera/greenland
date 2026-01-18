@@ -15,6 +15,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from sqlalchemy.orm import Session
+
 # Add src directory to path
 GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent)
 if GREENLAND_SRC_PATH not in sys.path:
@@ -74,7 +76,7 @@ class PradziaAgent:
             abs_path = os.path.abspath(self.db_path)
             logger.info(f"Using SQLite database: {abs_path}")
 
-    def get_session(self):
+    def get_session(self) -> Session:
         """Get database session using backend abstraction."""
         return create_backend_session(self.config)
 
@@ -268,9 +270,10 @@ class PradziaAgent:
         logger.info(f"Loading corpora (dry_run={dry_run})...")
 
         # Get corpora to load
+        configs_to_load: List[Any]  # Actually CorpusConfig, but avoiding import
         if corpus_names:
-            configs_to_load = [corpus.get_corpus_config(name) for name in corpus_names]
-            configs_to_load = [c for c in configs_to_load if c is not None]
+            maybe_configs = [corpus.get_corpus_config(name) for name in corpus_names]
+            configs_to_load = [c for c in maybe_configs if c is not None]
             if len(configs_to_load) != len(corpus_names):
                 missing = set(corpus_names) - {c.name for c in configs_to_load}
                 logger.warning(f"Some corpus names not found in config: {missing}")
@@ -309,8 +312,8 @@ class PradziaAgent:
             }
         else:
             # Actually load the corpora
-            results = {}
-            errors = []
+            results: Dict[str, Dict[str, Any]] = {}
+            errors: List[str] = []
 
             for corpus_config in configs_to_load:
                 try:
@@ -710,7 +713,7 @@ class PradziaAgent:
         logger.info(f"Starting full database initialization (dry_run={dry_run})...")
         start_time = datetime.now()
 
-        results = {
+        results: Dict[str, Any] = {
             "timestamp": start_time.isoformat(),
             "database_path": self.db_path,
             "dry_run": dry_run,
@@ -766,7 +769,7 @@ class PradziaAgent:
         logger.info("Running configuration check...")
         start_time = datetime.now()
 
-        results = {
+        results: Dict[str, Any] = {
             "timestamp": start_time.isoformat(),
             "database_path": self.db_path,
             "check": self.check_configuration(),
@@ -792,7 +795,7 @@ class PradziaAgent:
 
         return results
 
-    def _print_check_summary(self, results: Dict):
+    def _print_check_summary(self, results: Dict[str, Any]) -> None:
         """Print a summary of the check results."""
         check = results["check"]
 
@@ -837,7 +840,7 @@ class PradziaAgent:
         logger.info("=" * 80)
 
 
-def get_argument_parser():
+def get_argument_parser() -> argparse.ArgumentParser:
     """Return the argument parser for introspection.
 
     This function allows external tools to introspect the available
@@ -889,7 +892,7 @@ def get_argument_parser():
     return parser
 
 
-def main():
+def main() -> None:
     """Main entry point for the pradzia agent."""
     parser = get_argument_parser()
     args = parser.parse_args()

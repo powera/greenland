@@ -5,6 +5,8 @@ Declension Class Task - Determine declension class for nouns.
 import logging
 from typing import Optional, Tuple, TYPE_CHECKING
 
+from sqlalchemy.orm import Session
+
 import util.prompt_loader
 from clients.types import Schema, SchemaProperty
 from wordfreq.storage.models.schema import Lemma
@@ -20,7 +22,7 @@ def generate_declension_class(
     lemma: Lemma,
     target_translation: Optional[str],
     language_code: str,
-    session=None,
+    session: Optional[Session] = None,
 ) -> Tuple[Optional[str], Optional[str], float]:
     """
     Generate noun declension class using LLM.

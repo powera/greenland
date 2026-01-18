@@ -343,7 +343,7 @@ def get_corpus_size(
         if not corpus:
             return 0
 
-        count = (
+        count: int = (
             session.query(wordfreq.storage.models.schema.WordFrequency)
             .filter(wordfreq.storage.models.schema.WordFrequency.corpus_id == corpus.id)
             .count()
@@ -396,6 +396,7 @@ def get_effective_unknown_rank(
         corpus_size = get_corpus_size(corpus_name, session, db_path)
 
         # Calculate effective unknown rank
+        base_rank: int
         if corpus.max_unknown_rank is not None:
             base_rank = min(corpus.max_unknown_rank, max(corpus_size, default_unknown_rank))
         else:
@@ -437,7 +438,8 @@ def get_corpus_configs_from_db(
         query = session.query(wordfreq.storage.models.schema.Corpus)
         if enabled_only:
             query = query.filter(wordfreq.storage.models.schema.Corpus.enabled == True)
-        return query.all()
+        result: list[wordfreq.storage.models.schema.Corpus] = query.all()
+        return result
 
     finally:
         if should_close:

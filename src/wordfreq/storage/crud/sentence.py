@@ -1,6 +1,6 @@
 """CRUD operations for Sentence model."""
 
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, cast
 
 from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload
@@ -72,7 +72,8 @@ def get_sentence_by_id(
     if include_words:
         query = query.options(joinedload(Sentence.words).joinedload(SentenceWord.lemma))
 
-    return query.filter(Sentence.id == sentence_id).first()
+    result: Optional[Sentence] = query.filter(Sentence.id == sentence_id).first()
+    return result
 
 
 def get_sentences_by_level(
@@ -94,7 +95,7 @@ def get_sentences_by_level(
         .options(joinedload(Sentence.translations), joinedload(Sentence.words))
     )
 
-    sentences = query.all()
+    sentences: list[Sentence] = query.all()
 
     # Filter by language if specified
     if language_code:
@@ -209,11 +210,12 @@ def find_sentence_by_text(
     )
 
     if translation:
-        return (
+        result: Optional[Sentence] = (
             session.query(Sentence)
             .options(joinedload(Sentence.translations))
             .get(translation.sentence_id)
         )
+        return result
 
     return None
 
@@ -274,11 +276,12 @@ def get_sentence_conversation_count(session: Session, sentence_id: int) -> int:
     Returns:
         Number of conversations containing this sentence
     """
-    return (
+    result: int = (
         session.query(ConversationSentence)
         .filter(ConversationSentence.sentence_id == sentence_id)
         .count()
     )
+    return result
 
 
 def merge_duplicate_sentences(

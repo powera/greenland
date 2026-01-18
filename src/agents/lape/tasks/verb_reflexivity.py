@@ -3,7 +3,9 @@ Verb Reflexivity Task - Classify verbs by reflexivity.
 """
 
 import logging
-from typing import Optional, Tuple, TYPE_CHECKING
+from typing import List, Optional, Tuple, TYPE_CHECKING
+
+from sqlalchemy.orm import Session
 
 import util.prompt_loader
 from clients.types import Schema, SchemaProperty
@@ -20,7 +22,7 @@ def generate_verb_reflexivity(
     lemma: Lemma,
     target_translation: Optional[str],
     language_code: str,
-    session=None,
+    session: Optional[Session] = None,
 ) -> Tuple[Optional[str], Optional[str], float]:
     """
     Generate verb reflexivity classification using LLM.
@@ -72,7 +74,7 @@ def generate_verb_reflexivity(
             "reflexivity": SchemaProperty(
                 "string",
                 "The reflexivity classification",
-                enum=reflex_config["values"],
+                enum=list(reflex_config["values"]),
             ),
             "explanation": SchemaProperty(
                 "string", "Brief explanation with reflexive form if applicable"

@@ -109,7 +109,8 @@ def get_grammar_facts(
     if fact_type:
         query = query.filter(GrammarFact.fact_type == fact_type)
 
-    return query.all()
+    result: list[GrammarFact] = query.all()
+    return result
 
 
 def get_grammar_fact_value(

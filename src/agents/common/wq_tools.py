@@ -58,7 +58,7 @@ def get_lemma_or_raise(session: Session, lemma_id: int) -> Lemma:
     """
     from wordfreq.storage.models.schema import Lemma
 
-    lemma = session.get(Lemma, lemma_id)
+    lemma: Optional[Lemma] = session.get(Lemma, lemma_id)
     if not lemma:
         raise ValueError(f"Lemma {lemma_id} not found")
     return lemma

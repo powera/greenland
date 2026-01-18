@@ -5,6 +5,8 @@ Verb Transitivity Task - Classify verbs by transitivity.
 import logging
 from typing import Optional, Tuple, TYPE_CHECKING
 
+from sqlalchemy.orm import Session
+
 import util.prompt_loader
 from clients.types import Schema, SchemaProperty
 from wordfreq.storage.models.schema import Lemma
@@ -16,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 def generate_verb_transitivity(
-    agent: "LapeAgent", lemma: Lemma, session=None
+    agent: "LapeAgent", lemma: Lemma, session: Optional[Session] = None
 ) -> Tuple[Optional[str], Optional[str], float]:
     """
     Generate verb transitivity classification using LLM.

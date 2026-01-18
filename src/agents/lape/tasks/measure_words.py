@@ -5,6 +5,8 @@ Measure Words Task - Generate Chinese measure words/classifiers for nouns.
 import logging
 from typing import Optional, Tuple, TYPE_CHECKING
 
+from sqlalchemy.orm import Session
+
 import util.prompt_loader
 from clients.types import Schema, SchemaProperty
 from wordfreq.storage.models.schema import Lemma
@@ -16,7 +18,10 @@ logger = logging.getLogger(__name__)
 
 
 def generate_measure_words(
-    agent: "LapeAgent", lemma: Lemma, chinese_translation: Optional[str], session=None
+    agent: "LapeAgent",
+    lemma: Lemma,
+    chinese_translation: Optional[str],
+    session: Optional[Session] = None,
 ) -> Tuple[Optional[str], Optional[str], float]:
     """
     Generate Chinese measure word(s) for a noun using LLM.
@@ -91,11 +96,11 @@ def generate_measure_words(
         explanation = result.get("explanation", "")
         confidence = float(result.get("confidence", 0.5))
 
-        # Combine primary and alternatives
+        # Combine primary and alternatives for logging
         if alternatives:
-            all_measure_words = f"{measure_word} (alt: {', '.join(alternatives)})"
+            all_measure_words: Optional[str] = f"{measure_word} (alt: {', '.join(alternatives)})"
         else:
-            all_measure_words = measure_word
+            all_measure_words = str(measure_word) if measure_word else None
 
         logger.info(
             f"Generated measure word for '{lemma.lemma_text}': {all_measure_words} "
