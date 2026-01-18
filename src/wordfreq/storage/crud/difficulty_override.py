@@ -46,7 +46,8 @@ def add_difficulty_override(
         if notes is not None:
             existing.notes = notes
         session.flush()
-        return existing
+        result: LemmaDifficultyOverride = existing
+        return result
 
     # Create new override
     override = LemmaDifficultyOverride(
@@ -74,7 +75,7 @@ def get_difficulty_override(
     Returns:
         LemmaDifficultyOverride if found, None otherwise
     """
-    return (
+    result: Optional[LemmaDifficultyOverride] = (
         session.query(LemmaDifficultyOverride)
         .filter(
             and_(
@@ -84,6 +85,7 @@ def get_difficulty_override(
         )
         .first()
     )
+    return result
 
 
 def get_all_overrides_for_lemma(session: Session, lemma_id: int) -> List[LemmaDifficultyOverride]:
@@ -97,11 +99,12 @@ def get_all_overrides_for_lemma(session: Session, lemma_id: int) -> List[LemmaDi
     Returns:
         List of LemmaDifficultyOverride objects
     """
-    return (
+    result: list[LemmaDifficultyOverride] = (
         session.query(LemmaDifficultyOverride)
         .filter(LemmaDifficultyOverride.lemma_id == lemma_id)
         .all()
     )
+    return result
 
 
 def get_all_overrides_for_language(
@@ -117,11 +120,12 @@ def get_all_overrides_for_language(
     Returns:
         List of LemmaDifficultyOverride objects
     """
-    return (
+    result: list[LemmaDifficultyOverride] = (
         session.query(LemmaDifficultyOverride)
         .filter(LemmaDifficultyOverride.language_code == language_code)
         .all()
     )
+    return result
 
 
 def delete_difficulty_override(session: Session, lemma_id: int, language_code: str) -> bool:
@@ -167,10 +171,12 @@ def get_effective_difficulty_level(
     # Check for override first
     override = get_difficulty_override(session, lemma.id, language_code)
     if override:
-        return override.difficulty_level
+        result: Optional[int] = override.difficulty_level
+        return result
 
     # Fall back to default difficulty level
-    return lemma.difficulty_level
+    fallback: Optional[int] = lemma.difficulty_level
+    return fallback
 
 
 def get_lemmas_by_effective_level(

@@ -44,7 +44,8 @@ def add_lemma(
     )
 
     if existing:
-        return existing
+        result: Lemma = existing
+        return result
 
     # Generate GUID if pos_subtype is provided and auto_generate_guid is True
     guid = None
@@ -210,18 +211,20 @@ def get_lemma_by_guid(session: Session, guid: str) -> Optional[Lemma]:
     Returns:
         Lemma object or None if not found
     """
-    return session.query(Lemma).filter(Lemma.guid == guid).first()
+    result: Optional[Lemma] = session.query(Lemma).filter(Lemma.guid == guid).first()
+    return result
 
 
 def get_lemmas_without_subtypes(session: Session, limit: int = 100) -> List[Lemma]:
     """Get lemmas that need POS subtypes."""
-    return (
+    result: list[Lemma] = (
         session.query(Lemma)
         .filter(Lemma.pos_subtype == None)
         .order_by(Lemma.id.desc())
         .limit(limit)
         .all()
     )
+    return result
 
 
 def get_all_subtypes(session: Session, lang: Optional[str] = None) -> List[str]:
@@ -247,7 +250,8 @@ def get_lemmas_by_subtype(
     if lang == "chinese":
         query = query.filter(Lemma.chinese_translation != None)
 
-    return query.order_by(Lemma.guid).all()
+    result: list[Lemma] = query.order_by(Lemma.guid).all()
+    return result
 
 
 def get_lemmas_by_subtype_and_level(
@@ -343,7 +347,8 @@ def get_lemmas_by_subtype_and_level(
                 filtered_results.append(lemma)
         return filtered_results
 
-    return results
+    final_results: list[Lemma] = results
+    return final_results
 
 
 def handle_lemma_type_subtype_change(

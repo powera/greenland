@@ -12,8 +12,8 @@ import re
 import unicodedata
 from typing import Dict, List, Optional, Tuple
 
-import requests
-from bs4 import BeautifulSoup
+import requests  # type: ignore[import-untyped]
+from bs4 import BeautifulSoup  # type: ignore[import-not-found]
 
 logger = logging.getLogger(__name__)
 

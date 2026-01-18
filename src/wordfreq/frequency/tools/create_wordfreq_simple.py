@@ -50,8 +50,10 @@ for corpus_name, (imported, total) in results.items():
 
 # Import constants and calculate harmonic mean ranks (from notebook cells)
 import constants
+from wordfreq.storage.backend.config import DataSourceConfig
 
 print("Calculating harmonic mean ranks...")
-wordfreq.frequency.analysis.calculate_combined_ranks(db_path=constants.WORDFREQ_DB_PATH)
+config = DataSourceConfig(sqlite_path=constants.WORDFREQ_DB_PATH)
+wordfreq.frequency.analysis.calculate_combined_ranks(config=config)
 
 print("Word frequency data population completed!")

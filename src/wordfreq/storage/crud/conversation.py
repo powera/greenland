@@ -1,7 +1,7 @@
 """CRUD operations for Conversation and ConversationSentence models."""
 
 import json
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, cast
 
 from sqlalchemy.orm import Session, joinedload
 
@@ -113,7 +113,8 @@ def get_conversation_by_id(
                 )
             )
 
-    return query.filter(Conversation.id == conversation_id).first()
+    result: Optional[Conversation] = query.filter(Conversation.id == conversation_id).first()
+    return result
 
 
 def get_conversations_by_theme(
@@ -145,7 +146,10 @@ def get_conversations_by_theme(
 
     query = query.filter(Conversation.rejected == False)  # noqa: E712
 
-    return query.options(joinedload(Conversation.conversation_sentences)).all()
+    result: list[Conversation] = query.options(
+        joinedload(Conversation.conversation_sentences)
+    ).all()
+    return result
 
 
 def get_conversations_by_level(
@@ -180,7 +184,7 @@ def get_conversations_by_level(
         .joinedload(Sentence.translations)
     )
 
-    conversations = query.all()
+    conversations: list[Conversation] = query.all()
 
     # Filter by language if specified
     if language_code:
@@ -246,7 +250,8 @@ def get_conversation_keywords(conversation: Conversation) -> List[str]:
     if not conversation.keywords:
         return []
     try:
-        return json.loads(conversation.keywords)
+        result: list[str] = json.loads(conversation.keywords)
+        return result
     except json.JSONDecodeError:
         return []
 

@@ -449,7 +449,7 @@ def analyze_corpus_correlations() -> Dict[str, Any]:
             if len(ranks1) > 10:
                 try:
                     # Use Spearman rank correlation
-                    from scipy.stats import spearmanr
+                    from scipy.stats import spearmanr  # type: ignore[import-untyped]
 
                     corr, p_value = spearmanr(ranks1, ranks2)
 

@@ -137,8 +137,8 @@ def update_pronunciation_for_definition(
 
     # Get the definition
     definition = (
-        session.query(linguistic_db.Definition)
-        .filter(linguistic_db.Definition.id == definition_id)
+        session.query(linguistic_db.Definition)  # type: ignore[attr-defined]
+        .filter(linguistic_db.Definition.id == definition_id)  # type: ignore[attr-defined]
         .first()
     )
     if not definition:
@@ -169,7 +169,7 @@ def update_pronunciation_for_definition(
             phonetic = pronunciation_data.get("phonetic", "")
 
             # Update the definition with the pronunciation
-            linguistic_db.update_definition(
+            linguistic_db.update_definition(  # type: ignore[attr-defined]
                 session, definition.id, ipa_pronunciation=ipa, phonetic_pronunciation=phonetic
             )
 
@@ -288,7 +288,7 @@ def update_pronunciations_for_batch(
     logger.info(f"Processing batch of {limit} definitions for pronunciations")
 
     session = get_session_func()
-    definitions = linguistic_db.get_definitions_without_pronunciation(session, limit=limit)
+    definitions = linguistic_db.get_definitions_without_pronunciation(session, limit=limit)  # type: ignore[attr-defined]
 
     total = len(definitions)
     successful = 0

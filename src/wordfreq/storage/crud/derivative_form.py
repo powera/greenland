@@ -39,7 +39,8 @@ def add_derivative_form(
         )
 
         if existing:
-            return existing
+            result: DerivativeForm = existing
+            return result
 
         # Validate that word_token language matches if provided
         if word_token and word_token.language_code != language_code:
@@ -186,7 +187,8 @@ def get_all_derivative_forms_for_lemma(
     if pos_type:
         query = query.filter(Lemma.pos_type == pos_type)
 
-    return query.all()
+    forms: list[DerivativeForm] = query.all()
+    return forms
 
 
 def get_base_forms_for_lemma(
@@ -203,14 +205,15 @@ def get_base_forms_for_lemma(
     if pos_type:
         query = query.filter(Lemma.pos_type == pos_type)
 
-    return query.all()
+    result: list[DerivativeForm] = query.all()
+    return result
 
 
 def get_derivative_forms_without_pronunciation(
     session: Session, limit: int = 100
 ) -> List[DerivativeForm]:
     """Get derivative forms that need pronunciation information."""
-    return (
+    result: list[DerivativeForm] = (
         session.query(DerivativeForm)
         .filter(
             (DerivativeForm.ipa_pronunciation == None)
@@ -219,25 +222,28 @@ def get_derivative_forms_without_pronunciation(
         .limit(limit)
         .all()
     )
+    return result
 
 
 def get_derivative_forms_by_grammatical_form(
     session: Session, grammatical_form: str, limit: int = 100
 ) -> List[DerivativeForm]:
     """Get derivative forms by specific grammatical form."""
-    return (
+    result: list[DerivativeForm] = (
         session.query(DerivativeForm)
         .filter(DerivativeForm.grammatical_form == grammatical_form)
         .limit(limit)
         .all()
     )
+    return result
 
 
 def get_base_forms_only(session: Session, limit: int = 100) -> List[DerivativeForm]:
     """Get only base forms (infinitives, singulars, etc.)."""
-    return (
+    result: list[DerivativeForm] = (
         session.query(DerivativeForm).filter(DerivativeForm.is_base_form == True).limit(limit).all()
     )
+    return result
 
 
 def add_noun_derivative_form(
@@ -284,7 +290,8 @@ def add_noun_derivative_form(
 
         if existing_form:
             logger.debug(f"Derivative form already exists: {form_text} ({grammatical_form})")
-            return existing_form
+            result: DerivativeForm = existing_form
+            return result
 
         # Create new derivative form
         derivative_form = DerivativeForm(
@@ -323,11 +330,12 @@ def get_noun_derivative_forms(session: Session, lemma_id: int) -> List[Derivativ
     Returns:
         List of DerivativeForm objects
     """
-    return (
+    result: list[DerivativeForm] = (
         session.query(DerivativeForm)
         .filter(DerivativeForm.lemma_id == lemma_id, DerivativeForm.language_code == "lt")
         .all()
     )
+    return result
 
 
 def has_specific_noun_forms(
@@ -452,7 +460,8 @@ def get_alternative_forms_for_lemma(
     if language_code:
         query = query.filter(DerivativeForm.language_code == language_code)
 
-    return query.all()
+    result: list[DerivativeForm] = query.all()
+    return result
 
 
 def add_complete_word_entry(

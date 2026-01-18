@@ -1,6 +1,6 @@
 """CRUD operations for WordToken model."""
 
-from typing import List, Optional
+from typing import List, Optional, cast
 
 from sqlalchemy.orm import Session
 
@@ -9,7 +9,7 @@ from wordfreq.storage.models.schema import Corpus, DerivativeForm, WordFrequency
 
 def add_word_token(session: Session, token: str, language_code: str) -> WordToken:
     """Add a word token to the database if it doesn't exist, or return existing one."""
-    existing = (
+    existing: Optional[WordToken] = (
         session.query(WordToken)
         .filter(WordToken.token == token, WordToken.language_code == language_code)
         .first()
@@ -27,29 +27,31 @@ def get_word_token_by_text(
     session: Session, token_text: str, language_code: str
 ) -> Optional[WordToken]:
     """Get a word token from the database by its text and language."""
-    return (
+    result: Optional[WordToken] = (
         session.query(WordToken)
         .filter(WordToken.token == token_text, WordToken.language_code == language_code)
         .first()
     )
+    return result
 
 
 def get_word_tokens_needing_analysis(session: Session, limit: int = 100) -> List[WordToken]:
     """Get word tokens that need linguistic analysis (no derivative forms)."""
-    return (
+    result: list[WordToken] = (
         session.query(WordToken)
         .outerjoin(DerivativeForm)
         .filter(DerivativeForm.id == None)
         .limit(limit)
         .all()
     )
+    return result
 
 
 def get_word_tokens_by_frequency_rank(
     session: Session, corpus_name: str, limit: int = 100
 ) -> List[WordToken]:
     """Get word tokens ordered by frequency rank in a specific corpus."""
-    return (
+    result: list[WordToken] = (
         session.query(WordToken)
         .join(WordFrequency)
         .join(Corpus)
@@ -59,6 +61,7 @@ def get_word_tokens_by_frequency_rank(
         .limit(limit)
         .all()
     )
+    return result
 
 
 def get_word_tokens_by_combined_frequency_rank(
@@ -74,10 +77,11 @@ def get_word_tokens_by_combined_frequency_rank(
     Returns:
         List of WordToken objects ordered by frequency_rank (combined harmonic mean rank)
     """
-    return (
+    result: list[WordToken] = (
         session.query(WordToken)
         .filter(WordToken.frequency_rank != None)
         .order_by(WordToken.frequency_rank)
         .limit(limit)
         .all()
     )
+    return result

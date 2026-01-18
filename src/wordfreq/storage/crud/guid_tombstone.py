@@ -66,7 +66,10 @@ def get_tombstone_by_guid(session: Session, guid: str) -> Optional[GuidTombstone
     Returns:
         GuidTombstone object if found, None otherwise
     """
-    return session.query(GuidTombstone).filter(GuidTombstone.guid == guid).first()
+    result: Optional[GuidTombstone] = (
+        session.query(GuidTombstone).filter(GuidTombstone.guid == guid).first()
+    )
+    return result
 
 
 def get_tombstones_by_lemma_id(session: Session, lemma_id: int) -> List[GuidTombstone]:
@@ -80,12 +83,13 @@ def get_tombstones_by_lemma_id(session: Session, lemma_id: int) -> List[GuidTomb
     Returns:
         List of GuidTombstone objects
     """
-    return (
+    result: list[GuidTombstone] = (
         session.query(GuidTombstone)
         .filter(GuidTombstone.lemma_id == lemma_id)
         .order_by(GuidTombstone.tombstoned_at.desc())
         .all()
     )
+    return result
 
 
 def is_guid_tombstoned(session: Session, guid: str) -> bool:
@@ -99,7 +103,8 @@ def is_guid_tombstoned(session: Session, guid: str) -> bool:
     Returns:
         True if the GUID is tombstoned, False otherwise
     """
-    return session.query(GuidTombstone).filter(GuidTombstone.guid == guid).count() > 0
+    count: int = session.query(GuidTombstone).filter(GuidTombstone.guid == guid).count()
+    return count > 0
 
 
 def get_replacement_chain(session: Session, guid: str) -> List[GuidTombstone]:
