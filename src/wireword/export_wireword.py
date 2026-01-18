@@ -30,7 +30,7 @@ from wordfreq.storage.translation_helpers import (
     bulk_get_translations,
     get_translation,
 )
-from wordfreq.tools.chinese_converter import to_simplified
+from langtools.zh.converter import to_simplified
 from wordfreq.trakaido.utils.data_models import ExportStats, create_export_stats
 from wordfreq.trakaido.utils.text_rendering import format_subtype_display_name
 from wireword.helpers import (

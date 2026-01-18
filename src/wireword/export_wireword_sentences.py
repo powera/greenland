@@ -29,7 +29,7 @@ from wordfreq.storage.models.schema import (
     SentenceTranslation,
     SentenceWord,
 )
-from wordfreq.tools.chinese_converter import to_simplified
+from langtools.zh.converter import to_simplified
 
 # Configure logging
 logger = logging.getLogger(__name__)

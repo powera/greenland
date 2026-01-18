@@ -19,13 +19,15 @@ from config import Config
 from flask import Flask, g, render_template
 from sqlalchemy.orm import Session
 
-from pinyin_helper import (
-    generate_pinyin,
-    generate_pinyin_ruby_html,
+from langtools.ja.romaji_helper import (
     generate_romaji,
     generate_romaji_ruby_html,
-    is_chinese,
     is_japanese,
+)
+from langtools.zh.pinyin_helper import (
+    generate_pinyin,
+    generate_pinyin_ruby_html,
+    is_chinese,
 )
 from routes import (
     agents,

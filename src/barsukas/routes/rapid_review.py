@@ -23,6 +23,7 @@ from sqlalchemy import and_, or_
 from sqlalchemy.orm import joinedload
 
 from barsukas.helpers.audio_helpers import validate_audio_translation
+from langtools.zh.pinyin_helper import generate_pinyin
 from wordfreq.storage.models.schema import AudioQualityReview, Lemma
 from wordfreq.storage.queries.lemma import apply_effective_difficulty_filter
 
@@ -194,8 +195,6 @@ def submit(review_id: int) -> ResponseReturnValue:
             # Generate pinyin for Chinese text
             pinyin_text = None
             if next_review.language_code == "zh":
-                from barsukas.pinyin_helper import generate_pinyin
-
                 pinyin_text = generate_pinyin(next_review.expected_text)
 
             # Validate audio file against current translation
@@ -302,8 +301,6 @@ def skip(review_id: int) -> ResponseReturnValue:
             # Generate pinyin for Chinese text
             pinyin_text = None
             if next_review.language_code == "zh":
-                from barsukas.pinyin_helper import generate_pinyin
-
                 pinyin_text = generate_pinyin(next_review.expected_text)
 
             # Validate audio file against current translation
@@ -416,8 +413,6 @@ def bad_translation(review_id: int) -> ResponseReturnValue:
             # Generate pinyin for Chinese text
             pinyin_text = None
             if next_review.language_code == "zh":
-                from barsukas.pinyin_helper import generate_pinyin
-
                 pinyin_text = generate_pinyin(next_review.expected_text)
 
             # Validate audio file against current translation

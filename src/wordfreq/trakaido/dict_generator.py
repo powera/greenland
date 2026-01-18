@@ -39,7 +39,7 @@ from wordfreq.storage.database import (
 )
 from wordfreq.storage.models.schema import DerivativeForm, Lemma
 from wordfreq.storage.translation_helpers import get_translation
-from wordfreq.tools.chinese_converter import to_simplified
+from langtools.zh.converter import to_simplified
 
 
 def get_english_word_for_lemma(session: Any, lemma: Lemma) -> Optional[str]:
