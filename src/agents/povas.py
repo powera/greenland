@@ -20,9 +20,10 @@ import shutil
 import sys
 from collections import defaultdict
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
-from jinja2 import Environment, FileSystemLoader
+from jinja2 import Environment, FileSystemLoader  # type: ignore[import-not-found]
+from sqlalchemy.orm import Session
 from sqlalchemy import func
 
 # Add src directory to path
@@ -68,7 +69,7 @@ class PovasAgent:
         if self.debug:
             logger.setLevel(logging.DEBUG)
 
-    def get_session(self):
+    def get_session(self) -> Session:
         """Get database session using backend abstraction."""
         return create_backend_session(self.config)
 
@@ -78,7 +79,9 @@ class PovasAgent:
             os.makedirs(directory)
             logger.info(f"Created directory: {directory}")
 
-    def get_words_by_pos_subtype(self, session, pos_type: str) -> Dict[str, List[Dict[str, Any]]]:
+    def get_words_by_pos_subtype(
+        self, session: Session, pos_type: str
+    ) -> Dict[str, List[Dict[str, Any]]]:
         """
         Get words organized by POS subtype for a specific part of speech.
         Groups all derivative forms under their lemma.
@@ -192,7 +195,7 @@ class PovasAgent:
 
         return words_by_subtype
 
-    def generate_index_page(self, session, env, pos_types: List[str]) -> None:
+    def generate_index_page(self, session: Session, env: Environment, pos_types: List[str]) -> None:
         """
         Generate the main index page with links to POS type pages.
 
@@ -261,7 +264,7 @@ class PovasAgent:
         logger.info("Generated index page")
 
     def generate_pos_type_page(
-        self, env, pos_type: str, words_by_subtype: Dict[str, List[Dict[str, Any]]]
+        self, env: Environment, pos_type: str, words_by_subtype: Dict[str, List[Dict[str, Any]]]
     ) -> None:
         """
         Generate a page for a specific part of speech with links to subtypes.
@@ -272,7 +275,7 @@ class PovasAgent:
             words_by_subtype: Words organized by subtype
         """
         # Calculate stats for each subtype
-        subtype_stats = {}
+        subtype_stats: Dict[str, Dict[str, Any]] = {}
         total_words = 0
 
         for subtype, words in words_by_subtype.items():
@@ -280,27 +283,30 @@ class PovasAgent:
             total_words += word_count
 
             # Get top 5 words by frequency rank
-            top_words = sorted(
-                words, key=lambda w: float("inf") if w.get("rank") is None else w.get("rank")
-            )[:5]
-            top_words = [word["word"] for word in top_words]
+            def get_rank(w: Dict[str, Any]) -> float:
+                rank = w.get("rank")
+                return float("inf") if rank is None else float(rank)
+
+            top_words_sorted = sorted(words, key=get_rank)[:5]
+            top_words = [word["word"] for word in top_words_sorted]
 
             subtype_stats[subtype] = {
                 "word_count": word_count,
-                "percentage": 0,  # Will calculate after loop
+                "percentage": 0.0,  # Will calculate after loop
                 "top_words": top_words,
             }
 
         # Calculate percentages
         for subtype in subtype_stats:
-            subtype_stats[subtype]["percentage"] = round(
-                subtype_stats[subtype]["word_count"] / total_words * 100, 1
-            )
+            word_count_val: int = subtype_stats[subtype]["word_count"]
+            subtype_stats[subtype]["percentage"] = round(word_count_val / total_words * 100, 1)
 
         # Sort subtypes by word count
-        sorted_subtypes = sorted(
-            subtype_stats.items(), key=lambda x: x[1]["word_count"], reverse=True
-        )
+        def get_word_count(x: tuple[str, Dict[str, Any]]) -> int:
+            count: int = x[1]["word_count"]
+            return count
+
+        sorted_subtypes = sorted(subtype_stats.items(), key=get_word_count, reverse=True)
 
         # Load template
         template = env.get_template("pos_type.html")
@@ -323,7 +329,7 @@ class PovasAgent:
         logger.info(f"Generated page for {pos_type}")
 
     def generate_subtype_page(
-        self, env, pos_type: str, subtype: str, words: List[Dict[str, Any]]
+        self, env: Environment, pos_type: str, subtype: str, words: List[Dict[str, Any]]
     ) -> None:
         """
         Generate a page for a specific POS subtype.
@@ -364,7 +370,7 @@ class PovasAgent:
         shutil.copy2(self.JS_TEMPLATE_PATH, os.path.join(self.POS_SUBTYPE_DIR, self.JS_FILENAME))
         logger.info(f"Copied JS file from templates to output directory: {self.JS_FILENAME}")
 
-    def get_all_pos_types(self, session) -> List[str]:
+    def get_all_pos_types(self, session: Session) -> List[str]:
         """
         Get all part of speech types from the database.
 
@@ -446,7 +452,7 @@ class PovasAgent:
             session.close()
 
 
-def get_argument_parser():
+def get_argument_parser() -> argparse.ArgumentParser:
     """Return the argument parser for introspection."""
     parser = argparse.ArgumentParser(description="Povas - HTML Generation Agent for POS Subtypes")
 
@@ -460,7 +466,7 @@ def get_argument_parser():
     return parser
 
 
-def main():
+def main() -> None:
     """Main entry point for the povas agent."""
     parser = get_argument_parser()
     args = parser.parse_args()

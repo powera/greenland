@@ -3,7 +3,9 @@ Grammatical Gender Task - Determine grammatical gender for nouns.
 """
 
 import logging
-from typing import Optional, Tuple, TYPE_CHECKING
+from typing import List, Optional, Tuple, TYPE_CHECKING
+
+from sqlalchemy.orm import Session
 
 import util.prompt_loader
 from clients.types import Schema, SchemaProperty
@@ -20,7 +22,7 @@ def generate_grammatical_gender(
     lemma: Lemma,
     target_translation: Optional[str],
     language_code: str,
-    session=None,
+    session: Optional[Session] = None,
 ) -> Tuple[Optional[str], Optional[str], float]:
     """
     Generate grammatical gender for a noun using LLM.
@@ -76,7 +78,7 @@ def generate_grammatical_gender(
             "gender": SchemaProperty(
                 "string",
                 f"The grammatical gender: {valid_genders}",
-                enum=gender_config["genders"],
+                enum=list(gender_config["genders"]),
             ),
             "explanation": SchemaProperty(
                 "string", "Brief explanation of why this gender is correct"

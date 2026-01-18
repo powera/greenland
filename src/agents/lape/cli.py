@@ -9,7 +9,10 @@ import argparse
 import json
 import logging
 import sys
-from typing import Dict, List
+from typing import Any, Dict, List
+
+from sqlalchemy.orm import Session
+from wordfreq.storage.models.schema import Lemma
 
 from agents.common.common_args import (
     add_backend_args,
@@ -29,7 +32,7 @@ from wordfreq.storage.models.schema import BarsukasTask
 logger = logging.getLogger(__name__)
 
 
-def get_argument_parser():
+def get_argument_parser() -> argparse.ArgumentParser:
     """Return the argument parser for introspection."""
     parser = argparse.ArgumentParser(
         description="Lape - Grammar Facts Generator Agent",
@@ -152,7 +155,13 @@ Task presets:
     return parser
 
 
-def enqueue_grammar_fact_work(agent, session, lemmas, fact_types_by_language, dry_run=False):
+def enqueue_grammar_fact_work(
+    agent: LapeAgent,
+    session: Session,
+    lemmas: List[Lemma],
+    fact_types_by_language: Dict[str, List[str]],
+    dry_run: bool = False,
+) -> Dict[str, Any]:
     """Enqueue grammar fact generation work items to the queue.
 
     Args:
@@ -219,7 +228,7 @@ def enqueue_grammar_fact_work(agent, session, lemmas, fact_types_by_language, dr
     }
 
 
-def get_lape_queue_stats(session):
+def get_lape_queue_stats(session: Session) -> Dict[str, int]:
     """Get statistics for lape tasks in the queue."""
     task_type = "lape_generate_grammar_fact"
     return {
@@ -238,7 +247,7 @@ def get_lape_queue_stats(session):
     }
 
 
-def main():
+def main() -> None:
     """Command-line interface for the Lape agent."""
     parser = get_argument_parser()
     args = parser.parse_args()

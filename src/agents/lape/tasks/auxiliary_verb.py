@@ -3,7 +3,9 @@ Auxiliary Verb Task - Determine auxiliary verb for compound tenses.
 """
 
 import logging
-from typing import Optional, Tuple, TYPE_CHECKING
+from typing import List, Optional, Tuple, TYPE_CHECKING
+
+from sqlalchemy.orm import Session
 
 import util.prompt_loader
 from clients.types import Schema, SchemaProperty
@@ -20,7 +22,7 @@ def generate_auxiliary_verb(
     lemma: Lemma,
     target_translation: Optional[str],
     language_code: str,
-    session=None,
+    session: Optional[Session] = None,
 ) -> Tuple[Optional[str], Optional[str], float]:
     """
     Generate auxiliary verb classification for compound tenses using LLM.
@@ -74,7 +76,7 @@ def generate_auxiliary_verb(
             "auxiliary_verb": SchemaProperty(
                 "string",
                 f"The auxiliary verb: {valid_auxiliaries}",
-                enum=aux_config["auxiliaries"],
+                enum=list(aux_config["auxiliaries"]),
             ),
             "explanation": SchemaProperty("string", "Brief explanation if notable"),
             "confidence": SchemaProperty(

@@ -8,6 +8,8 @@ The actual generation logic for each fact type is in the tasks/ subdirectory.
 import logging
 from typing import Any, Dict, List, Optional, Tuple
 
+from sqlalchemy.orm import Session
+
 from agents.lape.tasks import (
     animacy,
     auxiliary_verb,
@@ -192,30 +194,34 @@ class LapeAgent:
         else:
             self.db_path = None
 
-        self.linguistic_client = None  # Lazy initialization
-        self.llm_client = None  # For direct LLM calls
+        self.linguistic_client: Optional[LinguisticClient] = None  # Lazy initialization
+        self.llm_client: Optional[UnifiedLLMClient] = None  # For direct LLM calls
 
         if self.debug:
             logger.setLevel(logging.DEBUG)
 
-    def get_session(self):
+    def get_session(self) -> Session:
         """Get database session using backend abstraction."""
         return create_backend_session(self.config)
 
-    def get_linguistic_client(self):
+    def get_linguistic_client(self) -> LinguisticClient:
         """Get or create linguistic client for LLM queries."""
         if self.linguistic_client is None:
-            self.linguistic_client = LinguisticClient(
+            client = LinguisticClient(
                 model=self.config.model, db_path=self.db_path, debug=self.debug
             )
+            self.linguistic_client = client
+            return client
         return self.linguistic_client
 
-    def get_llm_client(self):
+    def get_llm_client(self) -> UnifiedLLMClient:
         """Get or create LLM client for direct queries."""
         if self.llm_client is None:
-            self.llm_client = UnifiedLLMClient.from_config(self.config)
+            client = UnifiedLLMClient.from_config(self.config)
             if self.config.model:
-                self.llm_client.warm_model(self.config.model)
+                client.warm_model(self.config.model)
+            self.llm_client = client
+            return client
         return self.llm_client
 
     def generate_fact(
@@ -224,7 +230,7 @@ class LapeAgent:
         lemma: Lemma,
         language_code: str,
         translation: Optional[str] = None,
-        session=None,
+        session: Optional[Session] = None,
     ) -> Tuple[Optional[str], Optional[str], float]:
         """
         Dispatch to appropriate task handler based on fact type.
@@ -271,13 +277,17 @@ class LapeAgent:
     # These delegate to the task modules
 
     def generate_measure_words(
-        self, lemma: Lemma, chinese_translation: str, session=None
+        self, lemma: Lemma, chinese_translation: str, session: Optional[Session] = None
     ) -> Tuple[Optional[str], Optional[str], float]:
         """Generate Chinese measure word(s) for a noun using LLM."""
         return measure_words.generate_measure_words(self, lemma, chinese_translation, session)
 
     def generate_grammatical_gender(
-        self, lemma: Lemma, target_translation: str, language_code: str, session=None
+        self,
+        lemma: Lemma,
+        target_translation: str,
+        language_code: str,
+        session: Optional[Session] = None,
     ) -> Tuple[Optional[str], Optional[str], float]:
         """Generate grammatical gender for a noun using LLM."""
         return grammatical_gender.generate_grammatical_gender(
@@ -285,13 +295,17 @@ class LapeAgent:
         )
 
     def generate_verb_transitivity(
-        self, lemma: Lemma, session=None
+        self, lemma: Lemma, session: Optional[Session] = None
     ) -> Tuple[Optional[str], Optional[str], float]:
         """Generate verb transitivity classification using LLM."""
         return verb_transitivity.generate_verb_transitivity(self, lemma, session)
 
     def generate_verb_reflexivity(
-        self, lemma: Lemma, target_translation: str, language_code: str, session=None
+        self,
+        lemma: Lemma,
+        target_translation: str,
+        language_code: str,
+        session: Optional[Session] = None,
     ) -> Tuple[Optional[str], Optional[str], float]:
         """Generate verb reflexivity classification using LLM."""
         return verb_reflexivity.generate_verb_reflexivity(
@@ -299,13 +313,17 @@ class LapeAgent:
         )
 
     def generate_countability(
-        self, lemma: Lemma, session=None
+        self, lemma: Lemma, session: Optional[Session] = None
     ) -> Tuple[Optional[str], Optional[str], float]:
         """Generate noun countability classification using LLM."""
         return countability.generate_countability(self, lemma, session)
 
     def generate_declension_class(
-        self, lemma: Lemma, target_translation: str, language_code: str, session=None
+        self,
+        lemma: Lemma,
+        target_translation: str,
+        language_code: str,
+        session: Optional[Session] = None,
     ) -> Tuple[Optional[str], Optional[str], float]:
         """Generate noun declension class using LLM."""
         return declension_class.generate_declension_class(
@@ -313,7 +331,11 @@ class LapeAgent:
         )
 
     def generate_auxiliary_verb(
-        self, lemma: Lemma, target_translation: str, language_code: str, session=None
+        self,
+        lemma: Lemma,
+        target_translation: str,
+        language_code: str,
+        session: Optional[Session] = None,
     ) -> Tuple[Optional[str], Optional[str], float]:
         """Generate auxiliary verb classification for compound tenses using LLM."""
         return auxiliary_verb.generate_auxiliary_verb(
@@ -321,7 +343,7 @@ class LapeAgent:
         )
 
     def generate_animacy(
-        self, lemma: Lemma, session=None
+        self, lemma: Lemma, session: Optional[Session] = None
     ) -> Tuple[Optional[str], Optional[str], float]:
         """Generate noun animacy classification using LLM."""
         return animacy.generate_animacy(self, lemma, session)

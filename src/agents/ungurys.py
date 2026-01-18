@@ -408,7 +408,7 @@ class UngurysAgent:
         db_path = (
             self.config.sqlite_path if self.config.backend_type == BackendType.SQLITE else None
         )
-        results = {
+        results: Dict[str, Any] = {
             "timestamp": start_time.isoformat(),
             "database_path": db_path,
             "export_mode": export_mode,
@@ -494,7 +494,9 @@ class UngurysAgent:
 
         return results
 
-    def _print_summary(self, results: Dict, start_time: datetime, duration: float):
+    def _print_summary(
+        self, results: Dict[str, Any], start_time: datetime, duration: float
+    ) -> None:
         """Print a summary of the export results."""
         logger.info("=" * 80)
         logger.info("UNGURYS AGENT REPORT - WireWord Export")
@@ -588,7 +590,7 @@ class UngurysAgent:
         logger.info("=" * 80)
 
 
-def get_argument_parser():
+def get_argument_parser() -> argparse.ArgumentParser:
     """Return the argument parser for introspection."""
     parser = argparse.ArgumentParser(description="Ungurys - WireWord Export Agent")
 
@@ -647,7 +649,7 @@ def get_argument_parser():
     return parser
 
 
-def main():
+def main() -> None:
     """Main entry point for the ungurys agent."""
     parser = get_argument_parser()
     args = parser.parse_args()
