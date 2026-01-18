@@ -20,6 +20,9 @@ class ModelTier(Enum):
     GPT4 = auto()  # gpt-4o models
     GPT_41_NANO = auto()  # gpt-4.1-nano models
     GPT_41_MINI = auto()  # gpt-4.1-mini models
+    GPT_5_NANO = auto()  # gpt-5-nano models
+    GPT_5_MINI = auto()  # gpt-5-mini models
+    GPT_52 = auto()  # gpt-5.2 models
 
     # Anthropic models
     CLAUDE_HAIKU = auto()  # claude-3-5-haiku models
@@ -40,6 +43,9 @@ class CostConfig:
         ModelTier.GPT4: {"input": 2.5, "output": 10.0},
         ModelTier.GPT_41_NANO: {"input": 0.1, "output": 0.4},
         ModelTier.GPT_41_MINI: {"input": 0.4, "output": 1.6},
+        ModelTier.GPT_5_NANO: {"input": 0.05, "output": 0.4},
+        ModelTier.GPT_5_MINI: {"input": 0.25, "output": 2.0},
+        ModelTier.GPT_52: {"input": 1.75, "output": 14.0},
     }
 
     # Anthropic costs per million tokens
@@ -68,6 +74,12 @@ class CostConfig:
             return ModelTier.GPT_41_MINI
         elif "gpt-4o" in model_lower:
             return ModelTier.GPT4
+        elif "gpt-5-nano" in model_lower:
+            return ModelTier.GPT_5_NANO
+        elif "gpt-5-mini" in model_lower:
+            return ModelTier.GPT_5_MINI
+        elif "gpt-5.2" in model_lower:
+            return ModelTier.GPT_52
 
         # Anthropic models
         elif "claude" in model_lower:
