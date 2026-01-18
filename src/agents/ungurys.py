@@ -71,6 +71,10 @@ class UngurysAgent:
             self.language = "zh"
             self.simplified_chinese = False
             self.language_suffix = "zh_Hant"
+        elif language == "zh" and not self.simplified_chinese:
+            # Traditional Chinese passed as language="zh" with simplified_chinese=False
+            self.language = "zh"
+            self.language_suffix = "zh_Hant"
         else:
             self.language = language
             self.language_suffix = language
