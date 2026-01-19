@@ -12,8 +12,9 @@ the complexity that family terms vary significantly between languages:
 This generator uses:
 1. Section-based approach: each family relation concept (e.g., "sibling") is
    organized as a section containing multiple variants
-2. Hardcoded GUIDs: each variant has an explicit GUID with unique number
+2. Hardcoded GUIDs: each variant has an explicit GUID with unique number (10-slot ranges)
 3. Explicit language configs: each language declares which variants it uses
+4. Language groupings: reduce duplication for language families (Romance, Germanic, etc.)
 
 Usage:
     PYTHONPATH=src python src/wordfreq/data/family_relations_generator.py --help
@@ -23,14 +24,18 @@ Usage:
 
 import argparse
 import sys
-from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Dict, List, Set
 
 # Add parent directory to path for imports
 if str(Path(__file__).parent.parent.parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
+from wordfreq.data.family_relations_sections import (
+    ALL_SECTIONS,
+    SECTION_MAP,
+    FamilyRelationSection,
+)
 from wordfreq.storage.backend.config import BackendType, DataSourceConfig
 from wordfreq.storage.backend.factory import create_session
 from wordfreq.storage.crud.difficulty_override import add_difficulty_override
@@ -39,781 +44,197 @@ from wordfreq.storage.models.schema import Lemma
 from wordfreq.storage.translation_helpers import LANGUAGE_HIERARCHY
 
 
-@dataclass
-class FamilyRelationVariant:
-    """A single variant within a family relation section."""
-
-    guid: str  # Hardcoded GUID (e.g., "N35_010") - must be unique number, no suffixes
-    lemma_text: str  # English term (base form)
-    definition: str  # English definition
-
-    # Optional notes about this variant (usage patterns, NOT translations)
-    notes: Optional[str] = None
-
-    # Difficulty level (1-20 for Trakaido, or None for auto-assignment)
-    difficulty_level: Optional[int] = None
-
-    # Tags for additional categorization
-    tags: Optional[List[str]] = None
-
-
-@dataclass
-class FamilyRelationSection:
-    """A section representing a family relation concept with multiple variants."""
-
-    section_name: str  # Human-readable name (e.g., "Sibling")
-    description: str  # Description of this section
-    variants: List[FamilyRelationVariant]  # All variants in this section
-
-    def get_variant_guids(self) -> Set[str]:
-        """Get all GUIDs in this section."""
-        return {v.guid for v in self.variants}
-
-
 # =============================================================================
-# FAMILY RELATION SECTIONS
+# LANGUAGE GROUPINGS
 # =============================================================================
-# Each section represents a related group of family terms.
-# GUIDs are hardcoded with unique numbers (no a/b suffixes).
-# GUID range: N35_001 - N35_999 (family_relation subtype uses N35 prefix)
-#
-# GUID Allocation:
-#   N35_001-003: Parent
-#   N35_004-006: Child
-#   N35_010-016: Sibling
-#   N35_017-018: Half-sibling (adjacent to sibling)
-#   N35_020-027: Grandparent
-#   N35_028-030: Grandchild
-#   N35_031-036: Aunt/Uncle (combined)
-#   N35_037-038: Niece/Nephew (combined)
-#   N35_040-042: Cousin
-#   N35_050-053: Spouse
-#   N35_060-066: In-laws
-#   N35_070-071: Step-parent
-#   N35_072-074: Step-child
-#   N35_080+: Other relations
+# Language groups share similar family relation structures.
+# This reduces duplication in language configurations.
 # =============================================================================
 
-PARENT_SECTION = FamilyRelationSection(
-    section_name="Parent",
-    description="Parent and related terms",
-    variants=[
-        FamilyRelationVariant(
-            guid="N35_001",
-            lemma_text="parent",
-            definition="A mother or father",
-            difficulty_level=1,
-            tags=["nuclear_family", "gender_neutral"],
-        ),
-        FamilyRelationVariant(
-            guid="N35_002",
-            lemma_text="mother",
-            definition="A female parent",
-            difficulty_level=1,
-            tags=["nuclear_family", "female"],
-        ),
-        FamilyRelationVariant(
-            guid="N35_003",
-            lemma_text="father",
-            definition="A male parent",
-            difficulty_level=1,
-            tags=["nuclear_family", "male"],
-        ),
-    ],
-)
+# Romance languages typically gender cousins but use general terms for siblings
+ROMANCE_BASE_CONFIG: Dict[str, List[str]] = {
+    "Parent": ["N35_001", "N35_002", "N35_003"],
+    "Child": ["N35_011", "N35_012", "N35_013"],
+    "Sibling": ["N35_021", "N35_022", "N35_023"],
+    "Half-sibling": ["N35_031", "N35_032"],
+    "Grandparent": ["N35_041", "N35_042", "N35_043"],
+    "Grandchild": ["N35_051", "N35_052", "N35_053"],
+    "Aunt/Uncle": ["N35_061", "N35_062"],
+    "Niece/Nephew": ["N35_071", "N35_072"],
+    "Cousin": ["N35_082", "N35_083"],  # Gendered cousins (primo/prima)
+    "Spouse": ["N35_091", "N35_092", "N35_093", "N35_094"],
+    "In-law": ["N35_101", "N35_102", "N35_103", "N35_104", "N35_105", "N35_106", "N35_107"],
+    "Step-parent": ["N35_111", "N35_112"],
+    "Step-child": ["N35_121", "N35_122", "N35_123"],
+    "Other relations": ["N35_131"],
+}
 
-CHILD_SECTION = FamilyRelationSection(
-    section_name="Child",
-    description="Child and related terms",
-    variants=[
-        FamilyRelationVariant(
-            guid="N35_004",
-            lemma_text="child",
-            definition="A son or daughter",
-            difficulty_level=1,
-            tags=["nuclear_family", "gender_neutral"],
-        ),
-        FamilyRelationVariant(
-            guid="N35_005",
-            lemma_text="son",
-            definition="A male child",
-            difficulty_level=1,
-            tags=["nuclear_family", "male"],
-        ),
-        FamilyRelationVariant(
-            guid="N35_006",
-            lemma_text="daughter",
-            definition="A female child",
-            difficulty_level=1,
-            tags=["nuclear_family", "female"],
-        ),
-    ],
-)
-
-SIBLING_SECTION = FamilyRelationSection(
-    section_name="Sibling",
-    description="Sibling terms including gender-neutral, gendered, and age-distinguished variants",
-    variants=[
-        FamilyRelationVariant(
-            guid="N35_010",
-            lemma_text="sibling",
-            definition="A brother or sister",
-            difficulty_level=2,
-            tags=["nuclear_family", "gender_neutral"],
-            notes="Gender-neutral term; less common in some languages",
-        ),
-        FamilyRelationVariant(
-            guid="N35_011",
-            lemma_text="brother",
-            definition="A male sibling",
-            difficulty_level=1,
-            tags=["nuclear_family", "male"],
-            notes="General term; some languages only use age-distinguished variants",
-        ),
-        FamilyRelationVariant(
-            guid="N35_012",
-            lemma_text="sister",
-            definition="A female sibling",
-            difficulty_level=1,
-            tags=["nuclear_family", "female"],
-            notes="General term; some languages only use age-distinguished variants",
-        ),
-        FamilyRelationVariant(
-            guid="N35_013",
-            lemma_text="older brother",
-            definition="A male sibling who is older than oneself",
-            difficulty_level=2,
-            tags=["nuclear_family", "male", "age_distinguished"],
-            notes="Distinct term in Chinese, Korean, Vietnamese",
-        ),
-        FamilyRelationVariant(
-            guid="N35_014",
-            lemma_text="younger brother",
-            definition="A male sibling who is younger than oneself",
-            difficulty_level=3,
-            tags=["nuclear_family", "male", "age_distinguished"],
-            notes="Distinct term in Chinese, Korean, Vietnamese",
-        ),
-        FamilyRelationVariant(
-            guid="N35_015",
-            lemma_text="older sister",
-            definition="A female sibling who is older than oneself",
-            difficulty_level=2,
-            tags=["nuclear_family", "female", "age_distinguished"],
-            notes="Distinct term in Chinese, Korean, Vietnamese",
-        ),
-        FamilyRelationVariant(
-            guid="N35_016",
-            lemma_text="younger sister",
-            definition="A female sibling who is younger than oneself",
-            difficulty_level=3,
-            tags=["nuclear_family", "female", "age_distinguished"],
-            notes="Distinct term in Chinese, Korean, Vietnamese",
-        ),
-    ],
-)
-
-HALF_SIBLING_SECTION = FamilyRelationSection(
-    section_name="Half-sibling",
-    description="Half-sibling terms",
-    variants=[
-        FamilyRelationVariant(
-            guid="N35_017",
-            lemma_text="half-brother",
-            definition="A brother with whom one shares only one parent",
-            difficulty_level=5,
-            tags=["step_family", "male"],
-        ),
-        FamilyRelationVariant(
-            guid="N35_018",
-            lemma_text="half-sister",
-            definition="A sister with whom one shares only one parent",
-            difficulty_level=5,
-            tags=["step_family", "female"],
-        ),
-    ],
-)
-
-GRANDPARENT_SECTION = FamilyRelationSection(
-    section_name="Grandparent",
-    description="Grandparent and related terms including maternal/paternal variants",
-    variants=[
-        FamilyRelationVariant(
-            guid="N35_020",
-            lemma_text="grandparent",
-            definition="A parent of one's parent",
-            difficulty_level=2,
-            tags=["extended_family", "gender_neutral"],
-        ),
-        FamilyRelationVariant(
-            guid="N35_021",
-            lemma_text="grandmother",
-            definition="A mother of one's parent",
-            difficulty_level=2,
-            tags=["extended_family", "female"],
-            notes="General term; some languages distinguish maternal/paternal",
-        ),
-        FamilyRelationVariant(
-            guid="N35_022",
-            lemma_text="grandfather",
-            definition="A father of one's parent",
-            difficulty_level=2,
-            tags=["extended_family", "male"],
-            notes="General term; some languages distinguish maternal/paternal",
-        ),
-        FamilyRelationVariant(
-            guid="N35_023",
-            lemma_text="maternal grandmother",
-            definition="The mother of one's mother",
-            difficulty_level=3,
-            tags=["extended_family", "female", "maternal"],
-            notes="Distinct from paternal grandmother in some languages",
-        ),
-        FamilyRelationVariant(
-            guid="N35_024",
-            lemma_text="paternal grandmother",
-            definition="The mother of one's father",
-            difficulty_level=3,
-            tags=["extended_family", "female", "paternal"],
-            notes="Distinct from maternal grandmother in some languages",
-        ),
-        FamilyRelationVariant(
-            guid="N35_025",
-            lemma_text="maternal grandfather",
-            definition="The father of one's mother",
-            difficulty_level=3,
-            tags=["extended_family", "male", "maternal"],
-            notes="Distinct from paternal grandfather in some languages",
-        ),
-        FamilyRelationVariant(
-            guid="N35_026",
-            lemma_text="paternal grandfather",
-            definition="The father of one's father",
-            difficulty_level=3,
-            tags=["extended_family", "male", "paternal"],
-            notes="Distinct from maternal grandfather in some languages",
-        ),
-    ],
-)
-
-GRANDCHILD_SECTION = FamilyRelationSection(
-    section_name="Grandchild",
-    description="Grandchild and related terms",
-    variants=[
-        FamilyRelationVariant(
-            guid="N35_028",
-            lemma_text="grandchild",
-            definition="A child of one's child",
-            difficulty_level=3,
-            tags=["extended_family", "gender_neutral"],
-        ),
-        FamilyRelationVariant(
-            guid="N35_029",
-            lemma_text="grandson",
-            definition="A son of one's child",
-            difficulty_level=3,
-            tags=["extended_family", "male"],
-        ),
-        FamilyRelationVariant(
-            guid="N35_030",
-            lemma_text="granddaughter",
-            definition="A daughter of one's child",
-            difficulty_level=3,
-            tags=["extended_family", "female"],
-        ),
-    ],
-)
-
-AUNT_UNCLE_SECTION = FamilyRelationSection(
-    section_name="Aunt/Uncle",
-    description="Aunt and uncle terms including maternal/paternal variants",
-    variants=[
-        FamilyRelationVariant(
-            guid="N35_031",
-            lemma_text="aunt",
-            definition="A sister of one's parent, or the wife of one's uncle",
-            difficulty_level=2,
-            tags=["extended_family", "female"],
-            notes="General term; many languages distinguish maternal/paternal",
-        ),
-        FamilyRelationVariant(
-            guid="N35_032",
-            lemma_text="uncle",
-            definition="A brother of one's parent, or the husband of one's aunt",
-            difficulty_level=2,
-            tags=["extended_family", "male"],
-            notes="General term; many languages distinguish maternal/paternal",
-        ),
-        FamilyRelationVariant(
-            guid="N35_033",
-            lemma_text="maternal aunt",
-            definition="A sister of one's mother",
-            difficulty_level=3,
-            tags=["extended_family", "female", "maternal"],
-            notes="Distinct from paternal aunt in some languages",
-        ),
-        FamilyRelationVariant(
-            guid="N35_034",
-            lemma_text="paternal aunt",
-            definition="A sister of one's father",
-            difficulty_level=3,
-            tags=["extended_family", "female", "paternal"],
-            notes="Distinct from maternal aunt in some languages",
-        ),
-        FamilyRelationVariant(
-            guid="N35_035",
-            lemma_text="maternal uncle",
-            definition="A brother of one's mother",
-            difficulty_level=3,
-            tags=["extended_family", "male", "maternal"],
-            notes="Distinct from paternal uncle in some languages",
-        ),
-        FamilyRelationVariant(
-            guid="N35_036",
-            lemma_text="paternal uncle",
-            definition="A brother of one's father",
-            difficulty_level=3,
-            tags=["extended_family", "male", "paternal"],
-            notes="Distinct from maternal uncle in some languages",
-        ),
-    ],
-)
-
-NIECE_NEPHEW_SECTION = FamilyRelationSection(
-    section_name="Niece/Nephew",
-    description="Niece and nephew terms",
-    variants=[
-        FamilyRelationVariant(
-            guid="N35_037",
-            lemma_text="niece",
-            definition="A daughter of one's sibling",
-            difficulty_level=3,
-            tags=["extended_family", "female"],
-        ),
-        FamilyRelationVariant(
-            guid="N35_038",
-            lemma_text="nephew",
-            definition="A son of one's sibling",
-            difficulty_level=3,
-            tags=["extended_family", "male"],
-        ),
-    ],
-)
-
-COUSIN_SECTION = FamilyRelationSection(
-    section_name="Cousin",
-    description="Cousin terms including gender-neutral and gendered variants",
-    variants=[
-        FamilyRelationVariant(
-            guid="N35_040",
-            lemma_text="cousin",
-            definition="A child of one's aunt or uncle",
-            difficulty_level=2,
-            tags=["extended_family", "gender_neutral"],
-            notes="Gender-neutral in some languages; gendered in others",
-        ),
-        FamilyRelationVariant(
-            guid="N35_041",
-            lemma_text="male cousin",
-            definition="A male child of one's aunt or uncle",
-            difficulty_level=3,
-            tags=["extended_family", "male", "gendered"],
-            notes="Used in Romance languages",
-        ),
-        FamilyRelationVariant(
-            guid="N35_042",
-            lemma_text="female cousin",
-            definition="A female child of one's aunt or uncle",
-            difficulty_level=3,
-            tags=["extended_family", "female", "gendered"],
-            notes="Used in Romance languages",
-        ),
-    ],
-)
-
-SPOUSE_SECTION = FamilyRelationSection(
-    section_name="Spouse",
-    description="Spouse and related terms",
-    variants=[
-        FamilyRelationVariant(
-            guid="N35_050",
-            lemma_text="spouse",
-            definition="A husband or wife",
-            difficulty_level=2,
-            tags=["marriage", "gender_neutral"],
-        ),
-        FamilyRelationVariant(
-            guid="N35_051",
-            lemma_text="husband",
-            definition="A married man; a woman's male spouse",
-            difficulty_level=1,
-            tags=["marriage", "male"],
-        ),
-        FamilyRelationVariant(
-            guid="N35_052",
-            lemma_text="wife",
-            definition="A married woman; a man's female spouse",
-            difficulty_level=1,
-            tags=["marriage", "female"],
-        ),
-        FamilyRelationVariant(
-            guid="N35_053",
-            lemma_text="partner",
-            definition="A person in a romantic relationship (married or unmarried)",
-            difficulty_level=2,
-            tags=["marriage", "gender_neutral", "modern"],
-            notes="Modern term; may not have direct equivalents in all languages",
-        ),
-    ],
-)
-
-IN_LAW_SECTION = FamilyRelationSection(
-    section_name="In-law",
-    description="In-law family terms",
-    variants=[
-        FamilyRelationVariant(
-            guid="N35_060",
-            lemma_text="parent-in-law",
-            definition="A parent of one's spouse",
-            difficulty_level=4,
-            tags=["in_law", "gender_neutral"],
-            notes="May be awkward in some languages",
-        ),
-        FamilyRelationVariant(
-            guid="N35_061",
-            lemma_text="mother-in-law",
-            definition="The mother of one's spouse",
-            difficulty_level=3,
-            tags=["in_law", "female"],
-        ),
-        FamilyRelationVariant(
-            guid="N35_062",
-            lemma_text="father-in-law",
-            definition="The father of one's spouse",
-            difficulty_level=3,
-            tags=["in_law", "male"],
-        ),
-        FamilyRelationVariant(
-            guid="N35_063",
-            lemma_text="son-in-law",
-            definition="The husband of one's daughter",
-            difficulty_level=4,
-            tags=["in_law", "male"],
-        ),
-        FamilyRelationVariant(
-            guid="N35_064",
-            lemma_text="daughter-in-law",
-            definition="The wife of one's son",
-            difficulty_level=4,
-            tags=["in_law", "female"],
-        ),
-        FamilyRelationVariant(
-            guid="N35_065",
-            lemma_text="brother-in-law",
-            definition="The brother of one's spouse, or the husband of one's sibling",
-            difficulty_level=4,
-            tags=["in_law", "male"],
-        ),
-        FamilyRelationVariant(
-            guid="N35_066",
-            lemma_text="sister-in-law",
-            definition="The sister of one's spouse, or the wife of one's sibling",
-            difficulty_level=4,
-            tags=["in_law", "female"],
-        ),
-    ],
-)
-
-STEP_PARENT_SECTION = FamilyRelationSection(
-    section_name="Step-parent",
-    description="Step-parent terms",
-    variants=[
-        FamilyRelationVariant(
-            guid="N35_070",
-            lemma_text="stepmother",
-            definition="The wife of one's father who is not one's biological mother",
-            difficulty_level=5,
-            tags=["step_family", "female"],
-        ),
-        FamilyRelationVariant(
-            guid="N35_071",
-            lemma_text="stepfather",
-            definition="The husband of one's mother who is not one's biological father",
-            difficulty_level=5,
-            tags=["step_family", "male"],
-        ),
-    ],
-)
-
-STEP_CHILD_SECTION = FamilyRelationSection(
-    section_name="Step-child",
-    description="Step-child and related terms",
-    variants=[
-        FamilyRelationVariant(
-            guid="N35_072",
-            lemma_text="stepchild",
-            definition="A child of one's spouse from a previous relationship",
-            difficulty_level=5,
-            tags=["step_family", "gender_neutral"],
-        ),
-        FamilyRelationVariant(
-            guid="N35_073",
-            lemma_text="stepson",
-            definition="A male child of one's spouse from a previous relationship",
-            difficulty_level=5,
-            tags=["step_family", "male"],
-        ),
-        FamilyRelationVariant(
-            guid="N35_074",
-            lemma_text="stepdaughter",
-            definition="A female child of one's spouse from a previous relationship",
-            difficulty_level=5,
-            tags=["step_family", "female"],
-        ),
-    ],
-)
-
-OTHER_RELATIONS_SECTION = FamilyRelationSection(
-    section_name="Other relations",
-    description="Other family relations",
-    variants=[
-        FamilyRelationVariant(
-            guid="N35_080",
-            lemma_text="twin",
-            definition="One of two children born to the same mother at the same time",
-            difficulty_level=4,
-            tags=["nuclear_family", "gender_neutral"],
-        ),
-    ],
-)
-
-# All sections in order (note: half-sibling is adjacent to sibling)
-ALL_SECTIONS = [
-    PARENT_SECTION,
-    CHILD_SECTION,
-    SIBLING_SECTION,
-    HALF_SIBLING_SECTION,  # Adjacent to sibling
-    GRANDPARENT_SECTION,
-    GRANDCHILD_SECTION,
-    AUNT_UNCLE_SECTION,  # Combined aunt/uncle
-    NIECE_NEPHEW_SECTION,  # Combined niece/nephew
-    COUSIN_SECTION,
-    SPOUSE_SECTION,
-    IN_LAW_SECTION,  # Combined all in-laws
-    STEP_PARENT_SECTION,
-    STEP_CHILD_SECTION,
-    OTHER_RELATIONS_SECTION,
-]
-
-# Create a lookup map: section_name -> section
-SECTION_MAP = {section.section_name: section for section in ALL_SECTIONS}
+# Germanic languages (German, Dutch, Swedish) - similar to Romance
+GERMANIC_BASE_CONFIG: Dict[str, List[str]] = {
+    "Parent": ["N35_001", "N35_002", "N35_003"],
+    "Child": ["N35_011", "N35_012", "N35_013"],
+    "Sibling": ["N35_021", "N35_022", "N35_023"],
+    "Half-sibling": ["N35_031", "N35_032"],
+    "Grandparent": ["N35_041", "N35_042", "N35_043"],
+    "Grandchild": ["N35_051", "N35_052", "N35_053"],
+    "Aunt/Uncle": ["N35_061", "N35_062"],
+    "Niece/Nephew": ["N35_071", "N35_072"],
+    "Cousin": ["N35_082", "N35_083"],  # Gendered cousins
+    "Spouse": ["N35_091", "N35_092", "N35_093", "N35_094"],
+    "In-law": ["N35_101", "N35_102", "N35_103", "N35_104", "N35_105", "N35_106", "N35_107"],
+    "Step-parent": ["N35_111", "N35_112"],
+    "Step-child": ["N35_121", "N35_122", "N35_123"],
+    "Other relations": ["N35_131"],
+}
 
 
 # =============================================================================
 # LANGUAGE CONFIGURATIONS
 # =============================================================================
 # For each language, explicitly specify which GUIDs from each section to use.
-# This makes it crystal clear which variants are applicable.
+# Languages can inherit from a base config (ROMANCE_BASE_CONFIG, etc.) or
+# define their own configuration.
 # =============================================================================
 
 LANGUAGE_CONFIGS: Dict[str, Dict[str, List[str]]] = {
     "en": {
-        # English uses all standard terms
+        # English uses all standard terms including maternal/paternal variants
         "Parent": ["N35_001", "N35_002", "N35_003"],
-        "Child": ["N35_004", "N35_005", "N35_006"],
-        "Sibling": ["N35_010", "N35_011", "N35_012"],  # sibling, brother, sister
-        "Half-sibling": ["N35_017", "N35_018"],
+        "Child": ["N35_011", "N35_012", "N35_013"],
+        "Sibling": ["N35_021", "N35_022", "N35_023"],  # sibling, brother, sister
+        "Half-sibling": ["N35_031", "N35_032"],
         "Grandparent": [
-            "N35_020",
-            "N35_021",
-            "N35_022",
-            "N35_023",
-            "N35_024",
-            "N35_025",
-            "N35_026",
+            "N35_041",
+            "N35_042",
+            "N35_043",
+            "N35_044",
+            "N35_045",
+            "N35_046",
+            "N35_047",
         ],  # all variants
-        "Grandchild": ["N35_028", "N35_029", "N35_030"],
+        "Grandchild": ["N35_051", "N35_052", "N35_053"],
         "Aunt/Uncle": [
-            "N35_031",
-            "N35_032",
-            "N35_033",
-            "N35_034",
-            "N35_035",
-            "N35_036",
-        ],  # all variants
-        "Niece/Nephew": ["N35_037", "N35_038"],
-        "Cousin": ["N35_040"],  # gender-neutral only
-        "Spouse": ["N35_050", "N35_051", "N35_052", "N35_053"],
-        "In-law": ["N35_060", "N35_061", "N35_062", "N35_063", "N35_064", "N35_065", "N35_066"],
-        "Step-parent": ["N35_070", "N35_071"],
-        "Step-child": ["N35_072", "N35_073", "N35_074"],
-        "Other relations": ["N35_080"],
-    },
-    "zh": {
-        # Chinese distinguishes heavily by age and maternal/paternal
-        "Parent": ["N35_002", "N35_003"],  # mother, father (no gender-neutral "parent")
-        "Child": ["N35_005", "N35_006"],  # son, daughter (no "child")
-        "Sibling": [
-            "N35_013",
-            "N35_014",
-            "N35_015",
-            "N35_016",
-        ],  # age-distinguished only
-        "Half-sibling": ["N35_017", "N35_018"],
-        "Grandparent": [
-            "N35_023",
-            "N35_024",
-            "N35_025",
-            "N35_026",
-        ],  # maternal/paternal only
-        "Grandchild": ["N35_029", "N35_030"],  # grandson, granddaughter (no "grandchild")
-        "Aunt/Uncle": ["N35_033", "N35_034", "N35_035", "N35_036"],  # maternal/paternal only
-        "Niece/Nephew": ["N35_037", "N35_038"],
-        "Cousin": ["N35_040"],  # gender-neutral
-        "Spouse": ["N35_051", "N35_052"],  # husband, wife (no "spouse" or "partner")
-        "In-law": [
             "N35_061",
             "N35_062",
             "N35_063",
             "N35_064",
             "N35_065",
             "N35_066",
+        ],  # all variants
+        "Niece/Nephew": ["N35_071", "N35_072"],
+        "Cousin": ["N35_081"],  # gender-neutral only
+        "Spouse": ["N35_091", "N35_092", "N35_093", "N35_094"],
+        "In-law": ["N35_101", "N35_102", "N35_103", "N35_104", "N35_105", "N35_106", "N35_107"],
+        "Step-parent": ["N35_111", "N35_112"],
+        "Step-child": ["N35_121", "N35_122", "N35_123"],
+        "Other relations": ["N35_131"],
+    },
+    "zh": {
+        # Chinese distinguishes heavily by age and maternal/paternal
+        "Parent": ["N35_002", "N35_003"],  # mother, father (no gender-neutral "parent")
+        "Child": ["N35_012", "N35_013"],  # son, daughter (no "child")
+        "Sibling": [
+            "N35_024",
+            "N35_025",
+            "N35_026",
+            "N35_027",
+        ],  # age-distinguished only
+        "Half-sibling": ["N35_031", "N35_032"],
+        "Grandparent": [
+            "N35_044",
+            "N35_045",
+            "N35_046",
+            "N35_047",
+        ],  # maternal/paternal only
+        "Grandchild": ["N35_052", "N35_053"],  # grandson, granddaughter (no "grandchild")
+        "Aunt/Uncle": ["N35_063", "N35_064", "N35_065", "N35_066"],  # maternal/paternal only
+        "Niece/Nephew": ["N35_071", "N35_072"],
+        "Cousin": ["N35_081"],  # gender-neutral
+        "Spouse": ["N35_092", "N35_093"],  # husband, wife (no "spouse" or "partner")
+        "In-law": [
+            "N35_102",
+            "N35_103",
+            "N35_104",
+            "N35_105",
+            "N35_106",
+            "N35_107",
         ],  # no "parent-in-law"
-        "Step-parent": ["N35_070", "N35_071"],
-        "Step-child": ["N35_073", "N35_074"],  # stepson, stepdaughter (no "stepchild")
-        "Other relations": ["N35_080"],
+        "Step-parent": ["N35_111", "N35_112"],
+        "Step-child": ["N35_122", "N35_123"],  # stepson, stepdaughter (no "stepchild")
+        "Other relations": ["N35_131"],
     },
     "ko": {
         # Korean uses age-distinguished siblings
         "Parent": ["N35_001", "N35_002", "N35_003"],
-        "Child": ["N35_004", "N35_005", "N35_006"],
+        "Child": ["N35_011", "N35_012", "N35_013"],
         "Sibling": [
-            "N35_013",
-            "N35_014",
-            "N35_015",
-            "N35_016",
+            "N35_024",
+            "N35_025",
+            "N35_026",
+            "N35_027",
         ],  # age-distinguished
-        "Half-sibling": ["N35_017", "N35_018"],
-        "Grandparent": ["N35_020", "N35_021", "N35_022"],
-        "Grandchild": ["N35_028", "N35_029", "N35_030"],
-        "Aunt/Uncle": ["N35_031", "N35_032"],
-        "Niece/Nephew": ["N35_037", "N35_038"],
-        "Cousin": ["N35_040"],
-        "Spouse": ["N35_050", "N35_051", "N35_052", "N35_053"],
-        "In-law": ["N35_060", "N35_061", "N35_062", "N35_063", "N35_064", "N35_065", "N35_066"],
-        "Step-parent": ["N35_070", "N35_071"],
-        "Step-child": ["N35_072", "N35_073", "N35_074"],
-        "Other relations": ["N35_080"],
+        "Half-sibling": ["N35_031", "N35_032"],
+        "Grandparent": ["N35_041", "N35_042", "N35_043"],
+        "Grandchild": ["N35_051", "N35_052", "N35_053"],
+        "Aunt/Uncle": ["N35_061", "N35_062"],
+        "Niece/Nephew": ["N35_071", "N35_072"],
+        "Cousin": ["N35_081"],
+        "Spouse": ["N35_091", "N35_092", "N35_093", "N35_094"],
+        "In-law": ["N35_101", "N35_102", "N35_103", "N35_104", "N35_105", "N35_106", "N35_107"],
+        "Step-parent": ["N35_111", "N35_112"],
+        "Step-child": ["N35_121", "N35_122", "N35_123"],
+        "Other relations": ["N35_131"],
     },
     "vi": {
         # Vietnamese uses age-distinguished siblings
         "Parent": ["N35_001", "N35_002", "N35_003"],
-        "Child": ["N35_004", "N35_005", "N35_006"],
+        "Child": ["N35_011", "N35_012", "N35_013"],
         "Sibling": [
-            "N35_013",
-            "N35_014",
-            "N35_015",
-            "N35_016",
+            "N35_024",
+            "N35_025",
+            "N35_026",
+            "N35_027",
         ],  # age-distinguished
-        "Half-sibling": ["N35_017", "N35_018"],
-        "Grandparent": ["N35_020", "N35_021", "N35_022"],
-        "Grandchild": ["N35_028", "N35_029", "N35_030"],
-        "Aunt/Uncle": ["N35_031", "N35_032"],
-        "Niece/Nephew": ["N35_037", "N35_038"],
-        "Cousin": ["N35_040"],
-        "Spouse": ["N35_050", "N35_051", "N35_052", "N35_053"],
-        "In-law": ["N35_060", "N35_061", "N35_062", "N35_063", "N35_064", "N35_065", "N35_066"],
-        "Step-parent": ["N35_070", "N35_071"],
-        "Step-child": ["N35_072", "N35_073", "N35_074"],
-        "Other relations": ["N35_080"],
+        "Half-sibling": ["N35_031", "N35_032"],
+        "Grandparent": ["N35_041", "N35_042", "N35_043"],
+        "Grandchild": ["N35_051", "N35_052", "N35_053"],
+        "Aunt/Uncle": ["N35_061", "N35_062"],
+        "Niece/Nephew": ["N35_071", "N35_072"],
+        "Cousin": ["N35_081"],
+        "Spouse": ["N35_091", "N35_092", "N35_093", "N35_094"],
+        "In-law": ["N35_101", "N35_102", "N35_103", "N35_104", "N35_105", "N35_106", "N35_107"],
+        "Step-parent": ["N35_111", "N35_112"],
+        "Step-child": ["N35_121", "N35_122", "N35_123"],
+        "Other relations": ["N35_131"],
     },
-    "es": {
-        # Spanish uses gendered cousins
-        "Parent": ["N35_001", "N35_002", "N35_003"],
-        "Child": ["N35_004", "N35_005", "N35_006"],
-        "Sibling": ["N35_010", "N35_011", "N35_012"],
-        "Half-sibling": ["N35_017", "N35_018"],
-        "Grandparent": ["N35_020", "N35_021", "N35_022"],
-        "Grandchild": ["N35_028", "N35_029", "N35_030"],
-        "Aunt/Uncle": ["N35_031", "N35_032"],
-        "Niece/Nephew": ["N35_037", "N35_038"],
-        "Cousin": ["N35_041", "N35_042"],  # primo, prima (gendered)
-        "Spouse": ["N35_050", "N35_051", "N35_052", "N35_053"],
-        "In-law": ["N35_060", "N35_061", "N35_062", "N35_063", "N35_064", "N35_065", "N35_066"],
-        "Step-parent": ["N35_070", "N35_071"],
-        "Step-child": ["N35_072", "N35_073", "N35_074"],
-        "Other relations": ["N35_080"],
-    },
-    "fr": {
-        # French uses gendered cousins
-        "Parent": ["N35_001", "N35_002", "N35_003"],
-        "Child": ["N35_004", "N35_005", "N35_006"],
-        "Sibling": ["N35_010", "N35_011", "N35_012"],
-        "Half-sibling": ["N35_017", "N35_018"],
-        "Grandparent": ["N35_020", "N35_021", "N35_022"],
-        "Grandchild": ["N35_028", "N35_029", "N35_030"],
-        "Aunt/Uncle": ["N35_031", "N35_032"],
-        "Niece/Nephew": ["N35_037", "N35_038"],
-        "Cousin": ["N35_041", "N35_042"],  # cousin (m), cousine (gendered)
-        "Spouse": ["N35_050", "N35_051", "N35_052", "N35_053"],
-        "In-law": ["N35_060", "N35_061", "N35_062", "N35_063", "N35_064", "N35_065", "N35_066"],
-        "Step-parent": ["N35_070", "N35_071"],
-        "Step-child": ["N35_072", "N35_073", "N35_074"],
-        "Other relations": ["N35_080"],
-    },
-    "pt": {
-        # Portuguese uses gendered cousins
-        "Parent": ["N35_001", "N35_002", "N35_003"],
-        "Child": ["N35_004", "N35_005", "N35_006"],
-        "Sibling": ["N35_010", "N35_011", "N35_012"],
-        "Half-sibling": ["N35_017", "N35_018"],
-        "Grandparent": ["N35_020", "N35_021", "N35_022"],
-        "Grandchild": ["N35_028", "N35_029", "N35_030"],
-        "Aunt/Uncle": ["N35_031", "N35_032"],
-        "Niece/Nephew": ["N35_037", "N35_038"],
-        "Cousin": ["N35_041", "N35_042"],  # primo, prima (gendered)
-        "Spouse": ["N35_050", "N35_051", "N35_052", "N35_053"],
-        "In-law": ["N35_060", "N35_061", "N35_062", "N35_063", "N35_064", "N35_065", "N35_066"],
-        "Step-parent": ["N35_070", "N35_071"],
-        "Step-child": ["N35_072", "N35_073", "N35_074"],
-        "Other relations": ["N35_080"],
-    },
-    "it": {
-        # Italian uses gendered cousins
-        "Parent": ["N35_001", "N35_002", "N35_003"],
-        "Child": ["N35_004", "N35_005", "N35_006"],
-        "Sibling": ["N35_010", "N35_011", "N35_012"],
-        "Half-sibling": ["N35_017", "N35_018"],
-        "Grandparent": ["N35_020", "N35_021", "N35_022"],
-        "Grandchild": ["N35_028", "N35_029", "N35_030"],
-        "Aunt/Uncle": ["N35_031", "N35_032"],
-        "Niece/Nephew": ["N35_037", "N35_038"],
-        "Cousin": ["N35_041", "N35_042"],  # cugino, cugina (gendered)
-        "Spouse": ["N35_050", "N35_051", "N35_052", "N35_053"],
-        "In-law": ["N35_060", "N35_061", "N35_062", "N35_063", "N35_064", "N35_065", "N35_066"],
-        "Step-parent": ["N35_070", "N35_071"],
-        "Step-child": ["N35_072", "N35_073", "N35_074"],
-        "Other relations": ["N35_080"],
-    },
+    # Romance languages - use base config
+    "es": ROMANCE_BASE_CONFIG,  # Spanish
+    "fr": ROMANCE_BASE_CONFIG,  # French
+    "pt": ROMANCE_BASE_CONFIG,  # Portuguese
+    "it": ROMANCE_BASE_CONFIG,  # Italian
+    # Germanic languages - use base config
+    "de": GERMANIC_BASE_CONFIG,  # German
+    "nl": GERMANIC_BASE_CONFIG,  # Dutch
+    "sv": GERMANIC_BASE_CONFIG,  # Swedish
 }
 
 # Default config for languages not explicitly configured
 # Uses all general terms, no special variants
 DEFAULT_LANGUAGE_CONFIG = {
     "Parent": ["N35_001", "N35_002", "N35_003"],
-    "Child": ["N35_004", "N35_005", "N35_006"],
-    "Sibling": ["N35_010", "N35_011", "N35_012"],
-    "Half-sibling": ["N35_017", "N35_018"],
-    "Grandparent": ["N35_020", "N35_021", "N35_022"],
-    "Grandchild": ["N35_028", "N35_029", "N35_030"],
-    "Aunt/Uncle": ["N35_031", "N35_032"],
-    "Niece/Nephew": ["N35_037", "N35_038"],
-    "Cousin": ["N35_040"],
-    "Spouse": ["N35_050", "N35_051", "N35_052", "N35_053"],
-    "In-law": ["N35_060", "N35_061", "N35_062", "N35_063", "N35_064", "N35_065", "N35_066"],
-    "Step-parent": ["N35_070", "N35_071"],
-    "Step-child": ["N35_072", "N35_073", "N35_074"],
-    "Other relations": ["N35_080"],
+    "Child": ["N35_011", "N35_012", "N35_013"],
+    "Sibling": ["N35_021", "N35_022", "N35_023"],
+    "Half-sibling": ["N35_031", "N35_032"],
+    "Grandparent": ["N35_041", "N35_042", "N35_043"],
+    "Grandchild": ["N35_051", "N35_052", "N35_053"],
+    "Aunt/Uncle": ["N35_061", "N35_062"],
+    "Niece/Nephew": ["N35_071", "N35_072"],
+    "Cousin": ["N35_081"],
+    "Spouse": ["N35_091", "N35_092", "N35_093", "N35_094"],
+    "In-law": ["N35_101", "N35_102", "N35_103", "N35_104", "N35_105", "N35_106", "N35_107"],
+    "Step-parent": ["N35_111", "N35_112"],
+    "Step-child": ["N35_121", "N35_122", "N35_123"],
+    "Other relations": ["N35_131"],
 }
 
 
