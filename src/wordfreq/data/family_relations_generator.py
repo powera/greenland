@@ -23,6 +23,7 @@ Usage:
 """
 
 import argparse
+import json
 import sys
 from pathlib import Path
 from typing import Any, Dict, List, Set
@@ -352,9 +353,9 @@ def generate_family_relations(
                             pos_subtype="family_relation",
                             difficulty_level=variant.difficulty_level,
                             tags=(
-                                str(variant.tags)
+                                json.dumps(variant.tags)
                                 if variant.tags
-                                else None  # Simple string representation
+                                else None  # Valid JSON array
                             ),
                             notes=variant.notes,
                         )
