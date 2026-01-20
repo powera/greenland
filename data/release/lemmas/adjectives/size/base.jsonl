@@ -1,5 +1,5 @@
-{"guid": "A01_001", "pos_type": "adjective", "pos_subtype": "size", "concept_label": "big", "concept_definition": "of considerable size, extent, or intensity.", "difficulty_level": -1}
-{"guid": "A01_002", "pos_type": "adjective", "pos_subtype": "size", "concept_label": "small", "concept_definition": "of a size that is less than normal or usual.", "difficulty_level": -1}
-{"guid": "A01_003", "pos_type": "adjective", "pos_subtype": "size", "concept_label": "large", "concept_definition": "of considerable or relatively great size or extent.", "difficulty_level": -1}
-{"guid": "A01_004", "pos_type": "adjective", "pos_subtype": "size", "concept_label": "tiny", "concept_definition": "very small.", "difficulty_level": -1}
-{"guid": "A01_005", "pos_type": "adjective", "pos_subtype": "size", "concept_label": "huge", "concept_definition": "extremely large; enormous.", "difficulty_level": -1}
+{"guid": "A01_001", "pos_type": "adjective", "pos_subtype": "size", "concept_label": "big", "concept_definition": "of considerable size, extent, or intensity.", "translations": {"en": "big"}, "difficulty_level": -1}
+{"guid": "A01_002", "pos_type": "adjective", "pos_subtype": "size", "concept_label": "small", "concept_definition": "of a size that is less than normal or usual.", "translations": {"en": "small"}, "difficulty_level": -1}
+{"guid": "A01_003", "pos_type": "adjective", "pos_subtype": "size", "concept_label": "large", "concept_definition": "of considerable or relatively great size or extent.", "translations": {"en": "large"}, "difficulty_level": -1}
+{"guid": "A01_004", "pos_type": "adjective", "pos_subtype": "size", "concept_label": "tiny", "concept_definition": "very small.", "translations": {"en": "tiny"}, "difficulty_level": -1}
+{"guid": "A01_005", "pos_type": "adjective", "pos_subtype": "size", "concept_label": "huge", "concept_definition": "extremely large; enormous.", "translations": {"en": "huge"}, "difficulty_level": -1}

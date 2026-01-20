@@ -1,3 +1,3 @@
-{"guid": "V11_001", "pos_type": "verb", "pos_subtype": "existence", "concept_label": "be", "concept_definition": "to exist or live.", "difficulty_level": -1}
-{"guid": "V11_002", "pos_type": "verb", "pos_subtype": "existence", "concept_label": "exist", "concept_definition": "to have objective reality or being.", "difficulty_level": -1}
-{"guid": "V11_003", "pos_type": "verb", "pos_subtype": "existence", "concept_label": "remain", "concept_definition": "to continue to exist, especially after other similar people or things have ceased to do so.", "difficulty_level": -1}
+{"guid": "V11_001", "pos_type": "verb", "pos_subtype": "existence", "concept_label": "be", "concept_definition": "to exist or live.", "translations": {"en": "be"}, "difficulty_level": -1}
+{"guid": "V11_002", "pos_type": "verb", "pos_subtype": "existence", "concept_label": "exist", "concept_definition": "to have objective reality or being.", "translations": {"en": "exist"}, "difficulty_level": -1}
+{"guid": "V11_003", "pos_type": "verb", "pos_subtype": "existence", "concept_label": "remain", "concept_definition": "to continue to exist, especially after other similar people or things have ceased to do so.", "translations": {"en": "remain"}, "difficulty_level": -1}
