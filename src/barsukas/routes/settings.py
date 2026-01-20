@@ -8,7 +8,7 @@ import sys
 import threading
 import time
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -67,28 +67,44 @@ def index() -> ResponseReturnValue:
 
 @bp.route("/migrate-form", methods=["POST"])
 def migrate_form() -> ResponseReturnValue:
-    """Trigger migration from SQLite to JSONL (form submission)."""
-    direction = "sqlite-to-jsonl"
-    sqlite_path: str = request.form.get("sqlite_path", current_app.config.get("DB_PATH", ""))
+    """Trigger migration from database to JSONL (form submission).
+
+    Supports both SQLite and PostgreSQL backends.
+    """
+    backend_config = _get_backend_config()
+    backend_type = backend_config.backend_type
     jsonl_dir: str = request.form.get("jsonl_dir", "data/working")
 
-    # Validate paths
-    if not Path(sqlite_path).exists():
-        flash(f"Error: SQLite database not found: {sqlite_path}", "danger")
+    # Determine direction and validate based on backend type
+    if backend_type == BackendType.POSTGRES:
+        direction = "postgres-to-jsonl"
+        # PostgreSQL uses connection URL from config, no file path validation needed
+    elif backend_type == BackendType.SQLITE:
+        direction = "sqlite-to-jsonl"
+        sqlite_path: str = request.form.get("sqlite_path", current_app.config.get("DB_PATH", ""))
+        # Validate SQLite path exists
+        if not Path(sqlite_path).exists():
+            flash(f"Error: SQLite database not found: {sqlite_path}", "danger")
+            return redirect(url_for("settings.index"))
+    else:
+        flash(f"Error: Export from {backend_type.value} backend not supported", "danger")
         return redirect(url_for("settings.index"))
 
     try:
         # Build command
         script_path = Path(__file__).parent.parent.parent.parent / "scripts" / "migrate_backend.py"
-        cmd = [
+        cmd: list[str] = [
             sys.executable,
             str(script_path),
             direction,
-            "--sqlite-path",
-            sqlite_path,
             "--jsonl-dir",
             jsonl_dir,
         ]
+
+        # Add backend-specific arguments
+        if backend_type == BackendType.SQLITE:
+            cmd.extend(["--sqlite-path", sqlite_path])
+        # PostgreSQL URL is read from env/key file automatically
 
         # Run migration
         logger.info("Launching agent subprocess: %s", " ".join(cmd))
@@ -107,35 +123,55 @@ def migrate_form() -> ResponseReturnValue:
 
 @bp.route("/migrate", methods=["POST"])
 def migrate() -> ResponseReturnValue:
-    """Trigger migration from SQLite to JSONL (JSON API)."""
+    """Trigger migration from database to JSONL (JSON API).
+
+    Supports both SQLite and PostgreSQL backends.
+    """
     data = request.get_json()
-    direction: str = data.get("direction", "sqlite-to-jsonl") if data else "sqlite-to-jsonl"
+    backend_config = _get_backend_config()
+    backend_type = backend_config.backend_type
 
-    if direction != "sqlite-to-jsonl":
-        return jsonify({"error": "Only sqlite-to-jsonl migration is supported currently"}), 400
-
-    # Get paths
-    sqlite_path: str = (
-        data.get("sqlite_path", current_app.config.get("DB_PATH", "")) if data else ""
-    )
+    # Get JSONL directory from request or default
     jsonl_dir: str = data.get("jsonl_dir", "data/working") if data else "data/working"
 
-    # Validate paths
-    if not Path(sqlite_path).exists():
-        return jsonify({"error": f"SQLite database not found: {sqlite_path}"}), 400
+    # Determine direction based on backend type or explicit request
+    requested_direction: Optional[str] = data.get("direction") if data else None
+
+    if backend_type == BackendType.POSTGRES:
+        direction = "postgres-to-jsonl"
+        if requested_direction and requested_direction not in ("postgres-to-jsonl", "auto"):
+            return (
+                jsonify({"error": f"Cannot use {requested_direction} with PostgreSQL backend"}),
+                400,
+            )
+    elif backend_type == BackendType.SQLITE:
+        direction = "sqlite-to-jsonl"
+        if requested_direction and requested_direction not in ("sqlite-to-jsonl", "auto"):
+            return jsonify({"error": f"Cannot use {requested_direction} with SQLite backend"}), 400
+        # Validate SQLite path
+        sqlite_path: str = (
+            data.get("sqlite_path", current_app.config.get("DB_PATH", "")) if data else ""
+        )
+        if not Path(sqlite_path).exists():
+            return jsonify({"error": f"SQLite database not found: {sqlite_path}"}), 400
+    else:
+        return jsonify({"error": f"Export from {backend_type.value} backend not supported"}), 400
 
     try:
         # Build command
         script_path = Path(__file__).parent.parent.parent.parent / "scripts" / "migrate_backend.py"
-        cmd: list = [
+        cmd: list[str] = [
             sys.executable,
             str(script_path),
             direction,
-            "--sqlite-path",
-            sqlite_path,
             "--jsonl-dir",
             jsonl_dir,
         ]
+
+        # Add backend-specific arguments
+        if backend_type == BackendType.SQLITE:
+            cmd.extend(["--sqlite-path", sqlite_path])
+        # PostgreSQL URL is read from env/key file automatically
 
         # Run migration
         logger.info("Launching agent subprocess: %s", " ".join(cmd))
@@ -212,6 +248,15 @@ def backend_info() -> ResponseReturnValue:
         info["sqlite_exists"] = Path(sqlite_path).exists()
         if info["sqlite_exists"]:
             info["sqlite_size"] = Path(sqlite_path).stat().st_size
+    elif backend_type == BackendType.POSTGRES:
+        # Mask password in output
+        postgres_url = backend_config.postgres_url or ""
+        if "@" in postgres_url:
+            _, rest = postgres_url.split("@", 1)
+            info["postgres_url"] = f"postgresql://***@{rest}"
+        else:
+            info["postgres_url"] = postgres_url
+        info["postgres_connected"] = True  # If we got here, we're connected
     else:
         jsonl_dir = backend_config.jsonl_data_dir
         assert jsonl_dir is not None
