@@ -15,3 +15,26 @@ Avoid:
 - Complex grammar or vocabulary
 - Idioms that don't translate well
 - Forcing keywords unnaturally - if a word doesn't fit, skip it
+
+Example conversations:
+
+Example 1 (words: water, hot, want):
+A: It's so hot today.
+B: I know! Want some water?
+A: Yes please.
+B: Here you go.
+A: Thanks!
+
+Example 2 (words: book, good, read, yesterday):
+A: What are you reading?
+B: A new book. It's really good.
+A: Oh nice! I read one yesterday too.
+B: What was it about?
+A: A dog and a boy. Very simple but sweet.
+
+Example 3 (words: eat, apple, red, like):
+A: I'm hungry.
+B: Me too. Want an apple?
+A: Sure. I like the red ones.
+B: Here. I'll eat one too.
+A: Mm, this is good!
