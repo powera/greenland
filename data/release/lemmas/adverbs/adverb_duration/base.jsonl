@@ -1,3 +1,3 @@
-{"guid": "D05_001", "pos_type": "adverb", "pos_subtype": "adverb_duration", "concept_label": "long (duration)", "concept_definition": "for a long time.", "difficulty_level": -1}
-{"guid": "D05_002", "pos_type": "adverb", "pos_subtype": "adverb_duration", "concept_label": "briefly", "concept_definition": "for a short time; fleetingly.", "difficulty_level": -1}
-{"guid": "D05_003", "pos_type": "adverb", "pos_subtype": "adverb_duration", "concept_label": "forever (duration)", "concept_definition": "for all future time; endlessly.", "difficulty_level": -1}
+{"guid": "D05_001", "pos_type": "adverb", "pos_subtype": "adverb_duration", "concept_label": "long (duration)", "concept_definition": "for a long time.", "translations": {"en": "long (duration)"}, "difficulty_level": -1}
+{"guid": "D05_002", "pos_type": "adverb", "pos_subtype": "adverb_duration", "concept_label": "briefly", "concept_definition": "for a short time; fleetingly.", "translations": {"en": "briefly"}, "difficulty_level": -1}
+{"guid": "D05_003", "pos_type": "adverb", "pos_subtype": "adverb_duration", "concept_label": "forever (duration)", "concept_definition": "for all future time; endlessly.", "translations": {"en": "forever (duration)"}, "difficulty_level": -1}

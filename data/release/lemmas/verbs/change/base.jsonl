@@ -1,3 +1,3 @@
-{"guid": "V08_001", "pos_type": "verb", "pos_subtype": "change", "concept_label": "become", "concept_definition": "to begin to be; to undergo change or development.", "difficulty_level": -1}
-{"guid": "V08_002", "pos_type": "verb", "pos_subtype": "change", "concept_label": "turn", "concept_definition": "to change in nature, state, or condition.", "difficulty_level": -1}
-{"guid": "V08_003", "pos_type": "verb", "pos_subtype": "change", "concept_label": "grow", "concept_definition": "to increase in size, amount, or degree; to develop.", "difficulty_level": -1}
+{"guid": "V08_001", "pos_type": "verb", "pos_subtype": "change", "concept_label": "become", "concept_definition": "to begin to be; to undergo change or development.", "translations": {"en": "become"}, "difficulty_level": -1}
+{"guid": "V08_002", "pos_type": "verb", "pos_subtype": "change", "concept_label": "turn", "concept_definition": "to change in nature, state, or condition.", "translations": {"en": "turn"}, "difficulty_level": -1}
+{"guid": "V08_003", "pos_type": "verb", "pos_subtype": "change", "concept_label": "grow", "concept_definition": "to increase in size, amount, or degree; to develop.", "translations": {"en": "grow"}, "difficulty_level": -1}

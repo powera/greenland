@@ -1,4 +1,4 @@
-{"guid": "V02_001", "pos_type": "verb", "pos_subtype": "creation_action", "concept_label": "make (create)", "concept_definition": "to create or produce something.", "difficulty_level": -1}
-{"guid": "V02_002", "pos_type": "verb", "pos_subtype": "creation_action", "concept_label": "build", "concept_definition": "to construct by putting parts or materials together.", "difficulty_level": -1}
-{"guid": "V02_003", "pos_type": "verb", "pos_subtype": "creation_action", "concept_label": "create", "concept_definition": "to bring something into existence.", "difficulty_level": -1}
-{"guid": "V02_004", "pos_type": "verb", "pos_subtype": "creation_action", "concept_label": "write", "concept_definition": "to form letters, words, or symbols on a surface.", "difficulty_level": -1}
+{"guid": "V02_001", "pos_type": "verb", "pos_subtype": "creation_action", "concept_label": "make (create)", "concept_definition": "to create or produce something.", "translations": {"en": "make (create)"}, "difficulty_level": -1}
+{"guid": "V02_002", "pos_type": "verb", "pos_subtype": "creation_action", "concept_label": "build", "concept_definition": "to construct by putting parts or materials together.", "translations": {"en": "build"}, "difficulty_level": -1}
+{"guid": "V02_003", "pos_type": "verb", "pos_subtype": "creation_action", "concept_label": "create", "concept_definition": "to bring something into existence.", "translations": {"en": "create"}, "difficulty_level": -1}
+{"guid": "V02_004", "pos_type": "verb", "pos_subtype": "creation_action", "concept_label": "write", "concept_definition": "to form letters, words, or symbols on a surface.", "translations": {"en": "write"}, "difficulty_level": -1}
