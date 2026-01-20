@@ -183,10 +183,11 @@ def convert_sqlalchemy_lemma_to_jsonl(lemma: Any, session: Any) -> Any:
         notes=lemma.notes,
         added_at=lemma.added_at,
         updated_at=lemma.updated_at,
-        # Language-specific data (now includes English in translations)
+        # Language-specific data (translations now go in base.jsonl)
         translations=translations,
         difficulty_overrides=difficulty_overrides,
         derivative_forms=derivative_forms,
+        base_forms={},  # Populated when no derivative has is_base_form=true
         grammar_facts=grammar_facts,
         audio_hashes={},
     )
@@ -306,11 +307,14 @@ def convert_sqlalchemy_tombstone_to_jsonl(tombstone: Any) -> Any:
 
 
 def export_sqlite_to_release(sqlite_path: str, release_dir: str) -> None:
-    """Export SQLite to data/release format with separate language files.
+    """Export SQLite to data/release format with translations in base.jsonl.
 
     This creates:
-    - base.jsonl: concept definitions (guid, pos_type, pos_subtype, concept_label, concept_definition, difficulty_level)
-    - {lang}.jsonl: translations for each language (guid, translation)
+    - base.jsonl: concept definitions with translations dict
+      (guid, pos_type, pos_subtype, concept_label, concept_definition,
+       difficulty_level, translations: {lang_code: translation})
+    - {lang}.jsonl: Only created if there's language-specific data beyond translations
+      (derivative_forms, base_form, audio_hashes, grammar_facts, etc.)
 
     Args:
         sqlite_path: Path to SQLite database
@@ -365,12 +369,21 @@ def export_sqlite_to_release(sqlite_path: str, release_dir: str) -> None:
 
             print(f"Exporting {len(category_lemmas)} lemmas to {dir_name}/{pos_subtype}...")
 
-            # Collect data by language
+            # Collect base records (now includes translations)
             base_records = []
-            lang_records: Dict[str, list] = defaultdict(list)
 
             for lemma in category_lemmas:
-                # Base concept data
+                # Get all translations
+                all_translations = translation_helpers.get_all_translations(session, lemma)
+
+                # Build translations dict (only non-empty values)
+                translations_dict: Dict[str, str] = {}
+                for lang_code, translation in all_translations.items():
+                    if translation and translation.strip():
+                        all_languages.add(lang_code)
+                        translations_dict[lang_code] = translation
+
+                # Base concept data with translations
                 base_data: Dict[str, Any] = {
                     "guid": lemma.guid,
                     "pos_type": lemma.pos_type,
@@ -379,29 +392,21 @@ def export_sqlite_to_release(sqlite_path: str, release_dir: str) -> None:
                     "concept_definition": lemma.definition_text,
                 }
 
+                if translations_dict:
+                    base_data["translations"] = translations_dict
+
                 if lemma.difficulty_level is not None:
                     base_data["difficulty_level"] = lemma.difficulty_level
 
                 base_records.append(base_data)
 
-                # Get all translations
-                all_translations = translation_helpers.get_all_translations(session, lemma)
-
-                for lang_code, translation in all_translations.items():
-                    if translation and translation.strip():
-                        all_languages.add(lang_code)
-                        lang_records[lang_code].append(
-                            {"guid": lemma.guid, "translation": translation}
-                        )
-
-            # Write base.jsonl
+            # Write base.jsonl (now includes translations)
             base_file = category_dir / "base.jsonl"
             _write_jsonl_atomic(base_file, base_records)
 
-            # Write language files
-            for lang_code, records in lang_records.items():
-                lang_file = category_dir / f"{lang_code}.jsonl"
-                _write_jsonl_atomic(lang_file, records)
+            # Note: Per-language files would only be created if there's
+            # derivative_forms, base_form, audio_hashes, grammar_facts, etc.
+            # This simple export doesn't include those, so no lang files created.
 
         print(f"\nExport complete!")
         print(f"Languages exported: {', '.join(sorted(all_languages))}")

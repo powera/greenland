@@ -237,10 +237,11 @@ class JSONLImporter:
         """
         diffs = []
 
-        # Compare concept_label (lemma_text)
-        jsonl_label = jsonl_data.get("concept_label", "")
+        # Compare lemma_text (from translations['en'] or concept_label)
+        translations = jsonl_data.get("translations", {})
+        jsonl_label = translations.get("en", jsonl_data.get("concept_label", ""))
         if existing.lemma_text != jsonl_label:
-            diffs.append(f"concept_label: '{existing.lemma_text}' → '{jsonl_label}'")
+            diffs.append(f"lemma_text: '{existing.lemma_text}' → '{jsonl_label}'")
 
         # Compare concept_definition (definition_text)
         jsonl_def = jsonl_data.get("concept_definition", "")
@@ -316,7 +317,7 @@ class JSONLImporter:
         Create a Lemma object from JSONL data.
 
         Args:
-            jsonl_data: JSONL record
+            jsonl_data: JSONL record (from base.jsonl which now includes translations)
 
         Returns:
             Lemma object
@@ -326,11 +327,15 @@ class JSONLImporter:
         lemma.pos_type = jsonl_data.get("pos_type", "")
         lemma.pos_subtype = jsonl_data.get("pos_subtype")
 
-        # Use concept_label as lemma_text and definition_text
-        concept_label = jsonl_data.get("concept_label", "")
-        concept_definition = jsonl_data.get("concept_definition", "")
+        # Get translations dict (new format stores translations in base.jsonl)
+        translations = jsonl_data.get("translations", {})
 
-        lemma.lemma_text = concept_label
+        # Use English translation for lemma_text, falling back to concept_label
+        concept_label = jsonl_data.get("concept_label", "")
+        lemma.lemma_text = translations.get("en", concept_label)
+
+        # Use concept_definition for definition_text
+        concept_definition = jsonl_data.get("concept_definition", "")
         lemma.definition_text = concept_definition
 
         # Use import_level override if provided, otherwise use JSONL data
@@ -340,6 +345,9 @@ class JSONLImporter:
             lemma.difficulty_level = jsonl_data.get("difficulty_level")
 
         lemma.notes = jsonl_data.get("notes")
+
+        # Note: Non-English translations would need to be imported as LemmaTranslation
+        # records separately. This basic importer only handles the base Lemma.
 
         return lemma
 
@@ -388,8 +396,9 @@ class JSONLImporter:
         if not guid:
             return False, "Missing GUID"
 
-        # Get lemma text for logging
-        lemma_text = jsonl_data.get("concept_label", "")
+        # Get lemma text for logging (prefer translations['en'], fall back to concept_label)
+        translations = jsonl_data.get("translations", {})
+        lemma_text = translations.get("en", jsonl_data.get("concept_label", ""))
 
         # Check for existing lemma
         existing = self.find_existing_lemma(guid)
