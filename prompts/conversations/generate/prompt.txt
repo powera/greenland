@@ -1,39 +1,39 @@
-Create a simple conversation between two speakers (A and B) for a language learning app.
+Write a short, casual conversation between two people (A and B).
 
-The conversation MUST naturally incorporate these specific words:
+Try to use these words if they fit naturally:
 {word_list}
 
-Requirements:
-1. MUST include polite phrases:
-   - Start with a greeting (e.g., "Hello!", "Good morning!", "Hi there!")
-   - Include at least one polite expression during the conversation (e.g., "Nice to see you", "How are you?", "Please", "Thank you")
-   - End with a farewell or closing phrase (e.g., "Goodbye!", "See you later!", "Take care!", "Have a nice day!")
+Keep it simple:
+- About {num_sentences} lines total
+- Very short sentences (3-10 words each)
+- A1-A2 level vocabulary (true beginner)
+- Speakers alternate (A starts)
 
-2. Use ALL the words listed above naturally in the conversation - each word should appear at least once
+The conversation should feel real - like overhearing two people chat. Not every line needs to be a complete sentence. People can react naturally with "Oh!", "Really?", "Nice!", etc.
 
-3. Alternate between speakers A and B (A speaks first)
+DON'T force all the words in if they don't fit. A natural conversation using 3-4 of the words is better than an awkward one using all 5.
 
-4. Each sentence should be short and simple (5-15 words)
+Example conversations:
 
-5. The conversation should flow naturally with:
-   - A greeting/opening
-   - The main exchange using the required words
-   - A polite closing
+Example 1 (words: water, hot, want):
+A: It's so hot today.
+B: I know! Want some water?
+A: Yes please.
+B: Here you go.
+A: Thanks!
 
-6. Use present tense primarily, with simple past when appropriate
+Example 2 (words: book, good, read, yesterday):
+A: What are you reading?
+B: A new book. It's really good.
+A: Oh nice! I read one yesterday too.
+B: What was it about?
+A: A dog and a boy. Very simple but sweet.
 
-7. Keep vocabulary at an A2-B1 level (pre-intermediate) - simple and clear
+Example 3 (words: eat, apple, red, like):
+A: I'm hungry.
+B: Me too. Want an apple?
+A: Sure. I like the red ones.
+B: Here. I'll eat one too.
+A: Mm, this is good!
 
-8. Generate approximately {num_sentences} sentences, but can be slightly more to include proper greetings and farewells
-
-Example format of a good conversation:
-A: Hello! Nice to see you today!
-B: Hi! Good to see you too. How are you?
-A: I'm good, thank you. I like your blue shirt.
-B: Thanks! Blue is my favorite color. Are you feeling happy today?
-A: Yes, I am happy. My arm feels better now.
-B: That's great news! The doctor helped you.
-A: Yes, she was very kind. Well, goodbye!
-B: Goodbye! Have a nice day!
-
-Now generate a conversation using ALL the specified words with proper greetings and farewells.
+Now write a natural conversation. Focus on flow over word usage.
