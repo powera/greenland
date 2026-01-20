@@ -89,14 +89,14 @@ class Lemma:
 
     This class represents the merged view of a lemma combining:
     - Base concept data from base.jsonl (including translations and difficulty_overrides)
-    - Language-specific data from {lang}.jsonl files (derivative_forms, audio, etc.)
+    - Language-specific data from {lang}.jsonl files (derivative_forms, definition_text, etc.)
 
     File structure:
     - base.jsonl: guid, pos_type, pos_subtype, concept_label, concept_definition,
                   translations (dict), difficulty_level, difficulty_overrides (dict), notes
     - {lang}.jsonl: guid, derivative_forms, base_form (if no derivative has is_base_form),
-                    audio_hashes, grammar_facts,
-                    definition_text, tags/disambiguation/confidence (English only)
+                    audio_hashes, grammar_facts, definition_text (all languages),
+                    tags/disambiguation/confidence (English only)
     """
 
     # Primary key for JSONL is guid
@@ -145,6 +145,8 @@ class Lemma:
     # Nested relationships (stored as dicts in JSONL)
     # translations: Now stored in base.jsonl, still populated here at runtime
     translations: Dict[str, str] = field(default_factory=dict)  # lang_code -> translation
+    # definitions: Per-language definitions stored in {lang}.jsonl files
+    definitions: Dict[str, str] = field(default_factory=dict)  # lang_code -> definition
     difficulty_overrides: Dict[str, int] = field(default_factory=dict)  # lang_code -> level
     derivative_forms: Dict[str, Dict[str, Any]] = field(
         default_factory=dict
@@ -183,6 +185,7 @@ class Lemma:
 
         # Ensure default values for nested structures
         data.setdefault("translations", {})
+        data.setdefault("definitions", {})
         data.setdefault("difficulty_overrides", {})
         data.setdefault("derivative_forms", {})
         data.setdefault("base_forms", {})

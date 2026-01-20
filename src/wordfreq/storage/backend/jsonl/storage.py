@@ -193,9 +193,10 @@ class JSONLStorage(BaseStorage):
                         if "base_form" in data:
                             lemma.base_forms[lang_code] = data["base_form"]
 
-                        # Language-specific fields
+                        # Definition text for this language (all languages can have definitions)
                         if "definition_text" in data:
-                            # Store in lemma for backward compatibility
+                            lemma.definitions[lang_code] = data["definition_text"]
+                            # Backward compatibility: also populate definition_text for English
                             if lang_code == "en":
                                 lemma.definition_text = data["definition_text"]
 
@@ -434,19 +435,21 @@ class JSONLStorage(BaseStorage):
 
         # Determine which languages need per-language files
         # Note: translations and difficulty_overrides are now in base.jsonl.
-        # Per-language files are only needed for derivative_forms, base_forms,
-        # audio_hashes, grammar_facts, and English-only fields.
+        # Per-language files are needed for derivative_forms, base_forms,
+        # audio_hashes, grammar_facts, definitions, and English-only fields.
         languages_to_save: Set[str] = set()
         languages_to_save.update(lemma.derivative_forms.keys())
         languages_to_save.update(lemma.base_forms.keys())
         languages_to_save.update(lemma.audio_hashes.keys())
+        languages_to_save.update(lemma.definitions.keys())
 
         # Extract grammar_facts languages
         for fact in lemma.grammar_facts:
             if "language_code" in fact:
                 languages_to_save.add(fact["language_code"])
 
-        # English file may have definition_text, tags, disambiguation, confidence
+        # English file may also have tags, disambiguation, confidence (English-only fields)
+        # and definition_text for backward compat
         if lemma.definition_text or lemma.tags or lemma.disambiguation or lemma.confidence:
             languages_to_save.add("en")
 
@@ -629,8 +632,8 @@ class JSONLStorage(BaseStorage):
 
         Note: Translation and difficulty_overrides are now stored in base.jsonl.
         Per-language files contain: derivative_forms, base_form (if no derivative
-        has is_base_form=true), audio_hashes, grammar_facts, and English-only fields
-        (definition_text, tags, disambiguation, confidence).
+        has is_base_form=true), audio_hashes, grammar_facts, definition_text (all languages),
+        and English-only fields (tags, disambiguation, confidence).
 
         Args:
             lemma: The lemma
@@ -675,12 +678,17 @@ class JSONLStorage(BaseStorage):
             data["grammar_facts"] = lang_grammar_facts
             has_data = True
 
-        # Language-specific fields (only for English currently, but could be extended)
-        if lang_code == "en":
-            if lemma.definition_text:
-                data["definition_text"] = lemma.definition_text
-                has_data = True
+        # Definition text for this language (all languages can have definitions)
+        if lang_code in lemma.definitions:
+            data["definition_text"] = lemma.definitions[lang_code]
+            has_data = True
+        elif lang_code == "en" and lemma.definition_text:
+            # Backward compatibility: use definition_text for English
+            data["definition_text"] = lemma.definition_text
+            has_data = True
 
+        # English-only fields
+        if lang_code == "en":
             # Note: frequency_rank is development-only and not exported
 
             if lemma.tags:
@@ -851,6 +859,7 @@ class JSONLStorage(BaseStorage):
         languages_to_update.update(lemma.derivative_forms.keys())
         languages_to_update.update(lemma.base_forms.keys())
         languages_to_update.update(lemma.audio_hashes.keys())
+        languages_to_update.update(lemma.definitions.keys())
 
         # Remove from in-memory storage
         if lemma.guid and lemma.guid in self.lemmas:
