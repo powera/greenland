@@ -25,17 +25,30 @@ from wordfreq.storage.backend.config import BackendType, DataSourceConfig
 from wordfreq.storage.backend.factory import create_session
 
 
-def export_sqlite_to_jsonl(sqlite_path: str, jsonl_dir: str) -> None:
-    """Export all data from SQLite to JSONL format.
+def export_sqlalchemy_to_jsonl(source_config: DataSourceConfig, jsonl_dir: str) -> None:
+    """Export all data from a SQLAlchemy backend (SQLite or PostgreSQL) to JSONL format.
 
     Args:
-        sqlite_path: Path to SQLite database
+        source_config: DataSourceConfig for the source database (SQLite or PostgreSQL)
         jsonl_dir: Directory to write JSONL files
     """
-    print(f"Exporting from SQLite ({sqlite_path}) to JSONL ({jsonl_dir})...")
+    backend_name = source_config.backend_type.value.upper()
+    if source_config.backend_type == BackendType.SQLITE:
+        source_desc = source_config.sqlite_path
+    elif source_config.backend_type == BackendType.POSTGRES:
+        # Mask password in output
+        url = source_config.postgres_url or ""
+        if "@" in url:
+            _, rest = url.split("@", 1)
+            source_desc = f"postgresql://***@{rest}"
+        else:
+            source_desc = url
+    else:
+        raise ValueError(f"Unsupported source backend: {source_config.backend_type}")
 
-    # Create source session (SQLite)
-    source_config = DataSourceConfig(backend_type=BackendType.SQLITE, sqlite_path=sqlite_path)
+    print(f"Exporting from {backend_name} ({source_desc}) to JSONL ({jsonl_dir})...")
+
+    # Create source session
     source_session = create_session(source_config)
 
     # Create target session (JSONL)
@@ -106,6 +119,30 @@ def export_sqlite_to_jsonl(sqlite_path: str, jsonl_dir: str) -> None:
     finally:
         source_session.close()
         target_session.close()
+
+
+def export_sqlite_to_jsonl(sqlite_path: str, jsonl_dir: str) -> None:
+    """Export all data from SQLite to JSONL format.
+
+    This is a backwards-compatible wrapper around export_sqlalchemy_to_jsonl.
+
+    Args:
+        sqlite_path: Path to SQLite database
+        jsonl_dir: Directory to write JSONL files
+    """
+    source_config = DataSourceConfig(backend_type=BackendType.SQLITE, sqlite_path=sqlite_path)
+    export_sqlalchemy_to_jsonl(source_config, jsonl_dir)
+
+
+def export_postgres_to_jsonl(postgres_url: str, jsonl_dir: str) -> None:
+    """Export all data from PostgreSQL to JSONL format.
+
+    Args:
+        postgres_url: PostgreSQL connection URL
+        jsonl_dir: Directory to write JSONL files
+    """
+    source_config = DataSourceConfig(backend_type=BackendType.POSTGRES, postgres_url=postgres_url)
+    export_sqlalchemy_to_jsonl(source_config, jsonl_dir)
 
 
 def convert_sqlalchemy_lemma_to_jsonl(lemma: Any, session: Any) -> Any:
@@ -446,13 +483,18 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Migrate data between storage backends")
     parser.add_argument(
         "direction",
-        choices=["sqlite-to-jsonl", "jsonl-to-sqlite", "sqlite-to-release"],
+        choices=["sqlite-to-jsonl", "postgres-to-jsonl", "jsonl-to-sqlite", "sqlite-to-release"],
         help="Migration direction",
     )
     parser.add_argument(
         "--sqlite-path",
         default=constants.WORDFREQ_DB_PATH,
         help=f"Path to SQLite database (default: {constants.WORDFREQ_DB_PATH})",
+    )
+    parser.add_argument(
+        "--postgres-url",
+        default=None,
+        help="PostgreSQL connection URL (reads from env/key file if not provided)",
     )
     parser.add_argument(
         "--jsonl-dir",
@@ -469,6 +511,12 @@ def main() -> None:
 
     if args.direction == "sqlite-to-jsonl":
         export_sqlite_to_jsonl(args.sqlite_path, args.jsonl_dir)
+    elif args.direction == "postgres-to-jsonl":
+        postgres_url = args.postgres_url
+        if not postgres_url:
+            # Try to build from environment/key file
+            postgres_url = DataSourceConfig.build_postgres_url()
+        export_postgres_to_jsonl(postgres_url, args.jsonl_dir)
     elif args.direction == "sqlite-to-release":
         export_sqlite_to_release(args.sqlite_path, args.release_dir)
     else:

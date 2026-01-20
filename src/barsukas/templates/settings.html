@@ -30,6 +30,15 @@
                     <code>{{ backend_config.sqlite_path }}</code>
                 </div>
             </div>
+            {% elif current_backend == 'postgres' %}
+            <div class="row mb-3">
+                <div class="col-md-3">
+                    <strong>PostgreSQL:</strong>
+                </div>
+                <div class="col-md-9">
+                    <code>{{ backend_config }}</code>
+                </div>
+            </div>
             {% else %}
             <div class="row mb-3">
                 <div class="col-md-3">
@@ -53,7 +62,7 @@
             <h2 class="mb-0"><i class="bi bi-box-arrow-right"></i> Export Database to JSONL Format</h2>
         </div>
         <div class="card-body">
-            <p>Export your entire SQLite database to JSONL (JSON Lines) format for:</p>
+            <p>Export your entire database to JSONL (JSON Lines) format for:</p>
             <ul>
                 <li><strong>Version Control:</strong> Store database content in Git with meaningful diffs</li>
                 <li><strong>Backup:</strong> Create human-readable backups of all linguistic data</li>
@@ -62,12 +71,20 @@
             </ul>
 
             <form method="POST" action="{{ url_for('settings.migrate_form') }}">
+                {% if current_backend == 'sqlite' %}
                 <div class="mb-3">
                     <label for="sqlite-path" class="form-label">SQLite Database Path</label>
                     <input type="text" class="form-control" name="sqlite_path"
                            value="{{ backend_config.sqlite_path or '' }}" required>
                     <small class="form-text text-muted">Path to the SQLite database file</small>
                 </div>
+                {% elif current_backend == 'postgres' %}
+                <div class="mb-3">
+                    <div class="alert alert-secondary">
+                        <i class="bi bi-database"></i> <strong>Source:</strong> PostgreSQL database (connection configured via environment)
+                    </div>
+                </div>
+                {% endif %}
 
                 <div class="mb-3">
                     <label for="jsonl-dir" class="form-label">JSONL Output Directory</label>
@@ -77,7 +94,7 @@
                 </div>
 
                 <button type="submit" class="btn btn-primary btn-lg">
-                    <i class="bi bi-box-arrow-right"></i> Export SQLite to JSONL
+                    <i class="bi bi-box-arrow-right"></i> Export {{ current_backend.upper() }} to JSONL
                 </button>
             </form>
 
