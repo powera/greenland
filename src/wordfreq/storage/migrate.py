@@ -14,6 +14,8 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any, Dict, List, Set, Tuple
 
+from sqlalchemy.orm import selectinload
+
 # Add src to path if running as script
 if __name__ == "__main__":
     src_path = str(Path(__file__).parent.parent.parent)
@@ -64,9 +66,19 @@ def export_sqlalchemy_to_jsonl(source_config: DataSourceConfig, jsonl_dir: str) 
     from wordfreq.storage.models.schema import Sentence as SQLiteSentence
 
     try:
-        # Export Lemmas
+        # Export Lemmas with eager loading to avoid N+1 queries
+        # This is critical for PostgreSQL performance - loads all relationships in batch queries
         print("Exporting lemmas...")
-        lemmas = source_session.query(SQLiteLemma).all()
+        lemmas = (
+            source_session.query(SQLiteLemma)
+            .options(
+                selectinload(SQLiteLemma.translations),
+                selectinload(SQLiteLemma.difficulty_overrides),
+                selectinload(SQLiteLemma.derivative_forms),
+                selectinload(SQLiteLemma.grammar_facts),
+            )
+            .all()
+        )
         print(f"Found {len(lemmas)} lemmas")
 
         for lemma in lemmas:
@@ -74,9 +86,16 @@ def export_sqlalchemy_to_jsonl(source_config: DataSourceConfig, jsonl_dir: str) 
             jsonl_lemma = convert_sqlalchemy_lemma_to_jsonl(lemma, source_session)
             target_session.add(jsonl_lemma)
 
-        # Export Sentences
+        # Export Sentences with eager loading to avoid N+1 queries
         print("Exporting sentences...")
-        sentences = source_session.query(SQLiteSentence).all()
+        sentences = (
+            source_session.query(SQLiteSentence)
+            .options(
+                selectinload(SQLiteSentence.translations),
+                selectinload(SQLiteSentence.words),
+            )
+            .all()
+        )
         print(f"Found {len(sentences)} sentences")
 
         for sentence in sentences:
@@ -145,15 +164,22 @@ def export_postgres_to_jsonl(postgres_url: str, jsonl_dir: str) -> None:
     export_sqlalchemy_to_jsonl(source_config, jsonl_dir)
 
 
-def convert_sqlalchemy_lemma_to_jsonl(lemma: Any, session: Any) -> Any:
-    """Convert SQLAlchemy Lemma to JSONL dataclass."""
-    from wordfreq.storage import translation_helpers
+def convert_sqlalchemy_lemma_to_jsonl(lemma: Any, session: Any = None) -> Any:
+    """Convert SQLAlchemy Lemma to JSONL dataclass.
+
+    Args:
+        lemma: SQLAlchemy Lemma object with relationships already loaded via selectinload
+        session: Deprecated, kept for backward compatibility. Not used when relationships
+                 are pre-loaded.
+    """
     from wordfreq.storage.backend.jsonl import models as jsonl_models
 
-    # Get translations from the new translation table
-    all_translations = translation_helpers.get_all_translations(session, lemma)
-    # Remove None values - cast to str after filtering
-    translations: Dict[str, str] = {k: v for k, v in all_translations.items() if v is not None}
+    # Build translations from the pre-loaded translations relationship
+    # This avoids the N+1 query problem when relationships are loaded with selectinload
+    translations: Dict[str, str] = {"en": lemma.lemma_text}
+    for trans in lemma.translations:
+        if trans.translation:
+            translations[trans.language_code] = trans.translation
 
     # Get difficulty overrides
     difficulty_overrides = {}
