@@ -34,6 +34,7 @@ class BaseConcept:
     """JSONL model for base concept (stored in base.jsonl).
 
     This represents the core concept independent of any specific language.
+    The translations dict holds the canonical translation for each language.
     """
 
     # Primary identifier
@@ -46,6 +47,9 @@ class BaseConcept:
     # Concept identification (language-neutral, but likely English)
     concept_label: str = ""
     concept_definition: str = ""
+
+    # Translations for all languages: {"en": "dog", "lt": "šuo", "zh": "狗"}
+    translations: Dict[str, str] = field(default_factory=dict)
 
     # Base difficulty level (can be overridden per-language)
     difficulty_level: Optional[int] = None
@@ -61,6 +65,9 @@ class BaseConcept:
         data = asdict(self)
         # Remove runtime fields - Git handles versioning
         data.pop("added_at", None)
+        # Only include translations if non-empty
+        if not data.get("translations"):
+            data.pop("translations", None)
         return data
 
     @classmethod
@@ -71,6 +78,8 @@ class BaseConcept:
             data["added_at"] = datetime.datetime.fromisoformat(data["added_at"])
         else:
             data.setdefault("added_at", None)
+        # Ensure translations dict exists
+        data.setdefault("translations", {})
         return cls(**data)
 
 
@@ -78,8 +87,16 @@ class BaseConcept:
 class Lemma:
     """JSONL model for lemmas.
 
-    This class represents the merged view of a lemma combining base concept
-    data from base.jsonl with language-specific data from language files.
+    This class represents the merged view of a lemma combining:
+    - Base concept data from base.jsonl (including translations and difficulty_overrides)
+    - Language-specific data from {lang}.jsonl files (derivative_forms, definition_text, etc.)
+
+    File structure:
+    - base.jsonl: guid, pos_type, pos_subtype, concept_label, concept_definition,
+                  translations (dict), difficulty_level, difficulty_overrides (dict), notes
+    - {lang}.jsonl: guid, derivative_forms, base_form (if no derivative has is_base_form),
+                    audio_hashes, grammar_facts, definition_text (all languages),
+                    tags/disambiguation/confidence (English only)
     """
 
     # Primary key for JSONL is guid
@@ -126,11 +143,19 @@ class Lemma:
     updated_at: Optional[datetime.datetime] = None  # Git handles versioning
 
     # Nested relationships (stored as dicts in JSONL)
+    # translations: Now stored in base.jsonl, still populated here at runtime
     translations: Dict[str, str] = field(default_factory=dict)  # lang_code -> translation
+    # definitions: Per-language definitions stored in {lang}.jsonl files
+    definitions: Dict[str, str] = field(default_factory=dict)  # lang_code -> definition
     difficulty_overrides: Dict[str, int] = field(default_factory=dict)  # lang_code -> level
     derivative_forms: Dict[str, Dict[str, Any]] = field(
         default_factory=dict
     )  # lang_code -> {form_name -> form_data}
+    # base_forms: Used when no derivative_form has is_base_form=true for that language
+    # Contains {form: str, ipa: str, phonetic: str} per language
+    base_forms: Dict[str, Dict[str, Any]] = field(
+        default_factory=dict
+    )  # lang_code -> {form, ipa, phonetic}
     grammar_facts: List[Dict[str, Any]] = field(default_factory=list)
     audio_hashes: Dict[str, Dict[str, str]] = field(
         default_factory=dict
@@ -160,8 +185,10 @@ class Lemma:
 
         # Ensure default values for nested structures
         data.setdefault("translations", {})
+        data.setdefault("definitions", {})
         data.setdefault("difficulty_overrides", {})
         data.setdefault("derivative_forms", {})
+        data.setdefault("base_forms", {})
         data.setdefault("grammar_facts", [])
         data.setdefault("audio_hashes", {})
 
