@@ -34,12 +34,9 @@ def export_sqlite_to_jsonl(sqlite_path: str, jsonl_dir: str) -> None:
     """
     print(f"Exporting from SQLite ({sqlite_path}) to JSONL ({jsonl_dir})...")
 
-    # Create source session (SQLite) - use wrapped session
+    # Create source session (SQLite)
     source_config = DataSourceConfig(backend_type=BackendType.SQLITE, sqlite_path=sqlite_path)
-    source_session_wrapper = create_session(source_config)
-
-    # Get the underlying SQLAlchemy session for compatibility
-    source_session = source_session_wrapper._sqlalchemy_session  # type: ignore[attr-defined]
+    source_session = create_session(source_config)
 
     # Create target session (JSONL)
     target_config = DataSourceConfig(backend_type=BackendType.JSONL, jsonl_data_dir=jsonl_dir)
@@ -107,7 +104,7 @@ def export_sqlite_to_jsonl(sqlite_path: str, jsonl_dir: str) -> None:
         print("Export complete!")
 
     finally:
-        source_session_wrapper.close()
+        source_session.close()
         target_session.close()
 
 
