@@ -117,6 +117,10 @@ class JSONLStorage(BaseStorage):
                         if "translations" in data:
                             lemma.translations = data["translations"]
 
+                        # Load difficulty_overrides from base.jsonl (new format)
+                        if "difficulty_overrides" in data:
+                            lemma.difficulty_overrides = data["difficulty_overrides"]
+
                         # Populate lemma_text and definition_text from concept fields
                         # or from translations dict for backward compatibility
                         if "en" in lemma.translations:
@@ -230,9 +234,12 @@ class JSONLStorage(BaseStorage):
                         if "audio_hashes" in data:
                             lemma.audio_hashes[lang_code] = data["audio_hashes"]
 
+                        # Backward compatibility: read difficulty_level from per-language files
+                        # (new format stores difficulty_overrides in base.jsonl)
                         if "difficulty_level" in data:
-                            # This is a language-specific override
-                            lemma.difficulty_overrides[lang_code] = data["difficulty_level"]
+                            # Only use if not already set from base.jsonl
+                            if lang_code not in lemma.difficulty_overrides:
+                                lemma.difficulty_overrides[lang_code] = data["difficulty_level"]
 
                         if "grammar_facts" in data:
                             # Merge grammar facts with language_code tag
@@ -422,17 +429,17 @@ class JSONLStorage(BaseStorage):
             self.lemmas[lemma.guid] = lemma
         self.lemmas_by_id[lemma.id] = lemma
 
-        # Save base.jsonl file (includes translations for all languages)
+        # Save base.jsonl file (includes translations and difficulty_overrides)
         self._rewrite_base_file(lemma)
 
         # Determine which languages need per-language files
-        # Note: translations are now in base.jsonl, but we still need per-language
-        # files for derivative_forms, base_forms, audio_hashes, grammar_facts, etc.
+        # Note: translations and difficulty_overrides are now in base.jsonl.
+        # Per-language files are only needed for derivative_forms, base_forms,
+        # audio_hashes, grammar_facts, and English-only fields.
         languages_to_save: Set[str] = set()
         languages_to_save.update(lemma.derivative_forms.keys())
         languages_to_save.update(lemma.base_forms.keys())
         languages_to_save.update(lemma.audio_hashes.keys())
-        languages_to_save.update(lemma.difficulty_overrides.keys())
 
         # Extract grammar_facts languages
         for fact in lemma.grammar_facts:
@@ -563,6 +570,10 @@ class JSONLStorage(BaseStorage):
         if lemma.difficulty_level is not None:
             data["difficulty_level"] = lemma.difficulty_level
 
+        # Difficulty overrides per language (e.g., {"en": -1} to exclude from English)
+        if lemma.difficulty_overrides:
+            data["difficulty_overrides"] = lemma.difficulty_overrides
+
         if lemma.notes:
             data["notes"] = lemma.notes
 
@@ -616,10 +627,10 @@ class JSONLStorage(BaseStorage):
     ) -> Optional[Dict[str, Any]]:
         """Extract language-specific data from a lemma.
 
-        Note: Translation is now stored in base.jsonl, not in per-language files.
+        Note: Translation and difficulty_overrides are now stored in base.jsonl.
         Per-language files contain: derivative_forms, base_form (if no derivative
-        has is_base_form=true), audio_hashes, grammar_facts, difficulty_level override,
-        and English-only fields (definition_text, tags, disambiguation, confidence).
+        has is_base_form=true), audio_hashes, grammar_facts, and English-only fields
+        (definition_text, tags, disambiguation, confidence).
 
         Args:
             lemma: The lemma
@@ -654,10 +665,7 @@ class JSONLStorage(BaseStorage):
             data["audio_hashes"] = lemma.audio_hashes[lang_code]
             has_data = True
 
-        # Difficulty override for this language
-        if lang_code in lemma.difficulty_overrides:
-            data["difficulty_level"] = lemma.difficulty_overrides[lang_code]
-            has_data = True
+        # Note: difficulty_overrides now stored in base.jsonl
 
         # Extract grammar facts for this language
         lang_grammar_facts = [
@@ -838,11 +846,11 @@ class JSONLStorage(BaseStorage):
             lemma: The lemma to delete
         """
         # Collect languages before deleting
+        # Note: difficulty_overrides are in base.jsonl, not per-language files
         languages_to_update = {"en"}
         languages_to_update.update(lemma.derivative_forms.keys())
         languages_to_update.update(lemma.base_forms.keys())
         languages_to_update.update(lemma.audio_hashes.keys())
-        languages_to_update.update(lemma.difficulty_overrides.keys())
 
         # Remove from in-memory storage
         if lemma.guid and lemma.guid in self.lemmas:

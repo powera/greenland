@@ -88,14 +88,14 @@ class Lemma:
     """JSONL model for lemmas.
 
     This class represents the merged view of a lemma combining:
-    - Base concept data from base.jsonl (including translations for all languages)
+    - Base concept data from base.jsonl (including translations and difficulty_overrides)
     - Language-specific data from {lang}.jsonl files (derivative_forms, audio, etc.)
 
     File structure:
     - base.jsonl: guid, pos_type, pos_subtype, concept_label, concept_definition,
-                  translations (dict), difficulty_level, notes
+                  translations (dict), difficulty_level, difficulty_overrides (dict), notes
     - {lang}.jsonl: guid, derivative_forms, base_form (if no derivative has is_base_form),
-                    audio_hashes, grammar_facts, difficulty_level (override),
+                    audio_hashes, grammar_facts,
                     definition_text, tags/disambiguation/confidence (English only)
     """
 

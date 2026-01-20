@@ -310,9 +310,10 @@ def export_sqlite_to_release(sqlite_path: str, release_dir: str) -> None:
     """Export SQLite to data/release format with translations in base.jsonl.
 
     This creates:
-    - base.jsonl: concept definitions with translations dict
+    - base.jsonl: concept definitions with translations and difficulty_overrides
       (guid, pos_type, pos_subtype, concept_label, concept_definition,
-       difficulty_level, translations: {lang_code: translation})
+       difficulty_level, translations: {lang_code: translation},
+       difficulty_overrides: {lang_code: level})
     - {lang}.jsonl: Only created if there's language-specific data beyond translations
       (derivative_forms, base_form, audio_hashes, grammar_facts, etc.)
 
@@ -383,7 +384,12 @@ def export_sqlite_to_release(sqlite_path: str, release_dir: str) -> None:
                         all_languages.add(lang_code)
                         translations_dict[lang_code] = translation
 
-                # Base concept data with translations
+                # Get difficulty overrides
+                difficulty_overrides_dict: Dict[str, int] = {}
+                for override in lemma.difficulty_overrides:
+                    difficulty_overrides_dict[override.language_code] = override.difficulty_level
+
+                # Base concept data with translations and difficulty_overrides
                 base_data: Dict[str, Any] = {
                     "guid": lemma.guid,
                     "pos_type": lemma.pos_type,
@@ -397,6 +403,9 @@ def export_sqlite_to_release(sqlite_path: str, release_dir: str) -> None:
 
                 if lemma.difficulty_level is not None:
                     base_data["difficulty_level"] = lemma.difficulty_level
+
+                if difficulty_overrides_dict:
+                    base_data["difficulty_overrides"] = difficulty_overrides_dict
 
                 base_records.append(base_data)
 
