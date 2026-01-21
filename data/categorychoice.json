@@ -4,19 +4,19 @@
       "id": "family-relation",
       "label": "Family Relations",
       "groups": ["Family Relation"],
-      "avoidDecoys": ["occupation"]
+      "avoidDecoys": ["human", "occupation"]
     },
     {
       "id": "occupation",
       "label": "Occupations",
       "groups": ["Occupation"],
-      "avoidDecoys": ["family-relation"]
+      "avoidDecoys": ["human", "family-relation"]
     },
     {
       "id": "animal",
       "label": "Animals",
       "groups": ["Animals"],
-      "avoidDecoys": ["plant"]
+      "avoidDecoys": []
     },
     {
       "id": "body-part",
@@ -34,7 +34,7 @@
       "id": "plant",
       "label": "Plants",
       "groups": ["Plants"],
-      "avoidDecoys": ["animal"]
+      "avoidDecoys": []
     },
     {
       "id": "food",
@@ -112,13 +112,13 @@
       "id": "shape",
       "label": "Shapes",
       "groups": ["Shape"],
-      "avoidDecoys": ["color"]
+      "avoidDecoys": []
     },
     {
       "id": "color",
       "label": "Colors",
       "groups": ["Color"],
-      "avoidDecoys": ["shape"]
+      "avoidDecoys": []
     },
     {
       "id": "time-period",
