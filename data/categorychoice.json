@@ -1,22 +1,16 @@
 {
   "categories": [
     {
-      "id": "human",
-      "label": "Humans",
-      "groups": ["Humans"],
-      "avoidDecoys": ["occupation", "family-relation"]
-    },
-    {
       "id": "family-relation",
       "label": "Family Relations",
       "groups": ["Family Relation"],
-      "avoidDecoys": ["human", "occupation"]
+      "avoidDecoys": ["occupation"]
     },
     {
       "id": "occupation",
       "label": "Occupations",
       "groups": ["Occupation"],
-      "avoidDecoys": ["human", "family-relation"]
+      "avoidDecoys": ["family-relation"]
     },
     {
       "id": "animal",
@@ -61,10 +55,10 @@
       "avoidDecoys": ["furniture"]
     },
     {
-      "id": "small-movable-object",
-      "label": "Small Movable Objects",
-      "groups": ["Small Movable Object"],
-      "avoidDecoys": ["tool-machine"]
+      "id": "furniture",
+      "label": "Furniture",
+      "groups": ["Furniture"],
+      "avoidDecoys": ["building-structure"]
     },
     {
       "id": "clothing-accessory",
@@ -79,28 +73,40 @@
       "avoidDecoys": []
     },
     {
-      "id": "tool-machine",
-      "label": "Tools & Machines",
-      "groups": ["Tool/Machine"],
-      "avoidDecoys": ["vehicle", "small-movable-object"]
+      "id": "tool",
+      "label": "Tools",
+      "groups": ["Tool"],
+      "avoidDecoys": ["vehicle", "weapon", "electronic-device", "appliance"]
     },
     {
-      "id": "material-substance",
-      "label": "Materials & Substances",
-      "groups": ["Material/Substance"],
-      "avoidDecoys": []
+      "id": "electronic-device",
+      "label": "Electronic Devices",
+      "groups": ["Electronic Device"],
+      "avoidDecoys": ["tool", "appliance"]
     },
     {
-      "id": "concept-idea",
-      "label": "Concepts & Ideas",
-      "groups": ["Concept/Idea"],
-      "avoidDecoys": ["emotion-feeling"]
+      "id": "appliance",
+      "label": "Appliances",
+      "groups": ["Appliance"],
+      "avoidDecoys": ["tool", "electronic-device"]
+    },
+    {
+      "id": "weapon",
+      "label": "Weapons",
+      "groups": ["Weapon"],
+      "avoidDecoys": ["tool"]
+    },
+    {
+      "id": "vehicle",
+      "label": "Vehicles",
+      "groups": ["Vehicle"],
+      "avoidDecoys": ["tool"]
     },
     {
       "id": "emotion-feeling",
       "label": "Emotions & Feelings",
       "groups": ["Emotion/Feeling"],
-      "avoidDecoys": ["concept-idea"]
+      "avoidDecoys": []
     },
     {
       "id": "shape",
@@ -109,16 +115,16 @@
       "avoidDecoys": ["color"]
     },
     {
+      "id": "color",
+      "label": "Colors",
+      "groups": ["Color"],
+      "avoidDecoys": ["shape"]
+    },
+    {
       "id": "time-period",
       "label": "Time Periods",
       "groups": ["Time Period"],
       "avoidDecoys": ["temporal-name"]
-    },
-    {
-      "id": "personal-name",
-      "label": "Personal Names",
-      "groups": ["Personal Name"],
-      "avoidDecoys": []
     },
     {
       "id": "temporal-name",
@@ -145,18 +151,6 @@
       "avoidDecoys": ["country", "city"]
     },
     {
-      "id": "color",
-      "label": "Colors",
-      "groups": ["Color"],
-      "avoidDecoys": ["shape"]
-    },
-    {
-      "id": "quality",
-      "label": "Qualities",
-      "groups": ["Quality"],
-      "avoidDecoys": []
-    },
-    {
       "id": "definite-quantity",
       "label": "Numbers",
       "groups": ["Definite Quantity"],
@@ -167,18 +161,6 @@
       "label": "Ordinals",
       "groups": ["Sequence"],
       "avoidDecoys": ["definite-quantity"]
-    },
-    {
-      "id": "style",
-      "label": "Manner Adverbs",
-      "groups": ["Style"],
-      "avoidDecoys": []
-    },
-    {
-      "id": "location",
-      "label": "Location Adverbs",
-      "groups": ["Location"],
-      "avoidDecoys": []
     }
   ]
 }
