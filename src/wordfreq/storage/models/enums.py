@@ -16,6 +16,7 @@ class NounSubtype(enum.Enum):
     OCCUPATION = "occupation"  # Professions and roles (teacher, doctor, accountant)
     FAMILY_RELATION = "family_relation"  # Family members (brother, uncle, cousin, parent)
     HUMAN = "human"
+    HONORIFIC = "honorific"  # Titles and forms of address (Sir, Lord, Mr., Mrs., Dr.)
 
     ANIMAL = "animal"
     BODY_PART = "body_part"
@@ -29,6 +30,9 @@ class NounSubtype(enum.Enum):
 
     # Physical Objects and Structures
     BUILDING_STRUCTURE = "building_structure"
+    BUILDING_PART = (
+        "building_part"  # Parts of buildings (door, window, wall, floor, ceiling, roof, stairs)
+    )
     FURNITURE = "furniture"  # Furniture items (table, chair, desk, sofa, bed)
     SMALL_MOVABLE_OBJECT = "small_movable_object"
     CLOTHING_ACCESSORY = "clothing_accessory"
@@ -725,7 +729,9 @@ class GrammaticalForm(enum.Enum):
     # Cardinal: 一, 二, 三 (standard counting form)
     # Quantity: 一, 两, 三 (两 used before measure words for "two")
     NUMERAL_ZH_CARDINAL = "numeral/zh_cardinal"  # 一, 二, 三, 四, 五...
-    NUMERAL_ZH_QUANTITY = "numeral/zh_quantity"  # 一, 两, 三... (两 replaces 二 before measure words)
+    NUMERAL_ZH_QUANTITY = (
+        "numeral/zh_quantity"  # 一, 两, 三... (两 replaces 二 before measure words)
+    )
     NUMERAL_ZH_ORDINAL = "numeral/zh_ordinal"  # 第一, 第二, 第三...
 
     # Korean numerals (native Korean vs Sino-Korean systems)
