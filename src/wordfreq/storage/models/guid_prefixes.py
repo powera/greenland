@@ -37,7 +37,7 @@ SUBTYPE_GUID_PREFIXES = {
         "concept_idea": "N17",
         "communication_information": "N50",
         "technology_digital": "N52",
-        "state_condition": "N54",
+        "abstract_condition": "N54",
         "social_institution": "N55",
         "activity": "N41",
         "symbolic_element": "N18",

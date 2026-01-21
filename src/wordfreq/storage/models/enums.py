@@ -56,8 +56,8 @@ class NounSubtype(enum.Enum):
     TECHNOLOGY_DIGITAL = (
         "technology_digital"  # Digital/computing concepts (internet, email, website, data)
     )
-    STATE_CONDITION = (
-        "state_condition"  # Abstract conditions, situations (peace, danger, luck, fate)
+    ABSTRACT_CONDITION = (
+        "abstract_condition"  # Abstract conditions, situations (peace, danger, luck, fate)
     )
     SOCIAL_INSTITUTION = (
         "social_institution"  # Organizations, collective structures (government, army, company)
