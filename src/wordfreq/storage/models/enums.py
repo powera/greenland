@@ -52,6 +52,16 @@ class NounSubtype(enum.Enum):
 
     # Abstract Concepts and Ideas
     CONCEPT_IDEA = "concept_idea"
+    COMMUNICATION_INFORMATION = "communication_information"  # Language, messages, information (word, language, message, news)
+    TECHNOLOGY_DIGITAL = (
+        "technology_digital"  # Digital/computing concepts (internet, email, website, data)
+    )
+    ABSTRACT_CONDITION = (
+        "abstract_condition"  # Abstract conditions, situations (peace, danger, luck, fate)
+    )
+    SOCIAL_INSTITUTION = (
+        "social_institution"  # Organizations, collective structures (government, army, company)
+    )
     ACTIVITY = "activity"  # Activities and hobbies (reading, cooking, sports, dancing, hiking)
     SYMBOLIC_ELEMENT = "symbolic_element"
     QUALITY_ATTRIBUTE = "quality_attribute"
