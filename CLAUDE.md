@@ -52,3 +52,12 @@ After cloning, enable pre-commit hooks to automatically check black formatting:
 
 When writing HTML files, always use ordinary form submits for POST data - do
 not do an AJAX-based submission.  Avoid using disappearing UX elements.
+
+When modifying files in data/release :
+* make sure the GUID prefixes match those in wordfreq/storage/models/guid_prefixes.py
+* when creating a new "subtype", follow those instructions for updates
+* do not "change" GUIDs - keep the file sorted by GUID, and add new words at
+  the end, leaving gaps in GUIDs for removed words is expected
+* the "difficulty level" for newly added words should be -1 unless otherwise requested
+* words should be in "lemma" form, and should specify one definition of a
+  word, using a disambiguation if necessary
