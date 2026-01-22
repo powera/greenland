@@ -26,7 +26,13 @@ from wordfreq.storage.backend.config import DataSourceConfig
 logger = logging.getLogger(__name__)
 
 
-def run_flask_server(host: str, port: int, debug: bool, readonly: bool) -> None:
+def run_flask_server(
+    host: str,
+    port: int,
+    debug: bool,
+    readonly: bool,
+    persona: Optional[PersonaConfig] = None,
+) -> None:
     """Run the Flask server in the current thread."""
     app = create_app()
 
@@ -35,6 +41,17 @@ def run_flask_server(host: str, port: int, debug: bool, readonly: bool) -> None:
 
     if readonly:
         app.config["READONLY"] = True
+
+    # Apply persona-specific settings for UI visibility
+    if persona:
+        app.config["ALLOW_OUTBOUND_CALLS"] = persona.allow_outbound_calls
+        app.config["ALLOW_API_KEYS"] = persona.allow_api_keys
+        app.config["ENABLE_WORKER"] = persona.enable_worker
+    else:
+        # Defaults when no persona specified
+        app.config["ALLOW_OUTBOUND_CALLS"] = True
+        app.config["ALLOW_API_KEYS"] = True
+        app.config["ENABLE_WORKER"] = True
 
     logger.info(f"Starting Barsukas Flask server on http://{host}:{port}")
     logger.info(f"Database: {app.config['DB_PATH']}")
@@ -201,7 +218,7 @@ def main() -> None:
     # Run Flask server in the main thread
     # This blocks until the server is stopped (Ctrl+C or signal)
     try:
-        run_flask_server(args.host, args.port, args.debug, args.readonly)
+        run_flask_server(args.host, args.port, args.debug, args.readonly, persona)
     except KeyboardInterrupt:
         logger.info("Keyboard interrupt received, shutting down...")
     finally:
