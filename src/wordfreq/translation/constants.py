@@ -2,6 +2,8 @@
 
 """Constants and configuration for linguistic analysis."""
 
+from typing import Any, Dict
+
 import constants
 
 # Common model information
@@ -108,5 +110,78 @@ DEFAULT_TRANSLATION_LANGUAGES = {
         "code": "vi",
         "description": "Vietnamese translation in lemma form",
         "instructions": "- Vietnamese: Provide standard Vietnamese in base form",
+    },
+}
+
+# Regional variant configuration for pluricentric languages
+# Maps base language code to regional variants with their codes and descriptions
+REGIONAL_VARIANT_LANGUAGES: Dict[str, Dict[str, Any]] = {
+    "en": {
+        "display_name": "English",
+        "base_description": "American English (default)",
+        "variants": {
+            "en-US": {
+                "name": "American English",
+                "description": "Standard American English spelling and vocabulary",
+            },
+            "en-GB": {
+                "name": "British English",
+                "description": "British English spelling (colour, favour) and vocabulary (lorry, flat)",
+            },
+            "en-AU": {
+                "name": "Australian English",
+                "description": "Australian English spelling and vocabulary",
+            },
+        },
+    },
+    "es": {
+        "display_name": "Spanish",
+        "base_description": "Peninsular Spanish (Spain, default)",
+        "variants": {
+            "es-ES": {
+                "name": "Peninsular Spanish",
+                "description": "Standard Castilian Spanish as spoken in Spain",
+            },
+            "es-MX": {
+                "name": "Mexican Spanish",
+                "description": "Mexican Spanish vocabulary (computadora, carro, platicar)",
+            },
+            "es-AR": {
+                "name": "Argentine Spanish",
+                "description": "Argentine Spanish vocabulary (vos forms, local terms)",
+            },
+        },
+    },
+    "pt": {
+        "display_name": "Portuguese",
+        "base_description": "Brazilian Portuguese (default)",
+        "variants": {
+            "pt-BR": {
+                "name": "Brazilian Portuguese",
+                "description": "Brazilian Portuguese spelling and vocabulary (ônibus, trem)",
+            },
+            "pt-PT": {
+                "name": "European Portuguese",
+                "description": "European Portuguese spelling and vocabulary (autocarro, comboio)",
+            },
+        },
+    },
+    "zh": {
+        "display_name": "Chinese",
+        "base_description": "Mandarin Chinese (default)",
+        "variants": {
+            "zh-CN": {
+                "name": "Mandarin (Simplified)",
+                "description": "Standard Mandarin as spoken in Mainland China",
+            },
+            "zh-TW": {
+                "name": "Taiwanese Mandarin",
+                "description": "Mandarin as spoken in Taiwan with local vocabulary",
+            },
+            "zh-HK": {
+                "name": "Cantonese",
+                "description": "Cantonese as spoken in Hong Kong (written form)",
+            },
+        },
     },
 }
