@@ -287,11 +287,18 @@ class WirewordConversationExporter:
                     if sentence.id in regional_variants_by_sentence:
                         variants = regional_variants_by_sentence[sentence.id]
                         base_translation = translations.get(self.language)
-                        differing_variants = {
-                            region: trans
-                            for region, trans in variants.items()
-                            if trans and trans != base_translation
-                        }
+                        # For Chinese with simplified_chinese=True, convert variants before comparing
+                        differing_variants = {}
+                        for region, trans in variants.items():
+                            if not trans:
+                                continue
+                            # Normalize for comparison (convert to simplified if needed)
+                            compare_trans = trans
+                            if self.language == "zh" and self.simplified_chinese:
+                                compare_trans = to_simplified(trans)
+                            if compare_trans != base_translation:
+                                # Store the converted form in export
+                                differing_variants[region] = compare_trans
                         if differing_variants:
                             sentence_entry["regional_variants"] = differing_variants
 

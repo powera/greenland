@@ -686,11 +686,18 @@ class WirewordExporter:
                 if lemma_id in regional_variants_by_lemma:
                     variants = regional_variants_by_lemma[lemma_id]
                     # Only include variants that differ from base_target
-                    differing_variants = {
-                        region: trans
-                        for region, trans in variants.items()
-                        if trans and trans != entry["target_language"]
-                    }
+                    # For Chinese with simplified_chinese=True, convert variants before comparing
+                    differing_variants = {}
+                    for region, trans in variants.items():
+                        if not trans:
+                            continue
+                        # Normalize for comparison (convert to simplified if needed)
+                        compare_trans = trans
+                        if self.language == "zh" and self.simplified_chinese:
+                            compare_trans = to_simplified(trans)
+                        if compare_trans != entry["target_language"]:
+                            # Store the converted form in export
+                            differing_variants[region] = compare_trans
                     if differing_variants:
                         wireword["regional_variants"] = differing_variants
 
@@ -1219,11 +1226,18 @@ class WirewordExporter:
                 if lemma.id in regional_variants_by_lemma:
                     variants = regional_variants_by_lemma[lemma.id]
                     # Only include variants that differ from base_target
-                    differing_variants = {
-                        region: trans
-                        for region, trans in variants.items()
-                        if trans and trans != base_target
-                    }
+                    # For Chinese with simplified_chinese=True, convert variants before comparing
+                    differing_variants = {}
+                    for region, trans in variants.items():
+                        if not trans:
+                            continue
+                        # Normalize for comparison (convert to simplified if needed)
+                        compare_trans = trans
+                        if self.language == "zh" and self.simplified_chinese:
+                            compare_trans = to_simplified(trans)
+                        if compare_trans != base_target:
+                            # Store the converted form in export
+                            differing_variants[region] = compare_trans
                     if differing_variants:
                         wireword["regional_variants"] = differing_variants
 
