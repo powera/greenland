@@ -56,6 +56,7 @@ SUBTYPE_GUID_PREFIXES = {
         "place_name": "N30",
         "country": "N45",
         "city": "N46",
+        "geographic_place": "N56",
         "organization_name": "N31",
         "temporal_name": "N32",
         "nationality": "N33",

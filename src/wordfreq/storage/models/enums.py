@@ -47,7 +47,9 @@ class NounSubtype(enum.Enum):
 
     # Materials and Substances
     MATERIAL_SUBSTANCE = "material_substance"
-    CHEMICAL_COMPOUND = "chemical_compound"
+    CHEMICAL_COMPOUND = (
+        "chemical_compound"  # Chemical elements and compounds (oxygen, lithium, carbon dioxide)
+    )
     MEDICATION_REMEDY = "medication_remedy"
 
     # Abstract Concepts and Ideas
@@ -77,7 +79,7 @@ class NounSubtype(enum.Enum):
 
     # Groups and Collections
     GROUP_PEOPLE = "group_people"
-    GROUP_ANIMAL = "animal_grouping_term"
+    GROUP_ANIMAL = "animal_grouping_term"  # Measure words for animals (flock, herd, head)
     COLLECTION_THINGS = "collection_things"
 
     # Named Entities
@@ -85,6 +87,7 @@ class NounSubtype(enum.Enum):
     PLACE_NAME = "place_name"  # Generic place nouns (room, street, etc.)
     COUNTRY = "country"  # Countries (Lithuania, France, Japan)
     CITY = "city"  # Cities (Vilnius, Paris, Tokyo)
+    GEOGRAPHIC_PLACE = "geographic_place"  # Named geographic features (Atlantic Ocean, Pacific Ocean, Indian Ocean)
     ORGANIZATION_NAME = "organization_name"
 
     # Temporal Names
