@@ -8,39 +8,9 @@ used by the WireWord exporter.
 
 import json
 import logging
-from typing import Any, Dict, Optional
-
-# Import pypinyin for Chinese pinyin generation
-try:
-    from pypinyin import Style, lazy_pinyin
-
-    PYPINYIN_AVAILABLE = True
-except ImportError:
-    PYPINYIN_AVAILABLE = False
+from typing import Any, Dict
 
 logger = logging.getLogger(__name__)
-
-
-def generate_pinyin(chinese_text: str) -> Optional[str]:
-    """
-    Generate pinyin for Chinese text.
-
-    Args:
-        chinese_text: Chinese text to convert to pinyin
-
-    Returns:
-        Pinyin string with tone marks, or None if pypinyin is not available
-    """
-    if not PYPINYIN_AVAILABLE or not chinese_text:
-        return None
-
-    try:
-        # Use Style.TONE to get pinyin with tone marks (e.g., "nǐ hǎo")
-        pinyin_list = lazy_pinyin(chinese_text, style=Style.TONE)
-        return " ".join(pinyin_list)
-    except Exception as e:
-        logger.warning(f"Failed to generate pinyin for '{chinese_text}': {e}")
-        return None
 
 
 def normalize_pos_type(pos_type: str) -> str:

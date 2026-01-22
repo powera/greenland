@@ -31,7 +31,7 @@ from wordfreq.storage.models.schema import (
     SentenceWord,
 )
 from langtools.zh.converter import to_simplified
-from wireword.helpers import generate_pinyin
+from langtools.zh.pinyin_helper import generate_pinyin
 
 # Configure logging
 logger = logging.getLogger(__name__)
