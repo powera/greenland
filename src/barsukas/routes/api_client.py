@@ -26,7 +26,7 @@ def api_client_ui() -> ResponseReturnValue:
             "path": "/api/llm/voras/check-translations",
             "description": "Validate existing translations for a lemma using LLM",
             "params": [
-                {"name": "lemma_id", "type": "number", "required": True, "label": "Lemma ID"},
+                {"name": "guid", "type": "text", "required": True, "label": "GUID (e.g. N03_003)"},
             ],
         },
         {
@@ -35,7 +35,7 @@ def api_client_ui() -> ResponseReturnValue:
             "path": "/api/llm/voras/add-missing-translations",
             "description": "Generate missing translations for a lemma",
             "params": [
-                {"name": "lemma_id", "type": "number", "required": True, "label": "Lemma ID"},
+                {"name": "guid", "type": "text", "required": True, "label": "GUID (e.g. N03_003)"},
             ],
         },
         {
@@ -44,7 +44,7 @@ def api_client_ui() -> ResponseReturnValue:
             "path": "/api/llm/papuga/generate-pronunciations",
             "description": "Generate IPA and phonetic pronunciations for a lemma's forms",
             "params": [
-                {"name": "lemma_id", "type": "number", "required": True, "label": "Lemma ID"},
+                {"name": "guid", "type": "text", "required": True, "label": "GUID (e.g. N03_003)"},
                 {
                     "name": "lang_code",
                     "type": "select",
@@ -61,7 +61,7 @@ def api_client_ui() -> ResponseReturnValue:
             "path": "/api/llm/lokys/check-definition",
             "description": "Check and suggest improvements for a lemma's definition",
             "params": [
-                {"name": "lemma_id", "type": "number", "required": True, "label": "Lemma ID"},
+                {"name": "guid", "type": "text", "required": True, "label": "GUID (e.g. N03_003)"},
             ],
         },
         {
@@ -70,7 +70,7 @@ def api_client_ui() -> ResponseReturnValue:
             "path": "/api/llm/lokys/check-disambiguation",
             "description": "Check if a lemma needs disambiguation (parentheticals)",
             "params": [
-                {"name": "lemma_id", "type": "number", "required": True, "label": "Lemma ID"},
+                {"name": "guid", "type": "text", "required": True, "label": "GUID (e.g. N03_003)"},
             ],
         },
     ]
