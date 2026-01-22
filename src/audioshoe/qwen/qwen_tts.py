@@ -9,6 +9,7 @@ Repository: https://github.com/QwenLM/Qwen3-TTS
 
 import io
 import logging
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -61,6 +62,11 @@ def get_dtype(device: torch.device) -> torch.dtype:
         return torch.float16
     else:
         return torch.float32
+
+
+def _check_ffmpeg_available() -> bool:
+    """Check if ffmpeg is available in PATH."""
+    return shutil.which("ffmpeg") is not None
 
 
 class QwenTTSClient:
@@ -139,11 +145,20 @@ class QwenTTSClient:
             logger.debug(f"Model: {self.model_name}")
             logger.debug(f"Flash Attention: {self.use_flash_attention}")
 
+        # Check ffmpeg availability for MP3 conversion
+        self._ffmpeg_available = _check_ffmpeg_available()
+        if not self._ffmpeg_available:
+            logger.warning(
+                "ffmpeg not found in PATH. MP3 output will fall back to WAV format. "
+                "Install ffmpeg for MP3 support: brew install ffmpeg (macOS) or "
+                "apt-get install ffmpeg (Linux)"
+            )
+
         # Verify qwen-tts library is available
         try:
             import qwen_tts
 
-            logger.info(f"Qwen TTS library loaded successfully")
+            logger.info("Qwen TTS library loaded successfully")
         except ImportError:
             logger.error("Qwen TTS library not found. Please install it: pip install qwen-tts")
             raise RuntimeError(
@@ -274,6 +289,14 @@ class QwenTTSClient:
 
         # Convert to MP3 if requested
         if audio_format == AudioFormat.MP3:
+            # Check if ffmpeg is available (cached from init)
+            if not self._ffmpeg_available:
+                if self.debug:
+                    logger.debug("ffmpeg not available, returning WAV instead of MP3")
+                return wav_bytes
+
+            wav_path: Optional[Path] = None
+            mp3_path: Optional[Path] = None
             try:
                 with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp_wav:
                     tmp_wav.write(wav_bytes)
@@ -292,6 +315,8 @@ class QwenTTSClient:
                     "-qscale:a",
                     "2",
                     "-y",
+                    "-loglevel",
+                    "error",
                     str(mp3_path),
                 ]
 
@@ -307,17 +332,20 @@ class QwenTTSClient:
 
                 if result.returncode == 0:
                     mp3_bytes = mp3_path.read_bytes()
-                    mp3_path.unlink(missing_ok=True)
-                    wav_path.unlink(missing_ok=True)
                     return mp3_bytes
                 else:
-                    logger.warning(f"ffmpeg conversion failed: {result.stderr}")
-                    wav_path.unlink(missing_ok=True)
+                    logger.warning(f"ffmpeg conversion failed: {result.stderr.strip()}")
 
-            except FileNotFoundError:
-                logger.warning("ffmpeg not found. Returning WAV format instead.")
+            except subprocess.TimeoutExpired:
+                logger.warning("ffmpeg conversion timed out. Returning WAV format instead.")
             except Exception as e:
                 logger.warning(f"MP3 conversion failed: {e}. Returning WAV format instead.")
+            finally:
+                # Clean up temp files
+                if wav_path is not None:
+                    wav_path.unlink(missing_ok=True)
+                if mp3_path is not None:
+                    mp3_path.unlink(missing_ok=True)
 
         # Fallback to WAV
         return wav_bytes
