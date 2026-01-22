@@ -1,24 +1,23 @@
 """Factory for creating SQLAlchemy database sessions."""
 
-from typing import Any, Callable, Optional
-
-from sqlalchemy import create_engine, event
-from sqlalchemy.engine import Engine
-from sqlalchemy.orm import Session, sessionmaker
+from typing import TYPE_CHECKING, Any, Callable, Optional
 
 from wordfreq.storage.backend.config import BackendType, DataSourceConfig
-from wordfreq.storage.models.schema import Base
+
+if TYPE_CHECKING:
+    from sqlalchemy.engine import Engine
+    from sqlalchemy.orm import Session, sessionmaker
 
 _global_config: Optional[DataSourceConfig] = None
-_global_engine: Optional[Engine] = None
-_global_session_factory: Optional[sessionmaker] = None
+_global_engine: Optional["Engine"] = None
+_global_session_factory: Optional["sessionmaker"] = None
 
 # Cache engines by connection string to avoid creating new connections per request
-_engine_cache: dict[str, Engine] = {}
+_engine_cache: dict[str, "Engine"] = {}
 _engine_initialized: set[str] = set()  # Track which engines have had tables ensured
 
 
-def _create_engine(db_path: str) -> Engine:
+def _create_engine(db_path: str) -> "Engine":
     """Create a SQLAlchemy engine with appropriate settings.
 
     Args:
@@ -27,6 +26,8 @@ def _create_engine(db_path: str) -> Engine:
     Returns:
         Configured SQLAlchemy engine
     """
+    from sqlalchemy import create_engine, event
+
     # Determine if this is SQLite or another database
     if db_path.startswith("postgresql://") or db_path.startswith("mysql://"):
         # For other databases, use the path as-is
@@ -63,12 +64,16 @@ def _create_engine(db_path: str) -> Engine:
     return engine
 
 
-def _ensure_tables_exist(engine: Engine) -> None:
+def _ensure_tables_exist(engine: "Engine") -> None:
     """Ensure database tables exist.
 
     Args:
         engine: SQLAlchemy engine
     """
+    from sqlalchemy.orm import Session
+
+    from wordfreq.storage.models.schema import Base
+
     Base.metadata.create_all(engine)
 
     # Add missing columns to existing tables
@@ -111,7 +116,7 @@ def get_backend_type() -> "BackendType":
     return get_data_source_config().backend_type
 
 
-def _get_engine() -> Engine:
+def _get_engine() -> "Engine":
     """Get or create the global database engine.
 
     Returns:
@@ -140,12 +145,14 @@ def _get_engine() -> Engine:
     return _global_engine
 
 
-def _get_session_factory() -> sessionmaker:
+def _get_session_factory() -> "sessionmaker":
     """Get or create the global session factory.
 
     Returns:
         SQLAlchemy sessionmaker
     """
+    from sqlalchemy.orm import sessionmaker
+
     global _global_session_factory
 
     if _global_session_factory is None:
@@ -155,7 +162,7 @@ def _get_session_factory() -> sessionmaker:
     return _global_session_factory
 
 
-def _get_cached_engine(db_path: str) -> Engine:
+def _get_cached_engine(db_path: str) -> "Engine":
     """Get or create a cached engine for the given connection string.
 
     This avoids creating new database connections on every request, which is
@@ -182,7 +189,7 @@ def _get_cached_engine(db_path: str) -> Engine:
     return engine
 
 
-def create_session(config: Optional[DataSourceConfig] = None) -> Session:
+def create_session(config: Optional[DataSourceConfig] = None) -> "Session":
     """Create a new database session.
 
     Args:
@@ -191,6 +198,8 @@ def create_session(config: Optional[DataSourceConfig] = None) -> Session:
     Returns:
         A new SQLAlchemy Session instance (or JSONLSession for JSONL backend)
     """
+    from sqlalchemy.orm import sessionmaker
+
     if config is not None:
         # Create a session with specific config, using cached engine
         if config.backend_type == BackendType.JSONL:
@@ -220,7 +229,7 @@ def create_session(config: Optional[DataSourceConfig] = None) -> Session:
 
 def create_scoped_session_factory(
     config: Optional[DataSourceConfig] = None,
-) -> Callable[[], Session]:
+) -> Callable[[], "Session"]:
     """Create a scoped session factory compatible with Flask.
 
     Args:
@@ -236,7 +245,7 @@ def create_scoped_session_factory(
         def __init__(self, config: Optional[DataSourceConfig] = None) -> None:
             self.config = config
 
-        def __call__(self) -> Session:
+        def __call__(self) -> "Session":
             """Create a new session."""
             return create_session(self.config)
 

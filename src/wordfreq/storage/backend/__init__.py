@@ -3,7 +3,7 @@
 This module provides session creation for SQLAlchemy-based storage.
 """
 
-from sqlalchemy.orm import Session
+from typing import TYPE_CHECKING, Any
 
 from wordfreq.storage.backend.config import BackendType, DataSourceConfig
 from wordfreq.storage.backend.factory import (
@@ -12,6 +12,9 @@ from wordfreq.storage.backend.factory import (
     get_backend_type,
     get_data_source_config,
 )
+
+if TYPE_CHECKING:
+    from sqlalchemy.orm import Session
 
 __all__ = [
     "configure_backend",
@@ -22,3 +25,12 @@ __all__ = [
     "DataSourceConfig",
     "Session",
 ]
+
+
+def __getattr__(name: str) -> Any:
+    """Lazy import for Session to avoid importing SQLAlchemy at module load time."""
+    if name == "Session":
+        from sqlalchemy.orm import Session
+
+        return Session
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
