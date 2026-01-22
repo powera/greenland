@@ -20,9 +20,17 @@ dev = [
     "black>=23.0.0",
     "mypy>=1.0.0",
 ]
-ml = [
+# Core audio/TTS dependencies for audioshoe module
+audioshoe = [
     "torch>=2.0.0",
+    "numpy>=1.24.0",
+    "scipy>=1.10.0",
     "librosa>=0.10.0",
+    "pydub>=0.25.0",
+]
+# Extended ML dependencies (includes audioshoe + more)
+ml = [
+    "greenland[audioshoe]",
     "transformers>=4.35.0",
     "whisper>=1.0",
     "accelerate>=0.25.0",
@@ -64,6 +72,34 @@ module = [
     "pypinyin.*",
 ]
 ignore_missing_imports = true
+
+# Ignore missing imports for optional ML/audio dependencies
+# These are only required when using audioshoe features
+[[tool.mypy.overrides]]
+module = [
+    "torch.*",
+    "numpy.*",
+    "scipy.*",
+    "librosa.*",
+    "pydub.*",
+    "transformers.*",
+    "datasets.*",
+    "TTS.*",
+    "qwen_tts.*",
+    "whisper.*",
+]
+ignore_missing_imports = true
+
+# Audioshoe sample/driver scripts - relaxed typing for demo code
+[[tool.mypy.overrides]]
+module = [
+    "audioshoe.driver",
+    "audioshoe.driver_long",
+    "audioshoe.sample_driver",
+    "audioshoe.split_file",
+]
+disallow_untyped_defs = false
+warn_return_any = false
 
 # Files with complex JSON/dict type inference issues, obsolete API calls,
 # missing module exports, or deep structural issues that would require
