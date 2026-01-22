@@ -1,15 +1,26 @@
 #!/usr/bin/env python3
 """
-Strazdas - eSpeak-NG Audio Generation Agent
+Strazdas - Local Audio Generation Agent
 
-This agent generates audio files for lemmas using eSpeak-NG TTS.
+This agent generates audio files for lemmas using local TTS engines.
 Files are generated to a directory, stored with metadata in the
 AudioQualityReview table with 'pending_review' status, and can later be
 uploaded to S3 after review.
 
 "Strazdas" means "thrush" in Lithuanian - a songbird known for its melodious voice.
 
-Language documentation: https://github.com/espeak-ng/espeak-ng/blob/master/docs/languages.md
+Supported TTS backends:
+- espeak: eSpeak-NG with MBROLA voices (fast, lightweight, all languages)
+- qwen: Qwen3-TTS neural TTS (high quality, CJK + FIGS + PT)
+- piper: Piper neural TTS (good quality, select languages)
+
+Each backend has different voice options and language support.
+Use --list-voices to see available voices for each backend.
+
+Backend documentation:
+- eSpeak-NG: https://github.com/espeak-ng/espeak-ng/blob/master/docs/languages.md
+- Qwen3-TTS: https://github.com/QwenLM/Qwen3-TTS
+- Piper: https://github.com/rhasspy/piper
 """
 
 import argparse
@@ -18,8 +29,9 @@ import logging
 import sys
 import tempfile
 from datetime import datetime
+from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from sqlalchemy.orm import Session
 
@@ -39,7 +51,10 @@ from agents.common.common_args import (
     get_data_source_config,
 )
 from agents.common.lemma_selection import get_lemmas_for_agent
-from audioshoe.espeak import DEFAULT_ESPEAK_VOICES, EspeakVoice, generate_audio
+from audioshoe.espeak import DEFAULT_ESPEAK_VOICES, EspeakVoice
+from audioshoe.espeak import generate_audio as espeak_generate_audio
+from audioshoe.qwen import DEFAULT_QWEN_VOICES, QwenVoice
+from audioshoe.qwen import generate_audio as qwen_generate_audio
 from clients.audio import AudioFormat
 from clients.audio.manifest import generate_manifest
 from clients.audio.s3_uploader import S3AudioUploader
@@ -55,14 +70,47 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+class TtsBackend(Enum):
+    """Available TTS backends for audio generation."""
+
+    ESPEAK = "espeak"  # eSpeak-NG with MBROLA voices
+    QWEN = "qwen"  # Qwen3-TTS neural TTS
+    # PIPER = "piper"  # Piper neural TTS (future)
+
+    @classmethod
+    def from_string(cls, value: str) -> "TtsBackend":
+        """Convert string to TtsBackend enum."""
+        try:
+            return cls(value.lower())
+        except ValueError:
+            raise ValueError(f"Unknown TTS backend: {value}. Available: {[b.value for b in cls]}")
+
+
+# Type alias for voice types
+VoiceType = Union[EspeakVoice, QwenVoice]
+
+# Backend-specific language support
+BACKEND_LANGUAGES = {
+    TtsBackend.ESPEAK: ["lt", "zh", "ko", "fr", "de", "es", "pt", "sw", "vi"],
+    TtsBackend.QWEN: ["zh", "ja", "ko", "fr", "it", "de", "es", "pt"],
+}
+
+# Backend-specific default voices
+BACKEND_DEFAULT_VOICES: Dict[TtsBackend, Dict[str, List[VoiceType]]] = {
+    TtsBackend.ESPEAK: DEFAULT_ESPEAK_VOICES,  # type: ignore[dict-item]
+    TtsBackend.QWEN: DEFAULT_QWEN_VOICES,  # type: ignore[dict-item]
+}
+
+
 class StrazdasAgent:
-    """Agent for generating audio files using eSpeak-NG."""
+    """Agent for generating audio files using local TTS engines."""
 
     def __init__(
         self,
         config: DataSourceConfig,
         output_dir: Optional[str] = None,
         upload_s3: bool = False,
+        tts_backend: TtsBackend = TtsBackend.ESPEAK,
     ) -> None:
         """
         Initialize the Strazdas agent.
@@ -71,10 +119,12 @@ class StrazdasAgent:
             config: DataSourceConfig with model, debug, and backend settings (required)
             output_dir: Output directory for generated audio (uses temp dir if None)
             upload_s3: Whether to upload generated audio to S3 staging
+            tts_backend: TTS backend to use (espeak, qwen)
         """
         self.config = config
         self.debug = config.debug
         self.upload_s3 = upload_s3
+        self.tts_backend = tts_backend
         self.output_dir = (
             Path(output_dir) if output_dir else Path(tempfile.mkdtemp(prefix="strazdas_"))
         )
@@ -122,7 +172,7 @@ class StrazdasAgent:
         session: Session,
         lemma: Lemma,
         language_code: str,
-        voices: List[EspeakVoice],
+        voices: List[VoiceType],
         create_review_record: bool = True,
         use_ipa: bool = False,
     ) -> Dict[str, Any]:
@@ -133,9 +183,9 @@ class StrazdasAgent:
             session: Database session
             lemma: Lemma to generate audio for
             language_code: Target language code
-            voices: List of EspeakVoice to use
+            voices: List of voice objects (EspeakVoice or QwenVoice)
             create_review_record: Whether to create AudioQualityReview records
-            use_ipa: If True and lemma has IPA, use IPA for generation
+            use_ipa: If True and lemma has IPA, use IPA for generation (eSpeak only)
 
         Returns:
             Dict with generation results
@@ -151,11 +201,12 @@ class StrazdasAgent:
                 "error": "No translation available",
             }
 
-        # Check if we should use IPA
+        # Check if we should use IPA (only supported for eSpeak)
         ipa_text = None
-        if use_ipa and hasattr(lemma, "ipa") and lemma.ipa:
-            ipa_text = lemma.ipa
-            logger.info(f"Using IPA for generation: {ipa_text}")
+        if use_ipa and self.tts_backend == TtsBackend.ESPEAK:
+            if hasattr(lemma, "ipa") and lemma.ipa:
+                ipa_text = lemma.ipa
+                logger.info(f"Using IPA for generation: {ipa_text}")
 
         results = {
             "success": True,
@@ -163,21 +214,21 @@ class StrazdasAgent:
             "language": language_code,
             "text": text,
             "ipa_text": ipa_text,
+            "backend": self.tts_backend.value,
             "voices": [],
         }
 
         for voice in voices:
-            logger.info(f"Generating audio: {text} ({language_code}/{voice.name})")
+            logger.info(
+                f"Generating audio: {text} ({language_code}/{voice.name}) "
+                f"[{self.tts_backend.value}]"
+            )
 
-            # Use IPA if available, otherwise use regular text
+            # Use IPA if available (eSpeak only), otherwise use regular text
             input_text = ipa_text if ipa_text else text
 
-            # Generate audio using eSpeak-NG
-            result = generate_audio(
-                text=input_text,
-                voice=voice,
-                ipa_input=bool(ipa_text),
-            )
+            # Generate audio using the configured backend
+            result = self._generate_audio_with_backend(voice, input_text, ipa_text)
 
             if not result.success:
                 logger.error(f"Failed to generate audio: {result.error}")
@@ -195,8 +246,8 @@ class StrazdasAgent:
             filename = f"{lemma.guid}_{safe_text}.mp3"
 
             # Create language/voice subdirectories
-            # Use the voice name directly (e.g., "Ona", "Pierre")
-            voice_name = voice.name
+            # Use the voice ui_name for unique identification (e.g., "qwen-zh-f1")
+            voice_name = voice.ui_name if hasattr(voice, "ui_name") else voice.name
             voice_dir = self.output_dir / language_code / voice_name
             voice_dir.mkdir(parents=True, exist_ok=True)
 
@@ -214,7 +265,9 @@ class StrazdasAgent:
             s3_staging_url = None
             s3_staging_manifest_url = None
             if self.upload_s3 and self.s3_uploader:
-                # Generate manifest
+                # Generate manifest with backend-specific params
+                generation_params = self._get_generation_params(voice, ipa_text)
+
                 manifest_data = generate_manifest(
                     audio_file_path=file_path,
                     agent="strazdas",
@@ -224,10 +277,7 @@ class StrazdasAgent:
                     guid=lemma.guid,
                     sentence_id=None,
                     grammatical_form=None,
-                    generation_params={
-                        "voice": voice.espeak_identifier,
-                        "ipa_input": bool(ipa_text),
-                    },
+                    generation_params=generation_params,
                 )
 
                 # Upload to staging
@@ -271,6 +321,67 @@ class StrazdasAgent:
             )
 
         return results
+
+    def _generate_audio_with_backend(
+        self,
+        voice: VoiceType,
+        text: str,
+        ipa_text: Optional[str],
+    ) -> Any:
+        """
+        Generate audio using the configured TTS backend.
+
+        Args:
+            voice: Voice object (EspeakVoice or QwenVoice)
+            text: Text to synthesize
+            ipa_text: IPA text (eSpeak only)
+
+        Returns:
+            AudioGenerationResult from the backend
+        """
+        if self.tts_backend == TtsBackend.ESPEAK:
+            return espeak_generate_audio(
+                text=text,
+                voice=voice,  # type: ignore[arg-type]
+                ipa_input=bool(ipa_text),
+            )
+        elif self.tts_backend == TtsBackend.QWEN:
+            return qwen_generate_audio(
+                text=text,
+                voice=voice,  # type: ignore[arg-type]
+            )
+        else:
+            raise ValueError(f"Unsupported TTS backend: {self.tts_backend}")
+
+    def _get_generation_params(
+        self,
+        voice: VoiceType,
+        ipa_text: Optional[str],
+    ) -> Dict[str, Any]:
+        """
+        Get generation parameters for manifest based on backend.
+
+        Args:
+            voice: Voice object
+            ipa_text: IPA text (if used)
+
+        Returns:
+            Dict of generation parameters
+        """
+        if self.tts_backend == TtsBackend.ESPEAK:
+            return {
+                "backend": "espeak",
+                "voice": voice.espeak_identifier if hasattr(voice, "espeak_identifier") else voice.name,  # type: ignore[union-attr]
+                "ipa_input": bool(ipa_text),
+            }
+        elif self.tts_backend == TtsBackend.QWEN:
+            return {
+                "backend": "qwen",
+                "voice": voice.ui_name if hasattr(voice, "ui_name") else voice.name,
+                "model": "Qwen3-TTS-12Hz-1.7B-VoiceDesign",
+            }
+        else:
+            return {"backend": self.tts_backend.value, "voice": voice.name}
 
     def _create_review_record(
         self,
@@ -337,7 +448,7 @@ class StrazdasAgent:
         self,
         language_code: str,
         lemmas: Optional[List[Lemma]] = None,
-        voices: Optional[List[EspeakVoice]] = None,
+        voices: Optional[List[VoiceType]] = None,
         use_ipa: bool = False,
     ) -> Dict[str, Any]:
         """
@@ -346,14 +457,18 @@ class StrazdasAgent:
         Args:
             language_code: Target language code
             lemmas: List of lemmas to process (if None, returns empty result)
-            voices: Voices to use (defaults to language's default voices)
-            use_ipa: If True, use IPA for generation when available
+            voices: Voices to use (defaults to backend's default voices for language)
+            use_ipa: If True, use IPA for generation when available (eSpeak only)
 
         Returns:
             Dict with batch generation results
         """
         session = self.get_session()
-        voices = voices or DEFAULT_ESPEAK_VOICES.get(language_code, [])
+
+        # Get default voices for the configured backend
+        if voices is None:
+            backend_voices = BACKEND_DEFAULT_VOICES.get(self.tts_backend, {})
+            voices = backend_voices.get(language_code, [])
 
         try:
             # If no lemmas provided, return empty result
@@ -414,7 +529,7 @@ class StrazdasAgent:
 
 def get_argument_parser() -> argparse.ArgumentParser:
     """Return the argument parser for introspection."""
-    parser = argparse.ArgumentParser(description="Strazdas - eSpeak-NG Audio Generation Agent")
+    parser = argparse.ArgumentParser(description="Strazdas - Local Audio Generation Agent")
 
     # Common arguments
     add_common_args(parser)
@@ -431,28 +546,36 @@ def get_argument_parser() -> argparse.ArgumentParser:
         help="Operation mode: check-existing (list existing audio), populate-only (generate missing only), regenerate (delete and regenerate), coverage (report only, default)",
     )
 
+    # TTS backend selection
+    parser.add_argument(
+        "--tts-backend",
+        choices=["espeak", "qwen"],
+        default="espeak",
+        help="TTS backend to use: espeak (fast, all languages), qwen (neural, CJK+FIGS+PT). Default: espeak",
+    )
+
     # Strazdas-specific arguments
     parser.add_argument("--output-dir", help="Output directory for generated audio")
     parser.add_argument(
         "--language",
-        choices=["lt", "zh", "ko", "fr", "de", "es", "pt", "sw", "vi"],
+        choices=["lt", "zh", "ja", "ko", "fr", "it", "de", "es", "pt", "sw", "vi"],
         help="Target language code (required for populate-only and regenerate modes)",
     )
     parser.add_argument("--difficulty-level", type=int, help="Filter by difficulty level (1-20)")
     parser.add_argument(
         "--voices",
         nargs="+",
-        help="Voice names to use (e.g., Ona Jonas Ruta for Lithuanian). Use --list-voices to see available voices.",
+        help="Voice names to use. Use --list-voices to see available voices for each backend.",
     )
     parser.add_argument(
         "--list-voices",
         action="store_true",
-        help="List available voices for each language and exit",
+        help="List available voices for each TTS backend and exit",
     )
     parser.add_argument(
         "--use-ipa",
         action="store_true",
-        help="Use IPA phonetic notation for generation when available",
+        help="Use IPA phonetic notation for generation when available (eSpeak only)",
     )
     parser.add_argument(
         "--upload-s3",
@@ -470,16 +593,43 @@ def main() -> None:
 
     # Handle --list-voices
     if args.list_voices:
-        print("\nAvailable eSpeak-NG Voices by Language:")
-        print("=" * 60)
+        print("\n" + "=" * 70)
+        print("AVAILABLE TTS VOICES BY BACKEND")
+        print("=" * 70)
+
+        # eSpeak voices
+        print("\n[ESPEAK] eSpeak-NG with MBROLA voices")
+        print("-" * 70)
+        print("Languages: lt, zh, ko, fr, de, es, pt, sw, vi")
+        print("Usage: --tts-backend espeak --voices ONA JONAS")
         for lang_code in ["lt", "zh", "ko", "fr", "de", "es", "pt", "sw", "vi"]:
-            voices = EspeakVoice.get_voices_for_language(lang_code)
-            print(f"\n{lang_code.upper()}:")
-            for voice in voices:
-                gender_str = "Female" if voice.gender == "f" else "Male"
-                print(f"  {voice.name:12} - {gender_str:6} (variant {voice.variant})")
-        print("\n" + "=" * 60)
+            espeak_voices = EspeakVoice.get_voices_for_language(lang_code)
+            if espeak_voices:
+                print(f"\n  {lang_code.upper()}:")
+                for ev in espeak_voices:
+                    gender_str = "F" if ev.gender == "f" else "M"
+                    print(f"    {ev.name:12} ({gender_str}, variant {ev.variant})")
+
+        # Qwen voices
+        print("\n" + "-" * 70)
+        print("[QWEN] Qwen3-TTS Neural TTS (high quality)")
+        print("-" * 70)
+        print("Languages: zh, ja, ko, fr, it, de, es, pt")
+        print("Usage: --tts-backend qwen --voices QWEN_ZH_F1 QWEN_ZH_M2")
+        print("Voice types: f1=soprano, f2=alto, m1=tenor, m2=bass")
+        for lang_code in ["zh", "ja", "ko", "fr", "it", "de", "es", "pt"]:
+            qwen_voices = QwenVoice.get_voices_for_language(lang_code)
+            if qwen_voices:
+                print(f"\n  {lang_code.upper()}:")
+                for qv in qwen_voices:
+                    gender_str = "F" if qv.gender == "f" else "M"
+                    print(f"    {qv.name:16} ({gender_str}, {qv.pitch_type})")
+
+        print("\n" + "=" * 70)
         sys.exit(0)
+
+    # Parse TTS backend
+    tts_backend = TtsBackend.from_string(args.tts_backend)
 
     # Create configuration from args (always returns a valid config with defaults)
     config = get_data_source_config(args)
@@ -489,21 +639,33 @@ def main() -> None:
         print(f"Error: --language is required for --mode {args.mode}")
         sys.exit(1)
 
+    # Validate language is supported by the selected backend
+    if args.language and args.language not in BACKEND_LANGUAGES.get(tts_backend, []):
+        print(
+            f"Error: Language '{args.language}' is not supported by backend '{tts_backend.value}'"
+        )
+        print(f"Supported languages for {tts_backend.value}: {BACKEND_LANGUAGES[tts_backend]}")
+        sys.exit(1)
+
     # Create agent with config
     agent = StrazdasAgent(
         config=config,
         output_dir=args.output_dir,
         upload_s3=args.upload_s3,
+        tts_backend=tts_backend,
     )
 
-    # Convert voice names to EspeakVoice enums
-    selected_voices: Optional[List[EspeakVoice]] = None
+    # Convert voice names to appropriate voice enum based on backend
+    selected_voices: Optional[List[VoiceType]] = None
     if args.voices:
         try:
-            selected_voices = [EspeakVoice[v.upper()] for v in args.voices]
+            if tts_backend == TtsBackend.ESPEAK:
+                selected_voices = [EspeakVoice[v.upper()] for v in args.voices]
+            elif tts_backend == TtsBackend.QWEN:
+                selected_voices = [QwenVoice[v.upper()] for v in args.voices]
         except KeyError as e:
-            print(f"Error: Unknown voice name: {e}")
-            print(f"Use --list-voices to see available voices")
+            print(f"Error: Unknown voice name for {tts_backend.value} backend: {e}")
+            print("Use --list-voices to see available voices")
             sys.exit(1)
 
     # Get lemmas to process (either single lemma from --guid or batch)
@@ -535,7 +697,7 @@ def main() -> None:
     # Handle batch modes
     if args.mode == "coverage":
         # Report on audio coverage
-        print("\nAudio Coverage Report (eSpeak-NG)")
+        print("\nAudio Coverage Report")
         print("=" * 80)
         print("This mode reports on existing audio files in the AudioQualityReview table.")
         print("Use --language to filter by language.")
@@ -574,7 +736,7 @@ def main() -> None:
 
     elif args.mode == "check-existing":
         # List existing audio files
-        print("\nExisting Audio Files (eSpeak-NG)")
+        print("\nExisting Audio Files")
         print("=" * 80)
 
         session = agent.get_session()
@@ -619,7 +781,9 @@ def main() -> None:
             finally:
                 session.close()
 
-            voice_list = selected_voices or DEFAULT_ESPEAK_VOICES.get(args.language, [])
+            # Get default voices for the selected backend
+            backend_voices = BACKEND_DEFAULT_VOICES.get(tts_backend, {})
+            voice_list = selected_voices or backend_voices.get(args.language, [])
             voice_count = len(voice_list)
             estimated_files = lemma_count * voice_count
 
@@ -628,8 +792,14 @@ def main() -> None:
                 if selected_voices
                 else ", ".join(v.name for v in voice_list)
             )
+
+            backend_desc = {
+                TtsBackend.ESPEAK: "eSpeak-NG TTS (fast, local)",
+                TtsBackend.QWEN: "Qwen3-TTS neural TTS (high quality, local)",
+            }.get(tts_backend, tts_backend.value)
+
             if not confirm_operation(
-                message=f"This will generate audio for {lemma_count} lemmas with {voice_count} voices each.\nTotal files: {estimated_files}\nVoices: {voices_str}\nThis will use eSpeak-NG TTS (free, local generation).",
+                message=f"This will generate audio for {lemma_count} lemmas with {voice_count} voices each.\nTotal files: {estimated_files}\nVoices: {voices_str}\nBackend: {backend_desc}",
                 estimated_calls=None,  # No API calls, local generation
                 skip_confirmation=args.yes,
                 dry_run=args.dry_run,
@@ -649,8 +819,9 @@ def main() -> None:
 
         # Print summary
         logger.info("=" * 80)
-        logger.info("STRAZDAS AGENT REPORT - eSpeak-NG Audio Generation")
+        logger.info(f"STRAZDAS AGENT REPORT - {tts_backend.value.upper()} Audio Generation")
         logger.info("=" * 80)
+        logger.info(f"Backend: {tts_backend.value}")
         logger.info(f"Language: {results['language_code']}")
         logger.info(f"Total lemmas: {results['total_lemmas']}")
         logger.info(f"Voices: {', '.join(results['voices'])}")
