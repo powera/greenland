@@ -111,8 +111,9 @@
                         <option value="espeak-ng">eSpeak-NG (free, synthetic)</option>
                         <option value="piper">Piper (free, neural)</option>
                         <option value="coqui">Coqui TTS (free, neural, voice cloning)</option>
+                        <option value="qwen3">Qwen3 (free, neural, multilingual)</option>
                     </select>
-                    <div class="form-text">Choose TTS engine: OpenAI (paid), eSpeak (fast), Piper (neural), or Coqui (voice cloning)</div>
+                    <div class="form-text">Choose TTS engine: OpenAI (paid), eSpeak (fast), Piper (neural), Coqui (voice cloning), or Qwen3 (multilingual)</div>
                 </div>
                 <div class="mb-3">
                     <label for="audio_language" class="form-label">Language <span class="text-danger">*</span></label>
@@ -194,6 +195,7 @@ audioPlayerLemma.addEventListener('ended', function() {
     const espeakVoices = {{ espeak_voices|tojson }};
     const piperVoices = {{ piper_voices|tojson }};
     const coquiVoices = {{ coqui_voices|tojson }};
+    const qwen3Voices = {{ qwen3_voices|tojson }};
 
     const ttsEngineSelect = document.getElementById('audio_tts_engine');
     const languageSelect = document.getElementById('audio_language');
@@ -391,6 +393,64 @@ audioPlayerLemma.addEventListener('ended', function() {
 
             voiceHelp.textContent = 'Select Coqui XTTS voices to generate (high quality, voice cloning)';
             engineInfo.innerHTML = '<i class="bi bi-info-circle"></i> <strong>Note:</strong> Audio will be generated using Coqui TTS (free, neural, voice cloning). Review records will be created with status "pending_review".';
+
+            const row = document.createElement('div');
+            row.className = 'row';
+
+            const col1 = document.createElement('div');
+            col1.className = 'col-md-6';
+            const col2 = document.createElement('div');
+            col2.className = 'col-md-6';
+
+            voices.forEach((voice, idx) => {
+                const formCheck = document.createElement('div');
+                formCheck.className = 'form-check';
+
+                const checkbox = document.createElement('input');
+                checkbox.className = 'form-check-input';
+                checkbox.type = 'checkbox';
+                checkbox.name = 'voices';
+                checkbox.value = voice.name;
+                checkbox.id = `audio-voice-${voice.name}`;
+                checkbox.checked = true; // Check all by default
+
+                const label = document.createElement('label');
+                label.className = 'form-check-label';
+                label.htmlFor = `audio-voice-${voice.name}`;
+
+                // Add gender badge and UI name
+                const genderBadge = voice.gender === 'f' ? '♀' : '♂';
+                label.innerHTML = `${voice.ui_name} <span class="badge bg-secondary">${genderBadge}</span>`;
+
+                formCheck.appendChild(checkbox);
+                formCheck.appendChild(label);
+
+                if (idx < Math.ceil(voices.length / 2)) {
+                    col1.appendChild(formCheck);
+                } else {
+                    col2.appendChild(formCheck);
+                }
+            });
+
+            row.appendChild(col1);
+            row.appendChild(col2);
+            voicesContainer.appendChild(row);
+
+        } else if (engine === 'qwen3') {
+            if (!language) {
+                voicesContainer.innerHTML = '<div class="text-muted">Please select a language first</div>';
+                return;
+            }
+
+            // Show Qwen3 voices for selected language
+            const voices = qwen3Voices[language];
+            if (!voices || voices.length === 0) {
+                voicesContainer.innerHTML = '<div class="text-warning">No Qwen3 voices available for this language</div>';
+                return;
+            }
+
+            voiceHelp.textContent = 'Select Qwen3 neural voices to generate (high quality, multilingual)';
+            engineInfo.innerHTML = '<i class="bi bi-info-circle"></i> <strong>Note:</strong> Audio will be generated using Qwen3 TTS (free, neural, multilingual). Review records will be created with status "pending_review".';
 
             const row = document.createElement('div');
             row.className = 'row';

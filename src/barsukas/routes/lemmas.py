@@ -11,6 +11,7 @@ from flask.typing import ResponseReturnValue
 from audioshoe.coqui.types import CoquiVoice
 from audioshoe.espeak.types import EspeakVoice
 from audioshoe.piper.types import PiperVoice
+from audioshoe.qwen.types import QwenVoice
 from barsukas.helpers.lemma_display import get_difficulty_stats, group_derivative_forms
 from barsukas.utils.task_queue import get_tasks_for_target
 from wordfreq.storage.crud.derivative_form import delete_derivative_form
@@ -298,6 +299,14 @@ def view_lemma(lemma_id: int) -> ResponseReturnValue:
             {"name": v.name, "ui_name": v.ui_name, "gender": v.gender} for v in coqui_voice_list
         ]
 
+    # Qwen3 voices by language
+    qwen3_voices = {}
+    for lang_code in language_names.keys():
+        qwen3_voice_list = QwenVoice.get_voices_for_language(lang_code)
+        qwen3_voices[lang_code] = [
+            {"name": v.name, "ui_name": v.ui_name, "gender": v.gender} for v in qwen3_voice_list
+        ]
+
     queued_tasks = get_tasks_for_target(g.db, "lemma", lemma_id, limit=8)
 
     return render_template(
@@ -322,6 +331,7 @@ def view_lemma(lemma_id: int) -> ResponseReturnValue:
         espeak_voices=espeak_voices,
         piper_voices=piper_voices,
         coqui_voices=coqui_voices,
+        qwen3_voices=qwen3_voices,
         queued_tasks=queued_tasks,
     )
 
