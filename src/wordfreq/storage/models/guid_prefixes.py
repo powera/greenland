@@ -94,7 +94,7 @@ SUBTYPE_GUID_PREFIXES = {
         "origin": "A08",
         "purpose": "A09",
         "material": "A10",
-        "definite_quantity": "A11",
+        # A11 removed: definite_quantity moved to numeral POS
         "indefinite_quantity": "A12",
         "duration": "A13",
         "frequency": "A14",

@@ -143,7 +143,7 @@ class AdjectiveSubtype(enum.Enum):
     ORIGIN = "origin"  # Origin or source (American, Chinese, domestic, foreign)
     PURPOSE = "purpose"  # Purpose or function (educational, medical, industrial, recreational)
     MATERIAL = "material"  # Material composition (wooden, metal, plastic, cotton)
-    DEFINITE_QUANTITY = "definite_quantity"  # Specific amounts (one, ten, hundred, first)
+    # DEFINITE_QUANTITY removed: moved to numeral POS
     INDEFINITE_QUANTITY = "indefinite_quantity"  # Inexact amounts (many, few, some, several)
     DURATION = "duration"  # Time duration (brief, long, eternal, temporary)
     FREQUENCY = "frequency"  # Frequency of occurrence (daily, occasional, rare, frequent)

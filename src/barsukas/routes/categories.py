@@ -120,7 +120,7 @@ SUBTYPE_DESCRIPTIONS: Dict[str, Dict[str, str]] = {
         "origin": "Origin or source (American, Chinese, domestic, foreign)",
         "purpose": "Purpose or function (educational, medical, industrial)",
         "material": "Material composition (wooden, metal, plastic, cotton)",
-        "definite_quantity": "Specific amounts (one, ten, hundred, first)",
+        # definite_quantity removed: moved to numeral POS
         "indefinite_quantity": "Inexact amounts (many, few, some, several)",
         "duration": "Time duration (brief, long, eternal, temporary)",
         "frequency": "Frequency of occurrence (daily, occasional, rare)",
@@ -225,7 +225,7 @@ ADJECTIVE_GROUPS = {
     "Evaluative": ["quality", "aesthetic", "importance"],
     "Origin and Material": ["origin", "purpose", "material"],
     "Quantity and Time": [
-        "definite_quantity",
+        # definite_quantity removed: moved to numeral POS
         "indefinite_quantity",
         "duration",
         "frequency",
