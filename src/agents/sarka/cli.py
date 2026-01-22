@@ -52,6 +52,19 @@ Examples:
   # View a generated conversation
   python sarka.py --view 123
 
+Advanced options (category-based selection):
+  # Generate with words up to level 5, grouped by category
+  python sarka.py --level 1 --max-level 5 --by-category --generate
+
+  # Generate for a specific category (e.g., food_drink nouns)
+  python sarka.py --level 1 --max-level 5 --category food_drink --generate
+
+  # Skip words already used in 3+ conversations
+  python sarka.py --level 3 --max-word-usage 3 --generate
+
+  # Combine options: category-coherent conversations, level cap, usage filter
+  python sarka.py --level 1 --max-level 5 --by-category --max-word-usage 2 --generate
+
 Configuration:
   - Generates {conversations} conversations per level
   - Each conversation uses {words} words from the database
@@ -106,6 +119,11 @@ Configuration:
         type=int,
         help="End of level range (inclusive). If provided with --level, generates for all levels in range.",
     )
+    level_group.add_argument(
+        "--max-level",
+        type=int,
+        help="Maximum difficulty level (inclusive). Selects words from level 1 up to this level.",
+    )
 
     # Generation options
     gen_group = parser.add_argument_group("Generation options")
@@ -120,6 +138,23 @@ Configuration:
         type=int,
         default=8,
         help="Target number of sentences per conversation (default: 8)",
+    )
+    gen_group.add_argument(
+        "--max-word-usage",
+        type=int,
+        default=None,
+        help="Skip words already used in this many conversations (default: no limit)",
+    )
+    gen_group.add_argument(
+        "--category",
+        type=str,
+        default=None,
+        help="Generate conversations for a specific category (pos_subtype), e.g., 'food_drink'",
+    )
+    gen_group.add_argument(
+        "--by-category",
+        action="store_true",
+        help="Generate separate conversations for each noun category (keeps categories coherent)",
     )
 
     # Workqueue arguments
@@ -398,15 +433,32 @@ def main():
         logger.info("SARKA AGENT - GENERATING CONVERSATIONS")
         logger.info("=" * 60)
 
-        all_results = []
-        total_successful = 0
-        total_failed = 0
+        # Check if using new options (max_level, category, by_category, max_word_usage)
+        use_new_options = (
+            args.max_level is not None
+            or args.category is not None
+            or args.by_category
+            or args.max_word_usage is not None
+        )
 
-        for level in levels:
-            print(f"\n--- Level {level} ---")
+        if use_new_options:
+            # Use new generate_with_options method
+            print(f"\n--- Using advanced options ---")
+            if args.max_level:
+                print(f"Max level: {args.max_level}")
+            if args.category:
+                print(f"Category: {args.category}")
+            if args.by_category:
+                print("Grouping by category for coherent conversations")
+            if args.max_word_usage:
+                print(f"Max word usage: {args.max_word_usage} conversations")
 
-            result = agent.generate_for_level(
-                level=level,
+            result = agent.generate_with_options(
+                max_level=args.max_level,
+                level=args.level,
+                category=args.category,
+                by_category=args.by_category,
+                max_word_usage=args.max_word_usage,
                 num_conversations=args.num_conversations,
                 num_sentences=args.num_sentences,
                 dry_run=args.dry_run,
@@ -414,27 +466,29 @@ def main():
 
             if result.get("error"):
                 print(f"Error: {result['error']}")
-                continue
+                if result.get("plan_stats"):
+                    print(f"Stats: {result['plan_stats']}")
+                sys.exit(1)
 
-            all_results.append(result)
-            total_successful += result["successful"]
-            total_failed += result["failed"]
-
-            # Show level summary
-            summary = result["level_summary"]
-            print(f"Words at level: {summary['total_words']}")
-            for pos_type, data in summary["by_pos_type"].items():
-                subtypes_str = ", ".join(f"{k}: {v}" for k, v in data["subtypes"].items())
-                print(f"  {pos_type}: {data['total']} ({subtypes_str})")
+            # Show plan stats
+            stats = result.get("plan_stats", {})
+            print(f"\nWord selection:")
+            print(f"  Level range: {stats.get('level_desc', 'N/A')}")
+            print(f"  Total words: {stats.get('total_words', 0)}")
+            if stats.get("filtered_out", 0) > 0:
+                print(f"  Filtered out (usage limit): {stats['filtered_out']}")
+            if stats.get("category"):
+                print(f"  Category: {stats['category']}")
+            print(f"  By category grouping: {stats.get('by_category', False)}")
 
             print(f"\nGenerated: {result['successful']}/{result['total']} conversations")
             if result["failed"] > 0:
                 print(f"Failed: {result['failed']}")
 
             # Show sample results
-            if result["results"]:
+            if result.get("results"):
                 print("\nSample conversations:")
-                for i, res in enumerate(result["results"][:3], 1):
+                for i, res in enumerate(result["results"][:5], 1):
                     if res.get("success") or res.get("dry_run"):
                         words_str = ", ".join(res.get("words", []))
                         print(f"  {i}. {res.get('title')} ({res.get('num_sentences')} sentences)")
@@ -442,15 +496,72 @@ def main():
                     else:
                         print(f"  {i}. Error: {res.get('error')}")
 
-        print("\n" + "=" * 60)
-        print("GENERATION SUMMARY")
-        print("=" * 60)
-        print(f"Levels: {levels}")
-        print(f"Total successful: {total_successful}")
-        print(f"Total failed: {total_failed}")
-        if args.dry_run:
-            print("\n[DRY RUN] No conversations were actually saved")
-        print("=" * 60)
+            print("\n" + "=" * 60)
+            print("GENERATION SUMMARY")
+            print("=" * 60)
+            print(f"Total successful: {result['successful']}")
+            print(f"Total failed: {result['failed']}")
+            if args.dry_run:
+                print("\n[DRY RUN] No conversations were actually saved")
+            print("=" * 60)
+
+        else:
+            # Use original per-level generation
+            all_results = []
+            total_successful = 0
+            total_failed = 0
+
+            for level in levels:
+                print(f"\n--- Level {level} ---")
+
+                result = agent.generate_for_level(
+                    level=level,
+                    num_conversations=args.num_conversations,
+                    num_sentences=args.num_sentences,
+                    dry_run=args.dry_run,
+                )
+
+                if result.get("error"):
+                    print(f"Error: {result['error']}")
+                    continue
+
+                all_results.append(result)
+                total_successful += result["successful"]
+                total_failed += result["failed"]
+
+                # Show level summary
+                summary = result["level_summary"]
+                print(f"Words at level: {summary['total_words']}")
+                for pos_type, data in summary["by_pos_type"].items():
+                    subtypes_str = ", ".join(f"{k}: {v}" for k, v in data["subtypes"].items())
+                    print(f"  {pos_type}: {data['total']} ({subtypes_str})")
+
+                print(f"\nGenerated: {result['successful']}/{result['total']} conversations")
+                if result["failed"] > 0:
+                    print(f"Failed: {result['failed']}")
+
+                # Show sample results
+                if result["results"]:
+                    print("\nSample conversations:")
+                    for i, res in enumerate(result["results"][:3], 1):
+                        if res.get("success") or res.get("dry_run"):
+                            words_str = ", ".join(res.get("words", []))
+                            print(
+                                f"  {i}. {res.get('title')} ({res.get('num_sentences')} sentences)"
+                            )
+                            print(f"     Words: {words_str}")
+                        else:
+                            print(f"  {i}. Error: {res.get('error')}")
+
+            print("\n" + "=" * 60)
+            print("GENERATION SUMMARY")
+            print("=" * 60)
+            print(f"Levels: {levels}")
+            print(f"Total successful: {total_successful}")
+            print(f"Total failed: {total_failed}")
+            if args.dry_run:
+                print("\n[DRY RUN] No conversations were actually saved")
+            print("=" * 60)
 
 
 if __name__ == "__main__":
