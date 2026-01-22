@@ -23,13 +23,23 @@ DEFAULT_TIMEOUT = 150
 class UnifiedLLMClient:
     """Client for routing requests to appropriate LLM backend based on model name."""
 
-    def __init__(self, timeout: int = DEFAULT_TIMEOUT, debug: bool = True):
+    def __init__(
+        self,
+        timeout: int = DEFAULT_TIMEOUT,
+        debug: bool = True,
+        openai_api_key: Optional[str] = None,
+        anthropic_api_key: Optional[str] = None,
+        google_api_key: Optional[str] = None,
+    ):
         """
         Initialize client with configurable timeout and debug mode.
 
         Args:
             timeout: Request timeout in seconds for all backends
             debug: Whether to enable debug logging
+            openai_api_key: Optional API key for OpenAI (avoids file-based key loading)
+            anthropic_api_key: Optional API key for Anthropic (avoids file-based key loading)
+            google_api_key: Optional API key for Google/Gemini (avoids file-based key loading)
         """
         self.timeout = timeout
         self.debug = debug
@@ -39,11 +49,18 @@ class UnifiedLLMClient:
             logger.debug("Initialized UnifiedLLMClient (timeout=%ds)", timeout)
 
         # Initialize backend clients - debug logs only in client used
+        # Pass API keys if provided (for API server use)
         self.ollama = ollama_client.OllamaClient(timeout=timeout, debug=False)
         self.lmstudio = lmstudio_client.LMStudioClient(timeout=timeout, debug=False)
-        self.openai = openai_client.OpenAIClient(timeout=timeout, debug=False)
-        self.anthropic = anthropic_client.AnthropicClient(timeout=timeout, debug=False)
-        self.gemini = gemini_client.GeminiClient(timeout=timeout, debug=False)
+        self.openai = openai_client.OpenAIClient(
+            timeout=timeout, debug=False, api_key=openai_api_key
+        )
+        self.anthropic = anthropic_client.AnthropicClient(
+            timeout=timeout, debug=False, api_key=anthropic_api_key
+        )
+        self.gemini = gemini_client.GeminiClient(
+            timeout=timeout, debug=False, api_key=google_api_key
+        )
 
     @classmethod
     def from_config(
@@ -52,24 +69,46 @@ class UnifiedLLMClient:
         """
         Create a UnifiedLLMClient from a DataSourceConfig.
 
-        This extracts the model and debug settings from the config.
+        This extracts the model, debug settings, and optional API keys from the config.
         The model parameter from config will be used when making LLM requests.
+        API keys from config (if provided) will be passed to the underlying clients,
+        avoiding file-based key loading. This is useful for API server use where
+        keys come from request parameters.
 
         Args:
-            config: DataSourceConfig containing model, debug, and other configuration
+            config: DataSourceConfig containing model, debug, API keys, and other configuration
             timeout: Request timeout in seconds for all backends
 
         Returns:
-            UnifiedLLMClient instance with model and debug from config
+            UnifiedLLMClient instance with model, debug, and API keys from config
 
         Example:
             config = get_data_source_config(args)
             client = UnifiedLLMClient.from_config(config)
             # Client now has config.model and config.debug settings
+
+            # For API server use with runtime API keys:
+            config = DataSourceConfig(
+                model="gpt-5-mini",
+                openai_api_key="sk-...",
+            )
+            client = UnifiedLLMClient.from_config(config)
         """
         # Use debug setting from config
         debug = config.debug if hasattr(config, "debug") else False
-        client = cls(timeout=timeout, debug=debug)
+
+        # Extract optional API keys from config
+        openai_api_key = getattr(config, "openai_api_key", None)
+        anthropic_api_key = getattr(config, "anthropic_api_key", None)
+        google_api_key = getattr(config, "google_api_key", None)
+
+        client = cls(
+            timeout=timeout,
+            debug=debug,
+            openai_api_key=openai_api_key,
+            anthropic_api_key=anthropic_api_key,
+            google_api_key=google_api_key,
+        )
         # Store the model from config for use in requests
         # This allows agents to just call client methods without passing model each time
         client.default_model = config.model

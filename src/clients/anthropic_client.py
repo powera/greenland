@@ -47,14 +47,22 @@ def measure_completion(func: F) -> Callable[..., tuple[Any, float]]:
 class AnthropicClient:
     """Client for making direct HTTP requests to Anthropic API."""
 
-    def __init__(self, timeout: int = DEFAULT_TIMEOUT, cache: bool = True, debug: bool = False):
+    def __init__(
+        self,
+        timeout: int = DEFAULT_TIMEOUT,
+        cache: bool = True,
+        debug: bool = False,
+        api_key: Optional[str] = None,
+    ):
         """
         Initialize Anthropic client with API key.
 
         Args:
             timeout: Request timeout in seconds
+            cache: Whether to enable prompt caching
             debug: Whether to enable debug logging
-            default_system_prompt: Default system prompt to use for all requests
+            api_key: Optional API key to use instead of loading from file.
+                     Useful for API server use where keys come from request parameters.
         """
         self.timeout = timeout
         self.debug = debug
@@ -64,7 +72,8 @@ class AnthropicClient:
             logger.setLevel(logging.DEBUG)
             logger.debug("Initialized AnthropicClient in debug mode")
 
-        self.api_key = load_key("anthropic", required=False)
+        # Use provided api_key if given, otherwise load from file
+        self.api_key = api_key if api_key else load_key("anthropic", required=False)
         if self.api_key:
             self.headers = {
                 "x-api-key": self.api_key,
