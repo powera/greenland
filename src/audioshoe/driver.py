@@ -1,37 +1,48 @@
 # from README for whisper
+"""
+Sample script demonstrating whisper speech-to-text.
 
-import torch
-from datasets import load_dataset
-from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
-
-model_id = "openai/whisper-large-v3"
-
-# device = "cuda:0" if torch.cuda.is_available() else "cpu"
-# torch_dtype = torch.float16 if torch.cuda.is_available() else torch.float32
-
-# Always use MacBook M3 settings
-device = torch.device("mps")
-torch_dtype = torch.float16 if (model_id == "openai/whisper-large-v3") else torch.float32
+Requires: pip install greenland[audioshoe] transformers datasets
+"""
 
 
-model = AutoModelForSpeechSeq2Seq.from_pretrained(
-    model_id, torch_dtype=torch_dtype, low_cpu_mem_usage=True, use_safetensors=True
-)
-model.to(device)
+def main() -> None:
+    """Run whisper speech-to-text demo."""
+    import torch
+    from datasets import load_dataset
+    from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
 
-processor = AutoProcessor.from_pretrained(model_id)
+    model_id = "openai/whisper-large-v3"
 
-pipe = pipeline(
-    "automatic-speech-recognition",
-    model=model,
-    tokenizer=processor.tokenizer,
-    feature_extractor=processor.feature_extractor,
-    torch_dtype=torch_dtype,
-    device=device,
-)
+    # device = "cuda:0" if torch.cuda.is_available() else "cpu"
+    # torch_dtype = torch.float16 if torch.cuda.is_available() else torch.float32
 
-dataset = load_dataset("distil-whisper/librispeech_long", "clean", split="validation")
-sample = dataset[0]["audio"]
+    # Always use MacBook M3 settings
+    device = torch.device("mps")
+    torch_dtype = torch.float16 if (model_id == "openai/whisper-large-v3") else torch.float32
 
-result = pipe(sample)
-print(result["text"])
+    model = AutoModelForSpeechSeq2Seq.from_pretrained(
+        model_id, torch_dtype=torch_dtype, low_cpu_mem_usage=True, use_safetensors=True
+    )
+    model.to(device)
+
+    processor = AutoProcessor.from_pretrained(model_id)
+
+    pipe = pipeline(
+        "automatic-speech-recognition",
+        model=model,
+        tokenizer=processor.tokenizer,
+        feature_extractor=processor.feature_extractor,
+        torch_dtype=torch_dtype,
+        device=device,
+    )
+
+    dataset = load_dataset("distil-whisper/librispeech_long", "clean", split="validation")
+    sample = dataset[0]["audio"]
+
+    result = pipe(sample)
+    print(result["text"])
+
+
+if __name__ == "__main__":
+    main()

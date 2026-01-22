@@ -1,16 +1,13 @@
 # from Claude
+"""
+Audio segmentation and transcription utilities.
+
+Requires: pip install greenland[audioshoe] transformers
+"""
+
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, cast
-
-import librosa
-import numpy as np
-import torch
-from pydub import AudioSegment
-from pydub.silence import split_on_silence
-
-if TYPE_CHECKING:
-    from transformers import WhisperForConditionalGeneration, WhisperProcessor
+from typing import Any, cast
 
 
 def segment_audio(
@@ -18,9 +15,11 @@ def segment_audio(
     min_silence_len: int = 500,
     silence_thresh: int = -40,
     keep_silence: int = 100,
-) -> list[AudioSegment]:
+) -> list[Any]:
     """
     Segment an audio file into phrases based on silence.
+
+    Requires: pydub
 
     :param file_path: Path to the audio file
     :param min_silence_len: Minimum length of silence (in ms) that will be used to split the audio
@@ -28,6 +27,9 @@ def segment_audio(
     :param keep_silence: Amount of silence to keep around each phrase (in ms)
     :return: List of AudioSegment chunks
     """
+    from pydub import AudioSegment
+    from pydub.silence import split_on_silence
+
     # Load the audio file
     audio = AudioSegment.from_file(file_path, format="wav")
 
@@ -39,22 +41,27 @@ def segment_audio(
         keep_silence=keep_silence,
     )
 
-    return cast(list[AudioSegment], chunks)
+    return cast(list[Any], chunks)
 
 
 def transcribe_chunks(
-    chunks: list[AudioSegment],
-    processor: "WhisperProcessor",
-    model: "WhisperForConditionalGeneration",
+    chunks: list[Any],
+    processor: Any,
+    model: Any,
 ) -> list[str]:
     """
     Transcribe each audio chunk using the Whisper model.
 
-    :param chunks: List of AudioSegment chunks
-    :param processor: Whisper processor
-    :param model: Whisper model
+    Requires: torch, librosa, transformers
+
+    :param chunks: List of AudioSegment chunks (from pydub)
+    :param processor: Whisper processor (from transformers)
+    :param model: Whisper model (from transformers)
     :return: List of transcriptions
     """
+    import librosa
+    import torch
+
     transcriptions = []
 
     for i, chunk in enumerate(chunks):
@@ -78,19 +85,24 @@ def transcribe_chunks(
     return transcriptions
 
 
-# Usage example:
-file_path = "path/to/your/audio/file.wav"
-chunks = segment_audio(file_path)
+def main() -> None:
+    """Usage example for audio segmentation and transcription."""
+    from transformers import WhisperForConditionalGeneration, WhisperProcessor
 
-print(f"Number of segments: {len(chunks)}")
+    file_path = "path/to/your/audio/file.wav"
+    chunks = segment_audio(file_path)
 
-# Assuming you have already loaded your Whisper model and processor
-from transformers import WhisperForConditionalGeneration, WhisperProcessor
+    print(f"Number of segments: {len(chunks)}")
 
-processor = WhisperProcessor.from_pretrained("openai/whisper-base")
-model = WhisperForConditionalGeneration.from_pretrained("openai/whisper-base")
+    # Load Whisper model and processor
+    processor = WhisperProcessor.from_pretrained("openai/whisper-base")
+    model = WhisperForConditionalGeneration.from_pretrained("openai/whisper-base")
 
-transcriptions = transcribe_chunks(chunks, processor, model)
+    transcriptions = transcribe_chunks(chunks, processor, model)
 
-for i, transcription in enumerate(transcriptions):
-    print(f"Segment {i+1}: {transcription}")
+    for i, transcription in enumerate(transcriptions):
+        print(f"Segment {i+1}: {transcription}")
+
+
+if __name__ == "__main__":
+    main()
