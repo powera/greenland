@@ -31,6 +31,7 @@ from wordfreq.storage.models.schema import (
     SentenceWord,
 )
 from langtools.zh.converter import to_simplified
+from wireword.helpers import generate_pinyin
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -246,6 +247,12 @@ class WirewordConversationExporter:
                         "translations": translations,
                         "linked_words": linked_words,
                     }
+
+                    # Add pinyin for Chinese translations
+                    if self.language == "zh" and self.language in translations:
+                        pinyin = generate_pinyin(translations[self.language])
+                        if pinyin:
+                            sentence_entry["pinyin"] = pinyin
 
                     if sentence.minimum_level is not None:
                         sentence_entry["minimum_level"] = sentence.minimum_level
