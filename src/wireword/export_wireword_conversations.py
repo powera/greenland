@@ -27,8 +27,13 @@ from wordfreq.storage.models.schema import (
     Conversation,
     ConversationSentence,
     Sentence,
+    SentenceRegionalVariant,
     SentenceTranslation,
     SentenceWord,
+)
+from wordfreq.storage.translation_helpers import (
+    PLURICENTRIC_LANGUAGES,
+    is_pluricentric_language,
 )
 from langtools.zh.converter import to_simplified
 from langtools.zh.pinyin_helper import generate_pinyin
@@ -170,6 +175,30 @@ class WirewordConversationExporter:
                     audio_by_text[record.expected_text][record.voice_name] = record.manifest_md5
             logger.info(f"Bulk fetched {len(all_audio_records)} audio records")
 
+            # Bulk fetch regional variants for pluricentric languages
+            regional_variants_by_sentence: Dict[int, Dict[str, str]] = {}
+            if is_pluricentric_language(self.language):
+                variants_config = PLURICENTRIC_LANGUAGES[self.language]["variants"]
+                region_codes = list(variants_config.keys())
+
+                all_regional_variants = (
+                    session.query(SentenceRegionalVariant)
+                    .filter(
+                        SentenceRegionalVariant.sentence_id.in_(all_sentence_ids),
+                        SentenceRegionalVariant.region_code.in_(region_codes),
+                    )
+                    .all()
+                )
+
+                for variant in all_regional_variants:
+                    if variant.sentence_id not in regional_variants_by_sentence:
+                        regional_variants_by_sentence[variant.sentence_id] = {}
+                    regional_variants_by_sentence[variant.sentence_id][
+                        variant.region_code
+                    ] = variant.translation_text
+
+                logger.info(f"Bulk fetched {len(all_regional_variants)} regional variants")
+
             # Build output list
             output = []
 
@@ -253,6 +282,18 @@ class WirewordConversationExporter:
                         pinyin = generate_pinyin(translations[self.language])
                         if pinyin:
                             sentence_entry["pinyin"] = pinyin
+
+                    # Add regional variants for pluricentric languages
+                    if sentence.id in regional_variants_by_sentence:
+                        variants = regional_variants_by_sentence[sentence.id]
+                        base_translation = translations.get(self.language)
+                        differing_variants = {
+                            region: trans
+                            for region, trans in variants.items()
+                            if trans and trans != base_translation
+                        }
+                        if differing_variants:
+                            sentence_entry["regional_variants"] = differing_variants
 
                     if sentence.minimum_level is not None:
                         sentence_entry["minimum_level"] = sentence.minimum_level

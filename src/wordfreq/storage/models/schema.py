@@ -111,6 +111,9 @@ class Lemma(Base):
     translations = relationship(
         "LemmaTranslation", back_populates="lemma", cascade="all, delete-orphan"
     )
+    regional_variants = relationship(
+        "LemmaRegionalVariant", back_populates="lemma", cascade="all, delete-orphan"
+    )
     difficulty_overrides = relationship(
         "LemmaDifficultyOverride", back_populates="lemma", cascade="all, delete-orphan"
     )
@@ -149,6 +152,57 @@ class LemmaTranslation(Base):
 
     # Relationships
     lemma = relationship("Lemma", back_populates="translations")
+
+
+class LemmaRegionalVariant(Base):
+    """Model for storing regional variant translations for pluricentric languages.
+
+    Pluricentric languages have multiple regional standards that may differ in vocabulary,
+    spelling, or usage. This table stores regional overrides when a translation differs
+    from the base translation.
+
+    For example:
+    - English: "color" (base/en-US) vs "colour" (en-GB, en-AU)
+    - Spanish: "computadora" (es-MX) vs "ordenador" (es-ES)
+    - Portuguese: "ônibus" (pt-BR) vs "autocarro" (pt-PT)
+    - Chinese: Different vocabulary between Mandarin, Cantonese, and Taiwanese
+
+    The base translation is stored in LemmaTranslation with the simple language code (e.g., "en").
+    Regional variants are only stored here when they differ from the base.
+
+    Supported region codes (BCP 47 format):
+    - en-US, en-GB, en-AU (English)
+    - es-ES, es-MX, es-AR (Spanish)
+    - pt-PT, pt-BR (Portuguese)
+    - zh-CN, zh-HK, zh-TW (Chinese)
+    """
+
+    __tablename__ = "lemma_regional_variants"
+    __table_args__ = (
+        UniqueConstraint("lemma_id", "region_code", name="uq_lemma_regional_variant"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    lemma_id: Mapped[int] = mapped_column(ForeignKey("lemmas.id"), nullable=False)
+    region_code: Mapped[str] = mapped_column(
+        String, nullable=False, index=True
+    )  # e.g., "en-GB", "es-MX", "pt-BR", "zh-HK"
+    translation: Mapped[str] = mapped_column(
+        String, nullable=False, index=True
+    )  # Regional variant of the translation
+    definition_text: Mapped[Optional[str]] = mapped_column(
+        Text, nullable=True
+    )  # Regional variant of the definition (optional)
+
+    # Metadata
+    verified: Mapped[bool] = mapped_column(Boolean, default=False)
+    added_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now())
+    updated_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP, server_default=func.now(), onupdate=func.now()
+    )
+
+    # Relationships
+    lemma = relationship("Lemma", back_populates="regional_variants")
 
 
 class LemmaDifficultyOverride(Base):
@@ -292,6 +346,9 @@ class Sentence(Base):
     translations = relationship(
         "SentenceTranslation", back_populates="sentence", cascade="all, delete-orphan"
     )
+    regional_variants = relationship(
+        "SentenceRegionalVariant", back_populates="sentence", cascade="all, delete-orphan"
+    )
     words = relationship("SentenceWord", back_populates="sentence", cascade="all, delete-orphan")
     pattern_words = relationship(
         "SentencePatternWord", back_populates="sentence", cascade="all, delete-orphan"
@@ -327,6 +384,45 @@ class SentenceTranslation(Base):
 
     # Relationships
     sentence = relationship("Sentence", back_populates="translations")
+
+
+class SentenceRegionalVariant(Base):
+    """Model for storing regional variant translations for sentences in pluricentric languages.
+
+    Similar to LemmaRegionalVariant, this table stores regional overrides for sentences
+    when the translation differs from the base translation stored in SentenceTranslation.
+
+    The base translation is stored in SentenceTranslation with the simple language code (e.g., "en").
+    Regional variants are only stored here when they differ from the base.
+
+    Supported region codes (BCP 47 format):
+    - en-US, en-GB, en-AU (English)
+    - es-ES, es-MX, es-AR (Spanish)
+    - pt-PT, pt-BR (Portuguese)
+    - zh-CN, zh-HK, zh-TW (Chinese)
+    """
+
+    __tablename__ = "sentence_regional_variants"
+    __table_args__ = (
+        UniqueConstraint("sentence_id", "region_code", name="uq_sentence_regional_variant"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    sentence_id: Mapped[int] = mapped_column(ForeignKey("sentences.id"), nullable=False)
+    region_code: Mapped[str] = mapped_column(
+        String, nullable=False, index=True
+    )  # e.g., "en-GB", "es-MX", "pt-BR", "zh-HK"
+    translation_text: Mapped[str] = mapped_column(Text, nullable=False)
+
+    # Metadata
+    verified: Mapped[bool] = mapped_column(Boolean, default=False)
+    added_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now())
+    updated_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP, server_default=func.now(), onupdate=func.now()
+    )
+
+    # Relationships
+    sentence = relationship("Sentence", back_populates="regional_variants")
 
 
 class SentenceWord(Base):

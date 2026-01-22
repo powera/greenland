@@ -9,7 +9,7 @@ LemmaTranslation table. Code should use these helper functions instead of
 directly accessing translation fields.
 """
 
-from typing import Dict, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple, cast
 
 from sqlalchemy.orm import Session
 
@@ -45,6 +45,58 @@ LANGUAGE_HIERARCHY = [
     "ko",  # Korean (experimental)
     "sw",  # Swahili (experimental)
 ]
+
+# Pluricentric language configuration
+# These are languages with multiple regional standards that may differ in vocabulary,
+# spelling, or usage. The system supports a "base" translation with optional regional
+# overrides. Regional codes follow BCP 47 format (e.g., "en-US", "es-MX").
+#
+# For each base language code:
+# - "display_name": Human-readable name for the language family
+# - "default_region": The region code to use when no specific region is requested
+# - "variants": Dict mapping region codes to their display names
+#
+# Example usage:
+# - Base translation stored with code "en" in LemmaTranslation
+# - Regional override "colour" stored with code "en-GB" in LemmaRegionalVariant
+# - Export can include both base and all regional variants
+PLURICENTRIC_LANGUAGES: Dict[str, Dict[str, Any]] = {
+    "en": {
+        "display_name": "English",
+        "default_region": "en-US",
+        "variants": {
+            "en-US": "American English",
+            "en-GB": "British English",
+            "en-AU": "Australian English",
+        },
+    },
+    "es": {
+        "display_name": "Spanish",
+        "default_region": "es-ES",
+        "variants": {
+            "es-ES": "Castilian Spanish",
+            "es-MX": "Mexican Spanish",
+            "es-AR": "Argentine Spanish",
+        },
+    },
+    "pt": {
+        "display_name": "Portuguese",
+        "default_region": "pt-BR",
+        "variants": {
+            "pt-PT": "European Portuguese",
+            "pt-BR": "Brazilian Portuguese",
+        },
+    },
+    "zh": {
+        "display_name": "Chinese",
+        "default_region": "zh-CN",
+        "variants": {
+            "zh-CN": "Mandarin (Simplified)",
+            "zh-HK": "Cantonese",
+            "zh-TW": "Taiwanese Mandarin",
+        },
+    },
+}
 
 # Language mappings
 # Format: 'code': (field_name_or_code, display_name, use_lemma_translation_table)
@@ -571,3 +623,391 @@ def get_reference_translation(
 
     # No reference translation found
     return None, None
+
+
+# =============================================================================
+# Pluricentric Language Helper Functions
+# =============================================================================
+
+
+def is_pluricentric_language(lang_code: str) -> bool:
+    """
+    Check if a language code is a pluricentric language (has regional variants).
+
+    Args:
+        lang_code: Base language code (e.g., 'en', 'es', 'pt', 'zh')
+
+    Returns:
+        True if the language has defined regional variants, False otherwise
+    """
+    return lang_code in PLURICENTRIC_LANGUAGES
+
+
+def is_valid_region_code(region_code: str) -> bool:
+    """
+    Check if a region code is valid (defined in PLURICENTRIC_LANGUAGES).
+
+    Args:
+        region_code: Region code (e.g., 'en-US', 'es-MX', 'zh-CN')
+
+    Returns:
+        True if the region code is valid, False otherwise
+    """
+    base_lang = get_base_language(region_code)
+    if base_lang is None:
+        return False
+    variants = cast(Dict[str, str], PLURICENTRIC_LANGUAGES.get(base_lang, {}).get("variants", {}))
+    return region_code in variants
+
+
+def get_base_language(region_code: str) -> Optional[str]:
+    """
+    Extract the base language code from a region code.
+
+    Args:
+        region_code: Region code (e.g., 'en-US', 'es-MX', 'zh-CN')
+
+    Returns:
+        Base language code (e.g., 'en', 'es', 'zh') or None if invalid format
+    """
+    if "-" in region_code:
+        return region_code.split("-")[0]
+    return None
+
+
+def get_region_variants(lang_code: str) -> Dict[str, str]:
+    """
+    Get all regional variants for a pluricentric language.
+
+    Args:
+        lang_code: Base language code (e.g., 'en', 'es', 'pt', 'zh')
+
+    Returns:
+        Dictionary mapping region codes to display names.
+        Empty dict if language is not pluricentric.
+
+    Example:
+        >>> get_region_variants('es')
+        {'es-ES': 'Castilian Spanish', 'es-MX': 'Mexican Spanish', 'es-AR': 'Argentine Spanish'}
+    """
+    if lang_code not in PLURICENTRIC_LANGUAGES:
+        return {}
+    return cast(Dict[str, str], PLURICENTRIC_LANGUAGES[lang_code].get("variants", {}))
+
+
+def get_default_region(lang_code: str) -> Optional[str]:
+    """
+    Get the default regional variant for a pluricentric language.
+
+    Args:
+        lang_code: Base language code (e.g., 'en', 'es', 'pt', 'zh')
+
+    Returns:
+        Default region code (e.g., 'en-US', 'es-ES') or None if not pluricentric
+    """
+    if lang_code not in PLURICENTRIC_LANGUAGES:
+        return None
+    return cast(Optional[str], PLURICENTRIC_LANGUAGES[lang_code].get("default_region"))
+
+
+def get_region_display_name(region_code: str) -> Optional[str]:
+    """
+    Get the display name for a regional variant.
+
+    Args:
+        region_code: Region code (e.g., 'en-GB', 'es-MX', 'zh-HK')
+
+    Returns:
+        Display name (e.g., 'British English', 'Mexican Spanish', 'Cantonese')
+        or None if not found
+    """
+    base_lang = get_base_language(region_code)
+    if base_lang is None:
+        return None
+    variants = cast(Dict[str, str], PLURICENTRIC_LANGUAGES.get(base_lang, {}).get("variants", {}))
+    return variants.get(region_code)
+
+
+def get_regional_variant(session: Session, lemma: Lemma, region_code: str) -> Optional[str]:
+    """
+    Get a regional variant translation for a lemma.
+
+    Falls back to the base translation if no regional override exists.
+
+    Args:
+        session: Database session
+        lemma: Lemma object
+        region_code: Region code (e.g., 'en-GB', 'es-MX', 'zh-CN')
+
+    Returns:
+        Regional variant translation, base translation, or None if not found
+
+    Raises:
+        ValueError: If region_code is not valid
+    """
+    if not is_valid_region_code(region_code):
+        raise ValueError(f"Invalid region code: {region_code}")
+
+    # Import here to avoid circular imports
+    from wordfreq.storage.models.schema import LemmaRegionalVariant
+
+    # Try to get regional override
+    variant = (
+        session.query(LemmaRegionalVariant)
+        .filter(
+            LemmaRegionalVariant.lemma_id == lemma.id,
+            LemmaRegionalVariant.region_code == region_code,
+        )
+        .first()
+    )
+
+    if variant:
+        return cast(str, variant.translation)
+
+    # Fall back to base translation
+    base_lang = get_base_language(region_code)
+    if base_lang:
+        return get_translation(session, lemma, base_lang)
+    return None
+
+
+def set_regional_variant(
+    session: Session,
+    lemma: Lemma,
+    region_code: str,
+    translation: str,
+    definition: Optional[str] = None,
+) -> Tuple[Optional[str], str]:
+    """
+    Set a regional variant translation for a lemma.
+
+    Args:
+        session: Database session
+        lemma: Lemma object
+        region_code: Region code (e.g., 'en-GB', 'es-MX', 'zh-CN')
+        translation: Translation string to set
+        definition: Optional definition text for this regional variant
+
+    Returns:
+        Tuple of (old_translation, new_translation)
+
+    Raises:
+        ValueError: If region_code is not valid
+    """
+    if not is_valid_region_code(region_code):
+        raise ValueError(f"Invalid region code: {region_code}")
+
+    # Import here to avoid circular imports
+    from wordfreq.storage.models.schema import LemmaRegionalVariant
+
+    # Get old translation for logging
+    old_translation = get_regional_variant(session, lemma, region_code)
+
+    # Check if override already exists
+    variant = (
+        session.query(LemmaRegionalVariant)
+        .filter(
+            LemmaRegionalVariant.lemma_id == lemma.id,
+            LemmaRegionalVariant.region_code == region_code,
+        )
+        .first()
+    )
+
+    if variant:
+        variant.translation = translation
+        if definition is not None:
+            variant.definition_text = definition
+    else:
+        variant = LemmaRegionalVariant(
+            lemma_id=lemma.id,
+            region_code=region_code,
+            translation=translation,
+            definition_text=definition,
+            verified=False,
+        )
+        session.add(variant)
+
+    return old_translation, translation
+
+
+def get_all_regional_variants(
+    session: Session, lemma: Lemma, lang_code: str
+) -> Dict[str, Optional[str]]:
+    """
+    Get all regional variant translations for a lemma in a pluricentric language.
+
+    For each variant, returns the regional override if it exists, otherwise
+    returns the base translation.
+
+    Args:
+        session: Database session
+        lemma: Lemma object
+        lang_code: Base language code (e.g., 'en', 'es', 'pt', 'zh')
+
+    Returns:
+        Dictionary mapping region codes to translations.
+        Empty dict if language is not pluricentric.
+
+    Example:
+        >>> get_all_regional_variants(session, lemma, 'en')
+        {'en-US': 'color', 'en-GB': 'colour', 'en-AU': 'colour'}
+    """
+    if lang_code not in PLURICENTRIC_LANGUAGES:
+        return {}
+
+    # Import here to avoid circular imports
+    from wordfreq.storage.models.schema import LemmaRegionalVariant
+
+    variants = cast(Dict[str, str], PLURICENTRIC_LANGUAGES[lang_code]["variants"])
+    region_codes = list(variants.keys())
+
+    # Get base translation
+    base_translation = get_translation(session, lemma, lang_code)
+
+    # Batch fetch all regional overrides for this lemma
+    overrides = (
+        session.query(LemmaRegionalVariant)
+        .filter(
+            LemmaRegionalVariant.lemma_id == lemma.id,
+            LemmaRegionalVariant.region_code.in_(region_codes),
+        )
+        .all()
+    )
+
+    # Build lookup dict from overrides
+    overrides_by_region = {o.region_code: o.translation for o in overrides}
+
+    # Return all variants, using override if exists, else base translation
+    result = {}
+    for region_code in region_codes:
+        result[region_code] = overrides_by_region.get(region_code, base_translation)
+
+    return result
+
+
+def bulk_get_regional_variants(
+    session: Session, lemmas: list, region_code: str
+) -> Dict[int, Optional[str]]:
+    """
+    Get regional variant translations for multiple lemmas in a single query.
+
+    Optimized for bulk operations. Falls back to base translations for lemmas
+    without regional overrides.
+
+    Args:
+        session: Database session
+        lemmas: List of Lemma objects
+        region_code: Region code (e.g., 'en-GB', 'es-MX', 'zh-CN')
+
+    Returns:
+        Dictionary mapping lemma_id to translation string (or None if not found)
+
+    Raises:
+        ValueError: If region_code is not valid
+    """
+    if not is_valid_region_code(region_code):
+        raise ValueError(f"Invalid region code: {region_code}")
+
+    if not lemmas:
+        return {}
+
+    # Import here to avoid circular imports
+    from wordfreq.storage.models.schema import LemmaRegionalVariant
+
+    lemma_ids = [lemma.id for lemma in lemmas]
+    base_lang = get_base_language(region_code)
+
+    # Get base translations
+    base_translations = bulk_get_translations(session, lemmas, base_lang) if base_lang else {}
+
+    # Get regional overrides
+    overrides = (
+        session.query(LemmaRegionalVariant)
+        .filter(
+            LemmaRegionalVariant.lemma_id.in_(lemma_ids),
+            LemmaRegionalVariant.region_code == region_code,
+        )
+        .all()
+    )
+
+    overrides_by_id = {o.lemma_id: o.translation for o in overrides}
+
+    # Merge: use override if exists, else base translation
+    result = {}
+    for lemma in lemmas:
+        if lemma.id in overrides_by_id:
+            result[lemma.id] = overrides_by_id[lemma.id]
+        else:
+            result[lemma.id] = base_translations.get(lemma.id)
+
+    return result
+
+
+def bulk_get_all_regional_variants(
+    session: Session, lemmas: list, lang_code: str
+) -> Dict[int, Dict[str, Optional[str]]]:
+    """
+    Get all regional variant translations for multiple lemmas in a pluricentric language.
+
+    Optimized bulk version of get_all_regional_variants.
+
+    Args:
+        session: Database session
+        lemmas: List of Lemma objects
+        lang_code: Base language code (e.g., 'en', 'es', 'pt', 'zh')
+
+    Returns:
+        Dictionary mapping lemma_id to dict of region_code -> translation.
+        Empty outer dict if language is not pluricentric.
+
+    Example:
+        >>> bulk_get_all_regional_variants(session, lemmas, 'en')
+        {
+            1: {'en-US': 'color', 'en-GB': 'colour', 'en-AU': 'colour'},
+            2: {'en-US': 'center', 'en-GB': 'centre', 'en-AU': 'centre'},
+        }
+    """
+    if lang_code not in PLURICENTRIC_LANGUAGES:
+        return {}
+
+    if not lemmas:
+        return {}
+
+    # Import here to avoid circular imports
+    from wordfreq.storage.models.schema import LemmaRegionalVariant
+
+    variants_config = cast(Dict[str, str], PLURICENTRIC_LANGUAGES[lang_code]["variants"])
+    region_codes = list(variants_config.keys())
+    lemma_ids = [lemma.id for lemma in lemmas]
+
+    # Get base translations for all lemmas
+    base_translations = bulk_get_translations(session, lemmas, lang_code)
+
+    # Batch fetch all regional overrides for all lemmas
+    overrides = (
+        session.query(LemmaRegionalVariant)
+        .filter(
+            LemmaRegionalVariant.lemma_id.in_(lemma_ids),
+            LemmaRegionalVariant.region_code.in_(region_codes),
+        )
+        .all()
+    )
+
+    # Index overrides by (lemma_id, region_code)
+    overrides_index: Dict[Tuple[int, str], str] = {}
+    for o in overrides:
+        overrides_index[(o.lemma_id, o.region_code)] = o.translation
+
+    # Build result
+    result: Dict[int, Dict[str, Optional[str]]] = {}
+    for lemma in lemmas:
+        base_trans = base_translations.get(lemma.id)
+        lemma_variants: Dict[str, Optional[str]] = {}
+
+        for region_code in region_codes:
+            override = overrides_index.get((lemma.id, region_code))
+            lemma_variants[region_code] = override if override else base_trans
+
+        result[lemma.id] = lemma_variants
+
+    return result
