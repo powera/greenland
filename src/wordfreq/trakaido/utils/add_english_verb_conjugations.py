@@ -25,34 +25,36 @@ sys.path.insert(0, os.path.join(GREENLAND_REPO_ROOT, "data", "trakaido_wordlists
 from verbs import verbs_new
 
 # Form mapping from verbs.py to database format
+# Note: English verb conjugations use "verb/en_*" prefix to match GrammaticalForm enum
+# and use hyphens for gender markers (e.g., "3s-m" not "3s_m")
 FORM_MAPPING = {
     # Present tense
-    "1s_present": "verb/lt_1s_present",
-    "2s_present": "verb/lt_2s_present",
-    "3s-m_present": "verb/lt_3s_m_present",
-    "3s-f_present": "verb/lt_3s_f_present",
-    "1p_present": "verb/lt_1p_present",
-    "2p_present": "verb/lt_2p_present",
-    "3p-m_present": "verb/lt_3p_m_present",
-    "3p-f_present": "verb/lt_3p_f_present",
+    "1s_present": "verb/en_1s_present",
+    "2s_present": "verb/en_2s_present",
+    "3s-m_present": "verb/en_3s-m_present",
+    "3s-f_present": "verb/en_3s-f_present",
+    "1p_present": "verb/en_1p_present",
+    "2p_present": "verb/en_2p_present",
+    "3p-m_present": "verb/en_3p-m_present",
+    "3p-f_present": "verb/en_3p-f_present",
     # Past tense
-    "1s_past": "verb/lt_1s_past",
-    "2s_past": "verb/lt_2s_past",
-    "3s-m_past": "verb/lt_3s_m_past",
-    "3s-f_past": "verb/lt_3s_f_past",
-    "1p_past": "verb/lt_1p_past",
-    "2p_past": "verb/lt_2p_past",
-    "3p-m_past": "verb/lt_3p_m_past",
-    "3p-f_past": "verb/lt_3p_f_past",
+    "1s_past": "verb/en_1s_past",
+    "2s_past": "verb/en_2s_past",
+    "3s-m_past": "verb/en_3s-m_past",
+    "3s-f_past": "verb/en_3s-f_past",
+    "1p_past": "verb/en_1p_past",
+    "2p_past": "verb/en_2p_past",
+    "3p-m_past": "verb/en_3p-m_past",
+    "3p-f_past": "verb/en_3p-f_past",
     # Future tense
-    "1s_future": "verb/lt_1s_future",
-    "2s_future": "verb/lt_2s_future",
-    "3s-m_future": "verb/lt_3s_m_future",
-    "3s-f_future": "verb/lt_3s_f_future",
-    "1p_future": "verb/lt_1p_future",
-    "2p_future": "verb/lt_2p_future",
-    "3p-m_future": "verb/lt_3p_m_future",
-    "3p-f_future": "verb/lt_3p_f_future",
+    "1s_future": "verb/en_1s_future",
+    "2s_future": "verb/en_2s_future",
+    "3s-m_future": "verb/en_3s-m_future",
+    "3s-f_future": "verb/en_3s-f_future",
+    "1p_future": "verb/en_1p_future",
+    "2p_future": "verb/en_2p_future",
+    "3p-m_future": "verb/en_3p-m_future",
+    "3p-f_future": "verb/en_3p-f_future",
 }
 
 TENSE_MAPPING = {
