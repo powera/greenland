@@ -260,25 +260,36 @@ VERB_GROUPS = {
 }
 
 
-def get_subtype_counts(db_session: Any, pos_type: str) -> Dict[str, int]:
-    """Get the count of lemmas for each subtype within a POS type."""
-    from sqlalchemy import func
+def get_subtype_counts(db_session: Any, pos_type: str) -> Dict[str, Dict[str, int]]:
+    """Get the count of lemmas for each subtype within a POS type.
+
+    Returns a dict mapping subtype to {"total": count, "categorized": count}
+    where categorized means difficulty_level != -1.
+    """
+    from sqlalchemy import case, func
 
     results = (
-        db_session.query(Lemma.pos_subtype, func.count(Lemma.id))
+        db_session.query(
+            Lemma.pos_subtype,
+            func.count(Lemma.id).label("total"),
+            func.sum(case((Lemma.difficulty_level != -1, 1), else_=0)).label("categorized"),
+        )
         .filter(Lemma.pos_type == pos_type)
         .filter(Lemma.pos_subtype.isnot(None))
         .group_by(Lemma.pos_subtype)
         .all()
     )
-    return {subtype: count for subtype, count in results}
+    return {
+        subtype: {"total": total, "categorized": categorized or 0}
+        for subtype, total, categorized in results
+    }
 
 
 def build_category_data(
     pos_type: str,
     enum_class: Any,
     groups: Dict[str, List[str]],
-    counts: Dict[str, int],
+    counts: Dict[str, Dict[str, int]],
 ) -> List[Dict[str, Any]]:
     """Build category data structure for template rendering."""
     guid_prefixes = SUBTYPE_GUID_PREFIXES.get(pos_type, {})
@@ -290,13 +301,15 @@ def build_category_data(
         for subtype in subtypes:
             # Handle the special case where enum value might differ from GUID key
             guid_prefix = guid_prefixes.get(subtype, guid_prefixes.get(f"{pos_type}_{subtype}", ""))
+            subtype_counts = counts.get(subtype, {"total": 0, "categorized": 0})
             group_items.append(
                 {
                     "name": subtype,
                     "display_name": subtype.replace("_", " ").title(),
                     "description": descriptions.get(subtype, ""),
                     "guid_prefix": guid_prefix,
-                    "count": counts.get(subtype, 0),
+                    "count": subtype_counts["total"],
+                    "categorized_count": subtype_counts["categorized"],
                 }
             )
         grouped_data.append({"group_name": group_name, "items": group_items})
@@ -314,27 +327,31 @@ def list_categories() -> ResponseReturnValue:
     adverb_counts = get_subtype_counts(g.db, "adverb")
     numeral_counts = get_subtype_counts(g.db, "numeral")
 
+    # Helper to sum total words from new counts structure
+    def sum_total_words(counts: Dict[str, Dict[str, int]]) -> int:
+        return sum(c["total"] for c in counts.values())
+
     # Build data for each POS type
     categories = {
         "noun": {
             "title": "Noun Subtypes",
             "icon": "bi-box",
             "total_subtypes": len(NounSubtype),
-            "total_words": sum(noun_counts.values()),
+            "total_words": sum_total_words(noun_counts),
             "groups": build_category_data("noun", NounSubtype, NOUN_GROUPS, noun_counts),
         },
         "verb": {
             "title": "Verb Subtypes",
             "icon": "bi-lightning",
             "total_subtypes": len(VerbSubtype),
-            "total_words": sum(verb_counts.values()),
+            "total_words": sum_total_words(verb_counts),
             "groups": build_category_data("verb", VerbSubtype, VERB_GROUPS, verb_counts),
         },
         "adjective": {
             "title": "Adjective Subtypes",
             "icon": "bi-palette",
             "total_subtypes": len(AdjectiveSubtype),
-            "total_words": sum(adjective_counts.values()),
+            "total_words": sum_total_words(adjective_counts),
             "groups": build_category_data(
                 "adjective", AdjectiveSubtype, ADJECTIVE_GROUPS, adjective_counts
             ),
@@ -343,14 +360,14 @@ def list_categories() -> ResponseReturnValue:
             "title": "Adverb Subtypes",
             "icon": "bi-speedometer2",
             "total_subtypes": len(AdverbSubtype),
-            "total_words": sum(adverb_counts.values()),
+            "total_words": sum_total_words(adverb_counts),
             "groups": build_category_data("adverb", AdverbSubtype, ADVERB_GROUPS, adverb_counts),
         },
         "numeral": {
             "title": "Numeral Subtypes",
             "icon": "bi-123",
             "total_subtypes": len(NumeralSubtype),
-            "total_words": sum(numeral_counts.values()),
+            "total_words": sum_total_words(numeral_counts),
             "groups": [
                 {
                     "group_name": "Numerals",
@@ -364,7 +381,12 @@ def list_categories() -> ResponseReturnValue:
                             "guid_prefix": SUBTYPE_GUID_PREFIXES.get("numeral", {}).get(
                                 subtype.value, ""
                             ),
-                            "count": numeral_counts.get(subtype.value, 0),
+                            "count": numeral_counts.get(
+                                subtype.value, {"total": 0, "categorized": 0}
+                            )["total"],
+                            "categorized_count": numeral_counts.get(
+                                subtype.value, {"total": 0, "categorized": 0}
+                            )["categorized"],
                         }
                         for subtype in NumeralSubtype
                     ],

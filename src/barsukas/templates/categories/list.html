@@ -82,11 +82,11 @@
                                     <td class="text-end">
                                         {% if item.count > 0 %}
                                         <a href="{{ url_for('lemmas.list_lemmas', pos_type=pos_type, pos_subtype=item.name) }}"
-                                           class="badge bg-success text-decoration-none">
-                                            {{ item.count }}
+                                           class="badge {% if item.categorized_count == item.count %}bg-success{% else %}bg-warning text-dark{% endif %} text-decoration-none">
+                                            {{ item.categorized_count }} / {{ item.count }}
                                         </a>
                                         {% else %}
-                                        <span class="badge bg-secondary">0</span>
+                                        <span class="badge bg-secondary">0 / 0</span>
                                         {% endif %}
                                     </td>
                                 </tr>
