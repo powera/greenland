@@ -15,6 +15,8 @@ DB_PATH=""
 USE_POSTGRES=""
 # Python venv path (optional)
 VENV_PATH=""
+# Persona (optional - overrides other settings)
+PERSONA=""
 
 # Parse command-line arguments
 while [[ $# -gt 0 ]]; do
@@ -43,6 +45,17 @@ while [[ $# -gt 0 ]]; do
             VENV_PATH="$2"
             shift 2
             ;;
+        --persona)
+            PERSONA="$2"
+            shift 2
+            ;;
+        --list-personas)
+            echo "Available personas:"
+            echo "  prod   - Production mode: PostgreSQL backend, no local API keys, LLM calls only"
+            echo "  golden - Golden mode: Read-only JSONL from data/release"
+            echo "  local  - Local development: SQLite database with full access (default)"
+            exit 0
+            ;;
         *)
             # Pass through any other arguments to the Flask app
             break
@@ -50,10 +63,35 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# Validate storage format (only if not using postgres)
-if [[ -z "$USE_POSTGRES" && "$STORAGE_FORMAT" != "jsonl" && "$STORAGE_FORMAT" != "sqlite" ]]; then
+# Handle persona configuration (overrides manual settings)
+PERSONA_ARGS=""
+if [[ -n "$PERSONA" ]]; then
+    case "$PERSONA" in
+        prod)
+            USE_POSTGRES="true"
+            STORAGE_FORMAT="postgres"
+            PERSONA_ARGS="--persona prod"
+            ;;
+        golden)
+            STORAGE_FORMAT="jsonl"
+            PERSONA_ARGS="--persona golden --readonly --no-worker"
+            ;;
+        local)
+            STORAGE_FORMAT="sqlite"
+            PERSONA_ARGS="--persona local"
+            ;;
+        *)
+            echo "Error: Unknown persona '$PERSONA'"
+            echo "Use --list-personas to see available options"
+            exit 1
+            ;;
+    esac
+fi
+
+# Validate storage format (only if not using postgres and no persona set)
+if [[ -z "$PERSONA" && -z "$USE_POSTGRES" && "$STORAGE_FORMAT" != "jsonl" && "$STORAGE_FORMAT" != "sqlite" ]]; then
     echo "Error: Invalid storage format '$STORAGE_FORMAT'"
-    echo "Usage: $0 [-f|--format jsonl|sqlite] [--postgres] [-a|--all-interfaces] [-p|--port PORT] [--db-path PATH] [--venv PATH]"
+    echo "Usage: $0 [--persona prod|golden|local] [-f|--format jsonl|sqlite] [--postgres] [-a|--all-interfaces] [-p|--port PORT] [--db-path PATH] [--venv PATH]"
     exit 1
 fi
 
@@ -76,7 +114,7 @@ REPO_ROOT="$( cd "$SCRIPT_DIR/../.." && pwd )"
 # Set PYTHONPATH to include src/ directory
 export PYTHONPATH="$REPO_ROOT/src:$PYTHONPATH"
 
-# Configure storage backend based on format
+# Configure storage backend based on format or persona
 if [[ -n "$USE_POSTGRES" ]]; then
     export STORAGE_BACKEND="postgres"
     export USE_POSTGRES_BACKEND="true"
@@ -94,12 +132,20 @@ else
     fi
 fi
 
+# Export persona for Python to use
+if [[ -n "$PERSONA" ]]; then
+    export BARSUKAS_PERSONA="$PERSONA"
+fi
+
 # Change to barsukas directory
 cd "$SCRIPT_DIR"
 
 echo "=========================================="
 echo "Starting Barsukas Web Interface (Unified Mode)"
 echo "=========================================="
+if [[ -n "$PERSONA" ]]; then
+    echo "Persona: $PERSONA"
+fi
 if [[ -n "$VENV_PATH" ]]; then
     echo "Python venv: $VENV_PATH"
 fi
@@ -138,7 +184,7 @@ trap cleanup EXIT INT TERM
 # Exit code 0 = normal shutdown, don't restart
 # Exit code 42 = restart requested, restart immediately
 while true; do
-    python unified_app.py $HOST_ARGS --port "$PORT" "$@" &
+    python unified_app.py $HOST_ARGS --port "$PORT" $PERSONA_ARGS "$@" &
     SERVER_PID=$!
     wait "$SERVER_PID"
     EXIT_CODE=$?
