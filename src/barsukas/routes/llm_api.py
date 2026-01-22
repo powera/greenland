@@ -31,8 +31,45 @@ from agents.voras.agent import VorasAgent
 from wordfreq.storage.backend.config import BackendType, DataSourceConfig
 from wordfreq.storage.models.schema import Lemma
 
+from clients.keys import load_key
+
 bp = Blueprint("llm_api", __name__, url_prefix="/api/llm")
 logger = logging.getLogger(__name__)
+
+
+@bp.route("/system-key/<provider>", methods=["GET"])
+def get_system_api_key(provider: str) -> ResponseReturnValue:
+    """Get the system API key for a provider (if available).
+
+    This endpoint allows the API client UI to use locally-configured API keys
+    instead of requiring manual entry. Only returns keys that exist in the
+    local keys/ directory.
+
+    SECURITY NOTE: This endpoint returns actual API keys. It should only be
+    used in trusted environments where both the client and server are under
+    the same administrative control.
+
+    Args:
+        provider: One of 'openai', 'anthropic', or 'google'
+
+    Returns:
+        JSON with the API key if found, or error if not available
+    """
+    valid_providers = {"openai", "anthropic", "google"}
+    if provider not in valid_providers:
+        return _build_error_response(
+            f"Invalid provider. Must be one of: {', '.join(valid_providers)}", 400
+        )
+
+    try:
+        api_key = load_key(provider, required=False)
+        if api_key:
+            return jsonify({"success": True, "provider": provider, "api_key": api_key})
+        else:
+            return _build_error_response(f"No {provider} API key configured on this server", 404)
+    except Exception as e:
+        logger.exception("Error loading system API key for %s", provider)
+        return _build_error_response(str(e), 500)
 
 
 def _build_error_response(message: str, status_code: int = 400) -> ResponseReturnValue:
