@@ -19,6 +19,7 @@ from typing import Optional
 
 from config import Config
 from app import create_app
+from personas import get_persona, list_personas, PersonaConfig
 from workers.task_worker import run_worker, STOP_EVENT
 from wordfreq.storage.backend.config import DataSourceConfig
 
@@ -73,7 +74,44 @@ def main() -> None:
         action="store_true",
         help="Use PostgreSQL backend (builds URL from constants + keys/postgres.key)",
     )
+    parser.add_argument(
+        "--persona",
+        type=str,
+        choices=["prod", "golden", "local"],
+        help="Launch persona (prod, golden, local) - overrides other backend settings",
+    )
+    parser.add_argument(
+        "--list-personas",
+        action="store_true",
+        help="List available personas and exit",
+    )
     args = parser.parse_args()
+
+    # Handle --list-personas
+    if args.list_personas:
+        print("Available personas:")
+        for name, description in list_personas():
+            print(f"  {name:8} - {description}")
+        sys.exit(0)
+
+    # Get persona config if specified (or from environment)
+    persona: Optional[PersonaConfig] = None
+    persona_name = args.persona or os.environ.get("BARSUKAS_PERSONA")
+    if persona_name:
+        try:
+            persona = get_persona(persona_name)
+        except ValueError as e:
+            print(f"Error: {e}")
+            sys.exit(1)
+
+    # Apply persona overrides
+    if persona:
+        if persona.readonly:
+            args.readonly = True
+        if not persona.enable_worker:
+            args.no_worker = True
+        if persona.use_postgres:
+            args.postgres = True
 
     # Set up logging
     log_level = logging.DEBUG if args.debug else logging.INFO
@@ -95,6 +133,20 @@ def main() -> None:
         except Exception as e:
             logger.error(f"Failed to build PostgreSQL URL: {e}")
             sys.exit(1)
+    elif persona and persona.use_jsonl:
+        # JSONL mode from persona (e.g., GOLDEN)
+        repo_root = Path(__file__).parent.parent.parent
+        jsonl_dir = repo_root / (persona.jsonl_data_dir or "data/release")
+        if not jsonl_dir.exists():
+            logger.error(f"JSONL data directory not found at {jsonl_dir}")
+            sys.exit(1)
+        os.environ["STORAGE_BACKEND"] = "jsonl"
+        os.environ["JSONL_DATA_DIR"] = str(jsonl_dir)
+        db_display = f"JSONL ({jsonl_dir})"
+    elif os.environ.get("STORAGE_BACKEND") == "jsonl":
+        # JSONL mode from environment
+        jsonl_dir_env = os.environ.get("JSONL_DATA_DIR", "data/release")
+        db_display = f"JSONL ({jsonl_dir_env})"
     else:
         # SQLite mode - validate database exists
         if not Path(Config.DB_PATH).exists():
@@ -105,12 +157,20 @@ def main() -> None:
     logger.info("=" * 80)
     logger.info("BARSUKAS UNIFIED LAUNCHER")
     logger.info("=" * 80)
+    if persona:
+        logger.info(f"Persona: {persona.name.value.upper()} - {persona.description}")
     logger.info(f"Database: {db_display}")
     logger.info(f"Flask server will run on http://{args.host}:{args.port}")
+    if args.readonly:
+        logger.info("Mode: READ-ONLY")
     if not args.no_worker:
         logger.info(f"Task worker will poll every {args.poll_interval}s")
     else:
         logger.info("Task worker DISABLED")
+    if persona and not persona.allow_api_keys:
+        logger.info("API keys: DISABLED (no local keys)")
+    if persona and not persona.allow_outbound_calls:
+        logger.info("Outbound calls: LLM only (no external APIs)")
     logger.info("=" * 80)
 
     # Set up signal handlers for graceful shutdown
