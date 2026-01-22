@@ -10,7 +10,7 @@ operations without needing file-based key configuration.
 Example request:
     POST /api/llm/papuga/generate-pronunciations
     {
-        "lemma_id": 123,
+        "guid": "N03_003",
         "lang_code": "en",
         "model": "gpt-5-mini",
         "openai_api_key": "sk-..."
@@ -108,16 +108,19 @@ def _get_config_from_request(data: Dict[str, Any]) -> DataSourceConfig:
 
 
 def _get_lemma_or_error(
-    lemma_id: int,
+    guid: str,
 ) -> Union[Tuple[Lemma, None], Tuple[None, ResponseReturnValue]]:
-    """Get a lemma by ID or return an error response.
+    """Get a lemma by GUID or return an error response.
+
+    Args:
+        guid: The lemma GUID (e.g., "N03_003")
 
     Returns:
         Tuple of (lemma, None) if found, or (None, error_response) if not found
     """
-    lemma = g.db.query(Lemma).get(lemma_id)
+    lemma = g.db.query(Lemma).filter(Lemma.guid == guid).first()
     if not lemma:
-        return None, _build_error_response(f"Lemma with ID {lemma_id} not found", 404)
+        return None, _build_error_response(f"Lemma with GUID '{guid}' not found", 404)
     return lemma, None
 
 
@@ -130,7 +133,7 @@ def api_info() -> ResponseReturnValue:
             "method": "POST",
             "description": "Check translations for a lemma using LLM validation",
             "parameters": {
-                "lemma_id": "Required. ID of the lemma to check",
+                "guid": "Required. GUID of the lemma (e.g., 'N03_003')",
                 "model": "Optional. LLM model to use (default: gpt-5-mini)",
                 "openai_api_key": "Optional. OpenAI API key (for gpt-* models)",
                 "anthropic_api_key": "Optional. Anthropic API key (for claude-* models)",
@@ -142,7 +145,7 @@ def api_info() -> ResponseReturnValue:
             "method": "POST",
             "description": "Generate missing translations for a lemma",
             "parameters": {
-                "lemma_id": "Required. ID of the lemma",
+                "guid": "Required. GUID of the lemma (e.g., 'N03_003')",
                 "model": "Optional. LLM model to use",
                 "openai_api_key": "Optional. OpenAI API key",
                 "anthropic_api_key": "Optional. Anthropic API key",
@@ -154,7 +157,7 @@ def api_info() -> ResponseReturnValue:
             "method": "POST",
             "description": "Generate pronunciations for a lemma's forms",
             "parameters": {
-                "lemma_id": "Required. ID of the lemma",
+                "guid": "Required. GUID of the lemma (e.g., 'N03_003')",
                 "lang_code": "Optional. Language code (default: en)",
                 "model": "Optional. LLM model to use",
                 "openai_api_key": "Optional. OpenAI API key",
@@ -167,7 +170,7 @@ def api_info() -> ResponseReturnValue:
             "method": "POST",
             "description": "Check/improve the definition of a lemma",
             "parameters": {
-                "lemma_id": "Required. ID of the lemma",
+                "guid": "Required. GUID of the lemma (e.g., 'N03_003')",
                 "model": "Optional. LLM model to use",
                 "openai_api_key": "Optional. OpenAI API key",
                 "anthropic_api_key": "Optional. Anthropic API key",
@@ -191,7 +194,7 @@ def api_check_translations() -> ResponseReturnValue:
     """Check translations for a lemma using LLM validation.
 
     Request body (JSON):
-        lemma_id: Required. ID of the lemma to check
+        guid: Required. GUID of the lemma (e.g., 'N03_003')
         model: Optional. LLM model to use (default: gpt-5-mini)
         openai_api_key: Optional. OpenAI API key (for gpt-* models)
         anthropic_api_key: Optional. Anthropic API key (for claude-* models)
@@ -204,11 +207,11 @@ def api_check_translations() -> ResponseReturnValue:
     if not data:
         return _build_error_response("Request body must be JSON")
 
-    lemma_id = data.get("lemma_id")
-    if not lemma_id:
-        return _build_error_response("lemma_id is required")
+    guid = data.get("guid")
+    if not guid:
+        return _build_error_response("guid is required")
 
-    lemma, error = _get_lemma_or_error(lemma_id)
+    lemma, error = _get_lemma_or_error(guid)
     if error:
         return error
     assert lemma is not None  # Type narrowing for mypy
@@ -260,7 +263,7 @@ def api_check_translations() -> ResponseReturnValue:
 
         return _build_success_response(
             {
-                "lemma_id": lemma_id,
+                "guid": guid,
                 "lemma_text": lemma.lemma_text,
                 "all_valid": all_good,
                 "translations_checked": len(translations),
@@ -270,7 +273,7 @@ def api_check_translations() -> ResponseReturnValue:
         )
 
     except Exception as e:
-        logger.exception("Error checking translations for lemma %d", lemma_id)
+        logger.exception("Error checking translations for lemma %s", guid)
         return _build_error_response(str(e), 500)
 
 
@@ -279,7 +282,7 @@ def api_add_missing_translations() -> ResponseReturnValue:
     """Generate missing translations for a lemma.
 
     Request body (JSON):
-        lemma_id: Required. ID of the lemma
+        guid: Required. GUID of the lemma (e.g., 'N03_003')
         model: Optional. LLM model to use
         openai_api_key: Optional. OpenAI API key
         anthropic_api_key: Optional. Anthropic API key
@@ -292,11 +295,11 @@ def api_add_missing_translations() -> ResponseReturnValue:
     if not data:
         return _build_error_response("Request body must be JSON")
 
-    lemma_id = data.get("lemma_id")
-    if not lemma_id:
-        return _build_error_response("lemma_id is required")
+    guid = data.get("guid")
+    if not guid:
+        return _build_error_response("guid is required")
 
-    lemma, error = _get_lemma_or_error(lemma_id)
+    lemma, error = _get_lemma_or_error(guid)
     if error:
         return error
     assert lemma is not None  # Type narrowing for mypy
@@ -312,7 +315,7 @@ def api_add_missing_translations() -> ResponseReturnValue:
 
         return _build_success_response(
             {
-                "lemma_id": lemma_id,
+                "guid": guid,
                 "lemma_text": lemma.lemma_text,
                 "total_fixed": result.get("total_fixed", 0),
                 "total_failed": result.get("total_failed", 0),
@@ -322,7 +325,7 @@ def api_add_missing_translations() -> ResponseReturnValue:
 
     except Exception as e:
         g.db.rollback()
-        logger.exception("Error adding translations for lemma %d", lemma_id)
+        logger.exception("Error adding translations for lemma %s", guid)
         return _build_error_response(str(e), 500)
 
 
@@ -331,7 +334,7 @@ def api_generate_pronunciations() -> ResponseReturnValue:
     """Generate pronunciations for a lemma's forms.
 
     Request body (JSON):
-        lemma_id: Required. ID of the lemma
+        guid: Required. GUID of the lemma (e.g., 'N03_003')
         lang_code: Optional. Language code (default: en)
         model: Optional. LLM model to use
         openai_api_key: Optional. OpenAI API key
@@ -345,14 +348,14 @@ def api_generate_pronunciations() -> ResponseReturnValue:
     if not data:
         return _build_error_response("Request body must be JSON")
 
-    lemma_id = data.get("lemma_id")
-    if not lemma_id:
-        return _build_error_response("lemma_id is required")
+    guid = data.get("guid")
+    if not guid:
+        return _build_error_response("guid is required")
 
     lang_code = data.get("lang_code", "en")
     only_english = lang_code == "en"
 
-    lemma, error = _get_lemma_or_error(lemma_id)
+    lemma, error = _get_lemma_or_error(guid)
     if error:
         return error
     assert lemma is not None  # Type narrowing for mypy
@@ -363,7 +366,7 @@ def api_generate_pronunciations() -> ResponseReturnValue:
 
         # Generate pronunciations for the lemma using populate_missing_pronunciations
         result = agent.populate_missing_pronunciations(
-            lemma_id=lemma_id,
+            lemma_id=lemma.id,
             only_english=only_english,
             only_base_forms=False,
             dry_run=False,
@@ -373,7 +376,7 @@ def api_generate_pronunciations() -> ResponseReturnValue:
 
         return _build_success_response(
             {
-                "lemma_id": lemma_id,
+                "guid": guid,
                 "lemma_text": lemma.lemma_text,
                 "lang_code": lang_code,
                 "populated_count": result.get("populated_count", 0),
@@ -385,7 +388,7 @@ def api_generate_pronunciations() -> ResponseReturnValue:
 
     except Exception as e:
         g.db.rollback()
-        logger.exception("Error generating pronunciations for lemma %d", lemma_id)
+        logger.exception("Error generating pronunciations for lemma %s", guid)
         return _build_error_response(str(e), 500)
 
 
@@ -394,7 +397,7 @@ def api_check_definition() -> ResponseReturnValue:
     """Check/improve the definition of a lemma.
 
     Request body (JSON):
-        lemma_id: Required. ID of the lemma
+        guid: Required. GUID of the lemma (e.g., 'N03_003')
         model: Optional. LLM model to use
         openai_api_key: Optional. OpenAI API key
         anthropic_api_key: Optional. Anthropic API key
@@ -407,11 +410,11 @@ def api_check_definition() -> ResponseReturnValue:
     if not data:
         return _build_error_response("Request body must be JSON")
 
-    lemma_id = data.get("lemma_id")
-    if not lemma_id:
-        return _build_error_response("lemma_id is required")
+    guid = data.get("guid")
+    if not guid:
+        return _build_error_response("guid is required")
 
-    lemma, error = _get_lemma_or_error(lemma_id)
+    lemma, error = _get_lemma_or_error(guid)
     if error:
         return error
     assert lemma is not None  # Type narrowing for mypy
@@ -425,7 +428,7 @@ def api_check_definition() -> ResponseReturnValue:
 
         return _build_success_response(
             {
-                "lemma_id": lemma_id,
+                "guid": guid,
                 "lemma_text": lemma.lemma_text,
                 "current_definition": lemma.definition_text,
                 "is_valid": result.get("is_valid", False),
@@ -436,7 +439,7 @@ def api_check_definition() -> ResponseReturnValue:
         )
 
     except Exception as e:
-        logger.exception("Error checking definition for lemma %d", lemma_id)
+        logger.exception("Error checking definition for lemma %s", guid)
         return _build_error_response(str(e), 500)
 
 
@@ -445,7 +448,7 @@ def api_check_disambiguation() -> ResponseReturnValue:
     """Check if a lemma needs disambiguation.
 
     Request body (JSON):
-        lemma_id: Required. ID of the lemma
+        guid: Required. GUID of the lemma (e.g., 'N03_003')
         model: Optional. LLM model to use
         openai_api_key: Optional. OpenAI API key
         anthropic_api_key: Optional. Anthropic API key
@@ -458,11 +461,11 @@ def api_check_disambiguation() -> ResponseReturnValue:
     if not data:
         return _build_error_response("Request body must be JSON")
 
-    lemma_id = data.get("lemma_id")
-    if not lemma_id:
-        return _build_error_response("lemma_id is required")
+    guid = data.get("guid")
+    if not guid:
+        return _build_error_response("guid is required")
 
-    lemma, error = _get_lemma_or_error(lemma_id)
+    lemma, error = _get_lemma_or_error(guid)
     if error:
         return error
     assert lemma is not None  # Type narrowing for mypy
@@ -476,7 +479,7 @@ def api_check_disambiguation() -> ResponseReturnValue:
 
         return _build_success_response(
             {
-                "lemma_id": lemma_id,
+                "guid": guid,
                 "lemma_text": lemma.lemma_text,
                 "needs_disambiguation": result.get("needs_disambiguation", False),
                 "reason": result.get("reason"),
@@ -488,5 +491,5 @@ def api_check_disambiguation() -> ResponseReturnValue:
         )
 
     except Exception as e:
-        logger.exception("Error checking disambiguation for lemma %d", lemma_id)
+        logger.exception("Error checking disambiguation for lemma %s", guid)
         return _build_error_response(str(e), 500)
