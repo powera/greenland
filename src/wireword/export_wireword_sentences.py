@@ -30,6 +30,7 @@ from wordfreq.storage.models.schema import (
     SentenceWord,
 )
 from langtools.zh.converter import to_simplified
+from langtools.zh.pinyin_helper import generate_pinyin
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -287,6 +288,12 @@ class WirewordSentenceExporter:
                     "translations": translations,
                     "linked_words": linked_words,
                 }
+
+                # Add pinyin for Chinese translations
+                if self.language == "zh" and self.language in translations:
+                    pinyin = generate_pinyin(translations[self.language])
+                    if pinyin:
+                        sentence_entry["pinyin"] = pinyin
 
                 # Include optional metadata
                 if sentence.source_filename:
