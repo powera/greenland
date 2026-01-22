@@ -8,7 +8,7 @@ triggering LLM API operations on remote (or local) BARSUKAS instances.
 
 import logging
 
-from flask import Blueprint, render_template
+from flask import Blueprint, abort, current_app, render_template
 from flask.typing import ResponseReturnValue
 
 bp = Blueprint("api_client", __name__, url_prefix="/api-client")
@@ -18,6 +18,10 @@ logger = logging.getLogger(__name__)
 @bp.route("/")
 def api_client_ui() -> ResponseReturnValue:
     """Render the LLM API client interface."""
+    # Disable in PROD persona - this UI is for making outbound API calls
+    if not current_app.config.get("ALLOW_OUTBOUND_CALLS", True):
+        abort(403, description="LLM API Client is disabled in production mode")
+
     # Available endpoints with their parameters
     endpoints = [
         {
