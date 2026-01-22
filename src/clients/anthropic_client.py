@@ -296,13 +296,21 @@ Your response must be valid JSON that follows the above schema."""
         return Response(response_text=response_text, structured_data=structured_data, usage=usage)
 
 
-# Create default client instance
-client = AnthropicClient(debug=False)  # Set to True to enable debug logging
+# Lazy client instance - only created when first accessed
+_client: Optional[AnthropicClient] = None
+
+
+def _get_client() -> AnthropicClient:
+    """Get or create the default client instance."""
+    global _client
+    if _client is None:
+        _client = AnthropicClient(debug=False)
+    return _client
 
 
 # Expose key functions at module level for API compatibility
 def warm_model(model: str) -> bool:
-    return client.warm_model(model)
+    return _get_client().warm_model(model)
 
 
 def generate_chat(
@@ -327,4 +335,4 @@ def generate_chat(
         For text responses, structured_data will be empty dict
         For JSON responses, response_text will be empty string
     """
-    return client.generate_chat(prompt, model, brief, json_schema, context)
+    return _get_client().generate_chat(prompt, model, brief, json_schema, context)

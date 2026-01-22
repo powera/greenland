@@ -9,7 +9,6 @@ from functools import wraps
 from typing import Any, Callable, Dict, Optional, Tuple, TypeVar
 
 import requests
-import tiktoken
 
 import clients.lib
 import constants
@@ -74,6 +73,8 @@ class OpenAIClient:
             }
         else:
             self.headers = {}
+        import tiktoken
+
         self.encoder = tiktoken.get_encoding("cl100k_base")
 
     @measure_completion
@@ -260,13 +261,21 @@ class OpenAIClient:
         return Response(response_text=response_text, structured_data=structured_data, usage=usage)
 
 
-# Create default client instance
-client = OpenAIClient(debug=False)  # Set to True to enable debug logging
+# Lazy client instance - only created when first accessed
+_client: Optional[OpenAIClient] = None
+
+
+def _get_client() -> OpenAIClient:
+    """Get or create the default client instance."""
+    global _client
+    if _client is None:
+        _client = OpenAIClient(debug=False)
+    return _client
 
 
 # Expose key functions at module level for API compatibility
 def warm_model(model: str) -> bool:
-    return client.warm_model(model)
+    return _get_client().warm_model(model)
 
 
 def generate_chat(
@@ -284,4 +293,4 @@ def generate_chat(
         For text responses, structured_data will be empty dict
         For JSON responses, response_text will be empty string
     """
-    return client.generate_chat(prompt, model, brief, json_schema, context)
+    return _get_client().generate_chat(prompt, model, brief, json_schema, context)
