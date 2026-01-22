@@ -17,9 +17,10 @@ from sqlalchemy.orm import Session
 from agents.common.wq_tools import build_default_config, get_lemma_or_raise
 from config import Config
 import constants
-from agents.strazdas import StrazdasAgent
+from agents.strazdas import StrazdasAgent, TtsBackend
 from agents.vieversys import VieversysAgent
 from audioshoe.espeak import EspeakVoice
+from audioshoe.qwen import QwenVoice
 from clients.audio import Voice
 from wordfreq.storage.backend.config import DataSourceConfig
 from wordfreq.storage.models.schema import Lemma
@@ -75,7 +76,9 @@ def handle_generate_audio(session: Session, payload: Dict) -> str:
     # Convert voice names to appropriate enums based on TTS engine
     if tts_engine == "espeak-ng":
         espeak_voice_enums = [EspeakVoice[v.upper()] for v in voice_names]
-        strazdas_agent = StrazdasAgent(config=config, output_dir=audio_output_dir)
+        strazdas_agent = StrazdasAgent(
+            config=config, output_dir=audio_output_dir, tts_backend=TtsBackend.ESPEAK
+        )
         result = strazdas_agent.generate_audio_for_lemma(
             session,
             lemma,
@@ -83,6 +86,18 @@ def handle_generate_audio(session: Session, payload: Dict) -> str:
             espeak_voice_enums,
             create_review_record=True,
             use_ipa=use_ipa,
+        )
+    elif tts_engine == "qwen3":
+        qwen_voice_enums = [QwenVoice[v.upper()] for v in voice_names]
+        strazdas_agent = StrazdasAgent(
+            config=config, output_dir=audio_output_dir, tts_backend=TtsBackend.QWEN
+        )
+        result = strazdas_agent.generate_audio_for_lemma(
+            session,
+            lemma,
+            language_code,
+            qwen_voice_enums,
+            create_review_record=True,
         )
     else:
         # Default to OpenAI
