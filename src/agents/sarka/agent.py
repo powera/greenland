@@ -364,20 +364,31 @@ class SarkaAgent:
                     nouns_used[noun["lemma_id"]] += 1
 
             # Fill remaining slots with universal words (verbs, adjectives)
-            remaining_slots = WORDS_PER_CONVERSATION - len(conv_words)
-            attempts = 0
-            while len(conv_words) < WORDS_PER_CONVERSATION and attempts < 50:
-                if universal_idx >= len(universal_words):
-                    random.shuffle(universal_words)
-                    universal_idx = 0
+            # If no universal words available, fill with more nouns from same category
+            if universal_words:
+                attempts = 0
+                while len(conv_words) < WORDS_PER_CONVERSATION and attempts < 50:
+                    if universal_idx >= len(universal_words):
+                        random.shuffle(universal_words)
+                        universal_idx = 0
 
-                candidate = universal_words[universal_idx]
-                universal_idx += 1
-                attempts += 1
+                    candidate = universal_words[universal_idx]
+                    universal_idx += 1
+                    attempts += 1
 
-                if candidate["lemma_id"] not in used_lemma_ids:
-                    conv_words.append(candidate)
-                    used_lemma_ids.add(candidate["lemma_id"])
+                    if candidate["lemma_id"] not in used_lemma_ids:
+                        conv_words.append(candidate)
+                        used_lemma_ids.add(candidate["lemma_id"])
+
+            # If still need more words (no universal words or not enough), add more nouns
+            if len(conv_words) < WORDS_PER_CONVERSATION:
+                extra_nouns = [n for n in available_nouns if n["lemma_id"] not in used_lemma_ids]
+                for noun in extra_nouns:
+                    if len(conv_words) >= WORDS_PER_CONVERSATION:
+                        break
+                    conv_words.append(noun)
+                    used_lemma_ids.add(noun["lemma_id"])
+                    nouns_used[noun["lemma_id"]] += 1
 
             if conv_words:
                 conversations_plan.append(conv_words)
