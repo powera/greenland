@@ -35,6 +35,7 @@ from routes import (
     api,
     api_client,
     audio,
+    categories,
     conversations,
     exports,
     lemmas,
@@ -127,6 +128,7 @@ def create_app(config_class: type[Config] = Config, db_url: Optional[str] = None
     app.register_blueprint(lemmas.bp)
     app.register_blueprint(sentences.bp)
     app.register_blueprint(conversations.bp)
+    app.register_blueprint(categories.bp)
     app.register_blueprint(translations.bp)
     app.register_blueprint(overrides.bp)
     app.register_blueprint(agents.bp)

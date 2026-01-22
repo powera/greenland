@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}POS Subtype Categories{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1><i class="bi bi-grid-3x3-gap"></i> POS Subtype Categories</h1>
+                <p class="text-muted">
+                    {{ total_subtypes }} subtypes across 5 parts of speech, covering {{ total_words }} words
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Navigation -->
+<div class="row mb-4">
+    <div class="col">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-muted">Jump to:</h6>
+                <div class="d-flex flex-wrap gap-2">
+                    {% for pos_type, cat_data in categories.items() %}
+                    <a href="#{{ pos_type }}" class="btn btn-outline-primary btn-sm">
+                        <i class="{{ cat_data.icon }}"></i> {{ cat_data.title }}
+                        <span class="badge bg-secondary">{{ cat_data.total_subtypes }}</span>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Categories by POS Type -->
+{% for pos_type, cat_data in categories.items() %}
+<div class="row mb-4" id="{{ pos_type }}">
+    <div class="col">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">
+                    <i class="{{ cat_data.icon }}"></i> {{ cat_data.title }}
+                </h4>
+                <span class="badge bg-primary">
+                    {{ cat_data.total_subtypes }} subtypes, {{ cat_data.total_words }} words
+                </span>
+            </div>
+            <div class="card-body">
+                {% for group in cat_data.groups %}
+                <div class="mb-4">
+                    <h5 class="text-muted border-bottom pb-2">{{ group.group_name }}</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm">
+                            <thead>
+                                <tr>
+                                    <th style="width: 15%">GUID Prefix</th>
+                                    <th style="width: 20%">Subtype</th>
+                                    <th style="width: 55%">Description</th>
+                                    <th style="width: 10%" class="text-end">Words</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in group.items %}
+                                <tr>
+                                    <td>
+                                        {% if item.guid_prefix %}
+                                        <code class="text-primary">{{ item.guid_prefix }}</code>
+                                        {% else %}
+                                        <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{{ url_for('lemmas.list_lemmas', pos_type=pos_type, pos_subtype=item.name) }}"
+                                           class="text-decoration-none">
+                                            <strong>{{ item.display_name }}</strong>
+                                        </a>
+                                    </td>
+                                    <td class="text-muted">{{ item.description }}</td>
+                                    <td class="text-end">
+                                        {% if item.count > 0 %}
+                                        <a href="{{ url_for('lemmas.list_lemmas', pos_type=pos_type, pos_subtype=item.name) }}"
+                                           class="badge bg-success text-decoration-none">
+                                            {{ item.count }}
+                                        </a>
+                                        {% else %}
+                                        <span class="badge bg-secondary">0</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<!-- GUID System Explanation -->
+<div class="row mb-4">
+    <div class="col">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-info-circle"></i> About the GUID System</h5>
+            </div>
+            <div class="card-body">
+                <p>
+                    Each lemma in the database is assigned a <strong>GUID</strong> (Globally Unique Identifier)
+                    based on its part-of-speech subtype. The GUID format is:
+                </p>
+                <pre class="bg-light p-2"><code>&lt;PREFIX&gt;-&lt;NUMBER&gt;</code></pre>
+                <p>For example:</p>
+                <ul>
+                    <li><code>N02-0001</code> - First animal noun (N02 = animal)</li>
+                    <li><code>V01-0042</code> - 42nd physical action verb (V01 = physical_action)</li>
+                    <li><code>A02-0007</code> - 7th color adjective (A02 = color)</li>
+                </ul>
+                <p class="mb-0">
+                    The prefix letters indicate the POS type:
+                    <strong>N</strong> = Noun,
+                    <strong>V</strong> = Verb,
+                    <strong>A</strong> = Adjective,
+                    <strong>D</strong> = Adverb,
+                    <strong>Z</strong> = Numeral
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
