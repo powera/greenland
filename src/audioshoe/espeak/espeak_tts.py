@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 class EspeakNGClient:
     """Client for generating audio using eSpeak-NG TTS."""
 
-    def __init__(self, espeak_command: str = "espeak-ng", debug: bool = False):
+    def __init__(self, espeak_command: str = "/opt/homebrew/bin/espeak-ng", debug: bool = False):
         """
         Initialize eSpeak-NG TTS client.
 

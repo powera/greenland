@@ -60,14 +60,15 @@ class PiperClient:
 
         # Verify piper is available
         try:
+            # pip-installed piper uses --help (no --version flag)
             result = subprocess.run(
-                [self.piper_command, "--version"],
+                [self.piper_command, "--help"],
                 capture_output=True,
                 text=True,
                 timeout=5,
             )
             if result.returncode == 0:
-                logger.info(f"Piper version: {result.stdout.strip()}")
+                logger.info("Piper TTS is available")
             else:
                 logger.warning("Piper may not be properly installed")
         except FileNotFoundError:
@@ -172,19 +173,20 @@ class PiperClient:
                 wav_path = Path(tmp_wav.name)
 
             # Build Piper command
-            # Piper reads text from stdin and writes WAV to stdout or file
+            # Piper reads text from stdin and writes WAV to file
+            # Note: pip-installed piper uses -m and -f flags
             cmd = [
                 self.piper_command,
-                "--model",
+                "-m",
                 str(model_path),
-                "--output_file",
+                "-f",
                 str(wav_path),
             ]
 
             # Add length scale (inverse of speed)
             if speed != 1.0:
                 length_scale = 1.0 / speed
-                cmd.extend(["--length_scale", str(length_scale)])
+                cmd.extend(["--length-scale", str(length_scale)])
 
             if self.debug:
                 logger.debug(f"Running command: {' '.join(cmd)}")
