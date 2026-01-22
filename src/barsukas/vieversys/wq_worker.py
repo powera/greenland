@@ -19,7 +19,9 @@ from config import Config
 import constants
 from agents.strazdas import StrazdasAgent, TtsBackend
 from agents.vieversys import VieversysAgent
+from audioshoe.coqui import CoquiVoice
 from audioshoe.espeak import EspeakVoice
+from audioshoe.piper import PiperVoice
 from audioshoe.qwen import QwenVoice
 from clients.audio import Voice
 from wordfreq.storage.backend.config import DataSourceConfig
@@ -99,6 +101,16 @@ def handle_generate_audio(session: Session, payload: Dict) -> str:
             qwen_voice_enums,
             create_review_record=True,
         )
+    elif tts_engine == "piper":
+        piper_voice_enums = [PiperVoice[v.upper()] for v in voice_names]
+        result = _generate_audio_piper(
+            session, lemma, language_code, piper_voice_enums, audio_output_dir
+        )
+    elif tts_engine == "coqui":
+        coqui_voice_enums = [CoquiVoice[v.upper()] for v in voice_names]
+        result = _generate_audio_coqui(
+            session, lemma, language_code, coqui_voice_enums, audio_output_dir
+        )
     else:
         # Default to OpenAI
         openai_voice_enums = [Voice(v) for v in voice_names]
@@ -122,3 +134,207 @@ def handle_generate_audio(session: Session, payload: Dict) -> str:
         raise RuntimeError("No audio files were generated successfully")
 
     return f"Generated audio for {voice_count} voice(s) in {language_code}"
+
+
+def _generate_audio_piper(
+    session: Session,
+    lemma: Lemma,
+    language_code: str,
+    voices: List[PiperVoice],
+    output_dir: str,
+) -> Dict:
+    """
+    Generate audio for a lemma using Piper TTS.
+
+    Args:
+        session: Database session
+        lemma: Lemma object
+        language_code: Language code (e.g., "lt", "zh")
+        voices: List of PiperVoice enums
+        output_dir: Base output directory
+
+    Returns:
+        dict with success, voices (list of dicts with success key), and error information
+    """
+    import hashlib
+    import json
+
+    from audioshoe.piper import PiperClient
+    from clients.audio.types import AudioFormat
+    from wordfreq.storage.models.schema import AudioQualityReview
+    from wordfreq.storage.translation_helpers import get_translation
+
+    try:
+        # Get translation for the language
+        translation = get_translation(session, lemma, language_code)
+        if not translation:
+            return {
+                "success": False,
+                "error": f"No translation found for language: {language_code}",
+                "voices": [],
+            }
+
+        # Create Piper client
+        client = PiperClient()
+
+        # Generate audio for each voice
+        generated_voices = []
+        for voice in voices:
+            try:
+                # Generate audio
+                result = client.generate_audio(
+                    text=translation,
+                    voice=voice,
+                    audio_format=AudioFormat.MP3,
+                    speed=1.0,
+                )
+
+                if not result.success:
+                    logger.error(f"Failed to generate audio for {voice.ui_name}: {result.error}")
+                    generated_voices.append(
+                        {"voice": voice.ui_name, "success": False, "error": result.error}
+                    )
+                    continue
+
+                # Save audio file
+                voice_dir = Path(output_dir) / language_code / voice.ui_name
+                voice_dir.mkdir(parents=True, exist_ok=True)
+
+                # Calculate MD5 hash
+                md5_hash = hashlib.md5(result.audio_data).hexdigest()
+                filename = f"{md5_hash}.mp3"
+                file_path = voice_dir / filename
+
+                with open(file_path, "wb") as f:
+                    f.write(result.audio_data)
+
+                # Create review record
+                review = AudioQualityReview(
+                    guid=lemma.guid,
+                    lemma_id=lemma.id,
+                    language_code=language_code,
+                    voice_name=voice.ui_name,
+                    filename=filename,
+                    expected_text=translation,
+                    manifest_md5=md5_hash,
+                    status="pending_review",
+                    quality_issues=json.dumps([]),
+                )
+                session.add(review)
+                generated_voices.append({"voice": voice.ui_name, "success": True})
+            except Exception as e:
+                logger.error(f"Error generating Piper audio for {voice.ui_name}: {e}")
+                generated_voices.append({"voice": voice.ui_name, "success": False, "error": str(e)})
+
+        session.commit()
+
+        return {
+            "success": True,
+            "voices": generated_voices,
+        }
+
+    except Exception as e:
+        logger.error(f"Error generating Piper audio: {e}")
+        return {"success": False, "error": str(e), "voices": []}
+
+
+def _generate_audio_coqui(
+    session: Session,
+    lemma: Lemma,
+    language_code: str,
+    voices: List[CoquiVoice],
+    output_dir: str,
+) -> Dict:
+    """
+    Generate audio for a lemma using Coqui TTS.
+
+    Args:
+        session: Database session
+        lemma: Lemma object
+        language_code: Language code (e.g., "lt", "zh")
+        voices: List of CoquiVoice enums
+        output_dir: Base output directory
+
+    Returns:
+        dict with success, voices (list of dicts with success key), and error information
+    """
+    import hashlib
+    import json
+
+    from audioshoe.coqui import CoquiClient
+    from clients.audio.types import AudioFormat
+    from wordfreq.storage.models.schema import AudioQualityReview
+    from wordfreq.storage.translation_helpers import get_translation
+
+    try:
+        # Get translation for the language
+        translation = get_translation(session, lemma, language_code)
+        if not translation:
+            return {
+                "success": False,
+                "error": f"No translation found for language: {language_code}",
+                "voices": [],
+            }
+
+        # Create Coqui client
+        client = CoquiClient()
+
+        # Generate audio for each voice
+        generated_voices = []
+        for voice in voices:
+            try:
+                # Generate audio
+                result = client.generate_audio(
+                    text=translation,
+                    voice=voice,
+                    audio_format=AudioFormat.MP3,
+                    speed=1.0,
+                )
+
+                if not result.success:
+                    logger.error(f"Failed to generate audio for {voice.ui_name}: {result.error}")
+                    generated_voices.append(
+                        {"voice": voice.ui_name, "success": False, "error": result.error}
+                    )
+                    continue
+
+                # Save audio file
+                voice_dir = Path(output_dir) / language_code / voice.ui_name
+                voice_dir.mkdir(parents=True, exist_ok=True)
+
+                # Calculate MD5 hash
+                md5_hash = hashlib.md5(result.audio_data).hexdigest()
+                filename = f"{md5_hash}.mp3"
+                file_path = voice_dir / filename
+
+                with open(file_path, "wb") as f:
+                    f.write(result.audio_data)
+
+                # Create review record
+                review = AudioQualityReview(
+                    guid=lemma.guid,
+                    lemma_id=lemma.id,
+                    language_code=language_code,
+                    voice_name=voice.ui_name,
+                    filename=filename,
+                    expected_text=translation,
+                    manifest_md5=md5_hash,
+                    status="pending_review",
+                    quality_issues=json.dumps([]),
+                )
+                session.add(review)
+                generated_voices.append({"voice": voice.ui_name, "success": True})
+            except Exception as e:
+                logger.error(f"Error generating Coqui audio for {voice.ui_name}: {e}")
+                generated_voices.append({"voice": voice.ui_name, "success": False, "error": str(e)})
+
+        session.commit()
+
+        return {
+            "success": True,
+            "voices": generated_voices,
+        }
+
+    except Exception as e:
+        logger.error(f"Error generating Coqui audio: {e}")
+        return {"success": False, "error": str(e), "voices": []}
