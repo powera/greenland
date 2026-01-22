@@ -15,9 +15,10 @@ import sys
 import tempfile
 import time
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import TYPE_CHECKING, Any, Optional, Union
 
-import torch
+if TYPE_CHECKING:
+    import torch
 
 # Add src directory to path for imports
 GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent)
@@ -32,12 +33,14 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 
-def get_device() -> torch.device:
+def get_device() -> "torch.device":
     """
     Get the best available device for inference.
 
     Returns MPS for Apple Silicon, CUDA for NVIDIA GPUs, or CPU as fallback.
     """
+    import torch
+
     if torch.backends.mps.is_available():
         return torch.device("mps")
     elif torch.cuda.is_available():
@@ -46,7 +49,7 @@ def get_device() -> torch.device:
         return torch.device("cpu")
 
 
-def get_dtype(device: torch.device) -> torch.dtype:
+def get_dtype(device: "torch.device") -> "torch.dtype":
     """
     Get the appropriate dtype for the given device.
 
@@ -56,6 +59,8 @@ def get_dtype(device: torch.device) -> torch.dtype:
     Returns:
         Appropriate dtype (bfloat16 for CUDA, float16 for MPS, float32 for CPU)
     """
+    import torch
+
     if device.type == "cuda":
         return torch.bfloat16
     elif device.type == "mps":
@@ -82,8 +87,8 @@ class QwenTTSClient:
     def __init__(
         self,
         model_name: Optional[str] = None,
-        device: Optional[Union[str, torch.device]] = None,
-        dtype: Optional[torch.dtype] = None,
+        device: Optional[Union[str, "torch.device"]] = None,
+        dtype: Optional["torch.dtype"] = None,
         use_flash_attention: bool = False,
         ref_audio_dir: Optional[Path] = None,
         debug: bool = False,
@@ -112,6 +117,9 @@ class QwenTTSClient:
 
         # Set model name
         self.model_name = model_name or self.MODEL_VOICE_DESIGN
+
+        # Import torch for device/dtype handling
+        import torch
 
         # Set device
         if device is None:
@@ -263,6 +271,7 @@ class QwenTTSClient:
         """
         import numpy as np
         import scipy.io.wavfile as wavfile
+        import torch
 
         # Convert tensor to numpy if needed
         if isinstance(wav_data, torch.Tensor):
