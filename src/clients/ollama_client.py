@@ -235,13 +235,21 @@ Your response must be valid JSON that follows the above schema."""
             )
 
 
-# Create default client instance
-client = OllamaClient(debug=False)  # Set to True to enable debug logging
+# Lazy client instance - only created when first accessed
+_client: Optional[OllamaClient] = None
+
+
+def _get_client() -> OllamaClient:
+    """Get or create the default client instance."""
+    global _client
+    if _client is None:
+        _client = OllamaClient(debug=False)
+    return _client
 
 
 # Expose key functions at module level for API compatibility
 def warm_model(model: str) -> bool:
-    return client.warm_model(model)
+    return _get_client().warm_model(model)
 
 
 def generate_chat(
@@ -257,4 +265,4 @@ def generate_chat(
     Returns:
         Response data class containing response_text, structured_data, usage_info, and additional_thought
     """
-    return client.generate_chat(prompt, model, brief, json_schema, context)
+    return _get_client().generate_chat(prompt, model, brief, json_schema, context)

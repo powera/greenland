@@ -306,14 +306,22 @@ class UnifiedLLMClient:
             raise
 
 
-# Create default client instance
-client = UnifiedLLMClient()  # Use defaults for timeout and debug
+# Lazy client instance - only created when first accessed
+_client: Optional[UnifiedLLMClient] = None
+
+
+def _get_client() -> UnifiedLLMClient:
+    """Get or create the default client instance."""
+    global _client
+    if _client is None:
+        _client = UnifiedLLMClient()
+    return _client
 
 
 # Expose key functions at module level for API compatibility
 def warm_model(model: str, timeout: Optional[float] = None) -> bool:
     """Warm up a model for faster first inference."""
-    return client.warm_model(model, timeout)
+    return _get_client().warm_model(model, timeout)
 
 
 def generate_chat(
@@ -332,4 +340,4 @@ def generate_chat(
         For text responses, structured_data will be empty dict
         For JSON responses, response_text will be empty string
     """
-    return client.generate_chat(prompt, model, brief, json_schema, context, timeout)
+    return _get_client().generate_chat(prompt, model, brief, json_schema, context, timeout)
