@@ -23,6 +23,7 @@ class DataSourceConfig:
     - Storage backend (SQLite database or JSONL files)
     - Cache source (remote BARSUKAS server for translation lookups)
     - LLM model (which model to use for generation)
+    - LLM API keys (optional, for API server use - avoids command-line exposure)
     """
 
     backend_type: BackendType
@@ -33,6 +34,10 @@ class DataSourceConfig:
     cache_only: bool
     model: Optional[str]
     debug: bool
+    # Optional API keys for runtime injection (used by API server)
+    openai_api_key: Optional[str]
+    anthropic_api_key: Optional[str]
+    google_api_key: Optional[str]
 
     def __init__(
         self,
@@ -44,6 +49,9 @@ class DataSourceConfig:
         cache_only: bool = False,
         model: Optional[str] = None,
         debug: bool = False,
+        openai_api_key: Optional[str] = None,
+        anthropic_api_key: Optional[str] = None,
+        google_api_key: Optional[str] = None,
     ):
         """Initialize data source configuration.
 
@@ -98,6 +106,12 @@ class DataSourceConfig:
 
         # LLM configuration
         self.model = model
+
+        # Optional API keys for runtime injection (used by API server)
+        # These allow passing API keys via JSON parameters without command-line exposure
+        self.openai_api_key = openai_api_key
+        self.anthropic_api_key = anthropic_api_key
+        self.google_api_key = google_api_key
 
         # Debug configuration
         self.debug = debug
@@ -208,5 +222,12 @@ class DataSourceConfig:
             parts.append(f"model={self.model}")
         if self.debug:
             parts.append("debug=True")
+        # Show that API keys are set (but don't reveal values)
+        if self.openai_api_key:
+            parts.append("openai_api_key=***")
+        if self.anthropic_api_key:
+            parts.append("anthropic_api_key=***")
+        if self.google_api_key:
+            parts.append("google_api_key=***")
 
         return f"DataSourceConfig({', '.join(parts)})"

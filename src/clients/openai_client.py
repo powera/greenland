@@ -48,15 +48,25 @@ def measure_completion(func: F) -> Callable[..., tuple[Any, float]]:
 class OpenAIClient:
     """Client for making direct HTTP requests to OpenAI Responses API."""
 
-    def __init__(self, timeout: int = DEFAULT_TIMEOUT, debug: bool = False):
-        """Initialize OpenAI client with API key."""
+    def __init__(
+        self, timeout: int = DEFAULT_TIMEOUT, debug: bool = False, api_key: Optional[str] = None
+    ):
+        """Initialize OpenAI client with API key.
+
+        Args:
+            timeout: Request timeout in seconds
+            debug: Whether to enable debug logging
+            api_key: Optional API key to use instead of loading from file.
+                     Useful for API server use where keys come from request parameters.
+        """
         self.timeout = timeout
         self.debug = debug
         if debug:
             logger.setLevel(logging.DEBUG)
             logger.debug("Initialized OpenAIClient in debug mode")
 
-        self.api_key = load_key("openai", required=False)
+        # Use provided api_key if given, otherwise load from file
+        self.api_key = api_key if api_key else load_key("openai", required=False)
         if self.api_key:
             self.headers = {
                 "Authorization": f"Bearer {self.api_key}",

@@ -33,10 +33,12 @@ from routes import (
     agents,
     agents_launcher,
     api,
+    api_client,
     audio,
     conversations,
     exports,
     lemmas,
+    llm_api,
     operation_logs,
     overrides,
     pattern_sentences,
@@ -133,6 +135,8 @@ def create_app(config_class: type[Config] = Config, db_url: Optional[str] = None
     app.register_blueprint(wireword.bp)
     app.register_blueprint(exports.bp)
     app.register_blueprint(api.bp)
+    app.register_blueprint(llm_api.bp)
+    app.register_blueprint(api_client.bp)
     app.register_blueprint(audio.bp)
     app.register_blueprint(rapid_review.bp)
     app.register_blueprint(settings.bp)
