@@ -2,7 +2,7 @@
 
 This document provides guidance for working with the Greenland codebase.
 
-**Last Updated:** 2025-01-14
+**Last Updated:** 2026-01-22
 **Python Version:** 3.9+
 
 ---
@@ -75,8 +75,8 @@ python run_tests.py src/wordfreq
 
 ```bash
 # Python shell with preloaded linguistic tools
-python -i src/interactive.py
-# Provides: cl (LinguisticClient), rv (Reviewer), session, prcs (Processor)
+PYTHONPATH=src python -i src/interactive.py
+# Provides: cl (LinguisticClient), rv (LinguisticReviewer), session, prcs (WordProcessor)
 ```
 
 ### Web Interfaces
@@ -101,7 +101,11 @@ greenland/
 │   │   ├── frequency/         # Word frequency analysis
 │   │   ├── dictionary/        # Word list management and export
 │   │   ├── prompts/           # LLM prompt templates
-│   │   └── tools/             # CLI utilities (difficulty overrides, etc.)
+│   │   ├── tools/             # CLI utilities (difficulty overrides, etc.)
+│   │   ├── patterns/          # Sentence pattern definitions
+│   │   ├── trakaido/          # Trakaido app integration
+│   │   ├── templates/         # HTML templates for wordfreq
+│   │   └── data/              # Data files (linguistics.sqlite, IPA dict)
 │   │
 │   ├── agents/                # Autonomous data quality agents ⭐
 │   │   ├── pradzia.py         # Database initialization
@@ -114,7 +118,13 @@ greenland/
 │   │   ├── papuga.py          # Pronunciation validator
 │   │   ├── zvirblis.py        # Example sentence generator
 │   │   ├── povas.py           # HTML report generator
-│   │   └── ungurys.py         # WireWord export agent
+│   │   ├── ungurys.py         # WireWord export agent
+│   │   ├── elnias.py          # WireWord bootstrap export
+│   │   ├── buivolas.py        # Pattern-based sentence generator
+│   │   ├── lape.py            # Grammar facts generator
+│   │   ├── sarka.py           # Natural conversation generator
+│   │   ├── strazdas.py        # eSpeak-NG audio generation
+│   │   └── vieversys.py       # OpenAI TTS audio generation
 │   │
 │   ├── barsukas/              # Flask web interface for DB editing
 │   │   ├── app.py             # Flask application entry point
@@ -125,7 +135,12 @@ greenland/
 │   ├── clients/               # Unified LLM client system
 │   │   ├── unified_client.py  # Multi-provider LLM interface
 │   │   ├── types.py           # Schema definitions
-│   │   └── batch_queue.py     # Batch processing
+│   │   ├── batch_queue.py     # Batch processing
+│   │   ├── openai_client.py   # OpenAI provider
+│   │   ├── anthropic_client.py # Anthropic provider
+│   │   ├── gemini_client.py   # Google Gemini provider
+│   │   ├── ollama_client.py   # Ollama local models
+│   │   └── lmstudio_client.py # LM Studio local models
 │   │
 │   ├── benchmarks/            # LLM benchmark suite
 │   │   ├── lib/               # Benchmark framework (exemplars, generators, runners)
@@ -133,17 +148,23 @@ greenland/
 │   │   ├── verbalator/        # LLM query web interface
 │   │   ├── datastore/         # Benchmark results storage
 │   │   ├── schema/            # Database schema
+│   │   ├── run_benchmark.py   # Benchmark runner
+│   │   ├── validation.py      # Input validation utilities
 │   │   └── 0015_spell_check/, 0016_antonym/, etc.
 │   │
 │   ├── lib/                   # Shared libraries
-│   │   ├── run_benchmark.py   # Benchmark runner
-│   │   └── validation.py      # Input validation utilities
+│   │   ├── sentence_generation.py  # Sentence generation utilities
+│   │   ├── advanced_queries.py     # Advanced query helpers
+│   │   └── advanced_moderation.py  # Content moderation
 │   │
 │   ├── util/                  # General utilities
 │   │   ├── prompt_loader.py   # Prompt template loading
 │   │   ├── flesch_kincaid.py  # Readability calculations
-│   │   └── wiki_loader.py     # Wikipedia corpus processing
+│   │   ├── wiki_loader.py     # Wikipedia corpus processing
+│   │   └── stopwords.py       # Stopword lists
 │   │
+│   ├── wireword/             # WireWord format export utilities
+│   ├── langtools/            # Language processing tools
 │   ├── audioshoe/            # Audio generation drivers (eSpeak, Piper, Coqui)
 │   ├── tests/                # Test files
 │   └── constants.py           # Centralized path configuration ⭐ IMPORTANT
@@ -151,13 +172,16 @@ greenland/
 ├── prompts/                  # LLM prompt templates (top-level)
 ├── scripts/                  # Utility scripts (bootstrap, migrations)
 ├── data/                      # Static data files
-│   ├── gre_words/             # GRE vocabulary lists
-│   └── trakaido_wordlists/    # Difficulty-leveled wordlists
+│   ├── release/               # Release data files (wordlists, sentences)
+│   ├── trakaido_wordlists/    # Difficulty-leveled wordlists
+│   └── greenland_input/       # Input data files
 │
 ├── templates/                 # Jinja2 templates for reports
 ├── public_html/              # Static web assets (CSS, JS, images)
 ├── docs/                     # Documentation
-│   └── difficulty_overrides.md
+│   ├── difficulty_overrides.md
+│   ├── API.md                 # API documentation
+│   └── barsukas_agents.md     # Agent integration docs
 ├── audio/                    # Audio files and processing
 ├── hooks/                    # Git hooks (pre-commit for black)
 │
@@ -255,6 +279,7 @@ CLI utilities:
 | **povas** | Peacock | HTML report generator |
 | **ungurys** | Eel | WireWord export agent |
 | **elnias** | Deer | WireWord bootstrap export |
+| **sarka** | Magpie | Natural conversation sentence generator |
 
 **Running Agents:**
 
@@ -294,6 +319,10 @@ python sernas.py --dry-run
   - `translations.py` - Translation management
   - `agents.py` - Agent integration
   - `exports.py` - WireWord export routes
+  - `sentences.py` - Sentence management
+  - `audio.py` - Audio generation routes
+  - `api.py` - API endpoints
+  - `rapid_review.py` - Rapid review interface
 - `src/barsukas/templates/` - Jinja2 HTML templates
 - `src/barsukas/static/` - CSS and JavaScript
 
@@ -690,10 +719,11 @@ WIKI_CORPUS_BASE_PATH    # /Volumes/kelvin/wikipedia/2022_MAY
 
 From `.gitignore`:
 - `keys/` - API keys
-- `src/schema/benchmarks.db` - Benchmarks database
+- `src/benchmarks/schema/benchmarks.db` - Benchmarks database
 - `src/wordfreq/data/linguistics.sqlite` - Linguistics database
 - `src/clients/data/batch_tracking.sqlite` - Batch tracking
 - `src/wordfreq/output/` - Generated outputs
 - `input/` - Local input data
+- `data/working` - Gitstore local working files
 
 **Important:** These databases are gitignored. When setting up a new environment, you may need to initialize or copy existing databases.
