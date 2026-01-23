@@ -16,7 +16,8 @@ from pathlib import Path
 from typing import Any, Callable, Dict, Optional
 
 from config import Config
-from flask import Flask, g, render_template
+from flask import Flask, Response, g, render_template
+from metrics import RequestMetricsMiddleware, get_metrics_output
 from sqlalchemy.orm import Session
 
 from langtools.ja.romaji_helper import (
@@ -197,8 +198,9 @@ def create_app(config_class: type[Config] = Config, db_url: Optional[str] = None
 
     @app.before_request
     def before_request() -> None:
-        """Set up database session for each request."""
+        """Set up database session and start request timing for metrics."""
         g.db = app.db_session_factory()
+        RequestMetricsMiddleware.before_request()
 
     @app.teardown_appcontext
     def shutdown_session(exception: Optional[BaseException]) -> None:
@@ -210,6 +212,16 @@ def create_app(config_class: type[Config] = Config, db_url: Optional[str] = None
             else:
                 db.commit()
             db.close()
+
+    @app.after_request
+    def after_request(response: Response) -> Response:
+        """Record request metrics after response is generated."""
+        return RequestMetricsMiddleware.after_request(response)
+
+    @app.route("/metrics")
+    def metrics() -> Response:
+        """Expose Prometheus metrics endpoint."""
+        return Response(get_metrics_output(), mimetype="text/plain; charset=utf-8")
 
     @app.route("/")
     def index() -> Any:
