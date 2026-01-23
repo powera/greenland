@@ -1,0 +1,20 @@
+[Unit]
+Description=Barsukas Linguistic Database Web Interface
+After=network.target
+
+[Service]
+Type=simple
+User=greenland
+Group=greenland
+WorkingDirectory=/home/greenland/ROOT
+Environment=PYTHONPATH=/home/greenland/ROOT/src
+Environment=VIRTUAL_ENV=/home/greenland/ROOT/venv
+Environment=PATH=/home/greenland/ROOT/venv/bin:/usr/local/bin:/usr/bin:/bin
+ExecStart=/home/greenland/ROOT/venv/bin/python /home/greenland/ROOT/src/barsukas/unified_app.py --host 0.0.0.0 --port 5555 --persona prod
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
