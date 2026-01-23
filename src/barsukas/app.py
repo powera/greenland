@@ -16,7 +16,8 @@ from pathlib import Path
 from typing import Any, Callable, Dict, Optional
 
 from config import Config
-from flask import Flask, g, render_template
+from flask import Flask, Response, g, render_template
+from metrics import RequestMetricsMiddleware, get_metrics_output, record_llm_call
 from sqlalchemy.orm import Session
 
 from langtools.ja.romaji_helper import (
@@ -118,6 +119,15 @@ def create_app(config_class: type[Config] = Config, db_url: Optional[str] = None
     # Store backend config in app
     app.backend_config = backend_config
 
+    # Register LLM metrics callback so unified_client reports metrics
+    try:
+        from clients.unified_client import set_llm_metrics_callback
+
+        set_llm_metrics_callback(record_llm_call)
+    except ImportError:
+        # clients module may not be available in all configurations
+        pass
+
     # Create a session factory function that returns new sessions
     def session_factory() -> Session:
         return create_session(backend_config)
@@ -197,8 +207,9 @@ def create_app(config_class: type[Config] = Config, db_url: Optional[str] = None
 
     @app.before_request
     def before_request() -> None:
-        """Set up database session for each request."""
+        """Set up database session and start request timing for metrics."""
         g.db = app.db_session_factory()
+        RequestMetricsMiddleware.before_request()
 
     @app.teardown_appcontext
     def shutdown_session(exception: Optional[BaseException]) -> None:
@@ -210,6 +221,16 @@ def create_app(config_class: type[Config] = Config, db_url: Optional[str] = None
             else:
                 db.commit()
             db.close()
+
+    @app.after_request
+    def after_request(response: Response) -> Response:
+        """Record request metrics after response is generated."""
+        return RequestMetricsMiddleware.after_request(response)
+
+    @app.route("/metrics")
+    def metrics() -> Response:
+        """Expose Prometheus metrics endpoint."""
+        return Response(get_metrics_output(), mimetype="text/plain; charset=utf-8")
 
     @app.route("/")
     def index() -> Any:

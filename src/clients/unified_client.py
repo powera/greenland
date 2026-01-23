@@ -2,7 +2,8 @@
 """Unified client for routing requests to appropriate LLM backends."""
 
 import logging
-from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union
+import time
+from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Tuple, Union
 
 import benchmarks.datastore.common  # Assuming datastore.common is available
 from clients import anthropic_client, gemini_client, lmstudio_client, ollama_client, openai_client
@@ -11,6 +12,28 @@ from telemetry import LLMUsage
 
 if TYPE_CHECKING:
     from wordfreq.storage.backend.config import DataSourceConfig
+
+# Optional metrics callback - can be set by applications (e.g., Barsukas) to record LLM metrics
+# Signature: (backend: str, model: str, duration_seconds: float, status: str,
+#             tokens_in: int, tokens_out: int) -> None
+_metrics_callback: Optional[Callable[[str, str, float, str, int, int], None]] = None
+
+
+def set_llm_metrics_callback(
+    callback: Optional[Callable[[str, str, float, str, int, int], None]],
+) -> None:
+    """Set a callback function to record LLM call metrics.
+
+    This allows applications like Barsukas to inject their metrics recording
+    without creating a hard dependency.
+
+    Args:
+        callback: Function with signature (backend, model, duration_seconds, status,
+                 tokens_in, tokens_out) -> None, or None to disable metrics.
+    """
+    global _metrics_callback
+    _metrics_callback = callback
+
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -196,19 +219,38 @@ class UnifiedLLMClient:
         if client is None:
             raise ValueError(f"Could not determine client for model: {model}")
 
-        if self.debug:
-            if normalized_model != model:
-                logger.debug(
-                    "Using %s client for model: %s (normalized from %s)",
-                    client_name,
-                    normalized_model,
-                    model,
-                )
-            else:
-                logger.debug("Using %s client for model: %s", client_name, model)
-            client.debug = True
-
         return client, normalized_model
+
+    def _get_backend_name(
+        self,
+        client: Union[
+            ollama_client.OllamaClient,
+            lmstudio_client.LMStudioClient,
+            openai_client.OpenAIClient,
+            anthropic_client.AnthropicClient,
+            gemini_client.GeminiClient,
+        ],
+    ) -> str:
+        """Get the backend name for a client instance.
+
+        Args:
+            client: The LLM client instance.
+
+        Returns:
+            Backend name string (e.g., "openai", "anthropic", "gemini", "ollama", "lmstudio").
+        """
+        if isinstance(client, openai_client.OpenAIClient):
+            return "openai"
+        elif isinstance(client, anthropic_client.AnthropicClient):
+            return "anthropic"
+        elif isinstance(client, gemini_client.GeminiClient):
+            return "gemini"
+        elif isinstance(client, ollama_client.OllamaClient):
+            return "ollama"
+        elif isinstance(client, lmstudio_client.LMStudioClient):
+            return "lmstudio"
+        else:
+            return "unknown"
 
     def warm_model(self, model: str, timeout: Optional[float] = None) -> bool:
         """Initialize model for faster first inference."""
@@ -262,6 +304,27 @@ class UnifiedLLMClient:
         # Get the appropriate client for this model
         client, normalized_model = self._get_client(model)
 
+        # Determine backend name for metrics and logging
+        backend_name = self._get_backend_name(client)
+
+        if self.debug:
+            if normalized_model != model:
+                logger.debug(
+                    "Using %s client for model: %s (normalized from %s)",
+                    backend_name,
+                    normalized_model,
+                    model,
+                )
+            else:
+                logger.debug("Using %s client for model: %s", backend_name, model)
+            client.debug = True
+
+        # Track timing for metrics
+        start_time = time.perf_counter()
+        status = "success"
+        tokens_in = 0
+        tokens_out = 0
+
         try:
             result = client.generate_chat(
                 prompt=prompt,
@@ -270,6 +333,11 @@ class UnifiedLLMClient:
                 json_schema=json_schema,
                 context=context,
             )
+
+            # Extract token usage if available
+            if result.usage:
+                tokens_in = result.usage.tokens_in
+                tokens_out = result.usage.tokens_out
 
             # Always log token usage for all LLM queries
             response_type = "JSON" if json_schema else "text"
@@ -302,8 +370,20 @@ class UnifiedLLMClient:
             return result
 
         except Exception as e:
+            status = "error"
             logger.error("Chat generation failed: %s", str(e))
             raise
+
+        finally:
+            # Record metrics if callback is set
+            if _metrics_callback is not None:
+                duration = time.perf_counter() - start_time
+                try:
+                    _metrics_callback(
+                        backend_name, normalized_model, duration, status, tokens_in, tokens_out
+                    )
+                except Exception as metrics_error:
+                    logger.warning("Failed to record LLM metrics: %s", metrics_error)
 
 
 # Lazy client instance - only created when first accessed
