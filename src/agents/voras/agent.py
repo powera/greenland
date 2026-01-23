@@ -44,12 +44,9 @@ from wordfreq.storage.translation_helpers import (
     LANG_CODE_TO_LLM_FIELD,
     LANGUAGE_FIELDS,
     LANGUAGE_NAMES,
-    PLURICENTRIC_LANGUAGES,
     convert_llm_response_to_lang_codes,
     get_language_name,
     get_reference_translation,
-    is_pluricentric_language,
-    set_regional_variant,
 )
 from wordfreq.storage.translation_helpers import get_translation
 from wordfreq.storage.translation_helpers import get_translation as get_translation_helper
@@ -851,142 +848,6 @@ class VorasAgent:
                     f"{lang_result['fixed']} fixed, {lang_result['failed']} failed "
                     f"(of {lang_result['total_missing']} missing)"
                 )
-
-        finally:
-            session.close()
-
-        return results
-
-    def fix_missing_regional_variants(
-        self,
-        language_code: str,
-        limit: Optional[int] = None,
-        dry_run: bool = False,
-        lemmas: Optional[List[Lemma]] = None,
-    ) -> Dict[str, Any]:
-        """
-        Generate missing regional variants for a pluricentric language.
-
-        This should be called AFTER base translations exist. It queries the LLM
-        to identify regional differences for languages like en, es, pt, zh.
-
-        Args:
-            language_code: Base language code (must be pluricentric: en, es, pt, zh)
-            limit: Maximum number of words to process
-            dry_run: If True, only report what would be generated without making changes
-            lemmas: Optional pre-filtered list of lemmas to process
-
-        Returns:
-            Dictionary with generation results
-        """
-        if not is_pluricentric_language(language_code):
-            logger.error(f"Language '{language_code}' is not pluricentric")
-            return {"error": f"Language '{language_code}' is not pluricentric"}
-
-        lang_config = PLURICENTRIC_LANGUAGES[language_code]
-        region_codes = list(lang_config["variants"].keys())
-
-        logger.info(
-            f"Starting regional variant generation for {lang_config['display_name']} "
-            f"(regions: {', '.join(region_codes)})..."
-        )
-
-        session = self.get_session()
-        client = self.get_linguistic_client()
-
-        results: Dict[str, Any] = {
-            "language": language_code,
-            "language_name": lang_config["display_name"],
-            "total_processed": 0,
-            "total_with_variants": 0,
-            "total_failed": 0,
-            "by_region": {
-                region: {"name": info["name"], "variants_found": 0}
-                for region, info in lang_config["variants"].items()
-            },
-        }
-
-        try:
-            # Use provided lemmas or query for them
-            if lemmas is not None:
-                all_lemmas = lemmas[:limit] if limit else lemmas
-            else:
-                # Get lemmas that have a base translation for this language
-                query = session.query(Lemma).filter(Lemma.guid.isnot(None)).order_by(Lemma.id)
-
-                if limit:
-                    query = query.limit(limit)
-
-                all_lemmas = query.all()
-
-            # Filter to lemmas that have a base translation
-            words_to_process = []
-            for lemma in all_lemmas:
-                base_translation = self.get_translation(session, lemma, language_code)
-                if base_translation and base_translation.strip():
-                    words_to_process.append((lemma, base_translation))
-
-            total_words = len(words_to_process)
-            logger.info(f"Found {total_words} words with {language_code} translations to check")
-
-            for i, (lemma, base_translation) in enumerate(words_to_process, 1):
-                if i % 10 == 0:
-                    logger.info(f"Progress: {i}/{total_words} words processed")
-
-                try:
-                    if dry_run:
-                        logger.info(
-                            f"[DRY RUN] Would check regional variants for '{lemma.lemma_text}' "
-                            f"(base: {base_translation})"
-                        )
-                        results["total_processed"] += 1
-                        continue
-
-                    # Query LLM for regional variants
-                    variants, success = client.query_regional_variants(
-                        english_word=lemma.lemma_text,
-                        base_translation=base_translation,
-                        base_language_code=language_code,
-                        definition=lemma.definition_text or "",
-                        pos_type=lemma.pos_type,
-                    )
-
-                    if not success:
-                        logger.warning(f"Failed to get regional variants for '{lemma.lemma_text}'")
-                        results["total_failed"] += 1
-                        continue
-
-                    results["total_processed"] += 1
-
-                    if variants:
-                        results["total_with_variants"] += 1
-                        logger.info(
-                            f"Found {len(variants)} regional variant(s) for '{lemma.lemma_text}': "
-                            f"{variants}"
-                        )
-
-                        # Store each variant
-                        for region_code, variant_translation in variants.items():
-                            set_regional_variant(session, lemma, region_code, variant_translation)
-                            results["by_region"][region_code]["variants_found"] += 1
-
-                        session.commit()
-
-                except Exception as e:
-                    logger.error(f"Error processing '{lemma.lemma_text}': {e}")
-                    session.rollback()
-                    results["total_failed"] += 1
-
-            # Log summary
-            logger.info(
-                f"Regional variant generation complete: "
-                f"{results['total_processed']} processed, "
-                f"{results['total_with_variants']} with variants, "
-                f"{results['total_failed']} failed"
-            )
-            for region, info in results["by_region"].items():
-                if info["variants_found"] > 0:
-                    logger.info(f"  {info['name']}: {info['variants_found']} variants")
 
         finally:
             session.close()
