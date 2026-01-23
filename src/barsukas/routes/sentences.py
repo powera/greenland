@@ -10,6 +10,10 @@ from flask.typing import ResponseReturnValue
 from sqlalchemy import case, func, or_
 from werkzeug.wrappers import Response
 
+from audioshoe.coqui.types import CoquiVoice
+from audioshoe.espeak.types import EspeakVoice
+from audioshoe.piper.types import PiperVoice
+from audioshoe.qwen.types import QwenVoice
 from barsukas.helpers.flash_helpers import flash_and_log
 from barsukas.utils.task_queue import TaskType, enqueue_task
 from wordfreq.storage.models.schema import (
@@ -235,6 +239,50 @@ def view_sentence(sentence_id: int) -> Union[str, Response]:
         for cs, conv in conversation_links
     ]
 
+    # Prepare voice options for audio generation
+    openai_voices = [
+        "ash",
+        "alloy",
+        "nova",
+        "ballad",
+        "coral",
+        "echo",
+        "fable",
+        "onyx",
+        "sage",
+        "shimmer",
+    ]
+
+    # eSpeak-NG voices by language
+    espeak_voices = {}
+    for lang_code in language_names.keys():
+        espeak_voice_list = EspeakVoice.get_voices_for_language(lang_code)
+        espeak_voices[lang_code] = [{"name": v.name, "gender": v.gender} for v in espeak_voice_list]
+
+    # Piper voices by language
+    piper_voices = {}
+    for lang_code in language_names.keys():
+        piper_voice_list = PiperVoice.get_voices_for_language(lang_code)
+        piper_voices[lang_code] = [
+            {"name": v.name, "ui_name": v.ui_name, "gender": v.gender} for v in piper_voice_list
+        ]
+
+    # Coqui voices by language
+    coqui_voices = {}
+    for lang_code in language_names.keys():
+        coqui_voice_list = CoquiVoice.get_voices_for_language(lang_code)
+        coqui_voices[lang_code] = [
+            {"name": v.name, "ui_name": v.ui_name, "gender": v.gender} for v in coqui_voice_list
+        ]
+
+    # Qwen3 voices by language
+    qwen3_voices = {}
+    for lang_code in language_names.keys():
+        qwen3_voice_list = QwenVoice.get_voices_for_language(lang_code)
+        qwen3_voices[lang_code] = [
+            {"name": v.name, "ui_name": v.ui_name, "gender": v.gender} for v in qwen3_voice_list
+        ]
+
     return render_template(
         "sentences/view.html",
         sentence=sentence,
@@ -244,6 +292,11 @@ def view_sentence(sentence_id: int) -> Union[str, Response]:
         pattern_words=pattern_words_data,
         audio_by_language=audio_by_language,
         conversations_data=conversations_data,
+        openai_voices=openai_voices,
+        espeak_voices=espeak_voices,
+        piper_voices=piper_voices,
+        coqui_voices=coqui_voices,
+        qwen3_voices=qwen3_voices,
     )
 
 
