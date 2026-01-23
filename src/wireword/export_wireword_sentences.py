@@ -26,13 +26,8 @@ from wordfreq.storage.models.schema import (
     AudioQualityReview,
     ConversationSentence,
     Sentence,
-    SentenceRegionalVariant,
     SentenceTranslation,
     SentenceWord,
-)
-from wordfreq.storage.translation_helpers import (
-    PLURICENTRIC_LANGUAGES,
-    is_pluricentric_language,
 )
 from langtools.zh.converter import to_simplified
 from langtools.zh.pinyin_helper import generate_pinyin
@@ -231,31 +226,6 @@ class WirewordSentenceExporter:
                     audio_by_text[record.expected_text][record.voice_name] = record.manifest_md5
             logger.info(f"Bulk fetched {len(all_audio_records)} audio records")
 
-            # Bulk fetch regional variants for pluricentric languages
-            regional_variants_by_sentence: Dict[int, Dict[str, str]] = {}
-            if is_pluricentric_language(self.language):
-                variants_config = PLURICENTRIC_LANGUAGES[self.language]["variants"]
-                region_codes = list(variants_config.keys())
-
-                all_regional_variants = (
-                    session.query(SentenceRegionalVariant)
-                    .filter(
-                        SentenceRegionalVariant.sentence_id.in_(sentence_ids),
-                        SentenceRegionalVariant.region_code.in_(region_codes),
-                    )
-                    .all()
-                )
-
-                # Index by sentence_id
-                for variant in all_regional_variants:
-                    if variant.sentence_id not in regional_variants_by_sentence:
-                        regional_variants_by_sentence[variant.sentence_id] = {}
-                    regional_variants_by_sentence[variant.sentence_id][
-                        variant.region_code
-                    ] = variant.translation_text
-
-                logger.info(f"Bulk fetched {len(all_regional_variants)} regional variants")
-
             # Build output structure
             output = {
                 "language": self.language,
@@ -324,27 +294,6 @@ class WirewordSentenceExporter:
                     pinyin = generate_pinyin(translations[self.language])
                     if pinyin:
                         sentence_entry["pinyin"] = pinyin
-
-                # Add regional variants for pluricentric languages
-                if sentence.id in regional_variants_by_sentence:
-                    variants = regional_variants_by_sentence[sentence.id]
-                    # Get the base translation for comparison
-                    base_translation = translations.get(self.language)
-                    # Only include variants that differ from base
-                    # For Chinese with simplified_chinese=True, convert variants before comparing
-                    differing_variants = {}
-                    for region, trans in variants.items():
-                        if not trans:
-                            continue
-                        # Normalize for comparison (convert to simplified if needed)
-                        compare_trans = trans
-                        if self.language == "zh" and self.simplified_chinese:
-                            compare_trans = to_simplified(trans)
-                        if compare_trans != base_translation:
-                            # Store the converted form in export
-                            differing_variants[region] = compare_trans
-                    if differing_variants:
-                        sentence_entry["regional_variants"] = differing_variants
 
                 # Include optional metadata
                 if sentence.source_filename:

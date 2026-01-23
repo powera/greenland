@@ -27,11 +27,8 @@ from wordfreq.storage.models.grammar_fact import GrammarFact
 from wordfreq.storage.models.schema import AudioQualityReview, DerivativeForm, Lemma, WordToken
 from wordfreq.storage.translation_helpers import (
     LANGUAGE_FIELDS,
-    PLURICENTRIC_LANGUAGES,
-    bulk_get_all_regional_variants,
     bulk_get_translations,
     get_translation,
-    is_pluricentric_language,
 )
 from langtools.zh.converter import to_simplified
 from langtools.zh.pinyin_helper import generate_pinyin
@@ -450,16 +447,6 @@ class WirewordExporter:
                 grammar_facts_by_lemma[fact.lemma_id].append(fact)
             logger.info(f"Bulk fetched {len(all_grammar_facts)} grammar facts")
 
-            # Bulk fetch regional variants for pluricentric languages
-            regional_variants_by_lemma: Dict[int, Dict[str, Optional[str]]] = {}
-            if is_pluricentric_language(self.language):
-                regional_variants_by_lemma = bulk_get_all_regional_variants(
-                    session, lemmas_list, self.language
-                )
-                logger.info(
-                    f"Bulk fetched regional variants for {len(regional_variants_by_lemma)} lemmas"
-                )
-
             # Build English translation lookup for derivative forms
             # (used for _get_english_translation_from_db)
             english_forms_by_lemma: Dict[int, Dict[str, str]] = {}
@@ -681,25 +668,6 @@ class WirewordExporter:
                         # Store grammar facts as key-value pairs
                         grammar_metadata[fact.fact_type] = fact.fact_value
                     wireword["grammar_metadata"] = grammar_metadata
-
-                # Add regional variants for pluricentric languages
-                if lemma_id in regional_variants_by_lemma:
-                    variants = regional_variants_by_lemma[lemma_id]
-                    # Only include variants that differ from base_target
-                    # For Chinese with simplified_chinese=True, convert variants before comparing
-                    differing_variants = {}
-                    for region, trans in variants.items():
-                        if not trans:
-                            continue
-                        # Normalize for comparison (convert to simplified if needed)
-                        compare_trans = trans
-                        if self.language == "zh" and self.simplified_chinese:
-                            compare_trans = to_simplified(trans)
-                        if compare_trans != entry["target_language"]:
-                            # Store the converted form in export
-                            differing_variants[region] = compare_trans
-                    if differing_variants:
-                        wireword["regional_variants"] = differing_variants
 
                 if lemma.frequency_rank:
                     wireword["frequency_rank"] = lemma.frequency_rank
@@ -1048,16 +1016,6 @@ class WirewordExporter:
                     audio_by_guid_form[key][audio.voice_name] = audio.manifest_md5
             logger.info(f"Bulk fetched {len(all_audio_records)} audio records")
 
-            # Bulk fetch regional variants for pluricentric languages
-            regional_variants_by_lemma: Dict[int, Dict[str, Optional[str]]] = {}
-            if is_pluricentric_language(self.language):
-                regional_variants_by_lemma = bulk_get_all_regional_variants(
-                    session, lemmas, self.language
-                )
-                logger.info(
-                    f"Bulk fetched regional variants for {len(regional_variants_by_lemma)} verbs"
-                )
-
             # Transform to WireWord format using pre-fetched data
             wireword_data = []
             for lemma in lemmas:
@@ -1221,25 +1179,6 @@ class WirewordExporter:
                 # Add grammatical forms (conjugations)
                 if grammatical_forms:
                     wireword["grammatical_forms"] = grammatical_forms
-
-                # Add regional variants for pluricentric languages
-                if lemma.id in regional_variants_by_lemma:
-                    variants = regional_variants_by_lemma[lemma.id]
-                    # Only include variants that differ from base_target
-                    # For Chinese with simplified_chinese=True, convert variants before comparing
-                    differing_variants = {}
-                    for region, trans in variants.items():
-                        if not trans:
-                            continue
-                        # Normalize for comparison (convert to simplified if needed)
-                        compare_trans = trans
-                        if self.language == "zh" and self.simplified_chinese:
-                            compare_trans = to_simplified(trans)
-                        if compare_trans != base_target:
-                            # Store the converted form in export
-                            differing_variants[region] = compare_trans
-                    if differing_variants:
-                        wireword["regional_variants"] = differing_variants
 
                 if lemma.notes:
                     wireword["notes"] = lemma.notes
