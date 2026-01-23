@@ -4,13 +4,13 @@
 
 import json
 import logging
-from typing import Any, Callable, Dict, List, Optional, Tuple, cast
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import util.prompt_loader
 from clients.types import Schema, SchemaProperty
 from wordfreq.storage import database as linguistic_db
 from wordfreq.storage.translation_helpers import LANGUAGE_NAMES
-from wordfreq.translation.constants import DEFAULT_TRANSLATION_LANGUAGES, REGIONAL_VARIANT_LANGUAGES
+from wordfreq.translation.constants import DEFAULT_TRANSLATION_LANGUAGES
 
 logger = logging.getLogger(__name__)
 
@@ -159,133 +159,4 @@ def query_translations(
 
     except Exception as e:
         logger.error(f"Error generating translations for '{english_word}': {type(e).__name__}: {e}")
-        return {}, False
-
-
-def query_regional_variants(
-    client: Any,
-    english_word: str,
-    base_translation: str,
-    base_language_code: str,
-    definition: str,
-    pos_type: str,
-    get_session_func: Callable,
-    model: Optional[str] = None,
-) -> Tuple[Dict[str, str], bool]:
-    """
-    Query LLM to generate regional variants for a pluricentric language translation.
-
-    This is called AFTER the base translation exists. It asks the LLM to provide
-    regional variants where they differ from the base translation.
-
-    Args:
-        client: UnifiedLLMClient instance
-        english_word: English lemma form
-        base_translation: Existing translation in base form (e.g., "color" for en, "ordenador" for es)
-        base_language_code: Language code (e.g., 'en', 'es', 'pt', 'zh')
-        definition: Definition of the word
-        pos_type: Part of speech (noun, verb, etc.)
-        get_session_func: Function to get database session
-        model: Optional model override
-
-    Returns:
-        Tuple of (regional_variants dict, success flag)
-        regional_variants dict has keys like: en-US, en-GB, en-AU (only if different from base)
-        Returns empty dict if no variants differ from base.
-    """
-    if base_language_code not in REGIONAL_VARIANT_LANGUAGES:
-        logger.debug(
-            f"Language '{base_language_code}' is not pluricentric, skipping regional variants"
-        )
-        return {}, True  # Success but no variants needed
-
-    lang_config = REGIONAL_VARIANT_LANGUAGES[base_language_code]
-    variants = cast(Dict[str, Dict[str, str]], lang_config["variants"])
-
-    # Build schema properties for each regional variant
-    schema_properties = {}
-    for region_code, region_info in variants.items():
-        schema_properties[region_code] = SchemaProperty(
-            "string",
-            f"{region_info['name']}: translation if different from base, or 'SAME' if identical",
-        )
-
-    schema = Schema(
-        name="RegionalVariants",
-        description=f"Regional variants for {lang_config['display_name']} translation",
-        properties=schema_properties,
-    )
-
-    # Build variant descriptions for prompt
-    variant_descriptions = []
-    for region_code, region_info in variants.items():
-        variant_descriptions.append(
-            f"- {region_code} ({region_info['name']}): {region_info['description']}"
-        )
-
-    prompt = f"""Given the following word and its base {lang_config['display_name']} translation, provide regional variants where they differ.
-
-English word: "{english_word}"
-Definition: {definition}
-Part of speech: {pos_type}
-Base translation: "{base_translation}"
-
-Regional variants to check:
-{chr(10).join(variant_descriptions)}
-
-For each region, provide:
-- The regional translation if it differs from the base translation
-- The string "SAME" if the translation is identical to the base
-
-Only provide different translations where there are genuine regional vocabulary or spelling differences.
-Provide translations in lemma form (infinitive for verbs, singular for nouns)."""
-
-    context = f"""You are a linguistic expert specializing in regional variations of {lang_config['display_name']}.
-Your task is to identify when regional variants differ from a base translation.
-
-Guidelines:
-- Only mark as different when there's a genuine regional difference in vocabulary or spelling
-- Spelling differences count (e.g., color/colour, organize/organise)
-- Vocabulary differences count (e.g., truck/lorry, elevator/lift)
-- Minor pronunciation-only differences should be marked as "SAME"
-- When in doubt, mark as "SAME" - we only want genuine lexical differences"""
-
-    try:
-        response = client.generate_chat(
-            prompt=prompt, model=model, json_schema=schema, context=context
-        )
-
-        # Log successful query
-        session = get_session_func()
-        try:
-            linguistic_db.log_query(
-                session,
-                word=english_word,
-                query_type="regional_variant_generation",
-                prompt=prompt,
-                response=json.dumps(response.structured_data),
-                model=model or "unknown",
-            )
-        except Exception as log_err:
-            logger.error(f"Failed to log regional variant query: {log_err}")
-
-        # Process response - filter out "SAME" values
-        if response.structured_data and isinstance(response.structured_data, dict):
-            result = {}
-            for region_code, translation in response.structured_data.items():
-                if (
-                    translation
-                    and translation.upper() != "SAME"
-                    and translation != base_translation
-                ):
-                    result[region_code] = translation
-            return result, True
-        else:
-            logger.warning(f"Invalid response format for regional variants of '{english_word}'")
-            return {}, False
-
-    except Exception as e:
-        logger.error(
-            f"Error generating regional variants for '{english_word}': {type(e).__name__}: {e}"
-        )
         return {}, False

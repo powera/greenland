@@ -183,40 +183,6 @@ class LinguisticClient:
             self.model,
         )
 
-    def query_regional_variants(
-        self,
-        english_word: str,
-        base_translation: str,
-        base_language_code: str,
-        definition: str,
-        pos_type: str,
-    ) -> Tuple[Dict[str, str], bool]:
-        """
-        Query LLM to generate regional variants for a pluricentric language.
-
-        Args:
-            english_word: English lemma form
-            base_translation: Existing translation in base form
-            base_language_code: Language code (e.g., 'en', 'es', 'pt', 'zh')
-            definition: Definition of the word
-            pos_type: Part of speech
-
-        Returns:
-            Tuple of (regional_variants dict, success flag)
-            Dict keys are region codes (e.g., 'en-GB'), values are translations
-            Only includes variants that differ from base_translation
-        """
-        return translations.query_regional_variants(
-            self.client,
-            english_word,
-            base_translation,
-            base_language_code,
-            definition,
-            pos_type,
-            self.get_session,
-            self.model,
-        )
-
     # Word processing
     def process_word(self, word: str, refresh: bool = False) -> bool:
         """Process a word to get linguistic information and store in database."""
