@@ -17,7 +17,7 @@ from typing import Any, Callable, Dict, Optional
 
 from config import Config
 from flask import Flask, Response, g, render_template
-from metrics import RequestMetricsMiddleware, get_metrics_output
+from metrics import RequestMetricsMiddleware, get_metrics_output, record_llm_call
 from sqlalchemy.orm import Session
 
 from langtools.ja.romaji_helper import (
@@ -118,6 +118,15 @@ def create_app(config_class: type[Config] = Config, db_url: Optional[str] = None
 
     # Store backend config in app
     app.backend_config = backend_config
+
+    # Register LLM metrics callback so unified_client reports metrics
+    try:
+        from clients.unified_client import set_llm_metrics_callback
+
+        set_llm_metrics_callback(record_llm_call)
+    except ImportError:
+        # clients module may not be available in all configurations
+        pass
 
     # Create a session factory function that returns new sessions
     def session_factory() -> Session:

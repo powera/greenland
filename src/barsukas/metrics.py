@@ -53,6 +53,29 @@ DB_QUERY_COUNT = Counter(
     registry=REGISTRY,
 )
 
+# LLM call metrics
+LLM_CALL_COUNT = Counter(
+    "barsukas_llm_calls_total",
+    "Total number of LLM API calls",
+    ["backend", "model", "status"],
+    registry=REGISTRY,
+)
+
+LLM_CALL_LATENCY = Histogram(
+    "barsukas_llm_call_duration_seconds",
+    "LLM API call latency in seconds",
+    ["backend", "model"],
+    buckets=(1.0, 2.0, 5.0, 10.0, 15.0, 20.0, 30.0, 45.0, 60.0, 90.0, 120.0),
+    registry=REGISTRY,
+)
+
+LLM_TOKENS_TOTAL = Counter(
+    "barsukas_llm_tokens_total",
+    "Total number of tokens processed by LLM calls",
+    ["backend", "model", "direction"],
+    registry=REGISTRY,
+)
+
 # Resource usage metrics
 CPU_USAGE = Gauge(
     "barsukas_process_cpu_percent",
@@ -223,3 +246,58 @@ class RequestMetricsMiddleware:
             ).inc()
 
         return response
+
+
+@contextmanager
+def track_llm_call(backend: str, model: str) -> Generator[None, None, None]:
+    """Context manager to track LLM API call latency and count.
+
+    Args:
+        backend: The LLM backend (e.g., "openai", "anthropic", "gemini", "ollama").
+        model: The model name being used.
+
+    Usage:
+        with track_llm_call("openai", "gpt-4o"):
+            response = client.generate_chat(prompt)
+    """
+    start_time = time.perf_counter()
+    status = "success"
+    try:
+        yield
+    except Exception:
+        status = "error"
+        raise
+    finally:
+        duration = time.perf_counter() - start_time
+        LLM_CALL_LATENCY.labels(backend=backend, model=model).observe(duration)
+        LLM_CALL_COUNT.labels(backend=backend, model=model, status=status).inc()
+
+
+def record_llm_call(
+    backend: str,
+    model: str,
+    duration_seconds: float,
+    status: str = "success",
+    tokens_in: int = 0,
+    tokens_out: int = 0,
+) -> None:
+    """Record metrics for an LLM API call.
+
+    This function is useful when you need to record metrics after the fact,
+    rather than using the context manager.
+
+    Args:
+        backend: The LLM backend (e.g., "openai", "anthropic", "gemini", "ollama").
+        model: The model name being used.
+        duration_seconds: How long the call took in seconds.
+        status: "success" or "error".
+        tokens_in: Number of input tokens (optional).
+        tokens_out: Number of output tokens (optional).
+    """
+    LLM_CALL_LATENCY.labels(backend=backend, model=model).observe(duration_seconds)
+    LLM_CALL_COUNT.labels(backend=backend, model=model, status=status).inc()
+
+    if tokens_in > 0:
+        LLM_TOKENS_TOTAL.labels(backend=backend, model=model, direction="input").inc(tokens_in)
+    if tokens_out > 0:
+        LLM_TOKENS_TOTAL.labels(backend=backend, model=model, direction="output").inc(tokens_out)
