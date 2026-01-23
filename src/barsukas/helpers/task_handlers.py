@@ -1,7 +1,7 @@
 """Handlers that execute Barsukas background tasks.
 
-This module imports workqueue handlers from agent-specific modules
-in src/barsukas/{agent}/wq_worker.py and registers them in TASK_HANDLERS.
+This module imports workqueue handlers from src/workqueue/handlers/{agent}.py
+and registers them in TASK_HANDLERS.
 """
 
 from __future__ import annotations
@@ -26,15 +26,15 @@ from wordfreq.storage.translation_helpers import (
 )
 from wordfreq.translation.client import LinguisticClient
 
-# Import workqueue handlers from agent-specific modules
-from barsukas.lape.wq_worker import handle_generate_grammar_fact
-from barsukas.papuga.wq_worker import handle_generate_pronunciations
-from barsukas.sarka.wq_worker import handle_generate_conversation
-from barsukas.sernas.wq_worker import handle_generate_synonyms
-from barsukas.vieversys.wq_worker import handle_generate_audio, handle_generate_sentence_audio
-from barsukas.vilkas.wq_worker import handle_generate_forms
-from barsukas.voras.wq_worker import handle_add_missing_translations
-from barsukas.zvirblis.wq_worker import handle_translate_sentence
+# Import workqueue handlers from centralized workqueue package
+from workqueue.handlers.lape import handle_generate_grammar_fact
+from workqueue.handlers.papuga import handle_generate_pronunciations
+from workqueue.handlers.sarka import handle_generate_conversation
+from workqueue.handlers.sernas import handle_generate_synonyms
+from workqueue.handlers.vieversys import handle_generate_audio, handle_generate_sentence_audio
+from workqueue.handlers.vilkas import handle_generate_forms
+from workqueue.handlers.voras import handle_add_missing_translations
+from workqueue.handlers.zvirblis import handle_translate_sentence
 
 
 def _build_config() -> DataSourceConfig:

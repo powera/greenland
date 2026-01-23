@@ -65,9 +65,7 @@ def _query_conversation_llm(
         name="ConversationGeneration",
         description="Generate a simple conversation for language learning",
         properties={
-            "title": SchemaProperty(
-                "string", "A short title describing the conversation scenario"
-            ),
+            "title": SchemaProperty("string", "A short title describing the conversation scenario"),
             "sentences": SchemaProperty(
                 "array",
                 "List of conversation exchanges",
@@ -231,9 +229,7 @@ def generate_conversation_with_session(
         },
     )
 
-    logger.info(
-        f"Created conversation {conversation.id} with {len(created_sentences)} sentences"
-    )
+    logger.info(f"Created conversation {conversation.id} with {len(created_sentences)} sentences")
 
     return {
         "success": True,
