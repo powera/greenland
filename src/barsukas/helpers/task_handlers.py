@@ -31,7 +31,7 @@ from barsukas.lape.wq_worker import handle_generate_grammar_fact
 from barsukas.papuga.wq_worker import handle_generate_pronunciations
 from barsukas.sarka.wq_worker import handle_generate_conversation
 from barsukas.sernas.wq_worker import handle_generate_synonyms
-from barsukas.vieversys.wq_worker import handle_generate_audio
+from barsukas.vieversys.wq_worker import handle_generate_audio, handle_generate_sentence_audio
 from barsukas.vilkas.wq_worker import handle_generate_forms
 from barsukas.voras.wq_worker import handle_add_missing_translations
 from barsukas.zvirblis.wq_worker import handle_translate_sentence
@@ -307,6 +307,7 @@ TASK_HANDLERS = {
     "generate_synonyms": handle_generate_synonyms,
     "translate_sentence": handle_translate_sentence,
     "generate_audio": handle_generate_audio,
+    "generate_sentence_audio": handle_generate_sentence_audio,
     "generate_grammar_fact": handle_generate_grammar_fact,
     "lape_generate_grammar_fact": handle_lape_generate_grammar_fact,
     "sarka_generate_conversation": handle_generate_conversation,

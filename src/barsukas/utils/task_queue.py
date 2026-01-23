@@ -42,6 +42,7 @@ class TaskType:
     GENERATE_SYNONYMS = "generate_synonyms"
     TRANSLATE_SENTENCE = "translate_sentence"
     GENERATE_AUDIO = "generate_audio"
+    GENERATE_SENTENCE_AUDIO = "generate_sentence_audio"
     GENERATE_GRAMMAR_FACT = "generate_grammar_fact"
 
 

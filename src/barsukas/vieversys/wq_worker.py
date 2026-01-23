@@ -25,7 +25,7 @@ from audioshoe.piper import PiperVoice
 from audioshoe.qwen import QwenVoice
 from clients.audio import Voice
 from wordfreq.storage.backend.config import DataSourceConfig
-from wordfreq.storage.models.schema import Lemma
+from wordfreq.storage.models.schema import Lemma, Sentence, SentenceTranslation
 
 logger = logging.getLogger(__name__)
 
@@ -337,4 +337,442 @@ def _generate_audio_coqui(
 
     except Exception as e:
         logger.error(f"Error generating Coqui audio: {e}")
+        return {"success": False, "error": str(e), "voices": []}
+
+
+def handle_generate_sentence_audio(session: Session, payload: Dict) -> str:
+    """
+    Handle audio generation task for sentences.
+
+    Payload schema:
+        sentence_id: int - ID of the sentence to generate audio for
+        language_code: str - Target language code (e.g., "lt", "zh")
+        voices: List[str] - Voice names to use (e.g., ["ash", "alloy", "nova"])
+        tts_engine: str - TTS engine to use ("openai", "espeak-ng", "piper", "coqui", "qwen3")
+
+    Returns:
+        str: Result message describing what was generated
+    """
+    sentence_id = payload["sentence_id"]
+    language_code = payload["language_code"]
+    voice_names = payload.get("voices", ["ash", "alloy", "nova"])
+    tts_engine = payload.get("tts_engine", "openai")
+
+    # Get sentence
+    sentence = session.query(Sentence).filter_by(id=sentence_id).first()
+    if not sentence:
+        raise ValueError(f"Sentence {sentence_id} not found")
+
+    # Get translation
+    translation = (
+        session.query(SentenceTranslation)
+        .filter_by(sentence_id=sentence_id, language_code=language_code)
+        .first()
+    )
+    if not translation:
+        raise ValueError(f"No {language_code} translation for sentence {sentence_id}")
+
+    text = translation.translation_text.strip()
+    if not text:
+        raise ValueError(f"Empty translation for sentence {sentence_id} in {language_code}")
+
+    config = build_default_config()
+    audio_output_dir = _get_audio_output_dir()
+
+    # Generate audio based on TTS engine
+    if tts_engine == "espeak-ng":
+        result = _generate_sentence_audio_espeak(
+            session, sentence_id, text, language_code, voice_names, audio_output_dir, config
+        )
+    elif tts_engine == "qwen3":
+        result = _generate_sentence_audio_qwen(
+            session, sentence_id, text, language_code, voice_names, audio_output_dir, config
+        )
+    elif tts_engine == "piper":
+        result = _generate_sentence_audio_piper(
+            session, sentence_id, text, language_code, voice_names, audio_output_dir
+        )
+    elif tts_engine == "coqui":
+        result = _generate_sentence_audio_coqui(
+            session, sentence_id, text, language_code, voice_names, audio_output_dir
+        )
+    else:
+        # Default to OpenAI
+        result = _generate_sentence_audio_openai(
+            session, sentence_id, text, language_code, voice_names, audio_output_dir
+        )
+
+    if not result["success"]:
+        raise RuntimeError(result.get("error", "Sentence audio generation failed"))
+
+    successful_voices = [v for v in result.get("voices", []) if v.get("success")]
+    voice_count = len(successful_voices)
+
+    if voice_count == 0:
+        raise RuntimeError("No audio files were generated successfully for sentence")
+
+    return f"Generated sentence audio for {voice_count} voice(s) in {language_code}"
+
+
+def _generate_sentence_audio_openai(
+    session: Session,
+    sentence_id: int,
+    text: str,
+    language_code: str,
+    voice_names: List[str],
+    output_dir: str,
+) -> Dict:
+    """Generate sentence audio using OpenAI TTS."""
+    import hashlib
+    import json
+
+    from clients.audio import generate_audio
+    from clients.audio.types import AudioFormat
+    from wordfreq.storage.models.schema import AudioQualityReview
+
+    try:
+        openai_voice_enums = [Voice(v) for v in voice_names]
+        generated_voices = []
+
+        for voice in openai_voice_enums:
+            try:
+                result = generate_audio(text=text, voice=voice, language_code=language_code)
+
+                if not result.success:
+                    logger.error(f"Failed to generate OpenAI audio for sentence: {result.error}")
+                    generated_voices.append(
+                        {"voice": voice.value, "success": False, "error": result.error}
+                    )
+                    continue
+
+                # Save audio file
+                voice_dir = Path(output_dir) / language_code / voice.value
+                voice_dir.mkdir(parents=True, exist_ok=True)
+
+                md5_hash = hashlib.md5(result.audio_data).hexdigest()
+                filename = f"{md5_hash}.mp3"
+                file_path = voice_dir / filename
+
+                with open(file_path, "wb") as f:
+                    f.write(result.audio_data)
+
+                # Create review record for sentence
+                review = AudioQualityReview(
+                    sentence_id=sentence_id,
+                    language_code=language_code,
+                    voice_name=voice.value,
+                    filename=filename,
+                    expected_text=text,
+                    manifest_md5=md5_hash,
+                    status="pending_review",
+                    quality_issues=json.dumps([]),
+                )
+                session.add(review)
+                generated_voices.append({"voice": voice.value, "success": True})
+
+            except Exception as e:
+                logger.error(f"Error generating OpenAI audio for {voice.value}: {e}")
+                generated_voices.append({"voice": voice.value, "success": False, "error": str(e)})
+
+        session.commit()
+        return {"success": True, "voices": generated_voices}
+
+    except Exception as e:
+        logger.error(f"Error generating OpenAI sentence audio: {e}")
+        return {"success": False, "error": str(e), "voices": []}
+
+
+def _generate_sentence_audio_espeak(
+    session: Session,
+    sentence_id: int,
+    text: str,
+    language_code: str,
+    voice_names: List[str],
+    output_dir: str,
+    config: DataSourceConfig,
+) -> Dict:
+    """Generate sentence audio using eSpeak-NG."""
+    import hashlib
+    import json
+
+    from audioshoe.espeak import EspeakNGClient
+    from clients.audio.types import AudioFormat
+    from wordfreq.storage.models.schema import AudioQualityReview
+
+    try:
+        espeak_voice_enums = [EspeakVoice[v.upper()] for v in voice_names]
+        client = EspeakNGClient()
+
+        generated_voices = []
+        for voice in espeak_voice_enums:
+            try:
+                result = client.generate_audio(
+                    text=text,
+                    voice=voice,
+                    audio_format=AudioFormat.MP3,
+                )
+
+                if not result.success:
+                    logger.error(f"Failed to generate eSpeak audio: {result.error}")
+                    generated_voices.append(
+                        {"voice": voice.name, "success": False, "error": result.error}
+                    )
+                    continue
+
+                # Save audio file
+                voice_dir = Path(output_dir) / language_code / voice.name
+                voice_dir.mkdir(parents=True, exist_ok=True)
+
+                md5_hash = hashlib.md5(result.audio_data).hexdigest()
+                filename = f"{md5_hash}.mp3"
+                file_path = voice_dir / filename
+
+                with open(file_path, "wb") as f:
+                    f.write(result.audio_data)
+
+                # Create review record
+                review = AudioQualityReview(
+                    sentence_id=sentence_id,
+                    language_code=language_code,
+                    voice_name=voice.name,
+                    filename=filename,
+                    expected_text=text,
+                    manifest_md5=md5_hash,
+                    status="pending_review",
+                    quality_issues=json.dumps([]),
+                )
+                session.add(review)
+                generated_voices.append({"voice": voice.name, "success": True})
+
+            except Exception as e:
+                logger.error(f"Error generating eSpeak audio for {voice.name}: {e}")
+                generated_voices.append({"voice": voice.name, "success": False, "error": str(e)})
+
+        session.commit()
+        return {"success": True, "voices": generated_voices}
+
+    except Exception as e:
+        logger.error(f"Error generating eSpeak sentence audio: {e}")
+        return {"success": False, "error": str(e), "voices": []}
+
+
+def _generate_sentence_audio_qwen(
+    session: Session,
+    sentence_id: int,
+    text: str,
+    language_code: str,
+    voice_names: List[str],
+    output_dir: str,
+    config: DataSourceConfig,
+) -> Dict:
+    """Generate sentence audio using Qwen3."""
+    import hashlib
+    import json
+
+    from audioshoe.qwen import QwenTTSClient
+    from clients.audio.types import AudioFormat
+    from wordfreq.storage.models.schema import AudioQualityReview
+
+    try:
+        qwen_voice_enums = [QwenVoice[v.upper()] for v in voice_names]
+        client = QwenTTSClient()
+
+        generated_voices = []
+        for voice in qwen_voice_enums:
+            try:
+                result = client.generate_audio(
+                    text=text,
+                    voice=voice,
+                    audio_format=AudioFormat.MP3,
+                )
+
+                if not result.success:
+                    logger.error(f"Failed to generate Qwen audio: {result.error}")
+                    generated_voices.append(
+                        {"voice": voice.ui_name, "success": False, "error": result.error}
+                    )
+                    continue
+
+                # Save audio file
+                voice_dir = Path(output_dir) / language_code / voice.ui_name
+                voice_dir.mkdir(parents=True, exist_ok=True)
+
+                md5_hash = hashlib.md5(result.audio_data).hexdigest()
+                filename = f"{md5_hash}.mp3"
+                file_path = voice_dir / filename
+
+                with open(file_path, "wb") as f:
+                    f.write(result.audio_data)
+
+                # Create review record
+                review = AudioQualityReview(
+                    sentence_id=sentence_id,
+                    language_code=language_code,
+                    voice_name=voice.ui_name,
+                    filename=filename,
+                    expected_text=text,
+                    manifest_md5=md5_hash,
+                    status="pending_review",
+                    quality_issues=json.dumps([]),
+                )
+                session.add(review)
+                generated_voices.append({"voice": voice.ui_name, "success": True})
+
+            except Exception as e:
+                logger.error(f"Error generating Qwen audio for {voice.ui_name}: {e}")
+                generated_voices.append({"voice": voice.ui_name, "success": False, "error": str(e)})
+
+        session.commit()
+        return {"success": True, "voices": generated_voices}
+
+    except Exception as e:
+        logger.error(f"Error generating Qwen sentence audio: {e}")
+        return {"success": False, "error": str(e), "voices": []}
+
+
+def _generate_sentence_audio_piper(
+    session: Session,
+    sentence_id: int,
+    text: str,
+    language_code: str,
+    voice_names: List[str],
+    output_dir: str,
+) -> Dict:
+    """Generate sentence audio using Piper TTS."""
+    import hashlib
+    import json
+
+    from audioshoe.piper import PiperClient
+    from clients.audio.types import AudioFormat
+    from wordfreq.storage.models.schema import AudioQualityReview
+
+    try:
+        piper_voice_enums = [PiperVoice[v.upper()] for v in voice_names]
+        client = PiperClient()
+
+        generated_voices = []
+        for voice in piper_voice_enums:
+            try:
+                result = client.generate_audio(
+                    text=text,
+                    voice=voice,
+                    audio_format=AudioFormat.MP3,
+                    speed=1.0,
+                )
+
+                if not result.success:
+                    logger.error(f"Failed to generate Piper audio: {result.error}")
+                    generated_voices.append(
+                        {"voice": voice.ui_name, "success": False, "error": result.error}
+                    )
+                    continue
+
+                # Save audio file
+                voice_dir = Path(output_dir) / language_code / voice.ui_name
+                voice_dir.mkdir(parents=True, exist_ok=True)
+
+                md5_hash = hashlib.md5(result.audio_data).hexdigest()
+                filename = f"{md5_hash}.mp3"
+                file_path = voice_dir / filename
+
+                with open(file_path, "wb") as f:
+                    f.write(result.audio_data)
+
+                # Create review record
+                review = AudioQualityReview(
+                    sentence_id=sentence_id,
+                    language_code=language_code,
+                    voice_name=voice.ui_name,
+                    filename=filename,
+                    expected_text=text,
+                    manifest_md5=md5_hash,
+                    status="pending_review",
+                    quality_issues=json.dumps([]),
+                )
+                session.add(review)
+                generated_voices.append({"voice": voice.ui_name, "success": True})
+
+            except Exception as e:
+                logger.error(f"Error generating Piper audio for {voice.ui_name}: {e}")
+                generated_voices.append({"voice": voice.ui_name, "success": False, "error": str(e)})
+
+        session.commit()
+        return {"success": True, "voices": generated_voices}
+
+    except Exception as e:
+        logger.error(f"Error generating Piper sentence audio: {e}")
+        return {"success": False, "error": str(e), "voices": []}
+
+
+def _generate_sentence_audio_coqui(
+    session: Session,
+    sentence_id: int,
+    text: str,
+    language_code: str,
+    voice_names: List[str],
+    output_dir: str,
+) -> Dict:
+    """Generate sentence audio using Coqui TTS."""
+    import hashlib
+    import json
+
+    from audioshoe.coqui import CoquiClient
+    from clients.audio.types import AudioFormat
+    from wordfreq.storage.models.schema import AudioQualityReview
+
+    try:
+        coqui_voice_enums = [CoquiVoice[v.upper()] for v in voice_names]
+        client = CoquiClient()
+
+        generated_voices = []
+        for voice in coqui_voice_enums:
+            try:
+                result = client.generate_audio(
+                    text=text,
+                    voice=voice,
+                    audio_format=AudioFormat.MP3,
+                    speed=1.0,
+                )
+
+                if not result.success:
+                    logger.error(f"Failed to generate Coqui audio: {result.error}")
+                    generated_voices.append(
+                        {"voice": voice.ui_name, "success": False, "error": result.error}
+                    )
+                    continue
+
+                # Save audio file
+                voice_dir = Path(output_dir) / language_code / voice.ui_name
+                voice_dir.mkdir(parents=True, exist_ok=True)
+
+                md5_hash = hashlib.md5(result.audio_data).hexdigest()
+                filename = f"{md5_hash}.mp3"
+                file_path = voice_dir / filename
+
+                with open(file_path, "wb") as f:
+                    f.write(result.audio_data)
+
+                # Create review record
+                review = AudioQualityReview(
+                    sentence_id=sentence_id,
+                    language_code=language_code,
+                    voice_name=voice.ui_name,
+                    filename=filename,
+                    expected_text=text,
+                    manifest_md5=md5_hash,
+                    status="pending_review",
+                    quality_issues=json.dumps([]),
+                )
+                session.add(review)
+                generated_voices.append({"voice": voice.ui_name, "success": True})
+
+            except Exception as e:
+                logger.error(f"Error generating Coqui audio for {voice.ui_name}: {e}")
+                generated_voices.append({"voice": voice.ui_name, "success": False, "error": str(e)})
+
+        session.commit()
+        return {"success": True, "voices": generated_voices}
+
+    except Exception as e:
+        logger.error(f"Error generating Coqui sentence audio: {e}")
         return {"success": False, "error": str(e), "voices": []}

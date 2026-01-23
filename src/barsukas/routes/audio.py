@@ -41,7 +41,13 @@ from audioshoe.piper import PiperClient, PiperVoice
 from barsukas.helpers.audio_helpers import link_audio_to_lemma, validate_audio_translation
 from clients.audio import Voice
 import constants
-from wordfreq.storage.models.schema import AudioQualityReview, Lemma, LemmaDifficultyOverride
+from wordfreq.storage.models.schema import (
+    AudioQualityReview,
+    Lemma,
+    LemmaDifficultyOverride,
+    Sentence,
+    SentenceTranslation,
+)
 from wordfreq.storage.queries.lemma import apply_effective_difficulty_filter
 
 bp = Blueprint("audio", __name__, url_prefix="/audio")
@@ -1050,3 +1056,109 @@ def generate_single(guid: str) -> ResponseReturnValue:
         else:
             flash(f"Error queuing audio generation: {str(e)}", "error")
             return redirect(url_for("lemmas.view_lemma", lemma_id=lemma.id))
+
+
+@bp.route("/generate-sentence/<int:sentence_id>", methods=["POST"])
+def generate_sentence_audio(sentence_id: int) -> ResponseReturnValue:
+    """Generate audio for a single sentence (queued via task worker)."""
+    from barsukas.utils.task_queue import TaskType, enqueue_task
+
+    # Support both JSON and form data
+    if request.is_json:
+        data = request.get_json()
+        language_code = data.get("language")
+        voices = data.get("voices", ["ash", "alloy", "nova"])
+        tts_engine = data.get("tts_engine", "openai")
+    else:
+        language_code = request.form.get("language")
+        voices = request.form.getlist("voices")
+        if not voices:
+            voices = ["ash", "alloy", "nova"]
+        tts_engine = request.form.get("tts_engine", "openai")
+
+    # Find sentence first
+    sentence = g.db.query(Sentence).filter_by(id=sentence_id).first()
+    if not sentence:
+        if request.is_json:
+            return jsonify({"error": f"Sentence not found: {sentence_id}"}), 404
+        else:
+            flash(f"Sentence not found: {sentence_id}", "error")
+            return redirect(url_for("sentences.list_sentences"))
+
+    if not language_code:
+        if request.is_json:
+            return jsonify({"error": "Language code required"}), 400
+        else:
+            flash("Language code required", "error")
+            return redirect(url_for("sentences.view_sentence", sentence_id=sentence_id))
+
+    # Verify sentence has a translation for this language
+    translation = (
+        g.db.query(SentenceTranslation)
+        .filter_by(sentence_id=sentence_id, language_code=language_code)
+        .first()
+    )
+    if not translation:
+        if request.is_json:
+            return jsonify({"error": f"No translation for language: {language_code}"}), 400
+        else:
+            flash(f"No translation available for language: {language_code}", "error")
+            return redirect(url_for("sentences.view_sentence", sentence_id=sentence_id))
+
+    try:
+        # Enqueue audio generation task for sentence
+        result = enqueue_task(
+            g.db,
+            task_type=TaskType.GENERATE_SENTENCE_AUDIO,
+            target_type="sentence",
+            target_id=sentence_id,
+            payload={
+                "sentence_id": sentence_id,
+                "language_code": language_code,
+                "voices": voices,
+                "tts_engine": tts_engine,
+            },
+            dedup_key=f"{TaskType.GENERATE_SENTENCE_AUDIO}:{sentence_id}:{language_code}:{tts_engine}",
+        )
+
+        if request.is_json:
+            if result.created:
+                return jsonify(
+                    {
+                        "success": True,
+                        "queued": True,
+                        "task_id": result.task.id,
+                        "sentence_id": sentence_id,
+                        "language": language_code,
+                        "message": "Sentence audio generation queued. A worker will process it shortly.",
+                    }
+                )
+            else:
+                return jsonify(
+                    {
+                        "success": True,
+                        "queued": False,
+                        "task_id": result.task.id,
+                        "message": "Sentence audio generation already in progress for this sentence/language.",
+                    }
+                )
+        else:
+            if result.created:
+                flash(
+                    f"Queued sentence audio generation for {language_code}. A worker will process it shortly.",
+                    "info",
+                )
+            else:
+                flash(
+                    "Sentence audio generation already in progress for this sentence/language.",
+                    "warning",
+                )
+            return redirect(url_for("sentences.view_sentence", sentence_id=sentence_id))
+
+    except Exception as e:
+        logger.exception("Error enqueueing sentence audio generation task")
+        if request.is_json:
+            return jsonify({"error": str(e)}), 500
+        else:
+            flash(f"Error queuing sentence audio generation: {str(e)}", "error")
+            return redirect(url_for("sentences.view_sentence", sentence_id=sentence_id))

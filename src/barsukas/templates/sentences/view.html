@@ -290,14 +290,17 @@
 </div>
 
 <!-- Audio Files -->
-{% if audio_by_language %}
 <div class="row mb-4">
     <div class="col">
         <div class="card">
-            <div class="card-header">
-                <i class="bi bi-music-note-beamed"></i> Audio Files
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-music-note-beamed"></i> Audio Files</span>
+                <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#generateSentenceAudioModal">
+                    <i class="bi bi-mic-fill"></i> Generate Audio
+                </button>
             </div>
             <div class="card-body">
+                {% if audio_by_language %}
                 {% for lang_code in audio_by_language.keys()|sort %}
                     {% set lang_name = language_names.get(lang_code, lang_code) %}
                     <h5 class="mt-3">
@@ -354,7 +357,76 @@
                         </tbody>
                     </table>
                 {% endfor %}
+                {% else %}
+                <p class="text-muted">
+                    <i class="bi bi-info-circle"></i> No audio files have been generated for this sentence yet.
+                    Click "Generate Audio" to create audio files.
+                </p>
+                {% endif %}
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Generate Sentence Audio Modal -->
+<div class="modal fade" id="generateSentenceAudioModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Generate Audio for Sentence</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="{{ url_for('audio.generate_sentence_audio', sentence_id=sentence.id) }}">
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Sentence</label>
+                    <p class="form-control-plaintext">
+                        <code>#{{ sentence.id }}</code>
+                    </p>
+                </div>
+                <div class="mb-3">
+                    <label for="sentence_audio_tts_engine" class="form-label">TTS Engine <span class="text-danger">*</span></label>
+                    <select class="form-select" id="sentence_audio_tts_engine" name="tts_engine" required>
+                        <option value="openai">OpenAI (paid, high quality)</option>
+                        <option value="espeak-ng">eSpeak-NG (free, synthetic)</option>
+                        <option value="piper">Piper (free, neural)</option>
+                        <option value="coqui">Coqui TTS (free, neural, voice cloning)</option>
+                        <option value="qwen3">Qwen3 (free, neural, multilingual)</option>
+                    </select>
+                    <div class="form-text">Choose TTS engine: OpenAI (paid), eSpeak (fast), Piper (neural), Coqui (voice cloning), or Qwen3 (multilingual)</div>
+                </div>
+                <div class="mb-3">
+                    <label for="sentence_audio_language" class="form-label">Language <span class="text-danger">*</span></label>
+                    <select class="form-select" id="sentence_audio_language" name="language" required>
+                        <option value="">Select a language...</option>
+                        {% for lang_code, lang_name in language_names.items() %}
+                            {% if translations.get(lang_code) %}
+                            <option value="{{ lang_code }}">{{ lang_name }} ({{ translations[lang_code][:50] }}{% if translations[lang_code]|length > 50 %}...{% endif %})</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                    <div class="form-text">Only languages with translations are shown</div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Voices <span class="text-danger">*</span></label>
+                    <div class="form-text mb-2" id="sentence-audio-voice-help">Select voices to generate</div>
+                    <div id="sentence-audio-voices-container">
+                        <div class="text-muted">Please select a language and TTS engine</div>
+                    </div>
+                </div>
+                <div class="alert alert-info" id="sentence-audio-engine-info">
+                    <i class="bi bi-info-circle"></i>
+                    <strong>Note:</strong> Audio will be generated and saved to a temporary directory.
+                    Review records will be created with status "pending_review".
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-mic-fill"></i> Generate Audio
+                </button>
+            </div>
+            </form>
         </div>
     </div>
 </div>
@@ -395,8 +467,309 @@ audioPlayerSentence.addEventListener('ended', function() {
         currentPlayButtonSentence = null;
     }
 });
+
+// Sentence audio generation modal - dynamic voice options
+(function() {
+    const openaiVoices = {{ openai_voices|tojson }};
+    const espeakVoices = {{ espeak_voices|tojson }};
+    const piperVoices = {{ piper_voices|tojson }};
+    const coquiVoices = {{ coqui_voices|tojson }};
+    const qwen3Voices = {{ qwen3_voices|tojson }};
+
+    const ttsEngineSelect = document.getElementById('sentence_audio_tts_engine');
+    const languageSelect = document.getElementById('sentence_audio_language');
+    const voicesContainer = document.getElementById('sentence-audio-voices-container');
+    const voiceHelp = document.getElementById('sentence-audio-voice-help');
+    const engineInfo = document.getElementById('sentence-audio-engine-info');
+
+    function updateVoiceOptions() {
+        const engine = ttsEngineSelect.value;
+        const language = languageSelect.value;
+
+        // Clear previous voices
+        voicesContainer.innerHTML = '';
+
+        if (engine === 'openai') {
+            // Show OpenAI voices (not language-specific)
+            voiceHelp.textContent = 'Select OpenAI voices to generate (default: ash, alloy, nova)';
+            engineInfo.innerHTML = '<i class="bi bi-info-circle"></i> <strong>Note:</strong> Audio will be generated using OpenAI TTS API (paid). Review records will be created with status "pending_review".';
+
+            const row = document.createElement('div');
+            row.className = 'row';
+
+            const col1 = document.createElement('div');
+            col1.className = 'col-md-6';
+            const col2 = document.createElement('div');
+            col2.className = 'col-md-6';
+
+            openaiVoices.forEach((voice, idx) => {
+                const formCheck = document.createElement('div');
+                formCheck.className = 'form-check';
+
+                const checkbox = document.createElement('input');
+                checkbox.className = 'form-check-input';
+                checkbox.type = 'checkbox';
+                checkbox.name = 'voices';
+                checkbox.value = voice;
+                checkbox.id = `sentence-audio-voice-${voice}`;
+
+                if (['ash', 'alloy', 'nova'].includes(voice)) {
+                    checkbox.checked = true;
+                }
+
+                const label = document.createElement('label');
+                label.className = 'form-check-label';
+                label.htmlFor = `sentence-audio-voice-${voice}`;
+                label.textContent = voice;
+
+                formCheck.appendChild(checkbox);
+                formCheck.appendChild(label);
+
+                if (idx < 5) {
+                    col1.appendChild(formCheck);
+                } else {
+                    col2.appendChild(formCheck);
+                }
+            });
+
+            row.appendChild(col1);
+            row.appendChild(col2);
+            voicesContainer.appendChild(row);
+
+        } else if (engine === 'espeak-ng') {
+            if (!language) {
+                voicesContainer.innerHTML = '<div class="text-muted">Please select a language first</div>';
+                return;
+            }
+
+            const voices = espeakVoices[language];
+            if (!voices || voices.length === 0) {
+                voicesContainer.innerHTML = '<div class="text-warning">No eSpeak voices available for this language</div>';
+                return;
+            }
+
+            voiceHelp.textContent = 'Select eSpeak-NG voices to generate';
+            engineInfo.innerHTML = '<i class="bi bi-info-circle"></i> <strong>Note:</strong> Audio will be generated using eSpeak-NG (free, synthetic). Review records will be created with status "pending_review".';
+
+            const row = document.createElement('div');
+            row.className = 'row';
+
+            const col1 = document.createElement('div');
+            col1.className = 'col-md-6';
+            const col2 = document.createElement('div');
+            col2.className = 'col-md-6';
+
+            voices.forEach((voice, idx) => {
+                const formCheck = document.createElement('div');
+                formCheck.className = 'form-check';
+
+                const checkbox = document.createElement('input');
+                checkbox.className = 'form-check-input';
+                checkbox.type = 'checkbox';
+                checkbox.name = 'voices';
+                checkbox.value = voice.name;
+                checkbox.id = `sentence-audio-voice-${voice.name}`;
+                checkbox.checked = true;
+
+                const label = document.createElement('label');
+                label.className = 'form-check-label';
+                label.htmlFor = `sentence-audio-voice-${voice.name}`;
+
+                const genderBadge = voice.gender === 'f' ? '<span class="badge bg-secondary">F</span>' : '<span class="badge bg-secondary">M</span>';
+                label.innerHTML = `${voice.name} ${genderBadge}`;
+
+                formCheck.appendChild(checkbox);
+                formCheck.appendChild(label);
+
+                if (idx < 2) {
+                    col1.appendChild(formCheck);
+                } else {
+                    col2.appendChild(formCheck);
+                }
+            });
+
+            row.appendChild(col1);
+            row.appendChild(col2);
+            voicesContainer.appendChild(row);
+
+        } else if (engine === 'piper') {
+            if (!language) {
+                voicesContainer.innerHTML = '<div class="text-muted">Please select a language first</div>';
+                return;
+            }
+
+            const voices = piperVoices[language];
+            if (!voices || voices.length === 0) {
+                voicesContainer.innerHTML = '<div class="text-warning">No Piper voices available for this language</div>';
+                return;
+            }
+
+            voiceHelp.textContent = 'Select Piper neural voices to generate';
+            engineInfo.innerHTML = '<i class="bi bi-info-circle"></i> <strong>Note:</strong> Audio will be generated using Piper (free, neural). Review records will be created with status "pending_review".';
+
+            const row = document.createElement('div');
+            row.className = 'row';
+
+            const col1 = document.createElement('div');
+            col1.className = 'col-md-6';
+            const col2 = document.createElement('div');
+            col2.className = 'col-md-6';
+
+            voices.forEach((voice, idx) => {
+                const formCheck = document.createElement('div');
+                formCheck.className = 'form-check';
+
+                const checkbox = document.createElement('input');
+                checkbox.className = 'form-check-input';
+                checkbox.type = 'checkbox';
+                checkbox.name = 'voices';
+                checkbox.value = voice.name;
+                checkbox.id = `sentence-audio-voice-${voice.name}`;
+                checkbox.checked = true;
+
+                const label = document.createElement('label');
+                label.className = 'form-check-label';
+                label.htmlFor = `sentence-audio-voice-${voice.name}`;
+
+                const genderBadge = voice.gender === 'f' ? '<span class="badge bg-secondary">F</span>' : '<span class="badge bg-secondary">M</span>';
+                label.innerHTML = `${voice.ui_name} ${genderBadge}`;
+
+                formCheck.appendChild(checkbox);
+                formCheck.appendChild(label);
+
+                if (idx < Math.ceil(voices.length / 2)) {
+                    col1.appendChild(formCheck);
+                } else {
+                    col2.appendChild(formCheck);
+                }
+            });
+
+            row.appendChild(col1);
+            row.appendChild(col2);
+            voicesContainer.appendChild(row);
+
+        } else if (engine === 'coqui') {
+            if (!language) {
+                voicesContainer.innerHTML = '<div class="text-muted">Please select a language first</div>';
+                return;
+            }
+
+            const voices = coquiVoices[language];
+            if (!voices || voices.length === 0) {
+                voicesContainer.innerHTML = '<div class="text-warning">No Coqui voices available for this language</div>';
+                return;
+            }
+
+            voiceHelp.textContent = 'Select Coqui XTTS voices to generate';
+            engineInfo.innerHTML = '<i class="bi bi-info-circle"></i> <strong>Note:</strong> Audio will be generated using Coqui TTS (free, neural, voice cloning). Review records will be created with status "pending_review".';
+
+            const row = document.createElement('div');
+            row.className = 'row';
+
+            const col1 = document.createElement('div');
+            col1.className = 'col-md-6';
+            const col2 = document.createElement('div');
+            col2.className = 'col-md-6';
+
+            voices.forEach((voice, idx) => {
+                const formCheck = document.createElement('div');
+                formCheck.className = 'form-check';
+
+                const checkbox = document.createElement('input');
+                checkbox.className = 'form-check-input';
+                checkbox.type = 'checkbox';
+                checkbox.name = 'voices';
+                checkbox.value = voice.name;
+                checkbox.id = `sentence-audio-voice-${voice.name}`;
+                checkbox.checked = true;
+
+                const label = document.createElement('label');
+                label.className = 'form-check-label';
+                label.htmlFor = `sentence-audio-voice-${voice.name}`;
+
+                const genderBadge = voice.gender === 'f' ? '<span class="badge bg-secondary">F</span>' : '<span class="badge bg-secondary">M</span>';
+                label.innerHTML = `${voice.ui_name} ${genderBadge}`;
+
+                formCheck.appendChild(checkbox);
+                formCheck.appendChild(label);
+
+                if (idx < Math.ceil(voices.length / 2)) {
+                    col1.appendChild(formCheck);
+                } else {
+                    col2.appendChild(formCheck);
+                }
+            });
+
+            row.appendChild(col1);
+            row.appendChild(col2);
+            voicesContainer.appendChild(row);
+
+        } else if (engine === 'qwen3') {
+            if (!language) {
+                voicesContainer.innerHTML = '<div class="text-muted">Please select a language first</div>';
+                return;
+            }
+
+            const voices = qwen3Voices[language];
+            if (!voices || voices.length === 0) {
+                voicesContainer.innerHTML = '<div class="text-warning">No Qwen3 voices available for this language</div>';
+                return;
+            }
+
+            voiceHelp.textContent = 'Select Qwen3 neural voices to generate';
+            engineInfo.innerHTML = '<i class="bi bi-info-circle"></i> <strong>Note:</strong> Audio will be generated using Qwen3 TTS (free, neural, multilingual). Review records will be created with status "pending_review".';
+
+            const row = document.createElement('div');
+            row.className = 'row';
+
+            const col1 = document.createElement('div');
+            col1.className = 'col-md-6';
+            const col2 = document.createElement('div');
+            col2.className = 'col-md-6';
+
+            voices.forEach((voice, idx) => {
+                const formCheck = document.createElement('div');
+                formCheck.className = 'form-check';
+
+                const checkbox = document.createElement('input');
+                checkbox.className = 'form-check-input';
+                checkbox.type = 'checkbox';
+                checkbox.name = 'voices';
+                checkbox.value = voice.name;
+                checkbox.id = `sentence-audio-voice-${voice.name}`;
+                checkbox.checked = true;
+
+                const label = document.createElement('label');
+                label.className = 'form-check-label';
+                label.htmlFor = `sentence-audio-voice-${voice.name}`;
+
+                const genderBadge = voice.gender === 'f' ? '<span class="badge bg-secondary">F</span>' : '<span class="badge bg-secondary">M</span>';
+                label.innerHTML = `${voice.ui_name} ${genderBadge}`;
+
+                formCheck.appendChild(checkbox);
+                formCheck.appendChild(label);
+
+                if (idx < Math.ceil(voices.length / 2)) {
+                    col1.appendChild(formCheck);
+                } else {
+                    col2.appendChild(formCheck);
+                }
+            });
+
+            row.appendChild(col1);
+            row.appendChild(col2);
+            voicesContainer.appendChild(row);
+        }
+    }
+
+    // Update voices when engine or language changes
+    ttsEngineSelect.addEventListener('change', updateVoiceOptions);
+    languageSelect.addEventListener('change', updateVoiceOptions);
+
+    // Initialize on modal open
+    document.getElementById('generateSentenceAudioModal').addEventListener('shown.bs.modal', updateVoiceOptions);
+})();
 </script>
-{% endif %}
 
 <!-- Words Used in Sentence -->
 {% if words_by_language %}
