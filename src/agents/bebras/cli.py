@@ -9,7 +9,7 @@ allowing users to process sentences, manage word links, and add translations.
 import argparse
 import logging
 import sys
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 from agents.common.common_args import (
     add_backend_args,
@@ -29,7 +29,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def get_argument_parser():
+def get_argument_parser() -> argparse.ArgumentParser:
     """
     Return the argument parser for introspection.
 
@@ -162,7 +162,7 @@ def process_file(
         return 1
 
 
-def print_result(result: dict):
+def print_result(result: Dict[str, Any]) -> None:
     """Print processing result in human-readable format."""
     if result.get("success"):
         print("\n✓ Success!")
@@ -184,7 +184,7 @@ def print_result(result: dict):
         print(f"\n✗ Failed: {result.get('error', 'Unknown error')}")
 
 
-def print_batch_result(result: dict):
+def print_batch_result(result: Dict[str, Any]) -> None:
     """Print batch processing result in human-readable format."""
     total = result.get("total", 0)
     success = result.get("success_count", 0)
@@ -214,7 +214,7 @@ def print_batch_result(result: dict):
     print(f"{'='*60}")
 
 
-def main():
+def main() -> Optional[int]:
     """Main entry point for the Bebras CLI."""
     parser = get_argument_parser()
     args = parser.parse_args()

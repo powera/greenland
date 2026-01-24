@@ -65,12 +65,12 @@ class SernasAgent:
         self.debug = config.debug
 
         # Lazy initialization for LinguisticClient
-        self._linguistic_client = None
+        self._linguistic_client: Optional[LinguisticClient] = None
 
         if self.debug:
             logger.setLevel(logging.DEBUG)
 
-    def get_session(self):
+    def get_session(self) -> Any:
         """Get database session using backend abstraction."""
         return create_backend_session(self.config)
 
@@ -131,7 +131,7 @@ class SernasAgent:
                     "alternative_form",
                 ]
 
-            missing_by_language = {}
+            missing_by_language: Dict[str, List[Dict[str, Any]]] = {}
             for lang in lang_codes:
                 missing_by_language[lang] = []
 

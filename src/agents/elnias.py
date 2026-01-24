@@ -84,15 +84,9 @@ class ElniasAgent:
                 f"Unsupported language: {self.language}. Supported: {', '.join(SUPPORTED_LANGUAGES.keys())}"
             )
 
-        # Get db_path from config (TrakaidoExporter still uses db_path)
-        if config.backend_type == BackendType.SQLITE:
-            db_path = config.sqlite_path
-        else:
-            db_path = constants.WORDFREQ_DB_PATH  # fallback
-
         # Initialize exporter with language parameter and Chinese variant
         self.exporter = TrakaidoExporter(
-            db_path=db_path,
+            config=config,
             debug=self.debug,
             language=self.language,
             simplified_chinese=self.simplified_chinese if self.language == "zh" else True,
@@ -243,7 +237,7 @@ class ElniasAgent:
             return {"success": False, "error": str(e)}
 
 
-def get_argument_parser():
+def get_argument_parser() -> argparse.ArgumentParser:
     """Return the argument parser for introspection."""
     parser = argparse.ArgumentParser(
         description="Elnias - Bootstrap Export Agent",
@@ -294,7 +288,7 @@ Examples:
     return parser
 
 
-def main():
+def main() -> None:
     """Main entry point for command-line execution."""
     parser = get_argument_parser()
     args = parser.parse_args()

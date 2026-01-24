@@ -70,8 +70,15 @@ module = [
     "flask.*",
     "jieba.*",
     "pypinyin.*",
+    "psutil.*",
+    "bokeh.*",
 ]
 ignore_missing_imports = true
+
+# Skip bokeh entirely - it's a transitive dependency with Python 3.10+ syntax
+[[tool.mypy.overrides]]
+module = "bokeh.*"
+follow_imports = "skip"
 
 # Ignore missing imports for optional ML/audio dependencies
 # These are only required when using audioshoe features
@@ -127,6 +134,8 @@ module = [
     "benchmarks.lib.utils.base_generator",
     "benchmarks.lib.runners.geography_runner",
     "benchmarks.lib.generators.lemma_generator",
+    # One-off utility scripts with dynamic path manipulation
+    "wordfreq.trakaido.utils.add_english_verb_conjugations",
 ]
 ignore_errors = true
 

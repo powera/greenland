@@ -8,7 +8,10 @@ word-to-lemma matching, and database linking.
 
 import json
 import logging
-from typing import Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
+
+if TYPE_CHECKING:
+    from wordfreq.storage.database import Sentence
 
 import constants
 import util.prompt_loader
@@ -44,13 +47,13 @@ class BebrasAgent:
         if self.debug:
             logger.setLevel(logging.DEBUG)
 
-    def get_session(self):
+    def get_session(self) -> Any:
         """Get database session using backend abstraction."""
         return create_backend_session(self.config)
 
     def analyze_sentence(
         self, sentence_text: str, source_language: str = "en", context: Optional[str] = None
-    ) -> Dict[str, any]:
+    ) -> Dict[str, Any]:
         """
         Analyze a sentence to extract vocabulary words and their metadata.
 
@@ -151,11 +154,11 @@ class BebrasAgent:
     def link_sentence_to_words(
         self,
         sentence: "Sentence",
-        analysis: Dict,
+        analysis: Dict[str, Any],
         source_language: str = "en",
         target_languages: Optional[List[str]] = None,
-        session=None,
-    ) -> Dict[str, any]:
+        session: Any = None,
+    ) -> Dict[str, Any]:
         """
         Link a sentence to its vocabulary words in the database.
 
@@ -242,7 +245,7 @@ class BebrasAgent:
         target_languages: Optional[List[str]] = None,
         context: Optional[str] = None,
         verified: bool = False,
-    ) -> Dict[str, any]:
+    ) -> Dict[str, Any]:
         """
         Complete pipeline: analyze sentence, create database records, and link words.
 
@@ -299,7 +302,7 @@ class BebrasAgent:
                     source_text=sentence_text,
                     source_language=source_language,
                     target_languages=target_languages,
-                    model=self.config.model,
+                    model=self.config.model or "gpt-5-mini",
                 )
 
             session.flush()
@@ -341,7 +344,7 @@ class BebrasAgent:
         source_language: str = "en",
         target_languages: Optional[List[str]] = None,
         verified: bool = False,
-    ) -> Dict[str, any]:
+    ) -> Dict[str, Any]:
         """
         Process multiple sentences in batch.
 

@@ -70,7 +70,7 @@ class SarkaAgent:
         if self.debug:
             logger.setLevel(logging.DEBUG)
 
-    def get_session(self):
+    def get_session(self) -> Any:
         """Get database session using backend abstraction."""
         return create_backend_session(self.config)
 
@@ -83,7 +83,7 @@ class SarkaAgent:
         return self._llm_client
 
     def get_words_at_level(
-        self, level: int, session=None
+        self, level: int, session: Any = None
     ) -> Dict[str, Dict[str, List[Dict[str, Any]]]]:
         """Get all curated words at a specific difficulty level.
 
@@ -139,7 +139,7 @@ class SarkaAgent:
         max_level: int,
         min_level: int = 1,
         category: Optional[str] = None,
-        session=None,
+        session: Any = None,
     ) -> Dict[str, Dict[str, List[Dict[str, Any]]]]:
         """Get all curated words up to a maximum difficulty level.
 
@@ -196,7 +196,7 @@ class SarkaAgent:
             if close_session:
                 session.close()
 
-    def get_word_usage_counts(self, session=None) -> Dict[str, int]:
+    def get_word_usage_counts(self, session: Any = None) -> Dict[str, int]:
         """Get count of conversations each word appears in.
 
         Parses the keywords JSON field from Conversation table to count
@@ -261,7 +261,7 @@ class SarkaAgent:
 
         return dict(filtered)
 
-    def get_level_summary(self, level: int, session=None) -> Dict[str, Any]:
+    def get_level_summary(self, level: int, session: Any = None) -> Dict[str, Any]:
         """Get a summary of words available at a level.
 
         Args:
@@ -273,7 +273,7 @@ class SarkaAgent:
         """
         words_by_type = self.get_words_at_level(level, session)
 
-        summary = {
+        summary: Dict[str, Any] = {
             "level": level,
             "total_words": 0,
             "by_pos_type": {},
@@ -421,7 +421,7 @@ class SarkaAgent:
         word_idx = 0
 
         for _ in range(num_conversations):
-            conv_words = []
+            conv_words: List[Dict[str, Any]] = []
             attempts = 0
             while len(conv_words) < WORDS_PER_CONVERSATION and attempts < 100:
                 if word_idx >= len(word_pool):
@@ -486,7 +486,7 @@ class SarkaAgent:
             word_idx = 0
 
             for conv_num in range(num_conversations):
-                conv_words = []
+                conv_words: List[Dict[str, Any]] = []
                 words_needed = WORDS_PER_CONVERSATION
 
                 # Try to get diverse words for this conversation

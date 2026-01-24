@@ -20,7 +20,7 @@ Example request:
 import logging
 from typing import Any, Dict, Optional, Tuple, Union
 
-from config import Config
+from barsukas.config import Config
 from flask import Blueprint, g, jsonify, request
 from flask.typing import ResponseReturnValue
 

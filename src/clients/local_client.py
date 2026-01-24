@@ -23,7 +23,7 @@ async def text_completion(prompt: str, model_dir: str) -> str:
         model_dir,
         torch_dtype=torch.float16,
     )
-    model.to("mps")
+    model.to("mps")  # type: ignore[arg-type]
     tokenizer = AutoTokenizer.from_pretrained(model_dir)
 
     loop = asyncio.get_event_loop()
@@ -57,7 +57,7 @@ async def text_chat(prompt: str, model_dir: str) -> str:
         model_dir,
         torch_dtype=torch.float16,
     )
-    model.to("mps")
+    model.to("mps")  # type: ignore[arg-type]
     tokenizer = AutoTokenizer.from_pretrained(model_dir)
 
     loop = asyncio.get_event_loop()
@@ -92,7 +92,7 @@ def text_completion_interactive(prompt: str, model_dir: str) -> str:
     model = AutoModelForCausalLM.from_pretrained(
         model_dir,
     )
-    model.to("mps")
+    model.to("mps")  # type: ignore[arg-type]
     tokenizer = AutoTokenizer.from_pretrained(model_dir)
 
     with torch.no_grad():
@@ -146,7 +146,7 @@ def text_chat_interactive(prompt: str, model_dir: str) -> str:
         model_dir,
         torch_dtype=torch.float16,
     )
-    model.to("mps")
+    model.to("mps")  # type: ignore[arg-type]
     tokenizer = AutoTokenizer.from_pretrained(model_dir)
 
     with torch.no_grad():

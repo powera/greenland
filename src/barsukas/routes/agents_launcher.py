@@ -13,7 +13,7 @@ from typing import Any, Dict, IO, Iterator, List, Optional
 
 logger = logging.getLogger(__name__)
 
-from config import Config
+from barsukas.config import Config
 from flask import (
     Blueprint,
     Response,

@@ -27,7 +27,7 @@ from wordfreq.storage.models.schema import BarsukasTask
 logger = logging.getLogger(__name__)
 
 
-def get_argument_parser():
+def get_argument_parser() -> argparse.ArgumentParser:
     """Return the argument parser for introspection."""
     parser = argparse.ArgumentParser(
         description="Sarka - Conversation Generator Agent",

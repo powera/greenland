@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, Optional, Tuple
 
-from config import Config
+from barsukas.config import Config
 
 import constants
 from agents.lape import LapeAgent

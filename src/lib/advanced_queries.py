@@ -143,7 +143,7 @@ def _calculate_timeout(target_length: int) -> int:
 
 def _generate_response(
     topic: str, target_length: int, config: ResponseConfig, model: str = DEFAULT_MODEL
-) -> Tuple[str, LLMUsage]:
+) -> Tuple[str, Optional[LLMUsage]]:
     """Generate a response using the specified configuration.
 
     Args:
@@ -163,14 +163,14 @@ def _generate_response(
     # Calculate timeout based on target length
     timeout = _calculate_timeout(target_length)
 
-    response, _, usage = unified_client.generate_chat(
+    result = unified_client.generate_chat(
         prompt=prompt,
         model=model,
         context=context,
         timeout=timeout,  # Pass timeout to unified client
     )
 
-    return response.strip(), usage
+    return result.response_text.strip(), result.usage
 
 
 def generate_smart_response(
@@ -240,7 +240,7 @@ def generate_response(
     return _generate_response(topic, target_length, config, model)
 
 
-def categorize_topic(topic: str, model: str = DEFAULT_MODEL) -> Tuple[Dict, LLMUsage]:
+def categorize_topic(topic: str, model: str = DEFAULT_MODEL) -> Tuple[Dict, Optional[LLMUsage]]:
     """Determine appropriate response type for a given topic."""
     context = """You are categorizing topics to determine the most appropriate response type.
 Consider these response types and their use cases:"""
@@ -264,15 +264,15 @@ Consider these response types and their use cases:"""
 
     prompt = f"Analyze this topic and determine the most appropriate response type: {topic}"
 
-    _, response, usage = unified_client.generate_chat(
+    result = unified_client.generate_chat(
         prompt=prompt, model=model, json_schema=schema, context=context
     )
 
-    return response, usage
+    return result.structured_data, result.usage
 
 
 # Analysis functions
-def analyze_quotes(essay: str, model: str = DEFAULT_MODEL) -> Tuple[str, LLMUsage]:
+def analyze_quotes(essay: str, model: str = DEFAULT_MODEL) -> Tuple[str, Optional[LLMUsage]]:
     """Analyze quotes and cultural references in an essay."""
     _validate_input(essay)
 
@@ -288,12 +288,12 @@ List findings in order of appearance in the text."""
 
 {essay}"""
 
-    response, _, usage = unified_client.generate_chat(prompt=prompt, model=model, context=context)
+    result = unified_client.generate_chat(prompt=prompt, model=model, context=context)
 
-    return response.strip(), usage
+    return result.response_text.strip(), result.usage
 
 
-def analyze_logic(essay: str, model: str = DEFAULT_MODEL) -> Tuple[str, LLMUsage]:
+def analyze_logic(essay: str, model: str = DEFAULT_MODEL) -> Tuple[str, Optional[LLMUsage]]:
     """Analyze logical arguments in an essay."""
     _validate_input(essay)
 
@@ -310,9 +310,9 @@ Focus on argument structure and logical relationships."""
 
 {essay}"""
 
-    response, _, usage = unified_client.generate_chat(prompt=prompt, model=model, context=context)
+    result = unified_client.generate_chat(prompt=prompt, model=model, context=context)
 
-    return response.strip(), usage
+    return result.response_text.strip(), result.usage
 
 
 # Validation functions

@@ -11,7 +11,7 @@ This module handles the staging workflow for pending imports:
 import sys
 import time
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Any, Dict, List, Optional
 
 # Add src directory to path
 GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent.parent)
@@ -26,11 +26,11 @@ logger = get_logger(__name__)
 
 
 def list_pending_imports(
-    session,
+    session: Any,
     pos_type: Optional[str] = None,
     pos_subtype: Optional[str] = None,
     limit: Optional[int] = None,
-) -> Dict[str, any]:
+) -> Dict[str, Any]:
     """
     List words in the pending_imports staging table.
 
@@ -88,8 +88,8 @@ def list_pending_imports(
 
 
 def approve_pending_import(
-    session, pending_import_id: int, db_path: str, model: str = "gpt-5-mini", debug: bool = False
-) -> Dict[str, any]:
+    session: Any, pending_import_id: int, db_path: str, model: str = "gpt-5-mini", debug: bool = False
+) -> Dict[str, Any]:
     """
     Approve a pending import and convert it to a full Lemma/DerivativeForm entry.
 
@@ -176,11 +176,11 @@ def approve_pending_import(
 
 
 def reject_pending_import(
-    session,
+    session: Any,
     pending_import_id: int,
     reason: str = "manual_rejection",
     add_to_exclusions: bool = True,
-) -> Dict[str, any]:
+) -> Dict[str, Any]:
     """
     Reject a pending import and optionally add to exclusions list.
 
@@ -243,8 +243,8 @@ def reject_pending_import(
 
 
 def stage_missing_words_for_import(
-    session,
-    missing_words: list,
+    session: Any,
+    missing_words: List[Dict[str, Any]],
     db_path: str,
     limit: Optional[int] = None,
     model: str = "gpt-5-mini",
@@ -252,7 +252,7 @@ def stage_missing_words_for_import(
     dry_run: bool = False,
     target_language: str = "lt",
     debug: bool = False,
-) -> Dict[str, any]:
+) -> Dict[str, Any]:
     """
     Stage high-frequency missing words to the pending_imports table.
 

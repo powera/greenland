@@ -745,7 +745,7 @@ def generate() -> ResponseReturnValue:
             audio_base_dir = Path(audio_base_dir)
 
         # Create DataSourceConfig for agents
-        from config import Config
+        from barsukas.config import Config
 
         from wordfreq.storage.backend.config import BackendType, DataSourceConfig
 

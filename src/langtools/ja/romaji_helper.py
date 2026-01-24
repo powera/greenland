@@ -8,11 +8,12 @@ for Japanese text. Degrades gracefully if pykakasi is not available.
 
 import logging
 import re
-from typing import Optional
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
 # Try to import pykakasi for Japanese romaji, gracefully handle if not available
+_kakasi: Any = None
 try:
     import pykakasi
 
@@ -21,7 +22,6 @@ try:
     _kakasi = pykakasi.kakasi()
 except ImportError:
     PYKAKASI_AVAILABLE = False
-    _kakasi = None
     logger.warning("pykakasi not available - Japanese romaji transliteration will be disabled")
 
 

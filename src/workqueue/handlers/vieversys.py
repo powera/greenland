@@ -15,7 +15,7 @@ from flask import current_app
 from sqlalchemy.orm import Session
 
 from workqueue.tools import build_default_config, get_lemma_or_raise
-from config import Config
+from barsukas.config import Config
 import constants
 from agents.strazdas import StrazdasAgent, TtsBackend
 from agents.vieversys import VieversysAgent

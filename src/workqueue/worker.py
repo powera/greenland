@@ -11,7 +11,7 @@ import time
 from threading import Event
 from typing import Any
 
-from config import Config
+from barsukas.config import Config
 
 import constants
 from workqueue.registry import TASK_HANDLERS

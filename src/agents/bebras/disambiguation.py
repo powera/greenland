@@ -7,7 +7,7 @@ lemmas in the database, especially when there are multiple candidates (polysemes
 """
 
 import logging
-from typing import List, Optional
+from typing import Any, List, Optional
 
 import util.prompt_loader
 from clients.types import Schema, SchemaProperty
@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 def find_best_lemma_match(
-    session, lemma_text: str, pos: str, disambiguation_hint: Optional[str] = None
+    session: Any, lemma_text: str, pos: str, disambiguation_hint: Optional[str] = None
 ) -> Optional[Lemma]:
     """
     Find the best matching lemma for a word.
@@ -40,7 +40,7 @@ def find_best_lemma_match(
         Lemma.lemma_text.ilike(f"%{lemma_text}%"), Lemma.pos_type == pos_normalized
     )
 
-    candidates = query.all()
+    candidates: List[Lemma] = query.all()
 
     if not candidates:
         logger.debug(f"No lemma candidates found for '{lemma_text}' (POS: {pos})")
@@ -150,7 +150,7 @@ def disambiguate_lemma(
 
             # Validate candidate number
             if 1 <= candidate_num <= len(candidates):
-                selected = candidates[candidate_num - 1]
+                selected: Lemma = candidates[candidate_num - 1]
                 logger.info(
                     f"LLM selected candidate {candidate_num}: {selected.guid} - {reasoning}"
                 )

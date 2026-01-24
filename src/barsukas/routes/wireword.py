@@ -22,7 +22,7 @@ from agents.ungurys import SUPPORTED_LANGUAGES, UngurysAgent
 from wordfreq.storage.backend.config import DataSourceConfig
 
 if TYPE_CHECKING:
-    from app import BarsukasFlask
+    from barsukas.app import BarsukasFlask
 
 bp = Blueprint("wireword", __name__, url_prefix="/wireword")
 

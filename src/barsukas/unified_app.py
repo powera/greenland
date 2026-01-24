@@ -17,9 +17,9 @@ import types
 from pathlib import Path
 from typing import Optional
 
-from config import Config
-from app import create_app
-from personas import get_persona, list_personas, PersonaConfig
+from barsukas.config import Config
+from barsukas.app import create_app
+from barsukas.personas import get_persona, list_personas, PersonaConfig
 from workqueue.worker import run_worker, STOP_EVENT
 from wordfreq.storage.backend.config import DataSourceConfig
 

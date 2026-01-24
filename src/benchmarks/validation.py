@@ -44,7 +44,7 @@ class ValidationResult:
     explanation: str
     expected: Optional[str] = None
     response: Optional[str] = None
-    validator_results: List[Dict] = None
+    validator_results: Optional[List[Dict]] = None
 
 
 class QualityRating(enum.Enum):
@@ -78,8 +78,8 @@ class ResponseValidator:
         self,
         response: str,
         task_type: str,
-        expected: str = None,
-        context: str = None,
+        expected: Optional[str] = None,
+        context: Optional[str] = None,
         validator_models: tuple = ("qwen2.5:7b:Q4_K_M", "gemma2:9b:Q4_0"),
     ) -> ValidationResult:
         """Validate a response for a given task type."""
@@ -110,8 +110,8 @@ Respond in JSON format with:
         for model in validator_models:
             ollama_model = ":".join(model.split(":")[:-1])
             try:
-                response = ollama_client.generate_chat(prompt, ollama_model, json_schema=schema)
-                result = response.structured_data
+                llm_response = ollama_client.generate_chat(prompt, ollama_model, json_schema=schema)
+                result = llm_response.structured_data
                 validation_results.append({"validator_model": model, **result})
             except (json.JSONDecodeError, KeyError):
                 validation_results.append(
@@ -142,7 +142,8 @@ Respond in JSON format with:
         if len(original_prompt) + len(original_response) > 12000:
             raise ValueError("Input data too long")
 
-        completion = openai_client.client.client.beta.chat.completions.parse(
+        # NOTE: This uses the OpenAI SDK directly - would need refactoring to use our client
+        completion = openai_client.client.client.beta.chat.completions.parse(  # type: ignore[attr-defined]
             model=model,
             messages=[
                 {
@@ -165,7 +166,7 @@ Respond in JSON format with:
         usage = {
             "tokens_in": completion.usage.prompt_tokens,
             "tokens_out": completion.usage.completion_tokens,
-            "cost": openai_client.estimate_cost(completion.usage),
+            "cost": openai_client.estimate_cost(completion.usage),  # type: ignore[attr-defined]
         }
         return completion.choices[0].message.parsed, usage
 

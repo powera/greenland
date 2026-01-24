@@ -8,8 +8,8 @@ from typing import Dict, List, Optional
 
 from jinja2 import Environment, FileSystemLoader
 
-import benchmarks.datastore_benchmarks as datastore_benchmarks
-import benchmarks.datastore_common as datastore_common
+import benchmarks.datastore.benchmarks as datastore_benchmarks
+import benchmarks.datastore.common as datastore_common
 import constants
 
 
