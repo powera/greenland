@@ -53,6 +53,12 @@ Examples:
 
   # Generate LLM sentences for a GUID
   python -m agents.buivolas --task generate-sentences --mode llm --guid N06_001 --num-sentences 3 --language lt zh fr es en
+
+  # Generate guided sentences (vocabulary-aware) for a GUID
+  python -m agents.buivolas --task generate-sentences --mode guided --guid N06_001 --num-sentences 5
+
+  # Generate guided sentences for all lemmas at a difficulty level
+  python -m agents.buivolas --task generate-sentences --mode guided --level 3 --num-sentences 5 --limit 10
         """,
     )
 
@@ -82,8 +88,8 @@ Examples:
     # Arguments for generate-sentences task
     parser.add_argument(
         "--mode",
-        choices=["pattern", "llm"],
-        help="Sentence generation mode (for generate-sentences)",
+        choices=["pattern", "llm", "guided"],
+        help="Sentence generation mode: pattern (templates), llm (basic), guided (vocabulary-aware)",
     )
     parser.add_argument(
         "--pattern-limit",
@@ -158,7 +164,7 @@ def main() -> int:
             parser.error("generate-candidates requires either --patterns or --all-patterns")
     elif args.task == "generate-sentences":
         if not args.mode:
-            parser.error("generate-sentences requires --mode (pattern or llm)")
+            parser.error("generate-sentences requires --mode (pattern, llm, or guided)")
 
     config = get_data_source_config(args)
     agent = BuivolasAgent(config=config, dry_run=args.dry_run)
@@ -244,7 +250,124 @@ def main() -> int:
                 logger.info("DRY RUN - No database changes made")
             logger.info("=" * 80)
 
-        else:
+        elif args.mode == "guided":
+            # Guided mode: vocabulary-aware sentence generation
+            lemmas = _get_llm_lemmas(agent, args)
+
+            if not lemmas:
+                if args.guid:
+                    session = agent.get_session()
+                    try:
+                        all_lemmas = get_lemmas_for_agent(session, args)
+                        if all_lemmas:
+                            unsupported = all_lemmas[0]
+                            logger.info(
+                                "Lemma %s has POS type '%s' - sentence generation only supports nouns, verbs, and adjectives. Skipping.",
+                                args.guid,
+                                unsupported.pos_type,
+                            )
+                            return 0
+                        else:
+                            logger.error("Lemma %s does not exist", args.guid)
+                            return 1
+                    finally:
+                        session.close()
+                elif args.level:
+                    logger.error(
+                        "No nouns, verbs, or adjectives found at difficulty level %s", args.level
+                    )
+                else:
+                    logger.error("No lemmas to process. Specify --guid or --level")
+                    parser.print_help()
+                return 1
+
+            if len(lemmas) == 1:
+                lemma = lemmas[0]
+                logger.info("Processing (guided): %s (GUID: %s)", lemma.lemma_text, lemma.guid)
+            else:
+                logger.info("Processing %s lemmas (guided mode)", len(lemmas))
+                if args.level:
+                    logger.info("Difficulty level: %s", args.level)
+
+            total_generated = 0
+            total_stored = 0
+            total_skipped = 0
+            total_failed = 0
+
+            for i, lemma in enumerate(lemmas, 1):
+                if len(lemmas) > 1:
+                    logger.info(
+                        "\n[%s/%s] Processing: %s (%s)",
+                        i,
+                        len(lemmas),
+                        lemma.lemma_text,
+                        lemma.guid,
+                    )
+
+                result = agent.generate_guided_sentences_for_lemma(
+                    lemma=lemma,
+                    num_sentences=args.num_sentences,
+                    max_vocabulary_level=7,
+                )
+
+                if result.get("skipped"):
+                    logger.info("Skipped %s: %s", lemma.lemma_text, result.get("reason"))
+                    total_skipped += 1
+                    continue
+
+                if result.get("success") and result.get("sentences"):
+                    sentences = result["sentences"]
+                    total_generated += len(sentences)
+
+                    # Log the generated sentences
+                    for sent in sentences:
+                        en_text = sent.get("en", "")
+                        words_used = sent.get("words_used", [])
+                        lemmas_str = ", ".join(w.get("lemma", "") for w in words_used)
+                        logger.info("  -> %s", en_text)
+                        logger.info("     words: %s", lemmas_str)
+
+                    if not args.dry_run:
+                        session = agent.get_session()
+                        try:
+                            store_result = agent.store_guided_sentences(
+                                sentences_data=sentences,
+                                source_lemma=lemma,
+                                session=session,
+                            )
+                            total_stored += store_result["stored"]
+                            total_failed += store_result["failed"]
+
+                            logger.info(
+                                "Stored: %s, Failed: %s",
+                                store_result["stored"],
+                                store_result["failed"],
+                            )
+                        finally:
+                            session.close()
+                    else:
+                        logger.info("Would store %s sentences (dry run)", len(sentences))
+                else:
+                    logger.error(
+                        "Generation failed for %s: %s",
+                        lemma.lemma_text,
+                        result.get("error"),
+                    )
+                    total_failed += 1
+
+            if len(lemmas) > 1:
+                logger.info("\n%s", "=" * 60)
+                logger.info("Generation complete!")
+                logger.info("Lemmas processed: %s", len(lemmas))
+                if total_skipped > 0:
+                    logger.info("Lemmas skipped: %s", total_skipped)
+                logger.info("Sentences generated: %s", total_generated)
+                if not args.dry_run:
+                    logger.info("Sentences stored: %s", total_stored)
+                    logger.info("Sentences failed: %s", total_failed)
+                logger.info("%s", "=" * 60)
+
+        else:  # llm mode
             lemmas = _get_llm_lemmas(agent, args)
 
             if not lemmas:
