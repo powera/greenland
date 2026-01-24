@@ -11,7 +11,7 @@ from typing import Union, Tuple
 
 logger = logging.getLogger(__name__)
 
-from config import Config
+from barsukas.config import Config
 from flask import (
     Blueprint,
     flash,

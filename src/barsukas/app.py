@@ -15,9 +15,9 @@ import sys
 from pathlib import Path
 from typing import Any, Callable, Dict, Optional
 
-from config import Config
+from barsukas.config import Config
 from flask import Flask, Response, g, render_template
-from metrics import RequestMetricsMiddleware, get_metrics_output, record_llm_call
+from barsukas.metrics import RequestMetricsMiddleware, get_metrics_output, record_llm_call
 from sqlalchemy.orm import Session
 
 from langtools.ja.romaji_helper import (
@@ -30,7 +30,7 @@ from langtools.zh.pinyin_helper import (
     generate_pinyin_ruby_html,
     is_chinese,
 )
-from routes import (
+from barsukas.routes import (
     agents,
     agents_launcher,
     api,

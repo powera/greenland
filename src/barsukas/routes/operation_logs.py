@@ -5,7 +5,7 @@
 import json
 from typing import Union
 
-from config import Config
+from barsukas.config import Config
 from flask import Blueprint, flash, g, redirect, render_template, request, url_for
 from flask.typing import ResponseReturnValue
 from werkzeug.wrappers import Response

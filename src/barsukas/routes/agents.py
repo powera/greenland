@@ -6,7 +6,7 @@ import logging
 import traceback
 from typing import Optional
 
-from config import Config
+from barsukas.config import Config
 from flask import Blueprint, flash, g, jsonify, redirect, render_template, request, url_for
 from flask.typing import ResponseReturnValue
 

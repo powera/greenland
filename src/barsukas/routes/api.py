@@ -4,7 +4,7 @@
 
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-from config import Config
+from barsukas.config import Config
 from flask import Blueprint, Response, g, jsonify, request
 from flask.typing import ResponseReturnValue
 from sqlalchemy import func, or_

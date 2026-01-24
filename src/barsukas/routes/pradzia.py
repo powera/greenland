@@ -11,7 +11,7 @@ from typing import Any, Dict, List
 
 logger = logging.getLogger(__name__)
 
-from config import Config
+from barsukas.config import Config
 from flask import Blueprint, g, jsonify, redirect, render_template, request, url_for
 from flask.typing import ResponseReturnValue
 

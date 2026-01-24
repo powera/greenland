@@ -4,7 +4,7 @@
 
 from typing import Union
 
-from config import Config
+from barsukas.config import Config
 from flask import Blueprint, flash, g, jsonify, redirect, request, url_for
 from werkzeug.wrappers import Response
 
