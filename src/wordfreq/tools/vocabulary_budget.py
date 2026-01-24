@@ -73,6 +73,7 @@ def format_vocabulary_summary(
     vocabulary: Dict[str, Dict[str, List[str]]],
     max_examples_per_category: int = 8,
     exclude_subtypes: Optional[Set[str]] = None,
+    flatten_pos_types: Optional[Set[str]] = None,
 ) -> str:
     """Format vocabulary as a readable summary for LLM prompts.
 
@@ -80,15 +81,19 @@ def format_vocabulary_summary(
         vocabulary: Output from load_vocabulary_from_release()
         max_examples_per_category: Max words to show per category
         exclude_subtypes: Subtypes to exclude (e.g., {"pronoun", "determiner"})
+        flatten_pos_types: POS types to show as flat list without categories
+                          (e.g., {"verb"} shows "VERBS: eat, drink, sleep, ...")
 
     Returns:
         Formatted string like:
         "NOUNS: 8 animals (dog, cat, bird...), 10 foods (bread, rice...)
-         VERBS: 12 physical actions (eat, drink, run...)
+         VERBS: eat, drink, sleep, walk, run, see, hear, say, ...
          ADJECTIVES: 8 colors (red, blue, green...), 6 sizes (big, small...)"
     """
     if exclude_subtypes is None:
         exclude_subtypes = set()
+    if flatten_pos_types is None:
+        flatten_pos_types = set()
 
     lines = []
 
@@ -101,6 +106,19 @@ def format_vocabulary_summary(
             continue
 
         subtypes = vocabulary[pos_type]
+
+        # For flattened POS types, show all words in a simple list
+        if pos_type in flatten_pos_types:
+            all_words = []
+            for subtype, words in subtypes.items():
+                if subtype not in exclude_subtypes:
+                    all_words.extend(words)
+            if all_words:
+                words_str = ", ".join(all_words)
+                lines.append(f"{pos_type.upper()}S: {words_str}")
+            continue
+
+        # For other POS types, show by category
         category_parts = []
 
         for subtype, words in sorted(subtypes.items()):
@@ -180,6 +198,7 @@ def build_prompt_vocabulary_section(
         vocabulary,
         max_examples_per_category=6,
         exclude_subtypes=exclude,
+        flatten_pos_types={"verb"},  # Show verbs as flat list, not by category
     )
 
     return f"""Available vocabulary (levels 1-{max_level}):
