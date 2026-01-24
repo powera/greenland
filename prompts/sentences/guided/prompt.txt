@@ -1,0 +1,21 @@
+Generate {num_sentences} simple, natural English sentences using the word "{word}".
+
+Word: {word}
+Definition: {definition}
+Part of speech: {pos_type}
+{extra_context}
+
+{vocabulary_section}
+
+{previous_sentences}
+
+Requirements:
+1. Each sentence MUST use the word "{word}"
+2. Keep sentences SHORT: 4-10 words
+3. Use present tense or simple past only
+4. Make each sentence DIFFERENT - vary the subject, verb, and context
+5. Sound NATURAL - write sentences people actually say
+
+For each sentence, provide:
+- The English sentence (key 'en')
+- The tense used (key 'tense'): "present" or "past"
