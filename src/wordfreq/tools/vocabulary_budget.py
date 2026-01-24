@@ -176,7 +176,7 @@ def build_prompt_vocabulary_section(
     target_word: str,
     target_pos_type: str,
     target_pos_subtype: str,
-    max_level: int = 8,
+    max_level: int = 7,
 ) -> str:
     """Build a vocabulary section for sentence generation prompts.
 
@@ -196,7 +196,7 @@ def build_prompt_vocabulary_section(
 
     summary = format_vocabulary_summary(
         vocabulary,
-        max_examples_per_category=6,
+        max_examples_per_category=2,
         exclude_subtypes=exclude,
         flatten_pos_types={"verb"},  # Show verbs as flat list, not by category
     )
