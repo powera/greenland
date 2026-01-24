@@ -20,7 +20,7 @@ from typing import Optional
 from barsukas.config import Config
 from barsukas.app import create_app
 from barsukas.personas import get_persona, list_personas, PersonaConfig
-from barsukas.workers.task_worker import run_worker, STOP_EVENT
+from workqueue.worker import run_worker, STOP_EVENT
 from wordfreq.storage.backend.config import DataSourceConfig
 
 logger = logging.getLogger(__name__)
