@@ -128,7 +128,8 @@ class PatternSentenceGenerator:
             query = query.filter(Lemma.difficulty_level <= slot["max_level"])
 
         lemmas = query.all()
-        return [(lemma, lemma.guid) for lemma in lemmas]
+        # guid is guaranteed non-None by the isnot(None) filter above
+        return [(lemma, lemma.guid) for lemma in lemmas if lemma.guid is not None]
 
     def _slot_matches_lemma(self, slot: Dict[str, Any], lemma: Lemma) -> bool:
         if slot["pos_type"] != lemma.pos_type:
@@ -156,8 +157,12 @@ class PatternSentenceGenerator:
         if not target_slot_name:
             return []
 
-        slot_lemmas = {}
-        slot_names = []
+        # Ensure target lemma has a valid guid
+        if target_lemma.guid is None:
+            return []
+
+        slot_lemmas: Dict[str, List[Tuple[Lemma, str]]] = {}
+        slot_names: List[str] = []
 
         for slot in pattern["slots"]:
             slot_names.append(slot["name"])
@@ -310,7 +315,7 @@ class PatternSentenceGenerator:
                     Lemma.guid.isnot(None),
                 )
             lemma = query.first()
-            if lemma:
+            if lemma and lemma.guid is not None:
                 fixed_lemmas.append((lemma, lemma.guid))
             else:
                 # Log with GUID or lemma_text depending on what's available

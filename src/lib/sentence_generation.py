@@ -383,7 +383,7 @@ class SentenceGenerator:
         if case in case_rules and "endings" in case_rules[case]:
             endings = case_rules[case]["endings"]
             # Apply appropriate ending based on word characteristics
-            return word + endings.get("default", "")
+            return word + str(endings.get("default", ""))
         return word
 
     def _apply_conjugation(
@@ -393,7 +393,7 @@ class SentenceGenerator:
         # Simplified conjugation - would need full verb paradigms
         if tense in conjugation_rules:
             tense_rules = conjugation_rules[tense]
-            return tense_rules.get(subject, tense_rules.get("default", verb))
+            return str(tense_rules.get(subject, tense_rules.get("default", verb)))
         return verb
 
 
@@ -665,7 +665,7 @@ class LithuanianSentenceGenerator(SentenceGenerator):
         if lang_code == "lt":
             # Use Lithuanian-specific sentence building
             result = self.build_lithuanian_sentence(pattern)
-            return result["lithuanian"]
+            return str(result["lithuanian"])
         else:
             # Fall back to parent implementation for other languages
             return super()._build_target_language_sentence(pattern, lang_code)

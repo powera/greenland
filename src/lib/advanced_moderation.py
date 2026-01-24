@@ -3,7 +3,7 @@
 """Chat moderation functions to detect problematic content."""
 
 import logging
-from typing import Dict, Tuple
+from typing import Dict, Optional, Tuple
 
 from clients import unified_client
 from telemetry import LLMUsage
@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 DEFAULT_MODEL = "gemma2:9b"
 
 
-def check_message_safety(message: str, model: str = DEFAULT_MODEL) -> Tuple[Dict, LLMUsage]:
+def check_message_safety(message: str, model: str = DEFAULT_MODEL) -> Tuple[Dict, Optional[LLMUsage]]:
     """Check message for various types of unsafe or forbidden content.
 
     Args:
@@ -71,11 +71,11 @@ Respond with clear true/false values and specific concerns found."""
 
 {message}"""
 
-    _, response, usage = unified_client.generate_chat(
+    result = unified_client.generate_chat(
         prompt=prompt, model=model, json_schema=schema, context=context
     )
 
-    return response, usage
+    return result.structured_data, result.usage
 
 
 def _validate_input(text: str, min_length: int = 1) -> None:

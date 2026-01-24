@@ -51,7 +51,7 @@ def get_english_word_for_lemma(session: Any, lemma: Lemma) -> Optional[str]:
     # If that somehow fails, try to get from English derivative forms that are base forms
     for form in lemma.derivative_forms:
         if form.language_code == "en" and form.is_base_form:
-            return form.derivative_form_text
+            return str(form.derivative_form_text)
 
     return None  # Should not happen if data is correct
 
@@ -66,12 +66,12 @@ def get_lithuanian_word_for_lemma(session: Any, lemma: Lemma) -> str:
     # Fallback to Lithuanian base forms
     for form in lemma.derivative_forms:
         if form.is_base_form and form.language_code == "lt":
-            return form.derivative_form_text
+            return str(form.derivative_form_text)
 
     # Fallback to any Lithuanian derivative form
     for form in lemma.derivative_forms:
         if form.language_code == "lt":
-            return form.derivative_form_text
+            return str(form.derivative_form_text)
 
     # Final fallback (shouldn't happen if data is properly migrated)
     return lemma.lemma_text
@@ -135,7 +135,7 @@ def get_frequency_rank_for_lemma(session: Any, lemma: Lemma) -> Optional[int]:
     # Try to get from derivative forms
     for form in lemma.derivative_forms:
         if form.word_token and form.word_token.frequency_rank:
-            return form.word_token.frequency_rank
+            return int(form.word_token.frequency_rank)
 
     return None
 
@@ -428,7 +428,7 @@ Entry structure:
 
     for lemma in lemmas:
         # Validate GUID as Python variable name
-        if not validate_guid_as_variable_name(lemma.guid):
+        if not lemma.guid or not validate_guid_as_variable_name(lemma.guid):
             print(
                 f"Warning: Skipping lemma with invalid GUID '{lemma.guid}' (not a valid Python identifier)"
             )

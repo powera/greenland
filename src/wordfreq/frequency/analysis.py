@@ -5,7 +5,7 @@
 import logging
 import math
 import statistics
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple, TypedDict
 
 from sqlalchemy import case, func, or_
 
@@ -22,6 +22,14 @@ logger = logging.getLogger(__name__)
 
 # Constants
 DEFAULT_UNKNOWN_RANK = 12500  # Default rank for words not in a corpus
+
+
+class CorpusInfo(TypedDict):
+    """Type for corpus info dictionary values."""
+
+    name: str
+    weight: float
+    unknown_rank: int
 
 
 def calculate_combined_ranks(
@@ -73,7 +81,7 @@ def calculate_combined_ranks(
         return []
 
     # Create corpus info mapping
-    corpus_info = {}
+    corpus_info: Dict[int, CorpusInfo] = {}
     for corpus in corpora:
         effective_unknown_rank = wordfreq.frequency.corpus.get_effective_unknown_rank(
             corpus.name, unknown_rank, session

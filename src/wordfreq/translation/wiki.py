@@ -381,7 +381,7 @@ def extract_declension_from_html(html: str) -> Dict[str, str]:
 
     # Find the declension table - it typically has class "inflection-table"
     table = soup.find("table", class_="inflection-table")
-    if not table:
+    if not table or not hasattr(table, "find_all"):
         logger.warning("No inflection table found in HTML")
         return {}
 
@@ -395,7 +395,7 @@ def extract_declension_from_html(html: str) -> Dict[str, str]:
     #   Row 1+: Case name, plural form (no header row, no singular column)
     # Singulare tantum (singular-only):
     #   Row 1+: Case name, singular form (no header row, no plural column)
-    rows = table.find_all("tr")
+    rows = table.find_all("tr")  # type: ignore[union-attr]
 
     # Detect table structure by checking first row
     # If first row contains "singular" or "plural" in header cells, skip it
