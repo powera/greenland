@@ -1,15 +1,58 @@
 {% extends "base.html" %}
 
-{% block title %}Pattern Sentence Generator{% endblock %}
+{% block title %}Buivolas Sentence Generator{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
     <h1>
-        <i class="bi bi-grid-3x3"></i> Pattern Sentence Generator
+        <i class="bi bi-chat-left-quote"></i> Buivolas Sentence Generator
     </h1>
     <p class="lead">
-        Generate simple pattern-based sentences for language learning across multiple languages.
+        Generate example sentences for language learning using multiple generation modes.
     </p>
+
+    <!-- Mode Selection -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-toggles"></i> Generation Mode</h5>
+                </div>
+                <div class="card-body">
+                    <div class="btn-group" role="group" aria-label="Generation mode selection">
+                        <input type="radio" class="btn-check" name="generation_mode" id="mode_pattern" value="pattern" checked onchange="switchMode('pattern')">
+                        <label class="btn btn-outline-primary" for="mode_pattern">
+                            <i class="bi bi-grid-3x3"></i> Pattern Mode
+                        </label>
+
+                        <input type="radio" class="btn-check" name="generation_mode" id="mode_llm" value="llm" onchange="switchMode('llm')">
+                        <label class="btn btn-outline-success" for="mode_llm">
+                            <i class="bi bi-robot"></i> LLM Mode
+                        </label>
+
+                        <input type="radio" class="btn-check" name="generation_mode" id="mode_guided" value="guided" onchange="switchMode('guided')">
+                        <label class="btn btn-outline-info" for="mode_guided">
+                            <i class="bi bi-lightbulb"></i> Guided Mode
+                        </label>
+                    </div>
+                    <div class="mt-3">
+                        <div id="mode_desc_pattern">
+                            <span class="badge bg-primary">Pattern</span>
+                            Generate all possible sentence combinations from mechanical templates. Best for systematic coverage.
+                        </div>
+                        <div id="mode_desc_llm" style="display: none;">
+                            <span class="badge bg-success">LLM</span>
+                            Use AI to generate natural, contextual sentences for a specific word. Best for quality and variety.
+                        </div>
+                        <div id="mode_desc_guided" style="display: none;">
+                            <span class="badge bg-info">Guided</span>
+                            Vocabulary-aware AI generation that uses words from the database up to a specified difficulty level.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="row mb-4">
         <div class="col-md-4">
@@ -28,6 +71,50 @@
         </div>
     </div>
 
+    <!-- LLM/Guided Mode Section -->
+    <div id="llm_guided_section" style="display: none;">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5><i class="bi bi-stars"></i> Generate Sentences for a Word</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{{ url_for('pattern_sentences.generate_llm_guided') }}">
+                    <input type="hidden" name="mode" id="llm_guided_mode" value="llm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="lemma_guid" class="form-label fw-bold">Word GUID</label>
+                                <input type="text" class="form-control" id="lemma_guid" name="guid"
+                                       placeholder="e.g., N0001" required>
+                                <small class="form-text text-muted">Enter the GUID of the lemma to generate sentences for</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="num_sentences_llm" class="form-label fw-bold">Number of Sentences</label>
+                                <input type="number" class="form-control" id="num_sentences_llm" name="num_sentences"
+                                       value="5" min="1" max="20">
+                            </div>
+                        </div>
+                        <div class="col-md-3" id="max_level_section" style="display: none;">
+                            <div class="mb-3">
+                                <label for="max_vocabulary_level" class="form-label fw-bold">Max Vocabulary Level</label>
+                                <input type="number" class="form-control" id="max_vocabulary_level" name="max_vocabulary_level"
+                                       value="7" min="1" max="20">
+                                <small class="form-text text-muted">For guided mode</small>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-stars"></i> Generate Sentences
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pattern Mode Section -->
+    <div id="pattern_section">
     <!-- Step 1: Generate Candidates -->
     <div class="card">
         <div class="card-header">
@@ -239,6 +326,7 @@
             </ul>
         </div>
     </div>
+    </div><!-- End pattern_section -->
 </div>
 
 <script src="{{ url_for('static', filename='js/pattern_sentences.js') }}"></script>
@@ -250,5 +338,40 @@ document.addEventListener('DOMContentLoaded', function() {
         batchStatusUrl: '{{ url_for("pattern_sentences.batch_status") }}'
     });
 });
+
+function switchMode(mode) {
+    const patternSection = document.getElementById('pattern_section');
+    const llmGuidedSection = document.getElementById('llm_guided_section');
+    const maxLevelSection = document.getElementById('max_level_section');
+    const llmGuidedModeInput = document.getElementById('llm_guided_mode');
+
+    // Mode descriptions
+    const descPattern = document.getElementById('mode_desc_pattern');
+    const descLlm = document.getElementById('mode_desc_llm');
+    const descGuided = document.getElementById('mode_desc_guided');
+
+    // Hide all descriptions first
+    descPattern.style.display = 'none';
+    descLlm.style.display = 'none';
+    descGuided.style.display = 'none';
+
+    if (mode === 'pattern') {
+        patternSection.style.display = 'block';
+        llmGuidedSection.style.display = 'none';
+        descPattern.style.display = 'block';
+    } else {
+        patternSection.style.display = 'none';
+        llmGuidedSection.style.display = 'block';
+        llmGuidedModeInput.value = mode;
+
+        if (mode === 'llm') {
+            maxLevelSection.style.display = 'none';
+            descLlm.style.display = 'block';
+        } else if (mode === 'guided') {
+            maxLevelSection.style.display = 'block';
+            descGuided.style.display = 'block';
+        }
+    }
+}
 </script>
 {% endblock %}

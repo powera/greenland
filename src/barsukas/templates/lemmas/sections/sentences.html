@@ -16,7 +16,7 @@
             </div>
             <div class="card-body">
                 <p class="text-muted">
-                    <i class="bi bi-info-circle"></i> Use the <strong>Žvirblis agent</strong> to generate example sentences featuring this noun.
+                    <i class="bi bi-info-circle"></i> Use the <strong>Buivolas agent</strong> to generate example sentences featuring this noun.
                     Sentences are automatically linked to vocabulary words and assigned difficulty levels.
                 </p>
                 {% if sentence_count is defined and sentence_count > 0 %}
@@ -51,15 +51,50 @@
                         <small class="text-muted">{{ lemma.definition_text }}</small>
                     </div>
                     <div class="mb-3">
+                        <label for="generation_mode" class="form-label">Generation Mode</label>
+                        <select class="form-select" id="generation_mode" name="generation_mode" onchange="toggleGuidedOptions()">
+                            <option value="llm">LLM - Basic AI generation</option>
+                            <option value="guided">Guided - Vocabulary-aware generation</option>
+                        </select>
+                        <small class="text-muted">Choose how sentences are generated</small>
+                    </div>
+                    <div class="mb-3">
                         <label for="num_sentences" class="form-label">Number of Sentences</label>
                         <input type="number" class="form-control" id="num_sentences" name="num_sentences"
                                value="3" min="1" max="10" required>
                         <small class="text-muted">Generate between 1-10 example sentences</small>
                     </div>
-                    <div class="alert alert-info">
-                        <i class="bi bi-robot"></i> The Žvirblis agent will use AI to generate natural, contextual sentences
+                    <div class="mb-3" id="guided_options" style="display: none;">
+                        <label for="max_vocabulary_level" class="form-label">Max Vocabulary Level</label>
+                        <input type="number" class="form-control" id="max_vocabulary_level" name="max_vocabulary_level"
+                               value="7" min="1" max="20">
+                        <small class="text-muted">Sentences will use vocabulary up to this difficulty level</small>
+                    </div>
+                    <div class="alert alert-info" id="mode_description_llm">
+                        <i class="bi bi-robot"></i> The Buivolas agent will use AI to generate natural, contextual sentences
                         in English featuring this noun in different roles and patterns. Translations can be added later.
                     </div>
+                    <div class="alert alert-info" id="mode_description_guided" style="display: none;">
+                        <i class="bi bi-lightbulb"></i> Guided mode generates sentences using vocabulary words from the database
+                        up to the specified difficulty level, encouraging natural use of known words.
+                    </div>
+                    <script>
+                        function toggleGuidedOptions() {
+                            const mode = document.getElementById('generation_mode').value;
+                            const guidedOptions = document.getElementById('guided_options');
+                            const llmDesc = document.getElementById('mode_description_llm');
+                            const guidedDesc = document.getElementById('mode_description_guided');
+                            if (mode === 'guided') {
+                                guidedOptions.style.display = 'block';
+                                llmDesc.style.display = 'none';
+                                guidedDesc.style.display = 'block';
+                            } else {
+                                guidedOptions.style.display = 'none';
+                                llmDesc.style.display = 'block';
+                                guidedDesc.style.display = 'none';
+                            }
+                        }
+                    </script>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
