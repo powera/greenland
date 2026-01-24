@@ -15,7 +15,7 @@ from audioshoe.espeak.types import EspeakVoice
 from audioshoe.piper.types import PiperVoice
 from audioshoe.qwen.types import QwenVoice
 from barsukas.helpers.flash_helpers import flash_and_log
-from barsukas.utils.task_queue import TaskType, enqueue_task
+from barsukas.utils.task_queue import TaskType, enqueue_task, get_tasks_for_target
 from wordfreq.storage.models.schema import (
     AudioQualityReview,
     Conversation,
@@ -239,6 +239,9 @@ def view_sentence(sentence_id: int) -> Union[str, Response]:
         for cs, conv in conversation_links
     ]
 
+    # Get queued background tasks for this sentence
+    queued_tasks = get_tasks_for_target(g.db, "sentence", sentence_id, limit=8)
+
     # Prepare voice options for audio generation
     openai_voices = [
         "ash",
@@ -292,6 +295,7 @@ def view_sentence(sentence_id: int) -> Union[str, Response]:
         pattern_words=pattern_words_data,
         audio_by_language=audio_by_language,
         conversations_data=conversations_data,
+        queued_tasks=queued_tasks,
         openai_voices=openai_voices,
         espeak_voices=espeak_voices,
         piper_voices=piper_voices,
