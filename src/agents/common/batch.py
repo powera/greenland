@@ -10,8 +10,9 @@ import json
 import logging
 import sys
 from collections import defaultdict
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, Iterable, Optional
+from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 # Add src directory to path
 GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent)
@@ -20,11 +21,139 @@ if GREENLAND_SRC_PATH not in sys.path:
 
 from agents.common.common_args import add_backend_args, add_common_args, get_data_source_config
 from clients.batch_queue import BatchQueue, get_batch_manager
+from telemetry import CostConfig
 from wordfreq.storage.backend import create_session as create_backend_session
 from wordfreq.storage.translation_helpers import LANGUAGE_FIELDS, set_translation
 from wordfreq.translation.sentence import store_translation_results
 
 logger = logging.getLogger(__name__)
+
+# Batch API provides 50% discount on token costs
+BATCH_DISCOUNT = 0.5
+
+
+@dataclass
+class BatchUsage:
+    """Aggregated usage statistics for a batch."""
+
+    total_input_tokens: int = 0
+    total_output_tokens: int = 0
+    request_count: int = 0
+    model_name: Optional[str] = None
+
+    @property
+    def total_tokens(self) -> int:
+        return self.total_input_tokens + self.total_output_tokens
+
+    def calculate_cost(self, apply_batch_discount: bool = True) -> float:
+        """Calculate cost based on token usage and model.
+
+        Args:
+            apply_batch_discount: Whether to apply the 50% batch discount (default True)
+
+        Returns:
+            Estimated cost in USD
+        """
+        if not self.model_name:
+            return 0.0
+
+        base_cost = CostConfig.estimate_cost(
+            tokens_in=self.total_input_tokens,
+            tokens_out=self.total_output_tokens,
+            model=self.model_name,
+        )
+
+        if apply_batch_discount:
+            return base_cost * BATCH_DISCOUNT
+        return base_cost
+
+
+def _extract_usage_from_response(response_body: Optional[str]) -> Tuple[int, int, Optional[str]]:
+    """Extract token usage from a batch response body.
+
+    Args:
+        response_body: JSON string of the response body
+
+    Returns:
+        Tuple of (input_tokens, output_tokens, model_name)
+    """
+    if not response_body:
+        return 0, 0, None
+
+    try:
+        response = json.loads(response_body)
+    except json.JSONDecodeError:
+        return 0, 0, None
+
+    input_tokens = 0
+    output_tokens = 0
+    model_name = None
+
+    # Handle chat completions format: {"body": {"usage": {...}, "model": ...}}
+    if "body" in response:
+        body = response["body"]
+        usage = body.get("usage", {})
+        input_tokens = usage.get("prompt_tokens", 0)
+        output_tokens = usage.get("completion_tokens", 0)
+        model_name = body.get("model")
+
+    # Handle responses API format: {"usage": {...}, "model": ...}
+    elif "usage" in response:
+        usage = response.get("usage", {})
+        input_tokens = usage.get("input_tokens", usage.get("prompt_tokens", 0))
+        output_tokens = usage.get("output_tokens", usage.get("completion_tokens", 0))
+        model_name = response.get("model")
+
+    return input_tokens, output_tokens, model_name
+
+
+def aggregate_batch_usage(requests: Iterable[BatchQueue]) -> BatchUsage:
+    """Aggregate usage statistics from batch requests.
+
+    Args:
+        requests: Iterable of BatchQueue records with response_body populated
+
+    Returns:
+        BatchUsage with aggregated statistics
+    """
+    usage = BatchUsage()
+
+    for req in requests:
+        input_tokens, output_tokens, model_name = _extract_usage_from_response(req.response_body)
+        usage.total_input_tokens += input_tokens
+        usage.total_output_tokens += output_tokens
+        usage.request_count += 1
+
+        # Use the first model name we find
+        if model_name and not usage.model_name:
+            usage.model_name = model_name
+
+    return usage
+
+
+def _report_batch_usage(usage: BatchUsage) -> None:
+    """Log batch usage and pricing information."""
+    logger.info("")
+    logger.info("=" * 80)
+    logger.info("BATCH USAGE & PRICING")
+    logger.info("=" * 80)
+    logger.info("Requests processed: %d", usage.request_count)
+    logger.info("Input tokens:       %d", usage.total_input_tokens)
+    logger.info("Output tokens:      %d", usage.total_output_tokens)
+    logger.info("Total tokens:       %d", usage.total_tokens)
+    logger.info("-" * 40)
+
+    if usage.model_name:
+        logger.info("Model: %s", usage.model_name)
+        base_cost = usage.calculate_cost(apply_batch_discount=False)
+        batch_cost = usage.calculate_cost(apply_batch_discount=True)
+        logger.info("Base cost (non-batch): $%.4f", base_cost)
+        logger.info("Batch cost (50%% off): $%.4f", batch_cost)
+        logger.info("Savings:               $%.4f", base_cost - batch_cost)
+    else:
+        logger.info("Model: Unknown (unable to calculate pricing)")
+
+    logger.info("=" * 80)
 
 
 def _group_completed_by_agent(requests: Iterable[BatchQueue]) -> Dict[str, list[BatchQueue]]:
@@ -227,6 +356,10 @@ def main() -> int:
         if not completed_requests:
             logger.warning("No completed requests found for batch %s", args.batch_id)
             return 0
+
+        # Calculate and report usage/pricing before applying results
+        usage = aggregate_batch_usage(completed_requests)
+        _report_batch_usage(usage)
 
         grouped = _group_completed_by_agent(completed_requests)
         session = create_backend_session(config)
