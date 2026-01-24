@@ -27,4 +27,12 @@ Example words_used for "The cat sleeps on the bed":
   {"word": "bed", "lemma": "bed", "role": "noun"}
 ]
 
+Example words_used for "I stopped at the gas station":
+[
+  {"word": "stopped", "lemma": "stop", "role": "verb"},
+  {"word": "gas station", "lemma": "gas station", "role": "noun"}
+]
+
+Note: Multi-word phrases like "gas station", "ice cream", or "living room" should be treated as a single lemma.
+
 Do NOT include articles (a, an, the), pronouns (I, you, he, she, it, we, they), prepositions (on, in, at, to, for), or conjunctions in words_used.
