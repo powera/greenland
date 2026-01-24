@@ -45,6 +45,108 @@ def index() -> ResponseReturnValue:
     )
 
 
+@bp.route("/generate-llm-guided", methods=["POST"])
+def generate_llm_guided() -> ResponseReturnValue:
+    """Generate sentences using LLM or Guided mode for a specific lemma."""
+    from agents.buivolas import BuivolasAgent
+    from barsukas.routes.agents import flash_and_log, log_and_flash_error
+    from wordfreq.storage.backend import BackendType
+    from wordfreq.storage.backend.config import DataSourceConfig
+
+    # Get form parameters
+    guid = request.form.get("guid", "").strip()
+    mode = request.form.get("mode", "llm")
+    num_sentences = int(request.form.get("num_sentences", 5))
+    max_vocabulary_level = int(request.form.get("max_vocabulary_level", 7))
+
+    if not guid:
+        flash("GUID is required", "error")
+        return redirect(url_for("pattern_sentences.index"))
+
+    # Look up the lemma
+    lemma = g.db.query(Lemma).filter(Lemma.guid == guid).first()
+    if not lemma:
+        flash(f"Lemma with GUID '{guid}' not found", "error")
+        return redirect(url_for("pattern_sentences.index"))
+
+    try:
+        # Initialize agent
+        config = DataSourceConfig(
+            backend_type=BackendType.SQLITE,
+            sqlite_path=Config.DB_PATH,
+            model=constants.DEFAULT_MODEL,
+            debug=Config.DEBUG,
+        )
+        agent = BuivolasAgent(config=config)
+
+        # Generate sentences based on mode
+        if mode == "guided":
+            result = agent.generate_guided_sentences_for_lemma(
+                lemma=lemma,
+                num_sentences=num_sentences,
+                max_vocabulary_level=max_vocabulary_level,
+            )
+        else:
+            result = agent.generate_llm_sentences_for_lemma(
+                lemma=lemma,
+                num_sentences=num_sentences,
+                difficulty_context=lemma.difficulty_level,
+            )
+
+        if not result.get("success"):
+            flash_and_log(
+                f'Failed to generate sentences: {result.get("error", "Unknown error")}', "error"
+            )
+            return redirect(url_for("pattern_sentences.index"))
+
+        # Store the generated sentences
+        sentences_data = result.get("sentences", [])
+        if not sentences_data:
+            flash("No sentences were generated", "warning")
+            return redirect(url_for("pattern_sentences.index"))
+
+        # Use the appropriate store method based on mode
+        if mode == "guided":
+            store_result = agent.store_guided_sentences(
+                sentences_data=sentences_data, source_lemma=lemma, session=g.db
+            )
+        else:
+            store_result = agent.store_llm_sentences(
+                sentences_data=sentences_data, source_lemma=lemma, session=g.db
+            )
+
+        if store_result["stored"] > 0:
+            flash(
+                f'Successfully generated and stored {store_result["stored"]} sentence(s) '
+                f'for "{lemma.lemma_text}" using {mode} mode!',
+                "success",
+            )
+
+            # Get the newly created sentences
+            sentence_ids = store_result.get("sentence_ids", [])
+            if sentence_ids:
+                sentences = g.db.query(Sentence).filter(Sentence.id.in_(sentence_ids)).all()
+            else:
+                sentences = []
+
+            return render_template(
+                "agents/sentence_generation_results.html",
+                lemma=lemma,
+                sentences=sentences,
+                generated_count=store_result["stored"],
+            )
+        else:
+            flash_and_log("Failed to store generated sentences", "error")
+            if store_result.get("errors"):
+                for error in store_result["errors"][:3]:
+                    flash(f"Error: {error}", "error")
+
+    except Exception as e:
+        log_and_flash_error(e, "generating sentences")
+
+    return redirect(url_for("pattern_sentences.index"))
+
+
 @bp.route("/generate-candidates", methods=["POST"])
 def generate_candidates() -> ResponseReturnValue:
     """Execute the buivolas agent to generate candidate sentences (without translations)."""
