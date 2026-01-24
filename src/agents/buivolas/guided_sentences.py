@@ -16,7 +16,6 @@ from wordfreq.storage.database import (
     Lemma,
     add_sentence,
     add_sentence_translation,
-    add_sentence_word,
 )
 from wordfreq.storage.models.schema import SentencePatternWord
 from wordfreq.tools.vocabulary_budget import build_prompt_vocabulary_section
@@ -235,11 +234,6 @@ class GuidedSentenceGenerator:
         errors = []
         sentence_ids = []
 
-        # Strip disambiguation from lemma text
-        lemma_text = source_lemma.lemma_text
-        if "(" in lemma_text:
-            lemma_text = lemma_text.split("(")[0].strip()
-
         for sentence_data in sentences_data:
             try:
                 sentence = add_sentence(
@@ -254,16 +248,6 @@ class GuidedSentenceGenerator:
                     ),
                 )
 
-                # Link the sentence to the source lemma via SentencePatternWord
-                pattern_word = SentencePatternWord(
-                    sentence_id=sentence.id,
-                    lemma_id=source_lemma.id,
-                    position=0,
-                    slot_name="guided_target",
-                    english_text=lemma_text,
-                )
-                session.add(pattern_word)
-
                 # Store English translation
                 en_text = sentence_data.get("en", "")
                 if en_text:
@@ -275,9 +259,11 @@ class GuidedSentenceGenerator:
                         verified=False,
                     )
 
-                # Store words_used as sentence words
+                # Store words_used as SentencePatternWord entries
+                # Only store words where we can find a matching lemma
                 words_used = sentence_data.get("words_used", [])
-                for position, word_data in enumerate(words_used):
+                position = 0
+                for word_data in words_used:
                     if not isinstance(word_data, dict):
                         continue
 
@@ -288,19 +274,17 @@ class GuidedSentenceGenerator:
                         source_lemma=source_lemma,
                     )
 
-                    add_sentence_word(
-                        session=session,
-                        sentence=sentence,
-                        position=position,
-                        word_role=word_data.get("role", "unknown"),
-                        lemma=word_lemma,
-                        english_text=word_data.get("lemma"),
-                        target_language_text=None,
-                        grammatical_form=None,
-                        grammatical_case=None,
-                        declined_form=word_data.get("word"),
-                        language_code="en",
-                    )
+                    # Only create SentencePatternWord if we found a lemma
+                    if word_lemma:
+                        pattern_word = SentencePatternWord(
+                            sentence_id=sentence.id,
+                            lemma_id=word_lemma.id,
+                            position=position,
+                            slot_name=word_data.get("role", "unknown"),
+                            english_text=word_data.get("lemma", ""),
+                        )
+                        session.add(pattern_word)
+                        position += 1
 
                 # Set minimum level to -1 (unverified)
                 sentence.minimum_level = -1
