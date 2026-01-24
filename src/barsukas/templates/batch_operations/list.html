@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block title %}Batch Operations{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2><i class="bi bi-collection"></i> Batch Operations</h2>
+        <p class="text-muted">OpenAI batch API jobs</p>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="row mb-4">
+    <div class="col">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-funnel"></i> Filters
+            </div>
+            <div class="card-body">
+                <form method="get" class="row g-3">
+                    <div class="col-md-3">
+                        <label for="status" class="form-label">Status</label>
+                        <select class="form-select" id="status" name="status">
+                            <option value="">All statuses</option>
+                            {% for status in statuses %}
+                                <option value="{{ status }}" {% if status == status_filter %}selected{% endif %}>{{ status }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="agent" class="form-label">Agent</label>
+                        <select class="form-select" id="agent" name="agent">
+                            <option value="">All agents</option>
+                            {% for agent in agents %}
+                                <option value="{{ agent }}" {% if agent == agent_filter %}selected{% endif %}>{{ agent }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary me-2">
+                            <i class="bi bi-search"></i>
+                        </button>
+                        <a href="{{ url_for('batch_operations.list_batches') }}" class="btn btn-secondary">
+                            <i class="bi bi-x"></i>
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Results -->
+<div class="row mb-4">
+    <div class="col">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>
+                    <i class="bi bi-list"></i> Batches
+                    <span class="badge bg-secondary">{{ batches | length }} total</span>
+                </span>
+            </div>
+            <div class="card-body">
+                {% if batches %}
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Batch ID</th>
+                                    <th>Agent</th>
+                                    <th>Operation</th>
+                                    <th>Status</th>
+                                    <th>Requests</th>
+                                    <th>Submitted</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for batch in batches %}
+                                    <tr>
+                                        <td>
+                                            <a href="{{ url_for('batch_operations.view_batch', batch_id=batch.batch_id) }}">
+                                                <code>{{ batch.batch_id[:20] }}...</code>
+                                            </a>
+                                        </td>
+                                        <td><span class="badge bg-info">{{ batch.agent_name }}</span></td>
+                                        <td><small>{{ batch.operation_type }}</small></td>
+                                        <td>
+                                            {% if batch.overall_status == 'completed' %}
+                                                <span class="badge bg-success">completed</span>
+                                            {% elif batch.overall_status == 'failed' %}
+                                                <span class="badge bg-danger">failed</span>
+                                            {% elif batch.overall_status == 'processing' %}
+                                                <span class="badge bg-warning">processing</span>
+                                            {% elif batch.overall_status == 'submitted' %}
+                                                <span class="badge bg-primary">submitted</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">{{ batch.overall_status }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {{ batch.total }}
+                                            {% if batch.status_counts.get('completed', 0) > 0 %}
+                                                <small class="text-success">({{ batch.status_counts.get('completed', 0) }} done)</small>
+                                            {% endif %}
+                                            {% if batch.status_counts.get('failed', 0) > 0 %}
+                                                <small class="text-danger">({{ batch.status_counts.get('failed', 0) }} failed)</small>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if batch.submitted_at %}
+                                                <small>{{ batch.submitted_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted">No batch operations found.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Help -->
+<div class="row">
+    <div class="col">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-question-circle"></i> CLI Commands
+            </div>
+            <div class="card-body">
+                <p class="mb-2"><small>Check batch status:</small></p>
+                <code>PYTHONPATH=src python -m agents.common.batch status --batch-id &lt;batch_id&gt;</code>
+                <p class="mb-2 mt-3"><small>Complete a batch (apply results):</small></p>
+                <code>PYTHONPATH=src python -m agents.common.batch complete --batch-id &lt;batch_id&gt;</code>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

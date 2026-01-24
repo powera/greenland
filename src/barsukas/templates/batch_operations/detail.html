@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block title %}Batch {{ batch_id[:20] }}...{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('batch_operations.list_batches') }}">Batch Operations</a></li>
+                <li class="breadcrumb-item active">{{ batch_id[:20] }}...</li>
+            </ol>
+        </nav>
+        <h2><i class="bi bi-collection"></i> Batch Details</h2>
+        <p class="text-muted"><code>{{ batch_id }}</code></p>
+    </div>
+</div>
+
+<!-- Summary -->
+<div class="row mb-4">
+    <div class="col">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-bar-chart"></i> Summary
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <strong>Total Requests:</strong> {{ summary.total_requests }}
+                    </div>
+                    <div class="col-md-3">
+                        <strong>First Submitted:</strong>
+                        {% if summary.first_submitted %}
+                            {{ summary.first_submitted.strftime('%Y-%m-%d %H:%M') }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Last Completed:</strong>
+                        {% if summary.last_completed %}
+                            {{ summary.last_completed.strftime('%Y-%m-%d %H:%M') }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col">
+                        <strong>Status Breakdown:</strong>
+                        {% for status, count in summary.status_counts.items() %}
+                            {% if status == 'completed' %}
+                                <span class="badge bg-success">{{ status }}: {{ count }}</span>
+                            {% elif status == 'failed' %}
+                                <span class="badge bg-danger">{{ status }}: {{ count }}</span>
+                            {% elif status == 'processing' %}
+                                <span class="badge bg-warning">{{ status }}: {{ count }}</span>
+                            {% elif status == 'submitted' %}
+                                <span class="badge bg-primary">{{ status }}: {{ count }}</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ status }}: {{ count }}</span>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Requests -->
+<div class="row mb-4">
+    <div class="col">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-list"></i> Requests
+            </div>
+            <div class="card-body">
+                {% if requests %}
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Custom ID</th>
+                                    <th>Entity</th>
+                                    <th>Status</th>
+                                    <th>Submitted</th>
+                                    <th>Completed</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for req in requests %}
+                                    <tr>
+                                        <td><code>{{ req.custom_id }}</code></td>
+                                        <td>
+                                            {% if req.entity_type == 'sentence' and req.entity_id %}
+                                                <a href="{{ url_for('sentences.view_sentence', sentence_id=req.entity_id) }}">
+                                                    sentence #{{ req.entity_id }}
+                                                </a>
+                                            {% elif req.entity_type == 'lemma' and req.entity_id %}
+                                                <a href="{{ url_for('lemmas.view_lemma', lemma_id=req.entity_id) }}">
+                                                    lemma #{{ req.entity_id }}
+                                                </a>
+                                            {% elif req.entity_type and req.entity_id %}
+                                                {{ req.entity_type }} #{{ req.entity_id }}
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if req.status == 'completed' %}
+                                                <span class="badge bg-success">{{ req.status }}</span>
+                                            {% elif req.status == 'failed' %}
+                                                <span class="badge bg-danger">{{ req.status }}</span>
+                                            {% elif req.status == 'processing' %}
+                                                <span class="badge bg-warning">{{ req.status }}</span>
+                                            {% elif req.status == 'submitted' %}
+                                                <span class="badge bg-primary">{{ req.status }}</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">{{ req.status }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if req.submitted_at %}
+                                                <small>{{ req.submitted_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if req.completed_at %}
+                                                <small>{{ req.completed_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted">No requests found for this batch.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CLI Commands -->
+<div class="row">
+    <div class="col">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-terminal"></i> CLI Commands
+            </div>
+            <div class="card-body">
+                <p class="mb-2"><small>Check status:</small></p>
+                <code>PYTHONPATH=src python -m agents.common.batch status --batch-id {{ batch_id }}</code>
+                <p class="mb-2 mt-3"><small>Complete batch:</small></p>
+                <code>PYTHONPATH=src python -m agents.common.batch complete --batch-id {{ batch_id }}</code>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
