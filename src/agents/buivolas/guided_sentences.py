@@ -288,14 +288,24 @@ class GuidedSentenceGenerator:
                         session.add(pattern_word)
                         position += 1
                     else:
-                        # Stage missing word to pending_imports for later review
-                        self._stage_missing_word(
+                        # Stage missing word to pending_imports and create pattern word
+                        pending_import = self._stage_missing_word(
                             session,
                             word_text=word_data.get("lemma", ""),
                             word_role=word_data.get("role", "unknown"),
                             sentence_id=sentence.id,
                             sentence_text=en_text,
                         )
+                        if pending_import:
+                            pattern_word = SentencePatternWord(
+                                sentence_id=sentence.id,
+                                pending_import_id=pending_import.id,
+                                position=position,
+                                slot_name=word_data.get("role", "unknown"),
+                                english_text=word_data.get("lemma", ""),
+                            )
+                            session.add(pattern_word)
+                            position += 1
 
                 # Set minimum level to -1 (unverified)
                 sentence.minimum_level = -1
@@ -333,7 +343,7 @@ class GuidedSentenceGenerator:
         word_role: str,
         sentence_id: int,
         sentence_text: str,
-    ) -> None:
+    ) -> Optional[PendingImport]:
         """Stage a missing word to pending_imports for later review.
 
         Args:
@@ -342,9 +352,12 @@ class GuidedSentenceGenerator:
             word_role: POS role (noun, verb, adjective, adverb)
             sentence_id: ID of the sentence using this word
             sentence_text: The English sentence text for context
+
+        Returns:
+            The PendingImport record (existing or newly created), or None if word_text is empty
         """
         if not word_text:
-            return
+            return None
 
         # Map roles to POS types
         role_to_pos = {
@@ -367,11 +380,11 @@ class GuidedSentenceGenerator:
 
         if existing:
             logger.debug(
-                "Word '%s' (%s) already in pending_imports, skipping",
+                "Word '%s' (%s) already in pending_imports, reusing",
                 word_text,
                 pos_type,
             )
-            return
+            return cast(PendingImport, existing)
 
         # Create pending import entry
         pending = PendingImport(
@@ -385,12 +398,14 @@ class GuidedSentenceGenerator:
             notes=f"Missing vocabulary discovered in sentence: {sentence_text}",
         )
         session.add(pending)
+        session.flush()  # Get the id assigned
         logger.info(
             "Staged missing word '%s' (%s) to pending_imports from sentence %s",
             word_text,
             pos_type,
             sentence_id,
         )
+        return pending
 
     def _find_lemma_for_word(
         self,

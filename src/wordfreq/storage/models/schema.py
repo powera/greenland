@@ -401,18 +401,27 @@ class SentencePatternWord(Base):
     1. Permanent record of which lemmas were selected for the pattern
     2. Clear distinction between pattern definition vs. translation POS data
     3. Ability to detect when English word breakdown hasn't been generated yet
+
+    Either lemma_id or pending_import_id should be set (not both). When a word
+    used in a sentence doesn't exist in the lemmas table, pending_import_id
+    links to the staged import for later review.
     """
 
     __tablename__ = "sentence_pattern_words"
     __table_args__ = (
         UniqueConstraint("sentence_id", "position", name="uq_sentence_pattern_position"),
+        CheckConstraint(
+            "(lemma_id IS NOT NULL) OR (pending_import_id IS NOT NULL)",
+            name="ck_pattern_word_has_reference",
+        ),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     sentence_id: Mapped[int] = mapped_column(ForeignKey("sentences.id"), nullable=False)
-    lemma_id: Mapped[int] = mapped_column(
-        ForeignKey("lemmas.id"), nullable=False
-    )  # Pattern always has lemma
+    lemma_id: Mapped[Optional[int]] = mapped_column(ForeignKey("lemmas.id"), nullable=True)
+    pending_import_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("pending_imports.id"), nullable=True
+    )
 
     # Position in the pattern (0-indexed)
     position: Mapped[int] = mapped_column(Integer, nullable=False)
@@ -429,6 +438,7 @@ class SentencePatternWord(Base):
     # Relationships
     sentence = relationship("Sentence", back_populates="pattern_words")
     lemma = relationship("Lemma")
+    pending_import = relationship("PendingImport")
 
 
 class Corpus(Base):
