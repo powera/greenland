@@ -223,6 +223,7 @@ class ZvirblisAgent:
         target_languages: List[str],
         limit: Optional[int] = None,
         pattern_id: Optional[str] = None,
+        exclude_pending_imports: bool = False,
     ) -> tuple[Optional[str], int]:
         session = self.get_session()
         try:
@@ -246,6 +247,18 @@ class ZvirblisAgent:
 
             if pattern_id:
                 query = query.filter(Sentence.source_filename == f"pattern:{pattern_id}")
+
+            if exclude_pending_imports:
+                # Exclude sentences that have any SentencePatternWord with pending_import_id
+                sentences_with_pending = (
+                    session.query(SentencePatternWord.sentence_id)
+                    .filter(SentencePatternWord.pending_import_id.isnot(None))
+                    .distinct()
+                    .subquery()
+                )
+                query = query.filter(
+                    ~Sentence.id.in_(session.query(sentences_with_pending.c.sentence_id))
+                )
 
             if limit:
                 query = query.limit(limit)
@@ -379,6 +392,11 @@ def get_argument_parser() -> argparse.ArgumentParser:
     )
     submit_parser.add_argument("--limit", type=int, help="Max sentences to translate")
     submit_parser.add_argument("--pattern-id", help="Only translate sentences from this pattern")
+    submit_parser.add_argument(
+        "--exclude-pending-imports",
+        action="store_true",
+        help="Exclude sentences that have words with pending imports (missing lemmas)",
+    )
 
     parser.set_defaults(languages=["lt", "zh", "fr", "es"])
 
@@ -402,6 +420,7 @@ def main() -> int:
             target_languages=target_languages,
             limit=args.limit,
             pattern_id=args.pattern_id,
+            exclude_pending_imports=getattr(args, "exclude_pending_imports", False),
         )
 
         if batch_id:
