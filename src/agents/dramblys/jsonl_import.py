@@ -10,7 +10,7 @@ import json
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple, Union, cast
 
 from wordfreq.storage.models.schema import Lemma
 
@@ -28,14 +28,14 @@ class CategoryMigration:
             migration_file: Path to the category migrations JSON file
         """
         self.migration_file = migration_file
-        self.splits = {}
-        self.renames = {}
-        self.guid_overrides = {}
-        self.import_rules = {}
+        self.splits: Dict[str, Any] = {}
+        self.renames: Dict[str, str] = {}
+        self.guid_overrides: Dict[str, Any] = {}
+        self.import_rules: Dict[str, Any] = {}
 
         self._load_migrations()
 
-    def _load_migrations(self):
+    def _load_migrations(self) -> None:
         """Load migration configuration from file."""
         try:
             with open(self.migration_file, "r", encoding="utf-8") as f:
@@ -90,7 +90,8 @@ class CategoryMigration:
             List of target categories if this is a split, None otherwise
         """
         if old_category in self.splits:
-            return self.splits[old_category].get("split_into", [])
+            result: List[str] = self.splits[old_category].get("split_into", [])
+            return result
         return None
 
     def resolve_category(self, old_category: str) -> str:
@@ -111,7 +112,7 @@ class JSONLImporter:
 
     def __init__(
         self,
-        session,
+        session: Any,
         migration_config: Optional[CategoryMigration] = None,
         dry_run: bool = False,
         import_level: Optional[int] = None,
@@ -131,7 +132,7 @@ class JSONLImporter:
         self.import_level = import_level
 
         # Statistics
-        self.stats = {
+        self.stats: Dict[str, Any] = {
             "files_processed": 0,
             "records_read": 0,
             "records_imported": 0,
@@ -188,7 +189,8 @@ class JSONLImporter:
         Returns:
             Existing lemma or None
         """
-        return self.session.query(Lemma).filter(Lemma.guid == guid).first()
+        result: Optional[Lemma] = self.session.query(Lemma).filter(Lemma.guid == guid).first()
+        return result
 
     def check_category_coherence(
         self, existing: Lemma, jsonl_data: Dict
@@ -351,7 +353,7 @@ class JSONLImporter:
 
         return lemma
 
-    def update_lemma_from_jsonl(self, lemma: Lemma, jsonl_data: Dict):
+    def update_lemma_from_jsonl(self, lemma: Lemma, jsonl_data: Dict[str, Any]) -> None:
         """
         Update existing lemma with JSONL data.
 
@@ -438,7 +440,7 @@ class JSONLImporter:
             logger.info(f"  NEW: '{lemma_text}' [{guid}]")
             return True, "New lemma created"
 
-    def import_file(self, file_path: Path) -> Dict[str, int]:
+    def import_file(self, file_path: Path) -> Dict[str, Any]:
         """
         Import all records from a JSONL file.
 

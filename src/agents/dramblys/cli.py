@@ -27,7 +27,7 @@ from agents.common.common_args import (
 )
 
 
-def get_argument_parser():
+def get_argument_parser() -> argparse.ArgumentParser:
     """Return the argument parser for introspection.
 
     This function allows external tools to introspect the available
@@ -148,7 +148,7 @@ def get_argument_parser():
     return parser
 
 
-def main():
+def main() -> None:
     """Main entry point for the dramblys agent."""
     # Import here to avoid circular imports
     from agents.dramblys.agent import DramblysAgent

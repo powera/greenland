@@ -60,7 +60,7 @@ class DramblysAgent:
         if self.debug:
             logger.setLevel(logging.DEBUG)
 
-    def get_session(self):
+    def get_session(self) -> Any:
         """Get database session using backend abstraction."""
         return create_backend_session(self.config)
 
@@ -333,7 +333,7 @@ class DramblysAgent:
                     existing_tokens.add(token.token.lower())
 
             # Filter: valid words, not stopwords, not already defined, then take top N
-            word_list = []
+            word_list: List[str] = []
             for token in all_tokens:
                 if len(word_list) >= top_n:
                     break
@@ -729,7 +729,7 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
             return staging.stage_missing_words_for_import(
                 session=session,
                 missing_words=missing_words,
-                db_path=self.db_path,
+                db_path=self.db_path or constants.WORDFREQ_DB_PATH,
                 limit=limit,
                 model=model,
                 throttle=throttle,
@@ -871,7 +871,7 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
         session = self.get_session()
         try:
             return staging.approve_pending_import(
-                session, pending_import_id, self.db_path, model, self.debug
+                session, pending_import_id, self.db_path or constants.WORDFREQ_DB_PATH, model, self.debug
             )
         finally:
             session.close()
@@ -911,7 +911,7 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
         logger.info("Starting full missing words detection check...")
         start_time = datetime.now()
 
-        results = {
+        results: Dict[str, Any] = {
             "timestamp": start_time.isoformat(),
             "backend_type": str(self.config.backend_type),
             "checks": {
@@ -944,7 +944,7 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
 
         return results
 
-    def _print_frequency_check(self, freq_check: Dict, max_words: int = 10):
+    def _print_frequency_check(self, freq_check: Dict[str, Any], max_words: int = 10) -> None:
         """Print high-frequency missing words check results."""
         print(f"\n{'='*80}")
         print(f"HIGH-FREQUENCY MISSING WORDS:")
@@ -966,7 +966,7 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
                 )
         print(f"{'='*80}\n")
 
-    def _print_summary(self, results: Dict, start_time: datetime, duration: float):
+    def _print_summary(self, results: Dict[str, Any], start_time: datetime, duration: float) -> None:
         """Print a summary of the check results."""
         logger.info("=" * 80)
         logger.info("DRAMBLYS AGENT REPORT - Missing Words Detection")

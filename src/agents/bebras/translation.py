@@ -16,6 +16,10 @@ from sqlalchemy.orm import Session
 from clients.unified_client import UnifiedLLMClient
 from wordfreq.storage.database import Sentence
 from wordfreq.storage.models.schema import SentenceWord
+from wordfreq.storage.translation_helpers import (
+    get_language_name,
+    get_supported_languages,
+)
 from wordfreq.translation.sentence import (
     build_response_schema,
     build_translation_prompt,
@@ -122,3 +126,23 @@ def ensure_translations(
     except Exception as e:
         logger.error(f"Error translating sentence {sentence.id}: {e}", exc_info=True)
         return {"success": False, "error": str(e)}
+
+
+def validate_language_codes(codes: List[str]) -> List[str]:
+    """
+    Validate a list of language codes and return only the valid ones.
+
+    Args:
+        codes: List of language codes to validate
+
+    Returns:
+        List of valid language codes
+    """
+    supported = get_supported_languages()
+    valid_codes = []
+    for code in codes:
+        if code in supported:
+            valid_codes.append(code)
+        else:
+            logger.warning(f"Unsupported language code: {code}")
+    return valid_codes

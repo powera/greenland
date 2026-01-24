@@ -9,7 +9,7 @@ orphaned records, missing required fields, and constraint violations.
 import argparse
 import logging
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 import constants
 from wordfreq.storage.database import create_database_session
@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 class IntegrityChecker:
     """Database integrity checker."""
 
-    def __init__(self, db_path: str = None, debug: bool = False):
+    def __init__(self, db_path: Optional[str] = None, debug: bool = False):
         """
         Initialize the integrity checker.
 
@@ -35,11 +35,11 @@ class IntegrityChecker:
         if debug:
             logger.setLevel(logging.DEBUG)
 
-    def get_session(self):
+    def get_session(self) -> Any:
         """Get database session."""
         return create_database_session(self.db_path)
 
-    def check_orphaned_derivative_forms(self) -> Dict[str, any]:
+    def check_orphaned_derivative_forms(self) -> Dict[str, Any]:
         """Check for derivative forms with invalid lemma_id references."""
         logger.info("Checking for orphaned derivative forms...")
 
@@ -74,7 +74,7 @@ class IntegrityChecker:
         finally:
             session.close()
 
-    def check_derivative_form_word_tokens(self) -> Dict[str, any]:
+    def check_derivative_form_word_tokens(self) -> Dict[str, Any]:
         """Check for derivative forms with invalid word_token_id references or mismatched text."""
         logger.info("Checking derivative form word token references...")
 
@@ -128,7 +128,7 @@ class IntegrityChecker:
         finally:
             session.close()
 
-    def check_orphaned_word_frequencies(self) -> Dict[str, any]:
+    def check_orphaned_word_frequencies(self) -> Dict[str, Any]:
         """Check for word frequencies with invalid word_token_id or corpus_id."""
         logger.info("Checking for orphaned word frequencies...")
 
@@ -180,7 +180,7 @@ class IntegrityChecker:
         finally:
             session.close()
 
-    def check_missing_required_fields(self) -> Dict[str, any]:
+    def check_missing_required_fields(self) -> Dict[str, Any]:
         """Check for records with missing required fields."""
         logger.info("Checking for missing required fields...")
 
@@ -263,7 +263,7 @@ class IntegrityChecker:
         finally:
             session.close()
 
-    def check_lemmas_without_derivatives(self) -> Dict[str, any]:
+    def check_lemmas_without_derivatives(self) -> Dict[str, Any]:
         """Check for lemmas that have no derivative forms at all."""
         logger.info("Checking for lemmas without derivative forms...")
 
@@ -306,7 +306,7 @@ class IntegrityChecker:
         finally:
             session.close()
 
-    def check_duplicate_guids(self) -> Dict[str, any]:
+    def check_duplicate_guids(self) -> Dict[str, Any]:
         """Check for duplicate GUIDs in lemmas table."""
         logger.info("Checking for duplicate GUIDs...")
 
@@ -350,7 +350,7 @@ class IntegrityChecker:
         finally:
             session.close()
 
-    def check_invalid_difficulty_levels(self) -> Dict[str, any]:
+    def check_invalid_difficulty_levels(self) -> Dict[str, Any]:
         """Check for difficulty levels outside the valid range (1-20)."""
         logger.info("Checking for invalid difficulty levels...")
 
@@ -385,12 +385,12 @@ class IntegrityChecker:
         finally:
             session.close()
 
-    def run_full_check(self, output_file: Optional[str] = None) -> Dict[str, any]:
+    def run_full_check(self, output_file: Optional[str] = None) -> Dict[str, Any]:
         """Run all integrity checks and generate a comprehensive report."""
         logger.info("Starting full database integrity check...")
         start_time = datetime.now()
 
-        results = {
+        results: Dict[str, Any] = {
             "timestamp": start_time.isoformat(),
             "database_path": self.db_path,
             "checks": {
@@ -422,7 +422,7 @@ class IntegrityChecker:
 
         return results
 
-    def _print_summary(self, results: Dict, start_time: datetime, duration: float):
+    def _print_summary(self, results: Dict[str, Any], start_time: datetime, duration: float) -> None:
         """Print a summary of the check results."""
         logger.info("=" * 80)
         logger.info("BEBRAS INTEGRITY CHECK REPORT")
@@ -475,7 +475,7 @@ class IntegrityChecker:
         logger.info("=" * 80)
 
 
-def get_argument_parser():
+def get_argument_parser() -> argparse.ArgumentParser:
     """Return the argument parser for introspection."""
     parser = argparse.ArgumentParser(description="Bebras Database Integrity Checker")
     parser.add_argument("--db-path", help="Database path (uses default if not specified)")
@@ -498,7 +498,7 @@ def get_argument_parser():
     return parser
 
 
-def main():
+def main() -> None:
     """Main entry point for the integrity checker."""
     parser = get_argument_parser()
     args = parser.parse_args()
