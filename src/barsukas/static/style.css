@@ -197,3 +197,91 @@ ruby.with-separator rt {
     margin-right: 0.65em;
     text-align: center;
 }
+
+/* Utility Classes - Common patterns extracted from templates */
+
+/* Scrollable containers */
+.scrollable-sm {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.scrollable-md {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.scrollable-lg {
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+/* Terminal/code output styling */
+.terminal-output {
+    background-color: #1e1e1e;
+    color: #d4d4d4;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.85rem;
+    padding: 1rem;
+    border-radius: 0.25rem;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+/* Audio player styling */
+.audio-player-inline {
+    width: 200px;
+}
+
+.audio-player-large {
+    width: 100%;
+}
+
+/* Small text utilities */
+.text-xs {
+    font-size: 0.7rem;
+}
+
+.text-sm {
+    font-size: 0.85rem;
+}
+
+/* Cursor utilities */
+.cursor-pointer {
+    cursor: pointer;
+}
+
+/* Inline form styling */
+.inline-form {
+    display: inline-block;
+}
+
+/* Status badges with consistent sizing */
+.status-badge {
+    font-size: 0.8rem;
+}
+
+/* Filter form styling (for list pages) */
+.filter-form {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 0.25rem;
+    margin-bottom: 1rem;
+}
+
+/* Review container styling */
+.review-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* Expected text display (for audio review) */
+.expected-text-display {
+    font-size: 2rem;
+    font-weight: 500;
+    text-align: center;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+}
