@@ -38,12 +38,18 @@ class BatchUsage:
 
     total_input_tokens: int = 0
     total_output_tokens: int = 0
+    total_reasoning_tokens: int = 0
     request_count: int = 0
     model_name: Optional[str] = None
 
     @property
     def total_tokens(self) -> int:
         return self.total_input_tokens + self.total_output_tokens
+
+    @property
+    def actual_output_tokens(self) -> int:
+        """Output tokens excluding reasoning (what you actually see)."""
+        return self.total_output_tokens - self.total_reasoning_tokens
 
     def calculate_cost(self, apply_batch_discount: bool = True) -> float:
         """Calculate cost based on token usage and model.
@@ -68,25 +74,28 @@ class BatchUsage:
         return base_cost
 
 
-def _extract_usage_from_response(response_body: Optional[str]) -> Tuple[int, int, Optional[str]]:
+def _extract_usage_from_response(
+    response_body: Optional[str],
+) -> Tuple[int, int, int, Optional[str]]:
     """Extract token usage from a batch response body.
 
     Args:
         response_body: JSON string of the response body
 
     Returns:
-        Tuple of (input_tokens, output_tokens, model_name)
+        Tuple of (input_tokens, output_tokens, reasoning_tokens, model_name)
     """
     if not response_body:
-        return 0, 0, None
+        return 0, 0, 0, None
 
     try:
         response = json.loads(response_body)
     except json.JSONDecodeError:
-        return 0, 0, None
+        return 0, 0, 0, None
 
     input_tokens = 0
     output_tokens = 0
+    reasoning_tokens = 0
     model_name = None
 
     # Handle chat completions format: {"body": {"usage": {...}, "model": ...}}
@@ -97,6 +106,10 @@ def _extract_usage_from_response(response_body: Optional[str]) -> Tuple[int, int
         output_tokens = usage.get("completion_tokens", 0)
         model_name = body.get("model")
 
+        # Extract reasoning tokens from completion_tokens_details
+        completion_details = usage.get("completion_tokens_details", {})
+        reasoning_tokens = completion_details.get("reasoning_tokens", 0)
+
     # Handle responses API format: {"usage": {...}, "model": ...}
     elif "usage" in response:
         usage = response.get("usage", {})
@@ -104,7 +117,11 @@ def _extract_usage_from_response(response_body: Optional[str]) -> Tuple[int, int
         output_tokens = usage.get("output_tokens", usage.get("completion_tokens", 0))
         model_name = response.get("model")
 
-    return input_tokens, output_tokens, model_name
+        # Extract reasoning tokens from output_tokens_details
+        output_details = usage.get("output_tokens_details", {})
+        reasoning_tokens = output_details.get("reasoning_tokens", 0)
+
+    return input_tokens, output_tokens, reasoning_tokens, model_name
 
 
 def aggregate_batch_usage(requests: Iterable[BatchQueue]) -> BatchUsage:
@@ -119,9 +136,12 @@ def aggregate_batch_usage(requests: Iterable[BatchQueue]) -> BatchUsage:
     usage = BatchUsage()
 
     for req in requests:
-        input_tokens, output_tokens, model_name = _extract_usage_from_response(req.response_body)
+        input_tokens, output_tokens, reasoning_tokens, model_name = _extract_usage_from_response(
+            req.response_body
+        )
         usage.total_input_tokens += input_tokens
         usage.total_output_tokens += output_tokens
+        usage.total_reasoning_tokens += reasoning_tokens
         usage.request_count += 1
 
         # Use the first model name we find
@@ -140,6 +160,13 @@ def _report_batch_usage(usage: BatchUsage) -> None:
     logger.info("Requests processed: %d", usage.request_count)
     logger.info("Input tokens:       %d", usage.total_input_tokens)
     logger.info("Output tokens:      %d", usage.total_output_tokens)
+
+    # Show reasoning breakdown if present
+    if usage.total_reasoning_tokens > 0:
+        reasoning_pct = (usage.total_reasoning_tokens / usage.total_output_tokens * 100) if usage.total_output_tokens else 0
+        logger.info("  - Reasoning:      %d (%.0f%%)", usage.total_reasoning_tokens, reasoning_pct)
+        logger.info("  - Actual output:  %d (%.0f%%)", usage.actual_output_tokens, 100 - reasoning_pct)
+
     logger.info("Total tokens:       %d", usage.total_tokens)
     logger.info("-" * 40)
 
