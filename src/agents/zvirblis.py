@@ -293,6 +293,13 @@ class ZvirblisAgent:
                     "response_format": response_format,
                 }
 
+                # Minimize reasoning tokens for gpt-5-mini/nano (translation doesn't need deep reasoning)
+                if self.config.model and (
+                    self.config.model.startswith("gpt-5-mini")
+                    or self.config.model.startswith("gpt-5-nano")
+                ):
+                    request_body["reasoning_effort"] = "low"
+
                 metadata = BatchRequestMetadata(
                     custom_id=custom_id,
                     agent_name="zvirblis",
