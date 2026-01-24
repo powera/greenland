@@ -10,9 +10,9 @@ CRITICAL REQUIREMENTS FOR OUTPUT FORMAT:
 5. The "explanation" field is the ONLY place for notes about your choices
 
 REGIONAL VARIANTS ARE IMPORTANT:
-- Include regional variants as separate entries (e.g., for "potato" in Chinese: both "馬鈴薯" AND "土豆")
+- Include regional variants as separate entries (e.g., for "potato" in Chinese: both "马铃薯" AND "土豆")
 - Consider variants from different regions/dialects that learners might encounter
-- For Chinese: include both formal/written terms AND common colloquial terms
+- For Chinese: use Simplified characters (简体字) for Mainland Chinese (普通话), and include both formal/written terms AND common colloquial terms
 - For English: include both American and British spellings as separate alternate_spellings
 - For Spanish: consider Latin American vs. Castilian variants
 - Regional variants should be returned as separate array items, not combined with slashes

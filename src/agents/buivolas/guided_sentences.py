@@ -17,6 +17,7 @@ from wordfreq.storage.database import (
     add_sentence,
     add_sentence_translation,
 )
+from wordfreq.storage.models.imports import PendingImport
 from wordfreq.storage.models.schema import SentencePatternWord
 from wordfreq.tools.vocabulary_budget import build_prompt_vocabulary_section
 
@@ -261,6 +262,7 @@ class GuidedSentenceGenerator:
 
                 # Store words_used as SentencePatternWord entries
                 # Only store words where we can find a matching lemma
+                # Words without lemmas are staged to pending_imports
                 words_used = sentence_data.get("words_used", [])
                 position = 0
                 for word_data in words_used:
@@ -285,6 +287,25 @@ class GuidedSentenceGenerator:
                         )
                         session.add(pattern_word)
                         position += 1
+                    else:
+                        # Stage missing word to pending_imports and create pattern word
+                        pending_import = self._stage_missing_word(
+                            session,
+                            word_text=word_data.get("lemma", ""),
+                            word_role=word_data.get("role", "unknown"),
+                            sentence_id=sentence.id,
+                            sentence_text=en_text,
+                        )
+                        if pending_import:
+                            pattern_word = SentencePatternWord(
+                                sentence_id=sentence.id,
+                                pending_import_id=pending_import.id,
+                                position=position,
+                                slot_name=word_data.get("role", "unknown"),
+                                english_text=word_data.get("lemma", ""),
+                            )
+                            session.add(pattern_word)
+                            position += 1
 
                 # Set minimum level to -1 (unverified)
                 sentence.minimum_level = -1
@@ -314,6 +335,77 @@ class GuidedSentenceGenerator:
             "errors": errors,
             "sentence_ids": sentence_ids,
         }
+
+    def _stage_missing_word(
+        self,
+        session: Any,
+        word_text: str,
+        word_role: str,
+        sentence_id: int,
+        sentence_text: str,
+    ) -> Optional[PendingImport]:
+        """Stage a missing word to pending_imports for later review.
+
+        Args:
+            session: Database session
+            word_text: The lemma/base form of the word
+            word_role: POS role (noun, verb, adjective, adverb)
+            sentence_id: ID of the sentence using this word
+            sentence_text: The English sentence text for context
+
+        Returns:
+            The PendingImport record (existing or newly created), or None if word_text is empty
+        """
+        if not word_text:
+            return None
+
+        # Map roles to POS types
+        role_to_pos = {
+            "noun": "noun",
+            "verb": "verb",
+            "adjective": "adjective",
+            "adverb": "adverb",
+        }
+        pos_type = role_to_pos.get(word_role)
+
+        # Check if already in pending_imports with same word and pos_type
+        existing = (
+            session.query(PendingImport)
+            .filter(
+                PendingImport.english_word == word_text,
+                PendingImport.pos_type == pos_type,
+            )
+            .first()
+        )
+
+        if existing:
+            logger.debug(
+                "Word '%s' (%s) already in pending_imports, reusing",
+                word_text,
+                pos_type,
+            )
+            return cast(PendingImport, existing)
+
+        # Create pending import entry
+        pending = PendingImport(
+            english_word=word_text,
+            definition=sentence_text,  # Use sentence as context
+            disambiguation_translation=word_text,  # Use word itself
+            disambiguation_language="en",
+            pos_type=pos_type,
+            pos_subtype=None,
+            source=f"buivolas_guided_sentence_{sentence_id}",
+            notes=f"Missing vocabulary discovered in sentence: {sentence_text}",
+        )
+        session.add(pending)
+        session.flush()  # Get the id assigned
+        logger.info(
+            "Staged missing word '%s' (%s) to pending_imports from sentence %s",
+            word_text,
+            pos_type,
+            sentence_id,
+        )
+        return pending
 
     def _find_lemma_for_word(
         self,

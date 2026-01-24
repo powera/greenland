@@ -60,11 +60,9 @@ def query_synonyms_from_llm(
     context = util.prompt_loader.get_context("synonyms", "word")
     prompt_template = util.prompt_loader.get_prompt("synonyms", "word")
 
-    # Add language-specific notes
+    # Add language-specific notes (Chinese is already covered in context.txt)
     language_note = ""
-    if language_code == "zh":
-        language_note = "- For Chinese, provide Traditional Chinese characters (繁體字)\n- Include BOTH formal terms AND common colloquial terms (e.g., both 馬鈴薯 and 土豆 for 'potato')"
-    elif language_code == "ko":
+    if language_code == "ko":
         language_note = "- For Korean, provide words in Hangul (e.g., 거리, 길 for 'street')"
 
     # Build prompt with variables

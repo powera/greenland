@@ -40,8 +40,8 @@ DEFAULT_TRANSLATION_LANGUAGES = {
     "chinese": {
         "field": "chinese_translation",
         "code": "zh",
-        "description": "Chinese translation in lemma form (Traditional characters)",
-        "instructions": "- Chinese: Provide Traditional Chinese characters (繁體字) in base form\n  - Use natural spoken Mainland Mandarin forms (e.g., 鞋子 not bare 鞋, but 水 not 水份)\n  - Match the generality level of the English word (avoid overly specific translations)\n  - Do not include pinyin, just the characters",
+        "description": "Mainland Chinese (普通话) translation in lemma form (Simplified characters)",
+        "instructions": "- Chinese: Provide Simplified Chinese characters (简体字) for Mainland Chinese (普通话) in base form\n  - Use natural spoken Mainland Mandarin forms (e.g., 鞋子 not bare 鞋, but 水 not 水份)\n  - Match the generality level of the English word (avoid overly specific translations)\n  - Do not include pinyin, just the characters",
     },
     "korean": {
         "field": "korean_translation",
