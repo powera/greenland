@@ -171,85 +171,14 @@
     </div>
 </div>
 
+<script src="{{ url_for('static', filename='js/settings.js') }}"></script>
 <script>
-function copyToClipboard(elementId) {
-    const element = document.getElementById(elementId);
-    element.select();
-    document.execCommand('copy');
-
-    // Show feedback
-    const button = event.target.closest('button');
-    const originalHtml = button.innerHTML;
-    button.innerHTML = 'Copied!';
-    setTimeout(() => {
-        button.innerHTML = originalHtml;
-    }, 2000);
-}
-
-function restartBarsukas() {
-    if (!confirm('Are you sure you want to restart Barsukas? This will wait for all active requests to complete before restarting.')) {
-        return;
-    }
-
-    const statusDiv = document.getElementById('restart-status');
-    const messageDiv = document.getElementById('restart-message');
-    const restartButton = event.target.closest('button');
-
-    // Disable button and show status
-    restartButton.disabled = true;
-    statusDiv.style.display = 'block';
-    messageDiv.textContent = 'Initiating restart...';
-
-    // Trigger restart
-    fetch('{{ url_for("settings.restart") }}', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            messageDiv.textContent = 'Waiting for active requests to complete...';
-
-            // Poll for restart status
-            const pollInterval = setInterval(() => {
-                fetch('{{ url_for("settings.restart_status") }}')
-                    .then(response => response.json())
-                    .then(status => {
-                        if (status.shutdown_requested) {
-                            messageDiv.textContent = `Waiting for ${status.active_requests} active request(s) to complete...`;
-                        }
-                    })
-                    .catch(err => {
-                        // Connection lost - restart likely completed
-                        clearInterval(pollInterval);
-                        messageDiv.textContent = 'Restart completed. Waiting for server to come back online...';
-
-                        // Try to reconnect
-                        const reconnectInterval = setInterval(() => {
-                            fetch('{{ url_for("settings.index") }}')
-                                .then(response => {
-                                    if (response.ok) {
-                                        clearInterval(reconnectInterval);
-                                        window.location.reload();
-                                    }
-                                })
-                                .catch(() => {
-                                    // Still waiting for server to restart
-                                });
-                        }, 1000);
-                    });
-            }, 500);
-        } else {
-            messageDiv.textContent = 'Error: ' + (data.error || 'Unknown error');
-            restartButton.disabled = false;
-        }
-    })
-    .catch(error => {
-        messageDiv.textContent = 'Error initiating restart: ' + error.message;
-        restartButton.disabled = false;
+document.addEventListener('DOMContentLoaded', function() {
+    initSettings({
+        restartUrl: '{{ url_for("settings.restart") }}',
+        restartStatusUrl: '{{ url_for("settings.restart_status") }}',
+        settingsIndexUrl: '{{ url_for("settings.index") }}'
     });
-}
+});
 </script>
 {% endblock %}

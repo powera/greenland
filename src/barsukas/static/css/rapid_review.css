@@ -1,0 +1,162 @@
+.rapid-review-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.expected-text-display {
+    font-size: 4rem;
+    font-weight: bold;
+    text-align: center;
+    padding: 3rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 1rem;
+    margin: 2rem 0;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.action-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin: 2rem 0;
+}
+
+.action-btn {
+    flex: 1;
+    max-width: 200px;
+    padding: 2rem 1rem;
+    font-size: 1.5rem;
+    font-weight: bold;
+    border-radius: 0.5rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+
+.action-btn:active {
+    transform: translateY(0);
+}
+
+.btn-approve {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    color: white;
+}
+
+.btn-acceptable {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+}
+
+.btn-reject {
+    background: linear-gradient(135deg, #ee0979 0%, #ff6a00 100%);
+    color: white;
+}
+
+.issue-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+    margin: 1rem 0;
+}
+
+.issue-tag {
+    padding: 0.5rem 1rem;
+    border-radius: 2rem;
+    border: 2px solid #ddd;
+    background-color: white;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+}
+
+.issue-tag:hover {
+    border-color: #667eea;
+    background-color: #f0f4ff;
+}
+
+.issue-tag.selected {
+    background-color: #667eea;
+    color: white;
+    border-color: #667eea;
+}
+
+.progress-bar-container {
+    background-color: #e0e0e0;
+    height: 8px;
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 1rem 0;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    transition: width 0.3s ease;
+}
+
+.metadata-row {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin: 1rem 0;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.keyboard-hints {
+    text-align: center;
+    margin: 2rem 0;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-radius: 0.5rem;
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.keyboard-key {
+    display: inline-block;
+    padding: 0.2rem 0.5rem;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 0.25rem;
+    font-family: monospace;
+    font-weight: bold;
+    margin: 0 0.2rem;
+}
+
+.completion-message {
+    text-align: center;
+    padding: 3rem;
+    font-size: 1.5rem;
+    color: #666;
+}
+
+.audio-player-large {
+    width: 100%;
+    max-width: 600px;
+    margin: 1rem auto;
+    display: block;
+}
+
+.filter-bar {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.filter-bar select {
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    border: 2px solid #ddd;
+}

@@ -280,97 +280,12 @@
     {% endif %}
 </div>
 
+<script src="{{ url_for('static', filename='js/audio_list.js') }}"></script>
 <script>
-// Create a single shared audio player
-const audioPlayer = new Audio();
-let currentPlayButton = null;
-
-// Quick approve/reject handlers
 document.addEventListener('DOMContentLoaded', function() {
-    // Play audio button handlers
-    document.querySelectorAll('.play-audio-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const audioUrl = this.dataset.audioUrl;
-
-            // If clicking the same button, toggle play/pause
-            if (currentPlayButton === this && !audioPlayer.paused) {
-                audioPlayer.pause();
-                this.innerHTML = '<i class="bi bi-play-circle"></i>';
-                return;
-            }
-
-            // Reset previous button
-            if (currentPlayButton) {
-                currentPlayButton.innerHTML = '<i class="bi bi-play-circle"></i>';
-            }
-
-            // Play new audio
-            audioPlayer.src = audioUrl;
-            audioPlayer.play();
-            this.innerHTML = '<i class="bi bi-pause-circle"></i>';
-            currentPlayButton = this;
-        });
+    initAudioList({
+        quickUpdateUrlBase: '{{ url_for("audio.quick_update", review_id=0) }}'
     });
-
-    // Reset button when audio ends
-    audioPlayer.addEventListener('ended', function() {
-        if (currentPlayButton) {
-            currentPlayButton.innerHTML = '<i class="bi bi-play-circle"></i>';
-            currentPlayButton = null;
-        }
-    });
-
-    document.querySelectorAll('.quick-approve').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const reviewId = this.dataset.id;
-            quickUpdate(reviewId, 'approved', this);
-        });
-    });
-
-    document.querySelectorAll('.quick-reject').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const reviewId = this.dataset.id;
-            quickUpdate(reviewId, 'needs_replacement', this);
-        });
-    });
-
-    function quickUpdate(reviewId, status, button) {
-        button.disabled = true;
-        const row = document.querySelector(`tr[data-review-id="${reviewId}"]`);
-
-        fetch(`{{ url_for('audio.quick_update', review_id=0) }}`.replace('0', reviewId), {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ status: status })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Update status badge (6th column: GUID, Text, English, Language, Voice, Status)
-                const statusCell = row.querySelector('td:nth-child(6)');
-                if (status === 'approved') {
-                    statusCell.innerHTML = '<span class="badge bg-success status-badge">Approved</span>';
-                } else if (status === 'needs_replacement') {
-                    statusCell.innerHTML = '<span class="badge bg-danger status-badge">Needs Replacement</span>';
-                }
-                // Flash success
-                row.style.backgroundColor = '#d4edda';
-                setTimeout(() => {
-                    row.style.backgroundColor = '';
-                }, 1000);
-            } else {
-                alert('Error: ' + data.error);
-            }
-        })
-        .catch(error => {
-            alert('Error updating status: ' + error);
-        })
-        .finally(() => {
-            button.disabled = false;
-        });
-    }
 });
 </script>
 {% endblock %}
