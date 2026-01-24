@@ -12,7 +12,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from sqlalchemy.orm import Session
 
-from agents.common.wq_tools import build_default_config, get_lemma_or_raise
+from workqueue.tools import build_default_config, get_lemma_or_raise
 import constants
 import util.prompt_loader
 from wordfreq.storage.backend.config import DataSourceConfig

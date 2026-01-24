@@ -21,7 +21,7 @@ from agents.sarka.agent import (
     WORDS_PER_CONVERSATION,
     WORD_USAGE_TARGET,
 )
-from barsukas.utils.task_queue import TaskStatus, enqueue_task
+from workqueue.task_queue import TaskStatus, enqueue_task
 from wordfreq.storage.models.schema import BarsukasTask
 
 logger = logging.getLogger(__name__)

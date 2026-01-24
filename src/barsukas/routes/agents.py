@@ -15,7 +15,7 @@ from agents.lokys import LokysAgent
 from agents.papuga import PapugaAgent
 from agents.voras.agent import VorasAgent
 from barsukas.helpers.flash_helpers import flash_and_log, log_and_flash_error
-from barsukas.utils.task_queue import TaskType, enqueue_task
+from workqueue.task_queue import TaskType, enqueue_task
 from wordfreq.storage.backend.config import BackendType, DataSourceConfig
 from wordfreq.storage.models.schema import DerivativeForm, Lemma
 from wordfreq.storage.translation_helpers import get_supported_languages
@@ -623,7 +623,7 @@ def generate_sentences(lemma_id: int) -> ResponseReturnValue:
 @bp.route("/generate-grammar-fact/<int:lemma_id>", methods=["POST"])
 def generate_grammar_fact(lemma_id: int) -> ResponseReturnValue:
     """Generate a grammar fact for a lemma using the LAPE agent (queued via task worker)."""
-    from barsukas.lape.wq_worker import SUPPORTED_FACT_TYPES, validate_grammar_fact_request
+    from workqueue.handlers.lape import SUPPORTED_FACT_TYPES, validate_grammar_fact_request
     from wordfreq.storage.crud.grammar_fact import get_grammar_fact_value
 
     lemma = g.db.query(Lemma).get(lemma_id)

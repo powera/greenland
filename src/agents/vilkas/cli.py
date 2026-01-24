@@ -132,7 +132,7 @@ def enqueue_vilkas_work(session, lemmas, task, dry_run=False):
     Returns:
         Dictionary with enqueue statistics
     """
-    from barsukas.utils.task_queue import enqueue_task
+    from workqueue.task_queue import enqueue_task
 
     enqueued_count = 0
     skipped_count = 0

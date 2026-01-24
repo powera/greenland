@@ -14,8 +14,8 @@ from typing import Any
 from config import Config
 
 import constants
-from barsukas.helpers.task_handlers import TASK_HANDLERS
-from barsukas.utils.task_queue import claim_next_task, mark_task_complete, mark_task_failed
+from workqueue.registry import TASK_HANDLERS
+from workqueue.task_queue import claim_next_task, mark_task_complete, mark_task_failed
 from wordfreq.storage.backend import configure_backend, create_session
 from wordfreq.storage.backend.config import BackendType, DataSourceConfig
 

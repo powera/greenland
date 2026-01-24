@@ -14,7 +14,7 @@ from typing import Dict, List, Optional
 from flask import current_app
 from sqlalchemy.orm import Session
 
-from agents.common.wq_tools import build_default_config, get_lemma_or_raise
+from workqueue.tools import build_default_config, get_lemma_or_raise
 from config import Config
 import constants
 from agents.strazdas import StrazdasAgent, TtsBackend

@@ -965,7 +965,7 @@ def _generate_audio_coqui(
 @bp.route("/generate-single/<guid>", methods=["POST"])
 def generate_single(guid: str) -> ResponseReturnValue:
     """Generate audio for a single lemma (queued via task worker)."""
-    from barsukas.utils.task_queue import TaskType, enqueue_task
+    from workqueue.task_queue import TaskType, enqueue_task
 
     # Support both JSON and form data
     if request.is_json:
@@ -1061,7 +1061,7 @@ def generate_single(guid: str) -> ResponseReturnValue:
 @bp.route("/generate-sentence/<int:sentence_id>", methods=["POST"])
 def generate_sentence_audio(sentence_id: int) -> ResponseReturnValue:
     """Generate audio for a single sentence (queued via task worker)."""
-    from barsukas.utils.task_queue import TaskType, enqueue_task
+    from workqueue.task_queue import TaskType, enqueue_task
 
     # Support both JSON and form data
     if request.is_json:

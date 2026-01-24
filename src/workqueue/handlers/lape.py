@@ -9,7 +9,7 @@ from __future__ import annotations
 import logging
 from typing import Any, Dict, Optional, Tuple
 
-from agents.common.wq_tools import build_default_config, get_lemma_or_raise
+from workqueue.tools import build_default_config, get_lemma_or_raise
 import constants
 import util.prompt_loader
 from clients.types import Schema, SchemaProperty
