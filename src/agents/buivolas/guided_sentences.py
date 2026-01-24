@@ -147,8 +147,7 @@ class GuidedSentenceGenerator:
             num_sentences=num_sentences,
         )
 
-        # Combine context and prompt
-        full_prompt = f"{context}\n\n{prompt}"
+        # Context and prompt are passed separately to the LLM
 
         # Schema for word usage tracking
         word_used_schema = Schema(
@@ -201,7 +200,8 @@ class GuidedSentenceGenerator:
 
         try:
             response = self.llm_client.generate_chat(
-                prompt=full_prompt,
+                prompt=prompt,
+                context=context,
                 json_schema=schema,
                 timeout=120,  # Longer timeout for multiple sentences
             )

@@ -28,6 +28,9 @@ Example words_used for "I stopped at the gas station":
   {"word": "gas station", "lemma": "gas station", "role": "noun"}
 ]
 
-Note: Multi-word phrases like "gas station", "ice cream", or "living room" should be treated as a single lemma.
+Note on multi-word phrases:
+- Compound nouns that function as a single concept should be treated as a single lemma: "gas station", "ice cream", "living room", "fire truck"
+- Adjective + noun combinations where the adjective is descriptive should be separate lemmas: "cotton shirt" → cotton (adjective) + shirt (noun), "red apple" → red (adjective) + apple (noun)
+- When in doubt: if you could substitute a different adjective and the phrase still makes sense (cotton shirt → wool shirt), they are separate lemmas. If substitution changes the meaning entirely (gas station → diesel station doesn't work the same way), it's a single lemma.
 
 Do NOT include articles (a, an, the), pronouns (I, you, he, she, it, we, they), prepositions (on, in, at, to, for), or conjunctions in words_used.
