@@ -20,7 +20,7 @@ from typing import Optional
 from config import Config
 from app import create_app
 from personas import get_persona, list_personas, PersonaConfig
-from workers.task_worker import run_worker, STOP_EVENT
+from workqueue.worker import run_worker, STOP_EVENT
 from wordfreq.storage.backend.config import DataSourceConfig
 
 logger = logging.getLogger(__name__)
