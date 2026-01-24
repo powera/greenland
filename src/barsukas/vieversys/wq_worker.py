@@ -458,6 +458,7 @@ def _generate_sentence_audio_openai(
 
                 # Create review record for sentence
                 review = AudioQualityReview(
+                    guid=f"S_{sentence_id:05d}",  # Synthetic GUID for sentences
                     sentence_id=sentence_id,
                     language_code=language_code,
                     voice_name=voice.value,
@@ -532,6 +533,7 @@ def _generate_sentence_audio_espeak(
 
                 # Create review record
                 review = AudioQualityReview(
+                    guid=f"S_{sentence_id:05d}",  # Synthetic GUID for sentences
                     sentence_id=sentence_id,
                     language_code=language_code,
                     voice_name=voice.name,
@@ -606,6 +608,7 @@ def _generate_sentence_audio_qwen(
 
                 # Create review record
                 review = AudioQualityReview(
+                    guid=f"S_{sentence_id:05d}",  # Synthetic GUID for sentences
                     sentence_id=sentence_id,
                     language_code=language_code,
                     voice_name=voice.ui_name,
@@ -680,6 +683,7 @@ def _generate_sentence_audio_piper(
 
                 # Create review record
                 review = AudioQualityReview(
+                    guid=f"S_{sentence_id:05d}",  # Synthetic GUID for sentences
                     sentence_id=sentence_id,
                     language_code=language_code,
                     voice_name=voice.ui_name,
@@ -754,6 +758,7 @@ def _generate_sentence_audio_coqui(
 
                 # Create review record
                 review = AudioQualityReview(
+                    guid=f"S_{sentence_id:05d}",  # Synthetic GUID for sentences
                     sentence_id=sentence_id,
                     language_code=language_code,
                     voice_name=voice.ui_name,
