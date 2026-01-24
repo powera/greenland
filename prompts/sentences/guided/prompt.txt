@@ -18,4 +18,13 @@ Requirements:
 
 For each sentence, provide:
 - The English sentence (key 'en')
-- The tense used (key 'tense'): "present" or "past"
+- List of content words used (key 'words_used'): array of objects with 'word' (the exact word as it appears in the sentence) and 'lemma' (the dictionary/base form) and 'role' (noun, verb, adjective, adverb, or other)
+
+Example words_used for "The cat sleeps on the bed":
+[
+  {"word": "cat", "lemma": "cat", "role": "noun"},
+  {"word": "sleeps", "lemma": "sleep", "role": "verb"},
+  {"word": "bed", "lemma": "bed", "role": "noun"}
+]
+
+Do NOT include articles (a, an, the), pronouns (I, you, he, she, it, we, they), prepositions (on, in, at, to, for), or conjunctions in words_used.

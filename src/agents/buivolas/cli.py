@@ -290,6 +290,7 @@ def main() -> int:
                     logger.info("Difficulty level: %s", args.level)
 
             total_generated = 0
+            total_stored = 0
             total_skipped = 0
             total_failed = 0
 
@@ -321,7 +322,31 @@ def main() -> int:
                     # Log the generated sentences
                     for sent in sentences:
                         en_text = sent.get("en", "")
+                        words_used = sent.get("words_used", [])
+                        lemmas_str = ", ".join(w.get("lemma", "") for w in words_used)
                         logger.info("  -> %s", en_text)
+                        logger.info("     words: %s", lemmas_str)
+
+                    if not args.dry_run:
+                        session = agent.get_session()
+                        try:
+                            store_result = agent.store_guided_sentences(
+                                sentences_data=sentences,
+                                source_lemma=lemma,
+                                session=session,
+                            )
+                            total_stored += store_result["stored"]
+                            total_failed += store_result["failed"]
+
+                            logger.info(
+                                "Stored: %s, Failed: %s",
+                                store_result["stored"],
+                                store_result["failed"],
+                            )
+                        finally:
+                            session.close()
+                    else:
+                        logger.info("Would store %s sentences (dry run)", len(sentences))
                 else:
                     logger.error(
                         "Generation failed for %s: %s",
@@ -337,7 +362,9 @@ def main() -> int:
                 if total_skipped > 0:
                     logger.info("Lemmas skipped: %s", total_skipped)
                 logger.info("Sentences generated: %s", total_generated)
-                logger.info("Failed: %s", total_failed)
+                if not args.dry_run:
+                    logger.info("Sentences stored: %s", total_stored)
+                    logger.info("Sentences failed: %s", total_failed)
                 logger.info("%s", "=" * 60)
 
         else:  # llm mode

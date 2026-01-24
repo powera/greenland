@@ -12,7 +12,13 @@ from clients.types import Schema, SchemaProperty
 from clients.unified_client import UnifiedLLMClient
 from wordfreq.storage.backend import create_session as create_backend_session
 from wordfreq.storage.backend.config import DataSourceConfig
-from wordfreq.storage.database import Lemma
+from wordfreq.storage.database import (
+    Lemma,
+    add_sentence,
+    add_sentence_translation,
+    add_sentence_word,
+)
+from wordfreq.storage.models.schema import SentencePatternWord
 from wordfreq.tools.vocabulary_budget import build_prompt_vocabulary_section
 
 logger = logging.getLogger(__name__)
@@ -145,6 +151,26 @@ class GuidedSentenceGenerator:
         # Combine context and prompt
         full_prompt = f"{context}\n\n{prompt}"
 
+        # Schema for word usage tracking
+        word_used_schema = Schema(
+            name="WordUsed",
+            description="A content word used in the sentence",
+            properties={
+                "word": SchemaProperty(
+                    type="string",
+                    description="The word as it appears in the sentence",
+                ),
+                "lemma": SchemaProperty(
+                    type="string",
+                    description="The dictionary/base form of the word",
+                ),
+                "role": SchemaProperty(
+                    type="string",
+                    description="Part of speech: noun, verb, adjective, adverb, or other",
+                ),
+            },
+        )
+
         # Schema for multiple sentences
         sentence_schema = Schema(
             name="Sentence",
@@ -154,9 +180,10 @@ class GuidedSentenceGenerator:
                     type="string",
                     description="The English sentence",
                 ),
-                "tense": SchemaProperty(
-                    type="string",
-                    description="Verb tense (present or past)",
+                "words_used": SchemaProperty(
+                    type="array",
+                    description="List of content words used (nouns, verbs, adjectives, adverbs)",
+                    array_items_schema=word_used_schema,
                 ),
             },
         )
@@ -189,6 +216,185 @@ class GuidedSentenceGenerator:
         except Exception as e:
             logger.error("Error calling LLM: %s", e, exc_info=True)
             return None
+
+    def store_sentences(
+        self, sentences_data: List[Dict[str, Any]], source_lemma: Lemma, session: Any
+    ) -> Dict[str, Any]:
+        """Store generated sentences to the database.
+
+        Args:
+            sentences_data: List of sentence dicts with 'en' and 'words_used'
+            source_lemma: The lemma the sentences were generated for
+            session: Database session
+
+        Returns:
+            Dict with 'stored', 'failed', 'errors', 'sentence_ids'
+        """
+        stored_count = 0
+        failed_count = 0
+        errors = []
+        sentence_ids = []
+
+        # Strip disambiguation from lemma text
+        lemma_text = source_lemma.lemma_text
+        if "(" in lemma_text:
+            lemma_text = lemma_text.split("(")[0].strip()
+
+        for sentence_data in sentences_data:
+            try:
+                sentence = add_sentence(
+                    session=session,
+                    pattern_type="guided",
+                    tense=None,
+                    source_filename=f"buivolas_guided_{source_lemma.guid}",
+                    verified=False,
+                    notes=(
+                        "Guided generation for %s (GUID: %s)"
+                        % (source_lemma.lemma_text, source_lemma.guid)
+                    ),
+                )
+
+                # Link the sentence to the source lemma via SentencePatternWord
+                pattern_word = SentencePatternWord(
+                    sentence_id=sentence.id,
+                    lemma_id=source_lemma.id,
+                    position=0,
+                    slot_name="guided_target",
+                    english_text=lemma_text,
+                )
+                session.add(pattern_word)
+
+                # Store English translation
+                en_text = sentence_data.get("en", "")
+                if en_text:
+                    add_sentence_translation(
+                        session=session,
+                        sentence=sentence,
+                        language_code="en",
+                        translation_text=en_text,
+                        verified=False,
+                    )
+
+                # Store words_used as sentence words
+                words_used = sentence_data.get("words_used", [])
+                for position, word_data in enumerate(words_used):
+                    if not isinstance(word_data, dict):
+                        continue
+
+                    word_lemma = self._find_lemma_for_word(
+                        session,
+                        word_data.get("lemma", ""),
+                        word_data.get("role", "unknown"),
+                        source_lemma=source_lemma,
+                    )
+
+                    add_sentence_word(
+                        session=session,
+                        sentence=sentence,
+                        position=position,
+                        word_role=word_data.get("role", "unknown"),
+                        lemma=word_lemma,
+                        english_text=word_data.get("lemma"),
+                        target_language_text=None,
+                        grammatical_form=None,
+                        grammatical_case=None,
+                        declined_form=word_data.get("word"),
+                        language_code="en",
+                    )
+
+                # Set minimum level to -1 (unverified)
+                sentence.minimum_level = -1
+
+                session.flush()
+                stored_count += 1
+                sentence_ids.append(sentence.id)
+
+                logger.info(
+                    "✓ Stored sentence %s: %s",
+                    sentence.id,
+                    en_text[:50] if en_text else "N/A",
+                )
+
+            except Exception as e:
+                logger.error("Failed to store sentence: %s", e, exc_info=True)
+                failed_count += 1
+                errors.append(str(e))
+                session.rollback()
+
+        if stored_count > 0:
+            session.commit()
+
+        return {
+            "stored": stored_count,
+            "failed": failed_count,
+            "errors": errors,
+            "sentence_ids": sentence_ids,
+        }
+
+    def _find_lemma_for_word(
+        self,
+        session: Any,
+        word_text: str,
+        word_role: str,
+        source_lemma: Optional[Lemma] = None,
+    ) -> Optional[Lemma]:
+        """Find a lemma matching the given word text and role."""
+        if not word_text:
+            return None
+
+        # Check if it matches the source lemma
+        if source_lemma:
+            source_text = source_lemma.lemma_text
+            if "(" in source_text:
+                source_base = source_text.split("(")[0].strip()
+            else:
+                source_base = source_text
+
+            if word_text.lower() == source_base.lower():
+                logger.debug(
+                    "Matched word '%s' to source lemma: %s (%s)",
+                    word_text,
+                    source_lemma.guid,
+                    source_lemma.lemma_text,
+                )
+                return source_lemma
+
+        # Map roles to POS types
+        role_to_pos = {
+            "noun": "noun",
+            "verb": "verb",
+            "adjective": "adjective",
+            "adverb": "adverb",
+        }
+
+        pos_hint = role_to_pos.get(word_role)
+
+        # Try exact match
+        query = session.query(Lemma).filter(Lemma.lemma_text == word_text)
+        if pos_hint:
+            query = query.filter(Lemma.pos_type == pos_hint)
+        lemma = query.first()
+
+        if lemma:
+            logger.debug("Found lemma for '%s': %s", word_text, lemma.guid)
+            return cast(Lemma, lemma)
+
+        # Try case-insensitive match
+        query = session.query(Lemma).filter(Lemma.lemma_text.ilike(word_text))
+        if pos_hint:
+            query = query.filter(Lemma.pos_type == pos_hint)
+        lemma = query.first()
+
+        if lemma:
+            logger.debug(
+                "Found lemma (case-insensitive) for '%s': %s",
+                word_text,
+                lemma.guid,
+            )
+            return cast(Lemma, lemma)
+
+        logger.debug("No lemma found for word '%s' (role: %s)", word_text, word_role)
+        return None
 
 
 def generate_guided_sentences(

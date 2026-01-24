@@ -69,3 +69,11 @@ class BuivolasAgent:
             num_sentences=num_sentences,
             max_vocabulary_level=max_vocabulary_level,
         )
+
+    def store_guided_sentences(
+        self, sentences_data: Any, source_lemma: Lemma, session: Any
+    ) -> Dict[str, Any]:
+        """Store guided sentences to the database."""
+        return self.guided_generator.store_sentences(
+            sentences_data=sentences_data, source_lemma=source_lemma, session=session
+        )
