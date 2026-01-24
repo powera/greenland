@@ -3,6 +3,7 @@
 import logging
 from typing import Any, Dict, Optional
 
+from agents.buivolas.guided_sentences import GuidedSentenceGenerator
 from agents.buivolas.llm_sentences import LlmSentenceGenerator
 from agents.buivolas.pattern_sentences import PatternSentenceGenerator
 from wordfreq.storage.backend import create_session as create_backend_session
@@ -25,6 +26,7 @@ class BuivolasAgent:
 
         self.pattern_generator = PatternSentenceGenerator(config=config, dry_run=dry_run)
         self.llm_generator = LlmSentenceGenerator(config=config, dry_run=dry_run)
+        self.guided_generator = GuidedSentenceGenerator(config=config, dry_run=dry_run)
 
     def get_session(self) -> Any:
         return create_backend_session(self.config)
@@ -53,4 +55,17 @@ class BuivolasAgent:
     ) -> Dict[str, Any]:
         return self.llm_generator.store_sentences(
             sentences_data=sentences_data, source_lemma=source_lemma, session=session
+        )
+
+    def generate_guided_sentences_for_lemma(
+        self,
+        lemma: Lemma,
+        num_sentences: int = 5,
+        max_vocabulary_level: int = 7,
+    ) -> Dict[str, Any]:
+        """Generate sentences using vocabulary-aware prompts."""
+        return self.guided_generator.generate_sentences_for_lemma(
+            lemma=lemma,
+            num_sentences=num_sentences,
+            max_vocabulary_level=max_vocabulary_level,
         )
