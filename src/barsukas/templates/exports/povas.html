@@ -96,79 +96,12 @@
 }
 </style>
 
+<script src="{{ url_for('static', filename='exports.js') }}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('povasForm');
-    const generateBtn = document.getElementById('generateBtn');
-    const outputContainer = document.getElementById('outputContainer');
-    const outputContent = document.getElementById('outputContent');
-    const statusBadge = document.getElementById('statusBadge');
-
-    form.addEventListener('submit', async function(e) {
-        e.preventDefault();
-
-        // Show loading state
-        generateBtn.disabled = true;
-        generateBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Generating...';
-        outputContainer.style.display = 'none';
-
-        // Build form data
-        const formData = new FormData();
-        formData.append('generation_mode', document.getElementById('generation_mode').value);
-        formData.append('dry_run', document.getElementById('dry_run').checked);
-
-        try {
-            // Execute generation
-            const response = await fetch('{{ url_for("exports.povas_generate") }}', {
-                method: 'POST',
-                body: formData
-            });
-
-            const result = await response.json();
-
-            // Show output
-            outputContainer.style.display = 'block';
-
-            if (result.success) {
-                statusBadge.className = 'badge bg-success';
-                statusBadge.textContent = 'Success';
-                outputContent.innerHTML = `<pre>${escapeHtml(result.stdout)}</pre>`;
-            } else {
-                statusBadge.className = 'badge bg-danger';
-                statusBadge.textContent = 'Error';
-                outputContent.innerHTML = `
-                    <div class="alert alert-danger">
-                        <strong>Error:</strong> ${escapeHtml(result.error || 'Unknown error')}
-                    </div>
-                    ${result.stdout ? '<h6>Standard Output:</h6><pre>' + escapeHtml(result.stdout) + '</pre>' : ''}
-                    ${result.stderr ? '<h6>Error Output:</h6><pre>' + escapeHtml(result.stderr) + '</pre>' : ''}
-                `;
-            }
-
-            // Scroll to output
-            outputContainer.scrollIntoView({ behavior: 'smooth' });
-
-        } catch (error) {
-            outputContainer.style.display = 'block';
-            statusBadge.className = 'badge bg-danger';
-            statusBadge.textContent = 'Error';
-            outputContent.innerHTML = `
-                <div class="alert alert-danger">
-                    <strong>Error:</strong> ${escapeHtml(error.message)}
-                </div>
-            `;
-        } finally {
-            // Reset button
-            generateBtn.disabled = false;
-            generateBtn.innerHTML = '<i class="bi bi-play-circle"></i> Generate HTML';
-        }
+    initPovasExport({
+        generateUrl: '{{ url_for("exports.povas_generate") }}'
     });
-
-    function escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
 });
 </script>
 {% endblock %}
