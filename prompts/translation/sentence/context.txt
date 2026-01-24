@@ -8,7 +8,7 @@ TRANSLATION PRINCIPLES:
 
 LANGUAGE-SPECIFIC CONSIDERATIONS:
 - Lithuanian: Use standard modern Lithuanian with proper declensions
-- Chinese: Use Simplified Chinese characters unless specified otherwise
+- Chinese: Use Simplified Chinese characters (简体字) for Mainland Chinese (普通话)
 - Korean: Use standard Korean with appropriate honorifics when needed
 - French: Use standard French with proper gender agreements
 - German: Use standard German with proper case markings
