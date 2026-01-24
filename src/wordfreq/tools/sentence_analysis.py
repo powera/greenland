@@ -2,7 +2,7 @@
 
 from typing import List
 
-from sqlalchemy import func, or_
+from sqlalchemy import func, literal, or_
 from sqlalchemy.orm import Session
 
 from wordfreq.storage.models.schema import (
@@ -107,8 +107,8 @@ def find_candidate_lemmas_for_sentence(
             # For logographic languages, use SQL substring matching
             # For others, use case-insensitive exact match
             if lang_code in SUBSTRING_MATCH_LANGUAGES:
-                # Use SQL instr() for substring containment in either direction
-                # instr(A, B) > 0 means B is found within A
+                # Use LIKE-based contains() for DB-portable substring matching
+                # This works on both SQLite and Postgres
                 matching_forms = (
                     session.query(DerivativeForm)
                     .filter(
@@ -117,9 +117,9 @@ def find_candidate_lemmas_for_sentence(
                             # Exact match
                             DerivativeForm.derivative_form_text == declined_form,
                             # Derivative form contains the declined form
-                            func.instr(DerivativeForm.derivative_form_text, declined_form) > 0,
+                            DerivativeForm.derivative_form_text.contains(declined_form),
                             # Declined form contains the derivative form
-                            func.instr(declined_form, DerivativeForm.derivative_form_text) > 0,
+                            literal(declined_form).contains(DerivativeForm.derivative_form_text),
                         ),
                     )
                     .all()
