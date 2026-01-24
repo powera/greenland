@@ -100,7 +100,7 @@ def enqueue_papuga_work(session, lemmas, only_english=True, base_forms_only=Fals
     Returns:
         Dictionary with enqueue statistics
     """
-    from barsukas.utils.task_queue import enqueue_task
+    from workqueue.task_queue import enqueue_task
 
     enqueued_count = 0
     skipped_count = 0

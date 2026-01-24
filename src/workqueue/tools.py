@@ -1,7 +1,7 @@
 """Common utilities for workqueue handlers.
 
 This module provides shared functionality for workqueue handler functions
-in barsukas/*/wq_worker.py modules to eliminate repetitive code.
+to eliminate repetitive code.
 """
 
 from __future__ import annotations

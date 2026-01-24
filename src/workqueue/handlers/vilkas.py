@@ -11,7 +11,7 @@ from typing import Dict, List, Optional, Tuple
 
 from sqlalchemy.orm import Session
 
-from agents.common.wq_tools import build_default_config, get_lemma_or_raise
+from workqueue.tools import build_default_config, get_lemma_or_raise
 from wordfreq.storage.backend.config import DataSourceConfig
 from wordfreq.storage.models.schema import Lemma, LemmaTranslation
 from wordfreq.storage.translation_helpers import LANGUAGE_FIELDS, get_translation

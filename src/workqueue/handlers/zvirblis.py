@@ -10,7 +10,7 @@ from typing import Dict
 
 from sqlalchemy.orm import Session
 
-from agents.common.wq_tools import get_lemma_or_raise
+from workqueue.tools import get_lemma_or_raise
 import constants
 from wordfreq.storage.models.schema import Sentence, SentenceTranslation
 from wordfreq.storage.translation_helpers import get_supported_languages

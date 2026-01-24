@@ -18,7 +18,7 @@ from typing import TYPE_CHECKING, Dict, List, Optional
 
 from wordfreq.storage.models.schema import BarsukasTask
 
-from barsukas.utils.pipeline_order import get_pipeline_step
+from workqueue.pipeline_order import get_pipeline_step
 
 if TYPE_CHECKING:
     from sqlalchemy.orm import Session

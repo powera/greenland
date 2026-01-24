@@ -13,7 +13,7 @@ from audioshoe.espeak.types import EspeakVoice
 from audioshoe.piper.types import PiperVoice
 from audioshoe.qwen.types import QwenVoice
 from barsukas.helpers.lemma_display import get_difficulty_stats, group_derivative_forms
-from barsukas.utils.task_queue import get_tasks_for_target
+from workqueue.task_queue import get_tasks_for_target
 from wordfreq.storage.crud.derivative_form import delete_derivative_form
 from wordfreq.storage.crud.difficulty_override import get_all_overrides_for_lemma
 from wordfreq.storage.crud.lemma import handle_lemma_type_subtype_change

@@ -28,7 +28,7 @@ from agents.common.common_args import (
     validate_cache_args,
 )
 from agents.common.lemma_selection import get_lemmas_for_agent
-from barsukas.utils.task_queue import TaskStatus, enqueue_task
+from workqueue.task_queue import TaskStatus, enqueue_task
 from wordfreq.storage.models.schema import BarsukasTask
 
 # Import language mappings from translation_helpers (single source of truth)

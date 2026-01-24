@@ -62,7 +62,7 @@ LLM-heavy actions triggered from Barsukas (like generating translations, pronunc
 task so the UI responds immediately. Start the worker in a second shell:
 
 ```bash
-PYTHONPATH=src python -m barsukas.workers.task_worker --poll-interval 2
+PYTHONPATH=src python -m workqueue.worker --poll-interval 2
 ```
 
 Queued tasks are deduplicated per lemma/language, and the lemma page shows their latest status.

@@ -15,7 +15,7 @@ from audioshoe.espeak.types import EspeakVoice
 from audioshoe.piper.types import PiperVoice
 from audioshoe.qwen.types import QwenVoice
 from barsukas.helpers.flash_helpers import flash_and_log
-from barsukas.utils.task_queue import TaskType, enqueue_task, get_tasks_for_target
+from workqueue.task_queue import TaskType, enqueue_task, get_tasks_for_target
 from wordfreq.storage.models.schema import (
     AudioQualityReview,
     Conversation,

@@ -26,7 +26,7 @@ from agents.common.common_args import (
 )
 from agents.common.lemma_selection import get_lemmas_for_agent
 from agents.lape.agent import LapeAgent
-from barsukas.utils.task_queue import TaskStatus, enqueue_task
+from workqueue.task_queue import TaskStatus, enqueue_task
 from wordfreq.storage.models.schema import BarsukasTask
 
 logger = logging.getLogger(__name__)
