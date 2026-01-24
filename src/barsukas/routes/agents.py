@@ -551,6 +551,9 @@ def generate_sentences(lemma_id: int) -> ResponseReturnValue:
 
     # Get parameters from form
     num_sentences = int(request.form.get("num_sentences", 3))
+    generation_mode = request.form.get("generation_mode", "llm")
+    max_vocabulary_level = int(request.form.get("max_vocabulary_level", 7))
+
     try:
         # Import Buivolas agent for sentence creation
         from agents.buivolas import BuivolasAgent
@@ -565,12 +568,20 @@ def generate_sentences(lemma_id: int) -> ResponseReturnValue:
         )
         agent = BuivolasAgent(config=config)
 
-        # Generate sentences
-        result = agent.generate_llm_sentences_for_lemma(
-            lemma=lemma,
-            num_sentences=num_sentences,
-            difficulty_context=lemma.difficulty_level,
-        )
+        # Generate sentences based on mode
+        if generation_mode == "guided":
+            result = agent.generate_guided_sentences_for_lemma(
+                lemma=lemma,
+                num_sentences=num_sentences,
+                max_vocabulary_level=max_vocabulary_level,
+            )
+        else:
+            # Default to LLM mode
+            result = agent.generate_llm_sentences_for_lemma(
+                lemma=lemma,
+                num_sentences=num_sentences,
+                difficulty_context=lemma.difficulty_level,
+            )
 
         if not result.get("success"):
             flash_and_log(
@@ -584,13 +595,19 @@ def generate_sentences(lemma_id: int) -> ResponseReturnValue:
             flash("No sentences were generated", "warning")
             return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
-        store_result = agent.store_llm_sentences(
-            sentences_data=sentences_data, source_lemma=lemma, session=g.db
-        )
+        # Use the appropriate store method based on mode
+        if generation_mode == "guided":
+            store_result = agent.store_guided_sentences(
+                sentences_data=sentences_data, source_lemma=lemma, session=g.db
+            )
+        else:
+            store_result = agent.store_llm_sentences(
+                sentences_data=sentences_data, source_lemma=lemma, session=g.db
+            )
 
         if store_result["stored"] > 0:
             flash(
-                f'Successfully generated and stored {store_result["stored"]} sentence(s)!',
+                f'Successfully generated and stored {store_result["stored"]} sentence(s) using {generation_mode} mode!',
                 "success",
             )
 
