@@ -62,3 +62,4 @@ When modifying files in data/release :
 * the "difficulty level" for newly added words should be -1 unless otherwise requested
 * words should be in "lemma" form, and should specify one definition of a
   word, using a disambiguation if necessary
+* use mainland Chinese with simplified characters
