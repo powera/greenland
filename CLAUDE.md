@@ -50,8 +50,9 @@ their local browser.
 After cloning, enable pre-commit hooks to automatically check black formatting:
   git config core.hooksPath hooks
 
-When writing HTML files, always use ordinary form submits for POST data - do
-not do an AJAX-based submission.  Avoid using disappearing UX elements.
+When writing HTML templates, try to avoid inline CSS/JS; use separate files.
+Also, always use ordinary form submits for POST data - do not do an AJAX-based
+submission.  Avoid using disappearing UX elements most of the time.
 
 When modifying files in data/release :
 * make sure the GUID prefixes match those in wordfreq/storage/models/guid_prefixes.py
