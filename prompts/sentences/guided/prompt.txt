@@ -10,7 +10,7 @@ Part of speech: {pos_type}
 {previous_sentences}
 
 Requirements:
-1. Each sentence MUST use the word "{word}"
+1. Each sentence MUST use the word "{word}" (or an inflected form like plural, past tense, etc.) with the meaning given in the definition above
 2. Keep sentences SHORT: 4-10 words
 3. Use present tense or simple past only
 4. Make each sentence DIFFERENT - vary the subject, verb, and context
