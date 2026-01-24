@@ -2,7 +2,7 @@
 
 from typing import List
 
-from sqlalchemy import func
+from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
 
 from wordfreq.storage.models.schema import (
@@ -104,20 +104,26 @@ def find_candidate_lemmas_for_sentence(
             if not declined_form:
                 continue
 
-            # For logographic languages, get all forms and check with Python
-            # For others, use case-insensitive SQL query
+            # For logographic languages, use SQL substring matching
+            # For others, use case-insensitive exact match
             if lang_code in SUBSTRING_MATCH_LANGUAGES:
-                # Get all derivative forms for this language and filter in Python
-                all_forms = (
+                # Use SQL instr() for substring containment in either direction
+                # instr(A, B) > 0 means B is found within A
+                matching_forms = (
                     session.query(DerivativeForm)
-                    .filter(DerivativeForm.language_code == lang_code)
+                    .filter(
+                        DerivativeForm.language_code == lang_code,
+                        or_(
+                            # Exact match
+                            DerivativeForm.derivative_form_text == declined_form,
+                            # Derivative form contains the declined form
+                            func.instr(DerivativeForm.derivative_form_text, declined_form) > 0,
+                            # Declined form contains the derivative form
+                            func.instr(declined_form, DerivativeForm.derivative_form_text) > 0,
+                        ),
+                    )
                     .all()
                 )
-                matching_forms = [
-                    df
-                    for df in all_forms
-                    if _forms_match(declined_form, df.derivative_form_text, lang_code)
-                ]
             else:
                 # Case-insensitive exact match using SQL LOWER()
                 matching_forms = (
@@ -140,20 +146,33 @@ def find_candidate_lemmas_for_sentence(
                 global_lemma_matches[df.lemma_id]["english_texts"].add(slot_data["english_text"])
                 global_lemma_matches[df.lemma_id]["word_roles"].add(slot_data["word_role"])
 
-    # Build results for lemmas that match in at least min_language_matches languages
+    # Filter to lemmas that match in at least min_language_matches languages
+    qualifying_lemma_ids = [
+        lemma_id
+        for lemma_id, match_data in global_lemma_matches.items()
+        if len(match_data["langs"]) >= min_language_matches
+    ]
+
+    # Batch load all qualifying lemmas in one query
+    lemmas_by_id = {}
+    if qualifying_lemma_ids:
+        lemmas = session.query(Lemma).filter(Lemma.id.in_(qualifying_lemma_ids)).all()
+        lemmas_by_id = {lemma.id: lemma for lemma in lemmas}
+
+    # Build results
     results = []
-    for lemma_id, match_data in global_lemma_matches.items():
-        if len(match_data["langs"]) >= min_language_matches:
-            lemma = session.query(Lemma).filter(Lemma.id == lemma_id).first()
-            if lemma:
-                results.append(
-                    {
-                        "lemma": lemma,
-                        "english_text": ", ".join(sorted(match_data["english_texts"])),
-                        "matched_languages": sorted(match_data["langs"]),
-                        "word_role": ", ".join(sorted(match_data["word_roles"])),
-                    }
-                )
+    for lemma_id in qualifying_lemma_ids:
+        lemma = lemmas_by_id.get(lemma_id)
+        if lemma:
+            match_data = global_lemma_matches[lemma_id]
+            results.append(
+                {
+                    "lemma": lemma,
+                    "english_text": ", ".join(sorted(match_data["english_texts"])),
+                    "matched_languages": sorted(match_data["langs"]),
+                    "word_role": ", ".join(sorted(match_data["word_roles"])),
+                }
+            )
 
     return results
 
