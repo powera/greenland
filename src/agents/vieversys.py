@@ -32,6 +32,7 @@ from agents.common.common_args import (
     add_backend_args,
     add_common_args,
     add_guid_arg,
+    add_level_args,
     add_llm_args,
     add_processing_args,
     confirm_operation,
@@ -922,6 +923,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     add_common_args(parser)
     add_llm_args(parser)
     add_processing_args(parser)
+    add_level_args(parser)
     add_guid_arg(parser, help_text="Process only the lemma with this GUID")
     add_backend_args(parser)
 
@@ -940,7 +942,6 @@ def get_argument_parser() -> argparse.ArgumentParser:
         choices=["lt", "zh", "es", "fr"],
         help="Target language code (required for populate-only and regenerate modes)",
     )
-    parser.add_argument("--difficulty-level", type=int, help="Filter by difficulty level (1-20)")
     parser.add_argument(
         "--voices",
         nargs="+",
@@ -1126,7 +1127,7 @@ def main() -> None:
         # Check if we're generating sentences or lemmas
         if args.generate_sentences:
             # Generate audio for sentences
-            voice_count = len(voices) if voices else 3
+            voice_count = len(voices) if voices else len(DEFAULT_GPT_VOICES.get(args.language, []))
             estimated_calls = args.sentence_limit * voice_count
 
             # Confirm before running (unless --yes was provided)
@@ -1181,7 +1182,7 @@ def main() -> None:
             finally:
                 session.close()
 
-            voice_count = len(voices) if voices else 3
+            voice_count = len(voices) if voices else len(DEFAULT_GPT_VOICES.get(args.language, []))
             estimated_calls = lemma_count * voice_count
 
             if not confirm_operation(

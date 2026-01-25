@@ -164,8 +164,7 @@ class LemmaQueryBuilder:
     def has_translation_in(self, language_code: str) -> "LemmaQueryBuilder":
         """Filter to lemmas that have a translation in the specified language.
 
-        This checks the language-specific translation columns on the Lemma model
-        (e.g., french_translation, chinese_translation, etc.).
+        This checks the LemmaTranslation table for translations in the specified language.
 
         Args:
             language_code: Language code (e.g., 'fr', 'zh', 'ko', 'sw', 'lt', 'vi')
@@ -174,7 +173,7 @@ class LemmaQueryBuilder:
             Self for method chaining
 
         Raises:
-            ValueError: If language_code is not a recognized translation column
+            ValueError: If language_code is not a recognized language
         """
         from wordfreq.storage.translation_helpers import LANG_CODE_TO_LLM_FIELD
 
@@ -184,9 +183,15 @@ class LemmaQueryBuilder:
                 f"Valid codes: {sorted(LANG_CODE_TO_LLM_FIELD.keys())}"
             )
 
-        column_name = LANG_CODE_TO_LLM_FIELD[language_code]
-        column = getattr(Lemma, column_name)
-        self.query = self.query.filter(column.isnot(None))
+        from wordfreq.storage.models.schema import LemmaTranslation
+
+        self.query = self.query.filter(
+            Lemma.id.in_(
+                self.session.query(LemmaTranslation.lemma_id).filter(
+                    LemmaTranslation.language_code == language_code
+                )
+            )
+        )
         return self
 
     def order_by_id(self, ascending: bool = True) -> "LemmaQueryBuilder":
