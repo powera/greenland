@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+
+{% block title %}Rapid Sentence Review{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/sentence_rapid_review.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="rapid-review-container">
+    <!-- Header with Progress -->
+    <div class="text-center mb-4">
+        <h1><i class="bi bi-lightning-charge"></i> Rapid Sentence Review</h1>
+        <p class="text-muted">
+            <span id="progress-text">Review {{ total_count }} sentences</span>
+        </p>
+        <div class="progress-bar-container">
+            <div class="progress-bar-fill" id="progress-bar" style="width: 0%"></div>
+        </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+        <select id="status-filter" class="form-select" style="width: auto;">
+            {% for status in statuses %}
+            <option value="{{ status }}" {% if status == status_filter %}selected{% endif %}>
+                {{ status.replace('_', ' ').title() }}
+            </option>
+            {% endfor %}
+        </select>
+        <select id="level-filter" class="form-select" style="width: auto;">
+            <option value="">All Levels</option>
+            {% for level in levels %}
+            <option value="{{ level }}" {% if level|string == level_filter %}selected{% endif %}>Level {{ level }}</option>
+            {% endfor %}
+        </select>
+        <select id="pattern-filter" class="form-select" style="width: auto;">
+            <option value="">All Patterns</option>
+            {% for pattern in patterns %}
+            <option value="{{ pattern }}" {% if pattern == pattern_filter %}selected{% endif %}>{{ pattern }}</option>
+            {% endfor %}
+        </select>
+        <button id="apply-filters" class="btn btn-primary">
+            <i class="bi bi-funnel"></i> Apply
+        </button>
+    </div>
+
+    {% if sentence %}
+    <!-- Main Review Area -->
+    <div id="review-area">
+        <!-- Metadata Row -->
+        <div class="metadata-row">
+            <span><strong>ID:</strong> <code id="sentence-id">#{{ sentence.id }}</code></span>
+            <span><strong>Level:</strong> <span class="badge bg-info" id="sentence-level">{{ sentence.minimum_level }}</span></span>
+            {% if sentence.pattern_type %}
+            <span><strong>Pattern:</strong> <span class="badge bg-secondary" id="sentence-pattern">{{ sentence.pattern_type }}</span></span>
+            {% endif %}
+            {% if sentence.tense %}
+            <span><strong>Tense:</strong> <span class="badge bg-light text-dark" id="sentence-tense">{{ sentence.tense }}</span></span>
+            {% endif %}
+        </div>
+
+        <!-- English (Reference) -->
+        <div class="translation-card translation-en">
+            <div class="translation-lang">
+                <span class="lang-badge">EN</span> English
+            </div>
+            <div class="translation-text" id="trans-en">{{ translations.get('en', '(no English)') }}</div>
+        </div>
+
+        <!-- Target Languages Grid -->
+        <div class="translations-grid">
+            <!-- Spanish -->
+            <div class="translation-card translation-target">
+                <div class="translation-lang">
+                    <span class="lang-badge lang-es">ES</span> Spanish
+                </div>
+                <div class="translation-text" id="trans-es">{{ translations.get('es', '(missing)') }}</div>
+            </div>
+
+            <!-- French -->
+            <div class="translation-card translation-target">
+                <div class="translation-lang">
+                    <span class="lang-badge lang-fr">FR</span> French
+                </div>
+                <div class="translation-text" id="trans-fr">{{ translations.get('fr', '(missing)') }}</div>
+            </div>
+
+            <!-- Chinese -->
+            <div class="translation-card translation-target translation-zh">
+                <div class="translation-lang">
+                    <span class="lang-badge lang-zh">ZH</span> Chinese
+                </div>
+                <div class="translation-text" id="trans-zh">{{ translations.get('zh', '(missing)') }}</div>
+                {% if pinyin_text %}
+                <div class="translation-romanization" id="trans-zh-pinyin">{{ pinyin_text }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Lithuanian -->
+            <div class="translation-card translation-target">
+                <div class="translation-lang">
+                    <span class="lang-badge lang-lt">LT</span> Lithuanian
+                </div>
+                <div class="translation-text" id="trans-lt">{{ translations.get('lt', '(missing)') }}</div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <button class="action-btn btn-approve" id="btn-verify">
+                <i class="bi bi-check-circle"></i><br>
+                Verify<br>
+                <small>(G)</small>
+            </button>
+            <button class="action-btn btn-skip" id="btn-skip">
+                <i class="bi bi-skip-forward"></i><br>
+                Skip<br>
+                <small>(S)</small>
+            </button>
+            <button class="action-btn btn-reject" id="btn-reject">
+                <i class="bi bi-x-circle"></i><br>
+                Reject<br>
+                <small>(R)</small>
+            </button>
+        </div>
+
+        <!-- Undo Button -->
+        <div class="text-center mt-3">
+            <button class="btn btn-warning" id="btn-undo" disabled>
+                <i class="bi bi-arrow-counterclockwise"></i> Undo Last
+                <span class="badge bg-light text-dark" id="undo-count">0</span>
+            </button>
+            <a href="{{ url_for('sentences.view_sentence', sentence_id=sentence.id) }}"
+               class="btn btn-outline-secondary ms-2" id="btn-view-detail" target="_blank">
+                <i class="bi bi-box-arrow-up-right"></i> View Details
+            </a>
+        </div>
+
+        <!-- Keyboard Hints -->
+        <div class="keyboard-hints">
+            <strong>Keyboard Shortcuts:</strong>
+            <span class="keyboard-key">G</span> = Verify (Good)
+            &nbsp;|&nbsp;
+            <span class="keyboard-key">S</span> = Skip
+            &nbsp;|&nbsp;
+            <span class="keyboard-key">R</span> = Reject
+            &nbsp;|&nbsp;
+            <span class="keyboard-key">U</span> or <span class="keyboard-key">Backspace</span> = Undo
+        </div>
+    </div>
+
+    <!-- Completion Message (hidden initially) -->
+    <div id="completion-area" style="display: none;">
+        <div class="completion-message">
+            <i class="bi bi-check-circle-fill text-success" style="font-size: 4rem;"></i>
+            <h2>Review Complete!</h2>
+            <p>All sentences have been reviewed.</p>
+            <a href="{{ url_for('sentences.list_sentences') }}" class="btn btn-primary">
+                <i class="bi bi-arrow-left"></i> Back to List
+            </a>
+        </div>
+    </div>
+
+    {% else %}
+    <div class="completion-message">
+        <i class="bi bi-inbox" style="font-size: 4rem; color: #ccc;"></i>
+        <h2>No Sentences to Review</h2>
+        <p>There are no sentences matching your filters that have all required translations (ES, FR, ZH, LT).</p>
+        <a href="{{ url_for('sentences.list_sentences') }}" class="btn btn-primary">
+            <i class="bi bi-arrow-left"></i> Back to List
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<script src="{{ url_for('static', filename='js/sentence_rapid_review.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    initSentenceRapidReview({
+        initialSentenceId: {{ sentence.id if sentence else 'null' }},
+        totalCount: {{ total_count }},
+        statusFilter: '{{ status_filter }}',
+        levelFilter: '{{ level_filter }}',
+        patternFilter: '{{ pattern_filter }}',
+        rapidReviewIndexUrl: '{{ url_for("sentence_rapid_review.index") }}'
+    });
+});
+</script>
+{% endblock %}
