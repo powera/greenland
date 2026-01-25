@@ -311,7 +311,7 @@ class ZvirblisAgent:
                     self.config.model.startswith("gpt-5-mini")
                     or self.config.model.startswith("gpt-5-nano")
                 ):
-                    request_body["reasoning_effort"] = "low"
+                    request_body["reasoning_effort"] = "minimal"
 
                 metadata = BatchRequestMetadata(
                     custom_id=custom_id,
