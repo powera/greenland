@@ -154,7 +154,12 @@ def build_translation_prompt(
         )
 
     prompt_lines.append(
-        "Use the provided word translations where appropriate, but adjust grammar as needed for natural sentences."
+        "Use the provided word translations where appropriate, but prioritize natural translations. "
+        "If the target language expresses the concept differently (e.g., 'I like water' in Lithuanian "
+        "is 'Man patinka vanduo' using 'patikti' not 'mėgti', or 'I had lunch' in Chinese is '我吃了午饭' "
+        "using 'eat' not 'have'), use the natural phrasing and map words to their actual meanings, not "
+        "the English lemmas. Only include GUIDs for words that genuinely correspond to the referenced "
+        "lemma's meaning."
     )
 
     prompt = "\n".join(prompt_lines)

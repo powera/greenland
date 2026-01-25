@@ -5,7 +5,7 @@ Guidelines:
 - Keep sentences short (4-10 words) and grammatically simple
 - Use present tense or simple past tense
 - Vary sentence structures: statements, questions, simple descriptions
-- Vary subjects: use he, she, we, they, the farmer, the child, my friend, etc.
+- Vary subjects: use he, she, we, they, the farmer, the child, etc.
 - Make sentences about concrete, everyday situations
 - Avoid awkward or contrived sentences like "I wear purple clothes" or "The dog is under the big table"
 - Each sentence should feel like something you might actually hear or say
