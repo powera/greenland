@@ -95,7 +95,7 @@ def calculate_combined_ranks(
     corpus_ids = list(corpus_info.keys())
 
     # Get all words with their ranks in each corpus
-    word_data = {}
+    word_data: Dict[int, Dict[str, Any]] = {}
 
     # Query all word tokens
     word_tokens = session.query(WordToken).all()
@@ -108,6 +108,8 @@ def calculate_combined_ranks(
     # Organize frequency data by word_token_id and corpus_id
     freq_by_word_token: Dict[int, Dict[int, int]] = {}
     for freq in all_frequencies:
+        if freq.rank is None:
+            continue
         if freq.word_token_id not in freq_by_word_token:
             freq_by_word_token[freq.word_token_id] = {}
         freq_by_word_token[freq.word_token_id][freq.corpus_id] = freq.rank
@@ -199,7 +201,7 @@ def calculate_combined_ranks(
     # Update database if requested
     if update_db:
         # BATCH OPTIMIZATION: Build a map of id -> new_rank for batch update
-        updates_needed = {}
+        updates_needed: Dict[int, int] = {}
         for word_info in word_list:
             word_token_id = word_info.get("word_token_id")
             if word_token_id and word_info["current_rank"] != word_info["combined_rank"]:

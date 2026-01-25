@@ -1069,9 +1069,9 @@ def main() -> None:
                     .filter(AudioQualityReview.language_code == args.language)
                     .group_by(AudioQualityReview.voice_name)
                 )
-                results = query.all()
+                coverage_results = query.all()
                 print(f"\nLanguage: {args.language}")
-                for voice_name, count in results:
+                for voice_name, count in coverage_results:
                     print(f"  {voice_name}: {count} audio files")
             else:
                 query = session.query(
@@ -1079,9 +1079,9 @@ def main() -> None:
                     AudioQualityReview.voice_name,
                     func.count(AudioQualityReview.id),
                 ).group_by(AudioQualityReview.language_code, AudioQualityReview.voice_name)
-                results = query.all()
+                coverage_results = query.all()
                 current_lang = None
-                for lang_code, voice_name, count in results:
+                for lang_code, voice_name, count in coverage_results:
                     if lang_code != current_lang:
                         print(f"\n{lang_code}:")
                         current_lang = lang_code
@@ -1143,7 +1143,7 @@ def main() -> None:
 
             # Run sentence batch generation
             start_time = datetime.now()
-            results = agent.generate_sentences_batch(
+            batch_results = agent.generate_sentences_batch(
                 language_code=args.language,
                 guid=args.guid,
                 limit=args.sentence_limit,
@@ -1155,15 +1155,15 @@ def main() -> None:
             logger.info("=" * 80)
             logger.info("VIEVERSYS AGENT REPORT - Sentence Audio Generation")
             logger.info("=" * 80)
-            logger.info(f"Language: {results['language_code']}")
-            if results.get("guid"):
-                logger.info(f"GUID: {results['guid']}")
-            logger.info(f"Total sentences: {results['total_sentences']}")
-            logger.info(f"Voices: {', '.join(results['voices'])}")
-            logger.info(f"Successful: {results['success_count']}")
-            logger.info(f"Errors: {results['error_count']}")
+            logger.info(f"Language: {batch_results['language_code']}")
+            if batch_results.get("guid"):
+                logger.info(f"GUID: {batch_results['guid']}")
+            logger.info(f"Total sentences: {batch_results['total_sentences']}")
+            logger.info(f"Voices: {', '.join(batch_results['voices'])}")
+            logger.info(f"Successful: {batch_results['success_count']}")
+            logger.info(f"Errors: {batch_results['error_count']}")
             logger.info(f"Duration: {duration:.2f} seconds")
-            logger.info(f"Output directory: {results['output_dir']}")
+            logger.info(f"Output directory: {batch_results['output_dir']}")
             logger.info("=" * 80)
             return
 
@@ -1195,7 +1195,7 @@ def main() -> None:
 
         # Run batch generation
         start_time = datetime.now()
-        results = agent.generate_batch(
+        batch_results = agent.generate_batch(
             language_code=args.language,
             lemmas=lemmas,
             voices=voices,
@@ -1217,13 +1217,13 @@ def main() -> None:
         logger.info("=" * 80)
         logger.info("VIEVERSYS AGENT REPORT - Audio Generation")
         logger.info("=" * 80)
-        logger.info(f"Language: {results['language_code']}")
-        logger.info(f"Total lemmas: {results['total_lemmas']}")
-        logger.info(f"Voices: {', '.join(results['voices'])}")
-        logger.info(f"Successful: {results['success_count']}")
-        logger.info(f"Errors: {results['error_count']}")
+        logger.info(f"Language: {batch_results['language_code']}")
+        logger.info(f"Total lemmas: {batch_results['total_lemmas']}")
+        logger.info(f"Voices: {', '.join(batch_results['voices'])}")
+        logger.info(f"Successful: {batch_results['success_count']}")
+        logger.info(f"Errors: {batch_results['error_count']}")
         logger.info(f"Duration: {duration:.2f} seconds")
-        logger.info(f"Output directory: {results['output_dir']}")
+        logger.info(f"Output directory: {batch_results['output_dir']}")
         logger.info("=" * 80)
 
 

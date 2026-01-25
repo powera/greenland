@@ -15,6 +15,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from sqlalchemy import inspect
 from sqlalchemy.orm import Session
 
 # Add src directory to path
@@ -386,7 +387,7 @@ class PradziaAgent:
                 logger.info("Calculating combined ranks using harmonic mean...")
                 analysis.calculate_combined_ranks(config=self.config)
 
-                result = {
+                result: Dict[str, Any] = {
                     "dry_run": False,
                     "success": True,
                     "message": "Combined ranks calculated successfully",
@@ -604,7 +605,7 @@ class PradziaAgent:
             # Stage 4: Bulk insert lemmas
             if lemmas_to_insert:
                 logger.info("Stage 4: Bulk inserting lemmas...")
-                sqlite_session.bulk_insert_mappings(SQLLemma, lemmas_to_insert)
+                sqlite_session.bulk_insert_mappings(inspect(SQLLemma), lemmas_to_insert)
                 sqlite_session.commit()
                 logger.info(f"Inserted {len(lemmas_to_insert)} lemmas")
 
@@ -665,7 +666,9 @@ class PradziaAgent:
             # Stage 7: Bulk insert translations
             if translations_to_insert:
                 logger.info("Stage 7: Bulk inserting translations...")
-                sqlite_session.bulk_insert_mappings(LemmaTranslation, translations_to_insert)
+                sqlite_session.bulk_insert_mappings(
+                    inspect(LemmaTranslation), translations_to_insert
+                )
                 sqlite_session.commit()
                 logger.info(f"Inserted {len(translations_to_insert)} translations")
 

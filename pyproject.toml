@@ -54,6 +54,14 @@ disallow_untyped_defs = true
 mypy_path = "src"
 explicit_package_bases = true
 
+# Tests directory: opt out of requiring type annotations
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+check_untyped_defs = true
+warn_return_any = false
+
 # Benchmarks directory: opt out of requiring type annotations since these
 # are standalone scripts not called by other parts of the codebase
 [[tool.mypy.overrides]]
@@ -108,6 +116,11 @@ module = [
 disallow_untyped_defs = false
 warn_return_any = false
 
+# Trakaido utils - interactive CLI tools, skip type checking
+[[tool.mypy.overrides]]
+module = "wordfreq.trakaido.*"
+ignore_errors = true
+
 # Files with complex JSON/dict type inference issues, obsolete API calls,
 # missing module exports, or deep structural issues that would require
 # significant refactoring - ignore all errors for now
@@ -136,6 +149,9 @@ module = [
     "benchmarks.lib.generators.lemma_generator",
     # One-off utility scripts with dynamic path manipulation
     "wordfreq.trakaido.utils.add_english_verb_conjugations",
+    # Complex benchmark runner with many dynamic patterns
+    "benchmarks.run_quals",
+    "benchmarks.scripts.run_all_quals",
 ]
 ignore_errors = true
 

@@ -85,11 +85,11 @@ class WirewordExporter:
         if debug:
             logger.setLevel(logging.DEBUG)
 
-    def get_session(self):
+    def get_session(self) -> Any:
         """Get database session."""
         return create_session(self.config)
 
-    def get_english_word_from_lemma(self, session, lemma: Lemma) -> Optional[str]:
+    def get_english_word_from_lemma(self, session: Any, lemma: Lemma) -> Optional[str]:
         """
         Get the primary English word for a lemma.
 
@@ -104,7 +104,7 @@ class WirewordExporter:
 
     def query_trakaido_data_for_wireword(
         self,
-        session,
+        session: Any,
         difficulty_level: Optional[int] = None,
         pos_type: Optional[str] = None,
         pos_subtype: Optional[str] = None,
@@ -195,9 +195,7 @@ class WirewordExporter:
                 target_translation = to_simplified(target_translation)
 
             # Get effective difficulty level from pre-fetched data
-            effective_level = difficulty_levels_by_id.get(lemma.id)
-            if effective_level is None:
-                effective_level = 0
+            effective_level: int = difficulty_levels_by_id.get(lemma.id) or 0
 
             # Skip words at level -1 (excluded from all wireword exports)
             if effective_level == -1:
@@ -233,7 +231,7 @@ class WirewordExporter:
             Dictionary mapping (level, subtype) tuples to corpus names
         """
         # Group data by subtype to track when groups appear across levels
-        groups_by_level = {}
+        groups_by_level: Dict[int, set] = {}
         for entry in export_data:
             level = entry["trakaido_level"]
             subtype = entry["subtype"]
@@ -243,7 +241,7 @@ class WirewordExporter:
             groups_by_level[level].add(subtype)
 
         # Track which groups have been assigned to which WORDS level
-        group_assignments = {}  # group_name -> WORDS level
+        group_assignments: Dict[str, str] = {}  # group_name -> WORDS level
         corpus_assignments = {}  # (level, subtype) -> corpus name
 
         # Define the level ranges for each WORDS corpus
@@ -303,7 +301,7 @@ class WirewordExporter:
         return corpus_assignments
 
     def _get_audio_hashes(
-        self, session, guid: str, language: str, grammatical_form: Optional[str] = None
+        self, session: Any, guid: str, language: str, grammatical_form: Optional[str] = None
     ) -> Optional[Dict[str, str]]:
         """
         Get MD5 hashes for all available audio voices for a given word.
@@ -772,7 +770,7 @@ class WirewordExporter:
         Returns:
             Dictionary of derivative phrases to add to grammatical_forms
         """
-        derivative_phrases = {}
+        derivative_phrases: Dict[str, Any] = {}
 
         # Only generate for nouns
         if lemma.pos_type != "noun":
@@ -833,7 +831,11 @@ class WirewordExporter:
         wireword_dir = os.path.join(output_dir, "wireword")
         os.makedirs(wireword_dir, exist_ok=True)
 
-        results = {"files_created": [], "levels_exported": set(), "subtypes_exported": set()}
+        results: Dict[str, Any] = {
+            "files_created": [],
+            "levels_exported": set(),
+            "subtypes_exported": set(),
+        }
 
         # Export verbs to wireword_verbs.json
         verbs_path = os.path.join(wireword_dir, "wireword_verbs.json")
@@ -1045,8 +1047,8 @@ class WirewordExporter:
 
                 # Build grammatical forms (conjugations)
                 grammatical_forms = {}
-                target_alternatives = []
-                target_alternatives_pinyin = []
+                target_alternatives: List[str] = []
+                target_alternatives_pinyin: List[str] = []
                 english_synonyms = []
                 target_synonyms = []
                 target_synonyms_pinyin = []
@@ -1195,7 +1197,7 @@ class WirewordExporter:
             # ExportStats is already imported at module level
 
             # Calculate level distribution
-            level_dist = {}
+            level_dist: Dict[str, int] = {}
             for w in wireword_data:
                 level = str(w.get("level", 0))
                 level_dist[level] = level_dist.get(level, 0) + 1
