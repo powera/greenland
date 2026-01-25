@@ -335,8 +335,8 @@ class WirewordExporter:
         audio_hashes = {}
         for audio in audio_records:
             # Only include audio that is in production (has s3_prod_url)
-            # This ensures we only export production-ready audio, not staging-only
-            if audio.s3_prod_url:
+            # and has not been rejected (status != needs_replacement)
+            if audio.s3_prod_url and audio.status != "needs_replacement":
                 audio_hashes[audio.voice_name] = audio.manifest_md5
 
         return audio_hashes if audio_hashes else None
@@ -422,7 +422,8 @@ class WirewordExporter:
             # Index by (guid, grammatical_form) for quick lookup
             audio_by_guid_form: Dict[Tuple[str, Optional[str]], Dict[str, str]] = {}
             for audio in all_audio_records:
-                if audio.s3_prod_url:  # Only include production audio
+                # Only include production audio that hasn't been rejected
+                if audio.s3_prod_url and audio.status != "needs_replacement":
                     key = (audio.guid, audio.grammatical_form)
                     if key not in audio_by_guid_form:
                         audio_by_guid_form[key] = {}
@@ -1011,7 +1012,8 @@ class WirewordExporter:
             # Index by (guid, grammatical_form) for quick lookup
             audio_by_guid_form: Dict[Tuple[str, Optional[str]], Dict[str, str]] = {}
             for audio in all_audio_records:
-                if audio.s3_prod_url:  # Only include production audio
+                # Only include production audio that hasn't been rejected
+                if audio.s3_prod_url and audio.status != "needs_replacement":
                     key = (audio.guid, audio.grammatical_form)
                     if key not in audio_by_guid_form:
                         audio_by_guid_form[key] = {}
