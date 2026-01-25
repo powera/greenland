@@ -314,6 +314,9 @@ def get_character_description(voice: GptVoice) -> Optional[str]:
     This is prepended to the language-specific pronunciation prompt
     to give the TTS a character persona.
 
+    Variant 1 voices (primary) are language teachers.
+    Variant 2 voices (secondary) are ordinary native speakers.
+
     Args:
         voice: GptVoice enum value
 
@@ -328,7 +331,10 @@ def get_character_description(voice: GptVoice) -> Optional[str]:
     if not language_name:
         return None
 
-    return f"You are {name}, a friendly {language_name} language teacher."
+    if voice.variant == 1:
+        return f"You are {name}, a friendly {language_name} language teacher."
+    else:
+        return f"You are {name}, a native {language_name} speaker."
 
 
 def get_character_name(voice: GptVoice) -> Optional[str]:

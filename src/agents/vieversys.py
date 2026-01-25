@@ -78,6 +78,7 @@ class VieversysAgent:
         output_dir: Optional[str] = None,
         upload_s3: bool = False,
         auto_approve: bool = False,
+        skip_existing: bool = False,
     ) -> None:
         """
         Initialize the Vieversys agent.
@@ -87,11 +88,13 @@ class VieversysAgent:
             output_dir: Output directory for generated audio (uses temp dir if None)
             upload_s3: Whether to upload generated audio to S3 staging
             auto_approve: Whether to automatically approve audio (requires upload_s3)
+            skip_existing: Whether to skip lemma/voice combinations that already have audio
         """
         self.config = config
         self.debug = config.debug
         self.upload_s3 = upload_s3
         self.auto_approve = auto_approve
+        self.skip_existing = skip_existing
         self.output_dir = (
             Path(output_dir) if output_dir else Path(tempfile.mkdtemp(prefix="vieversys_"))
         )
@@ -314,6 +317,31 @@ class VieversysAgent:
         }
 
         for gpt_voice in voices:
+            # Check if audio already exists for this lemma/language/voice combination
+            if self.skip_existing:
+                existing = (
+                    session.query(AudioQualityReview)
+                    .filter_by(
+                        guid=lemma.guid,
+                        language_code=language_code,
+                        voice_name=gpt_voice.path_name,
+                    )
+                    .first()
+                )
+                if existing:
+                    logger.info(
+                        f"Skipping {lemma.guid}/{language_code}/{gpt_voice.path_name} - audio already exists"
+                    )
+                    results["voices"].append(
+                        {
+                            "voice": gpt_voice.path_name,
+                            "success": True,
+                            "skipped": True,
+                            "reason": "audio already exists",
+                        }
+                    )
+                    continue
+
             # Get character description for this voice
             character_description = get_character_description(gpt_voice)
             logger.info(f"Generating audio: {text} ({language_code}/{gpt_voice.path_name})")
@@ -536,6 +564,31 @@ class VieversysAgent:
         }
 
         for gpt_voice in voices:
+            # Check if audio already exists for this sentence/language/voice combination
+            if self.skip_existing:
+                existing = (
+                    session.query(AudioQualityReview)
+                    .filter_by(
+                        sentence_id=sentence.id,
+                        language_code=language_code,
+                        voice_name=gpt_voice.path_name,
+                    )
+                    .first()
+                )
+                if existing:
+                    logger.info(
+                        f"Skipping sentence {sentence.id}/{language_code}/{gpt_voice.path_name} - audio already exists"
+                    )
+                    results["voices"].append(
+                        {
+                            "voice": gpt_voice.path_name,
+                            "success": True,
+                            "skipped": True,
+                            "reason": "audio already exists",
+                        }
+                    )
+                    continue
+
             character_description = get_character_description(gpt_voice)
             logger.info(f"Generating audio: {text} ({language_code}/{gpt_voice.path_name})")
 
@@ -996,6 +1049,7 @@ def main() -> None:
         output_dir=args.output_dir,
         upload_s3=args.upload_s3,
         auto_approve=args.auto_approve,
+        skip_existing=(args.mode == "populate-only"),
     )
 
     # Convert voice names to GptVoice enums
