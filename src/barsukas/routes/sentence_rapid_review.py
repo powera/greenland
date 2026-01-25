@@ -22,8 +22,10 @@ from sqlalchemy.orm import Query
 
 from langtools.zh.pinyin_helper import generate_pinyin
 from wordfreq.storage.models.schema import (
+    Lemma,
     Sentence,
     SentenceTranslation,
+    SentenceWord,
 )
 
 bp = Blueprint("sentence_rapid_review", __name__, url_prefix="/sentences/rapid-review")
@@ -46,6 +48,41 @@ def has_required_translations(translations: Dict[str, str]) -> bool:
     return required.issubset(translations.keys())
 
 
+def calculate_sentence_minimum_level(sentence_id: int) -> int:
+    """Calculate minimum_level for a sentence based on its word difficulty levels.
+
+    Returns the max difficulty level of all linked lemmas, or -1 if:
+    - No words are linked to lemmas
+    - Any linked lemma has difficulty_level = -1 or NULL
+
+    Args:
+        sentence_id: The sentence ID to calculate level for
+
+    Returns:
+        Calculated minimum level, or -1 as fallback
+    """
+    # Get all words for this sentence that have linked lemmas
+    words_with_lemmas = (
+        g.db.query(SentenceWord, Lemma)
+        .join(Lemma, SentenceWord.lemma_id == Lemma.id)
+        .filter(SentenceWord.sentence_id == sentence_id)
+        .all()
+    )
+
+    if not words_with_lemmas:
+        return -1
+
+    max_level = -1
+    for word, lemma in words_with_lemmas:
+        if lemma.difficulty_level is None or lemma.difficulty_level == -1:
+            # Any unset or -1 level means the sentence level should be -1
+            return -1
+        if lemma.difficulty_level > max_level:
+            max_level = lemma.difficulty_level
+
+    return max_level if max_level > 0 else -1
+
+
 def build_sentence_query(
     status_filter: str = "ready",
     level_filter: str = "",
@@ -64,7 +101,7 @@ def build_sentence_query(
     if status_filter == "ready":
         query = query.filter(Sentence.verified == False)
         query = query.filter(Sentence.rejected == False)
-        query = query.filter(Sentence.minimum_level.isnot(None))
+        # Note: We don't filter by minimum_level - sentences without it can still be reviewed
     elif status_filter == "verified":
         query = query.filter(Sentence.verified == True)
     elif status_filter == "rejected":
@@ -243,6 +280,9 @@ def verify(sentence_id: int) -> ResponseReturnValue:
     pattern_filter = data.get("pattern", "")
 
     try:
+        # Calculate and set minimum_level based on word difficulty levels
+        sentence.minimum_level = calculate_sentence_minimum_level(sentence_id)
+
         # Mark as verified
         sentence.verified = True
         g.db.commit()
