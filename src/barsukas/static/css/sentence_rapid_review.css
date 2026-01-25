@@ -1,0 +1,203 @@
+.rapid-review-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.progress-bar-container {
+    background-color: #e0e0e0;
+    height: 8px;
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 1rem 0;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    transition: width 0.3s ease;
+}
+
+.filter-bar {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.filter-bar select {
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    border: 2px solid #ddd;
+}
+
+.metadata-row {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin: 1rem 0;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+/* Translation Cards */
+.translation-card {
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.translation-en {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.translation-en .translation-text {
+    font-size: 2rem;
+    font-weight: bold;
+    text-align: center;
+}
+
+.translation-target {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+}
+
+.translation-target .translation-text {
+    font-size: 1.4rem;
+    font-weight: 500;
+    text-align: center;
+    min-height: 2em;
+}
+
+.translation-zh .translation-text {
+    font-size: 1.8rem;
+}
+
+.translation-lang {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.translation-en .translation-lang {
+    color: rgba(255,255,255,0.8);
+}
+
+.lang-badge {
+    display: inline-block;
+    padding: 0.15rem 0.4rem;
+    border-radius: 0.25rem;
+    font-weight: bold;
+    font-size: 0.75rem;
+    margin-right: 0.3rem;
+    background: #6c757d;
+    color: white;
+}
+
+.lang-es { background: #f1c40f; color: #333; }
+.lang-fr { background: #3498db; color: white; }
+.lang-zh { background: #e74c3c; color: white; }
+.lang-lt { background: #27ae60; color: white; }
+
+.translation-romanization {
+    font-size: 1rem;
+    color: #888;
+    text-align: center;
+    margin-top: 0.5rem;
+    font-style: italic;
+}
+
+/* Translations Grid - 2x2 layout */
+.translations-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin: 1.5rem 0;
+}
+
+@media (max-width: 768px) {
+    .translations-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin: 2rem 0;
+}
+
+.action-btn {
+    flex: 1;
+    max-width: 180px;
+    padding: 1.5rem 1rem;
+    font-size: 1.2rem;
+    font-weight: bold;
+    border-radius: 0.5rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+
+.action-btn:active {
+    transform: translateY(0);
+}
+
+.btn-approve {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    color: white;
+}
+
+.btn-skip {
+    background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);
+    color: white;
+}
+
+.btn-reject {
+    background: linear-gradient(135deg, #ee0979 0%, #ff6a00 100%);
+    color: white;
+}
+
+/* Keyboard Hints */
+.keyboard-hints {
+    text-align: center;
+    margin: 2rem 0;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-radius: 0.5rem;
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.keyboard-key {
+    display: inline-block;
+    padding: 0.2rem 0.5rem;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 0.25rem;
+    font-family: monospace;
+    font-weight: bold;
+    margin: 0 0.2rem;
+}
+
+/* Completion Message */
+.completion-message {
+    text-align: center;
+    padding: 3rem;
+    font-size: 1.5rem;
+    color: #666;
+}
