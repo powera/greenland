@@ -48,6 +48,7 @@ from barsukas.routes import (
     pending_imports,
     pradzia,
     rapid_review,
+    rapid_review_hub,
     sentence_rapid_review,
     sentences,
     settings,
@@ -157,6 +158,7 @@ def create_app(config_class: type[Config] = Config, db_url: Optional[str] = None
     app.register_blueprint(api_client.bp)
     app.register_blueprint(audio.bp)
     app.register_blueprint(rapid_review.bp)
+    app.register_blueprint(rapid_review_hub.bp)
     app.register_blueprint(settings.bp)
     app.register_blueprint(pattern_sentences.bp)
     app.register_blueprint(pradzia.bp)
