@@ -17,6 +17,7 @@ from sqlalchemy.orm import Session, joinedload
 from wordfreq.storage.backend import create_session as create_backend_session
 from wordfreq.storage.backend.config import DataSourceConfig
 from wordfreq.storage.models.schema import (
+    DerivativeForm,
     Lemma,
     Sentence,
     SentenceTranslation,
@@ -155,8 +156,19 @@ class ErelisAgent:
                 )
                 continue
 
-            # Check if lemma translation appears in sentence translation
-            if not self._check_translation_match(lemma_trans, sentence_target, target_language):
+            # Get all derivative forms for this lemma in target language
+            derivative_forms = (
+                session.query(DerivativeForm.derivative_form_text)
+                .filter(
+                    DerivativeForm.lemma_id == lemma.id,
+                    DerivativeForm.language_code == target_language,
+                )
+                .all()
+            )
+            all_forms = [lemma_trans] + [df[0] for df in derivative_forms]
+
+            # Check if lemma translation or any derivative form appears in sentence
+            if not self._check_forms_match(all_forms, sentence_target, target_language):
                 match = FalseLemmaMatch(
                     sentence_id=sentence_id,
                     sentence_word_id=sw.id,
@@ -177,6 +189,23 @@ class ErelisAgent:
                 )
 
         return matches
+
+    def _check_forms_match(self, forms: List[str], sentence_trans: str, lang_code: str) -> bool:
+        """
+        Check if any form (base lemma or derivative) appears in the sentence.
+
+        Args:
+            forms: List of forms to check (base translation + derivative forms)
+            sentence_trans: The sentence's translation
+            lang_code: Language code for language-specific handling
+
+        Returns:
+            True if any form matches, False otherwise
+        """
+        for form in forms:
+            if self._check_translation_match(form, sentence_trans, lang_code):
+                return True
+        return False
 
     def _check_translation_match(
         self, lemma_trans: str, sentence_trans: str, lang_code: str
