@@ -43,6 +43,11 @@ from agents.common.lemma_selection import (
     get_lemmas_for_agent,
 )
 from clients.audio import AudioFormat, Voice, generate_audio
+from clients.audio.gpt_voices import (
+    DEFAULT_GPT_VOICES,
+    GptVoice,
+    get_character_description,
+)
 from clients.audio.manifest import generate_manifest
 from clients.audio.s3_uploader import S3AudioUploader
 from wordfreq.storage.backend import create_session as create_backend_session
@@ -62,19 +67,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Default voices for each language (3 per language as specified)
-DEFAULT_VOICES = {
-    "lt": [Voice.ASH, Voice.ALLOY, Voice.NOVA],
-    "zh": [Voice.ASH, Voice.ALLOY, Voice.NOVA],
-    "ko": [Voice.ASH, Voice.ALLOY, Voice.NOVA],
-    "fr": [Voice.ASH, Voice.ALLOY, Voice.NOVA],
-    "de": [Voice.ASH, Voice.ALLOY, Voice.NOVA],
-    "es": [Voice.ASH, Voice.ALLOY, Voice.NOVA],
-    "pt": [Voice.ASH, Voice.ALLOY, Voice.NOVA],
-    "sw": [Voice.ASH, Voice.ALLOY, Voice.NOVA],
-    "vi": [Voice.ASH, Voice.ALLOY, Voice.NOVA],
-}
-
 
 class VieversysAgent:
     """Agent for generating audio files for lemmas."""
@@ -84,6 +76,7 @@ class VieversysAgent:
         config: DataSourceConfig,
         output_dir: Optional[str] = None,
         upload_s3: bool = False,
+        auto_approve: bool = False,
     ) -> None:
         """
         Initialize the Vieversys agent.
@@ -92,13 +85,19 @@ class VieversysAgent:
             config: DataSourceConfig with model, debug, and backend settings (required)
             output_dir: Output directory for generated audio (uses temp dir if None)
             upload_s3: Whether to upload generated audio to S3 staging
+            auto_approve: Whether to automatically approve audio (requires upload_s3)
         """
         self.config = config
         self.debug = config.debug
         self.upload_s3 = upload_s3
+        self.auto_approve = auto_approve
         self.output_dir = (
             Path(output_dir) if output_dir else Path(tempfile.mkdtemp(prefix="vieversys_"))
         )
+
+        # Auto-approve requires S3 upload
+        if self.auto_approve and not self.upload_s3:
+            raise ValueError("--auto-approve requires --upload-s3")
 
         if self.debug:
             logger.setLevel(logging.DEBUG)
@@ -138,12 +137,147 @@ class VieversysAgent:
         """
         return get_translation(session, lemma, language_code)
 
+    def _upload_to_staging_path(
+        self,
+        audio_path: Path,
+        manifest_data: Dict[str, Any],
+        md5_hash: str,
+        language_code: str,
+        voice_path_name: str,
+    ) -> Tuple[bool, str, str]:
+        """
+        Upload audio and manifest to staging: staging/{language}/{voice}/{md5}.mp3
+
+        Args:
+            audio_path: Path to local audio file
+            manifest_data: Manifest data dictionary
+            md5_hash: MD5 hash of the audio file
+            language_code: Language code (e.g., "lt", "zh")
+            voice_path_name: Voice path name (e.g., "ruta", "jonas")
+
+        Returns:
+            Tuple of (success: bool, audio_url: str, manifest_url: str)
+        """
+        if not self.s3_uploader:
+            return False, "", ""
+
+        staging_prefix = "staging"
+        audio_key = f"{staging_prefix}/{language_code}/{voice_path_name}/{md5_hash}.mp3"
+        manifest_key = f"{staging_prefix}/{language_code}/{voice_path_name}/{md5_hash}.manifest"
+
+        try:
+            # Check if audio file already exists
+            try:
+                self.s3_uploader.s3.head_object(Bucket=self.s3_uploader.bucket_name, Key=audio_key)
+                # File exists
+                audio_url = self.s3_uploader.get_cdn_url(audio_key)
+                manifest_url = self.s3_uploader.get_cdn_url(manifest_key)
+                logger.info(f"Audio already exists in staging: {audio_key}")
+                return True, audio_url, manifest_url
+            except Exception:
+                pass  # File doesn't exist, proceed with upload
+
+            # Upload audio file
+            audio_extra_args = {
+                "ContentType": "audio/mpeg",
+                "ACL": "public-read",
+                "CacheControl": "public, max-age=3600",  # 1 hour cache for staging
+            }
+            self.s3_uploader.s3.upload_file(
+                str(audio_path),
+                self.s3_uploader.bucket_name,
+                audio_key,
+                ExtraArgs=audio_extra_args,
+            )
+            logger.info(f"Uploaded audio to staging: {audio_key}")
+
+            # Upload manifest file
+            import json
+
+            manifest_json = json.dumps(manifest_data, indent=2, ensure_ascii=False)
+            manifest_extra_args = {
+                "ContentType": "application/json",
+                "ACL": "public-read",
+                "CacheControl": "public, max-age=3600",
+            }
+            self.s3_uploader.s3.put_object(
+                Bucket=self.s3_uploader.bucket_name,
+                Key=manifest_key,
+                Body=manifest_json.encode("utf-8"),
+                **manifest_extra_args,
+            )
+            logger.info(f"Uploaded manifest to staging: {manifest_key}")
+
+            audio_url = self.s3_uploader.get_cdn_url(audio_key)
+            manifest_url = self.s3_uploader.get_cdn_url(manifest_key)
+            return True, audio_url, manifest_url
+
+        except Exception as e:
+            logger.error(f"Error uploading to staging: {e}")
+            return False, "", ""
+
+    def _upload_to_prod_path(
+        self,
+        audio_path: Path,
+        md5_hash: str,
+        language_code: str,
+        voice_path_name: str,
+    ) -> Tuple[bool, str]:
+        """
+        Upload audio file to production path: prod/{language}/{voice}/{md5}.mp3
+
+        Args:
+            audio_path: Path to local audio file
+            md5_hash: MD5 hash of the audio file
+            language_code: Language code (e.g., "lt", "zh")
+            voice_path_name: Voice path name (e.g., "ruta", "jonas")
+
+        Returns:
+            Tuple of (success: bool, prod_url: str)
+        """
+        if not self.s3_uploader:
+            return False, ""
+
+        prod_key = f"prod/{language_code}/{voice_path_name}/{md5_hash}.mp3"
+
+        try:
+            # Check if file already exists
+            try:
+                self.s3_uploader.s3.head_object(Bucket=self.s3_uploader.bucket_name, Key=prod_key)
+                # File exists
+                prod_url = self.s3_uploader.get_cdn_url(prod_key)
+                logger.info(f"Audio already exists in production: {prod_key}")
+                return True, prod_url
+            except Exception:
+                pass  # File doesn't exist, proceed with upload
+
+            # Upload to production
+            extra_args = {
+                "ContentType": "audio/mpeg",
+                "ACL": "public-read",
+                "CacheControl": "public, max-age=31536000, immutable",
+            }
+            self.s3_uploader.s3.upload_file(
+                str(audio_path),
+                self.s3_uploader.bucket_name,
+                prod_key,
+                ExtraArgs=extra_args,
+            )
+
+            prod_url = self.s3_uploader.get_cdn_url(prod_key)
+            logger.info(f"Uploaded to production: {prod_key}")
+            return True, prod_url
+
+        except Exception as e:
+            logger.error(f"Error uploading to production: {e}")
+            return False, ""
+
     def generate_audio_for_lemma(
         self,
         session: Session,
         lemma: Lemma,
         language_code: str,
-        voices: List[Voice],
+        voices: List[GptVoice],
         create_review_record: bool = True,
     ) -> Dict[str, Any]:
         """
@@ -153,7 +287,7 @@ class VieversysAgent:
             session: Database session
             lemma: Lemma to generate audio for
             language_code: Target language code
-            voices: List of voices to use
+            voices: List of GptVoice to use
             create_review_record: Whether to create AudioQualityReview records
 
         Returns:
@@ -178,17 +312,24 @@ class VieversysAgent:
             "voices": [],
         }
 
-        for voice in voices:
-            logger.info(f"Generating audio: {text} ({language_code}/{voice.value})")
+        for gpt_voice in voices:
+            # Get character description for this voice
+            character_description = get_character_description(gpt_voice)
+            logger.info(f"Generating audio: {text} ({language_code}/{gpt_voice.path_name})")
 
-            # Generate audio
-            result = generate_audio(text=text, voice=voice, language_code=language_code)
+            # Generate audio using the underlying OpenAI voice
+            result = generate_audio(
+                text=text,
+                voice=gpt_voice.openai_voice,
+                language_code=language_code,
+                character_description=character_description,
+            )
 
             if not result.success:
                 logger.error(f"Failed to generate audio: {result.error}")
                 results["voices"].append(
                     {
-                        "voice": voice.value,
+                        "voice": gpt_voice.path_name,
                         "success": False,
                         "error": result.error,
                     }
@@ -200,8 +341,8 @@ class VieversysAgent:
             safe_text = text.lower().replace(" ", "_")[:50]  # Limit length
             filename = f"{lemma.guid}_{safe_text}.mp3"
 
-            # Create language/voice subdirectories
-            voice_dir = self.output_dir / language_code / voice.value
+            # Create language/voice subdirectories using path_name (e.g., "ruta", "jonas")
+            voice_dir = self.output_dir / language_code / gpt_voice.path_name
             voice_dir.mkdir(parents=True, exist_ok=True)
 
             file_path = voice_dir / filename
@@ -217,12 +358,14 @@ class VieversysAgent:
             # Upload to S3 staging if enabled
             s3_staging_url = None
             s3_staging_manifest_url = None
+            s3_prod_url = None
+            voice_path_name = gpt_voice.path_name
             if self.upload_s3 and self.s3_uploader:
                 # Generate manifest
                 manifest_data = generate_manifest(
                     audio_file_path=file_path,
                     agent="vieversys",
-                    voice_name=voice.value,
+                    voice_name=voice_path_name,
                     language_code=language_code,
                     expected_text=text,
                     guid=lemma.guid,
@@ -230,21 +373,35 @@ class VieversysAgent:
                     grammatical_form=None,
                     generation_params={
                         "model": result.model,
+                        "openai_voice": gpt_voice.openai_voice_name,
+                        "character": voice_path_name,
                     },
                 )
 
-                # Upload to staging
-                success, audio_url, manifest_url, _ = self.s3_uploader.upload_to_staging(
+                # Upload to staging: staging/{language}/{voice}/{md5}.mp3
+                success, audio_url, manifest_url = self._upload_to_staging_path(
                     audio_path=file_path,
                     manifest_data=manifest_data,
-                    agent="vieversys",
-                    check_existing=True,
+                    md5_hash=md5_hash,
+                    language_code=language_code,
+                    voice_path_name=voice_path_name,
                 )
 
                 if success:
                     s3_staging_url = audio_url
                     s3_staging_manifest_url = manifest_url
-                    logger.info(f"Uploaded to S3 staging: {audio_url}")
+
+                    # If auto-approve, also upload to production
+                    # Production path: prod/{language}/{voice_path_name}/{md5}.mp3
+                    if self.auto_approve:
+                        prod_success, prod_url = self._upload_to_prod_path(
+                            file_path, md5_hash, language_code, voice_path_name
+                        )
+                        if prod_success:
+                            s3_prod_url = prod_url
+                            logger.info(f"Auto-approved to S3 prod: {prod_url}")
+                        else:
+                            logger.error(f"Failed to upload to S3 prod: {file_path}")
                 else:
                     logger.error(f"Failed to upload to S3 staging: {file_path}")
 
@@ -254,17 +411,18 @@ class VieversysAgent:
                     session,
                     lemma,
                     language_code,
-                    voice.value,
+                    voice_path_name,
                     filename,
                     text,
                     md5_hash,
                     s3_staging_url=s3_staging_url,
                     s3_staging_manifest_url=s3_staging_manifest_url,
+                    s3_prod_url=s3_prod_url,
                 )
 
             results["voices"].append(
                 {
-                    "voice": voice.value,
+                    "voice": voice_path_name,
                     "success": True,
                     "filename": filename,
                     "file_path": str(file_path),
@@ -286,8 +444,14 @@ class VieversysAgent:
         md5_hash: str,
         s3_staging_url: Optional[str] = None,
         s3_staging_manifest_url: Optional[str] = None,
+        s3_prod_url: Optional[str] = None,
     ) -> None:
         """Create AudioQualityReview record for generated audio."""
+        # Determine status based on auto_approve setting
+        status = "approved" if self.auto_approve else "pending_review"
+        accepted_at = datetime.now() if self.auto_approve else None
+        accepted_by = "vieversys-auto" if self.auto_approve else None
+
         # Check if record already exists
         existing = (
             session.query(AudioQualityReview)
@@ -305,13 +469,13 @@ class VieversysAgent:
             existing.filename = filename
             existing.expected_text = text
             existing.manifest_md5 = md5_hash
-            existing.status = "pending_review"
+            existing.status = status
             existing.s3_staging_url = s3_staging_url
             existing.s3_staging_manifest_url = s3_staging_manifest_url
             existing.staging_agent = "vieversys" if s3_staging_url else None
-            existing.s3_prod_url = None  # Clear prod URL when regenerating
-            existing.accepted_at = None
-            existing.accepted_by = None
+            existing.s3_prod_url = s3_prod_url
+            existing.accepted_at = accepted_at
+            existing.accepted_by = accepted_by
             logger.debug(f"Updated existing review record for {lemma.guid}")
         else:
             # Create new record
@@ -326,10 +490,12 @@ class VieversysAgent:
                 manifest_md5=md5_hash,
                 s3_staging_url=s3_staging_url,
                 s3_staging_manifest_url=s3_staging_manifest_url,
-                s3_prod_url=None,
+                s3_prod_url=s3_prod_url,
                 staging_agent="vieversys" if s3_staging_url else None,
                 lemma_id=lemma.id,
-                status="pending_review",
+                status=status,
+                accepted_at=accepted_at,
+                accepted_by=accepted_by,
             )
             session.add(review)
             logger.debug(f"Created review record for {lemma.guid}")
@@ -341,7 +507,7 @@ class VieversysAgent:
         session: Session,
         sentence: Sentence,
         sentence_translation: SentenceTranslation,
-        voices: List[Voice],
+        voices: List[GptVoice],
         create_review_record: bool = True,
     ) -> Dict[str, Any]:
         """
@@ -351,7 +517,7 @@ class VieversysAgent:
             session: Database session
             sentence: Sentence to generate audio for
             sentence_translation: SentenceTranslation with the text to speak
-            voices: List of voices to use
+            voices: List of GptVoice to use
             create_review_record: Whether to create AudioQualityReview records
 
         Returns:
@@ -368,19 +534,24 @@ class VieversysAgent:
             "voices": [],
         }
 
-        for voice in voices:
-            logger.info(f"Generating audio: {text} ({language_code}/{voice.value})")
+        for gpt_voice in voices:
+            character_description = get_character_description(gpt_voice)
+            logger.info(f"Generating audio: {text} ({language_code}/{gpt_voice.path_name})")
 
             # Generate audio (with is_sentence=True for natural sentence pacing)
             result = generate_audio(
-                text=text, voice=voice, language_code=language_code, is_sentence=True
+                text=text,
+                voice=gpt_voice.openai_voice,
+                language_code=language_code,
+                is_sentence=True,
+                character_description=character_description,
             )
 
             if not result.success:
                 logger.error(f"Failed to generate audio: {result.error}")
                 results["voices"].append(
                     {
-                        "voice": voice.value,
+                        "voice": gpt_voice.path_name,
                         "success": False,
                         "error": result.error,
                     }
@@ -393,7 +564,8 @@ class VieversysAgent:
             filename = f"sent_{sentence.id}_{safe_text}.mp3"
 
             # Create language/voice subdirectories
-            voice_dir = self.output_dir / language_code / voice.value
+            voice_path_name = gpt_voice.path_name
+            voice_dir = self.output_dir / language_code / voice_path_name
             voice_dir.mkdir(parents=True, exist_ok=True)
 
             file_path = voice_dir / filename
@@ -414,7 +586,7 @@ class VieversysAgent:
                 manifest_data = generate_manifest(
                     audio_file_path=file_path,
                     agent="vieversys",
-                    voice_name=voice.value,
+                    voice_name=voice_path_name,
                     language_code=language_code,
                     expected_text=text,
                     guid=None,  # Sentences don't have GUIDs
@@ -422,21 +594,23 @@ class VieversysAgent:
                     grammatical_form=None,
                     generation_params={
                         "model": result.model,
+                        "openai_voice": gpt_voice.openai_voice_name,
+                        "character": voice_path_name,
                     },
                 )
 
-                # Upload to staging
-                success, audio_url, manifest_url, _ = self.s3_uploader.upload_to_staging(
+                # Upload to staging: staging/{language}/{voice}/{md5}.mp3
+                success, audio_url, manifest_url = self._upload_to_staging_path(
                     audio_path=file_path,
                     manifest_data=manifest_data,
-                    agent="vieversys",
-                    check_existing=True,
+                    md5_hash=md5_hash,
+                    language_code=language_code,
+                    voice_path_name=voice_path_name,
                 )
 
                 if success:
                     s3_staging_url = audio_url
                     s3_staging_manifest_url = manifest_url
-                    logger.info(f"Uploaded to S3 staging: {audio_url}")
                 else:
                     logger.error(f"Failed to upload to S3 staging: {file_path}")
 
@@ -446,7 +620,7 @@ class VieversysAgent:
                     session,
                     sentence,
                     language_code,
-                    voice.value,
+                    voice_path_name,
                     filename,
                     text,
                     md5_hash,
@@ -456,7 +630,7 @@ class VieversysAgent:
 
             results["voices"].append(
                 {
-                    "voice": voice.value,
+                    "voice": voice_path_name,
                     "success": True,
                     "filename": filename,
                     "file_path": str(file_path),
@@ -531,7 +705,7 @@ class VieversysAgent:
         self,
         language_code: str,
         lemmas: Optional[List[Lemma]] = None,
-        voices: Optional[List[Voice]] = None,
+        voices: Optional[List[GptVoice]] = None,
     ) -> Dict[str, Any]:
         """
         Generate audio for a batch of lemmas.
@@ -539,13 +713,15 @@ class VieversysAgent:
         Args:
             language_code: Target language code
             lemmas: List of lemmas to process (if None, returns empty result)
-            voices: Voices to use (defaults to language's default voices)
+            voices: GptVoices to use (defaults to language's default voices)
 
         Returns:
             Dict with batch generation results
         """
         session = self.get_session()
-        voices = voices or DEFAULT_VOICES.get(language_code, [Voice.ASH, Voice.ALLOY, Voice.NOVA])
+        voices = voices or DEFAULT_GPT_VOICES.get(
+            language_code, GptVoice.get_default_voices_for_language(language_code)
+        )
 
         try:
             # If no lemmas provided, return empty result
@@ -553,7 +729,7 @@ class VieversysAgent:
                 return {
                     "language_code": language_code,
                     "total_lemmas": 0,
-                    "voices": [v.value for v in voices],
+                    "voices": [v.path_name for v in voices],
                     "output_dir": str(self.output_dir),
                     "lemmas": [],
                     "success_count": 0,
@@ -573,7 +749,7 @@ class VieversysAgent:
             results: Dict[str, Any] = {
                 "language_code": language_code,
                 "total_lemmas": len(lemmas),
-                "voices": [v.value for v in voices],
+                "voices": [v.path_name for v in voices],
                 "output_dir": str(self.output_dir),
                 "lemmas": [],
                 "success_count": 0,
@@ -603,7 +779,7 @@ class VieversysAgent:
         language_code: str,
         guid: Optional[str] = None,
         limit: int = 10,
-        voices: Optional[List[Voice]] = None,
+        voices: Optional[List[GptVoice]] = None,
     ) -> Dict[str, Any]:
         """
         Generate audio for sentences.
@@ -612,13 +788,15 @@ class VieversysAgent:
             language_code: Target language code
             guid: Optional GUID to filter sentences by (sentences that use this lemma)
             limit: Maximum number of sentences to process per language (default: 10)
-            voices: Voices to use (defaults to language's default voices)
+            voices: GptVoices to use (defaults to language's default voices)
 
         Returns:
             Dict with batch generation results
         """
         session = self.get_session()
-        voices = voices or DEFAULT_VOICES.get(language_code, [Voice.ASH, Voice.ALLOY, Voice.NOVA])
+        voices = voices or DEFAULT_GPT_VOICES.get(
+            language_code, GptVoice.get_default_voices_for_language(language_code)
+        )
 
         try:
             # Build query for sentences
@@ -654,7 +832,7 @@ class VieversysAgent:
                     "language_code": language_code,
                     "guid": guid,
                     "total_sentences": 0,
-                    "voices": [v.value for v in voices],
+                    "voices": [v.path_name for v in voices],
                     "output_dir": str(self.output_dir),
                     "sentences": [],
                     "success_count": 0,
@@ -667,7 +845,7 @@ class VieversysAgent:
                 "language_code": language_code,
                 "guid": guid,
                 "total_sentences": len(sentence_pairs),
-                "voices": [v.value for v in voices],
+                "voices": [v.path_name for v in voices],
                 "output_dir": str(self.output_dir),
                 "sentences": [],
                 "success_count": 0,
@@ -759,26 +937,14 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--output-dir", help="Output directory for generated audio")
     parser.add_argument(
         "--language",
-        choices=["lt", "zh", "ko", "fr", "de", "es", "pt", "sw", "vi"],
+        choices=["lt", "zh", "es", "fr"],
         help="Target language code (required for populate-only and regenerate modes)",
     )
     parser.add_argument("--difficulty-level", type=int, help="Filter by difficulty level (1-20)")
     parser.add_argument(
         "--voices",
         nargs="+",
-        choices=[
-            "ash",
-            "alloy",
-            "nova",
-            "ballad",
-            "coral",
-            "echo",
-            "fable",
-            "onyx",
-            "sage",
-            "shimmer",
-        ],
-        help="Voices to use (defaults to ash, alloy, nova)",
+        help="Character voices to use (e.g., ruta, jonas, meiling). Defaults to language's primary voices.",
     )
     parser.add_argument(
         "--generate-manifests",
@@ -800,6 +966,11 @@ def get_argument_parser() -> argparse.ArgumentParser:
         type=int,
         default=10,
         help="Maximum number of sentences to process per language (default: 10)",
+    )
+    parser.add_argument(
+        "--auto-approve",
+        action="store_true",
+        help="Automatically approve generated audio (sets status to 'approved' and copies to prod)",
     )
 
     return parser
@@ -823,12 +994,35 @@ def main() -> None:
         config=config,
         output_dir=args.output_dir,
         upload_s3=args.upload_s3,
+        auto_approve=args.auto_approve,
     )
 
-    # Convert voice names to Voice enums
+    # Convert voice names to GptVoice enums
     voices = None
     if args.voices:
-        voices = [Voice(v) for v in args.voices]
+        # Try to match by path_name (e.g., "ruta", "jonas") or ui_name (e.g., "gpt-lt-f1")
+        voices = []
+        for v in args.voices:
+            # First try ui_name format
+            gpt_voice = GptVoice.from_ui_name(v)
+            if gpt_voice:
+                voices.append(gpt_voice)
+                continue
+            # Try matching by path_name
+            found = False
+            for voice in GptVoice:
+                if voice.path_name == v.lower():
+                    voices.append(voice)
+                    found = True
+                    break
+            if not found:
+                print(f"Error: Unknown voice '{v}'")
+                print("Available voices by language:")
+                for lang in ["lt", "zh", "es", "fr"]:
+                    lang_voices = GptVoice.get_voices_for_language(lang)
+                    names = [gv.path_name for gv in lang_voices]
+                    print(f"  {lang}: {', '.join(names)}")
+                sys.exit(1)
 
     # Get lemmas to process (either single lemma from --guid or batch)
     # Only needed for modes that process lemmas (not coverage or check-existing)
@@ -1011,13 +1205,13 @@ def main() -> None:
         # Generate manifests if requested
         if args.generate_manifests:
             logger.info("Generating manifests...")
-            voice_list = voices or DEFAULT_VOICES.get(args.language, [])
+            voice_list = voices or DEFAULT_GPT_VOICES.get(args.language, [])
             for voice in voice_list:
                 try:
-                    manifest_path = agent.generate_manifest(args.language, voice.value)
+                    manifest_path = agent.generate_manifest(args.language, voice.path_name)
                     logger.info(f"Generated manifest: {manifest_path}")
                 except Exception as e:
-                    logger.error(f"Error generating manifest for {voice.value}: {e}")
+                    logger.error(f"Error generating manifest for {voice.path_name}: {e}")
 
         # Print summary
         logger.info("=" * 80)

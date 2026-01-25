@@ -114,6 +114,7 @@ class OpenAITTSClient:
         audio_format: AudioFormat = AudioFormat.MP3,
         speed: float = 1.0,
         is_sentence: bool = False,
+        character_description: Optional[str] = None,
     ) -> AudioGenerationResult:
         """
         Generate audio from text using OpenAI TTS.
@@ -126,6 +127,7 @@ class OpenAITTSClient:
             audio_format: Output audio format
             speed: Speed of speech (0.25 to 4.0)
             is_sentence: If True, use sentence-level prompt for natural pacing
+            character_description: Optional character persona to prepend to instructions
 
         Returns:
             AudioGenerationResult with audio data and metadata
@@ -145,6 +147,10 @@ class OpenAITTSClient:
 
         # Get language-specific instructions
         instructions = get_instructions(language_code, is_sentence=is_sentence)
+
+        # Prepend character description if provided
+        if character_description:
+            instructions = f"{character_description}\n\n{instructions}"
 
         # Prepare request payload
         payload: dict[str, Any] = {
@@ -243,6 +249,7 @@ def generate_audio(
     audio_format: AudioFormat = AudioFormat.MP3,
     speed: float = 1.0,
     is_sentence: bool = False,
+    character_description: Optional[str] = None,
 ) -> AudioGenerationResult:
     """
     Generate audio from text using OpenAI TTS.
@@ -257,10 +264,18 @@ def generate_audio(
         audio_format: Output audio format
         speed: Speed of speech (0.25 to 4.0)
         is_sentence: If True, use sentence-level prompt for natural pacing
+        character_description: Optional character persona to prepend to instructions
 
     Returns:
         AudioGenerationResult with audio data and metadata
     """
     return client.generate_audio(
-        text, voice, language_code, model, audio_format, speed, is_sentence
+        text,
+        voice,
+        language_code,
+        model,
+        audio_format,
+        speed,
+        is_sentence,
+        character_description,
     )
