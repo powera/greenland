@@ -78,6 +78,9 @@
             <span id="romanization-display">{{ review.expected_text|romaji }}</span>
         </div>
         {% endif %}
+        <div class="text-center text-muted" style="font-size: 1rem; margin-top: -0.5rem; margin-bottom: 1rem;{% if not english_translation %} display: none;{% endif %}">
+            <span id="english-translation-display">{{ english_translation or '' }}</span>
+        </div>
 
         <!-- Translation Mismatch Warning (hidden initially, shown by JS if needed) -->
         <div id="translation-warning" class="alert alert-warning text-center" style="display: none; margin: 1rem auto; max-width: 800px;">

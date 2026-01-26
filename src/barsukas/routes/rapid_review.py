@@ -24,10 +24,26 @@ from sqlalchemy.orm import joinedload
 
 from barsukas.helpers.audio_helpers import validate_audio_translation
 from langtools.zh.pinyin_helper import generate_pinyin
-from wordfreq.storage.models.schema import AudioQualityReview, Lemma
+from wordfreq.storage.models.schema import AudioQualityReview, Lemma, SentenceTranslation
 from wordfreq.storage.queries.lemma import apply_effective_difficulty_filter
 
 bp = Blueprint("rapid_review", __name__, url_prefix="/audio/rapid-review")
+
+
+def get_english_translation_for_review(review: AudioQualityReview) -> str | None:
+    """Get the English translation for a sentence audio review."""
+    if not review.sentence_id:
+        return None
+    # Query for the English translation of this sentence
+    translation = (
+        g.db.query(SentenceTranslation)
+        .filter(
+            SentenceTranslation.sentence_id == review.sentence_id,
+            SentenceTranslation.language_code == "en",
+        )
+        .first()
+    )
+    return translation.translation_text if translation else None
 
 
 @bp.route("/")
@@ -107,6 +123,11 @@ def index() -> ResponseReturnValue:
 
     statuses = ["pending_review", "approved", "approved_with_issues", "needs_replacement"]
 
+    # Get English translation for sentence audio
+    english_translation = None
+    if current_review:
+        english_translation = get_english_translation_for_review(current_review)
+
     return render_template(
         "audio/rapid_review.html",
         review=current_review,
@@ -122,6 +143,7 @@ def index() -> ResponseReturnValue:
         subtype_filter=subtype_filter,
         level_filter=level_filter,
         audio_type_filter=audio_type_filter,
+        english_translation=english_translation,
     )
 
 
@@ -217,6 +239,9 @@ def submit(review_id: int) -> ResponseReturnValue:
                 g.db, next_review.guid, next_review.expected_text, next_review.language_code
             )
 
+            # Get English translation for sentence audio
+            english_translation = get_english_translation_for_review(next_review)
+
             return jsonify(
                 {
                     "success": True,
@@ -230,6 +255,7 @@ def submit(review_id: int) -> ResponseReturnValue:
                         "display_voice": next_review.display_voice,
                         "filename": next_review.filename,
                         "pinyin": pinyin_text,
+                        "english_translation": english_translation,
                         "audio_url": url_for(
                             "audio.serve_audio_file",
                             language=next_review.language_code,
@@ -330,6 +356,9 @@ def skip(review_id: int) -> ResponseReturnValue:
                 g.db, next_review.guid, next_review.expected_text, next_review.language_code
             )
 
+            # Get English translation for sentence audio
+            english_translation = get_english_translation_for_review(next_review)
+
             return jsonify(
                 {
                     "success": True,
@@ -343,6 +372,7 @@ def skip(review_id: int) -> ResponseReturnValue:
                         "display_voice": next_review.display_voice,
                         "filename": next_review.filename,
                         "pinyin": pinyin_text,
+                        "english_translation": english_translation,
                         "audio_url": url_for(
                             "audio.serve_audio_file",
                             language=next_review.language_code,
@@ -449,6 +479,9 @@ def bad_translation(review_id: int) -> ResponseReturnValue:
                 g.db, next_review.guid, next_review.expected_text, next_review.language_code
             )
 
+            # Get English translation for sentence audio
+            english_translation = get_english_translation_for_review(next_review)
+
             return jsonify(
                 {
                     "success": True,
@@ -462,6 +495,7 @@ def bad_translation(review_id: int) -> ResponseReturnValue:
                         "display_voice": next_review.display_voice,
                         "filename": next_review.filename,
                         "pinyin": pinyin_text,
+                        "english_translation": english_translation,
                         "audio_url": url_for(
                             "audio.serve_audio_file",
                             language=next_review.language_code,

@@ -242,6 +242,17 @@ function initRapidReview(config) {
             pinyinDisplay.textContent = review.pinyin;
         }
 
+        // Update English translation if present (for sentence audio)
+        const englishDisplay = document.getElementById('english-translation-display');
+        if (englishDisplay) {
+            if (review.english_translation) {
+                englishDisplay.textContent = review.english_translation;
+                englishDisplay.parentElement.style.display = 'block';
+            } else {
+                englishDisplay.parentElement.style.display = 'none';
+            }
+        }
+
         // Check for translation mismatch and display warning
         const warningDiv = document.getElementById('translation-warning');
         if (warningDiv) {
