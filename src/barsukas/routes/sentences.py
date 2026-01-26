@@ -38,15 +38,17 @@ def list_sentences() -> ResponseReturnValue:
     search = request.args.get("search", "").strip()
     pattern_type = request.args.get("pattern_type", "").strip()
     minimum_level = request.args.get("minimum_level", "", type=str).strip()
-    show_all = request.args.get("show_all", "no")
+    exclude_rejected = request.args.get("exclude_rejected", "no")
+    exclude_verified = request.args.get("exclude_verified", "no")
 
     # Build query
     query = g.db.query(Sentence)
 
-    # By default, exclude verified and rejected sentences unless specifically requested
-    if show_all != "yes":
-        query = query.filter(Sentence.verified == False)
+    # Apply optional filters for rejected and verified sentences
+    if exclude_rejected == "yes":
         query = query.filter(Sentence.rejected == False)
+    if exclude_verified == "yes":
+        query = query.filter(Sentence.verified == False)
 
     # Apply filters
     if search:
@@ -122,7 +124,8 @@ def list_sentences() -> ResponseReturnValue:
         search=search,
         pattern_type=pattern_type,
         minimum_level=minimum_level,
-        show_all=show_all,
+        exclude_rejected=exclude_rejected,
+        exclude_verified=exclude_verified,
         pattern_types=pattern_types,
     )
 
