@@ -52,7 +52,7 @@
                             <option value="verbs">Verbs Only</option>
                         </select>
                         <small class="form-text text-muted">
-                            <strong>Default:</strong> Creates three files (wireword_verbs.json, wireword_nouns.json, and wireword_sentences.json) in data/trakaido_wordlists/lang_XX/generated/wireword/<br>
+                            <strong>Default:</strong> Creates four files (wireword_verbs.json, wireword_nouns.json, wireword_sentences.json, and wireword_manifest.json) in data/trakaido_wordlists/lang_XX/generated/wireword/<br>
                             <strong>Single File:</strong> Downloads one JSON file with optional filters<br>
                             <strong>Verbs Only:</strong> Downloads just the verbs file
                         </small>
@@ -122,11 +122,12 @@
 
                 <h6>Export Types:</h6>
                 <ul>
-                    <li><strong>Default (recommended):</strong> Creates three files in <code>data/trakaido_wordlists/lang_XX/generated/wireword/</code>:
+                    <li><strong>Default (recommended):</strong> Creates four files in <code>data/trakaido_wordlists/lang_XX/generated/wireword/</code>:
                         <ul>
                             <li><code>wireword_verbs.json</code> - All verb conjugations</li>
                             <li><code>wireword_nouns.json</code> - All non-verbs (nouns, adjectives, etc.)</li>
                             <li><code>wireword_sentences.json</code> - All sentences with level ≠ -1 and target language translation</li>
+                            <li><code>wireword_manifest.json</code> - Manifest with MD5 checksums and file metadata for cache validation</li>
                         </ul>
                         This is what Trakaido expects.
                     </li>
