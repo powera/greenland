@@ -284,7 +284,7 @@ class WirewordSentenceExporter:
 
                 # Build sentence entry
                 sentence_entry = {
-                    "sentence_id": sentence.id,
+                    "sentence_id": f"S_{sentence.id:05d}",
                     "translations": translations,
                     "linked_words": linked_words,
                 }

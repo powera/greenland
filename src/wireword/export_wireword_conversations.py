@@ -241,7 +241,7 @@ class WirewordConversationExporter:
 
                     # Build sentence entry
                     sentence_entry: Dict[str, Any] = {
-                        "sentence_id": sentence.id,
+                        "sentence_id": f"S_{sentence.id:05d}",
                         "position": cs.position,
                         "speaker": cs.speaker,
                         "translations": translations,
