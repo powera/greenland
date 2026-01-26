@@ -1,0 +1,215 @@
+{% extends "base.html" %}
+
+{% block title %}Sentence Word Statistics{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h1><i class="bi bi-bar-chart"></i> Sentence Word Statistics</h1>
+        <p class="text-muted">Word usage frequency in the sentences corpus</p>
+    </div>
+</div>
+
+<!-- Summary Stats -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <h3 class="mb-0">{{ unique_words }}</h3>
+                <small class="text-muted">Unique Words in Sentences</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <h3 class="mb-0">{{ total_occurrences }}</h3>
+                <small class="text-muted">Total Word Occurrences</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <h3 class="mb-0">{{ total }}</h3>
+                <small class="text-muted">Matching Words (filtered)</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filter Form -->
+<div class="search-form">
+    <form method="get" action="{{ url_for('sentence_stats.index') }}">
+        <div class="row g-3">
+            <div class="col-md-2">
+                <label for="min_level" class="form-label">Min Level</label>
+                <select class="form-select" id="min_level" name="min_level">
+                    <option value="">Any</option>
+                    {% for i in range(1, 21) %}
+                        <option value="{{ i }}" {% if min_level == i|string %}selected{% endif %}>
+                            {{ i }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="max_level" class="form-label">Max Level</label>
+                <select class="form-select" id="max_level" name="max_level">
+                    <option value="">Any</option>
+                    {% for i in range(1, 21) %}
+                        <option value="{{ i }}" {% if max_level == i|string %}selected{% endif %}>
+                            {{ i }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="pos_type" class="form-label">POS Type</label>
+                <select class="form-select" id="pos_type" name="pos_type">
+                    <option value="">All</option>
+                    {% for pt in pos_types %}
+                        <option value="{{ pt }}" {% if pt == pos_type %}selected{% endif %}>
+                            {{ pt }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="pos_subtype" class="form-label">Subtype</label>
+                <select class="form-select" id="pos_subtype" name="pos_subtype">
+                    <option value="">All</option>
+                    {% for pst in pos_subtypes %}
+                        <option value="{{ pst }}" {% if pst == pos_subtype %}selected{% endif %}>
+                            {{ pst }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="min_count" class="form-label">Min Count</label>
+                <input type="number" class="form-control" id="min_count" name="min_count"
+                       value="{{ min_count }}" placeholder="e.g. 5" min="1">
+            </div>
+            <div class="col-md-2">
+                <label for="sort_by" class="form-label">Sort By</label>
+                <select class="form-select" id="sort_by" name="sort_by">
+                    <option value="count_desc" {% if sort_by == 'count_desc' %}selected{% endif %}>Count (High to Low)</option>
+                    <option value="count_asc" {% if sort_by == 'count_asc' %}selected{% endif %}>Count (Low to High)</option>
+                    <option value="level_asc" {% if sort_by == 'level_asc' %}selected{% endif %}>Level (Low to High)</option>
+                    <option value="level_desc" {% if sort_by == 'level_desc' %}selected{% endif %}>Level (High to Low)</option>
+                    <option value="word_asc" {% if sort_by == 'word_asc' %}selected{% endif %}>Word (A-Z)</option>
+                    <option value="word_desc" {% if sort_by == 'word_desc' %}selected{% endif %}>Word (Z-A)</option>
+                </select>
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-funnel"></i> Apply Filters
+                </button>
+                <a href="{{ url_for('sentence_stats.index') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-x-circle"></i> Clear
+                </a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Results Table -->
+<div class="row">
+    <div class="col">
+        {% if stats %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Word</th>
+                            <th>Definition</th>
+                            <th>POS Type</th>
+                            <th>Subtype</th>
+                            <th class="text-center">Level</th>
+                            <th class="text-center">Sentence Count</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in stats %}
+                            <tr>
+                                <td>
+                                    <a href="{{ url_for('lemmas.view_lemma', lemma_id=row[0]) }}" class="text-decoration-none fw-bold">
+                                        {{ row[1] }}
+                                    </a>
+                                </td>
+                                <td class="text-muted">
+                                    {{ row[2][:80] if row[2] else '' }}{% if row[2] and row[2]|length > 80 %}...{% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">{{ row[3] }}</span>
+                                </td>
+                                <td>
+                                    {% if row[4] %}
+                                        <a href="{{ url_for('sentence_stats.index', pos_subtype=row[4], sort_by=sort_by) }}" class="text-decoration-none">
+                                            <span class="badge bg-light text-dark">{{ row[4] }}</span>
+                                        </a>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    {% if row[5] is not none %}
+                                        {% if row[5] == -1 %}
+                                            <span class="badge bg-warning">Excl</span>
+                                        {% else %}
+                                            <span class="badge bg-info">{{ row[5] }}</span>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge bg-primary fs-6">{{ row[6] }}</span>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if total_pages > 1 %}
+                <nav class="pagination-container" aria-label="Page navigation">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item {% if page == 1 %}disabled{% endif %}">
+                            <a class="page-link" href="{{ url_for('sentence_stats.index', page=page-1, min_level=min_level, max_level=max_level, pos_type=pos_type, pos_subtype=pos_subtype, sort_by=sort_by, min_count=min_count) }}">
+                                Previous
+                            </a>
+                        </li>
+
+                        {% for p in range(1, total_pages + 1) %}
+                            {% if p == page or (p <= 3 or p > total_pages - 3 or (p >= page - 2 and p <= page + 2)) %}
+                                <li class="page-item {% if p == page %}active{% endif %}">
+                                    <a class="page-link" href="{{ url_for('sentence_stats.index', page=p, min_level=min_level, max_level=max_level, pos_type=pos_type, pos_subtype=pos_subtype, sort_by=sort_by, min_count=min_count) }}">
+                                        {{ p }}
+                                    </a>
+                                </li>
+                            {% elif (p == 4 and page > 6) or (p == total_pages - 3 and page < total_pages - 5) %}
+                                <li class="page-item disabled">
+                                    <span class="page-link">...</span>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        <li class="page-item {% if page == total_pages %}disabled{% endif %}">
+                            <a class="page-link" href="{{ url_for('sentence_stats.index', page=page+1, min_level=min_level, max_level=max_level, pos_type=pos_type, pos_subtype=pos_subtype, sort_by=sort_by, min_count=min_count) }}">
+                                Next
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            {% endif %}
+        {% else %}
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i> No words found matching your criteria.
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
