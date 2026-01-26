@@ -23,7 +23,8 @@ def index() -> ResponseReturnValue:
     sort_by = request.args.get("sort_by", "count_desc").strip()
     min_count = request.args.get("min_count", "", type=str).strip()
 
-    # Base query: count word occurrences in sentences, grouped by lemma
+    # Base query: count unique sentences containing each lemma, grouped by lemma
+    # Use distinct sentence_id to avoid counting translations as separate occurrences
     query = (
         g.db.query(
             Lemma.id,
@@ -32,7 +33,7 @@ def index() -> ResponseReturnValue:
             Lemma.pos_type,
             Lemma.pos_subtype,
             Lemma.difficulty_level,
-            func.count(SentenceWord.id).label("sentence_count"),
+            func.count(func.distinct(SentenceWord.sentence_id)).label("sentence_count"),
         )
         .join(SentenceWord, SentenceWord.lemma_id == Lemma.id)
         .group_by(
@@ -72,15 +73,17 @@ def index() -> ResponseReturnValue:
     if min_count:
         try:
             min_count_int = int(min_count)
-            query = query.having(func.count(SentenceWord.id) >= min_count_int)
+            query = query.having(
+                func.count(func.distinct(SentenceWord.sentence_id)) >= min_count_int
+            )
         except ValueError:
             pass
 
     # Apply sorting
     if sort_by == "count_desc":
-        query = query.order_by(func.count(SentenceWord.id).desc())
+        query = query.order_by(func.count(func.distinct(SentenceWord.sentence_id)).desc())
     elif sort_by == "count_asc":
-        query = query.order_by(func.count(SentenceWord.id).asc())
+        query = query.order_by(func.count(func.distinct(SentenceWord.sentence_id)).asc())
     elif sort_by == "level_desc":
         query = query.order_by(Lemma.difficulty_level.desc().nullslast())
     elif sort_by == "level_asc":
@@ -90,7 +93,7 @@ def index() -> ResponseReturnValue:
     elif sort_by == "word_desc":
         query = query.order_by(Lemma.lemma_text.desc())
     else:
-        query = query.order_by(func.count(SentenceWord.id).desc())
+        query = query.order_by(func.count(func.distinct(SentenceWord.sentence_id)).desc())
 
     # Get total count for pagination (using a subquery)
     count_query = query.subquery()
@@ -119,13 +122,22 @@ def index() -> ResponseReturnValue:
     pos_subtypes = [row[0] for row in subtype_query.distinct().order_by(Lemma.pos_subtype).all()]
 
     # Calculate summary statistics
+    # Count unique words and total occurrences (counting each sentence only once,
+    # not once per translation)
     summary_query = g.db.query(
         func.count(func.distinct(SentenceWord.lemma_id)).label("unique_words"),
-        func.count(SentenceWord.id).label("total_occurrences"),
     ).filter(SentenceWord.lemma_id.isnot(None))
     summary = summary_query.first()
     unique_words = summary[0] if summary else 0
-    total_occurrences = summary[1] if summary else 0
+
+    # Count total word-sentence pairs (distinct by sentence_id + lemma_id)
+    total_occurrences_query = g.db.query(func.count()).select_from(
+        g.db.query(SentenceWord.sentence_id, SentenceWord.lemma_id)
+        .filter(SentenceWord.lemma_id.isnot(None))
+        .distinct()
+        .subquery()
+    )
+    total_occurrences = total_occurrences_query.scalar() or 0
 
     return render_template(
         "sentence_stats/index.html",
