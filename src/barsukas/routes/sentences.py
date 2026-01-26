@@ -629,3 +629,23 @@ def reject_sentence(sentence_id: int) -> Response:
 
     # Redirect back to the view page with current filters
     return redirect(request.referrer or url_for("sentences.list_sentences"))
+
+
+@bp.route("/<int:sentence_id>/unverify", methods=["POST"])
+def unverify_sentence(sentence_id: int) -> Response:
+    """Unverify a sentence and mark it as rejected."""
+    sentence = g.db.query(Sentence).get(sentence_id)
+    if not sentence:
+        flash("Sentence not found", "error")
+        return redirect(url_for("sentences.list_sentences"))
+
+    try:
+        sentence.verified = False
+        sentence.rejected = True
+        g.db.commit()
+        flash(f"Sentence #{sentence_id} unverified and marked as rejected", "success")
+    except Exception as e:
+        flash(f"Error unverifying sentence: {e}", "error")
+        g.db.rollback()
+
+    return redirect(url_for("sentences.view_sentence", sentence_id=sentence_id))

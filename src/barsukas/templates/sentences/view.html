@@ -68,6 +68,12 @@
                             <dd class="col-sm-7">
                                 {% if sentence.verified %}
                                     <i class="bi bi-check-circle-fill text-success"></i> Yes
+                                    <form method="POST" action="{{ url_for('sentences.unverify_sentence', sentence_id=sentence.id) }}" class="d-inline-block ms-2">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger"
+                                                onclick="return confirm('Reject this verified sentence? It will be unverified and marked as rejected.')">
+                                            <i class="bi bi-x-circle"></i> Reject
+                                        </button>
+                                    </form>
                                 {% else %}
                                     <i class="bi bi-x-circle text-muted"></i> No
                                 {% endif %}
