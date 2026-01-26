@@ -1,4 +1,6 @@
-This project primarily uses Python, with a PYTHONROOT of src/ .
+This project primarily uses Python, with a PYTHONROOT of src/ .  Use type
+hinting in all new Python code - and add missing type hints to any code other
+than src/benchmarks .
 
 The main purpose of the project is to create a multilingual linguistic
 database, and to generate files for the Trakaido language-learning app.
