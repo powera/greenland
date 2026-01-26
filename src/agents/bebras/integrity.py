@@ -9,11 +9,19 @@ orphaned records, missing required fields, and constraint violations.
 import argparse
 import logging
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, cast
 
 import constants
 from wordfreq.storage.database import create_database_session
-from wordfreq.storage.models.schema import Corpus, DerivativeForm, Lemma, WordFrequency, WordToken
+from wordfreq.storage.models.schema import (
+    Corpus,
+    DerivativeForm,
+    Lemma,
+    Sentence,
+    SentenceTranslation,
+    WordFrequency,
+    WordToken,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -385,6 +393,79 @@ class IntegrityChecker:
         finally:
             session.close()
 
+    def check_sentences_missing_punctuation(self) -> Dict[str, Any]:
+        """Check for sentences that are missing terminal punctuation.
+
+        Sentences should end with a period (. or 。), question mark (? or ？),
+        or exclamation mark (! or ！). This check finds sentences that don't
+        have any of these terminal punctuation marks.
+        """
+        logger.info("Checking for sentences missing terminal punctuation...")
+
+        session = self.get_session()
+        try:
+            # Terminal punctuation for various languages
+            terminal_punctuation = ".。?？!！"
+
+            # Get all non-rejected sentences with their translations
+            sentences = (
+                session.query(Sentence).filter(Sentence.rejected == False).all()  # noqa: E712
+            )
+
+            missing_punctuation: List[Dict[str, Any]] = []
+
+            for sentence in sentences:
+                # Get all translations for this sentence
+                translations = (
+                    session.query(SentenceTranslation)
+                    .filter(SentenceTranslation.sentence_id == sentence.id)
+                    .all()
+                )
+
+                for trans in translations:
+                    text = trans.translation_text.strip()
+                    if not text:
+                        continue
+
+                    # Check if the sentence ends with terminal punctuation
+                    if text[-1] not in terminal_punctuation:
+                        missing_punctuation.append(
+                            {
+                                "sentence_id": sentence.id,
+                                "translation_id": trans.id,
+                                "language_code": trans.language_code,
+                                "text": text,
+                                "last_char": text[-1] if text else "",
+                            }
+                        )
+
+            logger.info(
+                f"Found {len(missing_punctuation)} sentence translations missing terminal punctuation"
+            )
+
+            # Group by language for summary
+            by_language: Dict[str, int] = {}
+            for item in missing_punctuation:
+                lang = item["language_code"]
+                by_language[lang] = by_language.get(lang, 0) + 1
+
+            return {
+                "missing_count": len(missing_punctuation),
+                "by_language": by_language,
+                "missing_punctuation": missing_punctuation,
+            }
+
+        except Exception as e:
+            logger.error(f"Error checking sentences missing punctuation: {e}")
+            return {
+                "error": str(e),
+                "missing_count": 0,
+                "by_language": {},
+                "missing_punctuation": [],
+            }
+        finally:
+            session.close()
+
     def run_full_check(self, output_file: Optional[str] = None) -> Dict[str, Any]:
         """Run all integrity checks and generate a comprehensive report."""
         logger.info("Starting full database integrity check...")
@@ -401,6 +482,7 @@ class IntegrityChecker:
                 "lemmas_without_derivatives": self.check_lemmas_without_derivatives(),
                 "duplicate_guids": self.check_duplicate_guids(),
                 "invalid_difficulty_levels": self.check_invalid_difficulty_levels(),
+                "sentences_missing_punctuation": self.check_sentences_missing_punctuation(),
             },
         }
 
@@ -422,7 +504,9 @@ class IntegrityChecker:
 
         return results
 
-    def _print_summary(self, results: Dict[str, Any], start_time: datetime, duration: float) -> None:
+    def _print_summary(
+        self, results: Dict[str, Any], start_time: datetime, duration: float
+    ) -> None:
         """Print a summary of the check results."""
         logger.info("=" * 80)
         logger.info("BEBRAS INTEGRITY CHECK REPORT")
@@ -459,6 +543,14 @@ class IntegrityChecker:
 
         logger.info("INVALID DIFFICULTY LEVELS:")
         logger.info(f"  Count: {checks['invalid_difficulty_levels']['invalid_count']}")
+        logger.info("")
+
+        logger.info("SENTENCES MISSING PUNCTUATION:")
+        missing_punct = checks["sentences_missing_punctuation"]
+        logger.info(f"  Count: {missing_punct['missing_count']}")
+        if missing_punct.get("by_language"):
+            for lang, count in sorted(missing_punct["by_language"].items()):
+                logger.info(f"    {lang}: {count}")
 
         total_issues = (
             checks["orphaned_derivative_forms"]["orphaned_count"]
@@ -468,6 +560,7 @@ class IntegrityChecker:
             + checks["lemmas_without_derivatives"]["without_forms_count"]
             + checks["duplicate_guids"]["duplicate_count"]
             + checks["invalid_difficulty_levels"]["invalid_count"]
+            + missing_punct["missing_count"]
         )
 
         logger.info("")
@@ -489,6 +582,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
             "no-derivatives",
             "duplicates",
             "invalid-levels",
+            "missing-punctuation",
             "all",
         ],
         default="all",
@@ -538,6 +632,24 @@ def main() -> None:
     elif args.check == "invalid-levels":
         results = checker.check_invalid_difficulty_levels()
         print(f"\nInvalid difficulty levels: {results['invalid_count']}")
+
+    elif args.check == "missing-punctuation":
+        results = checker.check_sentences_missing_punctuation()
+        print(f"\nSentences missing terminal punctuation: {results['missing_count']}")
+        if results.get("by_language"):
+            for lang, count in sorted(results["by_language"].items()):
+                print(f"  {lang}: {count}")
+        # Print first few examples
+        missing_items = cast(List[Dict[str, Any]], results.get("missing_punctuation") or [])
+        if missing_items:
+            print("\nExamples:")
+            for item in missing_items[:10]:
+                text = str(item.get("text", ""))
+                text_preview = text[:60] + "..." if len(text) > 60 else text
+                print(
+                    f"  [{item.get('language_code')}] "
+                    f"id={item.get('sentence_id')}: {text_preview}"
+                )
 
     else:  # all
         checker.run_full_check(output_file=args.output)
