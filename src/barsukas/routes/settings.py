@@ -1,5 +1,6 @@
 """Settings and backend management routes."""
 
+import json
 import logging
 import os
 import signal
@@ -16,6 +17,7 @@ from flask import (
     Blueprint,
     current_app,
     flash,
+    g,
     jsonify,
     redirect,
     render_template,
@@ -27,6 +29,7 @@ from werkzeug.wrappers import Response
 
 from wordfreq.storage.backend import get_backend_type
 from wordfreq.storage.backend.config import BackendType, DataSourceConfig
+from wordfreq.storage.models.schema import Lemma
 
 if TYPE_CHECKING:
     from barsukas.app import BarsukasFlask
@@ -340,6 +343,129 @@ def restart_status() -> ResponseReturnValue:
             "ready_to_restart": active <= 1 if _shutdown_requested else False,
         }
     )
+
+
+@bp.route("/sync-difficulty-levels", methods=["POST"])
+def sync_difficulty_levels() -> ResponseReturnValue:
+    """Sync difficulty levels from release data (data/release/lemmas) to the database.
+
+    Reads all JSONL files from data/release/lemmas/**/*.jsonl, matches GUIDs
+    to database records, and updates difficulty_level where they differ.
+    """
+    dry_run = request.form.get("dry_run") == "on"
+
+    # Find all JSONL files in release data
+    release_dir = Path(__file__).parent.parent.parent.parent / "data" / "release" / "lemmas"
+    if not release_dir.exists():
+        flash(f"Release data directory not found: {release_dir}", "danger")
+        return redirect(url_for("settings.index"))
+
+    jsonl_files = list(release_dir.glob("**/*.jsonl"))
+    if not jsonl_files:
+        flash(f"No JSONL files found in {release_dir}", "warning")
+        return redirect(url_for("settings.index"))
+
+    # Read all release data and build GUID -> difficulty_level mapping
+    release_levels: dict[str, int] = {}
+    files_read = 0
+    for jsonl_file in jsonl_files:
+        try:
+            with open(jsonl_file, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    try:
+                        record = json.loads(line)
+                        guid = record.get("guid")
+                        difficulty_level = record.get("difficulty_level")
+                        if guid and difficulty_level is not None:
+                            release_levels[guid] = difficulty_level
+                    except json.JSONDecodeError:
+                        continue
+            files_read += 1
+        except Exception as e:
+            logger.warning(f"Error reading {jsonl_file}: {e}")
+            continue
+
+    if not release_levels:
+        flash("No valid GUID/difficulty_level pairs found in release data", "warning")
+        return redirect(url_for("settings.index"))
+
+    # Query database for all lemmas with GUIDs
+    db_lemmas = g.db.query(Lemma).filter(Lemma.guid.isnot(None)).all()
+
+    # Find differences and update
+    updated = 0
+    skipped_not_found = 0
+    skipped_same = 0
+    changes: list[dict] = []
+
+    for lemma in db_lemmas:
+        if lemma.guid not in release_levels:
+            skipped_not_found += 1
+            continue
+
+        release_level = release_levels[lemma.guid]
+        if lemma.difficulty_level == release_level:
+            skipped_same += 1
+            continue
+
+        changes.append(
+            {
+                "guid": lemma.guid,
+                "label": lemma.lemma_text,
+                "old_level": lemma.difficulty_level,
+                "new_level": release_level,
+            }
+        )
+
+        if not dry_run:
+            lemma.difficulty_level = release_level
+            updated += 1
+
+    if not dry_run and updated > 0:
+        g.db.commit()
+
+    # Build result message
+    if dry_run:
+        if changes:
+            changes_str = ", ".join(
+                f"{c['guid']} ({c['label']}): {c['old_level']} → {c['new_level']}"
+                for c in changes[:20]
+            )
+            if len(changes) > 20:
+                changes_str += f" ... and {len(changes) - 20} more"
+            flash(
+                f"[DRY RUN] Would update {len(changes)} lemmas. "
+                f"Files read: {files_read}. Release entries: {len(release_levels)}. "
+                f"DB lemmas with GUID: {len(db_lemmas)}. "
+                f"Changes: {changes_str}",
+                "info",
+            )
+        else:
+            flash(
+                f"[DRY RUN] No changes needed. "
+                f"Files read: {files_read}. Release entries: {len(release_levels)}. "
+                f"DB lemmas: {len(db_lemmas)}. All levels match.",
+                "success",
+            )
+    else:
+        if updated > 0:
+            flash(
+                f"Updated {updated} lemma difficulty levels from release data. "
+                f"Files read: {files_read}. Skipped (same): {skipped_same}. "
+                f"Skipped (not in release): {skipped_not_found}.",
+                "success",
+            )
+        else:
+            flash(
+                f"No updates needed. All {skipped_same} matching lemmas already have correct levels. "
+                f"({skipped_not_found} DB lemmas not found in release data)",
+                "info",
+            )
+
+    return redirect(url_for("settings.index"))
 
 
 @bp.before_request

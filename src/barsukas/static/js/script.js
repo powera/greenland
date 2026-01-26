@@ -1,8 +1,8 @@
 // Barsukas Web Interface JavaScript
 
-// Auto-dismiss flash messages after 5 seconds
+// Auto-dismiss flash messages after 5 seconds (only in the flash-messages container)
 document.addEventListener('DOMContentLoaded', function() {
-    const alerts = document.querySelectorAll('.alert');
+    const alerts = document.querySelectorAll('.flash-messages .alert');
     alerts.forEach(alert => {
         setTimeout(() => {
             const bsAlert = new bootstrap.Alert(alert);
