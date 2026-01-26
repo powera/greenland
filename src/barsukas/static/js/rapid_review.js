@@ -10,6 +10,7 @@
  * @param {string} config.statusFilter - Status filter value
  * @param {string} config.subtypeFilter - Subtype filter value
  * @param {string} config.levelFilter - Level filter value
+ * @param {string} config.typeFilter - Audio type filter value (lemma/sentence)
  * @param {string} config.rapidReviewIndexUrl - URL for rapid review index
  */
 function initRapidReview(config) {
@@ -22,6 +23,7 @@ function initRapidReview(config) {
     const statusFilter = config.statusFilter;
     const subtypeFilter = config.subtypeFilter;
     const levelFilter = config.levelFilter;
+    const typeFilter = config.typeFilter || '';
 
     // Undo stack - stores last 5 reviews
     const MAX_UNDO_STACK = 5;
@@ -149,6 +151,7 @@ function initRapidReview(config) {
 
         const voice = document.getElementById('voice-filter').value;
         const status = document.getElementById('status-filter').value;
+        const type = document.getElementById('type-filter').value;
         const subtype = document.getElementById('subtype-filter').value;
         const level = document.getElementById('level-filter').value;
 
@@ -156,6 +159,7 @@ function initRapidReview(config) {
         params.set('language', language);  // Language is always set
         if (voice) params.set('voice', voice);
         if (status) params.set('status', status);
+        if (type) params.set('type', type);
         if (subtype) params.set('subtype', subtype);
         if (level) params.set('level', level);
 
@@ -190,6 +194,7 @@ function initRapidReview(config) {
                 language: languageFilter,
                 voice: voiceFilter,
                 status_filter: statusFilter,
+                type: typeFilter,
                 subtype: subtypeFilter,
                 level: levelFilter
             })
@@ -308,6 +313,7 @@ function initRapidReview(config) {
                 language: languageFilter,
                 voice: voiceFilter,
                 status_filter: statusFilter,
+                type: typeFilter,
                 subtype: subtypeFilter,
                 level: levelFilter
             })
@@ -382,6 +388,7 @@ function initRapidReview(config) {
                 language: languageFilter,
                 voice: voiceFilter,
                 status_filter: statusFilter,
+                type: typeFilter,
                 subtype: subtypeFilter,
                 level: levelFilter
             })
@@ -419,6 +426,7 @@ function initRapidReview(config) {
                 language: languageFilter,
                 voice: voiceFilter,
                 status_filter: statusFilter,
+                type: typeFilter,
                 subtype: subtypeFilter,
                 level: levelFilter
             })

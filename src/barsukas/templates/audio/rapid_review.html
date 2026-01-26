@@ -40,6 +40,11 @@
             </option>
             {% endfor %}
         </select>
+        <select id="type-filter" class="form-select" style="width: auto;">
+            <option value="" {% if not audio_type_filter %}selected{% endif %}>All Types</option>
+            <option value="lemma" {% if audio_type_filter == 'lemma' %}selected{% endif %}>Lemmas</option>
+            <option value="sentence" {% if audio_type_filter == 'sentence' %}selected{% endif %}>Sentences</option>
+        </select>
         <select id="subtype-filter" class="form-select" style="width: auto;">
             <option value="">All Subtypes</option>
             {% for subtype in subtypes %}
@@ -258,6 +263,7 @@ document.addEventListener('DOMContentLoaded', function() {
         statusFilter: '{{ status_filter }}',
         subtypeFilter: '{{ subtype_filter }}',
         levelFilter: '{{ level_filter }}',
+        typeFilter: '{{ audio_type_filter }}',
         rapidReviewIndexUrl: '{{ url_for("rapid_review.index") }}'
     });
 });

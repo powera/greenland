@@ -1080,9 +1080,9 @@ def main() -> None:
                 sys.exit(1)
 
     # Get lemmas to process (either single lemma from --guid or batch)
-    # Only needed for modes that process lemmas (not coverage or check-existing)
+    # Only needed for modes that process lemmas (not coverage, check-existing, or sentence generation)
     lemmas = None
-    if args.mode in ["populate-only", "regenerate"]:
+    if args.mode in ["populate-only", "regenerate"] and not args.generate_sentences:
         # Require language for lemma processing
         if not args.language:
             print("Error: --language is required for lemma processing")

@@ -44,6 +44,7 @@ def index() -> ResponseReturnValue:
     status_filter = request.args.get("status", "pending_review")
     subtype_filter = request.args.get("subtype", "")
     level_filter = request.args.get("level", "")
+    audio_type_filter = request.args.get("type", "")  # "lemma", "sentence", or "" (all)
 
     # Build query - join with Lemma if we need subtype or level filtering
     if subtype_filter or level_filter:
@@ -68,6 +69,12 @@ def index() -> ResponseReturnValue:
 
     if status_filter:
         query = query.filter(AudioQualityReview.status == status_filter)
+
+    # Filter by audio type (lemma vs sentence)
+    if audio_type_filter == "lemma":
+        query = query.filter(AudioQualityReview.sentence_id.is_(None))
+    elif audio_type_filter == "sentence":
+        query = query.filter(AudioQualityReview.sentence_id.isnot(None))
 
     if subtype_filter:
         query = query.filter(Lemma.pos_subtype == subtype_filter)
@@ -114,6 +121,7 @@ def index() -> ResponseReturnValue:
         status_filter=status_filter,
         subtype_filter=subtype_filter,
         level_filter=level_filter,
+        audio_type_filter=audio_type_filter,
     )
 
 
@@ -143,6 +151,7 @@ def submit(review_id: int) -> ResponseReturnValue:
         language_filter = data.get("language", "")
         voice_filter = data.get("voice", "")
         status_filter = data.get("status_filter", "pending_review")
+        audio_type_filter = data.get("type", "")
         subtype_filter = data.get("subtype", "")
         level_filter = data.get("level", "")
 
@@ -176,6 +185,12 @@ def submit(review_id: int) -> ResponseReturnValue:
 
         if status_filter:
             query = query.filter(AudioQualityReview.status == status_filter)
+
+        # Filter by audio type (lemma vs sentence)
+        if audio_type_filter == "lemma":
+            query = query.filter(AudioQualityReview.sentence_id.is_(None))
+        elif audio_type_filter == "sentence":
+            query = query.filter(AudioQualityReview.sentence_id.isnot(None))
 
         if subtype_filter:
             query = query.filter(Lemma.pos_subtype == subtype_filter)
@@ -249,6 +264,7 @@ def skip(review_id: int) -> ResponseReturnValue:
         language_filter = data.get("language", "")
         voice_filter = data.get("voice", "")
         status_filter = data.get("status_filter", "pending_review")
+        audio_type_filter = data.get("type", "")
         subtype_filter = data.get("subtype", "")
         level_filter = data.get("level", "")
 
@@ -282,6 +298,12 @@ def skip(review_id: int) -> ResponseReturnValue:
 
         if status_filter:
             query = query.filter(AudioQualityReview.status == status_filter)
+
+        # Filter by audio type (lemma vs sentence)
+        if audio_type_filter == "lemma":
+            query = query.filter(AudioQualityReview.sentence_id.is_(None))
+        elif audio_type_filter == "sentence":
+            query = query.filter(AudioQualityReview.sentence_id.isnot(None))
 
         if subtype_filter:
             query = query.filter(Lemma.pos_subtype == subtype_filter)
@@ -361,6 +383,7 @@ def bad_translation(review_id: int) -> ResponseReturnValue:
         language_filter = data.get("language", "")
         voice_filter = data.get("voice", "")
         status_filter = data.get("status_filter", "pending_review")
+        audio_type_filter = data.get("type", "")
         subtype_filter = data.get("subtype", "")
         level_filter = data.get("level", "")
 
@@ -394,6 +417,12 @@ def bad_translation(review_id: int) -> ResponseReturnValue:
 
         if status_filter:
             query = query.filter(AudioQualityReview.status == status_filter)
+
+        # Filter by audio type (lemma vs sentence)
+        if audio_type_filter == "lemma":
+            query = query.filter(AudioQualityReview.sentence_id.is_(None))
+        elif audio_type_filter == "sentence":
+            query = query.filter(AudioQualityReview.sentence_id.isnot(None))
 
         if subtype_filter:
             query = query.filter(Lemma.pos_subtype == subtype_filter)
