@@ -1,8 +1,12 @@
 """Audio-specific helper functions for the Barsukas UI."""
 
-from typing import Any, Optional, cast
+import logging
+import re
+from typing import Any, Optional, Tuple, cast
 
 from wordfreq.storage.models.schema import Lemma
+
+logger = logging.getLogger(__name__)
 
 
 def link_audio_to_lemma(
@@ -134,3 +138,65 @@ def validate_audio_translation(
         "mismatch": mismatch,
         "lemma_found": True,
     }
+
+
+def copy_staging_to_prod(staging_url: str) -> Tuple[bool, str]:
+    """
+    Copy audio from staging to production using the new path format.
+
+    Parses staging URL to extract language, voice, and md5, then copies to:
+    staging/{language}/{voice}/{md5}.mp3 -> prod/{language}/{voice}/{md5}.mp3
+
+    Args:
+        staging_url: Full CDN URL to staging audio file
+
+    Returns:
+        Tuple of (success: bool, prod_url_or_error: str)
+    """
+    # Extract path parts from staging URL
+    # Pattern: staging/{lang}/{voice}/{md5}.mp3
+    match = re.search(r"/staging/([^/]+)/([^/]+)/([a-f0-9]+)\.mp3$", staging_url)
+    if not match:
+        return False, f"Could not parse staging URL: {staging_url}"
+
+    language_code = match.group(1)
+    voice_name = match.group(2)
+    md5_hash = match.group(3)
+
+    staging_key = f"staging/{language_code}/{voice_name}/{md5_hash}.mp3"
+    prod_key = f"prod/{language_code}/{voice_name}/{md5_hash}.mp3"
+
+    try:
+        from clients.audio.s3_uploader import S3AudioUploader
+
+        s3_uploader = S3AudioUploader()
+
+        # Check if already in prod
+        try:
+            s3_uploader.s3.head_object(Bucket=s3_uploader.bucket_name, Key=prod_key)
+            prod_url = s3_uploader.get_cdn_url(prod_key)
+            logger.info(f"Audio already exists in production: {prod_key}")
+            return True, prod_url
+        except Exception:
+            pass  # Not in prod yet, proceed with copy
+
+        # Copy from staging to prod
+        copy_source = {"Bucket": s3_uploader.bucket_name, "Key": staging_key}
+
+        s3_uploader.s3.copy_object(
+            CopySource=copy_source,
+            Bucket=s3_uploader.bucket_name,
+            Key=prod_key,
+            ACL="public-read",
+            ContentType="audio/mpeg",
+            CacheControl="public, max-age=31536000, immutable",
+            MetadataDirective="REPLACE",
+        )
+
+        prod_url = s3_uploader.get_cdn_url(prod_key)
+        logger.info(f"Copied to production: {staging_key} -> {prod_key}")
+        return True, prod_url
+
+    except Exception as e:
+        logger.error(f"Error copying to production: {e}")
+        return False, str(e)

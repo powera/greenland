@@ -167,7 +167,27 @@ def submit(review_id: int) -> ResponseReturnValue:
         review.status = status
         review.quality_issues = json.dumps(issues) if issues else None
         review.reviewed_at = datetime.utcnow()
-        g.db.commit()
+
+        # If approved, also push to production
+        if status in ["approved", "approved_with_issues"]:
+            if review.s3_staging_url and not review.s3_prod_url:
+                from barsukas.helpers.audio_helpers import copy_staging_to_prod
+
+                success, prod_url = copy_staging_to_prod(review.s3_staging_url)
+                if success:
+                    review.s3_prod_url = prod_url
+                    review.accepted_at = datetime.utcnow()
+                    review.accepted_by = "rapid_review"
+                else:
+                    # Log but don't fail the review - audio can be pushed later
+                    import logging
+
+                    logging.getLogger(__name__).warning(
+                        f"Failed to push audio {review_id} to production: {prod_url}"
+                    )
+            g.db.commit()
+        else:
+            g.db.commit()
 
         # Get next file based on same filters
         language_filter = data.get("language", "")
