@@ -40,6 +40,7 @@ from wireword.helpers import (
     generate_simple_grammatical_form_label,
     normalize_pos_type,
 )
+from wireword.generate_manifest import generate_manifest
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -883,6 +884,14 @@ class WirewordExporter:
         # Convert sets to sorted lists for JSON serialization
         results["levels_exported"] = sorted(list(results["levels_exported"]))
         results["subtypes_exported"] = sorted(list(results["subtypes_exported"]))
+
+        # Generate manifest file
+        manifest_success, manifest_path = generate_manifest(
+            wireword_dir, self.language, self.simplified_chinese
+        )
+        if manifest_success:
+            results["files_created"].append(manifest_path)
+            results["manifest_path"] = manifest_path
 
         logger.info(
             f"✅ WireWord directory export completed: {len(results['files_created'])} files created"
