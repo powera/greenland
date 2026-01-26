@@ -42,12 +42,6 @@ def get_sentence_translations(sentence_id: int) -> Dict[str, str]:
     return {t.language_code: t.translation_text for t in translations}
 
 
-def has_required_translations(translations: Dict[str, str]) -> bool:
-    """Check if sentence has all required translations (ES, FR, ZH, LT)."""
-    required = {"es", "fr", "zh", "lt"}
-    return required.issubset(translations.keys())
-
-
 def calculate_sentence_minimum_level(sentence_id: int) -> int:
     """Calculate minimum_level for a sentence based on its word difficulty levels.
 
@@ -129,14 +123,29 @@ def find_sentences_with_translations(query: Query, limit: int = 100) -> List[Dic
     """Find sentences that have all required translations.
 
     Returns list of sentence data dicts with translations included.
+    Uses a subquery to filter to only sentences with all required translations.
     """
-    # Get candidate sentences
-    candidates = query.limit(limit * 2).all()  # Fetch extra to filter
+    from sqlalchemy import func, and_
 
-    # Batch load translations for all candidates
+    required_langs = {"es", "fr", "zh", "lt"}
+
+    # Subquery: sentence IDs that have all required translations
+    subq = (
+        g.db.query(SentenceTranslation.sentence_id)
+        .filter(SentenceTranslation.language_code.in_(required_langs))
+        .group_by(SentenceTranslation.sentence_id)
+        .having(func.count(func.distinct(SentenceTranslation.language_code)) == len(required_langs))
+        .subquery()
+    )
+
+    # Filter the main query to only sentences with all required translations
+    filtered_query = query.filter(Sentence.id.in_(subq))
+    candidates = filtered_query.limit(limit).all()
+
     if not candidates:
         return []
 
+    # Batch load translations for the candidates
     sentence_ids = [s.id for s in candidates]
     all_translations = (
         g.db.query(SentenceTranslation)
@@ -151,19 +160,16 @@ def find_sentences_with_translations(query: Query, limit: int = 100) -> List[Dic
             translations_by_sentence[t.sentence_id] = {}
         translations_by_sentence[t.sentence_id][t.language_code] = t.translation_text
 
-    # Filter to sentences with all required translations
+    # Build result
     result = []
     for sentence in candidates:
         translations = translations_by_sentence.get(sentence.id, {})
-        if has_required_translations(translations):
-            result.append(
-                {
-                    "sentence": sentence,
-                    "translations": translations,
-                }
-            )
-            if len(result) >= limit:
-                break
+        result.append(
+            {
+                "sentence": sentence,
+                "translations": translations,
+            }
+        )
 
     return result
 
