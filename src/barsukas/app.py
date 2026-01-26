@@ -50,6 +50,7 @@ from barsukas.routes import (
     rapid_review,
     rapid_review_hub,
     sentence_rapid_review,
+    sentence_stats,
     sentences,
     settings,
     translations,
@@ -142,6 +143,7 @@ def create_app(config_class: type[Config] = Config, db_url: Optional[str] = None
     app.register_blueprint(lemmas.bp)
     app.register_blueprint(sentences.bp)
     app.register_blueprint(sentence_rapid_review.bp)
+    app.register_blueprint(sentence_stats.bp)
     app.register_blueprint(conversations.bp)
     app.register_blueprint(categories.bp)
     app.register_blueprint(translations.bp)
