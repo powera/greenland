@@ -24,7 +24,7 @@ from sqlalchemy.orm import joinedload
 
 from barsukas.helpers.audio_helpers import validate_audio_translation
 from langtools.zh.pinyin_helper import generate_pinyin
-from wordfreq.storage.models.schema import AudioQualityReview, Lemma, SentenceTranslation
+from wordfreq.storage.models.schema import AudioQualityReview, Lemma, Sentence, SentenceTranslation
 from wordfreq.storage.queries.lemma import apply_effective_difficulty_filter
 
 bp = Blueprint("rapid_review", __name__, url_prefix="/audio/rapid-review")
@@ -90,7 +90,9 @@ def index() -> ResponseReturnValue:
     if audio_type_filter == "lemma":
         query = query.filter(AudioQualityReview.sentence_id.is_(None))
     elif audio_type_filter == "sentence":
-        query = query.filter(AudioQualityReview.sentence_id.isnot(None))
+        # Exclude rejected sentences from sentence audio review
+        query = query.join(Sentence, AudioQualityReview.sentence_id == Sentence.id)
+        query = query.filter(Sentence.rejected == False)
 
     if subtype_filter:
         query = query.filter(Lemma.pos_subtype == subtype_filter)
@@ -232,7 +234,9 @@ def submit(review_id: int) -> ResponseReturnValue:
         if audio_type_filter == "lemma":
             query = query.filter(AudioQualityReview.sentence_id.is_(None))
         elif audio_type_filter == "sentence":
-            query = query.filter(AudioQualityReview.sentence_id.isnot(None))
+            # Exclude rejected sentences from sentence audio review
+            query = query.join(Sentence, AudioQualityReview.sentence_id == Sentence.id)
+            query = query.filter(Sentence.rejected == False)
 
         if subtype_filter:
             query = query.filter(Lemma.pos_subtype == subtype_filter)
@@ -349,7 +353,9 @@ def skip(review_id: int) -> ResponseReturnValue:
         if audio_type_filter == "lemma":
             query = query.filter(AudioQualityReview.sentence_id.is_(None))
         elif audio_type_filter == "sentence":
-            query = query.filter(AudioQualityReview.sentence_id.isnot(None))
+            # Exclude rejected sentences from sentence audio review
+            query = query.join(Sentence, AudioQualityReview.sentence_id == Sentence.id)
+            query = query.filter(Sentence.rejected == False)
 
         if subtype_filter:
             query = query.filter(Lemma.pos_subtype == subtype_filter)
@@ -472,7 +478,9 @@ def bad_translation(review_id: int) -> ResponseReturnValue:
         if audio_type_filter == "lemma":
             query = query.filter(AudioQualityReview.sentence_id.is_(None))
         elif audio_type_filter == "sentence":
-            query = query.filter(AudioQualityReview.sentence_id.isnot(None))
+            # Exclude rejected sentences from sentence audio review
+            query = query.join(Sentence, AudioQualityReview.sentence_id == Sentence.id)
+            query = query.filter(Sentence.rejected == False)
 
         if subtype_filter:
             query = query.filter(Lemma.pos_subtype == subtype_filter)
