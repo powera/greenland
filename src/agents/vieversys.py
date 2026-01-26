@@ -20,6 +20,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 # Add src directory to path
@@ -875,6 +876,26 @@ class VieversysAgent:
                     .subquery()
                 )
                 query = query.filter(Sentence.id.in_(sentence_ids_subquery))
+
+            # If skip_existing is enabled, filter out sentences that already have audio
+            # for ALL of the specified voices
+            if self.skip_existing:
+                voice_names = [v.path_name for v in voices]
+                # Find sentence IDs that have audio for all voices
+                sentences_with_all_voices = (
+                    session.query(AudioQualityReview.sentence_id)
+                    .filter(
+                        AudioQualityReview.sentence_id.isnot(None),
+                        AudioQualityReview.language_code == language_code,
+                        AudioQualityReview.voice_name.in_(voice_names),
+                    )
+                    .group_by(AudioQualityReview.sentence_id)
+                    .having(
+                        func.count(func.distinct(AudioQualityReview.voice_name)) == len(voice_names)
+                    )
+                    .subquery()
+                )
+                query = query.filter(Sentence.id.notin_(sentences_with_all_voices))
 
             # Order by sentence ID and limit
             query = query.order_by(Sentence.id).limit(limit)
