@@ -9,12 +9,14 @@ It replaces the legacy "export wireword" functionality from trakaido/utils.py.
 """
 
 import argparse
+import hashlib
+import json
 import logging
 import os
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 # Add src directory to path
 GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent)
@@ -32,6 +34,15 @@ from wordfreq.storage.translation_helpers import (
 from wordfreq.trakaido.utils.export_manager import TrakaidoExporter
 from wireword.export_wireword_conversations import WirewordConversationExporter
 from wireword.export_wireword_sentences import WirewordSentenceExporter
+
+# Voice character names per language (for manifest available_voices)
+# Maps language code to list of (path_name, display_name) tuples
+LANGUAGE_VOICE_NAMES: Dict[str, List[Tuple[str, str]]] = {
+    "lt": [("ruta", "Rūta"), ("jonas", "Jonas")],
+    "zh": [("meiling", "Meiling"), ("zhiyuan", "Zhiyuan")],
+    "fr": [("marie", "Marie"), ("pierre", "Pierre")],
+    "ko": [("yuna", "Yuna"), ("minho", "Minho")],  # Placeholder names for Korean
+}
 
 # Supported languages: Tier 1 and Tier 2 (excludes experimental tier 3)
 SUPPORTED_LANGUAGES = {
@@ -374,6 +385,204 @@ class UngurysAgent:
             logger.error(f"Failed to export conversations: {e}")
             return False, None
 
+    def _calculate_file_md5(self, filepath: str) -> str:
+        """Calculate MD5 hash of a file's contents."""
+        with open(filepath, "rb") as f:
+            return hashlib.md5(f.read()).hexdigest()
+
+    def _get_file_stats(self, filepath: str) -> Dict[str, Any]:
+        """Get statistics from a wireword JSON file (word count, levels, groups)."""
+        try:
+            with open(filepath, "r", encoding="utf-8") as f:
+                data = json.load(f)
+
+            if not isinstance(data, list):
+                return {}
+
+            levels: set[int] = set()
+            groups: set[str] = set()
+
+            for item in data:
+                if isinstance(item, dict):
+                    if "level" in item and item["level"] is not None:
+                        levels.add(item["level"])
+                    if "group" in item and item["group"]:
+                        groups.add(item["group"])
+
+            return {
+                "count": len(data),
+                "levels": sorted(levels),
+                "groups": sorted(groups),
+            }
+        except (json.JSONDecodeError, IOError):
+            return {}
+
+    def _get_sentence_file_stats(self, filepath: str) -> Dict[str, Any]:
+        """Get statistics from a wireword sentences JSON file."""
+        try:
+            with open(filepath, "r", encoding="utf-8") as f:
+                data = json.load(f)
+
+            if not isinstance(data, list):
+                return {}
+
+            min_level: Optional[int] = None
+            max_level: Optional[int] = None
+
+            for item in data:
+                if isinstance(item, dict) and "minimum_level" in item:
+                    level = item["minimum_level"]
+                    if level is not None:
+                        if min_level is None or level < min_level:
+                            min_level = level
+                        if max_level is None or level > max_level:
+                            max_level = level
+
+            return {
+                "count": len(data),
+                "min_level": min_level,
+                "max_level": max_level,
+            }
+        except (json.JSONDecodeError, IOError):
+            return {}
+
+    def generate_manifest(
+        self,
+        output_dir: Optional[str] = None,
+        export_results: Optional[Dict[str, Any]] = None,
+    ) -> Tuple[bool, str]:
+        """
+        Generate wireword_manifest.json for the exported files.
+
+        Args:
+            output_dir: Base output directory (e.g., lang_lt/generated).
+                       If None, uses language-specific path from get_language_output_dir()
+            export_results: Results from run_export containing file paths and stats
+
+        Returns:
+            Tuple of (success flag, manifest path)
+        """
+        if output_dir is None:
+            output_dir = self.get_language_output_dir()
+
+        wireword_dir = os.path.join(output_dir, "wireword")
+        manifest_path = os.path.join(wireword_dir, "wireword_manifest.json")
+
+        # Determine language name and code
+        language_name = SUPPORTED_LANGUAGES[self.language].lower()
+        if self.language == "zh" and not self.simplified_chinese:
+            language_name = "chinese_traditional"
+
+        # Use the language_suffix for the directory name pattern
+        language_code = self.language_suffix
+
+        # Get available voices for this language
+        voice_names = LANGUAGE_VOICE_NAMES.get(self.language, [])
+        available_voices = [v[0] for v in voice_names]  # path_name versions
+        default_voice = available_voices[0] if available_voices else None
+
+        # Build manifest structure
+        manifest: Dict[str, Any] = {
+            "version": 1,
+            "language": language_name,
+            "language_code": language_code,
+            "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "config": {
+                "audio_prefix": "/prod",
+                "available_voices": available_voices,
+                "default_voice": default_voice,
+            },
+            "word_files": [],
+            "sentence_files": [],
+            "auxiliary_files": [],
+        }
+
+        # Process word files
+        word_files_info = [
+            ("nouns", "wireword_nouns.json", "Nouns", "Words (nouns, adjectives, etc.)"),
+            ("verbs", "wireword_verbs.json", "Verbs", "Verbs with conjugations"),
+        ]
+
+        for file_id, filename, display_name, description in word_files_info:
+            filepath = os.path.join(wireword_dir, filename)
+            if os.path.exists(filepath):
+                file_stats = self._get_file_stats(filepath)
+                file_entry: Dict[str, Any] = {
+                    "id": file_id,
+                    "filename": filename,
+                    "display_name": display_name,
+                    "description": description,
+                    "type": "words",
+                    "md5": self._calculate_file_md5(filepath),
+                    "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "required": True,
+                }
+                if file_stats.get("count"):
+                    file_entry["word_count"] = file_stats["count"]
+                if file_stats.get("levels"):
+                    file_entry["levels"] = file_stats["levels"]
+                if file_stats.get("groups"):
+                    file_entry["groups"] = file_stats["groups"]
+
+                manifest["word_files"].append(file_entry)
+
+        # Process sentence files
+        sentences_path = os.path.join(wireword_dir, "wireword_sentences.json")
+        if os.path.exists(sentences_path):
+            sentence_stats = self._get_sentence_file_stats(sentences_path)
+            sentence_entry: Dict[str, Any] = {
+                "id": "sentences",
+                "filename": "wireword_sentences.json",
+                "display_name": "Practice Sentences",
+                "description": "Sentences for context-based learning",
+                "type": "sentences",
+                "md5": self._calculate_file_md5(sentences_path),
+                "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "required": False,
+            }
+            if sentence_stats.get("count"):
+                sentence_entry["sentence_count"] = sentence_stats["count"]
+            if sentence_stats.get("min_level") is not None:
+                sentence_entry["min_level"] = sentence_stats["min_level"]
+            if sentence_stats.get("max_level") is not None:
+                sentence_entry["max_level"] = sentence_stats["max_level"]
+
+            manifest["sentence_files"].append(sentence_entry)
+
+        # Process conversations file (JSONL format - auxiliary file)
+        conversations_path = os.path.join(wireword_dir, "wireword_conversations.jsonl")
+        if os.path.exists(conversations_path):
+            # Count lines in JSONL file
+            try:
+                with open(conversations_path, "r", encoding="utf-8") as f:
+                    conversation_count = sum(1 for line in f if line.strip())
+            except IOError:
+                conversation_count = 0
+
+            conversation_entry: Dict[str, Any] = {
+                "id": "conversations",
+                "filename": "wireword_conversations.jsonl",
+                "display_name": "Conversations",
+                "description": "Practice conversations for dialogue-based learning",
+                "type": "conversations",
+                "md5": self._calculate_file_md5(conversations_path),
+                "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "required": False,
+                "conversation_count": conversation_count,
+            }
+            manifest["auxiliary_files"].append(conversation_entry)
+
+        # Write manifest file
+        try:
+            os.makedirs(wireword_dir, exist_ok=True)
+            with open(manifest_path, "w", encoding="utf-8") as f:
+                json.dump(manifest, f, indent=2, ensure_ascii=False)
+            logger.info(f"Generated manifest: {manifest_path}")
+            return True, manifest_path
+        except IOError as e:
+            logger.error(f"Failed to write manifest: {e}")
+            return False, ""
+
     def run_export(
         self,
         output_path: Optional[str] = None,
@@ -485,6 +694,19 @@ class UngurysAgent:
             "note": "Conversations are always exported to wireword_conversations.jsonl file",
         }
 
+        # Generate manifest file
+        actual_dir = output_dir if output_dir else self.get_language_output_dir()
+        logger.info("Generating wireword_manifest.json...")
+        manifest_success, manifest_path = self.generate_manifest(
+            output_dir=actual_dir,
+            export_results=results,
+        )
+        results["exports"]["manifest"] = {
+            "success": manifest_success,
+            "path": manifest_path,
+            "note": "Manifest file describing all exported files with MD5 checksums",
+        }
+
         end_time = datetime.now()
         duration = (end_time - start_time).total_seconds()
         results["duration_seconds"] = duration
@@ -578,13 +800,25 @@ class UngurysAgent:
         # Conversation export (separate file)
         if "conversations" in results["exports"]:
             conversations = results["exports"]["conversations"]
-            logger.info(f"CONVERSATION EXPORT (separate file):")
+            logger.info("CONVERSATION EXPORT (separate file):")
             if conversations["success"]:
-                logger.info(f"  Status: SUCCESS")
+                logger.info("  Status: SUCCESS")
                 logger.info(f"  Total conversations: {conversations.get('count', 0)}")
-                logger.info(f"  File: wireword_conversations.jsonl")
+                logger.info("  File: wireword_conversations.jsonl")
             else:
-                logger.info(f"  Status: FAILED")
+                logger.info("  Status: FAILED")
+            logger.info("")
+
+        # Manifest export
+        if "manifest" in results["exports"]:
+            manifest = results["exports"]["manifest"]
+            logger.info("MANIFEST EXPORT:")
+            if manifest["success"]:
+                logger.info("  Status: SUCCESS")
+                logger.info(f"  Path: {manifest.get('path', '')}")
+                logger.info("  File: wireword_manifest.json")
+            else:
+                logger.info("  Status: FAILED")
             logger.info("")
 
         logger.info("=" * 80)
