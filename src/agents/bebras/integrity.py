@@ -393,12 +393,29 @@ class IntegrityChecker:
         finally:
             session.close()
 
-    def check_sentences_missing_punctuation(self) -> Dict[str, Any]:
+    def _get_period_for_language(self, language_code: str) -> str:
+        """Return the appropriate period character for a language.
+
+        Args:
+            language_code: ISO language code (e.g., 'en', 'zh', 'ja')
+
+        Returns:
+            The period character to use ('。' for CJK languages, '.' otherwise)
+        """
+        # CJK languages use fullwidth period
+        if language_code in ("zh", "ja"):
+            return "。"
+        return "."
+
+    def check_sentences_missing_punctuation(self, fix: bool = False) -> Dict[str, Any]:
         """Check for sentences that are missing terminal punctuation.
 
         Sentences should end with a period (. or 。), question mark (? or ？),
         or exclamation mark (! or ！). This check finds sentences that don't
         have any of these terminal punctuation marks.
+
+        Args:
+            fix: If True, append the appropriate period to sentences missing punctuation
         """
         logger.info("Checking for sentences missing terminal punctuation...")
 
@@ -413,6 +430,7 @@ class IntegrityChecker:
             )
 
             missing_punctuation: List[Dict[str, Any]] = []
+            fixed_count = 0
 
             for sentence in sentences:
                 # Get all translations for this sentence
@@ -439,6 +457,19 @@ class IntegrityChecker:
                             }
                         )
 
+                        if fix:
+                            period = self._get_period_for_language(trans.language_code)
+                            trans.translation_text = text + period
+                            fixed_count += 1
+                            logger.debug(
+                                f"Fixed sentence {sentence.id} ({trans.language_code}): "
+                                f"added '{period}'"
+                            )
+
+            if fix and fixed_count > 0:
+                session.commit()
+                logger.info(f"Fixed {fixed_count} sentence translations")
+
             logger.info(
                 f"Found {len(missing_punctuation)} sentence translations missing terminal punctuation"
             )
@@ -451,15 +482,19 @@ class IntegrityChecker:
 
             return {
                 "missing_count": len(missing_punctuation),
+                "fixed_count": fixed_count if fix else 0,
                 "by_language": by_language,
                 "missing_punctuation": missing_punctuation,
             }
 
         except Exception as e:
             logger.error(f"Error checking sentences missing punctuation: {e}")
+            if fix:
+                session.rollback()
             return {
                 "error": str(e),
                 "missing_count": 0,
+                "fixed_count": 0,
                 "by_language": {},
                 "missing_punctuation": [],
             }
@@ -588,6 +623,11 @@ def get_argument_parser() -> argparse.ArgumentParser:
         default="all",
         help="Which check to run (default: all)",
     )
+    parser.add_argument(
+        "--fix",
+        action="store_true",
+        help="Fix issues where possible (currently only missing-punctuation)",
+    )
 
     return parser
 
@@ -634,22 +674,25 @@ def main() -> None:
         print(f"\nInvalid difficulty levels: {results['invalid_count']}")
 
     elif args.check == "missing-punctuation":
-        results = checker.check_sentences_missing_punctuation()
+        results = checker.check_sentences_missing_punctuation(fix=args.fix)
         print(f"\nSentences missing terminal punctuation: {results['missing_count']}")
+        if args.fix:
+            print(f"Fixed: {results.get('fixed_count', 0)}")
         if results.get("by_language"):
             for lang, count in sorted(results["by_language"].items()):
                 print(f"  {lang}: {count}")
-        # Print first few examples
-        missing_items = cast(List[Dict[str, Any]], results.get("missing_punctuation") or [])
-        if missing_items:
-            print("\nExamples:")
-            for item in missing_items[:10]:
-                text = str(item.get("text", ""))
-                text_preview = text[:60] + "..." if len(text) > 60 else text
-                print(
-                    f"  [{item.get('language_code')}] "
-                    f"id={item.get('sentence_id')}: {text_preview}"
-                )
+        # Print first few examples (only if not fixing, since text would be pre-fix)
+        if not args.fix:
+            missing_items = cast(List[Dict[str, Any]], results.get("missing_punctuation") or [])
+            if missing_items:
+                print("\nExamples:")
+                for item in missing_items[:10]:
+                    text = str(item.get("text", ""))
+                    text_preview = text[:60] + "..." if len(text) > 60 else text
+                    print(
+                        f"  [{item.get('language_code')}] "
+                        f"id={item.get('sentence_id')}: {text_preview}"
+                    )
 
     else:  # all
         checker.run_full_check(output_file=args.output)
