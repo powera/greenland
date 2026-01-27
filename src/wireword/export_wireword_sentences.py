@@ -9,7 +9,6 @@ Exports all sentences with level != -1 that have a translation in the target lan
 import json
 import logging
 import sys
-from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
 
@@ -227,9 +226,10 @@ class WirewordSentenceExporter:
             logger.info(f"Bulk fetched {len(all_audio_records)} audio records")
 
             # Build output structure
+            # Note: No generated_date here - that belongs in the manifest file only,
+            # so the MD5 checksum stays stable when content hasn't changed.
             output = {
                 "language": self.language,
-                "generated_date": datetime.now().isoformat(),
                 "sentences": [],
             }
 
