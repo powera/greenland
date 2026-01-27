@@ -61,6 +61,7 @@ class TrakaidoExporter:
         debug: bool = False,
         language: str = "lt",
         simplified_chinese: bool = True,
+        include_unreviewed_audio: bool = False,
     ):
         """
         Initialize the TrakaidoExporter.
@@ -70,6 +71,8 @@ class TrakaidoExporter:
             debug: Enable debug logging
             language: Target language code ('lt' for Lithuanian, 'zh' for Chinese)
             simplified_chinese: If True and language is 'zh', convert to Simplified Chinese (default: True)
+            include_unreviewed_audio: If True, include audio that exists in staging but hasn't been
+                reviewed yet. The manifest's audio_prefix will be changed to point to staging.
         """
         # Use provided config or create default SQLite config
         if config is None:
@@ -78,6 +81,7 @@ class TrakaidoExporter:
         self.debug = debug
         self.language = language
         self.simplified_chinese = simplified_chinese
+        self.include_unreviewed_audio = include_unreviewed_audio
 
         if language not in self.LANGUAGE_CONFIG:
             raise ValueError(
@@ -665,6 +669,7 @@ class TrakaidoExporter:
             debug=self.debug,
             language=self.language,
             simplified_chinese=self.simplified_chinese,
+            include_unreviewed_audio=self.include_unreviewed_audio,
         )
         return exporter.export_to_wireword_format(output_path, **kwargs)
 
@@ -677,6 +682,7 @@ class TrakaidoExporter:
             debug=self.debug,
             language=self.language,
             simplified_chinese=self.simplified_chinese,
+            include_unreviewed_audio=self.include_unreviewed_audio,
         )
         return exporter.export_wireword_directory(output_dir)
 
@@ -691,6 +697,7 @@ class TrakaidoExporter:
             debug=self.debug,
             language=self.language,
             simplified_chinese=self.simplified_chinese,
+            include_unreviewed_audio=self.include_unreviewed_audio,
         )
         return exporter.export_verbs_to_wireword_format(output_path, **kwargs)
 

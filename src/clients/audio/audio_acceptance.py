@@ -67,6 +67,8 @@ def accept_audio_for_production(
     success, prod_url = s3_uploader.move_to_production(
         md5_hash=audio_review.manifest_md5,
         agent=audio_review.staging_agent,
+        language_code=audio_review.language_code,
+        voice_name=audio_review.voice_name,
     )
 
     if not success:

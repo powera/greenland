@@ -55,6 +55,7 @@ class WirewordExporter:
         debug: bool = False,
         language: str = "lt",
         simplified_chinese: bool = True,
+        include_unreviewed_audio: bool = False,
     ):
         """
         Initialize the WirewordExporter.
@@ -64,6 +65,8 @@ class WirewordExporter:
             debug: Enable debug logging
             language: Target language code ('lt' for Lithuanian, 'zh' for Chinese, etc.)
             simplified_chinese: If True and language is 'zh', convert to Simplified Chinese (default: True)
+            include_unreviewed_audio: If True, include audio that exists in staging but hasn't been
+                reviewed yet. The manifest's audio_prefix will be changed to point to staging.
         """
         # Use provided config or create default SQLite config
         if config is None:
@@ -72,6 +75,7 @@ class WirewordExporter:
         self.debug = debug
         self.language = language
         self.simplified_chinese = simplified_chinese
+        self.include_unreviewed_audio = include_unreviewed_audio
 
         if language not in LANGUAGE_FIELDS:
             raise ValueError(
@@ -423,8 +427,12 @@ class WirewordExporter:
             # Index by (guid, grammatical_form) for quick lookup
             audio_by_guid_form: Dict[Tuple[str, Optional[str]], Dict[str, str]] = {}
             for audio in all_audio_records:
-                # Only include production audio that hasn't been rejected
-                if audio.s3_prod_url and audio.status != "needs_replacement":
+                # Always exclude rejected audio
+                if audio.status == "needs_replacement":
+                    continue
+
+                # Include if in production OR (if flag is True and in staging)
+                if audio.s3_prod_url or (self.include_unreviewed_audio and audio.s3_staging_url):
                     key = (audio.guid, audio.grammatical_form)
                     if key not in audio_by_guid_form:
                         audio_by_guid_form[key] = {}
@@ -887,7 +895,10 @@ class WirewordExporter:
 
         # Generate manifest file
         manifest_success, manifest_path = generate_manifest(
-            wireword_dir, self.language, self.simplified_chinese
+            wireword_dir,
+            self.language,
+            self.simplified_chinese,
+            include_unreviewed_audio=self.include_unreviewed_audio,
         )
         if manifest_success:
             results["files_created"].append(manifest_path)
@@ -1021,8 +1032,12 @@ class WirewordExporter:
             # Index by (guid, grammatical_form) for quick lookup
             audio_by_guid_form: Dict[Tuple[str, Optional[str]], Dict[str, str]] = {}
             for audio in all_audio_records:
-                # Only include production audio that hasn't been rejected
-                if audio.s3_prod_url and audio.status != "needs_replacement":
+                # Always exclude rejected audio
+                if audio.status == "needs_replacement":
+                    continue
+
+                # Include if in production OR (if flag is True and in staging)
+                if audio.s3_prod_url or (self.include_unreviewed_audio and audio.s3_staging_url):
                     key = (audio.guid, audio.grammatical_form)
                     if key not in audio_by_guid_form:
                         audio_by_guid_form[key] = {}

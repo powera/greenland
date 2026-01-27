@@ -46,6 +46,7 @@ class WirewordConversationExporter:
         debug: bool = False,
         language: str = "lt",
         simplified_chinese: bool = True,
+        include_unreviewed_audio: bool = False,
     ):
         """
         Initialize the WirewordConversationExporter.
@@ -55,6 +56,8 @@ class WirewordConversationExporter:
             debug: Enable debug logging
             language: Target language code ('lt', 'zh', etc.)
             simplified_chinese: If True and language is 'zh', convert to Simplified Chinese
+            include_unreviewed_audio: If True, include audio that exists in staging but hasn't been
+                reviewed yet.
         """
         # Use provided config or create default SQLite config
         if config is None:
@@ -63,6 +66,7 @@ class WirewordConversationExporter:
         self.debug = debug
         self.language = language
         self.simplified_chinese = simplified_chinese
+        self.include_unreviewed_audio = include_unreviewed_audio
 
         if debug:
             logger.setLevel(logging.DEBUG)
@@ -158,16 +162,21 @@ class WirewordConversationExporter:
                 .filter(
                     AudioQualityReview.expected_text.in_(translation_texts),
                     AudioQualityReview.language_code == self.language,
-                    AudioQualityReview.status.in_(["approved", "pending_review"]),
                 )
                 .all()
             )
             audio_by_text: Dict[str, Dict[str, str]] = {}
             for record in all_audio_records:
-                if record.voice_name and record.manifest_md5:
-                    if record.expected_text not in audio_by_text:
-                        audio_by_text[record.expected_text] = {}
-                    audio_by_text[record.expected_text][record.voice_name] = record.manifest_md5
+                # Always exclude rejected audio
+                if record.status == "needs_replacement":
+                    continue
+
+                # Include if in production OR (if flag is True and in staging)
+                if record.s3_prod_url or (self.include_unreviewed_audio and record.s3_staging_url):
+                    if record.voice_name and record.manifest_md5:
+                        if record.expected_text not in audio_by_text:
+                            audio_by_text[record.expected_text] = {}
+                        audio_by_text[record.expected_text][record.voice_name] = record.manifest_md5
             logger.info(f"Bulk fetched {len(all_audio_records)} audio records")
 
             # Build output list

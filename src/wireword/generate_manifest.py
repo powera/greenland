@@ -103,6 +103,8 @@ def generate_manifest(
     wireword_dir: str,
     language: str,
     simplified_chinese: bool = True,
+    include_unreviewed_audio: bool = False,
+    staging_agent: str = "vieversys",
 ) -> Tuple[bool, str]:
     """
     Generate wireword_manifest.json for the exported files.
@@ -111,6 +113,8 @@ def generate_manifest(
         wireword_dir: The wireword output directory containing the exported files
         language: Language code (e.g., "lt", "zh", "fr")
         simplified_chinese: For Chinese, whether simplified (True) or traditional (False)
+        include_unreviewed_audio: If True, set audio_prefix to staging path
+        staging_agent: Agent name for staging path (default: "vieversys")
 
     Returns:
         Tuple of (success flag, manifest path)
@@ -129,6 +133,18 @@ def generate_manifest(
     available_voices = LANGUAGE_VOICE_NAMES.get(language, [])
     default_voice = available_voices[0] if available_voices else None
 
+    # Determine audio prefix
+    # When including unreviewed audio, point to staging path:
+    # staging/{agent}/{language}/{voice}/{md5}.mp3
+    # The client constructs: {audio_prefix}/{voice}/{md5}.mp3
+    if include_unreviewed_audio:
+        from clients.audio.s3_uploader import get_staging_prefix
+
+        staging_prefix = get_staging_prefix()
+        audio_prefix = f"/{staging_prefix}/{staging_agent}/{language_code}"
+    else:
+        audio_prefix = "/prod"
+
     # Build manifest structure
     manifest: Dict[str, Any] = {
         "version": 1,
@@ -136,7 +152,7 @@ def generate_manifest(
         "language_code": language_code,
         "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "config": {
-            "audio_prefix": "/prod",
+            "audio_prefix": audio_prefix,
             "available_voices": available_voices,
             "default_voice": default_voice,
         },

@@ -285,6 +285,8 @@ class StrazdasAgent:
                     audio_path=file_path,
                     manifest_data=manifest_data,
                     agent="strazdas",
+                    language_code=language_code,
+                    voice_name=voice_name,
                     check_existing=True,
                 )
 

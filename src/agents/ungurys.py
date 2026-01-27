@@ -53,6 +53,7 @@ class UngurysAgent:
         config: DataSourceConfig,
         language: str = "lt",
         simplified_chinese: bool = True,
+        include_unreviewed_audio: bool = False,
     ):
         """
         Initialize the Ungurys agent.
@@ -61,10 +62,13 @@ class UngurysAgent:
             config: DataSourceConfig with model, debug, and backend settings (required)
             language: Language code ('lt' for Lithuanian, 'zh' for Chinese, 'zh-Hant' for Traditional Chinese)
             simplified_chinese: For 'zh', whether to convert to Simplified (default: True)
+            include_unreviewed_audio: If True, include audio that exists in staging but hasn't been
+                reviewed yet. The manifest's audio_prefix will be changed to point to staging.
         """
         self.config = config
         self.debug = config.debug
         self.simplified_chinese = simplified_chinese
+        self.include_unreviewed_audio = include_unreviewed_audio
 
         # Handle language variants
         if language == "zh-Hant":
@@ -95,6 +99,7 @@ class UngurysAgent:
             debug=self.debug,
             language=self.language,
             simplified_chinese=self.simplified_chinese if self.language == "zh" else True,
+            include_unreviewed_audio=self.include_unreviewed_audio,
         )
 
         # Initialize sentence exporter with Chinese variant support
@@ -103,6 +108,7 @@ class UngurysAgent:
             debug=self.debug,
             language=self.language,
             simplified_chinese=self.simplified_chinese if self.language == "zh" else True,
+            include_unreviewed_audio=self.include_unreviewed_audio,
         )
 
         # Initialize conversation exporter with Chinese variant support
@@ -111,6 +117,7 @@ class UngurysAgent:
             debug=self.debug,
             language=self.language,
             simplified_chinese=self.simplified_chinese if self.language == "zh" else True,
+            include_unreviewed_audio=self.include_unreviewed_audio,
         )
 
         variant_info = ""
@@ -668,6 +675,11 @@ def get_argument_parser() -> argparse.ArgumentParser:
         default=True,
         help="Include unverified entries (default: True)",
     )
+    parser.add_argument(
+        "--include-unreviewed-audio",
+        action="store_true",
+        help="Include audio from staging that has not yet been reviewed. Changes audio path in manifest.",
+    )
 
     return parser
 
@@ -686,7 +698,11 @@ def main() -> None:
         language = "zh-Hant"
 
     # Create agent with config
-    agent = UngurysAgent(config=config, language=language)
+    agent = UngurysAgent(
+        config=config,
+        language=language,
+        include_unreviewed_audio=args.include_unreviewed_audio,
+    )
 
     # Set default paths if not specified
     if args.mode in ["single", "both"] and not args.output:

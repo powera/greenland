@@ -192,15 +192,19 @@ class S3AudioUploader:
         audio_path: Path,
         manifest_data: Dict[str, Any],
         agent: str,
+        language_code: str,
+        voice_name: str,
         check_existing: bool = True,
     ) -> Tuple[bool, str, str, str]:
         """
-        Upload audio file and manifest to staging/{agent}/ directory.
+        Upload audio file and manifest to staging/{agent}/{language}/{voice}/ directory.
 
         Args:
             audio_path: Path to local audio file
             manifest_data: Manifest data dictionary
             agent: Agent name (e.g., "vieversys", "strazdas")
+            language_code: Language code (e.g., "lt", "zh")
+            voice_name: Voice name (e.g., "ruta", "jonas")
             check_existing: If True, skip if file with same MD5 exists
 
         Returns:
@@ -214,9 +218,10 @@ class S3AudioUploader:
         md5_hash = hashlib.md5(audio_path.read_bytes()).hexdigest()
 
         # S3 keys for staging (use staging-postgres prefix when in postgres mode)
+        # Path structure: staging/{agent}/{language}/{voice}/{md5}.mp3
         staging_prefix = get_staging_prefix()
-        audio_key = f"{staging_prefix}/{agent}/{md5_hash}.mp3"
-        manifest_key = f"{staging_prefix}/{agent}/{md5_hash}.manifest"
+        audio_key = f"{staging_prefix}/{agent}/{language_code}/{voice_name}/{md5_hash}.mp3"
+        manifest_key = f"{staging_prefix}/{agent}/{language_code}/{voice_name}/{md5_hash}.manifest"
 
         # Check if audio file already exists
         if check_existing:
@@ -268,21 +273,34 @@ class S3AudioUploader:
             logger.error(f"Error uploading to staging: {e}")
             return False, "", "", md5_hash
 
-    def move_to_production(self, md5_hash: str, agent: str) -> Tuple[bool, str]:
+    def move_to_production(
+        self,
+        md5_hash: str,
+        agent: str,
+        language_code: Optional[str] = None,
+        voice_name: Optional[str] = None,
+    ) -> Tuple[bool, str]:
         """
-        Copy audio file from staging/{agent}/ to prod/.
+        Copy audio file from staging/{agent}/{language}/{voice}/ to prod/.
 
         Does NOT copy the manifest file - only the audio file.
 
         Args:
             md5_hash: MD5 hash of the audio file
             agent: Agent name (e.g., "vieversys", "strazdas")
+            language_code: Language code (e.g., "lt", "zh"). Required for new path structure.
+            voice_name: Voice name (e.g., "ruta", "jonas"). Required for new path structure.
 
         Returns:
             Tuple of (success: bool, prod_url: str)
         """
         staging_prefix = get_staging_prefix()
-        staging_key = f"{staging_prefix}/{agent}/{md5_hash}.mp3"
+        # Support both old path (staging/{agent}/{md5}.mp3) and new path
+        # (staging/{agent}/{language}/{voice}/{md5}.mp3)
+        if language_code and voice_name:
+            staging_key = f"{staging_prefix}/{agent}/{language_code}/{voice_name}/{md5_hash}.mp3"
+        else:
+            staging_key = f"{staging_prefix}/{agent}/{md5_hash}.mp3"
         prod_key = f"prod/{md5_hash}.mp3"
 
         try:

@@ -33,7 +33,7 @@ def _get_config() -> DataSourceConfig:
     return app.backend_config
 
 
-def export_all_languages() -> ResponseReturnValue:
+def export_all_languages(include_unreviewed_audio: bool = False) -> ResponseReturnValue:
     """Export WireWord files for all supported languages (directory mode only)."""
     try:
         # Create DataSourceConfig
@@ -52,6 +52,7 @@ def export_all_languages() -> ResponseReturnValue:
                         config=config,
                         language=lang_code,
                         simplified_chinese=True,
+                        include_unreviewed_audio=include_unreviewed_audio,
                     )
                     success_simp, results_simp = agent_simplified.export_wireword_directory()
                     all_results[f"{lang_name} (Simplified)"] = {
@@ -66,6 +67,7 @@ def export_all_languages() -> ResponseReturnValue:
                         config=config,
                         language=lang_code,
                         simplified_chinese=False,
+                        include_unreviewed_audio=include_unreviewed_audio,
                     )
                     success_trad, results_trad = agent_traditional.export_wireword_directory()
                     all_results[f"{lang_name} (Traditional)"] = {
@@ -79,6 +81,7 @@ def export_all_languages() -> ResponseReturnValue:
                     agent = UngurysAgent(
                         config=config,
                         language=lang_code,
+                        include_unreviewed_audio=include_unreviewed_audio,
                     )
                     success, results = agent.export_wireword_directory()
                     all_results[lang_name] = {"success": success, "results": results}
@@ -127,10 +130,11 @@ def export_wireword() -> ResponseReturnValue:
     export_type = request.form.get("export_type", "directory")
     difficulty_level = request.form.get("difficulty_level", "").strip()
     pos_type = request.form.get("pos_type", "").strip()
+    include_unreviewed_audio = request.form.get("include_unreviewed_audio") == "on"
 
     # Handle "All Languages" option
     if language == "all":
-        return export_all_languages()
+        return export_all_languages(include_unreviewed_audio=include_unreviewed_audio)
 
     # Validate language
     if language not in SUPPORTED_LANGUAGES:
@@ -160,6 +164,7 @@ def export_wireword() -> ResponseReturnValue:
             config=config,
             language=language if language != "zh-Hant" else "zh",
             simplified_chinese=simplified_chinese,
+            include_unreviewed_audio=include_unreviewed_audio,
         )
 
         if export_type == "directory":
