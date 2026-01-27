@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """One-off script to accept approved sentence audio and push to production S3.
 
-This script handles both S3 path formats:
-  New format: staging/{agent}/{language}/{voice}/{md5}.mp3 -> prod/{md5}.mp3
-  Legacy vieversys format: staging/{language}/{voice}/{md5}.mp3 -> prod/{md5}.mp3
+This script handles S3 path format:
+  staging/{language}/{voice}/{md5}.mp3 -> prod/{md5}.mp3
 
 Usage:
     PYTHONPATH=src python scripts/accept_approved_sentence_audio.py --language lt --dry-run
@@ -21,40 +20,30 @@ from typing import Optional, Tuple
 if str(Path(__file__).parent.parent / "src") not in sys.path:
     sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from clients.audio.s3_uploader import S3AudioUploader
+from clients.audio.s3_uploader import S3AudioUploader, get_prod_audio_key, get_staging_audio_key
 from wordfreq.storage.models.schema import AudioQualityReview
 from wordfreq.storage.utils.session import create_database_session
 
 
 def extract_staging_path_parts(
     staging_url: str,
-) -> Optional[Tuple[Optional[str], str, str, str]]:
+) -> Optional[Tuple[str, str, str]]:
     """
-    Extract agent, language, voice, and md5 from a staging URL.
+    Extract language, voice, and md5 from a staging URL.
 
-    Supports two formats:
-    - New format: .../staging/{agent}/{language}/{voice}/{md5}.mp3
-    - Legacy vieversys format: .../staging/{language}/{voice}/{md5}.mp3
+    Format: .../staging/{language}/{voice}/{md5}.mp3
 
     Returns:
-        Tuple of (agent or None, language, voice, md5) or None if parsing fails
+        Tuple of (language, voice, md5) or None if parsing fails
     """
-    # Try new format first: staging/{agent}/{lang}/{voice}/{md5}.mp3
-    match = re.search(r"/staging/([^/]+)/([^/]+)/([^/]+)/([a-f0-9]+)\.mp3$", staging_url)
-    if match:
-        return match.group(1), match.group(2), match.group(3), match.group(4)
-
-    # Try legacy vieversys format: staging/{lang}/{voice}/{md5}.mp3
     match = re.search(r"/staging/([^/]+)/([^/]+)/([a-f0-9]+)\.mp3$", staging_url)
     if match:
-        return None, match.group(1), match.group(2), match.group(3)
-
+        return match.group(1), match.group(2), match.group(3)
     return None
 
 
 def copy_staging_to_prod(
     s3_uploader: S3AudioUploader,
-    agent: Optional[str],
     language_code: str,
     voice_name: str,
     md5_hash: str,
@@ -62,15 +51,10 @@ def copy_staging_to_prod(
     """
     Copy audio from staging to production.
 
-    Supports both formats:
-    - New: staging/{agent}/{language}/{voice}/{md5}.mp3 -> prod/{md5}.mp3
-    - Legacy: staging/{language}/{voice}/{md5}.mp3 -> prod/{md5}.mp3
+    staging/{language}/{voice}/{md5}.mp3 -> prod/{md5}.mp3
     """
-    if agent:
-        staging_key = f"staging/{agent}/{language_code}/{voice_name}/{md5_hash}.mp3"
-    else:
-        staging_key = f"staging/{language_code}/{voice_name}/{md5_hash}.mp3"
-    prod_key = f"prod/{md5_hash}.mp3"
+    staging_key = get_staging_audio_key(language_code, voice_name, md5_hash)
+    prod_key = get_prod_audio_key(language_code, voice_name, md5_hash)
 
     try:
         # Check if already in prod
@@ -152,12 +136,9 @@ def main() -> None:
             for audio in audio_files:
                 parts = extract_staging_path_parts(audio.s3_staging_url)
                 if parts:
-                    agent, lang, voice, md5 = parts
+                    lang, voice, md5 = parts
                     print(f"  ID {audio.id}: {audio.expected_text[:50]}...")
-                    if agent:
-                        print(f"      staging/{agent}/{lang}/{voice}/{md5}.mp3 -> prod/{md5}.mp3")
-                    else:
-                        print(f"      staging/{lang}/{voice}/{md5}.mp3 -> prod/{md5}.mp3")
+                    print(f"      staging/{lang}/{voice}/{md5}.mp3 -> prod/{md5}.mp3")
                 else:
                     print(
                         f"  ID {audio.id}: {audio.expected_text[:50]}... (INVALID URL: {audio.s3_staging_url})"
@@ -177,11 +158,11 @@ def main() -> None:
                 failure_count += 1
                 continue
 
-            agent, lang, voice, md5 = parts
+            lang, voice, md5 = parts
 
             # Copy to production
             assert s3_uploader is not None
-            success, result = copy_staging_to_prod(s3_uploader, agent, lang, voice, md5)
+            success, result = copy_staging_to_prod(s3_uploader, lang, voice, md5)
 
             if success:
                 # Update database record

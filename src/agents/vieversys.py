@@ -163,12 +163,13 @@ class VieversysAgent:
         Returns:
             Tuple of (success: bool, audio_url: str, manifest_url: str)
         """
+        from clients.audio.s3_uploader import get_staging_audio_key, get_staging_manifest_key
+
         if not self.s3_uploader:
             return False, "", ""
 
-        staging_prefix = "staging"
-        audio_key = f"{staging_prefix}/{language_code}/{voice_path_name}/{md5_hash}.mp3"
-        manifest_key = f"{staging_prefix}/{language_code}/{voice_path_name}/{md5_hash}.manifest"
+        audio_key = get_staging_audio_key(language_code, voice_path_name, md5_hash)
+        manifest_key = get_staging_manifest_key(language_code, voice_path_name, md5_hash)
 
         try:
             # Check if audio file already exists

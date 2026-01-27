@@ -284,7 +284,6 @@ class StrazdasAgent:
                 success, audio_url, manifest_url, _ = self.s3_uploader.upload_to_staging(
                     audio_path=file_path,
                     manifest_data=manifest_data,
-                    agent="strazdas",
                     language_code=language_code,
                     voice_name=voice_name,
                     check_existing=True,

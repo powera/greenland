@@ -46,6 +46,56 @@ def get_staging_prefix() -> str:
     return "staging"
 
 
+def get_staging_audio_key(language_code: str, voice_name: str, md5_hash: str) -> str:
+    """Get the S3 key for a staging audio file.
+
+    Path format: staging/{language}/{voice}/{md5}.mp3
+
+    Args:
+        language_code: Language code (e.g., "lt", "zh")
+        voice_name: Voice name (e.g., "ruta", "jonas")
+        md5_hash: MD5 hash of the audio file
+
+    Returns:
+        S3 key string
+    """
+    staging_prefix = get_staging_prefix()
+    return f"{staging_prefix}/{language_code}/{voice_name}/{md5_hash}.mp3"
+
+
+def get_staging_manifest_key(language_code: str, voice_name: str, md5_hash: str) -> str:
+    """Get the S3 key for a staging manifest file.
+
+    Path format: staging/{language}/{voice}/{md5}.manifest
+
+    Args:
+        language_code: Language code (e.g., "lt", "zh")
+        voice_name: Voice name (e.g., "ruta", "jonas")
+        md5_hash: MD5 hash of the audio file
+
+    Returns:
+        S3 key string
+    """
+    staging_prefix = get_staging_prefix()
+    return f"{staging_prefix}/{language_code}/{voice_name}/{md5_hash}.manifest"
+
+
+def get_prod_audio_key(language_code: str, voice_name: str, md5_hash: str) -> str:
+    """Get the S3 key for a production audio file.
+
+    Path format: prod/{language}/{voice}/{md5}.mp3
+
+    Args:
+        language_code: Language code (e.g., "lt", "zh")
+        voice_name: Voice name (e.g., "ruta", "jonas")
+        md5_hash: MD5 hash of the audio file
+
+    Returns:
+        S3 key string
+    """
+    return f"prod/{language_code}/{voice_name}/{md5_hash}.mp3"
+
+
 class S3AudioUploader:
     """Upload audio files to Digital Ocean Spaces with MD5-based filenames."""
 
@@ -191,18 +241,16 @@ class S3AudioUploader:
         self,
         audio_path: Path,
         manifest_data: Dict[str, Any],
-        agent: str,
         language_code: str,
         voice_name: str,
         check_existing: bool = True,
     ) -> Tuple[bool, str, str, str]:
         """
-        Upload audio file and manifest to staging/{agent}/{language}/{voice}/ directory.
+        Upload audio file and manifest to staging/{language}/{voice}/ directory.
 
         Args:
             audio_path: Path to local audio file
             manifest_data: Manifest data dictionary
-            agent: Agent name (e.g., "vieversys", "strazdas")
             language_code: Language code (e.g., "lt", "zh")
             voice_name: Voice name (e.g., "ruta", "jonas")
             check_existing: If True, skip if file with same MD5 exists
@@ -217,11 +265,9 @@ class S3AudioUploader:
         # Calculate MD5 hash
         md5_hash = hashlib.md5(audio_path.read_bytes()).hexdigest()
 
-        # S3 keys for staging (use staging-postgres prefix when in postgres mode)
-        # Path structure: staging/{agent}/{language}/{voice}/{md5}.mp3
-        staging_prefix = get_staging_prefix()
-        audio_key = f"{staging_prefix}/{agent}/{language_code}/{voice_name}/{md5_hash}.mp3"
-        manifest_key = f"{staging_prefix}/{agent}/{language_code}/{voice_name}/{md5_hash}.manifest"
+        # S3 keys for staging: staging/{language}/{voice}/{md5}.mp3
+        audio_key = get_staging_audio_key(language_code, voice_name, md5_hash)
+        manifest_key = get_staging_manifest_key(language_code, voice_name, md5_hash)
 
         # Check if audio file already exists
         if check_existing:
@@ -276,32 +322,24 @@ class S3AudioUploader:
     def move_to_production(
         self,
         md5_hash: str,
-        agent: str,
-        language_code: Optional[str] = None,
-        voice_name: Optional[str] = None,
+        language_code: str,
+        voice_name: str,
     ) -> Tuple[bool, str]:
         """
-        Copy audio file from staging/{agent}/{language}/{voice}/ to prod/.
+        Copy audio file from staging/{language}/{voice}/ to prod/.
 
         Does NOT copy the manifest file - only the audio file.
 
         Args:
             md5_hash: MD5 hash of the audio file
-            agent: Agent name (e.g., "vieversys", "strazdas")
-            language_code: Language code (e.g., "lt", "zh"). Required for new path structure.
-            voice_name: Voice name (e.g., "ruta", "jonas"). Required for new path structure.
+            language_code: Language code (e.g., "lt", "zh")
+            voice_name: Voice name (e.g., "ruta", "jonas")
 
         Returns:
             Tuple of (success: bool, prod_url: str)
         """
-        staging_prefix = get_staging_prefix()
-        # Support both old path (staging/{agent}/{md5}.mp3) and new path
-        # (staging/{agent}/{language}/{voice}/{md5}.mp3)
-        if language_code and voice_name:
-            staging_key = f"{staging_prefix}/{agent}/{language_code}/{voice_name}/{md5_hash}.mp3"
-        else:
-            staging_key = f"{staging_prefix}/{agent}/{md5_hash}.mp3"
-        prod_key = f"prod/{md5_hash}.mp3"
+        staging_key = get_staging_audio_key(language_code, voice_name, md5_hash)
+        prod_key = get_prod_audio_key(language_code, voice_name, md5_hash)
 
         try:
             # Copy from staging to prod
@@ -332,14 +370,21 @@ class S3AudioUploader:
             return False, ""
 
     def upload_to_production(
-        self, audio_path: Path, md5_hash: str, check_existing: bool = True
+        self,
+        audio_path: Path,
+        md5_hash: str,
+        language_code: str,
+        voice_name: str,
+        check_existing: bool = True,
     ) -> Tuple[bool, str]:
         """
-        Upload audio file directly to prod/ directory.
+        Upload audio file directly to prod/{language}/{voice}/ directory.
 
         Args:
             audio_path: Path to local audio file
             md5_hash: MD5 hash of the audio file
+            language_code: Language code (e.g., "lt", "zh")
+            voice_name: Voice name (e.g., "ruta", "jonas")
             check_existing: If True, skip if file with same MD5 exists
 
         Returns:
@@ -349,7 +394,7 @@ class S3AudioUploader:
             logger.error(f"Audio file not found: {audio_path}")
             return False, ""
 
-        prod_key = f"prod/{md5_hash}.mp3"
+        prod_key = get_prod_audio_key(language_code, voice_name, md5_hash)
 
         # Check if file already exists
         if check_existing:

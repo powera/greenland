@@ -146,12 +146,9 @@ def validate_audio_translation(
 
 def copy_staging_to_prod(staging_url: str) -> Tuple[bool, str]:
     """
-    Copy audio from staging to production using the new path format.
+    Copy audio from staging to production.
 
-    Parses staging URL to extract agent, language, voice, and md5, then copies to:
-    staging/{agent}/{language}/{voice}/{md5}.mp3 -> prod/{md5}.mp3
-
-    Also supports legacy vieversys format:
+    Parses staging URL to extract language, voice, and md5, then copies to:
     staging/{language}/{voice}/{md5}.mp3 -> prod/{md5}.mp3
 
     Args:
@@ -160,28 +157,22 @@ def copy_staging_to_prod(staging_url: str) -> Tuple[bool, str]:
     Returns:
         Tuple of (success: bool, prod_url_or_error: str)
     """
-    # Extract path parts from staging URL
-    # Try new format first: staging/{agent}/{lang}/{voice}/{md5}.mp3
-    match = re.search(r"/staging/([^/]+)/([^/]+)/([^/]+)/([a-f0-9]+)\.mp3$", staging_url)
-    if match:
-        # New format: staging/{agent}/{lang}/{voice}/{md5}.mp3
-        agent = match.group(1)
-        language_code = match.group(2)
-        voice_name = match.group(3)
-        md5_hash = match.group(4)
-        staging_key = f"staging/{agent}/{language_code}/{voice_name}/{md5_hash}.mp3"
-    else:
-        # Try legacy vieversys format: staging/{lang}/{voice}/{md5}.mp3
-        match = re.search(r"/staging/([^/]+)/([^/]+)/([a-f0-9]+)\.mp3$", staging_url)
-        if not match:
-            return False, f"Could not parse staging URL: {staging_url}"
-        language_code = match.group(1)
-        voice_name = match.group(2)
-        md5_hash = match.group(3)
-        staging_key = f"staging/{language_code}/{voice_name}/{md5_hash}.mp3"
+    from clients.audio.s3_uploader import (
+        get_prod_audio_key,
+        get_staging_audio_key,
+    )
 
-    # Production path is always just prod/{md5}.mp3
-    prod_key = f"prod/{md5_hash}.mp3"
+    # Extract path parts from staging URL: staging/{lang}/{voice}/{md5}.mp3
+    match = re.search(r"/staging/([^/]+)/([^/]+)/([a-f0-9]+)\.mp3$", staging_url)
+    if not match:
+        return False, f"Could not parse staging URL: {staging_url}"
+
+    language_code = match.group(1)
+    voice_name = match.group(2)
+    md5_hash = match.group(3)
+
+    staging_key = get_staging_audio_key(language_code, voice_name, md5_hash)
+    prod_key = get_prod_audio_key(language_code, voice_name, md5_hash)
 
     try:
         from clients.audio.s3_uploader import S3AudioUploader

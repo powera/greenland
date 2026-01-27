@@ -104,7 +104,6 @@ def generate_manifest(
     language: str,
     simplified_chinese: bool = True,
     include_unreviewed_audio: bool = False,
-    staging_agent: str = "vieversys",
 ) -> Tuple[bool, str]:
     """
     Generate wireword_manifest.json for the exported files.
@@ -114,7 +113,6 @@ def generate_manifest(
         language: Language code (e.g., "lt", "zh", "fr")
         simplified_chinese: For Chinese, whether simplified (True) or traditional (False)
         include_unreviewed_audio: If True, set audio_prefix to staging path
-        staging_agent: Agent name for staging path (default: "vieversys")
 
     Returns:
         Tuple of (success flag, manifest path)
@@ -135,13 +133,13 @@ def generate_manifest(
 
     # Determine audio prefix
     # When including unreviewed audio, point to staging path:
-    # staging/{agent}/{language}/{voice}/{md5}.mp3
+    # staging/{language}/{voice}/{md5}.mp3
     # The client constructs: {audio_prefix}/{voice}/{md5}.mp3
     if include_unreviewed_audio:
         from clients.audio.s3_uploader import get_staging_prefix
 
         staging_prefix = get_staging_prefix()
-        audio_prefix = f"/{staging_prefix}/{staging_agent}/{language_code}"
+        audio_prefix = f"/{staging_prefix}/{language_code}"
     else:
         audio_prefix = "/prod"
 
