@@ -10,7 +10,7 @@ from unittest.mock import MagicMock, Mock, patch
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
-from clients.openai_batch_client import BatchStatus, OpenAIBatchClient
+from clients.openai.batch_client import BatchStatus, OpenAIBatchClient
 
 
 class OpenAIBatchClientTestCase(unittest.TestCase):
@@ -19,10 +19,10 @@ class OpenAIBatchClientTestCase(unittest.TestCase):
     def setUp(self) -> None:
         """Set up test fixtures."""
         # Create client without API key for testing
-        with patch("clients.openai_batch_client.load_key", return_value=None):
+        with patch("clients.openai.batch_client.load_key", return_value=None):
             self.client = OpenAIBatchClient(debug=False)
 
-    @patch("clients.openai_batch_client.requests.post")
+    @patch("clients.openai.batch_client.requests.post")
     def test_upload_batch_file(self, mock_post: MagicMock) -> None:
         """Test uploading a batch file."""
         # Set API key for this test
@@ -76,7 +76,7 @@ class OpenAIBatchClientTestCase(unittest.TestCase):
 
         self.assertIn("API key not available", str(context.exception))
 
-    @patch("clients.openai_batch_client.requests.post")
+    @patch("clients.openai.batch_client.requests.post")
     def test_create_batch(self, mock_post: MagicMock) -> None:
         """Test creating a batch."""
         # Set API key
@@ -115,7 +115,7 @@ class OpenAIBatchClientTestCase(unittest.TestCase):
         self.assertEqual(payload["endpoint"], "/v1/chat/completions")
         self.assertEqual(payload["metadata"]["test"], "value")
 
-    @patch("clients.openai_batch_client.requests.get")
+    @patch("clients.openai.batch_client.requests.get")
     def test_get_batch_status(self, mock_get: MagicMock) -> None:
         """Test getting batch status."""
         # Set API key
@@ -148,7 +148,7 @@ class OpenAIBatchClientTestCase(unittest.TestCase):
         call_args = mock_get.call_args[0]
         self.assertIn("batch_abc123", call_args[0])
 
-    @patch("clients.openai_batch_client.requests.get")
+    @patch("clients.openai.batch_client.requests.get")
     def test_list_batches(self, mock_get: MagicMock) -> None:
         """Test listing batches."""
         # Set API key
@@ -182,7 +182,7 @@ class OpenAIBatchClientTestCase(unittest.TestCase):
         call_kwargs = mock_get.call_args[1]
         self.assertEqual(call_kwargs["params"]["limit"], 2)
 
-    @patch("clients.openai_batch_client.requests.post")
+    @patch("clients.openai.batch_client.requests.post")
     def test_cancel_batch(self, mock_post: MagicMock) -> None:
         """Test cancelling a batch."""
         # Set API key
@@ -211,7 +211,7 @@ class OpenAIBatchClientTestCase(unittest.TestCase):
         self.assertIn("batch_abc123", call_args[0])
         self.assertIn("cancel", call_args[0])
 
-    @patch("clients.openai_batch_client.requests.get")
+    @patch("clients.openai.batch_client.requests.get")
     def test_download_batch_results(self, mock_get: MagicMock) -> None:
         """Test downloading batch results."""
         # Set API key
@@ -258,8 +258,8 @@ class OpenAIBatchClientTestCase(unittest.TestCase):
         self.assertIn("file_output_123", call_args[0])
         self.assertIn("content", call_args[0])
 
-    @patch("clients.openai_batch_client.requests.get")
-    @patch("clients.openai_batch_client.time.sleep")
+    @patch("clients.openai.batch_client.requests.get")
+    @patch("clients.openai.batch_client.time.sleep")
     def test_wait_for_batch_completion(self, mock_sleep: MagicMock, mock_get: MagicMock) -> None:
         """Test waiting for batch completion."""
         # Set API key
@@ -302,8 +302,8 @@ class OpenAIBatchClientTestCase(unittest.TestCase):
         # Verify sleep was called once (between polls)
         mock_sleep.assert_called_once_with(1)
 
-    @patch("clients.openai_batch_client.requests.get")
-    @patch("clients.openai_batch_client.time.sleep")
+    @patch("clients.openai.batch_client.requests.get")
+    @patch("clients.openai.batch_client.time.sleep")
     def test_wait_for_batch_completion_failure(
         self, mock_sleep: MagicMock, mock_get: MagicMock
     ) -> None:
@@ -331,7 +331,7 @@ class OpenAIBatchClientTestCase(unittest.TestCase):
 
         self.assertIn("failed", str(context.exception))
 
-    @patch("clients.openai_batch_client.requests.post")
+    @patch("clients.openai.batch_client.requests.post")
     def test_upload_error_handling(self, mock_post: MagicMock) -> None:
         """Test error handling during upload."""
         # Set API key
@@ -354,7 +354,7 @@ class OpenAIBatchClientTestCase(unittest.TestCase):
 
         self.assertIn("400", str(context.exception))
 
-    @patch("clients.openai_batch_client.requests.get")
+    @patch("clients.openai.batch_client.requests.get")
     def test_get_status_error_handling(self, mock_get: MagicMock) -> None:
         """Test error handling when getting status."""
         # Set API key

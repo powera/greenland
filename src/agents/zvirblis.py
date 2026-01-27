@@ -25,7 +25,7 @@ from clients.batch_queue import (
     BatchRequestMetadata,
     create_batch_database_session,
 )
-from clients.openai_batch_client import OpenAIBatchClient
+from clients.openai.batch_client import OpenAIBatchClient
 from agents.common.common_args import (
     add_backend_args,
     add_common_args,

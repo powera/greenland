@@ -17,7 +17,7 @@ from clients.batch_queue import (
     BatchRequestStatus,
     create_batch_database_session,
 )
-from clients.openai_batch_client import BatchStatus
+from clients.openai.batch_client import BatchStatus
 
 
 class BatchQueueManagerTestCase(unittest.TestCase):

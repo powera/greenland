@@ -6,7 +6,9 @@ import time
 from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Tuple, Union
 
 import benchmarks.datastore.common  # Assuming datastore.common is available
-from clients import anthropic_client, gemini_client, lmstudio_client, ollama_client, openai_client
+from clients import gemini_client, lmstudio_client, ollama_client
+from clients.anthropic import client as anthropic_client
+from clients.openai import client as openai_client
 from clients.types import Response, Schema
 from telemetry import LLMUsage
 

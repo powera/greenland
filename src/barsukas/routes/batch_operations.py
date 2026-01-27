@@ -11,7 +11,7 @@ from clients.batch_queue import (
     BatchRequestStatus,
     create_batch_database_session,
 )
-from clients.openai_batch_client import OpenAIBatchClient
+from clients.openai.batch_client import OpenAIBatchClient
 
 bp = Blueprint("batch_operations", __name__, url_prefix="/batch-operations")
 

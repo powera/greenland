@@ -22,7 +22,7 @@ from sqlalchemy import TIMESTAMP, Index, Integer, String, Text, create_engine, e
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, sessionmaker
 
 import constants
-from clients.openai_batch_client import BatchStatus, OpenAIBatchClient
+from clients.openai.batch_client import BatchStatus, OpenAIBatchClient
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
