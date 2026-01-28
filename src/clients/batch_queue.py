@@ -230,7 +230,7 @@ class BatchQueueManager:
         if limit:
             query = query.limit(limit)
 
-        return query.all()
+        return list(query.all())
 
     def submit_batch(
         self, requests: List[BatchQueue], batch_metadata: Optional[Dict[str, str]] = None
@@ -403,7 +403,7 @@ class BatchQueueManager:
         if limit:
             query = query.limit(limit)
 
-        return query.order_by(BatchQueue.completed_at.desc()).all()
+        return list(query.order_by(BatchQueue.completed_at.desc()).all())
 
     def get_failed_requests(
         self, agent_name: Optional[str] = None, batch_id: Optional[str] = None
@@ -424,7 +424,7 @@ class BatchQueueManager:
         if batch_id:
             query = query.filter_by(batch_id=batch_id)
 
-        return query.all()
+        return list(query.all())
 
     def cancel_batch(self, batch_id: str) -> Dict[str, Any]:
         """Cancel a batch that is in progress.

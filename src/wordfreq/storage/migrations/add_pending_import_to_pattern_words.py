@@ -38,7 +38,7 @@ def check_column_nullable(session: Session, table_name: str, column_name: str) -
     inspector = inspect(session.bind)
     for col in inspector.get_columns(table_name):
         if col["name"] == column_name:
-            return col["nullable"]
+            return bool(col["nullable"])
     return False
 
 
@@ -63,9 +63,7 @@ def migrate_table(session: Session, dry_run: bool = False) -> bool:
     session.execute(text("PRAGMA foreign_keys=OFF"))
 
     # Create new table with correct schema
-    session.execute(
-        text(
-            """
+    session.execute(text("""
         CREATE TABLE sentence_pattern_words_new (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             sentence_id INTEGER NOT NULL REFERENCES sentences(id),
@@ -77,21 +75,15 @@ def migrate_table(session: Session, dry_run: bool = False) -> bool:
             added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             UNIQUE (sentence_id, position)
         )
-    """
-        )
-    )
+    """))
 
     # Copy data from old table
-    session.execute(
-        text(
-            """
+    session.execute(text("""
         INSERT INTO sentence_pattern_words_new
             (id, sentence_id, lemma_id, pending_import_id, position, slot_name, english_text, added_at)
         SELECT id, sentence_id, lemma_id, NULL, position, slot_name, english_text, added_at
         FROM sentence_pattern_words
-    """
-        )
-    )
+    """))
 
     # Drop old table and rename new one
     session.execute(text("DROP TABLE sentence_pattern_words"))

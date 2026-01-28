@@ -8,6 +8,7 @@ This module handles all CLI argument parsing and the main entry point.
 import argparse
 import sys
 from pathlib import Path
+from typing import Any, Dict, List
 
 # Add src directory to path
 GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent.parent)
@@ -35,7 +36,7 @@ from wordfreq.storage.models.schema import BarsukasTask
 from wordfreq.storage.translation_helpers import LANGUAGE_FIELDS
 
 
-def get_argument_parser():
+def get_argument_parser() -> argparse.ArgumentParser:
     """Return the argument parser for introspection.
 
     This function allows external tools to introspect the available
@@ -104,7 +105,9 @@ def get_argument_parser():
     return parser
 
 
-def _handle_single_lemma_populate(agent, lemma, session, args):
+def _handle_single_lemma_populate(
+    agent: Any, lemma: Any, session: Any, args: argparse.Namespace
+) -> bool:
     """Handle populate mode for a single lemma.
 
     Args:
@@ -206,7 +209,13 @@ def _handle_single_lemma_populate(agent, lemma, session, args):
         return False
 
 
-def enqueue_voras_populate_work(agent, session, lemmas, languages_to_fix, dry_run=False):
+def enqueue_voras_populate_work(
+    agent: Any,
+    session: Any,
+    lemmas: List[Any],
+    languages_to_fix: List[str],
+    dry_run: bool = False,
+) -> Dict[str, Any]:
     """Enqueue translation population work items to the queue.
 
     Args:
@@ -258,7 +267,9 @@ def enqueue_voras_populate_work(agent, session, lemmas, languages_to_fix, dry_ru
     }
 
 
-def enqueue_voras_regenerate_work(agent, session, lemmas, dry_run=False):
+def enqueue_voras_regenerate_work(
+    agent: Any, session: Any, lemmas: List[Any], dry_run: bool = False
+) -> Dict[str, Any]:
     """Enqueue translation regeneration work items to the queue.
 
     Args:
@@ -308,7 +319,7 @@ def enqueue_voras_regenerate_work(agent, session, lemmas, dry_run=False):
     }
 
 
-def get_voras_queue_stats(session):
+def get_voras_queue_stats(session: Any) -> Dict[str, Dict[str, int]]:
     """Get statistics for voras tasks in the queue."""
     stats = {}
     for task_type in ["voras_populate_translations", "voras_regenerate_translations"]:
@@ -331,7 +342,7 @@ def get_voras_queue_stats(session):
     return stats
 
 
-def main():
+def main() -> None:
     """Main entry point for the voras agent."""
     # Import here to avoid circular imports
     from agents.voras import cli_display
