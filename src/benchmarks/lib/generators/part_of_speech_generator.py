@@ -57,10 +57,10 @@ Your task is to create clear, unambiguous questions about identifying parts of s
 Each question should have a clear, correct answer based on standard English grammar rules."""
 
         # Sample cache
-        self._samples = None
+        self._samples: Optional[List[Dict[str, Any]]] = None
         self._sample_index = 0
 
-    def _generate_from_file(self, **kwargs) -> Iterator[BenchmarkQuestion]:
+    def _generate_from_file(self, **kwargs: Any) -> Iterator[BenchmarkQuestion]:
         """
         Generate questions from sample file.
 
@@ -69,14 +69,20 @@ Each question should have a clear, correct answer based on standard English gram
         Yields:
             BenchmarkQuestion objects
         """
+        if not self.questions_file_path:
+            logger.warning("No questions file path set")
+            return
+
         try:
             # Load samples if not already loaded
-            if not self._samples:
+            if self._samples is None:
                 self._samples = self.load_json_file(self.questions_file_path)
-                logger.info(f"Loaded {len(self._samples)} sample sentences from file")
+
+            samples = self._samples
+            logger.info(f"Loaded {len(samples)} sample sentences from file")
 
             # Yield questions for each sample
-            for sample in self._samples:
+            for sample in samples:
                 sentence = sample["sentence"]
                 target_word = sample["target_word"]
                 correct_pos = sample["pos"]
@@ -115,7 +121,7 @@ Each question should have a clear, correct answer based on standard English gram
         except (FileNotFoundError, json.JSONDecodeError) as e:
             logger.error(f"Error loading sample data: {str(e)}")
 
-    def _generate_with_llm(self, **kwargs) -> Iterator[BenchmarkQuestion]:
+    def _generate_with_llm(self, **kwargs: Any) -> Iterator[BenchmarkQuestion]:
         """
         Generate questions using language model.
 

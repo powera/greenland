@@ -45,9 +45,9 @@ class LemmaGenerator(BenchmarkGenerator):
         The questions should test a model's ability to identify the lemma of a given word.
         """
 
-    def _generate_from_file(self) -> Iterator[BenchmarkQuestion]:
+    def _generate_from_file(self, **kwargs: Any) -> Iterator[BenchmarkQuestion]:
         """Generate questions from file."""
-        if not self.can_load_from_file:
+        if not self.can_load_from_file or not self.questions_file_path:
             return
 
         try:
@@ -77,7 +77,7 @@ class LemmaGenerator(BenchmarkGenerator):
             print(f"Error loading lemma words file: {e}")
             raise
 
-    def _generate_with_llm(self) -> Iterator[BenchmarkQuestion]:
+    def _generate_with_llm(self, **kwargs: Any) -> Iterator[BenchmarkQuestion]:
         """Generate questions using an LLM."""
         if not self.can_generate_with_llm:
             return
