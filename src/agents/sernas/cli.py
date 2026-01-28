@@ -7,6 +7,7 @@ This module handles all CLI argument parsing and the main entry point.
 
 import argparse
 import sys
+from typing import Any, Dict, List, Optional
 
 from agents.common.common_args import (
     add_backend_args,
@@ -85,7 +86,13 @@ def get_argument_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def enqueue_sernas_work(session, lemmas, languages, form_type=None, dry_run=False):
+def enqueue_sernas_work(
+    session: Any,
+    lemmas: List[Any],
+    languages: List[str],
+    form_type: Optional[str] = None,
+    dry_run: bool = False,
+) -> Dict[str, Any]:
     """Enqueue synonym generation work items to the queue.
 
     Args:
@@ -137,7 +144,7 @@ def enqueue_sernas_work(session, lemmas, languages, form_type=None, dry_run=Fals
     }
 
 
-def main():
+def main() -> None:
     """Main entry point for the šernas agent."""
     from agents.common.cli_display import display_language_header
     from agents.common.lemma_selection import get_lemmas_for_agent

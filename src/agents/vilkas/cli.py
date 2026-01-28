@@ -8,6 +8,7 @@ This module handles all CLI argument parsing and the main entry point.
 import argparse
 import sys
 from pathlib import Path
+from typing import Any, Dict, List
 
 from agents.common.common_args import (
     add_backend_args,
@@ -120,7 +121,9 @@ def get_argument_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def enqueue_vilkas_work(session, lemmas, task, dry_run=False):
+def enqueue_vilkas_work(
+    session: Any, lemmas: List[Any], task: str, dry_run: bool = False
+) -> Dict[str, Any]:
     """Enqueue word form generation work items to the queue.
 
     Args:

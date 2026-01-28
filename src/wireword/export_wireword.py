@@ -105,7 +105,8 @@ class WirewordExporter:
         Returns:
             English word string or None if not found
         """
-        return lemma.lemma_text
+        text: Optional[str] = lemma.lemma_text
+        return text
 
     def query_trakaido_data_for_wireword(
         self,

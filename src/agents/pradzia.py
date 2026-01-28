@@ -362,6 +362,7 @@ class PradziaAgent:
         """
         logger.info(f"Calculating combined ranks (dry_run={dry_run})...")
 
+        result: Dict[str, Any]
         if dry_run:
             # For dry run, just report what would happen
             session = self.get_session()
@@ -387,7 +388,7 @@ class PradziaAgent:
                 logger.info("Calculating combined ranks using harmonic mean...")
                 analysis.calculate_combined_ranks(config=self.config)
 
-                result: Dict[str, Any] = {
+                result = {
                     "dry_run": False,
                     "success": True,
                     "message": "Combined ranks calculated successfully",

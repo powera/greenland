@@ -8,6 +8,8 @@ Provides streamlined keyboard-driven audio quality review interface.
 
 import json
 from datetime import datetime
+from typing import Optional
+
 from flask import (
     Blueprint,
     flash,
@@ -30,7 +32,7 @@ from wordfreq.storage.queries.lemma import apply_effective_difficulty_filter
 bp = Blueprint("rapid_review", __name__, url_prefix="/audio/rapid-review")
 
 
-def get_english_translation_for_review(review: AudioQualityReview) -> str | None:
+def get_english_translation_for_review(review: AudioQualityReview) -> Optional[str]:
     """Get the English translation for a sentence audio review."""
     if not review.sentence_id:
         return None

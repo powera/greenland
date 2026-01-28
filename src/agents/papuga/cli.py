@@ -8,6 +8,7 @@ This module handles all CLI argument parsing and the main entry point.
 import argparse
 import logging
 import sys
+from typing import Any, Dict, List
 
 from agents.common.common_args import (
     add_backend_args,
@@ -87,7 +88,13 @@ def get_argument_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def enqueue_papuga_work(session, lemmas, only_english=True, base_forms_only=False, dry_run=False):
+def enqueue_papuga_work(
+    session: Any,
+    lemmas: List[Any],
+    only_english: bool = True,
+    base_forms_only: bool = False,
+    dry_run: bool = False,
+) -> Dict[str, Any]:
     """Enqueue pronunciation generation work items to the queue.
 
     Args:
@@ -152,7 +159,7 @@ def enqueue_papuga_work(session, lemmas, only_english=True, base_forms_only=Fals
     }
 
 
-def main():
+def main() -> None:
     """Main entry point for the papuga agent."""
     from agents.papuga.agent import PapugaAgent
 

@@ -7,7 +7,7 @@ work queue management, and the main entry point.
 import argparse
 import logging
 import sys
-from typing import Dict, List
+from typing import Any, Dict, List
 
 from agents.common.common_args import (
     add_backend_args,
@@ -168,7 +168,7 @@ Configuration:
     return parser
 
 
-def show_level_words(agent: SarkaAgent, level: int):
+def show_level_words(agent: SarkaAgent, level: int) -> None:
     """Display words available at a specific level."""
     summary = agent.get_level_summary(level)
 
@@ -191,12 +191,12 @@ def show_level_words(agent: SarkaAgent, level: int):
 
 def enqueue_level_work(
     agent: SarkaAgent,
-    session,
+    session: Any,
     level: int,
     num_conversations: int,
     num_sentences: int,
     dry_run: bool = False,
-):
+) -> Dict[str, Any]:
     """Enqueue conversation generation work items for a level.
 
     Args:
@@ -271,7 +271,7 @@ def enqueue_level_work(
     }
 
 
-def get_sarka_queue_stats(session):
+def get_sarka_queue_stats(session: Any) -> Dict[str, int]:
     """Get statistics for sarka tasks in the queue."""
     task_type = "sarka_generate_conversation"
     return {
@@ -290,7 +290,7 @@ def get_sarka_queue_stats(session):
     }
 
 
-def main():
+def main() -> None:
     """Command-line interface for the Sarka agent."""
     parser = get_argument_parser()
     args = parser.parse_args()

@@ -119,7 +119,7 @@ class OllamaClient:
         """Initialize model for faster first inference."""
         try:
             response = self._make_request("chat", {"model": model})
-            return response.status_code == 200
+            return bool(response.status_code == 200)
         except OllamaError:
             return False
 
