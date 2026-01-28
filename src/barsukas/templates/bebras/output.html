@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+
+{% block title %}{{ task_name }} - Output{% endblock %}
+
+{% block extra_head %}
+<style>
+    .output-container {
+        background-color: #1e1e1e;
+        color: #d4d4d4;
+        font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        font-size: 13px;
+        padding: 1rem;
+        border-radius: 0.375rem;
+        height: 500px;
+        overflow-y: auto;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+    .output-line {
+        line-height: 1.5;
+    }
+    .output-line.error {
+        color: #f14c4c;
+    }
+    .output-line.warning {
+        color: #cca700;
+    }
+    .output-line.success {
+        color: #23d18b;
+    }
+    .output-line.info {
+        color: #3794ff;
+    }
+    .status-badge {
+        font-size: 0.875rem;
+    }
+    .cmdline-preview {
+        font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        font-size: 12px;
+        background-color: #f8f9fa;
+        padding: 0.5rem;
+        border-radius: 0.25rem;
+        word-break: break-all;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-terminal fs-2 me-3 text-primary"></i>
+                    <div>
+                        <h1 class="mb-0">{{ task_name }}</h1>
+                        <span id="status-badge" class="badge bg-warning status-badge">
+                            <i class="bi bi-hourglass-split me-1"></i>Running...
+                        </span>
+                    </div>
+                </div>
+                <div>
+                    <a href="{{ url_for('bebras.index') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-2"></i>Back to BEBRAS
+                    </a>
+                </div>
+            </div>
+
+            <!-- Command line preview -->
+            <div class="mb-3">
+                <small class="text-muted">Command:</small>
+                <div class="cmdline-preview">{{ cmdline }}</div>
+            </div>
+
+            <!-- Output area -->
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>Output</span>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="copyOutput()">
+                        <i class="bi bi-clipboard me-1"></i>Copy
+                    </button>
+                </div>
+                <div class="card-body p-0">
+                    <div class="output-container" id="output"></div>
+                </div>
+            </div>
+
+            <!-- Action buttons (shown after completion) -->
+            <div id="completion-actions" class="mt-3" style="display: none;">
+                <a href="{{ url_for('bebras.index') }}" class="btn btn-primary">
+                    <i class="bi bi-arrow-repeat me-2"></i>Run Another Task
+                </a>
+                <a href="{{ url_for('batch_operations.list_batches') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-collection me-2"></i>View Batch Operations
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+const outputContainer = document.getElementById('output');
+const statusBadge = document.getElementById('status-badge');
+const completionActions = document.getElementById('completion-actions');
+let autoScroll = true;
+
+// Check if user has scrolled up manually
+outputContainer.addEventListener('scroll', function() {
+    const atBottom = outputContainer.scrollHeight - outputContainer.scrollTop <= outputContainer.clientHeight + 50;
+    autoScroll = atBottom;
+});
+
+function appendLine(text) {
+    const line = document.createElement('div');
+    line.className = 'output-line';
+
+    // Apply styling based on content
+    if (text.includes('ERROR') || text.includes('Error') || text.includes('Failed')) {
+        line.classList.add('error');
+    } else if (text.includes('WARNING') || text.includes('Warning')) {
+        line.classList.add('warning');
+    } else if (text.includes('SUCCESS') || text.includes('Success') || text.includes('Complete')) {
+        line.classList.add('success');
+    } else if (text.includes('INFO') || text.startsWith('===')) {
+        line.classList.add('info');
+    }
+
+    line.textContent = text;
+    outputContainer.appendChild(line);
+
+    if (autoScroll) {
+        outputContainer.scrollTop = outputContainer.scrollHeight;
+    }
+}
+
+function copyOutput() {
+    const text = outputContainer.innerText;
+    navigator.clipboard.writeText(text).then(function() {
+        // Brief feedback
+        const btn = document.querySelector('[onclick="copyOutput()"]');
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<i class="bi bi-check me-1"></i>Copied';
+        setTimeout(() => { btn.innerHTML = originalHtml; }, 1000);
+    });
+}
+
+// Connect to SSE stream
+const evtSource = new EventSource("{{ url_for('bebras.stream_output', task_id=task_id) }}");
+
+evtSource.onmessage = function(event) {
+    const data = JSON.parse(event.data);
+
+    if (data.type === 'output') {
+        appendLine(data.line);
+    } else if (data.type === 'complete') {
+        evtSource.close();
+        completionActions.style.display = 'block';
+
+        if (data.returncode === 0) {
+            statusBadge.className = 'badge bg-success status-badge';
+            statusBadge.innerHTML = '<i class="bi bi-check-circle me-1"></i>Completed';
+        } else {
+            statusBadge.className = 'badge bg-danger status-badge';
+            statusBadge.innerHTML = '<i class="bi bi-x-circle me-1"></i>Failed (exit code: ' + data.returncode + ')';
+        }
+    }
+};
+
+evtSource.onerror = function(err) {
+    console.error("EventSource failed:", err);
+    evtSource.close();
+    statusBadge.className = 'badge bg-danger status-badge';
+    statusBadge.innerHTML = '<i class="bi bi-exclamation-triangle me-1"></i>Connection lost';
+    completionActions.style.display = 'block';
+};
+</script>
+{% endblock %}

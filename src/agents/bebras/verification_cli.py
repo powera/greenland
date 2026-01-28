@@ -98,6 +98,23 @@ Examples:
         help="Skip linked lemma verification",
     )
 
+    # Batch submission subcommands
+    batch_words_parser = subparsers.add_parser(
+        "submit-batch-words", help="Submit batch word verification job to OpenAI Batch API"
+    )
+    _add_batch_args(batch_words_parser)
+
+    batch_sentences_parser = subparsers.add_parser(
+        "submit-batch-sentences", help="Submit batch sentence verification job to OpenAI Batch API"
+    )
+    _add_batch_args(batch_sentences_parser)
+    batch_sentences_parser.add_argument(
+        "--check-lemma-links",
+        action="store_true",
+        default=True,
+        help="Also verify linked lemmas (default: True)",
+    )
+
     return parser
 
 
@@ -125,6 +142,28 @@ def _add_common_verify_args(parser: argparse.ArgumentParser) -> None:
         "--json",
         action="store_true",
         help="Output results as JSON",
+    )
+
+
+def _add_batch_args(parser: argparse.ArgumentParser) -> None:
+    """Add arguments for batch submission subcommands."""
+    add_common_args(parser)
+    add_llm_args(parser, default_model="gpt-5-mini")
+    add_backend_args(parser)
+    add_language_args(parser, multiple=True)
+
+    parser.add_argument(
+        "--limit",
+        type=int,
+        default=100,
+        help="Maximum number of items to queue for batch verification (default: 100)",
+    )
+
+    parser.add_argument(
+        "--unverified-only",
+        action="store_true",
+        default=True,
+        help="Only verify items that haven't been verified yet (default: True)",
     )
 
 
@@ -380,6 +419,80 @@ def _print_sentence_verification_results(result: Dict[str, Any]) -> None:
     print("=" * 60)
 
 
+def submit_batch_words(args: argparse.Namespace) -> int:
+    """Submit batch word verification job."""
+    config = get_data_source_config(args)
+    agent = VerificationAgent(config)
+
+    languages = getattr(args, "languages", None) or DEFAULT_VERIFY_LANGUAGES
+    limit = getattr(args, "limit", 100)
+    unverified_only = getattr(args, "unverified_only", True)
+
+    logger.info(f"Submitting batch word verification for languages: {', '.join(languages)}")
+    logger.info(f"Limit: {limit}, Unverified only: {unverified_only}")
+
+    batch_id, count = agent.submit_batch_word_verification(
+        languages=languages,
+        limit=limit,
+        unverified_only=unverified_only,
+    )
+
+    if batch_id:
+        print("=" * 80)
+        print("BEBRAS VERIFICATION - BATCH SUBMISSION REPORT")
+        print("=" * 80)
+        print(f"Batch ID: {batch_id}")
+        print(f"Requests submitted: {count}")
+        print(f"Languages: {', '.join(languages)}")
+        print("=" * 80)
+        print(f"Check status with: python -m agents.common.batch status --batch-id {batch_id}")
+        print(
+            f"Complete batch with: python -m agents.common.batch complete --batch-id {batch_id} --agent bebras_verify"
+        )
+        return 0
+
+    logger.warning("No batch submitted (no items to verify)")
+    return 0
+
+
+def submit_batch_sentences(args: argparse.Namespace) -> int:
+    """Submit batch sentence verification job."""
+    config = get_data_source_config(args)
+    agent = VerificationAgent(config)
+
+    languages = getattr(args, "languages", None) or DEFAULT_VERIFY_LANGUAGES
+    limit = getattr(args, "limit", 100)
+    unverified_only = getattr(args, "unverified_only", True)
+    check_lemma_links = getattr(args, "check_lemma_links", True)
+
+    logger.info(f"Submitting batch sentence verification for languages: {', '.join(languages)}")
+    logger.info(f"Limit: {limit}, Unverified only: {unverified_only}")
+
+    batch_id, count = agent.submit_batch_sentence_verification(
+        languages=languages,
+        limit=limit,
+        unverified_only=unverified_only,
+        check_lemma_links=check_lemma_links,
+    )
+
+    if batch_id:
+        print("=" * 80)
+        print("BEBRAS VERIFICATION - BATCH SUBMISSION REPORT")
+        print("=" * 80)
+        print(f"Batch ID: {batch_id}")
+        print(f"Requests submitted: {count}")
+        print(f"Languages: {', '.join(languages)}")
+        print("=" * 80)
+        print(f"Check status with: python -m agents.common.batch status --batch-id {batch_id}")
+        print(
+            f"Complete batch with: python -m agents.common.batch complete --batch-id {batch_id} --agent bebras_verify"
+        )
+        return 0
+
+    logger.warning("No batch submitted (no items to verify)")
+    return 0
+
+
 def main() -> Optional[int]:
     """Main entry point for the verification CLI."""
     parser = get_argument_parser()
@@ -394,6 +507,10 @@ def main() -> Optional[int]:
         return verify_words(args)
     elif args.verify_type == "sentences":
         return verify_sentences(args)
+    elif args.verify_type == "submit-batch-words":
+        return submit_batch_words(args)
+    elif args.verify_type == "submit-batch-sentences":
+        return submit_batch_sentences(args)
     else:
         parser.print_help()
         return 1

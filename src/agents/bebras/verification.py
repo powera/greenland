@@ -7,8 +7,14 @@ It does NOT regenerate content - it only validates and returns "correct"/"incorr
 """
 
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
+from clients.batch_queue import (
+    BatchQueueManager,
+    BatchRequestMetadata,
+    create_batch_database_session,
+)
+from clients.openai.batch_client import OpenAIBatchClient
 from clients.types import Schema, SchemaProperty
 from clients.unified_client import UnifiedLLMClient
 from wordfreq.storage.backend import create_session as create_backend_session
@@ -114,6 +120,13 @@ class VerificationAgent:
         self.debug = config.debug
         self.model = config.model or "gpt-5-mini"
         self.llm_client = UnifiedLLMClient.from_config(config)
+
+        # Initialize batch processing components
+        self.batch_client = OpenAIBatchClient(debug=self.debug)
+        self.batch_session = create_batch_database_session()
+        self.batch_manager = BatchQueueManager(
+            self.batch_session, self.batch_client, debug=self.debug
+        )
 
         if self.debug:
             logger.setLevel(logging.DEBUG)
@@ -824,3 +837,346 @@ IMPORTANT:
         )
         if trans:
             trans.verified = verified
+
+    def submit_batch_word_verification(
+        self,
+        languages: List[str],
+        limit: Optional[int] = None,
+        unverified_only: bool = True,
+    ) -> Tuple[Optional[str], int]:
+        """Submit a batch verification job for word translations.
+
+        Args:
+            languages: Languages to verify
+            limit: Maximum number of lemmas to verify
+            unverified_only: Only verify unverified translations
+
+        Returns:
+            Tuple of (batch_id, request_count) or (None, 0) if no requests
+        """
+        session = self.get_session()
+        try:
+            # Filter languages
+            languages = filter_languages_for_model(languages, self.model)
+            if not languages:
+                logger.warning(f"No supported languages for model {self.model}")
+                return None, 0
+
+            # Build query
+            query = session.query(Lemma).filter(Lemma.guid.isnot(None))
+
+            if unverified_only:
+                # Only lemmas with unverified translations
+                query = (
+                    query.join(LemmaTranslation)
+                    .filter(
+                        LemmaTranslation.verified == False,  # noqa: E712
+                        LemmaTranslation.language_code.in_(languages),
+                    )
+                    .distinct()
+                )
+
+            if limit:
+                query = query.limit(limit)
+
+            lemmas = query.all()
+
+            if not lemmas:
+                logger.warning("No lemmas found for batch verification")
+                return None, 0
+
+            requests_queued = 0
+            for lemma in lemmas:
+                # Get translations for this lemma
+                translations: Dict[str, str] = {}
+                for lang_code in languages:
+                    trans = get_translation(session, lemma, lang_code)
+                    if trans and trans.strip():
+                        translations[lang_code] = trans
+
+                if not translations:
+                    continue
+
+                # Build prompt and schema
+                prompt = self._build_word_verification_prompt(lemma, translations)
+                schema = self._build_word_verification_schema(list(translations.keys()))
+
+                custom_id = f"verify_word_{lemma.id}"
+
+                # Build response format
+                response_format = {
+                    "type": "json_schema",
+                    "json_schema": {
+                        "name": schema.name,
+                        "strict": True,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                f"{key}_verdict": {
+                                    "type": "string",
+                                    "enum": ["correct", "incorrect"],
+                                }
+                                for key in translations.keys()
+                            },
+                            "required": [f"{key}_verdict" for key in translations.keys()],
+                            "additionalProperties": False,
+                        },
+                    },
+                }
+
+                request_body = {
+                    "model": self.model,
+                    "messages": [{"role": "user", "content": prompt}],
+                    "response_format": response_format,
+                }
+
+                metadata = BatchRequestMetadata(
+                    custom_id=custom_id,
+                    agent_name="bebras_verify",
+                    operation_type="verify_word",
+                    entity_id=lemma.id,
+                    entity_type="lemma",
+                )
+
+                try:
+                    self.batch_manager.queue_request(
+                        custom_id=custom_id,
+                        request_body=request_body,
+                        metadata=metadata,
+                        endpoint="/v1/chat/completions",
+                    )
+                    requests_queued += 1
+                except ValueError as e:
+                    logger.debug("Skipping lemma %s: %s", lemma.guid, e)
+
+            logger.info("Queued %s word verification requests", requests_queued)
+
+            if requests_queued > 0:
+                pending_requests = self.batch_manager.get_pending_requests(
+                    agent_name="bebras_verify", operation_type="verify_word"
+                )
+                batch_id, _ = self.batch_manager.submit_batch(
+                    pending_requests,
+                    batch_metadata={
+                        "agent": "bebras_verify",
+                        "operation": "verify_words",
+                    },
+                )
+                logger.info(
+                    "Submitted batch %s with %s requests",
+                    batch_id,
+                    len(pending_requests),
+                )
+                return batch_id, len(pending_requests)
+
+            return None, 0
+
+        finally:
+            session.close()
+
+    def submit_batch_sentence_verification(
+        self,
+        languages: List[str],
+        limit: Optional[int] = None,
+        unverified_only: bool = True,
+        check_lemma_links: bool = True,
+    ) -> Tuple[Optional[str], int]:
+        """Submit a batch verification job for sentence translations.
+
+        Args:
+            languages: Languages to verify
+            limit: Maximum number of sentences to verify
+            unverified_only: Only verify unverified translations
+            check_lemma_links: Whether to check linked lemmas
+
+        Returns:
+            Tuple of (batch_id, request_count) or (None, 0) if no requests
+        """
+        session = self.get_session()
+        try:
+            # Filter languages
+            languages = filter_languages_for_model(languages, self.model)
+            if not languages:
+                logger.warning(f"No supported languages for model {self.model}")
+                return None, 0
+
+            # Build query
+            query = session.query(Sentence)
+
+            if unverified_only:
+                # Only sentences with unverified translations
+                query = (
+                    query.join(SentenceTranslation)
+                    .filter(
+                        SentenceTranslation.verified == False,  # noqa: E712
+                        SentenceTranslation.language_code.in_(languages),
+                    )
+                    .distinct()
+                )
+
+            if limit:
+                query = query.limit(limit)
+
+            sentences = query.all()
+
+            if not sentences:
+                logger.warning("No sentences found for batch verification")
+                return None, 0
+
+            requests_queued = 0
+            for sentence in sentences:
+                # Get English sentence
+                english_trans = (
+                    session.query(SentenceTranslation)
+                    .filter(
+                        SentenceTranslation.sentence_id == sentence.id,
+                        SentenceTranslation.language_code == "en",
+                    )
+                    .first()
+                )
+
+                if not english_trans:
+                    continue
+
+                english_text = english_trans.translation_text
+
+                # Gather language data
+                language_data: Dict[str, Dict[str, Any]] = {}
+                for lang_code in languages:
+                    trans = (
+                        session.query(SentenceTranslation)
+                        .filter(
+                            SentenceTranslation.sentence_id == sentence.id,
+                            SentenceTranslation.language_code == lang_code,
+                        )
+                        .first()
+                    )
+
+                    if not trans:
+                        continue
+
+                    sentence_words = (
+                        session.query(SentenceWord)
+                        .filter(
+                            SentenceWord.sentence_id == sentence.id,
+                            SentenceWord.language_code == lang_code,
+                        )
+                        .order_by(SentenceWord.position)
+                        .all()
+                    )
+
+                    linked_lemmas = []
+                    for sw in sentence_words:
+                        lemma_info: Dict[str, Any] = {
+                            "position": sw.position,
+                            "english_text": sw.english_text,
+                            "target_text": sw.target_language_text,
+                            "declined_form": sw.declined_form,
+                            "word_role": sw.word_role,
+                            "lemma_guid": None,
+                            "expected_translation": None,
+                        }
+
+                        if sw.lemma:
+                            lemma_info["lemma_guid"] = sw.lemma.guid
+                            lemma_trans = get_translation(session, sw.lemma, lang_code)
+                            lemma_info["expected_translation"] = lemma_trans
+
+                        linked_lemmas.append(lemma_info)
+
+                    language_data[lang_code] = {
+                        "translation": trans.translation_text,
+                        "linked_lemmas": linked_lemmas,
+                    }
+
+                if not language_data:
+                    continue
+
+                # Build prompt
+                prompt = self._build_sentence_verification_prompt(
+                    english_text, language_data, check_lemma_links
+                )
+
+                custom_id = f"verify_sentence_{sentence.id}"
+
+                # Build response format (simplified - no lemma checks in batch for now)
+                response_format = {
+                    "type": "json_schema",
+                    "json_schema": {
+                        "name": "SentenceVerification",
+                        "strict": True,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                f"{lang_code}_meaning": {
+                                    "type": "string",
+                                    "enum": ["correct", "incorrect"],
+                                }
+                                for lang_code in language_data.keys()
+                            }
+                            | {
+                                f"{lang_code}_grammar": {
+                                    "type": "string",
+                                    "enum": ["correct", "incorrect"],
+                                }
+                                for lang_code in language_data.keys()
+                            },
+                            "required": [
+                                f"{lang_code}_{check}"
+                                for lang_code in language_data.keys()
+                                for check in ["meaning", "grammar"]
+                            ],
+                            "additionalProperties": False,
+                        },
+                    },
+                }
+
+                request_body = {
+                    "model": self.model,
+                    "messages": [{"role": "user", "content": prompt}],
+                    "response_format": response_format,
+                }
+
+                metadata = BatchRequestMetadata(
+                    custom_id=custom_id,
+                    agent_name="bebras_verify",
+                    operation_type="verify_sentence",
+                    entity_id=sentence.id,
+                    entity_type="sentence",
+                )
+
+                try:
+                    self.batch_manager.queue_request(
+                        custom_id=custom_id,
+                        request_body=request_body,
+                        metadata=metadata,
+                        endpoint="/v1/chat/completions",
+                    )
+                    requests_queued += 1
+                except ValueError as e:
+                    logger.debug("Skipping sentence %s: %s", sentence.id, e)
+
+            logger.info("Queued %s sentence verification requests", requests_queued)
+
+            if requests_queued > 0:
+                pending_requests = self.batch_manager.get_pending_requests(
+                    agent_name="bebras_verify", operation_type="verify_sentence"
+                )
+                batch_id, _ = self.batch_manager.submit_batch(
+                    pending_requests,
+                    batch_metadata={
+                        "agent": "bebras_verify",
+                        "operation": "verify_sentences",
+                    },
+                )
+                logger.info(
+                    "Submitted batch %s with %s requests",
+                    batch_id,
+                    len(pending_requests),
+                )
+                return batch_id, len(pending_requests)
+
+            return None, 0
+
+        finally:
+            session.close()
