@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-Bebras - Sentence-Word Link Management and Database Integrity Agent
+Bebras - Sentence-Word Link Management, Integrity, and Verification Agent
 
 This agent manages relationships between sentences and vocabulary words,
-and checks database integrity. Both are aspects of ensuring the beaver's
-"solid structures" remain strong!
+checks database integrity, and verifies translation correctness. All aspects
+of ensuring the beaver's "solid structures" remain strong!
 
 "Bebras" means "beaver" in Lithuanian - industrious builder of connections!
 
@@ -17,6 +17,12 @@ Usage:
 
   # Check database integrity
   python bebras.py --check-integrity [--check all|orphaned|...]
+
+  # Verify word translations
+  python bebras.py --verify words --limit 100 --languages lt zh
+
+  # Verify sentence translations
+  python bebras.py --verify sentences --limit 50
 """
 
 import argparse
@@ -37,6 +43,10 @@ from agents.bebras.cli import main as sentence_main
 from agents.bebras.integrity import get_argument_parser as get_integrity_parser
 from agents.bebras.integrity import main as integrity_main
 
+# Import verification functionality
+from agents.bebras.verification_cli import get_argument_parser as get_verify_parser
+from agents.bebras.verification_cli import main as verify_main
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -44,30 +54,37 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def get_argument_parser():
+def get_argument_parser() -> argparse.ArgumentParser:
     """
     Return the main argument parser.
 
     This function allows external tools to introspect the available
     command-line arguments without executing the main function.
     """
-    # Check if we're running in integrity check mode
+    # Check which mode we're running in
     if "--check-integrity" in sys.argv:
         return get_integrity_parser()
+    elif "--verify" in sys.argv:
+        return get_verify_parser()
     else:
         return get_sentence_parser()
 
 
-def main():
+def main() -> int:
     """Main entry point for Bebras."""
-    # Check if we're running in integrity check mode
+    # Check which mode we're running in
     if "--check-integrity" in sys.argv:
         # Remove the flag and delegate to integrity checker
         sys.argv.remove("--check-integrity")
-        return integrity_main()
+        integrity_main()  # Returns None
+        return 0
+    elif "--verify" in sys.argv:
+        # Remove the flag and delegate to verification
+        sys.argv.remove("--verify")
+        return verify_main() or 0
     else:
         # Run the sentence-word link functionality
-        return sentence_main()
+        return sentence_main() or 0
 
 
 if __name__ == "__main__":
