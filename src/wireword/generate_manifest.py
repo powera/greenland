@@ -134,12 +134,12 @@ def generate_manifest(
     # Determine audio prefix
     # When including unreviewed audio, point to staging path:
     # staging/{language}/{voice}/{md5}.mp3
-    # The client constructs: {audio_prefix}/{voice}/{md5}.mp3
+    # The client constructs: {audio_prefix}/{language}/{voice}/{md5}.mp3
     if include_unreviewed_audio:
         from clients.audio.s3_uploader import get_staging_prefix
 
         staging_prefix = get_staging_prefix()
-        audio_prefix = f"/{staging_prefix}/{language_code}"
+        audio_prefix = f"/{staging_prefix}"
     else:
         audio_prefix = "/prod"
 
