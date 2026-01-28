@@ -19,7 +19,7 @@ from benchmarks.lib.exemplars.base import ExemplarType, register_exemplar
 from lib.sentence_generation import SentenceGenerator
 
 # Sample word matrices for demonstration
-SAMPLE_WORD_MATRICES = {
+SAMPLE_WORD_MATRICES: Dict[str, Dict[str, Dict[str, Any]]] = {
     "subjects": {
         "I": {"english": "I", "lithuanian": "aš", "guid": "PRON_001"},
         "he": {"english": "he", "lithuanian": "jis", "guid": "PRON_003"},
@@ -62,7 +62,7 @@ SAMPLE_WORD_MATRICES = {
 }
 
 # Sample Lithuanian grammar rules
-LITHUANIAN_GRAMMAR_RULES = {
+LITHUANIAN_GRAMMAR_RULES: Dict[str, Any] = {
     "lt": {
         "cases": {
             "accusative": {
@@ -175,11 +175,8 @@ def run_sentence_generation_demo(models: Optional[List[str]] = None) -> Dict[str
         llm_client=llm_client,
     )
 
-    results = {
-        "pattern_based_generation": [],
-        "llm_enhanced_generation": [],
-        "demonstration_complete": False,
-    }
+    pattern_based_generation: List[Dict[str, Any]] = []
+    llm_enhanced_generation: List[Dict[str, Any]] = []
 
     print("\n1. Pattern-based Generation:")
     print("-" * 30)
@@ -191,7 +188,7 @@ def run_sentence_generation_demo(models: Optional[List[str]] = None) -> Dict[str
             sentences = generator.pattern_to_sentences(pattern, ["en", "lt"])
 
             result = {"pattern": pattern, "sentences": sentences, "method": "pattern_based"}
-            results["pattern_based_generation"].append(result)
+            pattern_based_generation.append(result)
 
             print(f"Pattern {i+1}:")
             print(
@@ -233,7 +230,7 @@ def run_sentence_generation_demo(models: Optional[List[str]] = None) -> Dict[str
             llm_result = generator.generate_with_llm(pattern, "lt")
 
             if llm_result:
-                results["llm_enhanced_generation"].append(llm_result)
+                llm_enhanced_generation.append(llm_result)
 
                 print(f"LLM Test {i+1}:")
                 print(
@@ -251,13 +248,15 @@ def run_sentence_generation_demo(models: Optional[List[str]] = None) -> Dict[str
         print("2. LLM-Enhanced Generation: Skipped (no LLM client available)")
         print()
 
-    results["demonstration_complete"] = True
-
     print("Demonstration completed!")
-    print(f"Pattern-based sentences: {len(results['pattern_based_generation'])}")
-    print(f"LLM-enhanced sentences: {len(results['llm_enhanced_generation'])}")
+    print(f"Pattern-based sentences: {len(pattern_based_generation)}")
+    print(f"LLM-enhanced sentences: {len(llm_enhanced_generation)}")
 
-    return results
+    return {
+        "pattern_based_generation": pattern_based_generation,
+        "llm_enhanced_generation": llm_enhanced_generation,
+        "demonstration_complete": True,
+    }
 
 
 def validate_sentence_structure(sentence_data: Dict[str, Any]) -> Dict[str, Any]:
@@ -270,39 +269,41 @@ def validate_sentence_structure(sentence_data: Dict[str, Any]) -> Dict[str, Any]
     Returns:
         Validation results
     """
-    validation = {"valid": True, "errors": [], "warnings": [], "analysis": {}}
+    errors: List[str] = []
+    warnings: List[str] = []
+    valid = True
 
     # Check required fields
     required_fields = ["analysis", "sentences"]
-    for field in required_fields:
-        if field not in sentence_data:
-            validation["valid"] = False
-            validation["errors"].append(f"Missing required field: {field}")
+    for field_name in required_fields:
+        if field_name not in sentence_data:
+            valid = False
+            errors.append(f"Missing required field: {field_name}")
 
     if "sentences" in sentence_data:
         sentences = sentence_data["sentences"]
         if not isinstance(sentences, dict):
-            validation["valid"] = False
-            validation["errors"].append("'sentences' must be a dictionary")
+            valid = False
+            errors.append("'sentences' must be a dictionary")
         else:
             # Check for both language versions
             if "english" not in sentences:
-                validation["warnings"].append("Missing English sentence")
+                warnings.append("Missing English sentence")
             if "lithuanian" not in sentences:
-                validation["warnings"].append("Missing Lithuanian sentence")
+                warnings.append("Missing Lithuanian sentence")
 
             # Basic length checks
             if sentences.get("english") and len(sentences["english"]) < 5:
-                validation["warnings"].append("English sentence seems too short")
+                warnings.append("English sentence seems too short")
             if sentences.get("lithuanian") and len(sentences["lithuanian"]) < 5:
-                validation["warnings"].append("Lithuanian sentence seems too short")
+                warnings.append("Lithuanian sentence seems too short")
 
     if "analysis" in sentence_data:
         analysis = sentence_data["analysis"]
         if analysis.get("makes_sense") is False:
-            validation["warnings"].append("LLM indicated the sentence doesn't make logical sense")
+            warnings.append("LLM indicated the sentence doesn't make logical sense")
 
-    return validation
+    return {"valid": valid, "errors": errors, "warnings": warnings, "analysis": {}}
 
 
 if __name__ == "__main__":

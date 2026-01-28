@@ -130,7 +130,7 @@ def run_definition_exemplar(word="granite", models=None, num_models=3):
         models: List of model names to use (if None, uses top models from database)
         num_models: Number of models to use if models parameter is None
     """
-    from benchmarks.lib.exemplars import registry, runner, storage
+    from benchmarks.lib.exemplars.base import registry, runner, storage
 
     # Update the prompt with the specific word
     exemplar = registry.get_exemplar("comprehensive_definition")

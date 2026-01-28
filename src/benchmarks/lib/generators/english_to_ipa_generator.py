@@ -6,7 +6,7 @@ import json
 import logging
 import os
 import random
-from typing import Dict, Iterator, List, Optional
+from typing import Any, Dict, Iterator, List, Optional
 
 from benchmarks.lib.utils.base_generator import BenchmarkGenerator
 from benchmarks.lib.utils.data_models import (
@@ -51,9 +51,9 @@ class EnglishToIPAGenerator(BenchmarkGenerator):
 ability to convert English words to their IPA (International Phonetic Alphabet) pronunciation.
 When providing IPA pronunciations, use American English pronunciation as the default."""
 
-    def _generate_from_file(self, **kwargs) -> Iterator[BenchmarkQuestion]:
+    def _generate_from_file(self, **kwargs: Any) -> Iterator[BenchmarkQuestion]:
         """Generate questions from predefined JSON file."""
-        if not self.can_load_from_file:
+        if not self.can_load_from_file or not self.questions_file_path:
             return
 
         try:
@@ -93,7 +93,7 @@ When providing IPA pronunciations, use American English pronunciation as the def
         except Exception as e:
             logger.error(f"Error generating questions from file: {e}")
 
-    def _generate_with_llm(self, **kwargs) -> Iterator[BenchmarkQuestion]:
+    def _generate_with_llm(self, **kwargs: Any) -> Iterator[BenchmarkQuestion]:
         """Generate questions using a language model."""
         if not self.can_generate_with_llm:
             return

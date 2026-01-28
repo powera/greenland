@@ -136,27 +136,14 @@ ignore_errors = true
 # significant refactoring - ignore all errors for now
 [[tool.mypy.overrides]]
 module = [
-    "benchmarks.lib.exemplars.tasks.wordfreq_translation_exemplar",
-    "benchmarks.lib.exemplars.tasks.lithuanian_sentence_exemplar",
-    "benchmarks.lib.exemplars.tasks.zebra_puzzle_exemplar",
-    "benchmarks.lib.exemplars.tasks.wars_of_roses_exemplar",
-    "benchmarks.lib.exemplars.tasks.poker_scorer_exemplar",
-    "benchmarks.lib.exemplars.tasks.poetry_exemplar",
-    "benchmarks.lib.exemplars.tasks.granite_structured_def_exemplar",
-    "benchmarks.lib.exemplars.tasks.granite_definition_exemplar",
-    "benchmarks.lib.exemplars.tasks.firefighter_dialogue_exemplar",
     "benchmarks.scripts.model_comparison",
     "benchmarks.verbalator.server",
     "benchmarks.server.routes.verbalator",
-    "benchmarks.lib.generators.pinyin_letter_count_generator",
-    "benchmarks.lib.generators.english_to_ipa_generator",
-    "benchmarks.lib.generators.part_of_speech_generator",
     "benchmarks.lib.exemplars.base",
     "benchmarks.datastore.test_benchmarks",
     "benchmarks.lib.utils.base_runner",
     "benchmarks.lib.utils.base_generator",
     "benchmarks.lib.runners.geography_runner",
-    "benchmarks.lib.generators.lemma_generator",
     # One-off utility scripts with dynamic path manipulation
     "wordfreq.trakaido.utils.add_english_verb_conjugations",
     # Complex benchmark runner with many dynamic patterns

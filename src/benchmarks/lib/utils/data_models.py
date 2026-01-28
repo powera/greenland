@@ -35,6 +35,7 @@ class EvaluationCriteria:
     contains: bool = False  # Whether answer just needs to contain correct text
     required_fields: List[str] = field(default_factory=list)  # Required fields for JSON
     tolerance: float = 0.0  # Tolerance for numeric answers
+    alternatives: List[str] = field(default_factory=list)  # Alternative correct answers
 
     def to_dict(self) -> Dict:
         """Convert to dictionary, removing default values."""

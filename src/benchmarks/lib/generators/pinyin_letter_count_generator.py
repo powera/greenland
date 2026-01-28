@@ -95,15 +95,15 @@ class PinyinLetterCountGenerator(BenchmarkGenerator):
             # Get Pinyin representation
             pinyin_repr = self._get_pinyin_representation(sentence)
 
-            # Create a set of letters that appear in the Pinyin
-            letters_in_pinyin = set(pinyin_repr.upper().replace(" ", ""))
-            letters_in_pinyin = [l for l in letters_in_pinyin if l.isalpha()]
+            # Create a list of letters that appear in the Pinyin
+            letters_set = set(pinyin_repr.upper().replace(" ", ""))
+            letters_in_pinyin: List[str] = [char for char in letters_set if char.isalpha()]
 
             if not letters_in_pinyin:
                 continue
 
             # Select a random letter to count
-            target_letter = random.choice(letters_in_pinyin)
+            target_letter: str = random.choice(letters_in_pinyin)
 
             # Count occurrences
             count = pinyin_repr.count(target_letter)
@@ -165,15 +165,15 @@ class PinyinLetterCountGenerator(BenchmarkGenerator):
                 # Get Pinyin representation
                 pinyin_repr = self._get_pinyin_representation(sentence)
 
-                # Create a set of letters that appear in the Pinyin
-                letters_in_pinyin = set(pinyin_repr.upper().replace(" ", ""))
-                letters_in_pinyin = [l for l in letters_in_pinyin if l.isalpha()]
+                # Create a list of letters that appear in the Pinyin
+                letters_set = set(pinyin_repr.upper().replace(" ", ""))
+                letters_in_pinyin: List[str] = [char for char in letters_set if char.isalpha()]
 
                 if not letters_in_pinyin:
                     continue
 
                 # Select a random letter to count
-                target_letter = random.choice(letters_in_pinyin)
+                target_letter: str = random.choice(letters_in_pinyin)
 
                 # Count occurrences
                 count = pinyin_repr.count(target_letter)

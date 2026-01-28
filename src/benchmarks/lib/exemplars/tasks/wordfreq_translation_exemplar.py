@@ -8,11 +8,12 @@ with specific words to ensure the translation and linguistic analysis system wor
 """
 
 import json
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Set
 
 import util.prompt_loader
 from clients.types import Schema, SchemaProperty
 from benchmarks.lib.exemplars.base import (
+    ExemplarResult,
     ExemplarType,
     compare_models,
     generate_report,
@@ -170,7 +171,7 @@ register_exemplar(
 
 def run_wordfreq_exemplar(
     word: str, models: Optional[List[str]] = None, num_models: int = 3
-) -> List[Dict]:
+) -> List[ExemplarResult]:
     """
     Run a wordfreq exemplar with specified models.
 
@@ -223,19 +224,23 @@ def run_wordfreq_exemplar(
     return results
 
 
-def run_vinegar_exemplar(models: Optional[List[str]] = None, num_models: int = 3) -> List[Dict]:
+def run_vinegar_exemplar(
+    models: Optional[List[str]] = None, num_models: int = 3
+) -> List[ExemplarResult]:
     """Run the vinegar wordfreq exemplar."""
     return run_wordfreq_exemplar("vinegar", models, num_models)
 
 
-def run_bicycle_exemplar(models: Optional[List[str]] = None, num_models: int = 3) -> List[Dict]:
+def run_bicycle_exemplar(
+    models: Optional[List[str]] = None, num_models: int = 3
+) -> List[ExemplarResult]:
     """Run the bicycle wordfreq exemplar."""
     return run_wordfreq_exemplar("bicycle", models, num_models)
 
 
 def run_both_exemplars(
     models: Optional[List[str]] = None, num_models: int = 3
-) -> Dict[str, List[Dict]]:
+) -> Dict[str, List[ExemplarResult]]:
     """
     Run both vinegar and bicycle exemplars.
 
@@ -276,34 +281,55 @@ def validate_wordfreq_response(response_data: Dict[str, Any], word: str) -> Dict
     Returns:
         Dictionary with validation results and analysis
     """
-    validation = {"word": word, "valid": True, "errors": [], "warnings": [], "analysis": {}}
+    errors: List[str] = []
+    warnings: List[str] = []
+    analysis: Dict[str, Any] = {}
 
     # Check basic structure
     if not isinstance(response_data, dict):
-        validation["valid"] = False
-        validation["errors"].append("Response is not a dictionary")
-        return validation
+        errors.append("Response is not a dictionary")
+        return {
+            "word": word,
+            "valid": False,
+            "errors": errors,
+            "warnings": warnings,
+            "analysis": analysis,
+        }
 
     if "definitions" not in response_data:
-        validation["valid"] = False
-        validation["errors"].append("Missing 'definitions' key")
-        return validation
+        errors.append("Missing 'definitions' key")
+        return {
+            "word": word,
+            "valid": False,
+            "errors": errors,
+            "warnings": warnings,
+            "analysis": analysis,
+        }
 
     definitions = response_data["definitions"]
     if not isinstance(definitions, list):
-        validation["valid"] = False
-        validation["errors"].append("'definitions' is not a list")
-        return validation
+        errors.append("'definitions' is not a list")
+        return {
+            "word": word,
+            "valid": False,
+            "errors": errors,
+            "warnings": warnings,
+            "analysis": analysis,
+        }
 
     if len(definitions) == 0:
-        validation["valid"] = False
-        validation["errors"].append("No definitions provided")
-        return validation
+        errors.append("No definitions provided")
+        return {
+            "word": word,
+            "valid": False,
+            "errors": errors,
+            "warnings": warnings,
+            "analysis": analysis,
+        }
 
     # Analyze each definition
-    validation["analysis"]["definition_count"] = len(definitions)
-    validation["analysis"]["pos_types"] = set()
-    validation["analysis"]["has_translations"] = {
+    pos_types: Set[str] = set()
+    has_translations: Dict[str, int] = {
         "chinese": 0,
         "korean": 0,
         "french": 0,
@@ -311,45 +337,55 @@ def validate_wordfreq_response(response_data: Dict[str, Any], word: str) -> Dict
         "vietnamese": 0,
         "lithuanian": 0,
     }
-    validation["analysis"]["has_phonetics"] = 0
-    validation["analysis"]["has_ipa"] = 0
-    validation["analysis"]["has_examples"] = 0
+    has_phonetics = 0
+    has_ipa = 0
+    has_examples = 0
 
     for i, definition in enumerate(definitions):
         if not isinstance(definition, dict):
-            validation["errors"].append(f"Definition {i} is not a dictionary")
+            errors.append(f"Definition {i} is not a dictionary")
             continue
 
         # Check required fields
         required_fields = ["definition", "pos", "lemma"]
-        for field in required_fields:
-            if field not in definition:
-                validation["errors"].append(f"Definition {i} missing required field: {field}")
+        for field_name in required_fields:
+            if field_name not in definition:
+                errors.append(f"Definition {i} missing required field: {field_name}")
 
         # Analyze POS
         if "pos" in definition:
             pos = definition["pos"]
-            validation["analysis"]["pos_types"].add(pos)
+            pos_types.add(pos)
             if pos not in VALID_POS_TYPES:
-                validation["warnings"].append(f"Definition {i} has invalid POS: {pos}")
+                warnings.append(f"Definition {i} has invalid POS: {pos}")
 
         # Check translations
-        for lang in validation["analysis"]["has_translations"]:
+        for lang in has_translations:
             if definition.get(f"{lang}_translation"):
-                validation["analysis"]["has_translations"][lang] += 1
+                has_translations[lang] += 1
 
         # Check phonetics and examples
         if definition.get("phonetic_spelling"):
-            validation["analysis"]["has_phonetics"] += 1
+            has_phonetics += 1
         if definition.get("ipa_spelling"):
-            validation["analysis"]["has_ipa"] += 1
+            has_ipa += 1
         if definition.get("examples") and len(definition["examples"]) > 0:
-            validation["analysis"]["has_examples"] += 1
+            has_examples += 1
 
-    # Convert set to list for JSON serialization
-    validation["analysis"]["pos_types"] = list(validation["analysis"]["pos_types"])
+    analysis["definition_count"] = len(definitions)
+    analysis["pos_types"] = list(pos_types)
+    analysis["has_translations"] = has_translations
+    analysis["has_phonetics"] = has_phonetics
+    analysis["has_ipa"] = has_ipa
+    analysis["has_examples"] = has_examples
 
-    return validation
+    return {
+        "word": word,
+        "valid": True,
+        "errors": errors,
+        "warnings": warnings,
+        "analysis": analysis,
+    }
 
 
 if __name__ == "__main__":

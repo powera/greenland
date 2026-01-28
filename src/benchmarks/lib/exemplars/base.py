@@ -18,7 +18,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 import benchmarks.datastore.common as datastore_common
 import benchmarks.benchmark_constants as benchmark_constants
 from clients import unified_client
-from clients.types import Response
+from clients.types import Response, Schema
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -52,9 +52,9 @@ class ExemplarMetadata:
     context: Optional[str] = None  # Optional system context for the prompt
     max_tokens: int = 1024  # Maximum tokens for response
     temperature: float = 0.7  # Temperature for generation
-    structured_output: Optional[Dict] = None  # JSON schema for structured output
+    structured_output: Optional[Schema] = None  # JSON schema for structured output
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary, handling enums and None values."""
         result = {}
         for k, v in asdict(self).items():
@@ -434,8 +434,7 @@ class ExemplarReportGenerator:
         # Generate simple HTML report
         report_path = os.path.join(self.output_dir, f"{exemplar_id}.html")
         with open(report_path, "w", encoding="utf-8") as f:
-            f.write(
-                f"""<!DOCTYPE html>
+            f.write(f"""<!DOCTYPE html>
 <html>
 <head>
     <title>Exemplar Report: {exemplar.name}</title>
@@ -459,8 +458,7 @@ class ExemplarReportGenerator:
     {self._generate_model_sections(results)}
 </body>
 </html>
-"""
-            )
+""")
 
         logger.info(f"Generated report at {report_path}")
         return report_path
@@ -485,8 +483,7 @@ class ExemplarReportGenerator:
             model_size = model_sizes.get(model_name, "Unknown")
 
             # Create section for this model
-            sections.append(
-                f"""
+            sections.append(f"""
     <div class="model-response">
         <h2>Model: {model_name} ({model_size} MB)</h2>
         <div class="metadata">
@@ -496,8 +493,7 @@ class ExemplarReportGenerator:
         <h3>Response:</h3>
         <pre>{response}</pre>
     </div>
-"""
-            )
+""")
 
         return "\n".join(sections)
 
@@ -533,8 +529,7 @@ class ExemplarReportGenerator:
         # Generate HTML table of exemplars
         rows = []
         for exemplar in exemplars:
-            rows.append(
-                f"""
+            rows.append(f"""
     <tr>
         <td>{exemplar.name}</td>
         <td>{exemplar.id}</td>
@@ -542,14 +537,12 @@ class ExemplarReportGenerator:
         <td>{exemplar.description or ""}</td>
         <td><a href="{exemplar.id}.html">View Report</a></td>
     </tr>
-"""
-            )
+""")
 
         # Write index report
         index_path = os.path.join(self.output_dir, "index.html")
         with open(index_path, "w") as f:
-            f.write(
-                f"""<!DOCTYPE html>
+            f.write(f"""<!DOCTYPE html>
 <html>
 <head>
     <title>Exemplar Reports</title>
@@ -575,8 +568,7 @@ class ExemplarReportGenerator:
     </table>
 </body>
 </html>
-"""
-            )
+""")
 
         logger.info(f"Generated index report at {index_path}")
         return index_path
@@ -600,7 +592,7 @@ def register_exemplar(
     context: Optional[str] = None,
     max_tokens: int = 1024,
     temperature: float = 0.7,
-    structured_output: Optional[Dict] = None,
+    structured_output: Optional[Schema] = None,
 ) -> None:
     """
     Register an exemplar with the global registry.
