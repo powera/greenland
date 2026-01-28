@@ -1,0 +1,552 @@
+{% extends "base.html" %}
+
+{% block title %}Bebras - Database Management{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/bebras.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="d-flex align-items-center mb-4">
+                <i class="bi bi-shield-check fs-2 me-3 text-primary"></i>
+                <div>
+                    <h1 class="mb-0">Bebras</h1>
+                    <p class="text-muted mb-0">Database Integrity, Sentence Links, and Translation Verification</p>
+                </div>
+            </div>
+
+            <!-- Stats row -->
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="card bg-light">
+                        <div class="card-body text-center py-2">
+                            <div class="fw-bold fs-4">{{ total_lemmas }}</div>
+                            <small class="text-muted">Lemmas with GUIDs</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-light">
+                        <div class="card-body text-center py-2">
+                            <div class="fw-bold fs-4">{{ total_sentences }}</div>
+                            <small class="text-muted">Active Sentences</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-light">
+                        <div class="card-body text-center py-2">
+                            <a href="{{ url_for('batch_operations.list_batches') }}" class="text-decoration-none">
+                                <div class="fw-bold fs-4"><i class="bi bi-collection"></i></div>
+                                <small class="text-muted">View Batch Jobs</small>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mode tabs -->
+            <ul class="nav nav-tabs bebras-tabs" id="bebrasModeTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="sentence-tab" data-bs-toggle="tab"
+                            data-bs-target="#sentence-pane" type="button" role="tab">
+                        <i class="bi bi-chat-left-quote me-2"></i>Sentence Links
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="integrity-tab" data-bs-toggle="tab"
+                            data-bs-target="#integrity-pane" type="button" role="tab">
+                        <i class="bi bi-shield-check me-2"></i>Integrity Check
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="verify-tab" data-bs-toggle="tab"
+                            data-bs-target="#verify-pane" type="button" role="tab">
+                        <i class="bi bi-check2-all me-2"></i>Translation Verification
+                    </button>
+                </li>
+            </ul>
+
+            <!-- Tab content -->
+            <div class="tab-content bebras-tab-content" id="bebrasTabContent">
+
+                <!-- Sentence Links Tab -->
+                <div class="tab-pane fade show active" id="sentence-pane" role="tabpanel">
+                    <div class="card border-top-0 rounded-top-0">
+                        <div class="card-body">
+                            <p class="text-muted mb-4">
+                                Process sentences to analyze vocabulary, create database records,
+                                and link sentences to existing lemmas.
+                            </p>
+
+                            <!-- Sub-tabs for single vs file -->
+                            <ul class="nav nav-pills mb-3" id="sentenceModeNav">
+                                <li class="nav-item">
+                                    <button class="nav-link active" data-bs-toggle="pill"
+                                            data-bs-target="#single-sentence">Single Sentence</button>
+                                </li>
+                                <li class="nav-item">
+                                    <button class="nav-link" data-bs-toggle="pill"
+                                            data-bs-target="#file-sentences">From File</button>
+                                </li>
+                            </ul>
+
+                            <div class="tab-content">
+                                <!-- Single Sentence Form -->
+                                <div class="tab-pane fade show active" id="single-sentence">
+                                    <form method="post" action="{{ url_for('bebras.process_sentence') }}">
+                                        <div class="mb-3">
+                                            <label for="sentence" class="form-label">Sentence</label>
+                                            <textarea class="form-control" id="sentence" name="sentence"
+                                                      rows="2" placeholder="Enter a sentence to process..."
+                                                      required></textarea>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="mb-3">
+                                                    <label for="source_language" class="form-label">Source Language</label>
+                                                    <select class="form-select" id="source_language" name="source_language">
+                                                        <option value="en" selected>English</option>
+                                                        <option value="lt">Lithuanian</option>
+                                                        <option value="zh">Chinese</option>
+                                                        <option value="fr">French</option>
+                                                        <option value="es">Spanish</option>
+                                                        <option value="de">German</option>
+                                                        <option value="eo">Esperanto</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Target Languages</label>
+                                                    <div class="d-flex flex-wrap gap-2">
+                                                        {% for code, name in verification_languages %}
+                                                        <div class="form-check form-check-inline">
+                                                            <input class="form-check-input" type="checkbox"
+                                                                   name="target_languages" value="{{ code }}"
+                                                                   id="tgt_{{ code }}" {% if code in ['lt', 'zh', 'fr', 'es'] %}checked{% endif %}>
+                                                            <label class="form-check-label" for="tgt_{{ code }}">{{ name }}</label>
+                                                        </div>
+                                                        {% endfor %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="context" class="form-label">Context (optional)</label>
+                                            <input type="text" class="form-control" id="context" name="context"
+                                                   placeholder="Optional context about the sentence">
+                                        </div>
+
+                                        <div class="d-flex gap-3 mb-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="verified" name="verified" value="true">
+                                                <label class="form-check-label" for="verified">Mark as verified</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="output_json" name="output_json" value="true">
+                                                <label class="form-check-label" for="output_json">JSON output</label>
+                                            </div>
+                                        </div>
+
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="bi bi-play-fill me-2"></i>Process Sentence
+                                        </button>
+                                    </form>
+                                </div>
+
+                                <!-- File Processing Form -->
+                                <div class="tab-pane fade" id="file-sentences">
+                                    <form method="post" action="{{ url_for('bebras.process_file') }}">
+                                        <div class="mb-3">
+                                            <label for="file_path" class="form-label">File Path</label>
+                                            <input type="text" class="form-control" id="file_path" name="file_path"
+                                                   placeholder="/path/to/sentences.txt" required>
+                                            <small class="form-text text-muted">One sentence per line</small>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="mb-3">
+                                                    <label for="file_source_language" class="form-label">Source Language</label>
+                                                    <select class="form-select" id="file_source_language" name="source_language">
+                                                        <option value="en" selected>English</option>
+                                                        <option value="lt">Lithuanian</option>
+                                                        <option value="zh">Chinese</option>
+                                                        <option value="fr">French</option>
+                                                        <option value="es">Spanish</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Target Languages</label>
+                                                    <div class="d-flex flex-wrap gap-2">
+                                                        {% for code, name in verification_languages %}
+                                                        <div class="form-check form-check-inline">
+                                                            <input class="form-check-input" type="checkbox"
+                                                                   name="target_languages" value="{{ code }}"
+                                                                   id="file_tgt_{{ code }}" {% if code in ['lt', 'zh', 'fr', 'es'] %}checked{% endif %}>
+                                                            <label class="form-check-label" for="file_tgt_{{ code }}">{{ name }}</label>
+                                                        </div>
+                                                        {% endfor %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="d-flex gap-3 mb-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="file_verified" name="verified" value="true">
+                                                <label class="form-check-label" for="file_verified">Mark as verified</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="file_output_json" name="output_json" value="true">
+                                                <label class="form-check-label" for="file_output_json">JSON output</label>
+                                            </div>
+                                        </div>
+
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="bi bi-play-fill me-2"></i>Process File
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <!-- CLI Reference -->
+                            <div class="mt-4 p-3 bg-dark text-light rounded">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <small class="text-muted">CLI Equivalent:</small>
+                                    <button class="btn btn-sm btn-outline-light" onclick="copyCliCommand('sentence-cli')">
+                                        <i class="bi bi-clipboard"></i>
+                                    </button>
+                                </div>
+                                <code id="sentence-cli">PYTHONPATH=src python src/agents/bebras.py --sentence "Your sentence" --languages lt zh fr es</code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Integrity Check Tab -->
+                <div class="tab-pane fade" id="integrity-pane" role="tabpanel">
+                    <div class="card border-top-0 rounded-top-0">
+                        <div class="card-body">
+                            <p class="text-muted mb-4">
+                                Check database structural integrity and identify data quality issues like
+                                orphaned records, missing fields, and constraint violations.
+                            </p>
+
+                            <form method="post" action="{{ url_for('bebras.check_integrity') }}">
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold">Check Type</label>
+                                    <div class="row">
+                                        {% for check_id, check_name, check_desc in integrity_checks %}
+                                        <div class="col-md-6 col-lg-4 mb-2">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio"
+                                                       name="check_type" value="{{ check_id }}"
+                                                       id="check_{{ check_id }}" {% if check_id == 'all' %}checked{% endif %}>
+                                                <label class="form-check-label" for="check_{{ check_id }}">
+                                                    <strong>{{ check_name }}</strong>
+                                                    <br><small class="text-muted">{{ check_desc }}</small>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+
+                                <div class="row mb-4">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="output_file" class="form-label">Output File (optional)</label>
+                                            <input type="text" class="form-control" id="output_file" name="output_file"
+                                                   placeholder="/path/to/report.json">
+                                            <small class="form-text text-muted">Save detailed JSON report to file</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3 pt-4">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="fix_issues" name="fix_issues" value="true">
+                                                <label class="form-check-label" for="fix_issues">
+                                                    <strong>Fix Issues</strong>
+                                                    <br><small class="text-muted">Auto-fix missing punctuation and sentence levels</small>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-shield-check me-2"></i>Run Integrity Check
+                                </button>
+                            </form>
+
+                            <!-- CLI Reference -->
+                            <div class="mt-4 p-3 bg-dark text-light rounded">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <small class="text-muted">CLI Equivalent:</small>
+                                    <button class="btn btn-sm btn-outline-light" onclick="copyCliCommand('integrity-cli')">
+                                        <i class="bi bi-clipboard"></i>
+                                    </button>
+                                </div>
+                                <code id="integrity-cli">PYTHONPATH=src python src/agents/bebras.py --check-integrity --check all</code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Translation Verification Tab -->
+                <div class="tab-pane fade" id="verify-pane" role="tabpanel">
+                    <div class="card border-top-0 rounded-top-0">
+                        <div class="card-body">
+                            <p class="text-muted mb-4">
+                                Verify existing translations without regenerating content.
+                                Uses LLM to check translation correctness, with optional batch API support for cost savings.
+                            </p>
+
+                            <!-- Sub-tabs for words vs sentences -->
+                            <ul class="nav nav-pills mb-3" id="verifyModeNav">
+                                <li class="nav-item">
+                                    <button class="nav-link active" data-bs-toggle="pill"
+                                            data-bs-target="#verify-words">Verify Words</button>
+                                </li>
+                                <li class="nav-item">
+                                    <button class="nav-link" data-bs-toggle="pill"
+                                            data-bs-target="#verify-sentences">Verify Sentences</button>
+                                </li>
+                            </ul>
+
+                            <div class="tab-content">
+                                <!-- Verify Words Form -->
+                                <div class="tab-pane fade show active" id="verify-words">
+                                    <form method="post" action="{{ url_for('bebras.verify_words') }}">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label for="word_guid" class="form-label">GUID (optional)</label>
+                                                    <input type="text" class="form-control" id="word_guid" name="guid"
+                                                           placeholder="WRD-00123">
+                                                    <small class="form-text text-muted">Leave empty to verify multiple words</small>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label for="word_limit" class="form-label">Limit</label>
+                                                    <input type="number" class="form-control" id="word_limit" name="limit"
+                                                           value="100" min="1" max="10000">
+                                                    <small class="form-text text-muted">Max words to verify</small>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="form-label">Languages to Verify</label>
+                                            <div class="d-flex flex-wrap gap-2">
+                                                {% for code, name in verification_languages %}
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" type="checkbox"
+                                                           name="languages" value="{{ code }}"
+                                                           id="word_lang_{{ code }}" {% if code in ['lt', 'zh', 'fr', 'es'] %}checked{% endif %}>
+                                                    <label class="form-check-label" for="word_lang_{{ code }}">{{ name }}</label>
+                                                </div>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-3">
+                                            <div class="col-md-6">
+                                                <div class="d-flex flex-column gap-2">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" id="word_unverified_only"
+                                                               name="unverified_only" value="true" checked>
+                                                        <label class="form-check-label" for="word_unverified_only">
+                                                            Only unverified translations
+                                                        </label>
+                                                    </div>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" id="word_report_only"
+                                                               name="report_only" value="true">
+                                                        <label class="form-check-label" for="word_report_only">
+                                                            Report only (don't update database)
+                                                        </label>
+                                                    </div>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" id="word_output_json"
+                                                               name="output_json" value="true">
+                                                        <label class="form-check-label" for="word_output_json">
+                                                            JSON output
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="card bg-light">
+                                                    <div class="card-body">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox" id="word_use_batch"
+                                                                   name="use_batch" value="true">
+                                                            <label class="form-check-label" for="word_use_batch">
+                                                                <i class="bi bi-collection me-1"></i>
+                                                                <strong>Use OpenAI Batch API</strong>
+                                                            </label>
+                                                        </div>
+                                                        <small class="text-muted d-block mt-1">
+                                                            Queue requests for async processing (50% cost savings).
+                                                            Results available in Batch Operations view.
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="bi bi-check2-all me-2"></i>Verify Words
+                                        </button>
+                                    </form>
+                                </div>
+
+                                <!-- Verify Sentences Form -->
+                                <div class="tab-pane fade" id="verify-sentences">
+                                    <form method="post" action="{{ url_for('bebras.verify_sentences') }}">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label for="sentence_id" class="form-label">Sentence ID (optional)</label>
+                                                    <input type="number" class="form-control" id="sentence_id" name="sentence_id"
+                                                           placeholder="123">
+                                                    <small class="form-text text-muted">Leave empty to verify multiple sentences</small>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label for="sentence_limit" class="form-label">Limit</label>
+                                                    <input type="number" class="form-control" id="sentence_limit" name="limit"
+                                                           value="50" min="1" max="10000">
+                                                    <small class="form-text text-muted">Max sentences to verify</small>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="form-label">Languages to Verify</label>
+                                            <div class="d-flex flex-wrap gap-2">
+                                                {% for code, name in verification_languages %}
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" type="checkbox"
+                                                           name="languages" value="{{ code }}"
+                                                           id="sent_lang_{{ code }}" {% if code in ['lt', 'zh', 'fr', 'es'] %}checked{% endif %}>
+                                                    <label class="form-check-label" for="sent_lang_{{ code }}">{{ name }}</label>
+                                                </div>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-3">
+                                            <div class="col-md-6">
+                                                <div class="d-flex flex-column gap-2">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" id="sent_unverified_only"
+                                                               name="unverified_only" value="true" checked>
+                                                        <label class="form-check-label" for="sent_unverified_only">
+                                                            Only unverified translations
+                                                        </label>
+                                                    </div>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" id="sent_report_only"
+                                                               name="report_only" value="true">
+                                                        <label class="form-check-label" for="sent_report_only">
+                                                            Report only (don't update database)
+                                                        </label>
+                                                    </div>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" id="sent_check_lemma_links"
+                                                               name="check_lemma_links" value="true" checked>
+                                                        <label class="form-check-label" for="sent_check_lemma_links">
+                                                            Also verify linked lemmas
+                                                        </label>
+                                                    </div>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" id="sent_output_json"
+                                                               name="output_json" value="true">
+                                                        <label class="form-check-label" for="sent_output_json">
+                                                            JSON output
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="card bg-light">
+                                                    <div class="card-body">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox" id="sent_use_batch"
+                                                                   name="use_batch" value="true">
+                                                            <label class="form-check-label" for="sent_use_batch">
+                                                                <i class="bi bi-collection me-1"></i>
+                                                                <strong>Use OpenAI Batch API</strong>
+                                                            </label>
+                                                        </div>
+                                                        <small class="text-muted d-block mt-1">
+                                                            Queue requests for async processing (50% cost savings).
+                                                            Results available in Batch Operations view.
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="bi bi-check2-all me-2"></i>Verify Sentences
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <!-- CLI Reference -->
+                            <div class="mt-4 p-3 bg-dark text-light rounded">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <small class="text-muted">CLI Equivalent:</small>
+                                    <button class="btn btn-sm btn-outline-light" onclick="copyCliCommand('verify-cli')">
+                                        <i class="bi bi-clipboard"></i>
+                                    </button>
+                                </div>
+                                <code id="verify-cli">PYTHONPATH=src python src/agents/bebras.py --verify words --languages lt zh fr es --limit 100</code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function copyCliCommand(elementId) {
+    const codeElement = document.getElementById(elementId);
+    const text = codeElement.innerText;
+    navigator.clipboard.writeText(text).then(function() {
+        // Show brief feedback
+        const btn = codeElement.closest('.bg-dark').querySelector('button');
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<i class="bi bi-check"></i>';
+        setTimeout(() => { btn.innerHTML = originalHtml; }, 1000);
+    });
+}
+
+// Update CLI command preview based on form inputs
+document.addEventListener('DOMContentLoaded', function() {
+    // Could add dynamic CLI preview updates here if needed
+});
+</script>
+{% endblock %}
