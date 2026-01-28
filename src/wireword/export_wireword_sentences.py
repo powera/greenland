@@ -144,17 +144,12 @@ class WirewordSentenceExporter:
 
         session = self.get_session()
         try:
-            # Build query: get all sentences EXCEPT those with level = -1
-            # This includes NULL/None levels
+            # Build query: get all sentences
             # OPTIMIZATION: Eager load translations to avoid N+1 queries
-            query = (
-                session.query(Sentence)
-                .options(joinedload(Sentence.translations))
-                .filter((Sentence.minimum_level != -1) | (Sentence.minimum_level == None))
-            )
+            query = session.query(Sentence).options(joinedload(Sentence.translations))
 
             all_sentences = query.all()
-            logger.info(f"Found {len(all_sentences)} sentences (excluding level = -1)")
+            logger.info(f"Found {len(all_sentences)} sentences")
 
             # Optionally exclude sentences that are part of conversations
             if exclude_conversation_sentences:
@@ -307,8 +302,12 @@ class WirewordSentenceExporter:
                 # Include optional metadata
                 if sentence.source_filename:
                     sentence_entry["source"] = sentence.source_filename
-                if sentence.minimum_level is not None:
+                # TODO: Remove level=21 fallback once wireword consumers no longer require
+                # minimum_level field. Currently they compute sentence levels from word levels.
+                if sentence.minimum_level is not None and sentence.minimum_level != -1:
                     sentence_entry["minimum_level"] = sentence.minimum_level
+                else:
+                    sentence_entry["minimum_level"] = 21
 
                 # Only include audio if present
                 if audio_dict:

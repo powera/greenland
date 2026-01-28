@@ -38,6 +38,7 @@ def list_sentences() -> ResponseReturnValue:
     search = request.args.get("search", "").strip()
     pattern_type = request.args.get("pattern_type", "").strip()
     minimum_level = request.args.get("minimum_level", "", type=str).strip()
+    has_translation = request.args.get("has_translation", "").strip()
     exclude_rejected = request.args.get("exclude_rejected", "no")
     exclude_verified = request.args.get("exclude_verified", "no")
 
@@ -64,8 +65,19 @@ def list_sentences() -> ResponseReturnValue:
     if minimum_level:
         if minimum_level == "null":
             query = query.filter(Sentence.minimum_level.is_(None))
+        elif minimum_level.endswith("+"):
+            # "8+" means level >= 8
+            level_value = int(minimum_level[:-1])
+            query = query.filter(Sentence.minimum_level >= level_value)
         else:
             query = query.filter(Sentence.minimum_level == int(minimum_level))
+
+    if has_translation:
+        # Filter sentences that have a translation in the specified language
+        translation_subquery = g.db.query(SentenceTranslation.sentence_id).filter(
+            SentenceTranslation.language_code == has_translation
+        )
+        query = query.filter(Sentence.id.in_(translation_subquery))
 
     # Order by minimum level (NULL at end), then by ID
     level_order = case(
@@ -114,6 +126,9 @@ def list_sentences() -> ResponseReturnValue:
     # Calculate pagination
     total_pages = (total + Config.ITEMS_PER_PAGE - 1) // Config.ITEMS_PER_PAGE
 
+    # Get languages for the translation filter dropdown
+    languages = get_languages_in_hierarchy()
+
     return render_template(
         "sentences/list.html",
         sentences=sentences,
@@ -124,9 +139,11 @@ def list_sentences() -> ResponseReturnValue:
         search=search,
         pattern_type=pattern_type,
         minimum_level=minimum_level,
+        has_translation=has_translation,
         exclude_rejected=exclude_rejected,
         exclude_verified=exclude_verified,
         pattern_types=pattern_types,
+        languages=languages,
     )
 
 

@@ -250,19 +250,9 @@ class UngurysAgent:
                 logger.warning("  Sentence export failed")
                 results["sentences_exported"] = 0
 
-            # Also export conversations
-            logger.info("Exporting conversations to wireword_conversations.jsonl...")
-            conversations_path = os.path.join(wireword_dir, "wireword_conversations.jsonl")
-            conv_success, conv_count = self.export_wireword_conversations(
-                output_path=conversations_path,
-            )
-            if conv_success:
-                logger.info(f"  Exported {conv_count} conversations")
-                results["conversations_exported"] = conv_count
-                results["files_created"].append(conversations_path)
-            else:
-                logger.warning("  Conversation export failed")
-                results["conversations_exported"] = 0
+            # TODO: Re-enable conversation export when we have conversations
+            # Conversation export is disabled - we currently have no conversations
+            results["conversations_exported"] = 0
         else:
             logger.error(f"Failed to export to {output_dir}")
 
@@ -481,15 +471,12 @@ class UngurysAgent:
             "note": "Sentences are always exported to wireword_sentences.json file",
         }
 
-        # Always export conversations to separate file (regardless of export mode)
-        logger.info("Exporting conversations to wireword_conversations.jsonl file...")
-        conv_success, conv_count = self.export_wireword_conversations(
-            output_path=None,  # Use default path
-        )
+        # TODO: Re-enable conversation export when we have conversations
+        # Conversation export is disabled - we currently have no conversations
         results["exports"]["conversations"] = {
-            "success": conv_success,
-            "count": conv_count,
-            "note": "Conversations are always exported to wireword_conversations.jsonl file",
+            "success": True,
+            "count": 0,
+            "note": "Conversation export disabled - no conversations available",
         }
 
         # Note: Manifest is generated automatically by export_wireword_directory()
