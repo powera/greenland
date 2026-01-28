@@ -55,6 +55,7 @@ LANGUAGE_FIELDS = {
     "en": ("lemma_text", "English", False),  # English uses lemma_text field
     "lt": ("lt", "Lithuanian", True),
     "zh": ("zh", "Chinese", True),
+    "zh-tw": ("zh-tw", "Chinese (Taiwan)", True),  # Taiwan-specific Chinese variant
     "fr": ("fr", "French", True),
     "es": ("es", "Spanish", True),
     "de": ("de", "German", True),

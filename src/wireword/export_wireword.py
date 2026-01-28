@@ -30,7 +30,7 @@ from wordfreq.storage.translation_helpers import (
     bulk_get_translations,
     get_translation,
 )
-from langtools.zh.converter import to_simplified
+from langtools.zh.converter import to_simplified, to_traditional
 from langtools.zh.pinyin_helper import generate_pinyin
 from wordfreq.trakaido.utils.data_models import ExportStats, create_export_stats
 from wordfreq.trakaido.utils.text_rendering import format_subtype_display_name
@@ -179,14 +179,31 @@ class WirewordExporter:
             session, all_lemmas, self.language
         )
 
+        # For Traditional Chinese export, also fetch zh-tw translations
+        zh_tw_translations_by_id: Dict[int, Optional[str]] = {}
+        if self.language == "zh" and not self.simplified_chinese:
+            zh_tw_translations_by_id = bulk_get_translations(session, all_lemmas, "zh-tw")
+            logger.info(
+                f"Fetched {sum(1 for v in zh_tw_translations_by_id.values() if v)} zh-tw translations"
+            )
+
         # Filter by translation availability using pre-fetched data
         lemmas = []
         for lemma in all_lemmas:
-            translation = translations_by_id.get(lemma.id)
-            if translation and translation.strip():
-                lemmas.append(lemma)
-                if limit and len(lemmas) >= limit:
-                    break
+            # For Traditional Chinese, consider both zh and zh-tw translations
+            if self.language == "zh" and not self.simplified_chinese:
+                zh_tw_trans = zh_tw_translations_by_id.get(lemma.id)
+                zh_trans = translations_by_id.get(lemma.id)
+                if (zh_tw_trans and zh_tw_trans.strip()) or (zh_trans and zh_trans.strip()):
+                    lemmas.append(lemma)
+                    if limit and len(lemmas) >= limit:
+                        break
+            else:
+                translation = translations_by_id.get(lemma.id)
+                if translation and translation.strip():
+                    lemmas.append(lemma)
+                    if limit and len(lemmas) >= limit:
+                        break
 
         logger.info(f"Found {len(lemmas)} lemmas with {self.language_name} translations")
 
@@ -195,15 +212,26 @@ class WirewordExporter:
         for lemma in lemmas:
             target_translation = translations_by_id.get(lemma.id)
 
-            # For Chinese, optionally convert to simplified
-            if self.language == "zh" and self.simplified_chinese and target_translation:
-                target_translation = to_simplified(target_translation)
+            # For Chinese, handle simplified vs traditional
+            if self.language == "zh":
+                if self.simplified_chinese:
+                    # Convert to Simplified Chinese
+                    if target_translation:
+                        target_translation = to_simplified(target_translation)
+                else:
+                    # Traditional Chinese: prefer zh-tw, fall back to converting zh
+                    zh_tw_trans = zh_tw_translations_by_id.get(lemma.id)
+                    if zh_tw_trans and zh_tw_trans.strip():
+                        target_translation = zh_tw_trans
+                    elif target_translation:
+                        # Convert zh to traditional as fallback
+                        target_translation = to_traditional(target_translation)
 
             # Get effective difficulty level from pre-fetched data
-            effective_level: int = difficulty_levels_by_id.get(lemma.id) or 0
+            lemma_effective_level: int = difficulty_levels_by_id.get(lemma.id) or 0
 
             # Skip words at level -1 (excluded from all wireword exports)
-            if effective_level == -1:
+            if lemma_effective_level == -1:
                 continue
 
             entry = {
@@ -214,7 +242,7 @@ class WirewordExporter:
                 "pos_type": lemma.pos_type,
                 "pos_subtype": lemma.pos_subtype or "general",
                 "subtype": lemma.pos_subtype or "general",
-                "trakaido_level": effective_level,
+                "trakaido_level": lemma_effective_level,
                 "verified": lemma.verified,
                 "confidence": lemma.confidence,
                 "_lemma_id": lemma.id,  # Keep for bulk lookups later
@@ -999,6 +1027,14 @@ class WirewordExporter:
             )
             logger.info(f"Bulk fetched translations and difficulty levels")
 
+            # For Traditional Chinese export, also fetch zh-tw translations
+            zh_tw_translations_by_id: Dict[int, Optional[str]] = {}
+            if self.language == "zh" and not self.simplified_chinese:
+                zh_tw_translations_by_id = bulk_get_translations(session, lemmas, "zh-tw")
+                logger.info(
+                    f"Fetched {sum(1 for v in zh_tw_translations_by_id.values() if v)} zh-tw translations for verbs"
+                )
+
             # Bulk fetch all derivative forms for all verbs
             all_derivative_forms = (
                 session.query(DerivativeForm).filter(DerivativeForm.lemma_id.in_(lemma_ids)).all()
@@ -1063,13 +1099,24 @@ class WirewordExporter:
                 base_english = self.get_english_word_from_lemma(session, lemma)
                 base_target = translations_by_id.get(lemma.id)
 
+                # For Chinese, handle simplified vs traditional
+                if self.language == "zh":
+                    if self.simplified_chinese:
+                        # Convert to Simplified Chinese
+                        if base_target:
+                            base_target = to_simplified(base_target)
+                    else:
+                        # Traditional Chinese: prefer zh-tw, fall back to converting zh
+                        zh_tw_trans = zh_tw_translations_by_id.get(lemma.id)
+                        if zh_tw_trans and zh_tw_trans.strip():
+                            base_target = zh_tw_trans
+                        elif base_target:
+                            # Convert zh to traditional as fallback
+                            base_target = to_traditional(base_target)
+
                 # Skip verbs without target language translation
                 if not base_target or not base_target.strip():
                     continue
-
-                # For Chinese, optionally convert to simplified
-                if self.language == "zh" and self.simplified_chinese and base_target:
-                    base_target = to_simplified(base_target)
 
                 # Build grammatical forms (conjugations)
                 grammatical_forms = {}

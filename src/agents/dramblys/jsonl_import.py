@@ -12,7 +12,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple, Union, cast
 
-from wordfreq.storage.models.schema import Lemma
+from wordfreq.storage.models.schema import Lemma, LemmaTranslation
+from wordfreq.storage.translation_helpers import LANGUAGE_FIELDS
 
 logger = logging.getLogger(__name__)
 
@@ -348,10 +349,66 @@ class JSONLImporter:
 
         lemma.notes = jsonl_data.get("notes")
 
-        # Note: Non-English translations would need to be imported as LemmaTranslation
-        # records separately. This basic importer only handles the base Lemma.
-
         return lemma
+
+    def import_translations_for_lemma(self, lemma: Lemma, translations: Dict[str, str]) -> int:
+        """
+        Import translations for a lemma from JSONL data.
+
+        Args:
+            lemma: The Lemma object to add translations to
+            translations: Dictionary of language_code -> translation_text
+
+        Returns:
+            Number of translations imported
+        """
+        if not translations or self.dry_run:
+            return 0
+
+        imported_count = 0
+        for lang_code, translation_text in translations.items():
+            # Skip English (stored as lemma_text, not in LemmaTranslation)
+            if lang_code == "en":
+                continue
+
+            # Skip empty translations
+            if not translation_text or not translation_text.strip():
+                continue
+
+            # Check if this is a supported language code
+            if lang_code not in LANGUAGE_FIELDS:
+                logger.debug(f"  Skipping unsupported language code: {lang_code}")
+                continue
+
+            # Check if translation already exists
+            existing = (
+                self.session.query(LemmaTranslation)
+                .filter(
+                    LemmaTranslation.lemma_id == lemma.id,
+                    LemmaTranslation.language_code == lang_code,
+                )
+                .first()
+            )
+
+            if existing:
+                # Update only if translation differs
+                if existing.translation != translation_text:
+                    existing.translation = translation_text
+                    imported_count += 1
+                    logger.debug(f"  Updated {lang_code} translation: {translation_text}")
+            else:
+                # Create new translation
+                translation_obj = LemmaTranslation(
+                    lemma_id=lemma.id,
+                    language_code=lang_code,
+                    translation=translation_text,
+                    verified=False,
+                )
+                self.session.add(translation_obj)
+                imported_count += 1
+                logger.debug(f"  Added {lang_code} translation: {translation_text}")
+
+        return imported_count
 
     def update_lemma_from_jsonl(self, lemma: Lemma, jsonl_data: Dict[str, Any]) -> None:
         """
@@ -408,7 +465,19 @@ class JSONLImporter:
         if existing:
             # GUID exists - check if lemma_text matches
             if existing.lemma_text == lemma_text:
-                # Same word, already exists - skip silently
+                # Same word, already exists - but still update/add translations
+                if not self.dry_run:
+                    translations_imported = self.import_translations_for_lemma(
+                        existing, translations
+                    )
+                    if translations_imported > 0:
+                        self.session.commit()
+                        logger.info(
+                            f"  UPDATE: '{lemma_text}' [{guid}] - Added {translations_imported} translations"
+                        )
+                        self.stats["records_imported"] += 1
+                        return True, f"Added {translations_imported} translations"
+
                 self.stats["records_skipped"] += 1
                 logger.debug(f"  SKIP: '{lemma_text}' [{guid}] - Already exists")
                 return False, "Already exists"
@@ -435,6 +504,13 @@ class JSONLImporter:
             if not self.dry_run:
                 lemma = self.create_lemma_from_jsonl(jsonl_data)
                 self.session.add(lemma)
+                self.session.flush()  # Get lemma.id for translations
+
+                # Import translations from JSONL
+                translations_imported = self.import_translations_for_lemma(lemma, translations)
+                if translations_imported > 0:
+                    logger.debug(f"  Imported {translations_imported} translations")
+
                 self.session.commit()
             self.stats["records_imported"] += 1
             logger.info(f"  NEW: '{lemma_text}' [{guid}]")
