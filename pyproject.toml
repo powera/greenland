@@ -71,7 +71,7 @@ disallow_incomplete_defs = false
 check_untyped_defs = true
 warn_return_any = false
 
-# Ignore missing stubs for external libraries used by benchmarks
+# Ignore missing stubs for external libraries
 [[tool.mypy.overrides]]
 module = [
     "sqlalchemy.*",
@@ -80,6 +80,16 @@ module = [
     "pypinyin.*",
     "psutil.*",
     "bokeh.*",
+    "prometheus_client.*",
+    "opencc.*",
+    "pykakasi.*",
+    "requests.*",
+    "boto3.*",
+    "botocore.*",
+    "tiktoken.*",
+    "werkzeug.*",
+    "jinja2.*",
+    "pydantic.*",
 ]
 ignore_missing_imports = true
 
