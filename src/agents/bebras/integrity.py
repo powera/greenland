@@ -407,6 +407,110 @@ class IntegrityChecker:
             return "。"
         return "."
 
+    def check_sentence_levels(self, fix: bool = False) -> Dict[str, Any]:
+        """Check for sentences with incorrect or missing minimum_level.
+
+        The minimum_level should be:
+        - The second-highest word difficulty level if the sentence has 3+ words
+        - The highest word difficulty level if the sentence has 1-2 words
+
+        This ensures sentences are shown once most (but not all) words are learned,
+        providing some challenge while keeping sentences accessible.
+
+        Args:
+            fix: If True, update the minimum_level for sentences with incorrect values
+        """
+        logger.info("Checking sentence minimum_level values...")
+
+        session = self.get_session()
+        try:
+            from wordfreq.storage.models.schema import SentencePatternWord
+
+            # Get all non-rejected sentences
+            sentences = (
+                session.query(Sentence).filter(Sentence.rejected == False).all()  # noqa: E712
+            )
+
+            issues: List[Dict[str, Any]] = []
+            fixed_count = 0
+
+            for sentence in sentences:
+                # Get pattern words with their lemmas' difficulty levels
+                pattern_words = (
+                    session.query(SentencePatternWord, Lemma)
+                    .join(Lemma, SentencePatternWord.lemma_id == Lemma.id)
+                    .filter(SentencePatternWord.sentence_id == sentence.id)
+                    .all()
+                )
+
+                # Collect difficulty levels (skip words without levels)
+                # Treat -1 (excluded words) as 21 for sorting purposes
+                difficulty_levels = [
+                    21 if lemma.difficulty_level == -1 else lemma.difficulty_level
+                    for pattern_word, lemma in pattern_words
+                    if lemma.difficulty_level is not None
+                ]
+
+                if not difficulty_levels:
+                    # No words with difficulty levels - skip
+                    continue
+
+                # Sort in descending order (21 = excluded words will sort highest)
+                difficulty_levels.sort(reverse=True)
+
+                # Calculate expected level
+                if len(difficulty_levels) >= 3:
+                    # Second-highest level
+                    expected_level = difficulty_levels[1]
+                else:
+                    # Highest level (1 or 2 words)
+                    expected_level = difficulty_levels[0]
+
+                # Check if current level matches
+                if sentence.minimum_level != expected_level:
+                    issues.append(
+                        {
+                            "sentence_id": sentence.id,
+                            "current_level": sentence.minimum_level,
+                            "expected_level": expected_level,
+                            "word_count": len(difficulty_levels),
+                            "difficulty_levels": difficulty_levels,
+                        }
+                    )
+
+                    if fix:
+                        sentence.minimum_level = expected_level
+                        fixed_count += 1
+                        logger.debug(
+                            f"Fixed sentence {sentence.id}: "
+                            f"{sentence.minimum_level} -> {expected_level}"
+                        )
+
+            if fix and fixed_count > 0:
+                session.commit()
+                logger.info(f"Fixed {fixed_count} sentence levels")
+
+            logger.info(f"Found {len(issues)} sentences with incorrect minimum_level")
+
+            return {
+                "issue_count": len(issues),
+                "fixed_count": fixed_count if fix else 0,
+                "issues": issues,
+            }
+
+        except Exception as e:
+            logger.error(f"Error checking sentence levels: {e}")
+            if fix:
+                session.rollback()
+            return {
+                "error": str(e),
+                "issue_count": 0,
+                "fixed_count": 0,
+                "issues": [],
+            }
+        finally:
+            session.close()
+
     def check_sentences_missing_punctuation(self, fix: bool = False) -> Dict[str, Any]:
         """Check for sentences that are missing terminal punctuation.
 
@@ -518,6 +622,7 @@ class IntegrityChecker:
                 "duplicate_guids": self.check_duplicate_guids(),
                 "invalid_difficulty_levels": self.check_invalid_difficulty_levels(),
                 "sentences_missing_punctuation": self.check_sentences_missing_punctuation(),
+                "sentence_levels": self.check_sentence_levels(),
             },
         }
 
@@ -586,6 +691,11 @@ class IntegrityChecker:
         if missing_punct.get("by_language"):
             for lang, count in sorted(missing_punct["by_language"].items()):
                 logger.info(f"    {lang}: {count}")
+        logger.info("")
+
+        logger.info("SENTENCE LEVELS:")
+        sentence_levels = checks["sentence_levels"]
+        logger.info(f"  Incorrect: {sentence_levels['issue_count']}")
 
         total_issues = (
             checks["orphaned_derivative_forms"]["orphaned_count"]
@@ -596,6 +706,7 @@ class IntegrityChecker:
             + checks["duplicate_guids"]["duplicate_count"]
             + checks["invalid_difficulty_levels"]["invalid_count"]
             + missing_punct["missing_count"]
+            + sentence_levels["issue_count"]
         )
 
         logger.info("")
@@ -618,6 +729,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
             "duplicates",
             "invalid-levels",
             "missing-punctuation",
+            "sentence-levels",
             "all",
         ],
         default="all",
@@ -626,7 +738,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--fix",
         action="store_true",
-        help="Fix issues where possible (currently only missing-punctuation)",
+        help="Fix issues where possible (missing-punctuation, sentence-levels)",
     )
 
     return parser
@@ -692,6 +804,24 @@ def main() -> None:
                     print(
                         f"  [{item.get('language_code')}] "
                         f"id={item.get('sentence_id')}: {text_preview}"
+                    )
+
+    elif args.check == "sentence-levels":
+        results = checker.check_sentence_levels(fix=args.fix)
+        print(f"\nSentences with incorrect minimum_level: {results['issue_count']}")
+        if args.fix:
+            print(f"Fixed: {results.get('fixed_count', 0)}")
+        # Print first few examples
+        if not args.fix:
+            issues = cast(List[Dict[str, Any]], results.get("issues") or [])
+            if issues:
+                print("\nExamples:")
+                for item in issues[:10]:
+                    print(
+                        f"  id={item.get('sentence_id')}: "
+                        f"current={item.get('current_level')} "
+                        f"expected={item.get('expected_level')} "
+                        f"(words: {item.get('word_count')}, levels: {item.get('difficulty_levels')})"
                     )
 
     else:  # all
