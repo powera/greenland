@@ -7,13 +7,37 @@ Tests the field difference detection algorithm without requiring database access
 
 import sys
 from pathlib import Path
+from unittest.mock import MagicMock
+import importlib.util
 
 if str(Path(__file__).parent.parent.parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
+# Mock the SQLAlchemy-dependent modules BEFORE importing jsonl_import
+# This allows us to test the pure-Python logic without database dependencies
+mock_schema = MagicMock()
+mock_schema.Lemma = MagicMock
+mock_schema.LemmaTranslation = MagicMock
+sys.modules["wordfreq.storage.models.schema"] = mock_schema
+
+mock_translation_helpers = MagicMock()
+mock_translation_helpers.LANGUAGE_FIELDS = {"en", "es", "fr", "de", "zh", "ja", "ko"}
+sys.modules["wordfreq.storage.translation_helpers"] = mock_translation_helpers
+
+# Also mock the agents.dramblys package itself to prevent __init__.py from loading
+sys.modules["agents.dramblys"] = MagicMock()
+
 import unittest
 
-from agents.dramblys.jsonl_import import JSONLImporter
+# Import the module directly to bypass the package __init__.py
+_module_path = Path(__file__).parent.parent.parent / "agents" / "dramblys" / "jsonl_import.py"
+_spec = importlib.util.spec_from_file_location("agents.dramblys.jsonl_import", _module_path)
+assert _spec is not None, "Could not load module spec"
+_jsonl_import = importlib.util.module_from_spec(_spec)
+sys.modules["agents.dramblys.jsonl_import"] = _jsonl_import
+assert _spec.loader is not None, "Module spec has no loader"
+_spec.loader.exec_module(_jsonl_import)
+JSONLImporter = _jsonl_import.JSONLImporter
 
 
 class MockLemma:
@@ -81,7 +105,7 @@ class TestJSONLImportDiff(unittest.TestCase):
 
         diffs = self.importer.get_field_differences(existing, jsonl_data)
         self.assertEqual(len(diffs), 1)
-        self.assertIn("concept_label", diffs[0])
+        self.assertIn("lemma_text", diffs[0])
         self.assertIn("red", diffs[0])
         self.assertIn("crimson", diffs[0])
 
@@ -211,7 +235,7 @@ class TestJSONLImportDiff(unittest.TestCase):
 
         # Check that all expected changes are present
         diff_str = " ".join(diffs)
-        self.assertIn("concept_label", diff_str)
+        self.assertIn("lemma_text", diff_str)
         self.assertIn("definition", diff_str)
         self.assertIn("difficulty_level", diff_str)
 
