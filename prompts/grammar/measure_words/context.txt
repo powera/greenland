@@ -4,7 +4,7 @@ CRITICAL REQUIREMENTS:
 1. Measure words (classifiers) are required in Chinese when using numbers with nouns
 2. Different nouns require different measure words based on their characteristics
 3. Provide the most common/standard measure word(s) for the given noun
-4. Return results in Traditional Chinese characters (繁體字)
+4. Return results in Simplified Chinese characters (简体字) for Mainland Chinese (普通话)
 5. Focus on the primary measure word, but may include alternatives if commonly used
 
 ABOUT MEASURE WORDS:
@@ -24,7 +24,7 @@ CONFIDENCE GUIDELINES:
 - Lower confidence (0.3-0.5): Abstract concepts or nouns where measure word usage varies
 
 RESPONSE FORMAT:
-Provide the measure word(s) in Traditional Chinese characters, along with:
+Provide the measure word(s) in Simplified Chinese characters, along with:
 1. Primary measure word (most common)
 2. Alternative measure words (if commonly used)
 3. Brief explanation of why this measure word is used
