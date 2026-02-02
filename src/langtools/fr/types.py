@@ -53,7 +53,8 @@ class VerbConjugation:
     confidence: float = 1.0
     notes: Optional[str] = None
 
-    # French verb forms (6 persons x multiple tenses)
+    # French verb forms (6 persons x 3 tenses + participles)
+    # These form names align with GrammaticalForm enum in enums.py
     # Present indicative (Présent de l'indicatif)
     PRESENT_FORMS = [
         "1s_present",  # je
@@ -63,23 +64,14 @@ class VerbConjugation:
         "2p_present",  # vous
         "3p_present",  # ils/elles
     ]
-    # Imperfect (Imparfait)
-    IMPERFECT_FORMS = [
-        "1s_imperfect",
-        "2s_imperfect",
-        "3s_imperfect",
-        "1p_imperfect",
-        "2p_imperfect",
-        "3p_imperfect",
-    ]
-    # Simple past (Passé simple)
-    SIMPLE_PAST_FORMS = [
-        "1s_simple_past",
-        "2s_simple_past",
-        "3s_simple_past",
-        "1p_simple_past",
-        "2p_simple_past",
-        "3p_simple_past",
+    # Imperfect (Imparfait) - uses "impf" to match GrammaticalForm enum
+    IMPF_FORMS = [
+        "1s_impf",
+        "2s_impf",
+        "3s_impf",
+        "1p_impf",
+        "2p_impf",
+        "3p_impf",
     ]
     # Future (Futur simple)
     FUTURE_FORMS = [
@@ -90,45 +82,12 @@ class VerbConjugation:
         "2p_future",
         "3p_future",
     ]
-    # Conditional (Conditionnel présent)
-    CONDITIONAL_FORMS = [
-        "1s_conditional",
-        "2s_conditional",
-        "3s_conditional",
-        "1p_conditional",
-        "2p_conditional",
-        "3p_conditional",
+    # Past participle forms (for passé composé)
+    PARTICIPLE_FORMS = [
+        "pc_m",  # masculine past participle (e.g., "allé")
+        "pc_f",  # feminine past participle (e.g., "allée")
     ]
-    # Present subjunctive (Subjonctif présent)
-    SUBJUNCTIVE_FORMS = [
-        "1s_subjunctive",
-        "2s_subjunctive",
-        "3s_subjunctive",
-        "1p_subjunctive",
-        "2p_subjunctive",
-        "3p_subjunctive",
-    ]
-    # Other forms
-    OTHER_FORMS = [
-        "infinitive",
-        "present_participle",  # participe présent
-        "past_participle",  # participe passé
-        "past_participle_f",  # feminine form
-        "past_participle_mp",  # masculine plural
-        "past_participle_fp",  # feminine plural
-        "imperative_2s",  # tu form
-        "imperative_1p",  # nous form
-        "imperative_2p",  # vous form
-    ]
-    ALL_FORMS = (
-        PRESENT_FORMS
-        + IMPERFECT_FORMS
-        + SIMPLE_PAST_FORMS
-        + FUTURE_FORMS
-        + CONDITIONAL_FORMS
-        + SUBJUNCTIVE_FORMS
-        + OTHER_FORMS
-    )
+    ALL_FORMS = PRESENT_FORMS + IMPF_FORMS + FUTURE_FORMS + PARTICIPLE_FORMS
 
 
 @dataclass
@@ -146,19 +105,14 @@ class AdjectiveDeclension:
     notes: Optional[str] = None
 
     # French adjectives have 4 agreement forms
+    # Form names align with GrammaticalForm enum (ADJ_FR_SINGULAR_M, etc.)
     AGREEMENT_FORMS = [
-        "masculine_singular",
-        "feminine_singular",
-        "masculine_plural",
-        "feminine_plural",
+        "singular_m",
+        "singular_f",
+        "plural_m",
+        "plural_f",
     ]
-    # Comparative forms
-    COMPARISON_FORMS = [
-        "positive",
-        "comparative",
-        "superlative",
-    ]
-    ALL_FORMS = AGREEMENT_FORMS + COMPARISON_FORMS
+    ALL_FORMS = AGREEMENT_FORMS
 
 
 @dataclass

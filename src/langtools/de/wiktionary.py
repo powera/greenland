@@ -458,7 +458,10 @@ class GermanParser:
         return result, success
 
     def _parse_adjective_table(self, html: str) -> Tuple[Dict[str, str], Dict[str, List[str]]]:
-        """Parse a German adjective declension HTML table."""
+        """Parse a German adjective declension HTML table.
+
+        Form names align with GrammaticalForm enum (singular_m, singular_f, etc.)
+        """
         soup = BeautifulSoup(html, "html.parser")
         forms: Dict[str, str] = {}
         alternatives: Dict[str, List[str]] = {}
@@ -471,36 +474,40 @@ class GermanParser:
         if not rows:
             return forms, alternatives
 
-        # German adjective tables are complex; try to extract key forms
-        # This is a simplified extraction
+        # German adjective tables are complex; extract simplified forms
+        # for alignment with GrammaticalForm enum
         for row in rows:
             cells = row.find_all(["th", "td"])
             if len(cells) < 2:
                 continue
 
             case_text = cells[0].get_text(strip=True).lower()
-            matched_case = None
 
-            for known_case, internal_name in self.CASE_NAME_MAP.items():
-                if known_case in case_text:
-                    matched_case = internal_name
-                    break
+            # Only extract nominative forms for simplified gender/number forms
+            if "nominativ" not in case_text and "nominative" not in case_text:
+                continue
 
-            if matched_case:
-                for i, cell in enumerate(cells[1:], start=1):
-                    form_text = cell.get_text(strip=True)
-                    cleaned = clean_form(form_text)
-                    if cleaned:
-                        # Simplified: just use index for gender
-                        gender_suffix = ["m", "f", "n", "pl"][min(i - 1, 3)]
-                        if gender_suffix == "pl":
-                            form_key = f"{matched_case}_plural_strong"
-                        else:
-                            form_key = f"{matched_case}_singular_{gender_suffix}_strong"
-                        if form_key not in forms:
-                            forms[form_key] = extract_primary_form(cleaned)
-                            if len(cleaned) > 1:
-                                alternatives[form_key] = cleaned[1:]
+            for i, cell in enumerate(cells[1:], start=1):
+                form_text = cell.get_text(strip=True)
+                cleaned = clean_form(form_text)
+                if cleaned:
+                    # Map column index to gender/number
+                    # Typical order: masculine, feminine, neuter, plural
+                    if i == 1:
+                        form_key = "singular_m"
+                    elif i == 2:
+                        form_key = "singular_f"
+                    elif i == 4:
+                        form_key = "plural_m"  # plural is gender-neutral in German
+                        if "plural_f" not in forms:
+                            forms["plural_f"] = extract_primary_form(cleaned)
+                    else:
+                        continue  # Skip neuter for now (not in enum)
+
+                    if form_key not in forms:
+                        forms[form_key] = extract_primary_form(cleaned)
+                        if len(cleaned) > 1:
+                            alternatives[form_key] = cleaned[1:]
 
         return forms, alternatives
 

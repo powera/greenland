@@ -63,7 +63,8 @@ class VerbConjugation:
     confidence: float = 1.0
     notes: Optional[str] = None
 
-    # German verb forms (6 persons x multiple tenses)
+    # German verb forms (6 persons x 3 tenses)
+    # Form names align with GrammaticalForm enum
     # Present tense (Präsens)
     PRESENT_FORMS = [
         "1s_present",  # ich
@@ -73,7 +74,7 @@ class VerbConjugation:
         "2p_present",  # ihr
         "3p_present",  # sie/Sie
     ]
-    # Simple past (Präteritum)
+    # Past tense (Perfekt in enum mapping)
     PAST_FORMS = [
         "1s_past",
         "2s_past",
@@ -82,35 +83,24 @@ class VerbConjugation:
         "2p_past",
         "3p_past",
     ]
-    # Subjunctive II (Konjunktiv II)
-    SUBJUNCTIVE_FORMS = [
-        "1s_subjunctive",
-        "2s_subjunctive",
-        "3s_subjunctive",
-        "1p_subjunctive",
-        "2p_subjunctive",
-        "3p_subjunctive",
+    # Future (Futur I)
+    FUTURE_FORMS = [
+        "1s_future",
+        "2s_future",
+        "3s_future",
+        "1p_future",
+        "2p_future",
+        "3p_future",
     ]
-    # Other forms
-    OTHER_FORMS = [
-        "infinitive",
-        "past_participle",
-        "present_participle",
-        "imperative_singular",
-        "imperative_plural",
-        "auxiliary",  # haben or sein
-    ]
-    ALL_FORMS = PRESENT_FORMS + PAST_FORMS + SUBJUNCTIVE_FORMS + OTHER_FORMS
+    ALL_FORMS = PRESENT_FORMS + PAST_FORMS + FUTURE_FORMS
 
 
 @dataclass
 class AdjectiveDeclension:
     """German adjective declension results.
 
-    German adjectives have three declension patterns:
-    - Strong (no article): ein großer Mann
-    - Weak (definite article): der große Mann
-    - Mixed (indefinite article): ein großer Mann (nominative) vs einen großen Mann (accusative)
+    German adjectives have complex declension patterns, but for alignment with
+    GrammaticalForm enum, we use simplified gender/number forms.
     """
 
     word: str
@@ -120,45 +110,14 @@ class AdjectiveDeclension:
     confidence: float = 1.0
     notes: Optional[str] = None
 
-    # Strong declension forms (4 cases x 4 genders incl. plural = 16 forms)
-    # Weak declension forms (same structure)
-    # Mixed declension forms (same structure)
-    # For simplicity, we store the most common (strong) forms
-    STRONG_SINGULAR_M = [
-        "nominative_singular_m_strong",
-        "genitive_singular_m_strong",
-        "dative_singular_m_strong",
-        "accusative_singular_m_strong",
+    # Form names align with GrammaticalForm enum (ADJ_DE_SINGULAR_M, etc.)
+    AGREEMENT_FORMS = [
+        "singular_m",
+        "singular_f",
+        "plural_m",
+        "plural_f",
     ]
-    STRONG_SINGULAR_F = [
-        "nominative_singular_f_strong",
-        "genitive_singular_f_strong",
-        "dative_singular_f_strong",
-        "accusative_singular_f_strong",
-    ]
-    STRONG_SINGULAR_N = [
-        "nominative_singular_n_strong",
-        "genitive_singular_n_strong",
-        "dative_singular_n_strong",
-        "accusative_singular_n_strong",
-    ]
-    STRONG_PLURAL = [
-        "nominative_plural_strong",
-        "genitive_plural_strong",
-        "dative_plural_strong",
-        "accusative_plural_strong",
-    ]
-
-    # Predicative and comparative forms
-    COMPARISON_FORMS = [
-        "positive",
-        "comparative",
-        "superlative",
-    ]
-
-    ALL_FORMS = (
-        STRONG_SINGULAR_M + STRONG_SINGULAR_F + STRONG_SINGULAR_N + STRONG_PLURAL + COMPARISON_FORMS
-    )
+    ALL_FORMS = AGREEMENT_FORMS
 
 
 @dataclass

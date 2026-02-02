@@ -133,6 +133,25 @@ class WiktionaryClient:
 
         return None
 
+    def get_section_wikitext(self, word: str, language: str = "Lithuanian") -> Optional[str]:
+        """
+        Fetch wikitext for a specific language section directly.
+
+        This is a convenience method that combines fetch_page_wikitext and
+        extract_language_section.
+
+        Args:
+            word: The word to look up
+            language: Language name (e.g., "Lithuanian", "French", "German")
+
+        Returns:
+            Language section wikitext or None if not found
+        """
+        wikitext = self.fetch_page_wikitext(word)
+        if not wikitext:
+            return None
+        return self.extract_language_section(wikitext, language)
+
     def extract_language_section(
         self, wikitext: str, language: str = "Lithuanian"
     ) -> Optional[str]:

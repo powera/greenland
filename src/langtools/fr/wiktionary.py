@@ -67,24 +67,16 @@ class FrenchParser:
         "3rd plural": "3p",
     }
 
-    # Tense mapping
+    # Tense mapping - values align with GrammaticalForm enum codes
     TENSE_MAP = {
         "present": "present",
         "présent": "present",
         "indicative present": "present",
-        "imperfect": "imperfect",
-        "imparfait": "imperfect",
-        "simple past": "simple_past",
-        "passé simple": "simple_past",
+        "imperfect": "impf",  # Matches GrammaticalForm VERB_FR_*_IMPF
+        "imparfait": "impf",
         "future": "future",
         "futur": "future",
         "futur simple": "future",
-        "conditional": "conditional",
-        "conditionnel": "conditional",
-        "conditionnel présent": "conditional",
-        "subjunctive": "subjunctive",
-        "subjonctif": "subjunctive",
-        "subjonctif présent": "subjunctive",
     }
 
     def __init__(self, client: Optional[WiktionaryClient] = None, debug: bool = False):
@@ -378,21 +370,13 @@ class FrenchParser:
                                 alternatives[form_key] = cleaned[1:]
 
     def _extract_participles(self, soup: BeautifulSoup, forms: Dict[str, str]) -> None:
-        """Extract participle forms from the page."""
+        """Extract participle forms from the page.
+
+        Past participle form names align with GrammaticalForm enum (pc_m, pc_f).
+        """
         text = soup.get_text()
 
-        # Present participle
-        present_part_patterns = [
-            r"present participle[:\s]+(\w+)",
-            r"participe présent[:\s]+(\w+)",
-        ]
-        for pattern in present_part_patterns:
-            match = re.search(pattern, text, re.IGNORECASE)
-            if match:
-                forms["present_participle"] = match.group(1)
-                break
-
-        # Past participle
+        # Past participle - masculine form (for passé composé)
         past_part_patterns = [
             r"past participle[:\s]+(\w+)",
             r"participe passé[:\s]+(\w+)",
@@ -400,7 +384,13 @@ class FrenchParser:
         for pattern in past_part_patterns:
             match = re.search(pattern, text, re.IGNORECASE)
             if match:
-                forms["past_participle"] = match.group(1)
+                pp = match.group(1)
+                forms["pc_m"] = pp  # Masculine past participle
+                # Generate feminine form (typically +e)
+                if not pp.endswith("e"):
+                    forms["pc_f"] = pp + "e"
+                else:
+                    forms["pc_f"] = pp
                 break
 
     def _detect_auxiliary(self, wikitext: str) -> Optional[str]:
@@ -437,7 +427,7 @@ class FrenchParser:
 
         templates = self.client.find_templates(fr_section, self.ADJECTIVE_TEMPLATE_PATTERNS)
 
-        forms: Dict[str, str] = {"masculine_singular": word, "positive": word}
+        forms: Dict[str, str] = {"singular_m": word}
         alternatives: Dict[str, List[str]] = {}
         raw_template: Optional[str] = None
 
@@ -478,21 +468,24 @@ class FrenchParser:
     def _extract_adjective_forms_from_template(
         self, template: str, word: str, forms: Dict[str, str]
     ) -> None:
-        """Extract adjective forms from template parameters."""
+        """Extract adjective forms from template parameters.
+
+        Form names align with GrammaticalForm enum (singular_m, singular_f, etc.)
+        """
         # Look for feminine singular
         fs_match = re.search(r"\|f(?:eminine)?(?:_?s(?:ing)?)?=([^|}]+)", template)
         if fs_match:
-            forms["feminine_singular"] = fs_match.group(1).strip()
+            forms["singular_f"] = fs_match.group(1).strip()
 
         # Look for masculine plural
         mp_match = re.search(r"\|m(?:asc)?(?:_?p(?:l)?)?=([^|}]+)", template)
         if mp_match:
-            forms["masculine_plural"] = mp_match.group(1).strip()
+            forms["plural_m"] = mp_match.group(1).strip()
 
         # Look for feminine plural
         fp_match = re.search(r"\|f(?:em)?(?:_?p(?:l)?)?=([^|}]+)", template)
         if fp_match:
-            forms["feminine_plural"] = fp_match.group(1).strip()
+            forms["plural_f"] = fp_match.group(1).strip()
 
     def _parse_adjective_table(self, html: str) -> Tuple[Dict[str, str], Dict[str, List[str]]]:
         """Parse an adjective HTML table."""
@@ -512,15 +505,15 @@ class FrenchParser:
 
             header = cells[0].get_text(strip=True).lower()
 
-            # Map header to form keys
+            # Map header to form keys (aligned with GrammaticalForm enum)
             if "masculin" in header and "singul" in header:
-                form_key = "masculine_singular"
+                form_key = "singular_m"
             elif "féminin" in header and "singul" in header:
-                form_key = "feminine_singular"
+                form_key = "singular_f"
             elif "masculin" in header and "plur" in header:
-                form_key = "masculine_plural"
+                form_key = "plural_m"
             elif "féminin" in header and "plur" in header:
-                form_key = "feminine_plural"
+                form_key = "plural_f"
             else:
                 continue
 
@@ -534,21 +527,24 @@ class FrenchParser:
         return forms, alternatives
 
     def _generate_regular_adjective_forms(self, word: str, forms: Dict[str, str]) -> None:
-        """Generate regular French adjective forms if not already present."""
-        ms = forms.get("masculine_singular", word)
+        """Generate regular French adjective forms if not already present.
+
+        Form names align with GrammaticalForm enum (singular_m, singular_f, etc.)
+        """
+        ms = forms.get("singular_m", word)
 
         # Feminine singular
-        if "feminine_singular" not in forms:
-            forms["feminine_singular"] = self._generate_feminine(ms)
+        if "singular_f" not in forms:
+            forms["singular_f"] = self._generate_feminine(ms)
 
         # Masculine plural
-        if "masculine_plural" not in forms:
-            forms["masculine_plural"] = self._generate_plural(ms)
+        if "plural_m" not in forms:
+            forms["plural_m"] = self._generate_plural(ms)
 
         # Feminine plural
-        if "feminine_plural" not in forms:
-            fs = forms.get("feminine_singular", self._generate_feminine(ms))
-            forms["feminine_plural"] = self._generate_plural(fs)
+        if "plural_f" not in forms:
+            fs = forms.get("singular_f", self._generate_feminine(ms))
+            forms["plural_f"] = self._generate_plural(fs)
 
     def _generate_feminine(self, word: str) -> str:
         """Generate regular feminine form of an adjective."""
