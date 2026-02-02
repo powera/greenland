@@ -691,5 +691,213 @@ class TestGermanNounDeclensionType(unittest.TestCase):
         self.assertTrue(decl.has_plural())
 
 
+# French parser tests
+
+# Import French modules
+from langtools.fr.types import FrenchGender
+from langtools.fr.types import NounDeclension as FrenchNounDeclension
+from langtools.fr.utils import clean_form as fr_clean_form
+from langtools.fr.utils import detect_gender_from_article as fr_detect_gender
+from langtools.fr.utils import extract_article as fr_extract_article
+from langtools.fr.utils import is_elided_form
+from langtools.fr.wiktionary import FrenchParser
+
+
+class TestFrenchUtils(unittest.TestCase):
+    """Tests for French utility functions."""
+
+    def test_extract_article_le(self) -> None:
+        """Test extracting 'le' article."""
+        article, noun = fr_extract_article("le chien")
+        self.assertEqual(article, "le")
+        self.assertEqual(noun, "chien")
+
+    def test_extract_article_la(self) -> None:
+        """Test extracting 'la' article."""
+        article, noun = fr_extract_article("la maison")
+        self.assertEqual(article, "la")
+        self.assertEqual(noun, "maison")
+
+    def test_extract_article_elided(self) -> None:
+        """Test extracting elided article l'."""
+        article, noun = fr_extract_article("l'homme")
+        self.assertEqual(article, "l'")
+        self.assertEqual(noun, "homme")
+
+    def test_extract_no_article(self) -> None:
+        """Test when no article present."""
+        article, noun = fr_extract_article("chien")
+        self.assertEqual(article, "")
+        self.assertEqual(noun, "chien")
+
+    def test_detect_gender_masculine(self) -> None:
+        """Test detecting masculine gender."""
+        self.assertEqual(fr_detect_gender("le"), "m")
+        self.assertEqual(fr_detect_gender("un"), "m")
+
+    def test_detect_gender_feminine(self) -> None:
+        """Test detecting feminine gender."""
+        self.assertEqual(fr_detect_gender("la"), "f")
+        self.assertEqual(fr_detect_gender("une"), "f")
+
+    def test_detect_gender_ambiguous(self) -> None:
+        """Test ambiguous articles."""
+        self.assertEqual(fr_detect_gender("l'"), "")
+        self.assertEqual(fr_detect_gender("les"), "")
+
+    def test_french_clean_form(self) -> None:
+        """Test French form cleaning."""
+        result = fr_clean_form("chiens")
+        self.assertEqual(result, ["chiens"])
+
+    def test_french_clean_form_with_accents(self) -> None:
+        """Test French form cleaning preserves accents."""
+        result = fr_clean_form("élève")
+        self.assertEqual(result, ["élève"])
+
+    def test_french_clean_form_alternatives(self) -> None:
+        """Test French form cleaning with alternatives."""
+        result = fr_clean_form("form1/form2")
+        self.assertEqual(result, ["form1", "form2"])
+
+    def test_is_elided_form_vowel(self) -> None:
+        """Test elision detection for vowels."""
+        self.assertTrue(is_elided_form("ami"))
+        self.assertTrue(is_elided_form("école"))
+
+    def test_is_elided_form_consonant(self) -> None:
+        """Test elision detection for consonants."""
+        self.assertFalse(is_elided_form("chien"))
+        self.assertFalse(is_elided_form("maison"))
+
+
+class TestFrenchParser(unittest.TestCase):
+    """Tests for FrenchParser class."""
+
+    def setUp(self) -> None:
+        """Set up test fixtures."""
+        self.mock_client = Mock(spec=WiktionaryClient)
+        self.parser = FrenchParser(client=self.mock_client, debug=False)
+
+    def test_get_noun_declensions_no_page(self) -> None:
+        """Test noun forms when page not found."""
+        self.mock_client.fetch_page_wikitext.return_value = None
+
+        result, success = self.parser.get_noun_declensions("nonexistent")
+
+        self.assertFalse(success)
+        self.assertEqual(result.forms, {})
+
+    def test_get_noun_declensions_no_french_section(self) -> None:
+        """Test noun forms when no French section."""
+        self.mock_client.fetch_page_wikitext.return_value = "==English==\nContent"
+        self.mock_client.extract_language_section.return_value = None
+
+        result, success = self.parser.get_noun_declensions("chien")
+
+        self.assertFalse(success)
+        self.assertEqual(result.forms, {})
+
+    def test_get_verb_conjugations_no_page(self) -> None:
+        """Test verb conjugation when page not found."""
+        self.mock_client.fetch_page_wikitext.return_value = None
+
+        result, success = self.parser.get_verb_conjugations("nonexistent")
+
+        self.assertFalse(success)
+        self.assertEqual(result.forms, {})
+
+    def test_get_adjective_declensions_no_page(self) -> None:
+        """Test adjective forms when page not found."""
+        self.mock_client.fetch_page_wikitext.return_value = None
+
+        result, success = self.parser.get_adjective_declensions("nonexistent")
+
+        self.assertFalse(success)
+
+    def test_get_adverb_forms_success(self) -> None:
+        """Test adverb forms always returns at least positive form."""
+        self.mock_client.fetch_page_wikitext.return_value = "==French==\n===Adverb==="
+        self.mock_client.extract_language_section.return_value = "===Adverb===\nAn adverb"
+        self.mock_client.find_templates.return_value = []
+
+        result, success = self.parser.get_adverb_forms("rapidement")
+
+        self.assertTrue(success)
+        self.assertEqual(result.forms["positive"], "rapidement")
+
+    def test_extract_gender_masculine(self) -> None:
+        """Test gender extraction for masculine."""
+        wikitext = "{{fr-noun|m}}"
+        gender = self.parser._extract_gender(wikitext)
+        self.assertEqual(gender, FrenchGender.MASCULINE)
+
+    def test_extract_gender_feminine(self) -> None:
+        """Test gender extraction for feminine."""
+        wikitext = "{{fr-noun|f}}"
+        gender = self.parser._extract_gender(wikitext)
+        self.assertEqual(gender, FrenchGender.FEMININE)
+
+    def test_generate_regular_plural(self) -> None:
+        """Test regular plural generation."""
+        self.assertEqual(self.parser._generate_regular_plural("chien"), "chiens")
+        self.assertEqual(self.parser._generate_regular_plural("chat"), "chats")
+
+    def test_generate_plural_ending_s(self) -> None:
+        """Test plural for words ending in -s."""
+        self.assertEqual(self.parser._generate_regular_plural("souris"), "souris")
+
+    def test_generate_plural_ending_eau(self) -> None:
+        """Test plural for words ending in -eau."""
+        self.assertEqual(self.parser._generate_regular_plural("bateau"), "bateaux")
+
+    def test_generate_plural_ending_al(self) -> None:
+        """Test plural for words ending in -al."""
+        self.assertEqual(self.parser._generate_regular_plural("journal"), "journaux")
+
+    def test_generate_feminine_regular(self) -> None:
+        """Test regular feminine generation."""
+        self.assertEqual(self.parser._generate_feminine("petit"), "petite")
+        self.assertEqual(self.parser._generate_feminine("grand"), "grande")
+
+    def test_generate_feminine_already_e(self) -> None:
+        """Test feminine for adjectives already ending in -e."""
+        self.assertEqual(self.parser._generate_feminine("rouge"), "rouge")
+
+    def test_generate_feminine_eux(self) -> None:
+        """Test feminine for -eux adjectives."""
+        self.assertEqual(self.parser._generate_feminine("heureux"), "heureuse")
+
+
+class TestFrenchNounDeclensionType(unittest.TestCase):
+    """Tests for French NounDeclension type."""
+
+    def test_has_singular_true(self) -> None:
+        """Test has_singular returns True when singular forms exist."""
+        decl = FrenchNounDeclension(
+            word="chien",
+            gender=FrenchGender.MASCULINE,
+            forms={"singular": "chien"},
+        )
+        self.assertTrue(decl.has_singular())
+
+    def test_has_plural_true(self) -> None:
+        """Test has_plural returns True when plural forms exist."""
+        decl = FrenchNounDeclension(
+            word="chien",
+            forms={"singular": "chien", "plural": "chiens"},
+        )
+        self.assertTrue(decl.has_plural())
+
+    def test_has_plural_false(self) -> None:
+        """Test has_plural returns False when no plural forms."""
+        decl = FrenchNounDeclension(
+            word="eau",
+            number_type=NounNumberType.SINGULARE_TANTUM,
+            forms={"singular": "eau"},
+        )
+        self.assertFalse(decl.has_plural())
+
+
 if __name__ == "__main__":
     unittest.main()
