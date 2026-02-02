@@ -116,8 +116,8 @@ def query_definitions(
         },
     )
 
-    context = util.prompt_loader.get_context("wordfreq", "definitions")
-    prompt_template = util.prompt_loader.get_prompt("wordfreq", "definitions")
+    context = util.prompt_loader.get_context("translation", "definitions")
+    prompt_template = util.prompt_loader.get_prompt("translation", "definitions")
     prompt = prompt_template.format(word=word)
 
     # Get model name from parameter or client attribute

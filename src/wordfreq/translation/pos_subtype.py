@@ -68,8 +68,8 @@ def query_pos_subtype(
     )
 
     # Select the appropriate context based on the part of speech
-    context = util.prompt_loader.get_context("wordfreq", "pos_subtype", pos_type)
-    prompt_template = util.prompt_loader.get_prompt("wordfreq", "pos_subtype")
+    context = util.prompt_loader.get_context("classification", "pos_subtype", pos_type)
+    prompt_template = util.prompt_loader.get_prompt("classification", "pos_subtype")
     prompt = prompt_template.format(word=word, pos_type=pos_type, definition_text=definition_text)
 
     try:

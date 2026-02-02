@@ -47,8 +47,8 @@ def generate_declension_class(
 
     # Load prompts
     try:
-        context = util.prompt_loader.get_context("wordfreq", "declension_class")
-        prompt_template = util.prompt_loader.get_prompt("wordfreq", "declension_class")
+        context = util.prompt_loader.get_context("grammar", "declension")
+        prompt_template = util.prompt_loader.get_prompt("grammar", "declension")
     except Exception as e:
         logger.error(f"Failed to load declension_class prompts: {e}")
         return None, None, 0.0

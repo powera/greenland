@@ -51,8 +51,8 @@ def generate_auxiliary_verb(
 
     # Load prompts
     try:
-        context = util.prompt_loader.get_context("wordfreq", "auxiliary_verb")
-        prompt_template = util.prompt_loader.get_prompt("wordfreq", "auxiliary_verb")
+        context = util.prompt_loader.get_context("grammar", "auxiliary")
+        prompt_template = util.prompt_loader.get_prompt("grammar", "auxiliary")
     except Exception as e:
         logger.error(f"Failed to load auxiliary_verb prompts: {e}")
         return None, None, 0.0

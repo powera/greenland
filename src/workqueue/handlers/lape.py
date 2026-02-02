@@ -115,8 +115,8 @@ def generate_measure_words(
         return None, None, 0.0
 
     try:
-        context = util.prompt_loader.get_context("wordfreq", "measure_words")
-        prompt_template = util.prompt_loader.get_prompt("wordfreq", "measure_words")
+        context = util.prompt_loader.get_context("grammar", "measure_words")
+        prompt_template = util.prompt_loader.get_prompt("grammar", "measure_words")
     except Exception as e:
         logger.error(f"Failed to load measure_words prompts: {e}")
         return None, None, 0.0
@@ -196,8 +196,8 @@ def generate_grammatical_gender(
     gender_system = gender_config["description"]
 
     try:
-        context = util.prompt_loader.get_context("wordfreq", "grammatical_gender")
-        prompt_template = util.prompt_loader.get_prompt("wordfreq", "grammatical_gender")
+        context = util.prompt_loader.get_context("grammar", "gender")
+        prompt_template = util.prompt_loader.get_prompt("grammar", "gender")
     except Exception as e:
         logger.error(f"Failed to load grammatical_gender prompts: {e}")
         return None, None, 0.0

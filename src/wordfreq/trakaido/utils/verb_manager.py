@@ -67,8 +67,8 @@ class VerbManager:
         language_names = {"lt": "Lithuanian", "zh": "Chinese", "ko": "Korean", "fr": "French"}
         language_name = language_names.get(language, "Lithuanian")
 
-        context = util.prompt_loader.get_context("wordfreq", "word_analysis")
-        prompt_template = util.prompt_loader.get_prompt("wordfreq", "word_analysis")
+        context = util.prompt_loader.get_context("analysis", "word")
+        prompt_template = util.prompt_loader.get_prompt("analysis", "word")
 
         if target_translation:
             word_specification = f"English verb '{english_verb}' with {language_name} translation '{target_translation}'"

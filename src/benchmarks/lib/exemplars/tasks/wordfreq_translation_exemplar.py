@@ -23,7 +23,7 @@ from wordfreq.storage import database as linguistic_db
 from wordfreq.storage.models.enums import GrammaticalForm
 
 # Get the context used by the actual wordfreq system
-wordfreq_context = util.prompt_loader.get_context("wordfreq", "definitions")
+wordfreq_context = util.prompt_loader.get_context("translation", "definitions")
 
 # Valid parts of speech (matching the actual system)
 VALID_POS_TYPES = {

@@ -64,8 +64,8 @@ class WordManager:
 
     def _get_word_analysis_prompt(self, english_word: str, lithuanian_word: str = None) -> str:
         """Get the prompt for analyzing a new word."""
-        context = util.prompt_loader.get_context("wordfreq", "word_analysis")
-        prompt_template = util.prompt_loader.get_prompt("wordfreq", "word_analysis")
+        context = util.prompt_loader.get_context("analysis", "word")
+        prompt_template = util.prompt_loader.get_prompt("analysis", "word")
 
         if lithuanian_word:
             word_specification = (

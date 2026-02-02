@@ -94,7 +94,7 @@ class WordCategorizer:
 
         # Load the prompt template
         try:
-            prompt_template = get_context("wordfreq", "word_categorizer")
+            prompt_template = get_context("classification", "word_categorizer")
         except FileNotFoundError as e:
             logger.error(f"Could not load prompt template: {e}")
             raise

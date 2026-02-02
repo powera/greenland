@@ -43,8 +43,8 @@ def generate_measure_words(
 
     # Load prompts
     try:
-        context = util.prompt_loader.get_context("wordfreq", "measure_words")
-        prompt_template = util.prompt_loader.get_prompt("wordfreq", "measure_words")
+        context = util.prompt_loader.get_context("grammar", "measure_words")
+        prompt_template = util.prompt_loader.get_prompt("grammar", "measure_words")
     except Exception as e:
         logger.error(f"Failed to load measure_words prompts: {e}")
         return None, None, 0.0

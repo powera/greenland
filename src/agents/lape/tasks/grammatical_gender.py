@@ -52,8 +52,8 @@ def generate_grammatical_gender(
 
     # Load prompts
     try:
-        context = util.prompt_loader.get_context("wordfreq", "grammatical_gender")
-        prompt_template = util.prompt_loader.get_prompt("wordfreq", "grammatical_gender")
+        context = util.prompt_loader.get_context("grammar", "gender")
+        prompt_template = util.prompt_loader.get_prompt("grammar", "gender")
     except Exception as e:
         logger.error(f"Failed to load grammatical_gender prompts: {e}")
         return None, None, 0.0

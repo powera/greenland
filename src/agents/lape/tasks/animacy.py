@@ -37,8 +37,8 @@ def generate_animacy(
 
     # Load prompts
     try:
-        context = util.prompt_loader.get_context("wordfreq", "animacy")
-        prompt_template = util.prompt_loader.get_prompt("wordfreq", "animacy")
+        context = util.prompt_loader.get_context("grammar", "animacy")
+        prompt_template = util.prompt_loader.get_prompt("grammar", "animacy")
     except Exception as e:
         logger.error(f"Failed to load animacy prompts: {e}")
         return None, None, 0.0
