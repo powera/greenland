@@ -37,7 +37,7 @@ For translations:
   - Prefer two-character terms for clarity and naturalness
   - Use single-character terms for common basic vocabulary (e.g., 酒 for wine, 牛 for cow, 茶 for tea, 水 for water)
   - Match the generality level of the English word (avoid overly specific translations like 葡萄酒 for wine)
-  - Use Traditional Chinese characters (繁體字)
+  - Use Simplified Chinese characters (简体字) for Mainland Chinese (普通话)
   - Use standard Mandarin Chinese (not regional variants)
   - Do not print the pinyin, just the characters
 - For French:
