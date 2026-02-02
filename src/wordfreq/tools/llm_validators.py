@@ -61,8 +61,8 @@ def validate_lemma_form(
     )
 
     # Load prompt from files
-    context = util.prompt_loader.get_context("wordfreq", "lemma_validation")
-    prompt_template = util.prompt_loader.get_prompt("wordfreq", "lemma_validation")
+    context = util.prompt_loader.get_context("validation", "lemma")
+    prompt_template = util.prompt_loader.get_prompt("validation", "lemma")
 
     prompt = prompt_template.format(word=word, pos_type=pos_type)
 
@@ -239,8 +239,8 @@ def validate_definition(
     )
 
     # Load prompt from files
-    context = util.prompt_loader.get_context("wordfreq", "definition_validation")
-    prompt_template = util.prompt_loader.get_prompt("wordfreq", "definition_validation")
+    context = util.prompt_loader.get_context("validation", "definition")
+    prompt_template = util.prompt_loader.get_prompt("validation", "definition")
 
     # Format translation info
     if translation_language and translation_text:
@@ -1115,8 +1115,8 @@ def validate_disambiguation_need(
         },
     )
 
-    context = util.prompt_loader.get_context("wordfreq", "disambiguation_validation")
-    prompt_template = util.prompt_loader.get_prompt("wordfreq", "disambiguation_validation")
+    context = util.prompt_loader.get_context("validation", "disambiguation")
+    prompt_template = util.prompt_loader.get_prompt("validation", "disambiguation")
 
     if translations:
         translations_info = ", ".join(f"{lang}: {text}" for lang, text in translations.items())

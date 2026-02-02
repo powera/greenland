@@ -109,8 +109,8 @@ def disambiguate_lemma(
         candidate_descriptions.append(desc)
 
     # Load prompt templates
-    prompt_context = util.prompt_loader.get_context("wordfreq", "word_disambiguation")
-    prompt_template = util.prompt_loader.get_prompt("wordfreq", "word_disambiguation")
+    prompt_context = util.prompt_loader.get_context("analysis", "disambiguation")
+    prompt_template = util.prompt_loader.get_prompt("analysis", "disambiguation")
 
     # Format the prompt with parameters
     formatted_prompt = prompt_template.format(

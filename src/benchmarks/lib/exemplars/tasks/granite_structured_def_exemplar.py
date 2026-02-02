@@ -100,7 +100,7 @@ def create_definition_schema() -> Schema:
     )
 
 
-long_context = util.prompt_loader.get_context("wordfreq", "definitions")
+long_context = util.prompt_loader.get_context("translation", "definitions")
 
 # Register the comprehensive word definition exemplar
 register_exemplar(

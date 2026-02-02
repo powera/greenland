@@ -37,8 +37,8 @@ def generate_countability(
 
     # Load prompts
     try:
-        context = util.prompt_loader.get_context("wordfreq", "countability")
-        prompt_template = util.prompt_loader.get_prompt("wordfreq", "countability")
+        context = util.prompt_loader.get_context("grammar", "countability")
+        prompt_template = util.prompt_loader.get_prompt("grammar", "countability")
     except Exception as e:
         logger.error(f"Failed to load countability prompts: {e}")
         return None, None, 0.0

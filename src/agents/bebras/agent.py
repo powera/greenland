@@ -93,8 +93,8 @@ class BebrasAgent:
     ) -> str:
         """Build the LLM prompt for sentence analysis."""
         # Load prompt templates
-        prompt_context = util.prompt_loader.get_context("wordfreq", "sentence_analysis")
-        prompt_template = util.prompt_loader.get_prompt("wordfreq", "sentence_analysis")
+        prompt_context = util.prompt_loader.get_context("analysis", "sentence")
+        prompt_template = util.prompt_loader.get_prompt("analysis", "sentence")
 
         # Format the prompt with parameters
         context_info = f"\n\nContext: {context}" if context else ""

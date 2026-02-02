@@ -50,8 +50,8 @@ def generate_verb_reflexivity(
 
     # Load prompts
     try:
-        context = util.prompt_loader.get_context("wordfreq", "verb_reflexivity")
-        prompt_template = util.prompt_loader.get_prompt("wordfreq", "verb_reflexivity")
+        context = util.prompt_loader.get_context("grammar", "reflexivity")
+        prompt_template = util.prompt_loader.get_prompt("grammar", "reflexivity")
     except Exception as e:
         logger.error(f"Failed to load verb_reflexivity prompts: {e}")
         return None, None, 0.0

@@ -37,8 +37,8 @@ def generate_verb_transitivity(
 
     # Load prompts
     try:
-        context = util.prompt_loader.get_context("wordfreq", "verb_transitivity")
-        prompt_template = util.prompt_loader.get_prompt("wordfreq", "verb_transitivity")
+        context = util.prompt_loader.get_context("grammar", "transitivity")
+        prompt_template = util.prompt_loader.get_prompt("grammar", "transitivity")
     except Exception as e:
         logger.error(f"Failed to load verb_transitivity prompts: {e}")
         return None, None, 0.0
