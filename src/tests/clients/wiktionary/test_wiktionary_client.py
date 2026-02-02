@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Tests for the Wiktionary client module."""
+"""Tests for the Wiktionary client module and language-specific parsers."""
 
 import os
 import sys
@@ -10,20 +10,31 @@ from unittest.mock import MagicMock, Mock, patch
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
 
 from clients.wiktionary.client import WiktionaryClient
-from clients.wiktionary.lithuanian import LithuanianParser
 from clients.wiktionary.types import NounNumberType
 from clients.wiktionary.utils import (
-    clean_form,
+    clean_form_generic,
     extract_alternative_forms,
     extract_primary_form,
     is_placeholder_text,
-    normalize_lithuanian_text,
-    remove_stress_marks,
+    normalize_text,
 )
+
+# Lithuanian imports
+from langtools.lt.types import NounDeclension as LithuanianNounDeclension
+from langtools.lt.utils import clean_form as lt_clean_form
+from langtools.lt.utils import normalize_lithuanian_text, remove_stress_marks
+from langtools.lt.wiktionary import LithuanianParser
+
+# German imports
+from langtools.de.types import GermanGender
+from langtools.de.types import NounDeclension as GermanNounDeclension
+from langtools.de.utils import clean_form as de_clean_form
+from langtools.de.utils import detect_gender_from_article, extract_article
+from langtools.de.wiktionary import GermanParser
 
 
 class TestRemoveStressMarks(unittest.TestCase):
-    """Tests for the remove_stress_marks function."""
+    """Tests for the remove_stress_marks function (Lithuanian)."""
 
     def test_remove_acute_accent(self) -> None:
         """Test removal of acute accent stress mark."""
@@ -81,7 +92,6 @@ class TestRemoveStressMarks(unittest.TestCase):
 
     def test_stress_on_lithuanian_letter(self) -> None:
         """Test removal of stress mark on top of Lithuanian letter."""
-        # u with ogonek + tilde should become just u with ogonek
         result = remove_stress_marks("ų̃")
         self.assertEqual(result, "ų")
 
@@ -111,52 +121,47 @@ class TestRemoveStressMarks(unittest.TestCase):
         self.assertEqual(result, "vilkas")
 
 
-class TestCleanForm(unittest.TestCase):
-    """Tests for the clean_form function."""
+class TestLithuanianCleanForm(unittest.TestCase):
+    """Tests for the Lithuanian clean_form function."""
 
     def test_single_form_with_stress(self) -> None:
         """Test cleaning a single form with stress marks."""
-        result = clean_form("šuõ")
+        result = lt_clean_form("šuõ")
         self.assertEqual(result, ["šuo"])
 
     def test_alternative_forms(self) -> None:
         """Test cleaning forms with alternatives."""
-        result = clean_form("šuniù/šunimì")
+        result = lt_clean_form("šuniù/šunimì")
         self.assertEqual(result, ["šuniu", "šunimi"])
 
     def test_lithuanian_letter_preserved(self) -> None:
         """Test that Lithuanian letters are preserved."""
-        result = clean_form("svogūnas")
+        result = lt_clean_form("svogūnas")
         self.assertEqual(result, ["svogūnas"])
 
     def test_em_dash_returns_empty(self) -> None:
         """Test that em dash returns empty list."""
-        result = clean_form("—")
+        result = lt_clean_form("—")
         self.assertEqual(result, [])
 
     def test_hyphen_returns_empty(self) -> None:
         """Test that hyphen returns empty list."""
-        result = clean_form("-")
+        result = lt_clean_form("-")
         self.assertEqual(result, [])
 
     def test_empty_string_returns_empty(self) -> None:
         """Test that empty string returns empty list."""
-        result = clean_form("")
-        self.assertEqual(result, [])
-
-    def test_none_returns_empty(self) -> None:
-        """Test that None-like values return empty list."""
-        result = clean_form("")
+        result = lt_clean_form("")
         self.assertEqual(result, [])
 
     def test_whitespace_stripped(self) -> None:
         """Test that whitespace is stripped."""
-        result = clean_form("  vilkas  ")
+        result = lt_clean_form("  vilkas  ")
         self.assertEqual(result, ["vilkas"])
 
     def test_multiple_alternatives(self) -> None:
         """Test multiple alternative forms."""
-        result = clean_form("form1/form2/form3")
+        result = lt_clean_form("form1/form2/form3")
         self.assertEqual(result, ["form1", "form2", "form3"])
 
 
@@ -226,7 +231,7 @@ class TestIsPlaceholderText(unittest.TestCase):
     def test_word_is_not_placeholder(self) -> None:
         """Test that actual words are not placeholders."""
         self.assertFalse(is_placeholder_text("vilkas"))
-        self.assertFalse(is_placeholder_text("šuo"))
+        self.assertFalse(is_placeholder_text("Hund"))
 
 
 class TestNormalizeLithuanianText(unittest.TestCase):
@@ -234,7 +239,6 @@ class TestNormalizeLithuanianText(unittest.TestCase):
 
     def test_nfc_normalization(self) -> None:
         """Test that text is normalized to NFC."""
-        # NFD representation of ą (a + combining ogonek)
         nfd_text = "a\u0328"
         result = normalize_lithuanian_text(nfd_text)
         self.assertEqual(result, "ą")
@@ -420,7 +424,7 @@ class TestLithuanianParser(unittest.TestCase):
         self.assertEqual(forms["nominative_plural"], "vilkai")
         self.assertEqual(forms["genitive_singular"], "vilko")
         self.assertEqual(forms["genitive_plural"], "vilkų")
-        self.assertEqual(len(forms), 14)  # 7 cases x 2 numbers
+        self.assertEqual(len(forms), 14)
 
     def test_parse_noun_table_plurale_tantum(self) -> None:
         """Test parsing a plurale tantum noun table."""
@@ -433,7 +437,6 @@ class TestLithuanianParser(unittest.TestCase):
         """
         forms, alternatives, number_type = self.parser._parse_noun_table(html)
 
-        # Should detect plurale tantum from header
         self.assertIn("nominative_plural", forms)
         self.assertEqual(forms["nominative_plural"], "durys")
 
@@ -467,14 +470,12 @@ class TestLithuanianParser(unittest.TestCase):
         self.assertEqual(result.forms["positive"], "greitai")
 
 
-class TestNounDeclensionType(unittest.TestCase):
-    """Tests for NounDeclension type."""
+class TestLithuanianNounDeclensionType(unittest.TestCase):
+    """Tests for Lithuanian NounDeclension type."""
 
     def test_has_singular_true(self) -> None:
         """Test has_singular returns True when singular forms exist."""
-        from clients.wiktionary.types import NounDeclension
-
-        decl = NounDeclension(
+        decl = LithuanianNounDeclension(
             word="vilkas",
             number_type=NounNumberType.REGULAR,
             forms={"nominative_singular": "vilkas", "genitive_singular": "vilko"},
@@ -483,9 +484,7 @@ class TestNounDeclensionType(unittest.TestCase):
 
     def test_has_singular_false(self) -> None:
         """Test has_singular returns False when no singular forms."""
-        from clients.wiktionary.types import NounDeclension
-
-        decl = NounDeclension(
+        decl = LithuanianNounDeclension(
             word="durys",
             number_type=NounNumberType.PLURALE_TANTUM,
             forms={"nominative_plural": "durys", "genitive_plural": "durų"},
@@ -494,9 +493,7 @@ class TestNounDeclensionType(unittest.TestCase):
 
     def test_has_plural_true(self) -> None:
         """Test has_plural returns True when plural forms exist."""
-        from clients.wiktionary.types import NounDeclension
-
-        decl = NounDeclension(
+        decl = LithuanianNounDeclension(
             word="vilkas",
             number_type=NounNumberType.REGULAR,
             forms={"nominative_plural": "vilkai", "genitive_plural": "vilkų"},
@@ -505,14 +502,193 @@ class TestNounDeclensionType(unittest.TestCase):
 
     def test_has_plural_false(self) -> None:
         """Test has_plural returns False when no plural forms."""
-        from clients.wiktionary.types import NounDeclension
-
-        decl = NounDeclension(
+        decl = LithuanianNounDeclension(
             word="pienas",
             number_type=NounNumberType.SINGULARE_TANTUM,
             forms={"nominative_singular": "pienas", "genitive_singular": "pieno"},
         )
         self.assertFalse(decl.has_plural())
+
+
+# German parser tests
+
+
+class TestGermanUtils(unittest.TestCase):
+    """Tests for German utility functions."""
+
+    def test_extract_article_der(self) -> None:
+        """Test extracting 'der' article."""
+        article, noun = extract_article("der Hund")
+        self.assertEqual(article, "der")
+        self.assertEqual(noun, "Hund")
+
+    def test_extract_article_die(self) -> None:
+        """Test extracting 'die' article."""
+        article, noun = extract_article("die Katze")
+        self.assertEqual(article, "die")
+        self.assertEqual(noun, "Katze")
+
+    def test_extract_article_das(self) -> None:
+        """Test extracting 'das' article."""
+        article, noun = extract_article("das Kind")
+        self.assertEqual(article, "das")
+        self.assertEqual(noun, "Kind")
+
+    def test_extract_no_article(self) -> None:
+        """Test when no article present."""
+        article, noun = extract_article("Hund")
+        self.assertEqual(article, "")
+        self.assertEqual(noun, "Hund")
+
+    def test_detect_gender_masculine(self) -> None:
+        """Test detecting masculine gender."""
+        self.assertEqual(detect_gender_from_article("der"), "m")
+
+    def test_detect_gender_feminine(self) -> None:
+        """Test detecting feminine gender."""
+        self.assertEqual(detect_gender_from_article("die"), "f")
+
+    def test_detect_gender_neuter(self) -> None:
+        """Test detecting neuter gender."""
+        self.assertEqual(detect_gender_from_article("das"), "n")
+
+    def test_german_clean_form(self) -> None:
+        """Test German form cleaning."""
+        result = de_clean_form("Hunde")
+        self.assertEqual(result, ["Hunde"])
+
+    def test_german_clean_form_with_umlaut(self) -> None:
+        """Test German form cleaning preserves umlauts."""
+        result = de_clean_form("Häuser")
+        self.assertEqual(result, ["Häuser"])
+
+    def test_german_clean_form_alternatives(self) -> None:
+        """Test German form cleaning with alternatives."""
+        result = de_clean_form("Form1/Form2")
+        self.assertEqual(result, ["Form1", "Form2"])
+
+
+class TestGermanParser(unittest.TestCase):
+    """Tests for GermanParser class."""
+
+    def setUp(self) -> None:
+        """Set up test fixtures."""
+        self.mock_client = Mock(spec=WiktionaryClient)
+        self.parser = GermanParser(client=self.mock_client, debug=False)
+
+    def test_get_noun_declensions_no_page(self) -> None:
+        """Test noun declension when page not found."""
+        self.mock_client.fetch_page_wikitext.return_value = None
+
+        result, success = self.parser.get_noun_declensions("nonexistent")
+
+        self.assertFalse(success)
+        self.assertEqual(result.forms, {})
+
+    def test_get_noun_declensions_no_german_section(self) -> None:
+        """Test noun declension when no German section."""
+        self.mock_client.fetch_page_wikitext.return_value = "==English==\nContent"
+        self.mock_client.extract_language_section.return_value = None
+
+        result, success = self.parser.get_noun_declensions("Hund")
+
+        self.assertFalse(success)
+        self.assertEqual(result.forms, {})
+
+    def test_get_verb_conjugations_no_page(self) -> None:
+        """Test verb conjugation when page not found."""
+        self.mock_client.fetch_page_wikitext.return_value = None
+
+        result, success = self.parser.get_verb_conjugations("nonexistent")
+
+        self.assertFalse(success)
+        self.assertEqual(result.forms, {})
+
+    def test_get_adjective_declensions_no_page(self) -> None:
+        """Test adjective declension when page not found."""
+        self.mock_client.fetch_page_wikitext.return_value = None
+
+        result, success = self.parser.get_adjective_declensions("nonexistent")
+
+        self.assertFalse(success)
+        self.assertEqual(result.forms, {})
+
+    def test_get_adverb_forms_success(self) -> None:
+        """Test adverb forms always returns at least positive form."""
+        self.mock_client.fetch_page_wikitext.return_value = "==German==\n===Adverb==="
+        self.mock_client.extract_language_section.return_value = "===Adverb===\nAn adverb"
+        self.mock_client.find_templates.return_value = []
+
+        result, success = self.parser.get_adverb_forms("schnell")
+
+        self.assertTrue(success)
+        self.assertEqual(result.forms["positive"], "schnell")
+
+    def test_extract_gender_masculine(self) -> None:
+        """Test gender extraction for masculine."""
+        wikitext = "{{de-noun|m}}"
+        gender = self.parser._extract_gender(wikitext)
+        self.assertEqual(gender, GermanGender.MASCULINE)
+
+    def test_extract_gender_feminine(self) -> None:
+        """Test gender extraction for feminine."""
+        wikitext = "{{de-noun|f}}"
+        gender = self.parser._extract_gender(wikitext)
+        self.assertEqual(gender, GermanGender.FEMININE)
+
+    def test_extract_gender_neuter(self) -> None:
+        """Test gender extraction for neuter."""
+        wikitext = "{{de-noun|n}}"
+        gender = self.parser._extract_gender(wikitext)
+        self.assertEqual(gender, GermanGender.NEUTER)
+
+    def test_parse_noun_table(self) -> None:
+        """Test parsing a German noun declension table."""
+        html = """
+        <table class="inflection-table">
+            <tr><th></th><th>Singular</th><th>Plural</th></tr>
+            <tr><td>Nominative</td><td>der Hund</td><td>die Hunde</td></tr>
+            <tr><td>Genitive</td><td>des Hundes</td><td>der Hunde</td></tr>
+            <tr><td>Dative</td><td>dem Hund</td><td>den Hunden</td></tr>
+            <tr><td>Accusative</td><td>den Hund</td><td>die Hunde</td></tr>
+        </table>
+        """
+        forms, alternatives, number_type = self.parser._parse_noun_table(html)
+
+        self.assertEqual(number_type, NounNumberType.REGULAR)
+        # Forms should have article stripped
+        self.assertIn("nominative_singular", forms)
+        self.assertIn("nominative_plural", forms)
+
+
+class TestGermanNounDeclensionType(unittest.TestCase):
+    """Tests for German NounDeclension type."""
+
+    def test_has_singular_true(self) -> None:
+        """Test has_singular returns True when singular forms exist."""
+        decl = GermanNounDeclension(
+            word="Hund",
+            gender=GermanGender.MASCULINE,
+            forms={"nominative_singular": "Hund", "genitive_singular": "Hundes"},
+        )
+        self.assertTrue(decl.has_singular())
+
+    def test_has_singular_false(self) -> None:
+        """Test has_singular returns False when no singular forms."""
+        decl = GermanNounDeclension(
+            word="Leute",
+            number_type=NounNumberType.PLURALE_TANTUM,
+            forms={"nominative_plural": "Leute", "genitive_plural": "Leute"},
+        )
+        self.assertFalse(decl.has_singular())
+
+    def test_has_plural_true(self) -> None:
+        """Test has_plural returns True when plural forms exist."""
+        decl = GermanNounDeclension(
+            word="Hund",
+            forms={"nominative_plural": "Hunde", "genitive_plural": "Hunde"},
+        )
+        self.assertTrue(decl.has_plural())
 
 
 if __name__ == "__main__":

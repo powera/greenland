@@ -1,101 +1,38 @@
-"""Utility functions for Wiktionary parsing."""
+"""Generic utility functions for Wiktionary parsing.
+
+Language-specific utilities are in langtools/<lang>/utils.py
+"""
 
 import unicodedata
-from typing import List
+from typing import Callable, List
 
 
-def remove_stress_marks(text: str) -> str:
+def normalize_text(text: str) -> str:
     """
-    Remove stress/accent marks from Lithuanian text while preserving Lithuanian letters.
-
-    Lithuanian has distinct letters with diacritics (a, c, e, e, i, s, u, u, z)
-    that must be preserved. However, stress marks (acute, grave, tilde)
-    that can appear on ANY vowel for pronunciation are removed.
-
-    Complex case: stress marks can appear on top of Lithuanian letters (e.g., u with ogonek + tilde)
-    In this case, we need to preserve the Lithuanian letter (u with ogonek) but remove the stress (tilde).
+    Normalize text to NFC form for consistent comparison.
 
     Args:
-        text: Text with stress marks
+        text: Text that may have various Unicode representations
 
     Returns:
-        Text without stress marks but with Lithuanian letters preserved
+        NFC-normalized text
     """
-    # Stress/tone combining marks that should be REMOVED
-    # U+0300: COMBINING GRAVE ACCENT
-    # U+0301: COMBINING ACUTE ACCENT
-    # U+0303: COMBINING TILDE
-    # Note: U+0307 (COMBINING DOT ABOVE) has dual purpose:
-    #       - On 'e' or 'E': forms Lithuanian e with dot (must be preserved)
-    #       - On other vowels: stress/accent mark (must be removed)
-    # Note: U+030C (COMBINING CARON) is NOT a stress mark - it's part of c, s, z
-    # Note: U+0304 (COMBINING MACRON) is NOT a stress mark - it's part of u with macron
-    # Note: U+0328 (COMBINING OGONEK) is NOT a stress mark - it's part of a, e, i, u with ogonek
-    stress_marks = {"\u0300", "\u0301", "\u0303"}
-
-    # Decompose unicode characters into base + combining marks
-    # NFD = Canonical Decomposition
-    decomposed = unicodedata.normalize("NFD", text)
-
-    # Build result by filtering combining marks
-    result: List[str] = []
-    i = 0
-    while i < len(decomposed):
-        char = decomposed[i]
-
-        # Check if this is a base character
-        if unicodedata.category(char) != "Mn":
-            # It's a base character, check what follows
-            base = char
-            combining_marks: List[str] = []
-
-            # Collect any combining marks that follow
-            j = i + 1
-            while j < len(decomposed) and unicodedata.category(decomposed[j]) == "Mn":
-                combining_marks.append(decomposed[j])
-                j += 1
-
-            # Separate stress marks from other combining marks
-            # Special handling for U+0307 (dot above):
-            # - Keep it if base is 'e' or 'E' (Lithuanian e with dot)
-            # - Remove it on other letters (stress mark)
-            non_stress_marks: List[str] = []
-            for m in combining_marks:
-                if m in stress_marks:
-                    # Always remove these stress marks
-                    continue
-                elif m == "\u0307":
-                    # Dot above: keep only if base is 'e' or 'E'
-                    if base.lower() == "e":
-                        non_stress_marks.append(m)
-                    # Otherwise skip (it's a stress mark)
-                else:
-                    # Keep other combining marks (Lithuanian letter components)
-                    non_stress_marks.append(m)
-
-            # Reconstruct with only non-stress marks
-            reconstructed = unicodedata.normalize("NFC", base + "".join(non_stress_marks))
-
-            # Add to result
-            result.append(reconstructed)
-
-            # Skip past the combining marks we processed
-            i = j
-        else:
-            # Orphan combining mark - skip it if it's a stress mark, otherwise keep
-            if char not in stress_marks and char != "\u0307":
-                result.append(char)
-            i += 1
-
-    return "".join(result)
+    return unicodedata.normalize("NFC", text)
 
 
-def clean_form(text: str) -> List[str]:
+def clean_form_generic(
+    text: str,
+    normalizer: Callable[[str], str] = normalize_text,
+) -> List[str]:
     """
-    Clean a grammatical form by removing stress marks and handling alternatives.
+    Clean a grammatical form by handling alternatives.
+
+    This is a generic version that can be customized with a language-specific
+    normalizer function.
 
     Args:
-        text: Raw form text (may contain stress marks, slashes for alternatives, etc.)
+        text: Raw form text (may contain slashes for alternatives, etc.)
+        normalizer: Function to normalize/clean each form
 
     Returns:
         List of cleaned forms (multiple if there are alternatives separated by /)
@@ -106,26 +43,13 @@ def clean_form(text: str) -> List[str]:
     # Split by slash to handle alternative forms
     forms = [f.strip() for f in text.split("/")]
 
-    # Remove stress marks from each form
-    cleaned_forms = [remove_stress_marks(form) for form in forms]
+    # Normalize each form
+    cleaned_forms = [normalizer(form) for form in forms]
 
     # Filter out empty strings
     cleaned_forms = [f for f in cleaned_forms if f]
 
     return cleaned_forms
-
-
-def normalize_lithuanian_text(text: str) -> str:
-    """
-    Normalize Lithuanian text to NFC form for consistent comparison.
-
-    Args:
-        text: Text that may have various Unicode representations
-
-    Returns:
-        NFC-normalized text
-    """
-    return unicodedata.normalize("NFC", text)
 
 
 def extract_primary_form(forms: List[str]) -> str:

@@ -1,4 +1,4 @@
-"""Lithuanian-specific Wiktionary parsing for grammatical forms."""
+"""Lithuanian Wiktionary parsing for grammatical forms."""
 
 import logging
 import re
@@ -6,21 +6,24 @@ from typing import Dict, List, Optional, Tuple
 
 from bs4 import BeautifulSoup, Tag
 
-from clients.wiktionary.client import WiktionaryClient
-from clients.wiktionary.types import (
+from clients.wiktionary import WiktionaryClient, extract_primary_form
+from clients.wiktionary.types import NounNumberType
+from langtools.lt.types import (
     AdjectiveDeclension,
     AdverbForms,
     NounDeclension,
-    NounNumberType,
     VerbConjugation,
 )
-from clients.wiktionary.utils import clean_form, extract_primary_form
+from langtools.lt.utils import clean_form
 
 logger = logging.getLogger(__name__)
 
 
 class LithuanianParser:
     """Parser for Lithuanian grammatical forms from Wiktionary."""
+
+    LANGUAGE = "Lithuanian"
+    LANGUAGE_CODE = "lt"
 
     # Template patterns for different parts of speech
     NOUN_TEMPLATE_PATTERNS = [
@@ -108,7 +111,7 @@ class LithuanianParser:
             return NounDeclension(word=word, number_type=NounNumberType.REGULAR, forms={}), False
 
         # Extract Lithuanian section
-        lt_section = self.client.extract_language_section(wikitext, "Lithuanian")
+        lt_section = self.client.extract_language_section(wikitext, self.LANGUAGE)
         if not lt_section:
             return NounDeclension(word=word, number_type=NounNumberType.REGULAR, forms={}), False
 
@@ -157,15 +160,7 @@ class LithuanianParser:
     def _parse_noun_table(
         self, html: str
     ) -> Tuple[Dict[str, str], Dict[str, List[str]], NounNumberType]:
-        """
-        Parse a noun declension HTML table.
-
-        Args:
-            html: HTML containing the declension table
-
-        Returns:
-            Tuple of (forms dict, alternatives dict, number type)
-        """
+        """Parse a noun declension HTML table."""
         soup = BeautifulSoup(html, "html.parser")
         forms: Dict[str, str] = {}
         alternatives: Dict[str, List[str]] = {}
@@ -198,7 +193,6 @@ class LithuanianParser:
 
         # If we couldn't determine from header, assume regular
         if not has_singular and not has_plural:
-            # Default to regular (both singular and plural)
             has_singular = True
             has_plural = True
 
@@ -245,14 +239,11 @@ class LithuanianParser:
                 cleaned = clean_form(form_text)
 
                 if cleaned:
-                    # Determine if this is singular or plural based on headers/context
                     if has_plural and not has_singular:
-                        # Plurale tantum
                         forms[f"{matched_case}_plural"] = extract_primary_form(cleaned)
                         if len(cleaned) > 1:
                             alternatives[f"{matched_case}_plural"] = cleaned[1:]
                     else:
-                        # Singulare tantum or default to singular
                         forms[f"{matched_case}_singular"] = extract_primary_form(cleaned)
                         if len(cleaned) > 1:
                             alternatives[f"{matched_case}_singular"] = cleaned[1:]
@@ -282,32 +273,26 @@ class LithuanianParser:
         """
         logger.info(f"Fetching verb conjugations for '{word}'")
 
-        # Fetch the page wikitext
         wikitext = self.client.fetch_page_wikitext(word)
         if not wikitext:
             return VerbConjugation(word=word, forms={}), False
 
-        # Extract Lithuanian section
-        lt_section = self.client.extract_language_section(wikitext, "Lithuanian")
+        lt_section = self.client.extract_language_section(wikitext, self.LANGUAGE)
         if not lt_section:
             return VerbConjugation(word=word, forms={}), False
 
-        # Find conjugation template
         templates = self.client.find_templates(lt_section, self.VERB_TEMPLATE_PATTERNS)
         if not templates:
             logger.warning(f"No verb conjugation template found for '{word}'")
             return VerbConjugation(word=word, forms={}), False
 
-        # Use the first matching template
         template_name, template_text = templates[0]
         logger.debug(f"Found template: {template_name}")
 
-        # Parse the template to HTML
         html = self.client.parse_to_html(template_text)
         if not html:
             return VerbConjugation(word=word, forms={}, raw_template=template_text), False
 
-        # Extract forms from HTML table
         forms, alternatives = self._parse_verb_table(html)
 
         result = VerbConjugation(
@@ -326,27 +311,13 @@ class LithuanianParser:
         return result, success
 
     def _parse_verb_table(self, html: str) -> Tuple[Dict[str, str], Dict[str, List[str]]]:
-        """
-        Parse a verb conjugation HTML table.
-
-        Lithuanian verb tables typically show:
-        - Rows: persons (1st/2nd/3rd singular/plural)
-        - Columns: tenses (present, past, future)
-
-        Args:
-            html: HTML containing the conjugation table
-
-        Returns:
-            Tuple of (forms dict, alternatives dict)
-        """
+        """Parse a verb conjugation HTML table."""
         soup = BeautifulSoup(html, "html.parser")
         forms: Dict[str, str] = {}
         alternatives: Dict[str, List[str]] = {}
 
-        # Find conjugation table(s)
         tables = soup.find_all("table", class_="inflection-table")
         if not tables:
-            # Try without class
             tables = soup.find_all("table")
 
         for table in tables:
@@ -387,7 +358,6 @@ class LithuanianParser:
             if len(cells) < 2:
                 continue
 
-            # First cell should be person indicator
             person_cell = cells[0].get_text(strip=True).lower()
             person = None
 
@@ -399,7 +369,6 @@ class LithuanianParser:
             if not person:
                 continue
 
-            # Parse form cells
             for i, cell in enumerate(cells[1:], start=1):
                 if i not in tense_columns:
                     continue
@@ -426,32 +395,26 @@ class LithuanianParser:
         """
         logger.info(f"Fetching adjective declensions for '{word}'")
 
-        # Fetch the page wikitext
         wikitext = self.client.fetch_page_wikitext(word)
         if not wikitext:
             return AdjectiveDeclension(word=word, forms={}), False
 
-        # Extract Lithuanian section
-        lt_section = self.client.extract_language_section(wikitext, "Lithuanian")
+        lt_section = self.client.extract_language_section(wikitext, self.LANGUAGE)
         if not lt_section:
             return AdjectiveDeclension(word=word, forms={}), False
 
-        # Find adjective template
         templates = self.client.find_templates(lt_section, self.ADJECTIVE_TEMPLATE_PATTERNS)
         if not templates:
             logger.warning(f"No adjective declension template found for '{word}'")
             return AdjectiveDeclension(word=word, forms={}), False
 
-        # Use the first matching template
         template_name, template_text = templates[0]
         logger.debug(f"Found template: {template_name}")
 
-        # Parse the template to HTML
         html = self.client.parse_to_html(template_text)
         if not html:
             return AdjectiveDeclension(word=word, forms={}, raw_template=template_text), False
 
-        # Extract forms from HTML table
         forms, alternatives = self._parse_adjective_table(html)
 
         result = AdjectiveDeclension(
@@ -470,24 +433,11 @@ class LithuanianParser:
         return result, success
 
     def _parse_adjective_table(self, html: str) -> Tuple[Dict[str, str], Dict[str, List[str]]]:
-        """
-        Parse an adjective declension HTML table.
-
-        Lithuanian adjective tables show:
-        - Rows: cases (7)
-        - Columns: number/gender combinations (singular m/f, plural m/f)
-
-        Args:
-            html: HTML containing the declension table
-
-        Returns:
-            Tuple of (forms dict, alternatives dict)
-        """
+        """Parse an adjective declension HTML table."""
         soup = BeautifulSoup(html, "html.parser")
         forms: Dict[str, str] = {}
         alternatives: Dict[str, List[str]] = {}
 
-        # Find the inflection table
         table = soup.find("table", class_="inflection-table")
         if not table or not isinstance(table, Tag):
             return forms, alternatives
@@ -497,7 +447,6 @@ class LithuanianParser:
             return forms, alternatives
 
         # Detect column structure from header
-        # Typical: case | singular m | singular f | plural m | plural f
         column_map: Dict[int, Tuple[str, str]] = {}  # index -> (number, gender)
 
         header_row = rows[0]
@@ -514,7 +463,7 @@ class LithuanianParser:
             elif "plural" in text and "fem" in text:
                 column_map[i] = ("plural", "f")
             elif "masculine" in text:
-                column_map[i] = ("singular", "m")  # Default to singular
+                column_map[i] = ("singular", "m")
             elif "feminine" in text:
                 column_map[i] = ("singular", "f")
 
@@ -524,7 +473,6 @@ class LithuanianParser:
             if len(cells) < 2:
                 continue
 
-            # First cell is the case name
             case_cell_text = cells[0].get_text(strip=True).lower()
             matched_case = None
 
@@ -536,7 +484,6 @@ class LithuanianParser:
             if not matched_case:
                 continue
 
-            # Parse form cells
             for i, cell in enumerate(cells[1:], start=1):
                 if i not in column_map:
                     continue
@@ -565,17 +512,14 @@ class LithuanianParser:
         """
         logger.info(f"Fetching adverb forms for '{word}'")
 
-        # Fetch the page wikitext
         wikitext = self.client.fetch_page_wikitext(word)
         if not wikitext:
             return AdverbForms(word=word, forms={}), False
 
-        # Extract Lithuanian section
-        lt_section = self.client.extract_language_section(wikitext, "Lithuanian")
+        lt_section = self.client.extract_language_section(wikitext, self.LANGUAGE)
         if not lt_section:
             return AdverbForms(word=word, forms={}), False
 
-        # Try to find adverb template
         templates = self.client.find_templates(lt_section, self.ADVERB_TEMPLATE_PATTERNS)
 
         forms: Dict[str, str] = {}
@@ -587,12 +531,10 @@ class LithuanianParser:
             raw_template = template_text
             logger.debug(f"Found adverb template: {template_name}")
 
-            # Parse the template to HTML
             html = self.client.parse_to_html(template_text)
             if html:
                 forms, alternatives = self._parse_adverb_table(html)
 
-        # If no forms found from template, try to parse from section text
         if not forms:
             forms, alternatives = self._extract_adverb_forms_from_text(lt_section, word)
 
@@ -616,39 +558,26 @@ class LithuanianParser:
         return result, success
 
     def _parse_adverb_table(self, html: str) -> Tuple[Dict[str, str], Dict[str, List[str]]]:
-        """
-        Parse an adverb HTML table or template output.
-
-        Args:
-            html: HTML containing adverb information
-
-        Returns:
-            Tuple of (forms dict, alternatives dict)
-        """
+        """Parse an adverb HTML table or template output."""
         soup = BeautifulSoup(html, "html.parser")
         forms: Dict[str, str] = {}
         alternatives: Dict[str, List[str]] = {}
 
-        # Look for comparative forms in various formats
         degree_keywords = {
             "positive": ["positive", "pos", "basic"],
             "comparative": ["comparative", "comp", "more"],
             "superlative": ["superlative", "sup", "most"],
         }
 
-        # Try to find forms in table cells or spans
         for degree, keywords in degree_keywords.items():
             for keyword in keywords:
-                # Look for labeled elements
                 elements = soup.find_all(
                     string=lambda text: text and keyword.lower() in text.lower() if text else False
                 )
                 for elem in elements:
-                    # Get the next sibling or parent's content
                     parent = elem.parent
                     if parent:
                         text = parent.get_text(strip=True)
-                        # Extract the form after the keyword
                         parts = text.split(":")
                         if len(parts) > 1:
                             form_text = parts[1].strip()
@@ -663,35 +592,22 @@ class LithuanianParser:
     def _extract_adverb_forms_from_text(
         self, lt_section: str, word: str
     ) -> Tuple[Dict[str, str], Dict[str, List[str]]]:
-        """
-        Try to extract adverb forms from section text.
-
-        Args:
-            lt_section: Lithuanian section wikitext
-            word: The word being looked up
-
-        Returns:
-            Tuple of (forms dict, alternatives dict)
-        """
+        """Try to extract adverb forms from section text."""
         forms: Dict[str, str] = {}
         alternatives: Dict[str, List[str]] = {}
 
-        # Common patterns for comparative forms in wikitext
-        # Pattern: comparative form {{lt-adv|comp=...}}
         comp_match = re.search(r"comp(?:arative)?[=:]\s*([^\s|}\]]+)", lt_section)
         if comp_match:
             cleaned = clean_form(comp_match.group(1))
             if cleaned:
                 forms["comparative"] = extract_primary_form(cleaned)
 
-        # Pattern: superlative form
         sup_match = re.search(r"sup(?:erlative)?[=:]\s*([^\s|}\]]+)", lt_section)
         if sup_match:
             cleaned = clean_form(sup_match.group(1))
             if cleaned:
                 forms["superlative"] = extract_primary_form(cleaned)
 
-        # The positive form is typically the word itself
         if word:
             forms["positive"] = word
 

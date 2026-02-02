@@ -2,72 +2,53 @@
 Wiktionary client for fetching linguistic data.
 
 This module provides access to Wiktionary's API for fetching grammatical forms
-of words in various languages. Currently focused on Lithuanian support.
+of words in various languages.
+
+For language-specific parsers, see:
+  - langtools.lt.wiktionary for Lithuanian
+  - langtools.de.wiktionary for German
 
 Example usage:
-    from clients.wiktionary import WiktionaryClient, LithuanianParser
+    from clients.wiktionary import WiktionaryClient
 
-    # Using the parser directly
+    # Using the base client
+    client = WiktionaryClient()
+    wikitext = client.fetch_page_wikitext("vilkas")
+    lt_section = client.extract_language_section(wikitext, "Lithuanian")
+
+    # For language-specific parsing, use the langtools modules:
+    from langtools.lt.wiktionary import LithuanianParser
     parser = LithuanianParser()
     declensions, success = parser.get_noun_declensions("vilkas")
-    if success:
-        print(declensions.forms)
-
-    # Using convenience functions
-    from clients.wiktionary import get_lithuanian_noun_forms
-    forms, success = get_lithuanian_noun_forms("vilkas")
 """
 
 from clients.wiktionary.client import WiktionaryClient
-from clients.wiktionary.lithuanian import (
-    LithuanianParser,
-    get_lithuanian_adjective_forms,
-    get_lithuanian_adverb_forms,
-    get_lithuanian_noun_forms,
-    get_lithuanian_verb_forms,
-)
 from clients.wiktionary.types import (
-    AdjectiveDeclension,
-    AdverbForms,
     FormResult,
-    NounDeclension,
     NounNumberType,
     PartOfSpeech,
-    VerbConjugation,
     WiktionaryResult,
 )
 from clients.wiktionary.utils import (
-    clean_form,
+    clean_form_generic,
     extract_alternative_forms,
     extract_primary_form,
     is_placeholder_text,
-    normalize_lithuanian_text,
-    remove_stress_marks,
+    normalize_text,
 )
 
 __all__ = [
     # Client classes
     "WiktionaryClient",
-    "LithuanianParser",
     # Type classes
-    "AdjectiveDeclension",
-    "AdverbForms",
     "FormResult",
-    "NounDeclension",
     "NounNumberType",
     "PartOfSpeech",
-    "VerbConjugation",
     "WiktionaryResult",
-    # Convenience functions
-    "get_lithuanian_noun_forms",
-    "get_lithuanian_verb_forms",
-    "get_lithuanian_adjective_forms",
-    "get_lithuanian_adverb_forms",
     # Utility functions
-    "clean_form",
+    "clean_form_generic",
     "extract_alternative_forms",
     "extract_primary_form",
     "is_placeholder_text",
-    "normalize_lithuanian_text",
-    "remove_stress_marks",
+    "normalize_text",
 ]
