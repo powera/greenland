@@ -79,9 +79,6 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
     },
     # -------------------------------------------------------------------------
     # CHINESE (zh) - East Asian focus, major trading partners
-    # NOTE: Baltic countries (Lithuania, Latvia, Estonia) are not included -
-    # they use the default level. Could add Thailand, Vietnam, Korea when
-    # those countries are added to the data.
     # -------------------------------------------------------------------------
     "zh": {
         TIER_1_LEVEL: [
@@ -91,6 +88,9 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
             "Canada",  # English-speaking (always Tier 1)
             "Australia",  # English-speaking (always Tier 1)
             "Japan",  # Major neighbor, economic ties
+            "South Korea",  # Major neighbor, economic ties
+            "Thailand",  # Southeast Asian neighbor, tourism
+            "Vietnam",  # Southeast Asian neighbor
             "Russia",  # Major neighbor
             "India",  # Neighbor, BRICS
         ],
@@ -98,11 +98,12 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
             "Germany",  # Major trade partner
             "France",  # Major European power
             "Brazil",  # BRICS partner
+            "South Africa",  # BRICS partner
+            "Egypt",  # Belt and Road
             "Italy",
             "Spain",
         ],
         # Baltic countries, Nordic countries use default level (14)
-        # Not relevant for Chinese learners - would add Thailand, Vietnam, Korea instead
     },
     # -------------------------------------------------------------------------
     # FRENCH (fr) - European focus, Francophone world
@@ -279,7 +280,6 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
     },
     # -------------------------------------------------------------------------
     # VIETNAMESE (vi) - Southeast Asian and French colonial ties
-    # NOTE: Would benefit from Thailand, Malaysia, Singapore when added to data
     # -------------------------------------------------------------------------
     "vi": {
         TIER_1_LEVEL: [
@@ -288,13 +288,16 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
             "Canada",  # English-speaking (always Tier 1)
             "Australia",  # English-speaking (always Tier 1) + regional
             "China",  # Major neighbor, cultural influence
+            "Thailand",  # Southeast Asian neighbor
+            "South Korea",  # Regional economic ties
             "Japan",  # Regional power
             "France",  # Colonial history
-            "Russia",  # Historic ties
         ],
         TIER_2_LEVEL: [
+            "Russia",  # Historic ties
             "Germany",
             "India",
+            "Egypt",  # Historic ties
             "Spain",
             "Italy",
             "Brazil",
@@ -304,7 +307,6 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
     },
     # -------------------------------------------------------------------------
     # JAPANESE (ja) - East Asian focus
-    # NOTE: Would benefit from Korea, Taiwan when added to data
     # -------------------------------------------------------------------------
     "ja": {
         TIER_1_LEVEL: [
@@ -313,7 +315,10 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
             "America",  # English-speaking (always Tier 1) + major ally
             "Canada",  # English-speaking (always Tier 1)
             "Australia",  # English-speaking (always Tier 1)
+            "South Korea",  # Major neighbor
             "China",  # Major neighbor
+            "Thailand",  # Popular destination
+            "Vietnam",  # Economic ties
             "Russia",  # Neighbor
             "Germany",  # Historic ties
         ],
@@ -321,6 +326,7 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
             "France",
             "India",
             "Brazil",  # Japanese diaspora
+            "Egypt",  # Tourism, history
             "Italy",
             "Spain",
             "Poland",
@@ -329,16 +335,18 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
     },
     # -------------------------------------------------------------------------
     # KOREAN (ko) - East Asian focus
-    # NOTE: Would benefit from having Korea (South Korea) itself in data
     # -------------------------------------------------------------------------
     "ko": {
         TIER_1_LEVEL: [
+            "South Korea",  # Home country
             "England",  # English-speaking (always Tier 1)
             "America",  # English-speaking (always Tier 1) + major ally
             "Canada",  # English-speaking (always Tier 1)
             "Australia",  # English-speaking (always Tier 1) + trade
             "China",  # Major neighbor
             "Japan",  # Major neighbor
+            "Vietnam",  # Economic ties, K-pop popularity
+            "Thailand",  # Tourism, K-pop popularity
             "Russia",  # Neighbor
             "Germany",  # Economic ties
         ],
@@ -346,6 +354,7 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
             "France",
             "India",
             "Brazil",
+            "Egypt",
             "Italy",
             "Spain",
             "Poland",
@@ -354,7 +363,7 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
     },
     # -------------------------------------------------------------------------
     # SWAHILI (sw) - East African focus
-    # NOTE: Would benefit from South Africa, Egypt, Tanzania when added to data
+    # NOTE: Would benefit from Tanzania, Kenya when added to data
     # -------------------------------------------------------------------------
     "sw": {
         TIER_1_LEVEL: [
@@ -362,6 +371,8 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
             "America",  # English-speaking (always Tier 1)
             "Canada",  # English-speaking (always Tier 1)
             "Australia",  # English-speaking (always Tier 1)
+            "South Africa",  # African neighbor, trade
+            "Egypt",  # Major African country, historic ties
             "China",  # Major investor/partner
             "India",  # Historic trade ties
             "Germany",  # Colonial history (Tanzania)
@@ -403,12 +414,17 @@ COUNTRY_TO_NATIONALITY_MAP: Dict[str, str] = {
     "Canada": "Canadian",
     "Japan": "Japanese",
     "China": "Chinese",
-    "India": "Indian",  # Not in current data but for future
-    "Brazil": "Brazilian",  # Not in current data but for future
-    "Australia": "Australian",  # Not in current data but for future
+    "India": "Indian",
+    "Brazil": "Brazilian",
+    "Australia": "Australian",
     "Sweden": "Swedish",
     "Norway": "Norwegian",
     "Finland": "Finnish",
+    "South Korea": "South Korean",
+    "Thailand": "Thai",
+    "Vietnam": "Vietnamese",
+    "South Africa": "South African",
+    "Egypt": "Egyptian",
 }
 
 
@@ -509,6 +525,11 @@ def validate_configuration() -> List[str]:
         "Sweden",
         "Norway",
         "Finland",
+        "South Korea",
+        "Thailand",
+        "Vietnam",
+        "South Africa",
+        "Egypt",
     }
 
     for lang_code, priorities in COUNTRY_PRIORITIES.items():
