@@ -9,8 +9,10 @@ It replaces the legacy "export wireword" functionality from trakaido/utils.py.
 """
 
 import argparse
+import json
 import logging
 import os
+import shutil
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -418,6 +420,59 @@ class UngurysAgent:
             logger.error(f"Failed to export conversations: {e}")
             return False, None
 
+    def export_category_choice(
+        self,
+        output_dir: Optional[str] = None,
+    ) -> Tuple[bool, Optional[str]]:
+        """
+        Export category choice data to the trakaido_wordlists directory.
+
+        This copies the categorychoice.json file from data/ to data/trakaido_wordlists/.
+        The file contains category definitions with names, descriptions, groups, and
+        similar categories to avoid when choosing quiz decoys.
+
+        Args:
+            output_dir: Output directory (default: data/trakaido_wordlists/)
+
+        Returns:
+            Tuple of (success flag, output path)
+        """
+        # Source file is at data/categorychoice.json
+        project_root = constants.PROJECT_ROOT
+        source_path = os.path.join(project_root, "data", "categorychoice.json")
+
+        # Default output is data/trakaido_wordlists/categorychoice.json
+        if output_dir is None:
+            output_dir = os.path.join(project_root, "data", "trakaido_wordlists")
+
+        output_path = os.path.join(output_dir, "categorychoice.json")
+
+        logger.info("Exporting category choice data...")
+
+        try:
+            # Check source file exists
+            if not os.path.exists(source_path):
+                logger.error(f"Source file not found: {source_path}")
+                return False, None
+
+            # Ensure output directory exists
+            os.makedirs(output_dir, exist_ok=True)
+
+            # Copy the file
+            shutil.copy2(source_path, output_path)
+
+            # Verify the copy by loading and checking
+            with open(output_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                category_count = len(data.get("categories", []))
+
+            logger.info(f"Successfully exported {category_count} categories to {output_path}")
+            return True, output_path
+
+        except Exception as e:
+            logger.error(f"Failed to export category choice data: {e}")
+            return False, None
+
     def run_export(
         self,
         output_path: Optional[str] = None,
@@ -536,6 +591,15 @@ class UngurysAgent:
             "success": True,
             "count": 0,
             "note": "Conversation export disabled - no conversations available",
+        }
+
+        # Export category choice data (language-independent, goes to trakaido_wordlists root)
+        logger.info("Exporting category choice data...")
+        category_success, category_path = self.export_category_choice()
+        results["exports"]["category_choice"] = {
+            "success": category_success,
+            "path": category_path,
+            "note": "Category definitions with avoidDecoys for quiz generation",
         }
 
         # Note: Manifest is generated automatically by export_wireword_directory()
@@ -671,6 +735,18 @@ class UngurysAgent:
                 logger.info("  Status: SUCCESS")
                 logger.info(f"  Path: {manifest.get('path', '')}")
                 logger.info("  File: wireword_manifest.json")
+            else:
+                logger.info("  Status: FAILED")
+            logger.info("")
+
+        # Category choice export
+        if "category_choice" in results["exports"]:
+            category = results["exports"]["category_choice"]
+            logger.info("CATEGORY CHOICE EXPORT:")
+            if category["success"]:
+                logger.info("  Status: SUCCESS")
+                logger.info(f"  Path: {category.get('path', '')}")
+                logger.info("  File: categorychoice.json")
             else:
                 logger.info("  Status: FAILED")
             logger.info("")
