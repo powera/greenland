@@ -7,6 +7,7 @@ of words in various languages.
 For language-specific parsers, see:
   - langtools.lt.wiktionary for Lithuanian
   - langtools.de.wiktionary for German
+  - langtools.es.wiktionary for Spanish
 
 Example usage:
     from clients.wiktionary import WiktionaryClient
