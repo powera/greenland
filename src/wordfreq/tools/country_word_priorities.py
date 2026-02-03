@@ -22,11 +22,14 @@ from typing import Dict, List, Optional, Set
 # =============================================================================
 # Countries are grouped at specific levels to batch them together.
 # Each tier maps to a specific difficulty level.
+# These levels are chosen to align with existing difficulty levels in the data:
+# - Early words: 6-9
+# - Mid-level words: 13-14
+# - Advanced words: 18-20
 
-TIER_1_LEVEL = 3  # Home country + immediate neighbors/cultural significance
-TIER_2_LEVEL = 8  # Major world powers + culturally relevant countries
-TIER_3_LEVEL = 13  # Secondary importance countries
-TIER_4_LEVEL = 18  # Remaining countries (lowest priority)
+TIER_1_LEVEL = 8  # Home country + immediate neighbors/cultural significance + English
+TIER_2_LEVEL = 13  # Major world powers + culturally relevant countries
+TIER_3_LEVEL = 18  # Remaining countries (lowest priority)
 
 
 # =============================================================================
@@ -44,10 +47,16 @@ TIER_4_LEVEL = 18  # Remaining countries (lowest priority)
 COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
     # -------------------------------------------------------------------------
     # LITHUANIAN (lt) - Baltic focus, European neighbors
+    # NOTE: English-speaking countries (England, America, Canada, Australia)
+    # are always in Tier 1 since we target English speakers.
     # -------------------------------------------------------------------------
     "lt": {
         TIER_1_LEVEL: [
             "Lithuania",  # Home country
+            "England",  # English-speaking (always Tier 1)
+            "America",  # English-speaking (always Tier 1)
+            "Canada",  # English-speaking (always Tier 1)
+            "Australia",  # English-speaking (always Tier 1)
             "Latvia",  # Baltic neighbor
             "Estonia",  # Baltic neighbor
             "Poland",  # Major neighbor, historical ties
@@ -55,24 +64,19 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
             "Germany",  # Major economic partner
         ],
         TIER_2_LEVEL: [
-            "England",  # Major emigration destination
             "France",  # Major European power
             "Spain",  # Emigration destination
             "Italy",  # European cultural significance
-            "America",  # Global superpower
             "Sweden",  # Nordic neighbor
             "Norway",  # Nordic neighbor
             "Finland",  # Nordic neighbor
-        ],
-        TIER_3_LEVEL: [
             "Japan",
             "China",
+        ],
+        TIER_3_LEVEL: [
             "India",
             "Brazil",
-            "Australia",
-            "Canada",
         ],
-        # TIER_4: Any remaining countries not listed
     },
     # -------------------------------------------------------------------------
     # CHINESE (zh) - East Asian focus, major trading partners
@@ -80,29 +84,27 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
     "zh": {
         TIER_1_LEVEL: [
             "China",  # Home country
+            "England",  # English-speaking (always Tier 1)
+            "America",  # English-speaking (always Tier 1)
+            "Canada",  # English-speaking (always Tier 1)
+            "Australia",  # English-speaking (always Tier 1)
             "Japan",  # Major neighbor, economic ties
-            "America",  # Major trade partner, global power
             "Russia",  # Major neighbor
             "India",  # Neighbor
         ],
         TIER_2_LEVEL: [
             "Germany",  # Major trade partner
             "France",  # Major European power
-            "England",  # Major English-speaking country
-            "Australia",  # Regional, Chinese diaspora
-            "Canada",  # Chinese diaspora
             "Brazil",  # BRICS partner
-        ],
-        TIER_3_LEVEL: [
             "Italy",
             "Spain",
+        ],
+        TIER_3_LEVEL: [
             "Poland",
             "Sweden",
             "Norway",
             "Finland",
-        ],
-        TIER_4_LEVEL: [
-            "Lithuania",  # Low relevance for Chinese learners
+            "Lithuania",
             "Latvia",
             "Estonia",
         ],
@@ -113,28 +115,26 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
     "fr": {
         TIER_1_LEVEL: [
             "France",  # Home country
+            "England",  # English-speaking (always Tier 1)
+            "America",  # English-speaking (always Tier 1)
+            "Canada",  # English-speaking (always Tier 1) + Francophone
+            "Australia",  # English-speaking (always Tier 1)
             "Germany",  # Major neighbor
-            "England",  # Historic rival, neighbor
             "Spain",  # Neighbor
             "Italy",  # Neighbor
-            "America",  # Global superpower
         ],
         TIER_2_LEVEL: [
-            "Canada",  # Francophone
             "Poland",  # European ties
             "Russia",  # Major power
             "China",  # Major power
             "Japan",  # Cultural interest
-            "Brazil",  # Largest Portuguese-speaking, ties
+            "Brazil",  # Ties
+            "India",
         ],
         TIER_3_LEVEL: [
-            "India",
-            "Australia",
             "Sweden",
             "Norway",
             "Finland",
-        ],
-        TIER_4_LEVEL: [
             "Lithuania",
             "Latvia",
             "Estonia",
@@ -146,28 +146,26 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
     "es": {
         TIER_1_LEVEL: [
             "Spain",  # Home country (or cultural origin)
-            "America",  # Major influence, neighbor for Latin America
+            "England",  # English-speaking (always Tier 1)
+            "America",  # English-speaking (always Tier 1)
+            "Canada",  # English-speaking (always Tier 1)
+            "Australia",  # English-speaking (always Tier 1)
             "France",  # Neighbor
             "Italy",  # Cultural ties
             "Germany",  # Major European power
-            "England",  # Global influence
         ],
         TIER_2_LEVEL: [
             "Brazil",  # Latin American neighbor
-            "Canada",  # North American
             "China",  # Major trade partner
             "Japan",  # Economic ties
             "Poland",
             "Russia",
+            "India",
         ],
         TIER_3_LEVEL: [
-            "India",
-            "Australia",
             "Sweden",
             "Norway",
             "Finland",
-        ],
-        TIER_4_LEVEL: [
             "Lithuania",
             "Latvia",
             "Estonia",
@@ -179,11 +177,13 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
     "de": {
         TIER_1_LEVEL: [
             "Germany",  # Home country
+            "England",  # English-speaking (always Tier 1)
+            "America",  # English-speaking (always Tier 1)
+            "Canada",  # English-speaking (always Tier 1)
+            "Australia",  # English-speaking (always Tier 1)
             "France",  # Major neighbor
             "Poland",  # Neighbor
             "Italy",  # Cultural ties, neighbor
-            "England",  # Major European power
-            "America",  # Global superpower
         ],
         TIER_2_LEVEL: [
             "Spain",  # European ties
@@ -192,15 +192,11 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
             "Japan",  # Economic ties
             "Sweden",  # Nordic
             "Norway",
+            "India",
+            "Brazil",
         ],
         TIER_3_LEVEL: [
             "Finland",
-            "India",
-            "Australia",
-            "Canada",
-            "Brazil",
-        ],
-        TIER_4_LEVEL: [
             "Lithuania",
             "Latvia",
             "Estonia",
@@ -212,11 +208,13 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
     "it": {
         TIER_1_LEVEL: [
             "Italy",  # Home country
+            "England",  # English-speaking (always Tier 1)
+            "America",  # English-speaking (always Tier 1)
+            "Canada",  # English-speaking (always Tier 1)
+            "Australia",  # English-speaking (always Tier 1)
             "France",  # Neighbor
             "Germany",  # Major European power
             "Spain",  # Mediterranean neighbor
-            "England",  # Major power
-            "America",  # Global superpower
         ],
         TIER_2_LEVEL: [
             "Poland",
@@ -224,16 +222,12 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
             "China",
             "Japan",
             "Brazil",  # Italian diaspora
-            "Canada",
+            "India",
         ],
         TIER_3_LEVEL: [
-            "India",
-            "Australia",
             "Sweden",
             "Norway",
             "Finland",
-        ],
-        TIER_4_LEVEL: [
             "Lithuania",
             "Latvia",
             "Estonia",
@@ -245,28 +239,26 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
     "pt": {
         TIER_1_LEVEL: [
             "Brazil",  # Largest Portuguese-speaking country
-            "America",  # Regional influence
+            "England",  # English-speaking (always Tier 1)
+            "America",  # English-speaking (always Tier 1)
+            "Canada",  # English-speaking (always Tier 1)
+            "Australia",  # English-speaking (always Tier 1)
             "Spain",  # Neighbor (Portugal)
             "France",  # European ties
-            "England",  # Historic ally (Portugal)
             "Germany",  # Major European power
         ],
         TIER_2_LEVEL: [
             "Italy",
             "Japan",  # Brazilian diaspora
             "China",  # Trade
-            "Canada",
-            "Australia",
             "Poland",
-        ],
-        TIER_3_LEVEL: [
             "India",
             "Russia",
+        ],
+        TIER_3_LEVEL: [
             "Sweden",
             "Norway",
             "Finland",
-        ],
-        TIER_4_LEVEL: [
             "Lithuania",
             "Latvia",
             "Estonia",
@@ -277,11 +269,13 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
     # -------------------------------------------------------------------------
     "nl": {
         TIER_1_LEVEL: [
+            "England",  # English-speaking (always Tier 1) + neighbor
+            "America",  # English-speaking (always Tier 1)
+            "Canada",  # English-speaking (always Tier 1)
+            "Australia",  # English-speaking (always Tier 1)
             "Germany",  # Major neighbor
             "France",  # Neighbor
-            "England",  # Neighbor across the sea
             "Spain",  # Historic ties
-            "America",  # Global power
             "Italy",  # European ties
         ],
         TIER_2_LEVEL: [
@@ -289,17 +283,13 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
             "Russia",
             "China",
             "Japan",
-            "Australia",
             "Brazil",
+            "India",
         ],
         TIER_3_LEVEL: [
-            "India",
-            "Canada",
             "Sweden",
             "Norway",
             "Finland",
-        ],
-        TIER_4_LEVEL: [
             "Lithuania",
             "Latvia",
             "Estonia",
@@ -311,11 +301,13 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
     "sv": {
         TIER_1_LEVEL: [
             "Sweden",  # Home country
+            "England",  # English-speaking (always Tier 1)
+            "America",  # English-speaking (always Tier 1)
+            "Canada",  # English-speaking (always Tier 1)
+            "Australia",  # English-speaking (always Tier 1)
             "Norway",  # Nordic neighbor
             "Finland",  # Nordic neighbor
             "Germany",  # Major European power
-            "England",  # Major power
-            "America",  # Global superpower
         ],
         TIER_2_LEVEL: [
             "France",
@@ -324,15 +316,11 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
             "Poland",
             "Russia",
             "China",
-        ],
-        TIER_3_LEVEL: [
             "Japan",
             "India",
-            "Australia",
-            "Canada",
             "Brazil",
         ],
-        TIER_4_LEVEL: [
+        TIER_3_LEVEL: [
             "Lithuania",
             "Latvia",
             "Estonia",
@@ -343,29 +331,27 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
     # -------------------------------------------------------------------------
     "vi": {
         TIER_1_LEVEL: [
+            "England",  # English-speaking (always Tier 1)
+            "America",  # English-speaking (always Tier 1)
+            "Canada",  # English-speaking (always Tier 1)
+            "Australia",  # English-speaking (always Tier 1) + regional
             "China",  # Major neighbor, cultural influence
-            "America",  # Historic ties
             "Japan",  # Regional power
             "France",  # Colonial history
             "Russia",  # Historic ties
-            "Australia",  # Regional
         ],
         TIER_2_LEVEL: [
             "Germany",
-            "England",
             "India",
-            "Canada",
             "Spain",
             "Italy",
-        ],
-        TIER_3_LEVEL: [
             "Brazil",
             "Poland",
+        ],
+        TIER_3_LEVEL: [
             "Sweden",
             "Norway",
             "Finland",
-        ],
-        TIER_4_LEVEL: [
             "Lithuania",
             "Latvia",
             "Estonia",
@@ -377,28 +363,26 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
     "ja": {
         TIER_1_LEVEL: [
             "Japan",  # Home country
-            "America",  # Major ally
+            "England",  # English-speaking (always Tier 1)
+            "America",  # English-speaking (always Tier 1) + major ally
+            "Canada",  # English-speaking (always Tier 1)
+            "Australia",  # English-speaking (always Tier 1)
             "China",  # Major neighbor
             "Russia",  # Neighbor
             "Germany",  # Historic ties
-            "England",  # Major power
         ],
         TIER_2_LEVEL: [
             "France",
-            "Australia",
             "India",
             "Brazil",  # Japanese diaspora
-            "Canada",
             "Italy",
-        ],
-        TIER_3_LEVEL: [
             "Spain",
             "Poland",
+        ],
+        TIER_3_LEVEL: [
             "Sweden",
             "Norway",
             "Finland",
-        ],
-        TIER_4_LEVEL: [
             "Lithuania",
             "Latvia",
             "Estonia",
@@ -409,29 +393,27 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
     # -------------------------------------------------------------------------
     "ko": {
         TIER_1_LEVEL: [
+            "England",  # English-speaking (always Tier 1)
+            "America",  # English-speaking (always Tier 1) + major ally
+            "Canada",  # English-speaking (always Tier 1)
+            "Australia",  # English-speaking (always Tier 1) + trade
             "China",  # Major neighbor
             "Japan",  # Major neighbor
-            "America",  # Major ally
             "Russia",  # Neighbor
             "Germany",  # Economic ties
-            "Australia",  # Trade, diaspora
         ],
         TIER_2_LEVEL: [
-            "England",
             "France",
             "India",
-            "Canada",
             "Brazil",
             "Italy",
-        ],
-        TIER_3_LEVEL: [
             "Spain",
             "Poland",
+        ],
+        TIER_3_LEVEL: [
             "Sweden",
             "Norway",
             "Finland",
-        ],
-        TIER_4_LEVEL: [
             "Lithuania",
             "Latvia",
             "Estonia",
@@ -442,10 +424,12 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
     # -------------------------------------------------------------------------
     "sw": {
         TIER_1_LEVEL: [
+            "England",  # English-speaking (always Tier 1) + colonial history
+            "America",  # English-speaking (always Tier 1)
+            "Canada",  # English-speaking (always Tier 1)
+            "Australia",  # English-speaking (always Tier 1)
             "China",  # Major investor/partner
             "India",  # Historic trade ties
-            "England",  # Colonial history
-            "America",  # Global power
             "Germany",  # Colonial history (Tanzania)
             "France",
         ],
@@ -453,18 +437,14 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
             "Japan",
             "Russia",
             "Brazil",
-            "Australia",
-            "Canada",
             "Italy",
-        ],
-        TIER_3_LEVEL: [
             "Spain",
             "Poland",
+        ],
+        TIER_3_LEVEL: [
             "Sweden",
             "Norway",
             "Finland",
-        ],
-        TIER_4_LEVEL: [
             "Lithuania",
             "Latvia",
             "Estonia",
@@ -568,7 +548,7 @@ def get_nationality_for_country(country_label: str) -> Optional[str]:
 
 def get_all_tier_levels() -> List[int]:
     """Get all tier levels in order."""
-    return [TIER_1_LEVEL, TIER_2_LEVEL, TIER_3_LEVEL, TIER_4_LEVEL]
+    return [TIER_1_LEVEL, TIER_2_LEVEL, TIER_3_LEVEL]
 
 
 def validate_configuration() -> List[str]:
@@ -637,7 +617,6 @@ if __name__ == "__main__":
 
     print()
     print("Tier Levels:")
-    print(f"  Tier 1 (home/neighbors): Level {TIER_1_LEVEL}")
+    print(f"  Tier 1 (home/neighbors/English): Level {TIER_1_LEVEL}")
     print(f"  Tier 2 (major powers): Level {TIER_2_LEVEL}")
-    print(f"  Tier 3 (secondary): Level {TIER_3_LEVEL}")
-    print(f"  Tier 4 (lowest priority): Level {TIER_4_LEVEL}")
+    print(f"  Tier 3 (remaining): Level {TIER_3_LEVEL}")

@@ -45,7 +45,6 @@ from wordfreq.tools.country_word_priorities import (
     TIER_1_LEVEL,
     TIER_2_LEVEL,
     TIER_3_LEVEL,
-    TIER_4_LEVEL,
     get_all_tier_levels,
     get_country_level_for_language,
     get_supported_languages,
@@ -237,7 +236,6 @@ class CountryOverrideManager:
             TIER_1_LEVEL: 0,
             TIER_2_LEVEL: 0,
             TIER_3_LEVEL: 0,
-            TIER_4_LEVEL: 0,
         }
 
         # Process all countries
@@ -443,10 +441,9 @@ class CountryOverrideManager:
         ]
 
         tier_names = {
-            TIER_1_LEVEL: f"Tier 1 (Level {TIER_1_LEVEL}) - Home/Neighbors",
+            TIER_1_LEVEL: f"Tier 1 (Level {TIER_1_LEVEL}) - Home/Neighbors/English",
             TIER_2_LEVEL: f"Tier 2 (Level {TIER_2_LEVEL}) - Major Powers",
-            TIER_3_LEVEL: f"Tier 3 (Level {TIER_3_LEVEL}) - Secondary",
-            TIER_4_LEVEL: f"Tier 4 (Level {TIER_4_LEVEL}) - Lowest Priority",
+            TIER_3_LEVEL: f"Tier 3 (Level {TIER_3_LEVEL}) - Remaining",
         }
 
         for level in get_all_tier_levels():

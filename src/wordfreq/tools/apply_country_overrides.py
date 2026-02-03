@@ -43,7 +43,6 @@ from wordfreq.tools.country_word_priorities import (
     TIER_1_LEVEL,
     TIER_2_LEVEL,
     TIER_3_LEVEL,
-    TIER_4_LEVEL,
     get_all_tier_levels,
     get_supported_languages,
     validate_configuration,
@@ -104,10 +103,9 @@ def cmd_preview_all(args: argparse.Namespace) -> None:
             print(f"Words with changes: {summary.words_with_changes}")
 
             tier_names = {
-                TIER_1_LEVEL: "Tier 1 (Home/Neighbors)",
+                TIER_1_LEVEL: "Tier 1 (Home/Neighbors/English)",
                 TIER_2_LEVEL: "Tier 2 (Major Powers)",
-                TIER_3_LEVEL: "Tier 3 (Secondary)",
-                TIER_4_LEVEL: "Tier 4 (Lowest Priority)",
+                TIER_3_LEVEL: "Tier 3 (Remaining)",
             }
 
             for level in get_all_tier_levels():
@@ -247,10 +245,9 @@ def cmd_validate(args: argparse.Namespace) -> None:
         print(f"  {', '.join(get_supported_languages())}")
         print()
         print("Tier levels:")
-        print(f"  Tier 1 (Home/Neighbors): Level {TIER_1_LEVEL}")
+        print(f"  Tier 1 (Home/Neighbors/English): Level {TIER_1_LEVEL}")
         print(f"  Tier 2 (Major Powers): Level {TIER_2_LEVEL}")
-        print(f"  Tier 3 (Secondary): Level {TIER_3_LEVEL}")
-        print(f"  Tier 4 (Lowest Priority): Level {TIER_4_LEVEL}")
+        print(f"  Tier 3 (Remaining): Level {TIER_3_LEVEL}")
 
 
 def cmd_info(args: argparse.Namespace) -> None:
@@ -268,10 +265,9 @@ def cmd_info(args: argparse.Namespace) -> None:
     print("=" * 60)
 
     tier_names = {
-        TIER_1_LEVEL: "Tier 1 - Home country and immediate neighbors",
+        TIER_1_LEVEL: "Tier 1 - Home country, neighbors, and English-speaking",
         TIER_2_LEVEL: "Tier 2 - Major world powers and culturally relevant",
-        TIER_3_LEVEL: "Tier 3 - Secondary importance",
-        TIER_4_LEVEL: "Tier 4 - Lowest priority",
+        TIER_3_LEVEL: "Tier 3 - Remaining countries",
     }
 
     for level in get_all_tier_levels():
