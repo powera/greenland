@@ -49,6 +49,7 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
     # LITHUANIAN (lt) - Baltic focus, European neighbors
     # NOTE: English-speaking countries (England, America, Canada, Australia)
     # are always in Tier 1 since we target English speakers.
+    # Countries not listed here use the default level from the lemma (14).
     # -------------------------------------------------------------------------
     "lt": {
         TIER_1_LEVEL: [
@@ -73,13 +74,14 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
             "Japan",
             "China",
         ],
-        TIER_3_LEVEL: [
-            "India",
-            "Brazil",
-        ],
+        # Tier 3: India, Brazil use default level (14)
+        # Not relevant enough to prioritize for Lithuanian learners
     },
     # -------------------------------------------------------------------------
     # CHINESE (zh) - East Asian focus, major trading partners
+    # NOTE: Baltic countries (Lithuania, Latvia, Estonia) are not included -
+    # they use the default level. Could add Thailand, Vietnam, Korea when
+    # those countries are added to the data.
     # -------------------------------------------------------------------------
     "zh": {
         TIER_1_LEVEL: [
@@ -90,7 +92,7 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
             "Australia",  # English-speaking (always Tier 1)
             "Japan",  # Major neighbor, economic ties
             "Russia",  # Major neighbor
-            "India",  # Neighbor
+            "India",  # Neighbor, BRICS
         ],
         TIER_2_LEVEL: [
             "Germany",  # Major trade partner
@@ -99,15 +101,8 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
             "Italy",
             "Spain",
         ],
-        TIER_3_LEVEL: [
-            "Poland",
-            "Sweden",
-            "Norway",
-            "Finland",
-            "Lithuania",
-            "Latvia",
-            "Estonia",
-        ],
+        # Baltic countries, Nordic countries use default level (14)
+        # Not relevant for Chinese learners - would add Thailand, Vietnam, Korea instead
     },
     # -------------------------------------------------------------------------
     # FRENCH (fr) - European focus, Francophone world
@@ -131,14 +126,7 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
             "Brazil",  # Ties
             "India",
         ],
-        TIER_3_LEVEL: [
-            "Sweden",
-            "Norway",
-            "Finland",
-            "Lithuania",
-            "Latvia",
-            "Estonia",
-        ],
+        # Nordic and Baltic countries use default level (14)
     },
     # -------------------------------------------------------------------------
     # SPANISH (es) - Latin American context, European ties
@@ -162,14 +150,7 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
             "Russia",
             "India",
         ],
-        TIER_3_LEVEL: [
-            "Sweden",
-            "Norway",
-            "Finland",
-            "Lithuania",
-            "Latvia",
-            "Estonia",
-        ],
+        # Nordic and Baltic countries use default level (14)
     },
     # -------------------------------------------------------------------------
     # GERMAN (de) - Central European focus
@@ -195,12 +176,7 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
             "India",
             "Brazil",
         ],
-        TIER_3_LEVEL: [
-            "Finland",
-            "Lithuania",
-            "Latvia",
-            "Estonia",
-        ],
+        # Baltic countries, Finland use default level (14)
     },
     # -------------------------------------------------------------------------
     # ITALIAN (it) - Mediterranean and European focus
@@ -224,14 +200,7 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
             "Brazil",  # Italian diaspora
             "India",
         ],
-        TIER_3_LEVEL: [
-            "Sweden",
-            "Norway",
-            "Finland",
-            "Lithuania",
-            "Latvia",
-            "Estonia",
-        ],
+        # Nordic and Baltic countries use default level (14)
     },
     # -------------------------------------------------------------------------
     # PORTUGUESE (pt) - Lusophone world, Brazilian focus
@@ -255,14 +224,7 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
             "India",
             "Russia",
         ],
-        TIER_3_LEVEL: [
-            "Sweden",
-            "Norway",
-            "Finland",
-            "Lithuania",
-            "Latvia",
-            "Estonia",
-        ],
+        # Nordic and Baltic countries use default level (14)
     },
     # -------------------------------------------------------------------------
     # DUTCH (nl) - European and colonial history focus
@@ -286,14 +248,7 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
             "Brazil",
             "India",
         ],
-        TIER_3_LEVEL: [
-            "Sweden",
-            "Norway",
-            "Finland",
-            "Lithuania",
-            "Latvia",
-            "Estonia",
-        ],
+        # Nordic and Baltic countries use default level (14)
     },
     # -------------------------------------------------------------------------
     # SWEDISH (sv) - Nordic and European focus
@@ -320,14 +275,11 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
             "India",
             "Brazil",
         ],
-        TIER_3_LEVEL: [
-            "Lithuania",
-            "Latvia",
-            "Estonia",
-        ],
+        # Baltic countries use default level (14)
     },
     # -------------------------------------------------------------------------
     # VIETNAMESE (vi) - Southeast Asian and French colonial ties
+    # NOTE: Would benefit from Thailand, Malaysia, Singapore when added to data
     # -------------------------------------------------------------------------
     "vi": {
         TIER_1_LEVEL: [
@@ -348,17 +300,11 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
             "Brazil",
             "Poland",
         ],
-        TIER_3_LEVEL: [
-            "Sweden",
-            "Norway",
-            "Finland",
-            "Lithuania",
-            "Latvia",
-            "Estonia",
-        ],
+        # Nordic and Baltic countries use default level (14)
     },
     # -------------------------------------------------------------------------
     # JAPANESE (ja) - East Asian focus
+    # NOTE: Would benefit from Korea, Taiwan when added to data
     # -------------------------------------------------------------------------
     "ja": {
         TIER_1_LEVEL: [
@@ -379,17 +325,11 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
             "Spain",
             "Poland",
         ],
-        TIER_3_LEVEL: [
-            "Sweden",
-            "Norway",
-            "Finland",
-            "Lithuania",
-            "Latvia",
-            "Estonia",
-        ],
+        # Nordic and Baltic countries use default level (14)
     },
     # -------------------------------------------------------------------------
     # KOREAN (ko) - East Asian focus
+    # NOTE: Would benefit from having Korea (South Korea) itself in data
     # -------------------------------------------------------------------------
     "ko": {
         TIER_1_LEVEL: [
@@ -410,17 +350,11 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
             "Spain",
             "Poland",
         ],
-        TIER_3_LEVEL: [
-            "Sweden",
-            "Norway",
-            "Finland",
-            "Lithuania",
-            "Latvia",
-            "Estonia",
-        ],
+        # Nordic and Baltic countries use default level (14)
     },
     # -------------------------------------------------------------------------
     # SWAHILI (sw) - East African focus
+    # NOTE: Would benefit from South Africa, Egypt, Tanzania when added to data
     # -------------------------------------------------------------------------
     "sw": {
         TIER_1_LEVEL: [
@@ -441,14 +375,7 @@ COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
             "Spain",
             "Poland",
         ],
-        TIER_3_LEVEL: [
-            "Sweden",
-            "Norway",
-            "Finland",
-            "Lithuania",
-            "Latvia",
-            "Estonia",
-        ],
+        # Nordic and Baltic countries use default level (14)
     },
 }
 
