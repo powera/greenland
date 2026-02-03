@@ -29,7 +29,11 @@ from wordfreq.storage.translation_helpers import (
     TIER_1_LANGUAGES,
     TIER_2_LANGUAGES,
 )
+from wordfreq.storage.backend.factory import create_session
 from wordfreq.trakaido.utils.export_manager import TrakaidoExporter
+from wordfreq.tools.country_word_priorities import (
+    get_supported_languages as get_country_override_languages,
+)
 from wireword.export_wireword_conversations import WirewordConversationExporter
 from wireword.export_wireword_sentences import WirewordSentenceExporter
 
@@ -126,6 +130,49 @@ class UngurysAgent:
         logger.info(
             f"Initialized Ungurys agent for {SUPPORTED_LANGUAGES[self.language]}{variant_info} (lang_{self.language_suffix})"
         )
+
+    def _apply_country_overrides(self) -> Dict[str, Any]:
+        """
+        Apply country-related difficulty level overrides for the target language.
+
+        This ensures country words appear at appropriate difficulty levels
+        based on the target language being learned. For example, "South Korea"
+        appears earlier for Chinese learners but later for Lithuanian learners.
+
+        Returns:
+            Dictionary with override results
+        """
+        # Check if this language has country override configuration
+        if self.language not in get_country_override_languages():
+            logger.info(f"No country override configuration for '{self.language}' - skipping")
+            return {"applied": False, "reason": "no_configuration"}
+
+        try:
+            from wordfreq.tools.country_override_manager import CountryOverrideManager
+
+            session = create_session(self.config)
+            manager = CountryOverrideManager(session)
+
+            # Apply overrides (this is idempotent - safe to run multiple times)
+            summary = manager.apply_overrides(self.language)
+
+            logger.info(
+                f"Applied country word overrides for '{self.language}': "
+                f"{summary.words_with_changes} words updated"
+            )
+
+            session.close()
+
+            return {
+                "applied": True,
+                "language": self.language,
+                "words_updated": summary.words_with_changes,
+                "changes_by_tier": summary.changes_by_tier,
+            }
+
+        except Exception as e:
+            logger.warning(f"Failed to apply country overrides: {e}")
+            return {"applied": False, "reason": str(e)}
 
     def get_language_output_dir(self) -> str:
         """
@@ -382,6 +429,7 @@ class UngurysAgent:
         include_without_guid: bool = False,
         include_unverified: bool = True,
         export_mode: str = "directory",
+        skip_country_overrides: bool = False,
     ) -> Dict[str, Any]:
         """
         Run the WireWord export with specified parameters.
@@ -396,11 +444,21 @@ class UngurysAgent:
             include_without_guid: Include lemmas without GUIDs (default: False)
             include_unverified: Include unverified entries (default: True)
             export_mode: Export mode ('single', 'directory', or 'both')
+            skip_country_overrides: Skip applying country difficulty overrides (default: False)
 
         Returns:
             Dictionary with export results
         """
         start_time = datetime.now()
+
+        # Apply country-related difficulty overrides before export
+        if not skip_country_overrides:
+            logger.info("Applying country word difficulty overrides...")
+            override_results = self._apply_country_overrides()
+        else:
+            logger.info("Skipping country word overrides (--skip-country-overrides)")
+            override_results = {"applied": False, "reason": "skipped"}
+
         # Get database path from config
         db_path = (
             self.config.sqlite_path if self.config.backend_type == BackendType.SQLITE else None
@@ -409,6 +467,7 @@ class UngurysAgent:
             "timestamp": start_time.isoformat(),
             "database_path": db_path,
             "export_mode": export_mode,
+            "country_overrides": override_results,
             "exports": {},
         }
 
@@ -516,6 +575,18 @@ class UngurysAgent:
         logger.info(f"Export Mode: {results['export_mode']}")
         logger.info(f"Duration: {duration:.2f} seconds")
         logger.info("")
+
+        # Country overrides
+        if "country_overrides" in results:
+            overrides = results["country_overrides"]
+            logger.info("COUNTRY WORD OVERRIDES:")
+            if overrides.get("applied"):
+                logger.info(f"  Status: APPLIED")
+                logger.info(f"  Words updated: {overrides.get('words_updated', 0)}")
+            else:
+                reason = overrides.get("reason", "unknown")
+                logger.info(f"  Status: SKIPPED ({reason})")
+            logger.info("")
 
         # Single-file export
         if "single" in results["exports"]:
@@ -667,6 +738,11 @@ def get_argument_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Include audio from staging that has not yet been reviewed. Changes audio path in manifest.",
     )
+    parser.add_argument(
+        "--skip-country-overrides",
+        action="store_true",
+        help="Skip applying country-specific difficulty overrides before export.",
+    )
 
     return parser
 
@@ -713,6 +789,7 @@ def main() -> None:
         include_without_guid=args.include_without_guid,
         include_unverified=args.include_unverified,
         export_mode=args.mode,
+        skip_country_overrides=args.skip_country_overrides,
     )
 
 
