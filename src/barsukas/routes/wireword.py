@@ -33,7 +33,9 @@ def _get_config() -> DataSourceConfig:
     return app.backend_config
 
 
-def export_all_languages(include_unreviewed_audio: bool = False) -> ResponseReturnValue:
+def export_all_languages(
+    include_unreviewed_audio: bool = False, apply_level_overrides: bool = False
+) -> ResponseReturnValue:
     """Export WireWord files for all supported languages (directory mode only)."""
     try:
         # Create DataSourceConfig
@@ -54,6 +56,8 @@ def export_all_languages(include_unreviewed_audio: bool = False) -> ResponseRetu
                         simplified_chinese=True,
                         include_unreviewed_audio=include_unreviewed_audio,
                     )
+                    if apply_level_overrides:
+                        agent_simplified.apply_level_overrides()
                     success_simp, results_simp = agent_simplified.export_wireword_directory()
                     all_results[f"{lang_name} (Simplified)"] = {
                         "success": success_simp,
@@ -69,6 +73,8 @@ def export_all_languages(include_unreviewed_audio: bool = False) -> ResponseRetu
                         simplified_chinese=False,
                         include_unreviewed_audio=include_unreviewed_audio,
                     )
+                    if apply_level_overrides:
+                        agent_traditional.apply_level_overrides()
                     success_trad, results_trad = agent_traditional.export_wireword_directory()
                     all_results[f"{lang_name} (Traditional)"] = {
                         "success": success_trad,
@@ -83,6 +89,8 @@ def export_all_languages(include_unreviewed_audio: bool = False) -> ResponseRetu
                         language=lang_code,
                         include_unreviewed_audio=include_unreviewed_audio,
                     )
+                    if apply_level_overrides:
+                        agent.apply_level_overrides()
                     success, results = agent.export_wireword_directory()
                     all_results[lang_name] = {"success": success, "results": results}
                     if not success:
@@ -131,10 +139,14 @@ def export_wireword() -> ResponseReturnValue:
     difficulty_level = request.form.get("difficulty_level", "").strip()
     pos_type = request.form.get("pos_type", "").strip()
     include_unreviewed_audio = request.form.get("include_unreviewed_audio") == "on"
+    apply_level_overrides = request.form.get("apply_level_overrides") == "on"
 
     # Handle "All Languages" option
     if language == "all":
-        return export_all_languages(include_unreviewed_audio=include_unreviewed_audio)
+        return export_all_languages(
+            include_unreviewed_audio=include_unreviewed_audio,
+            apply_level_overrides=apply_level_overrides,
+        )
 
     # Validate language
     if language not in SUPPORTED_LANGUAGES:
@@ -166,6 +178,17 @@ def export_wireword() -> ResponseReturnValue:
             simplified_chinese=simplified_chinese,
             include_unreviewed_audio=include_unreviewed_audio,
         )
+
+        # Apply level overrides if requested
+        override_results = None
+        if apply_level_overrides:
+            override_results = agent.apply_level_overrides()
+            country_applied = override_results.get("country_overrides", {}).get("applied", False)
+            family_applied = override_results.get("family_relation_overrides", {}).get(
+                "applied", False
+            )
+            if country_applied or family_applied:
+                flash("Applied difficulty level overrides before export", "info")
 
         if export_type == "directory":
             # Export to directory structure (includes sentences automatically via UNGURYS)

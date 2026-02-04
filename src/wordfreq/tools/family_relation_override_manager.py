@@ -135,7 +135,7 @@ class FamilyRelationOverrideManager:
         )
 
         for lemma in lemmas:
-            label = lemma.concept_label or lemma.lemma_text
+            label = lemma.lemma_text
             if label not in self._family_relation_words:
                 self._family_relation_words[label] = []
             self._family_relation_words[label].append(lemma)

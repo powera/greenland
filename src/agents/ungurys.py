@@ -36,6 +36,9 @@ from wordfreq.trakaido.utils.export_manager import TrakaidoExporter
 from wordfreq.tools.country_word_priorities import (
     get_supported_languages as get_country_override_languages,
 )
+from wordfreq.tools.family_relation_priorities import (
+    get_supported_languages as get_family_override_languages,
+)
 from wireword.export_wireword_conversations import WirewordConversationExporter
 from wireword.export_wireword_sentences import WirewordSentenceExporter
 
@@ -176,6 +179,77 @@ class UngurysAgent:
             logger.warning(f"Failed to apply country overrides: {e}")
             return {"applied": False, "reason": str(e)}
 
+    def _apply_family_relation_overrides(self) -> Dict[str, Any]:
+        """
+        Apply family relation difficulty level overrides for the target language.
+
+        This excludes family relation terms that don't map naturally to the
+        target language (e.g., "older brother" doesn't exist in English but
+        does in Chinese/Korean).
+
+        Returns:
+            Dictionary with override results
+        """
+        # Check if this language has family relation override configuration
+        if self.language not in get_family_override_languages():
+            logger.info(
+                f"No family relation override configuration for '{self.language}' - skipping"
+            )
+            return {"applied": False, "reason": "no_configuration"}
+
+        try:
+            from wordfreq.tools.family_relation_override_manager import (
+                FamilyRelationOverrideManager,
+            )
+
+            session = create_session(self.config)
+            manager = FamilyRelationOverrideManager(session)
+
+            # Apply overrides (this is idempotent - safe to run multiple times)
+            summary = manager.apply_overrides(self.language)
+
+            excluded_count = len([c for c in summary.changes if c.is_exclusion])
+            included_count = len([c for c in summary.changes if not c.is_exclusion])
+
+            logger.info(
+                f"Applied family relation overrides for '{self.language}': "
+                f"{excluded_count} words excluded, {included_count} words included"
+            )
+
+            session.close()
+
+            return {
+                "applied": True,
+                "language": self.language,
+                "words_excluded": excluded_count,
+                "words_included": included_count,
+                "total_changes": len(summary.changes),
+            }
+
+        except Exception as e:
+            logger.warning(f"Failed to apply family relation overrides: {e}")
+            return {"applied": False, "reason": str(e)}
+
+    def apply_level_overrides(self) -> Dict[str, Any]:
+        """
+        Apply all difficulty level overrides for the target language.
+
+        This is a public method that applies both country and family relation
+        overrides. Useful for calling from Barsukas before export.
+
+        Returns:
+            Dictionary with results for each override type
+        """
+        results: Dict[str, Any] = {}
+
+        logger.info("Applying country word difficulty overrides...")
+        results["country_overrides"] = self._apply_country_overrides()
+
+        logger.info("Applying family relation difficulty overrides...")
+        results["family_relation_overrides"] = self._apply_family_relation_overrides()
+
+        return results
+
     def get_language_output_dir(self) -> str:
         """
         Get the output directory path for the current language.
@@ -302,6 +376,15 @@ class UngurysAgent:
             # TODO: Re-enable conversation export when we have conversations
             # Conversation export is disabled - we currently have no conversations
             results["conversations_exported"] = 0
+
+            # Export category choice data (language-independent, goes to trakaido_wordlists root)
+            logger.info("Exporting category choice data...")
+            category_success, category_path = self.export_category_choice()
+            results["category_choice_exported"] = category_success
+            if category_success:
+                logger.info(f"  Exported categorychoice.json to {category_path}")
+            else:
+                logger.warning("  Category choice export failed")
         else:
             logger.error(f"Failed to export to {output_dir}")
 
@@ -485,6 +568,7 @@ class UngurysAgent:
         include_unverified: bool = True,
         export_mode: str = "directory",
         skip_country_overrides: bool = False,
+        skip_family_relation_overrides: bool = False,
     ) -> Dict[str, Any]:
         """
         Run the WireWord export with specified parameters.
@@ -500,6 +584,7 @@ class UngurysAgent:
             include_unverified: Include unverified entries (default: True)
             export_mode: Export mode ('single', 'directory', or 'both')
             skip_country_overrides: Skip applying country difficulty overrides (default: False)
+            skip_family_relation_overrides: Skip applying family relation difficulty overrides (default: False)
 
         Returns:
             Dictionary with export results
@@ -509,10 +594,18 @@ class UngurysAgent:
         # Apply country-related difficulty overrides before export
         if not skip_country_overrides:
             logger.info("Applying country word difficulty overrides...")
-            override_results = self._apply_country_overrides()
+            country_override_results = self._apply_country_overrides()
         else:
             logger.info("Skipping country word overrides (--skip-country-overrides)")
-            override_results = {"applied": False, "reason": "skipped"}
+            country_override_results = {"applied": False, "reason": "skipped"}
+
+        # Apply family relation difficulty overrides before export
+        if not skip_family_relation_overrides:
+            logger.info("Applying family relation difficulty overrides...")
+            family_override_results = self._apply_family_relation_overrides()
+        else:
+            logger.info("Skipping family relation overrides (--skip-family-relation-overrides)")
+            family_override_results = {"applied": False, "reason": "skipped"}
 
         # Get database path from config
         db_path = (
@@ -522,7 +615,8 @@ class UngurysAgent:
             "timestamp": start_time.isoformat(),
             "database_path": db_path,
             "export_mode": export_mode,
-            "country_overrides": override_results,
+            "country_overrides": country_override_results,
+            "family_relation_overrides": family_override_results,
             "exports": {},
         }
 
@@ -645,8 +739,21 @@ class UngurysAgent:
             overrides = results["country_overrides"]
             logger.info("COUNTRY WORD OVERRIDES:")
             if overrides.get("applied"):
-                logger.info(f"  Status: APPLIED")
+                logger.info("  Status: APPLIED")
                 logger.info(f"  Words updated: {overrides.get('words_updated', 0)}")
+            else:
+                reason = overrides.get("reason", "unknown")
+                logger.info(f"  Status: SKIPPED ({reason})")
+            logger.info("")
+
+        # Family relation overrides
+        if "family_relation_overrides" in results:
+            overrides = results["family_relation_overrides"]
+            logger.info("FAMILY RELATION OVERRIDES:")
+            if overrides.get("applied"):
+                logger.info("  Status: APPLIED")
+                logger.info(f"  Words excluded: {overrides.get('words_excluded', 0)}")
+                logger.info(f"  Words included: {overrides.get('words_included', 0)}")
             else:
                 reason = overrides.get("reason", "unknown")
                 logger.info(f"  Status: SKIPPED ({reason})")
@@ -819,6 +926,11 @@ def get_argument_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Skip applying country-specific difficulty overrides before export.",
     )
+    parser.add_argument(
+        "--skip-family-relation-overrides",
+        action="store_true",
+        help="Skip applying family relation difficulty overrides before export.",
+    )
 
     return parser
 
@@ -866,6 +978,7 @@ def main() -> None:
         include_unverified=args.include_unverified,
         export_mode=args.mode,
         skip_country_overrides=args.skip_country_overrides,
+        skip_family_relation_overrides=args.skip_family_relation_overrides,
     )
 
 

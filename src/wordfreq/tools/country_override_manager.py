@@ -50,6 +50,9 @@ from wordfreq.tools.country_word_priorities import (
     get_supported_languages,
 )
 
+# Difficulty level for excluded words (not relevant for this language)
+EXCLUDED_LEVEL = -1
+
 
 @dataclass
 class OverrideChange:
@@ -127,7 +130,7 @@ class CountryOverrideManager:
         )
 
         for lemma in countries:
-            label = lemma.concept_label or lemma.lemma_text
+            label = lemma.lemma_text
             if label not in self._country_words:
                 self._country_words[label] = []
             self._country_words[label].append(lemma)
@@ -156,7 +159,7 @@ class CountryOverrideManager:
         )
 
         for lemma in nationalities:
-            label = lemma.concept_label or lemma.lemma_text
+            label = lemma.lemma_text
             if label not in self._nationality_words:
                 self._nationality_words[label] = []
             self._nationality_words[label].append(lemma)
@@ -233,6 +236,7 @@ class CountryOverrideManager:
 
         changes: List[OverrideChange] = []
         changes_by_tier: Dict[int, int] = {
+            EXCLUDED_LEVEL: 0,
             TIER_1_LEVEL: 0,
             TIER_2_LEVEL: 0,
             TIER_3_LEVEL: 0,
@@ -247,11 +251,8 @@ class CountryOverrideManager:
             proposed_level = get_country_level_for_language(country_label, target_language)
 
             if proposed_level is None:
-                # Not in configuration - skip unless showing unchanged
-                if not include_unchanged:
-                    continue
-                # Use a default "unchanged" marker
-                proposed_level = -999
+                # Not in any tier - exclude this country (level -1)
+                proposed_level = EXCLUDED_LEVEL
 
             # Find all related words for this country
             related_words = self._find_related_words_for_country(country_label)
@@ -263,11 +264,9 @@ class CountryOverrideManager:
                     current_override.difficulty_level if current_override else None
                 )
 
-                if proposed_level == -999:
-                    # Unchanged - use default
-                    proposed_level_actual = lemma.difficulty_level or 14
-                else:
-                    proposed_level_actual = proposed_level
+                reason = f"{relationship} word for {country_label}"
+                if proposed_level == EXCLUDED_LEVEL:
+                    reason = f"{relationship} word for {country_label} (not relevant for {target_language})"
 
                 change = OverrideChange(
                     guid=lemma.guid or "",
@@ -276,15 +275,15 @@ class CountryOverrideManager:
                     country_label=country_label,
                     default_level=lemma.difficulty_level,
                     current_override=current_override_level,
-                    proposed_level=proposed_level_actual,
-                    reason=f"{relationship} word for {country_label}",
+                    proposed_level=proposed_level,
+                    reason=reason,
                 )
 
                 if change.is_change or include_unchanged:
                     changes.append(change)
 
-                    if change.is_change and proposed_level_actual in changes_by_tier:
-                        changes_by_tier[proposed_level_actual] += 1
+                    if change.is_change and proposed_level in changes_by_tier:
+                        changes_by_tier[proposed_level] += 1
 
         # Sort changes by proposed level, then by country label
         changes.sort(key=lambda c: (c.proposed_level, c.country_label, c.pos_subtype))
