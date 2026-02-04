@@ -118,6 +118,14 @@ def get_argument_parser() -> argparse.ArgumentParser:
         help="Enqueue work items for background processing by barsukas worker",
     )
 
+    # Form source arguments
+    parser.add_argument(
+        "--use-wiktionary",
+        action="store_true",
+        default=False,
+        help="Use Wiktionary instead of LLM for form generation (no API cost, supports en/es/fr/lt)",
+    )
+
     return parser
 
 
@@ -409,6 +417,7 @@ def main() -> None:
                     "model": args.model,
                     "throttle": args.throttle,
                     "dry_run": args.dry_run,
+                    "use_wiktionary": args.use_wiktionary,
                 }
 
                 results = agent.fix_missing_forms(**kwargs)
@@ -427,6 +436,7 @@ def main() -> None:
                 model=args.model,
                 throttle=args.throttle,
                 dry_run=args.dry_run,
+                use_wiktionary=args.use_wiktionary,
             )
             display.print_fix_results(results, args.dry_run)
 

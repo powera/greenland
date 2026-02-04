@@ -247,6 +247,7 @@ class VilkasAgent:
         model: Optional[str] = None,
         throttle: float = 1.0,
         dry_run: bool = False,
+        use_wiktionary: bool = False,
     ) -> Dict[str, Any]:
         """
         Generate and store missing word forms for a specific language.
@@ -267,6 +268,7 @@ class VilkasAgent:
             model: LLM model to use for generation (if None, uses config.model)
             throttle: Seconds to wait between API calls
             dry_run: If True, show what would be fixed without making changes
+            use_wiktionary: If True, use Wiktionary instead of LLM for form generation
 
         Returns:
             Dictionary with fix results
@@ -350,6 +352,7 @@ class VilkasAgent:
                 model=effective_model,
                 throttle=throttle,
                 dry_run=dry_run,
+                use_wiktionary=use_wiktionary,
             )
         else:
             logger.error(f"Unexpected handler configuration for {handler_key}")
@@ -366,6 +369,7 @@ class VilkasAgent:
         model: Optional[str] = None,
         throttle: float = 1.0,
         dry_run: bool = False,
+        use_wiktionary: bool = False,
     ) -> Dict[str, Any]:
         """
         Generic handler for generating missing word forms across languages.
@@ -380,6 +384,7 @@ class VilkasAgent:
             model: LLM model to use (if None, uses config.model)
             throttle: Seconds to wait between API calls
             dry_run: If True, show what would be fixed without making changes
+            use_wiktionary: If True, use Wiktionary instead of LLM for form generation
 
         Returns:
             Dictionary with fix results
@@ -487,10 +492,28 @@ class VilkasAgent:
                 "would_process": len(items_to_process),
                 "dry_run": True,
                 "sample": items_to_process[:10],
+                "source": "wiktionary" if use_wiktionary else "llm",
             }
 
-        # Initialize client
-        client = LinguisticClient(config=self.config)
+        # Check Wiktionary support if requested
+        if use_wiktionary:
+            from wordfreq.translation.wiktionary_forms import is_wiktionary_supported
+
+            if not is_wiktionary_supported(language_code, pos_type):
+                logger.error(
+                    f"Wiktionary not supported for {language_code} {pos_type}. "
+                    f"Supported: en/es/fr/lt for nouns/verbs/adjectives/adverbs"
+                )
+                return {
+                    "error": f"Wiktionary not supported for {language_code} {pos_type}",
+                    "total_needing_fix": total_needs_fix,
+                }
+            logger.info(f"Using Wiktionary for {language_name} {pos_type} form generation")
+        else:
+            logger.info(f"Using LLM for {language_name} {pos_type} form generation")
+
+        # Initialize client (only needed for LLM mode)
+        client = None if use_wiktionary else LinguisticClient(config=self.config)
 
         # Process each item
         successful = 0
@@ -512,8 +535,19 @@ class VilkasAgent:
                     failed += 1
                     continue
 
-                # Call the process function
-                success = process_lemma_for_task(task_key, found_lemma.id, self.config, client)
+                # Call the appropriate process function
+                if use_wiktionary:
+                    from wordfreq.translation.generate_forms_tasks import FORM_GENERATION_TASKS
+                    from wordfreq.translation.wiktionary_forms import (
+                        process_lemma_forms_wiktionary,
+                    )
+
+                    task_config = FORM_GENERATION_TASKS[task_key].config
+                    success = process_lemma_forms_wiktionary(
+                        found_lemma.id, self.config, task_config
+                    )
+                else:
+                    success = process_lemma_for_task(task_key, found_lemma.id, self.config, client)
 
                 if success:
                     successful += 1
@@ -522,15 +556,18 @@ class VilkasAgent:
                     failed += 1
                     logger.error(f"Failed to generate forms for '{item_info['english']}'")
 
-                # Throttle to avoid overloading the API
-                if i < len(items_to_process):
+                # Throttle to avoid overloading the API (less important for Wiktionary)
+                if i < len(items_to_process) and not use_wiktionary:
                     time.sleep(throttle)
+                elif i < len(items_to_process) and use_wiktionary:
+                    time.sleep(0.1)  # Small delay to be nice to Wiktionary
 
         finally:
             session.close()
 
+        source = "Wiktionary" if use_wiktionary else "LLM"
         logger.info(f"\n{'='*60}")
-        logger.info(f"Fix complete:")
+        logger.info(f"Fix complete (source: {source}):")
         logger.info(f"  Total needing fix: {total_needs_fix}")
         logger.info(f"  Processed: {len(items_to_process)}")
         logger.info(f"  Successful: {successful}")
@@ -543,6 +580,7 @@ class VilkasAgent:
             "successful": successful,
             "failed": failed,
             "dry_run": dry_run,
+            "source": "wiktionary" if use_wiktionary else "llm",
         }
 
     def run_full_check(self, output_file: Optional[str] = None) -> Dict[str, Any]:
