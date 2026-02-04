@@ -1,0 +1,2 @@
+{"guid": "N10_001", "pos_type": "noun", "pos_subtype": "artwork_artifact", "concept_label": "sculpture", "concept_definition": "a work of art made by shaping material.", "translations": {"en": "sculpture"}, "difficulty_level": 27}
+{"guid": "N10_002", "pos_type": "noun", "pos_subtype": "artwork_artifact", "concept_label": "statue", "concept_definition": "a carved or cast figure of a person or animal.", "translations": {"en": "statue"}, "difficulty_level": 27}
