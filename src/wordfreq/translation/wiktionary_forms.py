@@ -17,6 +17,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from wordfreq.storage import database as linguistic_db
 from wordfreq.storage.backend.config import DataSourceConfig
 from wordfreq.storage.connection_pool import get_session
+from wordfreq.storage.models.enums import GrammaticalForm
 from wordfreq.storage.translation_helpers import get_translation
 from wordfreq.translation.generate_forms_base import FormGenerationConfig
 
@@ -98,13 +99,13 @@ def _get_lithuanian_wiktionary_forms(word: str, pos_type: str) -> Tuple[Dict[str
 # Mapping from Wiktionary form names to the form names expected by LLM tasks
 # This allows Wiktionary output to be processed by the same storage logic
 
-# English verb: Wiktionary returns different keys than LLM expects
+# English verb: Wiktionary returns 5 canonical forms; map the ones that
+# correspond to person/tense slots through the task form_mapping, and map
+# the rest (infinitive, participles) directly to GrammaticalForm values
+# via WIKTIONARY_DIRECT_FORMS below.
 ENGLISH_VERB_WIKTIONARY_TO_TASK: Dict[str, str] = {
-    "infinitive": "1s_present",  # Base form stored as 1s present
     "3s_present": "3s_present",
-    "past": "1s_past",  # Simple past stored as 1s past
-    "past_participle": "3s_past",  # Past participle - use 3s past slot
-    "present_participle": "2s_present",  # Gerund - use 2s present slot
+    "past": "3s_past",  # English simple past is the same for all persons
 }
 
 # English noun: Keys match directly
@@ -204,6 +205,21 @@ WIKTIONARY_TO_TASK_MAPPINGS: Dict[str, Dict[str, Dict[str, str]]] = {
         "verb": {},  # Lithuanian verb conjugation is complex, not yet mapped
         "adjective": LITHUANIAN_ADJ_WIKTIONARY_TO_TASK,
         "adverb": LITHUANIAN_ADVERB_WIKTIONARY_TO_TASK,
+    },
+}
+
+
+# Direct Wiktionary-to-GrammaticalForm mappings for forms that don't exist
+# in the LLM task form_mapping (e.g., infinitive, participles).  These are
+# looked up as a fallback when the Wiktionary key isn't found via the
+# task-key-based path.
+WIKTIONARY_DIRECT_FORMS: Dict[str, Dict[str, Dict[str, GrammaticalForm]]] = {
+    "en": {
+        "verb": {
+            "infinitive": GrammaticalForm.VERB_INFINITIVE,
+            "past_participle": GrammaticalForm.VERB_PAST_PARTICIPLE,
+            "present_participle": GrammaticalForm.VERB_PRESENT_PARTICIPLE,
+        },
     },
 }
 
@@ -321,6 +337,12 @@ def process_lemma_forms_wiktionary(
             form_config.pos_type, {}
         )
 
+        # Get direct GrammaticalForm mappings for forms that aren't in the
+        # LLM task form_mapping (e.g., infinitive, participles)
+        direct_forms = WIKTIONARY_DIRECT_FORMS.get(form_config.language_code, {}).get(
+            form_config.pos_type, {}
+        )
+
         # Store each form
         stored = 0
         skipped = 0
@@ -330,28 +352,37 @@ def process_lemma_forms_wiktionary(
                 logger.debug(f"Skipping empty form: {wiktionary_key}")
                 continue
 
-            # Map Wiktionary key to task key
-            task_key = wiktionary_to_task.get(wiktionary_key, wiktionary_key)
+            # First, check if this form has a direct GrammaticalForm mapping
+            # (for forms like infinitive, participles that don't fit person/tense slots)
+            grammatical_form_enum: Optional[GrammaticalForm] = None
+            is_base = False
 
-            # Check if this task key exists in the form mapping
-            if task_key not in form_config.form_mapping:
-                logger.debug(f"Form key '{task_key}' not in form mapping, skipping")
+            if wiktionary_key in direct_forms:
+                grammatical_form_enum = direct_forms[wiktionary_key]
+                is_base = wiktionary_key == form_config.base_form_identifier
+            else:
+                # Map Wiktionary key to task key, then look up in form_mapping
+                task_key = wiktionary_to_task.get(wiktionary_key, wiktionary_key)
+                if task_key in form_config.form_mapping:
+                    grammatical_form_enum = form_config.form_mapping[task_key]
+                    is_base = task_key == form_config.base_form_identifier
+
+            if grammatical_form_enum is None:
+                logger.debug(f"Form key '{wiktionary_key}' has no mapping, skipping")
                 continue
 
-            grammatical_form_enum = form_config.form_mapping[task_key]
             grammatical_form_value = grammatical_form_enum.value
 
             # Check if this specific form already exists
             if grammatical_form_value in existing_grammatical_forms:
-                logger.debug(f"Form {task_key} already exists for lemma ID {lemma_id}, skipping")
+                logger.debug(
+                    f"Form '{wiktionary_key}' already exists for lemma ID {lemma_id}, skipping"
+                )
                 skipped += 1
                 continue
 
             # Get or create word token
             word_token = linguistic_db.add_word_token(session, form_text, form_config.language_code)
-
-            # Determine if this is the base form
-            is_base = task_key == form_config.base_form_identifier
 
             # Create derivative form
             session.add(
