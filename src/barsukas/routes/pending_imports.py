@@ -2,29 +2,28 @@
 
 """Routes for viewing pending imports."""
 
+from typing import Any, cast
+
 from barsukas.config import Config
-from flask import Blueprint, g, render_template, request
+from flask import Blueprint, Response, g, render_template, request
 from flask.typing import ResponseReturnValue
+from sqlalchemy.orm import Query
 
 from wordfreq.storage.models.imports import PendingImport
 
 bp = Blueprint("pending_imports", __name__, url_prefix="/pending-imports")
 
 
-@bp.route("/")
-def list_pending_imports() -> ResponseReturnValue:
-    """List pending imports with pagination and filtering."""
-    page = request.args.get("page", 1, type=int)
+def _build_filtered_query() -> Query[Any]:
+    """Build a filtered query for pending imports based on request args."""
     search = request.args.get("search", "").strip()
     pos_type_filter = request.args.get("pos_type", "").strip()
     pos_subtype_filter = request.args.get("pos_subtype", "").strip()
     source_filter = request.args.get("source", "").strip()
     language_filter = request.args.get("language", "").strip()
 
-    # Build query
     query = g.db.query(PendingImport)
 
-    # Apply filters
     if search:
         query = query.filter(
             (PendingImport.english_word.ilike(f"%{search}%"))
@@ -44,8 +43,15 @@ def list_pending_imports() -> ResponseReturnValue:
     if language_filter:
         query = query.filter(PendingImport.disambiguation_language == language_filter)
 
-    # Order by most recent first
-    query = query.order_by(PendingImport.added_at.desc())
+    return cast(Query[Any], query.order_by(PendingImport.added_at.desc()))
+
+
+@bp.route("/")
+def list_pending_imports() -> ResponseReturnValue:
+    """List pending imports with pagination and filtering."""
+    page = request.args.get("page", 1, type=int)
+
+    query = _build_filtered_query()
 
     # Paginate
     total = query.count()
@@ -88,6 +94,11 @@ def list_pending_imports() -> ResponseReturnValue:
     languages = [lang[0] for lang in languages if lang[0]]
 
     # Calculate pagination
+    search = request.args.get("search", "").strip()
+    pos_type_filter = request.args.get("pos_type", "").strip()
+    pos_subtype_filter = request.args.get("pos_subtype", "").strip()
+    source_filter = request.args.get("source", "").strip()
+    language_filter = request.args.get("language", "").strip()
     total_pages = (total + Config.ITEMS_PER_PAGE - 1) // Config.ITEMS_PER_PAGE
 
     return render_template(
@@ -105,4 +116,24 @@ def list_pending_imports() -> ResponseReturnValue:
         pos_subtypes=pos_subtypes,
         sources=sources,
         languages=languages,
+    )
+
+
+@bp.route("/export.txt")
+def export_text() -> Response:
+    """Export filtered pending imports as a tab-separated text file."""
+    query = _build_filtered_query()
+    imports = query.all()
+
+    lines = ["Word\tDefinition\tPOS"]
+    for item in imports:
+        pos = item.pos_type or ""
+        if item.pos_subtype:
+            pos += f"/{item.pos_subtype}"
+        lines.append(f"{item.english_word}\t{item.definition}\t{pos}")
+
+    return Response(
+        "\n".join(lines) + "\n",
+        mimetype="text/plain; charset=utf-8",
+        headers={"Content-Disposition": "attachment; filename=pending_imports.txt"},
     )

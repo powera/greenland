@@ -82,6 +82,9 @@
                     <i class="bi bi-list"></i> Pending Imports
                     <span class="badge bg-secondary">{{ total }} total</span>
                 </span>
+                <a href="{{ url_for('pending_imports.export_text', search=search, pos_type=pos_type_filter, pos_subtype=pos_subtype_filter, language=language_filter, source=source_filter) }}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-download"></i> Export to text file
+                </a>
             </div>
             <div class="card-body">
                 {% if imports %}
