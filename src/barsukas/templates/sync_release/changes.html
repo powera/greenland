@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}Sync - Text Changes{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('sync_release.index') }}">Sync</a></li>
+                    <li class="breadcrumb-item active">Text Changes</li>
+                </ol>
+            </nav>
+            <h2><i class="bi bi-pencil text-info"></i> Lemma Text Changes</h2>
+            <p class="text-muted">
+                Same GUID but different lemma_text between SQLite and <code>data/release</code>.
+            </p>
+        </div>
+    </div>
+
+    {% if not changes %}
+    <div class="alert alert-success">
+        <i class="bi bi-check-circle"></i> No lemma text changes found. All texts match.
+    </div>
+    <a href="{{ url_for('sync_release.index') }}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Back
+    </a>
+    {% else %}
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-list-check"></i> Text Changes: {{ changes|length }}</span>
+            <div>
+                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="selectAll('keep_old')">
+                    Keep All SQLite
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-info" onclick="selectAll('use_new')">
+                    Use All Release
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <form method="post" action="{{ url_for('sync_release.apply_changes') }}">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>GUID</th>
+                                <th>Category</th>
+                                <th>SQLite Text</th>
+                                <th>Release Text</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in changes %}
+                            <tr>
+                                <td>
+                                    <a href="{{ url_for('lemmas.view_lemma', lemma_id=item.lemma_id) }}" target="_blank">
+                                        <code>{{ item.guid }}</code>
+                                    </a>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">{{ item.pos_type }}</span>
+                                    {% if item.pos_subtype %}
+                                    <span class="badge bg-light text-dark">{{ item.pos_subtype }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <strong class="text-danger">{{ item.db_lemma_text }}</strong>
+                                    {% if item.db_definition %}
+                                    <br><small class="text-muted">{{ item.db_definition }}{% if item.db_definition|length >= 60 %}...{% endif %}</small>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <strong class="text-success">{{ item.release_lemma_text }}</strong>
+                                    {% if item.release_definition %}
+                                    <br><small class="text-muted">{{ item.release_definition }}{% if item.release_definition|length >= 60 %}...{% endif %}</small>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <select class="form-select form-select-sm action-select" name="action_{{ item.lemma_id }}" style="min-width: 130px;">
+                                        <option value="skip">Skip</option>
+                                        <option value="keep_old">Keep SQLite</option>
+                                        <option value="use_new">Use Release</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <a href="{{ url_for('sync_release.index') }}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Back
+                    </a>
+                    <button type="submit" class="btn btn-info">
+                        <i class="bi bi-check-lg"></i> Apply Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function selectAll(action) {
+    document.querySelectorAll('.action-select').forEach(function(select) {
+        for (var i = 0; i < select.options.length; i++) {
+            if (select.options[i].value === action) {
+                select.selectedIndex = i;
+                break;
+            }
+        }
+    });
+}
+</script>
+{% endblock %}

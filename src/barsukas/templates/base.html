@@ -87,6 +87,30 @@
                             </a></li>
                         </ul>
                     </li>
+                    <!-- Sync dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-arrow-left-right"></i> Sync
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-dark">
+                            <li><a class="dropdown-item" href="{{ url_for('sync_release.index') }}">
+                                <i class="bi bi-house"></i> Sync Hub
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('sync_release.additions') }}">
+                                <i class="bi bi-plus-circle text-success"></i> Additions
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('sync_release.removals') }}">
+                                <i class="bi bi-dash-circle text-danger"></i> Removals
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('sync_release.difficulty') }}">
+                                <i class="bi bi-speedometer2 text-warning"></i> Difficulty
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('sync_release.changes') }}">
+                                <i class="bi bi-pencil text-info"></i> Text Changes
+                            </a></li>
+                        </ul>
+                    </li>
                     <!-- Logs dropdown -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">

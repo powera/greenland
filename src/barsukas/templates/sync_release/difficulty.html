@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block title %}Sync Difficulty Levels{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('sync_release.index') }}">Sync</a></li>
+                    <li class="breadcrumb-item active">Difficulty</li>
+                </ol>
+            </nav>
+            <h2><i class="bi bi-speedometer2"></i> Sync Difficulty Levels</h2>
+            <p class="text-muted">
+                Lemmas with different difficulty levels (where lemma_text matches).
+            </p>
+        </div>
+    </div>
+
+    {% if not differences %}
+    <div class="alert alert-success">
+        <i class="bi bi-check-circle"></i> All difficulty levels are in sync!
+    </div>
+    {% else %}
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-list-check"></i> Differences: {{ differences|length }}</span>
+            <div>
+                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="selectAll('keep_old')">
+                    Keep All SQLite
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-primary" onclick="selectAll('use_new')">
+                    Use All Release
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <form method="post" action="{{ url_for('sync_release.apply_difficulty') }}">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>GUID</th>
+                                <th>Word</th>
+                                <th>Category</th>
+                                <th class="text-center">SQLite</th>
+                                <th class="text-center">Release</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for diff in differences %}
+                            <tr>
+                                <td>
+                                    <a href="{{ url_for('lemmas.view_lemma', lemma_id=diff.lemma_id) }}" target="_blank">
+                                        <code>{{ diff.guid }}</code>
+                                    </a>
+                                </td>
+                                <td>
+                                    <strong>{{ diff.lemma_text }}</strong>
+                                    {% if diff.definition %}
+                                    <br><small class="text-muted">{{ diff.definition }}{% if diff.definition|length >= 80 %}...{% endif %}</small>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">{{ diff.pos_type }}</span>
+                                    {% if diff.pos_subtype %}
+                                    <span class="badge bg-light text-dark">{{ diff.pos_subtype }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    {% if diff.db_level is none %}
+                                    <span class="badge bg-warning text-dark">None</span>
+                                    {% elif diff.db_level == -1 %}
+                                    <span class="badge bg-dark">-1</span>
+                                    {% else %}
+                                    <span class="badge bg-info">{{ diff.db_level }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    {% if diff.release_level is none %}
+                                    <span class="badge bg-warning text-dark">None</span>
+                                    {% elif diff.release_level == -1 %}
+                                    <span class="badge bg-dark">-1</span>
+                                    {% else %}
+                                    <span class="badge bg-primary">{{ diff.release_level }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <select class="form-select form-select-sm action-select" name="action_{{ diff.lemma_id }}" style="min-width: 130px;">
+                                        <option value="skip">Skip</option>
+                                        <option value="keep_old">Keep SQLite</option>
+                                        <option value="use_new">Use Release</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <a href="{{ url_for('sync_release.index') }}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Back
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-lg"></i> Apply Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function selectAll(action) {
+    document.querySelectorAll('.action-select').forEach(function(select) {
+        for (var i = 0; i < select.options.length; i++) {
+            if (select.options[i].value === action) {
+                select.selectedIndex = i;
+                break;
+            }
+        }
+    });
+}
+</script>
+{% endblock %}

@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block title %}Sync Release Data{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <h2><i class="bi bi-arrow-left-right"></i> Sync Release Data</h2>
+            <p class="text-muted">
+                Compare and sync data between <code>data/release</code> and the SQLite database.
+            </p>
+        </div>
+    </div>
+
+    {% if error %}
+    <div class="alert alert-danger">
+        <i class="bi bi-exclamation-triangle"></i> {{ error }}
+        <br><small>Path: <code>{{ release_dir }}</code></small>
+    </div>
+    {% elif not counts %}
+    <div class="alert alert-warning">
+        <i class="bi bi-exclamation-triangle"></i> No lemmas found in release directory.
+        <br><small>Path: <code>{{ release_dir }}</code></small>
+    </div>
+    {% else %}
+    <div class="row mb-3">
+        <div class="col">
+            <div class="card">
+                <div class="card-header">
+                    <i class="bi bi-info-circle"></i> Summary
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Release directory:</strong> <code>{{ release_dir }}</code></p>
+                            <p class="mb-1"><strong>Lemmas in release:</strong> {{ counts.release_total }}</p>
+                            <p class="mb-0"><strong>Lemmas in SQLite:</strong> {{ counts.db_total }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Additions -->
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="card h-100 {% if counts.additions > 0 %}border-success{% endif %}">
+                <div class="card-header">
+                    <i class="bi bi-plus-circle text-success"></i> Additions
+                </div>
+                <div class="card-body">
+                    <h3 class="card-title {% if counts.additions > 0 %}text-success{% else %}text-muted{% endif %}">
+                        {{ counts.additions }}
+                    </h3>
+                    <p class="card-text text-muted">
+                        GUIDs in release that are not in SQLite
+                    </p>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ url_for('sync_release.additions') }}"
+                       class="btn btn-sm {% if counts.additions > 0 %}btn-success{% else %}btn-outline-secondary{% endif %}">
+                        <i class="bi bi-arrow-right"></i> View &amp; Import
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Removals -->
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="card h-100 {% if counts.removals > 0 %}border-danger{% endif %}">
+                <div class="card-header">
+                    <i class="bi bi-dash-circle text-danger"></i> Removals
+                </div>
+                <div class="card-body">
+                    <h3 class="card-title {% if counts.removals > 0 %}text-danger{% else %}text-muted{% endif %}">
+                        {{ counts.removals }}
+                    </h3>
+                    <p class="card-text text-muted">
+                        GUIDs in SQLite that are not in release
+                    </p>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ url_for('sync_release.removals') }}"
+                       class="btn btn-sm {% if counts.removals > 0 %}btn-danger{% else %}btn-outline-secondary{% endif %}">
+                        <i class="bi bi-arrow-right"></i> View &amp; Delete
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Difficulty Changes -->
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="card h-100 {% if counts.difficulty > 0 %}border-warning{% endif %}">
+                <div class="card-header">
+                    <i class="bi bi-speedometer2 text-warning"></i> Difficulty
+                </div>
+                <div class="card-body">
+                    <h3 class="card-title {% if counts.difficulty > 0 %}text-warning{% else %}text-muted{% endif %}">
+                        {{ counts.difficulty }}
+                    </h3>
+                    <p class="card-text text-muted">
+                        Different difficulty levels (same lemma_text)
+                    </p>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ url_for('sync_release.difficulty') }}"
+                       class="btn btn-sm {% if counts.difficulty > 0 %}btn-warning{% else %}btn-outline-secondary{% endif %}">
+                        <i class="bi bi-arrow-right"></i> View &amp; Sync
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lemma Text Changes -->
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="card h-100 {% if counts.changes > 0 %}border-info{% endif %}">
+                <div class="card-header">
+                    <i class="bi bi-pencil text-info"></i> Text Changes
+                </div>
+                <div class="card-body">
+                    <h3 class="card-title {% if counts.changes > 0 %}text-info{% else %}text-muted{% endif %}">
+                        {{ counts.changes }}
+                    </h3>
+                    <p class="card-text text-muted">
+                        Same GUID but different lemma_text
+                    </p>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ url_for('sync_release.changes') }}"
+                       class="btn btn-sm {% if counts.changes > 0 %}btn-info{% else %}btn-outline-secondary{% endif %}">
+                        <i class="bi bi-arrow-right"></i> View &amp; Sync
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
