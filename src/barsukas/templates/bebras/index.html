@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Bebras - Database Management{% endblock %}
+{% block title %}Data Quality - Sentence Links, Integrity, and Verification{% endblock %}
 
 {% block extra_head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/bebras.css') }}">
@@ -14,8 +14,10 @@
             <div class="d-flex align-items-center mb-4">
                 <i class="bi bi-shield-check fs-2 me-3 text-primary"></i>
                 <div>
-                    <h1 class="mb-0">Bebras</h1>
-                    <p class="text-muted mb-0">Database Integrity, Sentence Links, and Translation Verification</p>
+                    <h1 class="mb-0">Data Quality Tools</h1>
+                    <p class="text-muted mb-0">
+                        Verify data integrity, link sentences to vocabulary words, and check translation accuracy.
+                    </p>
                 </div>
             </div>
 
@@ -25,7 +27,7 @@
                     <div class="card bg-light">
                         <div class="card-body text-center py-2">
                             <div class="fw-bold fs-4">{{ total_lemmas }}</div>
-                            <small class="text-muted">Lemmas with GUIDs</small>
+                            <small class="text-muted">Words in database</small>
                         </div>
                     </div>
                 </div>
@@ -33,7 +35,7 @@
                     <div class="card bg-light">
                         <div class="card-body text-center py-2">
                             <div class="fw-bold fs-4">{{ total_sentences }}</div>
-                            <small class="text-muted">Active Sentences</small>
+                            <small class="text-muted">Example sentences</small>
                         </div>
                     </div>
                 </div>
@@ -79,8 +81,8 @@
                     <div class="card border-top-0 rounded-top-0">
                         <div class="card-body">
                             <p class="text-muted mb-4">
-                                Process sentences to analyze vocabulary, create database records,
-                                and link sentences to existing lemmas.
+                                Add example sentences and automatically link them to vocabulary words.
+                                The system analyzes each sentence to identify which dictionary words it contains.
                             </p>
 
                             <!-- Sub-tabs for single vs file -->
@@ -238,8 +240,8 @@
                     <div class="card border-top-0 rounded-top-0">
                         <div class="card-body">
                             <p class="text-muted mb-4">
-                                Check database structural integrity and identify data quality issues like
-                                orphaned records, missing fields, and constraint violations.
+                                Scan the database for data problems: missing translations, broken references
+                                between records, incomplete entries, and other quality issues that need fixing.
                             </p>
 
                             <form method="post" action="{{ url_for('bebras.check_integrity') }}">
@@ -308,8 +310,9 @@
                     <div class="card border-top-0 rounded-top-0">
                         <div class="card-body">
                             <p class="text-muted mb-4">
-                                Verify existing translations without regenerating content.
-                                Uses LLM to check translation correctness, with optional batch API support for cost savings.
+                                Use AI to check if existing translations are correct. This reviews translations
+                                without regenerating them, marking each as verified or flagging problems.
+                                Batch processing available for large-scale verification at lower cost.
                             </p>
 
                             <!-- Sub-tabs for words vs sentences -->
@@ -331,9 +334,9 @@
                                         <div class="row">
                                             <div class="col-md-6">
                                                 <div class="mb-3">
-                                                    <label for="word_guid" class="form-label">GUID (optional)</label>
+                                                    <label for="word_guid" class="form-label">Word ID (optional)</label>
                                                     <input type="text" class="form-control" id="word_guid" name="guid"
-                                                           placeholder="WRD-00123">
+                                                           placeholder="e.g., N01_042 or V02_015">
                                                     <small class="form-text text-muted">Leave empty to verify multiple words</small>
                                                 </div>
                                             </div>
