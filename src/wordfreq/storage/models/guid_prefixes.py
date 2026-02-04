@@ -26,7 +26,7 @@ SUBTYPE_GUID_PREFIXES = {
         "artwork_artifact": "N10",
         "natural_feature": "N11",
         "tool": "N12",
-        "electronic_device": "N42",
+        "electronic_device": "N57",
         "appliance": "N43",
         "weapon": "N44",
         "vehicle": "N40",
