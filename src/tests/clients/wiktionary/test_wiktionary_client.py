@@ -899,5 +899,569 @@ class TestFrenchNounDeclensionType(unittest.TestCase):
         self.assertFalse(decl.has_plural())
 
 
+# Spanish parser tests
+
+# Import Spanish modules
+from langtools.es.types import SpanishGender
+from langtools.es.types import NounDeclension as SpanishNounDeclension
+from langtools.es.utils import clean_form as es_clean_form
+from langtools.es.utils import detect_gender_from_article as es_detect_gender
+from langtools.es.utils import detect_gender_from_word as es_detect_gender_from_word
+from langtools.es.utils import extract_article as es_extract_article
+from langtools.es.wiktionary import SpanishParser
+
+
+class TestSpanishUtils(unittest.TestCase):
+    """Tests for Spanish utility functions."""
+
+    def test_extract_article_el(self) -> None:
+        """Test extracting 'el' article."""
+        article, noun = es_extract_article("el perro")
+        self.assertEqual(article, "el")
+        self.assertEqual(noun, "perro")
+
+    def test_extract_article_la(self) -> None:
+        """Test extracting 'la' article."""
+        article, noun = es_extract_article("la casa")
+        self.assertEqual(article, "la")
+        self.assertEqual(noun, "casa")
+
+    def test_extract_article_los(self) -> None:
+        """Test extracting 'los' article."""
+        article, noun = es_extract_article("los perros")
+        self.assertEqual(article, "los")
+        self.assertEqual(noun, "perros")
+
+    def test_extract_article_las(self) -> None:
+        """Test extracting 'las' article."""
+        article, noun = es_extract_article("las casas")
+        self.assertEqual(article, "las")
+        self.assertEqual(noun, "casas")
+
+    def test_extract_no_article(self) -> None:
+        """Test when no article present."""
+        article, noun = es_extract_article("perro")
+        self.assertEqual(article, "")
+        self.assertEqual(noun, "perro")
+
+    def test_detect_gender_masculine(self) -> None:
+        """Test detecting masculine gender from article."""
+        self.assertEqual(es_detect_gender("el"), SpanishGender.MASCULINE)
+        self.assertEqual(es_detect_gender("un"), SpanishGender.MASCULINE)
+        self.assertEqual(es_detect_gender("los"), SpanishGender.MASCULINE)
+
+    def test_detect_gender_feminine(self) -> None:
+        """Test detecting feminine gender from article."""
+        self.assertEqual(es_detect_gender("la"), SpanishGender.FEMININE)
+        self.assertEqual(es_detect_gender("una"), SpanishGender.FEMININE)
+        self.assertEqual(es_detect_gender("las"), SpanishGender.FEMININE)
+
+    def test_detect_gender_from_word_masculine(self) -> None:
+        """Test detecting masculine gender from word ending."""
+        self.assertEqual(es_detect_gender_from_word("perro"), SpanishGender.MASCULINE)
+        self.assertEqual(es_detect_gender_from_word("libro"), SpanishGender.MASCULINE)
+
+    def test_detect_gender_from_word_feminine(self) -> None:
+        """Test detecting feminine gender from word ending."""
+        self.assertEqual(es_detect_gender_from_word("casa"), SpanishGender.FEMININE)
+        self.assertEqual(es_detect_gender_from_word("nación"), SpanishGender.FEMININE)
+        self.assertEqual(es_detect_gender_from_word("ciudad"), SpanishGender.FEMININE)
+
+    def test_spanish_clean_form(self) -> None:
+        """Test Spanish form cleaning."""
+        result = es_clean_form("perros")
+        self.assertEqual(result, ["perros"])
+
+    def test_spanish_clean_form_with_accents(self) -> None:
+        """Test Spanish form cleaning preserves accents."""
+        result = es_clean_form("canción")
+        self.assertEqual(result, ["canción"])
+
+    def test_spanish_clean_form_with_tilde(self) -> None:
+        """Test Spanish form cleaning preserves ñ."""
+        result = es_clean_form("España")
+        self.assertEqual(result, ["España"])
+
+    def test_spanish_clean_form_alternatives(self) -> None:
+        """Test Spanish form cleaning with alternatives."""
+        result = es_clean_form("form1/form2")
+        self.assertEqual(result, ["form1", "form2"])
+
+    def test_spanish_clean_form_empty(self) -> None:
+        """Test Spanish form cleaning returns empty for placeholders."""
+        result = es_clean_form("-")
+        self.assertEqual(result, [])
+        result = es_clean_form("—")
+        self.assertEqual(result, [])
+
+
+class TestSpanishParser(unittest.TestCase):
+    """Tests for SpanishParser class."""
+
+    def setUp(self) -> None:
+        """Set up test fixtures."""
+        self.mock_client = Mock(spec=WiktionaryClient)
+        self.parser = SpanishParser(client=self.mock_client, debug=False)
+
+    def test_get_noun_declensions_no_page(self) -> None:
+        """Test noun forms when page not found."""
+        self.mock_client.fetch_page_wikitext.return_value = None
+
+        result, success = self.parser.get_noun_declensions("nonexistent")
+
+        self.assertFalse(success)
+        self.assertEqual(result.word, "nonexistent")
+
+    def test_get_noun_declensions_no_spanish_section(self) -> None:
+        """Test noun forms when no Spanish section."""
+        self.mock_client.fetch_page_wikitext.return_value = "==English==\nContent"
+        self.mock_client.extract_language_section.return_value = None
+
+        result, success = self.parser.get_noun_declensions("perro")
+
+        self.assertFalse(success)
+
+    def test_get_verb_conjugations_no_page(self) -> None:
+        """Test verb conjugation when page not found."""
+        self.mock_client.fetch_page_wikitext.return_value = None
+
+        result, success = self.parser.get_verb_conjugations("nonexistent")
+
+        self.assertFalse(success)
+        self.assertEqual(result.forms, {})
+
+    def test_get_adjective_declensions_no_page(self) -> None:
+        """Test adjective forms when page not found."""
+        self.mock_client.fetch_page_wikitext.return_value = None
+
+        result, success = self.parser.get_adjective_declensions("nonexistent")
+
+        self.assertFalse(success)
+
+    def test_get_adverb_forms_success(self) -> None:
+        """Test adverb forms always returns at least positive form."""
+        self.mock_client.fetch_page_wikitext.return_value = "==Spanish==\n===Adverb==="
+        self.mock_client.extract_language_section.return_value = "===Adverb===\nAn adverb"
+        self.mock_client.find_templates.return_value = []
+
+        result, success = self.parser.get_adverb_forms("rápidamente")
+
+        self.assertTrue(success)
+        self.assertEqual(result.forms["positive"], "rápidamente")
+
+    def test_extract_gender_masculine(self) -> None:
+        """Test gender extraction for masculine."""
+        wikitext = "{{es-noun|m}}"
+        gender = self.parser._extract_gender(wikitext)
+        self.assertEqual(gender, SpanishGender.MASCULINE)
+
+    def test_extract_gender_feminine(self) -> None:
+        """Test gender extraction for feminine."""
+        wikitext = "{{es-noun|f}}"
+        gender = self.parser._extract_gender(wikitext)
+        self.assertEqual(gender, SpanishGender.FEMININE)
+
+    def test_extract_gender_from_article_pattern(self) -> None:
+        """Test gender extraction from article pattern."""
+        wikitext = "'''el''' perro"
+        gender = self.parser._extract_gender(wikitext)
+        self.assertEqual(gender, SpanishGender.MASCULINE)
+
+        wikitext = "'''la''' casa"
+        gender = self.parser._extract_gender(wikitext)
+        self.assertEqual(gender, SpanishGender.FEMININE)
+
+    def test_parse_adjective_template_regular(self) -> None:
+        """Test parsing adjective template with regular forms."""
+        template = "{{es-adj|f=alta|mpl=altos|fpl=altas}}"
+        forms, alternatives = self.parser._parse_adjective_template(template, "alto")
+
+        self.assertEqual(forms["singular_m"], "alto")
+        self.assertEqual(forms["singular_f"], "alta")
+        self.assertEqual(forms["plural_m"], "altos")
+        self.assertEqual(forms["plural_f"], "altas")
+
+    def test_parse_adjective_template_generates_regular_forms(self) -> None:
+        """Test adjective template generates regular forms when not specified."""
+        template = "{{es-adj}}"
+        forms, alternatives = self.parser._parse_adjective_template(template, "alto")
+
+        self.assertEqual(forms["singular_m"], "alto")
+        self.assertEqual(forms["singular_f"], "alta")  # -o -> -a
+        self.assertEqual(forms["plural_m"], "altos")  # + s
+        self.assertEqual(forms["plural_f"], "altas")  # + s
+
+    def test_parse_adjective_template_invariable(self) -> None:
+        """Test adjective template for invariable adjectives."""
+        template = "{{es-adj}}"
+        forms, alternatives = self.parser._parse_adjective_template(template, "grande")
+
+        self.assertEqual(forms["singular_m"], "grande")
+        self.assertEqual(forms["singular_f"], "grande")  # No change for -e ending
+        self.assertEqual(forms["plural_m"], "grandes")
+        self.assertEqual(forms["plural_f"], "grandes")
+
+    def test_parse_noun_template_with_plural(self) -> None:
+        """Test parsing noun template with explicit plural."""
+        template = "{{es-noun|m|pl=perros}}"
+        forms, alternatives, gender = self.parser._parse_noun_template(template)
+
+        self.assertEqual(forms["plural"], "perros")
+        self.assertEqual(gender, SpanishGender.MASCULINE)
+
+
+class TestSpanishNounDeclensionType(unittest.TestCase):
+    """Tests for Spanish NounDeclension type."""
+
+    def test_has_singular_true(self) -> None:
+        """Test has_singular returns True when singular forms exist."""
+        decl = SpanishNounDeclension(
+            word="perro",
+            gender=SpanishGender.MASCULINE,
+            forms={"singular": "perro"},
+        )
+        self.assertTrue(decl.has_singular())
+
+    def test_has_singular_false(self) -> None:
+        """Test has_singular returns False when no singular forms."""
+        decl = SpanishNounDeclension(
+            word="gafas",
+            number_type=NounNumberType.PLURALE_TANTUM,
+            forms={"plural": "gafas"},
+        )
+        self.assertFalse(decl.has_singular())
+
+    def test_has_plural_true(self) -> None:
+        """Test has_plural returns True when plural forms exist."""
+        decl = SpanishNounDeclension(
+            word="perro",
+            forms={"singular": "perro", "plural": "perros"},
+        )
+        self.assertTrue(decl.has_plural())
+
+    def test_has_plural_false(self) -> None:
+        """Test has_plural returns False when no plural forms."""
+        decl = SpanishNounDeclension(
+            word="agua",
+            number_type=NounNumberType.SINGULARE_TANTUM,
+            forms={"singular": "agua"},
+        )
+        self.assertFalse(decl.has_plural())
+
+
+# English parser tests
+
+# Import English modules
+from langtools.en.types import NounDeclension as EnglishNounDeclension
+from langtools.en.utils import clean_form as en_clean_form
+from langtools.en.utils import (
+    generate_3s_present,
+    generate_comparative,
+    generate_past_tense,
+    generate_present_participle,
+    generate_regular_plural,
+    generate_superlative,
+)
+from langtools.en.wiktionary import EnglishParser
+
+
+class TestEnglishUtils(unittest.TestCase):
+    """Tests for English utility functions."""
+
+    def test_generate_regular_plural_s(self) -> None:
+        """Test regular plural with -s."""
+        self.assertEqual(generate_regular_plural("cat"), "cats")
+        self.assertEqual(generate_regular_plural("dog"), "dogs")
+
+    def test_generate_regular_plural_es(self) -> None:
+        """Test plural with -es for s, sh, ch, x, z endings."""
+        self.assertEqual(generate_regular_plural("bus"), "buses")
+        self.assertEqual(generate_regular_plural("dish"), "dishes")
+        self.assertEqual(generate_regular_plural("watch"), "watches")
+        self.assertEqual(generate_regular_plural("box"), "boxes")
+        self.assertEqual(generate_regular_plural("quiz"), "quizes")
+
+    def test_generate_regular_plural_y_to_ies(self) -> None:
+        """Test plural with consonant + y -> -ies."""
+        self.assertEqual(generate_regular_plural("baby"), "babies")
+        self.assertEqual(generate_regular_plural("city"), "cities")
+
+    def test_generate_regular_plural_y_to_s(self) -> None:
+        """Test plural with vowel + y -> -s."""
+        self.assertEqual(generate_regular_plural("day"), "days")
+        self.assertEqual(generate_regular_plural("key"), "keys")
+
+    def test_generate_regular_plural_f_to_ves(self) -> None:
+        """Test plural with -f -> -ves."""
+        self.assertEqual(generate_regular_plural("leaf"), "leaves")
+        self.assertEqual(generate_regular_plural("knife"), "knives")
+
+    def test_generate_3s_present_s(self) -> None:
+        """Test 3rd person singular with -s."""
+        self.assertEqual(generate_3s_present("walk"), "walks")
+        self.assertEqual(generate_3s_present("run"), "runs")
+
+    def test_generate_3s_present_es(self) -> None:
+        """Test 3rd person singular with -es."""
+        self.assertEqual(generate_3s_present("watch"), "watches")
+        self.assertEqual(generate_3s_present("go"), "goes")
+        self.assertEqual(generate_3s_present("pass"), "passes")
+
+    def test_generate_3s_present_y_to_ies(self) -> None:
+        """Test 3rd person singular with -y -> -ies."""
+        self.assertEqual(generate_3s_present("try"), "tries")
+        self.assertEqual(generate_3s_present("fly"), "flies")
+
+    def test_generate_past_tense_ed(self) -> None:
+        """Test past tense with -ed."""
+        self.assertEqual(generate_past_tense("walk"), "walked")
+        self.assertEqual(generate_past_tense("talk"), "talked")
+
+    def test_generate_past_tense_d(self) -> None:
+        """Test past tense with -d for -e ending."""
+        self.assertEqual(generate_past_tense("love"), "loved")
+        self.assertEqual(generate_past_tense("bake"), "baked")
+
+    def test_generate_past_tense_y_to_ied(self) -> None:
+        """Test past tense with -y -> -ied."""
+        self.assertEqual(generate_past_tense("try"), "tried")
+        self.assertEqual(generate_past_tense("cry"), "cried")
+
+    def test_generate_present_participle_ing(self) -> None:
+        """Test present participle with -ing."""
+        self.assertEqual(generate_present_participle("walk"), "walking")
+        self.assertEqual(generate_present_participle("talk"), "talking")
+
+    def test_generate_present_participle_drop_e(self) -> None:
+        """Test present participle dropping -e."""
+        self.assertEqual(generate_present_participle("make"), "making")
+        self.assertEqual(generate_present_participle("love"), "loving")
+
+    def test_generate_present_participle_ie_to_ying(self) -> None:
+        """Test present participle with -ie -> -ying."""
+        self.assertEqual(generate_present_participle("lie"), "lying")
+        self.assertEqual(generate_present_participle("die"), "dying")
+
+    def test_generate_comparative_er(self) -> None:
+        """Test comparative with -er."""
+        self.assertEqual(generate_comparative("tall"), "taller")
+        self.assertEqual(generate_comparative("fast"), "faster")
+
+    def test_generate_comparative_r(self) -> None:
+        """Test comparative with -r for -e ending."""
+        self.assertEqual(generate_comparative("large"), "larger")
+        self.assertEqual(generate_comparative("nice"), "nicer")
+
+    def test_generate_comparative_y_to_ier(self) -> None:
+        """Test comparative with -y -> -ier."""
+        self.assertEqual(generate_comparative("happy"), "happier")
+        self.assertEqual(generate_comparative("easy"), "easier")
+
+    def test_generate_superlative_est(self) -> None:
+        """Test superlative with -est."""
+        self.assertEqual(generate_superlative("tall"), "tallest")
+        self.assertEqual(generate_superlative("fast"), "fastest")
+
+    def test_generate_superlative_st(self) -> None:
+        """Test superlative with -st for -e ending."""
+        self.assertEqual(generate_superlative("large"), "largest")
+        self.assertEqual(generate_superlative("nice"), "nicest")
+
+    def test_generate_superlative_y_to_iest(self) -> None:
+        """Test superlative with -y -> -iest."""
+        self.assertEqual(generate_superlative("happy"), "happiest")
+        self.assertEqual(generate_superlative("easy"), "easiest")
+
+    def test_english_clean_form(self) -> None:
+        """Test English form cleaning."""
+        result = en_clean_form("dogs")
+        self.assertEqual(result, ["dogs"])
+
+    def test_english_clean_form_alternatives(self) -> None:
+        """Test English form cleaning with alternatives."""
+        result = en_clean_form("form1/form2")
+        self.assertEqual(result, ["form1", "form2"])
+
+    def test_english_clean_form_empty(self) -> None:
+        """Test English form cleaning returns empty for placeholders."""
+        result = en_clean_form("-")
+        self.assertEqual(result, [])
+
+
+class TestEnglishParser(unittest.TestCase):
+    """Tests for EnglishParser class."""
+
+    def setUp(self) -> None:
+        """Set up test fixtures."""
+        self.mock_client = Mock(spec=WiktionaryClient)
+        self.parser = EnglishParser(client=self.mock_client, debug=False)
+
+    def test_get_noun_declensions_no_page(self) -> None:
+        """Test noun forms when page not found."""
+        self.mock_client.fetch_page_wikitext.return_value = None
+
+        result, success = self.parser.get_noun_declensions("nonexistent")
+
+        self.assertFalse(success)
+        self.assertEqual(result.word, "nonexistent")
+
+    def test_get_noun_declensions_no_english_section(self) -> None:
+        """Test noun forms when no English section."""
+        self.mock_client.fetch_page_wikitext.return_value = "==French==\nContent"
+        self.mock_client.extract_language_section.return_value = None
+
+        result, success = self.parser.get_noun_declensions("cat")
+
+        self.assertFalse(success)
+
+    def test_get_noun_declensions_generates_regular_plural(self) -> None:
+        """Test noun forms generates regular plural."""
+        self.mock_client.fetch_page_wikitext.return_value = "==English==\n===Noun==="
+        self.mock_client.extract_language_section.return_value = "===Noun===\nA cat"
+        self.mock_client.find_templates.return_value = []
+
+        result, success = self.parser.get_noun_declensions("cat")
+
+        self.assertTrue(success)
+        self.assertEqual(result.forms["singular"], "cat")
+        self.assertEqual(result.forms["plural"], "cats")
+
+    def test_get_verb_conjugations_no_page(self) -> None:
+        """Test verb conjugation when page not found."""
+        self.mock_client.fetch_page_wikitext.return_value = None
+
+        result, success = self.parser.get_verb_conjugations("nonexistent")
+
+        self.assertFalse(success)
+        self.assertEqual(result.forms, {})
+
+    def test_get_verb_conjugations_generates_regular_forms(self) -> None:
+        """Test verb conjugation generates regular forms."""
+        self.mock_client.fetch_page_wikitext.return_value = "==English==\n===Verb==="
+        self.mock_client.extract_language_section.return_value = "===Verb===\nTo walk"
+        self.mock_client.find_templates.return_value = []
+
+        result, success = self.parser.get_verb_conjugations("walk")
+
+        self.assertTrue(success)
+        self.assertEqual(result.forms["infinitive"], "walk")
+        self.assertEqual(result.forms["3s_present"], "walks")
+        self.assertEqual(result.forms["past"], "walked")
+        self.assertEqual(result.forms["past_participle"], "walked")
+        self.assertEqual(result.forms["present_participle"], "walking")
+
+    def test_get_adjective_declensions_no_page(self) -> None:
+        """Test adjective forms when page not found."""
+        self.mock_client.fetch_page_wikitext.return_value = None
+
+        result, success = self.parser.get_adjective_declensions("nonexistent")
+
+        self.assertFalse(success)
+        self.assertEqual(result.forms["positive"], "nonexistent")
+
+    def test_get_adjective_declensions_short_adjective(self) -> None:
+        """Test adjective forms for short adjective uses -er/-est."""
+        self.mock_client.fetch_page_wikitext.return_value = "==English==\n===Adjective==="
+        self.mock_client.extract_language_section.return_value = "===Adjective===\nTall"
+        self.mock_client.find_templates.return_value = []
+
+        result, success = self.parser.get_adjective_declensions("tall")
+
+        self.assertTrue(success)
+        self.assertEqual(result.forms["positive"], "tall")
+        self.assertEqual(result.forms["comparative"], "taller")
+        self.assertEqual(result.forms["superlative"], "tallest")
+
+    def test_get_adverb_forms_success(self) -> None:
+        """Test adverb forms always returns at least positive form."""
+        self.mock_client.fetch_page_wikitext.return_value = "==English==\n===Adverb==="
+        self.mock_client.extract_language_section.return_value = "===Adverb===\nAn adverb"
+        self.mock_client.find_templates.return_value = []
+
+        result, success = self.parser.get_adverb_forms("quickly")
+
+        self.assertTrue(success)
+        self.assertEqual(result.forms["positive"], "quickly")
+        # -ly adverbs use more/most
+        self.assertEqual(result.forms["comparative"], "more quickly")
+        self.assertEqual(result.forms["superlative"], "most quickly")
+
+    def test_get_adverb_forms_short_adverb(self) -> None:
+        """Test short adverb forms use -er/-est."""
+        self.mock_client.fetch_page_wikitext.return_value = "==English==\n===Adverb==="
+        self.mock_client.extract_language_section.return_value = "===Adverb===\nAn adverb"
+        self.mock_client.find_templates.return_value = []
+
+        result, success = self.parser.get_adverb_forms("fast")
+
+        self.assertTrue(success)
+        self.assertEqual(result.forms["positive"], "fast")
+        self.assertEqual(result.forms["comparative"], "faster")
+        self.assertEqual(result.forms["superlative"], "fastest")
+
+    def test_extract_plural_from_template(self) -> None:
+        """Test extracting plural from noun template."""
+        template = "{{en-noun|mice}}"
+        plural, alts = self.parser._extract_plural_from_template(template, "mouse")
+
+        self.assertEqual(plural, "mice")
+
+    def test_extract_plural_from_template_named(self) -> None:
+        """Test extracting plural from noun template with named param."""
+        template = "{{en-noun|pl=children}}"
+        plural, alts = self.parser._extract_plural_from_template(template, "child")
+
+        self.assertEqual(plural, "children")
+
+    def test_is_short_adjective_one_syllable(self) -> None:
+        """Test short adjective detection for one syllable words."""
+        self.assertTrue(self.parser._is_short_adjective("big"))
+        self.assertTrue(self.parser._is_short_adjective("tall"))
+        self.assertTrue(self.parser._is_short_adjective("fast"))
+
+    def test_is_short_adjective_two_syllable_y(self) -> None:
+        """Test short adjective detection for two syllable words ending in -y."""
+        self.assertTrue(self.parser._is_short_adjective("happy"))
+        self.assertTrue(self.parser._is_short_adjective("easy"))
+
+
+class TestEnglishNounDeclensionType(unittest.TestCase):
+    """Tests for English NounDeclension type."""
+
+    def test_has_singular_true(self) -> None:
+        """Test has_singular returns True when singular forms exist."""
+        decl = EnglishNounDeclension(
+            word="cat",
+            forms={"singular": "cat"},
+        )
+        self.assertTrue(decl.has_singular())
+
+    def test_has_singular_false(self) -> None:
+        """Test has_singular returns False when no singular forms."""
+        decl = EnglishNounDeclension(
+            word="scissors",
+            number_type=NounNumberType.PLURALE_TANTUM,
+            forms={"plural": "scissors"},
+        )
+        self.assertFalse(decl.has_singular())
+
+    def test_has_plural_true(self) -> None:
+        """Test has_plural returns True when plural forms exist."""
+        decl = EnglishNounDeclension(
+            word="cat",
+            forms={"singular": "cat", "plural": "cats"},
+        )
+        self.assertTrue(decl.has_plural())
+
+    def test_has_plural_false(self) -> None:
+        """Test has_plural returns False when no plural forms."""
+        decl = EnglishNounDeclension(
+            word="information",
+            number_type=NounNumberType.SINGULARE_TANTUM,
+            forms={"singular": "information"},
+        )
+        self.assertFalse(decl.has_plural())
+
+
 if __name__ == "__main__":
     unittest.main()

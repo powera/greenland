@@ -35,6 +35,9 @@ ADVERB_FORM_MAPPING = {
 
 # Form mapping for English verbs
 VERB_FORM_MAPPING = {
+    "infinitive": GrammaticalForm.VERB_INFINITIVE,
+    "present_participle": GrammaticalForm.VERB_PRESENT_PARTICIPLE,
+    "past_participle": GrammaticalForm.VERB_PAST_PARTICIPLE,
     "1s_present": GrammaticalForm.VERB_EN_1S_PRESENT,
     "2s_present": GrammaticalForm.VERB_EN_2S_PRESENT,
     "3s_present": GrammaticalForm.VERB_EN_3S_PRESENT,
