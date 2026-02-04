@@ -1,17 +1,22 @@
 {% extends "base.html" %}
 
-{% block title %}Agents{% endblock %}
+{% block title %}AI Agents{% endblock %}
 
 {% block content %}
 <div class="py-4">
-    <h1><i class="bi bi-robot"></i> Autonomous Agents</h1>
-    <p class="lead">Launch data quality and maintenance agents for the wordfreq database</p>
+    <h1><i class="bi bi-robot"></i> AI Agents</h1>
+    <p class="lead">Automated tools that process dictionary data using AI</p>
+    <p class="text-muted">
+        Agents are background scripts that perform bulk operations on the database.
+        They can generate translations, verify content quality, create audio files,
+        and prepare data for export. Each agent is named after a Lithuanian animal.
+    </p>
 
     {% if db_empty %}
     <div class="alert alert-warning">
         <i class="bi bi-exclamation-triangle"></i>
         <strong>Database is empty or not initialized.</strong>
-        Run the PRADZIA agent to initialize the database before using other agents.
+        Run the <em>Database Setup</em> agent (PRADZIA) first to initialize the database.
     </div>
     {% endif %}
 
@@ -35,8 +40,9 @@
         <div class="tab-pane fade show active" id="pipeline" role="tabpanel" aria-labelledby="pipeline-tab">
             <div class="alert alert-info">
                 <i class="bi bi-info-circle"></i>
-                <strong>Standard Pipeline:</strong> Follow these 8 steps in order to fully populate a word from English lemma + definition to complete multilingual data.
-                Click "Configure & Launch" to customize arguments like <code>--dry-run</code> or <code>--guid</code> for testing.
+                <strong>Standard Pipeline:</strong> These steps transform a basic English word into a complete
+                multilingual dictionary entry with translations, example sentences, and audio.
+                Run them in order for best results. Use "Configure & Launch" to test on specific words first.
             </div>
 
             <div class="pipeline-container">
@@ -85,7 +91,8 @@
         <div class="tab-pane fade" id="flexible" role="tabpanel" aria-labelledby="flexible-tab">
             <div class="alert alert-info">
                 <i class="bi bi-info-circle"></i>
-                <strong>Flexible Mode:</strong> Launch any agent with custom parameters for specialized workflows and debugging.
+                <strong>Flexible Mode:</strong> Run individual agents with custom settings.
+                Useful for re-running specific steps, debugging, or advanced workflows.
             </div>
 
             <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mt-2">

@@ -8,7 +8,8 @@
         <div class="col">
             <h2><i class="bi bi-arrow-left-right"></i> Sync Release Data</h2>
             <p class="text-muted">
-                Compare and sync data between <code>data/release</code> and the SQLite database.
+                Compare the master word list files (<code>data/release</code>) with the working database.
+                This helps keep them in sync when either source has been updated independently.
             </p>
         </div>
     </div>
@@ -33,9 +34,9 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
-                            <p class="mb-1"><strong>Release directory:</strong> <code>{{ release_dir }}</code></p>
-                            <p class="mb-1"><strong>Lemmas in release:</strong> {{ counts.release_total }}</p>
-                            <p class="mb-0"><strong>Lemmas in SQLite:</strong> {{ counts.db_total }}</p>
+                            <p class="mb-1"><strong>Master files location:</strong> <code>{{ release_dir }}</code></p>
+                            <p class="mb-1"><strong>Words in master files:</strong> {{ counts.release_total }}</p>
+                            <p class="mb-0"><strong>Words in database:</strong> {{ counts.db_total }}</p>
                         </div>
                     </div>
                 </div>
@@ -55,7 +56,7 @@
                         {{ counts.additions }}
                     </h3>
                     <p class="card-text text-muted">
-                        GUIDs in release that are not in SQLite
+                        New words in master files not yet in database
                     </p>
                 </div>
                 <div class="card-footer">
@@ -78,7 +79,7 @@
                         {{ counts.removals }}
                     </h3>
                     <p class="card-text text-muted">
-                        GUIDs in SQLite that are not in release
+                        Words in database that were removed from master files
                     </p>
                 </div>
                 <div class="card-footer">
@@ -101,7 +102,7 @@
                         {{ counts.difficulty }}
                     </h3>
                     <p class="card-text text-muted">
-                        Different difficulty levels (same lemma_text)
+                        Same word but different learner levels assigned
                     </p>
                 </div>
                 <div class="card-footer">
@@ -124,7 +125,7 @@
                         {{ counts.changes }}
                     </h3>
                     <p class="card-text text-muted">
-                        Same GUID but different lemma_text
+                        Same ID but word spelling differs
                     </p>
                 </div>
                 <div class="card-footer">

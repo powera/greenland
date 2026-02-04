@@ -3,10 +3,17 @@
 {% block title %}Home{% endblock %}
 
 {% block content %}
+<!-- Welcome Section -->
 <div class="row mb-4">
-    <div class="col">
-        <h1><i class="bi bi-house-door"></i> Barsukas</h1>
-        <p class="lead">Word Frequency Database Editor</p>
+    <div class="col-lg-8">
+        <h1><i class="bi bi-book"></i> Barsukas</h1>
+        <p class="lead">Multilingual Dictionary Editor for Language Learning</p>
+        <p class="text-muted">
+            Barsukas is a database editor for building multilingual vocabulary content.
+            It manages words (lemmas), their translations across multiple languages,
+            example sentences, and audio pronunciations. Content created here is
+            exported for use in the Trakaido language-learning app.
+        </p>
     </div>
 </div>
 
@@ -15,32 +22,36 @@
     <div class="col-md-3">
         <div class="card stat-card">
             <div class="card-body">
-                <h5 class="card-title text-muted">Total Lemmas</h5>
+                <h5 class="card-title text-muted">Words</h5>
                 <h2 class="card-text">{{ total_lemmas | default(0) }}</h2>
+                <small class="text-muted">dictionary entries</small>
             </div>
         </div>
     </div>
     <div class="col-md-3">
         <div class="card stat-card">
             <div class="card-body">
-                <h5 class="card-title text-muted">Verified</h5>
+                <h5 class="card-title text-muted">Reviewed</h5>
                 <h2 class="card-text text-success">{{ verified_lemmas | default(0) }}</h2>
+                <small class="text-muted">human-checked</small>
             </div>
         </div>
     </div>
     <div class="col-md-3">
         <div class="card stat-card">
             <div class="card-body">
-                <h5 class="card-title text-muted">With Difficulty Level</h5>
+                <h5 class="card-title text-muted">With Levels</h5>
                 <h2 class="card-text text-info">{{ with_difficulty | default(0) }}</h2>
+                <small class="text-muted">assigned to learner levels</small>
             </div>
         </div>
     </div>
     <div class="col-md-3">
         <div class="card stat-card">
             <div class="card-body">
-                <h5 class="card-title text-muted">Total Sentences</h5>
+                <h5 class="card-title text-muted">Sentences</h5>
                 <h2 class="card-text text-warning">{{ total_sentences | default(0) }}</h2>
+                <small class="text-muted">example sentences</small>
             </div>
         </div>
     </div>
@@ -52,12 +63,12 @@
         <div class="card">
             <div class="card-body">
                 <h5 class="card-title mb-3">
-                    <i class="bi bi-search"></i> Search Lemmas
+                    <i class="bi bi-search"></i> Search Words
                 </h5>
                 <form action="{{ url_for('lemmas.list_lemmas') }}" method="get">
                     <div class="input-group">
                         <input type="text" class="form-control" name="search"
-                               placeholder="Search by lemma text or definition..."
+                               placeholder="Search by word or definition..."
                                autofocus>
                         <button class="btn btn-primary" type="submit">
                             <i class="bi bi-search"></i> Search
@@ -66,10 +77,10 @@
                 </form>
                 <div class="mt-3">
                     <a href="{{ url_for('lemmas.list_lemmas') }}" class="btn btn-outline-secondary">
-                        <i class="bi bi-list"></i> Browse All Lemmas
+                        <i class="bi bi-list"></i> Browse All Words
                     </a>
                     <a href="{{ url_for('sentences.list_sentences') }}" class="btn btn-outline-secondary">
-                        <i class="bi bi-chat-left-quote"></i> Browse All Sentences
+                        <i class="bi bi-chat-left-quote"></i> Browse Sentences
                     </a>
                 </div>
             </div>
@@ -79,14 +90,18 @@
 
 <!-- Features -->
 <div class="row mt-5">
+    <div class="col-12 mb-3">
+        <h4>Key Features</h4>
+    </div>
     <div class="col-md-4">
         <div class="card h-100">
             <div class="card-body">
                 <h5 class="card-title">
-                    <i class="bi bi-pencil-square text-primary"></i> Edit Lemmas
+                    <i class="bi bi-pencil-square text-primary"></i> Edit Dictionary Entries
                 </h5>
                 <p class="card-text">
-                    Update lemma text, definitions, POS types, and difficulty levels.
+                    Add and update words with definitions, parts of speech (noun, verb, etc.),
+                    and learner difficulty levels from 1 (beginner) to 20 (advanced).
                 </p>
             </div>
         </div>
@@ -95,10 +110,11 @@
         <div class="card h-100">
             <div class="card-body">
                 <h5 class="card-title">
-                    <i class="bi bi-translate text-success"></i> Manage Translations
+                    <i class="bi bi-translate text-success"></i> Multilingual Translations
                 </h5>
                 <p class="card-text">
-                    Edit translations across 9 supported languages with automatic storage handling.
+                    Manage translations across 9 languages including Chinese, Spanish, French,
+                    German, and Lithuanian. AI-assisted with human review.
                 </p>
             </div>
         </div>
@@ -107,10 +123,44 @@
         <div class="card h-100">
             <div class="card-body">
                 <h5 class="card-title">
-                    <i class="bi bi-bar-chart text-warning"></i> Difficulty Overrides
+                    <i class="bi bi-robot text-info"></i> AI-Powered Agents
                 </h5>
                 <p class="card-text">
-                    Set per-language difficulty level overrides for Trakaido wordlists.
+                    Automated tools generate translations, verify quality, link sentences
+                    to vocabulary, and produce audio pronunciations.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Getting Started -->
+<div class="row mt-4">
+    <div class="col-12 mb-3">
+        <h4>Getting Started</h4>
+    </div>
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="bi bi-eye text-secondary"></i> Browse Content
+                </h5>
+                <p class="card-text">
+                    Use the <strong>View</strong> menu to explore existing words, sentences,
+                    and conversations. Click any word to see its translations and related content.
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="bi bi-play-circle text-secondary"></i> Run Operations
+                </h5>
+                <p class="card-text">
+                    Use the <strong>Tools</strong> menu to run AI agents, verify translations,
+                    review audio, and export data for the Trakaido app.
                 </p>
             </div>
         </div>
