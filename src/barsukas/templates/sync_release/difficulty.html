@@ -15,6 +15,7 @@
             <h2><i class="bi bi-speedometer2"></i> Sync Difficulty Levels</h2>
             <p class="text-muted">
                 Lemmas with different difficulty levels (where lemma_text matches).
+                Changes can go in either direction.
             </p>
         </div>
     </div>
@@ -28,10 +29,13 @@
         <div class="card-header d-flex justify-content-between align-items-center">
             <span><i class="bi bi-list-check"></i> Differences: {{ differences|length }}</span>
             <div>
-                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="selectAll('keep_old')">
-                    Keep All SQLite
+                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="selectAll('skip')">
+                    Skip All
                 </button>
-                <button type="button" class="btn btn-sm btn-outline-primary" onclick="selectAll('use_new')">
+                <button type="button" class="btn btn-sm btn-outline-warning" onclick="selectAll('use_db')">
+                    Use All DB
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-primary" onclick="selectAll('use_release')">
                     Use All Release
                 </button>
             </div>
@@ -89,10 +93,10 @@
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <select class="form-select form-select-sm action-select" name="action_{{ diff.lemma_id }}" style="min-width: 130px;">
+                                    <select class="form-select form-select-sm action-select" name="action_{{ diff.lemma_id }}" style="min-width: 140px;">
                                         <option value="skip">Skip</option>
-                                        <option value="keep_old">Keep SQLite</option>
-                                        <option value="use_new">Use Release</option>
+                                        <option value="use_db">Use DB</option>
+                                        <option value="use_release">Use Release</option>
                                     </select>
                                 </td>
                             </tr>

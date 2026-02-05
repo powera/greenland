@@ -639,16 +639,20 @@ def apply_level() -> ResponseReturnValue:
     release_dir = _get_sentence_release_dir()
     release_sentences = _load_release_sentences(release_dir)
 
-    updated_count = 0
+    updated_db_count = 0
+    updated_release_count = 0
     skipped_count = 0
     error_count = 0
 
+    # Track release file updates: {filepath: {guid: {field: value}}}
+    release_updates: Dict[Path, Dict[str, Dict[str, Any]]] = {}
+
     for sentence_id_str, action in actions.items():
-        if action == "skip" or action == "keep_old":
+        if action == "skip":
             skipped_count += 1
             continue
 
-        if action != "use_new":
+        if action not in ("use_release", "use_db"):
             continue
 
         try:
@@ -666,38 +670,70 @@ def apply_level() -> ResponseReturnValue:
                 error_count += 1
                 continue
 
-            new_level = release_data.get("minimum_level")
-            old_level = sentence.minimum_level
+            if action == "use_release":
+                new_level = release_data.get("minimum_level")
+                old_level = sentence.minimum_level
 
-            sentence.minimum_level = new_level
-            updated_count += 1
+                sentence.minimum_level = new_level
+                updated_db_count += 1
 
-            log_translation_change(
-                session=g.db,
-                source="sync-release",
-                operation_type="sentence_level_sync",
-                field_name="minimum_level",
-                old_value=str(old_level) if old_level is not None else None,
-                new_value=str(new_level) if new_level is not None else None,
-            )
+                log_translation_change(
+                    session=g.db,
+                    source="sync-release",
+                    operation_type="sentence_level_sync",
+                    field_name="minimum_level",
+                    old_value=str(old_level) if old_level is not None else None,
+                    new_value=str(new_level) if new_level is not None else None,
+                )
 
-            logger.info(
-                f"Updated minimum_level for sentence {sentence.guid}: "
-                f"{old_level} -> {new_level}"
-            )
+                logger.info(
+                    f"Updated minimum_level for sentence {sentence.guid}: "
+                    f"{old_level} -> {new_level}"
+                )
+
+            elif action == "use_db":
+                db_level = sentence.minimum_level
+                file_path = _find_release_file_for_sentence(release_dir, sentence.guid)
+                if file_path:
+                    if file_path not in release_updates:
+                        release_updates[file_path] = {}
+                    release_updates[file_path][sentence.guid] = {
+                        "minimum_level": db_level,
+                    }
+                    updated_release_count += 1
+                    logger.info(
+                        f"Queued release update for sentence {sentence.guid} "
+                        f"minimum_level: -> {db_level}"
+                    )
+                else:
+                    logger.warning(
+                        f"Could not find release file for sentence GUID: {sentence.guid}"
+                    )
+                    error_count += 1
 
         except Exception as e:
             logger.error(f"Error updating sentence {sentence_id_str}: {e}")
             error_count += 1
 
-    if updated_count > 0:
+    if updated_db_count > 0:
         try:
             g.db.commit()
-            flash(f"Updated {updated_count} sentence(s)", "success")
+            flash(f"Updated {updated_db_count} sentence(s) in database", "success")
         except Exception as e:
             g.db.rollback()
             flash(f"Error committing changes: {e}", "error")
             logger.error(f"Commit error: {e}")
+
+    if release_updates:
+        try:
+            _apply_release_sentence_field_updates(release_updates)
+            flash(
+                f"Updated {updated_release_count} sentence(s) in release files",
+                "success",
+            )
+        except Exception as e:
+            flash(f"Error updating release files: {e}", "error")
+            logger.error(f"Release file update error: {e}")
 
     if skipped_count > 0:
         flash(f"Skipped {skipped_count} sentence(s)", "info")
@@ -799,16 +835,20 @@ def apply_changes() -> ResponseReturnValue:
     release_dir = _get_sentence_release_dir()
     release_sentences = _load_release_sentences(release_dir)
 
-    updated_count = 0
+    updated_db_count = 0
+    updated_release_count = 0
     skipped_count = 0
     error_count = 0
 
+    # Track release file updates: {filepath: {guid: {field: value}}}
+    release_updates: Dict[Path, Dict[str, Dict[str, Any]]] = {}
+
     for sentence_id_str, action in actions.items():
-        if action == "skip" or action == "keep_old":
+        if action == "skip":
             skipped_count += 1
             continue
 
-        if action != "use_new":
+        if action not in ("use_release", "use_db"):
             continue
 
         try:
@@ -826,57 +866,92 @@ def apply_changes() -> ResponseReturnValue:
                 error_count += 1
                 continue
 
-            new_english = _get_release_sentence_english(release_data)
-            old_english = _get_db_sentence_english(g.db, sentence)
+            if action == "use_release":
+                new_english = _get_release_sentence_english(release_data)
+                old_english = _get_db_sentence_english(g.db, sentence)
 
-            # Update or create the English translation
-            trans_obj = (
-                g.db.query(SentenceTranslation)
-                .filter(
-                    SentenceTranslation.sentence_id == sentence.id,
-                    SentenceTranslation.language_code == "en",
+                # Update or create the English translation
+                trans_obj = (
+                    g.db.query(SentenceTranslation)
+                    .filter(
+                        SentenceTranslation.sentence_id == sentence.id,
+                        SentenceTranslation.language_code == "en",
+                    )
+                    .first()
                 )
-                .first()
-            )
 
-            if trans_obj:
-                trans_obj.translation_text = new_english
-            else:
-                trans_obj = SentenceTranslation(
-                    sentence_id=sentence.id,
+                if trans_obj:
+                    trans_obj.translation_text = new_english
+                else:
+                    trans_obj = SentenceTranslation(
+                        sentence_id=sentence.id,
+                        language_code="en",
+                        translation_text=new_english,
+                        verified=False,
+                    )
+                    g.db.add(trans_obj)
+
+                log_translation_change(
+                    session=g.db,
+                    source="sync-release",
+                    operation_type="sentence_text_sync",
                     language_code="en",
-                    translation_text=new_english,
-                    verified=False,
+                    old_translation=old_english,
+                    new_translation=new_english,
                 )
-                g.db.add(trans_obj)
 
-            log_translation_change(
-                session=g.db,
-                source="sync-release",
-                operation_type="sentence_text_sync",
-                language_code="en",
-                old_translation=old_english,
-                new_translation=new_english,
-            )
+                updated_db_count += 1
+                logger.info(
+                    f"Updated English text for sentence {sentence.guid}: "
+                    f"'{old_english[:40]}' -> '{new_english[:40]}'"
+                )
 
-            updated_count += 1
-            logger.info(
-                f"Updated English text for sentence {sentence.guid}: "
-                f"'{old_english[:40]}' -> '{new_english[:40]}'"
-            )
+            elif action == "use_db":
+                db_english = _get_db_sentence_english(g.db, sentence)
+                if db_english:
+                    file_path = _find_release_file_for_sentence(release_dir, sentence.guid)
+                    if file_path:
+                        if file_path not in release_updates:
+                            release_updates[file_path] = {}
+                        release_updates[file_path][sentence.guid] = {
+                            "translations.en": db_english,
+                        }
+                        updated_release_count += 1
+                        logger.info(
+                            f"Queued release update for sentence {sentence.guid} "
+                            f"English text: -> '{db_english[:40]}'"
+                        )
+                    else:
+                        logger.warning(
+                            f"Could not find release file for sentence GUID: " f"{sentence.guid}"
+                        )
+                        error_count += 1
+                else:
+                    skipped_count += 1
 
         except Exception as e:
             logger.error(f"Error updating sentence {sentence_id_str}: {e}")
             error_count += 1
 
-    if updated_count > 0:
+    if updated_db_count > 0:
         try:
             g.db.commit()
-            flash(f"Updated {updated_count} sentence(s)", "success")
+            flash(f"Updated {updated_db_count} sentence(s) in database", "success")
         except Exception as e:
             g.db.rollback()
             flash(f"Error committing changes: {e}", "error")
             logger.error(f"Commit error: {e}")
+
+    if release_updates:
+        try:
+            _apply_release_sentence_field_updates(release_updates)
+            flash(
+                f"Updated {updated_release_count} sentence(s) in release files",
+                "success",
+            )
+        except Exception as e:
+            flash(f"Error updating release files: {e}", "error")
+            logger.error(f"Release file update error: {e}")
 
     if skipped_count > 0:
         flash(f"Skipped {skipped_count} sentence(s)", "info")
@@ -1259,6 +1334,60 @@ def _apply_release_sentence_translation_updates(
                                 data["translations"][lang_code] = new_val
                             updated_lines.append(json.dumps(data, ensure_ascii=False) + "\n")
                             logger.info(f"Updated translations for {guid} in {file_path}")
+                        else:
+                            updated_lines.append(line)
+                    except json.JSONDecodeError:
+                        updated_lines.append(line)
+
+            with open(file_path, "w", encoding="utf-8") as f:
+                f.writelines(updated_lines)
+
+        except Exception as e:
+            logger.error(f"Error updating {file_path}: {e}")
+            raise
+
+
+def _apply_release_sentence_field_updates(
+    updates: Dict[Path, Dict[str, Dict[str, Any]]],
+) -> None:
+    """Apply field updates to sentence release JSONL files.
+
+    Supports top-level fields (e.g. minimum_level) and dotted paths
+    for nested fields (e.g. translations.en).
+
+    Args:
+        updates: {filepath: {guid: {field_or_dotted_path: new_value}}}
+    """
+    for file_path, guid_updates in updates.items():
+        if not file_path.exists():
+            logger.warning(f"Release file not found: {file_path}")
+            continue
+
+        updated_lines: List[str] = []
+        try:
+            with open(file_path, "r", encoding="utf-8") as f:
+                for line in f:
+                    stripped = line.strip()
+                    if not stripped:
+                        updated_lines.append(line)
+                        continue
+
+                    try:
+                        data = json.loads(stripped)
+                        guid = data.get("guid")
+
+                        if guid in guid_updates:
+                            for field_path, new_val in guid_updates[guid].items():
+                                if "." in field_path:
+                                    parts = field_path.split(".", 1)
+                                    parent_key, child_key = parts[0], parts[1]
+                                    if parent_key not in data:
+                                        data[parent_key] = {}
+                                    data[parent_key][child_key] = new_val
+                                else:
+                                    data[field_path] = new_val
+                            updated_lines.append(json.dumps(data, ensure_ascii=False) + "\n")
+                            logger.info(f"Updated fields for {guid} in {file_path}")
                         else:
                             updated_lines.append(line)
                     except json.JSONDecodeError:
