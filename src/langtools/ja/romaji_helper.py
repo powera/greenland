@@ -74,6 +74,32 @@ def generate_romaji(japanese_text: str) -> Optional[str]:
         return None
 
 
+def generate_hiragana(japanese_text: str) -> Optional[str]:
+    """
+    Generate hiragana reading for Japanese text (for dictionary sort keys).
+
+    Args:
+        japanese_text: Japanese text to convert to hiragana
+
+    Returns:
+        Hiragana string, or None if pykakasi is not available or text
+        doesn't contain Japanese characters.
+    """
+    if not PYKAKASI_AVAILABLE or not japanese_text or _kakasi is None:
+        return None
+
+    if not is_japanese(japanese_text):
+        return None
+
+    try:
+        result = _kakasi.convert(japanese_text)
+        hira_parts = [item["hira"] for item in result]
+        return "".join(hira_parts)
+    except Exception as e:
+        logger.warning(f"Failed to generate hiragana for '{japanese_text}': {e}")
+        return None
+
+
 def generate_romaji_ruby_html(japanese_text: str) -> str:
     """
     Generate HTML with ruby annotations for Japanese text with romaji.

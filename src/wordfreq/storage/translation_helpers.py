@@ -9,11 +9,17 @@ LemmaTranslation table. Code should use these helper functions instead of
 directly accessing translation fields.
 """
 
+import logging
 from typing import Dict, Optional, Tuple
 
 from sqlalchemy.orm import Session
 
 from wordfreq.storage.models.schema import Lemma, LemmaTranslation
+
+logger = logging.getLogger(__name__)
+
+# Languages that need a computed sort_key for dictionary ordering.
+_SORT_KEY_LANGUAGES = frozenset({"zh", "ja", "ko"})
 
 # Language hierarchy: ordered from most reliable/primary to experimental
 # Tier 1: Primary supported languages
@@ -229,6 +235,40 @@ def get_all_definitions(session: Session, lemma: Lemma) -> Dict[str, Optional[st
     return definitions
 
 
+def compute_sort_key(lang_code: str, translation: str) -> Optional[str]:
+    """Compute a romanized/phonetic sort key for CJK translations.
+
+    - Chinese (zh): pinyin with tone marks, e.g. "chī" for 吃
+    - Japanese (ja): hiragana reading, e.g. "たべる" for 食べる
+    - Korean (ko): the translation itself (Hangul already sorts correctly)
+
+    Returns None for non-CJK languages or if the required library is
+    unavailable.
+    """
+    if lang_code not in _SORT_KEY_LANGUAGES:
+        return None
+
+    if not translation or not translation.strip():
+        return None
+
+    try:
+        if lang_code == "zh":
+            from langtools.zh.pinyin_helper import generate_pinyin
+
+            return generate_pinyin(translation)
+        elif lang_code == "ja":
+            from langtools.ja.romaji_helper import generate_hiragana
+
+            return generate_hiragana(translation)
+        elif lang_code == "ko":
+            from langtools.ko.hangul_helper import decompose_hangul
+
+            return decompose_hangul(translation)
+    except Exception as e:
+        logger.warning(f"Failed to compute sort_key for {lang_code} '{translation}': {e}")
+    return None
+
+
 def set_translation(
     session: Session,
     lemma: Lemma,
@@ -270,16 +310,21 @@ def set_translation(
             .first()
         )
 
+        sort_key = compute_sort_key(lang_code, translation)
+
         if translation_obj:
             translation_obj.translation = translation
             if definition is not None:
                 translation_obj.definition_text = definition
+            if lang_code in _SORT_KEY_LANGUAGES:
+                translation_obj.sort_key = sort_key
         else:
             translation_obj = LemmaTranslation(
                 lemma_id=lemma.id,
                 language_code=field_name,
                 translation=translation,
                 definition_text=definition,
+                sort_key=sort_key,
                 verified=False,
             )
             session.add(translation_obj)

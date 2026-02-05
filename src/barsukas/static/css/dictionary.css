@@ -129,14 +129,9 @@
     font-style: italic;
 }
 
-/* Compact Chinese/Japanese ruby annotations in dictionary context */
-.dict-zh ruby,
-.dict-ja ruby {
-    display: inline;
-    margin-right: 0.15em;
-}
-
-.dict-zh ruby rt,
-.dict-ja ruby rt {
-    font-size: 0.6em;
+/* Romanization reading (pinyin / romaji) shown in parentheses */
+.dict-reading {
+    color: #888;
+    font-size: 0.82em;
+    font-weight: 400;
 }

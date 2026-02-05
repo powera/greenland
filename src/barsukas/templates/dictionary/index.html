@@ -16,7 +16,7 @@
     </div>
 </div>
 
-<!-- Language selector -->
+<!-- Language selector and sort control -->
 <div class="dict-controls mb-3">
     <form method="get" action="{{ url_for('peleda.dictionary') }}" class="row g-2 align-items-end">
         <div class="col-auto">
@@ -27,25 +27,50 @@
                 {% endfor %}
             </select>
         </div>
-        <input type="hidden" name="letter" value="{{ letter }}">
+        <div class="col-auto">
+            <label for="sort" class="form-label mb-0 small text-muted">Sort by</label>
+            <select class="form-select form-select-sm" id="sort" name="sort" onchange="this.form.submit()">
+                <option value="alpha" {% if sort == 'alpha' %}selected{% endif %}>Alphabetical</option>
+                <option value="level" {% if sort == 'level' %}selected{% endif %}>Level</option>
+            </select>
+        </div>
+        {% if sort == 'alpha' %}
+            <input type="hidden" name="letter" value="{{ letter }}">
+        {% elif sort == 'level' and selected_level is not none %}
+            <input type="hidden" name="level" value="{{ selected_level }}">
+        {% endif %}
     </form>
 </div>
 
+{% if sort == 'alpha' %}
 <!-- Alphabet bar -->
 <nav class="dict-alphabet mb-3" aria-label="Alphabet navigation">
     {% for l in alphabet %}
         {% if l == letter %}
             <span class="dict-letter dict-letter-active">{{ l }}</span>
         {% elif l in available_letters %}
-            <a href="{{ url_for('peleda.dictionary', lang=lang, letter=l) }}"
+            <a href="{{ url_for('peleda.dictionary', lang=lang, letter=l, sort='alpha') }}"
                class="dict-letter">{{ l }}</a>
         {% else %}
             <span class="dict-letter dict-letter-disabled">{{ l }}</span>
         {% endif %}
     {% endfor %}
 </nav>
+{% elif sort == 'level' %}
+<!-- Level bar -->
+<nav class="dict-alphabet mb-3" aria-label="Level navigation">
+    {% for lv in level_list %}
+        {% if lv == selected_level %}
+            <span class="dict-letter dict-letter-active">{{ lv }}</span>
+        {% else %}
+            <a href="{{ url_for('peleda.dictionary', lang=lang, sort='level', level=lv) }}"
+               class="dict-letter">{{ lv }}</a>
+        {% endif %}
+    {% endfor %}
+</nav>
+{% endif %}
 
-<!-- Column headers -->
+<!-- Dictionary table -->
 <div class="dict-page">
     <table class="dict-table">
         <thead>
@@ -63,15 +88,18 @@
                     <td class="dict-headword">
                         <a href="{{ url_for('lemmas.view_lemma', lemma_id=entry.id) }}"
                            class="dict-headword-link">{{ entry.headword }}</a>
+                        {%- if lang == 'zh' and entry.headword|pinyin %} <span class="dict-reading">({{ entry.headword|pinyin }})</span>
+                        {%- elif lang == 'ja' and entry.headword|romaji %} <span class="dict-reading">({{ entry.headword|romaji }})</span>
+                        {%- endif %}
                         {%- if entry.disambiguation %}<span class="dict-disambig"> ({{ entry.disambiguation }})</span>{% endif %}
                     </td>
                     {% for code in display_langs %}
                         <td class="dict-translation">
                             {% if entry.translations.get(code) %}
                                 {% if code == 'zh' %}
-                                    <span class="dict-zh">{{ entry.translations[code]|pinyin_ruby|safe }}</span>
+                                    <span class="dict-zh">{{ entry.translations[code] }}{% if entry.translations[code]|pinyin %} <span class="dict-reading">({{ entry.translations[code]|pinyin }})</span>{% endif %}</span>
                                 {% elif code == 'ja' %}
-                                    <span class="dict-ja">{{ entry.translations[code]|romaji_ruby|safe }}</span>
+                                    <span class="dict-ja">{{ entry.translations[code] }}{% if entry.translations[code]|romaji %} <span class="dict-reading">({{ entry.translations[code]|romaji }})</span>{% endif %}</span>
                                 {% else %}
                                     {{ entry.translations[code] }}
                                 {% endif %}
@@ -86,7 +114,7 @@
             {% if not entries %}
                 <tr>
                     <td colspan="{{ display_langs|length + 2 }}" class="text-center text-muted py-4">
-                        No entries for this letter.
+                        No entries{% if sort == 'alpha' %} for this letter{% elif sort == 'level' %} for this level{% endif %}.
                     </td>
                 </tr>
             {% endif %}
@@ -96,22 +124,27 @@
 
 <!-- Pagination -->
 {% if total_pages > 1 %}
+    {% if sort == 'level' %}
+        {% set page_params = {'lang': lang, 'sort': 'level', 'level': selected_level} %}
+    {% else %}
+        {% set page_params = {'lang': lang, 'sort': 'alpha', 'letter': letter} %}
+    {% endif %}
     <nav class="mt-3" aria-label="Page navigation">
         <ul class="pagination pagination-sm justify-content-center">
             <li class="page-item {% if page == 1 %}disabled{% endif %}">
-                <a class="page-link" href="{{ url_for('peleda.dictionary', lang=lang, letter=letter, page=page-1) }}">Prev</a>
+                <a class="page-link" href="{{ url_for('peleda.dictionary', page=page-1, **page_params) }}">Prev</a>
             </li>
             {% for p in range(1, total_pages + 1) %}
                 {% if p == page or (p <= 2 or p > total_pages - 2 or (p >= page - 2 and p <= page + 2)) %}
                     <li class="page-item {% if p == page %}active{% endif %}">
-                        <a class="page-link" href="{{ url_for('peleda.dictionary', lang=lang, letter=letter, page=p) }}">{{ p }}</a>
+                        <a class="page-link" href="{{ url_for('peleda.dictionary', page=p, **page_params) }}">{{ p }}</a>
                     </li>
                 {% elif (p == 3 and page > 5) or (p == total_pages - 2 and page < total_pages - 4) %}
                     <li class="page-item disabled"><span class="page-link">...</span></li>
                 {% endif %}
             {% endfor %}
             <li class="page-item {% if page == total_pages %}disabled{% endif %}">
-                <a class="page-link" href="{{ url_for('peleda.dictionary', lang=lang, letter=letter, page=page+1) }}">Next</a>
+                <a class="page-link" href="{{ url_for('peleda.dictionary', page=page+1, **page_params) }}">Next</a>
             </li>
         </ul>
     </nav>

@@ -139,6 +139,9 @@ class LemmaTranslation(Base):
     definition_text: Mapped[Optional[str]] = mapped_column(
         Text, nullable=True
     )  # Definition in this language
+    sort_key: Mapped[Optional[str]] = mapped_column(
+        String, nullable=True, index=True
+    )  # Romanized/phonetic form for sorting (e.g. pinyin for zh, kana for ja, jamo for ko)
 
     # Metadata
     verified: Mapped[bool] = mapped_column(Boolean, default=False)
