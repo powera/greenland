@@ -46,6 +46,7 @@ from barsukas.routes import (
     operation_logs,
     overrides,
     pattern_sentences,
+    peleda,
     pending_imports,
     pradzia,
     rapid_review,
@@ -166,6 +167,7 @@ def create_app(config_class: type[Config] = Config, db_url: Optional[str] = None
     app.register_blueprint(rapid_review_hub.bp)
     app.register_blueprint(settings.bp)
     app.register_blueprint(pattern_sentences.bp)
+    app.register_blueprint(peleda.bp)
     app.register_blueprint(pradzia.bp)
     app.register_blueprint(sync_release.bp)
 

@@ -1,0 +1,142 @@
+/* Dictionary view - dense, print-dictionary style */
+
+.dict-controls {
+    background: #f8f9fa;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.25rem;
+}
+
+/* Alphabet navigation bar */
+.dict-alphabet {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    background: #f8f9fa;
+    padding: 0.4rem;
+    border-radius: 0.25rem;
+}
+
+.dict-letter {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 1.75rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-decoration: none;
+    border-radius: 0.2rem;
+    color: #2c3e50;
+}
+
+.dict-letter:hover {
+    background-color: #dee2e6;
+    color: #2c3e50;
+}
+
+.dict-letter-active {
+    background-color: #2c3e50;
+    color: #fff;
+    font-weight: 700;
+}
+
+.dict-letter-disabled {
+    color: #ccc;
+    cursor: default;
+}
+
+/* Main dictionary table */
+.dict-page {
+    background: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+}
+
+.dict-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+    line-height: 1.35;
+}
+
+.dict-table thead th {
+    background-color: #f0f0f0;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #6c757d;
+    padding: 0.35rem 0.5rem;
+    border-bottom: 2px solid #ccc;
+    position: sticky;
+    top: 0;
+}
+
+.dict-headword-col { width: 28%; }
+.dict-trans-col { width: 22%; }
+.dict-pos-col { width: 6%; text-align: center; }
+
+.dict-table tbody tr {
+    border-bottom: 1px solid #eee;
+}
+
+.dict-table tbody tr:hover {
+    background-color: #fafafa;
+}
+
+.dict-entry td {
+    padding: 0.2rem 0.5rem;
+    vertical-align: baseline;
+}
+
+/* Headword styling */
+.dict-headword {
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+.dict-headword-link {
+    color: inherit;
+    text-decoration: none;
+}
+
+.dict-headword-link:hover {
+    color: #2c3e50;
+    text-decoration: underline;
+}
+
+.dict-disambig {
+    font-weight: 400;
+    font-style: italic;
+    color: #888;
+    font-size: 0.82em;
+}
+
+/* Translation cells */
+.dict-translation {
+    color: #333;
+}
+
+.dict-missing {
+    color: #ccc;
+}
+
+/* POS column */
+.dict-pos {
+    text-align: center;
+    font-size: 0.75rem;
+    color: #888;
+    font-style: italic;
+}
+
+/* Compact Chinese/Japanese ruby annotations in dictionary context */
+.dict-zh ruby,
+.dict-ja ruby {
+    display: inline;
+    margin-right: 0.15em;
+}
+
+.dict-zh ruby rt,
+.dict-ja ruby rt {
+    font-size: 0.6em;
+}
