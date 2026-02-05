@@ -248,6 +248,7 @@ def view_lemma(lemma_id: int) -> ResponseReturnValue:
     audio_files = data["audio_files"]
     sentence_count = data["sentence_count"]
     needs_disambiguation_check = data["needs_disambiguation_check"]
+    related_lemmas = data["related_lemmas"]
 
     # Get difficulty level distribution for same POS type/subtype
     difficulty_stats = get_difficulty_stats(g.db, lemma.pos_type, lemma.pos_subtype)
@@ -332,6 +333,7 @@ def view_lemma(lemma_id: int) -> ResponseReturnValue:
         piper_voices=piper_voices,
         coqui_voices=coqui_voices,
         qwen3_voices=qwen3_voices,
+        related_lemmas=related_lemmas,
         queued_tasks=queued_tasks,
     )
 

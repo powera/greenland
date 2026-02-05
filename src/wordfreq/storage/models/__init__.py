@@ -9,6 +9,10 @@ from wordfreq.storage.models.enums import (
 )
 from wordfreq.storage.models.grammar_fact import GrammarFact
 from wordfreq.storage.models.guid_tombstone import GuidTombstone
+from wordfreq.storage.models.lemma_relation import (
+    LemmaRelationGroup,
+    LemmaRelationMember,
+)
 from wordfreq.storage.models.operation_log import OperationLog
 from wordfreq.storage.models.query_log import QueryLog
 from wordfreq.storage.models.schema import (
@@ -41,6 +45,8 @@ __all__ = [
     "GuidTombstone",
     "Lemma",
     "LemmaDifficultyOverride",
+    "LemmaRelationGroup",
+    "LemmaRelationMember",
     "LemmaTranslation",
     "NounSubtype",
     "OperationLog",

@@ -14,6 +14,7 @@ from sqlalchemy import case, func
 from sqlalchemy.orm import Session
 
 from wordfreq.storage.models.grammar_fact import GrammarFact
+from wordfreq.storage.models.lemma_relation import LemmaRelationGroup, LemmaRelationMember
 from wordfreq.storage.models.schema import (
     AudioQualityReview,
     DerivativeForm,
@@ -315,6 +316,33 @@ def get_lemma_view_data(session: Session, lemma_id: int) -> Dict[str, Any]:
         )
         needs_disambiguation_check = duplicate_count > 0
 
+    # Query 9: Get related lemmas via relation groups
+    # Find groups this lemma belongs to, then all other members
+    related_lemmas: List[Tuple[str, Lemma]] = []
+    member_rows = (
+        session.query(LemmaRelationMember).filter(LemmaRelationMember.lemma_id == lemma_id).all()
+    )
+    if member_rows:
+        group_ids = [m.group_id for m in member_rows]
+        sibling_members = (
+            session.query(LemmaRelationMember, LemmaRelationGroup.concept_label)
+            .join(LemmaRelationGroup, LemmaRelationMember.group_id == LemmaRelationGroup.id)
+            .filter(
+                LemmaRelationMember.group_id.in_(group_ids),
+                LemmaRelationMember.lemma_id != lemma_id,
+            )
+            .all()
+        )
+        sibling_lemma_ids = [m.lemma_id for m, _ in sibling_members]
+        if sibling_lemma_ids:
+            sibling_lemmas = {
+                l.id: l for l in session.query(Lemma).filter(Lemma.id.in_(sibling_lemma_ids)).all()
+            }
+            for member, concept_label in sibling_members:
+                sibling = sibling_lemmas.get(member.lemma_id)
+                if sibling:
+                    related_lemmas.append((concept_label, sibling))
+
     return {
         "lemma": lemma,
         "translations": translations,
@@ -326,6 +354,7 @@ def get_lemma_view_data(session: Session, lemma_id: int) -> Dict[str, Any]:
         "audio_files": audio_files,
         "sentence_count": sentence_count,
         "needs_disambiguation_check": needs_disambiguation_check,
+        "related_lemmas": related_lemmas,
     }
 
 

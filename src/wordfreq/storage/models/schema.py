@@ -114,6 +114,9 @@ class Lemma(Base):
     difficulty_overrides = relationship(
         "LemmaDifficultyOverride", back_populates="lemma", cascade="all, delete-orphan"
     )
+    relation_memberships = relationship(
+        "LemmaRelationMember", back_populates="lemma", cascade="all, delete-orphan"
+    )
 
 
 class LemmaTranslation(Base):

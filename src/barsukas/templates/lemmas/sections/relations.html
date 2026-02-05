@@ -1,0 +1,53 @@
+<!-- Related Lemmas (Derivational Word Family) -->
+{% if related_lemmas %}
+<div class="row mb-4">
+    <div class="col">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-diagram-3"></i> Related Word Forms
+            </div>
+            <div class="card-body">
+                <table class="table table-sm table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Word</th>
+                            <th>POS</th>
+                            <th>GUID</th>
+                            <th>Difficulty</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for concept_label, rel in related_lemmas %}
+                        <tr>
+                            <td>
+                                <a href="{{ url_for('lemmas.view_lemma', lemma_id=rel.id) }}">
+                                    {{ rel.lemma_text }}
+                                </a>
+                            </td>
+                            <td>
+                                <span class="badge bg-secondary">{{ rel.pos_type }}</span>
+                                {% if rel.pos_subtype %}
+                                    <span class="badge bg-light text-dark">{{ rel.pos_subtype }}</span>
+                                {% endif %}
+                            </td>
+                            <td><code>{{ rel.guid or '—' }}</code></td>
+                            <td>
+                                {% if rel.difficulty_level is not none %}
+                                    {% if rel.difficulty_level == -1 %}
+                                        <span class="badge bg-warning">Excluded</span>
+                                    {% else %}
+                                        <span class="badge bg-info">Level {{ rel.difficulty_level }}</span>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="text-muted">Not set</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
