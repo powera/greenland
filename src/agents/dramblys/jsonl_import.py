@@ -392,12 +392,14 @@ class JSONLImporter:
 
             if existing:
                 # Update only if translation differs
+                # TODO: set sort_key via compute_sort_key() for dictionary ordering
                 if existing.translation != translation_text:
                     existing.translation = translation_text
                     imported_count += 1
                     logger.debug(f"  Updated {lang_code} translation: {translation_text}")
             else:
                 # Create new translation
+                # TODO: set sort_key via compute_sort_key() for dictionary ordering
                 translation_obj = LemmaTranslation(
                     lemma_id=lemma.id,
                     language_code=lang_code,

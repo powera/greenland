@@ -269,6 +269,7 @@ class JSONLSession(BaseSession):
         translations = []
         for lemma in self._storage.lemmas.values():
             for lang_code, translation_text in lemma.translations.items():
+                # TODO: set sort_key via compute_sort_key() for dictionary ordering
                 trans = models.LemmaTranslation(
                     lemma_id=lemma.id,
                     language_code=lang_code,

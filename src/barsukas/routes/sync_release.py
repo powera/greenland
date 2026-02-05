@@ -12,7 +12,11 @@ from flask.typing import ResponseReturnValue
 
 from wordfreq.storage.crud.operation_log import log_operation, log_translation_change
 from wordfreq.storage.models.schema import Lemma, LemmaTranslation
-from wordfreq.storage.translation_helpers import LANGUAGE_HIERARCHY, LANGUAGE_NAMES
+from wordfreq.storage.translation_helpers import (
+    LANGUAGE_HIERARCHY,
+    LANGUAGE_NAMES,
+    compute_sort_key,
+)
 
 if TYPE_CHECKING:
     from barsukas.app import BarsukasFlask
@@ -439,6 +443,7 @@ def apply_additions() -> ResponseReturnValue:
                     lemma_id=lemma.id,
                     language_code=lang_code,
                     translation=translation_text,
+                    sort_key=compute_sort_key(lang_code, translation_text),
                     verified=False,
                 )
                 g.db.add(trans)
@@ -1031,11 +1036,13 @@ def apply_translations() -> ResponseReturnValue:
                         if trans_obj:
                             old_val = trans_obj.translation
                             trans_obj.translation = release_val
+                            trans_obj.sort_key = compute_sort_key(lang_code, release_val)
                         else:
                             trans_obj = LemmaTranslation(
                                 lemma_id=lemma.id,
                                 language_code=lang_code,
                                 translation=release_val,
+                                sort_key=compute_sort_key(lang_code, release_val),
                                 verified=False,
                             )
                             g.db.add(trans_obj)
