@@ -2,39 +2,31 @@
 
 **Barsukas** (Lithuanian for "badger") is a lightweight Flask web interface for managing the linguistics database. It provides a user-friendly way to browse, edit, and export word data with AI-powered translation validation and comprehensive operation logging.
 
-## What's New
-
-Recent additions include:
-- ✅ **AI Translation Checking** - Validate translations with the Voras agent
-- ✅ **Add New Lemmas** - Create words directly from the web interface
-- ✅ **Operation Log Viewer** - Full audit trail with filtering
-- ✅ **WireWord Export** - Export to WireWord API format (4 languages, 3 export types)
-- ✅ **Read-Only Mode** - `--readonly` flag for safe browsing
-- ✅ **Smart Search** - Exact matches appear first in search results
-
 ## Features
 
-### Core Functionality
-- **Browse and Search Lemmas** - Paginated list with intelligent search (exact matches first) and filtering
-- **Add New Lemmas** - Create new words directly from the web interface
-- **Edit Lemma Details** - Update lemma text, definitions, POS types, and base difficulty levels
-- **Manage Translations** - Edit translations across 9 supported languages with automatic storage handling
+- **Browse and Search Lemmas** - Paginated list with intelligent search and filtering
+- **Add and Edit Lemmas** - Create and update words, definitions, POS types, and difficulty levels
+- **Manage Translations** - Edit translations across 14 languages with automatic storage handling
 - **AI Translation Checking** - Validate translations using the Voras agent with AI-powered suggestions
 - **Difficulty Overrides** - Set per-language difficulty level overrides for Trakaido wordlists
-- **Operation Logging** - All changes are automatically logged with full audit trail viewer
-- **WireWord Export** - Export word data to WireWord API format for multiple languages
-- **Read-Only Mode** - Optional `--readonly` flag to prevent any database modifications
+- **Sentence Management** - Browse, edit, and generate example sentences
+- **Conversation Sentences** - Manage natural conversation content
+- **Audio Generation** - Generate pronunciation audio via eSpeak-NG and OpenAI TTS
+- **Rapid Review** - Fast review interfaces for lemmas and sentences
+- **Category Browsing** - Browse words organized by semantic category
+- **Agent Launcher** - Run agents (Voras, Bebras, Pradzia) directly from the UI
+- **Batch Operations** - Bulk updates and import queue management
+- **Release Data Sync** - Sync database with release data files
+- **Dictionary View** - Language-specific dictionary with locale-aware sorting
+- **WireWord Export** - Export word data to WireWord API format
+- **API Endpoints** - Programmatic access for LLM integration
+- **Operation Logging** - All changes logged with full audit trail viewer
+- **Read-Only Mode** - Optional `--readonly` flag to prevent modifications
 
 ### Supported Languages
-- Chinese (zh)
-- French (fr)
-- Spanish (es)
-- German (de)
-- Portuguese (pt)
-- Korean (ko)
-- Swahili (sw)
-- Lithuanian (lt)
-- Vietnamese (vi)
+
+English, Lithuanian, Chinese, French, Spanish, German, Italian, Dutch,
+Portuguese, Swedish, Vietnamese, Japanese, Korean, Swahili
 
 ## Installation
 
@@ -197,19 +189,34 @@ barsukas/
 ├── app.py              # Flask application entry point
 ├── config.py           # Configuration settings
 ├── routes/             # Blueprint routes
-│   ├── lemmas.py       # Lemma CRUD operations (browse, add, edit)
+│   ├── lemmas.py       # Lemma CRUD (browse, add, edit)
 │   ├── translations.py # Translation management
 │   ├── overrides.py    # Difficulty override management
-│   ├── agents.py       # AI agent operations (Voras translation checking)
-│   ├── operation_logs.py # Operation log viewer
-│   └── wireword.py     # WireWord export functionality
+│   ├── categories.py   # Category browsing
+│   ├── sentences.py    # Sentence management
+│   ├── conversations.py # Conversation sentences
+│   ├── pattern_sentences.py # Pattern-based sentences
+│   ├── sentence_rapid_review.py # Sentence review
+│   ├── sentence_stats.py # Sentence statistics
+│   ├── agents.py       # Voras translation checking
+│   ├── agents_launcher.py # Agent launching UI
+│   ├── bebras.py       # Bebras integrity checks
+│   ├── pradzia.py      # Pradzia initialization
+│   ├── peleda.py       # Peleda operations
+│   ├── audio.py        # Audio generation
+│   ├── rapid_review.py # Rapid review interface
+│   ├── rapid_review_hub.py # Review hub
+│   ├── batch_operations.py # Bulk operations
+│   ├── pending_imports.py # Import queue
+│   ├── sync_release.py # Release data sync
+│   ├── exports.py      # Data export
+│   ├── wireword.py     # WireWord export
+│   ├── api.py          # API endpoints
+│   ├── api_client.py   # API client helpers
+│   ├── llm_api.py      # LLM API integration
+│   ├── operation_logs.py # Audit log viewer
+│   └── settings.py     # Settings management
 ├── templates/          # Jinja2 HTML templates
-│   ├── base.html       # Base layout with navigation
-│   ├── index.html      # Home page
-│   ├── lemmas/         # Lemma-related templates (list, view, edit, add)
-│   ├── agents/         # Agent results templates
-│   ├── logs/           # Operation log viewer templates
-│   └── wireword/       # WireWord export templates
 ├── static/             # CSS and JavaScript
 └── requirements.txt    # Python dependencies
 ```
@@ -221,17 +228,10 @@ barsukas/
 
 ## Possible Future Features
 
-The following features are not currently implemented but could be added:
-
-- [ ] Pronunciation management and validation (using Papuga agent)
 - [ ] Grammatical forms/derivative forms viewer and editor
-- [ ] Bulk translation operations (update multiple translations at once)
 - [ ] Search by translation text (not just lemma text)
 - [ ] Advanced filtering (by verified status, confidence range, etc.)
 - [ ] Undo recent changes
-- [ ] Batch import translations from CSV/JSON
-- [ ] API endpoints for programmatic access
-- [ ] Batch AI translation checking (validate multiple words at once)
 - [ ] WireWord export history/scheduling
 
 ## Contributing
