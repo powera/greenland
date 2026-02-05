@@ -11,10 +11,12 @@ wireword output convention used in `export_wireword_sentences.py`,
 `export_wireword_conversations.py`, and `vieversys.py`.
 
 The Sentence SQLAlchemy model currently has no `guid` column. A new nullable,
-unique, indexed column must be added to the `sentences` table. Existing
-sentences get backfilled with `S_{id:05d}`. New sentences can remain
-`guid=NULL` until curated for release (same pattern as Lemma, where many
-uncurated rows have `guid=NULL`).
+unique, indexed column must be added to the `sentences` table. There are
+currently no sentences in the database, so no backfill is needed.
+
+All sentence creation paths (agents, sync import, etc.) must auto-assign a
+GUID at creation time. The next available GUID is determined by querying
+`MAX(guid)` from the `sentences` table and incrementing the numeric portion.
 
 The one existing outlier is `migrate.py:290` which uses `:06d` - that should
 be updated to `:05d` for consistency.
@@ -115,12 +117,15 @@ Five sync modes, mirroring the lemma system:
 GUIDs present in release files but not in the `sentences` table.
 
 Import action:
-1. Create `Sentence` row with `guid`, `pattern_type`, `tense`, `minimum_level`
-2. Create `SentenceTranslation` rows for each language in `translations`
-3. For each `pattern_words` entry: resolve `lemma_guid` -> `lemma_id` via
-   `Lemma.guid` lookup, create `SentencePatternWord`. If a lemma GUID doesn't
-   exist in the DB, log a warning and skip that pattern word.
-4. Log via `log_operation(source="sync-release", operation_type="sentence_import")`
+1. **Pre-check**: resolve all `lemma_guid` values in `pattern_words` via
+   `Lemma.guid` lookup. If any lemma GUID is not found in the database, **block
+   the import** for that sentence and show a warning indicating which lemma
+   GUIDs are missing. The user should import the missing lemmas first (via the
+   lemma sync system) before retrying.
+2. Create `Sentence` row with `guid`, `pattern_type`, `tense`, `minimum_level`
+3. Create `SentenceTranslation` rows for each language in `translations`
+4. Create `SentencePatternWord` rows with the resolved `lemma_id` values
+5. Log via `log_operation(source="sync-release", operation_type="sentence_import")`
 
 ### 2. Removals (DB -> delete)
 
@@ -183,9 +188,29 @@ guid: Mapped[Optional[str]] = mapped_column(
 )
 ```
 
-Backfill existing rows: `UPDATE sentences SET guid = 'S_' || printf('%05d', id)`
+No backfill needed (no existing sentences in the database).
 
 Fix `migrate.py:290` to use `:05d` instead of `:06d`.
+
+### GUID Auto-Assignment
+
+Add a helper function (e.g. in a new `src/wordfreq/storage/crud/sentence_guid.py`
+or alongside existing sentence CRUD code) to allocate the next sentence GUID:
+
+```python
+def next_sentence_guid(session) -> str:
+    """Return the next available sentence GUID (S_NNNNN)."""
+    max_guid = session.query(func.max(Sentence.guid)).scalar()
+    if max_guid is None:
+        return "S_00001"
+    seq = int(max_guid.split("_")[1]) + 1
+    return f"S_{seq:05d}"
+```
+
+All sentence creation paths must call this to assign a GUID at creation time:
+- Sync import (additions from release files)
+- Agent sentence generation (buivolas, zvirdlis, etc.)
+- Any future manual sentence creation in Barsukas
 
 ### Export: `sqlite-to-sentence-release`
 
@@ -255,18 +280,20 @@ def _get_conversation_sentence_ids(session) -> Set[int]:
     """Get all sentence IDs that belong to conversations"""
 ```
 
-## Open Questions
+## Resolved Design Decisions
 
-1. **Backfill scope**: Should all existing sentences get GUIDs, or only
-   verified/non-rejected ones? Recommendation: all non-conversation sentences,
-   since we can always remove them from release files later.
+1. **No backfill needed**: There are currently no sentences in the database.
+   The `guid` column is added to the schema but no migration of existing data
+   is required.
 
-2. **Pattern word handling on import**: When importing a sentence from release
-   that references a lemma GUID not yet in the database, should we block the
-   import or allow it with a warning? Recommendation: allow import, skip
-   unresolvable pattern_words with a flash warning.
+2. **Block import on missing lemma GUIDs**: When importing a sentence from
+   release that references a lemma GUID not yet in the database, the import
+   is blocked with a warning. The user must import the missing lemmas first
+   (via the lemma sync additions flow) before retrying. The lemma GUIDs
+   referenced by `pattern_words` are expected to exist in `data/release/lemmas/`
+   and should be imported to the database before sentence import.
 
-3. **Sentence GUID assignment for new sentences**: Should the buivolas/zvirdlis
-   agents auto-assign GUIDs when creating sentences, or should GUIDs only be
-   assigned during export curation? Recommendation: assign during export, to
-   match the lemma workflow where agents create rows and curation assigns GUIDs.
+3. **Auto-assign GUIDs on creation**: All sentence creation paths auto-assign
+   a GUID immediately. This differs from the lemma workflow (where uncurated
+   lemmas may have `guid=NULL`) - every sentence gets a GUID from birth via
+   `next_sentence_guid()`.
