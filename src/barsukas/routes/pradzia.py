@@ -267,23 +267,6 @@ def bootstrap_from_json() -> ResponseReturnValue:
     return jsonify(result)
 
 
-@bp.route("/import-jsonl", methods=["POST"])
-def import_from_jsonl() -> ResponseReturnValue:
-    """Import lemmas from JSONL files (--import-jsonl mode)."""
-    jsonl_dir = request.form.get("jsonl_dir", "").strip()
-    dry_run = request.form.get("dry_run") == "on"
-
-    if not jsonl_dir:
-        return jsonify({"success": False, "error": "JSONL directory path is required"}), 400
-
-    args = ["--import-jsonl", jsonl_dir]
-    if dry_run:
-        args.append("--dry-run")
-
-    result = run_pradzia_command(args, timeout=1800)  # 30 minutes
-    return jsonify(result)
-
-
 @bp.route("/stats")
 def get_stats() -> ResponseReturnValue:
     """Get current database statistics as JSON."""
@@ -379,23 +362,5 @@ def execute_bootstrap() -> ResponseReturnValue:
         args.append("--no-update-difficulty")
 
     operation_name = "Bootstrap from JSON" + (" (Dry Run)" if dry_run else "")
-    task_id = start_pradzia_task(args, operation_name)
-    return redirect(url_for("agents_launcher.view_output", task_id=task_id))
-
-
-@bp.route("/execute/import-jsonl", methods=["POST"])
-def execute_import_jsonl() -> ResponseReturnValue:
-    """Execute import from JSONL and redirect to status page."""
-    jsonl_dir = request.form.get("jsonl_dir", "").strip()
-    dry_run = request.form.get("dry_run") == "on"
-
-    if not jsonl_dir:
-        return redirect(url_for("pradzia.index"))
-
-    args = ["--import-jsonl", jsonl_dir]
-    if dry_run:
-        args.append("--dry-run")
-
-    operation_name = "Import from JSONL" + (" (Dry Run)" if dry_run else "")
     task_id = start_pradzia_task(args, operation_name)
     return redirect(url_for("agents_launcher.view_output", task_id=task_id))

@@ -871,7 +871,11 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
         session = self.get_session()
         try:
             return staging.approve_pending_import(
-                session, pending_import_id, self.db_path or constants.WORDFREQ_DB_PATH, model, self.debug
+                session,
+                pending_import_id,
+                self.db_path or constants.WORDFREQ_DB_PATH,
+                model,
+                self.debug,
             )
         finally:
             session.close()
@@ -966,7 +970,9 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
                 )
         print(f"{'='*80}\n")
 
-    def _print_summary(self, results: Dict[str, Any], start_time: datetime, duration: float) -> None:
+    def _print_summary(
+        self, results: Dict[str, Any], start_time: datetime, duration: float
+    ) -> None:
         """Print a summary of the check results."""
         logger.info("=" * 80)
         logger.info("DRAMBLYS AGENT REPORT - Missing Words Detection")
@@ -1032,76 +1038,3 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
                     )
 
         logger.info("=" * 80)
-
-    def import_jsonl(
-        self,
-        source_path: str,
-        migration_file: Optional[str] = None,
-        pattern: str = "**/base.jsonl",
-        dry_run: bool = False,
-        import_level: Optional[int] = None,
-    ) -> Dict[str, Any]:
-        """
-        Import lemmas from JSONL files.
-
-        Args:
-            source_path: Path to JSONL file or directory
-            migration_file: Path to category migrations JSON file
-            pattern: Glob pattern for files if source_path is directory (default: **/base.jsonl)
-            dry_run: If True, show what would be imported without making changes
-            import_level: Optional difficulty level override for all imported lemmas
-
-        Returns:
-            Dictionary with import results
-        """
-        logger.info(f"Starting JSONL import from {source_path}...")
-
-        from pathlib import Path
-
-        from agents.dramblys.jsonl_import import CategoryMigration, JSONLImporter
-
-        source = Path(source_path)
-        if not source.exists():
-            return {"error": f"Source path does not exist: {source_path}"}
-
-        # Load migration config if provided
-        migration_config = None
-        if migration_file:
-            migration_config = CategoryMigration(migration_file)
-        elif Path("data/category_migrations.json").exists():
-            # Use default migration file if it exists
-            logger.info("Using default migration file: data/category_migrations.json")
-            migration_config = CategoryMigration("data/category_migrations.json")
-
-        session = self.get_session()
-        try:
-            importer = JSONLImporter(
-                session=session,
-                migration_config=migration_config,
-                dry_run=dry_run,
-                import_level=import_level,
-            )
-
-            # Import from file or directory
-            if source.is_file():
-                importer.import_file(source)
-            elif source.is_dir():
-                importer.import_directory(source, pattern=pattern)
-            else:
-                return {"error": f"Source is neither file nor directory: {source_path}"}
-
-            # Get results
-            results = importer.stats
-            results["summary"] = importer.get_summary()
-
-            # Print summary
-            logger.info(importer.get_summary())
-
-            return results
-
-        except Exception as e:
-            logger.error(f"Error during JSONL import: {e}")
-            session.rollback()
-            return {"error": str(e)}
-        finally:
-            session.close()

@@ -23,43 +23,6 @@ optional difficulty overrides.
 
 ## Tools for Loading/Updating Data
 
-### Import NEW lemmas (pradzia)
-
-Use **pradzia** to import new GUIDs into the database. This tool **only adds
-new lemmas** - it skips any GUID that already exists.
-
-```bash
-# Preview what would be imported (dry-run)
-PYTHONPATH=src python src/agents/pradzia.py --import-jsonl data/release/lemmas --dry-run
-
-# Actually import
-PYTHONPATH=src python src/agents/pradzia.py --import-jsonl data/release/lemmas
-```
-
-**What it syncs:**
-- ✅ New GUIDs (lemmas that don't exist in DB)
-- ❌ Changed translations on existing lemmas
-- ❌ Changed difficulty levels on existing lemmas
-- ❌ Any other changes to existing records
-
-### Import with translation updates (dramblys)
-
-Use **dramblys** for imports that also update translations on existing lemmas:
-
-```bash
-# Preview import
-PYTHONPATH=src python src/agents/dramblys.py --import-jsonl data/release/lemmas --dry-run
-
-# Actually import
-PYTHONPATH=src python src/agents/dramblys.py --import-jsonl data/release/lemmas
-```
-
-**What it syncs:**
-- ✅ New GUIDs
-- ✅ New/changed translations on existing lemmas (adds missing languages)
-- ❌ Changed difficulty levels (use manage_difficulty_overrides.py instead)
-- ❌ Changed lemma_text (reports as collision error if different)
-
 ### Sync via Barsukas UI
 
 Use the **Barsukas web UI** to compare and sync data between data/release and SQLite:
@@ -109,15 +72,14 @@ PYTHONPATH=src python src/wordfreq/storage/migrate.py sqlite-to-release \
 
 ## Sync Capabilities Summary
 
-| Change Type               | pradzia | dramblys | Barsukas `/sync` |
-|---------------------------|---------|----------|------------------|
-| New GUIDs                 | ✅      | ✅       | `/sync/additions` |
-| New translations          | ✅      | ✅       |                  |
-| Changed translations      | ❌      | ✅       |                  |
-| Difficulty (base level)   | ❌      | ❌       | `/sync/difficulty` |
-| Difficulty overrides      | ❌      | ❌       | manage_difficulty_overrides.py |
-| Changed lemma_text        | ❌      | ❌       | `/sync/changes` |
-| Remove orphaned GUIDs     | ❌      | ❌       | `/sync/removals` |
+| Change Type               | Barsukas `/sync`   |
+|---------------------------|--------------------|
+| New GUIDs                 | `/sync/additions`  |
+| Difficulty (base level)   | `/sync/difficulty` |
+| Changed translations      | `/sync/translations` |
+| Changed lemma_text        | `/sync/changes`    |
+| Remove orphaned GUIDs     | `/sync/removals`   |
+| Difficulty overrides      | manage_difficulty_overrides.py |
 
 ## File Format
 

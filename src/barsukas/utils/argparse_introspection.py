@@ -68,7 +68,6 @@ class ArgumentInfo:
             "check",
             "fix",
             "stage",
-            "import_jsonl",
             "form_type",
             "task",
         ]:

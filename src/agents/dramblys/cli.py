@@ -121,30 +121,6 @@ def get_argument_parser() -> argparse.ArgumentParser:
         help="[Subtype mode] Stage to pending_imports instead of processing directly",
     )
 
-    # JSONL import mode options
-    parser.add_argument(
-        "--import-jsonl",
-        type=str,
-        metavar="PATH",
-        help="Import lemmas from JSONL file(s). PATH can be a file or directory.",
-    )
-    parser.add_argument(
-        "--migration-file",
-        type=str,
-        help="[Import mode] Path to category migrations JSON file (default: data/category_migrations.json)",
-    )
-    parser.add_argument(
-        "--pattern",
-        type=str,
-        default="**/base.jsonl",
-        help="[Import mode] Glob pattern for JSONL files when importing directory (default: **/base.jsonl)",
-    )
-    parser.add_argument(
-        "--jsonl-import-level",
-        type=int,
-        help="[Import mode] Override difficulty_level for all imported lemmas (e.g., -1 for unassessed)",
-    )
-
     return parser
 
 
@@ -395,84 +371,6 @@ def main() -> None:
                 print(f"  Processed: {results['processed']}")
                 print(f"  Successful: {results['successful']}")
                 print(f"  Failed: {results['failed']}")
-        return
-
-    # Handle --import-jsonl mode
-    if args.import_jsonl:
-        # Get list of files that will be imported
-        source_path = Path(args.import_jsonl)
-        if source_path.is_file():
-            file_list = [source_path]
-        elif source_path.is_dir():
-            file_list = sorted(source_path.glob(args.pattern))
-        else:
-            print(
-                f"Error: Source path does not exist or is not a file/directory: {args.import_jsonl}"
-            )
-            return
-
-        # Build confirmation message with file list
-        file_list_str = "\n".join(
-            [
-                f"  - {f.relative_to(source_path.parent) if source_path.is_dir() else f.name}"
-                for f in file_list
-            ]
-        )
-        confirmation_msg = (
-            f"Import JSONL files from: {args.import_jsonl}\n"
-            f"Pattern: {args.pattern}\n"
-            f"Migration file: {args.migration_file or 'data/category_migrations.json (default)'}\n"
-            f"\n"
-            f"Files to be imported ({len(file_list)}):\n"
-            f"{file_list_str}"
-        )
-
-        if not confirm_operation(
-            message=confirmation_msg,
-            skip_confirmation=args.yes,
-            dry_run=args.dry_run,
-        ):
-            print("Aborted.")
-            return
-
-        results = agent.import_jsonl(
-            source_path=args.import_jsonl,
-            migration_file=args.migration_file,
-            pattern=args.pattern,
-            dry_run=args.dry_run,
-            import_level=args.jsonl_import_level,
-        )
-
-        if "error" in results:
-            print(f"\nError: {results['error']}")
-        else:
-            if args.dry_run:
-                print("\nDRY RUN - No changes made to database")
-            print(f"\nImport Results:")
-            print(f"  Files processed: {results['files_processed']}")
-            print(f"  Records read: {results['records_read']}")
-            print(f"  Records imported (new): {results['records_imported']}")
-            print(f"  Records skipped (already exist): {results['records_skipped']}")
-            print(f"  Errors: {results['errors']}")
-
-            if results.get("error_details"):
-                print(f"\nErrors:")
-                for detail in results["error_details"][:10]:
-                    if "guid" in detail:
-                        # GUID collision error
-                        print(f"  [{detail['guid']}]: {detail['error']}")
-                        if "db_lemma" in detail and "jsonl_lemma" in detail:
-                            print(f"    DB: '{detail['db_lemma']}'")
-                            print(f"    JSONL: '{detail['jsonl_lemma']}'")
-                    else:
-                        # Other error
-                        print(f"  {detail.get('file', 'unknown')}: {detail['error']}")
-
-            # Write to output file if requested
-            if args.output:
-                with open(args.output, "w", encoding="utf-8") as f:
-                    json.dump(results, f, indent=2, ensure_ascii=False)
-                print(f"\nFull results written to: {args.output}")
         return
 
     # Handle check mode (existing functionality)

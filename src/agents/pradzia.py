@@ -15,7 +15,6 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from sqlalchemy import inspect
 from sqlalchemy.orm import Session
 
 # Add src directory to path
@@ -514,190 +513,6 @@ class PradziaAgent:
 
         return result
 
-    def import_from_jsonl(self, jsonl_dir: str, dry_run: bool = False) -> Dict[str, Any]:
-        """
-        Import lemmas from JSONL files to SQLite database.
-
-        Uses bulk operations to minimize round-trips for remote databases.
-
-        Args:
-            jsonl_dir: Path to JSONL data directory (e.g., data/release)
-            dry_run: If True, only report what would be imported without writing
-
-        Returns:
-            Dictionary with import results
-        """
-        logger.info(f"Importing from JSONL directory: {jsonl_dir} (dry_run={dry_run})")
-        start_time = datetime.now()
-
-        from wordfreq.storage.backend import create_session as create_backend_session
-        from wordfreq.storage.backend.config import BackendType, DataSourceConfig
-        from wordfreq.storage.models.schema import Lemma as SQLLemma
-        from wordfreq.storage.models.schema import LemmaTranslation
-
-        result: Dict[str, Any] = {
-            "dry_run": dry_run,
-            "jsonl_dir": jsonl_dir,
-            "sqlite_db": self.db_path,
-        }
-
-        # Create JSONL backend session (source)
-        jsonl_config = DataSourceConfig(backend_type=BackendType.JSONL, jsonl_data_dir=jsonl_dir)
-        jsonl_session = create_backend_session(jsonl_config)
-
-        # Use existing SQLite session (destination)
-        sqlite_session = self.get_session()
-
-        try:
-            # Stage 1: Read all lemmas from JSONL (in-memory, no DB round-trips)
-            logger.info("Stage 1: Reading lemmas from JSONL files...")
-            jsonl_lemmas = jsonl_session.query(SQLLemma).all()
-            logger.info(f"Found {len(jsonl_lemmas)} lemmas in JSONL files")
-
-            result["total_lemmas_found"] = len(jsonl_lemmas)
-
-            if dry_run:
-                result["message"] = f"Would import {len(jsonl_lemmas)} lemmas from JSONL"
-                logger.info(f"DRY RUN: Would import {len(jsonl_lemmas)} lemmas")
-                return result
-
-            # Stage 2: Fetch existing GUIDs in one query
-            logger.info("Stage 2: Fetching existing GUIDs from destination database...")
-            existing_guids = set(
-                guid for (guid,) in sqlite_session.query(SQLLemma.guid).all() if guid
-            )
-            logger.info(f"Found {len(existing_guids)} existing lemmas in destination")
-            sqlite_session.commit()
-
-            # Stage 3: Prepare lemmas for bulk insert (filter out existing)
-            logger.info("Stage 3: Preparing lemmas for bulk insert...")
-            lemmas_to_insert = []
-            guid_to_jsonl_lemma = {}  # Map GUID to original lemma for translations
-
-            for lemma in jsonl_lemmas:
-                if lemma.guid and lemma.guid in existing_guids:
-                    continue  # Skip existing
-
-                guid_to_jsonl_lemma[lemma.guid] = lemma
-                lemmas_to_insert.append(
-                    {
-                        "guid": lemma.guid,
-                        "lemma_text": lemma.lemma_text,
-                        "definition_text": lemma.definition_text,
-                        "pos_type": lemma.pos_type,
-                        "pos_subtype": lemma.pos_subtype,
-                        "difficulty_level": lemma.difficulty_level,
-                        "frequency_rank": lemma.frequency_rank,
-                        "tags": lemma.tags,
-                        "disambiguation": (
-                            lemma.disambiguation if hasattr(lemma, "disambiguation") else None
-                        ),
-                        "confidence": lemma.confidence if hasattr(lemma, "confidence") else 0.0,
-                        "verified": lemma.verified if hasattr(lemma, "verified") else False,
-                        "notes": lemma.notes if hasattr(lemma, "notes") else None,
-                    }
-                )
-
-            skipped_count = len(jsonl_lemmas) - len(lemmas_to_insert)
-            logger.info(
-                f"Prepared {len(lemmas_to_insert)} lemmas for insert, skipping {skipped_count} existing"
-            )
-
-            # Stage 4: Bulk insert lemmas
-            if lemmas_to_insert:
-                logger.info("Stage 4: Bulk inserting lemmas...")
-                sqlite_session.bulk_insert_mappings(inspect(SQLLemma), lemmas_to_insert)
-                sqlite_session.commit()
-                logger.info(f"Inserted {len(lemmas_to_insert)} lemmas")
-
-            # Stage 5: Fetch back the inserted lemma IDs by GUID
-            logger.info("Stage 5: Fetching inserted lemma IDs...")
-            inserted_guids = list(guid_to_jsonl_lemma.keys())
-            guid_to_new_id = {}
-
-            if inserted_guids:
-                # Query in batches to avoid overly large IN clauses
-                batch_size = 500
-                for i in range(0, len(inserted_guids), batch_size):
-                    batch_guids = inserted_guids[i : i + batch_size]
-                    rows = (
-                        sqlite_session.query(SQLLemma.guid, SQLLemma.id)
-                        .filter(SQLLemma.guid.in_(batch_guids))
-                        .all()
-                    )
-                    for guid, lemma_id in rows:
-                        guid_to_new_id[guid] = lemma_id
-
-            sqlite_session.commit()
-            logger.info(f"Mapped {len(guid_to_new_id)} GUIDs to new IDs")
-
-            # Stage 6: Prepare translations for bulk insert
-            logger.info("Stage 6: Preparing translations for bulk insert...")
-            translations_to_insert = []
-
-            # Get all translations from JSONL in one query
-            all_jsonl_translations = jsonl_session.query(LemmaTranslation).all()
-
-            # Build a map from jsonl lemma_id to translations
-            jsonl_lemma_id_to_translations: Dict[int, List[Any]] = {}
-            for trans in all_jsonl_translations:
-                if trans.lemma_id not in jsonl_lemma_id_to_translations:
-                    jsonl_lemma_id_to_translations[trans.lemma_id] = []
-                jsonl_lemma_id_to_translations[trans.lemma_id].append(trans)
-
-            # Map translations to new lemma IDs
-            for guid, jsonl_lemma in guid_to_jsonl_lemma.items():
-                new_lemma_id = guid_to_new_id.get(guid)
-                if not new_lemma_id:
-                    continue
-
-                jsonl_translations = jsonl_lemma_id_to_translations.get(jsonl_lemma.id, [])
-                for trans in jsonl_translations:
-                    translations_to_insert.append(
-                        {
-                            "lemma_id": new_lemma_id,
-                            "language_code": trans.language_code,
-                            "translation": trans.translation,
-                            "verified": trans.verified if hasattr(trans, "verified") else False,
-                        }
-                    )
-
-            logger.info(f"Prepared {len(translations_to_insert)} translations for insert")
-
-            # Stage 7: Bulk insert translations
-            if translations_to_insert:
-                logger.info("Stage 7: Bulk inserting translations...")
-                sqlite_session.bulk_insert_mappings(
-                    inspect(LemmaTranslation), translations_to_insert
-                )
-                sqlite_session.commit()
-                logger.info(f"Inserted {len(translations_to_insert)} translations")
-
-            result["lemmas_imported"] = len(lemmas_to_insert)
-            result["lemmas_skipped"] = skipped_count
-            result["translations_imported"] = len(translations_to_insert)
-            result["success"] = True
-
-            logger.info(
-                f"Import complete: {len(lemmas_to_insert)} lemmas, "
-                f"{len(translations_to_insert)} translations imported"
-            )
-
-        except Exception as e:
-            logger.error(f"Error during import: {e}")
-            sqlite_session.rollback()
-            result["success"] = False
-            result["error"] = str(e)
-        finally:
-            jsonl_session.close()
-            sqlite_session.close()
-
-        end_time = datetime.now()
-        duration = (end_time - start_time).total_seconds()
-        result["duration_seconds"] = duration
-
-        return result
-
     def initialize_database(self, dry_run: bool = False) -> Dict[str, Any]:
         """
         Perform complete database initialization.
@@ -880,11 +695,6 @@ def get_argument_parser() -> argparse.ArgumentParser:
         metavar="JSON_PATH",
         help="Bootstrap database from trakaido JSON export (initial setup only)",
     )
-    mode_group.add_argument(
-        "--import-jsonl",
-        metavar="JSONL_DIR",
-        help="Import lemmas from JSONL files to SQLite database",
-    )
 
     # Bootstrap-specific options
     parser.add_argument(
@@ -985,29 +795,6 @@ def main() -> None:
         else:
             error_msg = result.get("error", "Unknown error")
             print(f"\n❌ Bootstrap failed: {error_msg}")
-
-    elif args.import_jsonl:
-        result = agent.import_from_jsonl(jsonl_dir=args.import_jsonl, dry_run=args.dry_run)
-
-        if args.output:
-            import json
-
-            with open(args.output, "w", encoding="utf-8") as f:
-                json.dump(result, f, indent=2, ensure_ascii=False)
-
-        if result.get("success"):
-            if not args.dry_run:
-                print(
-                    f"\n✅ Import complete: {result['lemmas_imported']} lemmas, "
-                    f"{result['translations_imported']} translations imported"
-                )
-                print(f"   Skipped (already exist): {result['lemmas_skipped']}")
-                print(f"   Duration: {result['duration_seconds']:.2f} seconds")
-            else:
-                print(f"\n✅ Dry run: Would import {result['total_lemmas_found']} lemmas")
-        else:
-            error_msg = result.get("error", "Unknown error")
-            print(f"\n❌ Import failed: {error_msg}")
 
     else:
         # Default: run check
