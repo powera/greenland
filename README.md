@@ -3,7 +3,7 @@
 A multilingual linguistic database and content generation system for the
 **Trakaido** language-learning app.
 
-**Python 3.9+** | **14 languages** | **SQLite-based**
+**Python 3.12+** | **14 languages** | **SQLite-based**
 
 ---
 
