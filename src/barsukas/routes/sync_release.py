@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional
 from flask import Blueprint, current_app, flash, g, redirect, render_template, request, url_for
 from flask.typing import ResponseReturnValue
 
+from wordfreq.storage.crud.operation_log import log_operation, log_translation_change
 from wordfreq.storage.models.schema import Lemma, LemmaTranslation
 from wordfreq.storage.translation_helpers import LANGUAGE_HIERARCHY, LANGUAGE_NAMES
 
@@ -290,6 +291,16 @@ def apply_difficulty() -> ResponseReturnValue:
             lemma.difficulty_level = new_level
             updated_count += 1
 
+            log_translation_change(
+                session=g.db,
+                source="sync-release",
+                operation_type="difficulty_sync",
+                lemma_id=lemma.id,
+                field_name="difficulty_level",
+                old_value=str(old_level) if old_level is not None else None,
+                new_value=str(new_level) if new_level is not None else None,
+            )
+
             logger.info(
                 f"Updated difficulty for '{lemma.lemma_text}' ({lemma.guid}): "
                 f"{old_level} -> {new_level}"
@@ -432,6 +443,19 @@ def apply_additions() -> ResponseReturnValue:
                 )
                 g.db.add(trans)
 
+            log_operation(
+                session=g.db,
+                source="sync-release",
+                operation_type="lemma_import",
+                lemma_id=lemma.id,
+                details={
+                    "lemma_text": lemma_text,
+                    "guid": guid,
+                    "pos_type": release_data.get("pos_type", ""),
+                    "translation_count": len(translations),
+                },
+            )
+
             imported_count += 1
             logger.info(f"Imported lemma '{lemma_text}' ({guid})")
 
@@ -543,6 +567,18 @@ def apply_removals() -> ResponseReturnValue:
                 logger.warning(f"Lemma not found: {lemma_id}")
                 error_count += 1
                 continue
+
+            log_operation(
+                session=g.db,
+                source="sync-release",
+                operation_type="lemma_delete",
+                lemma_id=lemma.id,
+                details={
+                    "lemma_text": lemma.lemma_text,
+                    "guid": lemma.guid,
+                    "pos_type": lemma.pos_type,
+                },
+            )
 
             logger.info(f"Deleting lemma '{lemma.lemma_text}' ({lemma.guid})")
             g.db.delete(lemma)
@@ -696,6 +732,16 @@ def apply_changes() -> ResponseReturnValue:
             lemma.lemma_text = new_text
             if new_definition:
                 lemma.definition_text = new_definition
+
+            log_translation_change(
+                session=g.db,
+                source="sync-release",
+                operation_type="lemma_text_sync",
+                lemma_id=lemma.id,
+                field_name="lemma_text",
+                old_value=old_text,
+                new_value=new_text,
+            )
 
             updated_count += 1
 
@@ -994,6 +1040,16 @@ def apply_translations() -> ResponseReturnValue:
                             )
                             g.db.add(trans_obj)
                             old_val = None
+
+                        log_translation_change(
+                            session=g.db,
+                            source="sync-release",
+                            operation_type="translation_sync",
+                            lemma_id=lemma.id,
+                            language_code=lang_code,
+                            old_translation=old_val,
+                            new_translation=release_val,
+                        )
 
                         updated_db_count += 1
                         logger.info(
