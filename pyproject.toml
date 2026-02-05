@@ -11,7 +11,7 @@ dependencies = [
     "requests>=2.31.0",
     "jinja2>=3.1.0",
 ]
-requires-python = ">=3.9"
+requires-python = ">=3.12"
 readme = "README.md"
 
 [project.optional-dependencies]
@@ -44,10 +44,10 @@ build-backend = "setuptools.build_meta"
 
 [tool.black]
 line-length = 100
-target-version = ['py39']
+target-version = ['py312']
 
 [tool.mypy]
-python_version = "3.9"
+python_version = "3.12"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
@@ -92,11 +92,6 @@ module = [
     "pydantic.*",
 ]
 ignore_missing_imports = true
-
-# Skip bokeh entirely - it's a transitive dependency with Python 3.10+ syntax
-[[tool.mypy.overrides]]
-module = "bokeh.*"
-follow_imports = "skip"
 
 # Ignore missing imports for optional ML/audio dependencies
 # These are only required when using audioshoe features
