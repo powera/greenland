@@ -14,6 +14,19 @@ from wordfreq.storage.models.schema import (
 )
 
 
+def next_sentence_guid(session: Session) -> str:
+    """Return the next available sentence GUID (S_NNNNN).
+
+    Queries the maximum existing sentence GUID and increments the numeric
+    portion.  If no sentences exist yet, starts at S_00001.
+    """
+    max_guid: Optional[str] = session.query(func.max(Sentence.guid)).scalar()
+    if max_guid is None:
+        return "S_00001"
+    seq = int(max_guid.split("_")[1]) + 1
+    return f"S_{seq:05d}"
+
+
 def add_sentence(
     session: Session,
     pattern_type: Optional[str] = None,
@@ -36,6 +49,7 @@ def add_sentence(
         Created Sentence object
     """
     sentence = Sentence(
+        guid=next_sentence_guid(session),
         pattern_type=pattern_type,
         tense=tense,
         source_filename=source_filename,

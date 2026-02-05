@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}Sync Sentence Levels{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('sync_sentence_release.index') }}">Sync Sentences</a></li>
+                    <li class="breadcrumb-item active">Level</li>
+                </ol>
+            </nav>
+            <h2><i class="bi bi-speedometer2"></i> Sync Minimum Levels</h2>
+            <p class="text-muted">
+                Sentences with different minimum levels (where English text matches).
+            </p>
+        </div>
+    </div>
+
+    {% if not differences %}
+    <div class="alert alert-success">
+        <i class="bi bi-check-circle"></i> All minimum levels are in sync!
+    </div>
+    {% else %}
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-list-check"></i> Differences: {{ differences|length }}</span>
+            <div>
+                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="selectAll('keep_old')">
+                    Keep All SQLite
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-primary" onclick="selectAll('use_new')">
+                    Use All Release
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <form method="post" action="{{ url_for('sync_sentence_release.apply_level') }}">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>GUID</th>
+                                <th>English Text</th>
+                                <th>Pattern</th>
+                                <th class="text-center">SQLite</th>
+                                <th class="text-center">Release</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for diff in differences %}
+                            <tr>
+                                <td><code>{{ diff.guid }}</code></td>
+                                <td>{{ diff.english_text }}</td>
+                                <td>
+                                    {% if diff.pattern_type %}
+                                    <span class="badge bg-secondary">{{ diff.pattern_type }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    {% if diff.db_level is none %}
+                                    <span class="badge bg-warning text-dark">None</span>
+                                    {% else %}
+                                    <span class="badge bg-info">{{ diff.db_level }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    {% if diff.release_level is none %}
+                                    <span class="badge bg-warning text-dark">None</span>
+                                    {% else %}
+                                    <span class="badge bg-primary">{{ diff.release_level }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <select class="form-select form-select-sm action-select" name="action_{{ diff.sentence_id }}" style="min-width: 130px;">
+                                        <option value="skip">Skip</option>
+                                        <option value="keep_old">Keep SQLite</option>
+                                        <option value="use_new">Use Release</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <a href="{{ url_for('sync_sentence_release.index') }}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Back
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-lg"></i> Apply Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function selectAll(action) {
+    document.querySelectorAll('.action-select').forEach(function(select) {
+        for (var i = 0; i < select.options.length; i++) {
+            if (select.options[i].value === action) {
+                select.selectedIndex = i;
+                break;
+            }
+        }
+    });
+}
+</script>
+{% endblock %}
