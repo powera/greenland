@@ -55,6 +55,7 @@ from barsukas.routes import (
     sentence_stats,
     sentences,
     settings,
+    sync_derivative_release,
     sync_release,
     sync_sentence_release,
     translations,
@@ -172,6 +173,7 @@ def create_app(config_class: type[Config] = Config, db_url: Optional[str] = None
     app.register_blueprint(pradzia.bp)
     app.register_blueprint(sync_release.bp)
     app.register_blueprint(sync_sentence_release.bp)
+    app.register_blueprint(sync_derivative_release.bp)
 
     # Register Jinja2 filters for Pinyin (Chinese) and Romaji (Japanese)
     app.jinja_env.filters["pinyin"] = generate_pinyin
