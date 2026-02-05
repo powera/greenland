@@ -20,17 +20,6 @@
         </div>
     </div>
 
-    {% if error %}
-    <div class="alert alert-danger">
-        <i class="bi bi-exclamation-triangle"></i> {{ error }}
-        <br><small>Path: <code>{{ release_dir }}</code></small>
-    </div>
-    {% elif not counts %}
-    <div class="alert alert-warning">
-        <i class="bi bi-exclamation-triangle"></i> No sentences found in release directory.
-        <br><small>Path: <code>{{ release_dir }}</code></small>
-    </div>
-    {% else %}
     <div class="row mb-3">
         <div class="col">
             <div class="card">
@@ -85,7 +74,7 @@
                         {{ counts.removals }}
                     </h3>
                     <p class="card-text text-muted">
-                        Sentences in database that were removed from release files
+                        Sentences in database not in release files
                     </p>
                 </div>
                 <div class="card-footer">
@@ -165,7 +154,29 @@
                 </div>
             </div>
         </div>
+
+        <!-- Export to JSONL -->
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="card h-100 {% if counts.export > 0 %}border-primary{% endif %}">
+                <div class="card-header">
+                    <i class="bi bi-download text-primary"></i> Export
+                </div>
+                <div class="card-body">
+                    <h3 class="card-title {% if counts.export > 0 %}text-primary{% else %}text-muted{% endif %}">
+                        {{ counts.export }}
+                    </h3>
+                    <p class="card-text text-muted">
+                        DB sentences not yet in release files
+                    </p>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ url_for('sync_sentence_release.export') }}"
+                       class="btn btn-sm {% if counts.export > 0 %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+                        <i class="bi bi-arrow-right"></i> View &amp; Export
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
-    {% endif %}
 </div>
 {% endblock %}
