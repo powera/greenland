@@ -15,6 +15,7 @@
             <h2><i class="bi bi-pencil text-info"></i> English Text Changes</h2>
             <p class="text-muted">
                 Same GUID but different English text between SQLite and <code>data/release/sentences</code>.
+                Changes can go in either direction.
             </p>
         </div>
     </div>
@@ -31,10 +32,13 @@
         <div class="card-header d-flex justify-content-between align-items-center">
             <span><i class="bi bi-list-check"></i> Text Changes: {{ changes|length }}</span>
             <div>
-                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="selectAll('keep_old')">
-                    Keep All SQLite
+                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="selectAll('skip')">
+                    Skip All
                 </button>
-                <button type="button" class="btn btn-sm btn-outline-info" onclick="selectAll('use_new')">
+                <button type="button" class="btn btn-sm btn-outline-warning" onclick="selectAll('use_db')">
+                    Use All DB
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-info" onclick="selectAll('use_release')">
                     Use All Release
                 </button>
             </div>
@@ -68,10 +72,10 @@
                                     <span class="text-success">{{ item.release_english }}</span>
                                 </td>
                                 <td>
-                                    <select class="form-select form-select-sm action-select" name="action_{{ item.sentence_id }}" style="min-width: 130px;">
+                                    <select class="form-select form-select-sm action-select" name="action_{{ item.sentence_id }}" style="min-width: 140px;">
                                         <option value="skip">Skip</option>
-                                        <option value="keep_old">Keep SQLite</option>
-                                        <option value="use_new">Use Release</option>
+                                        <option value="use_db">Use DB</option>
+                                        <option value="use_release">Use Release</option>
                                     </select>
                                 </td>
                             </tr>

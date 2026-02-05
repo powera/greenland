@@ -262,16 +262,20 @@ def apply_difficulty() -> ResponseReturnValue:
     release_dir = _get_release_dir()
     release_lemmas = _load_release_lemmas(release_dir)
 
-    updated_count = 0
+    updated_db_count = 0
+    updated_release_count = 0
     skipped_count = 0
     error_count = 0
 
+    # Track release file updates: {filepath: {guid: {field: value}}}
+    release_updates: Dict[Path, Dict[str, Dict[str, Any]]] = {}
+
     for lemma_id_str, action in actions.items():
-        if action == "skip" or action == "keep_old":
+        if action == "skip":
             skipped_count += 1
             continue
 
-        if action != "use_new":
+        if action not in ("use_release", "use_db"):
             continue
 
         try:
@@ -289,39 +293,69 @@ def apply_difficulty() -> ResponseReturnValue:
                 error_count += 1
                 continue
 
-            new_level = release_data.get("difficulty_level")
-            old_level = lemma.difficulty_level
+            if action == "use_release":
+                new_level = release_data.get("difficulty_level")
+                old_level = lemma.difficulty_level
 
-            lemma.difficulty_level = new_level
-            updated_count += 1
+                lemma.difficulty_level = new_level
+                updated_db_count += 1
 
-            log_translation_change(
-                session=g.db,
-                source="sync-release",
-                operation_type="difficulty_sync",
-                lemma_id=lemma.id,
-                field_name="difficulty_level",
-                old_value=str(old_level) if old_level is not None else None,
-                new_value=str(new_level) if new_level is not None else None,
-            )
+                log_translation_change(
+                    session=g.db,
+                    source="sync-release",
+                    operation_type="difficulty_sync",
+                    lemma_id=lemma.id,
+                    field_name="difficulty_level",
+                    old_value=str(old_level) if old_level is not None else None,
+                    new_value=str(new_level) if new_level is not None else None,
+                )
 
-            logger.info(
-                f"Updated difficulty for '{lemma.lemma_text}' ({lemma.guid}): "
-                f"{old_level} -> {new_level}"
-            )
+                logger.info(
+                    f"Updated difficulty for '{lemma.lemma_text}' ({lemma.guid}): "
+                    f"{old_level} -> {new_level}"
+                )
+
+            elif action == "use_db":
+                db_level = lemma.difficulty_level
+                file_path = _find_release_file_for_lemma(release_dir, lemma.guid)
+                if file_path:
+                    if file_path not in release_updates:
+                        release_updates[file_path] = {}
+                    release_updates[file_path][lemma.guid] = {
+                        "difficulty_level": db_level,
+                    }
+                    updated_release_count += 1
+                    logger.info(
+                        f"Queued release update for '{lemma.lemma_text}' "
+                        f"({lemma.guid}) difficulty_level: -> {db_level}"
+                    )
+                else:
+                    logger.warning(f"Could not find release file for GUID: {lemma.guid}")
+                    error_count += 1
 
         except Exception as e:
             logger.error(f"Error updating lemma {lemma_id_str}: {e}")
             error_count += 1
 
-    if updated_count > 0:
+    if updated_db_count > 0:
         try:
             g.db.commit()
-            flash(f"Updated {updated_count} lemma(s)", "success")
+            flash(f"Updated {updated_db_count} lemma(s) in database", "success")
         except Exception as e:
             g.db.rollback()
             flash(f"Error committing changes: {e}", "error")
             logger.error(f"Commit error: {e}")
+
+    if release_updates:
+        try:
+            _apply_release_field_updates(release_updates)
+            flash(
+                f"Updated {updated_release_count} lemma(s) in release files",
+                "success",
+            )
+        except Exception as e:
+            flash(f"Error updating release files: {e}", "error")
+            logger.error(f"Release file update error: {e}")
 
     if skipped_count > 0:
         flash(f"Skipped {skipped_count} lemma(s)", "info")
@@ -703,16 +737,20 @@ def apply_changes() -> ResponseReturnValue:
     release_dir = _get_release_dir()
     release_lemmas = _load_release_lemmas(release_dir)
 
-    updated_count = 0
+    updated_db_count = 0
+    updated_release_count = 0
     skipped_count = 0
     error_count = 0
 
+    # Track release file updates: {filepath: {guid: {field: value}}}
+    release_updates: Dict[Path, Dict[str, Dict[str, Any]]] = {}
+
     for lemma_id_str, action in actions.items():
-        if action == "skip" or action == "keep_old":
+        if action == "skip":
             skipped_count += 1
             continue
 
-        if action != "use_new":
+        if action not in ("use_release", "use_db"):
             continue
 
         try:
@@ -730,40 +768,72 @@ def apply_changes() -> ResponseReturnValue:
                 error_count += 1
                 continue
 
-            old_text = lemma.lemma_text
-            new_text = _get_release_lemma_text(release_data)
-            new_definition = release_data.get("concept_definition", "")
+            if action == "use_release":
+                old_text = lemma.lemma_text
+                new_text = _get_release_lemma_text(release_data)
+                new_definition = release_data.get("concept_definition", "")
 
-            lemma.lemma_text = new_text
-            if new_definition:
-                lemma.definition_text = new_definition
+                lemma.lemma_text = new_text
+                if new_definition:
+                    lemma.definition_text = new_definition
 
-            log_translation_change(
-                session=g.db,
-                source="sync-release",
-                operation_type="lemma_text_sync",
-                lemma_id=lemma.id,
-                field_name="lemma_text",
-                old_value=old_text,
-                new_value=new_text,
-            )
+                log_translation_change(
+                    session=g.db,
+                    source="sync-release",
+                    operation_type="lemma_text_sync",
+                    lemma_id=lemma.id,
+                    field_name="lemma_text",
+                    old_value=old_text,
+                    new_value=new_text,
+                )
 
-            updated_count += 1
+                updated_db_count += 1
+                logger.info(f"Updated lemma_text for ({lemma.guid}): '{old_text}' -> '{new_text}'")
 
-            logger.info(f"Updated lemma_text for ({lemma.guid}): '{old_text}' -> '{new_text}'")
+            elif action == "use_db":
+                db_text = lemma.lemma_text
+                update_fields: Dict[str, Any] = {}
+                # Update English translation in release (stored as translations.en)
+                update_fields["translations.en"] = db_text
+                if lemma.definition_text:
+                    update_fields["concept_definition"] = lemma.definition_text
+
+                file_path = _find_release_file_for_lemma(release_dir, lemma.guid)
+                if file_path:
+                    if file_path not in release_updates:
+                        release_updates[file_path] = {}
+                    release_updates[file_path][lemma.guid] = update_fields
+                    updated_release_count += 1
+                    logger.info(
+                        f"Queued release update for ({lemma.guid}) " f"lemma_text: -> '{db_text}'"
+                    )
+                else:
+                    logger.warning(f"Could not find release file for GUID: {lemma.guid}")
+                    error_count += 1
 
         except Exception as e:
             logger.error(f"Error updating lemma {lemma_id_str}: {e}")
             error_count += 1
 
-    if updated_count > 0:
+    if updated_db_count > 0:
         try:
             g.db.commit()
-            flash(f"Updated {updated_count} lemma(s)", "success")
+            flash(f"Updated {updated_db_count} lemma(s) in database", "success")
         except Exception as e:
             g.db.rollback()
             flash(f"Error committing changes: {e}", "error")
             logger.error(f"Commit error: {e}")
+
+    if release_updates:
+        try:
+            _apply_release_field_updates(release_updates)
+            flash(
+                f"Updated {updated_release_count} lemma(s) in release files",
+                "success",
+            )
+        except Exception as e:
+            flash(f"Error updating release files: {e}", "error")
+            logger.error(f"Release file update error: {e}")
 
     if skipped_count > 0:
         flash(f"Skipped {skipped_count} lemma(s)", "info")
@@ -1192,6 +1262,60 @@ def _apply_release_translation_updates(
                         updated_lines.append(line)
 
             # Write back
+            with open(file_path, "w", encoding="utf-8") as f:
+                f.writelines(updated_lines)
+
+        except Exception as e:
+            logger.error(f"Error updating {file_path}: {e}")
+            raise
+
+
+def _apply_release_field_updates(
+    updates: Dict[Path, Dict[str, Dict[str, Any]]],
+) -> None:
+    """Apply field updates to release JSONL files.
+
+    Supports top-level fields (e.g. difficulty_level) and dotted paths
+    for nested fields (e.g. translations.en).
+
+    Args:
+        updates: {filepath: {guid: {field_or_dotted_path: new_value}}}
+    """
+    for file_path, guid_updates in updates.items():
+        if not file_path.exists():
+            logger.warning(f"Release file not found: {file_path}")
+            continue
+
+        updated_lines: List[str] = []
+        try:
+            with open(file_path, "r", encoding="utf-8") as f:
+                for line in f:
+                    stripped = line.strip()
+                    if not stripped:
+                        updated_lines.append(line)
+                        continue
+
+                    try:
+                        data = json.loads(stripped)
+                        guid = data.get("guid")
+
+                        if guid in guid_updates:
+                            for field_path, new_val in guid_updates[guid].items():
+                                if "." in field_path:
+                                    parts = field_path.split(".", 1)
+                                    parent_key, child_key = parts[0], parts[1]
+                                    if parent_key not in data:
+                                        data[parent_key] = {}
+                                    data[parent_key][child_key] = new_val
+                                else:
+                                    data[field_path] = new_val
+                            updated_lines.append(json.dumps(data, ensure_ascii=False) + "\n")
+                            logger.info(f"Updated fields for {guid} in {file_path}")
+                        else:
+                            updated_lines.append(line)
+                    except json.JSONDecodeError:
+                        updated_lines.append(line)
+
             with open(file_path, "w", encoding="utf-8") as f:
                 f.writelines(updated_lines)
 
