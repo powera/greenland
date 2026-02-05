@@ -50,9 +50,9 @@
                         </dd>
                     {% endif %}
 
-                    {% if log.language_code %}
+                    {% if fact_data.get('language_code') %}
                         <dt class="col-sm-3">Language:</dt>
-                        <dd class="col-sm-9"><span class="badge bg-info">{{ log.language_code }}</span></dd>
+                        <dd class="col-sm-9"><span class="badge bg-info">{{ fact_data.language_code }}</span></dd>
                     {% endif %}
                 </dl>
             </div>

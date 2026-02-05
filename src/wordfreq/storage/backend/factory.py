@@ -72,6 +72,10 @@ def _ensure_tables_exist(engine: "Engine") -> None:
     """
     from sqlalchemy.orm import Session
 
+    # Import models package to ensure ALL models (including OperationLog,
+    # GrammarFact, etc.) are registered with Base.metadata before create_all.
+    # Without this, tables for models not yet imported would be silently skipped.
+    import wordfreq.storage.models  # noqa: F401
     from wordfreq.storage.models.schema import Base
 
     Base.metadata.create_all(engine)
