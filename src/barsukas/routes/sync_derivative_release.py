@@ -490,6 +490,7 @@ def language_detail(lang_code: str) -> ResponseReturnValue:
         additions=additions,
         removals=removals,
         changes=changes,
+        db_count=len(db_guids),
         release_dir=str(release_dir),
     )
 
@@ -850,6 +851,78 @@ def apply_changes(lang_code: str) -> ResponseReturnValue:
 
     if skipped_count > 0:
         flash(f"Skipped {skipped_count} lemma(s)", "info")
+
+    if error_count > 0:
+        flash(f"Errors: {error_count}", "warning")
+
+    return redirect(url_for("sync_derivative_release.language_detail", lang_code=lang_code))
+
+
+# =============================================================================
+# Export all DB -> Release
+# =============================================================================
+
+
+@bp.route("/<lang_code>/export_all", methods=["POST"])
+def export_all(lang_code: str) -> ResponseReturnValue:
+    """Export all DB derivative forms for a language to release files.
+
+    Writes every GUID that has derivative forms in the DB for this language
+    into the appropriate {lang_code}.jsonl files, creating or updating as needed.
+    """
+    release_dir = _get_release_dir()
+
+    if not release_dir.exists():
+        flash(f"Release directory not found: {release_dir}", "error")
+        return redirect(url_for("sync_derivative_release.language_detail", lang_code=lang_code))
+
+    db_forms = _load_db_derivatives_for_lang(g.db, lang_code)
+
+    if not db_forms:
+        flash(
+            f"No {LANGUAGE_NAMES.get(lang_code, lang_code)} derivative forms in database", "warning"
+        )
+        return redirect(url_for("sync_derivative_release.language_detail", lang_code=lang_code))
+
+    exported_count = 0
+    error_count = 0
+
+    for guid, forms in sorted(db_forms.items()):
+        try:
+            file_path = _find_release_file_for_lemma_lang(release_dir, guid, lang_code)
+            if not file_path:
+                logger.warning(f"Could not resolve release file for {guid} lang={lang_code}")
+                error_count += 1
+                continue
+
+            form_dicts = [_db_form_to_dict(f) for f in forms]
+            _append_or_update_release_line(file_path, guid, form_dicts)
+            exported_count += 1
+
+        except Exception as e:
+            logger.error(f"Error exporting derivatives for {guid} lang={lang_code}: {e}")
+            error_count += 1
+
+    if exported_count > 0:
+        log_operation(
+            session=g.db,
+            source="sync-release",
+            operation_type="derivative_export_all",
+            details={
+                "language_code": lang_code,
+                "guid_count": exported_count,
+            },
+        )
+        try:
+            g.db.commit()
+        except Exception as e:
+            g.db.rollback()
+            logger.error(f"Commit error logging export_all: {e}")
+
+        flash(
+            f"Exported {lang_code} derivative forms for {exported_count} lemma(s) to release files",
+            "success",
+        )
 
     if error_count > 0:
         flash(f"Errors: {error_count}", "warning")
