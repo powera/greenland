@@ -111,7 +111,7 @@
         <ul class="mb-0">
             <li><strong>Full Initialization:</strong> Use "Full Init" to set up corpora and load frequency data</li>
             <li><strong>Bootstrap from JSON:</strong> If you have a trakaido JSON export, use "Bootstrap" to import existing data</li>
-            <li><strong>Import from JSONL:</strong> If you have JSONL data files, use "Import JSONL" to import lemmas</li>
+            <li><strong>Sync Release:</strong> Use the <a href="/sync">Sync Release</a> tool to import lemmas from data/release JSONL files</li>
         </ul>
     </div>
     {% endif %}
@@ -318,40 +318,6 @@
             </div>
         </div>
 
-        <!-- Import from JSONL -->
-        <div class="col-md-6 mb-4">
-            <div class="card h-100 border-dark">
-                <div class="card-header bg-dark text-white">
-                    <h5 class="mb-0">
-                        <i class="bi bi-file-earmark-text"></i> Import from JSONL
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <p class="text-muted">
-                        Import lemmas from JSONL files to the SQLite database.
-                        Useful for importing data from the JSONL backend format.
-                    </p>
-                    <p><code>--import-jsonl JSONL_DIR</code></p>
-                    <form method="POST" action="{{ url_for('pradzia.execute_import_jsonl') }}">
-                        <div class="mb-3">
-                            <label for="jsonlDir" class="form-label fw-bold">JSONL Directory Path</label>
-                            <input type="text" class="form-control" id="jsonlDir" name="jsonl_dir"
-                                   placeholder="data/release" required>
-                            <div class="form-text">Path to directory containing JSONL data files</div>
-                        </div>
-                        <div class="form-check mb-3">
-                            <input class="form-check-input" type="checkbox" id="importDryRun" name="dry_run">
-                            <label class="form-check-label" for="importDryRun">
-                                Dry run (preview without importing)
-                            </label>
-                        </div>
-                        <button type="submit" class="btn btn-dark">
-                            <i class="bi bi-play-fill"></i> Import JSONL
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
     </div>
 
     <!-- Help Section -->

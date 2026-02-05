@@ -87,10 +87,6 @@ dramblys.py --top-n 10000             # Check top N frequency words
 
 # Fix mode (process with LLM)
 dramblys.py --fix --limit 20 --yes    # Process 20 missing words
-
-# Import mode
-dramblys.py --import-jsonl PATH       # Import from JSONL file/directory
-dramblys.py --import-jsonl PATH --migration-file FILE  # With category migrations
 ```
 
 ### voras (Translations)

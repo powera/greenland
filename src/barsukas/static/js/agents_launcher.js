@@ -64,12 +64,11 @@ function initAgentLauncher(scriptName) {
         });
 
         // Detect mode selector parameters (typically 'mode', 'check', 'task', etc.)
-        const modeSelectors = ['mode', 'check', 'fix', 'stage', 'import_jsonl', 'task', 'form_type'];
+        const modeSelectors = ['mode', 'check', 'fix', 'stage', 'task', 'form_type'];
         const foundModeSelectors = [];
 
         // Map parameter names to mode names (for cases where they differ)
         const modeNameMap = {
-            'import_jsonl': 'import',
             'check': 'check'  // can also be a select with choices
         };
 
@@ -104,7 +103,7 @@ function initAgentLauncher(scriptName) {
                         activeModes.add(input.value);
                     }
                 } else if (input.value && input.value !== '') {
-                    // Text/file input that acts as a mode selector (e.g., --import-jsonl)
+                    // Text/file input that acts as a mode selector
                     activeModes.add(modeName);
                 }
             });

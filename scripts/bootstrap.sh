@@ -7,11 +7,10 @@
 #   2. Initialize database tables and corpus configurations
 #   3. Load word frequency data from enabled corpora
 #   4. Calculate combined frequency ranks
-#   5. Import lemmas from data/release JSONL files
+#   5. Advise user to sync lemmas via Barsukas /sync UI
 #
 # Environment overrides:
 #   DB_PATH     - Path to SQLite database (default: src/wordfreq/data/linguistics.sqlite)
-#   JSONL_DIR   - Path to JSONL data directory (default: data/release)
 
 set -euo pipefail
 
@@ -19,11 +18,9 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO_ROOT"
 
 DB_PATH="${DB_PATH:-src/wordfreq/data/linguistics.sqlite}"
-JSONL_DIR="${JSONL_DIR:-data/release}"
 
 echo "=== Greenland Database Bootstrap ==="
 echo "Database: $DB_PATH"
-echo "JSONL data: $JSONL_DIR"
 echo ""
 
 # Step 0: Fail-fast if database already exists
@@ -53,29 +50,6 @@ fi
 echo "✓ Database initialization complete"
 echo ""
 
-# Step 2: Import lemmas from JSONL files
-echo "=== Step 2: Importing lemmas from JSONL files ==="
-echo "Source: $JSONL_DIR"
-
-if [[ ! -d "$JSONL_DIR" ]]; then
-  echo "⚠️  WARNING: JSONL directory not found: $JSONL_DIR"
-  echo "Skipping lemma import."
-  echo ""
-  echo "To import lemmas later, run:"
-  echo "  PYTHONPATH=src python -m agents.pradzia --import-jsonl $JSONL_DIR"
-  echo ""
-else
-  PYTHONPATH=src python -m agents.pradzia --import-jsonl "$JSONL_DIR"
-
-  if [[ $? -ne 0 ]]; then
-    echo "❌ Failed to import lemmas from JSONL"
-    exit 1
-  fi
-
-  echo "✓ Lemma import complete"
-  echo ""
-fi
-
 # Done!
 echo "=== Bootstrap Complete ==="
 echo ""
@@ -83,5 +57,6 @@ echo "Database initialized at: $DB_PATH"
 echo ""
 echo "Next steps:"
 echo "  1. Run the web UI: PYTHONPATH=src python -m barsukas.app"
-echo "  2. Process a lemma: scripts/activate_guid.sh N06_015"
+echo "  2. Sync lemmas from data/release: navigate to /sync in Barsukas"
+echo "  3. Process a lemma: scripts/activate_guid.sh N06_015"
 echo ""
