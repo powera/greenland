@@ -14,6 +14,7 @@ from flask.typing import ResponseReturnValue
 from sqlalchemy import func
 from sqlalchemy.orm import Query
 
+from langtools.collation import LATIN_SORT_KEY_LANGUAGES
 from langtools.ja.gojuon import KANA_TO_ROW, ROW_INITIALS, ROW_MEMBERS
 from wordfreq.storage.models.schema import Lemma, LemmaTranslation
 from wordfreq.storage.translation_helpers import LANGUAGE_NAMES
@@ -61,8 +62,11 @@ LANGUAGE_ALPHABETS: Dict[str, List[str]] = {
     "vi": list("AĂÂBCDĐEÊGHIKLMNOÔƠPQRSTUƯVXY"),
 }
 
-# Languages whose alphabet bar filters on sort_key rather than translation.
-_SORT_KEY_LANGUAGES = frozenset({"zh", "ja", "ko"})
+# CJK languages whose alphabet bar filters on sort_key rather than translation.
+_CJK_SORT_KEY_LANGUAGES = frozenset({"zh", "ja", "ko"})
+
+# All languages that use sort_key for ORDER BY (CJK + accented Latin).
+_SORT_KEY_LANGUAGES = _CJK_SORT_KEY_LANGUAGES | LATIN_SORT_KEY_LANGUAGES
 
 
 def _get_display_langs(source_lang: str) -> List[str]:
@@ -98,12 +102,20 @@ def _base_query_for_lang(lang: str) -> Query:  # type: ignore[type-arg]
 
 def _query_by_letter(lang: str, letter: str) -> Query:  # type: ignore[type-arg]
     """Alphabetical query filtered by first letter."""
-    if lang in _SORT_KEY_LANGUAGES:
+    if lang == "en":
+        letter_variants = [letter.upper(), letter.lower()]
+        return (
+            _base_query_for_lang(lang)
+            .filter(func.substr(Lemma.lemma_text, 1, 1).in_(letter_variants))
+            .order_by(func.lower(Lemma.lemma_text), Lemma.id)
+        )
+
+    if lang in _CJK_SORT_KEY_LANGUAGES:
+        # CJK: filter and order on sort_key.
         q = _base_query_for_lang(lang).filter(
             LemmaTranslation.sort_key.isnot(None),
         )
         if lang == "ja":
-            # Match all kana in this gojūon row (including voiced variants).
             row_kana = ROW_MEMBERS.get(letter, [letter])
             q = q.filter(func.substr(LemmaTranslation.sort_key, 1, 1).in_(row_kana))
         elif lang == "ko":
@@ -114,19 +126,15 @@ def _query_by_letter(lang: str, letter: str) -> Query:  # type: ignore[type-arg]
             )
         return q.order_by(LemmaTranslation.sort_key, Lemma.id)
 
-    # Latin-alphabet languages.
+    # Latin-alphabet languages: filter on translation text, order on sort_key
+    # when available (accented languages), otherwise on lowered translation.
     letter_variants = [letter.upper(), letter.lower()]
-    if lang == "en":
-        return (
-            _base_query_for_lang(lang)
-            .filter(func.substr(Lemma.lemma_text, 1, 1).in_(letter_variants))
-            .order_by(func.lower(Lemma.lemma_text), Lemma.id)
-        )
-    return (
-        _base_query_for_lang(lang)
-        .filter(func.substr(LemmaTranslation.translation, 1, 1).in_(letter_variants))
-        .order_by(func.lower(LemmaTranslation.translation), Lemma.id)
+    q = _base_query_for_lang(lang).filter(
+        func.substr(LemmaTranslation.translation, 1, 1).in_(letter_variants)
     )
+    if lang in LATIN_SORT_KEY_LANGUAGES:
+        return q.order_by(LemmaTranslation.sort_key, Lemma.id)
+    return q.order_by(func.lower(LemmaTranslation.translation), Lemma.id)
 
 
 def _query_by_level(lang: str, level: int) -> Query:  # type: ignore[type-arg]
@@ -134,6 +142,8 @@ def _query_by_level(lang: str, level: int) -> Query:  # type: ignore[type-arg]
     q = _base_query_for_lang(lang).filter(Lemma.difficulty_level == level)
     if lang == "en":
         return q.order_by(func.lower(Lemma.lemma_text), Lemma.id)
+    if lang in _SORT_KEY_LANGUAGES:
+        return q.order_by(LemmaTranslation.sort_key, Lemma.id)
     return q.order_by(func.lower(LemmaTranslation.translation), Lemma.id)
 
 
@@ -158,7 +168,7 @@ def _available_letters(lang: str) -> set[str]:
         )
         return {r[0].upper() for r in rows if r[0] and r[0].isalpha()}
 
-    if lang in _SORT_KEY_LANGUAGES:
+    if lang in _CJK_SORT_KEY_LANGUAGES:
         rows = (
             g.db.query(func.substr(LemmaTranslation.sort_key, 1, 1))
             .join(Lemma, Lemma.id == LemmaTranslation.lemma_id)
@@ -181,7 +191,7 @@ def _available_letters(lang: str) -> set[str]:
             # Korean jamo — direct match.
             return raw_initials
 
-    # Latin-alphabet languages.
+    # Latin-alphabet languages (including those with sort keys).
     rows = (
         g.db.query(func.substr(LemmaTranslation.translation, 1, 1))
         .join(Lemma, Lemma.id == LemmaTranslation.lemma_id)
@@ -248,7 +258,7 @@ def dictionary() -> ResponseReturnValue:
         available_letters: set[str] = set()
     else:
         letter = request.args.get("letter", "").strip()
-        if lang not in _SORT_KEY_LANGUAGES:
+        if lang not in _CJK_SORT_KEY_LANGUAGES:
             letter = letter.upper()
         if not (len(letter) == 1 and letter in alphabet):
             letter = alphabet[0] if alphabet else "A"

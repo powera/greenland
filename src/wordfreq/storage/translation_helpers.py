@@ -19,7 +19,14 @@ from wordfreq.storage.models.schema import Lemma, LemmaTranslation
 logger = logging.getLogger(__name__)
 
 # Languages that need a computed sort_key for dictionary ordering.
-_SORT_KEY_LANGUAGES = frozenset({"zh", "ja", "ko"})
+# CJK languages use transliteration (pinyin, hiragana, jamo); accented Latin
+# languages use character remapping (see langtools.collation).
+_CJK_SORT_KEY_LANGUAGES = frozenset({"zh", "ja", "ko"})
+
+# Import Latin collation languages so we have the full set.
+from langtools.collation import LATIN_SORT_KEY_LANGUAGES  # noqa: E402
+
+_SORT_KEY_LANGUAGES = _CJK_SORT_KEY_LANGUAGES | LATIN_SORT_KEY_LANGUAGES
 
 # Language hierarchy: ordered from most reliable/primary to experimental
 # Tier 1: Primary supported languages
@@ -236,13 +243,16 @@ def get_all_definitions(session: Session, lemma: Lemma) -> Dict[str, Optional[st
 
 
 def compute_sort_key(lang_code: str, translation: str) -> Optional[str]:
-    """Compute a romanized/phonetic sort key for CJK translations.
+    """Compute a sort key for dictionary ordering.
 
     - Chinese (zh): pinyin with tone marks, e.g. "chī" for 吃
     - Japanese (ja): hiragana reading, e.g. "たべる" for 食べる
-    - Korean (ko): the translation itself (Hangul already sorts correctly)
+    - Korean (ko): decomposed jamo
+    - Accented Latin languages (lt, es, de, sv, pt, fr, vi): character
+      remapping so that accented letters sort in their correct alphabet
+      position (e.g. Lithuanian "š" → "s{", sorting after "s" and before "t").
 
-    Returns None for non-CJK languages or if the required library is
+    Returns None for unsupported languages or if the required library is
     unavailable.
     """
     if lang_code not in _SORT_KEY_LANGUAGES:
@@ -264,6 +274,10 @@ def compute_sort_key(lang_code: str, translation: str) -> Optional[str]:
             from langtools.ko.hangul_helper import decompose_hangul
 
             return decompose_hangul(translation)
+        elif lang_code in LATIN_SORT_KEY_LANGUAGES:
+            from langtools.collation import generate_latin_sort_key
+
+            return generate_latin_sort_key(lang_code, translation)
     except Exception as e:
         logger.warning(f"Failed to compute sort_key for {lang_code} '{translation}': {e}")
     return None
