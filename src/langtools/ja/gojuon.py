@@ -2,28 +2,75 @@
 """
 Gojūon (五十音) ordering tables for Japanese.
 
-Provides the 10 row-initial kana used for dictionary alphabet bars, and
-mappings between voiced/semi-voiced kana and their base (unvoiced) row.
+Provides all 46 gojūon kana used for dictionary alphabet bars, and
+mappings between voiced/semi-voiced kana and their base (unvoiced) kana.
 """
 
 from typing import Dict, List
 
-# The 10 gojūon row initials, in standard dictionary order.
-ROW_INITIALS: List[str] = list("あかさたなはまやらわ")
+# All 46 gojūon kana in standard dictionary order.
+ROW_INITIALS: List[str] = list(
+    "あいうえお"
+    "かきくけこ"
+    "さしすせそ"
+    "たちつてと"
+    "なにぬねの"
+    "はひふへほ"
+    "まみむめも"
+    "やゆよ"
+    "らりるれろ"
+    "わをん"
+)
 
-# Each row initial maps to the full set of kana that belong to that row,
-# including voiced (dakuten) and semi-voiced (handakuten) variants.
+# Each kana maps to itself plus its voiced (dakuten) and semi-voiced
+# (handakuten) variants, used for filtering sort_key values.
 ROW_MEMBERS: Dict[str, List[str]] = {
-    "あ": list("あいうえお"),
-    "か": list("かきくけこがぎぐげご"),
-    "さ": list("さしすせそざじずぜぞ"),
-    "た": list("たちつてとだぢづでど"),
-    "な": list("なにぬねの"),
-    "は": list("はひふへほばびぶべぼぱぴぷぺぽ"),
-    "ま": list("まみむめも"),
-    "や": list("やゆよ"),
-    "ら": list("らりるれろ"),
-    "わ": list("わをん"),
+    "あ": ["あ"],
+    "い": ["い"],
+    "う": ["う"],
+    "え": ["え"],
+    "お": ["お"],
+    "か": ["か", "が"],
+    "き": ["き", "ぎ"],
+    "く": ["く", "ぐ"],
+    "け": ["け", "げ"],
+    "こ": ["こ", "ご"],
+    "さ": ["さ", "ざ"],
+    "し": ["し", "じ"],
+    "す": ["す", "ず"],
+    "せ": ["せ", "ぜ"],
+    "そ": ["そ", "ぞ"],
+    "た": ["た", "だ"],
+    "ち": ["ち", "ぢ"],
+    "つ": ["つ", "づ"],
+    "て": ["て", "で"],
+    "と": ["と", "ど"],
+    "な": ["な"],
+    "に": ["に"],
+    "ぬ": ["ぬ"],
+    "ね": ["ね"],
+    "の": ["の"],
+    "は": ["は", "ば", "ぱ"],
+    "ひ": ["ひ", "び", "ぴ"],
+    "ふ": ["ふ", "ぶ", "ぷ"],
+    "へ": ["へ", "べ", "ぺ"],
+    "ほ": ["ほ", "ぼ", "ぽ"],
+    "ま": ["ま"],
+    "み": ["み"],
+    "む": ["む"],
+    "め": ["め"],
+    "も": ["も"],
+    "や": ["や"],
+    "ゆ": ["ゆ"],
+    "よ": ["よ"],
+    "ら": ["ら"],
+    "り": ["り"],
+    "る": ["る"],
+    "れ": ["れ"],
+    "ろ": ["ろ"],
+    "わ": ["わ"],
+    "を": ["を"],
+    "ん": ["ん"],
 }
 
 # Reverse map: any kana → the row initial it belongs to.
