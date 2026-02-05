@@ -262,6 +262,9 @@ class Sentence(Base):
     __tablename__ = "sentences"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    guid: Mapped[Optional[str]] = mapped_column(
+        String, unique=True, nullable=True, index=True
+    )  # e.g., "S_00001"
 
     # Sentence pattern metadata
     pattern_type: Mapped[Optional[str]] = mapped_column(

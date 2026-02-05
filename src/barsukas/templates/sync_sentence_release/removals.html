@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block title %}Sync - Removed Sentences{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('sync_sentence_release.index') }}">Sync Sentences</a></li>
+                    <li class="breadcrumb-item active">Removals</li>
+                </ol>
+            </nav>
+            <h2><i class="bi bi-dash-circle text-danger"></i> Sentences Not in Release</h2>
+            <p class="text-muted">
+                Sentence GUIDs that exist in SQLite but not in <code>data/release/sentences</code>.
+                Conversation sentences are excluded.
+            </p>
+        </div>
+    </div>
+
+    {% if not removals %}
+    <div class="alert alert-success">
+        <i class="bi bi-check-circle"></i> No orphaned sentences found. SQLite matches release.
+    </div>
+    <a href="{{ url_for('sync_sentence_release.index') }}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Back
+    </a>
+    {% else %}
+    <div class="alert alert-warning">
+        <i class="bi bi-exclamation-triangle"></i> <strong>Warning:</strong> Deleting sentences will also delete their translations, word breakdowns, and pattern words. This cannot be undone.
+    </div>
+
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-list-check"></i> Orphaned Sentences: {{ removals|length }}</span>
+            <div>
+                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="toggleAll(false)">
+                    Deselect All
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-danger" onclick="toggleAll(true)">
+                    Select All
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <form method="post" action="{{ url_for('sync_sentence_release.apply_removals') }}" onsubmit="return confirmDelete()">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 40px;">
+                                    <input type="checkbox" id="select-all-checkbox" onchange="toggleAll(this.checked)">
+                                </th>
+                                <th>GUID</th>
+                                <th>English Text</th>
+                                <th>Pattern</th>
+                                <th class="text-center">Level</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in removals %}
+                            <tr>
+                                <td>
+                                    <input type="checkbox" class="item-checkbox" name="selected_ids" value="{{ item.sentence_id }}">
+                                </td>
+                                <td><code>{{ item.guid }}</code></td>
+                                <td>{{ item.english_text }}</td>
+                                <td>
+                                    {% if item.pattern_type %}
+                                    <span class="badge bg-secondary">{{ item.pattern_type }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    {% if item.minimum_level is none %}
+                                    <span class="badge bg-warning text-dark">None</span>
+                                    {% else %}
+                                    <span class="badge bg-info">{{ item.minimum_level }}</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <a href="{{ url_for('sync_sentence_release.index') }}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Back
+                    </a>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash"></i> Delete Selected
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function toggleAll(checked) {
+    document.querySelectorAll('.item-checkbox').forEach(function(checkbox) {
+        checkbox.checked = checked;
+    });
+    document.getElementById('select-all-checkbox').checked = checked;
+}
+
+function confirmDelete() {
+    var selected = document.querySelectorAll('.item-checkbox:checked').length;
+    if (selected === 0) {
+        alert('No sentences selected');
+        return false;
+    }
+    return confirm('Are you sure you want to delete ' + selected + ' sentence(s)? This cannot be undone.');
+}
+</script>
+{% endblock %}

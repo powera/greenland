@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block title %}Sync Sentence Translations{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('sync_sentence_release.index') }}">Sync Sentences</a></li>
+                    <li class="breadcrumb-item active">Translations</li>
+                </ol>
+            </nav>
+            <h2><i class="bi bi-translate text-purple"></i> Sync Sentence Translations</h2>
+            <p class="text-muted">
+                Translation differences between SQLite and <code>data/release/sentences</code>
+                for sentences with matching English text. Changes can go in either direction.
+            </p>
+        </div>
+    </div>
+
+    {% if not differences %}
+    <div class="alert alert-success">
+        <i class="bi bi-check-circle"></i> All sentence translations are in sync!
+    </div>
+    <a href="{{ url_for('sync_sentence_release.index') }}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Back
+    </a>
+    {% else %}
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-list-check"></i> Sentences with differences: {{ differences|length }}</span>
+            <div>
+                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="selectAll('skip')">
+                    Skip All
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-warning" onclick="selectAll('use_db')">
+                    Use All DB
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-primary" onclick="selectAll('use_release')">
+                    Use All Release
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <form method="post" action="{{ url_for('sync_sentence_release.apply_translations') }}">
+                {% for diff in differences %}
+                <div class="card mb-3">
+                    <div class="card-header bg-light text-dark py-2">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <code>{{ diff.guid }}</code>
+                                {% if diff.pattern_type %}
+                                <span class="badge bg-secondary ms-1">{{ diff.pattern_type }}</span>
+                                {% endif %}
+                                <span class="ms-2">{{ diff.english_text }}</span>
+                            </div>
+                            <span class="badge bg-secondary">{{ diff.diff_count }} diff{{ 's' if diff.diff_count != 1 }}</span>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table table-sm table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 120px;">Language</th>
+                                    <th>SQLite (DB)</th>
+                                    <th>Release</th>
+                                    <th style="width: 150px;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for ld in diff.lang_diffs %}
+                                <tr>
+                                    <td>
+                                        <span class="badge bg-info text-dark">{{ ld.lang_code }}</span>
+                                        <small>{{ ld.lang_name }}</small>
+                                    </td>
+                                    <td>
+                                        {% if ld.db_val %}
+                                        <span class="text-warning-emphasis">{{ ld.db_val }}</span>
+                                        {% else %}
+                                        <span class="text-muted fst-italic">empty</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if ld.release_val %}
+                                        <span class="text-primary">{{ ld.release_val }}</span>
+                                        {% else %}
+                                        <span class="text-muted fst-italic">empty</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <select class="form-select form-select-sm action-select"
+                                                name="action_{{ diff.sentence_id }}_{{ ld.lang_code }}">
+                                            <option value="skip">Skip</option>
+                                            {% if ld.db_val %}
+                                            <option value="use_db">Use DB</option>
+                                            {% endif %}
+                                            {% if ld.release_val %}
+                                            <option value="use_release">Use Release</option>
+                                            {% endif %}
+                                        </select>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% endfor %}
+
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <a href="{{ url_for('sync_sentence_release.index') }}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Back
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-lg"></i> Apply Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function selectAll(action) {
+    document.querySelectorAll('.action-select').forEach(function(select) {
+        for (var i = 0; i < select.options.length; i++) {
+            if (select.options[i].value === action) {
+                select.selectedIndex = i;
+                break;
+            }
+        }
+    });
+}
+</script>
+{% endblock %}

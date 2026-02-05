@@ -287,7 +287,7 @@ def convert_sqlalchemy_sentence_to_jsonl(sentence: Any) -> Any:
 
     return jsonl_models.Sentence(
         id=sentence.id,
-        guid=f"S_{sentence.id:06d}",  # Generate GUID
+        guid=f"S_{sentence.id:05d}",  # Generate GUID
         pattern_type=sentence.pattern_type,
         tense=sentence.tense,
         minimum_level=sentence.minimum_level,
@@ -484,6 +484,161 @@ def export_sqlite_to_release(sqlite_path: str, release_dir: str) -> None:
         session.close()
 
 
+def export_sqlite_to_sentence_release(sqlite_path: str, release_dir: str) -> None:
+    """Export sentences from SQLite to data/release/sentences format.
+
+    Sentences are grouped by their **primary lemma** — the noun with the lowest
+    GUID among the sentence's pattern words.  Falls back to any lemma with the
+    lowest GUID, then to ``misc/``.
+
+    Conversation sentences are excluded.
+
+    Args:
+        sqlite_path: Path to SQLite database
+        release_dir: Directory to write release files (e.g., data/release/sentences)
+    """
+    print(f"Exporting sentences from SQLite ({sqlite_path}) to release format ({release_dir})...")
+
+    from sqlalchemy.orm import selectinload
+
+    from wordfreq.storage.database import create_database_session
+    from wordfreq.storage.models.schema import (
+        ConversationSentence,
+        Lemma,
+        Sentence,
+        SentencePatternWord,
+    )
+
+    session = create_database_session(sqlite_path)
+
+    # Map POS types to directory names (pluralized)
+    type_to_dir: Dict[str, str] = {
+        "noun": "nouns",
+        "verb": "verbs",
+        "adjective": "adjectives",
+        "adverb": "adverbs",
+        "pronoun": "pronouns",
+        "preposition": "prepositions",
+        "conjunction": "conjunctions",
+        "interjection": "interjections",
+        "numeral": "numerals",
+        "particle": "particles",
+    }
+
+    try:
+        # Exclude conversation sentences
+        conversation_ids: Set[int] = set(
+            row[0] for row in session.query(ConversationSentence.sentence_id).distinct().all()
+        )
+
+        # Get all sentences with GUIDs, eager-load relationships
+        sentences = (
+            session.query(Sentence)
+            .filter(Sentence.guid.isnot(None))
+            .options(
+                selectinload(Sentence.translations),
+                selectinload(Sentence.pattern_words).selectinload(SentencePatternWord.lemma),
+            )
+            .order_by(Sentence.guid)
+            .all()
+        )
+
+        # Filter out conversation sentences
+        sentences = [s for s in sentences if s.id not in conversation_ids]
+        print(f"Found {len(sentences)} non-conversation sentences to export")
+
+        # Group sentences by primary lemma category
+        sentences_by_category: Dict[Tuple[str, str], List[Dict[str, Any]]] = defaultdict(list)
+
+        for sentence in sentences:
+            record = _sentence_to_release_record(sentence)
+            category = _resolve_primary_lemma_category(sentence)
+            sentences_by_category[category].append(record)
+
+        print(f"Organized into {len(sentences_by_category)} categories")
+
+        for (pos_type, pos_subtype), records in sentences_by_category.items():
+            dir_name = type_to_dir.get(pos_type, pos_type)
+            category_dir = Path(release_dir) / dir_name / pos_subtype
+            category_dir.mkdir(parents=True, exist_ok=True)
+
+            # Sort by GUID within each file
+            records.sort(key=lambda r: r["guid"])
+
+            print(f"Exporting {len(records)} sentences to {dir_name}/{pos_subtype}...")
+            _write_jsonl_atomic(category_dir / "base.jsonl", records)
+
+        print("Sentence export complete!")
+
+    finally:
+        session.close()
+
+
+def _resolve_primary_lemma_category(sentence: Any) -> Tuple[str, str]:
+    """Resolve the primary lemma category for directory placement.
+
+    Returns (pos_type, pos_subtype) based on the noun with the lowest GUID
+    among the sentence's pattern words.  Falls back to any lemma with the
+    lowest GUID, or ("misc", "misc") if nothing resolves.
+    """
+    lemmas_with_guids = []
+    for pw in sentence.pattern_words:
+        if pw.lemma and pw.lemma.guid:
+            lemmas_with_guids.append(pw.lemma)
+
+    if not lemmas_with_guids:
+        return ("misc", "misc")
+
+    # Prefer nouns
+    nouns = [l for l in lemmas_with_guids if l.pos_type and l.pos_type.lower() == "noun"]
+    if nouns:
+        best = min(nouns, key=lambda l: l.guid)
+    else:
+        best = min(lemmas_with_guids, key=lambda l: l.guid)
+
+    pos_type = best.pos_type.lower() if best.pos_type else "misc"
+    pos_subtype = best.pos_subtype.lower() if best.pos_subtype else "other"
+    return (pos_type, pos_subtype)
+
+
+def _sentence_to_release_record(sentence: Any) -> Dict[str, Any]:
+    """Convert a Sentence ORM object to a release JSONL record."""
+    translations: Dict[str, str] = {}
+    for trans in sentence.translations:
+        if trans.translation_text and trans.translation_text.strip():
+            translations[trans.language_code] = trans.translation_text
+
+    pattern_words: List[Dict[str, Any]] = []
+    for pw in sorted(sentence.pattern_words, key=lambda p: p.position):
+        lemma_guid = pw.lemma.guid if pw.lemma and pw.lemma.guid else None
+        pattern_words.append(
+            {
+                "position": pw.position,
+                "slot_name": pw.slot_name,
+                "lemma_guid": lemma_guid,
+                "english_text": pw.english_text,
+            }
+        )
+
+    record: Dict[str, Any] = {
+        "guid": sentence.guid,
+    }
+    if sentence.pattern_type:
+        record["pattern_type"] = sentence.pattern_type
+    if sentence.tense:
+        record["tense"] = sentence.tense
+    if sentence.minimum_level is not None:
+        record["minimum_level"] = sentence.minimum_level
+    if translations:
+        record["translations"] = translations
+    if pattern_words:
+        record["pattern_words"] = pattern_words
+    if sentence.notes:
+        record["notes"] = sentence.notes
+
+    return record
+
+
 def _write_jsonl_atomic(file_path: Path, records: List[Dict[str, Any]]) -> None:
     """Write JSONL file atomically.
 
@@ -509,7 +664,13 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Migrate data between storage backends")
     parser.add_argument(
         "direction",
-        choices=["sqlite-to-jsonl", "postgres-to-jsonl", "jsonl-to-sqlite", "sqlite-to-release"],
+        choices=[
+            "sqlite-to-jsonl",
+            "postgres-to-jsonl",
+            "jsonl-to-sqlite",
+            "sqlite-to-release",
+            "sqlite-to-sentence-release",
+        ],
         help="Migration direction",
     )
     parser.add_argument(
@@ -532,6 +693,11 @@ def main() -> None:
         default="data/release/lemmas",
         help="Path to release directory (default: data/release/lemmas)",
     )
+    parser.add_argument(
+        "--sentence-release-dir",
+        default="data/release/sentences",
+        help="Path to sentence release directory (default: data/release/sentences)",
+    )
 
     args = parser.parse_args()
 
@@ -545,6 +711,8 @@ def main() -> None:
         export_postgres_to_jsonl(postgres_url, args.jsonl_dir)
     elif args.direction == "sqlite-to-release":
         export_sqlite_to_release(args.sqlite_path, args.release_dir)
+    elif args.direction == "sqlite-to-sentence-release":
+        export_sqlite_to_sentence_release(args.sqlite_path, args.sentence_release_dir)
     else:
         print("JSONL to SQLite migration not yet implemented")
         sys.exit(1)
