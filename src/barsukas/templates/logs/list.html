@@ -103,8 +103,11 @@
                                                 {% if 'language_code' in item.fact_data %}
                                                     {{ item.fact_data.language_code }}:
                                                 {% endif %}
-                                                {% if 'old_value' in item.fact_data and 'new_value' in item.fact_data %}
-                                                    "{{ item.fact_data.old_value or 'null' }}" → "{{ item.fact_data.new_value or 'null' }}"
+                                                {% if 'old_translation' in item.fact_data or 'new_translation' in item.fact_data %}
+                                                    "{{ item.fact_data.get('old_translation') or 'null' }}" → "{{ item.fact_data.get('new_translation') or 'null' }}"
+                                                {% elif 'old_value' in item.fact_data or 'new_value' in item.fact_data %}
+                                                    {% if 'field_name' in item.fact_data %}{{ item.fact_data.field_name }}: {% endif %}
+                                                    "{{ item.fact_data.get('old_value') or 'null' }}" → "{{ item.fact_data.get('new_value') or 'null' }}"
                                                 {% elif 'field_name' in item.fact_data %}
                                                     {{ item.fact_data.field_name }}
                                                 {% else %}
