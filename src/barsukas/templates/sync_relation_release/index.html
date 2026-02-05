@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}Sync Relation Release Data{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('sync_release.index') }}">Sync Lemmas</a></li>
+                    <li class="breadcrumb-item active">Sync Relations</li>
+                </ol>
+            </nav>
+            <h2><i class="bi bi-diagram-3"></i> Sync Relation Release Data</h2>
+            <p class="text-muted">
+                Compare the relation group files (<code>data/release/lemma_relations</code>) with the working database.
+                Relation groups link lemmas that share a morphological root (e.g. rectangle/rectangular).
+            </p>
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col">
+            <div class="card">
+                <div class="card-header">
+                    <i class="bi bi-info-circle"></i> Summary
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Release files location:</strong> <code>{{ release_dir }}</code></p>
+                            <p class="mb-1"><strong>Groups in release files:</strong> {{ counts.release_total }}</p>
+                            <p class="mb-0"><strong>Groups in database:</strong> {{ counts.db_total }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if counts.release_total == 0 and counts.db_total > 0 %}
+    <div class="row mb-3">
+        <div class="col">
+            <div class="card border-primary">
+                <div class="card-header bg-primary text-white">
+                    <i class="bi bi-download"></i> Export Database Relations
+                </div>
+                <div class="card-body">
+                    <p>
+                        No release files found, but there are <strong>{{ counts.db_total }}</strong> relation groups in the database.
+                        Export them to create the initial JSONL release files.
+                    </p>
+                    <form method="post" action="{{ url_for('sync_relation_release.export_to_jsonl') }}">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-download"></i> Export All to JSONL
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="row">
+        <!-- Additions -->
+        <div class="col-md-6 col-lg-4 mb-3">
+            <div class="card h-100 {% if counts.additions > 0 %}border-success{% endif %}">
+                <div class="card-header">
+                    <i class="bi bi-plus-circle text-success"></i> Additions
+                </div>
+                <div class="card-body">
+                    <h3 class="card-title {% if counts.additions > 0 %}text-success{% else %}text-muted{% endif %}">
+                        {{ counts.additions }}
+                    </h3>
+                    <p class="card-text text-muted">
+                        Relation groups in release files not yet in database
+                    </p>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ url_for('sync_relation_release.additions') }}"
+                       class="btn btn-sm {% if counts.additions > 0 %}btn-success{% else %}btn-outline-secondary{% endif %}">
+                        <i class="bi bi-arrow-right"></i> View &amp; Import
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Removals -->
+        <div class="col-md-6 col-lg-4 mb-3">
+            <div class="card h-100 {% if counts.removals > 0 %}border-danger{% endif %}">
+                <div class="card-header">
+                    <i class="bi bi-dash-circle text-danger"></i> Removals
+                </div>
+                <div class="card-body">
+                    <h3 class="card-title {% if counts.removals > 0 %}text-danger{% else %}text-muted{% endif %}">
+                        {{ counts.removals }}
+                    </h3>
+                    <p class="card-text text-muted">
+                        Groups in database not in release files
+                    </p>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ url_for('sync_relation_release.removals') }}"
+                       class="btn btn-sm {% if counts.removals > 0 %}btn-danger{% else %}btn-outline-secondary{% endif %}">
+                        <i class="bi bi-arrow-right"></i> View &amp; Delete
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Member Differences -->
+        <div class="col-md-6 col-lg-4 mb-3">
+            <div class="card h-100 {% if counts.differences > 0 %}border-warning{% endif %}">
+                <div class="card-header">
+                    <i class="bi bi-people text-warning"></i> Member Differences
+                </div>
+                <div class="card-body">
+                    <h3 class="card-title {% if counts.differences > 0 %}text-warning{% else %}text-muted{% endif %}">
+                        {{ counts.differences }}
+                    </h3>
+                    <p class="card-text text-muted">
+                        Same concept but different member lemmas
+                    </p>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ url_for('sync_relation_release.differences') }}"
+                       class="btn btn-sm {% if counts.differences > 0 %}btn-warning{% else %}btn-outline-secondary{% endif %}">
+                        <i class="bi bi-arrow-right"></i> View &amp; Sync
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}Sync - Relation Member Differences{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('sync_relation_release.index') }}">Sync Relations</a></li>
+                    <li class="breadcrumb-item active">Member Differences</li>
+                </ol>
+            </nav>
+            <h2><i class="bi bi-people text-warning"></i> Member Differences</h2>
+            <p class="text-muted">
+                Relation groups that exist in both release and database but have different member lemmas.
+            </p>
+        </div>
+    </div>
+
+    {% if not differences %}
+    <div class="alert alert-success">
+        <i class="bi bi-check-circle"></i> No member differences found. Release and database are in sync.
+    </div>
+    <a href="{{ url_for('sync_relation_release.index') }}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Back
+    </a>
+    {% else %}
+    <form method="post" action="{{ url_for('sync_relation_release.apply_differences') }}">
+        {% for diff in differences %}
+        <div class="card mb-3">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>
+                    <strong>{{ diff.concept }}</strong>
+                    <span class="badge bg-secondary ms-2">{{ diff.relation_type }}</span>
+                </span>
+                <div class="btn-group btn-group-sm" role="group">
+                    <input type="radio" class="btn-check" name="action_{{ diff.group_id }}"
+                           id="release_{{ diff.group_id }}" value="use_release">
+                    <label class="btn btn-outline-success" for="release_{{ diff.group_id }}">Use Release</label>
+
+                    <input type="radio" class="btn-check" name="action_{{ diff.group_id }}"
+                           id="db_{{ diff.group_id }}" value="use_db">
+                    <label class="btn btn-outline-primary" for="db_{{ diff.group_id }}">Use DB</label>
+
+                    <input type="radio" class="btn-check" name="action_{{ diff.group_id }}"
+                           id="skip_{{ diff.group_id }}" value="skip" checked>
+                    <label class="btn btn-outline-secondary" for="skip_{{ diff.group_id }}">Skip</label>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-success"><i class="bi bi-file-earmark"></i> Release Members</h6>
+                        <ul class="list-unstyled mb-0">
+                            {% for guid in diff.release_members %}
+                            <li>
+                                <code{% if guid in diff.only_in_release %} class="text-success fw-bold"{% endif %}>{{ guid }}</code>
+                                {% if guid in diff.only_in_release %}
+                                <span class="badge bg-success">only in release</span>
+                                {% endif %}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-primary"><i class="bi bi-database"></i> DB Members</h6>
+                        <ul class="list-unstyled mb-0">
+                            {% for m in diff.db_members %}
+                            <li>
+                                <code{% if m.guid in diff.only_in_db %} class="text-primary fw-bold"{% endif %}>{{ m.guid }}</code>
+                                {{ m.word }} <small class="text-muted">({{ m.pos_type }})</small>
+                                {% if m.guid in diff.only_in_db %}
+                                <span class="badge bg-primary">only in DB</span>
+                                {% endif %}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+        <div class="d-flex justify-content-between align-items-center mt-3 mb-4">
+            <a href="{{ url_for('sync_relation_release.index') }}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Back
+            </a>
+            <button type="submit" class="btn btn-warning">
+                <i class="bi bi-check-lg"></i> Apply Selected Changes
+            </button>
+        </div>
+    </form>
+    {% endif %}
+</div>
+{% endblock %}
