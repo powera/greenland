@@ -39,6 +39,7 @@ class JSONLStorage(BaseStorage):
         self.sentence_verifications: Dict[str, models.SentenceVerification] = (
             {}
         )  # guid -> verification
+        self.relation_groups: List[models.LemmaRelationGroup] = []
 
         # ID counters for new objects
         self._next_lemma_id = 1
@@ -46,6 +47,8 @@ class JSONLStorage(BaseStorage):
         self._next_audio_review_id = 1
         self._next_operation_log_id = 1
         self._next_tombstone_id = 1
+        self._next_relation_group_id = 1
+        self._next_relation_member_id = 1
 
         # Track if data is loaded
         self._loaded = False
@@ -77,6 +80,7 @@ class JSONLStorage(BaseStorage):
         """Load all JSONL files into memory."""
         self._load_lemmas()
         self._load_sentences()
+        self._load_relations()
         self._load_audio_reviews()
         self._load_operation_logs()
         self._load_tombstones()
@@ -289,6 +293,46 @@ class JSONLStorage(BaseStorage):
 
             except Exception as e:
                 print(f"Error loading {sentences_file}: {e}")
+
+    def _load_relations(self) -> None:
+        """Load all lemma relation group files from disk.
+
+        Relation groups are stored as:
+        lemma_relations/{relation_type}/{subtype}.jsonl
+        Each line: {"concept": "circle", "members": ["A03_001", "N37_001"]}
+        """
+        relations_dir = self.data_dir / "lemma_relations"
+        if not relations_dir.exists():
+            return
+
+        for jsonl_file in sorted(relations_dir.rglob("*.jsonl")):
+            # relation_type is the parent directory name (e.g., "derivational")
+            relation_type = jsonl_file.parent.name
+
+            try:
+                with open(jsonl_file, "r", encoding="utf-8") as f:
+                    for line in f:
+                        line = line.strip()
+                        if not line:
+                            continue
+                        data = json.loads(line)
+                        concept = data.get("concept", "")
+                        member_guids = data.get("members", [])
+
+                        if not concept or not member_guids:
+                            continue
+
+                        group = models.LemmaRelationGroup()
+                        group.id = self._next_relation_group_id
+                        self._next_relation_group_id += 1
+                        group.relation_type = relation_type
+                        group.concept_label = concept
+                        group.member_guids = member_guids
+
+                        self.relation_groups.append(group)
+
+            except Exception as e:
+                print(f"Error loading {jsonl_file}: {e}")
 
     def _load_audio_reviews(self) -> None:
         """Load audio reviews from disk."""

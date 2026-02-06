@@ -381,6 +381,43 @@ class SentenceWord:
 
 
 @dataclass
+class LemmaRelationGroup:
+    """JSONL model for lemma relation groups.
+
+    In JSONL release files, relation groups are stored as:
+    data/release/lemma_relations/{relation_type}/{subtype}.jsonl
+    Each line: {"concept": "circle", "members": ["A03_001", "N37_001"]}
+    """
+
+    id: Optional[int] = None
+    relation_type: str = ""
+    concept_label: str = ""
+    notes: Optional[str] = None
+    added_at: Optional[datetime.datetime] = None
+    updated_at: Optional[datetime.datetime] = None
+
+    # Member GUIDs (resolved to LemmaRelationMember objects at query time)
+    member_guids: List[str] = field(default_factory=list)
+
+
+@dataclass
+class LemmaRelationMember:
+    """JSONL model for lemma relation members.
+
+    Note: In JSONL backend, these are derived from LemmaRelationGroup.member_guids.
+    """
+
+    id: Optional[int] = None
+    group_id: Optional[int] = None
+    lemma_id: Optional[int] = None
+    added_at: Optional[datetime.datetime] = None
+
+    # References (populated at runtime)
+    group: Optional["LemmaRelationGroup"] = None
+    lemma: Optional[Lemma] = None
+
+
+@dataclass
 class AudioQualityReview:
     """JSONL model for audio quality reviews."""
 
@@ -526,6 +563,8 @@ MODEL_REGISTRY = {
     "Sentence": Sentence,
     "SentenceTranslation": SentenceTranslation,
     "SentenceWord": SentenceWord,
+    "LemmaRelationGroup": LemmaRelationGroup,
+    "LemmaRelationMember": LemmaRelationMember,
     "AudioQualityReview": AudioQualityReview,
     "OperationLog": OperationLog,
     "GuidTombstone": GuidTombstone,

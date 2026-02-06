@@ -82,15 +82,18 @@
                                 <i class="bi bi-music-note-beamed"></i> Audio
                             </a></li>
                             {% endif %}
+                            {% if config.get('ALLOW_EXPORTS', True) %}
                             <li><a class="dropdown-item" href="{{ url_for('exports.exports_page') }}">
                                 <i class="bi bi-download"></i> Exports
                             </a></li>
+                            {% endif %}
                             <li><a class="dropdown-item" href="{{ url_for('batch_operations.list_batches') }}">
                                 <i class="bi bi-collection"></i> Batch Jobs
                             </a></li>
                         </ul>
                     </li>
-                    <!-- Sync dropdown -->
+                    {% if not config.get('READONLY', False) %}
+                    <!-- Sync dropdown (hidden in read-only/golden mode where DB is the release files) -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                             <i class="bi bi-arrow-left-right"></i> Sync
@@ -124,6 +127,7 @@
                             </a></li>
                         </ul>
                     </li>
+                    {% endif %}
                     <!-- Logs dropdown -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">

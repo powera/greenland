@@ -65,6 +65,12 @@ class JSONLSession(BaseSession):
 
             # Log statistics about what was loaded
             from wordfreq.storage.models.grammar_fact import GrammarFact as SQLGrammarFact
+            from wordfreq.storage.models.lemma_relation import (
+                LemmaRelationGroup as SQLLemmaRelationGroup,
+            )
+            from wordfreq.storage.models.lemma_relation import (
+                LemmaRelationMember as SQLLemmaRelationMember,
+            )
             from wordfreq.storage.models.schema import Lemma as SQLLemma
             from wordfreq.storage.models.schema import LemmaTranslation
             from wordfreq.storage.models.schema import Sentence as SQLSentence
@@ -74,6 +80,8 @@ class JSONLSession(BaseSession):
             lemma_count = self._sqlite_session.query(SQLLemma).count()
             translation_count = self._sqlite_session.query(LemmaTranslation).count()
             grammar_fact_count = self._sqlite_session.query(SQLGrammarFact).count()
+            relation_group_count = self._sqlite_session.query(SQLLemmaRelationGroup).count()
+            relation_member_count = self._sqlite_session.query(SQLLemmaRelationMember).count()
             sentence_count = self._sqlite_session.query(SQLSentence).count()
             sentence_translation_count = self._sqlite_session.query(SentenceTranslation).count()
             sentence_word_count = self._sqlite_session.query(SentenceWord).count()
@@ -83,6 +91,8 @@ class JSONLSession(BaseSession):
                 f"{lemma_count} lemmas, "
                 f"{translation_count} translations, "
                 f"{grammar_fact_count} grammar_facts, "
+                f"{relation_group_count} relation_groups, "
+                f"{relation_member_count} relation_members, "
                 f"{sentence_count} sentences, "
                 f"{sentence_translation_count} sentence_translations, "
                 f"{sentence_word_count} sentence_words"
@@ -97,6 +107,12 @@ class JSONLSession(BaseSession):
             Dictionary mapping JSONL models to SQLAlchemy models
         """
         from wordfreq.storage.models.grammar_fact import GrammarFact as SQLGrammarFact
+        from wordfreq.storage.models.lemma_relation import (
+            LemmaRelationGroup as SQLLemmaRelationGroup,
+        )
+        from wordfreq.storage.models.lemma_relation import (
+            LemmaRelationMember as SQLLemmaRelationMember,
+        )
         from wordfreq.storage.models.schema import DerivativeForm as SQLDerivativeForm
         from wordfreq.storage.models.schema import Lemma as SQLLemma
         from wordfreq.storage.models.schema import (
@@ -113,6 +129,8 @@ class JSONLSession(BaseSession):
             models.LemmaDifficultyOverride: SQLLemmaDifficultyOverride,
             models.DerivativeForm: SQLDerivativeForm,
             models.GrammarFact: SQLGrammarFact,
+            models.LemmaRelationGroup: SQLLemmaRelationGroup,
+            models.LemmaRelationMember: SQLLemmaRelationMember,
             models.Sentence: SQLSentence,
             models.SentenceTranslation: SQLSentenceTranslation,
             models.SentenceWord: SQLSentenceWord,
@@ -122,6 +140,12 @@ class JSONLSession(BaseSession):
         """Populate the temporary SQLite database with data from JSONL storage."""
         assert self._sqlite_session is not None  # For type checking
         from wordfreq.storage.models.grammar_fact import GrammarFact as SQLGrammarFact
+        from wordfreq.storage.models.lemma_relation import (
+            LemmaRelationGroup as SQLLemmaRelationGroup,
+        )
+        from wordfreq.storage.models.lemma_relation import (
+            LemmaRelationMember as SQLLemmaRelationMember,
+        )
         from wordfreq.storage.models.schema import Lemma as SQLLemma
         from wordfreq.storage.models.schema import LemmaTranslation
         from wordfreq.storage.models.schema import Sentence as SQLSentence
@@ -131,6 +155,8 @@ class JSONLSession(BaseSession):
         lemmas = []
         translations = []
         grammar_facts = []
+        relation_groups = []
+        relation_members = []
         sentences = []
         sentence_translations = []
         sentence_words = []
@@ -214,6 +240,30 @@ class JSONLSession(BaseSession):
                     }
                 )
 
+        # Prepare relation groups and members (resolve GUIDs to lemma IDs)
+        guid_to_lemma_id = {lem.guid: lem.id for lem in self._storage.lemmas.values() if lem.guid}
+        member_id_counter = 1
+        for group in self._storage.relation_groups:
+            relation_groups.append(
+                {
+                    "id": group.id,
+                    "relation_type": group.relation_type,
+                    "concept_label": group.concept_label,
+                    "notes": group.notes,
+                }
+            )
+            for member_guid in group.member_guids:
+                lemma_id = guid_to_lemma_id.get(member_guid)
+                if lemma_id is not None:
+                    relation_members.append(
+                        {
+                            "id": member_id_counter,
+                            "group_id": group.id,
+                            "lemma_id": lemma_id,
+                        }
+                    )
+                    member_id_counter += 1
+
         # Bulk insert
         if lemmas:
             self._sqlite_session.bulk_insert_mappings(SQLLemma, lemmas)
@@ -221,6 +271,10 @@ class JSONLSession(BaseSession):
             self._sqlite_session.bulk_insert_mappings(LemmaTranslation, translations)
         if grammar_facts:
             self._sqlite_session.bulk_insert_mappings(SQLGrammarFact, grammar_facts)
+        if relation_groups:
+            self._sqlite_session.bulk_insert_mappings(SQLLemmaRelationGroup, relation_groups)
+        if relation_members:
+            self._sqlite_session.bulk_insert_mappings(SQLLemmaRelationMember, relation_members)
         if sentences:
             self._sqlite_session.bulk_insert_mappings(SQLSentence, sentences)
         if sentence_translations:

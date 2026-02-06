@@ -53,6 +53,7 @@ while [[ $# -gt 0 ]]; do
             echo "Available personas:"
             echo "  prod   - Production mode: PostgreSQL backend, no local API keys, LLM calls only"
             echo "  golden - Golden mode: Read-only JSONL from data/release"
+            echo "  hosted - Hosted mode: Like golden but hardened (no restart, no exports)"
             echo "  local  - Local development: SQLite database with full access (default)"
             exit 0
             ;;
@@ -75,6 +76,10 @@ if [[ -n "$PERSONA" ]]; then
         golden)
             STORAGE_FORMAT="jsonl"
             PERSONA_ARGS="--persona golden --readonly --no-worker"
+            ;;
+        hosted)
+            STORAGE_FORMAT="jsonl"
+            PERSONA_ARGS="--persona hosted --readonly --no-worker"
             ;;
         local)
             STORAGE_FORMAT="sqlite"
