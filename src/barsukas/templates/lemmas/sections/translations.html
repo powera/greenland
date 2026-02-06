@@ -62,8 +62,12 @@
                                 </td>
                                 <td>
                                     <button type="button" class="btn btn-sm btn-outline-primary"
+                                            {% if not config.get('READONLY', False) %}
                                             data-bs-toggle="modal"
-                                            data-bs-target="#translationModal{{ lang_code }}">
+                                            data-bs-target="#translationModal{{ lang_code }}"
+                                            {% else %}
+                                            disabled title="Not available in hosted mode"
+                                            {% endif %}>
                                         <i class="bi bi-pencil"></i> Edit
                                     </button>
                                 </td>

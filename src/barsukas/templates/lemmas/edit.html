@@ -99,15 +99,15 @@
                         <label for="difficulty_level" class="form-label">Base Difficulty Level</label>
                         <input type="number" class="form-control" id="difficulty_level" name="difficulty_level"
                                value="{{ lemma.difficulty_level if lemma.difficulty_level is not none else '' }}"
-                               min="-1" max="20" placeholder="-1 or 1-20">
+                               min="-1" max="30" placeholder="-1 or 1-30">
                         <small class="form-text text-muted">
-                            Enter -1 to exclude from all languages, 1-20 for Trakaido level, or leave empty for no base level
+                            Enter -1 to exclude from all languages, 1-30 for Trakaido level, or leave empty for no base level
                         </small>
                         {% if difficulty_stats %}
                             <div class="mt-2 p-2 bg-light border rounded">
                                 <small class="text-muted">
                                     <strong>Difficulty levels for {{ lemma.pos_type }}{% if lemma.pos_subtype %} ({{ lemma.pos_subtype }}){% endif %}:</strong><br>
-                                    {% for level in range(-1, 21) %}
+                                    {% for level in range(-1, 31) %}
                                         {% if level in difficulty_stats %}
                                             {% if level == -1 %}
                                                 <span class="badge bg-warning text-dark me-1" title="{{ difficulty_stats[level] }} words">Excluded: {{ difficulty_stats[level] }}</span>
@@ -173,7 +173,7 @@
                 <h6><i class="bi bi-info-circle"></i> Editing Tips</h6>
                 <ul class="mb-0">
                     <li>Changes are logged to the operation_log table</li>
-                    <li>Difficulty level: Use -1 to exclude, 1-20 for levels, or leave empty</li>
+                    <li>Difficulty level: Use -1 to exclude, 1-30 for levels, or leave empty</li>
                     <li>Per-language difficulty overrides can be set on the view page</li>
                     <li>Translations can be edited from the view page</li>
                     <li><strong>Changing POS type/subtype will clear translations and derivative forms</strong></li>
