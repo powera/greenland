@@ -14,107 +14,156 @@ from contextlib import contextmanager
 from functools import wraps
 from typing import Any, Callable, Generator, TypeVar
 
-import psutil
-from prometheus_client import Counter, Gauge, Histogram, generate_latest
-from prometheus_client.registry import CollectorRegistry
+try:
+    from prometheus_client import Counter, Gauge, Histogram, generate_latest
+    from prometheus_client.registry import CollectorRegistry
 
-# Create a custom registry for Barsukas metrics
-REGISTRY = CollectorRegistry(auto_describe=True)
+    HAS_PROMETHEUS = True
+except ImportError:
+    HAS_PROMETHEUS = False
 
-# Request metrics
-REQUEST_COUNT = Counter(
-    "barsukas_http_requests_total",
-    "Total number of HTTP requests",
-    ["method", "endpoint", "status_code"],
-    registry=REGISTRY,
-)
+try:
+    import psutil
 
-REQUEST_LATENCY = Histogram(
-    "barsukas_http_request_duration_seconds",
-    "HTTP request latency in seconds",
-    ["method", "endpoint"],
-    buckets=(0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0),
-    registry=REGISTRY,
-)
+    HAS_PSUTIL = True
+except ImportError:
+    HAS_PSUTIL = False
 
-# Database metrics
-DB_QUERY_LATENCY = Histogram(
-    "barsukas_db_query_duration_seconds",
-    "Database query latency in seconds",
-    ["operation"],
-    buckets=(0.001, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5),
-    registry=REGISTRY,
-)
 
-DB_QUERY_COUNT = Counter(
-    "barsukas_db_queries_total",
-    "Total number of database queries",
-    ["operation"],
-    registry=REGISTRY,
-)
+class _NoOpMetric:
+    """Stub metric that silently ignores all operations."""
 
-# LLM call metrics
-LLM_CALL_COUNT = Counter(
-    "barsukas_llm_calls_total",
-    "Total number of LLM API calls",
-    ["backend", "model", "status"],
-    registry=REGISTRY,
-)
+    def labels(self, **kwargs: Any) -> "_NoOpMetric":
+        return self
 
-LLM_CALL_LATENCY = Histogram(
-    "barsukas_llm_call_duration_seconds",
-    "LLM API call latency in seconds",
-    ["backend", "model"],
-    buckets=(1.0, 2.0, 5.0, 10.0, 15.0, 20.0, 30.0, 45.0, 60.0, 90.0, 120.0),
-    registry=REGISTRY,
-)
+    def inc(self, amount: float = 1) -> None:
+        pass
 
-LLM_TOKENS_TOTAL = Counter(
-    "barsukas_llm_tokens_total",
-    "Total number of tokens processed by LLM calls",
-    ["backend", "model", "direction"],
-    registry=REGISTRY,
-)
+    def set(self, value: float) -> None:
+        pass
 
-# Resource usage metrics
-CPU_USAGE = Gauge(
-    "barsukas_process_cpu_percent",
-    "Current CPU usage percentage of the Barsukas process",
-    registry=REGISTRY,
-)
+    def observe(self, amount: float) -> None:
+        pass
 
-MEMORY_USAGE_BYTES = Gauge(
-    "barsukas_process_memory_bytes",
-    "Current memory usage in bytes of the Barsukas process",
-    ["type"],
-    registry=REGISTRY,
-)
 
-MEMORY_USAGE_PERCENT = Gauge(
-    "barsukas_process_memory_percent",
-    "Current memory usage percentage of the Barsukas process",
-    registry=REGISTRY,
-)
+_NOOP = _NoOpMetric()
 
-# Process info
-PROCESS_START_TIME = Gauge(
-    "barsukas_process_start_time_seconds",
-    "Start time of the Barsukas process (Unix timestamp)",
-    registry=REGISTRY,
-)
+if HAS_PROMETHEUS:
+    # Create a custom registry for Barsukas metrics
+    REGISTRY = CollectorRegistry(auto_describe=True)
 
-OPEN_FILE_DESCRIPTORS = Gauge(
-    "barsukas_process_open_fds",
-    "Number of open file descriptors",
-    registry=REGISTRY,
-)
+    # Request metrics
+    REQUEST_COUNT = Counter(
+        "barsukas_http_requests_total",
+        "Total number of HTTP requests",
+        ["method", "endpoint", "status_code"],
+        registry=REGISTRY,
+    )
+
+    REQUEST_LATENCY = Histogram(
+        "barsukas_http_request_duration_seconds",
+        "HTTP request latency in seconds",
+        ["method", "endpoint"],
+        buckets=(0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0),
+        registry=REGISTRY,
+    )
+
+    # Database metrics
+    DB_QUERY_LATENCY = Histogram(
+        "barsukas_db_query_duration_seconds",
+        "Database query latency in seconds",
+        ["operation"],
+        buckets=(0.001, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5),
+        registry=REGISTRY,
+    )
+
+    DB_QUERY_COUNT = Counter(
+        "barsukas_db_queries_total",
+        "Total number of database queries",
+        ["operation"],
+        registry=REGISTRY,
+    )
+
+    # LLM call metrics
+    LLM_CALL_COUNT = Counter(
+        "barsukas_llm_calls_total",
+        "Total number of LLM API calls",
+        ["backend", "model", "status"],
+        registry=REGISTRY,
+    )
+
+    LLM_CALL_LATENCY = Histogram(
+        "barsukas_llm_call_duration_seconds",
+        "LLM API call latency in seconds",
+        ["backend", "model"],
+        buckets=(1.0, 2.0, 5.0, 10.0, 15.0, 20.0, 30.0, 45.0, 60.0, 90.0, 120.0),
+        registry=REGISTRY,
+    )
+
+    LLM_TOKENS_TOTAL = Counter(
+        "barsukas_llm_tokens_total",
+        "Total number of tokens processed by LLM calls",
+        ["backend", "model", "direction"],
+        registry=REGISTRY,
+    )
+
+    # Resource usage metrics
+    CPU_USAGE = Gauge(
+        "barsukas_process_cpu_percent",
+        "Current CPU usage percentage of the Barsukas process",
+        registry=REGISTRY,
+    )
+
+    MEMORY_USAGE_BYTES = Gauge(
+        "barsukas_process_memory_bytes",
+        "Current memory usage in bytes of the Barsukas process",
+        ["type"],
+        registry=REGISTRY,
+    )
+
+    MEMORY_USAGE_PERCENT = Gauge(
+        "barsukas_process_memory_percent",
+        "Current memory usage percentage of the Barsukas process",
+        registry=REGISTRY,
+    )
+
+    # Process info
+    PROCESS_START_TIME = Gauge(
+        "barsukas_process_start_time_seconds",
+        "Start time of the Barsukas process (Unix timestamp)",
+        registry=REGISTRY,
+    )
+
+    OPEN_FILE_DESCRIPTORS = Gauge(
+        "barsukas_process_open_fds",
+        "Number of open file descriptors",
+        registry=REGISTRY,
+    )
+else:
+    REGISTRY = None  # type: ignore[assignment]
+    REQUEST_COUNT = _NOOP  # type: ignore[assignment]
+    REQUEST_LATENCY = _NOOP  # type: ignore[assignment]
+    DB_QUERY_LATENCY = _NOOP  # type: ignore[assignment]
+    DB_QUERY_COUNT = _NOOP  # type: ignore[assignment]
+    LLM_CALL_COUNT = _NOOP  # type: ignore[assignment]
+    LLM_CALL_LATENCY = _NOOP  # type: ignore[assignment]
+    LLM_TOKENS_TOTAL = _NOOP  # type: ignore[assignment]
+    CPU_USAGE = _NOOP  # type: ignore[assignment]
+    MEMORY_USAGE_BYTES = _NOOP  # type: ignore[assignment]
+    MEMORY_USAGE_PERCENT = _NOOP  # type: ignore[assignment]
+    PROCESS_START_TIME = _NOOP  # type: ignore[assignment]
+    OPEN_FILE_DESCRIPTORS = _NOOP  # type: ignore[assignment]
 
 
 def update_resource_metrics() -> None:
     """Update resource usage metrics.
 
     This should be called periodically or before generating metrics output.
+    Requires psutil to be installed; silently does nothing if unavailable.
     """
+    if not HAS_PSUTIL:
+        return
+
     process = psutil.Process()
 
     # CPU usage (percent since last call)
@@ -151,8 +200,11 @@ def get_metrics_output() -> bytes:
     """Generate Prometheus metrics output.
 
     Returns:
-        Prometheus metrics in text format as bytes.
+        Prometheus metrics in text format as bytes, or an empty response
+        if prometheus_client is not installed.
     """
+    if not HAS_PROMETHEUS:
+        return b""
     update_resource_metrics()
     return generate_latest(REGISTRY)  # type: ignore[no-any-return]
 
