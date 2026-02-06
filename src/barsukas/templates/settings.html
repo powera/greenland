@@ -7,6 +7,22 @@
     <h1><i class="bi bi-gear"></i> Settings</h1>
     <p class="text-muted">Configure storage backends and export database to different formats</p>
 
+    {% if not config.get('ALLOW_OUTBOUND_CALLS', True) %}
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2 class="mb-0"><i class="bi bi-github"></i> About Barsukas</h2>
+        </div>
+        <div class="card-body">
+            <p>Barsukas is the web interface for a multilingual linguistic database used by the Trakaido language-learning app.</p>
+            <p>
+                <a href="https://github.com/powera/greenland/" class="btn btn-outline-dark" target="_blank" rel="noopener">
+                    <i class="bi bi-github"></i> View source on GitHub
+                </a>
+            </p>
+        </div>
+    </div>
+    {% endif %}
+
     {% if config.get('ALLOW_RESTART', True) %}
     <div class="card mb-4">
         <div class="card-header">

@@ -22,7 +22,9 @@
                             {% endif %}
                             {% if needs_disambiguation_check %}
                             <form method="post" action="{{ url_for('agents.check_disambiguation', lemma_id=lemma.id) }}" style="display: inline;">
-                                <button type="submit" class="btn btn-sm btn-outline-warning" title="Other lemmas exist with this word - check if disambiguation is needed">
+                                <button type="submit" class="btn btn-sm btn-outline-warning"
+                                        title="{% if config.get('ALLOW_OUTBOUND_CALLS', True) %}Other lemmas exist with this word - check if disambiguation is needed{% else %}Not available in hosted mode{% endif %}"
+                                        {% if not config.get('ALLOW_OUTBOUND_CALLS', True) %}disabled{% endif %}>
                                     <i class="bi bi-exclamation-triangle"></i> Check Disambiguation
                                 </button>
                             </form>
@@ -31,7 +33,9 @@
                         <p class="lead lemma-definition">
                             {{ lemma.definition_text }}
                             <form method="post" action="{{ url_for('agents.check_definition', lemma_id=lemma.id) }}" style="display: inline;">
-                                <button type="submit" class="btn btn-sm btn-outline-primary" title="Check/improve definition using AI">
+                                <button type="submit" class="btn btn-sm btn-outline-primary"
+                                        title="{% if config.get('ALLOW_OUTBOUND_CALLS', True) %}Check/improve definition using AI{% else %}Not available in hosted mode{% endif %}"
+                                        {% if not config.get('ALLOW_OUTBOUND_CALLS', True) %}disabled{% endif %}>
                                     <i class="bi bi-robot"></i> Validate Definition
                                 </button>
                             </form>

@@ -5,18 +5,27 @@
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span><i class="bi bi-file-text"></i> Grammatical Forms & Pronunciations</span>
                 <div>
-                    <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#generateFormsModal">
+                    <button type="button" class="btn btn-sm btn-success"
+                            {% if config.get('ALLOW_OUTBOUND_CALLS', True) %}
+                            data-bs-toggle="modal" data-bs-target="#generateFormsModal"
+                            {% else %}
+                            disabled title="Not available in hosted mode"
+                            {% endif %}>
                         <i class="bi bi-plus-circle"></i> Generate Forms
                     </button>
                     {% if forms_by_language and forms_by_language.get('en') %}
                         <form method="post" action="{{ url_for('agents.check_pronunciations', lemma_id=lemma.id) }}" style="display: inline;">
-                            <button type="submit" class="btn btn-sm btn-light" title="Check pronunciations using AI">
+                            <button type="submit" class="btn btn-sm btn-light"
+                                    title="{% if config.get('ALLOW_OUTBOUND_CALLS', True) %}Check pronunciations using AI{% else %}Not available in hosted mode{% endif %}"
+                                    {% if not config.get('ALLOW_OUTBOUND_CALLS', True) %}disabled{% endif %}>
                                 <i class="bi bi-robot"></i> Check Pronunciations
                             </button>
                         </form>
                         <form method="post" action="{{ url_for('agents.generate_pronunciations', lemma_id=lemma.id) }}" style="display: inline;">
                             <input type="hidden" name="lang_code" value="en">
-                            <button type="submit" class="btn btn-sm btn-success" title="Generate missing pronunciations using AI">
+                            <button type="submit" class="btn btn-sm btn-success"
+                                    title="{% if config.get('ALLOW_OUTBOUND_CALLS', True) %}Generate missing pronunciations using AI{% else %}Not available in hosted mode{% endif %}"
+                                    {% if not config.get('ALLOW_OUTBOUND_CALLS', True) %}disabled{% endif %}>
                                 <i class="bi bi-volume-up"></i> Generate Pronunciations
                             </button>
                         </form>
