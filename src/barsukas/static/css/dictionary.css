@@ -45,6 +45,17 @@
     cursor: default;
 }
 
+/* Category dropdown bar */
+.dict-category-bar {
+    background: #f8f9fa;
+    padding: 0.4rem;
+    border-radius: 0.25rem;
+}
+
+.dict-category-select {
+    max-width: 20rem;
+}
+
 /* Main dictionary table */
 .dict-page {
     background: #fff;

@@ -14,6 +14,13 @@ from flask.typing import ResponseReturnValue
 from sqlalchemy import func
 from sqlalchemy.orm import Query
 
+from barsukas.routes.categories import (
+    ADJECTIVE_GROUPS,
+    ADVERB_GROUPS,
+    NOUN_GROUPS,
+    SUBTYPE_DESCRIPTIONS,
+    VERB_GROUPS,
+)
 from langtools.collation import LATIN_SORT_KEY_LANGUAGES
 from langtools.ja.gojuon import KANA_TO_ROW, ROW_INITIALS, ROW_MEMBERS
 from wordfreq.storage.models.schema import Lemma, LemmaTranslation
@@ -67,6 +74,24 @@ _CJK_SORT_KEY_LANGUAGES = frozenset({"zh", "ja", "ko"})
 
 # All languages that use sort_key for ORDER BY (CJK + accented Latin).
 _SORT_KEY_LANGUAGES = _CJK_SORT_KEY_LANGUAGES | LATIN_SORT_KEY_LANGUAGES
+
+# Groups for building the category dropdown, keyed by POS type.
+_POS_SUBTYPE_GROUPS: Dict[str, Dict[str, List[str]]] = {
+    "noun": NOUN_GROUPS,
+    "verb": VERB_GROUPS,
+    "adjective": ADJECTIVE_GROUPS,
+    "adverb": ADVERB_GROUPS,
+    "numeral": {"Numerals": ["cardinal", "ordinal"]},
+}
+
+# Display names for the POS type headers in the dropdown.
+_POS_DISPLAY_NAMES: Dict[str, str] = {
+    "noun": "Nouns",
+    "verb": "Verbs",
+    "adjective": "Adjectives",
+    "adverb": "Adverbs",
+    "numeral": "Numerals",
+}
 
 
 def _get_display_langs(source_lang: str) -> List[str]:
@@ -147,6 +172,21 @@ def _query_by_level(lang: str, level: int) -> Query:  # type: ignore[type-arg]
     return q.order_by(func.lower(LemmaTranslation.translation), Lemma.id)
 
 
+def _query_by_category(
+    lang: str, pos_type: str, pos_subtype: str
+) -> Query:  # type: ignore[type-arg]
+    """Query filtered to a single POS category (type + subtype)."""
+    q = _base_query_for_lang(lang).filter(
+        Lemma.pos_type == pos_type,
+        Lemma.pos_subtype == pos_subtype,
+    )
+    if lang == "en":
+        return q.order_by(func.lower(Lemma.lemma_text), Lemma.id)
+    if lang in _SORT_KEY_LANGUAGES:
+        return q.order_by(LemmaTranslation.sort_key, Lemma.id)
+    return q.order_by(func.lower(LemmaTranslation.translation), Lemma.id)
+
+
 # ---------------------------------------------------------------------------
 # Available-item helpers (for navigation bars)
 # ---------------------------------------------------------------------------
@@ -220,6 +260,57 @@ def _available_levels() -> set[int]:
     return {r[0] for r in rows}
 
 
+def _available_categories() -> set[Tuple[str, str]]:
+    """Return the set of (pos_type, pos_subtype) pairs that have entries."""
+    rows = (
+        g.db.query(Lemma.pos_type, Lemma.pos_subtype)
+        .filter(
+            Lemma.guid.isnot(None),
+            Lemma.pos_type.isnot(None),
+            Lemma.pos_subtype.isnot(None),
+        )
+        .distinct()
+        .all()
+    )
+    return {(r[0], r[1]) for r in rows}
+
+
+def _build_category_options(
+    available: set[Tuple[str, str]],
+) -> List[Dict[str, Any]]:
+    """Build a grouped list of category options for the dropdown.
+
+    Returns a list of dicts, each with:
+      - pos_type: POS type key (e.g. "noun")
+      - label: Display label for the optgroup (e.g. "Nouns")
+      - items: list of dicts with value, display_name, description
+    """
+    result: List[Dict[str, Any]] = []
+    for pos_type in ("noun", "verb", "adjective", "adverb", "numeral"):
+        groups = _POS_SUBTYPE_GROUPS.get(pos_type, {})
+        descriptions = SUBTYPE_DESCRIPTIONS.get(pos_type, {})
+        items: List[Dict[str, str]] = []
+        for _group_name, subtypes in groups.items():
+            for subtype in subtypes:
+                if (pos_type, subtype) in available:
+                    items.append(
+                        {
+                            "value": f"{pos_type}:{subtype}",
+                            "display_name": subtype.replace("_", " ").title(),
+                            "description": descriptions.get(subtype, ""),
+                        }
+                    )
+        if items:
+            result.append(
+                {
+                    "pos_type": pos_type,
+                    "label": _POS_DISPLAY_NAMES.get(pos_type, pos_type.title()),
+                    "items": items,
+                }
+            )
+    return result
+
+
 # ---------------------------------------------------------------------------
 # Main view
 # ---------------------------------------------------------------------------
@@ -236,7 +327,7 @@ def dictionary() -> ResponseReturnValue:
     valid_codes = {code for code, _ in DICTIONARY_SOURCE_LANGUAGES}
     if lang not in valid_codes:
         lang = "en"
-    if sort not in ("alpha", "level"):
+    if sort not in ("alpha", "level", "category"):
         sort = "alpha"
 
     display_langs = _get_display_langs(lang)
@@ -244,7 +335,33 @@ def dictionary() -> ResponseReturnValue:
 
     # --- Build query based on sort mode ---
 
-    if sort == "level":
+    # Defaults for template vars that only apply to specific modes.
+    selected_level: Optional[int] = None
+    level_list: List[int] = []
+    letter = alphabet[0] if alphabet else "A"
+    available_letters: set[str] = set()
+    category_options: List[Dict[str, Any]] = []
+    selected_category: Optional[str] = None
+
+    if sort == "category":
+        available = _available_categories()
+        category_options = _build_category_options(available)
+        selected_category = request.args.get("category", "").strip()
+
+        # Validate selected_category is a real option.
+        all_values = {item["value"] for group in category_options for item in group["items"]}
+        if selected_category not in all_values:
+            # Default to the first available category.
+            selected_category = category_options[0]["items"][0]["value"] if category_options else ""
+
+        if ":" in selected_category:
+            cat_pos_type, cat_subtype = selected_category.split(":", 1)
+            base_query = _query_by_category(lang, cat_pos_type, cat_subtype)
+        else:
+            # Fallback: show nothing if no categories exist.
+            base_query = _base_query_for_lang(lang).filter(Lemma.id < 0)
+
+    elif sort == "level":
         available_levels = _available_levels()
         selected_level = request.args.get("level", None, type=int)
         if selected_level not in available_levels:
@@ -252,10 +369,6 @@ def dictionary() -> ResponseReturnValue:
         level_list = sorted(available_levels)
 
         base_query = _query_by_level(lang, selected_level)
-
-        # Template vars specific to level mode.
-        letter = alphabet[0] if alphabet else "A"
-        available_letters: set[str] = set()
     else:
         letter = request.args.get("letter", "").strip()
         if lang not in _CJK_SORT_KEY_LANGUAGES:
@@ -265,10 +378,6 @@ def dictionary() -> ResponseReturnValue:
 
         base_query = _query_by_letter(lang, letter)
         available_letters = _available_letters(lang)
-
-        # Template vars specific to alpha mode.
-        selected_level = None
-        level_list = []
 
     # --- Paginate ---
 
@@ -326,6 +435,8 @@ def dictionary() -> ResponseReturnValue:
         sort=sort,
         selected_level=selected_level,
         level_list=level_list,
+        selected_category=selected_category,
+        category_options=category_options,
         page=page,
         total=total,
         total_pages=total_pages,
