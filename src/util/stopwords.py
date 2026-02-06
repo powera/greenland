@@ -103,6 +103,9 @@ stopwords = {
         "though",
         "so",
         "than",
+        "since",
+        "till",
+        "nor",
     ],
     "determiners": [
         "a",
