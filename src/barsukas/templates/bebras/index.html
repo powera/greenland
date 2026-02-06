@@ -71,6 +71,12 @@
                         <i class="bi bi-check2-all me-2"></i>Translation Verification
                     </button>
                 </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="duplicates-tab" data-bs-toggle="tab"
+                            data-bs-target="#duplicates-pane" type="button" role="tab">
+                        <i class="bi bi-files me-2"></i>Duplicate Words
+                    </button>
+                </li>
             </ul>
 
             <!-- Tab content -->
@@ -81,8 +87,12 @@
                     <div class="card border-top-0 rounded-top-0">
                         <div class="card-body">
                             <p class="text-muted mb-4">
-                                Add example sentences and automatically link them to vocabulary words.
-                                The system analyzes each sentence to identify which dictionary words it contains.
+                                Given a sentence, uses an LLM to identify the vocabulary lemmas it
+                                contains, then creates database links between the sentence and those
+                                lemmas. Use <strong>Single Sentence</strong> for one-off additions or
+                                <strong>From File</strong> to batch-process a text file (one sentence
+                                per line). Translations into the selected target languages are
+                                generated at the same time.
                             </p>
 
                             <!-- Sub-tabs for single vs file -->
@@ -240,8 +250,11 @@
                     <div class="card border-top-0 rounded-top-0">
                         <div class="card-body">
                             <p class="text-muted mb-4">
-                                Scan the database for data problems: missing translations, broken references
-                                between records, incomplete entries, and other quality issues that need fixing.
+                                Scan the database for structural problems. Choose a specific check
+                                below or run them all at once. Checks marked with
+                                <strong>Fix Issues</strong> support auto-repair (currently:
+                                missing punctuation and sentence levels). Results stream in real
+                                time so you can watch progress on large databases.
                             </p>
 
                             <form method="post" action="{{ url_for('bebras.check_integrity') }}">
@@ -310,9 +323,13 @@
                     <div class="card border-top-0 rounded-top-0">
                         <div class="card-body">
                             <p class="text-muted mb-4">
-                                Use AI to check if existing translations are correct. This reviews translations
-                                without regenerating them, marking each as verified or flagging problems.
-                                Batch processing available for large-scale verification at lower cost.
+                                Ask an LLM to review existing translations and judge whether they are
+                                correct. Translations are <em>not</em> regenerated &mdash; the model
+                                only gives a correct/incorrect verdict so you can spot problems.
+                                Use <strong>Verify Words</strong> for lemma translations or
+                                <strong>Verify Sentences</strong> for sentence translations.
+                                For large runs, enable the <strong>OpenAI Batch API</strong> option
+                                to queue requests at 50% cost.
                             </p>
 
                             <!-- Sub-tabs for words vs sentences -->
@@ -522,6 +539,27 @@
                                 </div>
                                 <code id="verify-cli">PYTHONPATH=src python src/agents/bebras.py --verify words --languages lt zh fr es --limit 100</code>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Duplicate Words Tab -->
+                <div class="tab-pane fade" id="duplicates-pane" role="tabpanel">
+                    <div class="card border-top-0 rounded-top-0">
+                        <div class="card-body">
+                            <p class="text-muted mb-4">
+                                Find lemmas that share the same headword and part of speech.
+                                These are likely accidental duplicates that should be merged.
+                                Lemmas intentionally distinguished by a disambiguation tag
+                                (e.g. "mouse (animal)" vs "mouse (computer)") are <em>not</em>
+                                flagged.
+                            </p>
+
+                            <form method="post" action="{{ url_for('bebras.find_duplicates') }}">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-search me-2"></i>Scan for Duplicate Words
+                                </button>
+                            </form>
                         </div>
                     </div>
                 </div>

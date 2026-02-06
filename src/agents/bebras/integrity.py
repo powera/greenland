@@ -358,6 +358,95 @@ class IntegrityChecker:
         finally:
             session.close()
 
+    def check_duplicate_words(self) -> Dict[str, Any]:
+        """Check for duplicate lemmas sharing the same text and part of speech.
+
+        Finds groups of lemmas that have the same (lemma_text, pos_type) and
+        either both lack a disambiguation or share the same disambiguation.
+        These are likely unintentional duplicates that should be merged.
+
+        Lemmas that differ only in disambiguation (e.g. "mouse (animal)" vs
+        "mouse (computer)") are intentional and excluded from this check.
+        """
+        logger.info("Checking for duplicate words...")
+
+        session = self.get_session()
+        try:
+            from sqlalchemy import func
+
+            # Find (lemma_text, pos_type, disambiguation) groups with more
+            # than one lemma.  We coalesce NULL disambiguation to empty string
+            # so that two NULL disambiguations are treated as equal.
+            coalesced_disambig = func.coalesce(Lemma.disambiguation, "")
+
+            dup_groups = (
+                session.query(
+                    Lemma.lemma_text,
+                    Lemma.pos_type,
+                    coalesced_disambig.label("disambig"),
+                    func.count(Lemma.id).label("cnt"),
+                )
+                .group_by(Lemma.lemma_text, Lemma.pos_type, coalesced_disambig)
+                .having(func.count(Lemma.id) > 1)
+                .all()
+            )
+
+            duplicates: List[Dict[str, Any]] = []
+            for lemma_text, pos_type, disambig, cnt in dup_groups:
+                # Fetch the actual lemmas in this group
+                query = session.query(Lemma).filter(
+                    Lemma.lemma_text == lemma_text,
+                    Lemma.pos_type == pos_type,
+                )
+                if disambig:
+                    query = query.filter(Lemma.disambiguation == disambig)
+                else:
+                    query = query.filter(
+                        (Lemma.disambiguation.is_(None)) | (Lemma.disambiguation == "")
+                    )
+
+                lemmas = query.all()
+                duplicates.append(
+                    {
+                        "lemma_text": lemma_text,
+                        "pos_type": pos_type,
+                        "disambiguation": disambig or None,
+                        "count": len(lemmas),
+                        "lemmas": [
+                            {
+                                "id": lemma.id,
+                                "guid": lemma.guid,
+                                "definition_text": lemma.definition_text,
+                                "difficulty_level": lemma.difficulty_level,
+                                "verified": lemma.verified,
+                            }
+                            for lemma in lemmas
+                        ],
+                    }
+                )
+
+            logger.info(
+                f"Found {len(duplicates)} groups of duplicate words "
+                f"({sum(d['count'] for d in duplicates)} total lemmas)"
+            )
+
+            return {
+                "duplicate_group_count": len(duplicates),
+                "total_duplicate_lemmas": sum(d["count"] for d in duplicates),
+                "duplicates": duplicates,
+            }
+
+        except Exception as e:
+            logger.error(f"Error checking duplicate words: {e}")
+            return {
+                "error": str(e),
+                "duplicate_group_count": 0,
+                "total_duplicate_lemmas": 0,
+                "duplicates": [],
+            }
+        finally:
+            session.close()
+
     def check_invalid_difficulty_levels(self) -> Dict[str, Any]:
         """Check for difficulty levels outside the valid range (1-20)."""
         logger.info("Checking for invalid difficulty levels...")
@@ -620,6 +709,7 @@ class IntegrityChecker:
                 "missing_required_fields": self.check_missing_required_fields(),
                 "lemmas_without_derivatives": self.check_lemmas_without_derivatives(),
                 "duplicate_guids": self.check_duplicate_guids(),
+                "duplicate_words": self.check_duplicate_words(),
                 "invalid_difficulty_levels": self.check_invalid_difficulty_levels(),
                 "sentences_missing_punctuation": self.check_sentences_missing_punctuation(),
                 "sentence_levels": self.check_sentence_levels(),
@@ -681,6 +771,12 @@ class IntegrityChecker:
         logger.info(f"  Count: {checks['duplicate_guids']['duplicate_count']}")
         logger.info("")
 
+        dup_words = checks["duplicate_words"]
+        logger.info("DUPLICATE WORDS:")
+        logger.info(f"  Groups: {dup_words['duplicate_group_count']}")
+        logger.info(f"  Total duplicate lemmas: {dup_words['total_duplicate_lemmas']}")
+        logger.info("")
+
         logger.info("INVALID DIFFICULTY LEVELS:")
         logger.info(f"  Count: {checks['invalid_difficulty_levels']['invalid_count']}")
         logger.info("")
@@ -704,6 +800,7 @@ class IntegrityChecker:
             + missing_fields["total_issues"]
             + checks["lemmas_without_derivatives"]["without_forms_count"]
             + checks["duplicate_guids"]["duplicate_count"]
+            + dup_words["duplicate_group_count"]
             + checks["invalid_difficulty_levels"]["invalid_count"]
             + missing_punct["missing_count"]
             + sentence_levels["issue_count"]
@@ -727,6 +824,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
             "missing-fields",
             "no-derivatives",
             "duplicates",
+            "duplicate-words",
             "invalid-levels",
             "missing-punctuation",
             "sentence-levels",
@@ -780,6 +878,27 @@ def main() -> None:
     elif args.check == "duplicates":
         results = checker.check_duplicate_guids()
         print(f"\nDuplicate GUIDs: {results['duplicate_count']}")
+
+    elif args.check == "duplicate-words":
+        results = checker.check_duplicate_words()
+        print(
+            f"\nDuplicate word groups: {results['duplicate_group_count']} "
+            f"({results['total_duplicate_lemmas']} total lemmas)"
+        )
+        dup_list = cast(List[Dict[str, Any]], results.get("duplicates") or [])
+        if dup_list:
+            print("\nDuplicate groups:")
+            for group in dup_list[:20]:
+                disambig_str = (
+                    f" ({group['disambiguation']})" if group.get("disambiguation") else ""
+                )
+                print(
+                    f"  '{group['lemma_text']}' [{group['pos_type']}]{disambig_str} "
+                    f"x{group['count']}:"
+                )
+                for lem in group["lemmas"]:
+                    guid_str = lem["guid"] or "no GUID"
+                    print(f"    id={lem['id']} {guid_str}: {lem['definition_text'][:60]}")
 
     elif args.check == "invalid-levels":
         results = checker.check_invalid_difficulty_levels()

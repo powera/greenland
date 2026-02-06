@@ -142,6 +142,22 @@
     color: #74c0fc;
 }
 
+/* Duplicate group cards */
+.dup-group-card .card-header {
+    background-color: #f8f9fa;
+}
+
+.dup-group-card table th {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #6c757d;
+}
+
+.dup-group-card table td {
+    vertical-align: middle;
+}
+
 /* Mobile responsiveness */
 @media (max-width: 768px) {
     .bebras-tabs .nav-link {
