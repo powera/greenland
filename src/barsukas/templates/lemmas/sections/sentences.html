@@ -9,7 +9,12 @@
                     <a href="{{ url_for('agents.view_sentences', lemma_id=lemma.id) }}" class="btn btn-sm btn-light" title="View all sentences">
                         <i class="bi bi-list"></i> View All
                     </a>
-                    <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#generateSentencesModal">
+                    <button type="button" class="btn btn-sm btn-success"
+                            {% if config.get('ALLOW_OUTBOUND_CALLS', True) %}
+                            data-bs-toggle="modal" data-bs-target="#generateSentencesModal"
+                            {% else %}
+                            disabled title="Not available in hosted mode"
+                            {% endif %}>
                         <i class="bi bi-plus-circle"></i> Generate Sentences
                     </button>
                 </div>

@@ -6,12 +6,16 @@
                 <span><i class="bi bi-translate"></i> Translations</span>
                 <div>
                     <form method="post" action="{{ url_for('agents.check_translations', lemma_id=lemma.id) }}" style="display: inline;">
-                        <button type="submit" class="btn btn-sm btn-light" title="Check translations using AI">
+                        <button type="submit" class="btn btn-sm btn-light"
+                                title="{% if config.get('ALLOW_OUTBOUND_CALLS', True) %}Check translations using AI{% else %}Not available in hosted mode{% endif %}"
+                                {% if not config.get('ALLOW_OUTBOUND_CALLS', True) %}disabled{% endif %}>
                             <i class="bi bi-robot"></i> Check Translations
                         </button>
                     </form>
                     <form method="post" action="{{ url_for('agents.add_missing_translations', lemma_id=lemma.id) }}" style="display: inline;">
-                        <button type="submit" class="btn btn-sm btn-success" title="Add missing translations using AI">
+                        <button type="submit" class="btn btn-sm btn-success"
+                                title="{% if config.get('ALLOW_OUTBOUND_CALLS', True) %}Add missing translations using AI{% else %}Not available in hosted mode{% endif %}"
+                                {% if not config.get('ALLOW_OUTBOUND_CALLS', True) %}disabled{% endif %}>
                             <i class="bi bi-plus-circle"></i> Add Missing Translations
                         </button>
                     </form>

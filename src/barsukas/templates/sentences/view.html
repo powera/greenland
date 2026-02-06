@@ -213,7 +213,12 @@
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span><i class="bi bi-translate"></i> Translations</span>
-                <button class="btn btn-sm btn-primary" data-bs-toggle="collapse" data-bs-target="#translateForm">
+                <button class="btn btn-sm btn-primary"
+                        {% if config.get('ALLOW_OUTBOUND_CALLS', True) %}
+                        data-bs-toggle="collapse" data-bs-target="#translateForm"
+                        {% else %}
+                        disabled title="Not available in hosted mode"
+                        {% endif %}>
                     <i class="bi bi-plus-circle"></i> Add Translation
                 </button>
             </div>
@@ -304,7 +309,12 @@
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span><i class="bi bi-music-note-beamed"></i> Audio Files</span>
-                <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#generateSentenceAudioModal">
+                <button type="button" class="btn btn-sm btn-success"
+                        {% if config.get('ALLOW_OUTBOUND_CALLS', True) %}
+                        data-bs-toggle="modal" data-bs-target="#generateSentenceAudioModal"
+                        {% else %}
+                        disabled title="Not available in hosted mode"
+                        {% endif %}>
                     <i class="bi bi-mic-fill"></i> Generate Audio
                 </button>
             </div>

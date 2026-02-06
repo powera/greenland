@@ -53,6 +53,11 @@ class JSONLStorage(BaseStorage):
         # Track if data is loaded
         self._loaded = False
 
+        # Cached SQLite engine (shared across sessions for read-only mode).
+        # Populated once on first query, then reused for all subsequent sessions.
+        self._cached_sqlite_engine: Optional[Any] = None
+        self._sqlite_populated = False
+
     def ensure_initialized(self) -> None:
         """Ensure directory structure exists and data is loaded."""
         self._ensure_directories()

@@ -6,7 +6,12 @@
                 <span><i class="bi bi-card-list"></i> Grammar Facts</span>
                 {% if lemma.pos_type == 'noun' %}
                 <div>
-                    <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#generateGrammarFactModal">
+                    <button type="button" class="btn btn-sm btn-success"
+                            {% if config.get('ALLOW_OUTBOUND_CALLS', True) %}
+                            data-bs-toggle="modal" data-bs-target="#generateGrammarFactModal"
+                            {% else %}
+                            disabled title="Not available in hosted mode"
+                            {% endif %}>
                         <i class="bi bi-plus-circle"></i> Generate Grammar Fact
                     </button>
                 </div>

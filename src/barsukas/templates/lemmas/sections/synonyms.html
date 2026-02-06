@@ -5,7 +5,12 @@
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span><i class="bi bi-shuffle"></i> Synonyms & Alternative Forms</span>
                 <div>
-                    <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#generateSynonymsModal">
+                    <button type="button" class="btn btn-sm btn-success"
+                            {% if config.get('ALLOW_OUTBOUND_CALLS', True) %}
+                            data-bs-toggle="modal" data-bs-target="#generateSynonymsModal"
+                            {% else %}
+                            disabled title="Not available in hosted mode"
+                            {% endif %}>
                         <i class="bi bi-plus-circle"></i> Generate Synonyms
                     </button>
                 </div>

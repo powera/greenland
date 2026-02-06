@@ -38,67 +38,101 @@ class JSONLSession(BaseSession):
     def _get_sqlite_session(self) -> Any:
         """Get or create a SQLite session for complex queries.
 
+        Uses a cached SQLite engine from the storage instance so the in-memory
+        database is populated once and reused across requests.
+
         Returns:
-            A SQLAlchemy session connected to a temporary SQLite database
+            A SQLAlchemy session connected to the cached in-memory SQLite database
         """
         if self._sqlite_session is None:
-            import logging
+            engine = self._get_or_create_cached_engine()
 
-            from sqlalchemy import create_engine
             from sqlalchemy.orm import sessionmaker
 
-            from wordfreq.storage.models.schema import Base
-
-            logger = logging.getLogger(__name__)
-            logger.info("Creating temporary in-memory SQLite database for JSONL backend queries")
-
-            # Create in-memory SQLite database
-            engine = create_engine("sqlite:///:memory:", echo=False)
-            Base.metadata.create_all(engine)
-
-            Session = sessionmaker(bind=engine)
-            self._sqlite_session = Session()
-            assert self._sqlite_session is not None  # For type checking
-
-            # Populate with data from JSONL storage
-            self._populate_sqlite()
-
-            # Log statistics about what was loaded
-            from wordfreq.storage.models.grammar_fact import GrammarFact as SQLGrammarFact
-            from wordfreq.storage.models.lemma_relation import (
-                LemmaRelationGroup as SQLLemmaRelationGroup,
-            )
-            from wordfreq.storage.models.lemma_relation import (
-                LemmaRelationMember as SQLLemmaRelationMember,
-            )
-            from wordfreq.storage.models.schema import Lemma as SQLLemma
-            from wordfreq.storage.models.schema import LemmaTranslation
-            from wordfreq.storage.models.schema import Sentence as SQLSentence
-            from wordfreq.storage.models.schema import SentenceTranslation, SentenceWord
-
-            assert self._sqlite_session is not None  # For type checking
-            lemma_count = self._sqlite_session.query(SQLLemma).count()
-            translation_count = self._sqlite_session.query(LemmaTranslation).count()
-            grammar_fact_count = self._sqlite_session.query(SQLGrammarFact).count()
-            relation_group_count = self._sqlite_session.query(SQLLemmaRelationGroup).count()
-            relation_member_count = self._sqlite_session.query(SQLLemmaRelationMember).count()
-            sentence_count = self._sqlite_session.query(SQLSentence).count()
-            sentence_translation_count = self._sqlite_session.query(SentenceTranslation).count()
-            sentence_word_count = self._sqlite_session.query(SentenceWord).count()
-
-            logger.info(
-                f"Populated temp SQLite DB: "
-                f"{lemma_count} lemmas, "
-                f"{translation_count} translations, "
-                f"{grammar_fact_count} grammar_facts, "
-                f"{relation_group_count} relation_groups, "
-                f"{relation_member_count} relation_members, "
-                f"{sentence_count} sentences, "
-                f"{sentence_translation_count} sentence_translations, "
-                f"{sentence_word_count} sentence_words"
-            )
+            SessionFactory = sessionmaker(bind=engine)
+            self._sqlite_session = SessionFactory()
 
         return self._sqlite_session
+
+    def _get_or_create_cached_engine(self) -> Any:
+        """Get or create a cached SQLite engine from the storage instance.
+
+        The engine and its data are created once and shared across all sessions
+        for the same storage instance. This avoids re-populating the in-memory
+        SQLite DB on every request.
+
+        Returns:
+            A SQLAlchemy engine connected to the cached in-memory SQLite database
+        """
+        if self._storage._cached_sqlite_engine is not None:
+            return self._storage._cached_sqlite_engine
+
+        import logging
+
+        from sqlalchemy import create_engine
+        from sqlalchemy.orm import sessionmaker
+        from sqlalchemy.pool import StaticPool
+
+        from wordfreq.storage.models.schema import Base
+
+        logger = logging.getLogger(__name__)
+        logger.info("Creating cached in-memory SQLite database for JSONL backend queries")
+
+        # Use StaticPool so all sessions share the same in-memory database
+        engine = create_engine(
+            "sqlite:///:memory:",
+            echo=False,
+            connect_args={"check_same_thread": False},
+            poolclass=StaticPool,
+        )
+        Base.metadata.create_all(engine)
+
+        # Populate the database using a temporary session
+        TempSessionFactory = sessionmaker(bind=engine)
+        temp_session = TempSessionFactory()
+        self._sqlite_session = temp_session
+        self._populate_sqlite()
+
+        # Log statistics about what was loaded
+        from wordfreq.storage.models.grammar_fact import GrammarFact as SQLGrammarFact
+        from wordfreq.storage.models.lemma_relation import (
+            LemmaRelationGroup as SQLLemmaRelationGroup,
+        )
+        from wordfreq.storage.models.lemma_relation import (
+            LemmaRelationMember as SQLLemmaRelationMember,
+        )
+        from wordfreq.storage.models.schema import Lemma as SQLLemma
+        from wordfreq.storage.models.schema import LemmaTranslation
+        from wordfreq.storage.models.schema import Sentence as SQLSentence
+        from wordfreq.storage.models.schema import SentenceTranslation, SentenceWord
+
+        assert temp_session is not None  # For type checking
+        lemma_count = temp_session.query(SQLLemma).count()
+        translation_count = temp_session.query(LemmaTranslation).count()
+        grammar_fact_count = temp_session.query(SQLGrammarFact).count()
+        relation_group_count = temp_session.query(SQLLemmaRelationGroup).count()
+        relation_member_count = temp_session.query(SQLLemmaRelationMember).count()
+        sentence_count = temp_session.query(SQLSentence).count()
+        sentence_translation_count = temp_session.query(SentenceTranslation).count()
+        sentence_word_count = temp_session.query(SentenceWord).count()
+
+        logger.info(
+            f"Populated cached SQLite DB: "
+            f"{lemma_count} lemmas, "
+            f"{translation_count} translations, "
+            f"{grammar_fact_count} grammar_facts, "
+            f"{relation_group_count} relation_groups, "
+            f"{relation_member_count} relation_members, "
+            f"{sentence_count} sentences, "
+            f"{sentence_translation_count} sentence_translations, "
+            f"{sentence_word_count} sentence_words"
+        )
+
+        # Cache the engine in storage for reuse by future sessions
+        self._storage._cached_sqlite_engine = engine
+        self._storage._sqlite_populated = True
+
+        return engine
 
     def _get_model_map(self) -> Dict[Type[Any], Type[Any]]:
         """Get mapping from JSONL model classes to SQLAlchemy model classes.
