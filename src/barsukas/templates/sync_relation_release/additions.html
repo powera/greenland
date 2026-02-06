@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}Sync - New Relation Groups{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('sync_relation_release.index') }}">Sync Relations</a></li>
+                    <li class="breadcrumb-item active">Additions</li>
+                </ol>
+            </nav>
+            <h2><i class="bi bi-plus-circle text-success"></i> New Relation Groups in Release</h2>
+            <p class="text-muted">
+                Relation groups that exist in <code>data/release/lemma_relations</code> but not in the database.
+            </p>
+        </div>
+    </div>
+
+    {% if blocked %}
+    <div class="alert alert-warning">
+        <i class="bi bi-exclamation-triangle"></i> <strong>{{ blocked|length }} group(s) blocked</strong> due to missing lemma GUIDs.
+        Import the missing lemmas first via <a href="{{ url_for('sync_release.additions') }}">Lemma Sync</a>.
+        <ul class="mb-0 mt-2">
+            {% for item in blocked %}
+            <li>
+                <strong>{{ item.concept }}</strong> ({{ item.relation_type }})
+                <br><small class="text-danger">Missing: {{ item.missing_guids|join(', ') }}</small>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    {% if not additions %}
+    <div class="alert alert-success">
+        <i class="bi bi-check-circle"></i> No new relation groups to import. Database is up to date with release.
+    </div>
+    <a href="{{ url_for('sync_relation_release.index') }}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Back
+    </a>
+    {% else %}
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-list-check"></i> New Groups: {{ additions|length }}</span>
+            <div>
+                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="toggleAll(false)">
+                    Deselect All
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-success" onclick="toggleAll(true)">
+                    Select All
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <form method="post" action="{{ url_for('sync_relation_release.apply_additions') }}">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 40px;">
+                                    <input type="checkbox" id="select-all-checkbox" onchange="toggleAll(this.checked)">
+                                </th>
+                                <th>Concept</th>
+                                <th>Type</th>
+                                <th>Subtype</th>
+                                <th>Members</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in additions %}
+                            <tr>
+                                <td>
+                                    <input type="checkbox" class="item-checkbox" name="selected_keys"
+                                           value="{{ item.relation_type }}|{{ item.concept }}">
+                                </td>
+                                <td><strong>{{ item.concept }}</strong></td>
+                                <td><span class="badge bg-secondary">{{ item.relation_type }}</span></td>
+                                <td><span class="badge bg-light text-dark">{{ item.subtype }}</span></td>
+                                <td>
+                                    {% for guid in item.members %}
+                                    <code>{{ guid }}</code>{% if not loop.last %}, {% endif %}
+                                    {% endfor %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <a href="{{ url_for('sync_relation_release.index') }}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Back
+                    </a>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-plus-lg"></i> Import Selected
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function toggleAll(checked) {
+    document.querySelectorAll('.item-checkbox').forEach(function(checkbox) {
+        checkbox.checked = checked;
+    });
+    document.getElementById('select-all-checkbox').checked = checked;
+}
+</script>
+{% endblock %}

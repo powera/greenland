@@ -144,6 +144,8 @@ module = [
     # Complex benchmark runner with many dynamic patterns
     "benchmarks.run_quals",
     "benchmarks.scripts.run_all_quals",
+    # Complex SQLAlchemy query type inference issues
+    "barsukas.helpers.db_optimization",
 ]
 ignore_errors = true
 

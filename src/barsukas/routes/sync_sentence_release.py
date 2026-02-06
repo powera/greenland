@@ -4,14 +4,20 @@
 
 import json
 import logging
+from collections import defaultdict
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple
 
 from flask import Blueprint, current_app, flash, g, redirect, render_template, request, url_for
 from flask.typing import ResponseReturnValue
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import selectinload
 
 from wordfreq.storage.crud.operation_log import log_operation, log_translation_change
+from wordfreq.storage.migrate import (
+    _resolve_primary_lemma_category,
+    _sentence_to_release_record,
+    _write_jsonl_atomic,
+)
 from wordfreq.storage.models.schema import (
     ConversationSentence,
     Lemma,
@@ -135,21 +141,7 @@ def index() -> ResponseReturnValue:
     """Display sentence sync hub with links to all sync modes."""
     release_dir = _get_sentence_release_dir()
 
-    if not release_dir.exists():
-        return render_template(
-            "sync_sentence_release/index.html",
-            release_dir=str(release_dir),
-            error="Sentence release directory not found",
-            counts=None,
-        )
-
     release_sentences = _load_release_sentences(release_dir)
-    if not release_sentences:
-        return render_template(
-            "sync_sentence_release/index.html",
-            release_dir=str(release_dir),
-            counts=None,
-        )
 
     # Get all DB sentence GUIDs (excluding conversations)
     conversation_ids = _get_conversation_sentence_ids(g.db)
@@ -193,6 +185,7 @@ def index() -> ResponseReturnValue:
         "db_total": len(db_guids),
         "additions": len(additions),
         "removals": len(removals),
+        "export": len(removals),
         "level": level_diffs,
         "changes": text_changes,
         "translations": translation_diffs,
@@ -464,11 +457,6 @@ def _find_sentence_removals(
 def removals() -> ResponseReturnValue:
     """Display sentence GUIDs in SQLite that don't exist in release."""
     release_dir = _get_sentence_release_dir()
-
-    if not release_dir.exists():
-        flash(f"Sentence release directory not found: {release_dir}", "error")
-        return redirect(url_for("sync_sentence_release.index"))
-
     release_sentences = _load_release_sentences(release_dir)
 
     removals_list = _find_sentence_removals(release_sentences, g.db)
@@ -1399,3 +1387,198 @@ def _apply_release_sentence_field_updates(
         except Exception as e:
             logger.error(f"Error updating {file_path}: {e}")
             raise
+
+
+# =============================================================================
+# Export (DB sentences not yet in release JSONL)
+# =============================================================================
+
+# Map POS types to directory names (pluralized)
+_TYPE_TO_DIR: Dict[str, str] = {
+    "noun": "nouns",
+    "verb": "verbs",
+    "adjective": "adjectives",
+    "adverb": "adverbs",
+    "pronoun": "pronouns",
+    "preposition": "prepositions",
+    "conjunction": "conjunctions",
+    "interjection": "interjections",
+    "numeral": "numerals",
+    "particle": "particles",
+}
+
+
+def _find_exportable_sentences(
+    release_sentences: Dict[str, Dict[str, Any]], db_session: Any
+) -> List[Dict[str, Any]]:
+    """Find DB sentences with GUIDs not present in release files.
+
+    Returns:
+        List of dicts with sentence info for display/export.
+    """
+    conversation_ids = _get_conversation_sentence_ids(db_session)
+    all_db_rows = (
+        db_session.query(Sentence.id, Sentence.guid).filter(Sentence.guid.isnot(None)).all()
+    )
+    db_guids = set(guid for sid, guid in all_db_rows if guid and sid not in conversation_ids)
+
+    release_guids = set(release_sentences.keys())
+    export_guids = db_guids - release_guids
+
+    if not export_guids:
+        return []
+
+    exportable: List[Dict[str, Any]] = []
+    batch_size = 500
+    guid_list = list(export_guids)
+
+    for i in range(0, len(guid_list), batch_size):
+        batch = guid_list[i : i + batch_size]
+        db_sentences = db_session.query(Sentence).filter(Sentence.guid.in_(batch)).all()
+
+        for db_sentence in db_sentences:
+            english_text = _get_db_sentence_english(db_session, db_sentence)
+            exportable.append(
+                {
+                    "guid": db_sentence.guid,
+                    "sentence_id": db_sentence.id,
+                    "english_text": english_text[:120] if english_text else "",
+                    "pattern_type": db_sentence.pattern_type or "",
+                    "minimum_level": db_sentence.minimum_level,
+                }
+            )
+
+    exportable.sort(key=lambda x: x["guid"])
+    return exportable
+
+
+@bp.route("/export")
+def export() -> ResponseReturnValue:
+    """Display DB sentences that are not yet in release JSONL files."""
+    release_dir = _get_sentence_release_dir()
+    release_sentences = _load_release_sentences(release_dir)
+
+    exportable = _find_exportable_sentences(release_sentences, g.db)
+
+    return render_template(
+        "sync_sentence_release/export.html",
+        exportable=exportable,
+        release_dir=str(release_dir),
+    )
+
+
+@bp.route("/export/apply", methods=["POST"])
+def apply_export() -> ResponseReturnValue:
+    """Export selected DB sentences to release JSONL files."""
+    app: "BarsukasFlask" = current_app  # type: ignore[assignment]
+    if app.config.get("READONLY", False):
+        flash("Database is in read-only mode", "error")
+        return redirect(url_for("sync_sentence_release.export"))
+
+    selected_guids = request.form.getlist("selected_guids")
+
+    if not selected_guids:
+        flash("No sentences selected for export", "warning")
+        return redirect(url_for("sync_sentence_release.export"))
+
+    release_dir = _get_sentence_release_dir()
+
+    # Load existing release data so we can merge
+    release_sentences = _load_release_sentences(release_dir)
+
+    # Get conversation sentence IDs to exclude
+    conversation_ids = _get_conversation_sentence_ids(g.db)
+
+    # Query selected sentences with eager-loaded relationships
+    db_sentences = (
+        g.db.query(Sentence)
+        .filter(Sentence.guid.in_(selected_guids))
+        .options(
+            selectinload(Sentence.translations),
+            selectinload(Sentence.pattern_words).selectinload(SentencePatternWord.lemma),
+        )
+        .all()
+    )
+
+    # Filter out conversation sentences
+    db_sentences = [s for s in db_sentences if s.id not in conversation_ids]
+
+    if not db_sentences:
+        flash("No valid sentences found for export", "warning")
+        return redirect(url_for("sync_sentence_release.export"))
+
+    # Group new sentences by category, merging with existing release data
+    # {(pos_type, pos_subtype): {guid: record}}
+    category_records: Dict[Tuple[str, str], Dict[str, Dict[str, Any]]] = defaultdict(dict)
+
+    # Pre-load existing release records grouped by category
+    for base_file in release_dir.rglob("base.jsonl"):
+        # Determine category from path: release_dir/pos_dir/subtype/base.jsonl
+        rel_path = base_file.relative_to(release_dir)
+        parts = rel_path.parts  # e.g. ("verbs", "motion", "base.jsonl")
+        if len(parts) < 3:
+            continue
+        pos_dir = parts[0]
+        subtype = parts[1]
+        # Reverse-map directory name to pos_type
+        pos_type = pos_dir
+        for pt, dn in _TYPE_TO_DIR.items():
+            if dn == pos_dir:
+                pos_type = pt
+                break
+        category_key = (pos_type, subtype)
+        try:
+            with open(base_file, "r", encoding="utf-8") as f:
+                for line in f:
+                    stripped = line.strip()
+                    if not stripped:
+                        continue
+                    try:
+                        data = json.loads(stripped)
+                        guid = data.get("guid")
+                        if guid:
+                            category_records[category_key][guid] = data
+                    except json.JSONDecodeError:
+                        continue
+        except Exception:
+            continue
+
+    # Add new sentences to their categories
+    exported_count = 0
+    for sentence in db_sentences:
+        record = _sentence_to_release_record(sentence)
+        category = _resolve_primary_lemma_category(sentence)
+        category_records[category][sentence.guid] = record
+        exported_count += 1
+
+    # Write out all affected categories
+    for (pos_type, pos_subtype), guid_to_record in category_records.items():
+        # Only write categories that contain newly exported sentences
+        has_new = any(
+            s.guid in guid_to_record
+            for s in db_sentences
+            if _resolve_primary_lemma_category(s) == (pos_type, pos_subtype)
+        )
+        if not has_new:
+            continue
+
+        dir_name = _TYPE_TO_DIR.get(pos_type, pos_type)
+        category_dir = release_dir / dir_name / pos_subtype
+        category_dir.mkdir(parents=True, exist_ok=True)
+
+        records = sorted(guid_to_record.values(), key=lambda r: r["guid"])
+        _write_jsonl_atomic(category_dir / "base.jsonl", records)
+
+    log_operation(
+        session=g.db,
+        source="sync-release",
+        operation_type="sentence_export",
+        details={
+            "exported_count": exported_count,
+            "selected_guids": selected_guids,
+        },
+    )
+    g.db.commit()
+
+    flash(f"Exported {exported_count} sentence(s) to release files", "success")
+    return redirect(url_for("sync_sentence_release.export"))
