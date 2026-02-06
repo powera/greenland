@@ -109,11 +109,11 @@
                         <select class="form-select" id="difficulty_level" name="difficulty_level">
                             <option value="">Not set</option>
                             <option value="-1">Excluded (-1)</option>
-                            {% for i in range(1, 31) %}
+                            {% for i in range(1, config.MAX_DIFFICULTY_LEVEL + 1) %}
                                 <option value="{{ i }}">Level {{ i }}</option>
                             {% endfor %}
                         </select>
-                        <small class="form-text text-muted">Trakaido difficulty level (1-30), or -1 to exclude from wordlists</small>
+                        <small class="form-text text-muted">Trakaido difficulty level (1-{{ config.MAX_DIFFICULTY_LEVEL }}), or -1 to exclude from wordlists</small>
                     </div>
 
                     <div class="alert alert-info">

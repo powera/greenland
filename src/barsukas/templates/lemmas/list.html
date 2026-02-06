@@ -58,7 +58,7 @@
                     <option value="">All</option>
                     <option value="null" {% if difficulty == 'null' %}selected{% endif %}>No level set</option>
                     <option value="-1" {% if difficulty == '-1' %}selected{% endif %}>Excluded (-1)</option>
-                    {% for i in range(1, 31) %}
+                    {% for i in range(1, config.MAX_DIFFICULTY_LEVEL + 1) %}
                         <option value="{{ i }}" {% if difficulty == i|string %}selected{% endif %}>
                             Level {{ i }}
                         </option>

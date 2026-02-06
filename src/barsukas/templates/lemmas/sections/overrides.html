@@ -83,9 +83,9 @@
                                 <div class="col-md-3">
                                     <label for="difficulty_level" class="form-label">Difficulty Level</label>
                                     <input type="number" class="form-control" id="difficulty_level" name="difficulty_level"
-                                           min="-1" max="30" required
-                                           placeholder="-1 or 1-30">
-                                    <small class="form-text text-muted">-1 to exclude, 1-30 for level</small>
+                                           min="-1" max="{{ config.MAX_DIFFICULTY_LEVEL }}" required
+                                           placeholder="-1 or 1-{{ config.MAX_DIFFICULTY_LEVEL }}">
+                                    <small class="form-text text-muted">-1 to exclude, 1-{{ config.MAX_DIFFICULTY_LEVEL }} for level</small>
                                 </div>
                                 <div class="col-md-5">
                                     <label for="notes" class="form-label">Notes (optional)</label>
