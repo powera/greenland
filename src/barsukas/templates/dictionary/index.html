@@ -35,12 +35,23 @@
                 <option value="category" {% if sort == 'category' %}selected{% endif %}>Category</option>
             </select>
         </div>
-        {% if sort == 'alpha' %}
+        {% if sort == 'category' %}
+        <div class="col-auto">
+            <label for="category" class="form-label mb-0 small text-muted">Category</label>
+            <select class="form-select form-select-sm dict-category-select" id="category" name="category" onchange="this.form.submit()">
+                {% for group in category_options %}
+                    <optgroup label="{{ group.label }}">
+                        {% for item in group["items"] %}
+                            <option value="{{ item.value }}" {% if item.value == selected_category %}selected{% endif %}>{{ item.display_name }}</option>
+                        {% endfor %}
+                    </optgroup>
+                {% endfor %}
+            </select>
+        </div>
+        {% elif sort == 'alpha' %}
             <input type="hidden" name="letter" value="{{ letter }}">
         {% elif sort == 'level' and selected_level is not none %}
             <input type="hidden" name="level" value="{{ selected_level }}">
-        {% elif sort == 'category' and selected_category %}
-            <input type="hidden" name="category" value="{{ selected_category }}">
         {% endif %}
     </form>
 </div>
@@ -71,23 +82,6 @@
         {% endif %}
     {% endfor %}
 </nav>
-{% elif sort == 'category' %}
-<!-- Category dropdown -->
-<div class="dict-category-bar mb-3">
-    <form method="get" action="{{ url_for('peleda.dictionary') }}">
-        <input type="hidden" name="lang" value="{{ lang }}">
-        <input type="hidden" name="sort" value="category">
-        <select class="form-select form-select-sm dict-category-select" name="category" onchange="this.form.submit()">
-            {% for group in category_options %}
-                <optgroup label="{{ group.label }}">
-                    {% for item in group.items %}
-                        <option value="{{ item.value }}" {% if item.value == selected_category %}selected{% endif %}>{{ item.display_name }}</option>
-                    {% endfor %}
-                </optgroup>
-            {% endfor %}
-        </select>
-    </form>
-</div>
 {% endif %}
 
 <!-- Dictionary table -->
