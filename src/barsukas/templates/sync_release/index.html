@@ -162,9 +162,12 @@
     </div>
 
     <div class="row mt-4">
-        <div class="col">
-            <a href="{{ url_for('sync_sentence_release.index') }}" class="btn btn-outline-primary me-2">
+        <div class="col d-flex gap-2">
+            <a href="{{ url_for('sync_sentence_release.index') }}" class="btn btn-outline-primary">
                 <i class="bi bi-chat-left-text"></i> Sync Sentences
+            </a>
+            <a href="{{ url_for('sync_derivative_release.index') }}" class="btn btn-outline-primary">
+                <i class="bi bi-diagram-3"></i> Sync Derivative Forms
             </a>
             <a href="{{ url_for('sync_relation_release.index') }}" class="btn btn-outline-primary">
                 <i class="bi bi-diagram-3"></i> Sync Relations

@@ -1,0 +1,300 @@
+{% extends "base.html" %}
+
+{% block title %}Sync Derivatives - {{ lang_name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('sync_release.index') }}">Sync</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('sync_derivative_release.index') }}">Derivatives</a></li>
+                    <li class="breadcrumb-item active">{{ lang_name }} ({{ lang_code }})</li>
+                </ol>
+            </nav>
+            <h2>
+                <i class="bi bi-diagram-3"></i> Derivative Forms &mdash;
+                <span class="badge bg-info text-dark">{{ lang_code }}</span> {{ lang_name }}
+            </h2>
+        </div>
+    </div>
+
+    {% if db_count > 0 %}
+    <div class="card mb-4">
+        <div class="card-body d-flex justify-content-between align-items-center">
+            <div>
+                <strong>{{ db_count }}</strong> lemma(s) with {{ lang_name }} derivative forms in DB.
+            </div>
+            <form method="post" action="{{ url_for('sync_derivative_release.export_all', lang_code=lang_code) }}"
+                  onsubmit="return confirm('Export all {{ db_count }} {{ lang_name }} lemma(s) from DB to release files?');">
+                <button type="submit" class="btn btn-outline-primary">
+                    <i class="bi bi-upload"></i> Export All DB &rarr; Release
+                </button>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if not additions and not removals and not changes %}
+    <div class="alert alert-success">
+        <i class="bi bi-check-circle"></i> All {{ lang_name }} derivative forms are in sync!
+    </div>
+    <a href="{{ url_for('sync_derivative_release.index') }}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Back
+    </a>
+    {% else %}
+
+    {# ========== ADDITIONS (release -> DB) ========== #}
+    {% if additions %}
+    <div class="card mb-4">
+        <div class="card-header bg-success bg-opacity-10">
+            <i class="bi bi-plus-circle text-success"></i>
+            <strong>Additions</strong> &mdash; {{ additions|length }} lemma(s) in release but not in DB
+        </div>
+        <div class="card-body">
+            <form method="post" action="{{ url_for('sync_derivative_release.apply_additions', lang_code=lang_code) }}">
+                <table class="table table-sm table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 40px;">
+                                <input type="checkbox" onclick="toggleAll(this, 'add_check')" checked>
+                            </th>
+                            <th>GUID</th>
+                            <th>Lemma</th>
+                            <th>Type</th>
+                            <th class="text-center">Forms</th>
+                            <th>Preview</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in additions %}
+                        <tr>
+                            <td>
+                                <input type="checkbox" class="add_check"
+                                       name="selected_guids" value="{{ item.guid }}" checked>
+                            </td>
+                            <td><code>{{ item.guid }}</code></td>
+                            <td><strong>{{ item.lemma_text }}</strong></td>
+                            <td>
+                                <span class="badge bg-secondary">{{ item.pos_type }}</span>
+                                {% if item.pos_subtype %}
+                                <span class="badge bg-light text-dark">{{ item.pos_subtype }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">{{ item.form_count }}</td>
+                            <td><small class="text-muted">{{ item.forms_preview }}</small></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-download"></i> Import Selected to DB
+                </button>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+
+    {# ========== REMOVALS (DB only - export or delete) ========== #}
+    {% if removals %}
+    <div class="card mb-4">
+        <div class="card-header bg-danger bg-opacity-10">
+            <i class="bi bi-dash-circle text-danger"></i>
+            <strong>In DB Only</strong> &mdash; {{ removals|length }} lemma(s) in DB but not in release
+        </div>
+        <div class="card-body">
+            <p class="text-muted mb-3">
+                These lemmas have {{ lang_name }} derivative forms in the database but no
+                <code>{{ lang_code }}.jsonl</code> release file entry.
+                Choose to <strong>export</strong> them to release files or <strong>delete</strong> from DB.
+            </p>
+            <form method="post" action="{{ url_for('sync_derivative_release.apply_removals', lang_code=lang_code) }}">
+                <table class="table table-sm table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>GUID</th>
+                            <th>Lemma</th>
+                            <th>Type</th>
+                            <th class="text-center">Forms</th>
+                            <th>Preview</th>
+                            <th style="width: 160px;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in removals %}
+                        <tr>
+                            <td><code>{{ item.guid }}</code></td>
+                            <td>
+                                {% if item.lemma_id %}
+                                <a href="{{ url_for('lemmas.view_lemma', lemma_id=item.lemma_id) }}" target="_blank">
+                                    <strong>{{ item.lemma_text }}</strong>
+                                </a>
+                                {% else %}
+                                <strong>{{ item.lemma_text }}</strong>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge bg-secondary">{{ item.pos_type }}</span>
+                                {% if item.pos_subtype %}
+                                <span class="badge bg-light text-dark">{{ item.pos_subtype }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">{{ item.form_count }}</td>
+                            <td><small class="text-muted">{{ item.forms_preview }}</small></td>
+                            <td>
+                                <select class="form-select form-select-sm removal-action"
+                                        name="action_{{ item.guid }}">
+                                    <option value="export" selected>Export to release</option>
+                                    <option value="skip">Skip</option>
+                                    <option value="delete">Delete from DB</option>
+                                </select>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-sm btn-outline-secondary"
+                            onclick="setAllSelects('.removal-action', 'export')">All Export</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary"
+                            onclick="setAllSelects('.removal-action', 'skip')">All Skip</button>
+                    <div class="flex-grow-1"></div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-lg"></i> Apply
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+
+    {# ========== CHANGES (both have forms, but they differ) ========== #}
+    {% if changes %}
+    <div class="card mb-4">
+        <div class="card-header bg-warning bg-opacity-10">
+            <i class="bi bi-pencil text-warning"></i>
+            <strong>Changes</strong> &mdash; {{ changes|length }} lemma(s) with differing forms
+        </div>
+        <div class="card-body">
+            <form method="post" action="{{ url_for('sync_derivative_release.apply_changes', lang_code=lang_code) }}">
+                {% for item in changes %}
+                <div class="card mb-3">
+                    <div class="card-header bg-light py-2 d-flex justify-content-between align-items-center">
+                        <div>
+                            {% if item.lemma_id %}
+                            <a href="{{ url_for('lemmas.view_lemma', lemma_id=item.lemma_id) }}" target="_blank">
+                                <code>{{ item.guid }}</code>
+                            </a>
+                            {% else %}
+                            <code>{{ item.guid }}</code>
+                            {% endif %}
+                            <strong class="ms-2">{{ item.lemma_text }}</strong>
+                            <span class="badge bg-secondary ms-1">{{ item.pos_type }}</span>
+                            {% if item.pos_subtype %}
+                            <span class="badge bg-light text-dark">{{ item.pos_subtype }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-warning text-dark">{{ item.diff_count }} diff{{ 's' if item.diff_count != 1 }}</span>
+                            <select class="form-select form-select-sm change-action" style="width: auto;"
+                                    name="action_{{ item.guid }}">
+                                <option value="skip">Skip</option>
+                                <option value="use_db">Use DB</option>
+                                <option value="use_release">Use Release</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table table-sm table-bordered mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 80px;">Status</th>
+                                    <th>Grammatical Form</th>
+                                    <th>DB</th>
+                                    <th>Release</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for fd in item.form_diffs %}
+                                <tr>
+                                    <td>
+                                        {% if fd.type == 'release_only' %}
+                                        <span class="badge bg-success">+release</span>
+                                        {% elif fd.type == 'db_only' %}
+                                        <span class="badge bg-danger">+db</span>
+                                        {% else %}
+                                        <span class="badge bg-warning text-dark">differs</span>
+                                        {% endif %}
+                                    </td>
+                                    <td><code>{{ fd.grammatical_form }}</code></td>
+                                    <td>
+                                        {% if fd.db_text %}
+                                        <strong>{{ fd.db_text }}</strong>
+                                        {% if fd.db_ipa %}<br><small class="text-muted">IPA: {{ fd.db_ipa }}</small>{% endif %}
+                                        {% if fd.db_phonetic %}<br><small class="text-muted">{{ fd.db_phonetic }}</small>{% endif %}
+                                        {% if fd.db_is_base %}<br><span class="badge bg-info text-dark">base</span>{% endif %}
+                                        {% else %}
+                                        <span class="text-muted fst-italic">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if fd.release_text %}
+                                        <strong>{{ fd.release_text }}</strong>
+                                        {% if fd.release_ipa %}<br><small class="text-muted">IPA: {{ fd.release_ipa }}</small>{% endif %}
+                                        {% if fd.release_phonetic %}<br><small class="text-muted">{{ fd.release_phonetic }}</small>{% endif %}
+                                        {% if fd.release_is_base %}<br><span class="badge bg-info text-dark">base</span>{% endif %}
+                                        {% else %}
+                                        <span class="text-muted fst-italic">-</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% endfor %}
+
+                <div class="d-flex gap-2 mt-3">
+                    <button type="button" class="btn btn-sm btn-outline-secondary"
+                            onclick="setAllSelects('.change-action', 'skip')">All Skip</button>
+                    <button type="button" class="btn btn-sm btn-outline-warning"
+                            onclick="setAllSelects('.change-action', 'use_db')">All Use DB</button>
+                    <button type="button" class="btn btn-sm btn-outline-primary"
+                            onclick="setAllSelects('.change-action', 'use_release')">All Use Release</button>
+                    <div class="flex-grow-1"></div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-lg"></i> Apply Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+
+    <a href="{{ url_for('sync_derivative_release.index') }}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Back to Derivative Sync
+    </a>
+    {% endif %}
+</div>
+
+<script>
+function toggleAll(source, className) {
+    document.querySelectorAll('.' + className).forEach(function(cb) {
+        cb.checked = source.checked;
+    });
+}
+
+function setAllSelects(selector, value) {
+    document.querySelectorAll(selector).forEach(function(select) {
+        for (var i = 0; i < select.options.length; i++) {
+            if (select.options[i].value === value) {
+                select.selectedIndex = i;
+                break;
+            }
+        }
+    });
+}
+</script>
+{% endblock %}
