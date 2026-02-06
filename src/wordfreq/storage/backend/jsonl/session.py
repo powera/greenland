@@ -150,6 +150,7 @@ class JSONLSession(BaseSession):
         from wordfreq.storage.models.schema import LemmaTranslation
         from wordfreq.storage.models.schema import Sentence as SQLSentence
         from wordfreq.storage.models.schema import SentenceTranslation, SentenceWord
+        from wordfreq.storage.translation_helpers import compute_sort_key
 
         # Use bulk operations for better performance
         lemmas = []
@@ -186,6 +187,7 @@ class JSONLSession(BaseSession):
                         "lemma_id": jsonl_lemma.id,
                         "language_code": lang_code,
                         "translation": translation,
+                        "sort_key": compute_sort_key(lang_code, translation),
                     }
                 )
 
@@ -320,14 +322,16 @@ class JSONLSession(BaseSession):
 
     def _extract_lemma_translations(self) -> List[models.LemmaTranslation]:
         """Extract LemmaTranslation objects from nested Lemma data."""
+        from wordfreq.storage.translation_helpers import compute_sort_key
+
         translations = []
         for lemma in self._storage.lemmas.values():
             for lang_code, translation_text in lemma.translations.items():
-                # TODO: set sort_key via compute_sort_key() for dictionary ordering
                 trans = models.LemmaTranslation(
                     lemma_id=lemma.id,
                     language_code=lang_code,
                     translation=translation_text,
+                    sort_key=compute_sort_key(lang_code, translation_text),
                     lemma=lemma,
                 )
                 translations.append(trans)

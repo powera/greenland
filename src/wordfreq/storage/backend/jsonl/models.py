@@ -211,6 +211,7 @@ class LemmaTranslation:
     lemma_id: Optional[int] = None
     language_code: str = ""
     translation: str = ""
+    sort_key: Optional[str] = None
     verified: bool = False
     added_at: Optional[datetime.datetime] = None
     updated_at: Optional[datetime.datetime] = None
