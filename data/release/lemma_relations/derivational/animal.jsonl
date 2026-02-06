@@ -3,3 +3,5 @@
 {"concept": "fish", "members": ["N02_034", "N06_008"]}
 {"concept": "pig", "members": ["N02_006", "N06_077"]}
 {"concept": "sheep", "members": ["N02_028", "N06_078"]}
+{"concept": "crab", "members": ["N02_066", "N06_082"]}
+{"concept": "lobster", "members": ["N02_067", "N06_083"]}
