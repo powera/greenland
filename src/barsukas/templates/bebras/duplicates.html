@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}Duplicate Words Report{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/bebras.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex align-items-center mb-4">
+                <i class="bi bi-files fs-2 me-3 text-primary"></i>
+                <div>
+                    <h1 class="mb-0">Duplicate Words Report</h1>
+                    <p class="text-muted mb-0">
+                        Lemmas sharing the same headword and part of speech.
+                    </p>
+                </div>
+            </div>
+
+            {% if results.get('error') %}
+            <div class="alert alert-danger">
+                Error running check: {{ results.error }}
+            </div>
+            {% endif %}
+
+            <!-- Summary -->
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="card bg-light">
+                        <div class="card-body text-center py-2">
+                            <div class="fw-bold fs-4">{{ results.duplicate_group_count }}</div>
+                            <small class="text-muted">Duplicate groups</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-light">
+                        <div class="card-body text-center py-2">
+                            <div class="fw-bold fs-4">{{ results.total_duplicate_lemmas }}</div>
+                            <small class="text-muted">Total duplicate lemmas</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-light">
+                        <div class="card-body text-center py-2">
+                            <a href="{{ url_for('bebras.index') }}" class="text-decoration-none">
+                                <div class="fw-bold fs-4"><i class="bi bi-arrow-left"></i></div>
+                                <small class="text-muted">Back to Data Quality</small>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% if results.duplicate_group_count == 0 %}
+            <div class="alert alert-success">
+                No duplicate words found. The database looks clean.
+            </div>
+            {% else %}
+            <!-- Duplicate groups -->
+            {% for group in results.duplicates %}
+            <div class="card mb-3 dup-group-card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong class="fs-5">{{ group.lemma_text }}</strong>
+                        <span class="badge bg-secondary ms-2">{{ group.pos_type }}</span>
+                        {% if group.disambiguation %}
+                        <span class="badge bg-info ms-1">{{ group.disambiguation }}</span>
+                        {% endif %}
+                    </div>
+                    <span class="badge bg-warning text-dark">{{ group.count }} entries</span>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-sm table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th style="width: 60px">ID</th>
+                                <th style="width: 120px">GUID</th>
+                                <th>Definition</th>
+                                <th style="width: 80px">Level</th>
+                                <th style="width: 80px">Verified</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for lem in group.lemmas %}
+                            <tr>
+                                <td>{{ lem.id }}</td>
+                                <td>
+                                    {% if lem.guid %}
+                                    <code>{{ lem.guid }}</code>
+                                    {% else %}
+                                    <span class="text-muted">none</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ lem.definition_text }}</td>
+                                <td>
+                                    {% if lem.difficulty_level is not none %}
+                                    {{ lem.difficulty_level }}
+                                    {% else %}
+                                    <span class="text-muted">&mdash;</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if lem.verified %}
+                                    <span class="text-success"><i class="bi bi-check-circle-fill"></i></span>
+                                    {% else %}
+                                    <span class="text-muted"><i class="bi bi-circle"></i></span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

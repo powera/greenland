@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Integrity Check: {{ check_type }}{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/bebras.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex align-items-center mb-4">
+                <i class="bi bi-shield-check fs-2 me-3 text-primary"></i>
+                <div>
+                    <h1 class="mb-0">Integrity Check: {{ check_type }}</h1>
+                    <p class="text-muted mb-0">
+                        Results from the in-process integrity check.
+                    </p>
+                </div>
+            </div>
+
+            {% if results.get('error') %}
+            <div class="alert alert-danger">
+                Error: {{ results.error }}
+            </div>
+            {% endif %}
+
+            <div class="mb-3">
+                <a href="{{ url_for('bebras.index') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i>Back to Data Quality
+                </a>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <pre class="mb-0" style="white-space: pre-wrap;">{{ results | tojson(indent=2) }}</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

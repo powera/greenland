@@ -29,6 +29,7 @@ from flask import (
 from flask.typing import ResponseReturnValue
 
 import constants
+from agents.bebras.integrity import IntegrityChecker
 from barsukas.config import Config
 from barsukas.helpers.flash_helpers import flash_and_log
 from wordfreq.storage.models.schema import Lemma, Sentence
@@ -55,18 +56,43 @@ VERIFICATION_LANGUAGES = [
 
 # Integrity check types
 INTEGRITY_CHECKS = [
-    ("all", "All Checks", "Run all integrity checks"),
-    ("orphaned", "Orphaned Records", "Check for orphaned derivative forms and word frequencies"),
-    ("missing-fields", "Missing Fields", "Check for missing required fields"),
-    ("no-derivatives", "No Derivatives", "Check for lemmas without derivative forms"),
-    ("duplicates", "Duplicate GUIDs", "Check for duplicate GUIDs"),
-    ("invalid-levels", "Invalid Levels", "Check for invalid difficulty levels"),
+    ("all", "All Checks", "Run every check below in one pass"),
+    (
+        "orphaned",
+        "Orphaned Records",
+        "Derivative forms or word frequencies pointing to deleted lemmas/tokens",
+    ),
+    (
+        "missing-fields",
+        "Missing Fields",
+        "Lemmas missing a definition, part of speech, or difficulty level",
+    ),
+    (
+        "no-derivatives",
+        "No Derivatives",
+        "Lemmas that have no inflected forms (e.g. no plural, no conjugations)",
+    ),
+    ("duplicates", "Duplicate GUIDs", "Two or more lemmas sharing the same GUID identifier"),
+    (
+        "duplicate-words",
+        "Duplicate Words",
+        "Lemmas with the same text and part of speech that may need merging",
+    ),
+    (
+        "invalid-levels",
+        "Invalid Levels",
+        "Difficulty levels outside the valid 1\u201320 range",
+    ),
     (
         "missing-punctuation",
         "Missing Punctuation",
-        "Check for sentences missing terminal punctuation",
+        "Sentence translations not ending with a period, question mark, or exclamation mark",
     ),
-    ("sentence-levels", "Sentence Levels", "Check for incorrect sentence minimum_level values"),
+    (
+        "sentence-levels",
+        "Sentence Levels",
+        "Sentences whose minimum_level doesn't match their linked word difficulties",
+    ),
 ]
 
 
@@ -188,6 +214,64 @@ def check_integrity() -> ResponseReturnValue:
         args.extend(["--db-path", Config.DB_PATH])
 
     return _execute_async(args, f"Integrity Check: {check_type}")
+
+
+@bp.route("/find-duplicates", methods=["POST"])
+def find_duplicates() -> ResponseReturnValue:
+    """Find duplicate words by calling IntegrityChecker directly (no subprocess).
+
+    This is an example of the decoupled approach: the web route imports and
+    calls the checker in-process instead of shelling out to the CLI.
+    """
+    db_path = None if Config.is_postgres_mode() else Config.DB_PATH
+    checker = IntegrityChecker(db_path=db_path)
+    results = checker.check_duplicate_words()
+
+    return render_template(
+        "bebras/duplicates.html",
+        results=results,
+    )
+
+
+@bp.route("/find-duplicates-integrity", methods=["POST"])
+def find_duplicates_integrity() -> ResponseReturnValue:
+    """Run a single named integrity check in-process and return results.
+
+    Demonstrates the decoupled pattern: call IntegrityChecker directly
+    instead of launching a subprocess.
+    """
+    check_type = request.form.get("check_type", "duplicate-words")
+    fix_issues = request.form.get("fix_issues") == "true"
+
+    db_path = None if Config.is_postgres_mode() else Config.DB_PATH
+    checker = IntegrityChecker(db_path=db_path)
+
+    check_map: Dict[str, Any] = {
+        "orphaned": lambda: {
+            "derivative_forms": checker.check_orphaned_derivative_forms(),
+            "derivative_form_word_tokens": checker.check_derivative_form_word_tokens(),
+            "word_frequencies": checker.check_orphaned_word_frequencies(),
+        },
+        "missing-fields": checker.check_missing_required_fields,
+        "no-derivatives": checker.check_lemmas_without_derivatives,
+        "duplicates": checker.check_duplicate_guids,
+        "duplicate-words": checker.check_duplicate_words,
+        "invalid-levels": checker.check_invalid_difficulty_levels,
+        "missing-punctuation": lambda: checker.check_sentences_missing_punctuation(fix=fix_issues),
+        "sentence-levels": lambda: checker.check_sentence_levels(fix=fix_issues),
+    }
+
+    runner = check_map.get(check_type)
+    if runner is None:
+        flash_and_log(f"Unknown check type: {check_type}", "error")
+        return redirect(url_for("bebras.index"))
+
+    results = runner()
+    return render_template(
+        "bebras/integrity_results.html",
+        check_type=check_type,
+        results=results,
+    )
 
 
 @bp.route("/verify-words", methods=["POST"])
