@@ -280,6 +280,9 @@ def restart() -> ResponseReturnValue:
     """
     global _shutdown_requested
 
+    if not current_app.config.get("ALLOW_RESTART", True):
+        return jsonify({"error": "Restart is disabled in this deployment"}), 403
+
     if _shutdown_requested:
         return jsonify({"error": "Restart already in progress"}), 409
 

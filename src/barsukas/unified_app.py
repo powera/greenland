@@ -47,11 +47,15 @@ def run_flask_server(
         app.config["ALLOW_OUTBOUND_CALLS"] = persona.allow_outbound_calls
         app.config["ALLOW_API_KEYS"] = persona.allow_api_keys
         app.config["ENABLE_WORKER"] = persona.enable_worker
+        app.config["ALLOW_RESTART"] = persona.allow_restart
+        app.config["ALLOW_EXPORTS"] = persona.allow_exports
     else:
         # Defaults when no persona specified
         app.config["ALLOW_OUTBOUND_CALLS"] = True
         app.config["ALLOW_API_KEYS"] = True
         app.config["ENABLE_WORKER"] = True
+        app.config["ALLOW_RESTART"] = True
+        app.config["ALLOW_EXPORTS"] = True
 
     logger.info(f"Starting Barsukas Flask server on http://{host}:{port}")
     logger.info(f"Database: {app.config['DB_PATH']}")
@@ -94,8 +98,8 @@ def main() -> None:
     parser.add_argument(
         "--persona",
         type=str,
-        choices=["prod", "golden", "local"],
-        help="Launch persona (prod, golden, local) - overrides other backend settings",
+        choices=["prod", "golden", "hosted", "local"],
+        help="Launch persona (prod, golden, hosted, local) - overrides other backend settings",
     )
     parser.add_argument(
         "--list-personas",

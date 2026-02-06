@@ -20,6 +20,7 @@ class PersonaName(Enum):
 
     PROD = "prod"
     GOLDEN = "golden"
+    HOSTED = "hosted"
     LOCAL = "local"
 
 
@@ -45,6 +46,10 @@ class PersonaConfig:
     # Worker settings
     enable_worker: bool = True
 
+    # Hardening settings (for hosted/shared deployments)
+    allow_restart: bool = True
+    allow_exports: bool = True
+
 
 # Define the available personas
 PERSONAS: dict[PersonaName, PersonaConfig] = {
@@ -65,6 +70,18 @@ PERSONAS: dict[PersonaName, PersonaConfig] = {
         allow_api_keys=True,
         allow_outbound_calls=True,
         enable_worker=False,  # No worker needed for read-only
+    ),
+    PersonaName.HOSTED: PersonaConfig(
+        name=PersonaName.HOSTED,
+        description="Hosted mode: Read-only JSONL like golden, hardened for shared deployment",
+        use_jsonl=True,
+        jsonl_data_dir="data/release",
+        readonly=True,
+        allow_api_keys=False,
+        allow_outbound_calls=False,
+        enable_worker=False,
+        allow_restart=False,
+        allow_exports=False,
     ),
     PersonaName.LOCAL: PersonaConfig(
         name=PersonaName.LOCAL,

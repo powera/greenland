@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 from barsukas.config import Config
 from flask import (
     Blueprint,
+    current_app,
     flash,
     jsonify,
     redirect,
@@ -33,6 +34,9 @@ bp = Blueprint("exports", __name__, url_prefix="/exports")
 @bp.route("/")
 def exports_page() -> ResponseReturnValue:
     """Display the exports landing page with POVAS and UNGURYS options."""
+    if not current_app.config.get("ALLOW_EXPORTS", True):
+        flash("Exports are disabled in this deployment.", "error")
+        return redirect(url_for("lemmas.index"))
     return render_template("exports/index.html")
 
 
