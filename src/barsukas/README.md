@@ -87,7 +87,7 @@ export BARSUKAS_DB_PATH=/path/to/linguistics.sqlite
 ## Validation Rules
 
 ### Difficulty Levels
-- Must be **-1** (exclude from language) OR **1-20** (Trakaido levels)
+- Must be **-1** (exclude from language) OR **1-30** (Trakaido levels)
 - Empty/null means no difficulty level is set
 - Per-language overrides take precedence over the base difficulty level
 

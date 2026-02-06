@@ -53,12 +53,15 @@
                                     <div class="input-group input-group-sm" style="max-width: 280px;">
                                         <input type="number" name="minimum_level" class="form-control form-control-sm"
                                                placeholder="New level" value="{{ sentence.minimum_level if sentence.minimum_level is not none else '' }}"
-                                               style="max-width: 80px;">
-                                        <button type="submit" class="btn btn-sm btn-primary">Update</button>
+                                               style="max-width: 80px;"
+                                               {% if config.get('READONLY', False) %}disabled{% endif %}>
+                                        <button type="submit" class="btn btn-sm btn-primary"
+                                                {% if config.get('READONLY', False) %}disabled title="Not available in hosted mode"{% endif %}>Update</button>
                                     </div>
                                 </form>
                                 <form method="POST" action="{{ url_for('sentences.auto_populate_level', sentence_id=sentence.id) }}" class="d-inline-block ms-1">
-                                    <button type="submit" class="btn btn-sm btn-success" title="Auto-populate level from max word difficulty">
+                                    <button type="submit" class="btn btn-sm btn-success" title="Auto-populate level from max word difficulty"
+                                            {% if config.get('READONLY', False) %}disabled{% endif %}>
                                         <i class="bi bi-magic"></i> Auto
                                     </button>
                                 </form>
@@ -70,7 +73,8 @@
                                     <i class="bi bi-check-circle-fill text-success"></i> Yes
                                     <form method="POST" action="{{ url_for('sentences.unverify_sentence', sentence_id=sentence.id) }}" class="d-inline-block ms-2">
                                         <button type="submit" class="btn btn-sm btn-outline-danger"
-                                                onclick="return confirm('Reject this verified sentence? It will be unverified and marked as rejected.')">
+                                                onclick="return confirm('Reject this verified sentence? It will be unverified and marked as rejected.')"
+                                                {% if config.get('READONLY', False) %}disabled title="Not available in hosted mode"{% endif %}>
                                             <i class="bi bi-x-circle"></i> Reject
                                         </button>
                                     </form>
@@ -366,8 +370,9 @@
                                 </td>
                                 <td>
                                     <a href="{{ url_for('audio.review_file', review_id=audio.id) }}"
-                                       class="btn btn-sm btn-outline-primary"
-                                       title="Review audio">
+                                       class="btn btn-sm btn-outline-primary {% if config.get('READONLY', False) %}disabled{% endif %}"
+                                       title="Review audio"
+                                       {% if config.get('READONLY', False) %}aria-disabled="true" tabindex="-1"{% endif %}>
                                         <i class="bi bi-pencil"></i>
                                     </a>
                                 </td>

@@ -5,7 +5,7 @@
 from typing import Any, Union
 
 from barsukas.config import Config
-from flask import Blueprint, flash, g, redirect, render_template, request, url_for
+from flask import Blueprint, current_app, flash, g, redirect, render_template, request, url_for
 from flask.typing import ResponseReturnValue
 from sqlalchemy import case, func, or_
 from werkzeug.wrappers import Response
@@ -327,6 +327,10 @@ def view_sentence(sentence_id: int) -> Union[str, Response]:
 @bp.route("/<int:sentence_id>/update_level", methods=["POST"])
 def update_level(sentence_id: int) -> Response:
     """Update the minimum level for a sentence."""
+    if current_app.config.get("READONLY"):
+        flash("Cannot modify data in read-only mode", "error")
+        return redirect(url_for("sentences.view_sentence", sentence_id=sentence_id))
+
     sentence = g.db.query(Sentence).get(sentence_id)
     if not sentence:
         flash("Sentence not found", "error")
@@ -355,6 +359,10 @@ def update_level(sentence_id: int) -> Response:
 @bp.route("/<int:sentence_id>/auto_populate_level", methods=["POST"])
 def auto_populate_level(sentence_id: int) -> Response:
     """Auto-populate the minimum level based on max difficulty_level of words in the sentence."""
+    if current_app.config.get("READONLY"):
+        flash("Cannot modify data in read-only mode", "error")
+        return redirect(url_for("sentences.view_sentence", sentence_id=sentence_id))
+
     sentence = g.db.query(Sentence).get(sentence_id)
     if not sentence:
         flash("Sentence not found", "error")
@@ -472,6 +480,10 @@ def accept_sentence(sentence_id: int) -> Response:
 
     This does NOT verify the sentence - that requires a separate Verify action.
     """
+    if current_app.config.get("READONLY"):
+        flash("Cannot modify data in read-only mode", "error")
+        return redirect(url_for("sentences.list_sentences"))
+
     sentence = g.db.query(Sentence).get(sentence_id)
     if not sentence:
         flash("Sentence not found", "error")
@@ -595,6 +607,10 @@ def accept_sentence(sentence_id: int) -> Response:
 @bp.route("/<int:sentence_id>/verify", methods=["POST"])
 def verify_sentence(sentence_id: int) -> Response:
     """Mark a sentence as verified. Requires translations and level to be set."""
+    if current_app.config.get("READONLY"):
+        flash("Cannot modify data in read-only mode", "error")
+        return redirect(url_for("sentences.list_sentences"))
+
     sentence = g.db.query(Sentence).get(sentence_id)
     if not sentence:
         flash("Sentence not found", "error")
@@ -631,6 +647,10 @@ def verify_sentence(sentence_id: int) -> Response:
 @bp.route("/<int:sentence_id>/reject", methods=["POST"])
 def reject_sentence(sentence_id: int) -> Response:
     """Mark a sentence as rejected so it won't be regenerated."""
+    if current_app.config.get("READONLY"):
+        flash("Cannot modify data in read-only mode", "error")
+        return redirect(url_for("sentences.list_sentences"))
+
     sentence = g.db.query(Sentence).get(sentence_id)
     if not sentence:
         flash("Sentence not found", "error")
@@ -651,6 +671,10 @@ def reject_sentence(sentence_id: int) -> Response:
 @bp.route("/<int:sentence_id>/unverify", methods=["POST"])
 def unverify_sentence(sentence_id: int) -> Response:
     """Unverify a sentence and mark it as rejected."""
+    if current_app.config.get("READONLY"):
+        flash("Cannot modify data in read-only mode", "error")
+        return redirect(url_for("sentences.view_sentence", sentence_id=sentence_id))
+
     sentence = g.db.query(Sentence).get(sentence_id)
     if not sentence:
         flash("Sentence not found", "error")

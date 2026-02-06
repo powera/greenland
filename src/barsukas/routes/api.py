@@ -207,7 +207,7 @@ def api_info() -> ResponseReturnValue:
                     "name": "difficulty",
                     "type": "query",
                     "required": False,
-                    "description": "Filter by difficulty level (1-20, '-1' for excluded, 'null' for not set)",
+                    "description": "Filter by difficulty level (1-30, '-1' for excluded, 'null' for not set)",
                 },
                 {
                     "name": "limit",
@@ -313,7 +313,7 @@ def search_lemmas() -> ResponseReturnValue:
     Query parameters:
         - q: Required. Search query to find in lemma text, definition, disambiguation, and translations
         - pos_type: Optional. Filter by part of speech (e.g., 'noun', 'verb')
-        - difficulty: Optional. Filter by difficulty level (1-20, '-1' for excluded, 'null' for not set)
+        - difficulty: Optional. Filter by difficulty level (1-30, '-1' for excluded, 'null' for not set)
         - limit: Optional. Maximum number of results to return (default: 20, max: 100)
         - offset: Optional. Number of results to skip for pagination (default: 0)
 
@@ -489,7 +489,7 @@ def get_lemma_info(guid: str) -> ResponseReturnValue:
         - definition: The English definition
         - pos_type: Part of speech type (noun, verb, etc.)
         - pos_subtype: Part of speech subtype (if populated)
-        - difficulty_level: Difficulty level (1-20, or -1 for excluded, or null if not set)
+        - difficulty_level: Difficulty level (1-30, or -1 for excluded, or null if not set)
         - verified: Whether the lemma has been human-verified
         - tags: JSON array of tags (or null if not set)
         - disambiguation: Disambiguation text (or null)

@@ -31,7 +31,7 @@ class Config:
 
     # Validation settings
     MIN_DIFFICULTY_LEVEL = 1
-    MAX_DIFFICULTY_LEVEL = 20
+    MAX_DIFFICULTY_LEVEL = 30
     EXCLUDE_DIFFICULTY_LEVEL = -1
 
     # Access control

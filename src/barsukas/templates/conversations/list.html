@@ -11,7 +11,9 @@
                 <p class="text-muted">{{ total }} conversation{{ 's' if total != 1 else '' }} found</p>
             </div>
             <div>
-                <a href="{{ url_for('conversations.dedupe_sentences') }}" class="btn btn-outline-warning">
+                <a href="{{ url_for('conversations.dedupe_sentences') }}"
+                   class="btn btn-outline-warning {% if config.get('READONLY', False) %}disabled{% endif %}"
+                   {% if config.get('READONLY', False) %}aria-disabled="true" tabindex="-1"{% endif %}>
                     <i class="bi bi-subtract"></i> Dedupe Sentences
                 </a>
             </div>
@@ -33,7 +35,7 @@
                 <select class="form-select" id="minimum_level" name="minimum_level">
                     <option value="">All</option>
                     <option value="null" {% if minimum_level == 'null' %}selected{% endif %}>No level set</option>
-                    {% for i in range(1, 21) %}
+                    {% for i in range(1, config.MAX_DIFFICULTY_LEVEL + 1) %}
                         <option value="{{ i }}" {% if minimum_level == i|string %}selected{% endif %}>
                             Level {{ i }}
                         </option>
@@ -121,13 +123,15 @@
                                     {% else %}
                                     <form method="POST" action="{{ url_for('conversations.verify_conversation', conversation_id=conversation.id) }}" class="d-inline">
                                         <button type="submit" class="btn btn-sm btn-success" title="Mark as verified"
-                                                onclick="return confirm('Verify this conversation?')">
+                                                onclick="return confirm('Verify this conversation?')"
+                                                {% if config.get('READONLY', False) %}disabled{% endif %}>
                                             <i class="bi bi-check-circle"></i> Verify
                                         </button>
                                     </form>
                                     <form method="POST" action="{{ url_for('conversations.reject_conversation', conversation_id=conversation.id) }}" class="d-inline">
                                         <button type="submit" class="btn btn-sm btn-danger" title="Mark as rejected (won't be regenerated)"
-                                                onclick="return confirm('Reject this conversation? It will not be regenerated.')">
+                                                onclick="return confirm('Reject this conversation? It will not be regenerated.')"
+                                                {% if config.get('READONLY', False) %}disabled{% endif %}>
                                             <i class="bi bi-x-circle"></i> Reject
                                         </button>
                                     </form>

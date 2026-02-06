@@ -42,7 +42,8 @@
                                         <form method="post" action="{{ url_for('overrides.delete_override', lemma_id=lemma.id, lang_code=override.language_code) }}"
                                               style="display: inline;"
                                               onsubmit="return confirmDelete('Delete difficulty override for {{ language_names[override.language_code] }}?');">
-                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger"
+                                                    {% if config.get('READONLY', False) %}disabled title="Not available in hosted mode"{% endif %}>
                                                 <i class="bi bi-trash"></i> Delete
                                             </button>
                                         </form>
@@ -56,7 +57,12 @@
                 {% endif %}
 
                 <!-- Add Override Form -->
-                <button type="button" class="btn btn-primary" data-bs-toggle="collapse" data-bs-target="#addOverrideForm">
+                <button type="button" class="btn btn-primary"
+                        {% if not config.get('READONLY', False) %}
+                        data-bs-toggle="collapse" data-bs-target="#addOverrideForm"
+                        {% else %}
+                        disabled title="Not available in hosted mode"
+                        {% endif %}>
                     <i class="bi bi-plus-circle"></i> Add Difficulty Override
                 </button>
 
@@ -77,9 +83,9 @@
                                 <div class="col-md-3">
                                     <label for="difficulty_level" class="form-label">Difficulty Level</label>
                                     <input type="number" class="form-control" id="difficulty_level" name="difficulty_level"
-                                           min="-1" max="20" required
-                                           placeholder="-1 or 1-20">
-                                    <small class="form-text text-muted">-1 to exclude, 1-20 for level</small>
+                                           min="-1" max="{{ config.MAX_DIFFICULTY_LEVEL }}" required
+                                           placeholder="-1 or 1-{{ config.MAX_DIFFICULTY_LEVEL }}">
+                                    <small class="form-text text-muted">-1 to exclude, 1-{{ config.MAX_DIFFICULTY_LEVEL }} for level</small>
                                 </div>
                                 <div class="col-md-5">
                                     <label for="notes" class="form-label">Notes (optional)</label>

@@ -11,7 +11,9 @@
                 <p class="text-muted">{{ total }} sentence{{ 's' if total != 1 else '' }} found</p>
             </div>
             <div>
-                <a href="{{ url_for('sentence_rapid_review.index') }}" class="btn btn-primary">
+                <a href="{{ url_for('sentence_rapid_review.index') }}"
+                   class="btn btn-primary {% if config.get('READONLY', False) %}disabled{% endif %}"
+                   {% if config.get('READONLY', False) %}aria-disabled="true" tabindex="-1"{% endif %}>
                     <i class="bi bi-lightning-charge"></i> Rapid Review
                 </a>
             </div>
@@ -44,12 +46,12 @@
                 <select class="form-select" id="minimum_level" name="minimum_level">
                     <option value="">All levels</option>
                     <option value="null" {% if minimum_level == 'null' %}selected{% endif %}>No level set</option>
-                    {% for i in range(1, 21) %}
+                    {% for i in range(1, config.MAX_DIFFICULTY_LEVEL + 1) %}
                         <option value="{{ i }}+" {% if minimum_level == i|string ~ '+' %}selected{% endif %}>
                             Level {{ i }}+
                         </option>
                     {% endfor %}
-                    {% for i in range(1, 21) %}
+                    {% for i in range(1, config.MAX_DIFFICULTY_LEVEL + 1) %}
                         <option value="{{ i }}" {% if minimum_level == i|string %}selected{% endif %}>
                             Exactly {{ i }}
                         </option>
@@ -146,21 +148,24 @@
                                     {% if not is_ready_to_verify %}
                                     <form method="POST" action="{{ url_for('sentences.accept_sentence', sentence_id=sentence.id) }}" class="d-inline">
                                         <button type="submit" class="btn btn-sm btn-success" title="Generate translations and set level"
-                                                onclick="return confirm('Accept this sentence? This will generate translations for all languages and set the level based on word difficulty.')">
+                                                onclick="return confirm('Accept this sentence? This will generate translations for all languages and set the level based on word difficulty.')"
+                                                {% if config.get('READONLY', False) %}disabled{% endif %}>
                                             <i class="bi bi-check-circle"></i> Accept
                                         </button>
                                     </form>
                                     {% else %}
                                     <form method="POST" action="{{ url_for('sentences.verify_sentence', sentence_id=sentence.id) }}" class="d-inline">
                                         <button type="submit" class="btn btn-sm btn-primary" title="Mark as verified"
-                                                onclick="return confirm('Verify this sentence? It will be removed from the list.')">
+                                                onclick="return confirm('Verify this sentence? It will be removed from the list.')"
+                                                {% if config.get('READONLY', False) %}disabled{% endif %}>
                                             <i class="bi bi-check-circle-fill"></i> Verify
                                         </button>
                                     </form>
                                     {% endif %}
                                     <form method="POST" action="{{ url_for('sentences.reject_sentence', sentence_id=sentence.id) }}" class="d-inline">
                                         <button type="submit" class="btn btn-sm btn-danger" title="Mark as rejected (won't be regenerated)"
-                                                onclick="return confirm('Reject this sentence? It will not be regenerated.')">
+                                                onclick="return confirm('Reject this sentence? It will not be regenerated.')"
+                                                {% if config.get('READONLY', False) %}disabled{% endif %}>
                                             <i class="bi bi-x-circle"></i> Reject
                                         </button>
                                     </form>
