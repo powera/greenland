@@ -293,11 +293,12 @@ class WirewordSentenceExporter:
                     "linked_words": linked_words,
                 }
 
-                # Add pinyin for Chinese translations
+                # Add pinyin for Chinese translations (inside translations dict
+                # so apps can access it as translations["pinyin"])
                 if self.language == "zh" and self.language in translations:
                     pinyin = generate_pinyin(translations[self.language])
                     if pinyin:
-                        sentence_entry["pinyin"] = pinyin
+                        translations["pinyin"] = pinyin
 
                 # Include optional metadata
                 if sentence.source_filename:
