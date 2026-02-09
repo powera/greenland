@@ -111,6 +111,17 @@ def handle_generate_audio(session: Session, payload: Dict) -> str:
         result = _generate_audio_coqui(
             session, lemma, language_code, coqui_voice_enums, audio_output_dir
         )
+    elif tts_engine in ("polly", "azure", "google"):
+        # Cloud TTS engines dispatched through VieversysAgent
+        vieversys_agent = VieversysAgent(
+            config=config, output_dir=audio_output_dir, tts_engine=tts_engine
+        )
+        result = vieversys_agent.generate_audio_for_lemma_cloud(
+            session,
+            lemma,
+            language_code,
+            voice_names,
+        )
     else:
         # Default to OpenAI
         openai_voice_enums = [Voice(v) for v in voice_names]
@@ -395,6 +406,10 @@ def handle_generate_sentence_audio(session: Session, payload: Dict) -> str:
     elif tts_engine == "coqui":
         result = _generate_sentence_audio_coqui(
             session, sentence_id, text, language_code, voice_names, audio_output_dir
+        )
+    elif tts_engine in ("polly", "azure", "google"):
+        result = _generate_sentence_audio_cloud(
+            session, sentence_id, text, language_code, voice_names, audio_output_dir, tts_engine
         )
     else:
         # Default to OpenAI
@@ -780,4 +795,141 @@ def _generate_sentence_audio_coqui(
 
     except Exception as e:
         logger.error(f"Error generating Coqui sentence audio: {e}")
+        return {"success": False, "error": str(e), "voices": []}
+
+
+def _generate_sentence_audio_cloud(
+    session: Session,
+    sentence_id: int,
+    text: str,
+    language_code: str,
+    voice_names: List[str],
+    output_dir: str,
+    tts_engine: str,
+) -> Dict:
+    """Generate sentence audio using a cloud TTS engine (Polly, Azure, or Google)."""
+    import hashlib
+    import json
+
+    from clients.audio.azure_tts import AzureTTSClient, AzureVoice
+    from clients.audio.google_tts import GoogleTTSClient, GoogleTtsVoice
+    from clients.audio.polly_tts import PollyTTSClient, PollyVoice
+    from clients.audio.types import AudioFormat
+    from wordfreq.storage.models.schema import AudioQualityReview
+
+    try:
+        generated_voices: List[Dict] = []
+
+        for voice_name in voice_names:
+            try:
+                # Generate audio with the appropriate cloud engine
+                if tts_engine == "polly":
+                    client_p = PollyTTSClient()
+                    polly_voice = None
+                    for pv in PollyVoice:
+                        if pv.name.lower() == voice_name.lower() or pv.ui_name == voice_name:
+                            polly_voice = pv
+                            break
+                    if not polly_voice:
+                        generated_voices.append(
+                            {
+                                "voice": voice_name,
+                                "success": False,
+                                "error": f"Unknown voice: {voice_name}",
+                            }
+                        )
+                        continue
+                    result = client_p.generate_audio(
+                        text=text, voice=polly_voice, language_code=language_code
+                    )
+                elif tts_engine == "azure":
+                    client_a = AzureTTSClient()
+                    azure_voice = None
+                    for av in AzureVoice:
+                        if av.name.lower() == voice_name.lower() or av.ui_name == voice_name:
+                            azure_voice = av
+                            break
+                    if not azure_voice:
+                        generated_voices.append(
+                            {
+                                "voice": voice_name,
+                                "success": False,
+                                "error": f"Unknown voice: {voice_name}",
+                            }
+                        )
+                        continue
+                    result = client_a.generate_audio(
+                        text=text, voice=azure_voice, language_code=language_code
+                    )
+                elif tts_engine == "google":
+                    client_g = GoogleTTSClient()
+                    google_voice = None
+                    for gv in GoogleTtsVoice:
+                        if gv.name.lower() == voice_name.lower() or gv.ui_name == voice_name:
+                            google_voice = gv
+                            break
+                    if not google_voice:
+                        generated_voices.append(
+                            {
+                                "voice": voice_name,
+                                "success": False,
+                                "error": f"Unknown voice: {voice_name}",
+                            }
+                        )
+                        continue
+                    result = client_g.generate_audio(
+                        text=text, voice=google_voice, language_code=language_code
+                    )
+                else:
+                    generated_voices.append(
+                        {
+                            "voice": voice_name,
+                            "success": False,
+                            "error": f"Unknown engine: {tts_engine}",
+                        }
+                    )
+                    continue
+
+                if not result.success:
+                    logger.error(f"Failed to generate {tts_engine} audio: {result.error}")
+                    generated_voices.append(
+                        {"voice": voice_name, "success": False, "error": result.error}
+                    )
+                    continue
+
+                # Save audio file
+                voice_dir = Path(output_dir) / language_code / voice_name
+                voice_dir.mkdir(parents=True, exist_ok=True)
+
+                md5_hash = hashlib.md5(result.audio_data).hexdigest()
+                filename = f"{md5_hash}.mp3"
+                file_path = voice_dir / filename
+
+                with open(file_path, "wb") as f:
+                    f.write(result.audio_data)
+
+                # Create review record
+                review = AudioQualityReview(
+                    guid=f"S_{sentence_id:05d}",
+                    sentence_id=sentence_id,
+                    language_code=language_code,
+                    voice_name=voice_name,
+                    filename=filename,
+                    expected_text=text,
+                    manifest_md5=md5_hash,
+                    status="pending_review",
+                    quality_issues=json.dumps([]),
+                )
+                session.add(review)
+                generated_voices.append({"voice": voice_name, "success": True})
+
+            except Exception as e:
+                logger.error(f"Error generating {tts_engine} audio for {voice_name}: {e}")
+                generated_voices.append({"voice": voice_name, "success": False, "error": str(e)})
+
+        session.commit()
+        return {"success": True, "voices": generated_voices}
+
+    except Exception as e:
+        logger.error(f"Error generating {tts_engine} sentence audio: {e}")
         return {"success": False, "error": str(e), "voices": []}

@@ -19,6 +19,9 @@
  * @param {Object} config.piperVoices - Object mapping language codes to Piper voice arrays
  * @param {Object} config.coquiVoices - Object mapping language codes to Coqui voice arrays
  * @param {Object} config.qwen3Voices - Object mapping language codes to Qwen3 voice arrays
+ * @param {Object} config.pollyVoices - Object mapping language codes to Amazon Polly voice arrays
+ * @param {Object} config.azureVoices - Object mapping language codes to Azure TTS voice arrays
+ * @param {Object} config.googleVoices - Object mapping language codes to Google Cloud TTS voice arrays
  */
 function setupAudioVoiceSelection(config) {
     const ttsEngineSelect = document.getElementById(config.engineSelectId);
@@ -170,6 +173,69 @@ function setupAudioVoiceSelection(config) {
 
             if (voiceHelp) voiceHelp.textContent = 'Select Qwen3 neural voices to generate';
             if (engineInfo) engineInfo.innerHTML = '<i class="bi bi-info-circle"></i> <strong>Note:</strong> Audio will be generated using Qwen3 TTS (free, neural, multilingual). Review records will be created with status "pending_review".';
+
+            const checkboxes = voices.map(voice => {
+                const genderBadge = voice.gender === 'f' ? 'F' : 'M';
+                return createVoiceCheckbox(voice.name, voice.ui_name, genderBadge, true);
+            });
+            voicesContainer.appendChild(createTwoColumnLayout(checkboxes));
+
+        } else if (engine === 'polly') {
+            if (!language) {
+                voicesContainer.innerHTML = '<div class="text-muted">Please select a language first</div>';
+                return;
+            }
+
+            const voices = config.pollyVoices ? config.pollyVoices[language] : null;
+            if (!voices || voices.length === 0) {
+                voicesContainer.innerHTML = '<div class="text-warning">No Amazon Polly voices available for this language</div>';
+                return;
+            }
+
+            if (voiceHelp) voiceHelp.textContent = 'Select Amazon Polly voices to generate';
+            if (engineInfo) engineInfo.innerHTML = '<i class="bi bi-info-circle"></i> <strong>Note:</strong> Audio will be generated using Amazon Polly (paid, neural). Review records will be created with status "pending_review".';
+
+            const checkboxes = voices.map(voice => {
+                const genderBadge = voice.gender === 'f' ? 'F' : 'M';
+                return createVoiceCheckbox(voice.name, voice.ui_name, genderBadge, true);
+            });
+            voicesContainer.appendChild(createTwoColumnLayout(checkboxes));
+
+        } else if (engine === 'azure') {
+            if (!language) {
+                voicesContainer.innerHTML = '<div class="text-muted">Please select a language first</div>';
+                return;
+            }
+
+            const voices = config.azureVoices ? config.azureVoices[language] : null;
+            if (!voices || voices.length === 0) {
+                voicesContainer.innerHTML = '<div class="text-warning">No Azure TTS voices available for this language</div>';
+                return;
+            }
+
+            if (voiceHelp) voiceHelp.textContent = 'Select Azure Cognitive TTS voices to generate';
+            if (engineInfo) engineInfo.innerHTML = '<i class="bi bi-info-circle"></i> <strong>Note:</strong> Audio will be generated using Azure Cognitive TTS (paid, neural). Review records will be created with status "pending_review".';
+
+            const checkboxes = voices.map(voice => {
+                const genderBadge = voice.gender === 'f' ? 'F' : 'M';
+                return createVoiceCheckbox(voice.name, voice.ui_name, genderBadge, true);
+            });
+            voicesContainer.appendChild(createTwoColumnLayout(checkboxes));
+
+        } else if (engine === 'google') {
+            if (!language) {
+                voicesContainer.innerHTML = '<div class="text-muted">Please select a language first</div>';
+                return;
+            }
+
+            const voices = config.googleVoices ? config.googleVoices[language] : null;
+            if (!voices || voices.length === 0) {
+                voicesContainer.innerHTML = '<div class="text-warning">No Google Cloud TTS voices available for this language</div>';
+                return;
+            }
+
+            if (voiceHelp) voiceHelp.textContent = 'Select Google Cloud TTS voices to generate';
+            if (engineInfo) engineInfo.innerHTML = '<i class="bi bi-info-circle"></i> <strong>Note:</strong> Audio will be generated using Google Cloud TTS (paid, Wavenet/Neural2). Review records will be created with status "pending_review".';
 
             const checkboxes = voices.map(voice => {
                 const genderBadge = voice.gender === 'f' ? 'F' : 'M';

@@ -14,6 +14,9 @@ from audioshoe.coqui.types import CoquiVoice
 from audioshoe.espeak.types import EspeakVoice
 from audioshoe.piper.types import PiperVoice
 from audioshoe.qwen.types import QwenVoice
+from clients.audio.azure_tts import AzureVoice
+from clients.audio.google_tts import GoogleTtsVoice
+from clients.audio.polly_tts import PollyVoice
 from barsukas.helpers.flash_helpers import flash_and_log
 from workqueue.task_queue import TaskType, enqueue_task, get_tasks_for_target
 from wordfreq.storage.models.schema import (
@@ -306,6 +309,30 @@ def view_sentence(sentence_id: int) -> Union[str, Response]:
             {"name": v.name, "ui_name": v.ui_name, "gender": v.gender} for v in qwen3_voice_list
         ]
 
+    # Amazon Polly voices by language
+    polly_voices = {}
+    for lang_code in language_names.keys():
+        polly_voice_list = PollyVoice.get_voices_for_language(lang_code)
+        polly_voices[lang_code] = [
+            {"name": v.name, "ui_name": v.ui_name, "gender": v.gender} for v in polly_voice_list
+        ]
+
+    # Azure TTS voices by language
+    azure_voices = {}
+    for lang_code in language_names.keys():
+        azure_voice_list = AzureVoice.get_voices_for_language(lang_code)
+        azure_voices[lang_code] = [
+            {"name": v.name, "ui_name": v.ui_name, "gender": v.gender} for v in azure_voice_list
+        ]
+
+    # Google Cloud TTS voices by language
+    google_voices = {}
+    for lang_code in language_names.keys():
+        google_voice_list = GoogleTtsVoice.get_voices_for_language(lang_code)
+        google_voices[lang_code] = [
+            {"name": v.name, "ui_name": v.ui_name, "gender": v.gender} for v in google_voice_list
+        ]
+
     return render_template(
         "sentences/view.html",
         sentence=sentence,
@@ -321,6 +348,9 @@ def view_sentence(sentence_id: int) -> Union[str, Response]:
         piper_voices=piper_voices,
         coqui_voices=coqui_voices,
         qwen3_voices=qwen3_voices,
+        polly_voices=polly_voices,
+        azure_voices=azure_voices,
+        google_voices=google_voices,
     )
 
 

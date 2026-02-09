@@ -40,6 +40,9 @@ from audioshoe.espeak import EspeakVoice
 from audioshoe.piper import PiperClient, PiperVoice
 from barsukas.helpers.audio_helpers import link_audio_to_lemma, validate_audio_translation
 from clients.audio import Voice
+from clients.audio.azure_tts import AzureVoice
+from clients.audio.google_tts import GoogleTtsVoice
+from clients.audio.polly_tts import PollyVoice
 import constants
 from wordfreq.storage.models.schema import (
     AudioQualityReview,
@@ -697,13 +700,40 @@ def generate() -> ResponseReturnValue:
             voices = EspeakVoice.get_voices_for_language(lang)
             espeak_voices[lang] = [{"name": v.name, "gender": v.gender} for v in voices]
 
-        tts_engines = ["openai", "espeak-ng"]
+        # Amazon Polly voices by language
+        polly_voices = {}
+        for lang in supported_languages:
+            pv = PollyVoice.get_voices_for_language(lang)
+            polly_voices[lang] = [
+                {"name": v.name, "ui_name": v.ui_name, "gender": v.gender} for v in pv
+            ]
+
+        # Azure TTS voices by language
+        azure_voices = {}
+        for lang in supported_languages:
+            av = AzureVoice.get_voices_for_language(lang)
+            azure_voices[lang] = [
+                {"name": v.name, "ui_name": v.ui_name, "gender": v.gender} for v in av
+            ]
+
+        # Google Cloud TTS voices by language
+        google_voices = {}
+        for lang in supported_languages:
+            gv = GoogleTtsVoice.get_voices_for_language(lang)
+            google_voices[lang] = [
+                {"name": v.name, "ui_name": v.ui_name, "gender": v.gender} for v in gv
+            ]
+
+        tts_engines = ["openai", "espeak-ng", "polly", "azure", "google"]
 
         return render_template(
             "audio/generate.html",
             supported_languages=supported_languages,
             openai_voices=openai_voices,
             espeak_voices=espeak_voices,
+            polly_voices=polly_voices,
+            azure_voices=azure_voices,
+            google_voices=google_voices,
             tts_engines=tts_engines,
         )
 
@@ -723,13 +753,13 @@ def generate() -> ResponseReturnValue:
         flash("At least one voice must be selected", "error")
         return redirect(url_for("audio.generate"))
 
-    # Convert voice names to appropriate enums based on TTS engine
+    # Validate voice names for the selected engine
     try:
         if tts_engine == "espeak-ng":
-            # Convert to EspeakVoice enums
             espeak_voice_enums = [EspeakVoice[v.upper()] for v in voice_names]
+        elif tts_engine in ("polly", "azure", "google"):
+            pass  # Cloud voice names are passed as-is to vieversys
         else:
-            # Convert to OpenAI Voice enums
             openai_voice_enums = [Voice(v) for v in voice_names]
     except (ValueError, KeyError) as e:
         flash(f"Invalid voice: {e}", "error")
@@ -756,6 +786,15 @@ def generate() -> ResponseReturnValue:
             debug=Config.DEBUG,
         )
 
+        engine_names = {
+            "openai": "OpenAI",
+            "espeak-ng": "eSpeak-NG",
+            "polly": "Amazon Polly",
+            "azure": "Azure Cognitive TTS",
+            "google": "Google Cloud TTS",
+        }
+        engine_name = engine_names.get(tts_engine, tts_engine)
+
         if tts_engine == "espeak-ng":
             strazdas_agent = StrazdasAgent(config=config, output_dir=str(audio_base_dir))
             results = strazdas_agent.generate_batch(
@@ -763,14 +802,20 @@ def generate() -> ResponseReturnValue:
                 voices=espeak_voice_enums,
                 use_ipa=use_ipa,
             )
-            engine_name = "eSpeak-NG"
+        elif tts_engine in ("polly", "azure", "google"):
+            vieversys_agent = VieversysAgent(
+                config=config, output_dir=str(audio_base_dir), tts_engine=tts_engine
+            )
+            results = vieversys_agent.generate_batch(
+                language_code=language_code,
+                cloud_voice_names=voice_names,
+            )
         else:
             vieversys_agent = VieversysAgent(config=config, output_dir=str(audio_base_dir))
             results = vieversys_agent.generate_batch(
                 language_code=language_code,
                 voices=openai_voice_enums,
             )
-            engine_name = "OpenAI"
 
         flash(
             f"Generated audio using {engine_name} for {results['success_count']} lemmas "
