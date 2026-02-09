@@ -413,7 +413,7 @@ def resolve_lemmas_for_sentence(
             existing_lemma: Optional[Lemma] = None
             existing_guid: Optional[str] = None
             if pw.lemma_id:
-                existing_lemma = session.query(Lemma).get(pw.lemma_id)
+                existing_lemma = session.get(Lemma, pw.lemma_id)
                 if existing_lemma:
                     existing_guid = existing_lemma.guid
 
@@ -450,7 +450,7 @@ def resolve_lemmas_for_sentence(
             forms = slot_forms.get(slot_key, {})
             sw_guid: Optional[str] = None
             if sw.lemma_id:
-                sw_lemma = session.query(Lemma).get(sw.lemma_id)
+                sw_lemma = session.get(Lemma, sw.lemma_id)
                 if sw_lemma:
                     sw_guid = sw_lemma.guid
 
