@@ -584,6 +584,107 @@ class GrammaticalForm(enum.Enum):
     VERB_PT_3P_M_FUTURE = "verb/pt_3p-m_future"
     VERB_PT_3P_F_FUTURE = "verb/pt_3p-f_future"
 
+    # Italian noun forms (singular/plural only - each noun has a fixed gender)
+    NOUN_IT_SINGULAR = "noun/it_singular"
+    NOUN_IT_PLURAL = "noun/it_plural"
+
+    # Italian adjective forms (2 genders × 2 numbers = 4 forms)
+    ADJ_IT_SINGULAR_M = "adjective/it_singular_m"
+    ADJ_IT_PLURAL_M = "adjective/it_plural_m"
+    ADJ_IT_SINGULAR_F = "adjective/it_singular_f"
+    ADJ_IT_PLURAL_F = "adjective/it_plural_f"
+
+    # Italian verb forms (6 persons × 3 tenses = 18 forms)
+    # Present tense (presente indicativo)
+    VERB_IT_1S_PRESENT = "verb/it_1s_present"
+    VERB_IT_2S_PRESENT = "verb/it_2s_present"
+    VERB_IT_3S_PRESENT = "verb/it_3s_present"  # "va" (gender-neutral)
+    VERB_IT_1P_PRESENT = "verb/it_1p_present"
+    VERB_IT_2P_PRESENT = "verb/it_2p_present"
+    VERB_IT_3P_PRESENT = "verb/it_3p_present"  # "vanno" (gender-neutral)
+
+    # Passato remoto (simple past)
+    VERB_IT_1S_PAST = "verb/it_1s_past"
+    VERB_IT_2S_PAST = "verb/it_2s_past"
+    VERB_IT_3S_PAST = "verb/it_3s_past"  # "andò" (gender-neutral)
+    VERB_IT_1P_PAST = "verb/it_1p_past"
+    VERB_IT_2P_PAST = "verb/it_2p_past"
+    VERB_IT_3P_PAST = "verb/it_3p_past"  # "andarono" (gender-neutral)
+
+    # Future (futuro semplice)
+    VERB_IT_1S_FUTURE = "verb/it_1s_future"
+    VERB_IT_2S_FUTURE = "verb/it_2s_future"
+    VERB_IT_3S_FUTURE = "verb/it_3s_future"  # "andrà" (gender-neutral)
+    VERB_IT_1P_FUTURE = "verb/it_1p_future"
+    VERB_IT_2P_FUTURE = "verb/it_2p_future"
+    VERB_IT_3P_FUTURE = "verb/it_3p_future"  # "andranno" (gender-neutral)
+
+    # Swedish noun forms (singular/plural only)
+    NOUN_SV_SINGULAR = "noun/sv_singular"
+    NOUN_SV_PLURAL = "noun/sv_plural"
+
+    # Swedish verb forms (6 persons × 3 tenses = 18 forms)
+    # Note: Swedish verbs don't conjugate by person, but we use the standard
+    # 6-person schema for consistency with other languages.
+    # Present tense (presens)
+    VERB_SV_1S_PRESENT = "verb/sv_1s_present"
+    VERB_SV_2S_PRESENT = "verb/sv_2s_present"
+    VERB_SV_3S_PRESENT = "verb/sv_3s_present"
+    VERB_SV_1P_PRESENT = "verb/sv_1p_present"
+    VERB_SV_2P_PRESENT = "verb/sv_2p_present"
+    VERB_SV_3P_PRESENT = "verb/sv_3p_present"
+
+    # Past tense (preteritum)
+    VERB_SV_1S_PAST = "verb/sv_1s_past"
+    VERB_SV_2S_PAST = "verb/sv_2s_past"
+    VERB_SV_3S_PAST = "verb/sv_3s_past"
+    VERB_SV_1P_PAST = "verb/sv_1p_past"
+    VERB_SV_2P_PAST = "verb/sv_2p_past"
+    VERB_SV_3P_PAST = "verb/sv_3p_past"
+
+    # Future (futurum)
+    VERB_SV_1S_FUTURE = "verb/sv_1s_future"
+    VERB_SV_2S_FUTURE = "verb/sv_2s_future"
+    VERB_SV_3S_FUTURE = "verb/sv_3s_future"
+    VERB_SV_1P_FUTURE = "verb/sv_1p_future"
+    VERB_SV_2P_FUTURE = "verb/sv_2p_future"
+    VERB_SV_3P_FUTURE = "verb/sv_3p_future"
+
+    # Dutch noun forms (singular/plural only - each noun has a fixed gender)
+    NOUN_NL_SINGULAR = "noun/nl_singular"
+    NOUN_NL_PLURAL = "noun/nl_plural"
+
+    # Dutch adjective forms (2 genders × 2 numbers = 4 forms)
+    ADJ_NL_SINGULAR_M = "adjective/nl_singular_m"
+    ADJ_NL_PLURAL_M = "adjective/nl_plural_m"
+    ADJ_NL_SINGULAR_F = "adjective/nl_singular_f"
+    ADJ_NL_PLURAL_F = "adjective/nl_plural_f"
+
+    # Dutch verb forms (6 persons × 3 tenses = 18 forms)
+    # Present tense (onvoltooid tegenwoordige tijd)
+    VERB_NL_1S_PRESENT = "verb/nl_1s_present"
+    VERB_NL_2S_PRESENT = "verb/nl_2s_present"
+    VERB_NL_3S_PRESENT = "verb/nl_3s_present"  # "gaat" (gender-neutral)
+    VERB_NL_1P_PRESENT = "verb/nl_1p_present"
+    VERB_NL_2P_PRESENT = "verb/nl_2p_present"
+    VERB_NL_3P_PRESENT = "verb/nl_3p_present"  # "gaan" (gender-neutral)
+
+    # Past tense (onvoltooid verleden tijd / imperfectum)
+    VERB_NL_1S_PAST = "verb/nl_1s_past"
+    VERB_NL_2S_PAST = "verb/nl_2s_past"
+    VERB_NL_3S_PAST = "verb/nl_3s_past"  # "ging" (gender-neutral)
+    VERB_NL_1P_PAST = "verb/nl_1p_past"
+    VERB_NL_2P_PAST = "verb/nl_2p_past"
+    VERB_NL_3P_PAST = "verb/nl_3p_past"  # "gingen" (gender-neutral)
+
+    # Future (onvoltooid toekomende tijd)
+    VERB_NL_1S_FUTURE = "verb/nl_1s_future"
+    VERB_NL_2S_FUTURE = "verb/nl_2s_future"
+    VERB_NL_3S_FUTURE = "verb/nl_3s_future"  # "zal gaan" (gender-neutral)
+    VERB_NL_1P_FUTURE = "verb/nl_1p_future"
+    VERB_NL_2P_FUTURE = "verb/nl_2p_future"
+    VERB_NL_3P_FUTURE = "verb/nl_3p_future"  # "zullen gaan" (gender-neutral)
+
     # Adverb forms
     ADVERB_POSITIVE = "adverb/positive"
     ADVERB_COMPARATIVE = "adverb/comparative"
@@ -596,6 +697,9 @@ class GrammaticalForm(enum.Enum):
     ADVERB_DE_BASE = "adverb/de_base"
     ADVERB_ES_BASE = "adverb/es_base"
     ADVERB_PT_BASE = "adverb/pt_base"
+    ADVERB_IT_BASE = "adverb/it_base"
+    ADVERB_SV_BASE = "adverb/sv_base"
+    ADVERB_NL_BASE = "adverb/nl_base"
     ADVERB_KO_BASE = "adverb/ko_base"
     ADVERB_ZH_BASE = "adverb/zh_base"
 

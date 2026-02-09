@@ -22,12 +22,15 @@ from wordfreq.translation import (
 )
 from wordfreq.translation.constants import DEFAULT_MODEL
 from wordfreq.translation.language_forms import (
+    dutch,
     english,
     french,
     german,
+    italian,
     lithuanian,
     portuguese,
     spanish,
+    swedish,
 )
 
 # Configure logging
@@ -346,6 +349,33 @@ class LinguisticClient:
         return portuguese.query_portuguese_verb_conjugations(
             self.client, lemma_id, self.get_session
         )
+
+    # Italian forms
+    def query_italian_noun_forms(self, lemma_id: int) -> Tuple[Dict[str, str], bool]:
+        """Query LLM for Italian noun forms."""
+        return italian.query_italian_noun_forms(self.client, lemma_id, self.get_session)
+
+    def query_italian_verb_conjugations(self, lemma_id: int) -> Tuple[Dict[str, str], bool]:
+        """Query LLM for Italian verb conjugations."""
+        return italian.query_italian_verb_conjugations(self.client, lemma_id, self.get_session)
+
+    # Swedish forms
+    def query_swedish_noun_forms(self, lemma_id: int) -> Tuple[Dict[str, str], bool]:
+        """Query LLM for Swedish noun forms."""
+        return swedish.query_swedish_noun_forms(self.client, lemma_id, self.get_session)
+
+    def query_swedish_verb_conjugations(self, lemma_id: int) -> Tuple[Dict[str, str], bool]:
+        """Query LLM for Swedish verb conjugations."""
+        return swedish.query_swedish_verb_conjugations(self.client, lemma_id, self.get_session)
+
+    # Dutch forms
+    def query_dutch_noun_forms(self, lemma_id: int) -> Tuple[Dict[str, str], bool]:
+        """Query LLM for Dutch noun forms."""
+        return dutch.query_dutch_noun_forms(self.client, lemma_id, self.get_session)
+
+    def query_dutch_verb_conjugations(self, lemma_id: int) -> Tuple[Dict[str, str], bool]:
+        """Query LLM for Dutch verb conjugations."""
+        return dutch.query_dutch_verb_conjugations(self.client, lemma_id, self.get_session)
 
     # Legacy methods for compatibility
     def get_word_token_info(self, token_text: str) -> Dict[str, Any]:

@@ -85,7 +85,7 @@ _REMAP_LANGUAGES: Dict[str, Dict[str, str]] = {
 # ---------------------------------------------------------------------------
 # Accented characters are NOT separate letters; they sort as their base.
 
-_STRIP_LANGUAGES: List[str] = ["de", "fr", "it", "pt"]
+_STRIP_LANGUAGES: List[str] = ["de", "fr", "it", "nl", "pt"]
 
 # ---------------------------------------------------------------------------
 # Public constants

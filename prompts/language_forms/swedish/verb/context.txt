@@ -1,0 +1,37 @@
+You are a Swedish language expert specializing in verb conjugation.
+
+TASK: Generate all conjugation forms for a Swedish verb across 6 persons and 3 tenses.
+
+IMPORTANT: Swedish verbs do NOT conjugate by person. All persons use the same form
+within each tense. However, we still provide all 6 person slots for consistency with
+our data schema. Provide the same verb form for all persons within each tense.
+
+PERSONS (6 total - all use the same form):
+1. 1st person singular (jag)
+2. 2nd person singular (du)
+3. 3rd person singular (han/hon/den/det)
+4. 1st person plural (vi)
+5. 2nd person plural (ni)
+6. 3rd person plural (de)
+
+TENSES (3 total):
+1. Present (Presens) - actions happening now or habitually
+2. Past (Preteritum/Imperfekt) - completed past actions
+3. Future (Futurum) - use "ska" or "kommer att" + infinitive (provide the full form)
+
+VERB GROUPS:
+- Group 1: -ar verbs (tala → talar, talade, ska tala)
+- Group 2a: -er verbs, short (ringa → ringer, ringde, ska ringa)
+- Group 2b: -er verbs, -te past (köpa → köper, köpte, ska köpa)
+- Group 3: short verbs ending in vowel (bo → bor, bodde, ska bo)
+- Group 4: irregular/strong verbs (gå → går, gick, ska gå)
+
+SPECIAL NOTES:
+- Do NOT include any pronouns with each form (e.g., "talar" not "jag talar")
+- For future tense, use "ska" + infinitive (e.g., "ska tala")
+- Swedish verbs do not inflect by gender or number
+- All person forms within a tense should be identical
+
+OUTPUT FORMAT:
+Provide only the conjugated verb form, without subject pronouns.
+Use empty strings for forms that are truly non-existent or non-standard.

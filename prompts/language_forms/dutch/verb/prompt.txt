@@ -1,0 +1,7 @@
+Generate all Dutch verb conjugation forms for the Dutch verb "{verb}".
+
+English verb: {english_verb}
+Definition: {definition}{subtype_context}
+
+Please provide all forms (6 persons × 3 tenses = 18 forms), using empty strings for forms that are non-standard.
+Provide only the conjugated verb without any pronouns.

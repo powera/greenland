@@ -1,0 +1,8 @@
+Generate all Swedish verb conjugation forms for the Swedish verb "{verb}".
+
+English verb: {english_verb}
+Definition: {definition}{subtype_context}
+
+Please provide all forms (6 persons × 3 tenses = 18 forms), using empty strings for forms that are non-standard.
+Provide only the conjugated verb without any pronouns.
+Note: Swedish verbs do not conjugate by person - all persons use the same form per tense.
